@@ -1,4 +1,4 @@
 #!/bin/bash
 
-./cft Release CreateRelease ":quit"
+./cft Release PushUpdate ":quit"
 

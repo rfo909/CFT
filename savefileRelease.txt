@@ -1,5 +1,6 @@
 
-call "Lib:e" (savefile)
+P(1,savefile) =file
+call "Lib:e" (file)
 /e
 
 # savefiles to include in release
@@ -36,16 +37,14 @@ FilesToMove->f
 /MoveFiles
 
 
-
-# Run GIT
+# Move savefiles not included in release, then run GIT add, commit and push
+MoveFiles
 HomeDir.run("git","add",".")
-gs
+gs # show status
 Input("Commit message?").get =msg
 HomeDir.run("git","commit","-m",msg)
 HomeDir.run("git","push","origin","master")
-/RunGit
-
-
+/PushUpdate
 
 
 # Git status
