@@ -1,0 +1,85 @@
+package rf.configtool.main.runtime.lib;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringTokenizer;
+
+import rf.configtool.main.Ctx;
+import rf.configtool.main.OutText;
+import rf.configtool.main.runtime.ColList;
+import rf.configtool.main.runtime.Function;
+import rf.configtool.main.runtime.Obj;
+import rf.configtool.main.runtime.Value;
+import rf.configtool.main.runtime.ValueBoolean;
+import rf.configtool.main.runtime.ValueObj;
+import rf.configtool.main.runtime.ValueString;
+import rf.configtool.main.runtime.lib.ObjDir.FunctionName;
+
+public class ObjRegex extends Obj {
+    
+    private String regex;
+
+    private ObjRegex() {
+        add(new FunctionMatch());
+    }
+
+    public ObjRegex (String regExp) {
+        this();
+        this.regex=regExp;
+    }
+    
+    
+    public boolean matches (String s) {
+        return s.matches(regex);
+    }
+
+    
+    public boolean matchesPartial (String s) {
+        return s.matches(".*" + regex + ".*");
+    }
+
+
+    @Override
+    public boolean eq(Obj x) {
+        if (x instanceof ObjRegex) {
+            ObjRegex d=(ObjRegex) x;
+            return d.regex.equals(regex);
+        }
+        return false;
+    }
+
+    @Override
+    public String synthesize() throws Exception {
+        return "Regex(" + (new ValueString(regex)).synthesize() + ")";
+    }
+
+
+    
+    @Override
+    public String getTypeName() {
+        return "Regex";
+    }
+    
+    @Override
+    public ColList getContentDescription() {
+        return ColList.list().regular(regex);
+    }
+    
+    
+    class FunctionMatch extends Function {
+        public String getName() {
+            return "match";
+        }
+        public String getShortDesc() {
+            return "match(str) - returns boolean";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected 1 parameter");
+            String str=getString("str",params,0);
+            
+            return new ValueBoolean(str.matches(regex));
+        }
+    }
+
+}

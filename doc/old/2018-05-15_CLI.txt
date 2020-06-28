@@ -1,0 +1,117 @@
+# Evaluation loop
+# ---------------
+
+- enter expression, press ENTER
+- expression is evaluated, and temporary id is created for it
+- list of evaluated values are displayed, in newest-first order
+- for each value we keep track of what values were used to create it
+
+# Execute expression, in this case function which constructs Directory object
+#
+
+$ Dir("d:\systor\data\roadside")
+[Dir d:\systor\data\roadside 12d 1f]
+
+# Assign top value to variable
+#
+
+$ =X
+X=[Dir d:\systor\data\roadside 12d 1f]
+
+# Execute expression. The environment keeps track of what sub-expressions
+# are used (via variables)
+#
+
+$ X.subdirs
+* .a /X = <[NoReceivers] [305C03] [Test] [101401] ...> (12)
+  X     = [Dir d:\systor\data\roadside 12d 1f]
+
+$ =subdirs
+* subdirs /X = <[NoReceivers] [305C03] [Test] [101401] ...> (12)
+  X          = [Dir d:\systor\data\roadside 12d 1f]
+
+# Processing loops work on list or single elements, and create
+# a result list. The ->IDENT is a loop construct, and the
+# loop variable has methods on it, such as
+#
+#    keep(boolean?)
+#
+# The default modus is that list values are not included in output.
+#
+
+$ subdirs ->x x.keep(x.name.length==6)
+* .b /subdirs = <[305C03] [101401] [999999] [123456] ...> (7)
+  subdirs /X  = <[NoReceivers] [305C03] [Test] [101401] ...> (12)
+  X           = [Dir d:\systor\data\roadside 12d 1f]
+
+$ =bins
+* bins /subdirs = <[305C03] [101401] [999999] [123456] ...> (7)
+  subdirs /X    = <[NoReceivers] [305C03] [Test] [101401] ...> (12)
+  X             = [Dir d:\systor\data\roadside 12d 1f]
+
+# Loop processing can also emit completely new values, using the emit()
+# function.
+#
+
+$ bins ->bin emit(bin+"\in") emit(bin+"\out")
+* .c /bins      = <[305C03\in] [305C03\out] [101401\in] [101401\out] ...> (14)
+  bins /subdirs = <[305C03] [101401] [999999] [123456] ...> (7)
+  subdirs /X    = <[NoReceivers] [305C03] [Test] [101401] ...> (12)
+  X             = [Dir d:\systor\data\roadside 12d 1f]
+
+$ =dirs
+* dirs /bins    = <[305C03\in] [305C03\out] [101401\in] [101401\out] ...> (14)
+  bins /subdirs = <[305C03] [101401] [999999] [123456] ...> (7)
+  subdirs /X    = <[NoReceivers] [305C03] [Test] [101401] ...> (12)
+  X             = [Dir d:\systor\data\roadside 12d 1f]
+
+# ---------------------------------------
+
+
+# Nested loops consist of iterating over multiple lists. To do more advanced things,
+# such as conditionals, the code has to be split up into multiple parts.
+#
+
+$ <"acfc" "ip" "easygo"> ->x emit("c:\systor\data\"+x+"\root")
+* .a = <"c:\systor\data\acfc\root" "c:\systor\ip\acfc\root" "c:\systor\data\easygo\root">
+
+$ =targets
+* targets = <"c:\systor\data\acfc\root" "c:\systor\ip\acfc\root" "c:\systor\data\easygo\root">
+
+
+$ CreateBINS(<>) 
+* .a /:CreateBINS = <"293999" "999299" "399399" ...>
+  targets         = <"c:\systor\data\acfc\root" "c:\systor\ip\acfc\root" "c:\systor\data\easygo\root">
+
+$ =BINS
+$ CreateInOut(BINS=BINS)
+$ =dirs
+
+$ targets->t dirs->d Dir(t+"\"+d).mkdir()
+
+% mkdir c:\systor\data\acfc\root\020200\in
+% mkdir c:\systor\data\acfc\root\020200\out
+% ...
+
+# Store that single line
+$ :CreateAllDirs
+
+
+* .c /.b #         = <>
+  .b /.a # targets = <"c:\systor\data\acfc\root" "c:\systor\ip\acfc\root" "c:\systor\data\easygo\root">
+  .a     #         = <"acfc" "ip" "easygo">
+
+# Code that doesn't return data, isn't stored in a variable. Rather we create a named statement, which
+# becomes part of the name space. This isn't limited to code not producing data. Rather it is the
+# way to define macros that can be invoked later. 
+#
+
+$ +CreateDirectories
+% Macro saved. Use :CreateDirectories to invoke
+* .c #         = <>
+  .b # targets = <"c:\systor\data\acfc\root" "c:\systor\ip\acfc\root" "c:\systor\data\easygo\root">
+  .a #         = <"acfc" "ip" "easygo">
+-----------------------------------------
+:CreateDirectories
+
+$ 

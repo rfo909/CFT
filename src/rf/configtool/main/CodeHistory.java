@@ -1,0 +1,235 @@
+package rf.configtool.main;
+
+import java.io.*;
+import java.util.*;
+
+import rf.configtool.data.Stmt;
+import rf.configtool.main.runtime.Value;
+import rf.configtool.main.runtime.ValueString;
+import rf.configtool.main.runtime.lib.ObjDict;
+import rf.configtool.parser.Parser;
+import rf.configtool.parser.SourceLocation;
+import rf.configtool.parser.Token;
+import rf.configtool.util.TabUtil;
+
+public class CodeHistory {
+    
+     
+    private Stdio stdio;
+    private Map<String, CodeLines> namedLines=new HashMap<String,CodeLines>();
+    private List<String> namesInSequence=new ArrayList<String>();
+    private ObjCfg cfg;
+    private FuncOverrides funcOverrides;
+        // used by ExprCall via ObjGlobal, for redefining functions as values, when
+        // loading and running a (script) file
+    
+    private String currLine;
+    
+    public CodeHistory (Stdio stdio, ObjCfg cfg) {
+        this.stdio=stdio;
+        this.cfg=cfg;
+        this.funcOverrides=funcOverrides;
+    }
+    
+    public void setFuncOverrides (FuncOverrides funcOverrides) {
+    	this.funcOverrides=funcOverrides;
+    }
+    
+    public void clearFuncOverrides() {
+    	funcOverrides=null;
+    }
+    
+    public void setCurrLine (String line) {
+        if (line.trim().length()==0) return; 
+        currLine=line;
+    }
+    
+    public String getCurrLine() {
+        return currLine;
+    }
+    
+    public boolean assignName(String name, boolean force) throws Exception {
+        if (currLine==null) throw new Exception("No current code line");
+        if (namedLines.get(name) != null && !force) return false;
+        
+        if (!namesInSequence.contains(name)) namesInSequence.add(name);
+        CodeLines c=namedLines.get(name);
+        SourceLocation loc=new SourceLocation("<func> " + name, 0, 0);
+        if (c==null) {
+            c=new CodeLines(currLine, loc);
+            namedLines.put(name, c);
+        } else {
+            c.update(currLine, loc);
+        }
+        return true;
+    }
+
+    public CodeLines getNamedLine (String name) {
+        if (funcOverrides != null) {
+            String s=funcOverrides.getFuncOverride(name);
+            if (s != null) {
+                SourceLocation loc=new SourceLocation("<override> " + name, 0, 0);
+                return new CodeLines(s, loc);
+            }
+        }
+        return namedLines.get(name); // may be null
+    }
+    
+
+    public void reportAll() {
+        report(null);
+    }
+    
+    public List<String> getNames() {
+        List<String> list=new ArrayList<String>();
+        for (String name:namesInSequence) list.add(name);
+        return list;
+    }
+    
+    public void report(String symbolSubStr) {
+        final int available=cfg.getScreenWidth();
+        
+        String hr="+--------------";
+        int x=available;
+        if (x > 500) x=80;  // ":nowrap" is implemented as width = 999999
+        while (hr.length() < x) hr=hr+"-";
+        
+        stdio.println(hr);
+        int nameMaxLength=3;
+        if (namesInSequence.size()==0 && currLine==null) {
+            stdio.println("No symbols defined, use /ident to define symbol for last program line");
+        } else {
+            for (String name:namesInSequence) {
+                if (name.length() > nameMaxLength) nameMaxLength=name.length();
+            }
+
+            List<String> output=new ArrayList<String>();
+            
+            for (int i=0; i<namesInSequence.size(); i++) {
+                String name=namesInSequence.get(i);
+                CodeLines c=namedLines.get(name);
+                
+                if (symbolSubStr != null && !name.contains(symbolSubStr)) continue; 
+                
+                String label=name;
+                while(label.length()<nameMaxLength) label=label+" ";
+                String namedLine=getNamedLine(name).getFirstNonBlankLine();
+                
+                String s="| " + label + ": " + TabUtil.substituteTabs(namedLine,1);
+
+                if (s.length() > available) s=s.substring(0,available-1)+"+";
+
+                stdio.println(s);
+            }
+
+        }
+        if (currLine != null) {
+            stdio.println(hr);
+            String label=".";
+            while (label.length()<nameMaxLength) label=label+" ";
+            String s="| " + label + ": " + TabUtil.substituteTabs(currLine,1);
+            
+            if (s.length() > available) s=s.substring(0,available-1)+"+";
+            stdio.println(s);
+        }
+        stdio.println(hr);
+
+        
+    }
+    
+    public File createSavefile (String name) {
+        return new File("savefile" + name + ".txt");
+    }
+    
+    public void save(String saveName) throws Exception {
+        PrintStream ps=new PrintStream(new FileOutputStream(createSavefile(saveName)));
+        
+        for (String s:namesInSequence) {
+            CodeLines c=namedLines.get(s);
+            List<String> saveLines=c.getSaveFormat();
+            for (String x:saveLines) {
+                ps.println(x);
+            }
+            ps.println("/" + s);
+        }
+        ps.close();
+        return;
+    }
+    
+    public void load(String saveName) throws Exception {
+        namedLines.clear();
+        namesInSequence.clear();
+        
+        BufferedReader reader=new BufferedReader(new FileReader(createSavefile(saveName)));
+        
+        List<CodeLine> lines=new ArrayList<CodeLine>();
+        CodeInlineDocument inlineDoc=null;
+       
+        for(int lineNumber=1; true; lineNumber++) {
+            String s=reader.readLine();
+            if (s==null) break;
+            
+            SourceLocation loc=new SourceLocation("<script> " + saveName, lineNumber, 0);
+
+            // Process inline document format, but add lines as-is to the
+            // lines list, as this the external representation. It gets parsed
+            // again in CodeLine() constructor. Here we are only concerned with
+            // termination, to know when "/xxx" actually means creating
+            // a named function.
+            //
+            // <<< mark
+            // line 1
+            // line 2
+            // >>> mark
+            //
+            final String trimmed=s.trim();
+
+            if (inlineDoc != null) {
+                // check for end marker
+                if (trimmed.startsWith(">>>") && inlineDoc.matchesEofMark(trimmed.substring(3).trim())) {
+                	// add generated code line
+                	lines.add(new CodeLine(loc,inlineDoc.createCodeLine()));
+                    inlineDoc=null;
+                    continue;
+                }
+                // add raw text line
+                inlineDoc.addLine(s);
+                continue;
+            }
+            if (trimmed.startsWith("<<<")) {
+                String inlineEofMark=trimmed.substring(3).trim();
+                inlineDoc=new CodeInlineDocument(inlineEofMark, loc);
+                continue;
+            }
+
+
+            if (trimmed.startsWith("/")) {
+                String name=s.trim().substring(1);
+                if (namesInSequence.contains(name)) namesInSequence.remove(name);
+                namesInSequence.add(name);
+                CodeLines c=new CodeLines(lines);
+                namedLines.put(name, c);
+                lines=new ArrayList<CodeLine>();
+                continue;
+            } 
+                
+            lines.add(new CodeLine(loc,s));
+        }
+        
+        reader.close();
+        
+    }
+    
+    
+    public void clear (String name) throws Exception {
+        if (namedLines.containsKey(name)) namedLines.remove(name);
+        if (namesInSequence.contains(name)) namesInSequence.remove(name);
+    }
+    public void copy (String fromName, String toName) throws Exception {
+        if (!namedLines.containsKey(fromName)) throw new Exception("No such named line: " + fromName);
+        if (namedLines.containsKey(toName)) throw new Exception("Target name '" + toName + "'exists - clear it first");
+        
+        namedLines.put(toName, namedLines.get(fromName));
+        namesInSequence.add(toName);
+    }
+}

@@ -1,0 +1,29 @@
+
+call "Lib:e" (savefile)
+/e
+
+Dir("/home/roar/Prosjekter/Java")
+/JavaDir
+
+Dir("/mnt/storage")
+/TargetDir
+
+P(1,Dir) =dir
+P(2,"ls -l")=cmd
+	debug(cmd)
+	dir.run(cmd.split)
+/run
+
+TargetDir.file("ConfigTool." + Lib.Sys.version + ".tar")
+/tarFile
+
+# Create tar-file under TargetDir, for current version
+println("Creating " + tarFile.path)
+if (!tarFile.exists, 
+	run(JavaDir, "tar cf " + tarFile.path + " ConfigTool"),
+	error("File " + tarFile.path + " already exists")
+	)
+true
+/CreateTar
+
+

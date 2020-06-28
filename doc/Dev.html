@@ -1,0 +1,1191 @@
+<html>
+<head>
+
+<style type="text/css">
+	* {font-family: arial}
+	pre {font-family:courier; margin-left:1Em; border-left: 3px solid blue; padding-left: 1Em; font-size: 16pt}
+	h1 {padding-top:1Em}
+</style>
+</head>
+<body>
+
+<h1>ConfigTool</h1>
+
+<h3>v1.0.5 2020-06-27 ExternalScriptState - cached</h3>
+<p>
+	When calling function in external script, we want repeated calls to that same script to 
+	reuse the same ObjGlobal. This is done by caching ExternalScriptState objects in
+	ObjGlobal, allocated on a per-script basis.  
+</p>
+<pre>
+	call "Lib:e" (savefile)
+</pre>
+<p>
+	This means that the above code, which selects a favourite editor, and stores it in
+	a ValDef, remembers this on the next call. Also, Input values and other data persisted
+	to ObjGlobal are kept.
+</p>
+<p>
+	Should an external script in turn call another external script, this gets cached internally
+	in the same way, creating a tree of session states for external scripts.
+</p>
+<p>
+	Updated doc on call expression and all over. Renamed macro mode from "global" to "independent".
+</p>
+
+
+<h3>v1.0.4 2020-06-26 Modified if() expression</h3>
+<p>
+	The if() is modified so that when the selected expression resolves
+	into a macro, it gets called automatically (once).
+</p>
+
+
+<h3>v1.0.4 2020-06-26 Added expression when()</h3>
+<p>
+	A simple implementation of multiple choice ("switch").
+</p>
+<pre>
+	when (bool, expr)
+</pre>
+<p>
+	When the first parameter is true, the expr is resolved. If it results in a macro (which is
+	a value), then it is called automatically (once). If the boolean expression is false, 
+	then the expression is never resolved, and instead null is returned.
+</p>
+
+
+<h3>v1.0.3b 2020-06-25 Fixed bug with CodeInlineDocument</h3>
+<p>
+	This was rewritten as part of file parsing 2020-06-21
+</p>
+
+<h3>v1.0.3 2020-06-24 Added global error() function</h3>
+<p>
+	Throws Exception, terminating code processing.
+</p>
+
+
+<h3>v1.0.2 2020-06-24 Added Lib.Sys</h3>
+<p>
+	The Sys object contains two functions: version() and functions()
+</p>
+
+<h3>v1.0.1 2020-06-23 cd improved</h3>
+<p>
+Changed so that if no direct match, cd uses one or more parts to match against 
+available directories. This means one can enter one or more substrings of 
+the target dir.
+</p>
+
+<h2>2020-06-22 VERSION 1.0</h2>
+<p>
+	With the robustness added with regards to parsing script files and
+	reporting errors, the versioning is changed from dates to numbers.
+</p>
+
+<p>
+	Improved error reporting for interactive lines and defined functions when
+	no script reload is done. Also fixed proper error reporting useing CodeLine.getSourceLocation()
+	when Parser.parse() fails.
+</p>
+
+
+
+<h3>2020-06-21 SourceLocation improvement</h3>
+<p>
+	Using SourceLocation to report location in script file or
+	"single line" just entered, or recently added but without script
+	being reloaded (either manually or because of updates in editor).
+	</p>
+		
+
+<h3>2020-06-21 File parsing / comments</h3>
+<p>
+	Fixed so that comments are processed correctly when executing code from file,
+	by parsing the code as lines, instead of concatenating into a string which is
+	then parsed.
+	</p>
+	
+<p>
+	Modified line editing command !x:marker!blabla to work only for 
+	functions containing a single line of code
+	</p>
+	
+<p>
+	Also showing first non-blank line in function list '?', should perhaps contains
+	a comment
+	</p>
+	
+<h3>2020-06-14 Macro</h3>
+<p>
+	Created ExprMacro which is { Stmt* } and which when executed returns a
+	ValueMacro object. This is a regular value, though not synthesizable, which
+	can be stored in a variable or returned from a function,
+</p>
+<p>
+	To call a macro, invoke the .call function on it, possibly with parameters,
+	which are in turn picked up with the usual P() function.
+</p>
+<p>
+	Macros come in two variants: local and global. A local macro has access
+	to variables in the caller, and will redefine those when assigning, rather
+	than create internal local variables. These macros
+	are for internal use inside functions. This means that local variables inside
+	the macro should be limited, as they have to be unique to avoid confusion.
+</p>
+<pre>
+	{ &lt;- .... }
+</pre>
+<p>
+	Global macros are scope-isolated macros that do not inherit anything from the caller 
+	environment. They can be passed around as parameters, and called by anyone,
+	without unfortunate side effects or errors due to missing symbols.
+</p>
+<pre>
+	{ .... }           
+</pre>
+<p>
+	Currently macros do not support loops or the PIPE character.
+</p>
+<h4>Example: automating data construction</h4>
+<pre>
+## Projects function
+	{
+		P(1)=name
+		P(2)=path
+		P(3)=types
+	
+		if(path.?trim, Dir(path), path) =path
+		if(types.?trim, types.split, types) =types
+	
+		Dict.set("name",name).set("path",path).set("types",types)
+	} =create
+	#
+	List(
+		create.call("Project1", "xyz", "java"),
+		create.call("Project2",  "c:\hub", "java txt")
+	) 
+/Projects
+</pre>
+<h4>Macros as parameters</h4>
+<pre>
+P(1,List)=options
+P(2,{"name"})=macroGetElementName
+	options-&gt;x
+		println(macroGetElementName.call(x))
+/ShowOptions
+
+P(1,List)=options
+P(2,{"name"})=macroGetElementName
+	readLine("Enter part of name? ") =sel
+	options-&gt;opt
+		assert(macroGetElementName.call(opt).contains(sel))
+		out(opt)
+/SelectOptions
+</pre>
+<p>
+	Here we see generic functions ShowOptions and SelectOptions, which are
+	supplied a list of options, and a macro that is invoked on each
+	item to produce a name.
+</p>
+<h4>Calling the above + extending if() expression</h4>
+<pre>
+Projects =p
+	{
+		" - " + P(1).get("name")
+	} =macroGetElementName
+	loop
+		println("--------------------")
+		println("Available projects")
+		println("--------------------")
+
+		ShowOptions (p, macroGetElementName)
+		SelectOptions(p, macroGetElementName) =result
+		false =breakOuter
+		if (result.length==1, { 
+			&lt;-
+			ValDef("Project", result.nth)
+			true =breakOuter
+		}.call, 0)
+		break(breakOuter)
+		println("* Your selection gave " + result.length + " possible options")
+
+/SelectProject
+</pre>
+
+<h3>2020-06-11 Added predicate calls: ".?"</h3>
+<p>
+	Instead of having to write predicate functions like String.isInt, there now
+	is a modifier to dotted calls, and a new class DottedCall, invoked from ExprE.
+</p>
+<pre>
+	"sdf".?parseInt
+	&lt;boolean&gt;
+  	false
+</pre>
+<p>
+	This notation returns error string if there is an exception, otherwise boolean true. 
+</p>
+<p>
+  The predicate calls can also be used to check if a function exists for a value, and
+  in this way identify the type of a value, using identity functions, String.isString(), 
+  List.isList() and so on. <b>TODO?</b>
+</p>
+
+
+
+<h3>2020-06-10 Added :NN</h3>
+<p>
+	Often one wants to access the n'th element of a result list, and ls(N) was created
+	for this. Now created colon command, which checks if last result is a List, and then
+	synthesizes the indicated element.
+</p>
+<pre>
+	$ ls
+	$ :0
+</pre>
+
+<h3>2020-06-09 Added Dir.runCapture() </h3>
+<p>
+	Created Dir.runCapture() which is a copy of Dir.run(), except that it captures output
+	and returns a list with the output lines.
+</p>
+<p>
+	The output lines are also sent to the screen, in case the external command asks the user
+	for input. Curses-based programs like nano and top are not suited for .runCapture()
+</p>
+
+<pre>
+	Dir.runCapture("ls")
+</pre>
+
+<h3>2020-06-09 Added List.empty() function</h3>
+
+<h3>2020-06-09 Added Global.FileLine() function</h3>
+<p>
+	This enables full synthesize-functionality of FileLine, rather than inheriting the
+	String class version, which is incomplete. Added and tested ValueObjFileLine synthesize()
+	method.
+</p>
+
+<h3>2020-06-09 Added Version info</h3>
+<p>
+	Created Version.java class, displayed from Main
+</p>
+
+<h3>2020-06-09 fixed bug in String synthesize</h3>
+<p>
+	Force escaping when string contains newline, cr or tab
+</p>
+
+<h3>2020-06-08 P() default value fix</h3>
+<p>
+	Originally, the default value was only used if the number of parameters given was
+	too short. Changed this so that giving null as positional parameter, means using
+	the default, if any.
+</p>
+
+<h3>2020-06-08 PDict() expression</h3>
+<p>
+	Added PDict() under ExprTerminal. It takes a comma-separated list of strings, which are mapped to
+	the function parameters by position, and returns a Dict object. If more names than
+	actual parameters, the value null is stored in the Dict.
+</p>
+<p>
+	The point is to simplify functions performing merging, which uses a dictionary. 
+	Also changed the String.merge() function to replace value null with "" (and not just
+	blindly getValAsString()).
+</p>
+
+
+<h3>2020-06-08 String.hash</h3>
+<p>
+	Added hash() function to string.
+</p>
+
+<h3>2020-06-08 File.hex \r\n\t</h3>
+<p>
+	Added detection for CR, LF and TAB, and displaying \r\n\t for those.
+</p>
+
+<h3>2020-06-07 negative index to List.nth</h3>
+<p>
+List.nth(-1) returns last element, .nth(-2) second last and so on
+</p>
+
+<h3>2020-06-07 File.hex</h3>
+<p>
+Renamed from File.hexList, made interactive, fixed bug (omitting display of characters with ascii 127), and
+added position col
+</p>
+
+<h3>2020-06-07 CharTable</h3>
+<p>
+Code is used in MVRS, and fails for long strings due to stack overflow. Fixed and tested.
+</p>
+
+<h3>2020-06-07 println</h3>
+<p>
+Global function println
+</p>
+
+
+<h3>2020-06-05 assert/reject in loop</h3>
+<p>
+Code for checking for assert/reject logic was added for "loop" statement. 
+</p>
+
+<h3>2020-06-03 Command line arguments</h3>
+<p>
+	Renamed the ConfigTool start script to ./cft, and it now supports command line parameters.
+	The first is the name of the script file, then follows zero or more strings that are
+	executed as if they were regular input.
+</p>
+
+<h3>2020-05-24 New master Doc.html</h3>
+<p>
+The Overview.txt contains disposition of topics
+</p>
+
+<h3>2020-03-15 Net routing</h3>
+<p>
+Routing ok
+</p>
+
+<h3>2020-03-08 Net v2</h3>
+<p>
+Network module v2. Crypto ok. Ping ok.
+</p>
+
+
+<h3>2020-03-06 readLine(prompt)</h3>
+<p>
+	Reads single text line without any "remembering" previous values as Input does
+</p>
+
+
+<h3>2020-02-28 Stdio</h3>
+<p>
+	Internal change: created Stdio to replace presence of stdin, stdout and the buffer class
+	for input text lines (programmed via stdin("xxx"))
+</p>
+
+
+
+<h3>2020-02-22 'here' documents</h3>
+<p>
+	Added notation for converting block of text in savefile to list of strings. 
+</p>
+
+<pre>
+	&lt;&lt;&lt; marker
+	line 1
+	line 2
+	&gt;&gt;&gt; marker
+</pre>
+
+<p>
+	This is a source-file feature, not available in the interactive shell, which instead
+	offers the function readLines(endMarker)
+</p>
+
+<h3>2019-12-20 Float()</h3>
+<p>
+	Following the template of Int() and Str(), for sorting floating point values
+</p>
+
+<h3>2019-11-07 File.readBytes()</h3>
+<p>
+	Added function readBytes on File object. Great for producing wave diagrams for sound
+	recordings (signed).
+</p>
+
+<h3>2019-10-30 automatic refresh when savefile changed</h3>
+<p>
+	Editing files with editors, we now get immediate update
+	when the save file is changed on disk.
+</p>
+
+<p>
+	Keeping the ":load" without file name, though it is redundant.
+</p>
+
+<h3>2019-10-20 savefile</h3>
+<p>
+	Created global function savefile() which returns File object for current savefile.
+</p>
+<pre>
+Dir.runDetach("leafpad",savefile.path)
+</pre>
+
+
+<h3>2019-10-19 List.push()</h3>
+<p>
+	Created "stack push" function for List, taking the following parameters:
+</p>
+
+<pre>
+List.push(Count,Default?)
+</pre>
+
+<p>
+	The Count is the number of elements we want pushed on the stack, and the Default is the
+	value to use if list does not contain enough elements. The values can then be assigned
+	to local variables in natural order.
+</p>
+
+<pre>
+$ "x y".split.push(3,"*")=a=b=c a+":"+b+":"+c
+  &lt;String&gt;
+  x:y:* 
+</pre>
+
+
+<h3>2019-10-19 Dict properties as functions</h3>
+<p>
+	Setting properties with names that are identifies, that don't collide with existing
+	functions, are added as dynamically generated functions, accessible via dotted notation.
+</p>
+
+<p>
+	Dict.set("a",5)
+	/x
+	x.a  # gives 5
+</p>
+
+<h3>2019-10-18 Cfg.wrap() and :wrap</h3>
+<p>
+	Added wrap state to Cfg, settable via Cfg.wrap(boolean) and flippable via colon command ":wrap"
+</p>
+
+<h3>2019-10-18 Dir.showTree() function</h3>
+<p>
+	Added Dir.showTree(Dir, LimitKb?) which returns a list of lines with all directories
+	under Dir, which contain files, and the sum of sizes of files in those directories is &gt;= LimitKb (defaults to 0). 
+</p>
+
+<p>
+	Or one can use code
+</p>
+
+<pre>
++-----------------------------------------------------
+| DFiles  : P(1,Dir)=d 0=n d.files-&gt;f f.length+n=n | n/1024=x ""+x+" kb"
+| ShowTree: P(1,Dir).allDirs-&gt;d report(d.path, DFiles(d)) | _.sort
++-----------------------------------------------------
+| .       : ShowTree
++-----------------------------------------------------
+</pre>
+
+<h3>2019-10-18 isWindows() function</h3>
+<p>
+	Returns boolean
+</p>
+
+<h3>2019-10-17 File.hexList</h3>
+<p>
+	Create File.hexList() which returns a list of strings displaying the
+	content in hex for any file.
+</p>
+
+
+<h3>2019-10-17 cat</h3>
+<p>
+	Created statement "cat" which follows the format of "cd", in that it either
+	takes (Expr) or eats the rest of the line, concatenates it and ends up with
+	a file path, which is then dumped directly to output, line by line, no formatting.
+</p>
+
+<p>
+	When successful, the cat statement puts the file as an ObjFile value on the
+	stack.
+</p>
+
+
+<h3>2019-10-17 todo.txt</h3>
+<p>
+	Due to using text editors for modifying save files, there is no longer much point in
+	creating advanced line editing functions. Even on a CLI one can always invoke "nano"
+	or similar.
+</p>
+
+<p>
+	Also, due to Dir.runDetach, the use of editors also reduce the need for 
+	advanced File.more, as it is easier to search and page around in an editor. 
+</p>
+
+
+<h3>2019-10-16 Cfg.w / .getScreenWidth / Grep.file()</h3>
+<p>
+	Lines from files, must have TAB substituted with spaces. Using existing code
+	written for File.more, moved it to rf.configtool.util.TabUtil, and
+	now integrated it into Grep, for cleaner result lists still.
+</p>
+<p>
+	Also added the same conversion on File.read, converting tabs to spaces, as 
+	file reading is primarily about displaying data. Note that DataFile is not
+	modified, as it is used to produce output files, and no conversion of tabs
+	should take place there.
+</p>
+
+<h3>2019-10-15 Cfg.w / .getScreenWidth / displaying result</h3>
+<p>
+	Added code to respect this (Runtime.processInteractiveInput()), after making
+	Report class return list of strings, rather than writing to stdout itself. 
+</p>
+
+
+<h3>2019-10-15 call() finalized</h3>
+<p>
+	The call statement is now the call expression, and its syntax is extended:
+</p>
+
+<pre>
+	call "savefile:function" [ with(Dict) ] Params?
+</pre>
+
+<p>
+	And it all works, and is a way to reuse code while overriding functions with values, 
+	as long as those values can be synthesized into strings.
+</p>
+
+<pre>
++-----------------------------------------------------
+| a   : 5
+| b   : "hei"+a
+| d   : Dict.set("a","xxx")
+| test: call "test:b" with (d)
++-----------------------------------------------------
+| .   : test
++-----------------------------------------------------
+Current save name: test
+$ test
+  &lt;String&gt;
+  heixxx 
+$
+</pre>
+
+<p>
+	The same mechanism will be handy when invoking from the command line, wrapping each
+	value into ValueString, then synthesizing, to ensure valid code. 
+</p>
+
+<p>
+	Implementation details:  rf.configtool.main.CallScriptFunc is the gateway.
+</p>
+
+
+
+
+<h3>2019-10-13 list becomes List</h3>
+<p>
+	The list function is renamed to List.
+</p>
+
+<p>
+	To identify needed changes:
+</p>
+<pre>
+$ Dir.files(Glob("savefile*"))-&gt;f Grep("list").file(f) -&gt;line out(line)
+</pre>
+
+
+<h3>2019-10-12 cd / ls</h3>
+<p>
+	As cd is used interactively, it was easy to fix it, just scanning the rest
+	of the input, and concatenating a path string. Also eliminated the name "dir",
+	and added two more names, so that
+</p>
+
+<ol>
+	<li>"ls" - list of directories and files</li>
+	<li>"lsf" - list of files</li>
+	<li>"lsd" - list of directories</li>
+</ol>
+
+
+<h3>2019-10-06 savefile format</h3>
+<p>
+	Created v2 savefile format, which is readable and editable. It is identified
+	by first line of file being #v2. Also modified '?' command to display code in
+	the same order as in the save file. Multi-line code is supported on read, and 
+	is preserved when saved, except for functions that have been changed. 
+</p>
+
+<p>
+	But even for modified functions, we preserve original lines preceding the function,
+	if such exist.
+</p>
+
+<p>
+	Also modified updates so that the original order is maintained.
+</p>
+
+<p>
+	And finally modified the ":load" command so that identifier is optional, except
+	for the very first time, as reload after modifications to save file will now
+	be required.
+</p>
+
+<h3>2019-10-01 debug</h3>
+<p>
+	Added statement debug(expr), to display text directly.
+</p>
+
+<h3>2019-10-01 loop / break</h3>
+<p>
+	Created loop statement, which loops forever, until break(true) is invoked. Note that
+	break can also be applied when iterating over a list value with "expr-&gt;..."
+</p>
+
+<p>
+	Created in anticipation of FileReader, which reads single lines from files, for 
+	filtering huge log files.
+</p>
+
+<h3>2019-09-26 changed local variable scope rules</h3>
+<p>
+	Introduced java class FunctionState, which contains both function parameters, and
+	all variables assigned via "=x". This allows for more logical constructs such as
+	</p>
+
+<pre>
+	$ 0=sum list(1,2,3)->x sum+x =sum | sum   # <-- returns 6
+</pre>
+
+<h3>2019-09-15 global Cfg object</h3>
+<p>
+	Created Cfg object, available via global function by same name. It currently contains the 
+	following variables:
+</p>
+<ol>
+	<li>'h' - height of screen - default 24</li>
+	<li>'w' - width of screen - default 130</li>
+	<li>'wd' - wrap data output - default true</li>
+	<li>'wm' - wrap more lines - default false</li>
+</ol>
+</p>
+
+<h4>Currently implemented</h4>
+<ul>
+	<li>the '?' command - respects 'w'</li>
+	<li>the showCode() function - respects 'w'</li>
+</ul>
+</p>
+
+
+<h3>2019-09-15 list.insert</h3>
+<p>
+	Added function insert(pos,val) on list, doing destructive modification on self().
+</p>
+
+<h3>2019-09-14 list.set</h3>
+<p>
+	Added function set(pos,val) on list, doing a destructinve modification on self()
+</p>
+
+<h3>2019-09-15 list.remove</h3>
+<p>
+	Added function remove(pos) on list, doing a destructive change on self(), constituting
+	the opposite of add() which also modifies the instance itself (and which is important when
+	using Val() to repeatedly refer to same object).
+</p>
+
+<h3>Manual entry - example</h3>
+<p>
+	Using readLines to paste in for example a netplan file, followed by a ":syn" to create an
+	actual list value. Then use replace to replace for instance an IP address with a merge
+	code.
+</p>
+
+<h3>2019-09-14 list.replace</h3>
+<p>
+	Added function replace(str1,str2) for the list value object. It traverses the list
+	and reads each value as string, then replaces str1 with str2. Returns new list.
+</p>
+
+<h3>2019-09-14 readLines</h3>
+<p>
+	Added global function readLines(endmarker) which reads input lines until label found on separate line.
+	Returns a list, which must be synthesized (with :syn) to be useful. Nice for creating a list
+	of strings from a text file that is copy-pasted into the window, followed by manually
+	entering the endmarker.
+</p>
+<p>
+	2019-10-17 renamed from original name "cat", as "cat" is now used to list a file.
+</p>
+
+
+
+<h3>2019-09-04 Dir.run()</h3>
+
+<p>
+	Run external commands. Uses redirecting of stdin, stdout and stderr. This means
+	we get to interact with external programs, but not buffer input via the stdin()
+	mechanism. For that we must probably implement some threads.
+</p>
+
+<pre>
+	$ Dir.run("ls")
+	$ Dir.run("ls","-l")
+	$ list("ls","-l")
+	$ /cmd
+	$ Dir.run(cmd)
+</pre>
+
+<h3>2009-09-04 File.move()</h3>
+<p>
+	Implemented .move(File) to rename and/or move a file. Returns self or throws
+	Exception. 
+</p>
+
+<h3>2009-09-04 Dict.setStr() and .mergeCodes()</h3>
+
+<p>
+	Added setStr() function to Dict, which parses string on format "xxx : yyy" or "xxx = yyy", and
+	puts value "yyy" in dictionary under key "xxx" (both trimmed).
+</p>
+
+<p>
+	Also added function mergeCodes() that returns copy where all keys are modified into ${key},
+	for use as merge codes.
+</p>
+
+<h3>2019-09-04 DataFile upgrades</h3>
+
+<p>
+	DataFile supports comment lines to be excluded.
+</p>
+
+<pre>
+	$ DateFile(File("x.txt"),"###").comment(";")
+	$ /df
+</pre>
+
+<h3>2019-09-02 Dict.get default value</h3>
+
+<p>
+	Added optional default value for Dict.get(name), so that when no value is found for name,
+	the default value is added to the dictionary, under the given name, and then returned.
+</p>
+
+<p>
+	This enables compact code:
+</p>
+
+<pre>
+	$ P(1,Dict)=d d.get("lines",list).add("hello")
+</pre>
+
+<h3>2019-09-02 Session Values</h3>
+
+<p>
+	Created two global functions, for maintaining session values. These let us instantiate
+	a Dict or list object that does not go away until explicitly reset, which can be
+	referred via simple code:
+</p>
+
+<pre>
+	$ ValDef("x",list)
+	$ /Init
+
+	$ Val("x")
+	$ /x
+
+	$ x.add(1)
+	$ x.add(2)
+	$ x.sum
+	  3
+</pre>
+
+<p>
+	Persistent values can are cleared by redefining them to null, which is the default
+	value when trying to get a value that doesn't exist.
+</p>
+
+<pre>
+	$ ValDef("x",list)
+</pre>
+
+
+<h3>2019-09-02 String .esc and .unEsc</h3>
+<p>
+	Needed a more robust synthesize method for strings, so added two functions to String, which
+	escapes all dangerous characters (even including space) and the reverse function. 
+</p>
+
+<p>
+	Changed the synthesize method of ValueString, so that when string contains both types of quotes,
+	it returns the escaped string in regular quotes, followed by .unEsc, thus generating code 
+	that restores the actual string.
+</p>
+
+
+<h3>2019-06-28 Input history</h3>
+
+<p>
+	Added history over the last 100 entered values, accessed via
+</p>
+
+<pre>
+	:       -- list numbered options
+	:N      -- use numbered option
+	::sdf   -- text starting with colon
+</pre>
+
+
+
+<h3>2019-06-25 Remote Server and Client</h3>
+<p>
+	Created a remote server that listens to a port, and a remote client that
+	connects to a remote server on an address and port. Currently no 
+	gentle way of leaving the connection, but apart from that it works
+</p>
+
+<pre>
+	Net.RemoteServer(2500).init
+
+	Net.RemoteClient("localhost",2500).connect
+
+	[localhost] $
+</pre>
+
+<p>
+	TODO
+</p>
+
+<ol>
+	<li>put connection into the background, where it receives output and buffers it
+	internally, to be displayed later when put into foreground</li>
+	<li>Need a way of regaining control of the local process, f.ex via command ":local"</li>
+	<li>Must also have a way of displaying connections, closing connections and activating background connection</li>
+	<li>Running connections in the background gives us a multitasking ability with, when
+		connecting localhost and running code there
+	</li>
+</ol>
+
+<h3>2019-06-18 uncompress compressed files</h3>
+<p>
+	Added File.uncompress(targetDir). Using old FileInfo class. It is not sophisticated, but it
+	solved a problem. Copies uncompressed files unchanged
+</p>
+
+<h3>2019-05-31 Lib.Net</h3>
+<p><b>2019-06-25: moved to GlobalObj</b></p>
+<p>
+	Want to use ConfigTool to push data over networks, possibly extending to full
+	remote control. Added the following functions, which allows us to set up a server
+	listening on a TCP server port, and using a client to push files over the network
+	to such servers. 
+</p>
+
+<pre>
+	Net.PushServer(2500).init    # sets up tcp server on port 2500
+
+	Net.PushClient("127.0.0.1",2500)  # creates client
+	/c
+
+	c.push(File)
+	c.push(File,"targetName")
+	c.remoteDir("xxx")
+</pre>
+
+<h3>2019-05-30 Grep takes regex</h3>
+
+<p>
+	Added two functions to Grep: matchRegex(re) and rejectRegex(re)
+</p>
+
+<h3>2019-05-30 String matching</h3>
+<p>
+	Added functions for locating substrings
+</p>
+
+<pre>
+	"abcd".before("c")
+	"ab"
+
+	"abcd".after("b")
+	"cd"
+
+	"abcd".between("a","d")
+	"bc"
+
+	"abbb".beforeLast("b")
+	"abb"
+
+	"aaab".afterLast("a")
+	"b"
+</pre>
+
+<h3>2019-04-04 Regex handling</h3>
+<p>
+	Created class Regex under runtime.lib, with a single static method for building RegEx from strings. Using
+	this method from <i>ObjGlob</i>.
+</p>
+<p>
+	Also modified inner workings of old class <i>ObjFilter</i> to build internal list of RE's, using Regex class. This allows
+	for more sophisticated filtering, as multiple contains("xxx") operate with logical AND between them, 
+	plus that Filter has support for case sensitive on/off. Added method for adding RE directly.
+</p>
+
+<p>
+	<i>TODO: upgrade ObjGrep to use RE's internally?</i>
+</p>
+
+<h3>2019-03-22 syn() function</h3>
+<p>
+	In preparation for creating multiline scripts, as well as for general flexibility, I've added
+	the global syn() function, which takes a synthesizable value, and returns as a string the code
+	that creates it. If the value can not be synthesized, an error is reported.
+</p>
+
+<p>
+	Also added String.indexOf() function for improved parsing.
+</p>
+
+
+<h3>2019-02-17 Function.java </h3>
+
+<p>
+	(2019-03-13 updated)
+</p>
+
+<p>
+	As part of creating a Gui class which should contain interactivity, we needed to extend the callFunction()
+	of the Function class, as invoked from LookupOrCall.resolve(). Created a parallel method, called callFunctionNew(), 
+	which by default calls the callFunction() method, which is now defined in Function.java throwing exception.
+</p>
+
+<p>
+	The callFunctionNew() takes Ctx object instead of TextIn and TextOut, which are anyway direct properties of the
+	Ctx object. 
+</p>
+
+<p>
+	Also extended the CommandProcessor interface to include the method processProgramLine.
+</p>
+
+<p>
+	In sum this makes it possible to create code that executes code. The first example is the Gui.button("name","code"), which
+	when having its "clicked" function called, executes the "code", using the CommandProcessor.processProgramLine() method. This
+	method returns a value, which becomes the return value from the clicked() method. This of course exemplifies how an
+	eval("str") function should work.
+</p>
+
+<p>
+	So obviously eval(str) was the next to be created.
+</p>
+
+<p>
+	2019-03-17 Never got the GUI to work, so deleted it.
+</p>
+
+<h3>2019-02-17 ObjPersistent</h3>
+<p>
+	After creating Gui.show, which displays a graphical interface, a method for killing that window on exit was needed. 
+</p>
+<p>
+	This was done by extending
+	the ObjPersistent class with a method cleanupOnExit(), which for ObjGui performs a dispose on the App object. Also added identically named method to ObjGlobal, and a call to that from Main on exit.
+</p>
+<p>
+	Also added method initPersistentObj() which is called once for each persisted instance. Added this method to the Gui object (ObjGui),
+	as a way of popping up the JFrame after it has been created and recognized as the first Gui object. Later calls to Gui which returns
+	objects with persistence-id matching an existing object are thrown away, and replaced by the persisted object.
+</p>
+
+
+<h3>2019-03-13 showCode()</h3>
+<p>
+	Added wildcard '*' option at end of name matches.
+</p>
+
+<p>
+	Example: showCode("DirCurr,Dir*:Config|S*:Search|*:The rest")
+</p>
+
+<p>
+	The point of DirCurr before Dir* is to ensure DirCurr is displayed before other Dir* whatever their alphabetical order.
+</p>
+
+<h3>Older changes</h3>
+
+
+<pre style="border:0; padding:0; margin:0">
+2019-01-10 DONE
+------------
+- showCode() for putting code lines of interest into different categories, as an alternative to '?' for listing program code
+- added Dict.has(key) -> boolean
+- added "cd" statement
+   - cd .   # go to start directory
+   - cd ..
+   - cd "string"
+   - cd identifier
+- removed Cmd module
+- added Glob and Regex top-level objects
+- extended various methods of Dir object with optional Glob parameter ()
+   - dirs()
+   - files()
+   - allDirs()
+   - allFiles()
+- modified presentation of Dir and File objects to not include full path, plus add File.separator to end of name for Dir (presentation only)
+- created dual named expression ("dir" and "ls"), currently no parameters, returns list of directories and files in current directory
+- created "pwd" as expression, no parameters, returns current directory as Dir object and displays full path
+   - in fact corresponds to Dir without parameters, but pwd is easier to type
+
+- added ValueInt.f() method to return as float
+- added ValueFloat.f() method that returns itself, to be able to "cast" any numeric value to float, even if it is a float
+- likewise with i() method of Int and Float
+
+2018-11-15 DONE
+---------------
+- Added method String synthesize() throws Exception to Obj, to be overridden by various objects and values
+- Overridden in all Value types
+- Added :syn command to Runtime.java and tested with the above
+- Added override of synthesize() methods to the following objects 
+   - Date
+   - Date.Duration
+   - Dir
+   - File
+   - ValueObjInt
+   - ValueObjStr
+   - ObjDict
+
+
+2018-11-14 DONE
+---------------
+- Made Input.get silent when there is buffered input in the InText object
+- Added no-argument constructor for Dir (using ".")
+- Added function Dir.find(str) to locate files which contain str in name
+- Added numbers in front of list entries when return value is list, for easy access with nth
+
+
+2018-11-12 DONE
+---------------
+- Added global Date class
+- Date is automatically set to current date and time
+- Added method Duration, which returns a Duration object
+- The Duration object is also the output from the diff() method
+- Durations are formatted differently from dates
+- Added line numbers to File.more()
+
+
+- Date methods
+   Duration - create Duration of 0
+   add(duration)
+   after(date)
+   before(date)
+   dayOfMonth
+   dayOfYear
+   diff(date) - returns Duration
+   fmt
+   get
+   hour
+   millisecond
+   minute
+   month
+   parse(value)
+   set(value)
+   setFormat(str)
+   sub(duration)
+   year
+   
+- Duration  methods
+   days(val)
+   get
+   hours(val)
+   millis(val)
+   minutes(val)
+   seconds(val)
+   
+For sorting on date, use get() method to return int (long) value, and sort on this.
+
+
+
+2018-11-09 DONE
+---------------
+- Changed Dict to not take label, and not be session-persistent
+- Renamed String.replace to String.replaceChars
+- Created new String.replace, which replaces string a with string b
+- Added Data.each(from,to) for integer counting - returns list
+- Added String.merge, taking a Dict, and replacing each key with corresponding value 
+	- for particular notation, such as ${x}, just modify keys accordingly
+
+
+2018-11-08 DONE 
+---------------
+- Fixed int parse problem, now parsing as long
+- String.parseFloat
+- String.replace
+- Added InText class, exists as instance in ObjGlobal
+- Modified Function.callFunction() interface, to include InText object
+- Added stdin(...) statement, which adds buffered input lines to the InText object
+- Modified Input object, removed readline-method from Obj, using InText instead
+- Added Dict as session persistent object
+	.set, .get, .keys, .remove
+- Added File.more function for paging through files
+- Added function yes() to Lib.Data
+
+
+
+2018-11-05 DONE
+---------------
+- Lib object
+- Lib.Math object (.sin(x) .cos(x))
+- Lib.Data object (.for(init,limit,incr) -> list)
+- Lib.Plot object (.readCSVFile(f) .plot(f))
+
+2018-10-?? DONE
+---------------
+- Added ExprIf(expr,expr,expr) with "lazy" evaluation, so only one of the last two expressions gets resolved
+- Added syntax to repeat a named line as text:
+	!x! ...
+	!x:pattern!...
+
+
+
+2018-09-15 DONE
+---------------
+- Fix problem with int+-*/float
+- Added round() function to ValueFloat
+
+2018-09-09 DONE
+---------------
+- Change list.add to modify same instance, instead
+of creating new. This means we can add data to an
+instance referred via local variable.
+
+- 'help' displays functions inside object in alphabetical
+order.
+
+2018-09-08 DONE
+---------------
+- Allow multiple programlines to be added on a single
+line, separated by the pipe symbol, and using the "_"
+underscore value for the return value of the 
+previous programline:
+
+Dir(".").files->f out(Int(f.length,f)) | _.sort.reverse->x out(x.data)
+
+
+2018-08-27 DONE
+---------------
+- Supporting parameters to named lines:
+
+P(pos,val) returns parameter value at pos (1-based) if called, otherwise val.
+
+Ex. 
+
+P(1,"x")=s s+"y"
+-> returns xy when declared
+/F
+
+F("a")
+-> returns "ay"
+</pre>
+
+
+</body>
+</html>	

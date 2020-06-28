@@ -1,0 +1,90 @@
+
+Cfg.w(130)
+/Init
+
+Dir("/home/roar/Prosjekter/Java")
+/DirJava
+
+DirLocalProject
+/DirCurr
+
+
+#---
+
+Dir("src")
+/DirLocalProject
+
+DirJava.sub("Speech")
+/DirProjectSpeech
+
+
+
+DirCurr.allFiles(Glob("*.java"))->f 
+	out(Str(f.name,f)) 
+	| _.sort->x out(x.data)
+/JavaFilesSorted
+
+P(1,Grep("test"))=g 
+	JavaFilesSorted->f g.file(f)->line report(f.name, line.lineNumber, line)
+/PSearch
+
+#
+# Get input
+#
+P(1,"test")=label Input(label).get
+/Get
+
+P(1,"test")=label Get(label).parseInt
+/GetI
+
+# ----
+
+PSearch(Grep(Get("Search1")))
+/S1
+
+S1
+/S
+
+stdin("") S
+/s
+
+
+PSearch(Grep(Get("Search2")))
+/S2
+
+PSearch(Grep(Get("Search3a AND")).match(Get("AND Search3b")))
+/S3
+
+
+Get("Part of file name")=x JavaFilesSorted->f assert(f.name.contains(x)) out(f)
+/FilterFiles
+
+FilterFiles->f report(f.path, f.length)
+/F
+
+FilterFiles.nth
+/FF
+
+stdin("") FilterFiles.nth =f
+Dir.runDetach("leafpad", f.path)
+/M
+
+stdin("") FilterFiles.nth =f
+Dir.run("more", f.path)
+/m
+
+showCode("S*,F,M:Main")
+/c
+
+P(1,savefile)=f
+call "Lib:e" (f)
+/e
+
+File("out.txt")
+/f
+
+P(1,List)=lines
+P(2,"a")=a
+P(3,"b")=b
+	lines->line out(line.replace(a,b))
+/repl

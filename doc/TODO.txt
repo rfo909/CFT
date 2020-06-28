@@ -1,0 +1,205 @@
+TODO
+
+Soft links (Linux)
+------------------
+CFT doesn't understand soft links. Deleting a soft link results in deleting the 
+file linked to. Not good!
+
+
+
+Macros
+------
+Should support loops and pipes. The execution mechanism should be shared
+with functions!
+
+
+FuncOverrides
+-------------
+Apart from never being used, these should support macro values as well as
+regular values. 
+
+Since never used, perhaps eliminate from language, for less complexity?
+No. That's not the way of the coder.
+
+
+
+
+Generic libraries (in CFT)
+--------------------------
+	- menus and selection (Lib)
+	- ascii diagrams
+	- generating diagrams in HTML canvas by autogenerating output
+
+
+
+
+Repository for scripts
+----------------------
+Github?
+
+System scripts in separate directory?
+
+
+
+GUI front-end = Web
+---------------------
+Instead of messing with Swing or Curses, why not let CFT act as a web server?
+
+
+
+
+
+
+Return statement?
+-----------------
+Could short-circuit a lot of logic, and make code more readable.
+
+
+
+
+
+
+
+Networking
+----------
+Would like to be able to collect data from remote servers, but unsure of how to
+set up this in a secure way. Should probably run via ssh. 
+
+
+Parallel sessions
+-----------------
+Would like to use networking code to interface background threads running 
+different script files. Could make a controller that interfaces multiple
+such processes, and communicates via loopback.
+
+This would also allow for output control, abandoning and even terminating
+runaway processes, depending on implementation. 
+
+
+
+
+
+Maven
+-----
+Should replace ANT with Maven.
+
+
+Far out
+-------
+	Selenium-Script integration?
+	Backup2 integration
+	PDF reports?
+	HTML generation is easy, but should there be tools?
+
+
+
+Plot
+----
+The plots are primitive, but served their purpose at the time. Should produce
+improved plots, either in-process, or with external tool.
+
+Or generate HTML code, including drawing in canvas?
+
+Huge CFT libs?
+
+
+
+Curses?
+-------
+Consider curses integration for
+	- menu creation
+	- alerts from background threads 
+
+Must not interfere with terminal window on Linux / CMD on Windows. 
+
+
+
+Interactive improvements
+------------------------
+
+Make separate parser for ls and cd, that does not tokenize
+special characters and numbers.
+
+Must understand globbing, as well as list of substrings as for cd today.
+
+ls(N) may not be an Expr any more, but its output will be a Value.
+
+
+
+
+
+
+Various suggestions
+-------------------
+
+	
+Implementere  
+	float.fmt(decimals) -> String
+	int.fmt(radix) -> String
+
+	Lib.Text.fmt(value,width)
+	Lib.Text.fmtRight(value,width)
+	Lib.Text.Histogram.data(List)
+	Lib.Text.Plot.timeline(List)   - ascii plot
+	
+	Lib.UI.inputSelectByNumber(List) - ber bruker taste inn tall for å velge verdi
+	Lib.UI.inputSelectByName(List) - ber bruker angi del av verdi
+
+	
+
+Reporting
+-----------
+Let data present themselves in columns, and supporting sub-levels of columns when
+presenting a list of object, each with sub-cols, tied to type. Should not need report() at all!
+
+Alternatively, extend out() to take additional cols for presentation
+
+
+
+Create new object type: Stream objects
+--------------------------------------
+
+- Stream objects for async processing
+	- for example processing Dir.run output
+	- or for processing big text files, using a processing loop reading one line at a time 
+	
+
+- create Lib.Data.LineReader object, for processing loops without buffering in RAM
+	LineReader(file)
+	LineReader(list)
+
+
+
+Sessions and threading
+----------------------
+
+- implementere flere parallelle sesjoner, med varsling om det dukker opp output i en av dem
+	- en viktig konsekvens blir at runaway-kode ikke kjører i forgrunnen, og 
+ 		at skjerm-output kan stoppes ved å trykke ENTER
+
+- introdusere ytterligere bakgrunnstråder inne i hver sesjon, for triggere / overvåkning
+
+- create network hub, network master and network peer functionality for remote control
+
+- create remote support for Dir and File objects, possibly also sessions and triggers
+
+- evt. eksplisitt funksjon for å kjøre kode i bakgrunnen?
+
+- support for reading environment variables
+
+
+
+Low priority
+-------------
+
+- improve graph generation
+	- axis labels
+	- understand date/time
+	- LOW-PRI
+
+		
+
+
+
+
+

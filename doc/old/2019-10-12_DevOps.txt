@@ -1,0 +1,195 @@
+
+# Need more advanced functions for copying files
+Dir.copyTree(Dir [,Glob])
+Dir.copyFiles(Dir, [,Glob])
+	## Must detect if source dir and target dir are the same, and then do nothing!!
+
+--------------
+
+#
+# Lambda expressions == code blocks == "here" code / code literal
+#
+
+{P(1,2)=x x+1} =code  code(3)
+
+-------------
+
+Dict.bind("add",{
+	P(1)=key P(2)=repo P(3)=jars
+	Dict.set("repo",repo).set("jars",jars)=d
+	self.set(key,d)
+})
+.add :("java_general", "https://git.systor.st/scm/stas/java_general.git",    "systor.jar")_
+.add :("stas_impex",   "https://git.systor.st/scm/stas/stas_impex_file.git", "impex.jar stas.impex.jar".split))
+.add :("gnt",          "https://git.systor.st/scm/stas/gnt.git",             "gnt.jar")
+/Modules
+
+#
+# --> The ":" function executes a code literal off the stack with the following list of parameters
+#     For no args :()
+#     For other invocations: use functions on the code literal:
+#
+#		{...}.argsList(list)
+#		{...}.call(a,b,c)              <-- :(...) is shortcut for this
+#
+ 
+-- Lambdas as inner functions
+
+{P(1)=x x+2}=sub
+list(1,2,3)->i out(sub:(i)) | _=x
+
+Given that lambdas run inside the same function, they share access to inner
+variables.
+
+-- Closures / self
+
+## 
+## Binding a lambda to a Dict object creates a closure that exists until the 
+## current code invocation stack terminates. Combining with ValDef, closures
+## can live much longer.
+##
+	
+Dict.set("data",list) =d
+d.bind("add",{
+	P(1)=data self.data.add("-"+data+"-")
+}) =closure    # <-- function that works on object x
+d  # <-- object with specialized add
+
+Alt.
+
+Lib.closure(d,{...}) =closure
+
+
+{...}   <-- literal x
+/a
+
+a  <- creates instace of x, AND LINKS IT to current environment?  ( a real closure )
+
+
+
+## Now this function instantiates a new Dict every time, which is kept available
+## due to closures being created, but those are all deleted when the execution is
+## complete (the top level code line completes)
+
+
+
+??? HVOR FØRER DETTE ????
+
+
+
+
+
+
+
+
+
+
+
+
+Dict
+.set("gnt",Dict.set("repo","xxx").set("jars","yyy"))
+.set
+
+
+
+
+
+##
+## Could return Dict of Dicts, with support for .xxx instead of get("xxx")
+##
+
+Dir("checkout")=d d.create d
+/RootDir
+
+P(1,Modules.gnt)=module
+module.repo.afterLast("/").before(".git")
+/RepoDir
+
+P(1,Modules.gnt)=module
+	# Checkouot
+	RootDir.run("cmd","/c","git","clone",module.repo)
+	#
+	RootDir.sub(RepoDir(module)) =moduleDir
+	# build
+	moduleDir.allFiles->f
+		assert(f.name=="pom.xml")
+		f.dir.run("cmd","/c","mvn","package")
+	|
+	# verify jars
+	moduleDir.allFiles->f assert(f.name.endsWith(".jar")) out(f.name) | _=allJars
+	module.jars->jar 
+		require(allJars.contains(jar), "jar file " + jar + " not found following build")
+	|
+/BuildModule
+
+Modules.keys->key
+	BuildModule(Modules._get(key))
+/BuildAll
+
+
+----------------------
+
+Lambda expressions == code blocks == "here" code / code literal
+
+{P(1,2)=x x+1} =code  code(3)
+
+
+
+
+
+
+Config("operations")
+.fields("code")
+.key("CopyFile").data( { 
+	P(1,Dict)=src P(2,Dir)=target P(3,File("x.txt"))=file
+	scr.file(file).copyTo(target)
+})
+.key("CopyAll").data( {
+	...
+})
+.key("MkDir").data( { ... } )
+
+
+
+
+P(1,Dir)=from P(2,Dir)=to
+...
+/Copy
+
+
+
+
+<<< EOF
+	mkdir  		[location]\wwwhome\[mvrs-context]
+	
+	copyAll  		[module]\config	[location]\wwwhome\[mvrs-context] 
+	copyAll  		[module]\static	[location]\wwwhome\[mvrs-context]
+	copyAllFilter	*.jar	[module]\lib	[location]\wwwhome\[mvrs-context]\servlets\WEB-INF\lib
+
+	# lag tom katalog
+	mkdir 		[location]\wwwhome\documentstore
+	mkdir 		[location]\wwwhome\temp
+
+EOF
+/RulesGNT
+
+
+
+P(1,"mkdir x").trim=rule
+	returnIf(rule=="" || rule.startsWith("#"))
+	
+	require(!rule.contains("[") && !rule.contains("]"), "merge codes should be replaced by actual values at this point: " + rule)
+
+	rule.split=parts
+	parts.nth=op
+	parts.remove(0)=args
+	
+	Dict.set("mkdir", {P(1)=path Dir(path).create})
+		.set("copyAll", {P(1)=src P(2)=target Dir(src).copyTree(Dir(target, Glob("*")) })
+		.set("copyAllFilter", {P(1)=src P(2)=pat P(3)=target Dir.src.copyTree(Dir(target), Glob(pat)) })
+		
+		.get(op).Pstrict.argsList(args).call  # Pstrict means parameters are required (see "require(...)")
+
+/ExecuteRule
+	
+
