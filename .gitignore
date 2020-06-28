@@ -1,3 +1,6 @@
+build/
+src/ebuild/
+
 # Compiled class file
 *.class
 
