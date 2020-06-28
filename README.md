@@ -71,6 +71,14 @@ later, just type
 $ :load Test
 ```
 
+## More examples
+
+### Counting number of lines of java code
+
+```
+$ Dir.allFiles(Glob("*.java"))-&gt;f out(f.read.length) | _.sum
+```
+
 
 
 # Documentation
