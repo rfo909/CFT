@@ -37,13 +37,22 @@ FilesToMove->f
 /MoveFiles
 
 
-# Move savefiles not included in release, then run GIT add, commit and push
+# Restore files from TargetDir after git push
+TargetDir.files->f
+	println("Restoring file " + f.name)
+	HomeDir.copy(f)
+/RestoreFiles
+
+
+
+# Move savefiles not included in release, then run GIT add, commit and push, before restoring the files
 MoveFiles
 HomeDir.run("git","add",".")
-gs # show status
+gs
 Input("Commit message?").get =msg
 HomeDir.run("git","commit","-m",msg)
 HomeDir.run("git","push","origin","master")
+RestoreFiles
 /PushUpdate
 
 
