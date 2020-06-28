@@ -1,44 +1,80 @@
-ConfigTool - 
+# CFT ("ConfigTool")
 
-# CFT - ConfigTool
+CFT is a terminal based Java application.
+It supports basic functions like "cd", "ls" and "pwd", but is also a programming language which lets you 
+create functions that call each other, for automating repetitive task being a developer.
 
-An automation shell written in Java.
+A central element is list processing, be it lists of files, list of lines from files, etc. 
 
-CFT was initiated at some point during 2018, as a multi purpose tool for 
-interactive use and easy automation. It has been extended as needs arose. 
-
-CFT is a programming language with the initial purpose of getting useful work
-out of single lines of code.
-
-- searching code
+- searching source code files
 - searching multiple log files
 - file copy, rename, move
 - interfacing external programs
-- code generation 
-- programming fun
+- sorting and reporting
+ 
 
-## Getting started
+# Getting started
 
-1. The project is currently builds with Apache ANT, and results in a single JAR-file.
-2. Once built, run using ./cft shell script or .\cft.cmd for windows.
-3. Please read the comprehensive Doc.html stored under ./doc for an introduction to CFT
+The project is currently built using Apache ANT, which results in a single JAR file.
 
-### Example code
+Once built, the application us run using ./cft (Linux) or .\cft.cmd (Windows).
+
+Please read the comprehensive document "Doc.html" stored under the ./doc directory, for
+a detailed introduction. CFT also contains an interactive help-function, to list both
+global functions and member functions inside various types of objects. 
+
+
+# Interactive use
+
+CFT is an interactive shell, which
+produces a simple '$' prompt. Below are some examples of statements and expressions.
+```
+$ ls          # list current directory
+# cd someDir  # chance current directory
+# cd ..       # change current directory
+$ 2+3         # using CFT as a calculator
+$ help        # show global functions
+$ Dir help    # show Dir object functions
+$ "x" help    # show string functions
+```
+# A functional language
+
+The example above calls an internal function, Dir(), which returns a Dir-objeckt. For functions
+that don't take any parameters, the ()'s can be omitted.
+
+To list all text files under the current directory:
 
 ```
-$ 2+3
-$ help
-$ Dir.help
+$ Dir.allFiles(Glob("*.txt"))
 ```
 
-## Going Open Source
+This produces a list of all text files. 
 
-Having reached a level of robustness and fairly reliable error handling, 
-version 1.0 was assigned, as it is now robust enough for others to enjoy
-without having to understand (all) the inner workings.
+Once you're happy with a line of code, and want to
+store it as a named function, just enter "/name". The code can then be saved, using the 
+":save" command with a save name, for example
+
+```
+$ Dir.allFiles(Glob("*.java"))
+  : (lists all java files)
+$ /JavaFiles
+$ :save Test
+```
+
+To run this code again, just type "JavaFiles" and press Enter. To load the script file
+later, just type
+
+```
+$ :load Test
+```
 
 
-Roar Foshaug,
-Trondheim, Norway,
-2020-06-28
+
+# Documentation
+
+The file Doc.html under ./doc gives a detailed walktrough of most of the functionality
+of CFT.
+
+
+
 

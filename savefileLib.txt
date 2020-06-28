@@ -1,0 +1,127 @@
+
+
+# Documentation
+<<< EOF
+#
+# --------------------------------------------------
+# OS independent editor functionality
+#
+# To edit a file: call "Lib:e" (File)
+# 
+# --------------------------------------------------
+#
+>>> EOF
+/doc
+
+
+# Select Linux editor and remember selection for next time, open file in editor
+P(1,savefile) =file
+List(
+	Dict.set("label","sublime")
+		.set("action", {P(1)=file Dir.runDetach("subl",file.path) }),
+	Dict.set("label","gedit")
+		.set("action", {P(1)=file Dir.runDetach("gedit",file.path) }),
+	Dict.set("label","leafpad")
+		.set("action", {P(1)=file Dir.runDetach("leafpad",file.path) }),
+	Dict.set("label","nano")
+		.set("action", {P(1)=file Dir.run("nano", file.path) })
+) =linuxEditors
+#
+if (Val("linuxEditor")==null,{<-
+	MenuSelect(linuxEditors, {P(1).get("label")},"Select editor") =ed
+	ValDef("linuxEditor", ed)
+}.call,0)
+#
+Val("linuxEditor").get("action").call(file)
+/ShowLinuxEditor
+
+
+
+# Clear selected Linux editor
+ValDef("linuxEditor",null)
+/Clear
+
+	
+
+# Edit file, defaults to savefile
+P(1,savefile)=file
+if(isWindows, Dir.runDetach("cmd","/c","notepad",file.path), ShowLinuxEditor(file))
+/e
+
+
+
+
+
+
+# Show a list of options
+P(1,List)=options
+P(2,{"name"})=macroGetElementName
+	options->x
+		println("- " + macroGetElementName.call(x))
+/ShowOptions
+
+
+
+# Select zero or more from list of options
+P(1,List)=options
+P(2,{"name"})=macroGetElementName
+	readLine("Enter part of name? ") =sel
+	options->opt
+		assert(macroGetElementName.call(opt).contains(sel))
+		out(opt)
+/SelectOptions
+
+
+
+# Display text with ---- under
+P(1,"Title") =title
+println(title)
+println( Lib.Data.yes(title.length,"-").concat )
+/Header
+
+
+
+
+# Select entry from menu
+P(1,List) =options
+P(2,{"name"}) =macroGetElementName
+P(3) =title
+#
+null =selectedElement
+loop
+	println("")
+	if (title != null, Header(title), 0)
+
+	ShowOptions(options, macroGetElementName)
+	SelectOptions(options, macroGetElementName) =result
+	
+	false =terminateLoop
+
+	if (result.length==1, {<-
+			result.nth =selectedElement
+			true =terminateLoop
+		}.call, {
+			println("** No match or not unique")
+		}.call
+	)
+	break(terminateLoop)
+| selectedElement
+/MenuSelect
+
+
+
+
+
+
+# ------- Test test test -------------
+{ PDict("label","action") } =data
+#
+List(
+	data.call("Search",{println("Performing action Search")}),
+	data.call("Locate file", {println("Performing action FileLocator")})
+) =entries
+{ P(1).get("label") } =macroGetElementName
+#
+MenuSelect(entries, macroGetElementName) =selectedElement
+selectedElement.get("action").call
+/test
