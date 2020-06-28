@@ -24,11 +24,11 @@ out of single lines of code.
 3. Please read the comprehensive Doc.html stored under ./doc for an introduction to CFT
 
 ### Example code
-...
+
+```
 $ 2+3
-<int>
 5
-...
+```
 
 ## Going Open Source
 
