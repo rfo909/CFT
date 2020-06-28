@@ -23,6 +23,13 @@ out of single lines of code.
 2. Once built, run using ./cft shell script or .\cft.cmd for windows.
 3. Please read the comprehensive Doc.html stored under ./doc for an introduction to CFT
 
+### Example code
+...
+$ 2+3
+<int>
+5
+...
+
 ## Going Open Source
 
 Having reached a level of robustness and fairly reliable error handling, 
@@ -30,7 +37,7 @@ version 1.0 was assigned, as it is now robust enough for others to enjoy
 without having to understand (all) the inner workings.
 
 
-Roar Foshaug
-Trondheim, Norway
+Roar Foshaug,
+Trondheim, Norway,
 2020-06-28
 
