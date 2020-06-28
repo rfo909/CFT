@@ -40,7 +40,8 @@ FilesToMove->f
 # Restore files from TargetDir after git push
 TargetDir.files->f
 	println("Restoring file " + f.name)
-	HomeDir.copy(f)
+	when (!HomeDir.copy(f), error("Failed to restore file"))
+	f.delete
 /RestoreFiles
 
 
