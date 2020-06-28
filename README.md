@@ -76,7 +76,13 @@ $ :load Test
 ### Counting number of lines of java code
 
 ```
-$ Dir.allFiles(Glob("*.java"))-&gt;f out(f.read.length) | _.sum
+$ Dir.allFiles(Glob("*.java"))->f out(f.read.length) | _.sum
+```
+
+### Calculating date (and time) 30 days ago
+
+```
+$ Date.sub(Date.Duration.days(30))
 ```
 
 
