@@ -10,10 +10,11 @@ See also shell script ./CreateOverview.sh
 /doc
 
 
-call "Lib:e" (savefile)
+P(1,savefile) =file
+call "Lib:e" (file)
 /e
 
-Dir("/home/roar/Prosjekter/Java/ConfigTool/doc")
+Dir("/home/roar/Prosjekter/Java/CFT/doc")
 /DocDir
 
 # Generate content from Doc.html - no params
@@ -33,6 +34,7 @@ DocDir.file("Doc.html")	=src
 grep.file(src) ->line
 	out(line.trim.merge(data)) 
 /content
+
 
 
 # Generate header - no params
