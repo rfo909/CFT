@@ -1,5 +1,7 @@
 build/
 src/ebuild/
+src/.classpath
+src/.project
 
 # Compiled class file
 *.class
