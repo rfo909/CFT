@@ -1,0 +1,55 @@
+
+call "Lib:e" (savefile)
+/e
+
+# savefiles to include in release
+"Code Lib Overview Release".split->x out("savefile"+x+".txt")
+/IncludedSavefiles
+
+
+# Project home directory
+Dir("/home/roar/Prosjekter/Java/CFT")
+/HomeDir
+
+
+# Identify savefiles to move to TargetDir
+IncludedSavefiles =list
+HomeDir.files(Glob("savefile*"))->f
+	reject(list.contains(f.name))
+	out(f)
+/FilesToMove
+
+
+# Get or create target directory
+HomeDir.sub("../CFT_savefiles") =d
+when (!d.exists, d.create)
+d
+/TargetDir
+
+
+# Move files not included in release to TargetDir
+FilesToMove->f
+	println("Copying file " + f.name + " to " + TargetDir.path)
+	when (!TargetDir.copy(f), error("Failed to copy file"))
+	println("Deleting file " + f.name)
+	f.delete
+/MoveFiles
+
+
+
+# Run GIT
+HomeDir.run("git","add",".")
+gs
+Input("Commit message?").get =msg
+HomeDir.run("git","commit","-m",msg)
+HomeDir.run("git","push","origin","master")
+/RunGit
+
+
+
+
+# Git status
+HomeDir.run("git","status")
+/gs
+
+
