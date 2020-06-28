@@ -10,7 +10,7 @@ See also shell script ./CreateOverview.sh
 /doc
 
 
-Dir.runDetach("gedit",savefile.path)
+call "Lib:e" (savefile)
 /e
 
 Dir("/home/roar/Prosjekter/Java/ConfigTool/doc")

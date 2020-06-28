@@ -2,6 +2,11 @@
 Cfg.w(130)
 /Init
 
+# Open script file in editor
+P(1,savefile)=f
+call "Lib:e" (f)
+/e
+
 Dir("/home/roar/Prosjekter/Java")
 /DirJava
 
@@ -75,10 +80,6 @@ Dir.run("more", f.path)
 
 showCode("S*,F,M:Main")
 /c
-
-P(1,savefile)=f
-call "Lib:e" (f)
-/e
 
 File("out.txt")
 /f

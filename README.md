@@ -38,6 +38,7 @@ $ 2+3         # using CFT as a calculator
 $ help        # show global functions
 $ Dir help    # show Dir object functions
 $ "x" help    # show string functions
+$ List help   # show list functions
 ```
 # A functional language
 
