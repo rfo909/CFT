@@ -27,7 +27,8 @@ out of single lines of code.
 
 ```
 $ 2+3
-5
+$ help
+$ Dir.help
 ```
 
 ## Going Open Source
