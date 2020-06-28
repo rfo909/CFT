@@ -2,7 +2,7 @@
 
 CFT is a terminal based Java application.
 It supports basic functions like "cd", "ls" and "pwd", but is also a programming language which lets you 
-create functions that call each other, for automating repetitive task being a developer.
+create functions that call each other, for automating repetitive tasks.
 
 A central element is list processing, be it lists of files, list of lines from files, etc. 
 
@@ -10,6 +10,8 @@ A central element is list processing, be it lists of files, list of lines from f
 - searching multiple log files
 - file copy, rename, move
 - interfacing external programs
+- grouping files by name
+- date processing
 - sorting and reporting
  
 
@@ -27,7 +29,7 @@ global functions and member functions inside various types of objects.
 # Interactive use
 
 CFT is an interactive shell, which
-produces a simple '$' prompt. Below are some examples of statements and expressions.
+produces a simple '$' prompt. Below are some examples interactive use.
 ```
 $ ls          # list current directory
 # cd someDir  # chance current directory
@@ -71,6 +73,8 @@ $ :load Test
 
 
 # Documentation
+
+The above is just a taste of how CFT works. 
 
 The file Doc.html under ./doc gives a detailed walktrough of most of the functionality
 of CFT.
