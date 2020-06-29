@@ -52,11 +52,12 @@ HomeDir.files(Glob("savefile*"))->f
 	|
 /Commit
 
-
+HomeDir.run("git","push","origin","master")
+/Push
 
 # Call Commit then run git to push update to github
 Commit
-HomeDir.run("git","push","origin","master")
+Push
 /PushUpdate
 
 

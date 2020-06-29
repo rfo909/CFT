@@ -49,6 +49,14 @@ if(isWindows, Dir.runDetach("cmd","/c","notepad",file.path), ShowLinuxEditor(fil
 /e
 
 
+# Page file, defaults to savefile
+P(1,savefile)=file
+if(isWindows,
+	Dir.runDetach("notepad", file.path),
+	Dir.run("more", file.path)
+)
+/m
+
 
 
 
