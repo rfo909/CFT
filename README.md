@@ -25,7 +25,7 @@ $ Dir.files
 # - get list of File objects
 ```
 
-WHen passing no parameters to a function in CFT, there is no need to include the ()'s
+When passing no parameters to a function in CFT, there is no need to include the ()'s
 
 
 ## Initial requirement
@@ -47,7 +47,7 @@ The project is currently built using Apache ANT, which results in a single JAR f
 
 There are no dependencies outside of standard Java libraries.
 
-Once built, the application is started using ./cft (Linux) or .\cft.cmd (Windows). To enter
+Once built, the application is started using ./cft (Linux) or .\cft.cmd (Windows). To leave
 type ":quit" or just type CTRL-C.
 
 Please read the comprehensive document "Doc.html" stored under the ./doc directory, for
@@ -74,7 +74,7 @@ $ List help   # show list functions
 # A functional language
 
 CFT is a functional language, consisting of functions producing objects where we call
-new functions. 
+new functions, and so on ...
 
 # Create own functions
 
@@ -117,9 +117,11 @@ Let's call the function JavaFiles.
 $ /JavaFiles
 ```
 
-Every time we enter JavaFiles and press Enter, we get a list of Java files
+Every time we type JavaFiles and press Enter, we get a list of Java files
 available from the current directory. Use "ls" and "cd" to move somewhere else,
 then run JavaFiles again.
+
+Type "cd" plus Enter to return to application home directory.
 
 ## Searching
 
@@ -143,7 +145,9 @@ follows a processing loop, where we iterate over all the JavaFiles, and for each
 the .file() function inside the grep object, which produces a list of lines. We iterate
 over those as well, and use report() to generate nice output.
 
-Time to save the script
+In CFT variable assigns are "reversed". Example "2 =a 3 =b a+b" returns 5.
+
+When the code works it's time to save the script
 
 ```
 $ :save MyScript
@@ -176,11 +180,24 @@ $ Dir("\\somehost\d$\someLogDir").files(Glob("*.log")
 
 ```
 
+## Converting one light year to kilometres
+
+$ Lib.Convert.lyToKm(1)
+
+## Doing math
+
+$ 2+3
+
+## List all the conversions I coded an evening far far away
+
+$ Lib.Convert help
+
+
 # Documentation
 
-The above is just a taste of how CFT works. 
+The above is still just a taste of how CFT works. 
 
-The file [./doc/Doc.html](doc/Doc.html) gives a detailed walktrough of most of the functionality.
+The file doc/Doc.html gives a detailed walktrough of most of the functionality.
 
 
 
