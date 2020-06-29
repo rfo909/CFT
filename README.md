@@ -1,29 +1,59 @@
 # CFT ("ConfigTool")
 
-CFT is a terminal based Java application.
-It supports basic functions like "cd", "ls" and "pwd", but is also a programming language which lets you 
-create functions that call each other, for automating repetitive tasks.
+CFT is a terminal based Java application, for interactive automation of simple
+tasks, such as searching, moving files, checking logs. 
 
-A central element is list processing, be it lists of files, list of lines from files, etc. 
+## Introduction
+
+The CFT application supports basic shell functions like "cd", "ls" and "pwd", 
+but is also a programming language which lets you build functions, that
+both call each other as well as a system library of over 200 member functions,
+belonging to all kinds of objects.
+
+The most central object types are Dir, File and List. There are also strings, integers,
+floats and booleans, plus still a few, totalling about 20 as of version 1.0.6. 
+
+Objects all contain functions, such that
+
+```
+$ Dir.files
+
+# really means: 
+# - call Dir() function with no parameters
+# - get Dir object
+# - call .files() function inside 
+# - get list of File objects
+```
+
+WHen passing no parameters to a function in CFT, there is no need to include the ()'s
+
+
+## Initial requirement
+
+CFT was developed to do small scale automation of tasks such as:
 
 - searching source code files
 - searching multiple log files
 - file copy, rename, move
-- interfacing external programs
+- running external programs such as Powershell and git
 - grouping files by name
 - date processing
 - sorting and reporting
- 
 
-# Getting started
+
+# Download and compile
 
 The project is currently built using Apache ANT, which results in a single JAR file.
 
-Once built, the application us run using ./cft (Linux) or .\cft.cmd (Windows).
+There are no dependencies outside of standard Java libraries.
+
+Once built, the application is started using ./cft (Linux) or .\cft.cmd (Windows). To enter
+type ":quit" or just type CTRL-C.
 
 Please read the comprehensive document "Doc.html" stored under the ./doc directory, for
 a detailed introduction. CFT also contains an interactive help-function, to list both
 global functions and member functions inside various types of objects. 
+
 
 
 # Interactive use
@@ -40,52 +70,111 @@ $ Dir help    # show Dir object functions
 $ "x" help    # show string functions
 $ List help   # show list functions
 ```
+
 # A functional language
 
-The example above calls an internal function, Dir(), which returns a Dir-objeckt. For functions
-that don't take any parameters, the ()'s can be omitted.
+CFT is a functional language, consisting of functions producing objects where we call
+new functions. 
 
-To list all text files under the current directory:
+# Create own functions
+
+We also create our own functions, which can be done interactively, or by editing
+the save file ("script file"). To create your first function, type the following, and press
+Enter.
 
 ```
-$ Dir.allFiles(Glob("*.txt"))
+$ "a b c".split
 ```
 
-This produces a list of all text files. 
+This produces a list of three values listed under each other. 
 
-Once you're happy with a line of code, and want to
-store it as a named function, just enter "/name". The code can then be saved, using the 
-":save" command with a save name, for example
+Then enter the following and press Enter.
+
+```
+$ /x
+```
+
+You have now created a function 'x', which you call by using its name. 
+
+```
+$ x+x
+```
+
+This produces a new list which is the sum of the previous two. 
+
+# Create something useful
+
+To produce a list of all Java source files found recursively under the current directory:
 
 ```
 $ Dir.allFiles(Glob("*.java"))
-  : (lists all java files)
+```
+
+That might be a candidate for a function name, to avoid having to type this more than once.
+Let's call the function JavaFiles.
+
+```
 $ /JavaFiles
-$ :save Test
 ```
 
-To run this code again, just type "JavaFiles" and press Enter. To load the script file
-later, just type
+Every time we enter JavaFiles and press Enter, we get a list of Java files
+available from the current directory. Use "ls" and "cd" to move somewhere else,
+then run JavaFiles again.
+
+## Searching
+
+Still working in the interactive interface, we can create a function to search for
+a string in all Java files. First we create a helper function, which creates a Grep
+object, which we then use in the main search function, which we call Search.
 
 ```
-$ :load Test
+$ Grep(Input("Enter search term").get)
+$ /GetGrep
+
+$ GetGrep =grep JavaFiles->f grep.file(f)->line report(line.file.name, line.lineNumber, line)
+$ /Search
 ```
 
-## More examples
+The Grep() function is a global function which takes a string, which is read from the user,
+and returns a Grep object. 
 
-### Counting number of lines of java code
+In the Search function we call GetGrep then assign it to a local variable 'grep'. Then 
+follows a processing loop, where we iterate over all the JavaFiles, and for each call
+the .file() function inside the grep object, which produces a list of lines. We iterate
+over those as well, and use report() to generate nice output.
+
+Time to save the script
 
 ```
-$ Dir.allFiles(Glob("*.java"))->f out(f.read.length) | _.sum
+$ :save MyScript
 ```
 
-### Calculating date (and time) 30 days ago
+To load later, naturally type
+
+```
+$ :load MyScript
+```
+
+# Other examples
+
+## Counting number of lines of java code
+
+```
+$ JavaFiles->f out(f.read.length) | _.sum
+```
+
+## Calculating date (and time) 30 days ago
 
 ```
 $ Date.sub(Date.Duration.days(30))
 ```
 
+## Open remote directories (windows)
 
+```
+$ Dir("\\somehost\d$\someLogDir").files(Glob("*.log")
+
+```
 
 # Documentation
 

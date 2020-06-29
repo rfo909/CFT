@@ -7,11 +7,31 @@
 # OS independent editor functionality
 #
 # To edit a file: call "Lib:e" (File)
+# To page a file: call "Lib:m" (File)
+#
+# For windows runs notepad, for Linux there is
+# choice. 
 # 
 # --------------------------------------------------
 #
 >>> EOF
-/doc
+/Readme
+
+
+# Edit file, defaults to savefile
+P(1,savefile)=file
+if(isWindows, Dir.runDetach("cmd","/c","notepad",file.path), ShowLinuxEditor(file))
+/e
+
+
+# Page file, defaults to savefile
+P(1,savefile)=file
+if(isWindows,
+	Dir.runDetach("notepad", file.path),
+	Dir.run("more", file.path)
+)
+/m
+
 
 
 # Select Linux editor and remember selection for next time, open file in editor
@@ -43,20 +63,6 @@ ValDef("linuxEditor",null)
 
 	
 
-# Edit file, defaults to savefile
-P(1,savefile)=file
-if(isWindows, Dir.runDetach("cmd","/c","notepad",file.path), ShowLinuxEditor(file))
-/e
-
-
-# Page file, defaults to savefile
-P(1,savefile)=file
-if(isWindows,
-	Dir.runDetach("notepad", file.path),
-	Dir.run("more", file.path)
-)
-/m
-
 
 
 
@@ -81,7 +87,7 @@ P(2,{"name"})=macroGetElementName
 
 
 
-# Display text with ---- under
+# Display text with line under
 P(1,"Title") =title
 println(title)
 println( Lib.Data.yes(title.length,"-").concat )
@@ -116,20 +122,3 @@ loop
 | selectedElement
 /MenuSelect
 
-
-
-
-
-
-# ------- Test test test -------------
-{ PDict("label","action") } =data
-#
-List(
-	data.call("Search",{println("Performing action Search")}),
-	data.call("Locate file", {println("Performing action FileLocator")})
-) =entries
-{ P(1).get("label") } =macroGetElementName
-#
-MenuSelect(entries, macroGetElementName) =selectedElement
-selectedElement.get("action").call
-/test
