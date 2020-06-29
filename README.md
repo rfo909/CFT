@@ -1,7 +1,8 @@
 # CFT ("ConfigTool")
 
 CFT is a terminal based Java application, for interactive automation of simple
-tasks, such as searching, moving files, checking logs. 
+tasks, such as searching, moving files, checking logs.
+
 
 ## Introduction
 
@@ -11,7 +12,10 @@ both call each other as well as a system library of over 200 member functions,
 belonging to all kinds of objects.
 
 The most central object types are Dir, File and List. There are also strings, integers,
-floats and booleans, plus still a few, totalling about 20 as of version 1.0.6. 
+floats and booleans, plus still a few, totalling about 20 as of version 1.0.6.
+
+The program prompt is a single '$'. You enter stuff, and press Enter, and it gets
+executed. 
 
 Objects all contain functions, such that
 
@@ -35,10 +39,23 @@ CFT was developed to do small scale automation of tasks such as:
 - searching source code files
 - searching multiple log files
 - file copy, rename, move
-- running external programs such as Powershell and git
-- grouping files by name
+- running all kinds of external programs
+- bulk copy files
 - date processing
 - sorting and reporting
+- starting and stopping services
+- making PowerShell remote commands manageable
+- ...
+
+## Teaser :-)
+
+By following the steps in this README file, you will create three single-line functions
+that when run, ask you to enter a search string, and then searches through all your source
+files (Java used in example), presenting a formatted result with columns for file, line number
+and matching lines.
+
+For more complex searches across multiple file types at once, excluding certain directories
+and so on, read the full Doc.html under ./doc directory.
 
 
 # Download and compile
@@ -185,7 +202,7 @@ $ Date.sub(Date.Duration.days(30))
 ## Open remote directories (windows)
 
 ```
-$ Dir("\\somehost\d$\someLogDir").files(Glob("*.log")
+$ Dir("\\somehost\d$\someLogDir").files(Glob("*.log"))
 
 ```
 
