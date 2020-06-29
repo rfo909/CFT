@@ -8,7 +8,6 @@ import rf.configtool.main.runtime.ValueList;
 public class Ctx {
     
     private Ctx parent;
-    //private HashMap<String,Value> localVariables=new HashMap<String,Value>();
     private String loopVariableName;
     private Value loopVariableValue;
     
