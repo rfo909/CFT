@@ -123,6 +123,8 @@ then run JavaFiles again.
 
 Type "cd" plus Enter to return to application home directory.
 
+Oh, and its "ls" regardless of running on Linux or Windows. 
+
 ## Searching
 
 Still working in the interactive interface, we can create a function to search for
@@ -188,9 +190,23 @@ $ Lib.Convert.lyToKm(1)
 
 $ 2+3
 
-## List all the conversions I coded an evening far far away
+## List all those conversions I coded an evening far far away
 
+```
 $ Lib.Convert help
+```
+
+## To open an editor with the savefile
+
+```
+$ Dir.runDetach("notepad", savefile.path)
+```
+If on Linux, enter "leafpad" or "gedit" or "subl", or what have you. If you need to run "nano",
+then replace .runDetach with .run, so as not to run the process in the background.
+
+Note that when editing a savefile, all you need do after saving changes, is run the code
+directly, as CFT discoveres the file has changed, and hurries to reload the updated code as you press
+Enter.
 
 
 # Documentation
