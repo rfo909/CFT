@@ -19,7 +19,7 @@ Objects all contain functions, such that
 $ Dir.files
 
 # really means: 
-# - call Dir() function with no parameters
+# - call global function Dir() with no parameters
 # - get Dir object
 # - call .files() function inside 
 # - get list of File objects
@@ -160,6 +160,13 @@ To load later, naturally type
 ```
 $ :load MyScript
 ```
+
+To list all your functions, type:
+
+```
+$ ?
+```
+
 
 # Other examples
 
