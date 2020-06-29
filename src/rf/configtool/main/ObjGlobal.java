@@ -21,7 +21,6 @@ import rf.configtool.main.runtime.lib.ValueObjFileLine;
 import rf.configtool.main.runtime.lib.ValueObjInt;
 import rf.configtool.main.runtime.lib.ValueObjFloat;
 import rf.configtool.main.runtime.lib.ValueObjStr;
-import rf.configtool.main.runtime.lib.net.ObjNet;
 import rf.configtool.parser.Parser;
 import rf.configtool.parser.SourceLocation;
 
@@ -88,7 +87,6 @@ public class ObjGlobal extends Obj {
         add(new FunctionDataFile());
         add(new FunctionEval());
         add(new FunctionSyn());
-        add(new FunctionNet());
         add(new FunctionVal());
         add(new FunctionValDef());
         add(new FunctionReadLines());
@@ -602,20 +600,6 @@ public class ObjGlobal extends Obj {
             return new ValueString(s);
         }
     }
-
-    class FunctionNet extends Function {
-        public String getName() {
-            return "Net";
-        }
-        public String getShortDesc() {
-            return "Net() - get or create Net singleton object";
-        }
-        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 0) throw new Exception("Expected no parameters");
-            ObjPersistent x=new ObjNet();
-            return ctx.getObjGlobal().getOrAddPersistentObject(x);
-        }
-    } 
 
 
     class FunctionVal extends Function {

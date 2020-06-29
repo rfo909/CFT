@@ -16,7 +16,6 @@ import rf.configtool.main.runtime.ValueList;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
 import rf.configtool.main.runtime.lib.conversions.ObjConvert;
-import rf.configtool.main.runtime.lib.net.ObjNet;
 
 import java.awt.Color;
 
