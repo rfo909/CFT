@@ -91,8 +91,7 @@ $ Date.sub(Date.Duration.days(30))
 
 The above is just a taste of how CFT works. 
 
-The file Doc.html under ./doc gives a detailed walktrough of most of the functionality
-of CFT.
+The file [./doc/Doc.html](doc/Doc.html) gives a detailed walktrough of most of the functionality.
 
 
 
