@@ -15,7 +15,7 @@ public class StmtLoop extends Stmt {
         
         ts.matchStr("loop","expected keyword 'loop'");
         
-        while (!ts.atEOF() && !ts.peekStr(Runtime.PROGRAM_LINE_SEPARATOR)) {
+        while (!ts.atEOF() && !ts.peekStr(Runtime.PROGRAM_LINE_SEPARATOR) && !ts.peekStr("}")) {
             body.add(Stmt.parse(ts));
         }
         

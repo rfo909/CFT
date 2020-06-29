@@ -11,9 +11,9 @@
 
 <h1 style="color:black; border:1px solid blue; padding:1Em; text-align: center">ConfigTool - CFT</h1>
 
-<p><i>Last updated: 2020-06-27 RFO</i></p>
+<p><i>Last updated: 2020-06-29 RFO</i></p>
 
-<p><i>v1.0.5</i></p>
+<p><i>v1.0.6</i></p>
 
 
 
@@ -795,7 +795,7 @@ To create a file with a single text line:
   when (mode==3, ... )
 </pre>
 <p>
-  Both if() and when() expressions have their functionality greatly expanded by macros, which
+  Both if() and when() expressions have their functionality greatly expanded by (local) macros, which
   are described later.
 </p>
 
@@ -1831,8 +1831,8 @@ To create a file with a single text line:
 
 <h2>Macros are values</h2>
 <p>
-  Macros are values, but they are not synthesizable, and they contain only one
-  function, .call(). They currently can not contain loops or the PIPE symbol.
+  Macros are values, but they are not synthesizable, and they have only one
+  function, .call(). They currently support loops, but not PIPE functionality.
 </p>
 
 

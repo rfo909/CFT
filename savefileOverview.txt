@@ -14,7 +14,7 @@ P(1,savefile) =file
 call "Lib:e" (file)
 /e
 
-Dir("/home/roar/Prosjekter/Java/CFT/doc")
+savefile.dir.sub("doc")
 /DocDir
 
 # Generate content from Doc.html - no params

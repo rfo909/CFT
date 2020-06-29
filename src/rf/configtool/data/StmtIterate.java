@@ -17,7 +17,7 @@ public class StmtIterate extends Stmt {
         ts.matchStr("->", "expected '->'");
         loopVariable=ts.matchIdentifier("expected loop variable name");
         
-        while (!ts.atEOF() && !ts.peekStr(Runtime.PROGRAM_LINE_SEPARATOR)) {
+        while (!ts.atEOF() && !ts.peekStr(Runtime.PROGRAM_LINE_SEPARATOR) && !ts.peekStr("}")) {
             body.add(Stmt.parse(ts));
         }
         
