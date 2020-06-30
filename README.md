@@ -1,7 +1,20 @@
 # CFT ("ConfigTool")
 
-CFT is a terminal based Java application, for interactive automation of simple
-tasks, such as searching, moving files, checking logs.
+CFT is a shell-like terminal based Java app, and programming language.
+
+It was created for interactive automation of simple tasks, such as
+
+- searching source code files
+- searching multiple log files
+- file copy, rename, move
+- running all kinds of external programs
+- bulk copy files
+- date processing
+- sorting and reporting
+- starting and stopping services
+- making PowerShell remote commands manageable
+- creating configuration files
+- ...
 
 
 ## Introduction
@@ -32,21 +45,6 @@ $ Dir.files
 When passing no parameters to a function in CFT, there is no need to include the ()'s
 
 
-## Initial requirement
-
-CFT was developed to do small scale automation of tasks such as:
-
-- searching source code files
-- searching multiple log files
-- file copy, rename, move
-- running all kinds of external programs
-- bulk copy files
-- date processing
-- sorting and reporting
-- starting and stopping services
-- making PowerShell remote commands manageable
-- ...
-
 ## Teaser :-)
 
 By following the steps in this README file, you will create three single-line functions
@@ -72,32 +70,25 @@ a detailed introduction. CFT also contains an interactive help-function, to list
 global functions and member functions inside various types of objects. 
 
 
-
-# Interactive use
-
-CFT is an interactive shell, which
-produces a simple '$' prompt. Below are some examples interactive use.
-```
-$ ls          # list current directory
-# cd someDir  # chance current directory
-# cd ..       # change current directory
-$ 2+3         # using CFT as a calculator
-$ help        # show global functions
-$ Dir help    # show Dir object functions
-$ "x" help    # show string functions
-$ List help   # show list functions
-```
-
-# A functional language
+# An interactive language
 
 CFT is a functional language, consisting of functions producing objects where we call
 new functions, and so on ...
 
+It is easy to learn, and test, by entering some code, and press Enter to have it
+run. CFT has full expression support and is great as a calculator.
+
+```
+$ 2+3
+```
+
+
 # Create own functions
 
-We also create our own functions, which can be done interactively, or by editing
-the save file ("script file"). To create your first function, type the following, and press
-Enter.
+To get full use of CFT, you will define your own functions. This can be done 
+interactively at first. 
+
+To create your first function, type the following, and press Enter.
 
 ```
 $ "a b c".split
@@ -156,15 +147,19 @@ $ GetGrep =grep JavaFiles->f grep.file(f)->line report(line.file.name, line.line
 $ /Search
 ```
 
-The Grep() function is a global function which takes a string, which is read from the user,
-and returns a Grep object. 
+The Grep() function is a global function which may take a search string as parameter. Here
+we read this from the user, using the global Input() function. The Grep() function then
+returns a Grep object, which becomes the return value from function GetGrep.
 
-In the Search function we call GetGrep then assign it to a local variable 'grep'. Then 
-follows a processing loop, where we iterate over all the JavaFiles, and for each call
-the .file() function inside the grep object, which produces a list of lines. We iterate
-over those as well, and use report() to generate nice output.
+In the Search function we first call GetGrep then assign it to a local variable 'grep'. Then 
+follows a processing loop, where we iterate over all the JavaFiles, and pass each file
+as argument to the Grep object .file() function. 
 
-In CFT variable assigns are "reversed". Example "2 =a 3 =b a+b" returns 5.
+This produces a list of lines, which we iterate over, using the report() statement to
+generate nice output.
+
+Note that in CFT variable assigns are "reversed", with value first (or more specifically,
+found on the stack), followed by "=" and a name. Example "2 =a 3 =b a+b" returns 5.
 
 When the code works it's time to save the script
 
@@ -172,7 +167,7 @@ When the code works it's time to save the script
 $ :save MyScript
 ```
 
-To load later, naturally type
+To load later, type
 
 ```
 $ :load MyScript
@@ -187,26 +182,19 @@ $ ?
 
 # Other examples
 
-## Counting number of lines of java code
+### Counting number of lines of java code
 
-```
 $ JavaFiles->f out(f.read.length) | _.sum
-```
 
-## Calculating date (and time) 30 days ago
+### Calculating date (and time) 30 days ago
 
-```
 $ Date.sub(Date.Duration.days(30))
-```
 
-## Open remote directories (windows)
+### Open remote directories (windows)
 
-```
 $ Dir("\\somehost\d$\someLogDir").files(Glob("*.log"))
 
-```
-
-## Converting one light year to kilometres
+### Converting one light year to kilometres
 
 $ Lib.Convert.lyToKm(1)
 
@@ -216,15 +204,12 @@ $ 2+3
 
 ## List all those conversions I coded an evening far far away
 
-```
 $ Lib.Convert help
-```
 
 ## To open an editor with the savefile
 
-```
 $ Dir.runDetach("notepad", savefile.path)
-```
+
 If on Linux, enter "leafpad" or "gedit" or "subl", or what have you. If you need to run "nano",
 then replace .runDetach with .run, so as not to run the process in the background.
 
