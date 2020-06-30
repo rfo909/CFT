@@ -31,11 +31,6 @@ public class ExprIf extends LexicalElement {
         	result = exprElse.resolve(ctx);
         }
         
-        // 2020-06-26 v1.0.4 macro adaption
-        if (result instanceof ValueMacro) {
-        	result = ((ValueMacro) result).call(ctx);
-        }
-        
         return result;
     }
 }

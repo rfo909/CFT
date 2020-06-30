@@ -794,10 +794,6 @@ To create a file with a single text line:
   when (mode==2, SomeOtherFunction(...))
   when (mode==3, ... )
 </pre>
-<p>
-  Both if() and when() expressions have their functionality greatly expanded by (local) macros, which
-  are described later.
-</p>
 
 
 
@@ -1739,230 +1735,31 @@ To create a file with a single text line:
 
 
 
-
-
-
-<h1>Macros</h1>
-
-<h2>Blocks of code</h2>
+<h1>Code blocks</h1>
 <p>
-  A macro is a block of code in curly braces {} that is considered an expression, which
-  returns a macro object, which in turn is a value. To call the macro, we call the function
-  .call() on the macro object.
+  In order for if() and when() to get more things done without having to create additional
+  functions, there is the code block. A code block is an expression which may contain
+  both statements and expressions, including loops, but excluding the PIPE logic.
 </p>
 <pre>
-  {P(1)=a P(2)=b a+b} =x x.call(3,5)
-  &lt;int&gt;
-  8
-</pre>
-
-<h2>As local helper functions</h2>
-<p>
-  When creating multi-line functions by editing the savefile, the macro functionality
-  can help in creating more structured code. Macros take parameters just like for normal functions.
-</p>
-<pre>
-  { P(1)=name Dict.set("name",name)} =m
-  List(
-    m.call("x"), m.call("y")
-  )
+  1 =a
+  when (something, {2 =a})
 </pre>
 <p>
-  This creates a list of two Dict objects.
+  Assignment of a variable is a statement, not an expression, but inside a code block it
+  is valid.
 </p>
-
-<h2>Two types of macro</h2>
-<p>
-  There are two types of macros: independent and local. This concerns scope rules. 
-</p>
-
-<h3>Independent macro</h3>
-<p>
-  This is the "default", and represents a block of code that does not depend on
-  the environment in which it runs. This means it needs to be initialized
-  with all values that it requires via parameters, but it also means it can
-  be passed along as argument to other functions, or even macros, to be called
-  anywhere.
-</p>
-
-
-<h3>Local macro</h3>
-<p>
-  Macros can also be created in "local" mode, which means they have access to
-  local variables in the environment where they run. This is handy for some
-  uses, though it means the macro should only be called inside the function
-  where it is defined.
-</p>
-<p>
-  Local macros are created by letting the body start with a <em>backpointing
-  arrow</em>, indicating the macro knows about the environment
-  in which it runs.
-</p>
-
-<h3>Example</h3>
-<p>
-  This simple example illustrates the difference between an independent macro, and
-  a local macro.
-</p>
-
-<pre>
-  # Independent macro does not affect 'a' in calling environment
-  1 =a {2 =a}.call a
-  &lt;int&gt;
-  1
-
-  # Local macro does
-  1 =a {&lt- 2 =a}.call a
-  &lt;int&gt;
-  2
-</pre>
-
-<h3>New variables</h3>
-<p>
-  When a local macro assigns a value to a variable, if that variable is not found anywhere, up
-  the outer scope chain, then it will be created inside the macro private scope.
-</p>
-<pre>
-  { &lt;- 1 =b }.call b
-  % ERROR java.lang.Exception: [input:17] unknown symbol 'b'
-</pre>
-
-
-
-<h2>Macros are values</h2>
-<p>
-  Macros are values, but they are not synthesizable, and they have only one
-  function, .call(). They currently support loops, but not PIPE functionality.
-</p>
-
-
-
-
-
-<h2>Examples</h2>
-
-<h3>Automating data construction</h3>
-<p>
-  The most immediate use of macros is to avoid having to create helper functions. Below
-  we use a macro which is stored in local variable 'create', and then called multiple
-  times, to produce Dict objects with content.
-</p>
-<p>
-  This macro does not need to access values from the surroundings, and so has no
-  back-pointing arrow at the start of the body. This makes the macro "independent", which just
-  means it will produce the same result wherever it might be called, if we were to pass it
-  along to someone else.
-</p>
-<pre>
-  {
-    P(1)=name
-    P(2)=path
-    P(3)=types
-  
-    path.split(";")->x out(Dir(x.trim)) | _=path
-    types.split =types
-  
-    Dict.set("name",name).set("path",path).set("types",types)
-  } =create
-  #
-  List(
-    create.call("Project1", "xyz", "java"),
-    create.call("Project2",  "c:\hub", "java txt")
-  ) 
-/Projects
-</pre>
-<p>
-  Remember the ".call" to call macros.
-</p>
-
-<h3>Macros as parameters</h3>
-<p>
-  Since macros are regular values, they can be passed as parameters to functions,
-  or even to other macros. This means we can create two generic functions below
-  to present a list of options, and to select from such a list, without knowing
-  anything about the list elements.
-</p>
-<p>
-  Be careful to create independent macros when they are meant to be invoked from
-  any other location.
-</p>
-
-<pre>
-P(1,List)=options
-P(2,{"name"})=macroGetElementName
-  options-&gt;x
-    println(macroGetElementName.call(x))
-/ShowOptions
-
-P(1,List)=options
-P(2,{"name"})=macroGetElementName
-  readLine("Enter part of name? ") =sel
-  options-&gt;opt
-    assert(macroGetElementName.call(opt).contains(sel))
-    out(opt)
-/SelectOptions
-</pre>
-
-<p>
-  This example implements base functionality needed by a simple menu system, and 
-  illustrates how we can select elements from a list, without knowing
-  how to present them. That is up to the caller, which passes a macro, which we call
-  with each element as parameter, to produce an element name for display or selection.
-</p>
-
-<p>
-  Without macros, we would most likely produce a list of strings to be rendered, then
-  at the caller take action depending on the string value selected, which is cumbersome
-  and inelegant.
-</p>
-
-<h3>Menu example</h3>
-<p>
-  The following example also uses macros, implementing a menu system, where labels and actions
-  are stored inside a list of Dict objects. The actions are macros, which call functions
-  Search and FileLocator.
-</p>
-
-<pre>
-  List(
-    Dict.set("label","Search").set("action", {Search})),
-    Dict.set("label","Locate file").set("action",{FileLocator)}),
-    Dict.set("label","Show file").set("action",{stdin("") FileLocator.nth.read})
-  ) =menu
-  {
-    "- " + P(1).get("label")
-  } =macroGetElementName
-  #
-  null =selectedElement
-  loop 
-    ShowOptions (menu, macroGetElementName)
-    SelectOptions(menu, macroGetElementName) =result
-    false =breakOuter
-
-    if (result.length==1, { &lt;-
-      result.nth =selectedElement
-      true =breakOuter
-    }.call, 0)
-    break(breakOuter)
-  | 
-  # 
-  # Executing menu code
-  #
-  selectedElement.get("action").call
-  /Menu
-</pre>
-
 
 <h2>Pitfalls</h2>
 <p>
-  Even though macros may occur literally inside other code, and have their variable scope
-  extend into the calling environment ("local mode"), they are still function-like. This means:
+  Even though code blocks may occur literally inside other code, and have their variable scope
+  extend out into the calling environment, they are still somewhat function-like. This means:
 </p>
 <ul>
-  <li>One can not pass data to or from macros via the stack, since stacks are 
-  local inside functions and macros
+  <li>One can not pass data to or from code blocks via the stack
   </li>
-  <li>Loop control does not extend from inside a function or macro to the caller. This means that
+  <li>Loop control does not extend from inside a code block to the surrounding code, partially
+    because code blocks can have their own loops. This means that
     for example calling break(true) has no effect on the caller.
   </li>
 </ul>
@@ -1971,64 +1768,57 @@ P(2,{"name"})=macroGetElementName
 </p>
 <pre>
   loop
-    if (someCondition, {&lt;- doSomething break(true)}.call, false)
+    when (someCondition, {doSomething break(true)}.call)
 </pre>
 
 <p>
-  This will <b>never terminate</b>. The correct way is to use a variable which is modified by the macro,
-  like this:
+  This will <b>never terminate</b>. The correct way is to use a variable which is modified by the
+  code block, and let the proper context trigger on it, like this:
 </p>
 <pre>
   loop
     false =terminate
-    if (someCondition, {&lt;- doSomething true =terminate}.call, false)
+    when (someCondition, {doSomething true =terminate})
     break(terminate)
 </pre>
 
 
-<h2>when() with macros</h2>
-<p>
-  The when() expression is a simplified version of if(), in that it contains no else-expression.
-</p>
-<pre>
-  when (bool, expr)
-</pre>
-<p>
-  If the boolean expression resolved to true, the 'expr' is resolved. If this turns out to be
-  a macro, it is automatically called (once). If the boolean expression is false, then
-  the 'expr' is not resolved, and the when() expression returns null as before.
-</p>
-<p>
-  Example of multiple choice
-<pre>
-  P(1)=x
-  when (x=="a", {...})
-  when (x=="b", {...})
-</pre>
-<p>
-  The result is either the return value from the macro, or null if the macro was not called. 
-</p>
 
 
-<h2>if() with macros</h2>
+
+
+
+
+
+
+
+<h1>Macros</h1>
 <p>
-  The if() expression handles macros in the same way as the when() expression. 
-  The if() is about selecting between two expressions, of which one is resolved. If it results
-  in a macro object, it is automatically called (once). 
+  In addition to inline code blocks that are executed immediately, there is the option of creating
+  "independent" code blocks, which are not executed immediately, but instead become a value
+  of type "Macro". A macro is like a regular function, except it currently does not support the PIPE
+  functionality, just as with code blocks.
 </p>
-<pre>
-  if(true,{1},{2})
-  &lt;int&gt;
-  1
-</pre>
 <p>
-  Note that this does not exclude adding ".call" after a macro.
+  A macro is written as a code block, where the body starts with a single asterisk (*), indicating
+  that this block of code can run anywhere, as it will always run in an isolated context, not
+  seeing any state of the caller, which code blocks naturally do.
+</p>
+<p>
+  Being a value, macros can be assigned to local variables, or passed as arguments, as well as
+  be the result value of a function. Macros can contain macros.
 </p>
 
-<p>
-  In order for if() to generate one of two macro values as output, just use double
-  braces, as macros can be defined inside macros.
-</p>
+<pre>
+  # Use macro m to create list with two dictionary objects
+  # without having to type so much
+  # ---
+
+  {* P(1)=name Dict.set("name",name)} =m
+  List(
+    m.call("x"), m.call("y")
+  )
+</pre>
 
 
 

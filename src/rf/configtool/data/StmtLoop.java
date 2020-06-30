@@ -22,7 +22,7 @@ public class StmtLoop extends Stmt {
     }
     
     public void execute (Ctx ctx) throws Exception {
-        ctx.getOutData().setProgramContainsLooping();
+        ctx.setProgramContainsLooping();
         
         OUTER: for (;;) {
             Ctx sub=ctx.sub();

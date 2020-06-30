@@ -16,12 +16,18 @@ public class Ctx {
     private OutData outData;
     private OutText outText;
     
+    // These two needed to support inline code-blocks ("macros")
+    
+    private boolean programContainsLooping = false;
+    private boolean programContainsLoopingInfoStopsHere=false;
+
+    
     private Stack<Value> stack=new Stack<Value>();
     private ObjGlobal objGlobal;
     
     private boolean abortIterationFlag; // "next"
     private boolean breakLoopFlag;  // "break"
-        
+    
 
     public Ctx(ObjGlobal objGlobal, FunctionState functionState) {
         this(null, new OutData(), new OutText(), objGlobal, functionState);
@@ -45,11 +51,36 @@ public class Ctx {
     public Ctx sub() {
         return new Ctx(this,outData,outText,objGlobal,functionState);
     }
-       
-    public Ctx sub(List<Value> params) {
-        return new Ctx(this,outData,outText,objGlobal,functionState.sub(params));
+              
+    /**
+     * Code block is a macro that is invoked immediately, and that has access up the
+     * Ctx stack, but with separate OutData object, so that
+     */
+    public Ctx subContextForCodeBlock () {
+        Ctx ctx = new Ctx(this,new OutData(),outText,objGlobal,functionState);
+        ctx.programContainsLoopingInfoStopsHere=true;
+        return ctx;
     }
-       
+    
+    /**
+     * Called from StmtIterate and StmtLoop. Could have used the occurrence of loop variables (which are
+     * stored in the Ctx instances) if it wasn't for the "loop" statement, which has no loop variable.
+     */
+    public void setProgramContainsLooping() {
+    	// Previously this was implemented as part of the OutData object which made it in effect
+    	// global.
+    	Ctx ctx=this;
+    	for(;;) {
+    		ctx.programContainsLooping=true;
+    		if (ctx.programContainsLoopingInfoStopsHere) break;
+    		if (ctx.parent == null) break;
+    		ctx=ctx.parent;
+    	}
+    	
+    }
+    
+
+              
     public void outln (String s) {
         objGlobal.outln(s);
     }
@@ -58,10 +89,10 @@ public class Ctx {
         objGlobal.outln();
     }
     
-   public Value getResult() {
+    public Value getResult() {
         // if program contains looping, then always return data from out(), even
         // if empty
-        if (outData.programContainsLooping()) {
+        if (programContainsLooping) {
             return new ValueList(outData.getOutData());
         }
         
@@ -111,6 +142,8 @@ public class Ctx {
         // contain loop variables, then we check with FunctionState, where
         // all assigned variables ("=x") are stored in shared scope for the
         // function. 
+    	
+    	// This also means one can not redefine loop variables.
         
     	if (loopVariableName != null && name.equals(loopVariableName)) {
     		return loopVariableValue;

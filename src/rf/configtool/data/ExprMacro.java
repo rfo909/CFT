@@ -12,7 +12,7 @@ import java.util.*;
 
 public class ExprMacro extends LexicalElement {
 
-	private boolean inheritContext;
+	private boolean localCodeBlock;
 	
     private List<Stmt> statements=new ArrayList<Stmt>();
     
@@ -23,10 +23,10 @@ public class ExprMacro extends LexicalElement {
         super(ts);
         ts.matchStr("{", "expected '{'");
         
-        inheritContext=false;
+        localCodeBlock=true;
         
-        if (ts.matchStr("<-")) {
-        	inheritContext=true;
+        if (ts.matchStr("*")) {  // indicates it can run "anywhere"
+        	localCodeBlock=false;
         }
         
         while (!ts.matchStr("}")) {
@@ -37,7 +37,11 @@ public class ExprMacro extends LexicalElement {
     
     
     public Value resolve (Ctx ctx) throws Exception {
-    	return new ValueMacro(statements, inheritContext);
+    	ValueMacro m=new ValueMacro(statements);
+    	if (localCodeBlock) {
+    		return m.callLocalMacro(ctx);
+    	}
+    	return m;
     }
 
 

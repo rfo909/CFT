@@ -38,19 +38,19 @@ if(isWindows,
 P(1,savefile) =file
 List(
 	Dict.set("label","sublime")
-		.set("action", {P(1)=file Dir.runDetach("subl",file.path) }),
+		.set("action", {* P(1)=file Dir.runDetach("subl",file.path) }),
 	Dict.set("label","gedit")
-		.set("action", {P(1)=file Dir.runDetach("gedit",file.path) }),
+		.set("action", {* P(1)=file Dir.runDetach("gedit",file.path) }),
 	Dict.set("label","leafpad")
-		.set("action", {P(1)=file Dir.runDetach("leafpad",file.path) }),
+		.set("action", {* P(1)=file Dir.runDetach("leafpad",file.path) }),
 	Dict.set("label","nano")
-		.set("action", {P(1)=file Dir.run("nano", file.path) })
+		.set("action", {* P(1)=file Dir.run("nano", file.path) })
 ) =linuxEditors
 #
-if (Val("linuxEditor")==null,{<-
-	MenuSelect(linuxEditors, {P(1).get("label")},"Select editor") =ed
+when (Val("linuxEditor")==null,{
+	MenuSelect(linuxEditors, {* P(1).get("label")},"Select editor") =ed
 	ValDef("linuxEditor", ed)
-}.call,0)
+})
 #
 Val("linuxEditor").get("action").call(file)
 /ShowLinuxEditor
@@ -69,7 +69,7 @@ ValDef("linuxEditor",null)
 
 # Show a list of options
 P(1,List)=options
-P(2,{"name"})=macroGetElementName
+P(2,{* "name"})=macroGetElementName
 	options->x
 		println("- " + macroGetElementName.call(x))
 /ShowOptions
@@ -78,7 +78,7 @@ P(2,{"name"})=macroGetElementName
 
 # Select zero or more from list of options
 P(1,List)=options
-P(2,{"name"})=macroGetElementName
+P(2,{* "name"})=macroGetElementName
 	readLine("Enter part of name? ") =sel
 	options->opt
 		assert(macroGetElementName.call(opt).contains(sel))
@@ -98,7 +98,7 @@ println( Lib.Data.yes(title.length,"-").concat )
 
 # Select entry from menu
 P(1,List) =options
-P(2,{"name"}) =macroGetElementName
+P(2,{* "name"}) =macroGetElementName
 P(3) =title
 #
 null =selectedElement
@@ -111,12 +111,12 @@ loop
 	
 	false =terminateLoop
 
-	if (result.length==1, {<-
+	if (result.length==1, {
 			result.nth =selectedElement
 			true =terminateLoop
-		}.call, {
+		}, {
 			println("** No match or not unique")
-		}.call
+		}
 	)
 	break(terminateLoop)
 | selectedElement

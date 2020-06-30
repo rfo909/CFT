@@ -24,7 +24,7 @@ public class StmtIterate extends Stmt {
     }
     
     public void execute (Ctx ctx) throws Exception {
-        ctx.getOutData().setProgramContainsLooping();
+        ctx.setProgramContainsLooping();
         
         Value v=ctx.pop();
         if (v==null) return; // No value occurs if a program line executes no out() and leaves nothing on the stack

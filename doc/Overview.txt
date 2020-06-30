@@ -3,8 +3,8 @@ Generated file - see script file savefileOverview.txt
 
 See also shell script ./CreateOverview.sh
 
-Created 2020-06-29 00:25:37 
-v1.0.5
+Created 2020-07-01 00:53:31 
+v1.0.7
 ------------------------------------------------------------------
 
 Introduction
@@ -106,22 +106,10 @@ Use as a calculator
 	* Lib.Convert
 	* Lib.Plot
 
-Macros
-	* Blocks of code
-	* As local helper functions
-	* Two types of macro
-	|	Independent macro
-	|	Local macro
-	|	Example
-	|	New variables
-	* Macros are values
-	* Examples
-	|	Automating data construction
-	|	Macros as parameters
-	|	Menu example
+Code blocks
 	* Pitfalls
-	* when() with macros
-	* if() with macros
+
+Macros
 
 Various advanced topics
 	* Predicate calls

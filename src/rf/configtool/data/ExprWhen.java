@@ -24,9 +24,6 @@ public class ExprWhen extends LexicalElement {
         boolean b=bool.resolve(ctx).getValAsBoolean();
         if (b) {
             Value val=expr.resolve(ctx);
-            if (val instanceof ValueMacro) {
-            	val=((ValueMacro) val).call(ctx);
-            }
             return val;
         } else {
         	return new ValueNull();
