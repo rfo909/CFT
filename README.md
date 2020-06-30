@@ -141,11 +141,16 @@ object, which we then use in the main search function, which we call Search.
 
 ```
 $ Grep(Input("Enter search term").get)
+    :
 $ /GetGrep
 
 $ GetGrep =grep JavaFiles->f grep.file(f)->line report(line.file.name, line.lineNumber, line)
+    :
 $ /Search
 ```
+
+After entering any code line, such as the first one above, it gets executed before you can
+make the code line into a function.
 
 The Grep() function is a global function which may take a search string as parameter. Here
 we read this from the user, using the global Input() function. The Grep() function then
@@ -161,7 +166,9 @@ generate nice output.
 Note that in CFT variable assigns are "reversed", with value first (or more specifically,
 found on the stack), followed by "=" and a name. Example "2 =a 3 =b a+b" returns 5.
 
-When the code works it's time to save the script
+When the code works it's time to save the script.
+
+## Save and load scripts
 
 ```
 $ :save MyScript
@@ -173,40 +180,61 @@ To load later, type
 $ :load MyScript
 ```
 
-To list all your functions, type:
+
+
+## Display functions
+
+To display all your defined functions, type
 
 ```
 $ ?
 ```
 
+To display all global functions, type
+
+```
+$ help
+```
+
+To display all functions inside an object, create an instance of that object (on the stack) 
+followed by help. Examples:
+
+```
+$ Dir help
+$ List help
+$ File("x.txt") help   # file does not need to exist
+```
+
 
 # Other examples
 
-### Counting number of lines of java code
+Counting number of lines of java code
 
 $ JavaFiles->f out(f.read.length) | _.sum
 
-### Calculating date (and time) 30 days ago
+Calculating date (and time) 30 days ago
 
 $ Date.sub(Date.Duration.days(30))
 
-### Open remote directories (windows)
+Open remote directories (windows)
 
 $ Dir("\\somehost\d$\someLogDir").files(Glob("*.log"))
 
-### Converting one light year to kilometres
+Converting one light year to kilometres
 
 $ Lib.Convert.lyToKm(1)
 
-## Doing math
+Doing math
 
-$ 2+3
+$ 2+3*5
 
-## List all those conversions I coded an evening far far away
+List all those conversions I coded an evening far far away
 
 $ Lib.Convert help
 
-## To open an editor with the savefile
+# Edit current script file in editor
+
+The global function savefile() returns a File object for the current script.
 
 $ Dir.runDetach("notepad", savefile.path)
 
