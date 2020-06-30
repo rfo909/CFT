@@ -172,11 +172,7 @@ When the code works it's time to save the script.
 
 ```
 $ :save MyScript
-```
 
-To load later, type
-
-```
 $ :load MyScript
 ```
 
@@ -203,34 +199,49 @@ followed by help. Examples:
 $ Dir help
 $ List help
 $ File("x.txt") help   # file does not need to exist
+$ Date help
+$ Lib help
+$ Lib.Math help
 ```
 
+The global Lib function creates a Lib object, which effectively works as a name space. Inside 
+the Lib object there are functions for creating still other objects, sich as the Math
+object, where you find math related functions for calculating sine and cosine.
+
+If you are going to use trigonometric functions a lot in your code, and since Math is a regular
+object, you can always store it in a variable.
+
+```
+$ Lib.Math =m Lib.Data.for(0,360,1)->i out(m.cos(i) + m.sin(i))
+```
 
 # Other examples
 
-Counting number of lines of java code
+#### Counting number of lines of java code
 
 $ JavaFiles->f out(f.read.length) | _.sum
 
-Calculating date (and time) 30 days ago
+#### Calculating date (and time) 30 days ago
 
 $ Date.sub(Date.Duration.days(30))
 
-Open remote directories (windows)
+#### Open remote directories (windows)
 
 $ Dir("\\somehost\d$\someLogDir").files(Glob("*.log"))
 
-Converting one light year to kilometres
+#### Converting one light year to kilometres
 
 $ Lib.Convert.lyToKm(1)
 
-Doing math
+#### Doing math
 
 $ 2+3*5
 
-List all those conversions I coded an evening far far away
+#### List all those conversions I coded an evening far far away
 
 $ Lib.Convert help
+
+
 
 # Edit current script file in editor
 
@@ -238,8 +249,9 @@ The global function savefile() returns a File object for the current script.
 
 $ Dir.runDetach("notepad", savefile.path)
 
-If on Linux, enter "leafpad" or "gedit" or "subl", or what have you. If you need to run "nano",
-then replace .runDetach with .run, so as not to run the process in the background.
+If on Linux, replace "notepad" with "leafpad" or "gedit" or "subl", or what have you. 
+If you need to run "nano", then replace .runDetach with .run, so as not to run the
+process in the background.
 
 Note that when editing a savefile, all you need do after saving changes, is run the code
 directly, as CFT discoveres the file has changed, and hurries to reload the updated code as you press
