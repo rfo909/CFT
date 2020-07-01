@@ -53,14 +53,11 @@ HomeDir.files(Glob("savefile*"))->f
 /Commit
 
 
+# Push latest commits
 HomeDir.run("git","push","origin","master")
 /Push
 
 
-# Call Commit then run git to push update to github
-Commit
-Push
-/PushUpdate
 
 
 
@@ -71,5 +68,11 @@ HomeDir.run("git","status")
 # Git diff
 HomeDir.run("git","diff")
 /gd
+
+# Run bash, ^D to return
+println("Running bash: press ^D to return to CFT")
+Dir.run("bash")
+/bash
+
 
 
