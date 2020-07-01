@@ -265,5 +265,10 @@ The above is still just a taste of how CFT works.
 The file doc/Doc.html gives a detailed walktrough of most of the functionality.
 
 
+# Philosophy
+
+- A "simple" interface which offers usable functionality, even one line at a time
+- Compact notation needs not mean ditching all readability
+- A programmers tool
 
 
