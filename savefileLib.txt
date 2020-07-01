@@ -96,10 +96,7 @@ println( Lib.Data.yes(title.length,"-").concat )
 
 
 
-# Select entry from menu
-P(1,List) =options
-P(2,{* "name"}) =macroGetElementName
-P(3) =title
+P(1,List) =options P(2,{* "name"}) =macroGetElementName P(3) =title
 #
 null =selectedElement
 loop
@@ -107,18 +104,58 @@ loop
 	if (title != null, Header(title), 0)
 
 	ShowOptions(options, macroGetElementName)
+	println("")
 	SelectOptions(options, macroGetElementName) =result
 	
-	false =terminateLoop
-
-	if (result.length==1, {
-			result.nth =selectedElement
-			true =terminateLoop
-		}, {
-			println("** No match or not unique")
-		}
-	)
-	break(terminateLoop)
+	when (result.length==1, { result.nth =selectedElement})
+	break(selectedElement != null)
+	println("** No match or not unique")
 | selectedElement
 /MenuSelect
+
+
+
+P(1,"label")=label P(2)=currVal
+	println("")
+	(label + if(currVal," ["+currVal+"]","") + " : ") =prompt
+	readLine(prompt) =line
+	if (line.trim=="", currVal, line)
+/ReadValue
+
+
+P(1,"label")=label P(2)=currVal
+null =gotResult
+loop
+	ReadValue(label,""+currVal) =val
+	when (val.?parseInt,{val.parseInt =gotResult})
+	break(gotResult != null)
+	println("** Integer required")
+|
+gotResult
+/ReadValueInt
+
+
+
+
+P(1,"label")=label P(2)=currVal P(3,"yes")=trueVal P(4,"no")=falseVal
+null =gotResult
+loop
+	if (currVal != null, if(currVal, trueVal, falseVal), null) =currStrVal
+	ReadValue(label,currStrVal) =val
+	when (val==trueVal, {true =gotResult})
+	when (val==falseVal, {false =gotResult})
+	break(gotResult != null)
+	println("** Please enter '" + trueVal + "' or '"  + falseVal + "'")
+|
+gotResult
+/ReadValueBoolean
+
+
+
+
+
+# Test
+ReadValueBoolean("Roar",false)
+/t
+
 
