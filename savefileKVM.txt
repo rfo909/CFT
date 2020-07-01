@@ -1,0 +1,155 @@
+
+# Script readme
+<<< EOF
+--------------------------------------------------------------
+This script manages creation, cloning, delete, start and stop
+of Virtual Machines using KVM on Linux.
+
+You must CFT as root to use this script.
+--------------------------------------------------------------
+>>> EOF
+/Readme
+
+call "Lib:e" (savefile)
+/e
+
+Dir("/var/lib/libvirt/boot")
+/BootImagesDir
+
+# List of VM names to protect against accidental delete
+List()
+/DoNotDelete
+
+
+
+# Selects boot image
+BootImagesDir.files =data
+{* P(1).name } =macroGetElementName
+call "Lib:MenuSelect" (data, macroGetElementName) 
+/BootImage
+
+
+
+# Various private macros
+Dict
+	.set("noSpace", {* P(1).replace(" ","_").replace("^t".unEsc,"_") })
+	.set("exec", {* P(1,"ls -l")=cmd println("------> " + cmd) println("") Dir.run(cmd.split) })
+/Util
+
+
+
+
+# Run virsh to display status for all defined VM's
+Util.exec.call("virsh list --all")
+/status
+
+
+# Short for status
+status
+/s
+
+
+
+P(1,"someTarget")=target
+	Util.exec.call("virsh start --domain " + target)
+	status
+/Start
+
+
+P(1,"someTarget")=target
+	Util.exec.call("virsh destroy --domain " + target)
+	status
+/Stop
+
+
+P(1,"someTarget")=target
+	when(DoNotDelete.contains(target), error("Can not delete target " + target + ": remove from DoNotDelete list first"))
+	stop(target)
+	Util.exec.call("virsh undefine --domain " + target)
+	Dir("/var/lib/libvirt/images").file(target + ".qcow2").delete
+	status
+/Delete
+
+
+# Interactive cloning of existing VM - stops original
+call "Lib:Header" ("Cloning existing VM")
+null=original
+null=cloneName
+loop
+	status
+	call "Lib:ReadValue" ("Original VM", original) =original
+	call "Lib:ReadValue" ("New VM", cloneName) =cloneName
+	call "Lib:ReadValueBoolean" ("Ok", false) =ok
+	break(ok)
+|
+	stop(original)
+	Util.exec.call("virt-clone --original " + original + " --name " + cloneName + " --auto-clone"
+		+ " --file /var/lib/libvirt/images/" + cloneName + ".qcow2")
+	start(cloneName)
+	status
+/Clone
+
+
+
+# Create new VM from scratch - fully interactive
+null =bootImage
+null =name
+false =headless
+8192 =ram
+null =cpus
+32 =disk
+loop
+	call "Lib:Header" ("Create new KVM Virtual Machine")
+
+	BootImage =bootImage
+	println("# Selected " + bootImage.path)
+
+	call "Lib:ReadValue" ("New VM name", name) =name
+
+	println("")
+	println("# Headless = no means use virt-manager")	
+	println("# Headless = yes (advanced) means use VNC to complete installation")
+	call "Lib:ReadValueBoolean" ("Headless", headless) =headless
+
+	call "Lib:ReadValueInt" ("RAM GB", ram) =ram
+	call "Lib:ReadValueInt" ("Disk GB", disk) =disk
+	call "Lib:ReadValueBoolean" ("Enter 'yes' to confirm this is okay", false) =ok
+	break(ok)
+|
+call "Lib:ReadValueBoolean" ("Enter 'yes' to continue", false, "yes","abort") =continue
+when (!continue,{
+	println("Aborting")
+	error("Aborting")
+})
+
+	List("virt-install",
+		"--name",name,
+		"--ram="+ram,
+		"--vcpus="+cpus,
+		"--cpu","host",
+		"--hvm",
+		"--network=bridge=br0,model=virtio",
+		"--disk","path=/var/lib/libvirt/images/"+name+".qcow2,size="+disk+",bus=virtio,format=qcow2",
+		"--cdrom",bootImage.path
+	) =cmd
+	if(headless, 
+		cmd+List("--graphics","vnc"),  
+		cmd
+	) =cmd
+
+	debug(cmd.concat(" "))
+	Dir.runDetach(cmd)
+
+	<<< EOF
+	-----------------------------------------------------------------
+	Use vnc or start virt-manager (as root) to finalize installation
+
+	virt-manager can be started by entering 'mgr' and press enter
+	-----------------------------------------------------------------
+	>>> EOF
+/Create
+
+
+# Run virt-manager (required X-windows)
+Dir.run("virt-manager")
+/mgr
