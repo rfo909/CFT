@@ -741,9 +741,11 @@ public class ObjGlobal extends Obj {
             	String s=params.get(0).getValAsString();
             	stdio.println(s);
             	return new ValueString(s);
-            } 
+            } else if (params.size() == 0) {
+            	stdio.println();
+            }
 
-            throw new Exception("Expected endmarker string parameter");
+            throw new Exception("Expected no parameter or string parameter");
         }
     }
     

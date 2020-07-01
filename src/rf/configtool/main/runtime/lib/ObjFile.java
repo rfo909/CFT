@@ -13,6 +13,7 @@ import rf.configtool.main.OutText;
 import rf.configtool.main.runtime.*;
 import rf.configtool.util.FileInfo;
 import rf.configtool.util.TabUtil;
+import java.nio.file.Path;
 
 public class ObjFile extends Obj {
 
@@ -208,13 +209,11 @@ public class ObjFile extends Obj {
             File f=new File(name);
             if (f.exists()) {
                 if (f.isFile()) {
-                    boolean result=f.delete();
-                    if (result) {
-                        outText.addPlainText("Deleted file  : " + f.getCanonicalPath());
-                    } else {
+                    boolean ok=f.delete();
+                    if (!ok) {
                         outText.addPlainText("Delete failed : " + f.getCanonicalPath());
                     }
-                    return new ValueBoolean(result);
+                    return new ValueBoolean(ok);
                 } else {
                     outText.addPlainText("Not a file    : " + f.getCanonicalPath());
                     return new ValueBoolean(false);
@@ -238,10 +237,7 @@ public class ObjFile extends Obj {
             if (params.size() != 1) throw new Exception("Expected one parameter any type (file data)");
             OutText outText=ctx.getOutText();
             File f=new File(name);
-//          if (f.exists()) {
-//              throw new Exception("File already exists");
-//          }
-            outText.addPlainText("Creating file " + name);
+
             PrintStream ps=null;
             try {
                 ps=new PrintStream(new FileOutputStream(f));

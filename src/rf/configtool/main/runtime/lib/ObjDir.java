@@ -264,9 +264,9 @@ public class ObjDir extends Obj {
             OutText outText=ctx.getOutText();
             File f=new File(name);
             if (!f.exists()) {
-                boolean result = f.mkdirs();
-                if (result) outText.addPlainText("Dir created " + f.getCanonicalPath());
-                return new ValueBoolean(result);
+                boolean ok = f.mkdirs();
+                if (!ok) throw new Exception("Could not create dir " + f.getCanonicalPath());
+                return new ValueBoolean(true);
             } else if (!f.isDirectory()) {
                 outText.addPlainText("Not a dir   " + f.getCanonicalPath());
                 return new ValueBoolean(false);
@@ -291,9 +291,6 @@ public class ObjDir extends Obj {
             if (f.exists()) {
                 if (f.isDirectory()) {
                     boolean result=f.delete();
-                    if (result) {
-                        outText.addPlainText("Deleted dir " + f.getCanonicalPath());
-                    }
                     return new ValueBoolean(result);
                 } else {
                     outText.addPlainText("Not a dir   " + f.getCanonicalPath());

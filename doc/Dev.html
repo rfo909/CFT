@@ -11,6 +11,19 @@
 
 <h1>ConfigTool</h1>
 
+<h3>v1.0.7b 2020-07-01 Removed some reporting</h3>
+<p>
+	Removed calls to outText.addPlainText() in ObjDir and ObjFile for situations that
+	are what we expect. 
+</p>
+<p>
+	println() can now be called without args for a simple newline
+</p>
+<p>
+	Updated doc for code blocks, to follow section on conditionals
+</p>
+
+
 <h3>v1.0.7 2020-06-30 Macro fixes</h3>
 <p>
 	Changed default macro into the "local" variant, only now it is known as "code-block", as it
@@ -18,9 +31,34 @@
 	asterisk '*' indicating it can run anywhere.
 </p>
 
-<p>
-	Updated Lib script with its menu. See details in TODO (moved offline under CFT_Extras)
-</p>
+<pre>
+
+(1) Changing defaults, so {} is now a local macro. The ExprMacro invokes
+such a macro immediately, and returns the resulting value.
+
+(2) The "independent" macro is now created as {* ... } where the star means
+it can run anywhere. 
+
+Updated Lib
+
+(3) The local macro (or "code block") should run in a context that forwards 
+lookups of parameters, but we must prevent outData.programContainsLooping() from
+being global for the function. That means moving it into Ctx
+
+(4) Moved it into Ctx, and added flag that stops propagation.
+
+boolean programContainsLooping
+boolean programContainsLoopingInfoStopsHere
+
+Created method setProgramContainsLooping() and redirected calls from StmtLoop and StmtIterate.
+
+
+Created Ctx.subContextForCodeBlock() which creates new sub-context same as sub() but
+with separate OutData-object for collecting out(x). 
+
+
+Seems to work.
+</pre>
 
 <h3>v1.0.6b 2020-06-29 Removed Net code</h3>
 <p>

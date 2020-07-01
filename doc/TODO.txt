@@ -1,0 +1,97 @@
+TODO
+
+
+
+
+
+cd / ls / cat / more / rm
+-------------------------
+cd is okay with its substrings, but limited with regards to 
+
+	cd /tmp
+	cd c:\xyz
+
+this is due to using same tokenizer as for rest
+ls is primitive, allowing only (N) expr
+
+cat is primitive, requires exact match
+
+more and rm don't exist
+
+
+
+
+Soft links (Linux)
+------------------
+CFT doesn't understand soft links. Deleting a soft link results in deleting the 
+file linked to. Not good!
+
+
+
+
+
+
+
+Repository for scripts
+----------------------
+Github?
+
+System scripts in separate directory?
+
+
+
+
+
+
+Parallel sessions
+-----------------
+Would like to use networking code to interface background threads running 
+different script files. Could make a controller that interfaces multiple
+such processes, and communicates via loopback.
+
+This would also allow for output control, abandoning and even terminating
+runaway processes, depending on implementation. 
+
+
+
+
+
+
+
+
+Curses?
+-------
+Consider curses integration for
+	- menu creation
+	- alerts from background threads 
+
+Must not interfere with terminal window on Linux / CMD on Windows. 
+
+
+
+
+
+
+Sessions and threading
+----------------------
+
+- implementere flere parallelle sesjoner, med varsling om det dukker opp output i en av dem
+	- en viktig konsekvens blir at runaway-kode ikke kjører i forgrunnen, og 
+ 		at skjerm-output kan stoppes ved å trykke ENTER
+
+- introdusere ytterligere bakgrunnstråder inne i hver sesjon, for triggere / overvåkning
+
+- create network hub, network master and network peer functionality for remote control
+
+- create remote support for Dir and File objects, possibly also sessions and triggers
+
+- evt. eksplisitt funksjon for å kjøre kode i bakgrunnen?
+
+- support for reading environment variables
+
+-
+
+
+
+
+

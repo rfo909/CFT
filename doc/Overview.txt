@@ -3,8 +3,8 @@ Generated file - see script file savefileOverview.txt
 
 See also shell script ./CreateOverview.sh
 
-Created 2020-07-01 00:53:31 
-v1.0.7
+Created 2020-07-01 22:50:39 
+v1.0.7b
 ------------------------------------------------------------------
 
 Introduction
@@ -45,10 +45,14 @@ CFT as a functional programming language
 	|	Terminates all loops
 	* Result value from code blocks
 	* Function parameters
-	* Conditional execution
+
+Conditional execution
 	|	List filtering
-	|	if() expression
-	|	when() expression
+	* if() expression
+	* when() expression
+
+Code blocks
+	* Pitfalls
 
 Running external programs
 	* Summary
@@ -105,9 +109,6 @@ Use as a calculator
 	* Lib.Math
 	* Lib.Convert
 	* Lib.Plot
-
-Code blocks
-	* Pitfalls
 
 Macros
 

@@ -11,9 +11,9 @@
 
 <h1 style="color:black; border:1px solid blue; padding:1Em; text-align: center">ConfigTool - CFT</h1>
 
-<p><i>Last updated: 2020-06-29 RFO</i></p>
+<p><i>Last updated: 2020-07-01 RFO</i></p>
 
-<p><i>v1.0.6</i></p>
+<p><i>v1.0.7</i></p>
 
 
 
@@ -749,7 +749,9 @@ To create a file with a single text line:
 
 
 
-<h2>Conditional execution</h2>
+
+
+<h1>Conditional execution</h1>
 <p>
   Conditional execution in CFT takes two basic forms.
 </p>
@@ -759,7 +761,7 @@ To create a file with a single text line:
   be executed or not.
 </p>
 
-<h3>if() expression</h3>
+<h2>if() expression</h2>
 <p>
   The if() statement takes three parameters, the condition, the if-expression, and the 
   else-expression. Depending on the condition only one of the two following expressions
@@ -772,10 +774,10 @@ To create a file with a single text line:
 
 <pre>
   SomeFunction(...) =a
-  if(a==null, Dict, a) =a
+  if(a==null, Dict, a) =a  # provides a default value if a is null
 </pre>
 
-<h3>when() expression</h3>
+<h2>when() expression</h2>
 <p>
   The when() expression is like an if() expression minus the else-part. 
 </p>
@@ -795,6 +797,53 @@ To create a file with a single text line:
   when (mode==3, ... )
 </pre>
 
+
+
+
+
+<h1>Code blocks</h1>
+<p>
+  An important feature is the concept of code blocks. These are considered expressions, and
+  can be used with if() and when(). Inside they can contain statements and expressions, as one
+  would expect.
+</p>
+<pre>
+  false =ok
+  when (someCondition, {
+    println("hello there")
+    true =ok
+  })
+</pre>
+<p>
+  Correspondingly with if(), and really all expressions anywhere can be replaced by a code block.
+</p>
+
+<h2>Pitfalls</h2>
+<p>
+  Even though code blocks occur literally inside other code, and have their variable scope
+  extend out into the calling environment, they are still somewhat function-like. This means:
+</p>
+<ul>
+  <li>
+    One can not pass data to or from code blocks via the stack, as they operate their
+    own stack internally
+  </li>
+  <li>
+    Loop control does not extend from inside a code block to the surrounding code, partially
+    because code blocks can have their own loops. This means that
+    for example calling break(true) has no effect on the caller.
+  </li>
+</ul>
+<p>
+  Example:
+</p>
+<pre>
+  "a b c".split-&gt;x
+    when(x=="b", {break(true)})  # does not break loop
+</pre>
+<p>
+  This break() does not affect the loop running outside the code block. 
+</p>
 
 
 
@@ -1081,32 +1130,22 @@ To create a file with a single text line:
 
 <h2>Searching multiple types of file</h2>
 <p>
-  To search multiple types of files, we need to create a helper function that determines if
-  a file is qualified or not. Here we use a local variable which gets set if the file name
-  ends with one of the file types. We use the "pipe" symbol to terminate the loop, in order
-  to return the value of the local variable.
+  To search multiple types of files, we create a function that creates a list of
+  valid types after the last dot, then check if the ending of the file matches one of
+  those.
 </p>
 <pre>
-  ".java .txt".split
+  "java txt".split
   /FileTypes
-
-  P(1,File) =f
-    false =found
-    FileTypes-&gt;ft 
-      assert(f.name.endsWith(ft)) true =found 
-    |
-    found
-  /FileQualified
 
   Input("Enter search term").get =st
   Grep(st) =grep
   ProjectDir.allFiles-&gt;f
-    assert(FileQualified(f))
+    assert(FileTypes.contains(f.name.afterLast(".").toLower))
     grep.file(f)-&gt;line
       report(line.file.name, line.lineNumber, line)
   /Search
 </pre>
-
 
 
 
@@ -1731,61 +1770,6 @@ To create a file with a single text line:
 <p>
   The above code generates an example plot as a png file in the current directory.
 </p>
-
-
-
-
-<h1>Code blocks</h1>
-<p>
-  In order for if() and when() to get more things done without having to create additional
-  functions, there is the code block. A code block is an expression which may contain
-  both statements and expressions, including loops, but excluding the PIPE logic.
-</p>
-<pre>
-  1 =a
-  when (something, {2 =a})
-</pre>
-<p>
-  Assignment of a variable is a statement, not an expression, but inside a code block it
-  is valid.
-</p>
-
-<h2>Pitfalls</h2>
-<p>
-  Even though code blocks may occur literally inside other code, and have their variable scope
-  extend out into the calling environment, they are still somewhat function-like. This means:
-</p>
-<ul>
-  <li>One can not pass data to or from code blocks via the stack
-  </li>
-  <li>Loop control does not extend from inside a code block to the surrounding code, partially
-    because code blocks can have their own loops. This means that
-    for example calling break(true) has no effect on the caller.
-  </li>
-</ul>
-<p>
-  Example:
-</p>
-<pre>
-  loop
-    when (someCondition, {doSomething break(true)}.call)
-</pre>
-
-<p>
-  This will <b>never terminate</b>. The correct way is to use a variable which is modified by the
-  code block, and let the proper context trigger on it, like this:
-</p>
-<pre>
-  loop
-    false =terminate
-    when (someCondition, {doSomething true =terminate})
-    break(terminate)
-</pre>
-
-
-
-
-
 
 
 
