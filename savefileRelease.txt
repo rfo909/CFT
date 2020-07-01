@@ -72,7 +72,7 @@ HomeDir.run("git","diff")
 # Run bash, ^D to return
 println("Running bash: press ^D to return to CFT")
 Dir.run("bash")
-/bash
+/sh
 
 
 
