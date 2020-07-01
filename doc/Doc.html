@@ -805,7 +805,7 @@ To create a file with a single text line:
 <p>
   An important feature is the concept of code blocks. These are considered expressions, and
   can be used with if() and when(). Inside they can contain statements and expressions, as one
-  would expect.
+  would expect. 
 </p>
 <pre>
   false =ok
@@ -814,9 +814,18 @@ To create a file with a single text line:
     true =ok
   })
 </pre>
+
+<h2>Code blocks are expressions</h2>
 <p>
-  Correspondingly with if(), and really all expressions anywhere can be replaced by a code block.
+  Even though mostly used with when() and if(), code blocks are general expressions, just
+  like a function call, or some variable lookup.
 </p>
+<pre>
+  {2+3}.bin
+  &lt;String&gt;
+  00000101
+</pre>
+
 
 <h2>Pitfalls</h2>
 <p>

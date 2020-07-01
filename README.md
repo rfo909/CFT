@@ -1,23 +1,40 @@
 # CFT ("ConfigTool")
 
-CFT is a shell-like terminal based Java app, and programming language.
+CFT is a shell-like terminal based Java app, and a full programming language.
 
 It was created for interactive automation of simple tasks, such as
 
 - searching source code files
 - searching multiple log files
-- file copy, rename, move
-- running all kinds of external programs
-- bulk copy files
+- running external programs
 - date processing
 - sorting and reporting
-- starting and stopping services
-- making PowerShell remote commands manageable
 - creating configuration files
 - ...
 
+# Download and compile
 
-## Introduction
+The project is currently built using Apache ANT, which results in a single JAR file.
+
+There are no dependencies outside of standard Java libraries.
+
+Once built, the application is started using 
+
+```
+./cft
+```
+
+On Windows, run
+
+```
+.\cft.cmd
+```
+
+To leave type ":quit" or just type CTRL-C.
+
+
+
+# Introduction
 
 The CFT application supports basic shell functions like "cd", "ls" and "pwd", 
 but is also a programming language which lets you build functions, that
@@ -56,18 +73,6 @@ For more complex searches across multiple file types at once, excluding certain 
 and so on, read the full Doc.html under ./doc directory.
 
 
-# Download and compile
-
-The project is currently built using Apache ANT, which results in a single JAR file.
-
-There are no dependencies outside of standard Java libraries.
-
-Once built, the application is started using ./cft (Linux) or .\cft.cmd (Windows). To leave
-type ":quit" or just type CTRL-C.
-
-Please read the comprehensive document "Doc.html" stored under the ./doc directory, for
-a detailed introduction. CFT also contains an interactive help-function, to list both
-global functions and member functions inside various types of objects. 
 
 
 # An interactive language
@@ -267,8 +272,8 @@ The file doc/Doc.html gives a detailed walktrough of most of the functionality.
 
 # Philosophy
 
-- A "simple" interface which offers usable functionality, even one line at a time
-- Compact notation needs not mean ditching all readability
-- A programmers tool
+- Interactive programmable shell
+- Compact programming language
+- Programmers automation tool.
 
 
