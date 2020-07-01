@@ -64,7 +64,7 @@ P(1,"someTarget")=target
 
 P(1,"someTarget")=target
 	when(DoNotDelete.contains(target), error("Can not delete target " + target + ": remove from DoNotDelete list first"))
-	stop(target)
+	Stop(target)
 	Util.exec.call("virsh undefine --domain " + target)
 	Dir("/var/lib/libvirt/images").file(target + ".qcow2").delete
 	status
@@ -82,10 +82,10 @@ loop
 	call "Lib:ReadValueBoolean" ("Ok", false) =ok
 	break(ok)
 |
-	stop(original)
+	Stop(original)
 	Util.exec.call("virt-clone --original " + original + " --name " + cloneName + " --auto-clone"
 		+ " --file /var/lib/libvirt/images/" + cloneName + ".qcow2")
-	start(cloneName)
+	Start(cloneName)
 	status
 /Clone
 
