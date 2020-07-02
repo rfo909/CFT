@@ -1,3 +1,5 @@
+# License
+<<< EOF
 #
 # CFT - an interactive programmable shell for automation 
 # Copyright (C) 2020 Roar Foshaug
@@ -14,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>
 #
+>>> EOF
+/License
 
 # Displays readme for this script file
 <<< EOF

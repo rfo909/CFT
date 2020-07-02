@@ -3,139 +3,140 @@ Generated file - see script file savefileOverview.txt
 
 See also shell script ./CreateOverview.sh
 
-Created 2020-07-01 22:50:39 
+Created 2020-07-02 12:20:30 
 v1.0.7b
 ------------------------------------------------------------------
 
 Introduction
 
 CFT as a shell
-	* Navigating directories
-	|	Listing files or directories only
-	* Show content of file
+ * Navigating directories
+ |   Listing files or directories only
+ * Show content of file
 
 The help system
 
 Base functions and objects: File, Dir and List
-	* File() function
-	* Dir() function
-	* Lists
-	|	List addition
+ * File() function
+ * Dir() function
+ * Lists
+ |   List addition
 
 Core types
-	* String literals
+ * String literals
 
 List processing
-	* Iterating over list content
-	* Filtering with assert(), reject() and break()
+ * Iterating over list content
+ * Filtering with assert(), reject() and break()
 
 Creating custom functions
-	* Creating a function
-	* Calling a function
-	* Listing custom functions
-	* Savefiles
+ * Creating a function
+ * Calling a function
+ * Listing custom functions
+ * Savefiles
 
 CFT as a functional programming language
-	* Code only
-	* Local variables
-	* Stack vs expressions
-	* Nested loops
-	* The PIPE symbol
-	* "Pipes" and code blocks
-	|	Terminates all loops
-	* Result value from code blocks
-	* Function parameters
+ * Code only
+ * Local variables
+ * Stack vs expressions
+ * Nested loops
+ * The PIPE symbol
+ * "Pipes" and code blocks
+ |   Terminates all loops
+ * Result value from code blocks
+ * Function parameters
 
 Conditional execution
-	|	List filtering
-	* if() expression
-	* when() expression
+ |   List filtering
+ * if() expression
+ * when() expression
 
 Code blocks
-	* Pitfalls
+ * Code blocks are expressions
+ * Pitfalls
 
 Running external programs
-	* Summary
-	* Dir.run()
-	* Dir.runCapture()
-	* Dir.runDetach()
-	* Dir.runProcess()
+ * Summary
+ * Dir.run()
+ * Dir.runCapture()
+ * Dir.runDetach()
+ * Dir.runProcess()
 
 Editing save files
-	* Using editor for entering code
-	* Scripts
-	* Comments
-	* The '?' command
-	* Debug
+ * Using editor for entering code
+ * Scripts
+ * Comments
+ * The '?' command
+ * Debug
 
 Interactive use
-	* Input
-	* Searching files / report()
-	|	FileLine
-	|	report()
-	|	Multi-line example
-	|	Grep.lines()
-	* Searching multiple types of file
-	* Searching log files / DateSort
-	* Generalized sorting
-	* Sets of configuration data / Dict
-	* Date and time processing
-	|	Milliseconds
-	|	The Date object
-	|	The Date.Duration object
-	* Session persistent data / ValDef / Val
-	* Synthesis
-	|	The problem
-	|	Creating code from values
-	|	Example using :syn
-	|	Example using :NN
-	* Repeat last program line
-	* Output format / Cfg
-	|	Line wrapping
-	|	Number of lines on screen
+ * Input
+ * Searching files / report()
+ |   FileLine
+ |   report()
+ |   Multi-line example
+ |   Grep.lines()
+ * Searching multiple types of file
+ * Searching log files / DateSort
+ * Generalized sorting
+ * Sets of configuration data / Dict
+ * Date and time processing
+ |   Milliseconds
+ |   The Date object
+ |   The Date.Duration object
+ * Session persistent data / ValDef / Val
+ * Synthesis
+ |   The problem
+ |   Creating code from values
+ |   Example using :syn
+ |   Example using :NN
+ * Repeat last program line
+ * Output format / Cfg
+ |   Line wrapping
+ |   Number of lines on screen
 
 Templating
-	* Merging text with Dict
-	* Using template files
-	* Script file "here" documents
-	|	A more complex example
-	|	PDict()
-	* Using DataFile
-	|	Include blank lines
-	|	Filter away comments
+ * Merging text with Dict
+ * Using template files
+ * Script file "here" documents
+ |   A more complex example
+ |   PDict()
+ * Using DataFile
+ |   Include blank lines
+ |   Filter away comments
 
 Use as a calculator
-	* Expressions and "variables"
-	* Lib.Math
-	* Lib.Convert
-	* Lib.Plot
+ * Expressions and "variables"
+ * Lib.Math
+ * Lib.Convert
+ * Lib.Plot
 
 Macros
 
 Various advanced topics
-	* Predicate calls
-	* Calling functions in external scripts
-	|	Session state
-	|	Session state tree
-	|	Function overrides
-	* Command line args
-	* List.push()
-	* Dict set strings
-	* Dict values as properties
-	* Dict.get with default value
-	* List.nth() negative indexes
-	* Working with text lines from stdin
-	* Function parameters as List or Dict
-	* The general loop statement
-	* Complex conditional blocks
-	* Storing CFT data structures to file - syn() and eval()
-	* String.esc() and .unEsc()
-	|	Escape codes
-	* Automating interactive functions
-	* Self-modifying script
-	* Differing between Windows and Linux
-	* Simple line editing
-	|	Develop complex code in steps
+ * Predicate calls
+ * Calling functions in external scripts
+ |   Session state
+ |   Session state tree
+ |   Function overrides
+ * Command line args
+ * List.push()
+ * Dict set strings
+ * Dict values as properties
+ * Dict.get with default value
+ * List.nth() negative indexes
+ * Working with text lines from stdin
+ * Function parameters as List or Dict
+ * The general loop statement
+ * Complex conditional blocks
+ * Storing CFT data structures to file - syn() and eval()
+ * String.esc() and .unEsc()
+ |   Escape codes
+ * Automating interactive functions
+ * Self-modifying script
+ * Differing between Windows and Linux
+ * Simple line editing
+ |   Develop complex code in steps
 
 Reference: Colon commands
 
