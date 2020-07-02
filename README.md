@@ -81,7 +81,7 @@ CFT is a functional language, consisting of functions producing objects where we
 new functions, and so on ...
 
 It is easy to learn, and test, by entering some code, and press Enter to have it
-run. CFT has full expression support and is great as a calculator.
+run. CFT has full expression support with normal cardinality rules, and is great as a calculator.
 
 ```
 $ 2+3
@@ -132,11 +132,11 @@ $ /JavaFiles
 
 Every time we type JavaFiles and press Enter, we get a list of Java files
 available from the current directory. Use "ls" and "cd" to move somewhere else,
-then run JavaFiles again.
+then run JavaFiles again, observing that the list of files differ.
 
-Type "cd" plus Enter to return to application home directory.
+Typing "cd" folloed by Enter returns you to the application home directory.
 
-Oh, and its "ls" regardless of running on Linux or Windows. 
+Oh, and its "ls" to list files, regardless of running on Linux or Windows. 
 
 ## Searching
 
@@ -210,7 +210,7 @@ $ Lib.Math help
 ```
 
 The global Lib function creates a Lib object, which effectively works as a name space. Inside 
-the Lib object there are functions for creating still other objects, sich as the Math
+the Lib object there are functions for creating still other objects, such as the Math
 object, where you find math related functions for calculating sine and cosine.
 
 If you are going to use trigonometric functions a lot in your code, and since Math is a regular
@@ -224,38 +224,47 @@ $ Lib.Math =m Lib.Data.for(0,360,1)->i out(m.cos(i) + m.sin(i))
 
 #### Counting number of lines of java code
 
+```
 $ JavaFiles->f out(f.read.length) | _.sum
-
+```
 #### Calculating date (and time) 30 days ago
 
+```
 $ Date.sub(Date.Duration.days(30))
-
+```
 #### Open remote directories (windows)
 
+```
 $ Dir("\\somehost\d$\someLogDir").files(Glob("*.log"))
-
+```
 #### Converting one light year to kilometres
 
+```
 $ Lib.Convert.lyToKm(1)
-
+```
 #### Doing math
 
+```
 $ 2+3*5
-
+```
 #### List all those conversions I coded an evening far far away
 
+```
 $ Lib.Convert help
-
+```
 
 
 # Edit current script file in editor
 
 The global function savefile() returns a File object for the current script.
 
+```
 $ Dir.runDetach("notepad", savefile.path)
+```
 
-If on Linux, replace "notepad" with "leafpad" or "gedit" or "subl", or what have you. 
-If you need to run "nano", then replace .runDetach with .run, so as not to run the
+On Linux replace "notepad" with "leafpad" or "gedit" or "subl", or what have you. 
+
+If you need to run "nano", then also replace .runDetach with .run, so as not to run the
 process in the background.
 
 Note that when editing a savefile, all you need do after saving changes, is run the code
@@ -272,8 +281,8 @@ The file doc/Doc.html gives a detailed walktrough of most of the functionality.
 
 # Philosophy
 
-- Interactive programmable shell
-- Compact programming language
+- Interactive programmable shell.
+- Compact programming language.
 - Programmers automation tool.
 
 
