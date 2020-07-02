@@ -38,16 +38,16 @@ To leave type ":quit" or just type CTRL-C.
 
 The CFT application supports basic shell functions like "cd", "ls" and "pwd", 
 but is also a programming language which lets you build functions, that
-both call each other as well as a system library of over 200 member functions,
-belonging to all kinds of objects.
+both call each other as well as a system library of 200+ functions,
+belonging, both global and inside objects.
 
-The most central object types are Dir, File and List. There are also strings, integers,
+The most central object types are Dir, File and List, along with strings, integers,
 floats and booleans, plus still a few, totalling about 20 as of version 1.0.6.
 
 The program prompt is a single '$'. You enter stuff, and press Enter, and it gets
 executed. 
 
-Objects all contain functions, such that
+Objects all contain functions. Example:
 
 ```
 $ Dir.files
