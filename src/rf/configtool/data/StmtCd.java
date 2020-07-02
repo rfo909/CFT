@@ -79,15 +79,39 @@ public class StmtCd extends Stmt {
             
             ctx.getObjGlobal().setCurrDir(currDir);
         } else {
-                File f=locateDir(ctx,pathElements);
-
-                if (f==null || !f.isDirectory() || !f.exists()) {
-                    throw new Exception("No such directory");
-                }
-                String currDir=f.getCanonicalPath();
-                
-                ctx.getObjGlobal().setCurrDir(currDir);
+        		// Detect presence of separator or colon (windows) - if so, concatenate as-is
+        		boolean isWindows = File.separatorChar=='\\';
+        		if (pathElements.contains(File.separator)) {
+        			boolean isAbsolute = pathElements.get(0).equals(File.separator) 
+        					|| (isWindows && pathElements.size()>=3 && pathElements.get(1).equals(":") && pathElements.get(2).equals(File.separator));
+        			
+        			// concatenate as-is
+        			String path="";
+        			for (String s:pathElements) path += s;
+        			
+        			File f;
+        			if (isAbsolute) {
+        				f=new File(path); 
+        			} else {
+        				f=new File(ctx.getObjGlobal().getCurrDir() + File.separator + path);
+        			}
+                    if (f==null || !f.isDirectory() || !f.exists()) {
+                        throw new Exception("No such directory");
+                    }
+                    String currDir=f.getCanonicalPath();
+                    ctx.getObjGlobal().setCurrDir(currDir);
+        		} else {
+	                File f=locateDir(ctx,pathElements);
+	
+	                if (f==null || !f.isDirectory() || !f.exists()) {
+	                    throw new Exception("No such directory");
+	                }
+	                String currDir=f.getCanonicalPath();
+	                
+	                ctx.getObjGlobal().setCurrDir(currDir);
+        		}
         }
+        
         String currDir=ctx.getObjGlobal().getCurrDir();
         ctx.getOutText().addPlainText(currDir);
         ctx.push(new ValueObj(new ObjDir(currDir)));

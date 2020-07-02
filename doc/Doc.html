@@ -11,9 +11,9 @@
 
 <h1 style="color:black; border:1px solid blue; padding:1Em; text-align: center">ConfigTool - CFT</h1>
 
-<p><i>Last updated: 2020-07-01 RFO</i></p>
+<p><i>Last updated: 2020-07-02 RFO</i></p>
 
-<p><i>v1.0.7</i></p>
+<p><i>v1.0.8</i></p>
 
 
 
@@ -1039,6 +1039,58 @@ To create a file with a single text line:
 
 
 <h1>Interactive use</h1>
+
+<h2>Change current directory</h2>
+<p>
+  The "cd" command should function mostly as expected. CFT has no autocomplete feature, since
+  it only reads lines, not key-presses.
+</p>
+
+<p>
+  Changing to a direct sub-directory, you need not type the entire name, just enough to make
+  it unique. You can even supply multiple parts, and the sub-directory that contains all
+  those strings, is selected.
+</p>
+<p>
+  Imagine you have three directories LongProjectA, LongProjectB and LongProjectC, and the
+  names A, B and C are used elsewhere, you could write:
+<pre>
+  $ cd Pr B
+</pre>
+
+<p>
+  Also note, particularly for Windows user, that paths with space in them need to be put into
+  quotes.
+</p>
+<pre>
+  $ cd "c:\Program Files\blah\blah"
+</pre>
+
+
+<h2>Listing files</h2>
+<p>
+  The "ls" command comes in three variants:
+</p>
+<ul>
+  <li> "ls" - lists directories and files</li>
+  <li> "lsd" - lists directories only</li>
+  <li> "lsf" - lists files only</li>
+</ul>
+<p>
+  What "ls" can not do is globbing. Instead, when you need globbing, you can type
+</p>
+<pre>
+  $ Dir.files(Glob("*.txt"))
+</pre>
+<p>
+  The reason for this limitation, is that "ls" and its cousins are expressions. That's what 
+  makes it possible to say:
+</p>
+<pre>
+  $ cd(ls(2))
+</pre>
+
+
 
 
 

@@ -3,8 +3,8 @@ Generated file - see script file savefileOverview.txt
 
 See also shell script ./CreateOverview.sh
 
-Created 2020-07-02 12:20:30 
-v1.0.7b
+Created 2020-07-02 22:51:46 
+v1.0.8
 ------------------------------------------------------------------
 
 Introduction
@@ -70,6 +70,8 @@ Editing save files
  * Debug
 
 Interactive use
+ * Change current directory
+ * Listing files
  * Input
  * Searching files / report()
  |   FileLine
