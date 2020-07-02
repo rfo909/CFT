@@ -98,4 +98,3 @@ call "Lib:m" (f)
 stdin("") FilterFiles.nth =f
 call "Lib:e" (f)
 /edit
-

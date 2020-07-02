@@ -84,7 +84,3 @@ ${version}
 # Main function - no params
 DocDir.file("Overview.txt").create(header+content)
 /CreateOverview
-
-
-
-

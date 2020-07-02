@@ -64,7 +64,10 @@ public class CodeLines {
         
     public List<String> getSaveFormat() {
         List<String> list=new ArrayList<String>();
-        for (CodeLine c:saveFormat) list.add(c.getLine());
+        for (CodeLine c:saveFormat) {
+        	if (c.getType()==CodeLine.TYPE_LINE_GENERATED) continue; // write NORMAL and ORIGINAL
+        	list.add(c.getLine());
+        }
         return list;
     }
   
@@ -88,7 +91,10 @@ public class CodeLines {
     }
     public TokenStream getTokenStream () throws Exception {
         Parser p=new Parser();
-        for (CodeLine cl:saveFormat) p.processLine(cl);
+        for (CodeLine cl:saveFormat) {
+        	if (cl.getType()==CodeLine.TYPE_LINE_ORIGINAL) continue; // only execute NORMAL and GENERATED
+        	p.processLine(cl);
+        }
         return p.getTokenStream();
     }
 

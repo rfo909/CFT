@@ -204,18 +204,21 @@ public class CodeHistory {
             if (inlineDoc != null) {
                 // check for end marker
                 if (trimmed.startsWith(">>>") && inlineDoc.matchesEofMark(trimmed.substring(3).trim())) {
+                	lines.add(new CodeLine(loc,s,CodeLine.TYPE_LINE_ORIGINAL));
                     // add generated code line
-                    lines.add(new CodeLine(loc,inlineDoc.createCodeLine()));
+                    lines.add(new CodeLine(loc,inlineDoc.createCodeLine(),CodeLine.TYPE_LINE_GENERATED));
                     inlineDoc=null;
                     continue;
                 }
                 // add raw text line
                 inlineDoc.addLine(s);
+                lines.add(new CodeLine(loc,s,CodeLine.TYPE_LINE_ORIGINAL));
                 continue;
             }
             if (trimmed.startsWith("<<<")) {
                 String inlineEofMark=trimmed.substring(3).trim();
                 inlineDoc=new CodeInlineDocument(inlineEofMark, loc);
+                lines.add(new CodeLine(loc, s, CodeLine.TYPE_LINE_ORIGINAL));
                 continue;
             }
 

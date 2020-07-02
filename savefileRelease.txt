@@ -95,6 +95,3 @@ HomeDir.run("git","diff")
 println("Running bash: press ^D to return to CFT")
 Dir.run("bash")
 /sh
-
-
-
