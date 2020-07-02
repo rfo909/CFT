@@ -760,6 +760,7 @@ public class ObjGlobal extends Obj {
                 return new ValueString(s);
             } else if (params.size() == 0) {
                 stdio.println();
+		return new ValueString("");
             }
 
             throw new Exception("Expected no parameter or string parameter");
