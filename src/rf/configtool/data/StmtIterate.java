@@ -53,7 +53,7 @@ public class StmtIterate extends Stmt {
             // iterate over all values in list
             data=((ValueList) v).getVal();
         } else {
-            if ((v instanceof ValueBoolean) && ((ValueBoolean) v).getVal()==false) {
+        	if (!v.getValAsBoolean()) {
                 // no iteration 
                 return;
             }
