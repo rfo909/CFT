@@ -281,8 +281,25 @@ The file doc/Doc.html gives a detailed walktrough of most of the functionality.
 
 # Philosophy
 
-- Interactive programmable shell.
-- Compact programming language.
-- Programmers automation tool.
+- Interactive programmable shell
+- Compact programming language
+- Programmers automation tool
+
+# Actual use
+
+Since getting the interpreter up and running, in 2018, functionality has been continously added. Below
+is a brief list of some of the otherwise complicated and/or boring tasks CFT has helped
+me solve.
+
+- searcing through the source code (including Java, HTML, CSS and JS) of multiple and differing projects, with quick switching between them
+- some deployment, copying sets of files to multiple targets
+- starting and stopping services with PowerShell on multiple remote servers
+- search through multiple log files, and get single time-sorted match list
+- identifying historic (zipped down) logs by date and time, copy to temp directory, unzip and search
+- start and stop, as well as generate stats from sets of Node processes used for stress testing MongoDb HA setup
+- initializing and cloning VM's under KVM (Linux)
+- run inside new VM's to set up correct hostname and netplan (Ubuntu Server)
+- generate the doc/Overview.txt file from Doc.html
+
 
 
