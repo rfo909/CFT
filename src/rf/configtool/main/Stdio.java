@@ -1,3 +1,20 @@
+/*
+CFT - an interactive programmable shell for automation 
+Copyright (C) 2020 Roar Foshaug
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>
+*/
+
 package rf.configtool.main;
 
 import java.io.BufferedReader;
@@ -17,8 +34,8 @@ import java.util.List;
  */
 public class Stdio {
 
-	public static final int CircBufferedOutput = 100;
-	
+    public static final int CircBufferedOutput = 100;
+    
     // stdin and stdout may be null (disconnected)
     private BufferedReader stdin;
     private PrintStream stdout;
@@ -32,8 +49,8 @@ public class Stdio {
         this.stdout=stdout;
 
         outputLines=new String[CircBufferedOutput];
-    	for (int i=0; i<outputLines.length; i++) outputLines[i]="";
-    	
+        for (int i=0; i<outputLines.length; i++) outputLines[i]="";
+        
     }
 
     public String getInputLine() throws Exception {
@@ -44,8 +61,8 @@ public class Stdio {
     }
     
     private String readLine() throws Exception {
-    	if (stdin == null) throw new Exception("stdin disconnected - no buffered lines");
-    	return stdin.readLine();
+        if (stdin == null) throw new Exception("stdin disconnected - no buffered lines");
+        return stdin.readLine();
     }
     
     
@@ -71,21 +88,21 @@ public class Stdio {
     private String currLine="";
     
     public void print (String x) {
-    	if (stdout != null) {
-    		stdout.print(currLine+x);
-    		currLine="";
-    	} else {
-    		currLine += x;
-    	}
+        if (stdout != null) {
+            stdout.print(currLine+x);
+            currLine="";
+        } else {
+            currLine += x;
+        }
     }
     
     public void println (String x) {
-    	String s=currLine+x;
-    	currLine="";
-    	
-		outputLines[outputPos]=s;
-		outputPos = (outputPos+1)%outputLines.length;
-		if (stdout != null) stdout.println(s);
+        String s=currLine+x;
+        currLine="";
+        
+        outputLines[outputPos]=s;
+        outputPos = (outputPos+1)%outputLines.length;
+        if (stdout != null) stdout.println(s);
     }
 
     public void println () {

@@ -1,3 +1,20 @@
+/*
+CFT - an interactive programmable shell for automation 
+Copyright (C) 2020 Roar Foshaug
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>
+*/
+
 package rf.configtool.main;
 
 import java.util.*;
@@ -67,16 +84,16 @@ public class Ctx {
      * stored in the Ctx instances) if it wasn't for the "loop" statement, which has no loop variable.
      */
     public void setProgramContainsLooping() {
-    	// Previously this was implemented as part of the OutData object which made it in effect
-    	// global.
-    	Ctx ctx=this;
-    	for(;;) {
-    		ctx.programContainsLooping=true;
-    		if (ctx.programContainsLoopingInfoStopsHere) break;
-    		if (ctx.parent == null) break;
-    		ctx=ctx.parent;
-    	}
-    	
+        // Previously this was implemented as part of the OutData object which made it in effect
+        // global.
+        Ctx ctx=this;
+        for(;;) {
+            ctx.programContainsLooping=true;
+            if (ctx.programContainsLoopingInfoStopsHere) break;
+            if (ctx.parent == null) break;
+            ctx=ctx.parent;
+        }
+        
     }
     
 
@@ -126,14 +143,14 @@ public class Ctx {
     }
     
     public void setLoopVariable (String name, Value value) {
-    	this.loopVariableName=name;
+        this.loopVariableName=name;
         this.loopVariableValue=value;
     }
     
     public Value getVariable (String name) {
-    	Value v=getLoopVariable(name);
-    	if (v != null) return v;
-    	
+        Value v=getLoopVariable(name);
+        if (v != null) return v;
+        
         return functionState.get(name);
     }
     
@@ -142,12 +159,12 @@ public class Ctx {
         // contain loop variables, then we check with FunctionState, where
         // all assigned variables ("=x") are stored in shared scope for the
         // function. 
-    	
-    	// This also means one can not redefine loop variables.
         
-    	if (loopVariableName != null && name.equals(loopVariableName)) {
-    		return loopVariableValue;
-    	}
+        // This also means one can not redefine loop variables.
+        
+        if (loopVariableName != null && name.equals(loopVariableName)) {
+            return loopVariableValue;
+        }
         if (parent != null) return parent.getLoopVariable(name);
         return null;
     }

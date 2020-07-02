@@ -1,3 +1,20 @@
+/*
+CFT - an interactive programmable shell for automation 
+Copyright (C) 2020 Roar Foshaug
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>
+*/
+
 package rf.configtool.main.runtime.lib;
 
 import java.io.*;
@@ -70,7 +87,7 @@ public class ObjGrep extends Obj {
     private boolean modeCheck=false;
     private int limit=0; 
     private boolean limitKeepFirst=false;
-    	// if limit is N > 0, if true, keep first N lines, otherwise last N lines
+        // if limit is N > 0, if true, keep first N lines, otherwise last N lines
     
     private Obj theObj() {
         return this;
@@ -227,14 +244,14 @@ public class ObjGrep extends Obj {
     
     
     private List<Value> applyLimit (List<Value> data) {
-    	if (limit <= 0) return data;
-    	List<Value> subset=new ArrayList<Value>();
-    	
-    	int offset = (limitKeepFirst ? 0 : data.size()-limit);
-    	for (int i=0; i<limit; i++) {
-    		subset.add(data.get(offset+i));
-    	}
-    	return subset;
+        if (limit <= 0) return data;
+        List<Value> subset=new ArrayList<Value>();
+        
+        int offset = (limitKeepFirst ? 0 : data.size()-limit);
+        for (int i=0; i<limit; i++) {
+            subset.add(data.get(offset+i));
+        }
+        return subset;
     }
     
     class FunctionModeCheck extends Function {

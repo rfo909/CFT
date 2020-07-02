@@ -1,3 +1,20 @@
+/*
+CFT - an interactive programmable shell for automation 
+Copyright (C) 2020 Roar Foshaug
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>
+*/
+
 package rf.configtool.data;
 
 import java.util.*;
@@ -20,13 +37,13 @@ public class ParamLookupDict extends LexicalElement {
         
         
         ts.matchStr("(","expected '('");
-    	for (;;) {
-    		if (ts.matchStr(")")) break;
-    		if (comma) ts.matchStr(",", "expected comma");
-    		names.add(new Expr(ts));
-    		comma=true;
-    	}
-    	if (names.size()==0) throw new Exception("Expected at least one field name");
+        for (;;) {
+            if (ts.matchStr(")")) break;
+            if (comma) ts.matchStr(",", "expected comma");
+            names.add(new Expr(ts));
+            comma=true;
+        }
+        if (names.size()==0) throw new Exception("Expected at least one field name");
         
     }
     
@@ -34,14 +51,14 @@ public class ParamLookupDict extends LexicalElement {
         List<Value> params=ctx.getFunctionState().getParams();
         Map<String,Value> map=new HashMap<String,Value>();
         for (int i=0; i<names.size(); i++) {
-        	String name=names.get(i).resolve(ctx).getValAsString();
-        	Value value;
-        	if (i < params.size()) {
-        		value=params.get(i);
-        	} else {
-        		value=new ValueNull();
-        	}
-        	map.put(name, value);
+            String name=names.get(i).resolve(ctx).getValAsString();
+            Value value;
+            if (i < params.size()) {
+                value=params.get(i);
+            } else {
+                value=new ValueNull();
+            }
+            map.put(name, value);
         }
         return new ValueObj(new ObjDict(map));
     }

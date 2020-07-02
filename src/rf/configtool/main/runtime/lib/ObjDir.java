@@ -1,3 +1,20 @@
+/*
+CFT - an interactive programmable shell for automation 
+Copyright (C) 2020 Roar Foshaug
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>
+*/
+
 package rf.configtool.main.runtime.lib;
 
 import java.io.*;
@@ -459,24 +476,24 @@ public class ObjDir extends Obj {
         Process process = processBuilder.start();
         
         if (capture != null) {
-        	BufferedReader br=null;
-        	try {
-		        br=new BufferedReader(new InputStreamReader(process.getInputStream()));
-		        for (;;) {
-		        	String line=br.readLine();
-		        	if (line==null) break;
-		        	capture.addLine(line);
-		        	stdio.println(line); // to allow interactive use
-		        }
-        	} finally {
-        		if (br != null) br.close();
-        	}
+            BufferedReader br=null;
+            try {
+                br=new BufferedReader(new InputStreamReader(process.getInputStream()));
+                for (;;) {
+                    String line=br.readLine();
+                    if (line==null) break;
+                    capture.addLine(line);
+                    stdio.println(line); // to allow interactive use
+                }
+            } finally {
+                if (br != null) br.close();
+            }
         } else {
-	        if (foreground) {
-	            process.waitFor();
-	            long endTime=System.currentTimeMillis();
-	            outText.addPlainText("Running " + program + " completed: " + (endTime-startTime) + "ms");
-	        }
+            if (foreground) {
+                process.waitFor();
+                long endTime=System.currentTimeMillis();
+                outText.addPlainText("Running " + program + " completed: " + (endTime-startTime) + "ms");
+            }
         }
     }
 
@@ -517,7 +534,7 @@ public class ObjDir extends Obj {
             return "runCapture(list|...) - execute external program in foreground, returns list of output lines";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	RunCaptureOutput capt=new RunCaptureOutput();
+            RunCaptureOutput capt=new RunCaptureOutput();
             callExternalProgram(true, ctx.getStdio(), ctx.getOutText(), capt, params);
             return capt.getCapturedLines();
         }
@@ -568,14 +585,14 @@ public class ObjDir extends Obj {
             return "runProcess(stdinFile, stdoutFile, stdErrFile, list|...) - execute external program in background with file I/O";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	ObjFile stdin = (ObjFile) getObj("stdinFile", params, 0);
-        	ObjFile stdout = (ObjFile) getObj("stdoutFile", params, 1);
-        	ObjFile stderr = (ObjFile) getObj("stderrFile", params, 2);
-        	
-           	List<Value> cmd=new ArrayList<Value>();
-           	for (int i=3; i<params.size(); i++) cmd.add(params.get(i));
+            ObjFile stdin = (ObjFile) getObj("stdinFile", params, 0);
+            ObjFile stdout = (ObjFile) getObj("stdoutFile", params, 1);
+            ObjFile stderr = (ObjFile) getObj("stderrFile", params, 2);
             
-        	
+              List<Value> cmd=new ArrayList<Value>();
+              for (int i=3; i<params.size(); i++) cmd.add(params.get(i));
+            
+            
             startProcess(stdin.getFile(), stdout.getFile(), stderr.getFile(), cmd);
             return new ValueObj(self());
 

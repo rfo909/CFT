@@ -1,3 +1,20 @@
+/*
+CFT - an interactive programmable shell for automation 
+Copyright (C) 2020 Roar Foshaug
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>
+*/
+
 package rf.configtool.main;
 
 import java.io.File;
@@ -89,10 +106,10 @@ public class Runtime {
             }
             return true;
         } else if (ts.matchStr("syn")) {
-        	if (lastResult==null) {
-        		objGlobal.outln("No current value, can not synthesize");
-        		return true;
-        	}
+            if (lastResult==null) {
+                objGlobal.outln("No current value, can not synthesize");
+                return true;
+            }
             String s=lastResult.synthesize();
             codeHistory.setCurrLine(s);
             objGlobal.outln("synthesize ok");
@@ -102,23 +119,23 @@ public class Runtime {
             objGlobal.outln("Assign to name by /xxx as usual");
             return true; // do not modify codeHistory
         } else if (ts.peekType(Token.TOK_INT)) {
-        	int pos=Integer.parseInt(ts.matchType(Token.TOK_INT).getStr());
-        	if (lastResult==null) {
-        		objGlobal.outln("No current value");
-        		return true;
-        	}
-        	if (!(lastResult instanceof ValueList)) {
-        		objGlobal.outln("Current value not a list");
-        		return true;
-        	}
+            int pos=Integer.parseInt(ts.matchType(Token.TOK_INT).getStr());
+            if (lastResult==null) {
+                objGlobal.outln("No current value");
+                return true;
+            }
+            if (!(lastResult instanceof ValueList)) {
+                objGlobal.outln("Current value not a list");
+                return true;
+            }
 
-        	List<Value> values=((ValueList) lastResult).getVal();
-        	
-        	if (pos < 0 || pos >= values.size()) {
-        		objGlobal.outln("Invalid index: " + pos);
-        		return true;
-        	}
-        		
+            List<Value> values=((ValueList) lastResult).getVal();
+            
+            if (pos < 0 || pos >= values.size()) {
+                objGlobal.outln("Invalid index: " + pos);
+                return true;
+            }
+                
             String s=values.get(pos).synthesize();
             codeHistory.setCurrLine(s);
             objGlobal.outln("synthesize ok");
@@ -126,7 +143,7 @@ public class Runtime {
             objGlobal.outln("| .  : " + s);
             objGlobal.outln("+-----------------------------------------------------");
             objGlobal.outln("Assign to name by /xxx as usual");
-        	return true;
+            return true;
         } else {
             throw new Exception("Unknown command, try: quit, save, load, delete, copy, debug, wrap, syn or <int>");
         }
@@ -217,11 +234,11 @@ public class Runtime {
                     
                     CodeLines codeLines=codeHistory.getNamedLine(str);
                     if (codeLines != null) {
-                    	if (codeLines.hasMultipleCodeLines()) {
-                    		objGlobal.outln("Function '" + str + "' is not a single line of code");
-                    		return;
-                    	}
-                    	String codeLine=codeLines.getFirstNonBlankLine();
+                        if (codeLines.hasMultipleCodeLines()) {
+                            objGlobal.outln("Function '" + str + "' is not a single line of code");
+                            return;
+                        }
+                        String codeLine=codeLines.getFirstNonBlankLine();
                         if (pattern != null) {
                             int cutoffPos=codeLine.indexOf(pattern);
                             if (cutoffPos > 0) {

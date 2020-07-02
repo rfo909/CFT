@@ -1,3 +1,20 @@
+/*
+CFT - an interactive programmable shell for automation 
+Copyright (C) 2020 Roar Foshaug
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>
+*/
+
 package rf.configtool.parser;
 import java.util.HashMap;
 
@@ -70,47 +87,47 @@ public class CharTable {
 //    }
 
     public Integer parse (CharSource source) {
-    	int charCount=0;
-    	for(;;) {
-	        if (source.eol()) {
-	        	if (tokenType==null) {
-	        		source.ungetChar(charCount);
-	        	}
-	            return tokenType;
-	        }
-	        
-	        char nextChar=source.getChar();
-	        CharTable next=map.get(nextChar);
-	        if (next==null) next=defaultMapping;
-	
-	        if (next==null) {
-	            // no more possible solutions
-	            source.ungetChar(); // unget nextChar
-	            if (tokenType == null) {
-	            	// neither does this map, so undo all iteration characters
-	            	source.ungetChar(charCount);
-	            }
-	            return tokenType; // may be null
-	        }
-	        if (next==this) {
-	        	// Avoid deep recursion for typically long strings.
-	        	// Also includes integers and identifiers
-	        	charCount++;
-	        	continue;
-	        }
-	        Integer result=next.parse(source);
-	        if (result==null) {
-	            source.ungetChar(); // nextChar led nowhere
-	            if (tokenType==null) {
-	            	// neither did any repeat matching inside this method
-	            	source.ungetChar(charCount);
-	            }
-	            return tokenType;
-	        } else {
-	            return result;
-	        }
+        int charCount=0;
+        for(;;) {
+            if (source.eol()) {
+                if (tokenType==null) {
+                    source.ungetChar(charCount);
+                }
+                return tokenType;
+            }
+            
+            char nextChar=source.getChar();
+            CharTable next=map.get(nextChar);
+            if (next==null) next=defaultMapping;
+    
+            if (next==null) {
+                // no more possible solutions
+                source.ungetChar(); // unget nextChar
+                if (tokenType == null) {
+                    // neither does this map, so undo all iteration characters
+                    source.ungetChar(charCount);
+                }
+                return tokenType; // may be null
+            }
+            if (next==this) {
+                // Avoid deep recursion for typically long strings.
+                // Also includes integers and identifiers
+                charCount++;
+                continue;
+            }
+            Integer result=next.parse(source);
+            if (result==null) {
+                source.ungetChar(); // nextChar led nowhere
+                if (tokenType==null) {
+                    // neither did any repeat matching inside this method
+                    source.ungetChar(charCount);
+                }
+                return tokenType;
+            } else {
+                return result;
+            }
 
-    	}
+        }
     }
 
  

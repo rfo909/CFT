@@ -1,3 +1,20 @@
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+
 # Help text
 <<< EOF
 ------------------------------------------------------------------
@@ -19,31 +36,31 @@ savefile.dir.sub("doc")
 
 # Generate content from Doc.html - no params
 Dict
-	.set("<h1>","^n".unEsc)
-	.set("<h2>","	* ")
-	.set("<h3>","	|	")
-	.set("<h4>","	|		")
-	.set("</h1>","")
-	.set("</h2>","")
-	.set("</h3>","")
-	.set("</h4>","")
-	=data
-#	
+    .set("<h1>","^n".unEsc)
+    .set("<h2>"," * ")
+    .set("<h3>"," |   ")
+    .set("<h4>"," |     ")
+    .set("</h1>","")
+    .set("</h2>","")
+    .set("</h3>","")
+    .set("</h4>","")
+    =data
+# 
 Grep.match("<h1> <h2> <h3> <h4>".split) =grep
-DocDir.file("Doc.html")	=src
+DocDir.file("Doc.html")   =src
 grep.file(src) ->line
-	out(line.trim.merge(data)) 
+    out(line.trim.merge(data)) 
 /content
 
 
 
 # Generate header - no params
 Dict
-	.set("savefile",savefile.name)
-	.set("date", Date.fmt)
-	.set("version", Lib.Sys.version)
-	.mergeCodes
-	=data
+    .set("savefile",savefile.name)
+    .set("date", Date.fmt)
+    .set("version", Lib.Sys.version)
+    .mergeCodes
+    =data
 <<< EOF
 ------------------------------------------------------------------
 Generated file - see script file ${savefile}

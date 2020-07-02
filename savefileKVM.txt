@@ -1,3 +1,20 @@
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+
 
 # Script readme
 <<< EOF
@@ -32,8 +49,8 @@ call "Lib:MenuSelect" (data, macroGetElementName)
 
 # Various private macros
 Dict
-	.set("noSpace", {* P(1).replace(" ","_").replace("^t".unEsc,"_") })
-	.set("exec", {* P(1,"ls -l")=cmd println("------> " + cmd) println("") Dir.run(cmd.split) })
+    .set("noSpace", {* P(1).replace(" ","_").replace("^t".unEsc,"_") })
+    .set("exec", {* P(1,"ls -l")=cmd println("------> " + cmd) println("") Dir.run(cmd.split) })
 /Util
 
 
@@ -51,23 +68,23 @@ status
 
 
 P(1,"someTarget")=target
-	Util.exec.call("virsh start --domain " + target)
-	status
+    Util.exec.call("virsh start --domain " + target)
+    status
 /Start
 
 
 P(1,"someTarget")=target
-	Util.exec.call("virsh destroy --domain " + target)
-	status
+    Util.exec.call("virsh destroy --domain " + target)
+    status
 /Stop
 
 
 P(1,"someTarget")=target
-	when(DoNotDelete.contains(target), error("Can not delete target " + target + ": remove from DoNotDelete list first"))
-	Stop(target)
-	Util.exec.call("virsh undefine --domain " + target)
-	Dir("/var/lib/libvirt/images").file(target + ".qcow2").delete
-	status
+    when(DoNotDelete.contains(target), error("Can not delete target " + target + ": remove from DoNotDelete list first"))
+    Stop(target)
+    Util.exec.call("virsh undefine --domain " + target)
+    Dir("/var/lib/libvirt/images").file(target + ".qcow2").delete
+    status
 /Delete
 
 
@@ -76,17 +93,17 @@ call "Lib:Header" ("Cloning existing VM")
 null=original
 null=cloneName
 loop
-	status
-	call "Lib:ReadValue" ("Original VM", original) =original
-	call "Lib:ReadValue" ("New VM", cloneName) =cloneName
-	call "Lib:ReadValueBoolean" ("Ok", false) =ok
-	break(ok)
+    status
+    call "Lib:ReadValue" ("Original VM", original) =original
+    call "Lib:ReadValue" ("New VM", cloneName) =cloneName
+    call "Lib:ReadValueBoolean" ("Ok", false) =ok
+    break(ok)
 |
-	Stop(original)
-	Util.exec.call("virt-clone --original " + original + " --name " + cloneName + " --auto-clone"
-		+ " --file /var/lib/libvirt/images/" + cloneName + ".qcow2")
-	Start(cloneName)
-	status
+    Stop(original)
+    Util.exec.call("virt-clone --original " + original + " --name " + cloneName + " --auto-clone"
+        + " --file /var/lib/libvirt/images/" + cloneName + ".qcow2")
+    Start(cloneName)
+    status
 /Clone
 
 
@@ -99,54 +116,54 @@ false =headless
 null =cpus
 32 =disk
 loop
-	call "Lib:Header" ("Create new KVM Virtual Machine")
+    call "Lib:Header" ("Create new KVM Virtual Machine")
 
-	BootImage =bootImage
-	println("# Selected " + bootImage.path)
+    BootImage =bootImage
+    println("# Selected " + bootImage.path)
 
-	call "Lib:ReadValue" ("New VM name", name) =name
+    call "Lib:ReadValue" ("New VM name", name) =name
 
-	println("")
-	println("# Headless = no means use virt-manager")	
-	println("# Headless = yes (advanced) means use VNC to complete installation")
-	call "Lib:ReadValueBoolean" ("Headless", headless) =headless
+    println("")
+    println("# Headless = no means use virt-manager") 
+    println("# Headless = yes (advanced) means use VNC to complete installation")
+    call "Lib:ReadValueBoolean" ("Headless", headless) =headless
 
-	call "Lib:ReadValueInt" ("RAM GB", ram) =ram
-	call "Lib:ReadValueInt" ("Disk GB", disk) =disk
-	call "Lib:ReadValueBoolean" ("Enter 'yes' to confirm this is okay", false) =ok
-	break(ok)
+    call "Lib:ReadValueInt" ("RAM GB", ram) =ram
+    call "Lib:ReadValueInt" ("Disk GB", disk) =disk
+    call "Lib:ReadValueBoolean" ("Enter 'yes' to confirm this is okay", false) =ok
+    break(ok)
 |
 call "Lib:ReadValueBoolean" ("Enter 'yes' to continue", false, "yes","abort") =continue
 when (!continue,{
-	println("Aborting")
-	error("Aborting")
+    println("Aborting")
+    error("Aborting")
 })
 
-	List("virt-install",
-		"--name",name,
-		"--ram="+ram,
-		"--vcpus="+cpus,
-		"--cpu","host",
-		"--hvm",
-		"--network=bridge=br0,model=virtio",
-		"--disk","path=/var/lib/libvirt/images/"+name+".qcow2,size="+disk+",bus=virtio,format=qcow2",
-		"--cdrom",bootImage.path
-	) =cmd
-	if(headless, 
-		cmd+List("--graphics","vnc"),  
-		cmd
-	) =cmd
+    List("virt-install",
+        "--name",name,
+        "--ram="+ram,
+        "--vcpus="+cpus,
+        "--cpu","host",
+        "--hvm",
+        "--network=bridge=br0,model=virtio",
+        "--disk","path=/var/lib/libvirt/images/"+name+".qcow2,size="+disk+",bus=virtio,format=qcow2",
+        "--cdrom",bootImage.path
+    ) =cmd
+    if(headless, 
+        cmd+List("--graphics","vnc"),  
+        cmd
+    ) =cmd
 
-	debug(cmd.concat(" "))
-	Dir.runDetach(cmd)
+    debug(cmd.concat(" "))
+    Dir.runDetach(cmd)
 
-	<<< EOF
-	-----------------------------------------------------------------
-	Use vnc or start virt-manager (as root) to finalize installation
+    <<< EOF
+    -----------------------------------------------------------------
+    Use vnc or start virt-manager (as root) to finalize installation
 
-	virt-manager can be started by entering 'mgr' and press enter
-	-----------------------------------------------------------------
-	>>> EOF
+    virt-manager can be started by entering 'mgr' and press enter
+    -----------------------------------------------------------------
+    >>> EOF
 /Create
 
 

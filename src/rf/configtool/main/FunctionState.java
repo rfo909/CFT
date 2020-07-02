@@ -1,3 +1,20 @@
+/*
+CFT - an interactive programmable shell for automation 
+Copyright (C) 2020 Roar Foshaug
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>
+*/
+
 package rf.configtool.main;
 
 import java.util.ArrayList;
@@ -17,7 +34,7 @@ import rf.configtool.main.runtime.Value;
  */
 public class FunctionState {
 
-	private FunctionState parent;
+    private FunctionState parent;
     private List<Value> params;
     private HashMap<String,Value> assignedVariables=new HashMap<String,Value>();
 
@@ -25,8 +42,8 @@ public class FunctionState {
         this(new ArrayList<Value>());
     }
     private FunctionState(List<Value> innerParams, FunctionState parent) {
-    	this.params=innerParams;
-    	this.parent=parent;
+        this.params=innerParams;
+        this.parent=parent;
     }
     public FunctionState (List<Value> params) {
         this.params=params;
@@ -37,27 +54,27 @@ public class FunctionState {
     }
     
     private boolean findAndSet (String varName, Value value) {
-    	if (assignedVariables.get(varName) != null) {
-    		assignedVariables.put(varName, value);
-    		return true;
-    	}
-    	if (parent != null) return parent.findAndSet(varName, value);
-    	return false;
+        if (assignedVariables.get(varName) != null) {
+            assignedVariables.put(varName, value);
+            return true;
+        }
+        if (parent != null) return parent.findAndSet(varName, value);
+        return false;
     }
     
     public void set(String varName, Value value) {
-    	if (!findAndSet(varName,value)) {
+        if (!findAndSet(varName,value)) {
             assignedVariables.put(varName, value);
-    	}
+        }
     }
     public Value get(String varName) {
-    	Value v=assignedVariables.get(varName);
-    	if (v != null) return v;
-    	if (parent != null) return parent.get(varName);
-    	return null;
+        Value v=assignedVariables.get(varName);
+        if (v != null) return v;
+        if (parent != null) return parent.get(varName);
+        return null;
     }
     
     public FunctionState sub(List<Value> innerParams) {
-    	return new FunctionState(innerParams, this);
+        return new FunctionState(innerParams, this);
     }
 }

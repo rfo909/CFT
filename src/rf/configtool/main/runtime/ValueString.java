@@ -1,3 +1,20 @@
+/*
+CFT - an interactive programmable shell for automation 
+Copyright (C) 2020 Roar Foshaug
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>
+*/
+
 package rf.configtool.main.runtime;
 
 import java.io.FileInputStream;
@@ -371,9 +388,9 @@ public class ValueString extends Value {
                 Value v=dict.getValue(key);
                 String mergeString;
                 if (v instanceof ValueNull) {
-                	mergeString="";
+                    mergeString="";
                 } else {
-                	mergeString=v.getValAsString();
+                    mergeString=v.getValAsString();
                 }
                 s=s.replace(key, mergeString);
             }
@@ -594,16 +611,16 @@ public class ValueString extends Value {
             digest.update(val.getBytes("UTF-8"));
             byte[] hash=digest.digest();
     
-		    String digits="0123456789abcdef";
-		    StringBuffer sb=new StringBuffer();
-		    for (int i=0; i<hash.length; i++) {
-		        byte b=hash[i];
-		        sb.append(digits.charAt( (b>>4) & 0x0F ));
-		        sb.append(digits.charAt( b & 0x0F ));
-		    }
-		    
-	    
-		    return new ValueString(sb.toString());
+            String digits="0123456789abcdef";
+            StringBuffer sb=new StringBuffer();
+            for (int i=0; i<hash.length; i++) {
+                byte b=hash[i];
+                sb.append(digits.charAt( (b>>4) & 0x0F ));
+                sb.append(digits.charAt( b & 0x0F ));
+            }
+            
+        
+            return new ValueString(sb.toString());
         }
     }
     

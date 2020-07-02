@@ -1,3 +1,20 @@
+/*
+CFT - an interactive programmable shell for automation 
+Copyright (C) 2020 Roar Foshaug
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>
+*/
+
 package rf.configtool.main;
 
 import java.io.*;
@@ -106,19 +123,19 @@ public class ObjGlobal extends Obj {
     }
     
     public void setRuntime (Runtime runtime) {
-    	this.runtime=runtime;
+        this.runtime=runtime;
     }
     
     public Runtime getRuntime() {
-    	return runtime;
+        return runtime;
     }
     
     public void setFuncOverrides (FuncOverrides funcOverrides) {
-    	codeHistory.setFuncOverrides(funcOverrides);
+        codeHistory.setFuncOverrides(funcOverrides);
     }
     
     public void clearFuncOverrides () {
-    	codeHistory.clearFuncOverrides();
+        codeHistory.clearFuncOverrides();
     }
     
     /**
@@ -130,12 +147,12 @@ public class ObjGlobal extends Obj {
      * Called from ExprCall
      */
     public ExternalScriptState getOrCreateExternalScriptState (String scriptName) throws Exception {
-    	ExternalScriptState x=externalScriptStates.get(scriptName);
-    	if (x==null) {
-    		x=new ExternalScriptState(stdio, scriptName);
-    		externalScriptStates.put(scriptName,  x);
-    	}
-    	return x;
+        ExternalScriptState x=externalScriptStates.get(scriptName);
+        if (x==null) {
+            x=new ExternalScriptState(stdio, scriptName);
+            externalScriptStates.put(scriptName,  x);
+        }
+        return x;
     }
     
     public String getCurrDir() {
@@ -679,7 +696,7 @@ public class ObjGlobal extends Obj {
                 
                 boolean silent=ctx.getStdio().hasBufferedInputLines();
                 if (!silent) {
-                	stdio.print(prompt);
+                    stdio.print(prompt);
                 }
                 return new ValueString(stdio.getInputLine());
             } 
@@ -738,11 +755,11 @@ public class ObjGlobal extends Obj {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() == 1) {
-            	String s=params.get(0).getValAsString();
-            	stdio.println(s);
-            	return new ValueString(s);
+                String s=params.get(0).getValAsString();
+                stdio.println(s);
+                return new ValueString(s);
             } else if (params.size() == 0) {
-            	stdio.println();
+                stdio.println();
             }
 
             throw new Exception("Expected no parameter or string parameter");
@@ -759,13 +776,13 @@ public class ObjGlobal extends Obj {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 3) {
-            	throw new Exception("Expected parameters str, lineNo, File");
+                throw new Exception("Expected parameters str, lineNo, File");
             }
             String str=getString("str", params, 0);
             Long lineNo=getInt("lineNo", params, 1);
             Obj obj=getObj("File", params, 2);
             if (!(obj instanceof ObjFile)) {
-            	throw new Exception("Invalid File object");
+                throw new Exception("Invalid File object");
             }
             ObjFile file=(ObjFile) obj;
             return new ValueObj(new ValueObjFileLine(str,lineNo,file));

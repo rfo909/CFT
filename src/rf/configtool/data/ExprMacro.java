@@ -1,3 +1,20 @@
+/*
+CFT - an interactive programmable shell for automation 
+Copyright (C) 2020 Roar Foshaug
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>
+*/
+
 package rf.configtool.data;
 
 import rf.configtool.main.Ctx;
@@ -12,8 +29,8 @@ import java.util.*;
 
 public class ExprMacro extends LexicalElement {
 
-	private boolean localCodeBlock;
-	
+    private boolean localCodeBlock;
+    
     private List<Stmt> statements=new ArrayList<Stmt>();
     
     // See Runtime.processCodeLines() method to extend to loops and supporting PROGRAM_LINE_SEPARATOR - must in addition 
@@ -26,7 +43,7 @@ public class ExprMacro extends LexicalElement {
         localCodeBlock=true;
         
         if (ts.matchStr("*")) {  // indicates it can run "anywhere"
-        	localCodeBlock=false;
+            localCodeBlock=false;
         }
         
         while (!ts.matchStr("}")) {
@@ -37,11 +54,11 @@ public class ExprMacro extends LexicalElement {
     
     
     public Value resolve (Ctx ctx) throws Exception {
-    	ValueMacro m=new ValueMacro(statements);
-    	if (localCodeBlock) {
-    		return m.callLocalMacro(ctx);
-    	}
-    	return m;
+        ValueMacro m=new ValueMacro(statements);
+        if (localCodeBlock) {
+            return m.callLocalMacro(ctx);
+        }
+        return m;
     }
 
 

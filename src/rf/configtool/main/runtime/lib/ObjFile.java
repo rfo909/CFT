@@ -1,3 +1,20 @@
+/*
+CFT - an interactive programmable shell for automation 
+Copyright (C) 2020 Roar Foshaug
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>
+*/
+
 package rf.configtool.main.runtime.lib;
 
 import java.io.*;
@@ -316,7 +333,7 @@ public class ObjFile extends Obj {
                     
                     String deTabbed=TabUtil.substituteTabs(line,4);
                     result.add(new ValueObjFileLine(deTabbed, lineNo, self()));  
-                    	// ObjFileLine is subclass of ValueString
+                        // ObjFileLine is subclass of ValueString
                 }
             } finally {
                 if (br != null) try {br.close();} catch (Exception ex) {};
@@ -618,16 +635,16 @@ public class ObjFile extends Obj {
 
         private String findChar(int i) {
             if (i==9) {
-            	return "\\t";
+                return "\\t";
             }
             if (i==13) {
-            	return "\\r";
+                return "\\r";
             }
             if (i==10) {
-            	return "\\n";
+                return "\\n";
             }
 
-        	if (i>=32 && i <= 126) {
+            if (i>=32 && i <= 126) {
                 byte[] b = { (byte) i };
                 try {
                     String s=new String(b,"ISO-8859-1");
@@ -640,9 +657,9 @@ public class ObjFile extends Obj {
         }
         
         private String createLine (int lineNumber, StringBuffer sb1, StringBuffer sb2) {
-        	String num=""+(lineNumber*ValuesPerLine);
-        	while(num.length() < 5) num=" "+num;
-        	
+            String num=""+(lineNumber*ValuesPerLine);
+            while(num.length() < 5) num=" "+num;
+            
             String a=sb1.toString();
             while (a.length() < ValuesPerLine*2) a+=" ";
             return num + " " + a + "   " + sb2.toString().trim();

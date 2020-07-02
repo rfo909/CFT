@@ -1,3 +1,20 @@
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+
 
 
 # Documentation
@@ -27,8 +44,8 @@ if(isWindows, Dir.runDetach("cmd","/c","notepad",file.path), ShowLinuxEditor(fil
 # Page file, defaults to savefile
 P(1,savefile)=file
 if(isWindows,
-	Dir.runDetach("notepad", file.path),
-	Dir.run("more", file.path)
+    Dir.runDetach("notepad", file.path),
+    Dir.run("more", file.path)
 )
 /m
 
@@ -37,19 +54,19 @@ if(isWindows,
 # Select Linux editor and remember selection for next time, open file in editor
 P(1,savefile) =file
 List(
-	Dict.set("label","sublime")
-		.set("action", {* P(1)=file Dir.runDetach("subl",file.path) }),
-	Dict.set("label","gedit")
-		.set("action", {* P(1)=file Dir.runDetach("gedit",file.path) }),
-	Dict.set("label","leafpad")
-		.set("action", {* P(1)=file Dir.runDetach("leafpad",file.path) }),
-	Dict.set("label","nano")
-		.set("action", {* P(1)=file Dir.run("nano", file.path) })
+    Dict.set("label","sublime")
+        .set("action", {* P(1)=file Dir.runDetach("subl",file.path) }),
+    Dict.set("label","gedit")
+        .set("action", {* P(1)=file Dir.runDetach("gedit",file.path) }),
+    Dict.set("label","leafpad")
+        .set("action", {* P(1)=file Dir.runDetach("leafpad",file.path) }),
+    Dict.set("label","nano")
+        .set("action", {* P(1)=file Dir.run("nano", file.path) })
 ) =linuxEditors
 #
 when (Val("linuxEditor")==null,{
-	MenuSelect(linuxEditors, {* P(1).get("label")},"Select editor") =ed
-	ValDef("linuxEditor", ed)
+    MenuSelect(linuxEditors, {* P(1).get("label")},"Select editor") =ed
+    ValDef("linuxEditor", ed)
 })
 #
 Val("linuxEditor").get("action").call(file)
@@ -61,7 +78,7 @@ Val("linuxEditor").get("action").call(file)
 ValDef("linuxEditor",null)
 /Clear
 
-	
+    
 
 
 
@@ -70,8 +87,8 @@ ValDef("linuxEditor",null)
 # Show a list of options
 P(1,List)=options
 P(2,{* "name"})=macroGetElementName
-	options->x
-		println("- " + macroGetElementName.call(x))
+    options->x
+        println("- " + macroGetElementName.call(x))
 /ShowOptions
 
 
@@ -79,10 +96,10 @@ P(2,{* "name"})=macroGetElementName
 # Select zero or more from list of options
 P(1,List)=options
 P(2,{* "name"})=macroGetElementName
-	readLine("Enter part of name? ") =sel
-	options->opt
-		assert(macroGetElementName.call(opt).contains(sel))
-		out(opt)
+    readLine("Enter part of name? ") =sel
+    options->opt
+        assert(macroGetElementName.call(opt).contains(sel))
+        out(opt)
 /SelectOptions
 
 
@@ -100,36 +117,36 @@ P(1,List) =options P(2,{* "name"}) =macroGetElementName P(3) =title
 #
 null =selectedElement
 loop
-	println("")
-	if (title != null, Header(title), 0)
+    println("")
+    if (title != null, Header(title), 0)
 
-	ShowOptions(options, macroGetElementName)
-	println("")
-	SelectOptions(options, macroGetElementName) =result
-	
-	when (result.length==1, { result.nth =selectedElement})
-	break(selectedElement != null)
-	println("** No match or not unique")
+    ShowOptions(options, macroGetElementName)
+    println("")
+    SelectOptions(options, macroGetElementName) =result
+    
+    when (result.length==1, { result.nth =selectedElement})
+    break(selectedElement != null)
+    println("** No match or not unique")
 | selectedElement
 /MenuSelect
 
 
 
 P(1,"label")=label P(2)=currVal
-	println("")
-	(label + if(currVal," ["+currVal+"]","") + " : ") =prompt
-	readLine(prompt) =line
-	if (line.trim=="", currVal, line)
+    println("")
+    (label + if(currVal," ["+currVal+"]","") + " : ") =prompt
+    readLine(prompt) =line
+    if (line.trim=="", currVal, line)
 /ReadValue
 
 
 P(1,"label")=label P(2)=currVal
 null =gotResult
 loop
-	ReadValue(label,""+currVal) =val
-	when (val.?parseInt,{val.parseInt =gotResult})
-	break(gotResult != null)
-	println("** Integer required")
+    ReadValue(label,""+currVal) =val
+    when (val.?parseInt,{val.parseInt =gotResult})
+    break(gotResult != null)
+    println("** Integer required")
 |
 gotResult
 /ReadValueInt
@@ -140,12 +157,12 @@ gotResult
 P(1,"label")=label P(2)=currVal P(3,"yes")=trueVal P(4,"no")=falseVal
 null =gotResult
 loop
-	if (currVal != null, if(currVal, trueVal, falseVal), null) =currStrVal
-	ReadValue(label,currStrVal) =val
-	when (val==trueVal, {true =gotResult})
-	when (val==falseVal, {false =gotResult})
-	break(gotResult != null)
-	println("** Please enter '" + trueVal + "' or '"  + falseVal + "'")
+    if (currVal != null, if(currVal, trueVal, falseVal), null) =currStrVal
+    ReadValue(label,currStrVal) =val
+    when (val==trueVal, {true =gotResult})
+    when (val==falseVal, {false =gotResult})
+    break(gotResult != null)
+    println("** Please enter '" + trueVal + "' or '"  + falseVal + "'")
 |
 gotResult
 /ReadValueBoolean

@@ -1,3 +1,20 @@
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+
 # Displays readme for this script file
 <<< EOF
 -------------------------------------------------
@@ -32,13 +49,13 @@ savefile.dir.sub("src")
 
 # Sort java files by name
 DirCode.allFiles(Glob("*.java"))->f 
-	out(Str(f.name.toLower,f)) 
-	| _.sort->x out(x.data)
+    out(Str(f.name.toLower,f)) 
+    | _.sort->x out(x.data)
 /JavaFilesSorted
 
 # Parametrized search, called from S1, S2, S3
 P(1,Grep("test"))=g 
-	JavaFilesSorted->f g.file(f)->line report(f.name, line.lineNumber, line)
+    JavaFilesSorted->f g.file(f)->line report(f.name, line.lineNumber, line)
 /PSearch
 
 

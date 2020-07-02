@@ -1,3 +1,20 @@
+/*
+CFT - an interactive programmable shell for automation 
+Copyright (C) 2020 Roar Foshaug
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>
+*/
+
 package rf.configtool.data;
 
 import java.util.ArrayList;
@@ -26,7 +43,7 @@ public class DottedCall extends LexicalElement {
         //System.out.println("DottedCall: " + code);
         ts.matchStr(".","Expected .identifier");
         if (ts.matchStr("?")) {
-        	checkMode=true;
+            checkMode=true;
         }
         ident=ts.matchIdentifier("expected .identifier");
         if (ts.matchStr("(")) {
@@ -43,9 +60,9 @@ public class DottedCall extends LexicalElement {
     }
     
     public Value resolve (Ctx ctx, Obj obj) throws Exception {
-//    	System.out.println("DottedCall.resolve: " + code);
-//    	System.out.println("DottedCall.resolve obj=" + obj.getTypeName());
-    	// parameters
+//      System.out.println("DottedCall.resolve: " + code);
+//      System.out.println("DottedCall.resolve obj=" + obj.getTypeName());
+        // parameters
         List<Value> values=new ArrayList<Value>();
         for (Expr e:params) values.add(e.resolve(ctx.sub()));
         
@@ -54,23 +71,23 @@ public class DottedCall extends LexicalElement {
         }
         Function f=obj.getFunction(ident);
         if (f==null) {
-        	if (checkMode) return new ValueBoolean(false);
-        	
-        	String msg=getSourceLocation() + " " + obj.getDescription() + " no method '" + ident + "'";
-        	throw new Exception(msg);
+            if (checkMode) return new ValueBoolean(false);
+            
+            String msg=getSourceLocation() + " " + obj.getDescription() + " no method '" + ident + "'";
+            throw new Exception(msg);
         }
 
         try {
-        	Value result=f.callFunction(ctx, values);
-        	//System.out.println("DottedCall result=" + result.getClass().getName());
-        	if (!checkMode) return result;
-        	return new ValueBoolean(true);
+            Value result=f.callFunction(ctx, values);
+            //System.out.println("DottedCall result=" + result.getClass().getName());
+            if (!checkMode) return result;
+            return new ValueBoolean(true);
         } catch (Exception ex) {
-        	if (checkMode) {
-        		return new ValueBoolean(false);
-        	} else {
-        		throw ex;
-        	}
+            if (checkMode) {
+                return new ValueBoolean(false);
+            } else {
+                throw ex;
+            }
         }
     }
 

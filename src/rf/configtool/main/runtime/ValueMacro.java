@@ -1,3 +1,20 @@
+/*
+CFT - an interactive programmable shell for automation 
+Copyright (C) 2020 Roar Foshaug
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>
+*/
+
 package rf.configtool.main.runtime;
 
 import java.util.*;
@@ -20,8 +37,8 @@ public class ValueMacro extends Value {
     private List<Stmt> statements;
     
     public ValueMacro (List<Stmt> statements) {
-    	this.statements=statements;
-    	
+        this.statements=statements;
+        
         add(new FunctionCall());
     }
     
@@ -33,7 +50,7 @@ public class ValueMacro extends Value {
 
     @Override
     public String getValAsString() {
-    	return "{}";
+        return "{}";
     }
     
     
@@ -60,11 +77,11 @@ public class ValueMacro extends Value {
      * lookup of as well parameters and variables. 
      */
     public Value callLocalMacro (Ctx ctx) throws Exception {
-    	// Execute local macro, which means it has Ctx lookup up the Ctx stack, including
-    	// parameters to the function, but that the loop flag stops
-    	Ctx sub=ctx.subContextForCodeBlock(); 
-    	invoke(sub);
-    	return sub.getResult();
+        // Execute local macro, which means it has Ctx lookup up the Ctx stack, including
+        // parameters to the function, but that the loop flag stops
+        Ctx sub=ctx.subContextForCodeBlock(); 
+        invoke(sub);
+        return sub.getResult();
     }
     
     
@@ -72,9 +89,9 @@ public class ValueMacro extends Value {
      * Call independent macro which runs in an isolated Ctx
      */
     public Value call (Ctx ctx, List<Value> params) throws Exception {
-    	Ctx sub=new Ctx(ctx.getObjGlobal(), new FunctionState(params));
-    	invoke(sub);
-    	return sub.getResult();
+        Ctx sub=new Ctx(ctx.getObjGlobal(), new FunctionState(params));
+        invoke(sub);
+        return sub.getResult();
     }
     
     class FunctionCall extends Function {
@@ -85,7 +102,7 @@ public class ValueMacro extends Value {
             return "call(...) - call macro with parameters";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	return call(ctx,params);
+            return call(ctx,params);
         }
     }
 
