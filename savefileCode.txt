@@ -19,6 +19,9 @@
 >>> EOF
 /License
 
+
+
+
 # Displays readme for this script file
 <<< EOF
 -------------------------------------------------
@@ -39,62 +42,80 @@ To edit the Code script file, run function "e".
 >>> EOF
 /RunMe
 
+
+
+
 Cfg.w(130)
 /Init
 
-# Open script file in editor
+
 P(1,savefile)=f
-call "Lib:e" (f)
+	call "Lib:e" (f)
 /e
 
+
+
 # Top directory for java code
-savefile.dir.sub("src")
+	savefile.dir.sub("src")
 /DirCode
 
+
+
 # Sort java files by name
-DirCode.allFiles(Glob("*.java"))->f 
-    out(Str(f.name.toLower,f)) 
-    | _.sort->x out(x.data)
+	DirCode.allFiles(Glob("*.java"))->f 
+		out(Str(f.name.toLower,f)) 
+		| _.sort->x out(x.data)
 /JavaFilesSorted
 
+
+
 # Parametrized search, called from S1, S2, S3
-P(1,Grep("test"))=g 
-    JavaFilesSorted->f g.file(f)->line report(f.name, line.lineNumber, line)
+	P(1,Grep("test"))=g 
+	JavaFilesSorted->f g.file(f)->line report(f.name, line.lineNumber, line)
 /PSearch
 
 
 # Helper to get text input
-P(1,"test")=label Input(label).get
+	P(1,"test")=label Input(label).get
 /Get
+
+
 
 PSearch(Grep(Get("Search1")))
 /S1
 
+
 PSearch(Grep(Get("Search2")))
 /S2
+
 
 PSearch(Grep(Get("Search3a AND")).match(Get("AND Search3b")))
 /S3
 
-# Short for S1
+
+
 S1
 /S
 
 
+
 # Locate source file by part of name
-Get("Part of file name")=x JavaFilesSorted->f assert(f.name.contains(x)) out(f)
+	Get("Part of file name")=x JavaFilesSorted->f assert(f.name.contains(x)) out(f)
 /FilterFiles
 
+
 # Front for FilterFiles, with reporting
-FilterFiles->f report(f.path, f.length)
+	FilterFiles->f report(f.path, f.length)
 /F
 
+
 # Page (more) through the first file located with "F"
-stdin("") FilterFiles.nth =f
+	stdin("") FilterFiles.nth =f
 call "Lib:m" (f)
 /m
 
+
 # Open editor with first file located with "F"
-stdin("") FilterFiles.nth =f
-call "Lib:e" (f)
+	stdin("") FilterFiles.nth =f
+	call "Lib:e" (f)
 /edit

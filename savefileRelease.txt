@@ -21,62 +21,90 @@
 
 
 
+# Readme for script
+<<< EOF
+---------------------------------------------------
+This script manages git both locally and remotely,
+and contains three major functions:
+
+Add, Commit and Push.
+---------------------------------------------------
+>>> EOF
+/Readme
+
+
+
+
 # Edit file (defaults to savefile)
 P(1,savefile) =file
-call "Lib:e" (file)
+	call "Lib:e" (file)
 /e
 
-# savefiles to include in release
-"Code Lib Overview Release KVM".split->x out("savefile"+x+".txt")
+
+# list of savefiles to include in release
+	"Code Lib Overview Release KVM".split->x out("savefile"+x+".txt")
 /IncludedSavefiles
 
 
 # Project home directory
-savefile.dir
+	savefile.dir
 /HomeDir
 
 
-# Identify savefiles to move to TargetDir
-IncludedSavefiles =list
-HomeDir.files(Glob("savefile*"))->f
-    reject(list.contains(f.name))
-    out(f)
-/FilesToMove
 
 
 
-# Move savefiles not included in release to TempDir, then run GIT commit before restoring the files
+# Move savefiles not included in release to TempDir, then run GIT add before restoring the files
 # ---
-# Create temp-dir
+#
+	# Identify savefiles to move to TargetDir
+	{
+		IncludedSavefiles =list
+		HomeDir.files(Glob("savefile*"))->f
+			reject(list.contains(f.name))
+	   	 	out(f)
+	} =FilesToMove
+
+	# Create temp-dir
     Dir("/tmp/release"+currentTimeMillis) =d
     when (!d.exists, d.create)
     d =TempDir
-#
-# Move files to TempDir
+
+	# Move files to TempDir
     FilesToMove->f
         println("Copying file " + f.name + " to " + TempDir.path)
         when (!TempDir.copy(f), error("Failed to copy file"))
         println("Deleting file " + f.name)
         f.delete
     |
-#
-# Run git
+
+	# Run git
     HomeDir.run("git","add",".")
-    gs
-    Input("Commit message?").get =msg
-    HomeDir.run("git","commit","-m",msg)
-#
-# Restore files
+    GitStatus
+
+	# Restore files
     TempDir.files->f
         println("Restoring file " + f.name)
         when (!HomeDir.copy(f), error("Failed to restore file from " + TempDir.path))
         f.delete
     |
+
+	# Delete temp-dir (should be empty)
+	println("Deleting temp dir " + d.path)
+	d.delete
+/Add
+
+
+
+# Commit changes
+	GitStatus
+	Input("Commit message?").get =msg
+	HomeDir.run("git","commit","-m",msg)
 /Commit
 
 
 # Push latest commits
-HomeDir.run("git","push","origin","master")
+	HomeDir.run("git","push","origin","master")
 /Push
 
 
@@ -84,14 +112,28 @@ HomeDir.run("git","push","origin","master")
 
 
 # Git status
-HomeDir.run("git","status")
-/gs
+	HomeDir.run("git","status")
+/GitStatus
+
+
+
 
 # Git diff
-HomeDir.run("git","diff")
+	HomeDir.run("git","diff")
+/GitDiff
+
+
+
+GitStatus
+/gs
+
+
+GitDiff
 /gd
 
+
+
 # Run bash, ^D to return
-println("Running bash: press ^D to return to CFT")
-Dir.run("bash")
+	println("Running bash: press ^D to return to CFT")
+	Dir.run("bash")
 /sh

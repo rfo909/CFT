@@ -3,7 +3,7 @@ Generated file - see script file savefileOverview.txt
 
 See also shell script ./CreateOverview.sh
 
-Created 2020-07-02 22:51:46 
+Created 2020-07-03 12:06:48 
 v1.0.8
 ------------------------------------------------------------------
 
@@ -64,15 +64,18 @@ Running external programs
 
 Editing save files
  * Using editor for entering code
- * Scripts
+ * Auto reload
+ * No auto save!
+ * Losing changes
+ * Multi-line functions
  * Comments
- * The '?' command
+ * First line of function ...
  * Debug
 
 Interactive use
  * Change current directory
  * Listing files
- * Input
+ * Get data from user: Input() and readLine()
  * Searching files / report()
  |   FileLine
  |   report()
@@ -81,7 +84,9 @@ Interactive use
  * Searching multiple types of file
  * Searching log files / DateSort
  * Generalized sorting
- * Sets of configuration data / Dict
+ |   Example: file size
+ |   Example: file name
+ * Dictionary objects / Dict()
  * Date and time processing
  |   Milliseconds
  |   The Date object

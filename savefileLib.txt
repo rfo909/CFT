@@ -20,97 +20,100 @@
 /License
 
 
-# Documentation
+
+
+# Readme for script
 <<< EOF
-#
-# --------------------------------------------------
-# OS independent editor functionality
-#
-# To edit a file: call "Lib:e" (File)
-# To page a file: call "Lib:m" (File)
-#
-# For windows runs notepad, for Linux there is
-# choice. 
-# 
-# --------------------------------------------------
-#
+
+--------------------------------------------------
+OS independent editor functionality
+
+To edit a file: call "Lib:e" (File)
+To page a file: call "Lib:m" (File)
+
+For windows runs notepad, for Linux there is
+choice. 
+ 
+--------------------------------------------------
+
 >>> EOF
 /Readme
 
 
-# Edit file, defaults to savefile
-P(1,savefile)=file
-if(isWindows, Dir.runDetach("cmd","/c","notepad",file.path), ShowLinuxEditor(file))
+
+
+# Edit file
+	P(1,savefile)=file
+	if(isWindows, Dir.runDetach("cmd","/c","notepad",file.path), ShowLinuxEditor(file))
 /e
 
 
-# Page file, defaults to savefile
-P(1,savefile)=file
-if(isWindows,
-    Dir.runDetach("notepad", file.path),
-    Dir.run("more", file.path)
-)
+# Page through file
+	P(1,savefile)=file
+	if(isWindows,
+		Dir.runDetach("notepad", file.path),
+		Dir.run("more", file.path)
+	)
 /m
 
 
 
 # Select Linux editor and remember selection for next time, open file in editor
-P(1,savefile) =file
-List(
-    Dict.set("label","sublime")
-        .set("action", {* P(1)=file Dir.runDetach("subl",file.path) }),
-    Dict.set("label","gedit")
-        .set("action", {* P(1)=file Dir.runDetach("gedit",file.path) }),
-    Dict.set("label","leafpad")
-        .set("action", {* P(1)=file Dir.runDetach("leafpad",file.path) }),
-    Dict.set("label","nano")
-        .set("action", {* P(1)=file Dir.run("nano", file.path) })
-) =linuxEditors
-#
-when (Val("linuxEditor")==null,{
-    MenuSelect(linuxEditors, {* P(1).get("label")},"Select editor") =ed
-    ValDef("linuxEditor", ed)
-})
-#
-Val("linuxEditor").get("action").call(file)
+# --
+ 	P(1,savefile) =file
+	List(
+		Dict.set("label","sublime")
+		    .set("action", {* P(1)=file Dir.runDetach("subl",file.path) }),
+		Dict.set("label","gedit")
+		    .set("action", {* P(1)=file Dir.runDetach("gedit",file.path) }),
+		Dict.set("label","leafpad")
+		    .set("action", {* P(1)=file Dir.runDetach("leafpad",file.path) }),
+		Dict.set("label","nano")
+		    .set("action", {* P(1)=file Dir.run("nano", file.path) })
+	) =linuxEditors
+
+	when (Val("linuxEditor")==null,{
+		MenuSelect(linuxEditors, {* P(1).get("label")},"Select editor") =ed
+		ValDef("linuxEditor", ed)
+	})
+
+	Val("linuxEditor").get("action").call(file)
 /ShowLinuxEditor
 
 
 
 # Clear selected Linux editor
-ValDef("linuxEditor",null)
+	ValDef("linuxEditor",null)
 /Clear
-
-    
-
 
 
 
 
 # Show a list of options
-P(1,List)=options
-P(2,{* "name"})=macroGetElementName
-    options->x
-        println("- " + macroGetElementName.call(x))
+	P(1,List)=options
+	P(2,{* "name"})=macroGetElementName
+		options->x
+		    println("- " + macroGetElementName.call(x))
 /ShowOptions
 
 
 
 # Select zero or more from list of options
-P(1,List)=options
-P(2,{* "name"})=macroGetElementName
-    readLine("Enter part of name? ") =sel
-    options->opt
-        assert(macroGetElementName.call(opt).contains(sel))
-        out(opt)
+# --
+	P(1,List)=options
+	P(2,{* "name"})=macroGetElementName
+		readLine("Enter part of name? ") =sel
+		options->opt
+		    assert(macroGetElementName.call(opt).contains(sel))
+		    out(opt)
 /SelectOptions
 
 
 
 # Display text with line under
-P(1,"Title") =title
-println(title)
-println( Lib.Data.yes(title.length,"-").concat )
+	P(1,"Title") =title
+	println(title)
+	println( Lib.Data.yes(title.length,"-").concat )
 /Header
 
 
@@ -118,19 +121,19 @@ println( Lib.Data.yes(title.length,"-").concat )
 
 P(1,List) =options P(2,{* "name"}) =macroGetElementName P(3) =title
 #
-null =selectedElement
-loop
-    println("")
-    if (title != null, Header(title), 0)
+	null =selectedElement
+	loop
+		println("")
+		if (title != null, Header(title), 0)
 
-    ShowOptions(options, macroGetElementName)
-    println("")
-    SelectOptions(options, macroGetElementName) =result
-    
-    when (result.length==1, { result.nth =selectedElement})
-    break(selectedElement != null)
-    println("** No match or not unique")
-| selectedElement
+		ShowOptions(options, macroGetElementName)
+		println("")
+		SelectOptions(options, macroGetElementName) =result
+		
+		when (result.length==1, { result.nth =selectedElement})
+		break(selectedElement != null)
+		println("** No match or not unique")
+	| selectedElement
 /MenuSelect
 
 
@@ -143,31 +146,33 @@ P(1,"label")=label P(2)=currVal
 /ReadValue
 
 
+
+
 P(1,"label")=label P(2)=currVal
-null =gotResult
-loop
-    ReadValue(label,""+currVal) =val
-    when (val.?parseInt,{val.parseInt =gotResult})
-    break(gotResult != null)
-    println("** Integer required")
-|
-gotResult
+	null =gotResult
+	loop
+		ReadValue(label,""+currVal) =val
+		when (val.?parseInt,{val.parseInt =gotResult})
+		break(gotResult != null)
+		println("** Integer required")
+	|
+	gotResult
 /ReadValueInt
 
 
 
 
 P(1,"label")=label P(2)=currVal P(3,"yes")=trueVal P(4,"no")=falseVal
-null =gotResult
-loop
-    if (currVal != null, if(currVal, trueVal, falseVal), null) =currStrVal
-    ReadValue(label,currStrVal) =val
-    when (val==trueVal, {true =gotResult})
-    when (val==falseVal, {false =gotResult})
-    break(gotResult != null)
-    println("** Please enter '" + trueVal + "' or '"  + falseVal + "'")
-|
-gotResult
+	null =gotResult
+	loop
+		if (currVal != null, if(currVal, trueVal, falseVal), null) =currStrVal
+		ReadValue(label,currStrVal) =val
+		when (val==trueVal, {true =gotResult})
+		when (val==falseVal, {false =gotResult})
+		break(gotResult != null)
+		println("** Please enter '" + trueVal + "' or '"  + falseVal + "'")
+	|
+	gotResult
 /ReadValueBoolean
 
 
@@ -175,7 +180,7 @@ gotResult
 
 
 # Test
-ReadValueBoolean("Roar",false)
+	ReadValueBoolean("Roar",false)
 /t
 
 
