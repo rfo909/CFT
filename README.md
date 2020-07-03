@@ -301,5 +301,9 @@ me solve.
 - run inside new VM's to set up correct hostname and netplan (Ubuntu Server)
 - generate the doc/Overview.txt file from Doc.html
 
+# Status
 
+Core is stable, and has been backwards compatible since October 2019, when global
+function list() became current List(). Development is focused on new objects and 
+new global / member functions operating orthogonally with existing functionality.
 

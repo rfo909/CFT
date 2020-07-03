@@ -33,9 +33,6 @@ public abstract class Stmt extends LexicalElement {
         if (ts.peekStr("cd")) {
             return new StmtCd(ts);
         }
-        if (ts.peekStr("cat")) {
-            return new StmtCat(ts);
-        }
         if (ts.peekStr("=")) {
             return new StmtAssign(ts);
         }
