@@ -320,7 +320,11 @@ public class Runtime {
             objGlobal.outln("% ERROR " + t.getClass().getName() + ": " + t.getMessage());
             if (debugMode) {
                 t.printStackTrace();
-                objGlobal.outln("% INPUT: " + ts.showNextTokens(10));
+                try {
+                	objGlobal.outln("% INPUT: " + ts.showNextTokens(10));
+                } catch (Exception ex) {
+                	// ignore
+                }
             }
         }
     }

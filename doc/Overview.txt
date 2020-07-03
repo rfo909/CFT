@@ -3,8 +3,8 @@ Generated file - see script file savefileOverview.txt
 
 See also shell script ./CreateOverview.sh
 
-Created 2020-07-03 12:06:48 
-v1.0.8
+Created 2020-07-03 21:49:32 
+v1.0.9
 ------------------------------------------------------------------
 
 Introduction
@@ -18,6 +18,12 @@ The help system
 
 Base functions and objects: File, Dir and List
  * File() function
+ |   Create file
+ |   Read file
+ |   Append to file
+ |   Page through a file
+ |   Show bytes of file
+ |   Encoding
  * Dir() function
  * Lists
  |   List addition

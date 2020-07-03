@@ -169,6 +169,8 @@ int, and the last for float values.
   The File() function requires a name, relative or absolute path, and returns a File object. As seen
   above, the file needs not exist (yet). 
 </p>
+
+<h3>Create file</h3>
 <p>
 To create a file with a single text line:
 </p>
@@ -178,18 +180,34 @@ To create a file with a single text line:
 </pre>
 
 <p>
+  If the file already exists, it is overwritten with the new content.
+</p>
+
+<h3>Read file</h3>
+
+<p>
   To read an existing text file:
 </p>
 <pre>
   File("x.txt").read
 </pre>
+<p>
+  This returns a list of all lines in the file.
+</p>
+
+<h3>Append to file</h3>
 
 <p>
-  To append a line to a file:
+  To append a single line to a file:
 </p>
 <pre>
   File("x.txt").append("another line")
 </pre>
+<p>
+  To append multiple lines, append a list instead.
+</p>
+
+<h3>Page through a file</h3>
 
 <p>
   To page through text file
@@ -198,6 +216,7 @@ To create a file with a single text line:
   File("x.txt").more
 </pre>
 
+<h3>Show bytes of file</h3>
 <p>
   To page through list of bytes (hex)
 </p>
@@ -205,6 +224,13 @@ To create a file with a single text line:
   File("x.txt").hex
 </pre>
 
+<h3>Encoding</h3>
+<p>
+  Default encoding is "ISO_8859_1", but this can be changed, for example:
+</p>
+<pre>
+  File("x.txt").setEncoding("UTF-8")
+</pre>
 
 
 
@@ -1155,7 +1181,7 @@ To create a file with a single text line:
 <h2>Searching files / report()</h2>
 <p>
   To search files, we usually use the Grep object. It takes a list of alternatives to look for,
-  and can optionally be instructed with patterns to reject. It has a file(File) function that
+  and can optionally be instructed with patterns to reject. It has a .file(File) function that
   runs the search on a file, and returns a list of lines that meet the requirements.
 </p>
 

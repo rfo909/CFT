@@ -42,7 +42,7 @@ P(1,savefile) =file
 
 
 # list of savefiles to include in release
-	"Code Lib Overview Release KVM".split->x out("savefile"+x+".txt")
+	"Code Lib Overview Release KVM VM".split->x out("savefile"+x+".txt")
 /IncludedSavefiles
 
 
@@ -51,6 +51,9 @@ P(1,savefile) =file
 /HomeDir
 
 
+# Update the Overview.txt fild
+call "Overview:CreateOverview"
+/CreateOverview
 
 
 

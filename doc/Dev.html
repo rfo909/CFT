@@ -11,6 +11,20 @@
 
 <h1>ConfigTool</h1>
 
+<h3>v1.0.9 2020-07-03 Small fixes</h3>
+<p>
+	Added backslash as valid "special" token. It was missing.
+</p>
+<p>
+	Made Runtime.processInteractiveInput() more robust, in that if parsing fails completely,
+	then reporting "next tokens" threw null-pointer-exception.
+</p>
+<p>
+	Adding encoding attribute to ObjFile. (.encoding() and .setEncoding(Str)). Default is
+	'ISO_8859_1'. Fixed and tested synthesis. Modifying functions .create .append .read .more,
+	tested ok! Updated doc.
+</p>
+
 
 <h3>v1.0.8 2020-07-02 cd improvement</h3>
 <p>

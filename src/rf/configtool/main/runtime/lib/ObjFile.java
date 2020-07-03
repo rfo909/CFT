@@ -30,11 +30,16 @@ import rf.configtool.main.OutText;
 import rf.configtool.main.runtime.*;
 import rf.configtool.util.FileInfo;
 import rf.configtool.util.TabUtil;
+
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 
 public class ObjFile extends Obj {
 
+	static final String DefaultEncoding = "ISO_8859_1";
+	
     private String name;
+    private String encoding=DefaultEncoding;
 
     public ObjFile(String name) {
         this.name=name;
@@ -66,6 +71,8 @@ public class ObjFile extends Obj {
         add(new FunctionMove());
         add(new FunctionHex());
         add(new FunctionReadBytes());
+        add(new FunctionEncoding());
+        add(new FunctionSetEncoding());
     }
 
     protected ObjFile self() {
@@ -92,7 +99,12 @@ public class ObjFile extends Obj {
 
     @Override
     public String synthesize() throws Exception {
-        return "File(" + (new ValueString(name)).synthesize() + ")";
+    	String enc="";
+    	if (!encoding.equals(DefaultEncoding)) {
+    		// setEncoding returns self!
+    		enc=".setEncoding(" + (new ValueString(encoding)).synthesize() + ")";
+    	}
+        return "File(" + (new ValueString(name)).synthesize() + ")" + enc;
     }
 
 
@@ -257,7 +269,7 @@ public class ObjFile extends Obj {
 
             PrintStream ps=null;
             try {
-                ps=new PrintStream(new FileOutputStream(f));
+                ps=new PrintStream(new FileOutputStream(f),false, encoding);
                 Value content=params.get(0);
                 if (content instanceof ValueList) {
                     List<Value> lines=((ValueList)content).getVal();
@@ -290,7 +302,7 @@ public class ObjFile extends Obj {
 //          }
             PrintStream ps=null;
             try {
-                ps=new PrintStream(new FileOutputStream(f,true));
+                ps=new PrintStream(new FileOutputStream(f,true), false, encoding);
                 Value content=params.get(0);
                 if (content instanceof ValueList) {
                     List<Value> lines=((ValueList)content).getVal();
@@ -325,7 +337,11 @@ public class ObjFile extends Obj {
             BufferedReader br=null;
             long lineNo=0;
             try {
-                br=new BufferedReader(new FileReader(f));
+                //br=new BufferedReader(new FileReader(f));
+            	br = new BufferedReader(
+         			   new InputStreamReader(
+         	                      new FileInputStream(f), encoding));
+
                 for (;;) {
                     String line=br.readLine();
                     lineNo++;
@@ -431,8 +447,12 @@ public class ObjFile extends Obj {
             
             BufferedReader br=null;
             try {
-                br=new BufferedReader(new InputStreamReader(new FileInputStream(f)));
-                int lineNo=0;
+                //br=new BufferedReader(new InputStreamReader(new FileInputStream(f)));
+            	br = new BufferedReader(
+          			   new InputStreamReader(
+          	                      new FileInputStream(f), encoding));
+
+            	int lineNo=0;
                 int linesDisplayed=0;
                 for (;;) {
                     String line=br.readLine();
@@ -532,17 +552,21 @@ public class ObjFile extends Obj {
                 if (!target.isFile()) throw new Exception("Target '" + target.getCanonicalPath() + "' exists, but is not a file");
                 outText.addPlainText("Overwriting file: " + target.getCanonicalPath());
             }
-            InputStream in=new FileInputStream(src);
-            OutputStream out=new FileOutputStream(target);
-            byte[] buf=new byte[64*1024];
-            for (;;) {
-                int count=in.read(buf);
-                if (count <= 0) break;
-                out.write(buf, 0, count);
+            InputStream in=null;
+            OutputStream out=null;
+            try {
+            	in=new FileInputStream(src);
+            	out=new FileOutputStream(target);
+	            byte[] buf=new byte[64*1024];
+	            for (;;) {
+	                int count=in.read(buf);
+	                if (count <= 0) break;
+	                out.write(buf, 0, count);
+	            }
+            } finally {
+	            if (in != null) try {in.close();} catch (Exception ex) {};
+	            if (out != null) try {out.close();} catch (Exception ex) {};
             }
-            in.close();
-            out.close();
-
             return new ValueObj(self());
         }
     }
@@ -749,7 +773,36 @@ public class ObjFile extends Obj {
         }
     } 
 
+    
+    class FunctionEncoding extends Function {
+        public String getName() {
+            return "encoding";
+        }
+        public String getShortDesc() {
+            return "encoding() - get encoding (string)";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueString(encoding);
+        }
+    }
 
+    class FunctionSetEncoding extends Function {
+        public String getName() {
+            return "setEncoding";
+        }
+        public String getShortDesc() {
+            return "setEncoding(encoding) - set encoding, returns self)";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected encoding parameter (String)");
+            encoding=getString("encoding", params, 0);
+            if (!Charset.isSupported(encoding)) throw new Exception("Charset '" + encoding + "' not supported");
+            return new ValueObj(self());
+        }
+    }
+
+ 
     private String fmt (int i, int n) {
         String s=""+i;
         while (s.length()<n) s=" "+s;
