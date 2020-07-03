@@ -32,9 +32,7 @@ import rf.configtool.parser.TokenStream;
 /**
  * When calling external scripts, we need to persist the ObjGlobal.
  * 
- * Load savefile into separate context, look up a named function, and execute it with given parameters,
- * including a data override for named functions within the scope. The data overrides replaces named
- * functions with values. When code inside the script calls those, note that parameters are ignored.
+ * Load savefile into separate context, look up a named function, and execute it with given parameters.
  */
 public class ExternalScriptState {
 
@@ -48,17 +46,14 @@ public class ExternalScriptState {
         objGlobal.loadCode(script);
     }
 
-    public Value invokeFunction (String func, FuncOverrides funcOverrides, List<Value> params) throws Exception {
+    public Value invokeFunction (String func, List<Value> params) throws Exception {
 
         // Code lookup
-        objGlobal.setFuncOverrides(funcOverrides);
-        
         CodeLines codeLines=objGlobal.getCodeHistory().getNamedLine(func);
         if (codeLines != null) {
             // execute code line
             Runtime rt=new Runtime(objGlobal);
             Value v = rt.processCodeLines(codeLines, new FunctionState(params));
-            objGlobal.clearFuncOverrides();
             return v;
         }
         

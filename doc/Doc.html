@@ -13,8 +13,7 @@
 
 <p><i>Last updated: 2020-07-03 RFO</i></p>
 
-<p><i>v1.0.8</i></p>
-
+<p><i>v1.0.9</i></p>
 
 
 <h1>Introduction</h1>
@@ -781,7 +780,7 @@ To create a file with a single text line:
 <p>
   Conditional execution in CFT takes two basic forms.
 </p>
-<h3>List filtering</h3>
+<h2>List filtering</h2>
 <p>
   The assert() and reject() statements inside loops decide if the rest of the loop body is to 
   be executed or not.
@@ -1930,36 +1929,6 @@ To create a file with a single text line:
 
 
 
-<h1>Macros</h1>
-<p>
-  In addition to inline code blocks that are executed immediately, there is the option of creating
-  "independent" code blocks, which are not executed immediately, but instead become a value
-  of type "Macro". A macro is like a regular function, except it currently does not support the PIPE
-  functionality, just as with code blocks.
-</p>
-<p>
-  A macro is written as a code block, where the body starts with a single asterisk (*), indicating
-  that this block of code can run anywhere, as it will always run in an isolated context, not
-  seeing any state of the caller, which code blocks naturally do.
-</p>
-<p>
-  Being a value, macros can be assigned to local variables, or passed as arguments, as well as
-  be the result value of a function. Macros can contain macros.
-</p>
-
-<pre>
-  # Use macro m to create list with two dictionary objects
-  # without having to type so much
-  # ---
-
-  {* P(1)=name Dict.set("name",name)} =m
-  List(
-    m.call("x"), m.call("y")
-  )
-</pre>
-
-
-
 
 
 
@@ -2024,26 +1993,6 @@ To create a file with a single text line:
   the same rule applies, creating in effect a tree of session states for scripts invoked
   from other scripts.
 </p>
-
-<h3>Function overrides</h3>
-
-<p>
-  One problem with calling functions in another script may be that they in turn
-  depend on default values implemented as other functions in that script, values which
-  may not be valid for our case.
-</p>
-
-<p>
-  To make the call mechanism handle this, we may supply a dictionary object of
-  values, using the "with (Dict)" notation before the parameter part (if any). The
-  dictionary is a way to replace named functions with values. When code in the target
-  script calls a function that is overridden via the "with (Dict)" part, the value from
-  the dictionary is returned instead. Any parameters are ignored, as there is no actual
-  function call.
-</p>
-<pre>
-  $ call "script:function" [ with(Dict) ] ( ... )?
-</pre>
 
 
 <h2>Command line args</h2>
@@ -2215,7 +2164,7 @@ To create a file with a single text line:
 
 
 
-<h2>Complex conditional blocks</h2>
+<h2>Alternative conditional blocks</h2>
 <p>
   The iteration operator can be used to iterate over lists, but it will also iterate over
   single values, which means the loop body is executed exactly once.
@@ -2239,6 +2188,7 @@ To create a file with a single text line:
   someData
   /populateSomeDataIfNotSet
 </pre>
+
 
 <h2>Storing CFT data structures to file - syn() and eval()</h2>
 <p>
@@ -2285,6 +2235,8 @@ To create a file with a single text line:
 <pre>
   "^q^aa^a^q".unEsc
 </pre>
+
+
 
 <h3>Escape codes</h3>
 <p>
@@ -2354,6 +2306,7 @@ To create a file with a single text line:
   def("filesSnapshot", Dir.files)
 </pre>
 
+
 <h2>Differing between Windows and Linux</h2>
 <p>
   A simple global function, isWindows() is used to differ between the two in code.
@@ -2396,6 +2349,40 @@ To create a file with a single text line:
   Note: this only applies to single-line scripts.
 </p>
 
+
+
+
+<h2>Macros</h2>
+<p>
+  In addition to inline code blocks that are executed immediately, there is the option of creating
+  "independent" code blocks, which are not executed immediately, but instead are considered
+  expressions that return a value of type Macro.
+</p>
+<p>
+  A macro is like a regular function, except it is also a value, which means it can be stored
+  in Dict objects, lists and sent as parameters, etc.
+</p>
+<p>
+  A macro is written in the same way as a code block, just that the body starts with 
+  a single asterisk (*), indicating
+  that this block of code can run anywhere, as it will always run in an isolated context, not
+  seeing any state of the caller, which code blocks naturally do.
+</p>
+<p>
+  To call a macro, apply the .call() function on it, with parameters as needed, which are
+  picked up insicde the code in the same way as in functions.
+</p>
+
+<h3>Simple example</h3>
+<p>
+  Simple example, using a macro to save typing.
+</p>
+<pre>
+  {* P(1)=name Dict.set("name",name)} =m
+  List(
+    m.call("x"), m.call("y")
+  )
+</pre>
 
 
 <h1>Reference: Colon commands</h1>

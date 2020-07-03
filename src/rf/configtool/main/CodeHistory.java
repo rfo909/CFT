@@ -36,24 +36,12 @@ public class CodeHistory {
     private Map<String, CodeLines> namedLines=new HashMap<String,CodeLines>();
     private List<String> namesInSequence=new ArrayList<String>();
     private ObjCfg cfg;
-    private FuncOverrides funcOverrides;
-        // used by ExprCall via ObjGlobal, for redefining functions as values, when
-        // loading and running a (script) file
     
     private String currLine;
     
     public CodeHistory (Stdio stdio, ObjCfg cfg) {
         this.stdio=stdio;
         this.cfg=cfg;
-        this.funcOverrides=funcOverrides;
-    }
-    
-    public void setFuncOverrides (FuncOverrides funcOverrides) {
-        this.funcOverrides=funcOverrides;
-    }
-    
-    public void clearFuncOverrides() {
-        funcOverrides=null;
     }
     
     public void setCurrLine (String line) {
@@ -82,13 +70,6 @@ public class CodeHistory {
     }
 
     public CodeLines getNamedLine (String name) {
-        if (funcOverrides != null) {
-            String s=funcOverrides.getFuncOverride(name);
-            if (s != null) {
-                SourceLocation loc=new SourceLocation("<override> " + name, 0, 0);
-                return new CodeLines(s, loc);
-            }
-        }
         return namedLines.get(name); // may be null
     }
     

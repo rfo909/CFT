@@ -3,8 +3,8 @@ Generated file - see script file savefileOverview.txt
 
 See also shell script ./CreateOverview.sh
 
-Created 2020-07-03 21:49:32 
-v1.0.9
+Created 2020-07-03 22:32:56 
+v1.0.9b
 ------------------------------------------------------------------
 
 Introduction
@@ -53,7 +53,7 @@ CFT as a functional programming language
  * Function parameters
 
 Conditional execution
- |   List filtering
+ * List filtering
  * if() expression
  * when() expression
 
@@ -124,14 +124,11 @@ Use as a calculator
  * Lib.Convert
  * Lib.Plot
 
-Macros
-
 Various advanced topics
  * Predicate calls
  * Calling functions in external scripts
  |   Session state
  |   Session state tree
- |   Function overrides
  * Command line args
  * List.push()
  * Dict set strings
@@ -141,7 +138,7 @@ Various advanced topics
  * Working with text lines from stdin
  * Function parameters as List or Dict
  * The general loop statement
- * Complex conditional blocks
+ * Alternative conditional blocks
  * Storing CFT data structures to file - syn() and eval()
  * String.esc() and .unEsc()
  |   Escape codes
@@ -150,6 +147,8 @@ Various advanced topics
  * Differing between Windows and Linux
  * Simple line editing
  |   Develop complex code in steps
+ * Macros
+ |   Simple example
 
 Reference: Colon commands
 

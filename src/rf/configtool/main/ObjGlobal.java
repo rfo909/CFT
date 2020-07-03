@@ -130,14 +130,6 @@ public class ObjGlobal extends Obj {
         return runtime;
     }
     
-    public void setFuncOverrides (FuncOverrides funcOverrides) {
-        codeHistory.setFuncOverrides(funcOverrides);
-    }
-    
-    public void clearFuncOverrides () {
-        codeHistory.clearFuncOverrides();
-    }
-    
     /**
      * ObjGlobal persists states of all external scripts invoked, so as their ValDef and other
      * session persistent values are remembered between calls, allowing external scripts
