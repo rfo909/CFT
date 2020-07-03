@@ -11,10 +11,18 @@
 
 <h1>ConfigTool</h1>
 
+
 <h3>v1.0.8 2020-07-02 cd improvement</h3>
 <p>
 	Fixed processing of paths including File.separator, including absolute paths, and
 	long relative paths, using the pre-existing tokenizer.
+</p>
+<p>
+	Added Doc sections on "changing directory" and "listing files" at top of
+	interactive use section.
+</p>
+<p>
+	Improved Doc on generalized sorting etc.
 </p>
 
 <h3>v1.0.7b 2020-07-01 Removed some reporting</h3>
@@ -28,6 +36,21 @@
 <p>
 	Updated doc for code blocks, to follow section on conditionals
 </p>
+<p>
+	Tiny modification to StmtIterate.execute() to execute single value iteration
+	depending on value.getValAsBoolean() - was just considering boolean false, but 
+	null is also boolean false (so is empty list, but that is correctly handled anyway).
+</p>
+<p>
+	After the code parsing improvements, saving a script with "here"-documents from CFT
+	replaced the "<<< EOF" notation with the generated List() code. Improved this by introducing
+	modes to CodeLine objects: "NORMAL" is the default, and means the line was read from
+	file, and is to be executed, as well as written back when saving. Then there's "ORIGINAL", which 
+	means line was read from file and will be written to file, but not run, because it has been 
+	replaced by one (or more) lines of type "GENERATED", which are run together with the "NORMAL"
+	lines, but not saved.
+</p>
+
 
 
 <h3>v1.0.7 2020-06-30 Macro fixes</h3>

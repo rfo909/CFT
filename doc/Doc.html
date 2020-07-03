@@ -11,7 +11,7 @@
 
 <h1 style="color:black; border:1px solid blue; padding:1Em; text-align: center">ConfigTool - CFT</h1>
 
-<p><i>Last updated: 2020-07-02 RFO</i></p>
+<p><i>Last updated: 2020-07-03 RFO</i></p>
 
 <p><i>v1.0.8</i></p>
 
@@ -991,8 +991,42 @@ To create a file with a single text line:
 </pre>
 
 
+<h2>Auto reload</h2>
+<p>
+  After modifying a script in an editor, and saving it, CFT automatically reloads it the next
+  time you run something.
+</p>
 
-<h2>Scripts</h2>
+
+<h2>No auto save!</h2>
+<p>
+  Note that when modifying a script from within CFT, by defining or redefining functions, there
+  is <em>no auto save</em>. This is to allow experimentation without making changes permanent, 
+  but requires that you remember to save manually when done. 
+</p>
+<p>
+  If you have never saved the script, you must enter a name:
+</p>
+<pre>
+  $ :save SomeName
+</pre>
+<p>
+  Having saved the script before, you need only enter the following:
+</p>
+<pre>
+  $ :save
+</pre>
+
+
+<h2>Pitfall</h2>
+<p>
+  Doing changes to a script inside CFT, but forgetting to save, then opening an editor, which
+  naturally reads the savefile, then saving in the editor, means the initial changes done
+  interactively are lost.
+</p>
+
+
+<h2>Multi-line functions</h2>
 <p>
   Editing the script file lets us write more complex functions. The save file supports
   multi-line functions. The same rules apply as for single lines, regarding scope rules, which
@@ -1009,14 +1043,15 @@ To create a file with a single text line:
 </p>
 
 
-<h2>The '?' command</h2>
+<h2>First line of function ...</h2>
 <p>
   The interactive command '?' is used to see the defined functions. For functions entered
-  interactively that first line is shown, while for multiline scripts, the first line is
-  displayed. 
+  interactively there is only one line, and that line is shown. For multiline functions, 
+  the first line is displayed. 
 </p>
 <p>
-  This may well be a comment.
+  Letting the first line of a multi-line function be a comment is a great way of 
+  producing meaningful content for the interactive '?' command.
 </p>
 
 
@@ -1024,7 +1059,7 @@ To create a file with a single text line:
 <h2>Debug</h2>
 <p>
   When creating complex code, we may need to display debug output. This is done with the global
-  debug() function.
+  debug() function, or you can use the println() function.
 </p>
 
 <pre>
@@ -1094,17 +1129,26 @@ To create a file with a single text line:
 
 
 
-<h2>Input</h2>
+<h2>Get data from user: Input() and readLine()</h2>
 <p>
-  To stop and ask the user to enter something, we got the Input object. 
+  To stop and ask the user to enter something, we got two options. The Input() function
+  produces an Input object which maintains a
+  session state, remembering earlier values, and suggesting the last value input as default,
+  with the ability to show earlier values. 
+</p>
+<p>
+  You need to call the ".get()" function on the Input object to actually ask the user to enter
+  data.
+</p>
+<p>
+  The readLine() function just pauses and reads a line. Both Input() and readLine() take a
+  prompt parameter. For Input objects, the session state remembering previous inputs, is
+  tied to the prompt string. 
 </p>
 <pre>
-  $ Input("Enter search text").get
+  $ Input("Enter search text").get =text
+  $ readLine("Enter name") =name
 </pre>
-<p>
-  The Input object is a bit special, as it maintains a session state, which remembers the previous
-  entered values, and offers to use the last value as default when called next time.
-</p>
 
 
 
@@ -1121,6 +1165,7 @@ To create a file with a single text line:
   two additional additional functions, "file()" to get the
   file object and "lineNumber()" which returns the line number in that file.
 </p>
+
 
 <h3>FileLine</h3>
 <p>
@@ -1202,7 +1247,8 @@ To create a file with a single text line:
   Input("Enter search term").get =st
   Grep(st) =grep
   ProjectDir.allFiles-&gt;f
-    assert(FileTypes.contains(f.name.afterLast(".").toLower))
+    f.name.afterLast(".").toLower =ending
+    assert(FileTypes.contains(ending))
     grep.file(f)-&gt;line
       report(line.file.name, line.lineNumber, line)
   /Search
@@ -1250,12 +1296,16 @@ To create a file with a single text line:
   on the finished list.
 </p>
 <p>
-  The trick to sorting is to make all types of objects to be sorted into a number or a string.
+  The trick to sorting is to <em>make all types of objects to be sorted into a number or a string</em>.
+</p>
+<p>
   This is done by three wrapper functions called "Int()", "Float()" and "Str()". They create objects that
   are subclasses of the regular int, float and
   string types, but also contain a "data" member that can be extracted after sorting, via the ".data()"
   function.
 </p>
+
+<h3>Example: file size</h3>
 <p>
   Let's sort the files in the current directory so that the biggest files are listed first.
 </p>
@@ -1263,32 +1313,48 @@ To create a file with a single text line:
   $ Dir.files-&gt;f out(Int(f.length,f)) | _.sort.reverse-&gt;x out(x.data)
 </pre>
 
-
 <p>
-  For better readability, replace out() with report(f.name, f.length) etc
+  For each file, we output an Int wrapper object, with value set to file length, and data
+  pointing to the file. The resulting list is sorted, reversed, then iterated to output
+  the data values, which are the original File object. 
 </p>
 
+<p>
+  Could also sort on time, as File.lastModified is another int value, with CFT int values
+  corresponding to long in Java.
+</p>
+
+<h3>Example: file name</h3>
+<p>
+  To sort on file names, we use the Str() wrapper function / object.
+</p>
+<pre>
+  $ Dir.files-&gt;f out(Str(f.name,f)) | _.sort-&gt; out(x.data)
+</pre>
 
 
 
-<h2>Sets of configuration data / Dict</h2>
+<h2>Dictionary objects / Dict()</h2>
 <p>
   When working with multiple projects, or sources of log files, we want to quickly flip
   between directories, file types and perhaps other settings. This is done using dictionary
-  objects, which are "key-value" stores. 
+  objects. 
 </p>
 <p>
-  Maintaining such structures is best done when editing the script file with an editor.
+  Dictionary objects are key-value stored, like Map in Java.
+</p>
+<p>
+  Maintaining these types structures is best done when editing the script file with an editor.
 </p>
 <pre>
   Dict
     .set("dir",Dir("/home/user/project1"))
-    .set("types",".java .txt".split)
+    .set("types","java txt".split)
   /Project1
 
   Dict
     .set("dir",Dir("/home/user/project2"))
-    .set("types",".js .css .html".split)
+    .set("types","js css html".split)
   /Project2
 
   Project1
@@ -1296,9 +1362,10 @@ To create a file with a single text line:
 </pre>
 
 <p>
-  Now building search code that uses the properties found in CurrProject means we can change
-  all settings interactively by doing a simple reassign of CurrProject.
+  Now we can build code that searches files and performs other operations on CurrProject. 
 </p>
+<p>
+  Switching between projects is done by redefining the CurrProject function. 
 <pre>
   $ Project2
   $ /CurrProject!

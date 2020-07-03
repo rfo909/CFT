@@ -71,7 +71,7 @@ public class Ctx {
               
     /**
      * Code block is a macro that is invoked immediately, and that has access up the
-     * Ctx stack, but with separate OutData object, so that
+     * Ctx stack, but with separate OutData object, to avoid mixing result data from environment.
      */
     public Ctx subContextForCodeBlock () {
         Ctx ctx = new Ctx(this,new OutData(),outText,objGlobal,functionState);
