@@ -77,6 +77,18 @@ public class ValueMacro extends Value {
             
             progLine.execute(sub);
             
+            OutText outText=sub.getOutText();
+
+            // Column data is formatted to text and added to outData as String objects
+            List<List<Value>> outData=outText.getData();
+            Report report=new Report();
+            List<String> formattedText=report.formatDataValues(outData);
+            for (String s:formattedText) {
+                sub.getOutData().out(new ValueString(s));
+            }
+
+            
+            
             retVal=sub.getResult();
         }
         return retVal;

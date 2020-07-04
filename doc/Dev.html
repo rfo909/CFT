@@ -11,10 +11,34 @@
 
 <h1>CFT Change log</h1>
 
-<h3>v1.0.10 2020-07-04 PIPE in macro and code block</h3>
+
+<h3>v1.0.10 2020-07-04 report() and Macro / block expressions</h3>
+<p>
+	Needed to clarify how report() works: each code block in a function or macro (logically) executes 
+	in a single Ctx object. Each code block is (be definition) one loop space, and depending on whether
+	there are looping statements there or not, will return either top-of-stack value, or list of elements 
+	from calls to out(). Or report().
+</p>
+<p>
+	Calls to report() are collected after the code block has executed, and are run through the Report
+	tools, creating a list of strings, which are then added to the OutData, as if they were
+	emitted via out(). Doing calls both to out() and to report() still means the lines from report()
+	get added to the end of the OutData list.
+</p>
+<p>
+	This same behaviour has now been implemented for ValueMacro, and verified.
+</p>
+
+
+
+<h3>v1.0.10 2020-07-04 PIPE in macro and block expression</h3>
 
 <p>
-	Enabled PIPE inside macros (and code blocks), tested ok
+	Renamed non-macro {} to "block expressions", as what is called ProgramLine in the code, and is
+	the parts separated by PIPE '|', were called "code blocks" before {} was introduced.
+</p>
+<p>
+	Enabled PIPE inside macros (and block expressions), tested ok
 </p>
 <p>
 	Changed name from "plain text" to system messages in class OutText.
@@ -22,6 +46,7 @@
 <p>
 	Added function Lib.Sys.sysMsg(str) to test behaviour from macros etc
 </p>
+
 
 
 
