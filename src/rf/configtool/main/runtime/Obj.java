@@ -132,33 +132,33 @@ public abstract class Obj {
     public void generateHelp(Ctx ctx) {
         OutText outText=ctx.getOutText();
         if (this instanceof ObjGlobal) {
-            outText.addPlainText("---");
-            outText.addPlainText("For help on data types, create an instance on the stack, then invoke 'help' statement");
-            outText.addPlainText("Example:");
-            outText.addPlainText("    List(1,2,3) help     - shows methods on lists");
-            outText.addPlainText("    'x' help             - shows methods on strings");
-            outText.addPlainText("    help(3)              - alternative notation - shows help on ints");
-            outText.addPlainText("");
-            outText.addPlainText("- Note that for functions with no arguments, the () are optional");
-            outText.addPlainText("- Looping is done with the '-> var' construct");
-            outText.addPlainText("     Example: List(1,2,3)->m out('xxx'+m)");
+            outText.addSystemMessage("---");
+            outText.addSystemMessage("For help on data types, create an instance on the stack, then invoke 'help' statement");
+            outText.addSystemMessage("Example:");
+            outText.addSystemMessage("    List(1,2,3) help     - shows methods on lists");
+            outText.addSystemMessage("    'x' help             - shows methods on strings");
+            outText.addSystemMessage("    help(3)              - alternative notation - shows help on ints");
+            outText.addSystemMessage("");
+            outText.addSystemMessage("- Note that for functions with no arguments, the () are optional");
+            outText.addSystemMessage("- Looping is done with the '-> var' construct");
+            outText.addSystemMessage("     Example: List(1,2,3)->m out('xxx'+m)");
             
-            outText.addPlainText("");
-            outText.addPlainText("- The out(expr) statement adds data to the output list");
-            outText.addPlainText("- In-line variables are assigned with '=ident' after the expression (stack)");
-            outText.addPlainText("- Type ':' for overview over colon commands");
-            outText.addPlainText("");;
-            outText.addPlainText("- The current program line can be given a name, for example '/Test");
-            outText.addPlainText("- To run it again, just enter 'Test'");
-            outText.addPlainText("- Enter '?Test' to get info about symbol Test, or just '?' for all");
-            outText.addPlainText("---");
-            outText.addPlainText("- Parameters are accessed with P(1), P(1,defaultVal) or just P() for param-list.");
-            outText.addPlainText("- The current value on stack is accessed via assignment or the '_' expr");
+            outText.addSystemMessage("");
+            outText.addSystemMessage("- The out(expr) statement adds data to the output list");
+            outText.addSystemMessage("- In-line variables are assigned with '=ident' after the expression (stack)");
+            outText.addSystemMessage("- Type ':' for overview over colon commands");
+            outText.addSystemMessage("");;
+            outText.addSystemMessage("- The current program line can be given a name, for example '/Test");
+            outText.addSystemMessage("- To run it again, just enter 'Test'");
+            outText.addSystemMessage("- Enter '?Test' to get info about symbol Test, or just '?' for all");
+            outText.addSystemMessage("---");
+            outText.addSystemMessage("- Parameters are accessed with P(1), P(1,defaultVal) or just P() for param-list.");
+            outText.addSystemMessage("- The current value on stack is accessed via assignment or the '_' expr");
             
-            outText.addPlainText("");
+            outText.addSystemMessage("");
         }
         
-        outText.addPlainText("(" + getTypeName() + ")");
+        outText.addSystemMessage("(" + getTypeName() + ")");
         
         List<String> fNames=new ArrayList<String>();        
         Iterator<String> names=functions.keySet().iterator();
@@ -173,7 +173,7 @@ public abstract class Obj {
         });
 
         for (String name:fNames) {
-            outText.addPlainText(functions.get(name).getShortDesc());
+            outText.addSystemMessage(functions.get(name).getShortDesc());
         }
     }
 

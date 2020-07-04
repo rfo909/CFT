@@ -39,6 +39,7 @@ public class ObjSys extends Obj {
     public ObjSys() {
         this.add(new FunctionVersion());
         this.add(new FunctionFunctions());
+        this.add(new FunctionSysMsg());
     }
     
     @Override
@@ -95,5 +96,20 @@ public class ObjSys extends Obj {
         }
     }
     
+    class FunctionSysMsg extends Function {
+        public String getName() {
+            return "sysMsg";
+        }
+        public String getShortDesc() {
+            return "sysMsg(msg) - add message to system messages, which are presented after run";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected string parameter msg");
+            String line=getString("msg", params, 0);
+            ctx.getOutText().addSystemMessage(line);
+            return new ValueBoolean(true);
+        }
+    }
+
     
 }

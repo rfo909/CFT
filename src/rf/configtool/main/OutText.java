@@ -27,11 +27,11 @@ import rf.configtool.main.runtime.reporttool.Report;
 
 /**
  * This object buffers two types of text output from code:
- * - plain text in the form of lines
+ * - plain text system messages in the form of lines
  * - structured data in the form of columns
  * 
  * The Runtime class implements presentation of these, in method processProgramLine,
- * just sending the plain text to stdout, while formatting the structured data into 
+ * just sending the plain text to stdout, (prefixed with '#'), while formatting the structured data into 
  * lines that are added to the OutData (same as out(x) in code). This is
  * so that report data can be easily written to file, as well as 
  * processed further (counting, sorting etc)
@@ -55,10 +55,10 @@ public class OutText {
     private List<List<Value>> data=new ArrayList<List<Value>>();
 
     // simple text output
-    private List<String> lines=new ArrayList<String>();
+    private List<String> systemMessages=new ArrayList<String>();
     
-    public void addPlainText (String line) {
-        lines.add(line);
+    public void addSystemMessage (String line) {
+        systemMessages.add(line);
     }
     
     public void addReportData (List<Value> values) {
@@ -71,17 +71,13 @@ public class OutText {
         addReportData(vList);
     }
     
-    public List<String> getPlainText() {
-        return lines;
+    public List<String> getSystemMessages() {
+        return systemMessages;
     }
     
     public List<List<Value>> getData() {
         return data;
     }
 
-    
-    public void clear() {
-        lines.clear();
-    }
-
+   
 }

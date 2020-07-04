@@ -182,8 +182,8 @@ public class Runtime {
             OutText outText=ctx.getOutText();
     
             // Plain text is just written to screen - this applies to help texts etc
-            List<String> plainText=outText.getPlainText();
-            for (String s:plainText) {
+            List<String> messages=outText.getSystemMessages();
+            for (String s:messages) {
                 objGlobal.outln("  # " + s);
             }
             

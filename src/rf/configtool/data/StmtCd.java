@@ -113,7 +113,7 @@ public class StmtCd extends Stmt {
         }
         
         String currDir=ctx.getObjGlobal().getCurrDir();
-        ctx.getOutText().addPlainText(currDir);
+        ctx.getOutText().addSystemMessage(currDir);
         ctx.push(new ValueObj(new ObjDir(currDir)));
 
     }

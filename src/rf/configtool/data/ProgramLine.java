@@ -31,7 +31,7 @@ public class ProgramLine extends LexicalElement {
 
     public ProgramLine (TokenStream ts) throws Exception {
         super(ts);
-        while (!ts.atEOF() && !ts.peekStr(Runtime.PROGRAM_LINE_SEPARATOR)) {
+        while (!ts.atEOF() && !ts.peekStr(Runtime.PROGRAM_LINE_SEPARATOR) && !ts.peekStr("}")) {
             statements.add(Stmt.parse(ts));
         }
     }

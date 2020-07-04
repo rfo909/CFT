@@ -31,7 +31,7 @@ public class ExprMacro extends LexicalElement {
 
     private boolean localCodeBlock;
     
-    private List<Stmt> statements=new ArrayList<Stmt>();
+    private List<ProgramLine> programLines=new ArrayList<ProgramLine>();
     
     // See Runtime.processCodeLines() method to extend to loops and supporting PROGRAM_LINE_SEPARATOR - must in addition 
     // add '}' as terminator character inside ProgramLine
@@ -46,15 +46,26 @@ public class ExprMacro extends LexicalElement {
             localCodeBlock=false;
         }
         
-        while (!ts.matchStr("}")) {
-            statements.add(Stmt.parse(ts));
+        List<ProgramLine> progLines=new ArrayList<ProgramLine>();
+        for(;;) {
+            progLines.add(new ProgramLine(ts));
+            if (ts.matchStr(Runtime.PROGRAM_LINE_SEPARATOR)) continue;
+            break;
         }
-        
+    	ts.matchStr("}","expected '}' closing " + (localCodeBlock ? "code block" : "macro"));
+    	
+        this.programLines=progLines;
+//
+//        
+//        while (!ts.matchStr("}")) {
+//            statements.add(Stmt.parse(ts));
+//        }
+//        
     }
     
     
     public Value resolve (Ctx ctx) throws Exception {
-        ValueMacro m=new ValueMacro(statements);
+        ValueMacro m=new ValueMacro(programLines);
         if (localCodeBlock) {
             return m.callLocalMacro(ctx);
         }

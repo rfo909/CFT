@@ -285,10 +285,10 @@ public class ObjDir extends Obj {
                 if (!ok) throw new Exception("Could not create dir " + f.getCanonicalPath());
                 return new ValueBoolean(true);
             } else if (!f.isDirectory()) {
-                outText.addPlainText("Not a dir   " + f.getCanonicalPath());
+                outText.addSystemMessage("Not a dir   " + f.getCanonicalPath());
                 return new ValueBoolean(false);
             } else {
-                outText.addPlainText("Dir exists  " + f.getCanonicalPath());
+                outText.addSystemMessage("Dir exists  " + f.getCanonicalPath());
                 return new ValueBoolean(false);
             }
         }
@@ -310,11 +310,11 @@ public class ObjDir extends Obj {
                     boolean result=f.delete();
                     return new ValueBoolean(result);
                 } else {
-                    outText.addPlainText("Not a dir   " + f.getCanonicalPath());
+                    outText.addSystemMessage("Not a dir   " + f.getCanonicalPath());
                     return new ValueBoolean(false);
                 }
             } else {
-                outText.addPlainText("Not found   " + f.getCanonicalPath());
+                outText.addSystemMessage("Not found   " + f.getCanonicalPath());
                 return new ValueBoolean(false);
             }
         }
@@ -492,7 +492,7 @@ public class ObjDir extends Obj {
             if (foreground) {
                 process.waitFor();
                 long endTime=System.currentTimeMillis();
-                outText.addPlainText("Running " + program + " completed: " + (endTime-startTime) + "ms");
+                outText.addSystemMessage("Running " + program + " completed: " + (endTime-startTime) + "ms");
             }
         }
     }

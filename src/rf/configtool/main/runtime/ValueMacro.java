@@ -19,6 +19,7 @@ package rf.configtool.main.runtime;
 
 import java.util.*;
 
+import rf.configtool.data.ProgramLine;
 import rf.configtool.data.Stmt;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.FunctionState;
@@ -26,6 +27,7 @@ import rf.configtool.main.ObjGlobal;
 import rf.configtool.main.OutData;
 import rf.configtool.main.OutText;
 import rf.configtool.main.runtime.lib.ObjGrep;
+import rf.configtool.main.runtime.reporttool.Report;
 
 /**
  * A macro is by default a local code block that is executed immediately, and is a way of grouping
@@ -34,10 +36,10 @@ import rf.configtool.main.runtime.lib.ObjGrep;
  */
 public class ValueMacro extends Value {
     
-    private List<Stmt> statements;
+    private List<ProgramLine> programLines;
     
-    public ValueMacro (List<Stmt> statements) {
-        this.statements=statements;
+    public ValueMacro (List<ProgramLine> programLines) {
+        this.programLines=programLines;
         
         add(new FunctionCall());
     }
@@ -66,10 +68,18 @@ public class ValueMacro extends Value {
     }
 
     
-    private void invoke (Ctx ctx) throws Exception {
-        for (Stmt stmt:statements) {
-            stmt.execute(ctx);
+    private Value invoke (Ctx ctxMacro) throws Exception {
+    	Value retVal=null;
+        
+        for (ProgramLine progLine:programLines) {
+            Ctx sub=ctxMacro.sub();
+            if (retVal != null) sub.push(retVal);
+            
+            progLine.execute(sub);
+            
+            retVal=sub.getResult();
         }
+        return retVal;
     }
 
     /**
@@ -80,8 +90,8 @@ public class ValueMacro extends Value {
         // Execute local macro, which means it has Ctx lookup up the Ctx stack, including
         // parameters to the function, but that the loop flag stops
         Ctx sub=ctx.subContextForCodeBlock(); 
-        invoke(sub);
-        return sub.getResult();
+        return invoke(sub);
+        //return sub.getResult();
     }
     
     
@@ -90,9 +100,11 @@ public class ValueMacro extends Value {
      */
     public Value call (Ctx ctx, List<Value> params) throws Exception {
         Ctx sub=new Ctx(ctx.getObjGlobal(), new FunctionState(params));
-        invoke(sub);
-        return sub.getResult();
+        return invoke(sub);
+        //return sub.getResult();
     }
+    
+    // -----------------------------------------------------------
     
     class FunctionCall extends Function {
         public String getName() {

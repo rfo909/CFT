@@ -149,7 +149,7 @@ public class ObjPlot extends Obj {
             }
             
             img.savePNG(objFile.getPath());
-            outText.addPlainText("File " + objFile.getPath() + " written");
+            outText.addSystemMessage("File " + objFile.getPath() + " written");
             
             return new ValueObj(theObj());
         }
