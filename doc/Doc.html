@@ -825,11 +825,10 @@ To create a file with a single text line:
 
 
 
-<h1>Code blocks</h1>
+<h1>Block expressions</h1>
 <p>
-  An important feature is the concept of code blocks. These are considered expressions, and
-  can be used with if() and when(). Inside they can contain statements and expressions, as one
-  would expect. 
+  An important feature is the concept of block expressions. These are sequences of code
+  inside curly braces, and are frequently used with if() and when().
 </p>
 <pre>
   false =ok
@@ -839,9 +838,9 @@ To create a file with a single text line:
   })
 </pre>
 
-<h2>Code blocks are expressions</h2>
+<h2>Block expressions are real expressions</h2>
 <p>
-  Even though mostly used with when() and if(), code blocks are general expressions, just
+  Even though mostly used with when() and if(), block expressions are general expressions, just
   like a function call, or some variable lookup.
 </p>
 <pre>
@@ -853,17 +852,17 @@ To create a file with a single text line:
 
 <h2>Pitfalls</h2>
 <p>
-  Even though code blocks occur literally inside other code, and have their variable scope
+  Even though block expressions occur literally inside other code, and have their variable scope
   extend out into the calling environment, they are still somewhat function-like. This means:
 </p>
 <ul>
   <li>
-    One can not pass data to or from code blocks via the stack, as they operate their
+    One can not pass data to or from block expressions via the stack, as they operate their
     own stack internally
   </li>
   <li>
-    Loop control does not extend from inside a code block to the surrounding code, partially
-    because code blocks can have their own loops. This means that
+    Loop control does not extend from inside a block expressions to the surrounding code, partially
+    because block expressions can have their own loops. This means that
     for example calling break(true) has no effect on the caller.
   </li>
 </ul>
@@ -875,7 +874,7 @@ To create a file with a single text line:
     when(x=="b", {break(true)})  # does not break loop
 </pre>
 <p>
-  This break() does not affect the loop running outside the code block. 
+  This break() does not affect the loop running outside the block expression. 
 </p>
 
 
@@ -2352,8 +2351,8 @@ To create a file with a single text line:
 
 <h2>Macros</h2>
 <p>
-  In addition to inline code blocks that are executed immediately, there is the option of creating
-  "independent" code blocks, which are not executed immediately, but instead are considered
+  In addition to inline block expressions that are executed immediately, there is the option of creating
+  "independent" block expressions, which are not executed immediately, but instead are considered
   expressions that return a value of type Macro.
 </p>
 <p>
@@ -2361,10 +2360,10 @@ To create a file with a single text line:
   in Dict objects, lists and sent as parameters, etc.
 </p>
 <p>
-  A macro is written in the same way as a code block, just that the body starts with 
+  A macro is written in the same way as a block expression, just that the body starts with 
   a single asterisk (*), indicating
   that this block of code can run anywhere, as it will always run in an isolated context, not
-  seeing any state of the caller, which code blocks naturally do.
+  seeing any state of the caller, which block expressions naturally do.
 </p>
 <p>
   To call a macro, apply the .call() function on it, with parameters as needed, which are
