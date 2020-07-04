@@ -3,7 +3,7 @@ Generated file - see script file savefileOverview.txt
 
 See also shell script ./CreateOverview.sh
 
-Created 2020-07-04 19:48:17 
+Created 2020-07-04 20:41:12 
 v1.0.10b
 ------------------------------------------------------------------
 
@@ -80,6 +80,9 @@ Editing save files
 
 Interactive use
  * Change current directory
+ |   Direct sub-directory: use partial name
+ |   Change drive letter in Windows
+ |   Paths with space
  * Listing files
  * Get data from user: Input() and readLine()
  * Searching files / report()
