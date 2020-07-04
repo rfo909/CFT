@@ -87,10 +87,12 @@ public class CodeHistory {
     public void report(String symbolSubStr) {
         final int available=cfg.getScreenWidth();
         
-        String hr="+--------------";
-        int x=available;
-        if (x > 500) x=80;  // ":nowrap" is implemented as width = 999999
-        while (hr.length() < x) hr=hr+"-";
+        String hr = "+-----------------------------------------------------";
+
+//        String hr="+--------------";
+//        int x=available;
+//        if (x > 500) x=80;  // ":nowrap" is implemented as width = 999999
+//        while (hr.length() < x) hr=hr+"-";
         
         stdio.println(hr);
         int nameMaxLength=3;

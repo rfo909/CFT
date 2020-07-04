@@ -3,7 +3,7 @@ Generated file - see script file savefileOverview.txt
 
 See also shell script ./CreateOverview.sh
 
-Created 2020-07-04 12:52:52 
+Created 2020-07-04 13:46:10 
 v1.0.10
 ------------------------------------------------------------------
 
@@ -149,6 +149,10 @@ Various advanced topics
  |   Develop complex code in steps
  * Macros
  |   Simple example
+
+Example code
+ * PowerShell example
+ * Windows CMD
 
 Reference: Colon commands
 

@@ -974,7 +974,6 @@ To create a file with a single text line:
 
 
 
-
 <h1>Editing save files</h1>
 
 
@@ -2382,6 +2381,46 @@ To create a file with a single text line:
     m.call("x"), m.call("y")
   )
 </pre>
+<p>
+  See savefileLib.txt for examples of macros used to implement generic
+  menu system, as applied to select editor for Linux.
+</p>
+
+
+
+
+<h1>Example code</h1>
+
+<h2>PowerShell example</h2>
+<p>
+  The following code is an effective way of using PowerShell from CFT, saving lots of typing.
+</p>
+<pre>
+  # List services via PowerShell
+    Input("Host").get =host
+    Input("Service name (including wildcards)").get =service
+    List("powershell","invoke-command","-computername",host,"-scriptblock","{get-service "+service+"}")
+  /PSGetServ
+</pre>
+
+
+<h2>Windows CMD</h2>
+<p>
+  Running commands using CMD in windows, mostly requires the "/c" flag.
+</p>
+<pre>
+  Dir("...")
+  /DirProject
+
+  # Add, commit and push with git
+    DirProject.run("cmd","/c","git","add",".")
+    Input("Commit message").get =msg
+    DirProject.run("cmd","/c","git","commit","-m",msg)
+    DirProject.run("cmd","/c","git","push","origin","master")
+  /GitPush
+</pre>
+
+
 
 
 <h1>Reference: Colon commands</h1>
