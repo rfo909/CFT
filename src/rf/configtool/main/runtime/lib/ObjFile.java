@@ -33,6 +33,9 @@ import rf.configtool.util.TabUtil;
 
 import java.nio.charset.Charset;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.Files;
+
 
 public class ObjFile extends Obj {
 
@@ -44,16 +47,19 @@ public class ObjFile extends Obj {
     public ObjFile(String name) {
         this.name=name;
 
-        try {
-            File f=new File(name);
-            if (f.exists()) {
-                this.name=f.getCanonicalPath();
-            }
-        } catch (Exception ex) {
-            this.name=name;
+        if (!isSymlink()) {
+	        try {
+	            File f=new File(name);
+	            if (f.exists()) {
+	                this.name=f.getCanonicalPath();
+	            }
+	        } catch (Exception ex) {
+	            this.name=name;
+	        }
         }
         
         add(new FunctionExists());
+        add(new FunctionIsSymlink());
         add(new FunctionName());
         add(new FunctionPath());
         add(new FunctionDir());
@@ -73,6 +79,11 @@ public class ObjFile extends Obj {
         add(new FunctionReadBytes());
         add(new FunctionEncoding());
         add(new FunctionSetEncoding());
+    }
+    
+    public boolean isSymlink() {
+    	Path path=Paths.get(name);
+    	return Files.isSymbolicLink(path);
     }
 
     protected ObjFile self() {
@@ -184,6 +195,19 @@ public class ObjFile extends Obj {
         }
     }
 
+    class FunctionIsSymlink extends Function {
+        public String getName() {
+            return "isSymlink";
+        }
+        public String getShortDesc() {
+            return "isSymlink() - returns true or false";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueBoolean(isSymlink());
+        }
+    }
+
     class FunctionName extends Function {
         public String getName() {
             return "name";
@@ -235,6 +259,10 @@ public class ObjFile extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
             OutText outText=ctx.getOutText();
+            if (isSymlink()) {
+            	outText.addSystemMessage("Symbolic link: can not delete");
+            	return new ValueBoolean(false);
+            }
             File f=new File(name);
             if (f.exists()) {
                 if (f.isFile()) {
@@ -266,6 +294,10 @@ public class ObjFile extends Obj {
             if (params.size() != 1) throw new Exception("Expected one parameter any type (file data)");
             OutText outText=ctx.getOutText();
             File f=new File(name);
+            if (isSymlink()) {
+            	outText.addSystemMessage("Symbolic link: can not write");
+            	return new ValueBoolean(false);
+            }
 
             PrintStream ps=null;
             try {
@@ -297,9 +329,12 @@ public class ObjFile extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 1) throw new Exception("Expected one parameter any type (file data)");
             File f=new File(name);
-//          if (!f.exists()) {
-//              throw new Exception("File does not exist");
-//          }
+            
+            if (isSymlink()) {
+                OutText outText=ctx.getOutText();
+            	outText.addSystemMessage("Symbolic link: can not write");
+            	return new ValueBoolean(false);
+            }
             PrintStream ps=null;
             try {
                 ps=new PrintStream(new FileOutputStream(f,true), false, encoding);
@@ -621,6 +656,11 @@ public class ObjFile extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 1) throw new Exception("Expected toFile parameter");
             OutText outText=ctx.getOutText();
+
+            if (isSymlink()) {
+            	outText.addSystemMessage("Symbolic link: can not move");
+            	return new ValueBoolean(false);
+            }
 
             Obj obj=getObj("toFile", params, 0);
             if (!(obj instanceof ObjFile)) throw new Exception("Expected File parameter");
