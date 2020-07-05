@@ -3,6 +3,7 @@ src/ebuild/
 src/.classpath
 src/.project
 code.work/
+code.sys/
 
 # Compiled class file
 *.class

@@ -55,7 +55,7 @@ Example:
 
 ```
 $ ls
-&lt;list&gt;
+<list>
 0: .git/       | d:6   | f:5
 1: build/      | d:1   | f:0
 2: doc/        | d:1   | f:4
@@ -119,7 +119,7 @@ objects types are
 
 ```
 $ File("x.txt")
-&lt;obj: File&gt;
+<obj: File>
 x.txt   DOES-NOT-EXIST
 ```
 
@@ -187,7 +187,7 @@ File("x.txt").setEncoding("UTF-8")
 
 ```
 $ Dir
-&lt;obj: Dir&gt;
+<obj: Dir>
 ConfigTool/ d:5 f:20
 ```
 
@@ -234,7 +234,7 @@ produces a list of File objects.
 
 ```
 $ Dir.files
-&lt;list&gt;
+<list>
 0: someFile.txt    | 0k    | 777     | 90d | 2020-02-22 16:38:53
 1: otherFile.txt   | 1k    | 1250    | 49d | 2020-04-03 10:02:44
 :
@@ -245,7 +245,7 @@ gets a specific element, defaulting to 0 if no argument.
 
 ```
 $ List("a","b","c").nth
-&lt;String&gt;
+<String>
 a
 ```
 
@@ -267,7 +267,7 @@ Two lists can be added together with "+".
 
 ```
 List(1,2) + List(3)
-&lt;list&gt;
+<list>
 1
 2
 3
@@ -303,10 +303,10 @@ for all kinds of combinations.
 
 ```
 $ "'a'"
-&lt;String&gt;
+<String>
 'a'
 $ '"' + "'a'" + '"'
-&lt;String&gt;
+<String>
 "'a'"
 ```
 
@@ -339,8 +339,8 @@ The iterator in CFT takes the form of an arrow followed by a loop variable. For 
 to return output, we use the out() statement inside.
 
 ```
-$ "1 2 3".split-&gt;x out("a"+x)
-&lt;list&gt;
+$ "1 2 3".split->x out("a"+x)
+<list>
 0: a1
 1: a2
 2: a3
@@ -354,15 +354,15 @@ The result is a list of strings, as displayed.
 Using the assert() statement, we may abort processing for elements that do not meet a condition.
 
 ```
-$ Dir.allFiles-&gt;f assert(f.name.endsWith(".java")) out(f)
+$ Dir.allFiles->f assert(f.name.endsWith(".java")) out(f)
 ```
 
 The reject() statement is the inverse of assert(), and aborts processing for elements that meet
 a certain condition.
 
 ```
-$ List(1,2,3,2,1)-&gt;x reject(x&gt;2) out(x)
-&lt;list&gt;
+$ List(1,2,3,2,1)->x reject(x>2) out(x)
+<list>
 1
 2
 2
@@ -372,8 +372,8 @@ $ List(1,2,3,2,1)-&gt;x reject(x&gt;2) out(x)
 The break() statement terminates the loop if the condition is true.
 
 ```
-List(1,2,3,2,1)-&gt;x break(x&gt;2) out(x)
-&lt;List&gt;
+List(1,2,3,2,1)->x break(x>2) out(x)
+<List>
 1
 2
 ```
@@ -392,7 +392,7 @@ When some code does what we want, we typically create a function from it. This i
 This assigns the name "name" to the last line, and we have now created a custom function.
 
 ```
-$ Dir.allFiles-&gt; f assert(f.name.endsWith(".java")) out(f)
+$ Dir.allFiles-> f assert(f.name.endsWith(".java")) out(f)
 $ /JavaFiles
 ```
 ## Calling a function
@@ -411,9 +411,9 @@ Enter '?' and press Enter.
 ```
 $ ?
 +-----------------------------------------------------
-| JavaFiles: Dir.allFiles-&gt;f assert(f.name.endsWith(".java")) out(f)
+| JavaFiles: Dir.allFiles->f assert(f.name.endsWith(".java")) out(f)
 +-----------------------------------------------------
-| .        : Dir.allFiles-&gt;f assert(f.name.endsWith(".java")) out(f)
+| .        : Dir.allFiles->f assert(f.name.endsWith(".java")) out(f)
 +-----------------------------------------------------
 ```
 
@@ -470,7 +470,7 @@ The point is that it is the function code that is named, not the result.
 
 ```
 $ "1 2 3".split
-&lt;list&gt;
+<list>
 0: 1
 1: 2
 2: 3
@@ -501,7 +501,7 @@ to the local variable.
 
 ```
 $ 3 =a 2 =b a+b
-&lt;int&gt;
+<int>
 5
 ```
 ## Stack vs expressions
@@ -514,11 +514,11 @@ parses expressions using regular infix notation ("3+2").
 ## Nested loops
 
 
-Loops are implemented using the "for each" functionality of "-&gt; var". Loops may well be nested.
+Loops are implemented using the "for each" functionality of "-> var". Loops may well be nested.
 
 ```
-$ List(1,2,3)-&gt;x List(1,2,3)-&gt;y  out(x*y)
-&lt;list&gt;
+$ List(1,2,3)->x List(1,2,3)->y  out(x*y)
+<list>
 0: 1
 1: 2
 2: 3
@@ -530,7 +530,7 @@ $ List(1,2,3)-&gt;x List(1,2,3)-&gt;y  out(x*y)
 8: 9
 ```
 
-It is worth noting that in this case, the body of each loop is all code following the "-&gt; var"
+It is worth noting that in this case, the body of each loop is all code following the "-> var"
 construct. But this can be changed using the "pipe" symbol, which "closes" all loops.
 
 ## The PIPE symbol
@@ -542,13 +542,13 @@ First a non-pipe example.
 If we wanted to sum the sizes of all files in a directory, we could do it like this:
 
 ```
-$ Dir.files-&gt;f out(f.length)
+$ Dir.files->f out(f.length)
 :
 : (output)
 :
 $ /sizes
 $ sizes.sum
-&lt;int&gt;
+<int>
 999
 $ /sizeSum
 ```
@@ -569,7 +569,7 @@ To avoid having to define a local variable just to grab one element off the stac
 variable name '_' pops the top value off the data stack.
 
 ```
-$ Dir.files-&gt; out(f.length) | _.sum
+$ Dir.files-> out(f.length) | _.sum
 $ /sizeSum
 ```
 
@@ -583,7 +583,7 @@ There is a simple rule deciding what is taken as the return value of any block o
 code separated by the "pipe" symbol (below).
 
 ```
-$ 0 =sum Dir.files-&gt;f sum+f.length =sum | sum
+$ 0 =sum Dir.files->f sum+f.length =sum | sum
 ```
 
 This code returns an int, not a list, where as the "sizes" function above returned a list.
@@ -625,7 +625,7 @@ and second it may act as documentation, as an example of expected value.
 Here we make an improved version of the JavaFiles function, that takes a directory parameter, and if none given, uses the current directory.
 
 ```
-$ P(1,Dir) =dir dir.allFiles-&gt;f assert(f.name.endsWith(".java")) out(f)
+$ P(1,Dir) =dir dir.allFiles->f assert(f.name.endsWith(".java")) out(f)
 :
 : (code result)
 :
@@ -644,7 +644,7 @@ $ Dir("/home/user/project2")
 $ /DirProject2
 $ DirProject1
 $ /CurrProject
-$ JavaFiles(CurrProject)-&gt;f out(f.length) | _.sum
+$ JavaFiles(CurrProject)->f out(f.length) | _.sum
 $ /JavaCodeSum
 ```
 
@@ -728,7 +728,7 @@ like a function call, or some variable lookup.
 
 ```
 {2+3}.bin
-&lt;String&gt;
+<String>
 00000101
 ```
 ## Pitfalls
@@ -752,7 +752,7 @@ for example calling break(true) has no effect on the caller.
 Example:
 
 ```
-"a b c".split-&gt;x
+"a b c".split->x
 when(x=="b", {break(true)})  # does not break loop
 ```
 
@@ -808,7 +808,7 @@ The output is also displayed line by line on the screen, in case the external pr
 user input.
 
 ```
-Dir.run("which","leafpad") =lines lines.length&gt;0 && lines.nth.contains("leafpad")
+Dir.run("which","leafpad") =lines lines.length>0 && lines.nth.contains("leafpad")
 /HasLeafpad
 ```
 
@@ -1074,9 +1074,9 @@ Dir("/home/user/project1")
 /ProjectDir
 Input("Enter search term").get =st
 Grep(st) =grep
-ProjectDir.allFiles-&gt;f
+ProjectDir.allFiles->f
 assert(f.name.endsWith(".java"))
-grep.file(f)-&gt;line
+grep.file(f)->line
 report(line.file.name, line.lineNumber, line)
 /Search
 ```
@@ -1088,7 +1088,7 @@ CFT terminal window.
 $ Search
 Enter search term
 class
-&lt;list&gt;
+<list>
 0: ProgramLine.java       | 11  | public class ProgramLine extends LexicalElement {
 1: StmtDebug.java         | 9   | public class StmtDebug extends Stmt {
 2: ExprIf.java            | 9   | public class ExprIf extends LexicalElement {
@@ -1114,10 +1114,10 @@ those.
 /FileTypes
 Input("Enter search term").get =st
 Grep(st) =grep
-ProjectDir.allFiles-&gt;f
+ProjectDir.allFiles->f
 f.name.afterLast(".").toLower =ending
 assert(FileTypes.contains(ending))
-grep.file(f)-&gt;line
+grep.file(f)->line
 report(line.file.name, line.lineNumber, line)
 /Search
 ```
@@ -1135,13 +1135,13 @@ A custom function / object has been created for this purpose, to make it easy to
 ```
 Input("Enter search term").get =st
 Grep(st)=grep
-ProjectDir.allFiles-&gt;f
+ProjectDir.allFiles->f
 assert(FileQualified(f))
-grep.file(f)-&gt;line
+grep.file(f)->line
 out(line)
 |
 =lines
-DateSort.asc(lines)-&gt;line
+DateSort.asc(lines)->line
 report(line.file.name, line.lineNumber, line)
 /SearchLog
 ```
@@ -1178,7 +1178,7 @@ function.
 Let's sort the files in the current directory so that the biggest files are listed first.
 
 ```
-$ Dir.files-&gt;f out(Int(f.length,f)) | _.sort.reverse-&gt;x out(x.data)
+$ Dir.files->f out(Int(f.length,f)) | _.sort.reverse->x out(x.data)
 ```
 
 For each file, we output an Int wrapper object, with value set to file length, and data
@@ -1195,7 +1195,7 @@ corresponding to long in Java.
 To sort on file names, we use the Str() wrapper function / object.
 
 ```
-$ Dir.files-&gt;f out(Str(f.name,f)) | _.sort-&gt; out(x.data)
+$ Dir.files->f out(Str(f.name,f)) | _.sort-> out(x.data)
 ```
 ## Dictionary objects / Dict()
 
@@ -1236,7 +1236,7 @@ To get a named value from a Dict object, use the get(name) function.
 
 ```
 $ Dict.set("a",23).get("a")
-&lt;int&gt;
+<int>
 23
 ```
 ## Date and time processing
@@ -1248,7 +1248,7 @@ If we want to produce a list of files modified within the last 30 minutes, we ca
 easily, using the global function currentTimeMillis, and the File.lastModified function.
 
 ```
-Dir.files-&gt;f assert(currentTimeMillis-f.lastModified&gt;30*60*1000) out(f)
+Dir.files->f assert(currentTimeMillis-f.lastModified>30*60*1000) out(f)
 /FilesModifiedLast30Minutes
 ```
 ### The Date object
@@ -1266,7 +1266,7 @@ To list all files that were changed between two date/times now becomes easy
 ```
 P(1,Date)=fromDate
 P(2,Date)=toDate
-Dir.files-&gt;f
+Dir.files->f
 Date(f.lastModified) =fileDate
 assert(fileDate.after(fromDate) && fileDate.before(toDate))
 out(f)
@@ -1295,7 +1295,7 @@ a named value, and access it.
 ```
 $ ValDef("a",12)
 $ Val("a")
-&lt;int&gt;
+<int>
 12
 ```
 
@@ -1314,7 +1314,7 @@ that location, we have to take care.
 The issue is that we can not just say
 
 ```
-Dir.allFiles-&gt;f ...
+Dir.allFiles->f ...
 ```
 
 ... because the Dir() function returns the current directory, which may change.
@@ -1340,11 +1340,11 @@ last result is not a list, an error is reported.
 ```
 $ cd ..
 # /home/roar
-&lt;obj: Dir&gt;
+<obj: Dir>
 roar/ d:61 f:33
 $ cd project1
 # /home/roar/project1
-&lt;obj: Dir&gt;
+<obj: Dir>
 project1/ d:0 f:0
 $ :syn
 synthesize ok
@@ -1371,7 +1371,7 @@ To synthesize a single element when the last result was a list, use :NN, as foll
 
 ```
 $ ls
-&lt;list&gt;
+<list>
 0: runtime/              | d:2 | f:12
 1: CallScriptFunc.java   | 1k  | 1398  |             | 2020-02-28 22:38:09
 2: CodeHistory.java      | 10k | 10980 | 2d_22:23:24 | 2020-06-07 12:57:49
@@ -1399,7 +1399,7 @@ be immediately run using the dot command, and extended on the fly, for example l
 
 ```
 $ ls
-&lt;list&gt;
+<list>
 0: runtime/              | d:2 | f:12
 1: CallScriptFunc.java   | 1k  | 1398  |             | 2020-02-28 22:38:09
 2: CodeHistory.java      | 10k | 10980 | 2d_22:23:24 | 2020-06-07 12:57:49
@@ -1430,7 +1430,7 @@ view the properties.
 $ Cfg.w
 ........10........20........30........40......  ...
 w=130
-&lt;int&gt;
+<int>
 130
 $ Cfg.w(100)
 ```
@@ -1476,7 +1476,7 @@ with their values (as strings).
 $ Dict.set("name","Julius")
 $ /data
 $ "Dear name".merge(data)
-&lt;String&gt;
+<String>
 Dear Julius
 ```
 
@@ -1489,7 +1489,7 @@ accidentally matching text not meant as merge codes.
 $ Dict.set("name","Julius").mergeCodes
 $ /data
 $ "Dear ${name}".merge(data)
-&lt;String&gt;
+<String>
 Dear Julius
 ```
 ## Using template files
@@ -1503,7 +1503,7 @@ file, which we then iterate over and apply the merge data.
 File("myTemplate.txt")
 /templateFile
 P(1,Dict)=data
-templateFile.read-&gt;line
+templateFile.read->line
 out(line.merge(data))
 /generate
 ```
@@ -1516,10 +1516,10 @@ editing a separate file, is to use a special feature of the script files, called
 of text are converted into code on the fly, becoming a List object.
 
 ```
-&lt;&lt;&lt; SomeMarker
+<<< SomeMarker
 This is
 some text
-&gt;&gt;&gt; SomeMarker
+>>> SomeMarker
 /myTemplate
 ```
 
@@ -1527,7 +1527,7 @@ Calling the myTemplate function from the interactive shell, produces the followi
 
 ```
 $ myTemplate
-&lt;list&gt;
+<list>
 0: This is
 1: some text
 ```
@@ -1541,11 +1541,11 @@ Dict
 .set("b",b)
 .mergeCodes
 =data
-&lt;&lt;&lt; SomeMarker
+<<< SomeMarker
 Value of a: ${a}
 Value of b: ${b}
-&gt;&gt;&gt; SomeMarker
--&gt;line
+>>> SomeMarker
+->line
 out(line.merge(data))
 /myMergedTemplate
 ```
@@ -1564,11 +1564,11 @@ The String.merge() function logic replaces value null for a merge field with emp
 
 ```
 PDict("a","b").mergeCodes =data
-&lt;&lt;&lt; SomeMarker
+<<< SomeMarker
 Value of a: ${a}
 Value of b: ${b}
-&gt;&gt;&gt; SomeMarker
--&gt;line
+>>> SomeMarker
+->line
 out(line.merge(data))
 /myMergedTemplate
 ```
@@ -1602,7 +1602,7 @@ string as a parameter, then accessing the individual templates.
 $ DataFile(File("data.txt"),"###")
 $ /df
 $ df.get("A")
-&lt;list&gt;
+<list>
 This is
 template A
 ```
@@ -1633,11 +1633,11 @@ Having a running instance of CFT on the desktop means access to a capable calcul
 
 ```
 $ 24*60*60
-&lt;int&gt;
+<int>
 86400
 /x
 x*365
-&lt;int&gt;
+<int>
 31536000
 ```
 
@@ -1673,7 +1673,7 @@ package should be invoked.
 File("/tmp/" + currentTimeMillis+".txt")
 /tmpFile
 tmpFile =f
-Lib.Data.each(0,720)-&gt;i
+Lib.Data.each(0,720)->i
 f.append(""+Lib.Math.sin(i) + "," + Lib.Math.cos(i))
 |
 Lib.Plot.typeTimeline.readCSVFile(f).plot(File("out.png"))
@@ -1700,10 +1700,10 @@ Dotted calls are made into predicate calls, by adding a '?' questionmark between
 and the function name.
 ```
 "sdf".?parseInt
-&lt;boolean&gt;
+<boolean>
 false
 "123".?parseInt
-&lt;boolean&gt;
+<boolean>
 true
 ```
 ## Calling functions in external scripts
@@ -1762,7 +1762,7 @@ to be assigned in "logical" order, and allows us to supply a default value if li
 
 ```
 $ List("x","y").split.push(3,"*")=a=b=c a+":"+b+":"+c
-&lt;String&gt;
+<String>
 x:y:*
 ```
 ## Dict set strings
@@ -1775,7 +1775,7 @@ function on the Dict object. It strips whitespace and accepts both colon and '='
 Dict.setStr("a : b")
 /d
 d.get("a")
-&lt;String&gt;
+<String>
 b
 ```
 
@@ -1785,7 +1785,7 @@ this:
 ```
 P(1) =propFile
 Dict =d
-propFile.read-&gt;line
+propFile.read->line
 reject(line.trim.startsWith("#"))
 assert(line.contains(":") || line.contains("="))
 d.setStr(line)
@@ -1803,7 +1803,7 @@ member functions, can be referenced via dotted notation, for increased readabili
 Dict.set("a","b")
 /d
 d.a
-&lt;String&gt;
+<String>
 b
 ```
 ## Dict.get with default value
@@ -1820,10 +1820,10 @@ Usually this makes sense only for session objects.
 ```
 ValDef("data",Dict)
 Val("data").get("a",3)
-&lt;int&gt;
+<int>
 3
 Val("data").keys
-&lt;list&gt;
+<list>
 0: a
 ```
 ## List.nth() negative indexes
@@ -1834,7 +1834,7 @@ last element, -2 the second last, and so on.
 
 ```
 List(1,2,3,4).nth(-1)
-&lt;int&gt;
+<int>
 ```
 ## Working with text lines from stdin
 
@@ -1851,7 +1851,7 @@ some function name, using synthesis.
 readLines("XXX")
 (paste or enter text, then enter end-marker manually)
 XXX
-&lgt;list&gt;
+&lgt;list>
 0: ...
 1: ...
 :syn
@@ -1881,8 +1881,8 @@ loop variable, and loops forever, until break() is called. It also obeys assert(
 and reject() as with list iteration.
 
 ```
-0=a loop break(a&gt;3) out(a) a+1=a
-&lt;list&gt;
+0=a loop break(a>3) out(a) a+1=a
+<list>
 0
 1
 2
@@ -1910,7 +1910,7 @@ we know its value will always be true in this case.
 
 ```
 P(1,Dict)=someData
-!someData.get("ready",false) -&gt; dummy
+!someData.get("ready",false) -> dummy
 someData.set("a",1)
 someData.set("b",2)
 someData.set("ready",true)
@@ -1989,7 +1989,7 @@ To gives a way of creating strings with newlines inside.
 
 ```
 "this^nis^na test".unEsc
-&lt;String&gt;
+<String>
 this
 is
 a test
@@ -2003,7 +2003,7 @@ input lines.
 
 ```
 stdin("read-this") Input("Enter data").get
-&lt;String&gt;
+<String>
 read-this
 ```
 
@@ -2019,7 +2019,7 @@ another way of entering commands.
 
 ```
 stdin("2+3")
-&lt;int&gt;
+<int>
 5
 ```
 
@@ -2040,7 +2040,7 @@ A simple global function, isWindows() is used to differ between the two in code.
 
 ```
 isWindows
-&lt;boolean&gt;
+<boolean>
 false
 ```
 ## Simple line editing
@@ -2064,7 +2064,7 @@ $ !x:p! txt
 ```
 $ Dir.files
 $ /x
-$ !x!-&gt;f out(f)
+$ !x!->f out(f)
 $ /x!
 $ !x:out!assert(f.name.endsWith(".txt")) out(f)
 $ /x!

@@ -6,5 +6,5 @@
 # don't overwrite the original, but instead store it in the first directory,
 # and may later manually move it to the target directory, when it's ok.
 
-codeDirs = code.work ; code.examples ; code.lib
+codeDirs = code.work ; code.examples ; code.sys ; code.lib
 
