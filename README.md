@@ -276,7 +276,9 @@ Enter.
 
 The above is still just a taste of how CFT works. 
 
-The file doc/Doc.html gives a detailed walktrough of most of the functionality.
+Read [full documentation](doc/Doc.md) gives a detailed walktrough of most of the functionality.
+
+Also check out the example scripts under "code.examples".
 
 
 # Philosophy
