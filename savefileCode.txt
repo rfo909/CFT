@@ -99,6 +99,11 @@ S1
 
 
 
+JavaFilesSorted
+/jf
+
+
+
 # Locate source file by part of name
 	Get("Part of file name")=x JavaFilesSorted->f assert(f.name.contains(x)) out(f)
 /FilterFiles
