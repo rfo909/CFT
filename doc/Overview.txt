@@ -33,6 +33,7 @@ Core types
 List processing
  * Iterating over list content
  * Filtering with assert(), reject() and break()
+ * The condOut() statement
 
 Creating custom functions
  * Creating a function

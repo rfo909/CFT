@@ -3,7 +3,7 @@
 
 **Last updated: 2020-07-05 RFO**
 
-**v1.0.11**
+**v1.0.12**
 # Introduction
 
 
@@ -19,7 +19,7 @@ on both. It should run everywhere that supports Java.
 
 
 Development has been going on since May 2018, and was assigned v1.0 as robustness and error
-handling had reached a scertain level, and was then made open source on github. It started
+handling had reached a certain level, and was then made open source on github. It started
 out purely as an interactive
 tool, with emphasis on terse syntax, since all code was entered via the command line. After
 a while it evolved into editing the savefiles, or "script files".
@@ -377,6 +377,13 @@ List(1,2,3,2,1)->x break(x>2) out(x)
 1
 2
 ```
+## The condOut() statement
+
+
+In addition to controlling loops with assert/reject and break, there is the condOut()
+statement, which takes a boolean condition as first parameter, and the value to
+be sent out as second parameter. Can be useful some times.
+
 # Creating custom functions
 
 ## Creating a function
