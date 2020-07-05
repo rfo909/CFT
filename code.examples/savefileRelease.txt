@@ -47,7 +47,7 @@ P(1,savefile) =file
 
 
 # Project home directory
-	savefile.dir
+	savefile.dir.sub("..")
 /HomeDir
 
 

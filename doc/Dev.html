@@ -11,11 +11,22 @@
 
 <h1>CFT Change log</h1>
 
-<h2>v1.0.10b 2020-07-04 Symbolic link</h2>
+<h3>v1.0.11 2020-07-05 Props</h3>
+<p>
+	Added Props class, which reads file "CFT.props". Configures only one field,
+	codeDirs, which is a list of directories in sequence to search for script files. 
+</p>
+
+<h3>v1.0.10b 2020-07-04 Symbolic link</h3>
 <p>
 	Added symbolic link check on File (using nio). Created function .isSymlink() and added
 	check preventing the following to operate when symlink: .delete() .create() .append() .move()
 </p>
+<p>
+	Added global function codeDirs() which returns list of code dirs, if one wants to list
+	content easily
+</p>
+
 
 
 

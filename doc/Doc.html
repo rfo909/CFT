@@ -11,9 +11,9 @@
 
 <h1 style="color:black; border:1px solid blue; padding:1Em; text-align: center">ConfigTool - CFT</h1>
 
-<p><i>Last updated: 2020-07-04 RFO</i></p>
+<p><i>Last updated: 2020-07-05 RFO</i></p>
 
-<p><i>v1.0.10b</i></p>
+<p><i>v1.0.11</i></p>
 
 
 <h1>Introduction</h1>
@@ -32,8 +32,9 @@
 </p>
 
 <p>
-  Development has been going on since May 2018, and the project has reached its v1.0, as certain
-  robustness and error handling functions were refined. It started out purely as an interactive
+  Development has been going on since May 2018, and was assigned v1.0 as robustness and error
+  handling had reached a scertain level, and was then made open source on github. It started
+  out purely as an interactive
   tool, with emphasis on terse syntax, since all code was entered via the command line. After
   a while it evolved into editing the savefiles, or "script files". 
 </p>
@@ -514,13 +515,30 @@ To create a file with a single text line:
 </pre>
 
 <p>
-  This creates a file in the CFT home directory called savefileTest.txt. To load it:
+  This creates a file under the "code.work" directory, found in the CFT home directory,
+  called savefileTest.txt. To load it:
 </p>
 
 <pre>
   $ :load Test
 </pre>
 
+
+<h2>CFT.props</h2>
+<p>
+  The CFT.props file contains the following line by default
+</p>
+<pre>
+codeDirs = code.work ; code.examples ; code.lib
+</pre>
+<p>
+  The first directory is always used when you enter ":save", while the others
+  are searched when loading. 
+</p>
+<p>
+  The code.examples contains some example code for various use, while code.lib contains
+  library code, used by most other scripts.
+</p>
 
 
 

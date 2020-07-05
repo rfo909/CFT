@@ -2,6 +2,7 @@ build/
 src/ebuild/
 src/.classpath
 src/.project
+code.work/
 
 # Compiled class file
 *.class

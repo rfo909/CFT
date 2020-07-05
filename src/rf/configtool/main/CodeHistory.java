@@ -33,14 +33,16 @@ public class CodeHistory {
     
      
     private Stdio stdio;
+    private PropsFile props;
     private Map<String, CodeLines> namedLines=new HashMap<String,CodeLines>();
     private List<String> namesInSequence=new ArrayList<String>();
     private ObjCfg cfg;
     
     private String currLine;
     
-    public CodeHistory (Stdio stdio, ObjCfg cfg) {
+    public CodeHistory (Stdio stdio, PropsFile props, ObjCfg cfg) {
         this.stdio=stdio;
+        this.props=props;
         this.cfg=cfg;
     }
     
@@ -88,11 +90,6 @@ public class CodeHistory {
         final int available=cfg.getScreenWidth();
         
         String hr = "+-----------------------------------------------------";
-
-//        String hr="+--------------";
-//        int x=available;
-//        if (x > 500) x=80;  // ":nowrap" is implemented as width = 999999
-//        while (hr.length() < x) hr=hr+"-";
         
         stdio.println(hr);
         int nameMaxLength=3;
@@ -103,11 +100,8 @@ public class CodeHistory {
                 if (name.length() > nameMaxLength) nameMaxLength=name.length();
             }
 
-            List<String> output=new ArrayList<String>();
-            
             for (int i=0; i<namesInSequence.size(); i++) {
                 String name=namesInSequence.get(i);
-                CodeLines c=namedLines.get(name);
                 
                 if (symbolSubStr != null && !name.contains(symbolSubStr)) continue; 
                 
@@ -137,12 +131,23 @@ public class CodeHistory {
         
     }
     
-    public File createSavefile (String name) {
-        return new File("savefile" + name + ".txt");
+    private String createSavefileName (String name) {
+        return "savefile" + name + ".txt";
     }
     
+    /**
+     * Return File for existing file as looked up along the Props path. Used 
+     * by global function savefile()
+     */
+    public File getSaveFile (String saveName) throws Exception {
+    	return props.getCodeLoadFile(createSavefileName(saveName));
+    }
+    
+    
     public void save(String saveName) throws Exception {
-        PrintStream ps=new PrintStream(new FileOutputStream(createSavefile(saveName)));
+    	File file=props.getCodeSaveFile(createSavefileName(saveName));
+    	stdio.println("(save) " + file.getCanonicalPath());
+        PrintStream ps=new PrintStream(new FileOutputStream(file));
         
         for (String s:namesInSequence) {
             CodeLines c=namedLines.get(s);
@@ -160,7 +165,9 @@ public class CodeHistory {
         namedLines.clear();
         namesInSequence.clear();
         
-        BufferedReader reader=new BufferedReader(new FileReader(createSavefile(saveName)));
+    	File file=props.getCodeLoadFile(createSavefileName(saveName));
+    	stdio.println("(load) " + file.getCanonicalPath());
+        BufferedReader reader=new BufferedReader(new FileReader(file));
         
         List<CodeLine> lines=new ArrayList<CodeLine>();
         CodeInlineDocument inlineDoc=null;

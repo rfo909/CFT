@@ -46,10 +46,12 @@ import rf.configtool.parser.SourceLocation;
  */
 public class ObjGlobal extends Obj {
     
+	private PropsFile props;
     private Stdio stdio;
 
     private String currDir;
     private CodeHistory codeHistory;
+    
     private String savename;
     
     private HashMap<String,ObjPersistent> sessionObjects=new HashMap<String,ObjPersistent>();
@@ -76,15 +78,16 @@ public class ObjGlobal extends Obj {
         return stdio;
     }
     
-    public ObjGlobal(Stdio stdio) {
-        // funcOverrides: maps names to value, hiding custom named functions
-        // used from ExprCall
+    public ObjGlobal(Stdio stdio) throws Exception {
+    	props=new PropsFile();
 
         this.stdio=stdio;
+        //props.report(stdio);
+        
         
         cfg=new ObjCfg();
         
-        codeHistory=new CodeHistory(stdio, cfg);
+        codeHistory=new CodeHistory(stdio, props, cfg);
         
         add(new FunctionList());
         add(new FunctionDir());
@@ -114,6 +117,7 @@ public class ObjGlobal extends Obj {
         add(new FunctionPrintln());
         add(new FunctionFileLine());
         add(new FunctionError());
+        add(new FunctionCodeDirs());
         
         add(new FunctionLib());
     }
@@ -287,7 +291,7 @@ public class ObjGlobal extends Obj {
 
     public File getSavefile() throws Exception {
         if (savename==null) throw new Exception("No save name defined");
-        return codeHistory.createSavefile(savename);
+        return codeHistory.getSaveFile(savename);
     }
     
     
@@ -795,6 +799,25 @@ public class ObjGlobal extends Obj {
             if (params.size() != 1) throw new Exception("Expected one parameter");
             String s=params.get(0).getValAsString();
             throw new Exception(s);
+        }
+    }
+
+    class FunctionCodeDirs extends Function {
+        public String getName() {
+            return "codeDirs";
+        }
+        public String getShortDesc() {
+            return "codeDirs - returns list of code dirs (see " + PropsFile.PROPS_FILE + ")";
+        }
+        @Override
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            List<Value> list=new ArrayList<Value>();
+            for (String s:props.getCodeDirs()) {
+            	ObjDir dir=new ObjDir(s);
+            	list.add(new ValueObj(dir));
+            }
+            return new ValueList(list);
         }
     }
 

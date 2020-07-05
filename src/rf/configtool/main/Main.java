@@ -26,7 +26,7 @@ public class Main {
     
     private static final Version VERSION = new Version();
     
-    public static void main (String[] args) {
+    public static void main (String[] args) throws Exception {
         BufferedReader stdin=new BufferedReader(new InputStreamReader(System.in));
         PrintStream stdout=System.out;
         
@@ -52,11 +52,11 @@ public class Main {
     private ObjGlobal objGlobal;
     private List<String> initialCommands;
     
-    public Main (BufferedReader stdin, PrintStream stdout) {
+    public Main (BufferedReader stdin, PrintStream stdout) throws Exception {
         this(stdin, stdout, null);
     }
 
-    public Main (BufferedReader stdin, PrintStream stdout, String scriptName) {
+    public Main (BufferedReader stdin, PrintStream stdout, String scriptName) throws Exception {
         stdio=new Stdio(stdin, stdout);
         
         objGlobal=new ObjGlobal(stdio);

@@ -1,0 +1,10 @@
+# Semicolon-separated list of directories to locate code, in sequence
+# from work-directories towards library directories. 
+
+# The first directory is the default save directory. This means that working
+# on a script file from one of the other directories, when you save it, you
+# don't overwrite the original, but instead store it in the first directory,
+# and may later manually move it to the target directory, when it's ok.
+
+codeDirs = code.work ; code.examples ; code.lib
+

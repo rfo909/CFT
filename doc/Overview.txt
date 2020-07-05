@@ -3,8 +3,8 @@ Generated file - see script file savefileOverview.txt
 
 See also shell script ./CreateOverview.sh
 
-Created 2020-07-04 22:55:14 
-v1.0.10b
+Created 2020-07-05 20:24:36 
+v1.0.11
 ------------------------------------------------------------------
 
 Introduction
@@ -40,6 +40,7 @@ Creating custom functions
  * Calling a function
  * Listing custom functions
  * Savefiles
+ * CFT.props
 
 CFT as a functional programming language
  * Code only

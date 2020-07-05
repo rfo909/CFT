@@ -20,8 +20,6 @@
 /License
 
 
-
-
 # Readme for script
 <<< EOF
 
