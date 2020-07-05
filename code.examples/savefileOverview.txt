@@ -74,7 +74,6 @@ Generated file - see script file ${savefile}
 
 See also shell script ./CreateOverview.sh
 
-Created ${date} 
 ${version}
 ------------------------------------------------------------------
 	>>> EOF

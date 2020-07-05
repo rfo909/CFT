@@ -56,7 +56,7 @@ P(1,savefile)=f
 
 
 # Top directory for java code
-	savefile.dir.sub("src")
+	savefile.dir.sub("..").sub("src")
 /DirCode
 
 
