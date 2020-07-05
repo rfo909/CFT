@@ -51,6 +51,9 @@ public abstract class Stmt extends LexicalElement {
         if (ts.peekStr("out")) {
             return new StmtOut(ts);
         }
+        if (ts.peekStr("condOut")) {
+        	return new StmtCondOut(ts);
+        }
         if (ts.peekStr("report")) {
             return new StmtReport(ts);
         }

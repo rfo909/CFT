@@ -11,16 +11,28 @@
 
 <h1>CFT Change log</h1>
 
+<h3>v1.0.12 2020-07-05 condOut()</h3>
+<p>
+	Like out() but with a conditional expression. For situations where assert/reject isn't suitable,
+	for example we want to do more logic. Since out() is not an expression it can not be put inside
+	an if() or when(), and also it can not be put inside a macro.
+</p>
+
 <h3>v1.0.11 2020-07-05 Props</h3>
 <p>
-	Added Props class, which reads file "CFT.props". Configures only one field,
-	codeDirs, which is a list of directories in sequence to search for script files. 
+	Added PropsFile class, which reads file "CFT.props". Configures only one field,
+	codeDirs, which is a list of directories in sequence to search for script files, when
+	loading, and using the first when saving. This means the first directory in the list
+	is for work.
 </p>
 
 <p>
 	Added global function codeDirs() which returns list of code dirs, if one wants to list
-	content easily
+	content easily.
 </p>
+<pre>
+	codeDirs->d d.files->f out(f)
+</pre>
 
 
 

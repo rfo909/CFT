@@ -22,7 +22,7 @@
   ConfigTool (CFT) is a "programmers tool", in the form of a Java application that runs in a 
   terminal window. It has no graphical
   elements, which means it can run everywhere. From the start it has been developed
-  as an interactive environment, with strong emphasis on automation. The syntax is brief, 
+  as an interactive environment, with strong emphasis on automation. The syntax is compact, 
   in the interest of getting useful work out of even a single line of code.
 </p>
 
@@ -318,9 +318,9 @@ To create a file with a single text line:
 
 
 <h3>List addition</h3>
-<o>
+<p>
   Two lists can be added together with "+".
-</o>
+</p>
 <pre>
   List(1,2) + List(3)
   &lt;list&gt;
@@ -963,7 +963,7 @@ codeDirs = code.work ; code.examples ; code.lib
   user input.
 </p>
 <pre>
-  Dir.run("which","leafpad") =lines lines.length>0 && lines.nth.contains("leafpad")
+  Dir.run("which","leafpad") =lines lines.length&gt;0 && lines.nth.contains("leafpad")
   /HasLeafpad
 </pre>
 
@@ -1453,7 +1453,7 @@ The following is used to switch drive letter in Windows.
   easily, using the global function currentTimeMillis, and the File.lastModified function.
 </p>
 <pre>
-  Dir.files-&gt;f assert(currentTimeMillis-f.lastModified>30*60*1000) out(f)
+  Dir.files-&gt;f assert(currentTimeMillis-f.lastModified&gt;30*60*1000) out(f)
   /FilesModifiedLast30Minutes
 </pre>
 
@@ -1537,7 +1537,7 @@ The following is used to switch drive letter in Windows.
   The issue is that we can not just say
 </p>
 <pre>
-  Dir.allFiles->f ...
+  Dir.allFiles-&gt;f ...
 </pre>
 <p>
   ... because the Dir() function returns the current directory, which may change. 
@@ -2001,9 +2001,9 @@ The following is used to switch drive letter in Windows.
   Sometimes we want to call a useful function in another script file. This is
   implemented with the "call" expression below.
 </p>
-<ore>
+<pre>
   call "Script:Function" (....)
-</ore>
+</pre>
 <p>
   Parameters are given as a list of values inside ()'s and may be omitted if no parameters.
 </p>
@@ -2186,7 +2186,7 @@ The following is used to switch drive letter in Windows.
   and reject() as with list iteration. 
 </p>
 <pre>
-  0=a loop break(a>3) out(a) a+1=a
+  0=a loop break(a&gt;3) out(a) a+1=a
   &lt;list&gt;
   0
   1
@@ -2278,14 +2278,14 @@ The following is used to switch drive letter in Windows.
 <p>
   For an escaped string, the escape character is the ^ symbol.
 </p>
-<table>
-  <tr><td>"Double quotes"</td><td>^q</td></tr>
-  <tr><td>'Single quotes' / Apostrophe</td><td>^a</td></tr>
-  <tr><td>Newline</td><td>^n</td></tr>
-  <tr><td>Carriage Return</td><td>^r</td></tr>
-  <tr><td>Tab</td><td>^t</td></tr>
-  <tr><td>The ^ symbol</td><td>^^</td></tr>
-</table>
+<ul>
+  <li>"Double quotes" ^q</li>
+  <li>'Single quotes' / Apostrophe ^a</li>
+  <li>Newline ^n</li>
+  <li>Carriage Return ^r</li>
+  <li>Tab ^t</li>
+  <li>The ^ symbol ^^</li>
+</ul>
 <p>
   To gives a way of creating strings with newlines inside.
 </p>
