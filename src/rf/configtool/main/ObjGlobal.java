@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package rf.configtool.main;
 
 import java.io.*;
+import java.lang.ProcessBuilder.Redirect;
 import java.util.*;
 
 import rf.configtool.main.runtime.*;
@@ -34,6 +35,7 @@ import rf.configtool.main.runtime.lib.ObjInput;
 import rf.configtool.main.runtime.lib.ObjLib;
 import rf.configtool.main.runtime.lib.ObjPersistent;
 import rf.configtool.main.runtime.lib.ObjRegex;
+import rf.configtool.main.runtime.lib.RunCaptureOutput;
 import rf.configtool.main.runtime.lib.ValueObjFileLine;
 import rf.configtool.main.runtime.lib.ValueObjInt;
 import rf.configtool.main.runtime.lib.ValueObjFloat;
@@ -46,7 +48,7 @@ import rf.configtool.parser.SourceLocation;
  */
 public class ObjGlobal extends Obj {
     
-	private PropsFile props;
+	private PropsFile propsFile;
     private Stdio stdio;
 
     private String currDir;
@@ -79,7 +81,7 @@ public class ObjGlobal extends Obj {
     }
     
     public ObjGlobal(Stdio stdio) throws Exception {
-    	props=new PropsFile();
+    	propsFile=new PropsFile();
 
         this.stdio=stdio;
         //props.report(stdio);
@@ -87,7 +89,7 @@ public class ObjGlobal extends Obj {
         
         cfg=new ObjCfg();
         
-        codeHistory=new CodeHistory(stdio, props, cfg);
+        codeHistory=new CodeHistory(stdio, propsFile, cfg);
         
         add(new FunctionList());
         add(new FunctionDir());
@@ -118,6 +120,7 @@ public class ObjGlobal extends Obj {
         add(new FunctionFileLine());
         add(new FunctionError());
         add(new FunctionCodeDirs());
+        add(new FunctionShell());
         
         add(new FunctionLib());
     }
@@ -807,19 +810,57 @@ public class ObjGlobal extends Obj {
             return "codeDirs";
         }
         public String getShortDesc() {
-            return "codeDirs - returns list of code dirs (see " + PropsFile.PROPS_FILE + ")";
+            return "codeDirs() - returns list of code dirs (see " + PropsFile.PROPS_FILE + ")";
         }
         @Override
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
             List<Value> list=new ArrayList<Value>();
-            for (String s:props.getCodeDirs()) {
+            for (String s:propsFile.getCodeDirs()) {
             	ObjDir dir=new ObjDir(s);
             	list.add(new ValueObj(dir));
             }
             return new ValueList(list);
         }
     }
+    
+    class FunctionShell extends Function {
+        public String getName() {
+            return "shell";
+        }
+        public String getShortDesc() {
+            return "shell() - runs shell as configured in " + PropsFile.PROPS_FILE;
+        }
+        @Override
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            callExternalProgram(propsFile.getShell(), ctx);
+            return new ValueBoolean(true);
+        }
+    }
+    
+    
+    
+    private void callExternalProgram (String cmd, Ctx ctx) throws Exception {
+        List<String> strArgs=new ArrayList<String>();
+        strArgs.add(cmd);
+
+        String program=strArgs.get(0);
+        
+        ProcessBuilder processBuilder = new ProcessBuilder(strArgs);
+        
+        processBuilder.redirectInput(Redirect.INHERIT); // connect input
+        processBuilder.redirectOutput(Redirect.INHERIT);
+        processBuilder.redirectError(Redirect.INHERIT);
+
+        // set current directory
+        processBuilder.directory(new File(getCurrDir()));
+        
+        Process process = processBuilder.start();
+        process.waitFor();
+        ctx.getOutText().addSystemMessage("Running " + program + " completed");
+    }
+
 
 
 }

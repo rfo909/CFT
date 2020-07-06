@@ -50,8 +50,6 @@
 
 <h1>CFT as a shell</h1>
 
-
-
 <h2>Navigating directories</h2>
 <p>
   CFT started out as an interactive shell-like app. It runs in a terminal window, and offers a simple '$' prompt, where one enters commands.
@@ -114,6 +112,10 @@ Example:
   $ File("TODO.txt").read
   $ cd doc
 </pre>
+
+
+
+
 
 
 
@@ -328,6 +330,23 @@ To create a file with a single text line:
   2
   3
 </pre>
+
+
+
+
+<h1>The shell() function</h1>
+<p>
+  The global shell() function starts a shell inside CFT. When you exit from it, you're back
+  in CFT.
+</p>
+<pre>
+  $ shell
+  (starts bash or cmd or Powershell or something else)
+  exit
+  # Running /usr/bin/bash completed: 25529ms
+  $
+</pre>
+
 
 
 

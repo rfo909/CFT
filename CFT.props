@@ -8,3 +8,9 @@
 
 codeDirs = . ; code.examples ; code.lib
 
+# Favourite shell, for the shell() global function
+
+shell = /usr/bin/bash
+# shell = cmd
+# shell = powershell
+

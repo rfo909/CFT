@@ -272,6 +272,19 @@ List(1,2) + List(3)
 2
 3
 ```
+# The shell() function
+
+
+The global shell() function starts a shell inside CFT. When you exit from it, you're back
+in CFT.
+
+```
+$ shell
+(starts bash or cmd or Powershell or something else)
+exit
+# Running /usr/bin/bash completed: 25529ms
+$
+```
 # Core types
 
 

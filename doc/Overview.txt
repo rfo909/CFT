@@ -3,7 +3,7 @@ Generated file - see script file savefileOverview.txt
 
 See also shell script ./CreateOverview.sh
 
-v1.0.12
+v1.0.13
 ------------------------------------------------------------------
 
 Introduction
@@ -26,6 +26,8 @@ Base functions and objects: File, Dir and List
  * Dir() function
  * Lists
  |   List addition
+
+The shell() function
 
 Core types
  * String literals

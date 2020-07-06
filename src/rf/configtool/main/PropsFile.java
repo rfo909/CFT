@@ -8,6 +8,8 @@ public class PropsFile {
 	public static final String PROPS_FILE = "CFT.props";
 	
 	private String codeDirs;
+	private String shell = "/usr/bin/bash";
+	
 	
 	public PropsFile () throws Exception {
 		
@@ -28,6 +30,7 @@ public class PropsFile {
 					String value=line.substring(pos+1).trim();
 					
 					if (name.equals("codeDirs")) codeDirs=value;
+					if (name.equals("shell")) shell=value;
 				}
 			}
 		} finally {
@@ -46,6 +49,10 @@ public class PropsFile {
 			list.add(st.nextToken().trim());
 		}
 		return list;
+	}
+	
+	public String getShell() {
+		return shell;
 	}
 	
 	/**
