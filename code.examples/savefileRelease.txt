@@ -41,10 +41,6 @@ P(1,savefile) =file
 /e
 
 
-# list of savefiles to include in release
-	"Code Lib Overview Release KVM VM".split->x out("savefile"+x+".txt")
-/IncludedSavefiles
-
 
 # Project home directory
 	savefile.dir.sub("..")
@@ -58,16 +54,12 @@ call "Overview:CreateOverview"
 
 
 
-# Move savefiles not included in release to TempDir, then run GIT add before restoring the files
+# Move save files from CFT home dir (which is the work dir) then run GIT add before restoring  files
+# Lib and example files are stored in code.lib and code.examples
 # ---
 #
 	# Identify savefiles to move to TargetDir
-	{
-		IncludedSavefiles =list
-		HomeDir.files(Glob("savefile*"))->f
-			reject(list.contains(f.name))
-	   	 	out(f)
-	} =FilesToMove
+	HomeDir.files(Glob("savefile*")) =FilesToMove
 
 	# Create temp-dir
     Dir("/tmp/release"+currentTimeMillis) =d
