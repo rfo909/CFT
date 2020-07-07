@@ -1,18 +1,61 @@
+ License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
+
+# Readme for script
+<<< EOF
+
+--------------------------------------------------
+
+Scripting PowerShell commands.
+
+Running remote commands with PowerShell.
+
+--------------------------------------------------
+
+>>> EOF
+/Readme
+
+
+call "Lib:e" (savefile)
+/e
+
+
 P(1)=host P(2,"get-service -name tomcat")=code
 	println("Executing " + code)
 	List("powershell","invoke-command","-computername",host,"-scriptblock","{" + code + "}") =cmd
 	Dir.run(cmd)
-/PSRemote
+/Call
+
 
 P(1)=host P(2)=service
-	PSRemote(host,"stop-service " + service)
+	Call(host,"stop-service " + service)
 /StopService
 
 P(1)=host P(2)=service
-	PSRemote(host,"start-service " + service)
+	Call(host,"start-service " + service)
 /StartService
 
 P(1)=host P(2)=service
-	PSRemote(host,"get-service " + service)
+	Call(host,"get-service " + service)
 /GetService
+
 

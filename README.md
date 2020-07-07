@@ -62,17 +62,6 @@ $ Dir.files
 When passing no parameters to a function in CFT, there is no need to include the ()'s
 
 
-## Teaser :-)
-
-By following the steps in this README file, you will create three single-line functions
-that when run, ask you to enter a search string, and then searches through all your source
-files (Java used in example), presenting a formatted result with columns for file, line number
-and matching lines.
-
-For more complex searches across multiple file types at once, excluding certain directories
-and so on, read the full Doc.html under ./doc directory.
-
-
 
 
 # An interactive language
