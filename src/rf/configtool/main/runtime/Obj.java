@@ -158,7 +158,7 @@ public abstract class Obj {
             outText.addSystemMessage("");
         }
         
-        outText.addSystemMessage("(" + getTypeName() + ")");
+        //outText.addSystemMessage("(" + getTypeName() + ")");
         
         List<String> fNames=new ArrayList<String>();        
         Iterator<String> names=functions.keySet().iterator();

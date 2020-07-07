@@ -35,6 +35,7 @@ import rf.configtool.main.runtime.lib.ObjInput;
 import rf.configtool.main.runtime.lib.ObjLib;
 import rf.configtool.main.runtime.lib.ObjPersistent;
 import rf.configtool.main.runtime.lib.ObjRegex;
+import rf.configtool.main.runtime.lib.ObjSys;
 import rf.configtool.main.runtime.lib.RunCaptureOutput;
 import rf.configtool.main.runtime.lib.ValueObjFileLine;
 import rf.configtool.main.runtime.lib.ValueObjInt;
@@ -119,9 +120,11 @@ public class ObjGlobal extends Obj {
         add(new FunctionPrintln());
         add(new FunctionFileLine());
         add(new FunctionError());
-        add(new FunctionCodeDirs());
         add(new FunctionShell());
+
         
+        // name spaces
+        add(new FunctionSys());
         add(new FunctionLib());
     }
     
@@ -136,6 +139,11 @@ public class ObjGlobal extends Obj {
     public Runtime getRuntime() {
         return runtime;
     }
+    
+    public PropsFile getPropsFile() {
+    	return propsFile;
+    }
+    
     
     /**
      * ObjGlobal persists states of all external scripts invoked, so as their ValDef and other
@@ -718,7 +726,6 @@ public class ObjGlobal extends Obj {
         }
     } 
 
-    
     class FunctionIsWindows extends Function {
         public String getName() {
             return "isWindows";
@@ -728,10 +735,12 @@ public class ObjGlobal extends Obj {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
-            return new ValueBoolean(runningOnWindows());
+            return new ValueBoolean(ctx.getObjGlobal().runningOnWindows());
         }
-    } 
-    class FunctionSavefile extends Function {
+    }
+ 
+    
+     class FunctionSavefile extends Function {
         public String getName() {
             return "savefile";
         }
@@ -805,25 +814,22 @@ public class ObjGlobal extends Obj {
         }
     }
 
-    class FunctionCodeDirs extends Function {
+   
+    class FunctionSys extends Function {
         public String getName() {
-            return "codeDirs";
+            return "Sys";
         }
         public String getShortDesc() {
-            return "codeDirs() - returns list of code dirs (see " + PropsFile.PROPS_FILE + ")";
+            return "Sys() - create Sys object";
         }
-        @Override
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
-            List<Value> list=new ArrayList<Value>();
-            for (String s:propsFile.getCodeDirs()) {
-            	ObjDir dir=new ObjDir(s);
-            	list.add(new ValueObj(dir));
-            }
-            return new ValueList(list);
+            return new ValueObj(new ObjSys());
         }
-    }
-    
+    } 
+
+   
+
     class FunctionShell extends Function {
         public String getName() {
             return "shell";
@@ -834,7 +840,7 @@ public class ObjGlobal extends Obj {
         @Override
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
-            callExternalProgram(propsFile.getShell(), ctx);
+            callExternalProgram(ctx.getObjGlobal().getPropsFile().getShell(), ctx);
             return new ValueBoolean(true);
         }
     }
@@ -854,12 +860,14 @@ public class ObjGlobal extends Obj {
         processBuilder.redirectError(Redirect.INHERIT);
 
         // set current directory
-        processBuilder.directory(new File(getCurrDir()));
+        processBuilder.directory(new File(ctx.getObjGlobal().getCurrDir()));
         
         Process process = processBuilder.start();
         process.waitFor();
         ctx.getOutText().addSystemMessage("Running " + program + " completed");
     }
+
+ 
 
 
 

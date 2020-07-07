@@ -62,7 +62,7 @@ savefile.dir.sub("..").sub("doc")
 	Dict
 		.set("savefile",savefile.name)
 		.set("date", Date.fmt)
-		.set("version", Lib.Sys.version)
+		.set("version", Sys.version)
 		.mergeCodes
 		=data
 

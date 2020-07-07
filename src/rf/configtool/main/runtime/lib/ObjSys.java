@@ -18,10 +18,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package rf.configtool.main.runtime.lib;
 
 import java.io.*;
+import java.lang.ProcessBuilder.Redirect;
 import java.util.*;
 
 import rf.configtool.main.Ctx;
 import rf.configtool.main.OutText;
+import rf.configtool.main.PropsFile;
 import rf.configtool.main.Version;
 import rf.configtool.main.runtime.ColList;
 import rf.configtool.main.runtime.Function;
@@ -37,9 +39,11 @@ import java.awt.Color;
 public class ObjSys extends Obj {
     
     public ObjSys() {
-        this.add(new FunctionVersion());
-        this.add(new FunctionFunctions());
-        this.add(new FunctionSysMsg());
+        add(new FunctionVersion());
+        add(new FunctionFunctions());
+        add(new FunctionLog());
+        add(new FunctionCodeDirs());
+
     }
     
     @Override
@@ -49,7 +53,7 @@ public class ObjSys extends Obj {
 
 
     public String getTypeName() {
-        return "Sys";
+        return "S";
     }
     
 
@@ -59,7 +63,7 @@ public class ObjSys extends Obj {
 
     
     private String getDesc() {
-        return "Sys";
+        return "S";
     }
     
     private Obj theObj () {
@@ -96,12 +100,12 @@ public class ObjSys extends Obj {
         }
     }
     
-    class FunctionSysMsg extends Function {
+    class FunctionLog extends Function {
         public String getName() {
-            return "sysMsg";
+            return "log";
         }
         public String getShortDesc() {
-            return "sysMsg(msg) - add message to system messages, which are presented after run";
+            return "log(msg) - add message to system messages, which are presented after run";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 1) throw new Exception("Expected string parameter msg");
@@ -111,5 +115,25 @@ public class ObjSys extends Obj {
         }
     }
 
+    class FunctionCodeDirs extends Function {
+        public String getName() {
+            return "codeDirs";
+        }
+        public String getShortDesc() {
+            return "codeDirs() - returns list of code dirs (see " + PropsFile.PROPS_FILE + ")";
+        }
+        @Override
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            List<Value> list=new ArrayList<Value>();
+            for (String s:ctx.getObjGlobal().getPropsFile().getCodeDirs()) {
+            	ObjDir dir=new ObjDir(s);
+            	list.add(new ValueObj(dir));
+            }
+            return new ValueList(list);
+        }
+    }
     
+
+
 }

@@ -22,6 +22,7 @@ import java.util.*;
 
 import rf.configtool.main.Ctx;
 import rf.configtool.main.OutText;
+import rf.configtool.main.PropsFile;
 import rf.configtool.main.runtime.ColList;
 import rf.configtool.main.runtime.Function;
 import rf.configtool.main.runtime.Obj;
@@ -43,7 +44,6 @@ public class ObjLib extends Obj {
         this.add(new FunctionData());
         this.add(new FunctionMath());
         this.add(new FunctionConvert());
-        this.add(new FunctionSys());
     }
     
     @Override
@@ -125,19 +125,25 @@ public class ObjLib extends Obj {
         }
     } 
 
-    class FunctionSys extends Function {
+    class FunctionCodeDirs extends Function {
         public String getName() {
-            return "Sys";
+            return "codeDirs";
         }
         public String getShortDesc() {
-            return "Sys() - create Sys object";
+            return "codeDirs() - returns list of code dirs (see " + PropsFile.PROPS_FILE + ")";
         }
+        @Override
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
-            return new ValueObj(new ObjSys());
+            List<Value> list=new ArrayList<Value>();
+            for (String s:ctx.getObjGlobal().getPropsFile().getCodeDirs()) {
+            	ObjDir dir=new ObjDir(s);
+            	list.add(new ValueObj(dir));
+            }
+            return new ValueList(list);
         }
-    } 
-
+    }
     
+
 
 }

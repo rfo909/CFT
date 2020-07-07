@@ -124,3 +124,11 @@ call "Lib:m" (f)
 	stdin("") FilterFiles.nth =f
 	call "Lib:e" (f)
 /edit
+
+
+
+Input("Savefile search").get=st Grep(st)=grep
+savefile.dir.sub("..").allFiles(Glob("savefile*"))->f
+	grep.file(f)->line report(line.file.name, line.lineNumber, line)
+/SScript
+
