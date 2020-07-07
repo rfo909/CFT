@@ -1,4 +1,4 @@
- License
+# License
 <<< EOF
 #
 # CFT - an interactive programmable shell for automation 
