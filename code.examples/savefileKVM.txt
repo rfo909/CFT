@@ -42,37 +42,37 @@ Dir("/var/lib/libvirt/boot")
 
 
 # List of VM names to protect against accidental delete
-	List()
+    List()
 /DoNotDelete
 
 
 
 # Selects boot image
 # --
-	BootImagesDir.files =data
-	{* P(1).name } =macroGetElementName
-	call "Lib:MenuSelect" (data, macroGetElementName) 
+    BootImagesDir.files =data
+    {* P(1).name } =macroGetElementName
+    call "Lib:MenuSelect" (data, macroGetElementName) 
 /BootImage
 
 
 
 # Various private macros
 # --
-	Dict
-		.set("noSpace", {* P(1).replace(" ","_").replace("^t".unEsc,"_") })
-		.set("exec", {* P(1,"ls -l")=cmd println("------> " + cmd) println("") Dir.run(cmd.split) })
+    Dict
+        .set("noSpace", {* P(1).replace(" ","_").replace("^t".unEsc,"_") })
+        .set("exec", {* P(1,"ls -l")=cmd println("------> " + cmd) println("") Dir.run(cmd.split) })
 /Util
 
 
 
 
 # Run virsh to display status for all defined VM's
-	Util.exec.call("virsh list --all")
+    Util.exec.call("virsh list --all")
 /status
 
 
 # Short for status
-	status
+    status
 /s
 
 
@@ -91,7 +91,7 @@ P(1,"someTarget")=target
 
 P(1,"someTarget")=target
     when(DoNotDelete.contains(target), 
-    	error("Can not delete target " + target + ": remove from DoNotDelete list first"))
+        error("Can not delete target " + target + ": remove from DoNotDelete list first"))
     Stop(target)
     Util.exec.call("virsh undefine --domain " + target)
     Dir("/var/lib/libvirt/images").file(target + ".qcow2").delete
@@ -101,55 +101,55 @@ P(1,"someTarget")=target
 
 # Interactive cloning of existing VM - stops original
 # --
-	call "Lib:Header" ("Cloning existing VM")
-	null=original
-	null=cloneName
-	loop
-		status
-		call "Lib:ReadValue" ("Original VM", original) =original
-		call "Lib:ReadValue" ("New VM", cloneName) =cloneName
-		call "Lib:ReadValueBoolean" ("Ok", false) =ok
-		break(ok)
-	|
-	Stop(original)
-	Util.exec.call("virt-clone --original " + original + " --name " + cloneName + " --auto-clone"
-	    + " --file /var/lib/libvirt/images/" + cloneName + ".qcow2")
-	Start(cloneName)
-	status
+    call "Lib:Header" ("Cloning existing VM")
+    null=original
+    null=cloneName
+    loop
+        status
+        call "Lib:ReadValue" ("Original VM", original) =original
+        call "Lib:ReadValue" ("New VM", cloneName) =cloneName
+        call "Lib:ReadValueBoolean" ("Ok", false) =ok
+        break(ok)
+    |
+    Stop(original)
+    Util.exec.call("virt-clone --original " + original + " --name " + cloneName + " --auto-clone"
+        + " --file /var/lib/libvirt/images/" + cloneName + ".qcow2")
+    Start(cloneName)
+    status
 /Clone
 
 
 
 # Create new VM from scratch - fully interactive
-	null =bootImage
-	null =name
-	false =headless
-	8192 =ram
-	null =cpus
-	32 =disk
-	loop
-		call "Lib:Header" ("Create new KVM Virtual Machine")
+    null =bootImage
+    null =name
+    false =headless
+    8192 =ram
+    null =cpus
+    32 =disk
+    loop
+        call "Lib:Header" ("Create new KVM Virtual Machine")
 
-		BootImage =bootImage
-		println("# Selected " + bootImage.path)
+        BootImage =bootImage
+        println("# Selected " + bootImage.path)
 
-		call "Lib:ReadValue" ("New VM name", name) =name
+        call "Lib:ReadValue" ("New VM name", name) =name
 
-		println("")
-		println("# Headless = no means use virt-manager") 
-		println("# Headless = yes (advanced) means use VNC to complete installation")
-		call "Lib:ReadValueBoolean" ("Headless", headless) =headless
+        println("")
+        println("# Headless = no means use virt-manager") 
+        println("# Headless = yes (advanced) means use VNC to complete installation")
+        call "Lib:ReadValueBoolean" ("Headless", headless) =headless
 
-		call "Lib:ReadValueInt" ("RAM GB", ram) =ram
-		call "Lib:ReadValueInt" ("Disk GB", disk) =disk
-		call "Lib:ReadValueBoolean" ("Enter 'yes' to confirm this is okay", false) =ok
-		break(ok)
-	|
-	call "Lib:ReadValueBoolean" ("Enter 'yes' to continue", false, "yes","abort") =continue
-	when (!continue,{
-		println("Aborting")
-		error("Aborting")
-	})
+        call "Lib:ReadValueInt" ("RAM GB", ram) =ram
+        call "Lib:ReadValueInt" ("Disk GB", disk) =disk
+        call "Lib:ReadValueBoolean" ("Enter 'yes' to confirm this is okay", false) =ok
+        break(ok)
+    |
+    call "Lib:ReadValueBoolean" ("Enter 'yes' to continue", false, "yes","abort") =continue
+    when (!continue,{
+        println("Aborting")
+        error("Aborting")
+    })
 
     List("virt-install",
         "--name",name,
@@ -180,5 +180,5 @@ P(1,"someTarget")=target
 
 
 # Run virt-manager (required X-windows)
-	Dir.run("virt-manager")
+    Dir.run("virt-manager")
 /mgr
