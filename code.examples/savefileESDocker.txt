@@ -19,7 +19,27 @@
 >>> EOF
 /License
 
+# Readme
+<<< EOF
+--------------------------------------------------------------------
 
+Attempting to test ElasticSearch metricbeat module. 
+Using Docker to set up ElasticSearch + Kibana. This works.
+
+Note: at least on windows, starting the containers (with the
+run* functions), control doesn't return to CFT. Had to use ^C, 
+but the containers continued running.
+
+Metricbeat also comes up, but doesn't seem to log any data in
+the default config.
+
+Possibly the Metricbeat component should run on a different
+(actual, not virtual) host, for easier configuration via
+.../mmetricbeat/metricbeat.yml and .../metricbeat/modules.d/xx.yml
+
+--------------------------------------------------------------------
+>>> EOF
+/Readme
 
 
 # Displays readme for this script file
