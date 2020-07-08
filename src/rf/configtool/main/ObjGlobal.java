@@ -60,7 +60,9 @@ public class ObjGlobal extends Obj {
     private HashMap<String,ObjPersistent> sessionObjects=new HashMap<String,ObjPersistent>();
     private HashMap<String,Value> sessionValues=new HashMap<String,Value>();
     private HashMap<String,ExternalScriptState> externalScriptStates=new HashMap<String,ExternalScriptState>();
-    private Runtime runtime;
+    private final Runtime runtime;
+    
+    private boolean terminationFlag = false;
     
     private ObjCfg cfg;
     
@@ -87,10 +89,11 @@ public class ObjGlobal extends Obj {
         this.stdio=stdio;
         //props.report(stdio);
         
-        
         cfg=new ObjCfg();
         
         codeHistory=new CodeHistory(stdio, propsFile, cfg);
+        this.runtime=new Runtime(this);
+        
         
         add(new FunctionList());
         add(new FunctionDir());
@@ -132,9 +135,6 @@ public class ObjGlobal extends Obj {
         return this;
     }
     
-    public void setRuntime (Runtime runtime) {
-        this.runtime=runtime;
-    }
     
     public Runtime getRuntime() {
         return runtime;
@@ -144,6 +144,13 @@ public class ObjGlobal extends Obj {
     	return propsFile;
     }
     
+    public void setTerminationFlag() {
+    	terminationFlag=true;
+    }
+    
+    public boolean getTerminationFlag() {
+    	return terminationFlag;
+    }
     
     /**
      * ObjGlobal persists states of all external scripts invoked, so as their ValDef and other
@@ -606,7 +613,7 @@ public class ObjGlobal extends Obj {
             if (params.size() != 1) throw new Exception("Expected parameter str");
             String str=getString("str",params,0);
             SourceLocation loc=new SourceLocation("<eval>", 0, 0);
-            return ctx.getObjGlobal().getRuntime().processCodeLines(new CodeLines(str, loc),null);
+            return runtime.processCodeLines(new CodeLines(str, loc),null);
         }
     }
 

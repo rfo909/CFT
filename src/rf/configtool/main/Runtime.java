@@ -43,14 +43,12 @@ public class Runtime {
     public static final String PROGRAM_LINE_SEPARATOR="|"; // separates multiple ProgramLines on same line
     
     private ObjGlobal objGlobal;
-    private CodeHistory codeHistory;
     private boolean debugMode=false;
     //private String saveIdentifier=null;
     private Value lastResult=null; 
     
     public Runtime (ObjGlobal objGlobal) {
         this.objGlobal=objGlobal;
-        this.codeHistory=objGlobal.getCodeHistory();
     }
 
     public String getCommandProcessorShortName() {
@@ -63,7 +61,7 @@ public class Runtime {
      */
     private boolean processColonCommand(TokenStream ts, CodeHistory codeHistory) throws Exception {
         if (ts.matchStr("quit")) {
-            objGlobal.setRuntime(null);
+            objGlobal.setTerminationFlag();
             return true;
         }
         if (ts.matchStr("save")) {
@@ -203,6 +201,8 @@ public class Runtime {
     public void processInteractiveInput (String line) {
         line=line.trim();
         TokenStream ts=null;
+    	CodeHistory codeHistory=objGlobal.getCodeHistory();
+
         try {
             // load code if file has changed in the background, typically with editor
             objGlobal.refreshIfSavefileUpdated();

@@ -77,11 +77,7 @@ public class ExprCall extends LexicalElement {
         String script=t.substring(0,pos);
         
         String func=t.substring(pos+1);
-        
-
-
-        
-        
+          
         List<Value> args=new ArrayList<Value>();
         for (Expr expr:params) args.add(expr.resolve(ctx));
         

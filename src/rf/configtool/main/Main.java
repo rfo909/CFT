@@ -68,8 +68,6 @@ public class Main {
                 return;
             }
         }
-        Runtime runtime=new Runtime(objGlobal);
-        objGlobal.setRuntime(runtime);
     }
     
     public void setInitialCommands (List<String> initialCommands) {
@@ -82,14 +80,14 @@ public class Main {
 
         try {
             for (;;) {
-                Runtime cp=objGlobal.getRuntime();
                 
-                if (cp==null) {
+                if (objGlobal.getTerminationFlag()) {
                     stdio.println("Runtime exit, cleaning up");
                     objGlobal.cleanupOnExit();
                     return;
                 }
                 
+                Runtime cp=objGlobal.getRuntime();
                 if (!initialCommands.isEmpty()) {
                     String cmd=initialCommands.remove(0).trim();
                     cp.processInteractiveInput(cmd);

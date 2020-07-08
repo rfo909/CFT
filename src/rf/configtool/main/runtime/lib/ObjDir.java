@@ -483,13 +483,13 @@ public class ObjDir extends Obj {
                     String line=br.readLine();
                     if (line==null) break;
                     capture.addLine(line);
-                    stdio.println(line); // to allow interactive use
+                    //stdio.println(line);
                 }
             } finally {
                 if (br != null) br.close();
             }
         } else {
-            if (foreground) {
+            if (foreground && capture==null) {
                 process.waitFor();
                 long endTime=System.currentTimeMillis();
                 outText.addSystemMessage("Running " + program + " completed: " + (endTime-startTime) + "ms");
@@ -531,7 +531,7 @@ public class ObjDir extends Obj {
             return "runCapture";
         }
         public String getShortDesc() {
-            return "runCapture(list|...) - execute external program in foreground, returns list of output lines";
+            return "runCapture(list|...) - execute external program in foreground, but capture output, and return list of output lines";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             RunCaptureOutput capt=new RunCaptureOutput();

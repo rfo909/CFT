@@ -38,12 +38,66 @@ choice.
 /Readme
 
 
-
-
 # Edit file
 	P(1,savefile)=file
+	EditHistoryAdd(file)
 	if(isWindows, Dir.runDetach("cmd","/c","notepad",file.path), ShowLinuxEditor(file))
 /e
+
+
+# Edit file from history
+EditFileFromHistory
+/e2
+
+
+
+
+# Add to edit-history
+	P(1)=file
+	EditHistory.add(file) =list
+	File(".editHistory").create(syn(list))
+/EditHistoryAdd
+
+# Get edit-history 
+	# Get from file if exists
+	File(".editHistory") =f
+	List =list
+	when (f.exists && f.read.length==1, {
+		eval(f.read.nth) =list
+		when(list==null, {List =list})
+	}) 
+	
+	# Validate files exist, then remove duplicates
+	list->f assert(f.exists) out(f) | _->f out(Str(f.path,f)) | _.unique->x out(x.data) | _=newList
+
+	# Trim list down to 12 newest entries
+	loop
+		break(newList.length <= 12)
+		newList.remove(0)
+	|	
+	# Update file
+	File(".editHistory").create(syn(newList))
+	newList
+/EditHistory
+
+
+# Show edit history, and select one to edit, or cancel (called from e2())
+	EditHistory =data
+	{* P(1).name } =macroGetElementName
+	Header("Enter part of file name to edit")
+
+	loop
+		ShowOptions(data, macroGetElementName)
+		println("")
+		println("(Press enter to cancel)")
+		SelectOptions(data, macroGetElementName, true) =result
+		when(result.length==1, e(result.nth))
+		break(result.length==1) # just started editor
+		break(result.length==0) # User pressed Enter
+		println("Not unique")
+/EditFileFromHistory
+
+
 
 
 # Page through file
@@ -53,7 +107,6 @@ choice.
 		Dir.run("more", file.path)
 	)
 /m
-
 
 
 # Select Linux editor and remember selection for next time, open file in editor
@@ -100,10 +153,14 @@ choice.
 # --
 	P(1,List)=options
 	P(2,{* "name"})=macroGetElementName
+	P(3,false)=emptyMeansNone
 		readLine("Enter part of name? ") =sel
 		options->opt
 		    assert(macroGetElementName.call(opt).contains(sel))
 		    out(opt)
+		| =result
+		when(emptyMeansNone && sel.trim=="", {List =result})
+		result
 /SelectOptions
 
 
@@ -117,7 +174,7 @@ choice.
 
 
 
-P(1,List) =options P(2,{* "name"}) =macroGetElementName P(3) =title
+P(1,List) =options P(2,{* "name"}) =macroGetElementName P(3) =title 
 #
 	null =selectedElement
 	loop

@@ -59,7 +59,8 @@ call "Overview:CreateOverview"
 # ---
 #
 	# Identify savefiles to move to TargetDir
-	HomeDir.files(Glob("savefile*")) =FilesToMove
+	HomeDir.files(Glob("savefile*"))  + HomeDir.files(Glob(".editHistory"))
+	=FilesToMove
 
 	# Create temp-dir
     Dir("/tmp/release"+currentTimeMillis) =d
