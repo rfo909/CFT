@@ -1,9 +1,9 @@
 # ConfigTool - CFT
 
 
-**Last updated: 2020-07-06 RFO**
+**Last updated: 2020-07-08 RFO**
 
-**v1.0.13**
+**v1.0.14**
 # Introduction
 
 
@@ -123,9 +123,17 @@ $ File("x.txt")
 x.txt   DOES-NOT-EXIST
 ```
 
-The File() function requires a name, relative or absolute path, and returns a File object. As seen
+The File() function requires a name, and returns a File object. As seen
 above, the file needs not exist (yet).
 
+
+The files created in this way are always located in
+the CFT home directory. This gives predictability for (system) data files etc.
+To access or create files in other directories:
+
+```
+$ SomeDirExpression.file("x.txt")
+```
 ### Create file
 
 
@@ -196,35 +204,52 @@ object offers multiple member functions, one of which is
 **files**, which produces a list of files in
 the directory. We can also call the Dir function with a path parameter.
 
-
-To create a subdirectory:
+### Create a subdirectory
 
 ```
 Dir.sub("someDir").create
 ```
+### Parent directory
 
-Also note that to get the parent directory of a Dir object, we use:
+
+ATo get the parent directory of a Dir object, we use:
 
 ```
 Dir.sub("..")
 ```
-
-To get files in a directory:
+### Get files in a directory
 
 ```
 Dir.files
 ```
+### Create a file in a directory
 
-To get directories in a directory:
+```
+Dir.file("x.txt").create("something")
+```
+### Get directories in a directory
 
 ```
 Dir.dirs
 ```
-
-To get all files recursively under a directory:
+### Get all files recursively under a directory
 
 ```
 Dir.allFiles
+```
+
+To get all directories recursively under a directory:
+
+```
+Dir.allDirs
+```
+### Delete a sub-directory
+
+
+The sub-directory must be empty
+
+```
+Dir.sub("something").delete
 ```
 ## Lists
 
@@ -456,17 +481,18 @@ called savefileTest.txt. To load it:
 ```
 $ :load Test
 ```
-## CFT.props
+## CFT.props - codeDirs
 
 
 The CFT.props file contains the following line by default
 
 ```
-codeDirs = code.work ; code.examples ; code.lib
+codeDirs = . ; code.examples ; code.lib
 ```
 
-The first directory is always used when you enter ":save", while the others
-are searched when loading.
+The codeDirs field defines a search order when loading scripts.
+The first directory is 
+**always** used when you type ":save".
 
 
 The code.examples contains some example code for various use, while code.lib contains
@@ -822,10 +848,6 @@ Dir.run("cmd /c git pull origin master".split)
 
 This works the same as Dir.run(), but returns a List of strings representing stdout from the
 external program, to be processed further.
-
-
-The output is also displayed line by line on the screen, in case the external program requires
-user input.
 
 ```
 Dir.run("which","leafpad") =lines lines.length>0 && lines.nth.contains("leafpad")

@@ -11,9 +11,9 @@
 
 <h1 style="color:black; border:1px solid blue; padding:1Em; text-align: center">ConfigTool - CFT</h1>
 
-<p><i>Last updated: 2020-07-06 RFO</i></p>
+<p><i>Last updated: 2020-07-08 RFO</i></p>
 
-<p><i>v1.0.13</i></p>
+<p><i>v1.0.14</i></p>
 
 
 <h1>Introduction</h1>
@@ -167,9 +167,18 @@ int, and the last for float values.
  </pre>
 
  <p>
-  The File() function requires a name, relative or absolute path, and returns a File object. As seen
-  above, the file needs not exist (yet). 
+  The File() function requires a name, and returns a File object. As seen
+  above, the file needs not exist (yet).
 </p>
+<p>
+  The files created in this way are always located in
+  the CFT home directory. This gives predictability for (system) data files etc.
+  To access or create files in other directories:
+</p>
+<pre>
+  $ SomeDirExpression.file("x.txt")
+</pre>
+
 
 <h3>Create file</h3>
 <p>
@@ -248,36 +257,48 @@ To create a file with a single text line:
   object offers multiple member functions, one of which is <b>files</b>, which produces a list of files in 
   the directory. We can also call the Dir function with a path parameter.
 </p>
-<p>
-  To create a subdirectory:
-</p>
+<h3>Create a subdirectory</h3>
 <pre>
   Dir.sub("someDir").create
 </pre>
+<h3>Parent directory</h3>
 <p>
-  Also note that to get the parent directory of a Dir object, we use:
+  ATo get the parent directory of a Dir object, we use:
 </p>
 <pre>
   Dir.sub("..")
 </pre>
-<p>
-  To get files in a directory:
-</p>
+<h3>Get files in a directory</h3>
 <pre>
   Dir.files
 </pre>
-<p>
-  To get directories in a directory:
-</p>
+<h3>Create a file in a directory</h3>
+<pre>
+  Dir.file("x.txt").create("something")
+</pre>
+<h3>Get directories in a directory</h3>
 <pre>
   Dir.dirs
 </pre>
-<p>
-  To get all files recursively under a directory:
-</p>
+<h3>Get all files recursively under a directory</h3>
 <pre>
   Dir.allFiles
 </pre>
+<p>
+  To get all directories recursively under a directory:
+</p>
+<pre>
+  Dir.allDirs
+</pre>
+<h3>Delete a sub-directory</h3>
+<p>
+  The sub-directory must be empty
+</p>
+<pre>
+  Dir.sub("something").delete
+</pre>
+
+
 
 <h2>Lists</h2>
 <p>
@@ -478,6 +499,9 @@ To create a file with a single text line:
 </p>
 
 
+
+
+
 <h1>Creating custom functions</h1>
 
 
@@ -548,16 +572,16 @@ To create a file with a single text line:
 </pre>
 
 
-<h2>CFT.props</h2>
+<h2>CFT.props - codeDirs</h2>
 <p>
   The CFT.props file contains the following line by default
 </p>
 <pre>
-codeDirs = code.work ; code.examples ; code.lib
+codeDirs = . ; code.examples ; code.lib
 </pre>
 <p>
-  The first directory is always used when you enter ":save", while the others
-  are searched when loading. 
+  The codeDirs field defines a search order when loading scripts. 
+  The first directory is <b>always</b> used when you type ":save".
 </p>
 <p>
   The code.examples contains some example code for various use, while code.lib contains
@@ -568,6 +592,7 @@ codeDirs = code.work ; code.examples ; code.lib
   the code.work directory. Doing this means it will hide the version in the code.lib directory.
   Which may be perfectly fine, as long as it is what you intended.
 </p>
+
 
 
 
@@ -982,10 +1007,7 @@ codeDirs = code.work ; code.examples ; code.lib
   This works the same as Dir.run(), but returns a List of strings representing stdout from the
   external program, to be processed further.
 </p>
-<p>
-  The output is also displayed line by line on the screen, in case the external program requires
-  user input.
-</p>
+
 <pre>
   Dir.run("which","leafpad") =lines lines.length&gt;0 && lines.nth.contains("leafpad")
   /HasLeafpad

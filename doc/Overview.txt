@@ -24,6 +24,13 @@ Base functions and objects: File, Dir and List
  |   Show bytes of file
  |   Encoding
  * Dir() function
+ |   Create a subdirectory
+ |   Parent directory
+ |   Get files in a directory
+ |   Create a file in a directory
+ |   Get directories in a directory
+ |   Get all files recursively under a directory
+ |   Delete a sub-directory
  * Lists
  |   List addition
 
@@ -42,7 +49,7 @@ Creating custom functions
  * Calling a function
  * Listing custom functions
  * Savefiles
- * CFT.props
+ * CFT.props - codeDirs
 
 CFT as a functional programming language
  * Code only
