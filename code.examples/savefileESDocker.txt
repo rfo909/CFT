@@ -1,0 +1,134 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
+
+
+
+# Displays readme for this script file
+<<< EOF
+-------------------------------------------------
+This script file contains functions to search
+through the project Java code. 
+
+Run function "S" and try searching for Token. 
+
+Then call function F and enter TokenStream to 
+locate where that class is found.
+
+To view code, run function "m" to page through
+the java code, or "edit" to open java file in
+editor.
+
+To edit the Code script file, run function "e".
+-------------------------------------------------
+>>> EOF
+/RunMe
+
+
+
+
+Cfg.w(130)
+/Init
+
+
+P(1,savefile)=f
+	call "Lib:e" (f)
+/e
+
+
+
+# Top directory for java code
+	savefile.dir.sub("..").sub("src")
+/DirCode
+
+
+
+# Sort java files by name
+	DirCode.allFiles(Glob("*.java"))->f 
+		out(Str(f.name.toLower,f)) 
+		| _.sort->x out(x.data)
+/JavaFilesSorted
+
+
+
+# Parametrized search, called from S1, S2, S3
+	P(1,Grep("test"))=g 
+	JavaFilesSorted->f g.file(f)->line report(f.name, line.lineNumber, line)
+/PSearch
+
+
+# Helper to get text input
+	P(1,"test")=label Input(label).get
+/Get
+
+
+
+PSearch(Grep(Get("Search1")))
+/S1
+
+
+PSearch(Grep(Get("Search2")))
+/S2
+
+
+PSearch(Grep(Get("Search3a AND")).match(Get("AND Search3b")))
+/S3
+
+
+
+S1
+/S
+
+
+
+JavaFilesSorted
+/jf
+
+
+
+# Locate source file by part of name
+	Get("Part of file name")=x JavaFilesSorted->f assert(f.name.contains(x)) out(f)
+/FilterFiles
+
+
+# Front for FilterFiles, with reporting
+	FilterFiles->f report(f.path, f.length)
+/F
+
+
+# Page (more) through the first file located with "F"
+	stdin("") FilterFiles.nth =f
+call "Lib:m" (f)
+/m
+
+
+# Open editor with first file located with "F"
+	stdin("") FilterFiles.nth =f
+	call "Lib:e" (f)
+/edit
+
+
+
+Input("Savefile search").get=st Grep(st)=grep
+savefile.dir.sub("..").allFiles(Glob("savefile*"))->f
+	grep.file(f)->line report(line.file.name, line.lineNumber, line)
+/SScript
+
