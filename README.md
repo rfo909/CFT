@@ -1,6 +1,8 @@
 # CFT ("ConfigTool")
 
-CFT is a shell-like terminal based Java app, and a full programming language.
+
+
+CFT is a shell-like terminal based Java app, and a functional programming language.
 
 It was created for interactive automation of simple tasks, such as
 
@@ -41,8 +43,11 @@ but is also a programming language which lets you build functions, that
 both call each other as well as a system library of 200+ functions,
 belonging, both global and inside objects.
 
-The most central object types are Dir, File and List, along with strings, integers,
-floats and booleans, plus still a few, totalling about 20 as of version 1.0.6.
+CFT is not a complete language, in the sense that one can create classes and instances
+of those. Instead you work with pre-defined functions, which return objects representing
+files, directories, strings, lists, dates etc, and create a hierarchy of compact functions
+that automate boring things like collecting and copying log files. The number of object types
+totals about 20 as of version 1.0.6.
 
 The program prompt is a single '$'. You enter stuff, and press Enter, and it gets
 executed. 
@@ -54,9 +59,9 @@ $ Dir.files
 
 # really means: 
 # - call global function Dir() with no parameters
-# - get Dir object
+# - returns Dir object
 # - call .files() function inside 
-# - get list of File objects
+# - returns list of File objects
 ```
 
 When passing no parameters to a function in CFT, there is no need to include the ()'s
@@ -221,10 +226,11 @@ $ JavaFiles->f out(f.read.length) | _.sum
 ```
 $ Date.sub(Date.Duration.days(30))
 ```
+
 #### Open remote directories (windows)
 
 ```
-$ Dir("\\somehost\d$\someLogDir").files(Glob("*.log"))
+$ Dir("\\\\somehost\d$\someLogDir").files(Glob("*.log"))
 ```
 #### Converting one light year to kilometres
 
@@ -243,6 +249,8 @@ $ Lib.Convert help
 ```
 
 
+
+
 # Edit current script file in editor
 
 The global function savefile() returns a File object for the current script.
@@ -251,10 +259,25 @@ The global function savefile() returns a File object for the current script.
 $ Dir.runDetach("notepad", savefile.path)
 ```
 
-On Linux replace "notepad" with "leafpad" or "gedit" or "subl", or what have you. 
+On Linux replace "notepad" with "leafpad" or "gedit" or "subl", or what have you.
 
 If you need to run "nano", then also replace .runDetach with .run, so as not to run the
 process in the background.
+
+```
+$ Dir.runDetach("leafpad", savefile.path)
+$ Dir.runDetach("subl", savefile.path)
+$ Dir.run("nano", savefile.path)
+```
+
+Or better yet, call the function e() inside the Lib scriptfile as follows:
+
+```
+$ call "Lib:e" (savefile)
+```
+
+This autodetects if you're on Linux or Windows, and for linux lets you select your editor (choice is remembered 
+for the session).
 
 Note that when editing a savefile, all you need do after saving changes, is run the code
 directly, as CFT discoveres the file has changed, and hurries to reload the updated code as you press
