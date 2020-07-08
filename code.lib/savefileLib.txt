@@ -103,7 +103,7 @@ EditFileFromHistory
 # Page through file
 	P(1,savefile)=file
 	if(isWindows,
-		Dir.runDetach("notepad", file.path),
+		file.more,
 		Dir.run("more", file.path)
 	)
 /m

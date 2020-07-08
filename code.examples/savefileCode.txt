@@ -40,7 +40,7 @@ editor.
 To edit the Code script file, run function "e".
 -------------------------------------------------
 >>> EOF
-/RunMe
+/Readme
 
 
 

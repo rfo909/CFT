@@ -53,7 +53,7 @@ public class ObjSys extends Obj {
 
 
     public String getTypeName() {
-        return "S";
+        return "Sys";
     }
     
 
@@ -63,7 +63,7 @@ public class ObjSys extends Obj {
 
     
     private String getDesc() {
-        return "S";
+        return "Sys";
     }
     
     private Obj theObj () {
