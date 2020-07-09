@@ -11,10 +11,23 @@
 
 <h1>CFT Change log</h1>
 
-<h3>v1.0.14 2020-07-08 Lib e2()</h3>
+<h3>v1.0.14 2020-07-09 StmtShellInteractive.java</h3>
+<p>
+	Implemented common parent class for all shell functionality: ls, cd, cat, edit, mkdir, rmdir, touch, rm
+</p>
+<p>
+	Using existing parser still.
+</p>
+<p>
+	Implemented and tested StmtLs, StmtCat, StmtCd
+</p>
+
+<h3>v1.0.14 2020-07-08 .runCapture</h3>
 <p>
 	Removed output to screen for Dir.runCapture()
 </p>
+
+<h3>v1.0.14 2020-07-08 Lib e2()</h3>
 <p>
 	Created function e2() which edits a file from history. The history is persisted to file .editHistory
 	in home directory. Done in preparation for global edit() command, which perhaps with no args

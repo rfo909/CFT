@@ -39,29 +39,48 @@ import rf.configtool.util.TabUtil;
 
 import java.util.*;
 
-public class StmtCd extends StmtShellInteractive {
+public class StmtCat extends StmtShellInteractive {
 
-    public StmtCd (TokenStream ts) throws Exception {
+    public StmtCat (TokenStream ts) throws Exception {
         super(ts);
-        if (!getName().equals("cd")) throw new Exception("Expected cd");
+        if (!getName().equals("cat")) throw new Exception("Expected cat");
     }
 
     @Override
     protected void processDefault(Ctx ctx) throws Exception {
-    	ctx.getObjGlobal().setCurrDir(null);
-    	ctx.getOutText().addSystemMessage(ctx.getObjGlobal().getCurrDir());
-    	ctx.push(new ValueObj(new ObjDir(ctx.getObjGlobal().getCurrDir())));
+    	throw new Exception("cat: No file");
     }
     
     
     @Override
     protected void processOne (Ctx ctx, File file) throws Exception {
-    	if (file.exists() && file.isDirectory()) {
-    		ctx.getObjGlobal().setCurrDir(file.getCanonicalPath());
-        	ctx.getOutText().addSystemMessage(ctx.getObjGlobal().getCurrDir());
-        	ctx.push(new ValueObj(new ObjDir(ctx.getObjGlobal().getCurrDir())));
+    	if (file.exists() && file.isFile()) {
+    		ObjFile objFile = new ObjFile(file.getCanonicalPath());
+    		
+    		List<Value> result=new ArrayList<Value>();
+            BufferedReader br=null;
+            long lineNo=0;
+            try {
+                //br=new BufferedReader(new FileReader(f));
+            	br = new BufferedReader(
+         			   new InputStreamReader(
+         	                      new FileInputStream(file)));
+
+                for (;;) {
+                    String line=br.readLine();
+                    lineNo++;
+                    if (line==null) break;
+                    
+                    String deTabbed=TabUtil.substituteTabs(line,4);
+                    result.add(new ValueObjFileLine(deTabbed, lineNo, objFile));  
+                        // ObjFileLine is subclass of ValueString
+                }
+            } finally {
+                if (br != null) try {br.close();} catch (Exception ex) {};
+            }
+            ctx.push( new ValueList(result) );
     	} else {
-    		throw new Exception("cd: Invalid directory");
+    		throw new Exception("cat: Invalid file");
     	}
   	
     }
@@ -70,7 +89,7 @@ public class StmtCd extends StmtShellInteractive {
     
     @Override
     protected void processSet (Ctx ctx, List<File> elements) throws Exception {
-    	if (elements.size() != 1) throw new Exception("cd: can only process one directory");
+    	if (elements.size() != 1) throw new Exception("cat: can only process one file");
     	processOne(ctx, elements.get(0));
    }
     
