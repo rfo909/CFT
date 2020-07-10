@@ -64,6 +64,10 @@ public class ObjFile extends Obj {
 	        }
         }
         
+        if (isSymlink()) {
+        	this.protection=new Protection("isSymlink");
+        }
+        
         add(new FunctionExists());
         add(new FunctionIsSymlink());
         add(new FunctionName());
@@ -93,8 +97,8 @@ public class ObjFile extends Obj {
     	return protection;
     }
     
-    public void validateDangerousOperation (String op) throws Exception {
-    	protection.validateDangerousOperation(op, name);
+    public void validateDestructiveOperation (String op) throws Exception {
+    	protection.validateDestructiveOperation(op, name);
    }
     
       
@@ -280,13 +284,9 @@ public class ObjFile extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
             
-            validateDangerousOperation("delete");
+            validateDestructiveOperation("delete");
 
             OutText outText=ctx.getOutText();
-            if (isSymlink()) {
-            	outText.addSystemMessage("Symbolic link: can not delete");
-            	return new ValueBoolean(false);
-            }
             File f=new File(name);
             if (f.exists()) {
                 if (f.isFile()) {
@@ -317,14 +317,10 @@ public class ObjFile extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 1) throw new Exception("Expected one parameter any type (file data)");
             
-            validateDangerousOperation("create");
+            validateDestructiveOperation("create");
 
             OutText outText=ctx.getOutText();
             File f=new File(name);
-            if (isSymlink()) {
-            	outText.addSystemMessage("Symbolic link: can not write");
-            	return new ValueBoolean(false);
-            }
 
             PrintStream ps=null;
             try {
@@ -356,15 +352,10 @@ public class ObjFile extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 1) throw new Exception("Expected one parameter any type (file data)");
             
-            validateDangerousOperation("append");
+            validateDestructiveOperation("append");
 
             File f=new File(name);
             
-            if (isSymlink()) {
-                OutText outText=ctx.getOutText();
-            	outText.addSystemMessage("Symbolic link: can not write");
-            	return new ValueBoolean(false);
-            }
             PrintStream ps=null;
             try {
                 ps=new PrintStream(new FileOutputStream(f,true), false, encoding);
@@ -568,7 +559,7 @@ public class ObjFile extends Obj {
             
             ObjDir targetDir=(ObjDir) obj;
             
-            targetDir.validateDangerousOperation("uncompress target dir");
+            targetDir.validateDestructiveOperation("uncompress target dir");
             
             FileInfo info=new FileInfo(name);
             
@@ -614,7 +605,7 @@ public class ObjFile extends Obj {
             ObjFile srcFile=(ObjFile) obj;
             ObjFile targetFile = self();
 
-            targetFile.validateDangerousOperation ("copyFrom target");
+            targetFile.validateDestructiveOperation ("copyFrom target");
 
             File src=new File(srcFile.getPath());
             File target=new File(targetFile.getPath());
@@ -662,7 +653,7 @@ public class ObjFile extends Obj {
             ObjFile targetFile=(ObjFile) obj;
 
 
-            targetFile.validateDangerousOperation("copyTo");
+            targetFile.validateDestructiveOperation("copyTo");
 
             File src=new File(self().getPath());
             File target=new File(targetFile.getPath());
@@ -699,19 +690,14 @@ public class ObjFile extends Obj {
             if (params.size() != 1) throw new Exception("Expected toFile parameter");
             OutText outText=ctx.getOutText();
 
-            if (isSymlink()) {
-            	outText.addSystemMessage("Symbolic link: can not move");
-            	return new ValueBoolean(false);
-            }
-
             Obj obj=getObj("toFile", params, 0);
             if (!(obj instanceof ObjFile)) throw new Exception("Expected File parameter");
 
             ObjFile srcFile=self();
             ObjFile targetFile=(ObjFile) obj;
             
-            srcFile.validateDangerousOperation("move source");
-            targetFile.validateDangerousOperation("move target");
+            srcFile.validateDestructiveOperation("move source");
+            targetFile.validateDestructiveOperation("move target");
  
             File src=new File(srcFile.getPath());
             File target=new File(targetFile.getPath());

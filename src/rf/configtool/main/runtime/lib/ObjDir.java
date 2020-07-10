@@ -19,6 +19,9 @@ package rf.configtool.main.runtime.lib;
 
 import java.io.*;
 import java.lang.ProcessBuilder.Redirect;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -35,13 +38,27 @@ public class ObjDir extends Obj {
     private Protection protection;
 
     public ObjDir(String name, Protection protection) throws Exception {
-        File f=new File(name);
-        this.name=f.getCanonicalPath();
-        this.protection=protection;
+    	this.name=name;
+    	this.protection=protection;
         
         if (protection==null) {
         	throw new Exception("protection==null is invalid, use Protection.NONE");
         }
+        
+        
+        if (isSymlink()) {
+        	this.protection=new Protection("isSymlink");
+        } else {
+	        try {
+	            File f=new File(name);
+	            if (f.exists()) {
+	                this.name=f.getCanonicalPath();
+	            }
+	        } catch (Exception ex) {
+	            this.name=name;
+	        }
+        }
+
 
         
         add(new FunctionName());
@@ -65,13 +82,19 @@ public class ObjDir extends Obj {
 
     }
     
+    
+    public boolean isSymlink() {
+    	Path path=Paths.get(name);
+    	return Files.isSymbolicLink(path);
+    }
+
 
     public Protection getProtection() {
     	return protection;
     }
     
-    public void validateDangerousOperation (String op) throws Exception {
-    	protection.validateDangerousOperation(op, name);
+    public void validateDestructiveOperation (String op) throws Exception {
+    	protection.validateDestructiveOperation(op, name);
    }
     
     public boolean dirExists() {
@@ -298,7 +321,7 @@ public class ObjDir extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
             
-            validateDangerousOperation("create");
+            validateDestructiveOperation("create");
 
         	OutText outText=ctx.getOutText();
             File f=new File(name);
@@ -326,7 +349,7 @@ public class ObjDir extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
             
-            validateDangerousOperation("delete");
+            validateDestructiveOperation("delete");
 
             OutText outText=ctx.getOutText();
             File f=new File(name);
@@ -355,7 +378,7 @@ public class ObjDir extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 1) throw new Exception("Expected File parameter");
 
-            validateDangerousOperation("copy target dir");
+            validateDestructiveOperation("copy target dir");
 
         	Value p1=params.get(0);
             if (!(p1 instanceof ValueObj)) throw new Exception("Expected File parameter");

@@ -27,7 +27,7 @@ public class Protection {
 		return code;
 	}
 
-	public void validateDangerousOperation (String op, String element) throws Exception {
+	public void validateDestructiveOperation (String op, String element) throws Exception {
 		if (code==null) return;
 		throw new Exception("INVALID-OP " + op + " : " + element + " (PROTECTED: " + code + ")");
 	}
