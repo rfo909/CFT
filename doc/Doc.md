@@ -2126,6 +2126,15 @@ m.call("x"), m.call("y")
 See savefileLib.txt for examples of macros used to implement generic
 menu system, as applied to select editor for Linux.
 
+## CFT.props - mCat, mEdit and mMore macros
+
+
+The configuration fields mCat, mEdit and mMore ("m" for macro) define macros
+that are called for interactive commands cat/edit/more. This means it is possible
+to redefine what edit means. Currently, mEdit calls either "Lib:e" if there is a
+file, otherwise "Lib:e2" which presents a history of documents edited. The
+mMore macro calls "Lib:m", while the mCat macro just calls .read on file parameter.
+
 # Example code
 
 ## Windows PowerShell

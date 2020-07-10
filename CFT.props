@@ -14,3 +14,16 @@ shell = /usr/bin/bash
 # shell = cmd
 # shell = powershell
 
+
+# Macros invoked for statements "cat", "edit" and "more". The single parameter
+# may be null or point to a file.
+
+
+mCat = {* P(1)=file when(file==null,error('cat: no file')) file.read->line out(line) }
+
+
+mEdit = {* P(1)=file if(file==null, {call 'Lib:e2'}, {call 'Lib:e' (file)}) }
+
+
+mMore = {* P(1)=file when(file==null,error('more: no file')) call 'Lib:m' (file) }
+

@@ -13,10 +13,26 @@
 
 <h1>CFT Change log</h1>
 
-<h3>v1.0.15 2020-07-10 ls/cd/cat</h3>
+
+<h3>v1.0.15 2020-07-10 cat / edit / more</h3>
+
 <p>
-Removed substring matching, now that globbing works as it should, as we're using same tokenizer 
-as for code. Example:
+	Created class StmtCatEditMore as subclass of StmtShellInteractive, which implements these 
+	three functions (as statements) via macros defined in CFT.props.
+</p>
+<p>
+	Works perfectly. Makes it easy to customize key functionality.
+</p>
+<p>
+	Deleted StmtCat standalone implementation from earlier, as this is a much
+	more elegant (and fun) solution.
+</p>
+
+
+<h3>v1.0.15 2020-07-10 StmtShellInteractive</h3>
+<p>
+	Removed substring matching, now that globbing works as it should, as we're using same tokenizer 
+	as for code. Example:
 </p>
 <pre>
 	$ cat a.b
@@ -24,6 +40,9 @@ as for code. Example:
 <p>
 	This is three tokens, "a", "." and "b", and so if there is no match on the concatenation "a.b", then
 	doing substrings matching would look for file names containg a and dot and b. Not intuitive!
+</p>
+<p>
+	Updated doc
 </p>
 
 <h3>v1.0.15 2020-07-10 File.tail(n)</h3>
@@ -51,9 +70,10 @@ A protected file does not allow delete, create, append, copyFrom (target), copyT
 
 
 
-<h3>v1.0.14 2020-07-09 StmtShellInteractive.java</h3>
+<h3>v1.0.14 2020-07-09 - ls / cd / cat</h3>
 <p>
-	Implemented common parent class for all shell functionality: ls, cd, cat, edit, mkdir, rmdir, touch, rm
+	Implemented common parent class, StmtShellInteractive.java, for all shell functionality: 
+	ls, cd, cat, edit, mkdir, rmdir, touch, rm
 </p>
 <p>
 	Using existing parser still.

@@ -163,6 +163,7 @@ Various advanced topics
  |   Develop complex code in steps
  * Macros
  |   Simple example
+ * CFT.props - mCat, mEdit and mMore macros
 
 Example code
  * Windows PowerShell

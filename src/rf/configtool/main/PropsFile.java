@@ -3,6 +3,8 @@ package rf.configtool.main;
 import java.io.*;
 import java.util.*;
 
+import rf.configtool.parser.SourceLocation;
+
 public class PropsFile {
 
 	public static final String PROPS_FILE = "CFT.props";
@@ -10,6 +12,9 @@ public class PropsFile {
 	private String codeDirs;
 	private String shell = "/usr/bin/bash";
 	
+	private String mCat  = "{* error('mCat macro undefined in " + PROPS_FILE + "') }";
+	private String mEdit = "{* error('mEdit macro undefined in " + PROPS_FILE + "') }";
+	private String mMore = "{* error('mMore macro undefined in " + PROPS_FILE + "') }";
 	
 	public PropsFile () throws Exception {
 		
@@ -31,11 +36,20 @@ public class PropsFile {
 					
 					if (name.equals("codeDirs")) codeDirs=value;
 					if (name.equals("shell")) shell=value;
+					
+					if (name.equals("mCat")) mCat=value;
+					if (name.equals("mEdit")) mEdit=value;
+					if (name.equals("mMore")) mMore=value;
 				}
 			}
 		} finally {
 			if (br != null) try {br.close();} catch (Exception ex) {};
 		}
+		
+	}
+	
+	public SourceLocation getSourceLocation (String value) throws Exception {
+		return new SourceLocation(PROPS_FILE, 0, 0);
 		
 	}
 	
@@ -53,6 +67,18 @@ public class PropsFile {
 	
 	public String getShell() {
 		return shell;
+	}
+	
+	public String getMCat() {
+		return mCat;
+	}
+	
+	public String getMEdit() {
+		return mEdit;
+	}
+	
+	public String getMMore() {
+		return mMore;
 	}
 	
 	/**
