@@ -27,6 +27,7 @@ import rf.configtool.main.runtime.*;
 import rf.configtool.main.runtime.lib.ObjDir;
 import rf.configtool.main.runtime.lib.ObjFile;
 import rf.configtool.main.runtime.lib.ObjGlob;
+import rf.configtool.main.runtime.lib.Protection;
 import rf.configtool.parser.TokenStream;
 
 /**
@@ -42,6 +43,6 @@ public class ExprPwd extends LexicalElement {
     public Value resolve (Ctx ctx) throws Exception {
         String currDir=ctx.getObjGlobal().getCurrDir();
         ctx.getOutText().addSystemMessage(currDir);
-        return new ValueObj(new ObjDir(currDir));
+        return new ValueObj(new ObjDir(currDir,Protection.NoProtection));
     }
 }

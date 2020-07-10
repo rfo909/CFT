@@ -42,10 +42,16 @@ public class ObjFile extends Obj {
 	static final String DefaultEncoding = "ISO_8859_1";
 	
     private String name;
+    private Protection protection;
     private String encoding=DefaultEncoding;
 
-    public ObjFile(String name) {
+    public ObjFile(String name, Protection protection) throws Exception {
         this.name=name;
+        this.protection=protection;
+        
+        if (protection==null) {
+        	throw new Exception("protection==null is invalid, use Protection.NONE");
+        }
 
         if (!isSymlink()) {
 	        try {
@@ -79,8 +85,18 @@ public class ObjFile extends Obj {
         add(new FunctionReadBytes());
         add(new FunctionEncoding());
         add(new FunctionSetEncoding());
+        add(new FunctionProtect());
     }
     
+    public Protection getProtection() {
+    	return protection;
+    }
+    
+    public void validateDangerousOperation (String op) throws Exception {
+    	protection.validateDangerousOperation(op, name);
+   }
+    
+      
     public boolean isSymlink() {
     	Path path=Paths.get(name);
     	return Files.isSymbolicLink(path);
@@ -111,11 +127,15 @@ public class ObjFile extends Obj {
     @Override
     public String synthesize() throws Exception {
     	String enc="";
+    	String prot="";
     	if (!encoding.equals(DefaultEncoding)) {
     		// setEncoding returns self!
     		enc=".setEncoding(" + (new ValueString(encoding)).synthesize() + ")";
     	}
-        return "File(" + (new ValueString(name)).synthesize() + ")" + enc;
+    	if (protection != null && protection.isActive()) {
+    		prot=".protect(" + (new ValueString(protection.getCode()).synthesize() + ")");
+    	}
+        return "File(" + (new ValueString(name)).synthesize() + ")" + enc + prot;
     }
 
 
@@ -258,6 +278,9 @@ public class ObjFile extends Obj {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
+            
+            validateDangerousOperation("delete");
+
             OutText outText=ctx.getOutText();
             if (isSymlink()) {
             	outText.addSystemMessage("Symbolic link: can not delete");
@@ -292,6 +315,9 @@ public class ObjFile extends Obj {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 1) throw new Exception("Expected one parameter any type (file data)");
+            
+            validateDangerousOperation("create");
+
             OutText outText=ctx.getOutText();
             File f=new File(name);
             if (isSymlink()) {
@@ -328,6 +354,9 @@ public class ObjFile extends Obj {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 1) throw new Exception("Expected one parameter any type (file data)");
+            
+            validateDangerousOperation("append");
+
             File f=new File(name);
             
             if (isSymlink()) {
@@ -404,7 +433,7 @@ public class ObjFile extends Obj {
             if (params.size() != 0) throw new Exception("Expected no parameters");
             int pos=name.lastIndexOf(File.separatorChar);
             if (pos < 0) throw new Exception("No directory found");
-            return new ValueObj(new ObjDir(name.substring(0,pos)));
+            return new ValueObj(new ObjDir(name.substring(0,pos), protection));
         }
     }
 
@@ -538,6 +567,8 @@ public class ObjFile extends Obj {
             
             ObjDir targetDir=(ObjDir) obj;
             
+            targetDir.validateDangerousOperation("uncompress target dir");
+            
             FileInfo info=new FileInfo(name);
             
             String targetFileName;
@@ -559,7 +590,7 @@ public class ObjFile extends Obj {
             
             in.close();
             out.close();
-            return new ValueObj(new ObjFile(targetPath));
+            return new ValueObj(new ObjFile(targetPath, targetDir.getProtection()));
         }
     }
 
@@ -572,15 +603,20 @@ public class ObjFile extends Obj {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 1) throw new Exception("Expected File parameter");
-            OutText outText=ctx.getOutText();
+
+
+        	OutText outText=ctx.getOutText();
 
             Obj obj=getObj("File", params, 0);
             if (!(obj instanceof ObjFile)) throw new Exception("Expected File parameter");
 
             ObjFile srcFile=(ObjFile) obj;
+            ObjFile targetFile = self();
+
+            targetFile.validateDangerousOperation ("copyFrom target");
 
             File src=new File(srcFile.getPath());
-            File target=new File(self().getPath());
+            File target=new File(targetFile.getPath());
 
             if (!src.isFile()) throw new Exception("Source '" + src.getCanonicalPath() + "' is not a file");
             if (target.exists()) {
@@ -621,10 +657,15 @@ public class ObjFile extends Obj {
             Obj obj=getObj("File", params, 0);
             if (!(obj instanceof ObjFile)) throw new Exception("Expected File parameter");
 
-            ObjFile srcFile=(ObjFile) obj;
+            ObjFile srcFile=self();
+            ObjFile targetFile=(ObjFile) obj;
+
+
+            targetFile.validateDangerousOperation("copyTo");
 
             File src=new File(self().getPath());
-            File target=new File(srcFile.getPath());
+            File target=new File(targetFile.getPath());
+            
 
             if (!src.isFile()) throw new Exception("Source '" + src.getCanonicalPath() + "' is not a file");
             if (target.exists()) {
@@ -665,10 +706,14 @@ public class ObjFile extends Obj {
             Obj obj=getObj("toFile", params, 0);
             if (!(obj instanceof ObjFile)) throw new Exception("Expected File parameter");
 
-            ObjFile srcFile=(ObjFile) obj;
-
-            File src=new File(self().getPath());
-            File target=new File(srcFile.getPath());
+            ObjFile srcFile=self();
+            ObjFile targetFile=(ObjFile) obj;
+            
+            srcFile.validateDangerousOperation("move source");
+            targetFile.validateDangerousOperation("move target");
+ 
+            File src=new File(srcFile.getPath());
+            File target=new File(targetFile.getPath());
 
             if (!src.isFile()) throw new Exception("Source '" + src.getCanonicalPath() + "' is not a file");
             if (target.exists()) {
@@ -841,6 +886,24 @@ public class ObjFile extends Obj {
             return new ValueObj(self());
         }
     }
+    
+
+    class FunctionProtect extends Function {
+        public String getName() {
+            return "protect";
+        }
+        public String getShortDesc() {
+            return "protect(code) - set protection code string, returns self";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 1) throw new Exception("Expected status string parameter");
+        	String label=getString("status", params, 0);
+        	protection = new Protection(label);
+            return new ValueObj(self());
+        }
+    }
+    
+
 
  
     private String fmt (int i, int n) {

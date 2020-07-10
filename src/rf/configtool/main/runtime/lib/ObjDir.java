@@ -32,10 +32,17 @@ import rf.configtool.main.runtime.*;
 public class ObjDir extends Obj {
 
     private String name;
+    private Protection protection;
 
-    public ObjDir(String name) throws Exception {
+    public ObjDir(String name, Protection protection) throws Exception {
         File f=new File(name);
         this.name=f.getCanonicalPath();
+        this.protection=protection;
+        
+        if (protection==null) {
+        	throw new Exception("protection==null is invalid, use Protection.NONE");
+        }
+
         
         add(new FunctionName());
         add(new FunctionPath());
@@ -54,8 +61,18 @@ public class ObjDir extends Obj {
         add(new FunctionRunProcess());
         add(new FunctionRunCapture());
         add(new FunctionShowTree());
+        add(new FunctionProtect());
 
     }
+    
+
+    public Protection getProtection() {
+    	return protection;
+    }
+    
+    public void validateDangerousOperation (String op) throws Exception {
+    	protection.validateDangerousOperation(op, name);
+   }
     
     public boolean dirExists() {
         try {
@@ -75,10 +92,7 @@ public class ObjDir extends Obj {
         return this;
     }
     
-    public ObjDir() throws Exception {
-        this(".");
-    }
-    
+     
     public String getName() {
         return name;
     }
@@ -94,7 +108,12 @@ public class ObjDir extends Obj {
 
     @Override
     public String synthesize() throws Exception {
-        return "Dir(" + (new ValueString(name)).synthesize() + ")";
+    	String prot="";
+    	if (protection != null && protection.isActive()) {
+    		prot=".protect(" + (new ValueString(protection.getCode()).synthesize() + ")");
+    	}
+    	
+        return "Dir(" + (new ValueString(name)).synthesize() + ")" + prot;
     }
 
 
@@ -143,7 +162,7 @@ public class ObjDir extends Obj {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 1) throw new Exception("Expected 1 parameter");
-            return new ValueObj(new ObjDir(name+File.separator+params.get(0).getValAsString()));
+            return new ValueObj(new ObjDir(name+File.separator+params.get(0).getValAsString(), protection));
         }
     }
 
@@ -203,7 +222,7 @@ public class ObjDir extends Obj {
             String s=((ValueString) params.get(0)).getVal();
             
             String fileName=name+File.separator+s;
-            return new ValueObj(new ObjFile(fileName));
+            return new ValueObj(new ObjFile(fileName, protection));
         }
     }
 
@@ -231,7 +250,7 @@ public class ObjDir extends Obj {
                 File x=new File(name + File.separator + s);
                 if (x.isFile()) {
                     if (glob != null && !glob.matches(s)) continue;
-                    result.add(new ValueObj(new ObjFile(x.getCanonicalPath())));
+                    result.add(new ValueObj(new ObjFile(x.getCanonicalPath(), protection)));
                 }
             }
             return new ValueList(result);
@@ -262,7 +281,7 @@ public class ObjDir extends Obj {
                 File x=new File(name + File.separator + s);
                 if (x.isDirectory()) {
                     if (glob != null && !glob.matches(s)) continue;
-                    result.add(new ValueObj(new ObjDir(x.getCanonicalPath())));
+                    result.add(new ValueObj(new ObjDir(x.getCanonicalPath(), protection)));
                 }
             }
             return new ValueList(result);
@@ -278,7 +297,10 @@ public class ObjDir extends Obj {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
-            OutText outText=ctx.getOutText();
+            
+            validateDangerousOperation("create");
+
+        	OutText outText=ctx.getOutText();
             File f=new File(name);
             if (!f.exists()) {
                 boolean ok = f.mkdirs();
@@ -303,6 +325,9 @@ public class ObjDir extends Obj {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
+            
+            validateDangerousOperation("delete");
+
             OutText outText=ctx.getOutText();
             File f=new File(name);
             if (f.exists()) {
@@ -329,7 +354,10 @@ public class ObjDir extends Obj {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 1) throw new Exception("Expected File parameter");
-            Value p1=params.get(0);
+
+            validateDangerousOperation("copy target dir");
+
+        	Value p1=params.get(0);
             if (!(p1 instanceof ValueObj)) throw new Exception("Expected File parameter");
             
             Obj obj=((ValueObj) p1).getVal();
@@ -384,7 +412,7 @@ public class ObjDir extends Obj {
             List<Value> result=new ArrayList<Value>();
             for (File f:allFiles) {
                 if (glob != null && !glob.matches(f.getName())) continue;
-                result.add(new ValueObj(new ObjFile(f.getCanonicalPath())));
+                result.add(new ValueObj(new ObjFile(f.getCanonicalPath(), protection)));
             }
             return new ValueList(result);
         }
@@ -414,7 +442,7 @@ public class ObjDir extends Obj {
             List<Value> result=new ArrayList<Value>();
             for (File f:allDirs) {
                 if (glob != null && !glob.matches(f.getName())) continue;
-                result.add(new ValueObj(new ObjDir(f.getCanonicalPath())));
+                result.add(new ValueObj(new ObjDir(f.getCanonicalPath(), protection)));
             }
             return new ValueList(result);
         }
@@ -660,6 +688,22 @@ public class ObjDir extends Obj {
     } 
 
 
+
+    class FunctionProtect extends Function {
+        public String getName() {
+            return "protect";
+        }
+        public String getShortDesc() {
+            return "protect(code) - set protection code string, returns self";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 1) throw new Exception("Expected status string parameter");
+        	String label=getString("status", params, 0);
+        	protection = new Protection(label);
+            return new ValueObj(self());
+        }
+    }
+    
 
 
 }

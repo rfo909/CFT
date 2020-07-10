@@ -3,7 +3,7 @@ Generated file - see script file savefileOverview.txt
 
 See also shell script ./CreateOverview.sh
 
-v1.0.14
+v1.0.15
 ------------------------------------------------------------------
 
 Introduction
@@ -93,7 +93,8 @@ Interactive use
  |   Direct sub-directory: use partial name
  |   Change drive letter in Windows
  |   Paths with space
- * Listing files
+ * Show files
+ * List text file
  * Get data from user: Input() and readLine()
  * Searching files / report()
  |   FileLine
@@ -138,34 +139,35 @@ Use as a calculator
  * Lib.Plot
 
 Various advanced topics
- * Predicate calls
- * Calling functions in external scripts
- |   Session state
- |   Session state tree
  * Command line args
+ * Calling functions in external scripts
+ * Protecting directories and files
+ * Working with text lines from stdin
+ * Differing between Windows and Linux
+ * Session state
+ |   Session state tree
+ * Predicate calls
  * List.push()
  * Dict set strings
  * Dict values as properties
  * Dict.get with default value
  * List.nth() negative indexes
- * Working with text lines from stdin
  * Function parameters as List or Dict
  * The general loop statement
- * Alternative conditional blocks
  * Storing CFT data structures to file - syn() and eval()
  * String.esc() and .unEsc()
  |   Escape codes
  * Automating interactive functions
  * Self-modifying script
- * Differing between Windows and Linux
  * Simple line editing
  |   Develop complex code in steps
  * Macros
  |   Simple example
 
 Example code
- * PowerShell example
+ * Windows PowerShell
  * Windows CMD
+ * Linux get user name
 
 Reference: Colon commands
 

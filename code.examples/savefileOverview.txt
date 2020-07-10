@@ -37,6 +37,9 @@ P(1,savefile) =file
 savefile.dir.sub("..").sub("doc")
 /DocDir
 
+DocDir.file("Doc.html").protect("Original")
+/FileDocHtml
+
 # Generate content from Doc.html - no params
 # --
 	Dict
@@ -51,8 +54,7 @@ savefile.dir.sub("..").sub("doc")
 		=data
 
 	Grep.match("<h1> <h2> <h3> <h4>".split) =grep
-	DocDir.file("Doc.html")   =src
-	grep.file(src) ->line
+	grep.file(FileDocHtml) ->line
 		out(line.trim.merge(data)) 
 /content
 

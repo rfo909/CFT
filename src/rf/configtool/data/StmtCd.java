@@ -32,6 +32,7 @@ import rf.configtool.main.runtime.ValueString;
 import rf.configtool.main.runtime.lib.ObjDir;
 import rf.configtool.main.runtime.lib.ObjFile;
 import rf.configtool.main.runtime.lib.ObjGlob;
+import rf.configtool.main.runtime.lib.Protection;
 import rf.configtool.main.runtime.lib.ValueObjFileLine;
 import rf.configtool.parser.Token;
 import rf.configtool.parser.TokenStream;
@@ -50,7 +51,7 @@ public class StmtCd extends StmtShellInteractive {
     protected void processDefault(Ctx ctx) throws Exception {
     	ctx.getObjGlobal().setCurrDir(null);
     	ctx.getOutText().addSystemMessage(ctx.getObjGlobal().getCurrDir());
-    	ctx.push(new ValueObj(new ObjDir(ctx.getObjGlobal().getCurrDir())));
+    	ctx.push(new ValueObj(new ObjDir(ctx.getObjGlobal().getCurrDir(), Protection.NoProtection)));
     }
     
     
@@ -59,7 +60,7 @@ public class StmtCd extends StmtShellInteractive {
     	if (file.exists() && file.isDirectory()) {
     		ctx.getObjGlobal().setCurrDir(file.getCanonicalPath());
         	ctx.getOutText().addSystemMessage(ctx.getObjGlobal().getCurrDir());
-        	ctx.push(new ValueObj(new ObjDir(ctx.getObjGlobal().getCurrDir())));
+        	ctx.push(new ValueObj(new ObjDir(ctx.getObjGlobal().getCurrDir(), Protection.NoProtection)));
     	} else {
     		throw new Exception("cd: Invalid directory");
     	}

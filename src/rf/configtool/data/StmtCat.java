@@ -32,6 +32,7 @@ import rf.configtool.main.runtime.ValueString;
 import rf.configtool.main.runtime.lib.ObjDir;
 import rf.configtool.main.runtime.lib.ObjFile;
 import rf.configtool.main.runtime.lib.ObjGlob;
+import rf.configtool.main.runtime.lib.Protection;
 import rf.configtool.main.runtime.lib.ValueObjFileLine;
 import rf.configtool.parser.Token;
 import rf.configtool.parser.TokenStream;
@@ -55,7 +56,7 @@ public class StmtCat extends StmtShellInteractive {
     @Override
     protected void processOne (Ctx ctx, File file) throws Exception {
     	if (file.exists() && file.isFile()) {
-    		ObjFile objFile = new ObjFile(file.getCanonicalPath());
+    		ObjFile objFile = new ObjFile(file.getCanonicalPath(), Protection.NoProtection);
     		
     		List<Value> result=new ArrayList<Value>();
             BufferedReader br=null;

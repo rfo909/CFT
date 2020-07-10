@@ -56,7 +56,7 @@ P(1,savefile)=f
 
 
 # Top directory for java code
-	savefile.dir.sub("..").sub("src")
+	savefile.dir.sub("..").sub("src").protect("IsSource")
 /DirCode
 
 
@@ -71,9 +71,12 @@ P(1,savefile)=f
 
 # Parametrized search, called from S1, S2, S3
 	P(1,Grep("test"))=g 
-	JavaFilesSorted->f g.file(f)->line report(f.name, line.lineNumber, line)
+	JavaFilesSorted->f g.file(f)->line out(line)
 /PSearch
 
+P(1)=lines
+	lines->line report(line.file.name, line.lineNumber, line)
+/fmt
 
 # Helper to get text input
 	P(1,"test")=label Input(label).get
@@ -81,15 +84,15 @@ P(1,savefile)=f
 
 
 
-PSearch(Grep(Get("Search1")))
+PSearch(Grep(Get("Search1")))=lines fmt(lines)
 /S1
 
 
-PSearch(Grep(Get("Search2")))
+PSearch(Grep(Get("Search2")))=lines fmt(lines)
 /S2
 
 
-PSearch(Grep(Get("Search3a AND")).match(Get("AND Search3b")))
+PSearch(Grep(Get("Search3a AND")).match(Get("AND Search3b")))=lines fmt(lines)
 /S3
 
 

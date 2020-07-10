@@ -29,6 +29,7 @@ import rf.configtool.main.runtime.ValueString;
 import rf.configtool.main.runtime.lib.ObjDir;
 import rf.configtool.main.runtime.lib.ObjFile;
 import rf.configtool.main.runtime.lib.ObjGlob;
+import rf.configtool.main.runtime.lib.Protection;
 import rf.configtool.parser.Token;
 import rf.configtool.parser.TokenStream;
 import java.util.*;
@@ -90,7 +91,7 @@ public class StmtLs extends StmtShellInteractive {
     protected void processOne (Ctx ctx, File file) throws Exception {
     	if (!file.exists()) throw new Exception("No such file or directory");
     	if (file.isFile()) {
-    		ctx.push(new ValueObj(new ObjFile(file.getCanonicalPath())));
+    		ctx.push(new ValueObj(new ObjFile(file.getCanonicalPath(), Protection.NoProtection)));
     		return;
     	}
     	if (file.isDirectory()) {
@@ -138,8 +139,8 @@ public class StmtLs extends StmtShellInteractive {
         }
         
         List<Value> result=new ArrayList<Value>();
-        for (String x:directories) result.add(new ValueObj(new ObjDir(x)));
-        for (String x:files) result.add(new ValueObj(new ObjFile(x)));
+        for (String x:directories) result.add(new ValueObj(new ObjDir(x, Protection.NoProtection)));
+        for (String x:files) result.add(new ValueObj(new ObjFile(x, Protection.NoProtection)));
                 
         ctx.push(new ValueList(result));   	
     	

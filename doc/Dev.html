@@ -9,7 +9,22 @@
 </head>
 <body>
 
-<h1>CFT Change log</h1>
+
+<h1>v1.0.15 CFT Change log</h1>
+
+<h3>2020-07-10 Dir.protect() and File.protect()</h3>
+<p>
+	Protection is a property that can be set on a file or a directory. Any files and directories 
+	derives from it, inherit the protection status. 
+</p>
+<p>
+	A protected directory does not allow create, delete or copy file into dir. This includes blocking 
+File.uncompress if target dir is protected.
+</p>
+<p>
+A protected file does not allow delete, create, append, copyFrom (target), copyTo, move (source or target)
+</p>
+
 
 <h3>v1.0.14 2020-07-09 StmtShellInteractive.java</h3>
 <p>
@@ -27,7 +42,7 @@
 	Removed output to screen for Dir.runCapture()
 </p>
 
-<h3>v1.0.14 2020-07-08 Lib e2()</h3>
+<h3>2020-07-08 Lib e2()</h3>
 <p>
 	Created function e2() which edits a file from history. The history is persisted to file .editHistory
 	in home directory. Done in preparation for global edit() command, which perhaps with no args

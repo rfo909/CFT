@@ -1,9 +1,9 @@
 # ConfigTool - CFT
 
 
-**Last updated: 2020-07-08 RFO**
+**Last updated: 2020-07-10 RFO**
 
-**v1.0.14**
+**v1.0.15**
 # Introduction
 
 
@@ -46,43 +46,18 @@ $ pwd
 $ lsf
 $ lsd
 ```
-
-The "ls" function as well as it sibling functions "lsd" and "lsf", can take an int argument,
-which makes them return the element identified by the value.
-
-
-Example:
-
-```
-$ ls
-<list>
-0: .git/       | d:6   | f:5
-1: build/      | d:1   | f:0
-2: doc/        | d:1   | f:4
-3: lib/        | d:0   | f:2
-4: src/        | d:2   | f:2
-5: .gitignore  | 0k    | 18      | 84d | 2020-02-28 21:25:26
-6: TODO.txt    | 7k    | 7367    |     | 2019-08-15 22:28:46
-```
 ## Show content of file
 
 
 Now if we want to list content of file "TODO.txt", we can enter
 
 ```
-$ ls(6).read
+$ cat TODO.txt
 ```
 
 Likewise, if we want to change current directory to the "doc" subdirectory, we can enter
 
 ```
-$ cd(ls(2))
-```
-
-Alternatively we could also write
-
-```
-$ File("TODO.txt").read
 $ cd doc
 ```
 # The help system
@@ -1015,7 +990,7 @@ quotes.
 ```
 $ cd "c:\Program Files\blah\blah"
 ```
-## Listing files
+## Show files
 
 
 The "ls" command comes in three variants:
@@ -1031,19 +1006,11 @@ The "ls" command comes in three variants:
 -  "lsf" - lists files only
 
 
+## List text file
 
-What "ls" can not do is globbing. Instead, when you need globbing, you can type
 
-```
-$ Dir.files(Glob("*.txt"))
-```
+The "cat" command lists the content of a file
 
-The reason for this limitation, is that "ls" and its cousins are expressions. That's what
-makes it possible to say:
-
-```
-$ cd(ls(2))
-```
 ## Get data from user: Input() and readLine()
 
 
@@ -1727,26 +1694,18 @@ The above code generates an example plot as a png file in the current directory.
 
 # Various advanced topics
 
-## Predicate calls
+## Command line args
 
 
-Example: to decide if a string is an integer, without
-resorting to either creating a built-in predicate function like .isInt, or even
-using regular expression matching, there is the 
-**predicate call** functionality,
-where one calls a function in a special way, resulting in a boolean value that tells
-if the call was ok or not.
+If CFT is invoked with command line arguments, the first is the name of the script,
+that is, a savefile minus the "savefile" prefix and ".txt" ending.
 
 
-Dotted calls are made into predicate calls, by adding a '?' questionmark between the dot
-and the function name.
+Then follows zero
+or more command lines, on string format. Example:
+
 ```
-"sdf".?parseInt
-<boolean>
-false
-"123".?parseInt
-<boolean>
-true
+./cft Code "S"
 ```
 ## Calling functions in external scripts
 
@@ -1760,7 +1719,66 @@ call "Script:Function" (....)
 
 Parameters are given as a list of values inside ()'s and may be omitted if no parameters.
 
-### Session state
+## Protecting directories and files
+
+
+In order to avoid accidental delete or modifications, both Dir and File have
+a function .protect("desc") which attaches a protection status to that object.
+
+
+Any Dir and File objects created from such an object, inherit the protection status.
+
+```
+Dir("src").protect("Source")
+/dirSrc
+
+A protected directory does not allow create, delete or copy file into dir. This includes blocking
+File.uncompress when target dir is protected.
+
+
+A protected file does not allow delete, create, append, copyFrom (target), copyTo or move (source or target).
+
+
+Invalid operations result in an error, where the operation is described, along with the
+protection code (String).
+
+
+All source directories when searching should be protected, as well as log directories, if originals
+matter.
+
+## Working with text lines from stdin
+
+
+If you've got some text in the copy-paste buffer that you want to work with, the
+readLines() global functions can be used. It takes one parameter, which is an end-marker, which must
+occur alone on a line, to mark the end.
+
+
+The readLines() function returns a list of strings, which you can turn into code and save under
+some function name, using synthesis.
+
+```
+readLines("XXX")
+(paste or enter text, then enter end-marker manually)
+XXX
+&lgt;list>
+0: ...
+1: ...
+:syn
+/someName
+...
+```
+## Differing between Windows and Linux
+
+
+A simple global function, isWindows() is used to differ between the two in code.
+
+```
+isWindows
+<boolean>
+false
+```
+## Session state
 
 
 The session state is where previous values to Input() are stored, as well as values
@@ -1783,18 +1801,26 @@ If code inside an external script in turn calls code inside
 the same rule applies, creating in effect a tree of session states for scripts invoked
 from other scripts.
 
-## Command line args
+## Predicate calls
 
 
-If CFT is invoked with command line arguments, the first is the name of the script,
-that is, a savefile minus the "savefile" prefix and ".txt" ending.
+Example: to decide if a string is an integer, without
+resorting to either creating a built-in predicate function like .isInt, or even
+using regular expression matching, there is the 
+**predicate call** functionality,
+where one calls a function in a special way, resulting in a boolean value that tells
+if the call was ok or not.
 
 
-Then follows zero
-or more command lines, on string format. Example:
-
+Dotted calls are made into predicate calls, by adding a '?' questionmark between the dot
+and the function name.
 ```
-./cft Code "S"
+"sdf".?parseInt
+<boolean>
+false
+"123".?parseInt
+<boolean>
+true
 ```
 ## List.push()
 
@@ -1878,28 +1904,6 @@ last element, -2 the second last, and so on.
 List(1,2,3,4).nth(-1)
 <int>
 ```
-## Working with text lines from stdin
-
-
-If you've got some text in the copy-paste buffer that you want to work with, the
-readLines() global functions can be used. It takes one parameter, which is an end-marker, which must
-occur alone on a line, to mark the end.
-
-
-The readLines() function returns a list of strings, which you can turn into code and save under
-some function name, using synthesis.
-
-```
-readLines("XXX")
-(paste or enter text, then enter end-marker manually)
-XXX
-&lgt;list>
-0: ...
-1: ...
-:syn
-/someName
-...
-```
 ## Function parameters as List or Dict
 
 
@@ -1934,32 +1938,6 @@ and reject() as with list iteration.
 If you forget to increment the variable a, or forget or create an invalid break(), then
 the loop may never terminate, and CFT has to be killed with ^C
 
-## Alternative conditional blocks
-
-
-The iteration operator can be used to iterate over lists, but it will also iterate over
-single values, which means the loop body is executed exactly once.
-
-
-There are two exceptions, and that is if the value is either 
-**null**or boolean 
-**false**. For these values, the iteration statement does not run
-the loop body at all.
-
-
-Note that the iteration loop still requires a loop variable, even though
-we know its value will always be true in this case.
-
-```
-P(1,Dict)=someData
-!someData.get("ready",false) -> dummy
-someData.set("a",1)
-someData.set("b",2)
-someData.set("ready",true)
-|
-someData
-/populateSomeDataIfNotSet
-```
 ## Storing CFT data structures to file - syn() and eval()
 
 
@@ -2075,16 +2053,6 @@ stdin (syn(val), "/"+symbol+"!")
 /def
 def("filesSnapshot", Dir.files)
 ```
-## Differing between Windows and Linux
-
-
-A simple global function, isWindows() is used to differ between the two in code.
-
-```
-isWindows
-<boolean>
-false
-```
 ## Simple line editing
 
 
@@ -2152,16 +2120,23 @@ menu system, as applied to select editor for Linux.
 
 # Example code
 
-## PowerShell example
+## Windows PowerShell
 
 
 The following code is an effective way of using PowerShell from CFT, saving lots of typing.
 
 ```
+# Run remote script-block
+P(1)=host
+P(2)=cmd
+List("powershell","invoke-command","-computername",host,"-scriptblock","{" + cmd + "}") =fullCmd
+Dir.run(fullCmd)
+/PSRun
 # List services via PowerShell
 Input("Host").get =host
 Input("Service name (including wildcards)").get =service
-List("powershell","invoke-command","-computername",host,"-scriptblock","{get-service "+service+"}")
+"get-service -name " + service =cmd  # no splitting
+PSRun(host, cmd)
 /PSGetServ
 ```
 ## Windows CMD
@@ -2178,6 +2153,12 @@ Input("Commit message").get =msg
 DirProject.run("cmd","/c","git","commit","-m",msg)
 DirProject.run("cmd","/c","git","push","origin","master")
 /GitPush
+```
+## Linux get user name
+
+```
+Dir.runCapture("whoami").nth
+/GetUser
 ```
 # Reference: Colon commands
 

@@ -36,6 +36,7 @@ import rf.configtool.main.runtime.lib.ObjLib;
 import rf.configtool.main.runtime.lib.ObjPersistent;
 import rf.configtool.main.runtime.lib.ObjRegex;
 import rf.configtool.main.runtime.lib.ObjSys;
+import rf.configtool.main.runtime.lib.Protection;
 import rf.configtool.main.runtime.lib.RunCaptureOutput;
 import rf.configtool.main.runtime.lib.ValueObjFileLine;
 import rf.configtool.main.runtime.lib.ValueObjInt;
@@ -338,10 +339,10 @@ public class ObjGlobal extends Obj {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size()==0) {
-                return new ValueObj(new ObjDir(getCurrDir()));
+                return new ValueObj(new ObjDir(getCurrDir(), Protection.NoProtection));
             } else if (params.size()==1) {
                 String s=getString("str", params, 0);
-                return new ValueObj(new ObjDir( s ));
+                return new ValueObj(new ObjDir(s, Protection.NoProtection));
             } else {
                 throw new Exception("Expected one optional string parameter");
             }
@@ -358,7 +359,7 @@ public class ObjGlobal extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 1) throw new Exception("Expected 1 parameter");
             if (!(params.get(0) instanceof ValueString)) throw new Exception("Expected String parameter");
-            return new ValueObj(new ObjFile( ((ValueString) params.get(0)).getVal()));
+            return new ValueObj(new ObjFile( ((ValueString) params.get(0)).getVal(), Protection.NoProtection));
         }
     }
     
@@ -757,7 +758,7 @@ public class ObjGlobal extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
             File f=getSavefile();
-            return new ValueObj(new ObjFile(f.getCanonicalPath()));
+            return new ValueObj(new ObjFile(f.getCanonicalPath(), Protection.NoProtection));
         }
     } 
 
