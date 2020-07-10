@@ -1739,6 +1739,7 @@ Any Dir and File objects created from such an object, inherit the protection sta
 ```
 Dir("src").protect("Source")
 /dirSrc
+```
 
 A protected directory does not allow create, delete or copy file into dir. This includes blocking
 File.uncompress when target dir is protected.
