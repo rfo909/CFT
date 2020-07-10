@@ -187,8 +187,10 @@ public abstract class StmtShellInteractive extends Stmt {
 			return;
 		}
 		
-		// attempts substring(s)
-		processSet(ctx, getElementListBySubstrings(path, elements));
+		throw new Exception("No match: " + expr);
+//		
+//		// attempts substring(s)
+//		processSet(ctx, getElementListBySubstrings(path, elements));
 	}
 
   

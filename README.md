@@ -1,6 +1,5 @@
+
 # CFT ("ConfigTool")
-
-
 
 CFT is a shell-like terminal based Java app, and a functional programming language.
 

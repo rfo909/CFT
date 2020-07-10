@@ -252,7 +252,7 @@ To create a file with a single text line:
 <pre>
   Dir.file("x.txt").create("something")
 </pre>
-<h3>Get directories in a directory</h3>
+<h3>Get immediate directories in a directory</h3>
 <pre>
   Dir.dirs
 </pre>
@@ -260,9 +260,7 @@ To create a file with a single text line:
 <pre>
   Dir.allFiles
 </pre>
-<p>
-  To get all directories recursively under a directory:
-</p>
+<h3>Get all directories recursively under a directory:</h3>
 <pre>
   Dir.allDirs
 </pre>
@@ -478,11 +476,11 @@ To create a file with a single text line:
 
 
 
-<h1>Creating custom functions</h1>
+<h1>Creating functions</h1>
 
 
 
-<h2>Creating a function</h2>
+<h2>Naming lines of code</h2>
 <p>
   When some code does what we want, we typically create a function from it. This is done by entering
 </p>
@@ -972,7 +970,7 @@ codeDirs = . ; code.examples ; code.lib
 </p>
 <p>
   Often it is easier to use String.split in this case, as Dir.run() accept a single List value
-  instead of multiple string parameters.
+  instead of a list of values.
 </p>
 <pre>
   Dir.run("cmd /c git pull origin master".split)
@@ -989,10 +987,6 @@ codeDirs = . ; code.examples ; code.lib
   /HasLeafpad
 </pre>
 
-<p>
-  Note that though this function shows output from the external program, this is done line by line,
-  which will mess up programs using cursor positioning, such as "nano" and "top".
-</p>
 
 <h2>Dir.runDetach()</h2>
 <p>
@@ -1000,11 +994,12 @@ codeDirs = . ; code.examples ; code.lib
   off the background process. 
 </p>
 <pre>
-  $ Dir.runDetach("notepad", savefile.path)
+  $ Dir.runDetach("leafpad", savefile.path)
 </pre>
 
+
 <p>
-  This example runs notepad in the background, with the path of the current savefile as 
+  This example runs the (linux) leapad editor in the background, with the path of the current savefile as 
   argument.
 </p>
 
@@ -1059,6 +1054,9 @@ codeDirs = . ; code.examples ; code.lib
 </pre>
 
 
+
+
+
 <h2>Auto reload</h2>
 <p>
   After modifying a script in an editor, and saving it, CFT automatically reloads it the next
@@ -1066,7 +1064,7 @@ codeDirs = . ; code.examples ; code.lib
 </p>
 
 
-<h2>No auto save!</h2>
+<h2>No auto save!!</h2>
 <p>
   Note that when modifying a script from within CFT, by defining or redefining functions, there
   is <em>no auto save</em>. This is to allow experimentation without making changes permanent, 
@@ -1086,17 +1084,25 @@ codeDirs = . ; code.examples ; code.lib
 </pre>
 
 
-<h2>Losing changes</h2>
+<h3>Losing changes</h3>
 <p>
-  Doing changes to a script inside CFT, but forgetting to save, then opening an editor, which
-  naturally reads the savefile, then saving in the editor, means the initial changes done
-  interactively are lost.
+  Doing changes to a script inside CFT, but forgetting to save, then opening the savefile
+  in an editor, and saving, causes CFT to automatically reload the savefile, losing the initial
+  changes. 
 </p>
+<p>
+  After doing interactive changes inside CFT, always save. Also either refresh file in open
+  editor, or close editor and open new.
+</p>
+
+
+
+
 
 
 <h2>Multi-line functions</h2>
 <p>
-  Editing the script file lets us write more complex functions. The save file supports
+  Editing the savefile lets us write more complex functions. The save file supports
   multi-line functions. The same rules apply as for single lines, regarding scope rules, which
   means loops and loop termination using the "pipe" symbol.
 </p>
@@ -1121,7 +1127,10 @@ codeDirs = . ; code.examples ; code.lib
   Letting the first line of a multi-line function be a comment is a great way of 
   producing meaningful content for the interactive '?' command.
 </p>
-
+<p>
+  Alternatively, putting all parameter grabs on a single first line, serves as great
+  documentation of function interface when seen with the '?' command.
+</p>
 
 
 <h2>Debug</h2>
@@ -1148,19 +1157,15 @@ codeDirs = . ; code.examples ; code.lib
   The "cd" command should function mostly as expected. CFT has no autocomplete feature, since
   it only reads lines, not key-presses.
 </p>
-
-<h3>Direct sub-directory: use partial name</h3>
 <p>
-  Changing to a direct sub-directory, you need not type the entire name, just enough to make
-  it unique. You can even supply multiple parts, and the sub-directory that contains all
-  those strings, is selected.
+  CFT handles globbing with '*' in the last part of the path, so you can enter:
 </p>
-<p>
-  Imagine you have three directories LongProjectA, LongProjectB and LongProjectC, and the
-  names A, B and C are used elsewhere, you could write:
 <pre>
-  $ cd Pr B
+  $ cd Proj*
+  $ cd ../OtherProj*  # will fail if more than one match
 </pre>
+
+
 
 <h3>Change drive letter in Windows</h3>
 <p>
@@ -1180,7 +1185,7 @@ The following is used to switch drive letter in Windows.
 </pre>
 
 
-<h2>Show files</h2>
+<h2>List files</h2>
 <p>
   The "ls" command comes in three variants:
 </p>
@@ -1190,12 +1195,24 @@ The following is used to switch drive letter in Windows.
   <li> "lsf" - lists files only</li>
 </ul>
 
-
-<h2>List text file</h2>
 <p>
-  The "cat" command lists the content of a file
+  As with "cd", it handles globbing with '*' in the last part of the path:
 </p>
+<pre>
+  $ ls *.txt
+  $ ls ../OtherProject/*.xml
+</pre>
 
+
+
+<h2>Display text file</h2>
+<p>
+  The "cat" command lists the content of a file, and also understands globbing.
+</p>
+<pre>
+  $ cat README*
+  $ cat ../OtherProject/build*.xml   # will fail if more than one match
+</pre>
 
 
 

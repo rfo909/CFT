@@ -71,6 +71,7 @@ public class StmtCd extends StmtShellInteractive {
     
     @Override
     protected void processSet (Ctx ctx, List<File> elements) throws Exception {
+    	if (elements.size() == 0) throw new Exception("cd: expected one directory");
     	if (elements.size() != 1) throw new Exception("cd: can only process one directory");
     	processOne(ctx, elements.get(0));
    }

@@ -90,6 +90,7 @@ public class StmtCat extends StmtShellInteractive {
     
     @Override
     protected void processSet (Ctx ctx, List<File> elements) throws Exception {
+    	if (elements.size() == 0) throw new Exception("cat: expected one file");
     	if (elements.size() != 1) throw new Exception("cat: can only process one file");
     	processOne(ctx, elements.get(0));
    }

@@ -202,7 +202,7 @@ Dir.files
 ```
 Dir.file("x.txt").create("something")
 ```
-### Get directories in a directory
+### Get immediate directories in a directory
 
 ```
 Dir.dirs
@@ -212,8 +212,7 @@ Dir.dirs
 ```
 Dir.allFiles
 ```
-
-To get all directories recursively under a directory:
+### Get all directories recursively under a directory:
 
 ```
 Dir.allDirs
@@ -397,9 +396,9 @@ In addition to controlling loops with assert/reject and break, there is the cond
 statement, which takes a boolean condition as first parameter, and the value to
 be sent out as second parameter. Can be useful some times.
 
-# Creating custom functions
+# Creating functions
 
-## Creating a function
+## Naming lines of code
 
 
 When some code does what we want, we typically create a function from it. This is done by entering
@@ -813,7 +812,7 @@ For proper operating systems (Linux) you naturally skip the two first elements o
 
 
 Often it is easier to use String.split in this case, as Dir.run() accept a single List value
-instead of multiple string parameters.
+instead of a list of values.
 
 ```
 Dir.run("cmd /c git pull origin master".split)
@@ -828,10 +827,6 @@ external program, to be processed further.
 Dir.run("which","leafpad") =lines lines.length>0 && lines.nth.contains("leafpad")
 /HasLeafpad
 ```
-
-Note that though this function shows output from the external program, this is done line by line,
-which will mess up programs using cursor positioning, such as "nano" and "top".
-
 ## Dir.runDetach()
 
 
@@ -839,10 +834,10 @@ Use to run external program in the background. The CFT code continues running af
 off the background process.
 
 ```
-$ Dir.runDetach("notepad", savefile.path)
+$ Dir.runDetach("leafpad", savefile.path)
 ```
 
-This example runs notepad in the background, with the path of the current savefile as
+This example runs the (linux) leapad editor in the background, with the path of the current savefile as
 argument.
 
 ## Dir.runProcess()
@@ -889,7 +884,7 @@ $ Dir.run("nano", savefile.path)
 After modifying a script in an editor, and saving it, CFT automatically reloads it the next
 time you run something.
 
-## No auto save!
+## No auto save!!
 
 
 Note that when modifying a script from within CFT, by defining or redefining functions, there
@@ -909,17 +904,21 @@ Having saved the script before, you need only enter the following:
 ```
 $ :save
 ```
-## Losing changes
+### Losing changes
 
 
-Doing changes to a script inside CFT, but forgetting to save, then opening an editor, which
-naturally reads the savefile, then saving in the editor, means the initial changes done
-interactively are lost.
+Doing changes to a script inside CFT, but forgetting to save, then opening the savefile
+in an editor, and saving, causes CFT to automatically reload the savefile, losing the initial
+changes.
+
+
+After doing interactive changes inside CFT, always save. Also either refresh file in open
+editor, or close editor and open new.
 
 ## Multi-line functions
 
 
-Editing the script file lets us write more complex functions. The save file supports
+Editing the savefile lets us write more complex functions. The save file supports
 multi-line functions. The same rules apply as for single lines, regarding scope rules, which
 means loops and loop termination using the "pipe" symbol.
 
@@ -942,6 +941,10 @@ the first line is displayed.
 Letting the first line of a multi-line function be a comment is a great way of
 producing meaningful content for the interactive '?' command.
 
+
+Alternatively, putting all parameter grabs on a single first line, serves as great
+documentation of function interface when seen with the '?' command.
+
 ## Debug
 
 
@@ -960,18 +963,12 @@ $ debug("data")
 The "cd" command should function mostly as expected. CFT has no autocomplete feature, since
 it only reads lines, not key-presses.
 
-### Direct sub-directory: use partial name
 
+CFT handles globbing with '*' in the last part of the path, so you can enter:
 
-Changing to a direct sub-directory, you need not type the entire name, just enough to make
-it unique. You can even supply multiple parts, and the sub-directory that contains all
-those strings, is selected.
-
-
-Imagine you have three directories LongProjectA, LongProjectB and LongProjectC, and the
-names A, B and C are used elsewhere, you could write:
 ```
-$ cd Pr B
+$ cd Proj*
+$ cd ../OtherProj*  # will fail if more than one match
 ```
 ### Change drive letter in Windows
 
@@ -990,7 +987,7 @@ quotes.
 ```
 $ cd "c:\Program Files\blah\blah"
 ```
-## Show files
+## List files
 
 
 The "ls" command comes in three variants:
@@ -1006,11 +1003,22 @@ The "ls" command comes in three variants:
 -  "lsf" - lists files only
 
 
-## List text file
+
+As with "cd", it handles globbing with '*' in the last part of the path:
+
+```
+$ ls *.txt
+$ ls ../OtherProject/*.xml
+```
+## Display text file
 
 
-The "cat" command lists the content of a file
+The "cat" command lists the content of a file, and also understands globbing.
 
+```
+$ cat README*
+$ cat ../OtherProject/build*.xml   # will fail if more than one match
+```
 ## Get data from user: Input() and readLine()
 
 

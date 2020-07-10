@@ -86,6 +86,7 @@ public class ObjFile extends Obj {
         add(new FunctionEncoding());
         add(new FunctionSetEncoding());
         add(new FunctionProtect());
+        add(new FunctionTail());
     }
     
     public Protection getProtection() {
@@ -900,6 +901,57 @@ public class ObjFile extends Obj {
         	String label=getString("status", params, 0);
         	protection = new Protection(label);
             return new ValueObj(self());
+        }
+    }
+    
+
+    class FunctionTail extends Function {
+        public String getName() {
+            return "tail";
+        }
+        public String getShortDesc() {
+            return "tail(count) - returns list of lines from end of file";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 1) throw new Exception("Expected count parameter");
+        	final int count=(int) getInt("count", params, 0);
+        	String[] lines=new String[count];
+        	
+            File f=new File(name);
+            if (!f.exists()) {
+                throw new Exception("File does not exist");
+            }
+
+            BufferedReader br=null;
+            int readLines=0;
+            try {
+            	br = new BufferedReader(
+         			   new InputStreamReader(
+         	                      new FileInputStream(f), encoding));
+
+                for (;;) {
+                    String line=br.readLine();
+                    if (line==null) break;
+
+                    lines[readLines%count]=line;
+                    readLines++;
+                }
+                
+                List<Value> result=new ArrayList<Value>();
+                for (int i=0; i<count; i++) {
+                	int pos=(readLines+i)%count;
+                	long lineNo = readLines-count+i;
+                	if (lineNo < 0) continue;
+                	String s=lines[pos];
+                	String deTabbed=TabUtil.substituteTabs(s, 4);
+                	result.add(new ValueObjFileLine(deTabbed, lineNo, self()));
+                }
+                
+                return new ValueList(result);
+            } finally {
+                if (br != null) try {br.close();} catch (Exception ex) {};
+            }
+        	
         }
     }
     

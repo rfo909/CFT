@@ -28,8 +28,9 @@ Base functions and objects: File, Dir and List
  |   Parent directory
  |   Get files in a directory
  |   Create a file in a directory
- |   Get directories in a directory
+ |   Get immediate directories in a directory
  |   Get all files recursively under a directory
+ |   Get all directories recursively under a directory:
  |   Delete a sub-directory
  * Lists
  |   List addition
@@ -44,8 +45,8 @@ List processing
  * Filtering with assert(), reject() and break()
  * The condOut() statement
 
-Creating custom functions
- * Creating a function
+Creating functions
+ * Naming lines of code
  * Calling a function
  * Listing custom functions
  * Savefiles
@@ -81,8 +82,8 @@ Running external programs
 Editing save files
  * Using editor for entering code
  * Auto reload
- * No auto save!
- * Losing changes
+ * No auto save!!
+ |   Losing changes
  * Multi-line functions
  * Comments
  * First line of function ...
@@ -90,11 +91,10 @@ Editing save files
 
 Interactive use
  * Change current directory
- |   Direct sub-directory: use partial name
  |   Change drive letter in Windows
  |   Paths with space
- * Show files
- * List text file
+ * List files
+ * Display text file
  * Get data from user: Input() and readLine()
  * Searching files / report()
  |   FileLine

@@ -5,14 +5,33 @@
 	* {font-family: arial}
 	pre {font-family:courier; margin-left:1Em; border-left: 3px solid blue; padding-left: 1Em; font-size: 16pt}
 	h1 {padding-top:1Em}
+	*.tag {color:black; padding:0.2Em; background-color: orange}
 </style>
 </head>
 <body>
 
 
-<h1>v1.0.15 CFT Change log</h1>
+<h1>CFT Change log</h1>
 
-<h3>2020-07-10 Dir.protect() and File.protect()</h3>
+<h3>v1.0.15 2020-07-10 ls/cd/cat</h3>
+<p>
+Removed substring matching, now that globbing works as it should, as we're using same tokenizer 
+as for code. Example:
+</p>
+<pre>
+	$ cat a.b
+</pre>
+<p>
+	This is three tokens, "a", "." and "b", and so if there is no match on the concatenation "a.b", then
+	doing substrings matching would look for file names containg a and dot and b. Not intuitive!
+</p>
+
+<h3>v1.0.15 2020-07-10 File.tail(n)</h3>
+<p>
+	Added function to get n last lines of file.
+</p>
+
+<h3>v1.0.15 2020-07-10 Dir.protect() and File.protect()</h3>
 <p>
 	Protection is a property that can be set on a file or a directory. Any files and directories 
 	derives from it, inherit the protection status. 
@@ -24,6 +43,12 @@ File.uncompress if target dir is protected.
 <p>
 A protected file does not allow delete, create, append, copyFrom (target), copyTo, move (source or target)
 </p>
+
+
+
+
+<h2 class="tag">2020-07-10 Tagging v1.0.14</h2>
+
 
 
 <h3>v1.0.14 2020-07-09 StmtShellInteractive.java</h3>
