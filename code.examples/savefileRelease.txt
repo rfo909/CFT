@@ -47,17 +47,16 @@ P(1,savefile) =file
 /HomeDir
 
 
-# Update the Overview.txt file
-call "Overview:CreateOverview"
-call "MD:Run"
-/CreateOverview
-
 
 
 # Move save files from CFT home dir (which is the work dir) then run GIT add before restoring  files
 # Lib and example files are stored in code.lib and code.examples
 # ---
-#
+
+	# Update the Overview.txt file
+	call "Overview:CreateOverview"
+	call "MD:Run"
+
 	# Identify savefiles to move to TargetDir
 	HomeDir.files(Glob("savefile*"))  + HomeDir.files(Glob(".editHistory"))
 	=FilesToMove

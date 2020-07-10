@@ -71,6 +71,7 @@ Conditional execution
 Block expressions
  * Block expressions are real expressions
  * Pitfalls
+ * Full functionality
 
 Running external programs
  * Summary

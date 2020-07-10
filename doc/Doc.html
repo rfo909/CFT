@@ -875,7 +875,7 @@ codeDirs = . ; code.examples ; code.lib
 
 <h1>Block expressions</h1>
 <p>
-  An important feature is the concept of block expressions. These are sequences of code
+  Block expressions are sequences of code
   inside curly braces, and are frequently used with if() and when().
 </p>
 <pre>
@@ -926,6 +926,16 @@ codeDirs = . ; code.examples ; code.lib
 </p>
 
 
+<h2>Full functionality</h2>
+<p>
+  Block expressions can contain looping and the code can be partitioned into a
+  number of code blocks (multiple loop spaces). Example:
+</p>
+<pre>
+  List(1,2,3)=a {a->x assert(x%2==1) out(x) | _.sum} 
+  &lt;int&gt;
+  4
+</pre>
 
 
 

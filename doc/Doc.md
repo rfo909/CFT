@@ -733,7 +733,7 @@ when (mode==3, ... )
 # Block expressions
 
 
-An important feature is the concept of block expressions. These are sequences of code
+Block expressions are sequences of code
 inside curly braces, and are frequently used with if() and when().
 
 ```
@@ -781,6 +781,18 @@ when(x=="b", {break(true)})  # does not break loop
 
 This break() does not affect the loop running outside the block expression.
 
+## Full functionality
+
+
+Block expressions can contain looping and the code can be partitioned into a
+number of code blocks (multiple loop spaces). Example:
+
+```
+List(1,2,3)=a {a->
+x assert(x%2==1) out(x) | _.sum}
+<int>
+4
+```
 # Running external programs
 
 ## Summary
