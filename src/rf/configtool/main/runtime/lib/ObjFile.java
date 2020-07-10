@@ -69,7 +69,6 @@ public class ObjFile extends Obj {
         }
         
         add(new FunctionExists());
-        add(new FunctionIsSymlink());
         add(new FunctionName());
         add(new FunctionPath());
         add(new FunctionDir());
@@ -88,7 +87,6 @@ public class ObjFile extends Obj {
         add(new FunctionHex());
         add(new FunctionReadBytes());
         add(new FunctionEncoding());
-        add(new FunctionSetEncoding());
         add(new FunctionProtect());
         add(new FunctionTail());
     }
@@ -135,7 +133,7 @@ public class ObjFile extends Obj {
     	String prot="";
     	if (!encoding.equals(DefaultEncoding)) {
     		// setEncoding returns self!
-    		enc=".setEncoding(" + (new ValueString(encoding)).synthesize() + ")";
+    		enc=".encoding(" + (new ValueString(encoding)).synthesize() + ")";
     	}
     	if (protection != null && protection.isActive()) {
     		prot=".protect(" + (new ValueString(protection.getCode()).synthesize() + ")");
@@ -217,19 +215,6 @@ public class ObjFile extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
             return new ValueBoolean(fileExists());
-        }
-    }
-
-    class FunctionIsSymlink extends Function {
-        public String getName() {
-            return "isSymlink";
-        }
-        public String getShortDesc() {
-            return "isSymlink() - returns true or false";
-        }
-        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 0) throw new Exception("Expected no parameters");
-            return new ValueBoolean(isSymlink());
         }
     }
 
@@ -851,26 +836,18 @@ public class ObjFile extends Obj {
             return "encoding";
         }
         public String getShortDesc() {
-            return "encoding() - get encoding (string)";
+            return "encoding(encoding?) - get or set encoding (returns self)";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 0) throw new Exception("Expected no parameters");
+        	if (params.size() == 1) {
+                String targetEncoding=getString("encoding", params, 0);
+                if (!Charset.isSupported(targetEncoding)) throw new Exception("Charset '" + targetEncoding + "' not supported");
+                encoding=targetEncoding;
+                return new ValueObj(self()); // important for synthesis
+        	} else if (params.size() != 0) {
+            	throw new Exception("Expected single optional parameter encoding");
+        	}
             return new ValueString(encoding);
-        }
-    }
-
-    class FunctionSetEncoding extends Function {
-        public String getName() {
-            return "setEncoding";
-        }
-        public String getShortDesc() {
-            return "setEncoding(encoding) - set encoding, returns self)";
-        }
-        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 1) throw new Exception("Expected encoding parameter (String)");
-            encoding=getString("encoding", params, 0);
-            if (!Charset.isSupported(encoding)) throw new Exception("Charset '" + encoding + "' not supported");
-            return new ValueObj(self());
         }
     }
     

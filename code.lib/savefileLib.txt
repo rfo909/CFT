@@ -70,9 +70,9 @@ EditFileFromHistory
 	# Validate files exist, then remove duplicates
 	list->f assert(f.exists) out(f) | _->f out(Str(f.path,f)) | _.unique->x out(x.data) | _=newList
 
-	# Trim list down to 12 newest entries
+	# Trim list down to N newest entries
 	loop
-		break(newList.length <= 12)
+		break(newList.length <= 20)
 		newList.remove(0)
 	|	
 	# Update file

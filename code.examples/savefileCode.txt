@@ -126,7 +126,7 @@ call "Lib:m" (f)
 # Open editor with first file located with "F"
 	stdin("") FilterFiles.nth =f
 	call "Lib:e" (f)
-/edit
+/ed
 
 
 
