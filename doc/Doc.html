@@ -60,11 +60,12 @@
   $ cd subdir
   $ cd ..
   $ pwd
+  $ ls ../someDir/*.txt
 </pre>
 
 <h3>Listing files or directories only</h3>
 <pre>
-  $ lsf
+  $ lsf 
   $ lsd
 </pre>
 
@@ -77,6 +78,8 @@
 
 <pre>
   $ cat TODO.txt
+  $ more TODO.txt
+  $ edit TODO.txt
 </pre>
 
 <p>
@@ -86,9 +89,6 @@
 <pre>
   $ cd doc
 </pre>
-
-
-
 
 
 
@@ -199,7 +199,7 @@ To create a file with a single text line:
   To page through text file
 </p>
 <pre>
-  File("x.txt").more
+  more x.txt
 </pre>
 
 <h3>Show bytes of file</h3>

@@ -39,6 +39,7 @@ $ ls
 $ cd subdir
 $ cd ..
 $ pwd
+$ ls ../someDir/*.txt
 ```
 ### Listing files or directories only
 
@@ -53,6 +54,8 @@ Now if we want to list content of file "TODO.txt", we can enter
 
 ```
 $ cat TODO.txt
+$ more TODO.txt
+$ edit TODO.txt
 ```
 
 Likewise, if we want to change current directory to the "doc" subdirectory, we can enter
@@ -148,7 +151,7 @@ To append multiple lines, append a list instead.
 To page through text file
 
 ```
-File("x.txt").more
+more x.txt
 ```
 ### Show bytes of file
 
