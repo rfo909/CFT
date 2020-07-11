@@ -118,6 +118,10 @@ public class ObjFile extends Obj {
         return new File(name);
     }
     
+    public String getEncoding() {
+    	return encoding;
+    }
+    
     @Override
     public boolean eq(Obj x) {
         if (x instanceof ObjFile) {

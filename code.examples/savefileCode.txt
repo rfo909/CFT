@@ -68,11 +68,22 @@ P(1,savefile)=f
 /JavaFilesSorted
 
 
+JavaFilesSorted
+/jf
+
+
 
 # Parametrized search, called from S1, S2, S3
 	P(1,Grep("test"))=g 
 	JavaFilesSorted->f g.file(f)->line out(line)
 /PSearch
+
+# Count number of hits in files, called from C1, C2, C3
+	P(1,Grep("test")) .modeCount =g 
+	JavaFilesSorted->f g.file(f)=count out(Int(count, f.name))
+	| _.sort->x   # sort ascending on number of hits
+		report(x.data, x)
+/CSearch
 
 P(1)=lines
 	lines->line report(line.file.name, line.lineNumber, line)
@@ -81,6 +92,17 @@ P(1)=lines
 # Helper to get text input
 	P(1,"test")=label Input(label).get
 /Get
+
+CSearch(Grep(Get("Search1")))
+/C1
+
+
+CSearch(Grep(Get("Search2")))
+/C2
+
+
+CSearch(Grep(Get("Search3a AND")).match(Get("AND Search3b")))
+/C3
 
 
 
@@ -101,9 +123,9 @@ S1
 /S
 
 
+C1
+/C
 
-JavaFilesSorted
-/jf
 
 
 

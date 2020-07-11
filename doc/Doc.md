@@ -1,9 +1,9 @@
 # ConfigTool - CFT
 
 
-**Last updated: 2020-07-10 RFO**
+**Last updated: 2020-07-11 RFO**
 
-**v1.0.15**
+**v1.0.16**
 # Introduction
 
 
@@ -1128,17 +1128,92 @@ class
 :
 :
 ```
-### Grep.lines()
+## Grep.file()
+
+
+Searching for text in files, we use the .file() function of the Grep object.
+
+## Grep.lines()
 
 
 To match content from a list instead of from file, the "Grep.lines()" function takes
 a list of strings.
 
+## Working with huge logs - counting hits
+
+
+The Grep instances are by default set up with a limit of the 1000 first matches. Reaching
+that limit produces a warning. The limits are configurable as follows:
+
+```
+$ Grep("...").limitFirst(100)
+$ Grep("...").limitLast(100)
+```
+### Counting hits
+
+
+Whwn working with big files, one can also decide to initially do a count of hits,
+to narrow down the search terms before doing an actual search.
+
+```
+$ Grep("...").modeCount
+```
+
+When a Grep object is operating in count mode, limits don't apply. Limits exist to protect
+us from running out of memory, and counting does not consume any memory.
+
+
+The following example shows a function for searching through a set of java files and
+counting the hits in each, summing these up.
+
+```
+Input("Enter search term").get =st
+Grep(st).modeCount =grep
+ProjectDir.allFiles->f
+assert(f.name.endsWith(".java"))
+grep.file(f) =count
+out(count)
+| _.sum
+/SearchCount
+```
+### Limiting search to a few files
+
+
+When working with huge data sets, we can count the number of hits in each file. This
+could be presented as a sum, as above, or as a sorted list, displaying the number of hits
+per file.
+
+```
+Input("Enter search term").get =st
+Grep(st).modeCount =grep
+ProjectDir.allFiles->f
+assert(f.name.endsWith(".java"))
+grep.file(f) =count
+out(Int(count,f))        # <--- see section on "Generalized sorting"
+| _.sort->x
+report(x.data.name, x)
+/ShowHitCount
+```
+
+The next step is then to extend the regular search function, with an input for (part of)
+the file name(s) to search:
+
+```
+Input("Enter search term").get =st
+Grep(st) =grep
+Input("(Part of) file name").get =fn
+ProjectDir.allFiles->f
+assert(f.name.endsWith(".java"))
+assert(f.name.contains(fn))    # <--- new
+grep.file(f)->line
+report(line.file.name, line.lineNumber, line)
+/Search
+```
 ## Searching multiple types of file
 
 
-To search multiple types of files, we create a function that creates a list of
-valid types after the last dot, then check if the ending of the file matches one of
+To search multiple types of files, we create a function that lists the
+valid types (after last dot) then check if the ending of the file matches one of
 those.
 
 ```

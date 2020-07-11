@@ -13,6 +13,29 @@
 
 <h1>CFT Change log</h1>
 
+<h3>v1.0.16 2020-07-11 Grep</h3>
+<p>
+	Fixed bug so that Grep.file() uses File.getEncoding()
+</p>
+<p>
+	Improved handling of limit, so that if there is a limit, no more than that number of ValueObjFileLine
+	are kept in memory at the time.
+</p>
+<p>
+	Also applied a default corresponding to "limitFirst(1000)".
+</p>
+<p>
+	Added Grep.modeCount() which changes .file() and .lines() to return number of matches instead
+	of data.
+</p>
+<p>
+	When doing regular search and reaching the limit, a WARNING is issued via the 
+	OutText.addSystemMessage()
+</p>
+
+
+<h2 class="tag">2020-07-11 Tagging v1.0.15</h2>
+
 
 <h3>v1.0.15 2020-07-10 File.encoding</h3>
 <p>

@@ -11,9 +11,9 @@
 
 <h1 style="color:black; border:1px solid blue; padding:1Em; text-align: center">ConfigTool - CFT</h1>
 
-<p><i>Last updated: 2020-07-10 RFO</i></p>
+<p><i>Last updated: 2020-07-11 RFO</i></p>
 
-<p><i>v1.0.15</i></p>
+<p><i>v1.0.16</i></p>
 
 
 <h1>Introduction</h1>
@@ -1330,7 +1330,15 @@ The following is used to switch drive letter in Windows.
         :
 </pre>
 
-<h3>Grep.lines()</h3>
+
+<h2>Grep.file()</h2>
+<p>
+  Searching for text in files, we use the .file() function of the Grep object. 
+</p>
+
+
+
+<h2>Grep.lines()</h2>
 <p>
   To match content from a list instead of from file, the "Grep.lines()" function takes
   a list of strings.
@@ -1339,10 +1347,85 @@ The following is used to switch drive letter in Windows.
 
 
 
+
+<h2>Working with huge logs - counting hits</h2>
+<p>
+  The Grep instances are by default set up with a limit of the 1000 first matches. Reaching
+  that limit produces a warning. The limits are configurable as follows:
+</p>
+<pre>
+  $ Grep("...").limitFirst(100) 
+  $ Grep("...").limitLast(100)
+</pre>
+
+<h3>Counting hits</h3>
+<p>
+  Whwn working with big files, one can also decide to initially do a count of hits,
+  to narrow down the search terms before doing an actual search. 
+</p>
+<pre>
+  $ Grep("...").modeCount
+</pre>
+<p>
+  When a Grep object is operating in count mode, limits don't apply. Limits exist to protect
+  us from running out of memory, and counting does not consume any memory.
+</p>
+<p>
+  The following example shows a function for searching through a set of java files and
+  counting the hits in each, summing these up.
+</p>
+<pre>
+  Input("Enter search term").get =st
+  Grep(st).modeCount =grep
+  ProjectDir.allFiles-&gt;f
+    assert(f.name.endsWith(".java"))
+    grep.file(f) =count
+    out(count)
+  | _.sum
+  /SearchCount
+</pre>
+
+<h3>Limiting search to a few files</h3>
+<p>
+  When working with huge data sets, we can count the number of hits in each file. This
+  could be presented as a sum, as above, or as a sorted list, displaying the number of hits
+  per file.
+</p>
+<pre>
+  Input("Enter search term").get =st
+  Grep(st).modeCount =grep
+  ProjectDir.allFiles-&gt;f
+    assert(f.name.endsWith(".java"))
+    grep.file(f) =count
+    out(Int(count,f))        # &lt;--- see section on "Generalized sorting"
+  | _.sort-&gt;x
+    report(x.data.name, x)
+  /ShowHitCount
+</pre>
+<p>
+  The next step is then to extend the regular search function, with an input for (part of)
+  the file name(s) to search:
+</p>
+<pre>
+  Input("Enter search term").get =st
+  Grep(st) =grep
+  Input("(Part of) file name").get =fn
+  ProjectDir.allFiles-&gt;f
+    assert(f.name.endsWith(".java"))
+    assert(f.name.contains(fn))    # &lt;--- new
+    grep.file(f)-&gt;line
+      report(line.file.name, line.lineNumber, line)
+  /Search
+</pre>
+
+
+
+
+
 <h2>Searching multiple types of file</h2>
 <p>
-  To search multiple types of files, we create a function that creates a list of
-  valid types after the last dot, then check if the ending of the file matches one of
+  To search multiple types of files, we create a function that lists the
+  valid types (after last dot) then check if the ending of the file matches one of
   those.
 </p>
 <pre>
