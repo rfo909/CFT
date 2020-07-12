@@ -92,6 +92,8 @@ public class ObjGrep extends Obj {
     private List<Match> matchList=new ArrayList<Match>();
     private int mode=ModeDefault;
     private int limit=DEFAULT_LIMIT; 
+    private boolean limitKeepFirst=true;
+        // if limit is N > 0, if true, keep first N lines, otherwise last N lines
     
     private Obj self() {
         return this;
@@ -111,7 +113,8 @@ public class ObjGrep extends Obj {
         add(new FunctionMatchRegex());
         add(new FunctionRejectRegex());
         
-        add(new FunctionLimit());
+        add(new FunctionLimitFirst());
+        add(new FunctionLimitLast());
         
     }
     
@@ -180,6 +183,7 @@ public class ObjGrep extends Obj {
       	                      new FileInputStream(f.getPath()), f.getEncoding()));
 
             int count=0;
+            boolean reachedLimit = false;
             
             try {
                 long lineNo=0;
@@ -204,8 +208,21 @@ public class ObjGrep extends Obj {
                         } else {
 	                        String deTabbed=TabUtil.substituteTabs(line,4);
 	                        result.add(new ValueObjFileLine(deTabbed, lineNo, f));
-	                        if (result.size() > limit) throw new Exception("grep limit " + limit + " reached " + f.getPath());
 	                        
+	                        if (limit > 0) {
+	                        	if (limitKeepFirst) {
+	                        		if (result.size()==limit) {
+	                        			ctx.getObjGlobal().addSystemMessage("WARNING: grep limit " + limit + " reached " + f.getPath());
+	                        			return new ValueList(result);
+	                        		}
+	                        	} else {
+	                        		// keep tail
+	                        		if (result.size() > limit) {
+	                        			reachedLimit=true;
+	                        			result.remove(0);
+	                        		}
+	                        	}
+	                        }
 	                    }
                     }
                         
@@ -217,6 +234,9 @@ public class ObjGrep extends Obj {
             	return new ValueInt(count);
             }
             
+            if (reachedLimit) {
+    			ctx.getObjGlobal().addSystemMessage("WARNING: grep limit " + limit + " reached " + f.getPath());
+            }
             return new ValueList(result);
         }
     }
@@ -238,6 +258,7 @@ public class ObjGrep extends Obj {
             List<Value> result=new ArrayList<Value>();
 
             int count=0;
+            boolean reachedLimit=false;
             
             for (Value lineObj:lines) {
                 String line=lineObj.getValAsString();
@@ -257,13 +278,30 @@ public class ObjGrep extends Obj {
                     	count++;
                     } else {
 	                    result.add(lineObj);
-	                    if (result.size() > limit) throw new Exception("grep limit " + limit + " exceeded");
+	                    
+	                    if (limit > 0) {
+		                	if (limitKeepFirst) {
+		                		if (result.size()==limit) {
+		                			ctx.getObjGlobal().addSystemMessage("WARNING: grep limit " + limit + " reached");
+		                			return new ValueList(result);
+		                		}
+		                	} else {
+		                		// keep last
+		                		if (result.size() > limit) {
+		                			reachedLimit=true;
+		                			result.remove(0);
+		                		}
+		                	}
+	                    }
                     }
                     
                 }
             }
             if (mode==ModeCount) {
             	return new ValueInt(count);
+            }
+            if (reachedLimit) {
+    			ctx.getObjGlobal().addSystemMessage("WARNING: grep limit " + limit + " reached");
             }
             return new ValueList(result);
         }
@@ -333,17 +371,35 @@ public class ObjGrep extends Obj {
     }
     
     
-    class FunctionLimit extends Function {
+    class FunctionLimitFirst extends Function {
         public String getName() {
-            return "limit";
+            return "limitFirst";
         }
         public String getShortDesc() {
-            return "limit(count) - set match count limit - returns self";
+            return "limitFirst(count) - return first N matches only";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 1) throw new Exception("Expected parameter count");
             int count=(int) getInt("count", params, 0);
             limit=count;
+            limitKeepFirst=true;
+            return new ValueObj(self());
+        }
+    }
+    
+ 
+    class FunctionLimitLast extends Function {
+        public String getName() {
+            return "limitLast";
+        }
+        public String getShortDesc() {
+            return "limitLast(count) - return last N matches only";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected parameter count");
+            int count=(int) getInt("count", params, 0);
+            limit=count;
+            limitKeepFirst=false;
             return new ValueObj(self());
         }
     }

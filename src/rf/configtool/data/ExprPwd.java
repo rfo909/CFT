@@ -42,7 +42,7 @@ public class ExprPwd extends LexicalElement {
     
     public Value resolve (Ctx ctx) throws Exception {
         String currDir=ctx.getObjGlobal().getCurrDir();
-        ctx.getOutText().addSystemMessage(currDir);
+        ctx.getObjGlobal().addSystemMessage(currDir);
         return new ValueObj(new ObjDir(currDir,Protection.NoProtection));
     }
 }

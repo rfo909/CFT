@@ -31,6 +31,7 @@ import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueBoolean;
 import rf.configtool.main.runtime.ValueFloat;
+import rf.configtool.main.runtime.ValueInt;
 import rf.configtool.main.runtime.ValueList;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
@@ -43,6 +44,7 @@ public class ObjSys extends Obj {
         add(new FunctionFunctions());
         add(new FunctionLog());
         add(new FunctionCodeDirs());
+        add(new FunctionOutCount());
 
     }
     
@@ -110,7 +112,7 @@ public class ObjSys extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 1) throw new Exception("Expected string parameter msg");
             String line=getString("msg", params, 0);
-            ctx.getOutText().addSystemMessage(line);
+            ctx.getObjGlobal().addSystemMessage(line);
             return new ValueBoolean(true);
         }
     }
@@ -134,6 +136,22 @@ public class ObjSys extends Obj {
         }
     }
     
-
+    
+    class FunctionOutCount extends Function {
+        public String getName() {
+            return "outCount";
+        }
+        public String getShortDesc() {
+            return "outCount() - returns number of values emitted via out() / report()";
+        }
+        @Override
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            int out = ctx.getOutData().getOutDataLength();
+            int report = ctx.getOutText().getData().size();
+            return new ValueInt(out+report);
+        }
+    }
+    
 
 }

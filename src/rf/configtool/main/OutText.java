@@ -54,13 +54,6 @@ public class OutText {
     
     private List<List<Value>> data=new ArrayList<List<Value>>();
 
-    // simple text output
-    private List<String> systemMessages=new ArrayList<String>();
-    
-    public void addSystemMessage (String line) {
-        systemMessages.add(line);
-    }
-    
     public void addReportData (List<Value> values) {
         data.add(values);
     }
@@ -71,9 +64,6 @@ public class OutText {
         addReportData(vList);
     }
     
-    public List<String> getSystemMessages() {
-        return systemMessages;
-    }
     
     public List<List<Value>> getData() {
         return data;

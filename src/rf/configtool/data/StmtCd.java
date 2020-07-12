@@ -50,7 +50,7 @@ public class StmtCd extends StmtShellInteractive {
     @Override
     protected void processDefault(Ctx ctx) throws Exception {
     	ctx.getObjGlobal().setCurrDir(null);
-    	ctx.getOutText().addSystemMessage(ctx.getObjGlobal().getCurrDir());
+    	ctx.getObjGlobal().addSystemMessage(ctx.getObjGlobal().getCurrDir());
     	ctx.push(new ValueObj(new ObjDir(ctx.getObjGlobal().getCurrDir(), Protection.NoProtection)));
     }
     
@@ -59,7 +59,7 @@ public class StmtCd extends StmtShellInteractive {
     protected void processOne (Ctx ctx, File file) throws Exception {
     	if (file.exists() && file.isDirectory()) {
     		ctx.getObjGlobal().setCurrDir(file.getCanonicalPath());
-        	ctx.getOutText().addSystemMessage(ctx.getObjGlobal().getCurrDir());
+        	ctx.getObjGlobal().addSystemMessage(ctx.getObjGlobal().getCurrDir());
         	ctx.push(new ValueObj(new ObjDir(ctx.getObjGlobal().getCurrDir(), Protection.NoProtection)));
     	} else {
     		throw new Exception("cd: Invalid directory");

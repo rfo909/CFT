@@ -179,13 +179,7 @@ public class Runtime {
             
             OutText outText=ctx.getOutText();
     
-            // System messages are written to screen - this applies to help texts etc
-            List<String> messages=outText.getSystemMessages();
-            for (String s:messages) {
-                objGlobal.outln("  # " + s);
-            }
-            
-            // Column data is formatted to text and added to outData as String objects
+             // Column data is formatted to text and added to outData as String objects
             List<List<Value>> outData=outText.getData();
             Report report=new Report();
             List<String> formattedText=report.formatDataValues(outData);
@@ -314,6 +308,18 @@ public class Runtime {
                     }
                     stdio.println(s);
                 }
+                
+                
+                
+                // System messages are written to screen - this applies to help texts etc
+                List<String> messages=objGlobal.getSystemMessages();
+                for (String s:messages) {
+                    objGlobal.outln("  # " + s);
+                }
+                
+                objGlobal.clearSystemMessages();
+                
+
             }
             
         } catch (Throwable t) {

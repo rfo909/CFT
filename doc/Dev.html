@@ -18,13 +18,16 @@
 	Changed global error() function to take two parameters: boolean condition and message.
 </p>
 <p>
-	Changed Grep limitFirst and limitLast into single .limit(N) and made hitting Grep limit
-	into an exception, as we need to get to know it, rather than thinking we have a complete
-	set of data, which is in fact incomplete.
+	Added newline for readLine. Added common prefix (?) to both readLine() and Input.get()
 </p>
+<o>
+	Moved system messages from OutText to ObjGlobal, ensuring we can present them
+	after all interactive processing is complete, for example when Grep.file() passes limits.
+</o>
 
 <p>
-	Added newline for readLine. Added common prefix (?) to both readLine() and Input.get()
+	Added function Sys.outCount() returning number of values emitted with out(), to do
+	cutoffs for huge result sets.
 </p>
 
 

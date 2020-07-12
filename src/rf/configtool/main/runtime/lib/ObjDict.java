@@ -264,7 +264,7 @@ public class ObjDict extends Obj {
                 while (keys.hasNext()) {
                     String key=keys.next();
                     String line=key + ": " + values.get(key).getValAsString();
-                    ctx.getOutText().addSystemMessage(line);
+                    ctx.getObjGlobal().addSystemMessage(line);
                 }
             }
             return new ValueObj(theDict());

@@ -281,15 +281,15 @@ public class ObjFile extends Obj {
                 if (f.isFile()) {
                     boolean ok=f.delete();
                     if (!ok) {
-                        outText.addSystemMessage("Delete failed : " + f.getCanonicalPath());
+                    	ctx.getObjGlobal().addSystemMessage("Delete failed : " + f.getCanonicalPath());
                     }
                     return new ValueBoolean(ok);
                 } else {
-                    outText.addSystemMessage("Not a file    : " + f.getCanonicalPath());
+                	ctx.getObjGlobal().addSystemMessage("Not a file    : " + f.getCanonicalPath());
                     return new ValueBoolean(false);
                 }
             } 
-            outText.addSystemMessage("No such file  : " + f.getCanonicalPath());
+            ctx.getObjGlobal().addSystemMessage("No such file  : " + f.getCanonicalPath());
             return new ValueBoolean(false);
         }
     }
@@ -602,7 +602,7 @@ public class ObjFile extends Obj {
             if (!src.isFile()) throw new Exception("Source '" + src.getCanonicalPath() + "' is not a file");
             if (target.exists()) {
                 if (!target.isFile()) throw new Exception("Target '" + target.getCanonicalPath() + "' exists, but is not a file");
-                outText.addSystemMessage("Overwriting file: " + target.getCanonicalPath());
+                ctx.getObjGlobal().addSystemMessage("Overwriting file: " + target.getCanonicalPath());
             }
             InputStream in=null;
             OutputStream out=null;
@@ -651,7 +651,7 @@ public class ObjFile extends Obj {
             if (!src.isFile()) throw new Exception("Source '" + src.getCanonicalPath() + "' is not a file");
             if (target.exists()) {
                 if (!target.isFile()) throw new Exception("Target '" + target.getCanonicalPath() + "' exists, but is not a file");
-                outText.addSystemMessage("Overwriting file: " + target.getCanonicalPath());
+                ctx.getObjGlobal().addSystemMessage("Overwriting file: " + target.getCanonicalPath());
             }
             InputStream in=new FileInputStream(src);
             OutputStream out=new FileOutputStream(target);
@@ -694,7 +694,7 @@ public class ObjFile extends Obj {
             if (!src.isFile()) throw new Exception("Source '" + src.getCanonicalPath() + "' is not a file");
             if (target.exists()) {
                 if (!target.isFile()) throw new Exception("Target '" + target.getCanonicalPath() + "' exists, but is not a file");
-                outText.addSystemMessage("Overwriting file: " + target.getCanonicalPath());
+                ctx.getObjGlobal().addSystemMessage("Overwriting file: " + target.getCanonicalPath());
             }
             boolean ok=src.renameTo(target);
             if (!ok) throw new Exception("mv failed");

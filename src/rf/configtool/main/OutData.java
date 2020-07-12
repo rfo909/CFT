@@ -41,5 +41,8 @@ public class OutData {
         return outData.isEmpty();
     }
     
+    public int getOutDataLength() {
+    	return outData.size();
+    }
 
 }

@@ -75,7 +75,9 @@ JavaFilesSorted
 
 # Parametrized search, called from S1, S2, S3
 	P(1,Grep("test"))=g 
-	JavaFilesSorted->f g.file(f)->line out(line)
+	JavaFilesSorted->f 
+		g.file(f)->line 
+			out(line) 
 /PSearch
 
 # Count number of hits in files, called from C1, C2, C3

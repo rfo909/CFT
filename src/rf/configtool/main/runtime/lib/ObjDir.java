@@ -330,10 +330,10 @@ public class ObjDir extends Obj {
                 if (!ok) throw new Exception("Could not create dir " + f.getCanonicalPath());
                 return new ValueBoolean(true);
             } else if (!f.isDirectory()) {
-                outText.addSystemMessage("Not a dir   " + f.getCanonicalPath());
+            	ctx.getObjGlobal().addSystemMessage("Not a dir   " + f.getCanonicalPath());
                 return new ValueBoolean(false);
             } else {
-                outText.addSystemMessage("Dir exists  " + f.getCanonicalPath());
+            	ctx.getObjGlobal().addSystemMessage("Dir exists  " + f.getCanonicalPath());
                 return new ValueBoolean(false);
             }
         }
@@ -358,11 +358,11 @@ public class ObjDir extends Obj {
                     boolean result=f.delete();
                     return new ValueBoolean(result);
                 } else {
-                    outText.addSystemMessage("Not a dir   " + f.getCanonicalPath());
+                	ctx.getObjGlobal().addSystemMessage("Not a dir   " + f.getCanonicalPath());
                     return new ValueBoolean(false);
                 }
             } else {
-                outText.addSystemMessage("Not found   " + f.getCanonicalPath());
+            	ctx.getObjGlobal().addSystemMessage("Not found   " + f.getCanonicalPath());
                 return new ValueBoolean(false);
             }
         }
@@ -478,7 +478,7 @@ public class ObjDir extends Obj {
             if (f.getName().equals(".") || f.getName().equals("..")) continue;
             if (f.isDirectory()) {
                 // search for sub-dirs before adding dir, this makes it safe
-                // to delete directories in the order presented
+                // to delete dioutTextrectories in the order presented
                 try {
                     traverse(stdio, f, dirs, files);
                 } catch(Exception ex) {
@@ -492,7 +492,7 @@ public class ObjDir extends Obj {
         
     }
     
-   private void callExternalProgram (boolean foreground, Stdio stdio, OutText outText, RunCaptureOutput capture, List<Value> params) throws Exception {
+   private void callExternalProgram (Ctx ctx, boolean foreground, Stdio stdio, OutText outText, RunCaptureOutput capture, List<Value> params) throws Exception {
         List<Value> args;
         if (params.size()==1) {
             if (params.get(0) instanceof ValueString) {
@@ -543,7 +543,7 @@ public class ObjDir extends Obj {
             if (foreground && capture==null) {
                 process.waitFor();
                 long endTime=System.currentTimeMillis();
-                outText.addSystemMessage("Running " + program + " completed: " + (endTime-startTime) + "ms");
+                ctx.getObjGlobal().addSystemMessage("Running " + program + " completed: " + (endTime-startTime) + "ms");
             }
         }
     }
@@ -556,7 +556,7 @@ public class ObjDir extends Obj {
             return "run(list|...) - execute external program in foreground, waits for it to terminate";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            callExternalProgram(true, ctx.getStdio(), ctx.getOutText(), null, params);
+            callExternalProgram(ctx, true, ctx.getStdio(), ctx.getOutText(), null, params);
             return new ValueObj(self());
 
         }
@@ -571,7 +571,7 @@ public class ObjDir extends Obj {
             return "runDetach(list|...) - execute external program in background";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            callExternalProgram(false, ctx.getStdio(), ctx.getOutText(), null, params);
+            callExternalProgram(ctx, false, ctx.getStdio(), ctx.getOutText(), null, params);
             return new ValueObj(self());
 
         }
@@ -586,7 +586,7 @@ public class ObjDir extends Obj {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             RunCaptureOutput capt=new RunCaptureOutput();
-            callExternalProgram(true, ctx.getStdio(), ctx.getOutText(), capt, params);
+            callExternalProgram(ctx, true, ctx.getStdio(), ctx.getOutText(), capt, params);
             return capt.getCapturedLines();
         }
     }

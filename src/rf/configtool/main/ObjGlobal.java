@@ -62,6 +62,9 @@ public class ObjGlobal extends Obj {
     private HashMap<String,Value> sessionValues=new HashMap<String,Value>();
     private HashMap<String,ExternalScriptState> externalScriptStates=new HashMap<String,ExternalScriptState>();
     private final Runtime runtime;
+    private List<String> systemMessages=new ArrayList<String>();
+    
+
     
     private boolean terminationFlag = false;
     
@@ -152,6 +155,19 @@ public class ObjGlobal extends Obj {
     public boolean getTerminationFlag() {
     	return terminationFlag;
     }
+    
+    public void addSystemMessage (String line) {
+        systemMessages.add(line);
+    }
+    
+    public List<String> getSystemMessages() {
+        return systemMessages;
+    }
+    
+    public void clearSystemMessages() {
+    	systemMessages.clear();
+    }
+ 
     
     /**
      * ObjGlobal persists states of all external scripts invoked, so as their ValDef and other
@@ -874,7 +890,7 @@ public class ObjGlobal extends Obj {
         
         Process process = processBuilder.start();
         process.waitFor();
-        ctx.getOutText().addSystemMessage("Running " + program + " completed");
+        ctx.getObjGlobal().addSystemMessage("Running " + program + " completed");
     }
 
  

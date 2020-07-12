@@ -1146,7 +1146,8 @@ The Grep instances are by default set up with a limit of the 1000 first matches.
 that limit produces an error. The limit is set as follows:
 
 ```
-$ Grep("...").limit(100)
+$ Grep("...").limitFirst(100)
+$ Grep("...").limitLast(100)
 ```
 ### Counting hits
 

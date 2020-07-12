@@ -1354,7 +1354,8 @@ The following is used to switch drive letter in Windows.
   that limit produces an error. The limit is set as follows:
 </p>
 <pre>
-  $ Grep("...").limit(100) 
+  $ Grep("...").limitFirst(100) 
+  $ Grep("...").limitLast(100)
 </pre>
 
 <h3>Counting hits</h3>

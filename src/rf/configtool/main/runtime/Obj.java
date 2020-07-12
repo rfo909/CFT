@@ -130,32 +130,33 @@ public abstract class Obj {
     }
     
     public void generateHelp(Ctx ctx) {
+    	ObjGlobal objGlobal=ctx.getObjGlobal();
         OutText outText=ctx.getOutText();
         if (this instanceof ObjGlobal) {
-            outText.addSystemMessage("---");
-            outText.addSystemMessage("For help on data types, create an instance on the stack, then invoke 'help' statement");
-            outText.addSystemMessage("Example:");
-            outText.addSystemMessage("    List(1,2,3) help     - shows methods on lists");
-            outText.addSystemMessage("    'x' help             - shows methods on strings");
-            outText.addSystemMessage("    help(3)              - alternative notation - shows help on ints");
-            outText.addSystemMessage("");
-            outText.addSystemMessage("- Note that for functions with no arguments, the () are optional");
-            outText.addSystemMessage("- Looping is done with the '-> var' construct");
-            outText.addSystemMessage("     Example: List(1,2,3)->m out('xxx'+m)");
+        	objGlobal.addSystemMessage("---");
+        	objGlobal.addSystemMessage("For help on data types, create an instance on the stack, then invoke 'help' statement");
+        	objGlobal.addSystemMessage("Example:");
+        	objGlobal.addSystemMessage("    List(1,2,3) help     - shows methods on lists");
+        	objGlobal.addSystemMessage("    'x' help             - shows methods on strings");
+        	objGlobal.addSystemMessage("    help(3)              - alternative notation - shows help on ints");
+        	objGlobal.addSystemMessage("");
+        	objGlobal.addSystemMessage("- Note that for functions with no arguments, the () are optional");
+        	objGlobal.addSystemMessage("- Looping is done with the '-> var' construct");
+        	objGlobal.addSystemMessage("     Example: List(1,2,3)->m out('xxx'+m)");
             
-            outText.addSystemMessage("");
-            outText.addSystemMessage("- The out(expr) statement adds data to the output list");
-            outText.addSystemMessage("- In-line variables are assigned with '=ident' after the expression (stack)");
-            outText.addSystemMessage("- Type ':' for overview over colon commands");
-            outText.addSystemMessage("");;
-            outText.addSystemMessage("- The current program line can be given a name, for example '/Test");
-            outText.addSystemMessage("- To run it again, just enter 'Test'");
-            outText.addSystemMessage("- Enter '?Test' to get info about symbol Test, or just '?' for all");
-            outText.addSystemMessage("---");
-            outText.addSystemMessage("- Parameters are accessed with P(1), P(1,defaultVal) or just P() for param-list.");
-            outText.addSystemMessage("- The current value on stack is accessed via assignment or the '_' expr");
+        	objGlobal.addSystemMessage("");
+        	objGlobal.addSystemMessage("- The out(expr) statement adds data to the output list");
+        	objGlobal.addSystemMessage("- In-line variables are assigned with '=ident' after the expression (stack)");
+        	objGlobal.addSystemMessage("- Type ':' for overview over colon commands");
+        	objGlobal.addSystemMessage("");;
+        	objGlobal.addSystemMessage("- The current program line can be given a name, for example '/Test");
+        	objGlobal.addSystemMessage("- To run it again, just enter 'Test'");
+        	objGlobal.addSystemMessage("- Enter '?Test' to get info about symbol Test, or just '?' for all");
+        	objGlobal.addSystemMessage("---");
+        	objGlobal.addSystemMessage("- Parameters are accessed with P(1), P(1,defaultVal) or just P() for param-list.");
+        	objGlobal.addSystemMessage("- The current value on stack is accessed via assignment or the '_' expr");
             
-            outText.addSystemMessage("");
+        	objGlobal.addSystemMessage("");
         }
         
         //outText.addSystemMessage("(" + getTypeName() + ")");
@@ -173,7 +174,7 @@ public abstract class Obj {
         });
 
         for (String name:fNames) {
-            outText.addSystemMessage(functions.get(name).getShortDesc());
+        	objGlobal.addSystemMessage(functions.get(name).getShortDesc());
         }
     }
 
