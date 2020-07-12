@@ -80,9 +80,8 @@ JavaFilesSorted
 
 # Count number of hits in files, called from C1, C2, C3
 	P(1,Grep("test")) .modeCount =g 
-	JavaFilesSorted->f g.file(f)=count out(Int(count, f.name))
-	| _.sort->x   # sort ascending on number of hits
-		report(x.data, x)
+	JavaFilesSorted->f out(g.file(f))
+	| _.sum
 /CSearch
 
 P(1)=lines

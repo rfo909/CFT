@@ -13,6 +13,21 @@
 
 <h1>CFT Change log</h1>
 
+<h3>v1.0.16 2020-07-12</h3>
+<p>
+	Changed global error() function to take two parameters: boolean condition and message.
+</p>
+<p>
+	Changed Grep limitFirst and limitLast into single .limit(N) and made hitting Grep limit
+	into an exception, as we need to get to know it, rather than thinking we have a complete
+	set of data, which is in fact incomplete.
+</p>
+
+<p>
+	Added newline for readLine. Added common prefix (?) to both readLine() and Input.get()
+</p>
+
+
 <h3>v1.0.16 2020-07-11 Grep</h3>
 <p>
 	Fixed bug so that Grep.file() uses File.getEncoding()

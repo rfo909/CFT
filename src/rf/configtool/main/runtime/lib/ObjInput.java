@@ -116,7 +116,7 @@ public class ObjInput extends ObjPersistent {
             // '::sdfsdf' - match text that starts with colon
             // ':xxx' - identify option
             LOOP: for(;;) {
-                ctx.outln(label);
+                ctx.outln("(?) " + label);
                 if (currValue.trim().length()>0) ctx.outln("(enter for '" + currValue + "')");
                 if (uniqueValues.size() > 0) ctx.outln("(':' for options)");
                 String line=ctx.getStdio().getInputLine();

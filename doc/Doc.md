@@ -1142,12 +1142,11 @@ a list of strings.
 ## Working with huge logs - counting hits
 
 
-The Grep instances are by default set up with a limit of the 1000 first matches. Reaching
-that limit produces a warning. The limits are configurable as follows:
+The Grep instances are by default set up with a limit of the 1000 first matches. Passing
+that limit produces an error. The limit is set as follows:
 
 ```
-$ Grep("...").limitFirst(100)
-$ Grep("...").limitLast(100)
+$ Grep("...").limit(100)
 ```
 ### Counting hits
 
@@ -1159,7 +1158,7 @@ to narrow down the search terms before doing an actual search.
 $ Grep("...").modeCount
 ```
 
-When a Grep object is operating in count mode, limits don't apply. Limits exist to protect
+When a Grep object is operating in count mode, the limit doesn't apply. Limits exist to protect
 us from running out of memory, and counting does not consume any memory.
 
 

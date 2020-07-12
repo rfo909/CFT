@@ -711,7 +711,7 @@ public class ObjGlobal extends Obj {
                 
                 boolean silent=ctx.getStdio().hasBufferedInputLines();
                 if (!silent) {
-                    stdio.print(prompt);
+                    stdio.println("(?) " + prompt);
                 }
                 return new ValueString(stdio.getInputLine());
             } 
@@ -812,13 +812,15 @@ public class ObjGlobal extends Obj {
             return "error";
         }
         public String getShortDesc() {
-            return "error(value) - throws exception, terminating code execution";
+            return "error(expr, value) - if expr is true, throws exception, terminating code execution";
         }
         @Override
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 1) throw new Exception("Expected one parameter");
-            String s=params.get(0).getValAsString();
-            throw new Exception(s);
+            if (params.size() != 2) throw new Exception("Expected parameters cond, message");
+            boolean cond=params.get(0).getValAsBoolean();
+            String s=params.get(1).getValAsString();
+            if (cond) throw new Exception(s);
+            return new ValueNull();
         }
     }
 
