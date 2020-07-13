@@ -106,16 +106,25 @@ CSearch(Grep(Get("Search3a AND")).match(Get("AND Search3b")))
 /C3
 
 
+3000
+/MaxHitsPerFile
 
-PSearch(Grep(Get("Search1")))=lines fmt(lines)
+
+PSearch(Grep(Get("Search1")).limitLast(MaxHitsPerFile))=lines 
+	error(lines.length>20000, "#lines="+lines.length) 
+	fmt(lines)
 /S1
 
 
-PSearch(Grep(Get("Search2")))=lines fmt(lines)
+PSearch(Grep(Get("Search2")).limitLast(MaxHitsPerFile))=lines 
+	error(lines.length>20000, "#lines="+lines.length) 
+	fmt(lines)
 /S2
 
 
-PSearch(Grep(Get("Search3a AND")).match(Get("AND Search3b")))=lines fmt(lines)
+PSearch(Grep(Get("Search3a AND")).match(Get("AND Search3b")).limitLast(MaxHitsPerFile))=lines 
+	error(lines.length>20000, "#lines="+lines.length) 
+	fmt(lines)
 /S3
 
 

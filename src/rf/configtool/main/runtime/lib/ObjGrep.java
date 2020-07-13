@@ -184,6 +184,7 @@ public class ObjGrep extends Obj {
 
             int count=0;
             boolean reachedLimit = false;
+            final String limitType=(limitKeepFirst ? "first" : "last");
             
             try {
                 long lineNo=0;
@@ -212,7 +213,7 @@ public class ObjGrep extends Obj {
 	                        if (limit > 0) {
 	                        	if (limitKeepFirst) {
 	                        		if (result.size()==limit) {
-	                        			ctx.getObjGlobal().addSystemMessage("WARNING: grep limit " + limit + " reached " + f.getPath());
+	                        			ctx.getObjGlobal().addSystemMessage("WARNING: grep limit " + limitType + " " + limit + " reached " + f.getPath());
 	                        			return new ValueList(result);
 	                        		}
 	                        	} else {
@@ -235,7 +236,7 @@ public class ObjGrep extends Obj {
             }
             
             if (reachedLimit) {
-    			ctx.getObjGlobal().addSystemMessage("WARNING: grep limit " + limit + " reached " + f.getPath());
+    			ctx.getObjGlobal().addSystemMessage("WARNING: grep limit " + limitType + " " + limit + " reached " + f.getPath());
             }
             return new ValueList(result);
         }
@@ -259,7 +260,8 @@ public class ObjGrep extends Obj {
 
             int count=0;
             boolean reachedLimit=false;
-            
+            final String limitType=(limitKeepFirst ? "first" : "last");
+
             for (Value lineObj:lines) {
                 String line=lineObj.getValAsString();
                 if (line==null) break;
@@ -282,7 +284,7 @@ public class ObjGrep extends Obj {
 	                    if (limit > 0) {
 		                	if (limitKeepFirst) {
 		                		if (result.size()==limit) {
-		                			ctx.getObjGlobal().addSystemMessage("WARNING: grep limit " + limit + " reached");
+		                			ctx.getObjGlobal().addSystemMessage("WARNING: grep limit " + limitType + " " + limit + " reached");
 		                			return new ValueList(result);
 		                		}
 		                	} else {
@@ -301,7 +303,7 @@ public class ObjGrep extends Obj {
             	return new ValueInt(count);
             }
             if (reachedLimit) {
-    			ctx.getObjGlobal().addSystemMessage("WARNING: grep limit " + limit + " reached");
+    			ctx.getObjGlobal().addSystemMessage("WARNING: grep limit " + limitType + " " + limit + " reached");
             }
             return new ValueList(result);
         }

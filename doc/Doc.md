@@ -1,7 +1,7 @@
 # ConfigTool - CFT
 
 
-**Last updated: 2020-07-11 RFO**
+**Last updated: 2020-07-13 RFO**
 
 **v1.0.16**
 # Introduction
@@ -19,7 +19,7 @@ on both. It should run everywhere that supports Java.
 
 
 Development has been going on since May 2018, and was assigned v1.0 as robustness and error
-handling had reached a certain level, and was then made open source on github. It started
+handling had reached a certain level, maturing enough to be made open source on github. It started
 out purely as an interactive
 tool, with emphasis on terse syntax, since all code was entered via the command line. After
 a while it evolved into editing the savefiles, or "script files".
@@ -57,12 +57,7 @@ $ cat TODO.txt
 $ more TODO.txt
 $ edit TODO.txt
 ```
-
-Likewise, if we want to change current directory to the "doc" subdirectory, we can enter
-
-```
-$ cd doc
-```
+<
 # The help system
 
 
@@ -532,7 +527,8 @@ $ 3 =a 2 =b a+b
 
 It is worth noting that even though CFT uses a data stack, expressions are not stack-based.
 This is because  writing postfix expressions is too bothersome (ex. "3 2 +"), so CFT
-parses expressions using regular infix notation ("3+2").
+parses expressions using regular infix notation ("3+2"), respecting normal cardinality rules,
+so that 2+3*5 becomes 17.
 
 ## Nested loops
 
