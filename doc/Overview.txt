@@ -99,6 +99,7 @@ Interactive use
  |   Editing a previous file again
  |   cat, more, edit - implementation
  * Print working directory: pwd
+ * Using cd, ls, cat, more and edit in code
  * Get data from user: Input() and readLine()
  * Searching files / report()
  |   FileLine

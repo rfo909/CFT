@@ -11,7 +11,7 @@
 
 <h1 style="color:black; border:1px solid blue; padding:1Em; text-align: center">ConfigTool - CFT</h1>
 
-<p><i>Last updated: 2020-07-13 RFO</i></p>
+<p><i>Last updated: 2020-07-14 RFO</i></p>
 
 <p><i>v1.0.16</i></p>
 
@@ -1281,6 +1281,45 @@ The following is used to switch drive letter in Windows.
   $ pwd
 </pre>
 
+
+
+<h2>Using cd, ls, cat, more and edit in code</h2>
+<p>
+  Quick answer: <b>this should be avoided.</b>
+</p>
+<p>
+  These statements, unless called in "function mode", with ()'s, WILL consume all tokens up to the
+  end of the function, or the next PIPE. They will mess up your code, and fail. For use on the
+  interactive command line only.
+</p>
+<p>
+  In script code, there generally is no point in navigating to a current directory. The
+  "current directory" is really a concept for interactive use. Once you get to a 
+  directory you need to write code for:
+</p>
+<pre>
+  $ pwd
+  $ :syn
+  $ /MyDir
+</pre>
+<p>
+  The :syn command synthesizes code from the value returned from pwd, and then we assign it
+  to a function. From then on, using MyDir to access sub-directories or files, gets the
+  same results independent of the current directory. 
+</p>
+<p>
+  To start an editor or page through a file from code, please use the following:
+</p>
+<pre>
+  $ call "Lib:e" (file)  # open editor
+  $ call "Lib:m" (file)  # page through file with more
+</pre>
+<p>
+  This is what the "edit" and "more" commands uses internally anyway.
+</p>
+<p>
+  See CFT.props for the cat, more and edit macros for details.
+</p>
 
 
 

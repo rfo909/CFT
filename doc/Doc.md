@@ -1,7 +1,7 @@
 # ConfigTool - CFT
 
 
-**Last updated: 2020-07-13 RFO**
+**Last updated: 2020-07-14 RFO**
 
 **v1.0.16**
 # Introduction
@@ -1088,6 +1088,44 @@ is the same as the "Dir" expression.
 ```
 $ pwd
 ```
+## Using cd, ls, cat, more and edit in code
+
+
+Quick answer: 
+**this should be avoided.**
+
+These statements, unless called in "function mode", with ()'s, WILL consume all tokens up to the
+end of the function, or the next PIPE. They will mess up your code, and fail. For use on the
+interactive command line only.
+
+
+In script code, there generally is no point in navigating to a current directory. The
+"current directory" is really a concept for interactive use. Once you get to a
+directory you need to write code for:
+
+```
+$ pwd
+$ :syn
+$ /MyDir
+```
+
+The :syn command synthesizes code from the value returned from pwd, and then we assign it
+to a function. From then on, using MyDir to access sub-directories or files, gets the
+same results independent of the current directory.
+
+
+To start an editor or page through a file from code, please use the following:
+
+```
+$ call "Lib:e" (file)  # open editor
+$ call "Lib:m" (file)  # page through file with more
+```
+
+This is what the "edit" and "more" commands uses internally anyway.
+
+
+See CFT.props for the cat, more and edit macros for details.
+
 ## Get data from user: Input() and readLine()
 
 
