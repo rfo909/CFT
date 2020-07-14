@@ -83,14 +83,10 @@ public class ObjGrep extends Obj {
     }
     
     public static final int DEFAULT_LIMIT = 1000;
-    
-    private static final int ModeDefault = 0;
-    private static final int ModeCount = 1;
-    private static final int ModeCheck = 2;
+
     
     
     private List<Match> matchList=new ArrayList<Match>();
-    private int mode=ModeDefault;
     private int limit=DEFAULT_LIMIT; 
     private boolean limitKeepFirst=true;
         // if limit is N > 0, if true, keep first N lines, otherwise last N lines
@@ -105,13 +101,12 @@ public class ObjGrep extends Obj {
         }
         add(new FunctionMatch());
         add(new FunctionReject());
-        add(new FunctionFile());
-        add(new FunctionLines());
-        add(new FunctionModeCheck());
-        add(new FunctionModeCount());
-        
         add(new FunctionMatchRegex());
         add(new FunctionRejectRegex());
+  
+        add(new FunctionFile());
+        //add(new FunctionLines());
+        add(new FunctionFileCount());
         
         add(new FunctionLimitFirst());
         add(new FunctionLimitLast());
@@ -182,7 +177,6 @@ public class ObjGrep extends Obj {
       			   new InputStreamReader(
       	                      new FileInputStream(f.getPath()), f.getEncoding()));
 
-            int count=0;
             boolean reachedLimit = false;
             final String limitType=(limitKeepFirst ? "first" : "last");
             
@@ -202,39 +196,29 @@ public class ObjGrep extends Obj {
                     }
                     
                     if (keep) {
-                        if (mode == ModeCheck) return new ValueBoolean(true);
-                    
-                        if (mode == ModeCount) {
-                        	count++;
-                        } else {
-	                        String deTabbed=TabUtil.substituteTabs(line,4);
-	                        result.add(new ValueObjFileLine(deTabbed, lineNo, f));
-	                        
-	                        if (limit > 0) {
-	                        	if (limitKeepFirst) {
-	                        		if (result.size()==limit) {
-	                        			ctx.getObjGlobal().addSystemMessage("WARNING: grep limit " + limitType + " " + limit + " reached " + f.getPath());
-	                        			return new ValueList(result);
-	                        		}
-	                        	} else {
-	                        		// keep tail
-	                        		if (result.size() > limit) {
-	                        			reachedLimit=true;
-	                        			result.remove(0);
-	                        		}
-	                        	}
-	                        }
-	                    }
+                        String deTabbed=TabUtil.substituteTabs(line,4);
+                        result.add(new ValueObjFileLine(deTabbed, lineNo, f));
+                        
+                        if (limit > 0) {
+                        	if (limitKeepFirst) {
+                        		if (result.size()==limit) {
+                        			ctx.getObjGlobal().addSystemMessage("WARNING: grep limit " + limitType + " " + limit + " reached " + f.getPath());
+                        			return new ValueList(result);
+                        		}
+                        	} else {
+                        		// keep tail
+                        		if (result.size() > limit) {
+                        			reachedLimit=true;
+                        			result.remove(0);
+                        		}
+                        	}
+                        }
                     }
                         
                 }
             } finally {
                 br.close();
             }
-            if (mode==ModeCount) {
-            	return new ValueInt(count);
-            }
-            
             if (reachedLimit) {
     			ctx.getObjGlobal().addSystemMessage("WARNING: grep limit " + limitType + " " + limit + " reached " + f.getPath());
             }
@@ -242,100 +226,124 @@ public class ObjGrep extends Obj {
         }
     }
     
-    
-    class FunctionLines extends Function {
+    class FunctionFileCount extends Function {
         public String getName() {
-            return "lines";
+            return "fileCount";
         }
         public String getShortDesc() {
-            return "lines(list) - identify lines that match";
+            return "fileCount(File) - search file for lines which match the Grep object, returns int";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 1 || !(params.get(0) instanceof ValueList)) {
-                throw new Exception("Expected list parameter");
+            if (params.size() != 1 || !(params.get(0) instanceof ValueObj)) {
+                throw new Exception("Expected File parameter");
             }
+            Obj o1=((ValueObj) (params.get(0))).getVal();
+            if (!(o1 instanceof ObjFile)) {
+                throw new Exception("Expected File parameter");
+            }
+            ObjFile f=(ObjFile) o1;
             
-            List<Value> lines=((ValueList) params.get(0)).getVal();
             List<Value> result=new ArrayList<Value>();
+            BufferedReader br = new BufferedReader(
+      			   new InputStreamReader(
+      	                      new FileInputStream(f.getPath()), f.getEncoding()));
 
             int count=0;
-            boolean reachedLimit=false;
-            final String limitType=(limitKeepFirst ? "first" : "last");
-
-            for (Value lineObj:lines) {
-                String line=lineObj.getValAsString();
-                if (line==null) break;
-                
-                boolean keep=true;
-                for (Match m:matchList) {
-                    if (!m.match(line)) {
-                        keep=false;
-                        break;
-                    }
-                }
-                
-                if (keep) {
-                    if (mode==ModeCheck) return new ValueBoolean(true);
-                    if (mode == ModeCount) {
-                    	count++;
-                    } else {
-	                    result.add(lineObj);
-	                    
-	                    if (limit > 0) {
-		                	if (limitKeepFirst) {
-		                		if (result.size()==limit) {
-		                			ctx.getObjGlobal().addSystemMessage("WARNING: grep limit " + limitType + " " + limit + " reached");
-		                			return new ValueList(result);
-		                		}
-		                	} else {
-		                		// keep last
-		                		if (result.size() > limit) {
-		                			reachedLimit=true;
-		                			result.remove(0);
-		                		}
-		                	}
-	                    }
+            
+            try {
+                for (;;) {
+                    String line=br.readLine();
+                    if (line==null) break;
+                    
+                    boolean keep=true;
+                    for (Match m:matchList) {
+                        if (!m.match(line)) {
+                            keep=false;
+                            break;
+                        }
                     }
                     
+                    if (keep) {
+                    	count++;
+                    }
+                        
                 }
+            } finally {
+                br.close();
             }
-            if (mode==ModeCount) {
-            	return new ValueInt(count);
-            }
-            if (reachedLimit) {
-    			ctx.getObjGlobal().addSystemMessage("WARNING: grep limit " + limitType + " " + limit + " reached");
-            }
-            return new ValueList(result);
+        	return new ValueInt(count);
         }
     }
     
+//    
+//    class FunctionLines extends Function {
+//        public String getName() {
+//            return "lines";
+//        }
+//        public String getShortDesc() {
+//            return "lines(list) - identify lines that match";
+//        }
+//        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+//            if (params.size() != 1 || !(params.get(0) instanceof ValueList)) {
+//                throw new Exception("Expected list parameter");
+//            }
+//            
+//            List<Value> lines=((ValueList) params.get(0)).getVal();
+//            List<Value> result=new ArrayList<Value>();
+//
+//            int count=0;
+//            boolean reachedLimit=false;
+//            final String limitType=(limitKeepFirst ? "first" : "last");
+//
+//            for (Value lineObj:lines) {
+//                String line=lineObj.getValAsString();
+//                if (line==null) break;
+//                
+//                boolean keep=true;
+//                for (Match m:matchList) {
+//                    if (!m.match(line)) {
+//                        keep=false;
+//                        break;
+//                    }
+//                }
+//                
+//                if (keep) {
+//                    if (mode==ModeCheck) return new ValueBoolean(true);
+//                    if (mode == ModeCount) {
+//                    	count++;
+//                    } else {
+//	                    result.add(lineObj);
+//	                    
+//	                    if (limit > 0) {
+//		                	if (limitKeepFirst) {
+//		                		if (result.size()==limit) {
+//		                			ctx.getObjGlobal().addSystemMessage("WARNING: grep limit " + limitType + " " + limit + " reached");
+//		                			return new ValueList(result);
+//		                		}
+//		                	} else {
+//		                		// keep last
+//		                		if (result.size() > limit) {
+//		                			reachedLimit=true;
+//		                			result.remove(0);
+//		                		}
+//		                	}
+//	                    }
+//                    }
+//                    
+//                }
+//            }
+//            if (mode==ModeCount) {
+//            	return new ValueInt(count);
+//            }
+//            if (reachedLimit) {
+//    			ctx.getObjGlobal().addSystemMessage("WARNING: grep limit " + limitType + " " + limit + " reached");
+//            }
+//            return new ValueList(result);
+//        }
+//    }
+//    
     
-    class FunctionModeCheck extends Function {
-        public String getName() {
-            return "modeCheck";
-        }
-        public String getShortDesc() {
-            return "modeCheck() - changes output of file() and lines() to boolean - returns self";
-        }
-        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            mode=ModeCheck;
-            return new ValueObj(self());
-        }
-    }
-    
-    class FunctionModeCount extends Function {
-        public String getName() {
-            return "modeCount";
-        }
-        public String getShortDesc() {
-            return "modeCount() - changes output of file() and lines() to int - returns self";
-        }
-        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            mode=ModeCount;
-            return new ValueObj(self());
-        }
-    }
-    
+  
     class FunctionMatchRegex extends Function {
         public String getName() {
             return "matchRegex";

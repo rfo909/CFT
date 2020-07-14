@@ -21,6 +21,7 @@ import java.io.*;
 import java.util.*;
 
 import rf.configtool.main.runtime.*;
+import rf.configtool.root.Root;
 
 public class Main {
     
@@ -52,13 +53,21 @@ public class Main {
     private ObjGlobal objGlobal;
     private List<String> initialCommands;
     
+    public static final boolean TEST_ROOT = false;
+    
     public Main (BufferedReader stdin, PrintStream stdout) throws Exception {
-        this(stdin, stdout, null);
+    		this(stdin, stdout, null);
     }
 
     public Main (BufferedReader stdin, PrintStream stdout, String scriptName) throws Exception {
-        stdio=new Stdio(stdin, stdout);
+    	if (TEST_ROOT) {
+    		// EXPERIMENTAL
+	    	Root root=new Root(new Stdio(stdin,stdout));
+	    	root.inputLoop();
+	    	System.exit(0);
+    	} 
         
+        stdio=new Stdio(stdin, stdout);
         objGlobal=new ObjGlobal(stdio);
         if (scriptName != null) {
             try {
@@ -96,7 +105,7 @@ public class Main {
 
                 String pre="$";
                 
-                stdio.print(pre + " ");
+                System.out.print(pre + " ");
                 String line=stdio.getInputLine().trim();
                 
                 cp.processInteractiveInput(line);

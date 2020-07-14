@@ -44,6 +44,7 @@ public class ObjDataFile extends Obj {
         add(new FunctionGet());
         add(new FunctionGetAll());
         add(new FunctionComment());
+        add(new FunctionKeys());
     }
     
     protected Obj self() {
@@ -64,6 +65,30 @@ public class ObjDataFile extends Obj {
     public ColList getContentDescription() {
         return ColList.list().regular("File: " + file.getPath()).regular("Prefix: " + prefix).regular("Comment: " + comment);
     }
+    
+    private List<Value> getKeys () throws Exception {
+        List<Value> result=new ArrayList<Value>();
+        
+        BufferedReader br=null;
+        try {
+            br=new BufferedReader(new FileReader(new File(file.getPath())));
+            for (;;) {
+                String s=br.readLine();
+                if (s==null) break;
+
+                if (s.startsWith(prefix)) {
+                    String s2=s.substring(prefix.length());
+                    result.add(new ValueString(s2.trim()));
+                }
+            }
+        } finally {
+            if (br != null) try {br.close();} catch (Exception e2) {};
+        } 
+        return result;
+    }
+    
+    
+
     
     private List<Value> getLines (String key, boolean includeBlanks) throws Exception {
         List<Value> result=new ArrayList<Value>();
@@ -136,5 +161,19 @@ public class ObjDataFile extends Obj {
             return new ValueObj(self());
         }
     }
+    
+    class FunctionKeys extends Function {
+        public String getName() {
+            return "keys";
+        }
+        public String getShortDesc() {
+            return "keys() - get list of keys";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueList(getKeys());
+        }
+    }
+    
 
 }

@@ -18,7 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package rf.configtool.main;
 
 import java.io.BufferedReader;
-import java.io.PrintStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,7 +34,7 @@ import java.util.List;
  */
 public class Stdio {
 
-    public static final int CircBufferedOutput = 100;
+    public static final int CircBufferedOutput = 1000;
     
     // stdin and stdout may be null (disconnected)
     private BufferedReader stdin;
@@ -43,6 +43,14 @@ public class Stdio {
     private List<String> bufferedInputLines=new ArrayList<String>();
     private String[] outputLines;
     private int outputPos=0;
+    
+    public Stdio (InputStream in, OutputStream out) {
+    	this.stdin=new BufferedReader(new InputStreamReader(in));
+    	this.stdout=new PrintStream(out);
+
+    	outputLines=new String[CircBufferedOutput];
+        for (int i=0; i<outputLines.length; i++) outputLines[i]="";
+    }
     
     public Stdio(BufferedReader stdin, PrintStream stdout) {
         this.stdin=stdin;
@@ -85,21 +93,7 @@ public class Stdio {
      * Output text
      */
    
-    private String currLine="";
-    
-    public void print (String x) {
-        if (stdout != null) {
-            stdout.print(currLine+x);
-            currLine="";
-        } else {
-            currLine += x;
-        }
-    }
-    
-    public void println (String x) {
-        String s=currLine+x;
-        currLine="";
-        
+    public void println (String s) {
         outputLines[outputPos]=s;
         outputPos = (outputPos+1)%outputLines.length;
         if (stdout != null) stdout.println(s);

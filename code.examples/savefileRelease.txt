@@ -58,7 +58,9 @@ P(1,savefile) =file
 	call "MD:Run"
 
 	# Identify savefiles to move to TargetDir
-	HomeDir.files(Glob("savefile*"))  + HomeDir.files(Glob(".editHistory"))
+	HomeDir.files(Glob("savefile*"))  
+	+ HomeDir.files(Glob(".editHistory"))
+	+ HomeDir.file("projects.txt")
 	=FilesToMove
 
 	# Create temp-dir

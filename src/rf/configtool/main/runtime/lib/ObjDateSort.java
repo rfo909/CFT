@@ -35,11 +35,6 @@ import rf.configtool.main.runtime.ValueBoolean;
 import rf.configtool.main.runtime.ValueList;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
-import rf.configtool.main.runtime.lib.ObjGrep.FunctionFile;
-import rf.configtool.main.runtime.lib.ObjGrep.FunctionMatch;
-import rf.configtool.main.runtime.lib.ObjGrep.FunctionModeCheck;
-import rf.configtool.main.runtime.lib.ObjGrep.FunctionReject;
-import rf.configtool.main.runtime.lib.ObjGrep.StrMatch;
 
 /**
  * Sorting lines starting with date/time is typical for processing log files.

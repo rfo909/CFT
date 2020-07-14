@@ -20,18 +20,18 @@
 /License
 
 
-# Help text
+# Readme
 <<< EOF
 ------------------------------------------------------------------
 Generate the file Overview.txt from the Doc.html by calling
 function CreateOverview()
 ------------------------------------------------------------------
 >>> EOF
-/doc
+/Readme
 
 
 P(1,savefile) =file
-	call "Lib:e" (file)
+	edit (file)
 /e
 
 savefile.dir.sub("..").sub("doc")
