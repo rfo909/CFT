@@ -185,8 +185,7 @@ P(1,Grep)=grep
 	# Count matches first
 	TextFiles->tf 
 		assert(filter.call(tf))
-		#out(grep.fileCount(tf)) 
-		out(0)
+		out(grep.fileCount(tf)) 
 	| _.sum =count
 	# If too many hits, just cancel
 	error(count>10000, "Search matches " + count + " lines - not shown")
@@ -203,6 +202,7 @@ P(1,Grep)=grep
 
 	Val("FileFilter") =filter
 	if(filter==null, "No filter", "Filtering on " + filter) =msg
+	
 	println
 	println("The file filter, if defined, is a string value.")
 	println("Processing files, if file filter is defined, only files")
@@ -273,11 +273,15 @@ Input("... AND Search3c").get=c
 	| _.sort->x 
 		x.data =file 
 		report(file.path, file.length, Date(file.lastModified).fmt)
-	| =lines
-	# The report lines are data which we now display
+	| =lines  # the report(...) outputs
+	
+
+	# Display report lines, and create line numbers
 	0 =lineNo
 	lines->line
+		# Pad lineNo to 3 characters
 		{""+lineNo =s loop break(s.length>=3) " "+s =s | s} =lineNoStr
+		
 		println(lineNoStr + ": " + line)
 		lineNo+1 =lineNo
 	|

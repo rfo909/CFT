@@ -91,11 +91,14 @@ Editing save files
  * Debug
 
 Interactive use
- * Change current directory
+ * Change current directory: cd
  |   Change drive letter in Windows
  |   Paths with space
- * List files
- * Display text file
+ * List files: ls
+ * Display text file: cat, more, edit
+ |   Editing a previous file again
+ |   cat, more, edit - implementation
+ * Print working directory: pwd
  * Get data from user: Input() and readLine()
  * Searching files / report()
  |   FileLine

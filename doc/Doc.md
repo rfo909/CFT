@@ -57,7 +57,6 @@ $ cat TODO.txt
 $ more TODO.txt
 $ edit TODO.txt
 ```
-<
 # The help system
 
 
@@ -968,7 +967,7 @@ $ debug("data")
 ```
 # Interactive use
 
-## Change current directory
+## Change current directory: cd
 
 
 The "cd" command should function mostly as expected. CFT has no autocomplete feature, since
@@ -981,6 +980,15 @@ CFT handles globbing with '*' in the last part of the path, so you can enter:
 $ cd Proj*
 $ cd ../OtherProj*  # will fail if more than one match
 ```
+
+The "cd" command also has a "funtion mode", where you can enter
+
+```
+$ cd (expr)
+```
+
+The expression must resolve into a Dir object.
+
 ### Change drive letter in Windows
 
 
@@ -998,7 +1006,7 @@ quotes.
 ```
 $ cd "c:\Program Files\blah\blah"
 ```
-## List files
+## List files: ls
 
 
 The "ls" command comes in three variants:
@@ -1021,22 +1029,72 @@ As with "cd", it handles globbing with '*' in the last part of the path:
 $ ls *.txt
 $ ls ../OtherProject/*.xml
 ```
-## Display text file
+
+Also as with "cd", the "ls" command has a "function mode", where it takes an
+expression inside ()'s.
+
+```
+$ ls (expr)
+```
+
+The expr should resolve into a Dir object.
+
+## Display text file: cat, more, edit
 
 
-The "cat" command lists the content of a file, and also understands globbing.
+The "cat" command lists the content of a file, while "more" pages through the file, and
+"edit" opens an editor with the file. All these also understand globbing in the same way
+as "cd" and "ls"
 
 ```
 $ cat README*
+$ more README*
+$ edit README*
 $ cat ../OtherProject/build*.xml   # will fail if more than one match
+```
+
+As with "ls" and "cd", these also handle "function mode", where we pass an expression
+inside ()'s. Example:
+
+```
+$ edit (savefile)
+```
+### Editing a previous file again
+
+
+Each time "edit" is used to display a file in an editor, a history log is maintained. To
+display this log, and select a file from it, just type enter with nothing following. This
+only works in interactive mode.
+
+```
+$ edit
+```
+### cat, more, edit - implementation
+
+
+These three commands (statements) are defined via macros in the CFT.props file, which for
+"edit" and "more" calls functions inside the Lib script (under code.lib).
+
+<o>
+This means that their functionality are not complete defined within the CFT java code, and
+that their functionality can be modified without recompiling the code.
+
+## Print working directory: pwd
+
+
+The command "pwd" is also implemented as an expression, and returns the current directory. This
+is the same as the "Dir" expression.
+
+```
+$ pwd
 ```
 ## Get data from user: Input() and readLine()
 
 
 To stop and ask the user to enter something, we got two options. The Input() function
 produces an Input object which maintains a
-session state, remembering earlier values, and suggesting the last value input as default,
-with the ability to show earlier values.
+session state, remembering earlier values, and suggesting the last value entered as default,
+with the ability to show and select earlier values.
 
 
 You need to call the ".get()" function on the Input object to actually ask the user to enter
