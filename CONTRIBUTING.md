@@ -15,6 +15,12 @@ Below are some ideas I have been considering for a while, without having conclud
 way of implementation. Many also "suffer" under the "programmers disease" of potentially being clever and smart, but without 
 fulfilling some actual need .... :-)
 
+#### - Multiple script states
+
+At a minimum should cache and reload as needed multiple script states in memory, and also allow
+for fast switching between them.
+
+Actively being worked on.
 
 #### - Parse tools
 
@@ -120,3 +126,46 @@ I have not had the need, but this is a piece of functionality that a half descen
 #### - Imports?
 
 Importing code from other scripts, making functions there a part of the current script? 
+
+#### - Network support
+
+A big topic, which may fall into different categories:
+
+- exchange data and files between multiple CFT instances on different hosts
+- establishing a network A-B-C where A sees B and B sees C, etc, avoiding network segmentation limits
+- remote control
+- uploading and running scripts remotely
+- signing scripts?
+- creating "remote" functionality at least for Dir and File and exchanging all synthesizable objects
+- running CFT as daemon? 
+- network security, shared secrets, encryption, certificates, authorization, ...
+- CFT user privileges needed to be able to start/stop services etc?
+- Creating a dangerous vector of attack?
+- REST client for testing / management / monitoring - at least will not by itself require elevated user
+- REST server, for JavaScript interactive client / stats / ???
+- FTP in its various versions?
+- SSH?
+
+#### - Script repository
+
+For users running CFT on multiple locations, getting a way to access scripts off some server would be nice. 
+
+Perhaps using that primitive, no-username-or-password version of FTP, was that called "simple FTP"? 
+
+Or just HTTP GET?
+
+## Remember ...
+
+The philosophy of CFT is that of providing advanced functionality in a simple wrapping, with an emphasis
+on simple. Simple not only as in using a "command interface" and even (gasp!) text, but also of how
+much code is required. 
+
+As an example, creating an interface to a graphing package, it would not do having to perform 20+ calls
+to an API for setting basic properties like fonts, colors and all such. 
+
+Providing instead a (well documented) text file format, possibly with an embedded parser, for 99% of those
+options, with merge codes for things like headers, is a possible way of maintaining control over
+every aspect, while supporting an easy to use interface for casual needs.
+
+ 
+
