@@ -4,15 +4,16 @@ CFT has now mostly reached the level I imagined it would when I started the proj
 
 Though one can always think of huge numbers of things to integrate, the key for me is to treat CFT as somewhat of
 a toy language. Creating script files with much more than 10-20 functions just gets messy, as there is no
-type system, nor should there be one.
+type system, nor should there be one. Also there is no way of creating classes, which is also by design, in order
+to keep code and interpreter simple.
 
 I'd like a discussion on improvements that give powerful features managed with small pieces of code.
 
 ## Ideas under consideration
 
 Below are some ideas I have been considering for a while, without having concluded, and without having found an elegant
-way of implementation. Many also "suffer" under the "programmers disease" of potentially being smart, but without 
-really satisfying a tangible need .... :-)
+way of implementation. Many also "suffer" under the "programmers disease" of potentially being clever and smart, but without 
+fulfilling some actual need .... :-)
 
 
 #### - Parse tools
@@ -107,8 +108,15 @@ loop, would be nice.
 Some scripts require the user to be logged in as root. Checking this is easy enough, and an onload
 mechanism could warn the user immediately.
 
-#### - Reading environment variables
+#### - Environment variables
 
-Would be nice.
+Reading enviroment variables would be nice.
+
+Starting a command with Dir.run and with custom environment variable values would be even nicer.
+
+I have not had the need, but this is a piece of functionality that a half descent shell "must" have, right?
 
 
+#### - Imports?
+
+Importing code from other scripts, making functions there a part of the current script? 
