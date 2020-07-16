@@ -127,9 +127,28 @@ Every time we type JavaFiles and press Enter, we get a list of Java files
 available from the current directory. Use "ls" and "cd" to move somewhere else,
 then run JavaFiles again, observing that the list of files differ.
 
-Typing "cd" folloed by Enter returns you to the application home directory.
+Typing "cd" followed by Enter returns you to the application home directory.
 
-Oh, and its "ls" to list files, regardless of running on Linux or Windows. 
+## Objects, not text
+
+The list that is produced when you type JavaFiles is just a representation of the list of
+files. To see the full paths of the files, type the following:
+
+
+```
+$ JavaFiles->f out(f.path)
+```
+
+Now you get a list of strings, each the path of a Java file. This illustrates that although
+the output from JavaFiles looks incomplete, missing the paths etc, full objects are returned,
+on which a number of functions can be called. To see all available functions, just create
+a file object and follow it by "help". The file does not need to exist.
+
+```
+$ File("x") help
+```
+
+
 
 ## Searching
 
@@ -196,7 +215,7 @@ followed by help. Examples:
 ```
 $ Dir help
 $ List help
-$ File("x.txt") help   # file does not need to exist
+$ File("x") help
 $ Date help
 $ Lib help
 $ Lib.Math help
