@@ -1,7 +1,7 @@
 
 # CFT ("ConfigTool")
 
-CFT is a shell-like terminal based Java app, and a functional programming language.
+CFT is a shell-like terminal based Java app, and a programming language.
 
 It was created for interactive automation of simple tasks, such as
 
@@ -15,7 +15,7 @@ It was created for interactive automation of simple tasks, such as
 
 # Download and compile
 
-The project is currently built using Apache ANT, which results in a single JAR file.
+The project is written in Java and built using Apache ANT, which results in a single JAR file.
 
 There are no dependencies outside of standard Java libraries.
 
@@ -39,8 +39,7 @@ To leave type ":quit" or just type CTRL-C.
 
 The CFT application supports basic shell functions like "cd", "ls" and "pwd", 
 but is also a programming language which lets you build functions, that
-both call each other as well as a system library of 200+ functions,
-belonging, both global and inside objects.
+both call each other as well as a system library of 200+ functions, both global and inside objects.
 
 CFT is not a complete language, in the sense that one can create classes and instances
 of those. Instead you work with pre-defined functions, which return objects representing
@@ -67,14 +66,10 @@ When passing no parameters to a function in CFT, there is no need to include the
 
 
 
-
 # An interactive language
 
-CFT is a functional language, consisting of functions producing objects where we call
-new functions, and so on ...
-
-It is easy to learn, and test, by entering some code, and press Enter to have it
-run. CFT has full expression support with normal cardinality rules, and is great as a calculator.
+CFT accepts lines of input, with code which is executed. There is full expression 
+support with normal cardinality rules, and so CFT is great as a calculator.
 
 ```
 $ 2+3
@@ -89,49 +84,31 @@ interactively at first.
 To create your first function, type the following, and press Enter.
 
 ```
-$ "a b c".split
-```
-
-This produces a list of three values listed under each other. 
-
-Then enter the following and press Enter.
-
-```
-$ /x
-```
-
-You have now created a function 'x', which you call by using its name. 
-
-```
-$ x+x
-```
-
-This produces a new list which is the sum of the previous two. 
-
-# Create something useful
-
-To produce a list of all Java source files found recursively under the current directory:
-
-```
 $ Dir.allFiles(Glob("*.java"))
 ```
 
-That might be a candidate for a function name, to avoid having to type this more than once.
-Let's call the function JavaFiles.
+This produces a list of all java files under the directly and indirectly under current directory,
+
+After the list of files has displayed, we may name this code line, creating a function:
 
 ```
 $ /JavaFiles
 ```
 
-Every time we type JavaFiles and press Enter, we get a list of Java files
-available from the current directory. Use "ls" and "cd" to move somewhere else,
-then run JavaFiles again, observing that the list of files differ.
+Every time we type JavaFiles and press Enter, we call the JavaFiles function and get a list of Java files
+available from the current directory. Since JavaFiles takes no parameters, the ()'s are optional.
 
-Typing "cd" followed by Enter returns you to the application home directory.
+To create functions that take parameters, read the doc.
 
-## Objects, not text
+Now use "ls" and "cd" to move somewhere else,
+then run JavaFiles again, observing that the list of files differ, as the "Dir" function always returns the
+current directory.
 
-The list that is produced when you type JavaFiles is just a representation of the list of
+To return to the CFT home directory, type just "cd" and press Enter.
+
+## Note: objects, not text
+
+The list that is produced when you call JavaFiles is just a representation of the list of
 files. To see the full paths of the files, type the following:
 
 
@@ -139,10 +116,14 @@ files. To see the full paths of the files, type the following:
 $ JavaFiles->f out(f.path)
 ```
 
+The arrow indicates a loop, followed by a loop variable.
+
 Now you get a list of strings, each the path of a Java file. This illustrates that although
-the output from JavaFiles looks incomplete, missing the paths etc, full objects are returned,
-on which a number of functions can be called. To see all available functions, just create
-a file object and follow it by "help". The file does not need to exist.
+the output from JavaFiles looks like text, it is really a list of File objects, each with
+functions we can call, such as the .path function.
+
+To see all available functions for File objects, we can create
+a File object using the global File() function, and follow it by "help". The file does not need to exist.
 
 ```
 $ File("x") help
@@ -157,7 +138,7 @@ a string in all Java files. First we create a helper function, which creates a G
 object, which we then use in the main search function, which we call Search.
 
 ```
-$ Grep(Input("Enter search term").get)
+$ Grep(readLine("Enter search term"))
     :
 $ /GetGrep
 
@@ -169,19 +150,27 @@ $ /Search
 After entering any code line, such as the first one above, it gets executed before you can
 make the code line into a function.
 
-The Grep() function is a global function which may take a search string as parameter. Here
-we read this from the user, using the global Input() function. The Grep() function then
+The Grep() is a global function which may take a search string as parameter. Here
+we read this from the user, using the global readLine() function, which expects a 
+prompt string as parameter. The Grep() function then
 returns a Grep object, which becomes the return value from function GetGrep.
 
-In the Search function we first call GetGrep then assign it to a local variable 'grep'. Then 
-follows a processing loop, where we iterate over all the JavaFiles, and pass each file
-as argument to the Grep object .file() function. 
+In the Search function we first call GetGrep then assign it to a local variable 'grep'. Variable
+assignment is "reversed" in CFT, as it is stack based. At any time we enter "=" and an identifier,
+it means grabbing the topmist value off the stack and storing it in a local variable. 
 
-This produces a list of lines, which we iterate over, using the report() statement to
-generate nice output.
+Example "2 =a 3 =b a+b" returns 5.
 
-Note that in CFT variable assigns are "reversed", with value first (or more specifically,
-found on the stack), followed by "=" and a name. Example "2 =a 3 =b a+b" returns 5.
+
+Then follows a processing loop, where we iterate over all the JavaFiles, with 'f' being the
+loop variable, and pass each file as argument to the Grep object function .file(). 
+
+This produces a list of lines, which we also iterate over, and for each produce output
+by calling report() to generate nice formatted output.
+
+If we wanted the output to display the path of the files, we'd just type line.file.path instead
+of line.file.name inside the call to report().
+
 
 When the code works it's time to save the script.
 
