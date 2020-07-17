@@ -45,6 +45,7 @@ public class ObjSys extends Obj {
         add(new FunctionLog());
         add(new FunctionCodeDirs());
         add(new FunctionOutCount());
+        add(new FunctionLastResult());
 
     }
     
@@ -153,5 +154,19 @@ public class ObjSys extends Obj {
         }
     }
     
-
+    class FunctionLastResult extends Function {
+        public String getName() {
+            return "lastResult";
+        }
+        public String getShortDesc() {
+            return "lastResult() - returns last interactive result";
+        }
+        @Override
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return ctx.getObjGlobal().getRoot().getLastResult();
+        }
+    }
+    
+    
 }

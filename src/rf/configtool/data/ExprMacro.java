@@ -56,12 +56,7 @@ public class ExprMacro extends LexicalElement {
     	ts.matchStr("}","expected '}' closing " + (localCodeBlock ? "code block" : "macro"));
     	
         this.programLines=progLines;
-//
-//        
-//        while (!ts.matchStr("}")) {
-//            statements.add(Stmt.parse(ts));
-//        }
-//        
+    
     }
     
     

@@ -128,6 +128,11 @@ public class Root {
 		}
 	}
 	
+	public Value getLastResult() {
+		if (lastResult==null) return new ValueNull();
+		return lastResult;
+	}
+	
 	// Moved here from Main
 	public void inputLoop() {
 		copyrightNotice();

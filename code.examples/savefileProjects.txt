@@ -291,3 +291,8 @@ TextFiles
 /TF
 
 
+# Experimental code
+call "Investigate:log"
+/log
+
+

@@ -1,0 +1,69 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
+# Readme
+<<< EOF
+-------------------------------------------------------------------
+Creating an investigation log when working with finding out why
+a system behaves as it does. Uses Sys.lastResult to obtain
+data.
+
+EXPERIMENTAL
+-------------------------------------------------------------------
+>>> EOF
+/Readme
+
+call "Lib:e" (savefile)
+/e
+
+File(".investigate")
+/LogFile
+
+
+# Main function
+	Sys.lastResult =res
+	error(res==null,"No lastResult")
+	res.?nth =isList
+	readLine("Include " + if(isList,"list","non-list") + " value? (Enter / N)").toLower=="" =useValue
+	
+	LogFile.append("")
+	LogFile.append(Date.fmt)
+	when(useValue, {
+		when(isList,{
+			readLine("Element number").parseInt =pos
+			if(pos=="", 0, pos) =pos
+			res.nth(pos) =res
+		})
+		LogFile.append(syn(res))
+	})
+	readLine("Comment") =comment
+	LogFile.append(comment)
+	#show
+/log
+
+LogFile.read
+/show
+
+# clear investigation file
+readLine('Are you really sure you want to delete investigation log? Type "yes" to confirm') =x
+when(x=="yes", LogFile.create(""))
+/clear
+
