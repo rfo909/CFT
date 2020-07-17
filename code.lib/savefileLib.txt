@@ -83,7 +83,7 @@ EditFileFromHistory
 
 # Show edit history, and select one to edit, or cancel (called from e2())
 	EditHistory =data
-	{* P(1).name } =macroGetElementName
+	{* P(1).path } =macroGetElementName
 	Header("Enter part of file name to edit")
 
 	loop

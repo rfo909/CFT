@@ -543,7 +543,7 @@ public class ObjDir extends Obj {
             if (foreground && capture==null) {
                 process.waitFor();
                 long endTime=System.currentTimeMillis();
-                ctx.getObjGlobal().addSystemMessage("Running " + program + " completed: " + (endTime-startTime) + "ms");
+                //ctx.getObjGlobal().addSystemMessage("Running " + program + " completed: " + (endTime-startTime) + "ms");
             }
         }
     }

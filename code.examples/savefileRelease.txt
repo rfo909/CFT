@@ -57,7 +57,7 @@ P(1,savefile) =file
 	call "Overview:CreateOverview"
 	call "MD:Run"
 
-	# Identify savefiles to move to TargetDir
+	# Identify files to move temporarily out of the way, so as not to be included in git add .
 	HomeDir.files(Glob("savefile*"))  
 	+ HomeDir.files(Glob(".editHistory"))
 	+ HomeDir.file("projects.txt")
@@ -118,15 +118,14 @@ P(1,savefile) =file
 
 # Git diff
 	HomeDir.run("git","diff")
-/GitDiff
+/diff
 
 
 
 GitStatus
 /gs
 
-
-GitDiff
+diff
 /gd
 
 
