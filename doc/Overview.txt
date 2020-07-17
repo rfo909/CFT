@@ -8,6 +8,9 @@ v1.0.17
 
 Introduction
 
+What CFT is not
+ * So what is it for?
+
 CFT as a shell
  * Navigating directories
  |   Listing files or directories only
@@ -49,7 +52,11 @@ Creating functions
  * Naming lines of code
  * Calling a function
  * Listing custom functions
- * Savefiles
+
+Savefiles
+ * Save
+ * Load
+ * Create new empty script
  * CFT.props - codeDirs
 
 CFT as a functional programming language

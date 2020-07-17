@@ -41,8 +41,9 @@ public class Root {
 	
 	public Root(Stdio stdio) throws Exception {
 		this.stdio = stdio;
-		currScript = new ScriptState(new ObjGlobal(this,stdio));
-		scriptStates.put(currScript.getScriptName(), currScript);
+		createNewScript();
+		//currScript = new ScriptState(new ObjGlobal(this,stdio));
+		//scriptStates.put(currScript.getScriptName(), currScript);
 	}
 	
 	public void loadScript (String scriptName) throws Exception {
@@ -101,6 +102,21 @@ public class Root {
 		ScriptState newScript=new ScriptState(name, new ObjGlobal(this,stdio));  // throws exception if there is trouble
 		scriptStates.put(newScript.getScriptName(), newScript);
 		return newScript;
+	}
+	
+	
+	public void createNewScript() throws Exception {
+		currScript = new ScriptState(new ObjGlobal(this,stdio));
+		scriptStates.put(currScript.getScriptName(), currScript);
+	}
+	
+	private String getScriptStateNames() {
+		StringBuffer sb=new StringBuffer();
+		Iterator<String> keys = scriptStates.keySet().iterator();
+		while (keys.hasNext()) {
+			sb.append(" '" + keys.next() + "'");
+		}
+		return sb.toString().trim();
 	}
 	
 	private void cleanupOnExit () throws Exception {
@@ -324,6 +340,9 @@ public class Root {
 				}
 			}
 			return;
+		} else if (ts.matchStr("new")) {
+			createNewScript();
+			return;
 		} else if (ts.matchStr("copy")) {
 			String ident1 = ts.matchIdentifier("expected name of codeline to be copied");
 			String ident2 = ts.matchIdentifier("expected target name");
@@ -336,6 +355,7 @@ public class Root {
 			} else {
 				objGlobal.outln("DEBUG MODE OFF");
 			}
+			objGlobal.outln("Loaded scripts: " + getScriptStateNames());
 			return;
 		} else if (ts.matchStr("wrap")) {
 			boolean wrap = objGlobal.getObjCfg().changeWrap();
@@ -393,7 +413,7 @@ public class Root {
 			objGlobal.outln("Assign to name by /xxx as usual");
 			return;
 		} else {
-			throw new Exception("Unknown command, try: quit, save, load, delete, copy, debug, wrap, syn or <int>");
+			throw new Exception("Unknown command, try: quit, save, load, new, delete, copy, debug, wrap, syn or <int>");
 		}
 	}
 

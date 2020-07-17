@@ -1,13 +1,16 @@
-# ConfigTool - CFT
+# CFT / ConfigTool
 
-
-**Last updated: 2020-07-17 RFO**
-
-**v1.0.16**
+```
+Interactive object oriented programmable shell.
+Compact programming language.
+Automation tool.
+Last updated: 2020-07-17 RFO
+v1.0.17
+```
 # Introduction
 
 
-ConfigTool (CFT) is a "programmers tool", in the form of a Java application that runs in a
+CFT is a programmers tool, in the form of a Java application that runs in a
 terminal window. It has no graphical
 elements, which means it can run everywhere. From the start it has been developed
 as an interactive environment, with strong emphasis on automation. The syntax is compact,
@@ -15,17 +18,80 @@ in the interest of getting useful work out of even a single line of code.
 
 
 CFT has been routinely used on Linux and Windows, and easily integrates with external commands
-on both. It should run everywhere that supports Java.
+on both, particularly PowerShell. It should run everywhere that supports Java.
 
 
-Development has been going on since May 2018, and was assigned v1.0 as robustness and error
-handling had reached a certain level, maturing enough to be made open source on github. It started
+Development has been going on since May 2018, and v1.0 marked a certain level of robustness and error
+handling, being mature enough to be made open source on github. It started
 out purely as an interactive
-tool, with emphasis on terse syntax, since all code was entered via the command line. After
+tool, with emphasis on compact syntax, since all code was entered via the command line. After
 a while it evolved into editing the savefiles, or "script files".
 
 
 Functionality has been driven partially by needs and partially by what's fun to implement.
+
+# What CFT is not
+
+
+CFT does not allow classes or objects apart from those predefined. That would
+increase complexity a lot, be harder to implement (scope rules, inheritance etc),
+and is not what I needed.
+
+
+CFT is meant for simple automation tasks, like moving files, searching and running
+external programs. It has the feel of a "toy language", with some particularly
+strange features, including being stack based, but supporting normal "2+3*5" expressions.
+
+
+Writing big functions is certainly possible. Letting scripts call each other is
+also both supported and used. But writing complex applications is not the intention
+behind this app.
+
+
+Also, doing GUI or doing networking other than what you get with curl and other
+external programs, is not what CFT is about. In this respect, CFT is a shell, it
+depends on other programs.
+
+
+Finally, CFT is also not a full shell. You will need regular shells for all kinds of
+interactive commands. CFT does not have autocomplete, in fact its input is
+line based.
+
+## So what is it for?
+
+
+Commands like "ls" and "cd" exist, with globbing, as well as "more" and "edit" (which opens a file
+in an editor), but they are not meant for moving around the directory tree doing much. Rather
+they are for locating files and directories, for which you then build code.
+
+
+Everything in CFT is functions, and defining your own is super easy, and 
+**this is the point of CFT**.
+
+
+That 
+**even automation can be simple**, with functions calling other functions. Once some function is
+tested, it can do the boring stuff for you:
+
+
+
+-  copying files
+
+
+-  searching source code and logs
+
+
+-  deploying jar files to test environments
+
+
+-  generate netplan config files
+
+
+-  automate git and powershell and other things that require you to type too much
+
+
+
+... and so on.
 
 # CFT as a shell
 
@@ -437,7 +503,9 @@ Here we see function 'JavaFiles' and its code. We also see the last entered code
 a dot '.' in front of it. The last code line is the one that can be given a name, and further,
 the last code line can be repeated by entering a single dot and pressing enter.
 
-## Savefiles
+# Savefiles
+
+## Save
 
 
 To save all named functions, enter the special command below
@@ -446,12 +514,23 @@ To save all named functions, enter the special command below
 $ :save Test
 ```
 
-This creates a file under the "code.work" directory, found in the CFT home directory,
-called savefileTest.txt. To load it:
+This creates a file under the CFT home directory,
+called savefileTest.txt.
+
+## Load
 
 ```
 $ :load Test
 ```
+## Create new empty script
+
+
+To create a new script from scratch, there is the colon command:
+
+```
+$ :new
+```
+
 ## CFT.props - codeDirs
 
 
