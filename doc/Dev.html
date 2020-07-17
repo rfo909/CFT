@@ -13,7 +13,25 @@
 
 <h1>CFT Change log</h1>
 
-<h2>v1.0.17 2020-07-17 shell() function</h2>
+<h3>v1.0.17 2020-07-17 Projects script</h3>
+<p>
+	Improved Projects script, making file name filtering more explicitly set and cleared.
+</p>
+<p>
+	Removed CRLF
+</p>
+<pre>
+$ :load Projects
+$ savefile.read=x savefile.create(x)
+</pre>
+
+<h3>v1.0.17 2020-07-17 reload script bug</h3>
+<p>
+	Fixed minor bug, when deleting a script file that has been loaded, CFT crashed.
+</p>
+
+
+<h3>v1.0.17 2020-07-17 shell() function</h3>
 <p>
 	Added CFT.props field "winShell" set to "powershell" as default, 
 	while keeping the "shell" field, and differentiating between windows and linux

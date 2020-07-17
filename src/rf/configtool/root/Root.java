@@ -56,10 +56,21 @@ public class Root {
 
 	private void refreshIfSavefileUpdated() throws Exception {
 		Iterator<String> keys = scriptStates.keySet().iterator();
+		List<String> keysToDelete=new ArrayList<String>();
 		while (keys.hasNext()) {
 			String key = keys.next();
 			ScriptState x = scriptStates.get(key);
-			x.getObjGlobal().refreshIfSavefileUpdated();
+			try {
+				x.getObjGlobal().refreshIfSavefileUpdated();
+			} catch (Exception ex) {
+				stdio.println("ERROR: could not reload script " + key + " - removing from cache");
+				keysToDelete.add(key);
+			}
+		}
+		for (String key:keysToDelete) {
+			if (!currScript.getObjGlobal().equals(key)) {
+				scriptStates.remove(key);
+			}
 		}
 	}
 	
