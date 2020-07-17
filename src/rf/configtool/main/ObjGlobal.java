@@ -844,7 +844,13 @@ public class ObjGlobal extends Obj {
         @Override
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
-            callExternalProgram(ctx.getObjGlobal().getPropsFile().getShell(), ctx);
+            String shellCommand;
+            if (File.separator.equals("\\")) {
+            	shellCommand=ctx.getObjGlobal().getPropsFile().getWinShell();
+            } else {
+            	shellCommand=ctx.getObjGlobal().getPropsFile().getShell();
+            }
+            callExternalProgram(shellCommand, ctx);
             return new ValueBoolean(true);
         }
     }

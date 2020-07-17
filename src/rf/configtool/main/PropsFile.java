@@ -11,6 +11,7 @@ public class PropsFile {
 	
 	private String codeDirs;
 	private String shell = "/usr/bin/bash";
+	private String winShell = "powershell";
 	
 	private String mCat  = "{* error('mCat macro undefined in " + PROPS_FILE + "') }";
 	private String mEdit = "{* error('mEdit macro undefined in " + PROPS_FILE + "') }";
@@ -36,6 +37,7 @@ public class PropsFile {
 					
 					if (name.equals("codeDirs")) codeDirs=value;
 					if (name.equals("shell")) shell=value;
+					if (name.equals("winShell")) winShell=value;
 					
 					if (name.equals("mCat")) mCat=value;
 					if (name.equals("mEdit")) mEdit=value;
@@ -67,6 +69,10 @@ public class PropsFile {
 	
 	public String getShell() {
 		return shell;
+	}
+	
+	public String getWinShell() {
+		return winShell;
 	}
 	
 	public String getMCat() {
