@@ -232,10 +232,3 @@ P(1,"label")=label P(2)=currVal P(3,"yes")=trueVal P(4,"no")=falseVal
 
 
 
-
-
-# Test
-	ReadValueBoolean("Roar",false)
-/t
-
-

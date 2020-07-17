@@ -117,8 +117,8 @@ public class ObjInput extends ObjPersistent {
             // ':xxx' - identify option
             LOOP: for(;;) {
                 ctx.outln("(?) " + label);
-                if (currValue.trim().length()>0) ctx.outln("(enter for '" + currValue + "')");
-                if (uniqueValues.size() > 0) ctx.outln("(':' for options)");
+                if (currValue.trim().length()>0) ctx.outln("    enter for '" + currValue + "'");
+                if (uniqueValues.size() > 0) ctx.outln("    ':' for options");
                 String line=ctx.getStdio().getInputLine();
                 if (line.trim().length()==0) {
                     if (currValue==null) currValue="";
