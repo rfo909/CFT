@@ -1984,14 +1984,6 @@ each call to a function in the same script, is run within the same environment.
 This lets individual scripts have persistent session state, that is remembered between
 calls, which means Input() remembers what you typed in last time, etc.
 
-### Session state tree
-
-
-If code inside an external script in turn calls code inside 
-**another** script, then
-the same rule applies, creating in effect a tree of session states for scripts invoked
-from other scripts.
-
 ## Predicate calls
 
 

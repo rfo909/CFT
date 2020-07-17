@@ -154,7 +154,6 @@ Various advanced topics
  * Working with text lines from stdin
  * Differing between Windows and Linux
  * Session state
- |   Session state tree
  * Predicate calls
  * List.push()
  * Dict set strings
