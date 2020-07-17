@@ -15,12 +15,6 @@ Below are some ideas I have been considering for a while, without having conclud
 way of implementation. Many also "suffer" under the "programmers disease" of potentially being clever and smart, but without 
 fulfilling some actual need .... :-)
 
-#### - Multiple script states
-
-At a minimum should cache and reload as needed multiple script states in memory, and also allow
-for fast switching between them.
-
-Actively being worked on.
 
 #### - Parse tools
 

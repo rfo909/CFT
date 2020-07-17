@@ -1,7 +1,7 @@
 # ConfigTool - CFT
 
 
-**Last updated: 2020-07-14 RFO**
+**Last updated: 2020-07-17 RFO**
 
 **v1.0.16**
 # Introduction
