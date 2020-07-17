@@ -109,7 +109,7 @@ public class StmtShowCode extends Stmt {
                     for (String name:names) {
                         boolean foundMatch = trunc ? name.startsWith(match) : name.equals(match);
                         if (foundMatch) {
-                            String codeLine=code.getNamedLine(name).getFirstNonBlankLine();
+                            String codeLine=code.getNamedCodeLines(name).getFirstNonBlankLine();
                             if (codeLine.length() > maxValueLength) {
                                 codeLine=codeLine.substring(0,maxValueLength-2) + "+";
                             }

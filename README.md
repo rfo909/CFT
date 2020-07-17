@@ -300,7 +300,7 @@ Read [full documentation](doc/Doc.md) gives a detailed walktrough of most of the
 Also check out the example scripts under "code.examples".
 
 
-# Philosophy
+# Goals
 
 - Interactive programmable shell
 - Compact programming language
@@ -325,6 +325,5 @@ me solve.
 # Status
 
 Core is stable, and has been backwards compatible since October 2019, when global
-function list() became current List(). Development is focused on new objects and 
-new global / member functions operating orthogonally with existing functionality.
+function list() was renamed to the current global function List().
 

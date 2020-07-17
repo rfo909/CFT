@@ -17,6 +17,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.data;
 
+import rf.configtool.main.CodeLines;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.ObjGlobal;
 import rf.configtool.main.Runtime;
@@ -31,7 +32,7 @@ public class ProgramLine extends LexicalElement {
 
     public ProgramLine (TokenStream ts) throws Exception {
         super(ts);
-        while (!ts.atEOF() && !ts.peekStr(Runtime.PROGRAM_LINE_SEPARATOR) && !ts.peekStr("}")) {
+        while (!ts.atEOF() && !ts.peekStr(CodeLines.PROGRAM_LINE_SEPARATOR) && !ts.peekStr("}")) {
             statements.add(Stmt.parse(ts));
         }
     }

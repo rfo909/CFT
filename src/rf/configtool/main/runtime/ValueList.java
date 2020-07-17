@@ -58,7 +58,7 @@ public class ValueList extends Value {
     
     @Override
     public String getTypeName() {
-        return "list";
+        return "List";
     }
 
 

@@ -31,7 +31,7 @@ import rf.configtool.main.runtime.reporttool.Report;
 
 /**
  * A macro is by default a local code block that is executed immediately, and is a way of grouping
- * multiple statements and expressions as a single expression. Bit it can also be created as a
+ * multiple statements and expressions as a single expression. But it can also be created as a
  * stand-alone object, that is invoked via .call(params). It then runs in an independent context.
  */
 public class ValueMacro extends Value {
@@ -103,7 +103,6 @@ public class ValueMacro extends Value {
         // parameters to the function, but that the loop flag stops
         Ctx sub=ctx.subContextForCodeBlock(); 
         return invoke(sub);
-        //return sub.getResult();
     }
     
     
@@ -113,7 +112,6 @@ public class ValueMacro extends Value {
     public Value call (Ctx ctx, List<Value> params) throws Exception {
         Ctx sub=new Ctx(ctx.getObjGlobal(), new FunctionState(params));
         return invoke(sub);
-        //return sub.getResult();
     }
     
     // -----------------------------------------------------------

@@ -17,6 +17,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.data;
 
+import rf.configtool.main.CodeLines;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.ObjGlobal;
 import rf.configtool.main.Runtime;
@@ -49,7 +50,7 @@ public class ExprMacro extends LexicalElement {
         List<ProgramLine> progLines=new ArrayList<ProgramLine>();
         for(;;) {
             progLines.add(new ProgramLine(ts));
-            if (ts.matchStr(Runtime.PROGRAM_LINE_SEPARATOR)) continue;
+            if (ts.matchStr(CodeLines.PROGRAM_LINE_SEPARATOR)) continue;
             break;
         }
     	ts.matchStr("}","expected '}' closing " + (localCodeBlock ? "code block" : "macro"));

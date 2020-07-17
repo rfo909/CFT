@@ -44,12 +44,14 @@ import rf.configtool.main.runtime.lib.ValueObjFloat;
 import rf.configtool.main.runtime.lib.ValueObjStr;
 import rf.configtool.parser.Parser;
 import rf.configtool.parser.SourceLocation;
+import rf.configtool.root.Root;
 
 /**
  * Note that actions without a return value, are statements, and must be parsed
  */
 public class ObjGlobal extends Obj {
     
+	private Root root;
 	private PropsFile propsFile;
     private Stdio stdio;
 
@@ -60,13 +62,10 @@ public class ObjGlobal extends Obj {
     
     private HashMap<String,ObjPersistent> sessionObjects=new HashMap<String,ObjPersistent>();
     private HashMap<String,Value> sessionValues=new HashMap<String,Value>();
-    private HashMap<String,ExternalScriptState> externalScriptStates=new HashMap<String,ExternalScriptState>();
     private final Runtime runtime;
     private List<String> systemMessages=new ArrayList<String>();
     
 
-    
-    private boolean terminationFlag = false;
     
     private ObjCfg cfg;
     
@@ -83,13 +82,18 @@ public class ObjGlobal extends Obj {
         stdio.println();
     }
     
+    public Root getRoot() {
+    	return root;
+    }
+    
     public Stdio getStdio() {
         return stdio;
     }
     
-    public ObjGlobal(Stdio stdio) throws Exception {
+    public ObjGlobal(Root root, Stdio stdio) throws Exception {
     	propsFile=new PropsFile();
 
+    	this.root=root;
         this.stdio=stdio;
         //props.report(stdio);
         
@@ -147,15 +151,7 @@ public class ObjGlobal extends Obj {
     public PropsFile getPropsFile() {
     	return propsFile;
     }
-    
-    public void setTerminationFlag() {
-    	terminationFlag=true;
-    }
-    
-    public boolean getTerminationFlag() {
-    	return terminationFlag;
-    }
-    
+ 
     public void addSystemMessage (String line) {
         systemMessages.add(line);
     }
@@ -168,24 +164,6 @@ public class ObjGlobal extends Obj {
     	systemMessages.clear();
     }
  
-    
-    /**
-     * ObjGlobal persists states of all external scripts invoked, so as their ValDef and other
-     * session persistent values are remembered between calls, allowing external scripts
-     * to act like stateful objects. If an external script in turn calls another external script,
-     * the same takes place inside its ObjGlobal (which is created and kept inside the ExternalScriptState object.
-     * 
-     * Called from ExprCall
-     */
-    public ExternalScriptState getOrCreateExternalScriptState (String scriptName) throws Exception {
-        ExternalScriptState x=externalScriptStates.get(scriptName);
-        if (x==null) {
-            x=new ExternalScriptState(stdio, scriptName);
-            externalScriptStates.put(scriptName,  x);
-        }
-        return x;
-    }
-    
     public String getCurrDir() {
         if (currDir==null) {
             File f=new File(".");

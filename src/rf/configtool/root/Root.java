@@ -31,18 +31,22 @@ public class Root {
 	private static final Version VERSION = new Version();
 
 
+	private Stdio stdio;
 	
 	private Map<String, ScriptState> scriptStates = new HashMap<String, ScriptState>();
 	private ScriptState currScript;
-	private Stdio stdio;
 	private boolean debugMode;
 	private Value lastResult;
 	private boolean terminationFlag = false;
-
+	
 	public Root(Stdio stdio) throws Exception {
-		currScript = new ScriptState();
-		scriptStates.put(currScript.getScriptName(), currScript);
 		this.stdio = stdio;
+		currScript = new ScriptState(new ObjGlobal(this,stdio));
+		scriptStates.put(currScript.getScriptName(), currScript);
+	}
+	
+	public void loadScript (String scriptName) throws Exception {
+		currScript = getScriptState(scriptName);
 	}
 
 	public void setInitialCommands(List<String> initialCommands) {
@@ -71,21 +75,21 @@ public class Root {
 		}
 	}
 	
-	private void processLoad (String name) throws Exception {
+	public ScriptState getScriptState (String name) throws Exception {
 		ObjGlobal objGlobal = currScript.getObjGlobal();
 		if (name == null || name.equals(currScript.getScriptName())) {
-			objGlobal.loadCode(null); // reloads code - pointless as code is reloaded automatically when changed, but okay
-			return;
+			//objGlobal.loadCode(null); // reloads code - pointless as code is reloaded automatically when changed, but okay
+			return currScript;
 		}
 		ScriptState otherScript=scriptStates.get(name);
 		if (otherScript != null) {
-			otherScript.getObjGlobal().loadCode(null);  // reload it just for show
-			currScript=otherScript;
-			return;
+			return otherScript;
+//			currScript=otherScript;
+//			return;
 		}
-		ScriptState newScript=new ScriptState(name);  // throws exception if there is trouble
+		ScriptState newScript=new ScriptState(name, new ObjGlobal(this,stdio));  // throws exception if there is trouble
 		scriptStates.put(newScript.getScriptName(), newScript);
-		currScript=newScript;
+		return newScript;
 	}
 	
 	private void cleanupOnExit () throws Exception {
@@ -96,8 +100,7 @@ public class Root {
 			x.getObjGlobal().cleanupOnExit();
 		}
 	}
-
-
+	
 	// Moved here from Main
 	public void inputLoop() {
 		copyrightNotice();
@@ -116,10 +119,13 @@ public class Root {
 
 				String pre = "$";
 
+				// Stdio can only do line output, so using System.out directly
 				System.out.print(pre + " ");
 				String line = stdio.getInputLine().trim();
+				
+				processInteractiveInput(line);
 
-				objGlobal.getRuntime().processInteractiveInput(line);
+				//objGlobal.getRuntime().processInteractiveInput(line);
 
 			}
 		} catch (Exception ex) {
@@ -165,7 +171,7 @@ public class Root {
                         str=str.substring(0,colon);
                     }
                     
-                    CodeLines codeLines=codeHistory.getNamedLine(str);
+                    CodeLines codeLines=codeHistory.getNamedCodeLines(str);
                     if (codeLines != null) {
                         if (codeLines.hasMultipleCodeLines()) {
                             objGlobal.outln("Function '" + str + "' is not a single line of code");
@@ -262,11 +268,11 @@ public class Root {
             }
             
         } catch (Throwable t) {
-            objGlobal.outln("% ERROR " + t.getClass().getName() + ": " + t.getMessage());
+            objGlobal.outln("ERROR " + t.getClass().getName() + ": " + t.getMessage());
             if (debugMode) {
                 t.printStackTrace();
                 try {
-                	objGlobal.outln("% INPUT: " + ts.showNextTokens(10));
+                	objGlobal.outln("INPUT: " + ts.showNextTokens(10));
                 } catch (Exception ex) {
                 	// ignore
                 }
@@ -274,27 +280,17 @@ public class Root {
         }
     }
 
-
-	private void copyrightNotice() {
-		System.out.println("");
-		System.out.println("CFT (\"ConfigTool\") Copyright (c) 2020 Roar Foshaug");
-		System.out.println("This program comes with ABSOLUTELY NO WARRANTY. See GNU GPL3.");
-		System.out.println("This is free software, and you are welcome to redistribute it");
-		System.out.println("under certain conditions. See GNU GPL3.");
-		System.out.println("");
-		System.out.println("You should have received a copy of the GNU General Public License");
-		System.out.println("along with this program.  If not, see <https://www.gnu.org/licenses/>");
-		System.out.println("");
-	}
-
 	private void processColonCommand(TokenStream ts) throws Exception {
 		ObjGlobal objGlobal=currScript.getObjGlobal();
 		CodeHistory codeHistory=objGlobal.getCodeHistory();
 		
 		if (ts.matchStr("quit")) {
-			objGlobal.setTerminationFlag();
+			terminationFlag=true;
 			return;
 		}
+		
+		final int screenWidth=objGlobal.getObjCfg().getScreenWidth();
+
 		if (ts.matchStr("save")) {
 			String ident = ts.matchIdentifier(); // may be null
 			if (ident==null) ident=currScript.getScriptName();
@@ -305,7 +301,7 @@ public class Root {
 			return;
 		} else if (ts.matchStr("load")) {
 			String ident = ts.matchIdentifier(); // may be null
-			processLoad (ident);
+			currScript = getScriptState(ident);
 			return;
 		} else if (ts.matchStr("delete")) {
 			for (;;) {
@@ -347,7 +343,11 @@ public class Root {
 			codeHistory.setCurrLine(s);
 			objGlobal.outln("synthesize ok");
 			objGlobal.outln("+-----------------------------------------------------");
-			objGlobal.outln("| .  : " + s);
+			String line="| .  : " + s;
+			if (line.length() > screenWidth) {
+				line=line.substring(0,screenWidth-1)+"+";
+			}
+			objGlobal.outln(line);
 			objGlobal.outln("+-----------------------------------------------------");
 			objGlobal.outln("Assign to name by /xxx as usual");
 			return; // do not modify codeHistory
@@ -373,7 +373,11 @@ public class Root {
 			codeHistory.setCurrLine(s);
 			objGlobal.outln("synthesize ok");
 			objGlobal.outln("+-----------------------------------------------------");
-			objGlobal.outln("| .  : " + s);
+			String line="| .  : " + s;
+			if (line.length() > screenWidth) {
+				line=line.substring(0,screenWidth-1)+"+";
+			}
+			objGlobal.outln(line);
 			objGlobal.outln("+-----------------------------------------------------");
 			objGlobal.outln("Assign to name by /xxx as usual");
 			return;
@@ -381,5 +385,21 @@ public class Root {
 			throw new Exception("Unknown command, try: quit, save, load, delete, copy, debug, wrap, syn or <int>");
 		}
 	}
+
+	
+	
+
+	private void copyrightNotice() {
+		stdio.println("");
+		stdio.println("CFT (\"ConfigTool\") Copyright (c) 2020 Roar Foshaug");
+		stdio.println("This program comes with ABSOLUTELY NO WARRANTY. See GNU GPL3.");
+		stdio.println("This is free software, and you are welcome to redistribute it");
+		stdio.println("under certain conditions. See GNU GPL3.");
+		stdio.println("");
+		stdio.println("You should have received a copy of the GNU General Public License");
+		stdio.println("along with this program.  If not, see <https://www.gnu.org/licenses/>");
+		stdio.println("");
+	}
+
 
 }

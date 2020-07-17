@@ -71,7 +71,7 @@ public class CodeHistory {
         return true;
     }
 
-    public CodeLines getNamedLine (String name) {
+    public CodeLines getNamedCodeLines (String name) {
         return namedLines.get(name); // may be null
     }
     
@@ -107,7 +107,7 @@ public class CodeHistory {
                 
                 String label=name;
                 while(label.length()<nameMaxLength) label=label+" ";
-                String namedLine=getNamedLine(name).getFirstNonBlankLine();
+                String namedLine=getNamedCodeLines(name).getFirstNonBlankLine();
                 
                 String s="| " + label + ": " + TabUtil.substituteTabs(namedLine,1);
 

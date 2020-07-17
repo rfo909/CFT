@@ -21,7 +21,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.PrintStream;
 
-import rf.configtool.main.ExternalScriptState;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.ObjGlobal;
 import rf.configtool.main.Stdio;
@@ -32,6 +31,8 @@ import rf.configtool.main.runtime.lib.ObjFile;
 import rf.configtool.main.runtime.lib.ObjGlob;
 import rf.configtool.parser.SourceLocation;
 import rf.configtool.parser.TokenStream;
+import rf.configtool.root.ScriptState;
+
 import java.util.*;
 
 /**
@@ -84,7 +85,8 @@ public class ExprCall extends LexicalElement {
         ObjGlobal objGlobal=ctx.getObjGlobal();
         Stdio stdio=objGlobal.getStdio();
         
-        ExternalScriptState x=objGlobal.getOrCreateExternalScriptState(script);
+        //return objGlobal.getRoot().invokeScriptFunction(script, func, args);
+        ScriptState x=objGlobal.getRoot().getScriptState(script);
         Value retVal=x.invokeFunction (func, args);
         return retVal;
     }

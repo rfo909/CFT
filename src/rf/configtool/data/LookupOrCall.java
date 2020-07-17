@@ -81,7 +81,7 @@ public class LookupOrCall extends LexicalElement {
         
         // Code lookup
         ObjGlobal objGlobal=ctx.getObjGlobal();
-        CodeLines codeLines=objGlobal.getCodeHistory().getNamedLine(ident);
+        CodeLines codeLines=objGlobal.getCodeHistory().getNamedCodeLines(ident);
         if (codeLines!= null) {
             //if (values.size() > 0) throw new Exception(getSourceLocation() + " code identified by '" + ident + "' can not take params");
             // execute code line

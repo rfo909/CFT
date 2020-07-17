@@ -26,28 +26,7 @@ import rf.configtool.main.runtime.ValueString;
 import rf.configtool.main.runtime.reporttool.Report;
 
 /**
- * This object buffers two types of text output from code:
- * - plain text system messages in the form of lines
- * - structured data in the form of columns
- * 
- * The Runtime class implements presentation of these, in method processProgramLine,
- * just sending the plain text to stdout, (prefixed with '#'), while formatting the structured data into 
- * lines that are added to the OutData (same as out(x) in code). This is
- * so that report data can be easily written to file, as well as 
- * processed further (counting, sorting etc)
- * 
- * Example:
- * 
-+-----------------------------------------------------
-| data  : "a b c d e".split
-|
-| file  : File("test.txt")
-|
-| rep   : data->d report(1,2,3,d)
-|
-| update: file.delete file.create(rep)
-+-----------------------------------------------------
- *
+ * This object buffers data for creating formatted reports
  */
 public class OutText {
     

@@ -17,6 +17,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.data;
 
+import rf.configtool.main.CodeLines;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.Runtime;
 import rf.configtool.main.runtime.*;
@@ -32,7 +33,7 @@ public class StmtLoop extends Stmt {
         
         ts.matchStr("loop","expected keyword 'loop'");
         
-        while (!ts.atEOF() && !ts.peekStr(Runtime.PROGRAM_LINE_SEPARATOR) && !ts.peekStr("}")) {
+        while (!ts.atEOF() && !ts.peekStr(CodeLines.PROGRAM_LINE_SEPARATOR) && !ts.peekStr("}")) {
             body.add(Stmt.parse(ts));
         }
         

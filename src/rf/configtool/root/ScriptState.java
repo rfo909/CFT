@@ -1,25 +1,28 @@
 package rf.configtool.root;
 
+import java.util.List;
+
+import rf.configtool.main.CodeLines;
+import rf.configtool.main.FunctionState;
 import rf.configtool.main.ObjGlobal;
 import rf.configtool.main.Stdio;
+import rf.configtool.main.runtime.Value;
+import rf.configtool.main.Runtime;
 
 public class ScriptState {
 	private String scriptName;
 	private ObjGlobal objGlobal;
-	private Pipe miso, mosi;
-
+	private Stdio stdio;
+	
 	// Default state
-	public ScriptState() throws Exception {
-		this(null);
+	public ScriptState(ObjGlobal objGlobal) throws Exception {
+		this(null, objGlobal);
 	}
 
-	public ScriptState(String scriptName) throws Exception {
+	public ScriptState(String scriptName, ObjGlobal objGlobal) throws Exception {
 		this.scriptName = (scriptName == null ? "" : scriptName);
-		this.miso = new Pipe();
-		this.mosi = new Pipe();
 
-		Stdio stdio = new Stdio(mosi.getInputStream(), miso.getOutputStream());
-		objGlobal = new ObjGlobal(stdio);
+		this.objGlobal = objGlobal;
 		if (scriptName != null) {
 			objGlobal.loadCode(scriptName);
 		}
@@ -36,13 +39,20 @@ public class ScriptState {
 	public ObjGlobal getObjGlobal() {
 		return objGlobal;
 	}
-
-	public Pipe getMiso() {
-		return miso;
+	
+	public Value invokeFunction (String func, List<Value> params) throws Exception {
+	
+	  // Code lookup
+	  CodeLines codeLines=objGlobal.getCodeHistory().getNamedCodeLines(func);
+	  if (codeLines != null) {
+	      // execute code line
+	      Runtime rt=new Runtime(objGlobal);
+	      Value v = rt.processCodeLines(codeLines, new FunctionState(params));
+	      return v;
+	  }
+	  
+	  throw new Exception("Unknown symbol '" + func + "'");
 	}
 
-	public Pipe getMosi() {
-		return mosi;
-	}
 
 }

@@ -20,6 +20,10 @@ package rf.configtool.main;
 import java.util.ArrayList;
 import java.util.List;
 
+import rf.configtool.data.ProgramLine;
+import rf.configtool.main.runtime.Value;
+import rf.configtool.main.runtime.ValueString;
+import rf.configtool.main.runtime.reporttool.Report;
 import rf.configtool.parser.Parser;
 import rf.configtool.parser.SourceLocation;
 import rf.configtool.parser.TokenStream;
@@ -30,6 +34,10 @@ import rf.configtool.parser.TokenStream;
  *
  */
 public class CodeLines {
+	
+    public static final String PROGRAM_LINE_SEPARATOR="|"; // separates multiple ProgramLines on same line
+    
+
     private List<CodeLine> saveFormat;
     
     public CodeLines (String singleLine, SourceLocation loc) {
@@ -89,13 +97,60 @@ public class CodeLines {
         return false;
         
     }
-    public TokenStream getTokenStream () throws Exception {
+    
+     public TokenStream getTokenStream () throws Exception {
         Parser p=new Parser();
         for (CodeLine cl:saveFormat) {
         	if (cl.getType()==CodeLine.TYPE_LINE_ORIGINAL) continue; // only execute NORMAL and GENERATED
         	p.processLine(cl);
         }
         return p.getTokenStream();
+     }
+    
+     
+     
+     public List<ProgramLine> getProgramLines () throws Exception {
+     	TokenStream ts=getTokenStream();
+ 	    List<ProgramLine> progLines=new ArrayList<ProgramLine>();
+ 	    for(;;) {
+ 	        progLines.add(new ProgramLine(ts));
+ 	        if (ts.matchStr(PROGRAM_LINE_SEPARATOR)) continue;
+ 	        break;
+ 	    }
+ 	    return progLines;
+     }
+     
+     
+
+    
+    public Value execute (ObjGlobal objGlobal, FunctionState functionState) throws Exception {
+
+        if (functionState==null) functionState=new FunctionState();
+        
+        
+        List<ProgramLine> progLines=getProgramLines();
+
+        Value retVal=null;
+        
+        for (ProgramLine progLine:progLines) {
+            Ctx ctx=new Ctx(objGlobal, functionState);
+            if (retVal != null) ctx.push(retVal);
+            
+            progLine.execute(ctx);
+            
+            OutText outText=ctx.getOutText();
+    
+             // Column data is formatted to text and added to outData as String objects
+            List<List<Value>> outData=outText.getData();
+            Report report=new Report();
+            List<String> formattedText=report.formatDataValues(outData);
+            for (String s:formattedText) {
+                ctx.getOutData().out(new ValueString(s));
+            }
+            
+            retVal=ctx.getResult();
+        }
+        return retVal;
     }
 
 }

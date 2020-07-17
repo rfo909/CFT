@@ -102,7 +102,7 @@ public class Report {
             }
         } else {
             
-            list.add("  <list>");
+            list.add("  <List>");
             List<Value> values=((ValueList) value).getVal();
             if (values.size()==0) {
                 list.add("  (empty)");
