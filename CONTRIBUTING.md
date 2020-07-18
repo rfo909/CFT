@@ -52,25 +52,6 @@ RAM, or searching for special things, as well as notifying the user that somethi
 Again a fine idea, except the actual need has never emerged. Being able to filter files on dates and names, has been 
 good enough so far.
 
-#### - Creating investigation reports
-
-Searching through logs, following tangents, making notes of both the data found and what we believe they mean, 
-and eventually producing a report (HTML or PDF even), has along with monitoring files been an idea I had
-from the very start. 
-
-As software developers, searching logs and documenting our findings, perhaps even the paths that did not mean
-what we thought, can be useful.
-
-A simple function Sys.lastValue() which points at the output from the last command, could be a start.
-
-Allowing free syntax commands would be even nicer:
-```
-  $ @ : blah blah  # add last value and comment blah blah
-  $ @33 : blah blah  # add lastValue.nth(33) plus comment to investigation report
-  $ @show      # show investigation tree
-  $ @go XXX    # switch to different node / untested theory
-```
-
 
 #### - Menu system / GUI
 
