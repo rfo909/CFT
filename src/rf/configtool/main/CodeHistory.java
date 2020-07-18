@@ -146,7 +146,7 @@ public class CodeHistory {
     
     public void save(String saveName) throws Exception {
     	File file=props.getCodeSaveFile(createSavefileName(saveName));
-    	stdio.println("(save) " + file.getCanonicalPath());
+    	stdio.println("--(save)-- " + file.getCanonicalPath());
         PrintStream ps=new PrintStream(new FileOutputStream(file));
         
         for (String s:namesInSequence) {
@@ -166,7 +166,7 @@ public class CodeHistory {
         namesInSequence.clear();
         
     	File file=props.getCodeLoadFile(createSavefileName(saveName));
-    	stdio.println("(load) " + file.getCanonicalPath());
+    	stdio.println("--(load)-- " + file.getCanonicalPath());
         BufferedReader reader=new BufferedReader(new FileReader(file));
         
         List<CodeLine> lines=new ArrayList<CodeLine>();

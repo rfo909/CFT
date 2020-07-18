@@ -121,22 +121,6 @@ when (Val("Project")==null, ChangeProject)
     dict
 /CurrProject
 
-# Display current project
-    CheckProject
-    
-    CurrProject =pr
-    println
-    pr.Desc->d
-        println("** " + d)
-    |
-    pr.Dir->d
-        println("   " + d)
-    |
-    println("   " + pr.Type.concat(" "))
-    println
-    true
-/Curr
-
 
 # Produce list of files to search
     CheckProject
@@ -253,6 +237,25 @@ Input("... AND Search3c").get=c
         assert(tf.name.contains(fn))
         out(tf)
 /FileLocator
+
+
+# Display current project
+    CheckProject
+    
+    CurrProject =pr
+    println
+    pr.Desc->d
+        println("** " + d)
+    |
+    pr.Dir->d
+        println("   " + d)
+    |
+    println("   " + pr.Type.concat(" "))
+    println
+    true
+/Curr
+
+
 
 # Interactive call to FileLocator, sorted presentation, newest first
     CheckProject
