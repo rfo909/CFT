@@ -69,10 +69,14 @@ When passing no parameters to a function in CFT, there is no need to include the
 # An interactive language
 
 CFT accepts lines of input, with code which is executed. There is full expression 
-support with normal cardinality rules, and so CFT is great as a calculator.
+support with normal cardinality rules, and so CFT is great as a calculator. The interactivity
+makes it easy to experiment
 
 ```
-$ 2+3
+$ 2+3*5
+$ "a b c d".split
+$ List(1,2,3).concat("x")
+$ ls
 ```
 
 
@@ -202,12 +206,15 @@ To display all functions inside an object, create an instance of that object (on
 followed by help. Examples:
 
 ```
+$ "" help
+$ 1 help
 $ Dir help
 $ List help
 $ File("x") help
 $ Date help
 $ Lib help
 $ Lib.Math help
+$ Sys help
 ```
 
 The global Lib function creates a Lib object, which effectively works as a name space. Inside 
@@ -217,17 +224,20 @@ object, where you find math related functions for calculating sine and cosine.
 If you are going to use trigonometric functions a lot in your code, and since Math is a regular
 object, you can always store it in a variable.
 
-```
-$ Lib.Math =m Lib.Data.for(0,360,1)->i out(m.cos(i) + m.sin(i))
-```
 
-# Other examples
+# Some more examples
 
 #### Counting number of lines of java code
 
 ```
 $ JavaFiles->f out(f.read.length) | _.sum
 ```
+#### Sum sizes of files (bytes)
+
+```
+$ JavaFiles->f out(f.length) | _.sum
+```
+
 #### Calculating date (and time) 30 days ago
 
 ```
@@ -244,51 +254,32 @@ $ Dir("\\\\somehost\d$\someLogDir").files(Glob("*.log"))
 ```
 $ Lib.Convert.lyToKm(1)
 ```
-#### Doing math
-
-```
-$ 2+3*5
-```
-#### List all those conversions I coded an evening far far away
-
-```
-$ Lib.Convert help
-```
 
 
 
 
 # Edit current script file in editor
 
-The global function savefile() returns a File object for the current script.
+The global function savefile() returns a File object for the current script. This means you can
+for example write the following code:
 
 ```
 $ Dir.runDetach("notepad", savefile.path)
 ```
 
-On Linux replace "notepad" with "leafpad" or "gedit" or "subl", or what have you.
+On Linux you might replace "notepad" with "leafpad" or "gedit" or "subl" and so on.
 
-If you need to run "nano", then also replace .runDetach with .run, so as not to run the
-process in the background.
-
-```
-$ Dir.runDetach("leafpad", savefile.path)
-$ Dir.runDetach("subl", savefile.path)
-$ Dir.run("nano", savefile.path)
-```
-
-Or better yet, call the function e() inside the Lib scriptfile as follows:
+Since this is a very common command, there has been created a shortcut which opens
+the current savefile in an editor. For windows, it uses notepad, for Linux, there is
+you select your editor the first time.
 
 ```
-$ call "Lib:e" (savefile)
+$ @e
 ```
 
-This autodetects if you're on Linux or Windows, and for linux lets you select your editor (choice is remembered 
-for the session).
+# Shortcuts
 
-Note that when editing a savefile, all you need do after saving changes, is run the code
-directly, as CFT discoveres the file has changed, and hurries to reload the updated code as you press
-Enter.
+Shortcuts are of course fully configurable, via the CFT.props file.
 
 
 # Documentation
