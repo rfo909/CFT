@@ -50,6 +50,33 @@ EditFileFromHistory
 /e2
 
 
+# Page through file
+	P(1,savefile)=file
+	if(isWindows,
+		Dir.run("cmd" "/c", "more", file.path),
+		Dir.run("more", file.path)
+	)
+/m
+
+
+
+# Update Cfg with terminal size (if possible)
+	false =updated
+	if (!isWindows,{
+		Dir.runCapture("which","stty").nth.contains("stty") =hasStty
+		when(hasStty, {
+			Dir.runCapture("stty","size").nth.split =list
+			#debug("list=" + list)
+			Cfg.h(list.nth(0).parseInt)
+			Cfg.w(list.nth(1).parseInt)
+			true =updated
+		})
+	},{
+		# Windows - no solution yet
+	})
+	if(updated, Cfg, null)
+/GetTerminalSize
+			
 
 
 # Add to edit-history
@@ -99,14 +126,6 @@ EditFileFromHistory
 
 
 
-
-# Page through file
-	P(1,savefile)=file
-	if(isWindows,
-		file.more,
-		Dir.run("more", file.path)
-	)
-/m
 
 
 # Select Linux editor and remember selection for next time, open file in editor

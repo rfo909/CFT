@@ -41,8 +41,11 @@ mMore = {* P(1)=file when(file==null,error('more: no file')) call 'Lib:m' (file)
 shortcutPrefix = @
 
 shortcut:r = stdin(":load Release","?")
-shortcut:p = stdin(":load Projects","?")
+shortcut:p = stdin(":load Projects","Curr")
 shortcut:e = call "Lib:e" (savefile)
+
+shortcut:term = call "Lib:GetTerminalSize"
+
 
 # List available shortcuts when typing '@' only
 # ---

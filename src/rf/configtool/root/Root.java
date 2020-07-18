@@ -33,6 +33,7 @@ public class Root {
 
 	private Stdio stdio;
 	private PropsFile propsFile;
+    private ObjCfg objCfg;
 
 	private Map<String, ScriptState> scriptStates = new HashMap<String, ScriptState>();
 	private ScriptState currScript;
@@ -43,6 +44,8 @@ public class Root {
 	public Root(Stdio stdio) throws Exception {
 		this.stdio = stdio;
     	propsFile=new PropsFile();
+        objCfg=new ObjCfg();
+
 
 		createNewScript();
 		// currScript = new ScriptState(new ObjGlobal(this,stdio));
@@ -52,6 +55,11 @@ public class Root {
 	public PropsFile getPropsFile() {
 		return propsFile;
 	}
+
+    
+    public ObjCfg getObjCfg() {
+        return objCfg;
+    }
 
 	public void loadScript(String scriptName) throws Exception {
 		currScript = getScriptState(scriptName, true);
@@ -324,8 +332,7 @@ public class Root {
 		// present result
 		Report report = new Report();
 		List<String> lines = report.displayValueLines(result);
-		ObjCfg cfg = objGlobal.getObjCfg();
-		int width = cfg.getScreenWidth();
+		int width = objCfg.getScreenWidth();
 
 		Stdio stdio = objGlobal.getStdio();
 
@@ -359,7 +366,7 @@ public class Root {
 			return;
 		}
 
-		final int screenWidth = objGlobal.getObjCfg().getScreenWidth();
+		final int screenWidth = objCfg.getScreenWidth();
 
 		if (ts.matchStr("save")) {
 			String ident = ts.matchIdentifier(); // may be null
@@ -402,7 +409,7 @@ public class Root {
 			objGlobal.outln("Loaded scripts: " + getScriptStateNames());
 			return;
 		} else if (ts.matchStr("wrap")) {
-			boolean wrap = objGlobal.getObjCfg().changeWrap();
+			boolean wrap = objCfg.changeWrap();
 			if (wrap) {
 				objGlobal.outln("WRAP MODE ON. Repeat :wrap command to turn off again.");
 			} else {

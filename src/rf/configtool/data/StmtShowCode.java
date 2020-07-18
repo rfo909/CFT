@@ -69,7 +69,7 @@ public class StmtShowCode extends Stmt {
         
         CodeHistory code = ctx.getObjGlobal().getCodeHistory();
         List<String> names=code.getNames();
-        ObjCfg cfg=ctx.getObjGlobal().getObjCfg();
+        ObjCfg cfg=ctx.getObjGlobal().getRoot().getObjCfg();
         
         
         names.sort(new Comparator<String>() {

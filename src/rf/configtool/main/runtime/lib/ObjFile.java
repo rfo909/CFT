@@ -484,8 +484,8 @@ public class ObjFile extends Obj {
 
 
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            final int lines=ctx.getObjGlobal().getObjCfg().getScreenHeight()-2; // room for info line + input line
-            final int width=ctx.getObjGlobal().getObjCfg().getScreenWidth()-2; // a little space to the right
+            final int lines=ctx.getObjGlobal().getRoot().getObjCfg().getScreenHeight()-2; // room for info line + input line
+            final int width=ctx.getObjGlobal().getRoot().getObjCfg().getScreenWidth()-2; // a little space to the right
 
             File f=new File(name);
             if (!f.exists() || !f.isFile()) throw new Exception("Invalid file");
@@ -754,7 +754,7 @@ public class ObjFile extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
             
-            final int lines=ctx.getObjGlobal().getObjCfg().getScreenHeight()-2; // room for info line + input line
+            final int lines=ctx.getObjGlobal().getRoot().getObjCfg().getScreenHeight()-2; // room for info line + input line
             
             
             File f=getFile();

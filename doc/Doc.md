@@ -531,6 +531,17 @@ To create a new script from scratch, there is the colon command:
 $ :new
 ```
 
+## The @e shortcut
+
+
+A common shortcut is @e, which opens current savefile in an editor:
+
+```
+$ @e
+```
+
+Shortcuts can be redefined in the CFT.props file.
+
 ## CFT.props - codeDirs
 
 

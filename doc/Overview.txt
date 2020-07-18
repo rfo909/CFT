@@ -57,6 +57,7 @@ Savefiles
  * Save
  * Load
  * Create new empty script
+ * The @e shortcut
  * CFT.props - codeDirs
 
 CFT as a functional programming language

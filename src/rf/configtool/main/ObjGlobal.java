@@ -63,16 +63,7 @@ public class ObjGlobal extends Obj {
     private HashMap<String,Value> sessionValues=new HashMap<String,Value>();
     private final Runtime runtime;
     private List<String> systemMessages=new ArrayList<String>();
-    
-
-    
-    private ObjCfg cfg;
-    
-    
-    public ObjCfg getObjCfg() {
-        return cfg;
-    }
-     
+   
     public void outln (String s) {
         stdio.println(s);
     }
@@ -94,9 +85,8 @@ public class ObjGlobal extends Obj {
         this.stdio=stdio;
         //props.report(stdio);
         
-        cfg=new ObjCfg();
         
-        codeHistory=new CodeHistory(stdio, root.getPropsFile(), cfg);
+        codeHistory=new CodeHistory(stdio, root.getPropsFile(), root.getObjCfg());
         this.runtime=new Runtime(this);
         
         
@@ -717,7 +707,7 @@ public class ObjGlobal extends Obj {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
-            return new ValueObj(ctx.getObjGlobal().getObjCfg());
+            return new ValueObj(ctx.getObjGlobal().getRoot().getObjCfg());
         }
     } 
 
