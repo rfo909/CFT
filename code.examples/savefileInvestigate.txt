@@ -55,10 +55,10 @@ File(".investigate")
 	readLine("Comment") =comment
 	LogFile.append(comment)
 	#show
-/log
+/LogWithData
 
 LogFile.read
-/show
+/Show
 
 # clear investigation file
 readLine('Are you really sure you want to delete investigation log? Type "yes" to confirm') =x
