@@ -34,9 +34,6 @@ You must CFT as root to use this script.
 
 
 
-call "Lib:e" (savefile)
-/e
-
 Dir("/var/lib/libvirt/boot")
 /BootImagesDir
 

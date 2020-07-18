@@ -29,9 +29,6 @@ Generate MD version of Doc.html
 /doc
 
 
-P(1,savefile) =file
-	call "Lib:e" (file)
-/e
 
 savefile.dir.sub("..").sub("doc")
 /DocDir

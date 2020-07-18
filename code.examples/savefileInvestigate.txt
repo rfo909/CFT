@@ -31,8 +31,6 @@ EXPERIMENTAL
 >>> EOF
 /Readme
 
-call "Lib:e" (savefile)
-/e
 
 File(".investigate")
 /LogFile

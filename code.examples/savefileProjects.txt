@@ -62,14 +62,6 @@ There can be multiples of every line, including Dir.
 
 
 
-
-
-
-
-# Open script file in editor
-edit (savefile)
-/e
-
 # Set up screen dimensions
     Cfg.w(130) Cfg.h(25)
 /Init

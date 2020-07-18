@@ -35,13 +35,6 @@ Add, Commit and Push.
 
 
 
-# Edit file (defaults to savefile)
-P(1,savefile) =file
-	call "Lib:e" (file)
-/e
-
-
-
 # Project home directory
 	savefile.dir.sub("..")
 /HomeDir

@@ -35,9 +35,6 @@ Running remote commands with PowerShell.
 /Readme
 
 
-call "Lib:e" (savefile)
-/e
-
 
 P(1)=host P(2,"get-service -name tomcat")=code
 	println("Executing " + code)

@@ -30,10 +30,6 @@ function CreateOverview()
 /Readme
 
 
-P(1,savefile) =file
-	edit (file)
-/e
-
 savefile.dir.sub("..").sub("doc")
 /DocDir
 

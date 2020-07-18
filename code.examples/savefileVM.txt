@@ -17,10 +17,6 @@ After running, exit CFT and reboot
 
 
 
-call "Lib:e" (savefile)
-/e
-
-
 File("/etc/netplan/50-cloud-init.yaml")
 /FileNetplan
 

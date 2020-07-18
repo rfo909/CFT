@@ -45,6 +45,8 @@ shortcut:p = stdin(":load Projects","Curr")
 shortcut:e = call "Lib:e" (savefile)
 
 shortcut:term = call "Lib:GetTerminalSize"
+shortcut:S = call "Projects:S"
+shortcut:SS = stdin("") call "Projects:S"
 
 
 # List available shortcuts when typing '@' only

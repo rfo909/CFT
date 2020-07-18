@@ -33,8 +33,6 @@ but the containers continued running.
 >>> EOF
 /Readme
 
-call "Lib:e" (savefile)
-/e
 
 # Run command string (must split correctly)
 P(1,"dir")=cmd
