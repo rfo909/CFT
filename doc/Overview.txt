@@ -179,6 +179,7 @@ Various advanced topics
  * Macros
  |   Simple example
  * CFT.props - mCat, mEdit and mMore macros
+ * CFT.props - shortcuts
 
 Example code
  * Windows PowerShell

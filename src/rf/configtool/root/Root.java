@@ -6,13 +6,18 @@ import java.util.*;
 import rf.configtool.main.CodeHistory;
 import rf.configtool.main.CodeLine;
 import rf.configtool.main.CodeLines;
+import rf.configtool.main.Ctx;
+import rf.configtool.main.FunctionState;
 import rf.configtool.main.ObjCfg;
 import rf.configtool.main.ObjGlobal;
+import rf.configtool.main.PropsFile;
 import rf.configtool.main.Stdio;
 import rf.configtool.main.Version;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueList;
+import rf.configtool.main.runtime.ValueMacro;
 import rf.configtool.main.runtime.ValueNull;
+import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.reporttool.Report;
 import rf.configtool.parser.Parser;
 import rf.configtool.parser.SourceLocation;
@@ -20,34 +25,36 @@ import rf.configtool.parser.Token;
 import rf.configtool.parser.TokenStream;
 
 /**
- * EXPERIMENTAL
- * 
- * The Root class manages a set of parallel script contexts. It also handles
- * which stdio to connect to among those, in effect letting the user switch
- * between different objects.
+ * The Root class manages a set of parallel script contexts.
  */
 public class Root {
 
 	private static final Version VERSION = new Version();
 
-
 	private Stdio stdio;
-	
+	private PropsFile propsFile;
+
 	private Map<String, ScriptState> scriptStates = new HashMap<String, ScriptState>();
 	private ScriptState currScript;
 	private boolean debugMode;
 	private Value lastResult;
 	private boolean terminationFlag = false;
-	
+
 	public Root(Stdio stdio) throws Exception {
 		this.stdio = stdio;
+    	propsFile=new PropsFile();
+
 		createNewScript();
-		//currScript = new ScriptState(new ObjGlobal(this,stdio));
-		//scriptStates.put(currScript.getScriptName(), currScript);
+		// currScript = new ScriptState(new ObjGlobal(this,stdio));
+		// scriptStates.put(currScript.getScriptName(), currScript);
 	}
 	
-	public void loadScript (String scriptName) throws Exception {
-		currScript = getScriptState(scriptName);
+	public PropsFile getPropsFile() {
+		return propsFile;
+	}
+
+	public void loadScript(String scriptName) throws Exception {
+		currScript = getScriptState(scriptName, true);
 	}
 
 	public void setInitialCommands(List<String> initialCommands) {
@@ -57,7 +64,7 @@ public class Root {
 
 	private void refreshIfSavefileUpdated() throws Exception {
 		Iterator<String> keys = scriptStates.keySet().iterator();
-		List<String> keysToDelete=new ArrayList<String>();
+		List<String> keysToDelete = new ArrayList<String>();
 		while (keys.hasNext()) {
 			String key = keys.next();
 			ScriptState x = scriptStates.get(key);
@@ -68,58 +75,58 @@ public class Root {
 				keysToDelete.add(key);
 			}
 		}
-		for (String key:keysToDelete) {
+		for (String key : keysToDelete) {
 			if (!currScript.getObjGlobal().equals(key)) {
 				scriptStates.remove(key);
 			}
 		}
 	}
-	
-	private void processSave (String newName) throws Exception {
+
+	private void processSave(String newName) throws Exception {
 		// user has typed :save name
 		currScript.getObjGlobal().saveCode(newName);
 
-		String currName=currScript.getScriptName();
+		String currName = currScript.getScriptName();
 		if (!currName.equals(newName)) {
 			scriptStates.remove(currName);
 			currScript.updateName(newName);
 			scriptStates.put(newName, currScript);
 		}
 	}
-	
-	public ScriptState getScriptState (String name) throws Exception {
-		ObjGlobal objGlobal = currScript.getObjGlobal();
+
+	public ScriptState getScriptState(String name, boolean isLoad) throws Exception {
 		if (name == null || name.equals(currScript.getScriptName())) {
-			//objGlobal.loadCode(null); // reloads code - pointless as code is reloaded automatically when changed, but okay
+			if (isLoad)
+				currScript.getObjGlobal().loadCode(null); // reloads code - overwrite any local changes
 			return currScript;
 		}
-		ScriptState otherScript=scriptStates.get(name);
+		ScriptState otherScript = scriptStates.get(name);
 		if (otherScript != null) {
+			if (isLoad)
+				otherScript.getObjGlobal().loadCode(otherScript.getScriptName());
 			return otherScript;
-//			currScript=otherScript;
-//			return;
 		}
-		ScriptState newScript=new ScriptState(name, new ObjGlobal(this,stdio));  // throws exception if there is trouble
+		ScriptState newScript = new ScriptState(name, new ObjGlobal(this, stdio)); // throws exception if there is
+																					// trouble
 		scriptStates.put(newScript.getScriptName(), newScript);
 		return newScript;
 	}
-	
-	
+
 	public void createNewScript() throws Exception {
-		currScript = new ScriptState(new ObjGlobal(this,stdio));
+		currScript = new ScriptState(new ObjGlobal(this, stdio));
 		scriptStates.put(currScript.getScriptName(), currScript);
 	}
-	
+
 	private String getScriptStateNames() {
-		StringBuffer sb=new StringBuffer();
+		StringBuffer sb = new StringBuffer();
 		Iterator<String> keys = scriptStates.keySet().iterator();
 		while (keys.hasNext()) {
 			sb.append(" '" + keys.next() + "'");
 		}
 		return sb.toString().trim();
 	}
-	
-	private void cleanupOnExit () throws Exception {
+
+	private void cleanupOnExit() throws Exception {
 		Iterator<String> keys = scriptStates.keySet().iterator();
 		while (keys.hasNext()) {
 			String key = keys.next();
@@ -127,12 +134,13 @@ public class Root {
 			x.getObjGlobal().cleanupOnExit();
 		}
 	}
-	
+
 	public Value getLastResult() {
-		if (lastResult==null) return new ValueNull();
+		if (lastResult == null)
+			return new ValueNull();
 		return lastResult;
 	}
-	
+
 	// Moved here from Main
 	public void inputLoop() {
 		copyrightNotice();
@@ -154,186 +162,217 @@ public class Root {
 				// Stdio can only do line output, so using System.out directly
 				System.out.print(pre + " ");
 				String line = stdio.getInputLine().trim();
-				
-				processInteractiveInput(line);
 
-				//objGlobal.getRuntime().processInteractiveInput(line);
+				processInteractiveInput(line);
 
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * Moved here from Runtime
 	 */
-	public void processInteractiveInput (String line) throws Exception {
-        line=line.trim();
-        TokenStream ts=null;
-        ObjGlobal objGlobal=currScript.getObjGlobal();
-    	CodeHistory codeHistory=objGlobal.getCodeHistory();
-    	
-    	refreshIfSavefileUpdated();
+	public void processInteractiveInput(String line) throws Exception {
+		line = line.trim();
+		TokenStream ts = null;
+		ObjGlobal objGlobal = currScript.getObjGlobal();
+		CodeHistory codeHistory = objGlobal.getCodeHistory();
 
-        try {
-            // load code if file has changed in the background, typically with editor
-            // pre-processing input
-            
-            if (line.startsWith(".")) {
-                // repeat previous command 
-                String currLine=codeHistory.getCurrLine();
-                if (currLine==null) {
-                    objGlobal.outln("ERROR: no current line");
-                    return;
-                }
-                line=currLine + line.substring(1); 
-                objGlobal.outln("$ " + line);
-            } 
-            else if (line.startsWith("!")) {
-                int pos=line.indexOf("!",1);
-                if (pos > 0) {
-                    String str=line.substring(1, pos);
-                    
-                    // Look for inner pattern
-                    String pattern=null;
-                    int colon=str.indexOf(':');
-                    if (colon>0) {
-                        pattern=str.substring(colon+1);
-                        str=str.substring(0,colon);
-                    }
-                    
-                    CodeLines codeLines=codeHistory.getNamedCodeLines(str);
-                    if (codeLines != null) {
-                        if (codeLines.hasMultipleCodeLines()) {
-                            objGlobal.outln("Function '" + str + "' is not a single line of code");
-                            return;
-                        }
-                        String codeLine=codeLines.getFirstNonBlankLine();
-                        if (pattern != null) {
-                            int cutoffPos=codeLine.indexOf(pattern);
-                            if (cutoffPos > 0) {
-                                codeLine=codeLine.substring(0,cutoffPos);
-                            }
-                        }
-                        line=codeLine+line.substring(pos+1);
-                        objGlobal.outln("----> " + line);
-                    } else {
-                        objGlobal.outln("No function '" + str + "' - Usage: !ident! or !ident:pattern!...");
-                        return;
-                    }
-                    
-                }
-            }
-              
-            // identify input tokens
-            Parser p=new Parser();
-            SourceLocation loc=new SourceLocation("input",0,0);
-            p.processLine(new CodeLine(loc, line));
-            ts=p.getTokenStream();
-            
-            // execute input
-            
-            if (ts.matchStr("/")) {
-                String ident=ts.matchIdentifier("expected name following '/' - for naming current program line");
-                boolean force=ts.matchStr("!");
-                if (!ts.atEOF()) throw new Exception("Expected '/ident' to save previous program line");
-                boolean success=codeHistory.assignName(ident, force);
-                if (!success) {
-                    objGlobal.outln("ERROR: Symbol exists. Use /" + ident + "! to override");
-                }
-                return;
-            } 
-            if (ts.matchStr("?")) {
-                
-                String ident=ts.matchIdentifier();
-                if (ident != null) {
-                    codeHistory.report(ident);
-                } else {
-                    codeHistory.reportAll();
-                }
-                String savename=objGlobal.getSavename();
-                if (savename != null) objGlobal.outln("Current save name: " + savename);
-                return; // abort further processing
-            }
-            if (ts.matchStr(":")) {
-                processColonCommand(ts);
-                return;
-            }
-            
-            // actually execute code line
-            if (line.trim().length() > 0) {
-                // program line
-                codeHistory.setCurrLine(line);
-                Value result=objGlobal.getRuntime().processCodeLines(new CodeLines(line,loc), null);
-                
-                if (result==null) result=new ValueNull();
-                
-                lastResult=result;
+		refreshIfSavefileUpdated();
+		propsFile.refreshFromFile();
 
-                Report report=new Report();
-                List<String> lines=report.displayValueLines(result);
-                ObjCfg cfg = objGlobal.getObjCfg();
-                int width=cfg.getScreenWidth();
-                
-                Stdio stdio=objGlobal.getStdio();
-    
-                // Display lines cut off at screenWidth, for readability
-                for (String s:lines) {
-                    if (s.length() > width-1) {
-                        s=s.substring(0,width-2)+"+";
-                    }
-                    stdio.println(s);
-                }
-                
-                
-                
-                // System messages are written to screen - this applies to help texts etc
-                List<String> messages=objGlobal.getSystemMessages();
-                for (String s:messages) {
-                    objGlobal.outln("  # " + s);
-                }
-                
-                objGlobal.clearSystemMessages();
-                
+		try {
+			// Shortcuts
 
-            }
-            
-        } catch (Throwable t) {
-            objGlobal.outln("ERROR " + t.getClass().getName() + ": " + t.getMessage());
-            if (debugMode) {
-                t.printStackTrace();
-                try {
-                	objGlobal.outln("INPUT: " + ts.showNextTokens(10));
-                } catch (Exception ex) {
-                	// ignore
-                }
-            }
-        }
-    }
+			String shortcutPrefix = propsFile.getShortcutPrefix();
+			if (line.startsWith(shortcutPrefix)) {
+				String shortcutName = line.substring(shortcutPrefix.length()).trim();
+				String macro = propsFile.getShortcutMacro(shortcutName);
+				SourceLocation loc = new SourceLocation("shortcut:" + shortcutName, 0, 0);
+
+				Ctx ctx = new Ctx(objGlobal, new FunctionState());
+				CodeLines codeLines = new CodeLines(macro, loc);
+
+				Value ret = ctx.getObjGlobal().getRuntime().processCodeLines(codeLines, new FunctionState());
+				if (ret instanceof ValueMacro) {
+					ValueMacro macroObj = (ValueMacro) ret;
+					ret = macroObj.call(ctx.sub());
+				}
+				postProcessResult(ret);
+				showSystemLog();
+
+				return;
+			}
+
+			// pre-processing input
+
+			if (line.startsWith(".")) {
+				// repeat previous command
+				String currLine = codeHistory.getCurrLine();
+				if (currLine == null) {
+					objGlobal.outln("ERROR: no current line");
+					return;
+				}
+				line = currLine + line.substring(1);
+				objGlobal.outln("$ " + line);
+			} else if (line.startsWith("!")) {
+				int pos = line.indexOf("!", 1);
+				if (pos > 0) {
+					String str = line.substring(1, pos);
+
+					// Look for inner pattern
+					String pattern = null;
+					int colon = str.indexOf(':');
+					if (colon > 0) {
+						pattern = str.substring(colon + 1);
+						str = str.substring(0, colon);
+					}
+
+					CodeLines codeLines = codeHistory.getNamedCodeLines(str);
+					if (codeLines != null) {
+						if (codeLines.hasMultipleCodeLines()) {
+							objGlobal.outln("Function '" + str + "' is not a single line of code");
+							return;
+						}
+						String codeLine = codeLines.getFirstNonBlankLine();
+						if (pattern != null) {
+							int cutoffPos = codeLine.indexOf(pattern);
+							if (cutoffPos > 0) {
+								codeLine = codeLine.substring(0, cutoffPos);
+							}
+						}
+						line = codeLine + line.substring(pos + 1);
+						objGlobal.outln("----> " + line);
+					} else {
+						objGlobal.outln("No function '" + str + "' - Usage: !ident! or !ident:pattern!...");
+						return;
+					}
+
+				}
+			}
+
+			// identify input tokens
+			Parser p = new Parser();
+			SourceLocation loc = new SourceLocation("input", 0, 0);
+			p.processLine(new CodeLine(loc, line));
+			ts = p.getTokenStream();
+
+			// execute input
+
+			if (ts.matchStr("/")) {
+				String ident = ts.matchIdentifier("expected name following '/' - for naming current program line");
+				boolean force = ts.matchStr("!");
+				if (!ts.atEOF())
+					throw new Exception("Expected '/ident' to save previous program line");
+				boolean success = codeHistory.assignName(ident, force);
+				if (!success) {
+					objGlobal.outln("ERROR: Symbol exists. Use /" + ident + "! to override");
+				}
+				return;
+			}
+			if (ts.matchStr("?")) {
+
+				String ident = ts.matchIdentifier();
+				if (ident != null) {
+					codeHistory.report(ident);
+				} else {
+					codeHistory.reportAll();
+				}
+				String savename = objGlobal.getSavename();
+				if (savename != null)
+					objGlobal.outln("Current save name: " + savename);
+				return; // abort further processing
+			}
+			if (ts.matchStr(":")) {
+				processColonCommand(ts);
+				return;
+			}
+
+			// actually execute code line
+			if (line.trim().length() > 0) {
+				// program line
+				codeHistory.setCurrLine(line);
+				Value result = objGlobal.getRuntime().processCodeLines(new CodeLines(line, loc), null);
+
+				postProcessResult(result);
+				showSystemLog();
+			}
+
+		} catch (Throwable t) {
+			objGlobal.outln("ERROR " + t.getClass().getName() + ": " + t.getMessage());
+			if (debugMode) {
+				t.printStackTrace();
+				try {
+					objGlobal.outln("INPUT: " + ts.showNextTokens(10));
+				} catch (Exception ex) {
+					// ignore
+				}
+			}
+		}
+	}
+
+	private void postProcessResult(Value result) throws Exception {
+		if (result == null)
+			result = new ValueNull();
+		ObjGlobal objGlobal = currScript.getObjGlobal();
+
+		// update lastResult
+		lastResult = result;
+
+		// present result
+		Report report = new Report();
+		List<String> lines = report.displayValueLines(result);
+		ObjCfg cfg = objGlobal.getObjCfg();
+		int width = cfg.getScreenWidth();
+
+		Stdio stdio = objGlobal.getStdio();
+
+		// Display lines cut off at screenWidth, for readability
+		for (String s : lines) {
+			if (s.length() > width - 1) {
+				s = s.substring(0, width - 2) + "+";
+			}
+			stdio.println(s);
+		}
+
+	}
+
+	public void showSystemLog() {
+		ObjGlobal objGlobal = currScript.getObjGlobal();
+		// System messages are written to screen - this applies to help texts etc
+		List<String> messages = objGlobal.getSystemMessages();
+		for (String s : messages) {
+			objGlobal.outln("  # " + s);
+		}
+
+		objGlobal.clearSystemMessages();
+	}
 
 	private void processColonCommand(TokenStream ts) throws Exception {
-		ObjGlobal objGlobal=currScript.getObjGlobal();
-		CodeHistory codeHistory=objGlobal.getCodeHistory();
-		
+		ObjGlobal objGlobal = currScript.getObjGlobal();
+		CodeHistory codeHistory = objGlobal.getCodeHistory();
+
 		if (ts.matchStr("quit")) {
-			terminationFlag=true;
+			terminationFlag = true;
 			return;
 		}
-		
-		final int screenWidth=objGlobal.getObjCfg().getScreenWidth();
+
+		final int screenWidth = objGlobal.getObjCfg().getScreenWidth();
 
 		if (ts.matchStr("save")) {
 			String ident = ts.matchIdentifier(); // may be null
-			if (ident==null) ident=currScript.getScriptName();
-			if (ident==null) {
+			if (ident == null)
+				ident = currScript.getScriptName();
+			if (ident == null) {
 				throw new Exception("No save name");
 			}
 			processSave(ident); // maintain map
 			return;
 		} else if (ts.matchStr("load")) {
 			String ident = ts.matchIdentifier(); // may be null
-			currScript = getScriptState(ident);
+			currScript = getScriptState(ident, true);
 			return;
 		} else if (ts.matchStr("delete")) {
 			for (;;) {
@@ -379,9 +418,9 @@ public class Root {
 			codeHistory.setCurrLine(s);
 			objGlobal.outln("synthesize ok");
 			objGlobal.outln("+-----------------------------------------------------");
-			String line="| .  : " + s;
+			String line = "| .  : " + s;
 			if (line.length() > screenWidth) {
-				line=line.substring(0,screenWidth-1)+"+";
+				line = line.substring(0, screenWidth - 1) + "+";
 			}
 			objGlobal.outln(line);
 			objGlobal.outln("+-----------------------------------------------------");
@@ -409,9 +448,9 @@ public class Root {
 			codeHistory.setCurrLine(s);
 			objGlobal.outln("synthesize ok");
 			objGlobal.outln("+-----------------------------------------------------");
-			String line="| .  : " + s;
+			String line = "| .  : " + s;
 			if (line.length() > screenWidth) {
-				line=line.substring(0,screenWidth-1)+"+";
+				line = line.substring(0, screenWidth - 1) + "+";
 			}
 			objGlobal.outln(line);
 			objGlobal.outln("+-----------------------------------------------------");
@@ -421,9 +460,6 @@ public class Root {
 			throw new Exception("Unknown command, try: quit, save, load, new, delete, copy, debug, wrap, syn or <int>");
 		}
 	}
-
-	
-	
 
 	private void copyrightNotice() {
 		stdio.println("");
@@ -436,6 +472,5 @@ public class Root {
 		stdio.println("along with this program.  If not, see <https://www.gnu.org/licenses/>");
 		stdio.println("");
 	}
-
 
 }

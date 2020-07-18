@@ -17,9 +17,24 @@ public class PropsFile {
 	private String mEdit = "{* error('mEdit macro undefined in " + PROPS_FILE + "') }";
 	private String mMore = "{* error('mMore macro undefined in " + PROPS_FILE + "') }";
 	
+	private String shortcutPrefix = "@";
+	private Map<String,String> shortcuts=new HashMap<String,String>();
+
+	private String fileInfo="";;
+
 	public PropsFile () throws Exception {
+		refreshFromFile();
+	}
+	
+	
+	public void refreshFromFile() throws Exception {
 		
 		File f=new File(PROPS_FILE);
+		
+		// refresh when changed, not otherwise
+		String newFileInfo=f.length() + "x" + f.lastModified();
+		if (newFileInfo.equals(fileInfo)) return;
+		fileInfo=newFileInfo;
 		
 		BufferedReader br=null;
 		try {
@@ -42,6 +57,13 @@ public class PropsFile {
 					if (name.equals("mCat")) mCat=value;
 					if (name.equals("mEdit")) mEdit=value;
 					if (name.equals("mMore")) mMore=value;
+					
+					if (name.equals("shortcutPrefix")) shortcutPrefix=value;
+					if (name.startsWith("shortcut:")) {
+						int colonPos=name.indexOf(':');
+						String shortcutName=name.substring(colonPos+1);
+						shortcuts.put(shortcutName, value);  // macro
+					}
 				}
 			}
 		} finally {
@@ -86,6 +108,16 @@ public class PropsFile {
 	public String getMMore() {
 		return mMore;
 	}
+	
+	
+	public String getShortcutPrefix() {
+		return shortcutPrefix;
+	}
+	
+	public String getShortcutMacro (String shortcutName) {
+		return shortcuts.get(shortcutName);
+	}
+	
 	
 	/**
 	 * Current working directory is first directory in codeDirs

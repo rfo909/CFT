@@ -52,7 +52,6 @@ import rf.configtool.root.Root;
 public class ObjGlobal extends Obj {
     
 	private Root root;
-	private PropsFile propsFile;
     private Stdio stdio;
 
     private String currDir;
@@ -91,15 +90,13 @@ public class ObjGlobal extends Obj {
     }
     
     public ObjGlobal(Root root, Stdio stdio) throws Exception {
-    	propsFile=new PropsFile();
-
     	this.root=root;
         this.stdio=stdio;
         //props.report(stdio);
         
         cfg=new ObjCfg();
         
-        codeHistory=new CodeHistory(stdio, propsFile, cfg);
+        codeHistory=new CodeHistory(stdio, root.getPropsFile(), cfg);
         this.runtime=new Runtime(this);
         
         
@@ -148,10 +145,6 @@ public class ObjGlobal extends Obj {
         return runtime;
     }
     
-    public PropsFile getPropsFile() {
-    	return propsFile;
-    }
- 
     public void addSystemMessage (String line) {
         systemMessages.add(line);
     }
@@ -846,9 +839,9 @@ public class ObjGlobal extends Obj {
             if (params.size() != 0) throw new Exception("Expected no parameters");
             String shellCommand;
             if (File.separator.equals("\\")) {
-            	shellCommand=ctx.getObjGlobal().getPropsFile().getWinShell();
+            	shellCommand=ctx.getObjGlobal().getRoot().getPropsFile().getWinShell();
             } else {
-            	shellCommand=ctx.getObjGlobal().getPropsFile().getShell();
+            	shellCommand=ctx.getObjGlobal().getRoot().getPropsFile().getShell();
             }
             callExternalProgram(shellCommand, ctx);
             return new ValueBoolean(true);

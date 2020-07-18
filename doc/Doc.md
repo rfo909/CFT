@@ -4,7 +4,7 @@
 Interactive object oriented programmable shell.
 Compact programming language.
 Automation tool.
-Last updated: 2020-07-17 RFO
+Last updated: 2020-07-18 RFO
 v1.0.17
 ```
 # Introduction
@@ -2388,6 +2388,33 @@ that are called for interactive commands cat/edit/more. This means it is possibl
 to redefine what edit means. Currently, mEdit calls either "Lib:e" if there is a
 file, otherwise "Lib:e2" which presents a history of documents edited. The
 mMore macro calls "Lib:m", while the mCat macro just calls .read on file parameter.
+
+## CFT.props - shortcuts
+
+
+The CFT.props text is self explanatory.
+
+```
+# Shortcuts
+#
+# The shortcuts are lines of code. If that code results in a macro, it is invoked with
+# no parameters. Since we don't need parameters, there is really no need for macros
+# here. The return value from a shortcut becomes the "last value", available
+# via Sys.lastResult, as well as used by :syn etc
+#
+# Note that shortcuts only work when the prefix is at the start of the interactive
+# input line.
+# ---
+shortcutPrefix = @
+shortcut:r = stdin(":load Release","?")
+shortcut:p = stdin(":load Projects","?")
+# List available shortcuts when typing '@' only
+# ---
+shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) out(line)
+```
+
+This means that typing @r loads the Release script, then executes the '?' command, which
+lists its content.
 
 # Example code
 

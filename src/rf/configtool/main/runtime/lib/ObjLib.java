@@ -136,7 +136,7 @@ public class ObjLib extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
             List<Value> list=new ArrayList<Value>();
-            for (String s:ctx.getObjGlobal().getPropsFile().getCodeDirs()) {
+            for (String s:ctx.getObjGlobal().getRoot().getPropsFile().getCodeDirs()) {
             	ObjDir dir=new ObjDir(s, Protection.NoProtection);
             	list.add(new ValueObj(dir));
             }

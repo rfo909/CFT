@@ -13,6 +13,54 @@
 
 <h1>CFT Change log</h1>
 
+
+
+<h3>v1.0.17 2020-07-18 shortcuts</h3>
+<p>
+	Added shortcuts feature. Consists of config lines in CFT.props, and handling in
+	Root.processInteractiveInput.
+</p>
+
+<p>
+	Example from CFT.props
+</p>
+<pre>
+# Shortcuts
+#
+# The shortcuts are lines of code. If that code results in a macro, it is invoked with
+# no parameters. Since we don't need parameters, there is really no need for macros
+# here. The return value from a shortcut becomes the "last value", available
+# via Sys.lastResult, as well as used by :syn etc
+#
+# Note that shortcuts only work when the prefix is at the start of the interactive
+# input line. 
+# ---
+shortcutPrefix = @
+
+shortcut:r = stdin(":load Release","?")
+shortcut:p = stdin(":load Projects","?")
+
+# List available shortcuts when typing '@' only
+# ---
+shortcut: = File("CFT.props").read-&gt;line assert(line.contains("shortcut:")) out(line)
+</pre>
+<p>
+	This means typing @r on the comand line, loads "Release" script and lists its content
+</p>
+<p>
+	Also moved PropsFile instance from ObjGlobal, which despite its name has multiple
+	instances, into Root, which is the new single master object.
+</p>
+<p>
+	And added autoload to PropsFile (called from top of Root.processInteractiveInput.
+</p>
+<p>
+	Even implemented a default shortcut, when typing only @, which lists the shortcuts
+	by searching the CFT.props file!!
+</p>
+
+
+
 <h3>v1.0.17 2020-07-17 Sys.lastResult()</h3>
 <p>
 	Created Sys.lastResult() function, that returns the last result as stored inside Root, 

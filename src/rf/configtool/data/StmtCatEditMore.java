@@ -92,7 +92,7 @@ public class StmtCatEditMore extends StmtShellInteractive {
  
     
     private void callMacro (Ctx ctx, ObjFile file) throws Exception {
-    	PropsFile propsFile=ctx.getObjGlobal().getPropsFile();
+    	PropsFile propsFile=ctx.getObjGlobal().getRoot().getPropsFile();
     	SourceLocation loc=propsFile.getSourceLocation(name);
     	
     	String macro;

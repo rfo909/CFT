@@ -114,6 +114,10 @@ public class ValueMacro extends Value {
         return invoke(sub);
     }
     
+    public Value call (Ctx ctx) throws Exception {
+    	return call(ctx,new ArrayList<Value>());
+    }
+    
     // -----------------------------------------------------------
     
     class FunctionCall extends Function {
