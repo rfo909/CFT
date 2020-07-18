@@ -42,6 +42,7 @@ shortcutPrefix = @
 
 shortcut:r = stdin(":load Release","?")
 shortcut:p = stdin(":load Projects","?")
+shortcut:e = call "Lib:e" (savefile)
 
 # List available shortcuts when typing '@' only
 # ---
