@@ -36,26 +36,45 @@ File(".investigate")
 /LogFile
 
 
-# Main function
+
+# Log with data
 	Sys.lastResult =res
-	error(res==null,"No lastResult")
 	res.?nth =isList
-	readLine("Include " + if(isList,"list","non-list") + " value? (Enter / N)").toLower=="" =useValue
 	
-	LogFile.append("")
-	LogFile.append(Date.fmt)
-	when(useValue, {
-		when(isList,{
-			readLine("Element number").parseInt =pos
-			if(pos=="", 0, pos) =pos
-			res.nth(pos) =res
-		})
-		LogFile.append(syn(res))
+	when(isList,{
+		readLine("Element number").parseInt =pos
+		if(pos=="", 0, pos) =pos
+		res.nth(pos) =res
 	})
+	{* syn(P(1)) } =conv
+	if(conv.?call(res), conv(res), "<Can not be synthesized>") =value
+	
 	readLine("Comment") =comment
-	LogFile.append(comment)
-	#show
+	LogFile.append(List("",Date.fmt,value,comment))
 /LogWithData
+
+
+# Log multiple lines, no data
+	List("",Date.fmt) =list
+
+	loop
+		readLine("Text, blank when done") =line
+		break(line=="")
+		list.add(line)
+	|
+	LogFile.append(list)
+/LogNoData
+
+
+# Log pasted text
+	readLine("End marker") =endMarker
+	readLines(endMarker) =lines
+	
+	List("",Date.fmt,"------") + lines + List("------") =data
+	LogFile.append(data)
+/LogPastedText
+
+
 
 LogFile.read
 /Show

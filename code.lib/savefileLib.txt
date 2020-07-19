@@ -53,7 +53,7 @@ EditFileFromHistory
 # Page through file
 	P(1,savefile)=file
 	if(isWindows,
-		Dir.run("cmd" "/c", "more", file.path),
+		Dir.run("cmd", "/c", "more", file.path),
 		Dir.run("more", file.path)
 	)
 /m
@@ -63,6 +63,7 @@ EditFileFromHistory
 # Update Cfg with terminal size (if possible)
 	false =updated
 	if (!isWindows,{
+		# Linux
 		Dir.runCapture("which","stty").nth.contains("stty") =hasStty
 		when(hasStty, {
 			Dir.runCapture("stty","size").nth.split =list
@@ -72,7 +73,12 @@ EditFileFromHistory
 			true =updated
 		})
 	},{
-		# Windows - no solution yet
+		# Windows
+		Dir.runCapture("powershell","(Get-Host).UI.RawUI.WindowSize.Width").nth.parseInt =w
+		Dir.runCapture("powershell","(Get-Host).UI.RawUI.WindowSize.Height").nth.parseInt =h
+		Cfg.w(w)
+		Cfg.h(h)
+		true =updated
 	})
 	if(updated, Cfg, null)
 /GetTerminalSize
