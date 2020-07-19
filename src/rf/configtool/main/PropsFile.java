@@ -6,20 +6,24 @@ import java.util.*;
 import rf.configtool.parser.SourceLocation;
 
 public class PropsFile {
+	
+	public static final String DEFAULT_SHORTCUT = "'Undefined shortcut'";
 
 	public static final String PROPS_FILE = "CFT.props";
 	
 	private String codeDirs;
-	private String shell = "/usr/bin/bash";
-	private String winShell = "powershell";
+	private String shell;
+	private String winShell;
 	
-	private String mCat  = "{* error('mCat macro undefined in " + PROPS_FILE + "') }";
-	private String mEdit = "{* error('mEdit macro undefined in " + PROPS_FILE + "') }";
-	private String mMore = "{* error('mMore macro undefined in " + PROPS_FILE + "') }";
+	private String mCat;
+	private String mEdit;
+	private String mMore;
 	
-	private String shortcutPrefix = "@";
-	private Map<String,String> shortcuts=new HashMap<String,String>();
+	private String shortcutPrefix;
+	private Map<String,String> shortcuts;
+	
 
+	// detect changes 
 	private String fileInfo="";;
 
 	public PropsFile () throws Exception {
@@ -28,14 +32,28 @@ public class PropsFile {
 	
 	
 	public void refreshFromFile() throws Exception {
-		
 		File f=new File(PROPS_FILE);
-		
-		// refresh when changed, not otherwise
+
+		// Decide if file has changed
 		String newFileInfo=f.length() + "x" + f.lastModified();
 		if (newFileInfo.equals(fileInfo)) return;
+
+		// going ahead with reading file
 		fileInfo=newFileInfo;
 		
+		// Set defaults
+		codeDirs=".";
+		shell = "/usr/bin/bash";
+		winShell = "powershell";
+		
+		mCat  = "{* error('mCat macro undefined in " + PROPS_FILE + "') }";
+		mEdit = "{* error('mEdit macro undefined in " + PROPS_FILE + "') }";
+		mMore = "{* error('mMore macro undefined in " + PROPS_FILE + "') }";
+		
+		shortcutPrefix = "@";
+		shortcuts=new HashMap<String,String>();
+
+		// process file
 		BufferedReader br=null;
 		try {
 			br=new BufferedReader(new FileReader(f));
@@ -115,7 +133,9 @@ public class PropsFile {
 	}
 	
 	public String getShortcutMacro (String shortcutName) {
-		return shortcuts.get(shortcutName);
+		String s=shortcuts.get(shortcutName);
+		if (s==null) s=DEFAULT_SHORTCUT;
+		return s;
 	}
 	
 	
