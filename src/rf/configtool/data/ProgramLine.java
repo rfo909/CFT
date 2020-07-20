@@ -40,6 +40,8 @@ public class ProgramLine extends LexicalElement {
     
     public void execute (Ctx ctx) throws Exception {
         for (Stmt stmt:statements) {
+        	ctx.debug(stmt);
+        	
             stmt.execute(ctx);
         }
     }

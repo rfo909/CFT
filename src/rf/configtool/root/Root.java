@@ -60,6 +60,10 @@ public class Root {
     public ObjCfg getObjCfg() {
         return objCfg;
     }
+    
+    public boolean isDebugMode() {
+    	return debugMode;
+    }
 
 	public void loadScript(String scriptName) throws Exception {
 		currScript = getScriptState(scriptName, true);
@@ -309,6 +313,11 @@ public class Root {
 			}
 
 		} catch (Throwable t) {
+			try {
+				showSystemLog(); 
+			} catch (Exception ex) {
+				// ignore
+			}
 			objGlobal.outln("ERROR " + t.getClass().getName() + ": " + t.getMessage());
 			if (debugMode) {
 				t.printStackTrace();

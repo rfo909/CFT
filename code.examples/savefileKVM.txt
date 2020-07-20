@@ -34,7 +34,9 @@ You must CFT as root to use this script.
 
 
 
-Dir("/var/lib/libvirt/boot")
+Dir("/var/lib/libvirt/boot") =d
+error(!d.exists,"Missing directory: " + d.path)
+d
 /BootImagesDir
 
 

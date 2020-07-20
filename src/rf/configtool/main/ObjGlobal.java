@@ -80,6 +80,10 @@ public class ObjGlobal extends Obj {
         return stdio;
     }
     
+    public boolean isDebugMode() {
+    	return root.isDebugMode();
+    }
+    
     public ObjGlobal(Root root, Stdio stdio) throws Exception {
     	this.root=root;
         this.stdio=stdio;
@@ -137,6 +141,10 @@ public class ObjGlobal extends Obj {
     
     public void addSystemMessage (String line) {
         systemMessages.add(line);
+    }
+    
+    public void debug (String line) {
+    	systemMessages.add("[debug] " + line);
     }
     
     public List<String> getSystemMessages() {

@@ -19,8 +19,11 @@ package rf.configtool.main;
 
 import java.util.*;
 
+import rf.configtool.data.Expr;
+import rf.configtool.data.Stmt;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueList;
+import rf.configtool.parser.SourceLocation;
 
 public class Ctx {
     
@@ -78,6 +81,24 @@ public class Ctx {
         ctx.programContainsLoopingInfoStopsHere=true;
         return ctx;
     }
+    
+    
+    public boolean isDebugMode() {
+    	return objGlobal.isDebugMode();
+    }
+    
+    public void debug (Stmt stmt) {
+    	if (isDebugMode()) {
+    		objGlobal.debug("stmt " + stmt.getSourceLocation().toString());
+    	}
+    }
+    
+    public void debug (Expr expr) {
+    	if (isDebugMode()) {
+    		objGlobal.debug("expr " + expr.getSourceLocation().toString());
+    	}
+    }
+    
     
     /**
      * Called from StmtIterate and StmtLoop. Could have used the occurrence of loop variables (which are

@@ -55,6 +55,7 @@ public class Expr extends LexicalElement {
     }
     
     public Value resolve (Ctx ctx) throws Exception {
+    	ctx.debug(this);
         if (parts.size() == 1) {
             return parts.get(0).resolve(ctx);
         }
