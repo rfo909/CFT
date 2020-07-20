@@ -67,7 +67,9 @@ There can be multiples of every line, including Dir.
 /Init
 
 # projects.txt file contains all data
-    DataFile(File("projects.txt"),"###").comment("#")
+	File("projects.txt")=f
+	error(!f.exists,"File " + f.path + " missing - run Readme() for details")
+    DataFile(f,"###").comment("#")
 /ProjectsFile
 
 # List projects and select 
