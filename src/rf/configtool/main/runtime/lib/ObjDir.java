@@ -25,6 +25,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import rf.configtool.main.Ctx;
 import rf.configtool.main.Ctx;
@@ -627,7 +628,7 @@ public class ObjDir extends Obj {
         
         Process process = processBuilder.start();
         if (waitForExit) {
-        	process.waitFor();
+        	process.waitFor(5,TimeUnit.MINUTES);
         }
         
         

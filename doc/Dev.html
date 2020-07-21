@@ -14,9 +14,17 @@
 <h1>CFT Change log</h1>
 
 
+<h3>v1.1.1 2020-07-21 Dir.runProcessWait timeout</h3>
+<p>
+	Added 5 minutes timeout
+</p>
+
+
 <h3>v1.1.1 2020-07-21 Dir.runProcessWait</h3>
 <p>
-	Functions like .runProcess() but waits for process to terminate.
+	Functions like .runProcess() but waits for process to terminate. Dir.runProcess() was written
+	for a case where we wanted to run up to 100 background node processes, for stress testing. 
+	That is a valid use case, so leaving it unmodified, creating new function instead.
 </p>
 
 
