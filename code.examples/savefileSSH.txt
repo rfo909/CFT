@@ -1,0 +1,62 @@
+# Readme
+<<< EOF
+-------------------------------------------------
+Script file for distributing ssh key to remote
+servers, to enable ssh without password. If you
+have not done so, first create an rsa key, by
+running the following command in Linux shell
+
+$ shell
+ssh-keygen -t rsa
+exit
+
+Then run sshEnable, to copy that file to 
+remote hosts. Note that this script overwrites
+the remote .ssh/authorized_keys file with the
+key. For multiple keys, append the rsa key
+to the authorized_keys file instead.
+-------------------------------------------------
+>>> EOF
+/Readme
+
+
+
+Input("sshTarget: name@host").get
+/GetSSHTarget
+
+
+
+# Copy ssh key to remote target host - if problems, ensure .ssh dir exists in home dir of sshTarget
+	GetSSHTarget =sshTarget
+	Input("Local home dir -- containing .ssh/id_rsa.pub").get =localHome
+	
+	println("Copying file")
+	Dir.run("scp",localHome+"/.ssh/id_rsa.pub",sshTarget+":.ssh/authorized_keys")  # overwriting
+	println("Done")
+	
+	readLine("press Enter to test automatic login to " + sshTarget)
+	remoteCommand(sshTarget,'echo "This line created on `hostname -f`"')
+/sshEnable
+
+
+P(1)=sshTarget
+	Dir.run("ssh", sshTarget)
+/remoteShell
+
+
+P(1)=sshTarget P(2,"ls")=cmd
+	Dir.run("ssh", sshTarget, cmd)
+/remoteCommand
+
+
+# Interactive call to remoteShell
+	remoteShell(GetSSHTarget)
+/rsh
+
+# Interactive call to remoteCommand
+	GetSSHTarget =target
+	Input("Remote command").get =cmd
+	remoteCommand(target, cmd)
+/rcmd
+
+

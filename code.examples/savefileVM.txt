@@ -46,12 +46,12 @@ File("/etc/hostname")
 
 
 # Show result files
-	println("")
+	println
 	println(FileHostname.path)
 	println("---")
 	FileHostname.read->line println(line) |
 	println("---")
-	println("")
+	println
 	println(FileNetplan.path)
 	println("---")
 	FileNetplan.read->line println(line) |

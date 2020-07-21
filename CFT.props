@@ -13,7 +13,7 @@ codeDirs = . ; code.examples ; code.lib
 # Favourite shell, for the shell() global function
 # ----
 
-shell = /usr/bin/bash
+shell = bash
 winShell = powershell
 
 
@@ -43,6 +43,7 @@ shortcutPrefix = @
 
 shortcut:e    = "---- open script in editor ----"         call "Lib:e" (savefile)
 shortcut:term = "---- Update terminal size ----"          call "Lib:GetTerminalSize"
+shortcut:top  = "---- Run top command ----"               Dir.run("top")
 
 # Release script
 shortcut:rel  = "---- Release ----"                       stdin(":load Release","?")
