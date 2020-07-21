@@ -68,8 +68,6 @@ DocDir.file("Doc.html").protect("Original")
 ------------------------------------------------------------------
 Generated file - see script file ${savefile}
 
-See also shell script ./CreateOverview.sh
-
 ${version}
 ------------------------------------------------------------------
 	>>> EOF

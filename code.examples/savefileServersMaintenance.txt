@@ -41,8 +41,7 @@ Input("SSH target on format username@server").get
 
 
 # Update server
-P(1)=target
-	when(target==null, {sshTarget =target})
+P(1,sshTarget)=target
 
 	# Check if server is up
 	if(target.contains("@"), target.after("@"), target) =host
@@ -54,8 +53,6 @@ P(1)=target
 		Dir.run("ssh",target,cmd)
 	|
 /UpdateServer
-
-
 
 
 call "SSH:rsh"

@@ -41,6 +41,11 @@ public class ParamLookup extends LexicalElement {
         
     }
     
+    private Value getDefaultValue(Ctx ctx) throws Exception {
+    	if (defaultValue != null) return defaultValue.resolve(ctx);
+    	return new ValueNull();
+    }
+    
     public Value resolve (Ctx ctx) throws Exception {
         List<Value> params=ctx.getFunctionState().getParams();
         if (pos==null) return new ValueList(params);
@@ -52,14 +57,14 @@ public class ParamLookup extends LexicalElement {
         if (iPos < 1) throw new Exception("invalid position, must be 1 or greater");
         iPos--;
         
-        Value def;
-        if (defaultValue != null) def=defaultValue.resolve(ctx); else def=new ValueNull();
+        // Made resolve of defaultValue lazy, so it is only resolved when needed, this
+        // allows for it to be code that asks interactively for the value)
         
         if (iPos >= params.size()) {
-            return def;
+            return getDefaultValue(ctx);
         } else {
             Value v=params.get(iPos);
-            if (v instanceof ValueNull) return def;
+            if (v instanceof ValueNull) return getDefaultValue(ctx);
             return v;
         }
     }

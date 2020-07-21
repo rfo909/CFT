@@ -1,8 +1,6 @@
 ------------------------------------------------------------------
 Generated file - see script file savefileOverview.txt
 
-See also shell script ./CreateOverview.sh
-
 v1.1.0
 ------------------------------------------------------------------
 
@@ -70,6 +68,8 @@ CFT as a functional programming language
  |   Terminates all loops
  * Result value from code blocks
  * Function parameters
+ |   Simple example
+ |   Asking for missing value
 
 Conditional execution
  * List filtering
@@ -136,8 +136,8 @@ Interactive use
  |   Example using :NN
  * Repeat last program line
  * Output format / Cfg
+ |   The @term shortcut
  |   Line wrapping
- |   Number of lines on screen
 
 Templating
  * Merging text with Dict

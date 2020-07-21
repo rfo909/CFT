@@ -4,8 +4,8 @@
 Interactive object oriented programmable shell.
 Compact programming language.
 Automation tool.
-Last updated: 2020-07-18 RFO
-v1.0.17
+Last updated: 2020-07-21 RFO
+v1.1.0
 ```
 # Introduction
 
@@ -724,10 +724,25 @@ take place, or filtering mean that "out()" never get called, the result is an em
 ## Function parameters
 
 
-Custom functions can also take parameters. This is done using the P() statement, which
+Custom functions can also take parameters. This is done using the P() expression, which
 identifies the parameter by position, and allows a default value. The default value is important
-for two reasons. First it allows the function code to execute while being developed interactively,
-and second it may act as documentation, as an example of expected value.
+for three reasons:
+
+
+
+- It allows the function code to execute while being developed interactively
+
+
+- May act as documentation in the source
+
+
+- Provides an elegant way of making functions interactive and non-interactive at the same time,
+as the default expression is evaluated only when the parameter is not given, or is given
+as value null, and may call a function or use a block expression to ask the user to input
+the value.
+
+
+### Simple example
 
 
 Here we make an improved version of the JavaFiles function, that takes a directory parameter, and if none given, uses the current directory.
@@ -769,6 +784,12 @@ Note: when redefining a currently existing named function, we need to add '!' to
 we want to override the old definition. Now when we run JavaCodeSum, it works on the
 java files under project 2.
 
+### Asking for missing value
+
+```
+P(1,Input("Enter value").get) =value
+...
+```
 # Conditional execution
 
 
@@ -1709,44 +1730,33 @@ the more() function on the File object.
 
 
 Output to screen is regulated via a Cfg object. It is a session object, that contains default
-settings for number of lines and line width of the current window / terminal.
+settings for number of lines and line width of the current window / terminal. It's default
+mode of operation is to disable wrapping, which means long lines are cut, ending with a simple '+'
+to indicate this.
 
 
-To change these, we use global function Cfg() to obtain the Cfg object, and methods to set or
-view the properties.
+To change the current size of the terminal window, we may use global function Cfg() to obtain
+the Cfg object, and methods to set or view the properties.
+
+### The @term shortcut
+
+
+After the introduction of short cuts, the easiest way to set the terminal window width and
+height, is to enter
 
 ```
-$ Cfg.w
-........10........20........30........40......  ...
-w=130
-<int>
-130
-$ Cfg.w(100)
+$ @term
 ```
 
-Calling Cfg.w without parameters produces a long line to help identify the width of the current
-windows, plus the crrent value. Calling Cfg.w with a value sets the width. The same goes for Cfg.h
-which gets or sets the height of the screen.
+This works on Linux (using stty command) and on Windows (powershell).
 
 ### Line wrapping
 
 
 By default, ouput line wrapping is off, which means that lines longer than the Cfg.w gets truncated
-with a '+' to indicate there is more. It can be switched via the Cfg object, but there is also a
+with a '+' to indicate there is more. It can be switched on/off via the Cfg object, but there is also a
 colon command ":wrap" which toggles wrapping on or off.
 
-### Number of lines on screen
-
-
-The number of lines on the screen is used to page content when calling the File.more() and
-File.hex() functions. The CFT File.more() function is very limited, and it is usually better to just
-open a text editor with the file, or even invoke "more" as external program (Linux).
-
-```
-P(1)=file
-Dir.run("more",file.path)
-/more
-```
 # Templating
 
 

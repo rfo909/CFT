@@ -13,6 +13,13 @@
 
 <h1>CFT Change log</h1>
 
+<h3>v1.1.0 2020-07-21 P(N,Expr)</h3>
+<p>
+	Made resolving optional default-value Expr lazy, so only resolved when needed. This allows us to put
+	interactive code as default, asking for the value, and saves us a "when (value==null, ...)"
+	in the code.
+</p>
+
 <h3>v1.1.0 2020-07-21 ServersMaintenance script</h3>
 <p>
 	Created script for automating apt-get update etc, on a number of hosts, based on
