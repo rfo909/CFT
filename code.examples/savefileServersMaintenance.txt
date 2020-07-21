@@ -25,43 +25,20 @@ you will be interactively asked for it.
 >>> EOF
 /Readme
 
-"/Script:"+Sys.version+"/completed/"
-/CodeMsg
-
 
 # The commands that are executed on remote host
-Dict.set("code",CodeMsg).mergeCodes =data
 <<< EOF
-echo "Running apt-get update"
 sudo apt-get -y update
-echo "Running apt-get upgrade"
 sudo apt-get -y upgrade
-echo "Running apt-get dist-upgrade"
 sudo apt-get -y dist-upgrade
-echo "${code} Done. Logging off"
-exit
 >>> EOF
-->line
-	out(line.merge(data))
 /Commands
 
-
-
-File("/tmp/in")
-/fileIn
-
-File("/tmp/out")
-/fileOut
-
-File("/tmp/err")
-/fileErr
 
 
 Input("SSH target on format username@server").get
 /sshTarget
 
-
-/TargetExists
 
 # Update server
 P(1)=target
@@ -72,29 +49,15 @@ P(1)=target
 	Dir.runCapture("ping","-c","1",host)->line assert(line.contains("0 received")) out(line) | _.length>0 =failure
 	error(failure,"No such host " + host)
 
-	
-	loop
-		break(!fileOut.exists)
-		{fileOut.read->s assert(s.contains(CodeMsg)) out(1) | _.length>0 } =completed
-		break(completed)
-		Sys.sleep(1000)   # wait for previous job to complete
+	Commands->cmd
+		println("------> " + target + " ---> " + cmd)
+		Dir.runCapture("ssh",target,cmd)->line
+			assert(line.toLower.contains("err")) out(line)
 	|
-	
-	when(fileOut.exists, fileOut.delete)
-	when(fileErr.exists, fileErr.delete)
-	
-	fileIn.create(Commands)
-
-	Dir.runProcess(fileIn, fileOut, fileErr, "ssh", target)
-	
-	"Upgrade running in background"
 /UpdateServer
 
 
 
-
-fileOut.read
-/fr
 
 call "SSH:rsh"
 /rsh
