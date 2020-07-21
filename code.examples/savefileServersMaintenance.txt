@@ -51,8 +51,7 @@ P(1)=target
 
 	Commands->cmd
 		println("------> " + target + " ---> " + cmd)
-		Dir.runCapture("ssh",target,cmd)->line
-			assert(line.toLower.contains("err")) out(line)
+		Dir.run("ssh",target,cmd)
 	|
 /UpdateServer
 
