@@ -76,6 +76,7 @@ public class ObjDir extends Obj {
         add(new FunctionRun());
         add(new FunctionRunDetach());
         add(new FunctionRunProcess());
+        add(new FunctionRunProcessWait());
         add(new FunctionRunCapture());
         add(new FunctionShowTree());
         add(new FunctionProtect());
@@ -592,7 +593,7 @@ public class ObjDir extends Obj {
     }
 
 
-    private void startProcess (File input, File output, File stderr, List<Value> params) throws Exception {
+    private void startProcess (File input, File output, File stderr, List<Value> params, boolean waitForExit) throws Exception {
         List<Value> args;
         if (params.size()==1) {
             if (params.get(0) instanceof ValueString) {
@@ -624,7 +625,12 @@ public class ObjDir extends Obj {
         // set current directory
         processBuilder.directory(new File(name));
         
-        processBuilder.start();
+        Process process = processBuilder.start();
+        if (waitForExit) {
+        	process.waitFor();
+        }
+        
+        
     }
 
 
@@ -644,7 +650,30 @@ public class ObjDir extends Obj {
               for (int i=3; i<params.size(); i++) cmd.add(params.get(i));
             
             
-            startProcess(stdin.getFile(), stdout.getFile(), stderr.getFile(), cmd);
+            startProcess(stdin.getFile(), stdout.getFile(), stderr.getFile(), cmd, false);
+            return new ValueObj(self());
+
+        }
+    }
+    
+
+    class FunctionRunProcessWait extends Function {
+        public String getName() {
+            return "runProcessWait";
+        }
+        public String getShortDesc() {
+            return "runProcessWait(stdinFile, stdoutFile, stdErrFile, list|...) - execute external program with file I/O, blocking until it exits";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            ObjFile stdin = (ObjFile) getObj("stdinFile", params, 0);
+            ObjFile stdout = (ObjFile) getObj("stdoutFile", params, 1);
+            ObjFile stderr = (ObjFile) getObj("stderrFile", params, 2);
+            
+              List<Value> cmd=new ArrayList<Value>();
+              for (int i=3; i<params.size(); i++) cmd.add(params.get(i));
+            
+            
+            startProcess(stdin.getFile(), stdout.getFile(), stderr.getFile(), cmd, true);
             return new ValueObj(self());
 
         }
@@ -728,5 +757,6 @@ public class ObjDir extends Obj {
     }
     
 
+  
 
 }

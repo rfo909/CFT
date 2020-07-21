@@ -14,7 +14,7 @@ To do this
 $ :load SSH
 $ Readme
 
-Main function of this script is UpdateServer, 
+Main function of this script is LinuxAptUpdate, 
 which requires an ssh target string on the form
 
 	username@host
@@ -26,33 +26,67 @@ you will be interactively asked for it.
 /Readme
 
 
-# The commands that are executed on remote host
-<<< EOF
-sudo apt-get -y update
-sudo apt-get -y upgrade
-sudo apt-get -y dist-upgrade
->>> EOF
-/Commands
-
-
-
 Input("SSH target on format username@server").get
-/sshTarget
+/ReadSSHTarget
 
 
-# Update server
-P(1,sshTarget)=target
-
-	# Check if server is up
+P(1)=target	# Check if server is up
 	if(target.contains("@"), target.after("@"), target) =host
 	Dir.runCapture("ping","-c","1",host)->line assert(line.contains("0 received")) out(line) | _.length>0 =failure
-	error(failure,"No such host " + host)
+	failure
+/HostDown
 
-	Commands->cmd
-		println("------> " + target + " ---> " + cmd)
-		Dir.run("ssh",target,cmd)
-	|
-/UpdateServer
+
+# Run single command via ssh command line
+P(1)=target P(2)=singleCommand
+	error(HostDown(target),"Unknown host: " + target)
+
+	Dir.runCapture("ssh",target,singleCommand)
+/RemoteCommand
+
+
+P(1)=name Dir("/tmp").file(name + currentTimeMillis)
+/TmpFile
+
+# Run multi-line command sequence in single ssh session via stdin
+	P(1)=target
+	P(2,List)=commands
+	
+	error(HostDown(target),"Unknown host: " + target)
+
+	TmpFile("in") =inFile
+	TmpFile("out") =outFile
+	TmpFile("err") =errFile
+	
+	inFile.create(commands)
+	println("---> " + target)
+	Dir.runProcessWait(inFile,outFile,errFile,"ssh",target)	
+	outFile.read->line println("      ##  " + line)
+	
+	{* P(1)=f when(f.exists, f.delete) } =Del
+	
+	Del.call(inFile)
+	Del.call(outFile)
+	Del.call(errFile)
+/RemoteCommandSet
+
+
+# Linux update
+P(1,ReadSSHTarget)=target
+<<< EOF
+echo "------ apt-get update"
+sudo apt-get -y update
+echo "------ apt-get upgrade"
+sudo apt-get -y upgrade
+echo "------ apt-get dist-upgrade"
+sudo apt-get -y dist-upgrade
+exit
+>>> EOF
+=commands
+#
+RemoteCommandSet(target,commands)
+/LinuxAptUpdate
+
 
 
 call "SSH:rsh"
