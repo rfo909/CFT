@@ -60,10 +60,18 @@ File("/tmp/err")
 Input("SSH target on format username@server").get
 /sshTarget
 
+
+/TargetExists
+
 # Update server
 P(1)=target
-
 	when(target==null, {sshTarget =target})
+
+	# Check if server is up
+	if(target.contains("@"), target.after("@"), target) =host
+	Dir.runCapture("ping","-c","1",host)->line assert(line.contains("0 received")) out(line) | _.length>0 =failure
+	error(failure,"No such host " + host)
+
 	
 	loop
 		break(!fileOut.exists)
@@ -78,6 +86,8 @@ P(1)=target
 	fileIn.create(Commands)
 
 	Dir.runProcess(fileIn, fileOut, fileErr, "ssh", target)
+	
+	"Upgrade running in background"
 /UpdateServer
 
 
