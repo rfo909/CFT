@@ -1,20 +1,21 @@
 ## Thanks for showing an interest in this software
 
-CFT has now mostly reached the level I imagined it would when I started the project. I use it all the time myself.
 
-Though one can always think of huge numbers of things to integrate, the key for me is to treat CFT as somewhat of
-a toy language. Creating script files with much more than 10-20 functions just gets messy, as there is no
-type system, nor should there be one. Also there is no way of creating classes, which is also by design, in order
-to keep code and interpreter simple.
+As of mid July 2020, CFT has now mostly reached the level I imagined it would when I started the project. I use it all the time myself.
 
-I'd like a discussion on improvements that give powerful features managed with small pieces of code.
+Although one can always add stuff, the key for me is to add only things that truly expand the functionality, in the
+broadest possible sense.  
+
+I'd like a discussion on such additions.
+
 
 ## Ideas under consideration
 
-Below are some ideas I have been considering for a while, without having concluded, and without having found an elegant
-way of implementation. Many also "suffer" under the "programmers disease" of potentially being clever and smart, but without 
-fulfilling some actual need .... :-)
+Below are some ideas I have been considering for a while, without having concluded, or without having found an elegant
+way of implementation. 
 
+Many suffer under the "programmers disease" of potentially being clever and smart, but without 
+fulfilling some actual need, but they may inspire useful ideas.
 
 #### - Parse tools
 
@@ -22,50 +23,23 @@ To be able to parse tokens from strings, in a way that is easily expressable in 
 
 Parsing JSON and HTML.
 
-#### - Detached front-end (UI)
-
-The idea is to let the UI be a thread separate from backend processes, each running a command. The idea is to let the user 
-stop million-line listings, by pressing Enter or something, which would immediately detach the Stdio of the
-running process.
-
-It turned out that adding simple limits on both Grep and the ability to let a processing loop find out how many items
-have been output, is sufficient for terminating otherwise runaway searches.
+Let code operate more interactively, by parsing live output from ssh session with remote server.
 
 #### - Capturing ^C
 
-Would be nice when having unsaved changes. Have not found a way of doing that.
+Would be nice when having unsaved changes, as working with windows ^C means "copy". Have not found a way of doing that.
 
-#### - Reading key presses / characters
-
-Various curses libs offer this, but are they compatible across environments? CFT must be able to run in CMD on windows, as
-well as console and terminal windows on Linux. Should also hopefully work on Mac.
 
 #### - Testing on mac
 
-I have almost no experience with Macs.
+CFT should be tested on Mac.
 
-#### - Monitoring files
-
-Having some special type of object, some FileMonitor, watch over log files and catch changes, possibly putting them into 
-RAM, or searching for special things, as well as notifying the user that something has happened.
-
-Again a fine idea, except the actual need has never emerged. Being able to filter files on dates and names, has been 
-good enough so far.
-
-
-#### - Menu system / GUI
-
-Some shared code in the Lib script enables text menus, and can be extended. Operating a GUI, using Swing ... that's not
-very tempting. Letting the CFT process be a web server, presenting a GUI via HTML and JS is preferrable,
-but ... will it require lots of CFT code, huge templates and overall complexity? And what is the need?
 
 #### - Improved graph
 
 The graph tool (Lib.Plot) is extremely primitive. Being able to create somewhat more advanced graphs would be nice, but
 the current implementation sufficed for what I was doing at the time. 
 
-Adding support for some free external program, communicating via text files or command lines? Could work. Again, 
-would depend on the need.
 
 #### - Free text search engine
 
@@ -73,7 +47,7 @@ Rather than grepping through files, and somewhat in line with the point about mo
 creating a RAM database for more advanced queries, spesifically what I call X-Y-Z query, which goes like this:
 
 - search for lines that contain X
-- out of these, identify some pattern Y
+- out of each of those, identify some pattern Y
 - locate lines that contain Y and additional pattern Z
 
 This search would be extremely hard to solve with just Grep, due to high number of traversals.
@@ -98,10 +72,6 @@ Starting a command with Dir.run and with custom environment variable values woul
 I have not had the need, but this is a piece of functionality that a half descent shell "must" have, right?
 
 
-#### - Imports?
-
-Importing code from other scripts, making functions there a part of the current script? 
-
 #### - Network support
 
 A big topic, which may fall into different categories:
@@ -123,24 +93,19 @@ A big topic, which may fall into different categories:
 
 #### - Script repository
 
-For users running CFT on multiple locations, getting a way to access scripts off some server would be nice. 
+For users running CFT on multiple locations, getting a way to access updated scripts off some server would be nice. 
 
-Perhaps using that primitive, no-username-or-password version of FTP, was that called "simple FTP"? 
+Perhaps using TFTP (Trivial FTP). 
 
 Or just HTTP GET?
+
 
 ## Remember ...
 
 The philosophy of CFT is that of providing advanced functionality in a simple wrapping, with an emphasis
-on simple. Simple not only as in using a "command interface" and even (gasp!) text, but also of how
-much code is required. 
+on simple. Simple not only as in using a "command interface", but also of how
+much CFT script code is required. 
 
-As an example, creating an interface to a graphing package, it would not do having to perform 20+ calls
-to an API for setting basic properties like fonts, colors and all such. 
-
-Providing instead a (well documented) text file format, possibly with an embedded parser, for 99% of those
-options, with merge codes for things like headers, is a possible way of maintaining control over
-every aspect, while supporting an easy to use interface for casual needs.
-
- 
+Complex API's are okay as long as the defaults allow easy use as well. Preferrably complex API's should
+be replaced by config-files, which can be adapted easily through merging in data.
 
