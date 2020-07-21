@@ -11,10 +11,15 @@ ssh-keygen -t rsa
 exit
 
 Then run sshEnable, to copy that file to 
-remote hosts. Note that this script overwrites
-the remote .ssh/authorized_keys file with the
-key. For multiple keys, append the rsa key
-to the authorized_keys file instead.
+remote hosts. 
+
+Sudo without password
+---------------------
+Log in as root, add the following line to 
+/etc/sudoers
+
+username	ALL=(ALL) NOPASSWD:ALL
+
 -------------------------------------------------
 >>> EOF
 /Readme
@@ -30,15 +35,19 @@ Input("sshTarget: name@host").get
 	GetSSHTarget =sshTarget
 	Input("Local home dir -- containing .ssh/id_rsa.pub").get =localHome
 	
-	println("Writing remote authorized_keys")
-	Dir.run("scp",localHome+"/.ssh/id_rsa.pub",sshTarget+":.ssh/authorized_keys")  # overwriting
+	println("Copy key file to remote home dir")
+	Dir.run("scp",localHome+"/.ssh/id_rsa.pub",sshTarget+":.")
 	
-	println("Writing remote id_rsa.pub")
-	Dir.run("scp",localHome+"/.ssh/id_rsa.pub",sshTarget+":.ssh/id_rsa.pub") # enable ssh from target onwards
+	println("Appending to remote .ssh/authorized_keys")
+	remoteCommand(sshTarget,"cat id_rsa.pub >> .ssh/authorized_keys")
 
+	println("Deleting remote copy of id_rsa.pub")
+	remoteCommand(sshTarget,"rm id_rsa.pub")	
+	
 	println("Ensuring 700 access on remote .ssh dir")
 	remoteCommand(sshTarget,"chmod 700 .ssh")
 /sshEnable
+
 
 
 P(1)=sshTarget

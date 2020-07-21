@@ -46,6 +46,7 @@ public class ObjSys extends Obj {
         add(new FunctionCodeDirs());
         add(new FunctionOutCount());
         add(new FunctionLastResult());
+        add(new FunctionSleep());
 
     }
     
@@ -168,5 +169,25 @@ public class ObjSys extends Obj {
         }
     }
     
+    class FunctionSleep extends Function {
+        public String getName() {
+            return "sleep";
+        }
+        public String getShortDesc() {
+            return "sleep(millis) - returns current time in ms";
+        }
+        @Override
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected millis parameter");
+            int millis=(int) getInt("millis", params, 0);
+            try {
+            	Thread.sleep(millis);
+            } catch (Exception ex) {
+            	// ignore
+            }
+            return new ValueInt(System.currentTimeMillis());
+        }
+    }
     
+
 }

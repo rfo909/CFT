@@ -61,6 +61,9 @@ shortcut:IND  = "---- Investigate log no data ----"       call "Investigate:LogN
 shortcut:IP   = "---- Investigate log pasted text ----"   call "Investigate:LogPastedText"
 shortcut:IS   = "---- Investigate show log ----"          call "Investigate:Show"
 
+# Servers maintenance
+shortcut:SM   = "---- Servers maintenance script ----"    stdin(":load ServersMaintenance","?")
+
 
 # List available shortcuts when typing '@' only
 # ---
