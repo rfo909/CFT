@@ -30,12 +30,14 @@ Input("sshTarget: name@host").get
 	GetSSHTarget =sshTarget
 	Input("Local home dir -- containing .ssh/id_rsa.pub").get =localHome
 	
-	println("Copying file")
+	println("Writing remote authorized_keys")
 	Dir.run("scp",localHome+"/.ssh/id_rsa.pub",sshTarget+":.ssh/authorized_keys")  # overwriting
-	println("Done")
 	
-	readLine("press Enter to test automatic login to " + sshTarget)
-	remoteCommand(sshTarget,'echo "This line created on `hostname -f`"')
+	println("Writing remote id_rsa.pub")
+	Dir.run("scp",localHome+"/.ssh/id_rsa.pub",sshTarget+":.ssh/id_rsa.pub") # enable ssh from target onwards
+
+	println("Ensuring 700 access on remote .ssh dir")
+	remoteCommand(sshTarget,"chmod 700 .ssh")
 /sshEnable
 
 
