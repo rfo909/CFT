@@ -1,26 +1,15 @@
 # Readme
 <<< EOF
 ------------------------------------------------
-Example script doing automated update on remote
-linux (Ubuntu) hosts. Uses apt package manager.
+Collection of functions for querying and 
+managing servers remotely via SSH. For scripts
+to work, the remote server must
 
-Requirements:
+- allow ssh without password
+- allow sudo without password
 
-- Ensure ssh without password
-- Ensure sudo without password
-
-To do this
-
-$ :load SSH
-$ Readme
-
-Main function of this script is LinuxAptUpdate, 
-which requires an ssh target string on the form
-
-	username@host
-
-It can either be provided as a parameter, or 
-you will be interactively asked for it.
+To do this, see the SSH script and its Readme
+function.
 ------------------------------------------------
 >>> EOF
 /Readme
@@ -30,49 +19,103 @@ Input("SSH target on format username@server").get
 /ReadSSHTarget
 
 
-P(1)=target	# Check if server is up
+P(1)=target	# Check if server fails to respond on ping
 	if(target.contains("@"), target.after("@"), target) =host
 	Dir.runCapture("ping","-c","1",host)->line assert(line.contains("0 received")) out(line) | _.length>0 =failure
 	failure
 /HostDown
 
 
-# Run single command via ssh command line
-P(1)=target P(2)=singleCommand
+P(1)=target P(2)=singleCommand # Run single command via ssh command line, returns output lines (stderr to screen)
 	error(HostDown(target),"Unknown host: " + target)
 
 	Dir.runCapture("ssh",target,singleCommand)
 /RemoteCommand
 
 
-P(1)=name Dir("/tmp").file(name + currentTimeMillis)
+
+P(1)=name Dir("/tmp").file(name + currentTimeMillis)  # Create temp file under /tmp
 /TmpFile
 
-# Run multi-line command sequence in single ssh session via stdin
-	P(1)=target
-	P(2,List)=commands
-	
+
+
+P(1)=target P(2,List)=commands  # Multiple commands in single ssh session via stdin, returns stdout and stderr lines
+
 	error(HostDown(target),"Unknown host: " + target)
+	
+	"------ Starting " + Sys.version + " ------" =marker
+	
+	# prefix commands with recognizable line
+	'echo "' + marker + '"' =echo
+	List(echo) + commands =cmd
 
 	TmpFile("in") =inFile
 	TmpFile("out") =outFile
 	TmpFile("err") =errFile
 	
-	inFile.create(commands)
-	println("---> " + target)
-	Dir.runProcessWait(inFile,outFile,errFile,"ssh",target)	
-	outFile.read->line println("      ##  " + line)
+	inFile.create(cmd)
+	Dir.runProcessWait(inFile,outFile,errFile,"ssh",target)
+	
+	false =foundMarker
+	outFile.read->line
+		condOut(foundMarker,"(stdout) " + line)
+		when(line.contains(marker), {true=foundMarker})
+	| _=outLines
+	
+	List =errLines
+	when (errFile.exists, {
+		errFile.read->line out("(stderr) "+line) | _=errLines
+	})
+
+	outLines + errLines =outputLines
 	
 	{* P(1)=f when(f.exists, f.delete) } =Del
 	
 	Del.call(inFile)
 	Del.call(outFile)
 	Del.call(errFile)
+	
+	# return value
+	outputLines
 /RemoteCommandSet
 
 
-# Linux update
-P(1,ReadSSHTarget)=target
+
+P(1)=target P(2,List)=commands P(3,Dict)=codes # returns list of codes
+	RemoteCommandSet(target, commands) =output
+	List =result
+	output->line 
+		codes.keys->key
+			when(line.contains(key), result.add(codes.get(key)))
+	|
+	# return value
+	result.unique
+/RemoteCommandSetCoded
+
+
+
+# Example on how to classify java support on remote server (interactive)
+	ReadSSHTarget =target
+	Dict
+		# Maps output strings to result codes
+		.set("not found","notfound")
+		.set("OpenJDK","openjdk")
+		.set('"11.0.', "v11")
+		.set('"14.0.', "v14")
+		=codes
+
+	List("java -version")=commands
+	
+	call "ServersMaintenance:RemoteCommandSetCoded" (target, commands, codes) =result
+	!result.contains("notfound") =hasJava
+	println("Java status for " + target + " -> hasJava=" + hasJava + ", all codes = " + result.concat(" "))
+/ExampleCodedResponse
+
+
+
+
+P(1,ReadSSHTarget)=target # Linux update with apt - returns output lines
+#
 <<< EOF
 echo "------ apt-get update"
 sudo apt-get -y update
@@ -89,7 +132,5 @@ RemoteCommandSet(target,commands)
 
 
 
-call "SSH:rsh"
-/rsh
 
 

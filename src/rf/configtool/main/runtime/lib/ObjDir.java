@@ -584,7 +584,7 @@ public class ObjDir extends Obj {
             return "runCapture";
         }
         public String getShortDesc() {
-            return "runCapture(list|...) - execute external program in foreground, but capture output, and return list of output lines";
+            return "runCapture(list|...) - execute external program in foreground, but capture output, and return list of stdout lines";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             RunCaptureOutput capt=new RunCaptureOutput();

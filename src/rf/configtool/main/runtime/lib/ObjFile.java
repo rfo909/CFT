@@ -89,6 +89,7 @@ public class ObjFile extends Obj {
         add(new FunctionEncoding());
         add(new FunctionProtect());
         add(new FunctionTail());
+        add(new FunctionHead());
     }
     
     public Protection getProtection() {
@@ -877,7 +878,7 @@ public class ObjFile extends Obj {
             return "tail";
         }
         public String getShortDesc() {
-            return "tail(count) - returns list of lines from end of file";
+            return "tail(count) - returns list of lines from end of file (empty list if file doesn't exist)";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
         	if (params.size() != 1) throw new Exception("Expected count parameter");
@@ -886,7 +887,9 @@ public class ObjFile extends Obj {
         	
             File f=new File(name);
             if (!f.exists()) {
-                throw new Exception("File does not exist");
+            	// return empty list 
+            	List<Value> list=new ArrayList<Value>();
+            	return new ValueList(list);
             }
 
             BufferedReader br=null;
@@ -922,6 +925,52 @@ public class ObjFile extends Obj {
         }
     }
     
+
+    
+    class FunctionHead extends Function {
+        public String getName() {
+            return "head";
+        }
+        public String getShortDesc() {
+            return "head(count) - returns list of lines from start of file (empty list if file doesn't exist)";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 1) throw new Exception("Expected count parameter");
+        	final int count=(int) getInt("count", params, 0);
+        	
+            File f=new File(name);
+            if (!f.exists()) {
+            	// return empty list 
+            	List<Value> list=new ArrayList<Value>();
+            	return new ValueList(list);
+            }
+
+            List<Value> list=new ArrayList<Value>();
+            
+            BufferedReader br=null;
+            try {
+            	br = new BufferedReader(
+         			   new InputStreamReader(
+         	                      new FileInputStream(f), encoding));
+
+            	long lineNo=0;
+                for (;;) {
+                    String line=br.readLine();
+                    lineNo++;
+                    if (line==null) break;
+                    
+                	String deTabbed=TabUtil.substituteTabs(line, 4);
+                    list.add(new ValueObjFileLine(deTabbed, lineNo, self()));
+                    if (list.size() >= count) break;
+                }
+                return new ValueList(list);
+
+            } finally {
+                if (br != null) try {br.close();} catch (Exception ex) {};
+            }
+        	
+        }
+    }
 
 
  

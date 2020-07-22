@@ -13,6 +13,21 @@
 
 <h1>CFT Change log</h1>
 
+<h3>v1.1.1 2020-07-22 ServersMaintenance script</h3>
+<p>
+	Improved this script with new function RemoteCommandSetCoded() to easily categorize
+	output from ssh session. The RemoteCommandSet function is improved as well, 
+	echoing a marker string, and looking for it in stdout, to eliminate the
+	welcome text when logging in. It also returns stderr lines, prefixing output
+	lines with (stdout) or (stderr).
+</p>
+
+
+<h3>v1.1.1 2020-07-22 File.tail and .head</h3>
+<p>
+	Added File.head, and modified File.tail, so both return empty list
+	if file doesn't exist, rather than exception.
+</p>
 
 <h3>v1.1.1 2020-07-21 Dir.runProcessWait timeout</h3>
 <p>

@@ -312,6 +312,9 @@ me solve.
 - initializing and cloning VM's under KVM (Linux)
 - run inside new VM's to set up correct hostname and netplan (Ubuntu Server)
 - generate the doc/Overview.txt file from Doc.html
+- deploy SSH key files across hosts
+- apt-get update and apt-get upgrade multiple hosts (Ubuntu)
+
 
 # Status
 
