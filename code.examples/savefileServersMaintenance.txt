@@ -19,17 +19,31 @@ Input("SSH target on format username@server").get
 /ReadSSHTarget
 
 
+Val("showDebug")
+/showDebug
+
+
+P(1)=debug
+	ValDef("showDebug", debug)
+/setDebug
+
+
+
 P(1)=target	# Check if server fails to respond on ping
 	if(target.contains("@"), target.after("@"), target) =host
 	Dir.runCapture("ping","-c","1",host)->line assert(line.contains("0 received")) out(line) | _.length>0 =failure
-	failure
-/HostDown
+	!failure
+/HostOk
 
 
 P(1)=target P(2)=singleCommand # Run single command via ssh command line, returns output lines (stderr to screen)
-	error(HostDown(target),"Unknown host: " + target)
-
-	Dir.runCapture("ssh",target,singleCommand)
+	Dir.runCapture("ssh",target,singleCommand) =lines
+	when(showDebug,{
+		println(" : " + singleCommand)
+		lines->line println("   ## " + line)
+	})
+	# Return value
+	lines
 /RemoteCommand
 
 
@@ -41,7 +55,15 @@ P(1)=name Dir("/tmp").file(name + currentTimeMillis)  # Create temp file under /
 
 P(1)=target P(2,List)=commands  # Multiple commands in single ssh session via stdin, returns stdout and stderr lines
 
-	error(HostDown(target),"Unknown host: " + target)
+	# ensure commands is a list
+	when(!commands.?nth, {
+		List(commands) =commands
+	})
+
+	when(showDebug, {
+		println("target=" + target)
+		commands->x println(" : " + x)
+	})
 	
 	"------ Starting " + Sys.version + " ------" =marker
 	
@@ -75,6 +97,9 @@ P(1)=target P(2,List)=commands  # Multiple commands in single ssh session via st
 	Del.call(outFile)
 	Del.call(errFile)
 	
+	when(showDebug, {
+		outputLines->line println("   ## " + line)
+	})
 	# return value
 	outputLines
 /RemoteCommandSet
@@ -91,6 +116,7 @@ P(1)=target P(2,List)=commands P(3,Dict)=codes # returns list of codes
 	# return value
 	result.unique
 /RemoteCommandSetCoded
+
 
 
 

@@ -192,6 +192,7 @@ EditFileFromHistory
 
 # Display text with line under
 	P(1,"Title") =title
+	println
 	println(title)
 	println( Lib.Data.yes(title.length,"-").concat )
 /Header
