@@ -21,6 +21,7 @@ import java.io.*;
 import java.lang.ProcessBuilder.Redirect;
 import java.util.*;
 
+import rf.configtool.data.Expr;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.OutText;
 import rf.configtool.main.PropsFile;
@@ -47,6 +48,7 @@ public class ObjSys extends Obj {
         add(new FunctionOutCount());
         add(new FunctionLastResult());
         add(new FunctionSleep());
+        add(new FunctionStdin());
 
     }
     
@@ -188,6 +190,37 @@ public class ObjSys extends Obj {
             return new ValueInt(System.currentTimeMillis());
         }
     }
+    
+
+    class FunctionStdin extends Function {
+        public String getName() {
+            return "stdin";
+        }
+        public String getShortDesc() {
+            return "stdin(list|...) - buffer stdin lines - no params to clear - returns number of lines cached";
+        }
+        @Override
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() == 0) {
+            	// clear buffered input
+                ctx.getStdio().clearBufferedInputLines();
+            } else {
+	            
+	            List<Value> values;
+	            if (params.size()==1 && (params.get(0) instanceof ValueList)) {
+	            	values=((ValueList) params.get(0)).getVal();
+	            } else {
+	            	values=params;
+	            }
+	            
+	            for (Value v:values) {
+	            	String s=v.getValAsString();
+	            	ctx.getStdio().addBufferedInputLine(s);
+	            }
+            }
+            return new ValueInt(ctx.getStdio().getCachedInputLineCount());
+        }
+  }
     
 
 }

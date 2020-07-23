@@ -4,8 +4,8 @@
 Interactive object oriented programmable shell.
 Compact programming language.
 Automation tool.
-Last updated: 2020-07-21 RFO
-v1.1.0
+Last updated: 2020-07-23 RFO
+v1.1.1
 ```
 # Introduction
 
@@ -2301,23 +2301,23 @@ a test
 
 
 Functions may query the user with Input("prompt").get and readLine("prompt"). If we want
-to automate such functions, we use global statement stdin() to buffer up any number of
+to automate such functions, we use function Sys.stdin() to buffer up any number of
 input lines.
 
 ```
-stdin("read-this") Input("Enter data").get
+Sys.stdin("read-this") Input("Enter data").get
 <String>
 read-this
 ```
 
 Note that both Input.get() and readLine() detect if there is buffered input, and
 if so, does not display the prompt or other info (Input.get()). Particularly for Input.get(),
-buffering the empty string "" with stdin() means repeating the last value.
+buffering the empty string "" with Sys.stdin() means repeating the last value.
 
 ## Self-modifying script
 
 
-Using the stdin() statement without being followed by Input.get() or readLine(), is just
+Using the Sys.stdin() statement without being followed by Input.get() or readLine(), is just
 another way of entering commands.
 
 ```
@@ -2332,7 +2332,7 @@ functions. We can also automate running colon commands.
 ```
 P(1)=symbol
 P(2)=val
-stdin (syn(val), "/"+symbol+"!")
+Sys.stdin (syn(val), "/"+symbol+"!")
 /def
 def("filesSnapshot", Dir.files)
 ```
@@ -2427,8 +2427,8 @@ The CFT.props text is self explanatory.
 # input line.
 # ---
 shortcutPrefix = @
-shortcut:r = stdin(":load Release","?")
-shortcut:p = stdin(":load Projects","?")
+shortcut:r = Sys.stdin(":load Release","?")
+shortcut:p = Sys.stdin(":load Projects","?")
 # List available shortcuts when typing '@' only
 # ---
 shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) out(line)

@@ -88,6 +88,10 @@ public class Stdio {
     public void clearBufferedInputLines() {
         bufferedInputLines.clear();
     }
+    
+    public int getCachedInputLineCount() {
+    	return bufferedInputLines.size();
+    }
 
     /**
      * Output text
