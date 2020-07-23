@@ -222,6 +222,13 @@ Input("... AND Search3b").get=b
 Input("... AND Search3c").get=c
 /S3
 
+# Search with one positive and one negative parameter
+CheckProject
+ShowFileFilter
+Input("Search1").get =a
+Input("Search1n (reject)").get =b
+Search(Grep(a).reject(b))
+/SN
 
 # Locate file by partial name
     P(1,"java")=fn

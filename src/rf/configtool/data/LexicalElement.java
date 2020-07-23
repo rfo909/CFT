@@ -17,6 +17,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.data;
 
+import rf.configtool.main.SourceException;
 import rf.configtool.parser.*;
 
 public class LexicalElement {
@@ -31,5 +32,9 @@ public class LexicalElement {
         return sourceLocation;
     }
     
+    public final Exception ex(String msg) throws Exception {
+        return new SourceException(getSourceLocation(), msg);
+    }
+ 
     
 }

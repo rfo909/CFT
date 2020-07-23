@@ -13,6 +13,14 @@
 
 <h1>CFT Change log</h1>
 
+<h3>v1.1.1 2020-07-23 Error handling</h3>
+<p>
+	Created SourceException which improves error handling, by wrapping non-SourceExceptions into
+	SourceExceptions at certain points, getting an indication about where the error occurred also
+	for exceptions from inside java libraries, such as trying to read a file that doesn't exist.
+</p>
+
+
 <h3>v1.1.1 2020-07-23 Moved stdin() to Sys.stdin()</h3>
 <p>
 	The global statement stdin() is now function stdin() inside Sys object, in an effort

@@ -75,7 +75,7 @@ public class ExprB extends LexicalElement {
             va=((ValueFloat) a).getVal();
             vb=((ValueInt) b).getVal();
         } else {
-            throw new Exception("Expected int/float comparison");
+            throw ex("Expected int/float comparison");
         }
         
         if (sep.equals(">")) {
@@ -94,7 +94,7 @@ public class ExprB extends LexicalElement {
             return new ValueBoolean(va<=vb);
         }
         
-        throw new Exception("Internal error");
+        throw ex("Internal error");
     }
 
 }

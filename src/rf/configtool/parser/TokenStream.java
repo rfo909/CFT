@@ -21,6 +21,8 @@ import java.io.PrintStream;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import rf.configtool.main.SourceException;
+
 public class TokenStream {
     
     private List<Token> tokens;
@@ -97,7 +99,7 @@ public class TokenStream {
      */
     public Token matchAnyToken(String errMsg) throws Exception {
         if (atEOF()) {
-            throw new Exception(errMsg);
+            throw new Exception("(at EOF) " + errMsg);
         }
         Token t=curr();
         pos++;
@@ -120,7 +122,7 @@ public class TokenStream {
             return t;
         }
         if (errMsg != null) {
-            throw new Exception(t.getSourceLocation() + " " + errMsg);
+            throw new SourceException(t.getSourceLocation(), errMsg);
         }
         return null;
     }
@@ -142,7 +144,7 @@ public class TokenStream {
             return t;
         }
         if (errMsg != null) {
-            throw new Exception(t.getSourceLocation() + " " + errMsg);
+            throw new SourceException(t.getSourceLocation(),errMsg);
         }
         return null;
     }

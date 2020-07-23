@@ -64,7 +64,7 @@ public class ExprCall extends LexicalElement {
     
     private String asString(Ctx ctx, Expr expr, String name) throws Exception {
         Value v=expr.resolve(ctx);
-        if (v==null || !(v instanceof ValueString)) throw new Exception(name + " - expected string parameter");
+        if (v==null || !(v instanceof ValueString)) throw ex(name + " - expected string parameter");
         return ((ValueString) v).getVal();
     }
     
@@ -73,7 +73,7 @@ public class ExprCall extends LexicalElement {
     public Value resolve (Ctx ctx) throws Exception {
         String t=asString(ctx,target,"script:function").trim();
         int pos=t.indexOf(":");
-        if (pos < 0) throw new Exception("Expected script:function");
+        if (pos < 0) throw ex("Expected script:function");
         
         String script=t.substring(0,pos);
         

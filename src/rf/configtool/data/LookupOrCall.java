@@ -25,6 +25,7 @@ import rf.configtool.main.Ctx;
 import rf.configtool.main.FunctionState;
 import rf.configtool.main.ObjGlobal;
 import rf.configtool.main.Runtime;
+import rf.configtool.main.SourceException;
 import rf.configtool.main.runtime.*;
 import rf.configtool.parser.TokenStream;
 
@@ -56,18 +57,6 @@ public class LookupOrCall extends LexicalElement {
         List<Value> values=new ArrayList<Value>();
         for (Expr e:params) values.add(e.resolve(ctx));
         
-//        if (dotValue != null) {
-//            Obj obj=dotValue;
-//            if (obj instanceof ValueObj) {
-//                obj=((ValueObj) obj).getVal();
-//            }
-//            Function f=obj.getFunction(ident);
-//            if (f==null) throw new Exception(getSourceLocation() + " " + obj.getDescription() + " no method '" + ident + "'");
-//
-//            return callFunction(f, ctx, values);
-//        }
-        
-        
         // Global lookup
         Function f=ctx.getObjGlobal().getFunction(ident);
         if (f != null) return callFunction(f, ctx, values); 
@@ -75,7 +64,7 @@ public class LookupOrCall extends LexicalElement {
         // variable lookup
         Value v=ctx.getVariable(ident);
         if (v != null) {
-            if (values.size() > 0) throw new Exception(getSourceLocation() + " variable lookup '" + ident + "' can not take params");
+            if (values.size() > 0) throw new SourceException(getSourceLocation(), "variable lookup '" + ident + "' can not take params");
             return v;
         }
         
@@ -83,16 +72,24 @@ public class LookupOrCall extends LexicalElement {
         ObjGlobal objGlobal=ctx.getObjGlobal();
         CodeLines codeLines=objGlobal.getCodeHistory().getNamedCodeLines(ident);
         if (codeLines!= null) {
-            //if (values.size() > 0) throw new Exception(getSourceLocation() + " code identified by '" + ident + "' can not take params");
             // execute code line
             Runtime rt=new Runtime(objGlobal);
             return rt.processCodeLines(codeLines, new FunctionState(values));
         }
         
-        throw new Exception(getSourceLocation() + " unknown symbol '" + ident + "'");
+        throw new SourceException(getSourceLocation(), "unknown symbol '" + ident + "'");
     }
     
     private Value callFunction(Function f, Ctx ctx, List<Value> values) throws Exception {
-        return f.callFunction(ctx, values);
+    	try {
+    		return f.callFunction(ctx, values);
+    	} catch (Exception ex) {
+        	if (!(ex instanceof SourceException)) {
+        		throw new SourceException(getSourceLocation(), ex);
+        	} else {
+        		throw ex;
+        	}
+
+    	}
     }
 }

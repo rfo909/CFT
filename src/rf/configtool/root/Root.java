@@ -11,6 +11,7 @@ import rf.configtool.main.FunctionState;
 import rf.configtool.main.ObjCfg;
 import rf.configtool.main.ObjGlobal;
 import rf.configtool.main.PropsFile;
+import rf.configtool.main.SourceException;
 import rf.configtool.main.Stdio;
 import rf.configtool.main.Version;
 import rf.configtool.main.runtime.Value;
@@ -318,14 +319,21 @@ public class Root {
 			} catch (Exception ex) {
 				// ignore
 			}
-			objGlobal.outln("ERROR " + t.getClass().getName() + ": " + t.getMessage());
+			objGlobal.outln("ERROR: " + t.getMessage());
 			if (debugMode) {
-				t.printStackTrace();
-				try {
-					objGlobal.outln("INPUT: " + ts.showNextTokens(10));
-				} catch (Exception ex) {
-					// ignore
+				if (t instanceof SourceException) {
+					SourceException se=(SourceException) t;
+					if (se.getOriginalException() != null) {
+						// show original exception stack trace!
+						t=se.getOriginalException();
+					}
 				}
+				t.printStackTrace();
+//				try {
+//					objGlobal.outln("INPUT: " + ts.showNextTokens(10));
+//				} catch (Exception ex) {
+//					// ignore
+//				}
 			}
 		}
 	}
@@ -382,7 +390,7 @@ public class Root {
 			if (ident == null)
 				ident = currScript.getScriptName();
 			if (ident == null) {
-				throw new Exception("No save name");
+				throw new SourceException(ts.getSourceLocation(), "No save name");
 			}
 			processSave(ident); // maintain map
 			return;

@@ -24,6 +24,7 @@ import rf.configtool.main.Ctx;
 import rf.configtool.main.FunctionState;
 import rf.configtool.main.ObjGlobal;
 import rf.configtool.main.Runtime;
+import rf.configtool.main.SourceException;
 import rf.configtool.main.runtime.*;
 import rf.configtool.parser.TokenStream;
 
@@ -86,7 +87,11 @@ public class DottedCall extends LexicalElement {
             if (checkMode) {
                 return new ValueBoolean(false);
             } else {
-                throw ex;
+            	if (!(ex instanceof SourceException)) {
+            		throw new SourceException(getSourceLocation(), ex);
+            	} else {
+            		throw ex;
+            	}
             }
         }
     }

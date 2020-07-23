@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import rf.configtool.main.Ctx;
+import rf.configtool.main.SourceException;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueBoolean;
 import rf.configtool.parser.TokenStream;
@@ -53,7 +54,7 @@ public class ExprA extends LexicalElement {
         for (ExprB part:parts) {
             Value v=part.resolve(ctx);
             if (!(v instanceof ValueBoolean)) {
-                throw new Exception(getSourceLocation() + " expected boolean value");
+                throw new SourceException(getSourceLocation(), "expected boolean value");
             }
             if ( ! ((ValueBoolean) v).getVal()) {
                 return new ValueBoolean(false);

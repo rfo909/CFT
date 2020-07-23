@@ -21,6 +21,7 @@ import java.io.*;
 import java.util.ArrayList;
 
 import rf.configtool.main.CodeLine;
+import rf.configtool.main.SourceException;
 
 public class Parser {
     
@@ -58,7 +59,7 @@ public class Parser {
             int startPos=source.getPos();
             Integer tokenType=root.parse(source);
             if (tokenType==null) {
-                throw new Exception(cl.getLoc() + ": Parse failed at position " + startPos + " (char=" + source.getChar());
+                throw new SourceException(cl.getLoc(), "Parse failed at position " + startPos + " (char=" + source.getChar());
             }
             if (tokenType < 0) {
                 // ignore whitespace and comments

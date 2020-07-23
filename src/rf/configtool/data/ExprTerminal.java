@@ -20,6 +20,7 @@ package rf.configtool.data;
 import java.util.List;
 
 import rf.configtool.main.Ctx;
+import rf.configtool.main.SourceException;
 import rf.configtool.main.runtime.*;
 import rf.configtool.parser.Token;
 import rf.configtool.parser.TokenStream;
@@ -121,37 +122,46 @@ public class ExprTerminal extends LexicalElement {
     }
     
     public Value resolve (Ctx ctx) throws Exception {
-        if (innerExpr != null) return innerExpr.resolve(ctx);
-        if (notExpr != null) {
-            Value v=notExpr.resolve(ctx);
-            return new ValueBoolean(!v.getValAsBoolean());
-        }
-        if (negExpr != null) {
-            Value v=negExpr.resolve(ctx);
-            if (v instanceof ValueInt) {
-                long result=-((ValueInt)v).getVal();
-                return new ValueInt(result);
-            } else if (v instanceof ValueFloat) {
-                double result=-((ValueFloat)v).getVal();
-                return new ValueFloat(result);
-            } else {
-                throw new Exception(negExpr.getSourceLocation() + " expected numeric value (int/float)");
-            }
-        }
-        if (pop != null) return pop.resolve(ctx);
-        if (exprIf != null) return exprIf.resolve(ctx);
-        if (exprWhen != null) return exprWhen.resolve(ctx);
-        if (exprPwd != null) return exprPwd.resolve(ctx);
-        if (nullValue) return new ValueNull();
-        if (exprCall != null) return exprCall.resolve(ctx);
-        
-        if (literalValue != null) return literalValue;
-        if (paramLookup != null) return paramLookup.resolve(ctx);
-        if (paramLookupDict != null) return paramLookupDict.resolve(ctx);
-        if (exprMacro != null) return exprMacro.resolve(ctx);
-        if (lookupCall != null) return lookupCall.resolve(ctx);
-        
-        throw new RuntimeException("Internal error");
+    	try {
+	        if (innerExpr != null) return innerExpr.resolve(ctx);
+	        if (notExpr != null) {
+	            Value v=notExpr.resolve(ctx);
+	            return new ValueBoolean(!v.getValAsBoolean());
+	        }
+	        if (negExpr != null) {
+	            Value v=negExpr.resolve(ctx);
+	            if (v instanceof ValueInt) {
+	                long result=-((ValueInt)v).getVal();
+	                return new ValueInt(result);
+	            } else if (v instanceof ValueFloat) {
+	                double result=-((ValueFloat)v).getVal();
+	                return new ValueFloat(result);
+	            } else {
+	                throw new SourceException(negExpr.getSourceLocation(), "expected numeric value (int/float)");
+	            }
+	        }
+	        if (pop != null) return pop.resolve(ctx);
+	        if (exprIf != null) return exprIf.resolve(ctx);
+	        if (exprWhen != null) return exprWhen.resolve(ctx);
+	        if (exprPwd != null) return exprPwd.resolve(ctx);
+	        if (nullValue) return new ValueNull();
+	        if (exprCall != null) return exprCall.resolve(ctx);
+	        
+	        if (literalValue != null) return literalValue;
+	        if (paramLookup != null) return paramLookup.resolve(ctx);
+	        if (paramLookupDict != null) return paramLookupDict.resolve(ctx);
+	        if (exprMacro != null) return exprMacro.resolve(ctx);
+	        if (lookupCall != null) return lookupCall.resolve(ctx);
+	        
+	        throw new RuntimeException("Internal error");
+    	} catch (Exception ex) {
+    		if (ex instanceof SourceException) {
+    			throw ex;
+    		} else {
+    			throw new SourceException(getSourceLocation(), ex);
+    		}
+
+    	}
     }
 
 }

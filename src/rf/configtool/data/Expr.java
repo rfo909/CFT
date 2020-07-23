@@ -20,6 +20,7 @@ package rf.configtool.data;
 import java.util.*;
 
 import rf.configtool.main.Ctx;
+import rf.configtool.main.SourceException;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueBoolean;
 import rf.configtool.parser.TokenStream;
@@ -56,21 +57,29 @@ public class Expr extends LexicalElement {
     
     public Value resolve (Ctx ctx) throws Exception {
     	ctx.debug(this);
-        if (parts.size() == 1) {
-            return parts.get(0).resolve(ctx);
-        }
-
-        // logical or, implement short-cut processing
-        for (ExprA part:parts) {
-            Value v=part.resolve(ctx);
-            if (!(v instanceof ValueBoolean)) {
-                throw new Exception(getSourceLocation() + " expected boolean value");
-            }
-            if ( ((ValueBoolean) v).getVal()) {
-                return v;
-            }
-        }
-        
-        return new ValueBoolean(false);
+    	try {
+	        if (parts.size() == 1) {
+	            return parts.get(0).resolve(ctx);
+	        }
+	
+	        // logical or, implement short-cut processing
+	        for (ExprA part:parts) {
+	            Value v=part.resolve(ctx);
+	            if (!(v instanceof ValueBoolean)) {
+	                throw new SourceException(getSourceLocation(), "expected boolean value");
+	            }
+	            if ( ((ValueBoolean) v).getVal()) {
+	                return v;
+	            }
+	        }
+	        
+	        return new ValueBoolean(false);
+    	} catch (Exception ex) {
+    		if (ex instanceof SourceException) {
+    			throw ex;
+    		} else {
+    			throw new SourceException(getSourceLocation(), ex);
+    		}
+    	}
     }
 }

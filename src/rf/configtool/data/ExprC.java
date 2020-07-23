@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import rf.configtool.main.Ctx;
+import rf.configtool.main.SourceException;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueString;
 import rf.configtool.main.runtime.ValueBoolean;
@@ -64,11 +65,7 @@ public class ExprC extends LexicalElement {
         }
         return currVal;
     }
-    
-    private Exception ex(String msg) throws Exception {
-        return new Exception(getSourceLocation() + " " + msg);
-    }
-    
+     
     // int +- int -> int
     // int +- float -> float
     // float +- int/float -> float
