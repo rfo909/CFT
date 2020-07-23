@@ -1,25 +1,25 @@
 
 # CFT ("ConfigTool")
 
-CFT is a shell-like terminal based Java app, and a programming language.
+CFT is a shell-like terminal based Java app, and a programming language, created to interactively
+build code for all kinds of automation, including copying files, searching source code trees and
+running external commands.
 
-It was created for interactive automation of simple tasks, such as
 
-- searching source code files
-- searching multiple log files
-- running external programs
-- date processing
-- sorting and reporting
-- creating configuration files
-- ...
+```
+P(1) =host true =ok Dir.runCapture("ping","-c","1",host)->line when(line.contains("0 received"),{false =ok}) | ok
+/HostFound
+
+Dir.allFiles(Glob("*.java"))->file assert(Date(file.lastModified).after(Date.sub(Date.Duration.hours(12)))) out(file)
+/JavaFilesModifiedLast12Hours
+```
 
 # Download and compile
 
-The project is written in Java and built using Apache ANT, which results in a single JAR file.
+The project is written in Java and built using Apache ANT, which results in a single JAR file. It runs on both Linux and 
+Windows, and has no dependencies outside of standard Java libraries.
 
-There are no dependencies outside of standard Java libraries.
-
-Once built, the application is started using 
+Once built, the application is started 
 
 ```
 ./cft
@@ -41,14 +41,10 @@ The CFT application supports basic shell functions like "cd", "ls" and "pwd",
 but is also a programming language which lets you build functions, that
 both call each other as well as a system library of 200+ functions, both global and inside objects.
 
-CFT is not a complete language, in the sense that one can create classes and instances
-of those. Instead you work with pre-defined functions, which return objects representing
-files, directories, strings, lists, dates etc, and create a hierarchy of compact functions
-that automate boring things like collecting and copying log files. The number of object types
-totals about 20 as of version 1.0.6.
+CFT is not a complete language, as one can not create classes. 
 
-The program prompt is a single '$'. You enter stuff, and press Enter, and it gets
-executed. 
+Instead CFT offers a number of global functions which return relevant objects representing files,
+directories, strings, dates and so on.
 
 Objects all contain functions. Example:
 
@@ -68,52 +64,49 @@ When passing no parameters to a function in CFT, there is no need to include the
 
 # An interactive language
 
-CFT accepts lines of input, with code which is executed. There is full expression 
-support with normal cardinality rules, and so CFT is great as a calculator. The interactivity
-makes it easy to experiment
+CFT reads single lines from the user, and as we press Enter, the line is interpreted. 
+
+There is full expression support, with normal cardinality rules, so CFT can be used as
+a desk calculator. Interactivity makes it easy to experiment
 
 ```
 $ 2+3*5
 $ "a b c d".split
 $ List(1,2,3).concat("x")
 $ ls
+$ cd ..
 ```
 
 
 # Create own functions
 
-To get full use of CFT, you will define your own functions. This can be done 
-interactively at first. 
+The power of CFT is defining functions. This can be done 
+interactively at first, later you may select using an editor. 
 
-To create your first function, type the following, and press Enter.
+Type the following, and press Enter.
 
 ```
 $ Dir.allFiles(Glob("*.java"))
 ```
 
-This produces a list of all java files under the directly and indirectly under current directory,
+This produces a list of all java files directly and indirectly under current directory,
 
-After the list of files has displayed, we may name this code line, creating a function:
+After the list of files has displayed, we name this code line, creating a function:
 
 ```
 $ /JavaFiles
 ```
 
-Every time we type JavaFiles and press Enter, we call the JavaFiles function and get a list of Java files
+Every time we now type JavaFiles and press Enter, we call the JavaFiles function and get a list of Java files
 available from the current directory. Since JavaFiles takes no parameters, the ()'s are optional.
 
 To create functions that take parameters, read the doc.
 
-Now use "ls" and "cd" to move somewhere else,
-then run JavaFiles again, observing that the list of files differ, as the "Dir" function always returns the
-current directory.
 
-To return to the CFT home directory, type just "cd" and press Enter.
-
-## Note: objects, not text
+## Objects - not text
 
 The list that is produced when you call JavaFiles is just a representation of the list of
-files. To see the full paths of the files, type the following:
+file objects. To see the full paths of the files, type the following:
 
 
 ```
@@ -125,14 +118,6 @@ The arrow indicates a loop, followed by a loop variable.
 Now you get a list of strings, each the path of a Java file. This illustrates that although
 the output from JavaFiles looks like text, it is really a list of File objects, each with
 functions we can call, such as the .path function.
-
-To see all available functions for File objects, we can create
-a File object using the global File() function, and follow it by "help". The file does not need to exist.
-
-```
-$ File("x") help
-```
-
 
 
 ## Searching
@@ -151,8 +136,12 @@ $ GetGrep =grep JavaFiles->f grep.file(f)->line report(line.file.name, line.line
 $ /Search
 ```
 
-After entering any code line, such as the first one above, it gets executed before you can
-make the code line into a function.
+The colon indicates that there is output, and in this case also input, when the code asks you
+to enter search term, as the line is interpreted.
+
+Once the line works, we name them, using the forward slash and a name, creating functions.
+
+
 
 The Grep() is a global function which may take a search string as parameter. Here
 we read this from the user, using the global readLine() function, which expects a 
@@ -161,13 +150,11 @@ returns a Grep object, which becomes the return value from function GetGrep.
 
 In the Search function we first call GetGrep then assign it to a local variable 'grep'. Variable
 assignment is "reversed" in CFT, as it is stack based. At any time we enter "=" and an identifier,
-it means grabbing the topmist value off the stack and storing it in a local variable. 
-
-Example "2 =a 3 =b a+b" returns 5.
+it means grabbing the topmost value off the stack and storing it in a local variable (inside current function). 
 
 
 Then follows a processing loop, where we iterate over all the JavaFiles, with 'f' being the
-loop variable, and pass each file as argument to the Grep object function .file(). 
+loop variable. We pass each file as parameter to the Grep object function .file(). 
 
 This produces a list of lines, which we also iterate over, and for each produce output
 by calling report() to generate nice formatted output.
@@ -221,9 +208,7 @@ The global Lib function creates a Lib object, which effectively works as a name 
 the Lib object there are functions for creating still other objects, such as the Math
 object, where you find math related functions for calculating sine and cosine.
 
-If you are going to use trigonometric functions a lot in your code, and since Math is a regular
-object, you can always store it in a variable.
-
+Sys is another such namespace function / object.
 
 # Some more examples
 
@@ -247,7 +232,7 @@ $ Date.sub(Date.Duration.days(30))
 #### Open remote directories (windows)
 
 ```
-$ Dir("\\\\somehost\d$\someLogDir").files(Glob("*.log"))
+$ Dir("\\somehost\d$\someLogDir").files(Glob("*.log"))
 ```
 #### Converting one light year to kilometres
 
@@ -260,26 +245,17 @@ $ Lib.Convert.lyToKm(1)
 
 # Edit current script file in editor
 
-The global function savefile() returns a File object for the current script. This means you can
-for example write the following code:
-
-```
-$ Dir.runDetach("notepad", savefile.path)
-```
-
-On Linux you might replace "notepad" with "leafpad" or "gedit" or "subl" and so on.
-
-Since this is a very common command, there has been created a shortcut which opens
-the current savefile in an editor. For windows, it uses notepad, for Linux, there is
-you select your editor the first time.
+If the current script has been saved, you can always edit it by entering the following:
 
 ```
 $ @e
 ```
 
-# Shortcuts
+This is a configurable shortcut. To see all shortcuts, just enter:
 
-Shortcuts are of course fully configurable, via the CFT.props file.
+```
+$ @
+```
 
 
 # Documentation
@@ -297,27 +273,4 @@ Also check out the example scripts under "code.examples".
 - Compact programming language
 - Programmers automation tool
 
-# Actual use
-
-Since getting the interpreter up and running, in 2018, functionality has been continously added. Below
-is a brief list of some of the otherwise complicated and/or boring tasks CFT has helped
-me solve.
-
-- searcing through the source code (including Java, HTML, CSS and JS) of multiple and differing projects, with quick switching between them
-- some deployment, copying sets of files to multiple targets
-- starting and stopping services with PowerShell on multiple remote servers
-- search through multiple log files, and get single time-sorted match list
-- identifying historic (zipped down) logs by date and time, copy to temp directory, unzip and search
-- start and stop, as well as generate stats from sets of Node processes used for stress testing MongoDb HA setup
-- initializing and cloning VM's under KVM (Linux)
-- run inside new VM's to set up correct hostname and netplan (Ubuntu Server)
-- generate the doc/Overview.txt file from Doc.html
-- deploy SSH key files across hosts
-- apt-get update and apt-get upgrade multiple hosts (Ubuntu)
-
-
-# Status
-
-Core is stable, and has been backwards compatible since October 2019, when global
-function list() was renamed to the current global function List().
 
