@@ -157,7 +157,42 @@ to enter search term, as the line is interpreted.
 
 Once a line works, we name it, using the forward slash and a name. This creates functions.
 
-### Inner workings
+### Terminal window size
+
+When running searches, you may find that long lines wrap and mess up the screen.
+
+CFT needs to know the terminal windows size, to determine where to cut the lines if wrapping is off,
+which it is by default. After resizing, enter
+
+```
+$ @term
+```
+
+This should work on both Linux and Windows. To turn wrapping on or off, enter
+
+```
+$ :wrap
+```
+
+#### About these commands
+
+The first is a global shortcut. List them all by entering
+
+```
+$ @
+```
+
+Shortcuts are defined in the CFT.props file. 
+
+The second is a "colon command", which is system commands outside the programming language. To
+list all, just type
+
+```
+$ :
+```
+
+
+### Inner workings of the search example
 
 The Grep() is a global function which may take a search string as parameter. Here
 we read this from the user, using the global readLine() function, which expects a 
@@ -242,6 +277,8 @@ This allows you to break function code across multiple lines, and use indentatio
 
 After saving the script code in the editor, CFT automatically reloads the code when you press Enter, so there is
 no need to reload.
+
+
 
 
 # Documentation
