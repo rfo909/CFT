@@ -7,11 +7,21 @@ running external commands.
 
 
 ```
-P(1) =host true =ok Dir.runCapture("ping","-c","1",host)->line when(line.contains("0 received"),{false =ok}) | ok
-/HostFound
+P(1) =host # Check that host responds to ping 
+	true =ok 
+	Dir.runCapture("ping","-c","1",host)->line 
+		when(line.contains("0 received"),{false =ok}) 
+	| 
+	ok
+/PingOk
 
-Dir.allFiles(Glob("*.java"))->file assert(Date(file.lastModified).after(Date.sub(Date.Duration.hours(12)))) out(file)
-/JavaFilesModifiedLast12Hours
+P(1,12) =hours # Get recently modified java files
+Dir.allFiles(Glob("*.java"))->file 
+	Date.sub(Date.Duration.hours(hours)) =dateLimit
+	Date(file.lastModified) =fileDate
+	assert(fileDate.after(dateLimit))
+	out(file)
+/JavaFilesRecentlyModified
 ```
 
 # Download and compile
