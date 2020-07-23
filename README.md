@@ -1,9 +1,14 @@
 
 # CFT ("ConfigTool")
 
-CFT is a shell-like terminal based Java app, and a programming language, created to interactively
-build code for all kinds of automation, including copying files, searching source code trees and
+
+CFT is a shell-like terminal based Java application, and a programming language, created to interactively
+build code for all kinds of automation.
+
+This includes copying files, searching both directories and files, and 
 running external commands.
+
+Everything in CFT is about functions.
 
 
 ```
@@ -48,24 +53,24 @@ To leave type ":quit" or just type CTRL-C.
 
 # Introduction
 
-The CFT application supports basic shell functions like "cd", "ls" and "pwd", 
-but is also a programming language which lets you build functions, that
-both call each other as well as a system library of 200+ functions, both global and inside objects.
+The CFT application supports basic shell functions like "cd", "ls" and "pwd", but
+is primarily a Domain Specific Language (DSL) for automation.  
 
-CFT is not a complete language, as one can not create classes. 
+It is object oriented, as opposed to traditional *ix shells such as bash, which process text.
 
-Instead CFT offers a number of global functions which return relevant objects representing files,
-directories, strings, dates and so on.
+Still, you can not create your own classes, only use the built-in objects, as returned by
+the system library of 200+ functions, of which ~30 are globally available, and the rest
+exist as member functions of objects.
 
-Objects all contain functions. Example:
+Example:
 
 ```
 $ Dir.files
 
-# really means: 
+# means: 
 # - call global function Dir() with no parameters
-# - returns Dir object
-# - call .files() function inside 
+# - returns Dir object for current directory
+# - call .files() inside the Dir object 
 # - returns list of File objects
 ```
 
@@ -91,7 +96,7 @@ $ cd ..
 
 # Create own functions
 
-The power of CFT is defining functions. This can be done 
+The power of CFT is defining own functions. This can be done 
 interactively at first, later you may select using an editor. 
 
 Type the following, and press Enter.
@@ -100,7 +105,7 @@ Type the following, and press Enter.
 $ Dir.allFiles(Glob("*.java"))
 ```
 
-This produces a list of all java files directly and indirectly under current directory,
+This produces a list of all java files directly and indirectly under the current directory,
 
 After the list of files has displayed, we name this code line, creating a function:
 
@@ -114,7 +119,7 @@ available from the current directory. Since JavaFiles takes no parameters, the (
 To create functions that take parameters, read the doc.
 
 
-## Objects - not text
+# Objects - not text
 
 The list that is produced when you call JavaFiles is just a representation of the list of
 file objects. To see the full paths of the files, type the following:
@@ -134,8 +139,8 @@ functions we can call, such as the .path function.
 ## Searching
 
 Still working in the interactive interface, we can create a function to search for
-a string in all Java files. First we create a helper function, which creates a Grep
-object, which we then use in the main search function, which we call Search.
+a string in all Java files. Since we are working interactively, input is limited to single lines,
+so first we create a helper function, GetGrep, then the main function, which we call Search.
 
 ```
 $ Grep(readLine("Enter search term"))
@@ -147,12 +152,12 @@ $ GetGrep =grep JavaFiles->f grep.file(f)->line report(line.file.name, line.line
 $ /Search
 ```
 
-The colon indicates that there is output, and in this case also input, when the code asks you
+The colons above indicate that there is output, and in this case also input, when the code asks you
 to enter search term, as the line is interpreted.
 
-Once the line works, we name them, using the forward slash and a name, creating functions.
+Once a line works, we name it, using the forward slash and a name. This creates functions.
 
-
+### Inner workings
 
 The Grep() is a global function which may take a search string as parameter. Here
 we read this from the user, using the global readLine() function, which expects a 
@@ -215,43 +220,14 @@ $ Lib.Math help
 $ Sys help
 ```
 
+The File("x") expression creates a File object. The file does not need to exist for help to list
+functions inside. 
+
 The global Lib function creates a Lib object, which effectively works as a name space. Inside 
 the Lib object there are functions for creating still other objects, such as the Math
 object, where you find math related functions for calculating sine and cosine.
 
 Sys is another such namespace function / object.
-
-# Some more examples
-
-#### Counting number of lines of java code
-
-```
-$ JavaFiles->f out(f.read.length) | _.sum
-```
-#### Sum sizes of files (bytes)
-
-```
-$ JavaFiles->f out(f.length) | _.sum
-```
-
-#### Calculating date (and time) 30 days ago
-
-```
-$ Date.sub(Date.Duration.days(30))
-```
-
-#### Open remote directories (windows)
-
-```
-$ Dir("\\somehost\d$\someLogDir").files(Glob("*.log"))
-```
-#### Converting one light year to kilometres
-
-```
-$ Lib.Convert.lyToKm(1)
-```
-
-
 
 
 # Edit current script file in editor
@@ -262,11 +238,10 @@ If the current script has been saved, you can always edit it by entering the fol
 $ @e
 ```
 
-This is a configurable shortcut. To see all shortcuts, just enter:
+This allows you to break function code across multiple lines, and use indentation to make it more readable. 
 
-```
-$ @
-```
+After saving the script code in the editor, CFT automatically reloads the code when you press Enter, so there is
+no need to reload.
 
 
 # Documentation
@@ -282,6 +257,6 @@ Also check out the example scripts under "code.examples".
 
 - Interactive programmable shell
 - Compact programming language
-- Programmers automation tool
+- Automation tool
 
 
