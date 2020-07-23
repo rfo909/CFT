@@ -16,11 +16,12 @@ P(1) =host # Check that host responds to ping
 /PingOk
 
 P(1,12) =hours # Get recently modified java files
-Dir.allFiles(Glob("*.java"))->file 
 	Date.sub(Date.Duration.hours(hours)) =dateLimit
-	Date(file.lastModified) =fileDate
-	assert(fileDate.after(dateLimit))
-	out(file)
+	
+	Dir.allFiles(Glob("*.java"))->file 
+		Date(file.lastModified) =fileDate
+		assert(fileDate.after(dateLimit))
+		out(file)
 /JavaFilesRecentlyModified
 ```
 
