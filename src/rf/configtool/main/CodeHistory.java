@@ -103,7 +103,7 @@ public class CodeHistory {
             for (int i=0; i<namesInSequence.size(); i++) {
                 String name=namesInSequence.get(i);
                 
-                if (symbolSubStr != null && !name.contains(symbolSubStr)) continue; 
+                if (symbolSubStr != null && !name.startsWith(symbolSubStr)) continue; 
                 
                 String label=name;
                 while(label.length()<nameMaxLength) label=label+" ";

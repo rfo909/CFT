@@ -49,11 +49,13 @@ public class ObjMath extends Obj {
     }
 
 
+    @Override
     public String getTypeName() {
         return "Math";
     }
     
 
+    @Override
     public ColList getContentDescription() {
         return ColList.list().regular(getDesc());
     }

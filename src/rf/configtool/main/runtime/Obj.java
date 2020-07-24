@@ -24,6 +24,7 @@ import java.util.*;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.ObjGlobal;
 import rf.configtool.main.OutText;
+import rf.configtool.main.Version;
 
 /**
  * Super class of all object types.
@@ -133,33 +134,15 @@ public abstract class Obj {
     	ObjGlobal objGlobal=ctx.getObjGlobal();
         OutText outText=ctx.getOutText();
         if (this instanceof ObjGlobal) {
-        	objGlobal.addSystemMessage("---");
-        	objGlobal.addSystemMessage("For help on data types, create an instance on the stack, then invoke 'help' statement");
-        	objGlobal.addSystemMessage("Example:");
-        	objGlobal.addSystemMessage("    List(1,2,3) help     - shows methods on lists");
-        	objGlobal.addSystemMessage("    'x' help             - shows methods on strings");
-        	objGlobal.addSystemMessage("    help(3)              - alternative notation - shows help on ints");
+        	objGlobal.addSystemMessage("-------------------------------------------------");
+        	objGlobal.addSystemMessage("Please read the full documentation: doc/Doc.html");
+        	objGlobal.addSystemMessage("-------------------------------------------------");
+            objGlobal.addSystemMessage(new Version().getVersion());
         	objGlobal.addSystemMessage("");
-        	objGlobal.addSystemMessage("- Note that for functions with no arguments, the () are optional");
-        	objGlobal.addSystemMessage("- Looping is done with the '-> var' construct");
-        	objGlobal.addSystemMessage("     Example: List(1,2,3)->m out('xxx'+m)");
-            
-        	objGlobal.addSystemMessage("");
-        	objGlobal.addSystemMessage("- The out(expr) statement adds data to the output list");
-        	objGlobal.addSystemMessage("- In-line variables are assigned with '=ident' after the expression (stack)");
-        	objGlobal.addSystemMessage("- Type ':' for overview over colon commands");
-        	objGlobal.addSystemMessage("");;
-        	objGlobal.addSystemMessage("- The current program line can be given a name, for example '/Test");
-        	objGlobal.addSystemMessage("- To run it again, just enter 'Test'");
-        	objGlobal.addSystemMessage("- Enter '?Test' to get info about symbol Test, or just '?' for all");
-        	objGlobal.addSystemMessage("---");
-        	objGlobal.addSystemMessage("- Parameters are accessed with P(1), P(1,defaultVal) or just P() for param-list.");
-        	objGlobal.addSystemMessage("- The current value on stack is accessed via assignment or the '_' expr");
-            
-        	objGlobal.addSystemMessage("");
-        }
+            objGlobal.addSystemMessage("Global functions");
+            objGlobal.addSystemMessage("");
+        } 
         
-        //outText.addSystemMessage("(" + getTypeName() + ")");
         
         List<String> fNames=new ArrayList<String>();        
         Iterator<String> names=functions.keySet().iterator();
