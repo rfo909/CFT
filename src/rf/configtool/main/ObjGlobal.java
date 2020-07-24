@@ -117,7 +117,6 @@ public class ObjGlobal extends Obj {
         add(new FunctionReadLines());
         add(new FunctionReadLine());
         add(new FunctionCfg());
-        add(new FunctionIsWindows());
         add(new FunctionSavefile());
         add(new FunctionPrintln());
         add(new FunctionFileLine());
@@ -719,18 +718,6 @@ public class ObjGlobal extends Obj {
         }
     } 
 
-    class FunctionIsWindows extends Function {
-        public String getName() {
-            return "isWindows";
-        }
-        public String getShortDesc() {
-            return "isWindows() - returns boolean";
-        }
-        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 0) throw new Exception("Expected no parameters");
-            return new ValueBoolean(ctx.getObjGlobal().runningOnWindows());
-        }
-    }
  
     
      class FunctionSavefile extends Function {

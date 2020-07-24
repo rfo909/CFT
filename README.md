@@ -119,7 +119,7 @@ available from the current directory. Since JavaFiles takes no parameters, the (
 To create functions that take parameters, read the doc.
 
 
-# Objects - not text
+## Objects - not text
 
 The list that is produced when you call JavaFiles is just a representation of the list of
 file objects. To see the full paths of the files, type the following:

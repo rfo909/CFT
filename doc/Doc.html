@@ -14,11 +14,11 @@ CFT / ConfigTool
 </h1>
 
 <pre style="padding-left:0; margin-left:0">
-Interactive object oriented programmable shell.
+Object oriented programmable shell.
 Compact programming language. 
 Automation tool.
 
-Last updated: 2020-07-23 RFO
+Last updated: 2020-07-24 RFO
 v1.1.1
 
 </pre>
@@ -2402,10 +2402,11 @@ The following is used to switch drive letter in Windows.
 
 <h2>Differing between Windows and Linux</h2>
 <p>
-  A simple global function, isWindows() is used to differ between the two in code.
+  Calling function Sys.isWindows() is used to differ between the two in code. It does this
+  by checking if File.separator is a backslash.
 </p>
 <pre>
-  isWindows
+  Sys.isWindows
   &lt;boolean&gt;
   false
 </pre>

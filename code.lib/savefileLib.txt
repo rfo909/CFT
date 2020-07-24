@@ -41,7 +41,7 @@ choice.
 # Edit file
 	P(1,savefile)=file
 	EditHistoryAdd(file)
-	if(isWindows, Dir.runDetach("cmd","/c","notepad",file.path), ShowLinuxEditor(file))
+	if(Sys.isWindows, Dir.runDetach("cmd","/c","notepad",file.path), ShowLinuxEditor(file))
 /e
 
 
@@ -52,7 +52,7 @@ EditFileFromHistory
 
 # Page through file
 	P(1,savefile)=file
-	if(isWindows,
+	if(Sys.isWindows,
 		Dir.run("cmd", "/c", "more", file.path),
 		Dir.run("more", file.path)
 	)
@@ -62,7 +62,7 @@ EditFileFromHistory
 
 # Update Cfg with terminal size (if possible)
 	false =updated
-	if (!isWindows,{
+	if (!Sys.isWindows,{
 		# Linux
 		Dir.runCapture("which","stty").nth.contains("stty") =hasStty
 		when(hasStty, {

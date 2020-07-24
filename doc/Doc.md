@@ -1,10 +1,10 @@
 # CFT / ConfigTool
 
 ```
-Interactive object oriented programmable shell.
+Object oriented programmable shell.
 Compact programming language.
 Automation tool.
-Last updated: 2020-07-23 RFO
+Last updated: 2020-07-24 RFO
 v1.1.1
 ```
 # Introduction
@@ -2062,10 +2062,11 @@ XXX
 ## Differing between Windows and Linux
 
 
-A simple global function, isWindows() is used to differ between the two in code.
+Calling function Sys.isWindows() is used to differ between the two in code. It does this
+by checking if File.separator is a backslash.
 
 ```
-isWindows
+Sys.isWindows
 <boolean>
 false
 ```
