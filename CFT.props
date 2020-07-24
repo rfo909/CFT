@@ -1,6 +1,8 @@
+# codeDirs
+#
 # Semicolon-separated list of directories to locate code, in sequence
 # from work-directories towards library directories. 
-
+#
 # The first directory is the default save directory. This means that working
 # on a script file from one of the other directories, when you save it, you
 # don't overwrite the original, but instead store it in the first directory,
@@ -9,17 +11,14 @@
 
 codeDirs = . ; code.examples ; code.lib
 
-prompt = Sys.scriptName=x if(x==null,"$ ","<"+x+">$ ")
-
-
- 
-
 
 # Favourite shell, for the shell() global function
 # ----
 
 shell = bash
 winShell = powershell
+
+
 
 
 # Macros invoked for statements "cat", "edit" and "more". The single parameter
@@ -35,10 +34,8 @@ mMore = {* P(1)=file when(file==null,error('more: no file')) call 'Lib:m' (file)
 
 # Shortcuts
 #
-# The shortcuts are lines of code. If that code results in a macro, it is invoked with
-# no parameters. Since we don't need parameters, there is really no need for macros
-# here. The return value from a shortcut becomes the "last value", available
-# via Sys.lastResult, as well as used by :syn etc
+# The shortcuts are lines of code. The return value from a shortcut becomes 
+# the "last value", available via Sys.lastResult, as well as used by :syn etc
 #
 # Note that shortcuts only work when the prefix is at the start of the interactive
 # input line. 
@@ -74,5 +71,14 @@ shortcut:SM   = "---- Servers maintenance script ----"    Sys.stdin(":load Serve
 # List available shortcuts when typing '@' only
 # ---
 shortcut:     = "---- Show all shortcuts ----"            File("CFT.props").read->line assert(line.contains("shortcut:")) out(line)
+
+
+
+#
+# The prompt setting is a line of code, just as with the shortcuts
+# ---
+
+prompt = Sys.scriptName=x if(x==null,"$ ",x+" $ ")
+
 
 
