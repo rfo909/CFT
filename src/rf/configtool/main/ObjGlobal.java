@@ -57,7 +57,7 @@ public class ObjGlobal extends Obj {
     private String currDir;
     private CodeHistory codeHistory;
     
-    private String savename;
+    private String scriptName;
     
     private HashMap<String,ObjPersistent> sessionObjects=new HashMap<String,ObjPersistent>();
     private HashMap<String,Value> sessionValues=new HashMap<String,Value>();
@@ -117,7 +117,6 @@ public class ObjGlobal extends Obj {
         add(new FunctionReadLines());
         add(new FunctionReadLine());
         add(new FunctionCfg());
-        add(new FunctionSavefile());
         add(new FunctionPrintln());
         add(new FunctionFileLine());
         add(new FunctionError());
@@ -255,13 +254,13 @@ public class ObjGlobal extends Obj {
     }
 
     public void refreshIfSavefileUpdated() throws Exception {
-        if (savename==null) return;
+        if (scriptName==null) return;
         
         String copy=savefileState;
         updateSavefileState();
         if (!copy.equals(savefileState)) {
             //stdout.println("% Refreshing from file");
-            loadCode(savename);
+            loadCode(scriptName);
         }
     }
 
@@ -270,31 +269,30 @@ public class ObjGlobal extends Obj {
     }
     
     public void saveCode (String name) throws Exception {
-        if (name==null) name=savename;
+        if (name==null) name=scriptName;
         if (name==null) throw new Exception("No save name defined");
-        savename=name;
-        codeHistory.save(savename);
+        scriptName=name;
+        codeHistory.save(scriptName);
 
         updateSavefileState();
     }
     
     public void loadCode (String name) throws Exception {
-        if (name==null) name=savename;
+        if (name==null) name=scriptName;
         if (name==null) throw new Exception("No save name defined");
-        savename=name;
-        codeHistory.load(savename);
+        scriptName=name;
+        codeHistory.load(scriptName);
         
         updateSavefileState();
     }
 
-    public String getSavename() {
-        return savename;
+    public String getScriptName() {
+        return scriptName;
     }
-
-
-    public File getSavefile() throws Exception {
-        if (savename==null) throw new Exception("No save name defined");
-        return codeHistory.getSaveFile(savename);
+    
+     public File getSavefile() throws Exception {
+        if (scriptName==null) throw new Exception("No save name defined");
+        return codeHistory.getSaveFile(scriptName);
     }
     
     
@@ -720,20 +718,6 @@ public class ObjGlobal extends Obj {
 
  
     
-     class FunctionSavefile extends Function {
-        public String getName() {
-            return "savefile";
-        }
-        public String getShortDesc() {
-            return "savefile() - returns File object for savefile";
-        }
-        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 0) throw new Exception("Expected no parameters");
-            File f=getSavefile();
-            return new ValueObj(new ObjFile(f.getCanonicalPath(), Protection.NoProtection));
-        }
-    } 
-
     class FunctionPrintln extends Function {
         public String getName() {
             return "println";

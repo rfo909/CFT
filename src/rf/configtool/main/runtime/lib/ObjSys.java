@@ -34,6 +34,7 @@ import rf.configtool.main.runtime.ValueBoolean;
 import rf.configtool.main.runtime.ValueFloat;
 import rf.configtool.main.runtime.ValueInt;
 import rf.configtool.main.runtime.ValueList;
+import rf.configtool.main.runtime.ValueNull;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
 import java.awt.Color;
@@ -50,6 +51,8 @@ public class ObjSys extends Obj {
 		add(new FunctionSleep());
 		add(new FunctionStdin());
         add(new FunctionIsWindows());
+        add(new FunctionSavefile());
+        add(new FunctionScriptName());
 	}
 
 	@Override
@@ -253,6 +256,43 @@ public class ObjSys extends Obj {
 			if (params.size() != 0)
 				throw new Exception("Expected no parameters");
 			return new ValueBoolean(ctx.getObjGlobal().runningOnWindows());
+		}
+	}
+
+	class FunctionSavefile extends Function {
+        public String getName() {
+            return "savefile";
+        }
+        public String getShortDesc() {
+            return "savefile() - returns File object for savefile or null if no savefile";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            try {
+	            File f=ctx.getObjGlobal().getSavefile();
+	            return new ValueObj(new ObjFile(f.getCanonicalPath(), Protection.NoProtection));
+            } catch (Exception ex) {
+            	return new ValueNull();
+            }
+        }
+    } 
+
+
+	class FunctionScriptName extends Function {
+		public String getName() {
+			return "scriptName";
+		}
+
+		public String getShortDesc() {
+			return "scriptName() - returns script name or null if not saved yet";
+		}
+
+		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+			if (params.size() != 0)
+				throw new Exception("Expected no parameters");
+			String scriptName=ctx.getObjGlobal().getScriptName();
+			if (scriptName==null) return new ValueNull();
+			return new ValueString(scriptName);
 		}
 	}
 

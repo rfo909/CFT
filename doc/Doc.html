@@ -1111,7 +1111,7 @@ codeDirs = . ; code.examples ; code.lib
   off the background process. 
 </p>
 <pre>
-  $ Dir.runDetach("leafpad", savefile.path)
+  $ Dir.runDetach("leafpad", Sys.savefile.path)
 </pre>
 
 
@@ -1147,7 +1147,7 @@ codeDirs = . ; code.examples ; code.lib
 <pre>
   $ :save Test
 
-  $ Dir.runDetach("notepad", savefile.path)
+  $ Dir.runDetach("notepad", Sys.savefile.path)
       : 
       : (Notepad pops up, just close it immediately)
       :
@@ -1167,10 +1167,16 @@ codeDirs = . ; code.examples ; code.lib
 </p>
 
 <pre>
-  $ Dir.run("nano", savefile.path)
+  $ Dir.run("nano", Sys.savefile.path)
 </pre>
 
-
+<p>
+  All this functionality is embedded in the Lib e() function, which is in turn called
+  from default shortcut
+</p>
+<pre>
+  $ @e
+</pre>
 
 
 
@@ -1357,7 +1363,7 @@ The following is used to switch drive letter in Windows.
   inside ()'s. Example:
 </p>
 <pre>
-  $ edit (savefile)
+  $ edit (Sys.savefile)
 </pre>
 
 

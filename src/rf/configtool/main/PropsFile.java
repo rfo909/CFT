@@ -12,6 +12,8 @@ public class PropsFile {
 	public static final String PROPS_FILE = "CFT.props";
 	
 	private String codeDirs;
+	private String prompt;   // line of code
+	
 	private String shell;
 	private String winShell;
 	
@@ -43,6 +45,7 @@ public class PropsFile {
 		
 		// Set defaults
 		codeDirs=".";
+		prompt="$";
 		shell = "/usr/bin/bash";
 		winShell = "powershell";
 		
@@ -69,6 +72,8 @@ public class PropsFile {
 					String value=line.substring(pos+1).trim();
 					
 					if (name.equals("codeDirs")) codeDirs=value;
+					if (name.equals("prompt")) prompt=value;
+					
 					if (name.equals("shell")) shell=value;
 					if (name.equals("winShell")) winShell=value;
 					
@@ -107,6 +112,10 @@ public class PropsFile {
 		return list;
 	}
 	
+	public String getPromptCode() {
+		return prompt;
+	}
+	
 	public String getShell() {
 		return shell;
 	}
@@ -132,7 +141,7 @@ public class PropsFile {
 		return shortcutPrefix;
 	}
 	
-	public String getShortcutMacro (String shortcutName) {
+	public String getShortcutCode (String shortcutName) {
 		String s=shortcuts.get(shortcutName);
 		if (s==null) s=DEFAULT_SHORTCUT;
 		return s;

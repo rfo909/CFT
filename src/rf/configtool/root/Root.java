@@ -159,21 +159,42 @@ public class Root {
 		copyrightNotice();
 		stdio.println(VERSION.getVersion());
 
-		ObjGlobal objGlobal = currScript.getObjGlobal();
 
 		try {
 			for (;;) {
+				refreshIfSavefileUpdated();
+				propsFile.refreshFromFile();
+
 
 				if (terminationFlag) {
 					stdio.println("Runtime exit, cleaning up");
 					cleanupOnExit();
 					return;
 				}
+				
+				// Run the prompt code line to produce possibly dynamic prompt
+				String promptCode = propsFile.getPromptCode();
+				SourceLocation loc = new SourceLocation("prompt", 0, 0);
+				
+				CodeLines codeLines = new CodeLines(promptCode, loc);
+				
+				ObjGlobal objGlobal = currScript.getObjGlobal();
 
-				String pre = "$";
+				String pre;
+				try {
+					Value ret = objGlobal.getRuntime().processCodeLines(codeLines, new FunctionState());
+					pre=ret.getValAsString();
+				} catch (Exception ex) {
+					if (debugMode) {
+						pre="ERROR";
+						ex.printStackTrace();
+					} else {
+						pre="$";
+					}
+				}
 
 				// Stdio can only do line output, so using System.out directly
-				System.out.print(pre + " ");
+				System.out.print(pre);
 				String line = stdio.getInputLine().trim();
 
 				processInteractiveInput(line);
@@ -193,26 +214,18 @@ public class Root {
 		ObjGlobal objGlobal = currScript.getObjGlobal();
 		CodeHistory codeHistory = objGlobal.getCodeHistory();
 
-		refreshIfSavefileUpdated();
-		propsFile.refreshFromFile();
-
 		try {
 			// Shortcuts
 
 			String shortcutPrefix = propsFile.getShortcutPrefix();
 			if (line.startsWith(shortcutPrefix)) {
 				String shortcutName = line.substring(shortcutPrefix.length()).trim();
-				String macro = propsFile.getShortcutMacro(shortcutName);
+				String shortcutCode = propsFile.getShortcutCode(shortcutName);
 				SourceLocation loc = new SourceLocation("shortcut:" + shortcutName, 0, 0);
 
-				Ctx ctx = new Ctx(objGlobal, new FunctionState());
-				CodeLines codeLines = new CodeLines(macro, loc);
+				CodeLines codeLines = new CodeLines(shortcutCode, loc);
 
-				Value ret = ctx.getObjGlobal().getRuntime().processCodeLines(codeLines, new FunctionState());
-				if (ret instanceof ValueMacro) {
-					ValueMacro macroObj = (ValueMacro) ret;
-					ret = macroObj.call(ctx.sub());
-				}
+				Value ret = objGlobal.getRuntime().processCodeLines(codeLines, new FunctionState());
 				postProcessResult(ret);
 				showSystemLog();
 
@@ -293,9 +306,9 @@ public class Root {
 				} else {
 					codeHistory.reportAll();
 				}
-				String savename = objGlobal.getSavename();
-				if (savename != null)
-					objGlobal.outln("Current save name: " + savename);
+				String scriptName = objGlobal.getScriptName();
+				if (scriptName != null)
+					objGlobal.outln("Current script name: " + scriptName);
 				return; // abort further processing
 			}
 			if (ts.matchStr(":")) {
@@ -339,8 +352,9 @@ public class Root {
 	}
 
 	private void postProcessResult(Value result) throws Exception {
-		if (result == null)
+		if (result == null) {
 			result = new ValueNull();
+		}
 		ObjGlobal objGlobal = currScript.getObjGlobal();
 
 		// update lastResult

@@ -39,7 +39,7 @@ choice.
 
 
 # Edit file
-	P(1,savefile)=file
+	P(1,Sys.savefile)=file
 	EditHistoryAdd(file)
 	if(Sys.isWindows, Dir.runDetach("cmd","/c","notepad",file.path), ShowLinuxEditor(file))
 /e
@@ -51,7 +51,7 @@ EditFileFromHistory
 
 
 # Page through file
-	P(1,savefile)=file
+	P(1,Sys.savefile)=file
 	if(Sys.isWindows,
 		Dir.run("cmd", "/c", "more", file.path),
 		Dir.run("more", file.path)
@@ -136,7 +136,7 @@ EditFileFromHistory
 
 # Select Linux editor and remember selection for next time, open file in editor
 # --
- 	P(1,savefile) =file
+ 	P(1,Sys.savefile) =file
 	List(
 		Dict.set("label","sublime")
 		    .set("action", {* P(1)=file Dir.runDetach("subl",file.path) }),

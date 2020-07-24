@@ -955,7 +955,7 @@ Use to run external program in the background. The CFT code continues running af
 off the background process.
 
 ```
-$ Dir.runDetach("leafpad", savefile.path)
+$ Dir.runDetach("leafpad", Sys.savefile.path)
 ```
 
 This example runs the (linux) leapad editor in the background, with the path of the current savefile as
@@ -980,7 +980,7 @@ which we use to create full path argument to notepad.
 
 ```
 $ :save Test
-$ Dir.runDetach("notepad", savefile.path)
+$ Dir.runDetach("notepad", Sys.savefile.path)
 :
 : (Notepad pops up, just close it immediately)
 :
@@ -997,7 +997,14 @@ terminal-only environment, we may choose to run nano, using Dir.run() instead of
 so as to connect stdin and stdout correctly.
 
 ```
-$ Dir.run("nano", savefile.path)
+$ Dir.run("nano", Sys.savefile.path)
+```
+
+All this functionality is embedded in the Lib e() function, which is in turn called
+from default shortcut
+
+```
+$ @e
 ```
 ## Auto reload
 
@@ -1168,7 +1175,7 @@ As with "ls" and "cd", these also handle "function mode", where we pass an expre
 inside ()'s. Example:
 
 ```
-$ edit (savefile)
+$ edit (Sys.savefile)
 ```
 ### Editing a previous file again
 

@@ -30,7 +30,7 @@ function CreateOverview()
 /Readme
 
 
-savefile.dir.sub("..").sub("doc")
+Sys.savefile.dir.sub("..").sub("doc")
 /DocDir
 
 DocDir.file("Doc.html").protect("Original")
@@ -58,7 +58,7 @@ DocDir.file("Doc.html").protect("Original")
 
 # Generate header - no params
 	Dict
-		.set("savefile",savefile.name)
+		.set("savefile",Sys.savefile.name)
 		.set("date", Date.fmt)
 		.set("version", Sys.version)
 		.mergeCodes
