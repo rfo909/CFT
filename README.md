@@ -12,22 +12,24 @@ Everything in CFT is about functions.
 
 
 ```
-P(1) =host # Check that host responds to ping 
-	true =ok 
-	Dir.runCapture("ping","-c","1",host)->line 
-		when(line.contains("0 received"),{false =ok}) 
-	| 
-	ok
-/PingOk
+Dir("/home/user/projects/whatever/src")
+/SourceDir
 
-P(1,12) =hours # Get recently modified java files
-	Date.sub(Date.Duration.hours(hours)) =dateLimit
-	
-	Dir.allFiles(Glob("*.java"))->file 
-		Date(file.lastModified) =fileDate
-		assert(fileDate.after(dateLimit))
-		out(file)
-/JavaFilesRecentlyModified
+
+"c h cpp".split
+/FileTypes
+
+
+SourceDir.allFiles->f assert(FileTypes.contains(f.name.afterLast("."))) out(f)
+/SourceFiles
+
+
+Grep(Input("Search term").get)
+/GetGrepObj
+ 
+ 
+GetGrepObj =grepObj SourceFiles->f grepObj.file(f)->line report(line.file.name, line.lineNumber, line)
+/Search
 ```
 
 # Download and compile
