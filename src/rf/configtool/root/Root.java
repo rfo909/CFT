@@ -162,8 +162,6 @@ public class Root {
 
 		try {
 			for (;;) {
-				refreshIfSavefileUpdated();
-				propsFile.refreshFromFile();
 
 
 				if (terminationFlag) {
@@ -197,6 +195,10 @@ public class Root {
 				System.out.print(pre);
 				String line = stdio.getInputLine().trim();
 
+				refreshIfSavefileUpdated();
+				propsFile.refreshFromFile();
+
+				
 				processInteractiveInput(line);
 
 			}

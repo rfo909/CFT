@@ -18,7 +18,7 @@
 <p>
 	Added code to CFT.props:
 
-	prompt = Sys.scriptName=x if(x==null,"$ ","<"+x+">$ ")
+	prompt = Sys.scriptName=x if(x==null,"$ ",x+" $ ")
 </p>
 
 <h3>v1.1.1 2020-07-24 created Sys.scriptName</h3>
@@ -28,7 +28,7 @@
 
 <h3>v1.1.1 2020-07-24 moved savefile() to Sys.savefile()</h3>
 <p>
-	Also makes it return null when not defined, instead of error. Modified the @e macro accordingly.
+	Also makes it return null when not defined, instead of error. Modified the @e shortcut accordingly.
 </p>
 
 
