@@ -1241,7 +1241,7 @@ tied to the prompt string.
 $ Input("Enter search text").get =text
 $ readLine("Enter name") =name
 ```
-## Searching files / report()
+# Searching files / report()
 
 
 To search files, we usually use the Grep object. It takes a list of alternatives to look for,
@@ -1258,7 +1258,7 @@ file object and ".lineNumber()" which returns the line number in that file.
 The File.read() function also produces a list of FileLine, rather than regular string
 values.
 
-### report()
+## report()
 
 
 We already know that iterative loops can generate output using out(), but there is a second way,
@@ -1270,7 +1270,7 @@ The formatted text is added to the same list of output as data via out(), but on
 loop space has completed. This means that the formatted output from report() is data (strings),
 just like values from out().
 
-### Multi-line example
+## Multi-line example
 
 
 Below we will show a multi-line example function, which we create editing the savefile,
@@ -1383,7 +1383,7 @@ grep.file(f)->line
 report(line.file.name, line.lineNumber, line)
 /Search
 ```
-## Searching log files / DateSort
+# Searching log files / DateSort
 
 
 Lines written to log files often will start with date and time. Further, actions that we want to
@@ -1407,7 +1407,7 @@ DateSort.asc(lines)->line
 report(line.file.name, line.lineNumber, line)
 /SearchLog
 ```
-## Generalized sorting
+# Generalized sorting
 
 
 The List object has a function sort(), which does one of two things:
@@ -1434,7 +1434,7 @@ are subclasses of the regular int, float and
 string types, but also contain a "data" member that can be extracted after sorting, via the ".data()"
 function.
 
-### Example: file size
+## Example: file size
 
 
 Let's sort the files in the current directory so that the biggest files are listed first.
@@ -1451,7 +1451,7 @@ the data values, which are the original File object.
 Could also sort on time, as File.lastModified is another int value, with CFT int values
 corresponding to long in Java.
 
-### Example: file name
+## Example: file name
 
 
 To sort on file names, we use the Str() wrapper function / object.
@@ -1459,7 +1459,7 @@ To sort on file names, we use the Str() wrapper function / object.
 ```
 $ Dir.files->f out(Str(f.name,f)) | _.sort-> out(x.data)
 ```
-## Dictionary objects / Dict()
+# Dictionary objects / Dict()
 
 
 When working with multiple projects, or sources of log files, we want to quickly flip
@@ -1501,9 +1501,9 @@ $ Dict.set("a",23).get("a")
 <int>
 23
 ```
-## Date and time processing
+# Date and time processing
 
-### Milliseconds
+## Milliseconds
 
 
 If we want to produce a list of files modified within the last 30 minutes, we can do this
@@ -1513,7 +1513,7 @@ easily, using the global function currentTimeMillis, and the File.lastModified f
 Dir.files->f assert(currentTimeMillis-f.lastModified>30*60*1000) out(f)
 /FilesModifiedLast30Minutes
 ```
-### The Date object
+## The Date object
 
 
 The Date() function can be invoked without parameters, producing a Date object that represents
@@ -1534,7 +1534,7 @@ assert(fileDate.after(fromDate) && fileDate.before(toDate))
 out(f)
 /FilesBetweenDates
 ```
-### The Date.Duration object
+## The Date.Duration object
 
 
 The Date object in turn contains a function Duration() which creates a Date.Duration object. This
@@ -1547,7 +1547,7 @@ Example: calculating the date (and time) 300 days ago
 ```
 $ Date.Duration.days(300) =x Date.sub(x)
 ```
-## Session persistent data / ValDef / Val
+# Session persistent data / ValDef / Val
 
 
 When working interactively with large sets of data, we have the option of saving those
@@ -1563,9 +1563,9 @@ $ Val("a")
 
 Being tied to the session, these data are lost when quitting CFT.
 
-## Synthesis
+# Synthesis
 
-### The problem
+## The problem
 
 
 If we use "cd" and "ls" to move
@@ -1581,7 +1581,7 @@ Dir.allFiles->f ...
 
 ... because the Dir() function returns the current directory, which may change.
 
-### Creating code from values
+## Creating code from values
 
 
 This is where the 
@@ -1597,7 +1597,7 @@ the form of two "colon commands".
 last result is not a list, an error is reported.
 
 
-### Example using :syn
+## Example using :syn
 
 ```
 $ cd ..
@@ -1626,7 +1626,7 @@ last command, which means it can now be assigned a name, for example "DirProject
 Calling function "DirProject" will now always generate a Dir object pointing to the same
 directory, and is no longer dependening on current directory.
 
-### Example using :NN
+## Example using :NN
 
 
 To synthesize a single element when the last result was a list, use :NN, as follows
@@ -1648,7 +1648,7 @@ Assign to name by /xxx as usual
 
 If the last value was not a list, the ":NN" command will fail with an error.
 
-## Repeat last program line
+# Repeat last program line
 
 
 The last program line entered (not colon commands or function name assignment) can be
@@ -1678,7 +1678,7 @@ $ ..more
 Here the first dot is the File("...") code line that was synthesized, then ".more" calls
 the more() function on the File object.
 
-## Output format / Cfg
+# Output format / Cfg
 
 
 Output to screen is regulated via a Cfg object. It is a session object, that contains default
@@ -1690,7 +1690,7 @@ to indicate this.
 To change the current size of the terminal window, we may use global function Cfg() to obtain
 the Cfg object, and methods to set or view the properties.
 
-### The @term shortcut
+## The @term shortcut
 
 
 After the introduction of short cuts, the easiest way to set the terminal window width and
@@ -1702,7 +1702,7 @@ $ @term
 
 This works on Linux (using stty command) and on Windows (powershell).
 
-### Line wrapping
+## Line wrapping
 
 
 By default, ouput line wrapping is off, which means that lines longer than the Cfg.w gets truncated
@@ -1743,7 +1743,7 @@ $ "Dear ${name}".merge(data)
 <String>
 Dear Julius
 ```
-## Using template files
+## Using individual template files
 
 
 The simplest way to create template text, is to enter it into a text file, which CFT
@@ -1792,29 +1792,6 @@ Dict
 .set("b",b)
 .mergeCodes
 =data
-<<< SomeMarker
-Value of a: ${a}
-Value of b: ${b}
->>> SomeMarker
-->line
-out(line.merge(data))
-/myMergedTemplate
-```
-### PDict()
-
-
-With many parameters to be merged into the template text, the special expression PDict() saves
-us some writing. It takes a comma-separated list of value names, which are mapped to
-parameter values by position, creating a Dict object.
-
-
-For missing parameters, the value null is stored in the Dict.
-
-
-The String.merge() function logic replaces value null for a merge field with empty string.
-
-```
-PDict("a","b").mergeCodes =data
 <<< SomeMarker
 Value of a: ${a}
 Value of b: ${b}
@@ -1875,6 +1852,29 @@ $ /df
 
 Now all lines starting with "//" are automatically stripped from any output.
 
+## PDict()
+
+
+With many parameters to be merged into the template text, the special expression PDict() saves
+us some writing. It takes a comma-separated list of value names, which are mapped to
+parameter values by position, creating a Dict object.
+
+
+For missing parameters, the value null is stored in the Dict.
+
+
+The String.merge() function logic replaces value null for a merge field with empty string.
+
+```
+PDict("a","b").mergeCodes =data
+<<< SomeMarker
+Value of a: ${a}
+Value of b: ${b}
+>>> SomeMarker
+->line
+out(line.merge(data))
+/myMergedTemplate
+```
 # Use as a calculator
 
 ## Expressions and "variables"
@@ -2097,7 +2097,7 @@ d.setStr(line)
 d
 /GetProps
 ```
-## Dict values as properties
+## Dict fields as functions
 
 
 For readability, values with names that are valid identifiers, and don't collide with regular
@@ -2163,7 +2163,7 @@ loop variable, and loops forever, until break() is called. It also obeys assert(
 and reject() as with list iteration.
 
 ```
-0=a loop break(a>3) out(a) a+1=a
+0=a loop break(a>3) out(a) a+1 =a
 <List>
 0
 1
@@ -2203,8 +2203,8 @@ This can be used to save arbitrarily big structures, as long as they are synthes
 ## String.esc() and .unEsc()
 
 
-As was mentioned initially, CFT has no escape character, so backslashes are just regular
-characters. However, we still require a way of converting "difficult" strings to code,
+As was mentioned initially, CFT doesn't use backslash as an escape character.
+However, we still require a way of converting "difficult" strings to code,
 via synthesis. For this purpose, the two functions String.esc() and String.unEsc() was
 created.
 
@@ -2250,7 +2250,7 @@ this
 is
 a test
 ```
-## Automating interactive functions
+## Automating interactive functions / Sys.stdin()
 
 
 Functions may query the user with Input("prompt").get and readLine("prompt"). If we want
@@ -2264,14 +2264,14 @@ read-this
 ```
 
 Note that both Input.get() and readLine() detect if there is buffered input, and
-if so, does not display the prompt or other info (Input.get()). Particularly for Input.get(),
-buffering the empty string "" with Sys.stdin() means repeating the last value.
+if so, do not display the prompt or other info. Particularly useful for Input.get(),
+since buffering the empty string "" with Sys.stdin() means repeating the last value.
 
-## Self-modifying script
+## Running colon commands
 
 
 Using the Sys.stdin() statement without being followed by Input.get() or readLine(), is just
-another way of entering commands.
+another way of entering commands. This means colon commands are available from CFT code.
 
 ```
 stdin("2+3")
@@ -2280,14 +2280,12 @@ stdin("2+3")
 ```
 
 This can be exploited to let a script modify itself, by redefining
-functions. We can also automate running colon commands.
+functions, although that will be troublesome if those functions read input. A better
+use is that of running colon commands, particularly loading scripts. This is used
+frequently with shortcuts.
 
 ```
-P(1)=symbol
-P(2)=val
-Sys.stdin (syn(val), "/"+symbol+"!")
-/def
-def("filesSnapshot", Dir.files)
+stdin(":load SomeScript","?")
 ```
 ## Simple line editing
 
@@ -2390,7 +2388,7 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
 This means that typing @r loads the Release script, then executes the '?' command, which
 lists its content.
 
-# Example code
+# Various example code
 
 ## Windows PowerShell
 
@@ -2440,6 +2438,7 @@ Savefile management
 ```
 :save Ident
 :load Ident
+:new
 ```
 
 Managing named functions

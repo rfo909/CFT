@@ -1462,7 +1462,7 @@ The following is used to switch drive letter in Windows.
 
 
 
-<h2>Searching files / report()</h2>
+<h1>Searching files / report()</h1>
 <p>
   To search files, we usually use the Grep object. It takes a list of alternatives to look for,
   and can optionally be instructed with patterns to reject. It has a .file(File) function that
@@ -1484,7 +1484,7 @@ The following is used to switch drive letter in Windows.
 
 
 
-<h3>report()</h3>
+<h2>report()</h2>
 <p>
   We already know that iterative loops can generate output using out(), but there is a second way,
   which is the report() statement. It can take one or more parameters, and results in a list of strings that
@@ -1496,7 +1496,8 @@ The following is used to switch drive letter in Windows.
   just like values from out().
 </p>
 
-<h3>Multi-line example</h3>
+
+<h2>Multi-line example</h2>
 <p>
   Below we will show a multi-line example function, which we create editing the savefile,
   that asks the user for a search text, then searches
@@ -1630,7 +1631,7 @@ The following is used to switch drive letter in Windows.
 
 
 
-<h2>Searching log files / DateSort</h2>
+<h1>Searching log files / DateSort</h1>
 <p>
   Lines written to log files often will start with date and time. Further, actions that we want to
   trace may span several log files, for example when messages are sent between different services,
@@ -1657,7 +1658,7 @@ The following is used to switch drive letter in Windows.
 
 
 
-<h2>Generalized sorting</h2>
+<h1>Generalized sorting</h1>
 <p>
   The List object has a function sort(), which does one of two things: 
 </p>
@@ -1679,7 +1680,7 @@ The following is used to switch drive letter in Windows.
   function.
 </p>
 
-<h3>Example: file size</h3>
+<h2>Example: file size</h2>
 <p>
   Let's sort the files in the current directory so that the biggest files are listed first.
 </p>
@@ -1698,7 +1699,7 @@ The following is used to switch drive letter in Windows.
   corresponding to long in Java.
 </p>
 
-<h3>Example: file name</h3>
+<h2>Example: file name</h2>
 <p>
   To sort on file names, we use the Str() wrapper function / object.
 </p>
@@ -1708,7 +1709,7 @@ The following is used to switch drive letter in Windows.
 
 
 
-<h2>Dictionary objects / Dict()</h2>
+<h1>Dictionary objects / Dict()</h1>
 <p>
   When working with multiple projects, or sources of log files, we want to quickly flip
   between directories, file types and perhaps other settings. This is done using dictionary
@@ -1758,9 +1759,9 @@ The following is used to switch drive letter in Windows.
 
 
 
-<h2>Date and time processing</h2>
+<h1>Date and time processing</h1>
 
-<h3>Milliseconds</h3>
+<h2>Milliseconds</h2>
 <p>
   If we want to produce a list of files modified within the last 30 minutes, we can do this
   easily, using the global function currentTimeMillis, and the File.lastModified function.
@@ -1770,7 +1771,7 @@ The following is used to switch drive letter in Windows.
   /FilesModifiedLast30Minutes
 </pre>
 
-<h3>The Date object</h3>
+<h2>The Date object</h2>
 <p>
   The Date() function can be invoked without parameters, producing a Date object that represents
   current date and time, or it can be called with an int value, which is milliseconds, such as 
@@ -1795,7 +1796,7 @@ The following is used to switch drive letter in Windows.
 
 
 
-<h3>The Date.Duration object</h3>
+<h2>The Date.Duration object</h2>
 <p>
   The Date object in turn contains a function Duration() which creates a Date.Duration object. This
   is both output from Date.diff, which calculates the amount of time between two dates, and used 
@@ -1813,7 +1814,7 @@ The following is used to switch drive letter in Windows.
 
 
 
-<h2>Session persistent data / ValDef / Val</h2>
+<h1>Session persistent data / ValDef / Val</h1>
 <p>
   When working interactively with large sets of data, we have the option of saving those
   data into a session persistent data store. Two global functions let us define
@@ -1836,9 +1837,9 @@ The following is used to switch drive letter in Windows.
 
 
 
-<h2>Synthesis</h2>
+<h1>Synthesis</h1>
 
-<h3>The problem</h3>
+<h2>The problem</h2>
 
 <p>
   If we use "cd" and "ls" to move
@@ -1857,7 +1858,7 @@ The following is used to switch drive letter in Windows.
 </p>
 
 
-<h3>Creating code from values</h3>
+<h2>Creating code from values</h2>
 <p>
   This is where the <i>syntesis</i> functionality comes in. The most often used variant takes
   the form of two "colon commands". 
@@ -1869,7 +1870,7 @@ The following is used to switch drive letter in Windows.
 </ol>
 
 
-<h3>Example using :syn</h3>
+<h2>Example using :syn</h2>
 
 <pre>
   $ cd ..
@@ -1902,7 +1903,7 @@ The following is used to switch drive letter in Windows.
   directory, and is no longer dependening on current directory.
 </p>
 
-<h3>Example using :NN</h3>
+<h2>Example using :NN</h2>
 
 <p>
   To synthesize a single element when the last result was a list, use :NN, as follows
@@ -1930,7 +1931,7 @@ The following is used to switch drive letter in Windows.
 
 
 
-<h2>Repeat last program line</h2>
+<h1>Repeat last program line</h1>
 <p>
   The last program line entered (not colon commands or function name assignment) can be
   repeated by entering "." (dot), then possibly be followed by additional code.
@@ -1967,7 +1968,7 @@ The following is used to switch drive letter in Windows.
 
 
 
-<h2>Output format / Cfg</h2>
+<h1>Output format / Cfg</h1>
 <p>
   Output to screen is regulated via a Cfg object. It is a session object, that contains default
   settings for number of lines and line width of the current window / terminal. It's default
@@ -1981,7 +1982,7 @@ The following is used to switch drive letter in Windows.
 
 
 
-<h3>The @term shortcut</h3>
+<h2>The @term shortcut</h2>
 <p>
   After the introduction of short cuts, the easiest way to set the terminal window width and
   height, is to enter
@@ -1996,7 +1997,7 @@ The following is used to switch drive letter in Windows.
 
 
 
-<h3>Line wrapping</h3>
+<h2>Line wrapping</h2>
 <p>
   By default, ouput line wrapping is off, which means that lines longer than the Cfg.w gets truncated
   with a '+' to indicate there is more. It can be switched on/off via the Cfg object, but there is also a
@@ -2049,7 +2050,7 @@ The following is used to switch drive letter in Windows.
 
 
 
-<h2>Using template files</h2>
+<h2>Using individual template files</h2>
 <p>
   The simplest way to create template text, is to enter it into a text file, which CFT
   then reads and processes. The File.read() function returns a list of lines from the
@@ -2110,29 +2111,6 @@ The following is used to switch drive letter in Windows.
 </pre>
 
 
-<h3>PDict()</h3>
-<p>
-  With many parameters to be merged into the template text, the special expression PDict() saves
-  us some writing. It takes a comma-separated list of value names, which are mapped to 
-  parameter values by position, creating a Dict object. 
-</p>
-<p>
-  For missing parameters, the value null is stored in the Dict.
-</p>
-<p>
-  The String.merge() function logic replaces value null for a merge field with empty string.
-</p>
-<pre>
-  PDict("a","b").mergeCodes =data
-  &lt;&lt;&lt; SomeMarker
-  Value of a: ${a}
-  Value of b: ${b}
-  &gt;&gt;&gt; SomeMarker
-  -&gt;line 
-    out(line.merge(data))
-  /myMergedTemplate
-</pre>
-
 
 
 
@@ -2191,6 +2169,34 @@ The following is used to switch drive letter in Windows.
 <p>
   Now all lines starting with "//" are automatically stripped from any output.
 </p>
+
+
+
+
+
+<h2>PDict()</h2>
+<p>
+  With many parameters to be merged into the template text, the special expression PDict() saves
+  us some writing. It takes a comma-separated list of value names, which are mapped to 
+  parameter values by position, creating a Dict object. 
+</p>
+<p>
+  For missing parameters, the value null is stored in the Dict.
+</p>
+<p>
+  The String.merge() function logic replaces value null for a merge field with empty string.
+</p>
+<pre>
+  PDict("a","b").mergeCodes =data
+  &lt;&lt;&lt; SomeMarker
+  Value of a: ${a}
+  Value of b: ${b}
+  &gt;&gt;&gt; SomeMarker
+  -&gt;line 
+    out(line.merge(data))
+  /myMergedTemplate
+</pre>
+
 
 
 
@@ -2482,7 +2488,7 @@ The following is used to switch drive letter in Windows.
 
 
 
-<h2>Dict values as properties</h2>
+<h2>Dict fields as functions</h2>
 <p>
   For readability, values with names that are valid identifiers, and don't collide with regular 
   member functions, can be referenced via dotted notation, for increased readability.
@@ -2552,6 +2558,10 @@ The following is used to switch drive letter in Windows.
   in the dictionary.
 </p>
 
+
+
+
+
 <h2>The general loop statement</h2>
 <p>
   In addition to looping over lists, there is a general loop construct. It identifies no
@@ -2559,7 +2569,7 @@ The following is used to switch drive letter in Windows.
   and reject() as with list iteration. 
 </p>
 <pre>
-  0=a loop break(a&gt;3) out(a) a+1=a
+  0=a loop break(a&gt;3) out(a) a+1 =a
   &lt;List&gt;
   0
   1
@@ -2607,8 +2617,8 @@ The following is used to switch drive letter in Windows.
 
 <h2>String.esc() and .unEsc()</h2>
 <p>
-  As was mentioned initially, CFT has no escape character, so backslashes are just regular
-  characters. However, we still require a way of converting "difficult" strings to code,
+  As was mentioned initially, CFT doesn't use backslash as an escape character. 
+  However, we still require a way of converting "difficult" strings to code,
   via synthesis. For this purpose, the two functions String.esc() and String.unEsc() was
   created.
 </p>
@@ -2648,7 +2658,7 @@ The following is used to switch drive letter in Windows.
 
 
 
-<h2>Automating interactive functions</h2>
+<h2>Automating interactive functions / Sys.stdin()</h2>
 <p>
   Functions may query the user with Input("prompt").get and readLine("prompt"). If we want
   to automate such functions, we use function Sys.stdin() to buffer up any number of 
@@ -2661,16 +2671,16 @@ The following is used to switch drive letter in Windows.
 </pre>
 <p>
   Note that both Input.get() and readLine() detect if there is buffered input, and
-  if so, does not display the prompt or other info (Input.get()). Particularly for Input.get(),
-  buffering the empty string "" with Sys.stdin() means repeating the last value.
+  if so, do not display the prompt or other info. Particularly useful for Input.get(),
+  since buffering the empty string "" with Sys.stdin() means repeating the last value.
 </p>
 
 
 
-<h2>Self-modifying script</h2>
+<h2>Running colon commands</h2>
 <p>
   Using the Sys.stdin() statement without being followed by Input.get() or readLine(), is just 
-  another way of entering commands. 
+  another way of entering commands. This means colon commands are available from CFT code.
 </p>
 <pre>
   stdin("2+3")
@@ -2679,15 +2689,12 @@ The following is used to switch drive letter in Windows.
 </pre>
 <p>
   This can be exploited to let a script modify itself, by redefining
-  functions. We can also automate running colon commands.
+  functions, although that will be troublesome if those functions read input. A better
+  use is that of running colon commands, particularly loading scripts. This is used
+  frequently with shortcuts.
 </p>
 <pre>
-  P(1)=symbol
-  P(2)=val
-    Sys.stdin (syn(val), "/"+symbol+"!")
-  /def
-
-  def("filesSnapshot", Dir.files)
+  stdin(":load SomeScript","?")
 </pre>
 
 
@@ -2812,7 +2819,7 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
 
 
 
-<h1>Example code</h1>
+<h1>Various example code</h1>
 
 <h2>Windows PowerShell</h2>
 <p>
@@ -2867,6 +2874,7 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
 <pre>
   :save Ident
   :load Ident
+  :new
 </pre>
 
 <p>Managing named functions</p>

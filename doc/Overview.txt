@@ -109,42 +109,51 @@ Interactive use
  * Print working directory: pwd
  * Using cd, ls, cat, more and edit inside (function) code
  * Get data from user: Input() and readLine()
- * Searching files / report()
- |   report()
- |   Multi-line example
+
+Searching files / report()
+ * report()
+ * Multi-line example
  * Grep - complex example
  * Working with huge logs - counting hits
  |   Counting hits
  |   Limiting search to a few files
- * Searching log files / DateSort
- * Generalized sorting
- |   Example: file size
- |   Example: file name
- * Dictionary objects / Dict()
- * Date and time processing
- |   Milliseconds
- |   The Date object
- |   The Date.Duration object
- * Session persistent data / ValDef / Val
- * Synthesis
- |   The problem
- |   Creating code from values
- |   Example using :syn
- |   Example using :NN
- * Repeat last program line
- * Output format / Cfg
- |   The @term shortcut
- |   Line wrapping
+
+Searching log files / DateSort
+
+Generalized sorting
+ * Example: file size
+ * Example: file name
+
+Dictionary objects / Dict()
+
+Date and time processing
+ * Milliseconds
+ * The Date object
+ * The Date.Duration object
+
+Session persistent data / ValDef / Val
+
+Synthesis
+ * The problem
+ * Creating code from values
+ * Example using :syn
+ * Example using :NN
+
+Repeat last program line
+
+Output format / Cfg
+ * The @term shortcut
+ * Line wrapping
 
 Templating
  * Merging text with Dict
- * Using template files
+ * Using individual template files
  * Script file "here" documents
  |   A more complex example
- |   PDict()
  * Using DataFile
  |   Include blank lines
  |   Filter away comments
+ * PDict()
 
 Use as a calculator
  * Expressions and "variables"
@@ -162,7 +171,7 @@ Various advanced topics
  * Predicate calls
  * List.push()
  * Dict set strings
- * Dict values as properties
+ * Dict fields as functions
  * Dict.get with default value
  * List.nth() negative indexes
  * Function parameters as List or Dict
@@ -170,8 +179,8 @@ Various advanced topics
  * Storing CFT data structures to file - syn() and eval()
  * String.esc() and .unEsc()
  |   Escape codes
- * Automating interactive functions
- * Self-modifying script
+ * Automating interactive functions / Sys.stdin()
+ * Running colon commands
  * Simple line editing
  |   Develop complex code in steps
  * Macros
@@ -179,7 +188,7 @@ Various advanced topics
  * CFT.props - mCat, mEdit and mMore macros
  * CFT.props - shortcuts
 
-Example code
+Various example code
  * Windows PowerShell
  * Windows CMD
  * Linux get user name
