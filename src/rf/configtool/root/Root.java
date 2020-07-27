@@ -40,17 +40,20 @@ public class Root {
 	private ScriptState currScript;
 	private boolean debugMode;
 	private Value lastResult;
+	private final long startTime;
 	private boolean terminationFlag = false;
 
 	public Root(Stdio stdio) throws Exception {
+		this.startTime=System.currentTimeMillis();
 		this.stdio = stdio;
     	propsFile=new PropsFile();
         objCfg=new ObjCfg();
 
-
-		createNewScript();
-		// currScript = new ScriptState(new ObjGlobal(this,stdio));
-		// scriptStates.put(currScript.getScriptName(), currScript);
+        createNewScript();
+	}
+	
+	public long getStartTime() {
+		return startTime;
 	}
 	
 	public PropsFile getPropsFile() {

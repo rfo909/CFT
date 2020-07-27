@@ -53,6 +53,7 @@ public class ObjSys extends Obj {
         add(new FunctionIsWindows());
         add(new FunctionSavefile());
         add(new FunctionScriptName());
+        add(new FunctionUptime());
 	}
 
 	@Override
@@ -293,6 +294,25 @@ public class ObjSys extends Obj {
 			String scriptName=ctx.getObjGlobal().getScriptName();
 			if (scriptName==null) return new ValueNull();
 			return new ValueString(scriptName);
+		}
+	}
+	
+	
+	class FunctionUptime extends Function {
+		public String getName() {
+			return "uptime";
+		}
+
+		public String getShortDesc() {
+			return "uptime() - returns a Date.Duration object";
+		}
+
+		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+			if (params.size() != 0)
+				throw new Exception("Expected no parameters");
+			long uptime=System.currentTimeMillis() - ctx.getObjGlobal().getRoot().getStartTime();
+			ObjDuration d=new ObjDuration(uptime);
+			return new ValueObj(d);
 		}
 	}
 

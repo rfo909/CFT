@@ -78,13 +78,13 @@ public abstract class Obj {
     
     protected String getString(String name, List<Value> args, int pos) throws Exception {
         Value v=args.get(pos);
-        if (!(v instanceof ValueString)) throw new Exception(name + ": type errror, expected String, got " + v.getTypeName());
+        if (!(v instanceof ValueString)) throw new Exception(name + ": type error, expected String, got " + v.getTypeName());
         return ((ValueString) v).getVal();
     }
     
     protected long getInt(String name, List<Value> args, int pos) throws Exception {
         Value v=args.get(pos);
-        if (!(v instanceof ValueInt)) throw new Exception(name + ": type errror, expected int, got " + v.getTypeName());
+        if (!(v instanceof ValueInt)) throw new Exception(name + ": type error, expected int, got " + v.getTypeName());
         return ((ValueInt) v).getVal();
     }
     
@@ -92,24 +92,24 @@ public abstract class Obj {
         Value v=args.get(pos);
         if (v instanceof ValueInt) return ((ValueInt) v).getVal();
         if (v instanceof ValueFloat) return ((ValueFloat) v).getVal(); 
-        throw new Exception(name + ": type errror, expected int or float, got " + v.getTypeName());
+        throw new Exception(name + ": type error, expected int or float, got " + v.getTypeName());
     }
     
     protected boolean getBoolean(String name, List<Value> args, int pos) throws Exception {
         Value v=args.get(pos);
-        if (!(v instanceof ValueBoolean)) throw new Exception(name + ": type errror, expected boolean, got " + v.getTypeName());
+        if (!(v instanceof ValueBoolean)) throw new Exception(name + ": type error, expected boolean, got " + v.getTypeName());
         return ((ValueBoolean) v).getVal();
     }
     
     protected List<Value> getList(String name, List<Value> args, int pos) throws Exception {
         Value v=args.get(pos);
-        if (!(v instanceof ValueList)) throw new Exception(name + ": type errror, expected list, got " + v.getTypeName());
+        if (!(v instanceof ValueList)) throw new Exception(name + ": type error, expected list, got " + v.getTypeName());
         return ((ValueList) v).getVal();
     }
     
     protected Obj getObj(String name, List<Value> args, int pos) throws Exception {
         Value v=args.get(pos);
-        if (!(v instanceof ValueObj)) throw new Exception(name + ": type errror, expected obj, got " + v.getTypeName());
+        if (!(v instanceof ValueObj)) throw new Exception(name + ": type error, expected obj, got " + v.getTypeName());
         return ((ValueObj) v).getVal();
     }
     

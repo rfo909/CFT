@@ -28,7 +28,9 @@ Grep(Input("Search term").get)
 /GetGrepObj
  
  
-GetGrepObj =grepObj SourceFiles->f grepObj.file(f)->line report(line.file.name, line.lineNumber, line)
+GetGrepObj =grepObj SourceFiles->f 
+	grepObj.file(f)->line 
+		report(line.file.name, line.lineNumber, line)
 /Search
 ```
 
@@ -56,27 +58,28 @@ To leave type ":quit" or just type CTRL-C.
 # Introduction
 
 The CFT application supports basic shell functions like "cd", "ls" and "pwd", but
-is primarily a Domain Specific Language (DSL) for automation.  
+is primarily a Domain Specific Language (DSL) for automation.
 
 It is object oriented, as opposed to traditional *ix shells such as bash, which process text.
 
-Still, you can not create your own classes, only use the built-in objects, as returned by
-the system library of 200+ functions, of which ~30 are globally available, and the rest
-exist as member functions of objects.
+Given the purpose of automation, and to keep complexity down, you can not create your own classes, 
+only use the built-in objects.
 
 Example:
 
 ```
-$ Dir.files
+$ Dir.files.length
 
 # means: 
 # - call global function Dir() with no parameters
 # - returns Dir object for current directory
 # - call .files() inside the Dir object 
 # - returns list of File objects
+# - call .length() function on the list object
+# - returns an int
 ```
 
-When passing no parameters to a function in CFT, there is no need to include the ()'s
+Parantheses are optional when calling functions with no parameters, for compact and readable syntax.
 
 
 
@@ -123,7 +126,7 @@ To create functions that take parameters, read the doc.
 
 ## Objects - not text
 
-The list that is produced when you call JavaFiles is just a representation of the list of
+The list that is produced when you call JavaFiles is just a visual representation of the list of
 file objects. To see the full paths of the files, type the following:
 
 
@@ -141,8 +144,8 @@ functions we can call, such as the .path function.
 ## Searching
 
 Still working in the interactive interface, we can create a function to search for
-a string in all Java files. Since we are working interactively, input is limited to single lines,
-so first we create a helper function, GetGrep, then the main function, which we call Search.
+a string in all Java files. Since we are working interactively, and coding is limited to single lines,
+we first create a helper function, GetGrep, then the main function, which we call Search.
 
 ```
 $ Grep(readLine("Enter search term"))
@@ -157,14 +160,15 @@ $ /Search
 The colons above indicate that there is output, and in this case also input, when the code asks you
 to enter search term, as the line is interpreted.
 
-Once a line works, we name it, using the forward slash and a name. This creates functions.
+Once a line works, we name it, using the forward slash and a name, creating functions.
+
 
 ### Terminal window size
 
 When running searches, you may find that long lines wrap and mess up the screen.
 
 CFT needs to know the terminal windows size, to determine where to cut the lines if wrapping is off,
-which it is by default. After resizing, enter
+which it is by default. To get the terminal settings, enter
 
 ```
 $ @term
@@ -178,7 +182,7 @@ $ :wrap
 
 #### About these commands
 
-The first is a global shortcut. List them all by entering
+The first is a global shortcut, which means it runs code. List them all by entering
 
 ```
 $ @
@@ -186,7 +190,7 @@ $ @
 
 Shortcuts are defined in the CFT.props file. 
 
-The second is a "colon command", which is system commands outside the programming language. To
+The second is a "colon command", which are system commands outside the programming language. To
 list all, just type
 
 ```
@@ -207,13 +211,14 @@ it means grabbing the topmost value off the stack and storing it in a local vari
 
 
 Then follows a processing loop, where we iterate over all the JavaFiles, with 'f' being the
-loop variable. We pass each file as parameter to the Grep object function .file(). 
+loop variable. We pass each file as parameter to the Grep object function .file(). The member functions of
+all objects are written in Java, and so executes at full speed. 
 
 This produces a list of lines, which we also iterate over, and for each produce output
 by calling report() to generate nice formatted output.
 
-If we wanted the output to display the path of the files, we'd just type line.file.path instead
-of line.file.name inside the call to report().
+If we wanted the output to display the path of the files, we'd just write "line.file.path" instead
+of "line.file.name" inside the call to report().
 
 
 When the code works it's time to save the script.
@@ -226,6 +231,13 @@ $ :save MyScript
 $ :load MyScript
 ```
 
+## Start a new script
+
+To create a new empty script, just type
+
+```
+$ :new
+```
 
 
 ## Display functions
@@ -242,8 +254,8 @@ To display all global functions, type
 $ help
 ```
 
-To display all functions inside an object, create an instance of that object (on the stack) 
-followed by help. Examples:
+All values in CFT are objects, including integers and strings. To display all functions inside an object, create 
+an instance of that object (on the stack) followed by help. Examples:
 
 ```
 $ "" help
@@ -257,14 +269,16 @@ $ Lib.Math help
 $ Sys help
 ```
 
-The File("x") expression creates a File object. The file does not need to exist for help to list
-functions inside. 
+The global File() function requires a string parameter. Here we just use "x", to create a valid File object.
+The file does not need to exist.
 
 The global Lib function creates a Lib object, which effectively works as a name space. Inside 
 the Lib object there are functions for creating still other objects, such as the Math
 object, where you find math related functions for calculating sine and cosine.
 
 Sys is another such namespace function / object.
+
+
 
 
 # Edit current script file in editor
