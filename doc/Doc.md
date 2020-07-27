@@ -1,11 +1,8 @@
 # CFT / ConfigTool
 
 ```
-Object oriented programmable shell.
-Compact programming language.
-Automation tool.
-Last updated: 2020-07-24 RFO
-v1.1.1
+Last updated: 2020-07-27 RFO
+v1.1.2
 ```
 # Introduction
 
@@ -66,12 +63,11 @@ they are for locating files and directories, for which you then build code.
 
 
 Everything in CFT is functions, and defining your own is super easy, and 
-**this is the point of CFT**.
+**this is the point of CFT**,
+that automation can be a simple and interactive process.
 
 
-That 
-**even automation can be simple**, with functions calling other functions. Once some function is
-tested, it can do the boring stuff for you:
+Once functions are tested, they can do all kinds of boring and repetitious stuff for us:
 
 
 
@@ -167,7 +163,8 @@ above, the file needs not exist (yet).
 
 The files created in this way are always located in
 the CFT home directory. This gives predictability for (system) data files etc.
-To access or create files in other directories:
+To access or create files in other directories, use the file() function inside
+some Dir object:
 
 ```
 $ SomeDirExpression.file("x.txt")
@@ -227,7 +224,7 @@ File("x.txt").hex
 Default encoding is "ISO_8859_1", but this can be changed, for example:
 
 ```
-File("x.txt").setEncoding("UTF-8")
+File("x.txt").encoding("UTF-8")
 ```
 ## Dir() function
 
@@ -887,6 +884,13 @@ when(x=="b", {break(true)})  # does not break loop
 
 This break() does not affect the loop running outside the block expression.
 
+
+With break() taking a boolean value, the solution is of course to write:
+
+```
+"a b c".split->x
+break(x=="b")
+```
 ## Full functionality
 
 
@@ -978,32 +982,11 @@ the current savefile in an editor. This of course requires a current savefile, w
 by colon command save. The savefile internal function returns a File object for the savefile,
 which we use to create full path argument to notepad.
 
+
+Since this is functionality is used frequently, there exists a global shortcut that does this.
+
 ```
 $ :save Test
-$ Dir.runDetach("notepad", Sys.savefile.path)
-:
-: (Notepad pops up, just close it immediately)
-:
-$ /e
-$ :save
-```
-
-Now, calling function 'e', by just typing 'e' and pressing Enter, will open the current
-savefile ("script file") in notepad.
-
-
-Alernatively, on linux we may start leafpad or gedit instead of notepad, or if running in a
-terminal-only environment, we may choose to run nano, using Dir.run() instead of .runDetach(),
-so as to connect stdin and stdout correctly.
-
-```
-$ Dir.run("nano", Sys.savefile.path)
-```
-
-All this functionality is embedded in the Lib e() function, which is in turn called
-from default shortcut
-
-```
 $ @e
 ```
 ## Auto reload
@@ -1049,9 +1032,6 @@ editor, or close editor and open new.
 Editing the savefile lets us write more complex functions. The save file supports
 multi-line functions. The same rules apply as for single lines, regarding scope rules, which
 means loops and loop termination using the "pipe" symbol.
-
-
-Note: the "pipe" still terminates all nested loops.
 
 ## Comments
 

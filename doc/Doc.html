@@ -14,12 +14,9 @@ CFT / ConfigTool
 </h1>
 
 <pre style="padding-left:0; margin-left:0">
-Object oriented programmable shell.
-Compact programming language. 
-Automation tool.
 
-Last updated: 2020-07-24 RFO
-v1.1.1
+Last updated: 2020-07-27 RFO
+v1.1.2
 
 </pre>
 
@@ -86,12 +83,12 @@ v1.1.1
   they are for locating files and directories, for which you then build code. 
 </p>
 <p>
-  Everything in CFT is functions, and defining your own is super easy, and <em>this is the point of CFT</em>.
+  Everything in CFT is functions, and defining your own is super easy, and <em>this is the point of CFT</em>, 
+  that automation can be a simple and interactive process.
 </p>
 <p>
-  That <b>even automation can be simple</b>, with functions calling other functions. Once some function is
-  tested, it can do the boring stuff for you:
-  </p>
+  Once functions are tested, they can do all kinds of boring and repetitious stuff for us:
+</p>
   <ul>
   <li> copying files</li>
   <li> searching source code and logs</li>
@@ -200,7 +197,8 @@ int, and the last for float values.
 <p>
   The files created in this way are always located in
   the CFT home directory. This gives predictability for (system) data files etc.
-  To access or create files in other directories:
+  To access or create files in other directories, use the file() function inside
+  some Dir object:
 </p>
 <pre>
   $ SomeDirExpression.file("x.txt")
@@ -266,7 +264,7 @@ To create a file with a single text line:
   Default encoding is "ISO_8859_1", but this can be changed, for example:
 </p>
 <pre>
-  File("x.txt").setEncoding("UTF-8")
+  File("x.txt").encoding("UTF-8")
 </pre>
 
 
@@ -284,6 +282,7 @@ To create a file with a single text line:
   object offers multiple member functions, one of which is <b>files</b>, which produces a list of files in 
   the directory. We can also call the Dir function with a path parameter.
 </p>
+
 <h3>Create a subdirectory</h3>
 <pre>
   Dir.sub("someDir").create
@@ -1025,11 +1024,18 @@ codeDirs = . ; code.examples ; code.lib
 </p>
 <pre>
   "a b c".split-&gt;x
-    when(x=="b", {break(true)})  # does not break loop
+  when(x=="b", {break(true)})  # does not break loop
 </pre>
 <p>
   This break() does not affect the loop running outside the block expression. 
 </p>
+<p>
+  With break() taking a boolean value, the solution is of course to write:
+</p>
+<pre>
+  "a b c".split-&gt;x
+  break(x=="b")
+</pre>
 
 
 <h2>Full functionality</h2>
@@ -1144,39 +1150,16 @@ codeDirs = . ; code.examples ; code.lib
   which we use to create full path argument to notepad.
 </p>
 
+<p>
+  Since this is functionality is used frequently, there exists a global shortcut that does this.
+</p>
 <pre>
   $ :save Test
-
-  $ Dir.runDetach("notepad", Sys.savefile.path)
-      : 
-      : (Notepad pops up, just close it immediately)
-      :
-  $ /e
-
-  $ :save
-</pre>
-
-<p>
-  Now, calling function 'e', by just typing 'e' and pressing Enter, will open the current 
-  savefile ("script file") in notepad.
-</p>
-<p>
-  Alernatively, on linux we may start leafpad or gedit instead of notepad, or if running in a
-  terminal-only environment, we may choose to run nano, using Dir.run() instead of .runDetach(),
-  so as to connect stdin and stdout correctly.
-</p>
-
-<pre>
-  $ Dir.run("nano", Sys.savefile.path)
-</pre>
-
-<p>
-  All this functionality is embedded in the Lib e() function, which is in turn called
-  from default shortcut
-</p>
-<pre>
   $ @e
 </pre>
+
+
+
 
 
 
@@ -1229,9 +1212,7 @@ codeDirs = . ; code.examples ; code.lib
   multi-line functions. The same rules apply as for single lines, regarding scope rules, which
   means loops and loop termination using the "pipe" symbol.
 </p>
-<p>
-  Note: the "pipe" still terminates all nested loops.
-</p>
+
 
 
 <h2>Comments</h2>
@@ -1254,6 +1235,7 @@ codeDirs = . ; code.examples ; code.lib
   Alternatively, putting all parameter grabs on a single first line, serves as great
   documentation of function interface when seen with the '?' command.
 </p>
+
 
 
 <h2>Debug</h2>
