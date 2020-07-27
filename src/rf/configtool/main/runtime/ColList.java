@@ -67,8 +67,11 @@ public class ColList {
 //
     public String getCompactDisplay() {
         StringBuffer sb=new StringBuffer();
+        boolean space=false;
         for (String s:list) {
-            sb.append(s+" ");
+            if (space) sb.append(" ");
+            sb.append(s);
+            space=true;
         }
         return sb.toString();
     }

@@ -46,7 +46,7 @@ public class ValueMacro extends Value {
     
     @Override
     public String getTypeName() {
-        return "macro";
+        return "Macro";
     }
 
 

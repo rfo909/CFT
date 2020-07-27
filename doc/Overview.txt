@@ -34,7 +34,6 @@ Base functions and objects: File, Dir and List
  |   Get all directories recursively under a directory:
  |   Delete a sub-directory
  * Lists
- |   List addition
 
 The shell() function
 
@@ -43,8 +42,9 @@ Core types
 
 List processing
  * Iterating over list content
- * Filtering with assert(), reject() and break()
+ * Filtering with assert(), reject() and break() + out()
  * The condOut() statement
+ * List addition
 
 Creating functions
  * Naming lines of code
@@ -63,10 +63,10 @@ CFT as a functional programming language
  * Local variables
  * Stack vs expressions
  * Nested loops
- * The PIPE symbol
- * "Pipes" and code blocks
- |   Terminates all loops
- * Result value from code blocks
+ * Loop spaces - "pipes"
+ * Result value from a loop space
+ |   If the loop space contains looping ...
+ |   Otherwise ...
  * Function parameters
  |   Simple example
  |   Asking for missing value
@@ -95,7 +95,7 @@ Editing save files
  |   Losing changes
  * Multi-line functions
  * Comments
- * First line of function ...
+ * First line of a function ...
  * Debug
 
 Interactive use
@@ -107,18 +107,15 @@ Interactive use
  |   Editing a previous file again
  |   cat, more, edit - implementation
  * Print working directory: pwd
- * Using cd, ls, cat, more and edit in code
+ * Using cd, ls, cat, more and edit inside (function) code
  * Get data from user: Input() and readLine()
  * Searching files / report()
- |   FileLine
  |   report()
  |   Multi-line example
- * Grep.file()
- * Grep.lines()
+ * Grep - complex example
  * Working with huge logs - counting hits
  |   Counting hits
  |   Limiting search to a few files
- * Searching multiple types of file
  * Searching log files / DateSort
  * Generalized sorting
  |   Example: file size

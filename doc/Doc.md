@@ -293,7 +293,7 @@ produces a list of File objects.
 
 ```
 $ Dir.files
-<list>
+<List>
 0: someFile.txt    | 0k    | 777     | 90d | 2020-02-22 16:38:53
 1: otherFile.txt   | 1k    | 1250    | 49d | 2020-04-03 10:02:44
 :
@@ -314,22 +314,11 @@ For details of available functions, as always use the help system:
 $ List help
 ```
 
-To create file with multiple lines:
+To create file with multiple lines, or to add multiple lines, we use lists.
 
 ```
-File("x.txt").create(List("line1","line2","line 3"))
-```
-### List addition
-
-
-Two lists can be added together with "+".
-
-```
-List(1,2) + List(3)
-<list>
-1
-2
-3
+File("x.txt").create( ListExpression )
+File("x.txt").append( ListExpression )
 ```
 # The shell() function
 
@@ -412,7 +401,7 @@ to return output, we use the out() statement inside.
 
 ```
 $ "1 2 3".split->x out("a"+x)
-<list>
+<List>
 0: a1
 1: a2
 2: a3
@@ -420,7 +409,7 @@ $ "1 2 3".split->x out("a"+x)
 
 The result is a list of strings, as displayed.
 
-## Filtering with assert(), reject() and break()
+## Filtering with assert(), reject() and break() + out()
 
 
 Using the assert() statement, we may abort processing for elements that do not meet a condition.
@@ -434,7 +423,7 @@ a certain condition.
 
 ```
 $ List(1,2,3,2,1)->x reject(x>2) out(x)
-<list>
+<List>
 1
 2
 2
@@ -456,6 +445,18 @@ In addition to controlling loops with assert/reject and break, there is the cond
 statement, which takes a boolean condition as first parameter, and the value to
 be sent out as second parameter. Can be useful some times.
 
+## List addition
+
+
+Two lists can be added together with "+".
+
+```
+List(1,2) + List(3)
+<List>
+1
+2
+3
+```
 # Creating functions
 
 ## Naming lines of code
@@ -574,7 +575,7 @@ The point is that it is the function code that is named, not the result.
 
 ```
 $ "1 2 3".split
-<list>
+<List>
 0: 1
 1: 2
 2: 3
@@ -611,10 +612,12 @@ $ 3 =a 2 =b a+b
 ## Stack vs expressions
 
 
-It is worth noting that even though CFT uses a data stack, expressions are not stack-based.
+Even though CFT uses a data stack, expressions are not stack-based.
+
+
 This is because  writing postfix expressions is too bothersome (ex. "3 2 +"), so CFT
-parses expressions using regular infix notation ("3+2"), respecting normal cardinality rules,
-so that 2+3*5 becomes 17.
+only understands expressions using regular infix notation ("3+2"). Respecting normal cardinality rules,
+we have that 2+3*5 becomes 17.
 
 ## Nested loops
 
@@ -623,7 +626,7 @@ Loops are implemented using the "for each" functionality of "-> var". Loops may 
 
 ```
 $ List(1,2,3)->x List(1,2,3)->y  out(x*y)
-<list>
+<List>
 0: 1
 1: 2
 2: 3
@@ -635,114 +638,107 @@ $ List(1,2,3)->x List(1,2,3)->y  out(x*y)
 8: 9
 ```
 
-It is worth noting that in this case, the body of each loop is all code following the "-> var"
+In this case, the body of each loop is all code following the "-> var"
 construct. But this can be changed using the "pipe" symbol, which "closes" all loops.
 
-## The PIPE symbol
+## Loop spaces - "pipes"
 
 
-First a non-pipe example.
+The body of any loop is the rest of the code, or until a "pipe" symbol
+is found. The pipe symbol ("|") more accurately breaks the code into a sequence of
+**loop spaces**, which means acting as an end-point for
+running loops.
 
 
-If we wanted to sum the sizes of all files in a directory, we could do it like this:
-
-```
-$ Dir.files->f out(f.length)
-:
-: (output)
-:
-$ /sizes
-$ sizes.sum
-<int>
-999
-$ /sizeSum
-```
-
-This works using the "sum" function on the List object that is the output
-of the function "sizes".
-
-## "Pipes" and code blocks
-
-
-The "pipe" symbol '|' can be used to combine these two. What a "pipe" does, is providing
-an end point for all current loops, waiting for them to complete, and produce their output.
-That output is then put on top of the stack, available for the next section of code to work
-with, or to do something else.
-
-
-To avoid having to define a local variable just to grab one element off the stack, the special
-variable name '_' pops the top value off the data stack.
+The way a "pipe" works, is to wait for all current loops to terminate, then take the
+return value from that loop space and putting it onto the stack for the next loop
+space to work with (or do something else). Example:
 
 ```
-$ Dir.files-> out(f.length) | _.sum
-$ /sizeSum
+$ Dir.files->f out(f.length) | =sizes sizes.sum
 ```
 
-We call the different parts of code separated by "pipe" symbols 
-**code blocks**.
+This single line of code first contains a loop, which outputs a list of integers for
+the sizes of all files in the current directory. Then the "pipe" symbol terminates that
+loop space, and creates a new one, where we pick the result from the previous loop
+space off the stack and assigns it to a local variable. We then apply the sum() function to it.
 
 
-Often the output from a set of loops will be used in the next part, but that's
-not always the case, usually when we want our function to return a non-list value.
-There is a simple rule deciding what is taken as the return value of any block of
-code separated by the "pipe" symbol (below).
+To save us some typing, the special expression "_" (underscore) pops the topmost value off
+the stack.
 
 ```
-$ 0 =sum Dir.files->f sum+f.length =sum | sum
+$ Dir.files->f out(f.length) | _.sum
 ```
 
-This code returns an int, not a list, where as the "sizes" function above returned a list.
+As we see from the above code, a loop spaces don't 
+**need** containing loops. The
+following is perfectly legal, although a little silly.
 
-### Terminates all loops
+```
+$ 2+3 | | | | =x x | =y y | _ |
+```
 
+Yes, it returns 5.
 
-Note that if there are nested loops, the "pipe" symbol terminates all these, not
-just the innermost.
-
-## Result value from code blocks
-
-
-The return value of a function is the result value of the last code block,
-with multiple code blocks being separated by the "pipe" symbol.
+## Result value from a loop space
 
 
-For a block of code the result value is decided as follows:
+All bodies of code in CFT consist of one or more 
+**loop spaces**. The result value
+from any such body is the return value from the last loop space.
+
+### If the loop space contains looping ...
 
 
+If a loop space contains loop statements, the result value is a list of data generated
+via calls to out() or report() statements. If no actual iteraions take place, or
+filtering with assert(), reject() or break() means no data is generated via out() or report(),
+then the result is an empty list.
 
-- If the code block contains loop statements, the result is
-a list of data generated via "out()" or "report()" statements. If no actual iterations
-take place, or filtering mean that "out()" never get called, the result is an empty list.
+### Otherwise ...
 
 
-- If the code block does not contain loops, the output is the topmost value on the data stack.
-
+A loop space that doesn't contain loop statements, has as its return value the topmost
+element on the stack after all code has executed. If there is no value on the stack,
+the return value is 
+**null**.
 
 ## Function parameters
 
 
 Custom functions can also take parameters. This is done using the P() expression, which
-identifies the parameter by position, and allows a default value. The default value is important
-for three reasons:
+identifies the parameter by position. Note that 
+**parameter position is 1-based**.
+
+```
+$ P(1)=a P(2)=b a+b   # fails!
+```
+
+If you enter the above code interactively, it will fail, complaining that you can not add
+"null + null". This is because there is no call yet, and so there are no parameter values. This is
+fixed by letting the P() expression take a second parameters, which is a default value expression.
+
+
+The default value parameter to P() is important for three reasons.
 
 
 
-- It allows the function code to execute while being developed interactively
+- Allows the function code to execute while being developed interactively
 
 
 - May act as documentation in the source
 
 
 - Provides an elegant way of making functions interactive and non-interactive at the same time,
-as the default expression is evaluated only when the parameter is not given, or is given
-as value null, and may call a function or use a block expression to ask the user to input
-the value.
+as the default expression is evaluated only when parameter is not given (or is null),
+and may then ask the user to input the value.
 
 
 ### Simple example
 
 
-Here we make an improved version of the JavaFiles function, that takes a directory parameter, and if none given, uses the current directory.
+Here we make an improved version of the JavaFiles function, that takes a directory parameter, and if none given, uses the current directory ("Dir").
 
 ```
 $ P(1,Dir) =dir dir.allFiles->f assert(f.name.endsWith(".java")) out(f)
@@ -752,40 +748,32 @@ $ P(1,Dir) =dir dir.allFiles->f assert(f.name.endsWith(".java")) out(f)
 $ /JavaFiles
 ```
 
-As this function body is entered, and executed, it runs on current directory, since
-the default value for parameter 1 is "Dir". When calling the function without parameters,
-the current directory is always used, but we can now direct it to returns java files from
-a specific directory.
+Typing this code interactively means it gets executed directly, with no actuall call
+parameters. This means P(1) is null, and so the default value ("Dir") is used, which means
+the code runs on current directory.
+
+
+After defining the function, we may call it without parameters, or supply null for
+a given parameter, which again means the
+default expression is used, and the code again executes on current directory.
+
+
+But now we can let this function run on a custom Dir object, regardless of the current
+directory.
 
 ```
 $ Dir("/home/user/project1")
 $ /DirProject1
-$ Dir("/home/user/project2")
-$ /DirProject2
-$ DirProject1
-$ /CurrProject
-$ JavaFiles(CurrProject)->f out(f.length) | _.sum
-$ /JavaCodeSum
+$ JavaFiles(DirProject1)
 ```
-
-Now we have a function JavaCodeSum which calculates the sum total of all Java files
-in a directory defined as CurrProject. To change project, all we have to do
-is redefine CurrProject to refer to another project.
-
-```
-$ DirProject2
-$ /CurrProject!
-```
-
-Note: when redefining a currently existing named function, we need to add '!' to indicate that
-we want to override the old definition. Now when we run JavaCodeSum, it works on the
-java files under project 2.
-
 ### Asking for missing value
 
+
+The default expression of P() can also be used to ask for a value when the parameters
+is missing.
+
 ```
-P(1,Input("Enter value").get) =value
-...
+P(1,Input("Enter value").get) =value ...
 ```
 # Conditional execution
 
@@ -795,8 +783,8 @@ Conditional execution in CFT takes two basic forms.
 ## List filtering
 
 
-The assert() and reject() statements inside loops decide if the rest of the loop body is to
-be executed or not.
+The assert(), reject() and break() statements inside loops decide if the rest of the loop body is to
+be executed or not, and provide the data filtering mechanism in CFT.
 
 ## if() expression
 
@@ -807,11 +795,11 @@ are resolved.
 
 
 In this example we call SomeFunction, then use an if() expression to replace return value 'null'
-with a Dict object.
+with integer 0 (zero).
 
 ```
 SomeFunction(...) =a
-if(a==null, Dict, a) =a  # provides a default value if a is null
+if(a==null, 0, a) =a  # provides a default value if a is null
 ```
 ## when() expression
 
@@ -826,7 +814,7 @@ If the boolean expression resolves to true, then the 'expr' is resolved, and thi
 value. Otherwise, the 'expr' is not resolved, and the return value is null.
 
 
-The when() expression is the best way of expression multiple-choice conditionals ("switch" in Java).
+The when() expression is good for handling multiple-choice ladders ("switch" in Java).
 
 ```
 when (mode==1, SomeFunction(...))
@@ -849,7 +837,7 @@ true =ok
 ## Block expressions are real expressions
 
 
-Even though mostly used with when() and if(), block expressions are general expressions, just
+Though mostly used with when() and if(), block expressions are general expressions, just
 like a function call, or some variable lookup.
 
 ```
@@ -860,8 +848,8 @@ like a function call, or some variable lookup.
 ## Pitfalls
 
 
-Even though block expressions occur literally inside other code, and have their variable scope
-extend out into the calling environment, they are still somewhat function-like. This means:
+Block expressions occur literally inside other code, and have their variable scope
+extend out into the calling environment, but they are still somewhat function-like. This means:
 
 
 
@@ -882,10 +870,12 @@ Example:
 when(x=="b", {break(true)})  # does not break loop
 ```
 
-This break() does not affect the loop running outside the block expression.
+The call to break() inside a block expression does not affect the loop running outside
+the block expression.
 
 
-With break() taking a boolean value, the solution is of course to write:
+With break() taking a boolean value, the above example is a bit artificial, as the solution
+here is to write:
 
 ```
 "a b c".split->x
@@ -895,7 +885,7 @@ break(x=="b")
 
 
 Block expressions can contain looping and the code can be partitioned into a
-number of code blocks (multiple loop spaces). Example:
+number of loop spaces (with the "pipe" symbol). Example:
 
 ```
 List(1,2,3)=a {a->
@@ -932,7 +922,7 @@ the external process has terminated.
 $ Dir.run("cmd","/c","git","pull","origin","master")
 ```
 
-Many Windows programs require the "cmd","/c" in front. Notepad is an exception.
+Many Windows programs require the "cmd","/c" in front of the actual program.
 For proper operating systems (Linux) you naturally skip the two first elements of the command list.
 
 
@@ -956,7 +946,7 @@ Dir.run("which","leafpad") =lines lines.length>0 && lines.nth.contains("leafpad"
 
 
 Use to run external program in the background. The CFT code continues running after forking
-off the background process.
+off the background process. Nice for editors etc.
 
 ```
 $ Dir.runDetach("leafpad", Sys.savefile.path)
@@ -968,9 +958,8 @@ argument.
 ## Dir.runProcess()
 
 
-Similar to Dir.runDetach(), but for cases where we need to inspect the output, as this command
-sets the external program up to read input from an input file, and redirect both stdout and
-stderr to different files (File objects).
+Similar to Dir.runDetach(), but for cases where we need to provide non-interactive input,
+and inspect the output, as this uses files for stdin, stdout and stderr.
 
 # Editing save files
 
@@ -979,14 +968,13 @@ stderr to different files (File objects).
 
 As was illustrated above, in the case of Dir.runDetach(), we can create a function that opens
 the current savefile in an editor. This of course requires a current savefile, which is created
-by colon command save. The savefile internal function returns a File object for the savefile,
-which we use to create full path argument to notepad.
+by colon command save. The Sys.savefile() function returns a File object for the savefile,
+or null if no savefile exists.
 
 
-Since this is functionality is used frequently, there exists a global shortcut that does this.
+Since this is functionality is used very frequently, there exists a global shortcut that does this.
 
 ```
-$ :save Test
 $ @e
 ```
 ## Auto reload
@@ -1029,16 +1017,21 @@ editor, or close editor and open new.
 ## Multi-line functions
 
 
-Editing the savefile lets us write more complex functions. The save file supports
-multi-line functions. The same rules apply as for single lines, regarding scope rules, which
-means loops and loop termination using the "pipe" symbol.
+Editing the savefile lets us write more complex functions as we can break function
+code across multiple lines, using indentation and comments. The same rules apply as for
+single lines, regarding how the "pipe" symbol sections the code into multiple
+loop spaces.
 
 ## Comments
 
 
 The hash character '#' indicates that the rest of the line is a comment.
 
-## First line of function ...
+
+Note that ALL TEXT following one function assigment ("/name") is included as the
+code body of the next function.
+
+## First line of a function ...
 
 
 The interactive command '?' is used to see the defined functions. For functions entered
@@ -1063,6 +1056,9 @@ debug() function, or you can use the println() function.
 $ debug("data")
 %DEBUG% data
 ```
+
+You can of course also just call println(...)
+
 # Interactive use
 
 ## Change current directory: cd
@@ -1186,7 +1182,7 @@ is the same as the "Dir" expression.
 ```
 $ pwd
 ```
-## Using cd, ls, cat, more and edit in code
+## Using cd, ls, cat, more and edit inside (function) code
 
 
 Quick answer: 
@@ -1254,22 +1250,13 @@ runs the search on a file, and returns a list of lines that meet the requirement
 
 
 But the lines returned from "Grep.file()" are not
-just strings, they are extended strings, of a type called "FileLine". It contains
-two additional additional functions, "file()" to get the
-file object and "lineNumber()" which returns the line number in that file.
-
-### FileLine
+just strings, they are extended strings, of a type called "FileLine", which contains
+two additional additional functions, ".file()" to get the
+file object and ".lineNumber()" which returns the line number in that file.
 
 
-The function "File.read()" also returns a list of FileLine objects, and not just strings.
-A FileLine object can be created with global function FileLine().
-
-```
-$ FileLine("",1,File("x.txt")) help
-```
-
-This lists all the functions of the String type, plus the two mentioned above, "file()" and
-"lineNumber()".
+The File.read() function also produces a list of FileLine, rather than regular string
+values.
 
 ### report()
 
@@ -1279,8 +1266,8 @@ which is the report() statement. It can take one or more parameters, and results
 are formatted into columns, for readability.
 
 
-The formatted text is added to the same list of output as data via out(), but after the
-code block has completed. This means that the formatted output from report() is data,
+The formatted text is added to the same list of output as data via out(), but only after the
+loop space has completed. This means that the formatted output from report() is data (strings),
 just like values from out().
 
 ### Multi-line example
@@ -1310,7 +1297,7 @@ CFT terminal window.
 $ Search
 Enter search term
 class
-<list>
+<List>
 0: ProgramLine.java       | 11  | public class ProgramLine extends LexicalElement {
 1: StmtDebug.java         | 9   | public class StmtDebug extends Stmt {
 2: ExprIf.java            | 9   | public class ExprIf extends LexicalElement {
@@ -1318,22 +1305,21 @@ class
 :
 :
 ```
-## Grep.file()
+## Grep - complex example
 
-
-Searching for text in files, we use the .file() function of the Grep object.
-
-## Grep.lines()
-
-
-To match content from a list instead of from file, the "Grep.lines()" function takes
-a list of strings.
-
+```
+# Match lines containing "a" or "b", and that do not contain "c" or "d"
+Grep.match("a","b").reject("c","d")
+# Match lines containing "a" AND "b"
+Grep.match("a").match("b")
+# Regular expressions - matching lines with 8 digits in sequence
+Grep.matchRegex("[0-9]{8}")
+```
 ## Working with huge logs - counting hits
 
 
 The Grep instances are by default set up with a limit of the 1000 first matches. Passing
-that limit produces an error. The limit is set as follows:
+that limit produces an error. The limit can be changed as follows:
 
 ```
 $ Grep("...").limitFirst(100)
@@ -1342,26 +1328,24 @@ $ Grep("...").limitLast(100)
 ### Counting hits
 
 
-Whwn working with big files, one can also decide to initially do a count of hits,
+When working with big files, one can also decide to initially do a count of hits,
 to narrow down the search terms before doing an actual search.
-
-```
-$ Grep("...").modeCount
-```
-
-When a Grep object is operating in count mode, the limit doesn't apply. Limits exist to protect
-us from running out of memory, and counting does not consume any memory.
 
 
 The following example shows a function for searching through a set of java files and
-counting the hits in each, summing these up.
+counting the hits in each, summing these up, using Grep.fileCount() function instead
+of Grep.file(), which produces result lines.
+
+
+Counting hits is not subject to the limits above, as those exist in order to
+avoid uncontrolled memory use.
 
 ```
 Input("Enter search term").get =st
-Grep(st).modeCount =grep
+Grep(st) =grep
 ProjectDir.allFiles->f
 assert(f.name.endsWith(".java"))
-grep.file(f) =count
+grep.fileCount(f) =count
 out(count)
 | _.sum
 /SearchCount
@@ -1375,10 +1359,10 @@ per file.
 
 ```
 Input("Enter search term").get =st
-Grep(st).modeCount =grep
+Grep(st) =grep
 ProjectDir.allFiles->f
 assert(f.name.endsWith(".java"))
-grep.file(f) =count
+grep.fileCount(f) =count
 out(Int(count,f))        # <--- see section on "Generalized sorting"
 | _.sort->x
 report(x.data.name, x)
@@ -1395,25 +1379,6 @@ Input("(Part of) file name").get =fn
 ProjectDir.allFiles->f
 assert(f.name.endsWith(".java"))
 assert(f.name.contains(fn))    # <--- new
-grep.file(f)->line
-report(line.file.name, line.lineNumber, line)
-/Search
-```
-## Searching multiple types of file
-
-
-To search multiple types of files, we create a function that lists the
-valid types (after last dot) then check if the ending of the file matches one of
-those.
-
-```
-"java txt".split
-/FileTypes
-Input("Enter search term").get =st
-Grep(st) =grep
-ProjectDir.allFiles->f
-f.name.afterLast(".").toLower =ending
-assert(FileTypes.contains(ending))
 grep.file(f)->line
 report(line.file.name, line.lineNumber, line)
 /Search
@@ -1668,7 +1633,7 @@ To synthesize a single element when the last result was a list, use :NN, as foll
 
 ```
 $ ls
-<list>
+<List>
 0: runtime/              | d:2 | f:12
 1: CallScriptFunc.java   | 1k  | 1398  |             | 2020-02-28 22:38:09
 2: CodeHistory.java      | 10k | 10980 | 2d_22:23:24 | 2020-06-07 12:57:49
@@ -1696,7 +1661,7 @@ be immediately run using the dot command, and extended on the fly, for example l
 
 ```
 $ ls
-<list>
+<List>
 0: runtime/              | d:2 | f:12
 1: CallScriptFunc.java   | 1k  | 1398  |             | 2020-02-28 22:38:09
 2: CodeHistory.java      | 10k | 10980 | 2d_22:23:24 | 2020-06-07 12:57:49
@@ -1813,7 +1778,7 @@ Calling the myTemplate function from the interactive shell, produces the followi
 
 ```
 $ myTemplate
-<list>
+<List>
 0: This is
 1: some text
 ```
@@ -1888,7 +1853,7 @@ string as a parameter, then accessing the individual templates.
 $ DataFile(File("data.txt"),"###")
 $ /df
 $ df.get("A")
-<list>
+<List>
 This is
 template A
 ```
@@ -2162,7 +2127,7 @@ Val("data").get("a",3)
 <int>
 3
 Val("data").keys
-<list>
+<List>
 0: a
 ```
 ## List.nth() negative indexes
@@ -2199,7 +2164,7 @@ and reject() as with list iteration.
 
 ```
 0=a loop break(a>3) out(a) a+1=a
-<list>
+<List>
 0
 1
 2
@@ -2367,11 +2332,11 @@ in Dict objects, lists and sent as parameters, etc.
 
 A macro is written in the same way as a block expression, just that the body starts with
 a single asterisk (*), indicating
-that this block of code can run anywhere, as it will always run in an isolated context, not
+that the code can run anywhere, as it will always run in an isolated context, not
 seeing any state of the caller, which block expressions naturally do.
 
 
-To call a macro, apply the .call() function on it, with parameters as needed, which are
+To call a Macro, apply the .call() function on it, with parameters as needed, which are
 picked up insicde the code in the same way as in functions.
 
 ### Simple example
@@ -2433,7 +2398,7 @@ lists its content.
 The following code is an effective way of using PowerShell from CFT, saving lots of typing.
 
 ```
-# Run remote script-block
+# Run remote PowerShell script-block
 P(1)=host
 P(2)=cmd
 List("powershell","invoke-command","-computername",host,"-scriptblock","{" + cmd + "}") =fullCmd

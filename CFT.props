@@ -57,15 +57,12 @@ shortcut:PS   = "---- Projects perform search ----"       call "Projects:Curr" c
 shortcut:PSS  = "---- Projects repeat last search ----"   Sys.stdin("") call "Projects:S"
 shortcut:PP   = "---- Projects change project ----"       call "Projects:ChangeProject"
 
-# Investigate script
+# Investigate script (experimental)
 shortcut:I    = "---- Investigate ----"                   Sys.stdin(":load Investigate","?")
 shortcut:ID   = "---- Investigate log with data ----"     call "Investigate:LogWithData"
 shortcut:IND  = "---- Investigate log no data ----"       call "Investigate:LogNoData"
 shortcut:IP   = "---- Investigate log pasted text ----"   call "Investigate:LogPastedText"
 shortcut:IS   = "---- Investigate show log ----"          call "Investigate:Show"
-
-# Servers maintenance
-shortcut:SM   = "---- Servers maintenance script ----"    Sys.stdin(":load ServersMaintenance","?")
 
 
 # List available shortcuts when typing '@' only

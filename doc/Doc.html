@@ -333,7 +333,7 @@ To create a file with a single text line:
 
 <pre>
   $ Dir.files
-  &lt;list&gt;
+  &lt;List&gt;
    0: someFile.txt    | 0k    | 777     | 90d | 2020-02-22 16:38:53
    1: otherFile.txt   | 1k    | 1250    | 49d | 2020-04-03 10:02:44
      :
@@ -357,23 +357,11 @@ To create a file with a single text line:
 </pre>
 
 <p>
-  To create file with multiple lines:
+  To create file with multiple lines, or to add multiple lines, we use lists.
 </p>
 <pre>
-  File("x.txt").create(List("line1","line2","line 3"))
-</pre>
-
-
-<h3>List addition</h3>
-<p>
-  Two lists can be added together with "+".
-</p>
-<pre>
-  List(1,2) + List(3)
-  &lt;list&gt;
-  1
-  2
-  3
+  File("x.txt").create( ListExpression )
+  File("x.txt").append( ListExpression )
 </pre>
 
 
@@ -471,7 +459,7 @@ To create a file with a single text line:
 
 <pre>
   $ "1 2 3".split-&gt;x out("a"+x)
-  &lt;list&gt;
+  &lt;List&gt;
    0: a1
    1: a2
    2: a3
@@ -484,7 +472,7 @@ To create a file with a single text line:
 
 
 
-<h2>Filtering with assert(), reject() and break()</h2>
+<h2>Filtering with assert(), reject() and break() + out()</h2>
 <p>
   Using the assert() statement, we may abort processing for elements that do not meet a condition. 
 </p>
@@ -497,7 +485,7 @@ To create a file with a single text line:
 </p>
 <pre>
   $ List(1,2,3,2,1)-&gt;x reject(x&gt;2) out(x)
-  &lt;list&gt;
+  &lt;List&gt;
   1
   2
   2
@@ -521,6 +509,19 @@ To create a file with a single text line:
   statement, which takes a boolean condition as first parameter, and the value to 
   be sent out as second parameter. Can be useful some times.
 </p>
+
+
+<h2>List addition</h2>
+<p>
+  Two lists can be added together with "+".
+</p>
+<pre>
+  List(1,2) + List(3)
+  &lt;List&gt;
+  1
+  2
+  3
+</pre>
 
 
 
@@ -679,7 +680,7 @@ codeDirs = . ; code.examples ; code.lib
 
 <pre>
   $ "1 2 3".split
-  &lt;list&gt;
+  &lt;List&gt;
    0: 1
    1: 2
    2: 3
@@ -727,10 +728,12 @@ codeDirs = . ; code.examples ; code.lib
 <h2>Stack vs expressions</h2>
 
 <p>
-  It is worth noting that even though CFT uses a data stack, expressions are not stack-based.
+  Even though CFT uses a data stack, expressions are not stack-based.
+</p>
+<p>
   This is because  writing postfix expressions is too bothersome (ex. "3 2 +"), so CFT 
-  parses expressions using regular infix notation ("3+2"), respecting normal cardinality rules,
-  so that 2+3*5 becomes 17.
+  only understands expressions using regular infix notation ("3+2"). Respecting normal cardinality rules,
+  we have that 2+3*5 becomes 17.
 </p>
 
 
@@ -742,7 +745,7 @@ codeDirs = . ; code.examples ; code.lib
 
 <pre>
   $ List(1,2,3)-&gt;x List(1,2,3)-&gt;y  out(x*y)
-  &lt;list&gt;
+  &lt;List&gt;
    0: 1
    1: 2
    2: 3
@@ -755,100 +758,79 @@ codeDirs = . ; code.examples ; code.lib
 </pre>
 
 <p>
-  It is worth noting that in this case, the body of each loop is all code following the "-&gt; var"
+  In this case, the body of each loop is all code following the "-&gt; var"
   construct. But this can be changed using the "pipe" symbol, which "closes" all loops.
 </p>
 
 
 
-<h2>The PIPE symbol</h2>
+<h2>Loop spaces - "pipes"</h2>
 <p>
-  First a non-pipe example. 
+  The body of any loop is the rest of the code, or until a "pipe" symbol
+  is found. The pipe symbol ("|") more accurately breaks the code into a sequence of
+  <em>loop spaces</em>, which means acting as an end-point for 
+  running loops.
 </p>
 <p>
-  If we wanted to sum the sizes of all files in a directory, we could do it like this:
+  The way a "pipe" works, is to wait for all current loops to terminate, then take the
+  return value from that loop space and putting it onto the stack for the next loop
+  space to work with (or do something else). Example:
 </p>
-
 <pre>
-  $ Dir.files-&gt;f out(f.length)
-      :
-      : (output)
-      :
-  $ /sizes
-
-  $ sizes.sum
-  &lt;int&gt;
-  999
-  $ /sizeSum
+  $ Dir.files-&gt;f out(f.length) | =sizes sizes.sum
+</pre>
+<p>
+  This single line of code first contains a loop, which outputs a list of integers for
+  the sizes of all files in the current directory. Then the "pipe" symbol terminates that
+  loop space, and creates a new one, where we pick the result from the previous loop
+  space off the stack and assigns it to a local variable. We then apply the sum() function to it.
+</p>
+<p>
+  To save us some typing, the special expression "_" (underscore) pops the topmost value off
+  the stack.
+</p>
+<pre>
+  $ Dir.files-&gt;f out(f.length) | _.sum
 </pre>
 
 <p>
-  This works using the "sum" function on the List object that is the output
-  of the function "sizes".
+  As we see from the above code, a loop spaces don't <em>need</em> containing loops. The 
+  following is perfectly legal, although a little silly.
 </p>
-
-<h2>"Pipes" and code blocks</h2>
-<p>
-  The "pipe" symbol '|' can be used to combine these two. What a "pipe" does, is providing
-  an end point for all current loops, waiting for them to complete, and produce their output.
-  That output is then put on top of the stack, available for the next section of code to work
-  with, or to do something else.
-</p>
-
-<p>
-  To avoid having to define a local variable just to grab one element off the stack, the special
-  variable name '_' pops the top value off the data stack.
-</p>
-
 <pre>
-  $ Dir.files-&gt; out(f.length) | _.sum
-  $ /sizeSum
-</pre>
-
-<p>
-  We call the different parts of code separated by "pipe" symbols <b>code blocks</b>.
-</p>
-<p>
-  Often the output from a set of loops will be used in the next part, but that's
-  not always the case, usually when we want our function to return a non-list value. 
-  There is a simple rule deciding what is taken as the return value of any block of 
-  code separated by the "pipe" symbol (below).
-</p>
-
-<pre>
-  $ 0 =sum Dir.files-&gt;f sum+f.length =sum | sum
+  $ 2+3 | | | | =x x | =y y | _ |
 </pre>
 <p>
-  This code returns an int, not a list, where as the "sizes" function above returned a list.
+  Yes, it returns 5.
 </p>
 
-<h3>Terminates all loops</h3>
+
+
+
+
+
+
+<h2>Result value from a loop space</h2>
 <p>
-  Note that if there are nested loops, the "pipe" symbol terminates all these, not 
-  just the innermost.
+  All bodies of code in CFT consist of one or more <em>loop spaces</em>. The result value
+  from any such body is the return value from the last loop space.
 </p>
 
-
-
-
-<h2>Result value from code blocks</h2>
+<h3>If the loop space contains looping ...</h3>
 <p>
-  The return value of a function is the result value of the last code block, 
-  with multiple code blocks being separated by the "pipe" symbol.
+  If a loop space contains loop statements, the result value is a list of data generated
+  via calls to out() or report() statements. If no actual iteraions take place, or
+  filtering with assert(), reject() or break() means no data is generated via out() or report(), 
+  then the result is an empty list.
 </p>
+
+<h3>Otherwise ...</h3>
 <p>
-  For a block of code the result value is decided as follows:
+  A loop space that doesn't contain loop statements, has as its return value the topmost
+  element on the stack after all code has executed. If there is no value on the stack,
+  the return value is <em>null</em>.
 </p>
-<ol>
-  <li>
-    If the code block contains loop statements, the result is 
-    a list of data generated via "out()" or "report()" statements. If no actual iterations
-    take place, or filtering mean that "out()" never get called, the result is an empty list.
-  </li>
-  <li>
-     If the code block does not contain loops, the output is the topmost value on the data stack.
-   </li>
-</ol>
+
 
 
 
@@ -857,23 +839,35 @@ codeDirs = . ; code.examples ; code.lib
 <h2>Function parameters</h2>
 <p>
   Custom functions can also take parameters. This is done using the P() expression, which
-  identifies the parameter by position, and allows a default value. The default value is important
-  for three reasons:
+  identifies the parameter by position. Note that <em>parameter position is 1-based</em>.  
+</p>
+<pre>
+  $ P(1)=a P(2)=b a+b   # fails!
+</pre>
+<p>
+  If you enter the above code interactively, it will fail, complaining that you can not add
+  "null + null". This is because there is no call yet, and so there are no parameter values. This is 
+  fixed by letting the P() expression take a second parameters, which is a default value expression.
+</p>
+<p>
+  The default value parameter to P() is important for three reasons.
 </p>
 <ol>
-  <li>It allows the function code to execute while being developed interactively</li> 
+  <li>Allows the function code to execute while being developed interactively</li> 
   <li>May act as documentation in the source</li>
   <li>
     Provides an elegant way of making functions interactive and non-interactive at the same time, 
-    as the default expression is evaluated only when the parameter is not given, or is given
-    as value null, and may call a function or use a block expression to ask the user to input
-    the value.
+    as the default expression is evaluated only when parameter is not given (or is null), 
+    and may then ask the user to input the value.
 </li>
 </ol>
 
+
+
+
 <h3>Simple example</h3>
 <p>
-  Here we make an improved version of the JavaFiles function, that takes a directory parameter, and if none given, uses the current directory.
+  Here we make an improved version of the JavaFiles function, that takes a directory parameter, and if none given, uses the current directory ("Dir").
 </p>
 <pre>
   $ P(1,Dir) =dir dir.allFiles-&gt;f assert(f.name.endsWith(".java")) out(f)
@@ -884,45 +878,35 @@ codeDirs = . ; code.examples ; code.lib
 </pre>
 
 <p>
-  As this function body is entered, and executed, it runs on current directory, since
-  the default value for parameter 1 is "Dir". When calling the function without parameters,
-  the current directory is always used, but we can now direct it to returns java files from
-  a specific directory.
+  Typing this code interactively means it gets executed directly, with no actuall call
+  parameters. This means P(1) is null, and so the default value ("Dir") is used, which means
+  the code runs on current directory.
+</p>
+<p>
+  After defining the function, we may call it without parameters, or supply null for
+  a given parameter, which again means the 
+  default expression is used, and the code again executes on current directory.
+</p>
+<p>
+  But now we can let this function run on a custom Dir object, regardless of the current
+  directory.
 </p>
 <pre>
   $ Dir("/home/user/project1")
   $ /DirProject1
 
-  $ Dir("/home/user/project2")
-  $ /DirProject2
-
-  $ DirProject1
-  $ /CurrProject
-
-  $ JavaFiles(CurrProject)-&gt;f out(f.length) | _.sum
-  $ /JavaCodeSum
-</pre>
-<p>
-  Now we have a function JavaCodeSum which calculates the sum total of all Java files 
-  in a directory defined as CurrProject. To change project, all we have to do
-  is redefine CurrProject to refer to another project.
-</p>
-
-<pre>
-  $ DirProject2
-  $ /CurrProject!
+  $ JavaFiles(DirProject1)
 </pre>
 
-<p>
-  Note: when redefining a currently existing named function, we need to add '!' to indicate that
-  we want to override the old definition. Now when we run JavaCodeSum, it works on the 
-  java files under project 2.
-</p>
+
 
 <h3>Asking for missing value</h3>
+<p>
+  The default expression of P() can also be used to ask for a value when the parameters
+  is missing.
+</p>
 <pre>
-  P(1,Input("Enter value").get) =value
-  ...
+  P(1,Input("Enter value").get) =value ...
 </pre>
 
 
@@ -934,8 +918,8 @@ codeDirs = . ; code.examples ; code.lib
 </p>
 <h2>List filtering</h2>
 <p>
-  The assert() and reject() statements inside loops decide if the rest of the loop body is to 
-  be executed or not.
+  The assert(), reject() and break() statements inside loops decide if the rest of the loop body is to 
+  be executed or not, and provide the data filtering mechanism in CFT.
 </p>
 
 <h2>if() expression</h2>
@@ -946,12 +930,12 @@ codeDirs = . ; code.examples ; code.lib
 </p>
 <p>
   In this example we call SomeFunction, then use an if() expression to replace return value 'null' 
-  with a Dict object.
+  with integer 0 (zero).
 </p>
 
 <pre>
   SomeFunction(...) =a
-  if(a==null, Dict, a) =a  # provides a default value if a is null
+  if(a==null, 0, a) =a  # provides a default value if a is null
 </pre>
 
 <h2>when() expression</h2>
@@ -966,7 +950,7 @@ codeDirs = . ; code.examples ; code.lib
   value. Otherwise, the 'expr' is not resolved, and the return value is null.
 </p>
 <p>
-  The when() expression is the best way of expression multiple-choice conditionals ("switch" in Java).
+  The when() expression is good for handling multiple-choice ladders ("switch" in Java).
 </p>
 <pre>
   when (mode==1, SomeFunction(...))
@@ -978,10 +962,12 @@ codeDirs = . ; code.examples ; code.lib
 
 
 
+
+
 <h1>Block expressions</h1>
 <p>
   Block expressions are sequences of code
-  inside curly braces, and are frequently used with if() and when().
+  inside curly braces, and are frequently used with if() and when(). 
 </p>
 <pre>
   false =ok
@@ -991,9 +977,12 @@ codeDirs = . ; code.examples ; code.lib
   })
 </pre>
 
+
+
+
 <h2>Block expressions are real expressions</h2>
 <p>
-  Even though mostly used with when() and if(), block expressions are general expressions, just
+  Though mostly used with when() and if(), block expressions are general expressions, just
   like a function call, or some variable lookup.
 </p>
 <pre>
@@ -1005,8 +994,8 @@ codeDirs = . ; code.examples ; code.lib
 
 <h2>Pitfalls</h2>
 <p>
-  Even though block expressions occur literally inside other code, and have their variable scope
-  extend out into the calling environment, they are still somewhat function-like. This means:
+  Block expressions occur literally inside other code, and have their variable scope
+  extend out into the calling environment, but they are still somewhat function-like. This means:
 </p>
 <ul>
   <li>
@@ -1027,10 +1016,12 @@ codeDirs = . ; code.examples ; code.lib
   when(x=="b", {break(true)})  # does not break loop
 </pre>
 <p>
-  This break() does not affect the loop running outside the block expression. 
+  The call to break() inside a block expression does not affect the loop running outside
+  the block expression. 
 </p>
 <p>
-  With break() taking a boolean value, the solution is of course to write:
+  With break() taking a boolean value, the above example is a bit artificial, as the solution 
+  here is to write:
 </p>
 <pre>
   "a b c".split-&gt;x
@@ -1038,10 +1029,12 @@ codeDirs = . ; code.examples ; code.lib
 </pre>
 
 
+
+
 <h2>Full functionality</h2>
 <p>
   Block expressions can contain looping and the code can be partitioned into a
-  number of code blocks (multiple loop spaces). Example:
+  number of loop spaces (with the "pipe" symbol). Example:
 </p>
 <pre>
   List(1,2,3)=a {a->x assert(x%2==1) out(x) | _.sum} 
@@ -1088,7 +1081,7 @@ codeDirs = . ; code.examples ; code.lib
   $ Dir.run("cmd","/c","git","pull","origin","master")
 </pre>
 <p>
-  Many Windows programs require the "cmd","/c" in front. Notepad is an exception.
+  Many Windows programs require the "cmd","/c" in front of the actual program.
   For proper operating systems (Linux) you naturally skip the two first elements of the command list.
 </p>
 <p>
@@ -1098,6 +1091,8 @@ codeDirs = . ; code.examples ; code.lib
 <pre>
   Dir.run("cmd /c git pull origin master".split)
 </pre>
+
+
 
 <h2>Dir.runCapture()</h2>
 <p>
@@ -1111,27 +1106,31 @@ codeDirs = . ; code.examples ; code.lib
 </pre>
 
 
+
 <h2>Dir.runDetach()</h2>
 <p>
   Use to run external program in the background. The CFT code continues running after forking
-  off the background process. 
+  off the background process. Nice for editors etc.
 </p>
 <pre>
   $ Dir.runDetach("leafpad", Sys.savefile.path)
 </pre>
-
 
 <p>
   This example runs the (linux) leapad editor in the background, with the path of the current savefile as 
   argument.
 </p>
 
+
+
+
 <h2>Dir.runProcess()</h2>
 <p>
-  Similar to Dir.runDetach(), but for cases where we need to inspect the output, as this command
-  sets the external program up to read input from an input file, and redirect both stdout and
-  stderr to different files (File objects).
+  Similar to Dir.runDetach(), but for cases where we need to provide non-interactive input, 
+  and inspect the output, as this uses files for stdin, stdout and stderr.
 </p>
+
+
 
 
 
@@ -1140,21 +1139,19 @@ codeDirs = . ; code.examples ; code.lib
 <h1>Editing save files</h1>
 
 
-
 <h2>Using editor for entering code</h2>
 
 <p>
   As was illustrated above, in the case of Dir.runDetach(), we can create a function that opens
   the current savefile in an editor. This of course requires a current savefile, which is created
-  by colon command save. The savefile internal function returns a File object for the savefile,
-  which we use to create full path argument to notepad.
+  by colon command save. The Sys.savefile() function returns a File object for the savefile,
+  or null if no savefile exists.
 </p>
 
 <p>
-  Since this is functionality is used frequently, there exists a global shortcut that does this.
+  Since this is functionality is used very frequently, there exists a global shortcut that does this.
 </p>
 <pre>
-  $ :save Test
   $ @e
 </pre>
 
@@ -1208,10 +1205,12 @@ codeDirs = . ; code.examples ; code.lib
 
 <h2>Multi-line functions</h2>
 <p>
-  Editing the savefile lets us write more complex functions. The save file supports
-  multi-line functions. The same rules apply as for single lines, regarding scope rules, which
-  means loops and loop termination using the "pipe" symbol.
+  Editing the savefile lets us write more complex functions as we can break function
+  code across multiple lines, using indentation and comments. The same rules apply as for 
+  single lines, regarding how the "pipe" symbol sections the code into multiple
+  loop spaces.
 </p>
+
 
 
 
@@ -1220,8 +1219,16 @@ codeDirs = . ; code.examples ; code.lib
   The hash character '#' indicates that the rest of the line is a comment.
 </p>
 
+<p>
+  Note that ALL TEXT following one function assigment ("/name") is included as the 
+  code body of the next function. 
+</p>
 
-<h2>First line of function ...</h2>
+
+
+
+
+<h2>First line of a function ...</h2>
 <p>
   The interactive command '?' is used to see the defined functions. For functions entered
   interactively there is only one line, and that line is shown. For multiline functions, 
@@ -1238,6 +1245,8 @@ codeDirs = . ; code.examples ; code.lib
 
 
 
+
+
 <h2>Debug</h2>
 <p>
   When creating complex code, we may need to display debug output. This is done with the global
@@ -1248,6 +1257,9 @@ codeDirs = . ; code.examples ; code.lib
   $ debug("data")
   %DEBUG% data
 </pre>
+<p>
+  You can of course also just call println(...)
+</p>
 
 
 
@@ -1384,7 +1396,7 @@ The following is used to switch drive letter in Windows.
 
 
 
-<h2>Using cd, ls, cat, more and edit in code</h2>
+<h2>Using cd, ls, cat, more and edit inside (function) code</h2>
 <p>
   Quick answer: <b>this should be avoided.</b>
 </p>
@@ -1424,6 +1436,8 @@ The following is used to switch drive letter in Windows.
 
 
 
+
+
 <h2>Get data from user: Input() and readLine()</h2>
 <p>
   To stop and ask the user to enter something, we got two options. The Input() function
@@ -1457,24 +1471,18 @@ The following is used to switch drive letter in Windows.
 
 <p>
   But the lines returned from "Grep.file()" are not
-  just strings, they are extended strings, of a type called "FileLine". It contains
-  two additional additional functions, "file()" to get the
-  file object and "lineNumber()" which returns the line number in that file.
+  just strings, they are extended strings, of a type called "FileLine", which contains
+  two additional additional functions, ".file()" to get the
+  file object and ".lineNumber()" which returns the line number in that file.
+</p>
+
+<p>
+  The File.read() function also produces a list of FileLine, rather than regular string
+  values.
 </p>
 
 
-<h3>FileLine</h3>
-<p>
-  The function "File.read()" also returns a list of FileLine objects, and not just strings. 
-  A FileLine object can be created with global function FileLine().
-</p>
-<pre>
-  $ FileLine("",1,File("x.txt")) help
-</pre>
-<p>
-  This lists all the functions of the String type, plus the two mentioned above, "file()" and
-  "lineNumber()".
-</p>
+
 
 <h3>report()</h3>
 <p>
@@ -1483,8 +1491,8 @@ The following is used to switch drive letter in Windows.
   are formatted into columns, for readability.
 </p>
 <p>
-  The formatted text is added to the same list of output as data via out(), but after the 
-  code block has completed. This means that the formatted output from report() is data,
+  The formatted text is added to the same list of output as data via out(), but only after the 
+  loop space has completed. This means that the formatted output from report() is data (strings),
   just like values from out().
 </p>
 
@@ -1517,7 +1525,7 @@ The following is used to switch drive letter in Windows.
   $ Search
   Enter search term
   class
-  &lt;list&gt;
+  &lt;List&gt;
    0: ProgramLine.java       | 11  | public class ProgramLine extends LexicalElement {
    1: StmtDebug.java         | 9   | public class StmtDebug extends Stmt {
    2: ExprIf.java            | 9   | public class ExprIf extends LexicalElement {
@@ -1527,18 +1535,20 @@ The following is used to switch drive letter in Windows.
 </pre>
 
 
-<h2>Grep.file()</h2>
-<p>
-  Searching for text in files, we use the .file() function of the Grep object. 
-</p>
 
 
 
-<h2>Grep.lines()</h2>
-<p>
-  To match content from a list instead of from file, the "Grep.lines()" function takes
-  a list of strings.
-</p>
+<h2>Grep - complex example</h2>
+<pre>
+  # Match lines containing "a" or "b", and that do not contain "c" or "d"
+  Grep.match("a","b").reject("c","d")  
+
+  # Match lines containing "a" AND "b"
+  Grep.match("a").match("b")
+
+  # Regular expressions - matching lines with 8 digits in sequence
+  Grep.matchRegex("[0-9]{8}")
+</pre>
 
 
 
@@ -1547,39 +1557,39 @@ The following is used to switch drive letter in Windows.
 <h2>Working with huge logs - counting hits</h2>
 <p>
   The Grep instances are by default set up with a limit of the 1000 first matches. Passing
-  that limit produces an error. The limit is set as follows:
+  that limit produces an error. The limit can be changed as follows:
 </p>
 <pre>
-  $ Grep("...").limitFirst(100) 
+  $ Grep("...").limitFirst(100)
   $ Grep("...").limitLast(100)
 </pre>
 
+
 <h3>Counting hits</h3>
 <p>
-  Whwn working with big files, one can also decide to initially do a count of hits,
+  When working with big files, one can also decide to initially do a count of hits,
   to narrow down the search terms before doing an actual search. 
-</p>
-<pre>
-  $ Grep("...").modeCount
-</pre>
-<p>
-  When a Grep object is operating in count mode, the limit doesn't apply. Limits exist to protect
-  us from running out of memory, and counting does not consume any memory.
 </p>
 <p>
   The following example shows a function for searching through a set of java files and
-  counting the hits in each, summing these up.
+  counting the hits in each, summing these up, using Grep.fileCount() function instead
+  of Grep.file(), which produces result lines.
+</p>
+<p>
+  Counting hits is not subject to the limits above, as those exist in order to 
+  avoid uncontrolled memory use.
 </p>
 <pre>
   Input("Enter search term").get =st
-  Grep(st).modeCount =grep
+  Grep(st) =grep
   ProjectDir.allFiles-&gt;f
     assert(f.name.endsWith(".java"))
-    grep.file(f) =count
+    grep.fileCount(f) =count
     out(count)
   | _.sum
   /SearchCount
 </pre>
+
 
 <h3>Limiting search to a few files</h3>
 <p>
@@ -1589,10 +1599,10 @@ The following is used to switch drive letter in Windows.
 </p>
 <pre>
   Input("Enter search term").get =st
-  Grep(st).modeCount =grep
+  Grep(st) =grep
   ProjectDir.allFiles-&gt;f
     assert(f.name.endsWith(".java"))
-    grep.file(f) =count
+    grep.fileCount(f) =count
     out(Int(count,f))        # &lt;--- see section on "Generalized sorting"
   | _.sort-&gt;x
     report(x.data.name, x)
@@ -1617,26 +1627,6 @@ The following is used to switch drive letter in Windows.
 
 
 
-
-<h2>Searching multiple types of file</h2>
-<p>
-  To search multiple types of files, we create a function that lists the
-  valid types (after last dot) then check if the ending of the file matches one of
-  those.
-</p>
-<pre>
-  "java txt".split
-  /FileTypes
-
-  Input("Enter search term").get =st
-  Grep(st) =grep
-  ProjectDir.allFiles-&gt;f
-    f.name.afterLast(".").toLower =ending
-    assert(FileTypes.contains(ending))
-    grep.file(f)-&gt;line
-      report(line.file.name, line.lineNumber, line)
-  /Search
-</pre>
 
 
 
@@ -1920,7 +1910,7 @@ The following is used to switch drive letter in Windows.
 
 <pre>
   $ ls
-  &lt;list&gt;
+  &lt;List&gt;
    0: runtime/              | d:2 | f:12
    1: CallScriptFunc.java   | 1k  | 1398  |             | 2020-02-28 22:38:09
    2: CodeHistory.java      | 10k | 10980 | 2d_22:23:24 | 2020-06-07 12:57:49
@@ -1953,7 +1943,7 @@ The following is used to switch drive letter in Windows.
 </p>
 <pre>
   $ ls
-  &lt;list&gt;
+  &lt;List&gt;
    0: runtime/              | d:2 | f:12
    1: CallScriptFunc.java   | 1k  | 1398  |             | 2020-02-28 22:38:09
    2: CodeHistory.java      | 10k | 10980 | 2d_22:23:24 | 2020-06-07 12:57:49
@@ -2096,7 +2086,7 @@ The following is used to switch drive letter in Windows.
 </p>
 <pre>
   $ myTemplate
-  &lt;list&gt;
+  &lt;List&gt;
   0: This is
   1: some text
 </pre>
@@ -2179,7 +2169,7 @@ The following is used to switch drive letter in Windows.
   $ /df
 
   $ df.get("A")
-  &lt;list&gt;
+  &lt;List&gt;
   This is
   template A
 </pre>
@@ -2523,7 +2513,7 @@ The following is used to switch drive letter in Windows.
   3
 
   Val("data").keys
-  &lt;list&gt;
+  &lt;List&gt;
   0: a
 </pre>
 
@@ -2570,7 +2560,7 @@ The following is used to switch drive letter in Windows.
 </p>
 <pre>
   0=a loop break(a&gt;3) out(a) a+1=a
-  &lt;list&gt;
+  &lt;List&gt;
   0
   1
   2
@@ -2751,11 +2741,11 @@ The following is used to switch drive letter in Windows.
 <p>
   A macro is written in the same way as a block expression, just that the body starts with 
   a single asterisk (*), indicating
-  that this block of code can run anywhere, as it will always run in an isolated context, not
-  seeing any state of the caller, which block expressions naturally do.
+  that the code can run anywhere, as it will always run in an isolated context, not
+  seeing any state of the caller, which block expressions naturally do. 
 </p>
 <p>
-  To call a macro, apply the .call() function on it, with parameters as needed, which are
+  To call a Macro, apply the .call() function on it, with parameters as needed, which are
   picked up insicde the code in the same way as in functions.
 </p>
 
@@ -2773,7 +2763,6 @@ The following is used to switch drive letter in Windows.
   See savefileLib.txt for examples of macros used to implement generic
   menu system, as applied to select editor for Linux.
 </p>
-
 
 
 
@@ -2830,7 +2819,7 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
   The following code is an effective way of using PowerShell from CFT, saving lots of typing.
 </p>
 <pre>
-  # Run remote script-block
+  # Run remote PowerShell script-block
     P(1)=host
     P(2)=cmd
     List("powershell","invoke-command","-computername",host,"-scriptblock","{" + cmd + "}") =fullCmd
