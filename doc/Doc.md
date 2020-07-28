@@ -371,7 +371,8 @@ $ '"' + "'a'" + '"'
 "'a'"
 ```
 
-Also, there is no escape character, which means backslash is just another character.
+Also, backslash is not used as escape character, which means backslash is just another character,
+simplifying those Windows paths.
 
 # List processing
 

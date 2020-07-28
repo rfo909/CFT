@@ -64,7 +64,7 @@ EditFileFromHistory
 	false =updated
 	if (!Sys.isWindows,{
 		# Linux
-		Dir.runCapture("which","stty").nth.contains("stty") =hasStty
+		Dir.runCapture("which","stty").nth.contains("/stty") =hasStty
 		when(hasStty, {
 			Dir.runCapture("stty","size").nth.split =list
 			#debug("list=" + list)
@@ -73,7 +73,7 @@ EditFileFromHistory
 			true =updated
 		})
 	},{
-		# Windows
+		# Windows (a bit slow)
 		Dir.runCapture("powershell","(Get-Host).UI.RawUI.WindowSize.Width").nth.parseInt =w
 		Dir.runCapture("powershell","(Get-Host).UI.RawUI.WindowSize.Height").nth.parseInt =h
 		Cfg.w(w)
