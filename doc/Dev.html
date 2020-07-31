@@ -13,11 +13,44 @@
 
 <h1>CFT Change log</h1>
 
+<h3>v1.1.2 2020-07-31 Improved Investigation script</h3>
+<p>
+	Standardized file output. Changed shortcuts to lower case.
+</p>
+
+
+<h3>v1.1.2 2020-07-31 Logical bug</h3>
+<p>
+	!a && !b  failed
+</p>
+<p>
+	Seemed to end up as !(a && !(b)) due to indiscriminate Expr matching. 
+</p>
+<p>
+	Fixed in ExprTerminal, where notExpr is now ExprE instead of Expr. Verified by simple
+	truth table listout.
+</p>
+<pre>
+a=true b=true false
+a=true b=false false
+a=false b=true false
+a=false b=false true
+</pre>
+
+<h3>v1.1.2 2020-07-31 Colon command overhaul</h3>
+<p>
+	Improved feedback when typing just ":"
+</p>
+<p>
+	Added :sw which switches between loaded scripts by partial match, or lists all
+	available if no (partial) identifier given
+</p>
+
 
 <h3>v1.1.2 2020-07-27 Doc overhaul</h3>
 <p>
-	Changed old "code blocks" to "loop spaces", leaving "block expressions" and macros
-	unchanged. 
+	Replaced old term "code blocks" with "loop spaces", leaving "block expressions" and macros
+	unchanged.
 </p>
 
 

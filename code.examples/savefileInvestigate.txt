@@ -37,41 +37,66 @@ File(".investigate")
 
 
 
+
 # Log with data
+	List("","D:"+Date.fmt,"----") =list
+
 	Sys.lastResult =res
 	res.?nth =isList
-	
+
 	when(isList,{
-		readLine("Element number").parseInt =pos
-		if(pos=="", 0, pos) =pos
-		res.nth(pos) =res
+		readLine("Element number (Enter for all)") =num
+		when(num.?parseInt, {res.nth(num.parseInt) =res})
 	})
-	{* syn(P(1)) } =conv
-	if(conv.?call(res), conv(res), "<Can not be synthesized>") =value
 	
-	readLine("Comment") =comment
-	LogFile.append(List("",Date.fmt,value,comment))
+	0 =count
+	res->x 
+		list.add("# " +x) 
+		count+1 =count
+	|
+	list.add("----")
+
+	loop
+		readLine("Comment, blank when done") =line
+		break(line=="")
+		list.add("C:" + line)
+	|
+	list.add("")
+	
+	LogFile.append(list)
 /LogWithData
 
 
 # Log multiple lines, no data
-	List("",Date.fmt) =list
+	List("","D:"+Date.fmt) =list
 
 	loop
-		readLine("Text, blank when done") =line
+		readLine("Comment, blank when done") =line
 		break(line=="")
-		list.add(line)
+		list.add("C:" + line)
 	|
+	list.add("")
 	LogFile.append(list)
 /LogNoData
 
 
 # Log pasted text
+	List("","D:"+Date.fmt,"----") =list
+
 	readLine("End marker") =endMarker
 	readLines(endMarker) =lines
 	
-	List("",Date.fmt,"------") + lines + List("------") =data
-	LogFile.append(data)
+	lines->line list.add("# " + line) |
+	
+	list.add("----")
+	loop
+		readLine("Comment, blank when done") =line
+		break(line=="")
+		list.add("C:" + line)
+	|
+	
+	list.add("")
+	LogFile.append(list)
 /LogPastedText
 
 

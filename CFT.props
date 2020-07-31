@@ -58,16 +58,16 @@ shortcut:PSS  = "---- Projects repeat last search ----"   Sys.stdin("") call "Pr
 shortcut:PP   = "---- Projects change project ----"       call "Projects:ChangeProject"
 
 # Investigate script (experimental)
-shortcut:I    = "---- Investigate ----"                   Sys.stdin(":load Investigate","?")
-shortcut:ID   = "---- Investigate log with data ----"     call "Investigate:LogWithData"
-shortcut:IND  = "---- Investigate log no data ----"       call "Investigate:LogNoData"
-shortcut:IP   = "---- Investigate log pasted text ----"   call "Investigate:LogPastedText"
-shortcut:IS   = "---- Investigate show log ----"          call "Investigate:Show"
+shortcut:INV  = "---- Investigate ----"                   Sys.stdin(":load Investigate","?")
+shortcut:id   = "---- Investigate log with data ----"     call "Investigate:LogWithData"
+shortcut:ind  = "---- Investigate log no data ----"       call "Investigate:LogNoData"
+shortcut:ip   = "---- Investigate log pasted text ----"   call "Investigate:LogPastedText"
+shortcut:is   = "---- Investigate show log ----"          call "Investigate:Show"
 
 
 # List available shortcuts when typing '@' only
 # ---
-shortcut:     = "---- Show all shortcuts ----"            File("CFT.props").read->line assert(line.contains("shortcut:")) out(line)
+shortcut:     = "---- Show all shortcuts ----"            File("CFT.props").read->line assert(line.startsWith("shortcut:")) out(line)
 
 
 

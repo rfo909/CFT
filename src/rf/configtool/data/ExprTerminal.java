@@ -28,7 +28,7 @@ import rf.configtool.parser.TokenStream;
 public class ExprTerminal extends LexicalElement {
     
     private Expr innerExpr;
-    private Expr notExpr;
+    private ExprE notExpr;
     private Expr negExpr;
     private ExprPop pop;
     private ExprIf exprIf;
@@ -53,7 +53,7 @@ public class ExprTerminal extends LexicalElement {
         }
 
         if (ts.matchStr("!")) {
-            notExpr=new Expr(ts);
+            notExpr=new ExprE(ts);
             return;
         }
         if (ts.matchStr("-")) {

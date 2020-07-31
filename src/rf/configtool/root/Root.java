@@ -417,6 +417,36 @@ public class Root {
 			String ident = ts.matchIdentifier(); // may be null
 			currScript = getScriptState(ident, true);
 			return;
+		} else if (ts.matchStr("sw")) {
+			String ident=null;
+			if (ts.peekType(Token.TOK_IDENTIFIER)) {
+				ident=ts.matchIdentifier("internal error");
+			}
+		
+			Iterator<String> keys = scriptStates.keySet().iterator();
+			boolean foundAny=false;
+			while (keys.hasNext()) {
+				String scriptName=keys.next();
+				if (scriptName.trim().length()==0) {
+					// the empty script
+					continue;
+				}
+				if (ident != null) {
+					if (scriptName.contains(ident)) {
+						// got a match, switch to it
+						currScript=getScriptState(scriptName, false);
+						return;
+					}
+				} else {
+					stdio.println("- " + scriptName);
+					foundAny=true;
+				}
+			}
+			if (!foundAny) {
+				stdio.println("(no scripts loaded)");
+			}
+			return;
+
 		} else if (ts.matchStr("delete")) {
 			for (;;) {
 				String ident = ts.matchIdentifier("expected identifier to be cleared");
@@ -442,7 +472,7 @@ public class Root {
 			} else {
 				objGlobal.outln("DEBUG MODE OFF");
 			}
-			objGlobal.outln("Loaded scripts: " + getScriptStateNames());
+			//objGlobal.outln("Loaded scripts: " + getScriptStateNames());
 			return;
 		} else if (ts.matchStr("wrap")) {
 			boolean wrap = objCfg.changeWrap();
@@ -500,7 +530,22 @@ public class Root {
 			objGlobal.outln("Assign to name by /xxx as usual");
 			return;
 		} else {
-			throw new Exception("Unknown command, try: quit, save, load, new, delete, copy, debug, wrap, syn or <int>");
+			stdio.println();
+			stdio.println("Colon commands");
+			stdio.println("--------------");
+			stdio.println(":save [ident]?           - save script");
+			stdio.println(":load [ident]?           - load script");
+			stdio.println(":new                     - create new empty script");
+			stdio.println(":sw [ident]?             - switch between loaded scripts");
+			stdio.println(":delete ident [, ident]* - delete function(s)");
+			stdio.println(":copy ident ident        - copy function");
+			stdio.println(":wrap                    - line wrap on/off");
+			stdio.println(":debug                   - enter or leave debug mode");
+			stdio.println(":syn                     - synthesize last result");
+			stdio.println(":<int>                   - synthesize a row from last result (must be list)");
+			stdio.println(":quit                    - terminate CFT");
+			stdio.println();
+			return;
 		}
 	}
 
