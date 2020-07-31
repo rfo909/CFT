@@ -59,8 +59,8 @@ shortcut:PP   = "---- Projects change project ----"       call "Projects:ChangeP
 
 # Investigate script (experimental)
 shortcut:INV  = "---- Investigate ----"                   Sys.stdin(":load Investigate","?")
+shortcut:i    = "---- Investigate log no data ----"       call "Investigate:LogNoData"
 shortcut:id   = "---- Investigate log with data ----"     call "Investigate:LogWithData"
-shortcut:ind  = "---- Investigate log no data ----"       call "Investigate:LogNoData"
 shortcut:ip   = "---- Investigate log pasted text ----"   call "Investigate:LogPastedText"
 shortcut:is   = "---- Investigate show log ----"          call "Investigate:Show"
 
