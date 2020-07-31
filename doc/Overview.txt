@@ -7,40 +7,46 @@ v1.1.2
 Introduction
 
 What CFT is not
- * So what is it for?
+
+So what is it for?
+ * Functions example
+ |   No parantheses?
+ * Coding vs purely interactive use
+ * Typical use
 
 CFT as a shell
  * Navigating directories
- |   Listing files or directories only
  * Show content of file
 
 The help system
 
-Base functions and objects: File, Dir and List
- * File() function
- |   Create file
- |   Read file
- |   Append to file
- |   Page through a file
- |   Show bytes of file
- |   Encoding
- * Dir() function
- |   Create a subdirectory
- |   Parent directory
- |   Get files in a directory
- |   Create a file in a directory
- |   Get immediate directories in a directory
- |   Get all files recursively under a directory
- |   Get all directories recursively under a directory:
- |   Delete a sub-directory
- * Lists
+Lists
+
+Files
+ * Create file
+ * Read file
+ * Append to file
+ * Page through a file
+ * Show bytes of file
+ * Encoding
+ * Delete a file
+
+Directories
+ * Create a subdirectory
+ * Parent directory
+ * Get files in a directory
+ * Create a file in a directory
+ * Get immediate directories in a directory
+ * Get all files recursively under a directory
+ * Get all directories recursively under a directory:
+ * Delete a sub-directory
 
 The shell() function
 
 Core types
  * String literals
 
-List processing
+List iteration / filtering
  * Iterating over list content
  * Filtering with assert(), reject() and break() + out()
  * The condOut() statement
@@ -57,6 +63,11 @@ Savefiles
  * Create new empty script
  * The @e shortcut
  * CFT.props - codeDirs
+
+Protecting files and directories
+ * Example
+ * No guarantee
+ * Laziness is our friend
 
 CFT as a functional programming language
  * Code only
@@ -75,6 +86,7 @@ Conditional execution
  * List filtering
  * if() expression
  * when() expression
+ * error() expression
 
 Block expressions
  * Block expressions are real expressions
@@ -165,6 +177,8 @@ Various advanced topics
  * Command line args
  * Calling functions in external scripts
  * Protecting directories and files
+ |   A protected directory does not allow
+ |   A protected file does not allow
  * Working with text lines from stdin
  * Differing between Windows and Linux
  * Session state

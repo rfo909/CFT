@@ -747,12 +747,15 @@ public class ObjDir extends Obj {
             return "protect";
         }
         public String getShortDesc() {
-            return "protect(code) - set protection code string, returns self";
+            return "protect(desc?) - set protection status, returns self";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 1) throw new Exception("Expected status string parameter");
-        	String label=getString("status", params, 0);
-        	protection = new Protection(label);
+        	String desc="-";
+        	if (params.size() > 1) throw new Exception("Expected optional string parameter");
+        	if (params.size()==1) {
+        		desc=getString("desc", params, 0);
+        	}
+        	protection = new Protection(desc);
             return new ValueObj(self());
         }
     }

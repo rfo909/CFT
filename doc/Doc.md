@@ -1,7 +1,7 @@
 # CFT / ConfigTool
 
 ```
-Last updated: 2020-07-27 RFO
+Last updated: 2020-07-31 RFO
 v1.1.2
 ```
 # Introduction
@@ -14,13 +14,16 @@ as an interactive environment, with strong emphasis on automation. The syntax is
 in the interest of getting useful work out of even a single line of code.
 
 
-CFT has been routinely used on Linux and Windows, and easily integrates with external commands
-on both, particularly PowerShell. It should run everywhere that supports Java.
+CFT is tested on Linux and Windows, and easily integrates with external commands
+on both, such as PowerShell, git, ssh. It should run everywhere that supports Java.
 
 
-Development has been going on since May 2018, and v1.0 marked a certain level of robustness and error
-handling, being mature enough to be made open source on github. It started
-out purely as an interactive
+Development has been going on since May 2018, and v1.0 towards end of June 2020
+marked a certain level of robustness and error
+handling, being mature enough for open source release on github.
+
+
+It started out purely as an interactive
 tool, with emphasis on compact syntax, since all code was entered via the command line. After
 a while it evolved into editing the savefiles, or "script files".
 
@@ -32,42 +35,86 @@ Functionality has been driven partially by needs and partially by what's fun to 
 
 CFT does not allow classes or objects apart from those predefined. That would
 increase complexity a lot, be harder to implement (scope rules, inheritance etc),
-and is not what I needed.
+and is not what was needed.
 
 
-CFT is meant for simple automation tasks, like moving files, searching and running
-external programs. It has the feel of a "toy language", with some particularly
-strange features, including being stack based, but supporting normal "2+3*5" expressions.
+CFT is meant for automation tasks, such as moving files, searching and running
+external programs. It is a Domain Specific Language, not general purpose.
 
 
 Writing big functions is certainly possible. Letting scripts call each other is
-also both supported and used. But writing complex applications is not the intention
-behind this app.
+also both supported and used. But writing complex applications, or introducing
+abstractions, is not the intention
+behind this application.
 
 
-Also, doing GUI or doing networking other than what you get with curl and other
-external programs, is not what CFT is about. In this respect, CFT is a shell, it
-depends on other programs.
+**It is a do-this-then-that type of language.**
+
+Also, for many purposes, we will call external programs. In this respect, CFT is a shell, in that it
+depends on external programs. Still, CFT is not a full shell. You will usually also need regular shells
+for all kinds of interactive commands, as well as file managers etc.
 
 
-Finally, CFT is also not a full shell. You will need regular shells for all kinds of
-interactive commands. CFT does not have autocomplete, in fact its input is
-line based.
+CFT doesn't support autocomplete, since its interactivity is line based.
 
-## So what is it for?
+# So what is it for?
 
 
 Commands like "ls" and "cd" exist, with globbing, as well as "more" and "edit" (which opens a file
-in an editor), but they are not meant for moving around the directory tree doing much. Rather
-they are for locating files and directories, for which you then build code.
+in an editor), and they are meant for moving around the directory tree. Actually changing
+and moving files and directories is supposed to be scripted with code.
 
 
 Everything in CFT is functions, and defining your own is super easy, and 
 **this is the point of CFT**,
-that automation can be a simple and interactive process.
+the automation aspect, and that automation should be a simple and interactive process.
+
+## Functions example
 
 
-Once functions are tested, they can do all kinds of boring and repetitious stuff for us:
+CFT is object oriented, as opposed to traditional *ix shells such as bash, which process text.
+
+
+This means that the return value from some function always is an object that has other functions
+inside. Strings, integers and floats are all objects.
+
+
+Example:
+
+```
+$ Dir.files.length
+# means:
+# - call global function Dir() with no parameters
+# - returns Dir object for current directory
+# - call .files() inside the Dir object
+# - returns list of File objects
+# - call .length() function on the list object
+# - returns an int
+```
+### No parantheses?
+
+
+When calling a function without parameters, the parantheses () are optional.
+
+## Coding vs purely interactive use
+
+
+Working on mission-critical systems, one must at all costs avoid issuing the wrong commands.
+Creating functions, and preferrably adding code to validate input, to reject specific server
+names or domains, etc, plus the .protect() mechanism for Dir and File objects, helps you avoid doing
+seriously bad things.
+
+Better use a little time to step-wise develop some function with proper checking of
+parameters from users or other functions, before you let it actually do anything, rather
+than interactively mistype, and kill the wrong database or VM.
+
+
+Even boring stuff has the potential for serious consequences, if you delete the original log
+files, instead of the copy you unzipped. Use the protect() mechanism routinely when pointing
+a Dir at a location where destructive updates must not happen, and save yourself from
+some of those "just need to do this in a hurry" typing mishaps.
+
+## Typical use
 
 
 
@@ -80,14 +127,23 @@ Once functions are tested, they can do all kinds of boring and repetitious stuff
 -  deploying jar files to test environments
 
 
+-  restart services
+
+
+-  delete logs older than X days - carefully
+
+
+-  verify that a bunch of VM's can be pinged
+
+
 -  generate netplan config files
+
+
+-  automated management via ssh
 
 
 -  automate git and powershell and other things that require you to type too much
 
-
-
-... and so on.
 
 # CFT as a shell
 
@@ -102,12 +158,6 @@ $ cd subdir
 $ cd ..
 $ pwd
 $ ls ../someDir/*.txt
-```
-### Listing files or directories only
-
-```
-$ lsf
-$ lsd
 ```
 ## Show content of file
 
@@ -138,165 +188,22 @@ The first produces a list of global functions, the second of functions inside st
 the third displayes the functions inside Dir objects. The fourth lists functions available on
 int, and the last for float values.
 
-# Base functions and objects: File, Dir and List
+# Lists
 
 
-CFT is a programming language, with an interactive front-end,
-and offers a number of built-in functions, which produce objects
-with member functions and so on. The most important
-objects types are 
-**File** and 
-**Dir**, plus 
-**List**.
-
-## File() function
+Lists are created with the global List() function, which creates
+a list from all its parameters.
 
 ```
-$ File("x.txt")
-<obj: File>
-x.txt   DOES-NOT-EXIST
+$ List(1,2,3,4)
 ```
 
-The File() function requires a name, and returns a File object. As seen
-above, the file needs not exist (yet).
-
-
-The files created in this way are always located in
-the CFT home directory. This gives predictability for (system) data files etc.
-To access or create files in other directories, use the file() function inside
-some Dir object:
-
-```
-$ SomeDirExpression.file("x.txt")
-```
-### Create file
-
-
-To create a file with a single text line:
-
-```
-File("x.txt").create("one line")
-```
-
-If the file already exists, it is overwritten with the new content.
-
-### Read file
-
-
-To read an existing text file:
-
-```
-File("x.txt").read
-```
-
-This returns a list of all lines in the file.
-
-### Append to file
-
-
-To append a single line to a file:
-
-```
-File("x.txt").append("another line")
-```
-
-To append multiple lines, append a list instead.
-
-### Page through a file
-
-
-To page through text file
-
-```
-more x.txt
-```
-### Show bytes of file
-
-
-To page through list of bytes (hex)
-
-```
-File("x.txt").hex
-```
-### Encoding
-
-
-Default encoding is "ISO_8859_1", but this can be changed, for example:
-
-```
-File("x.txt").encoding("UTF-8")
-```
-## Dir() function
-
-```
-$ Dir
-<obj: Dir>
-ConfigTool/ d:5 f:20
-```
-
-Calling the Dir function with no parameters returns a Dir object for the current directory. The Dir
-object offers multiple member functions, one of which is 
-**files**, which produces a list of files in
-the directory. We can also call the Dir function with a path parameter.
-
-### Create a subdirectory
-
-```
-Dir.sub("someDir").create
-```
-### Parent directory
-
-
-ATo get the parent directory of a Dir object, we use:
-
-```
-Dir.sub("..")
-```
-### Get files in a directory
-
-```
-Dir.files
-```
-### Create a file in a directory
-
-```
-Dir.file("x.txt").create("something")
-```
-### Get immediate directories in a directory
-
-```
-Dir.dirs
-```
-### Get all files recursively under a directory
-
-```
-Dir.allFiles
-```
-### Get all directories recursively under a directory:
-
-```
-Dir.allDirs
-```
-### Delete a sub-directory
-
-
-The sub-directory must be empty
-
-```
-Dir.sub("something").delete
-```
-## Lists
-
-
-The List object is essential for all data processing in CFT. Calling Dir.files() function
-produces a list of File objects.
+Lists are also returned from many other functions, for example
+calling Dir.files() function produces a list of File objects inside that
+directory object.
 
 ```
 $ Dir.files
-<List>
-0: someFile.txt    | 0k    | 777     | 90d | 2020-02-22 16:38:53
-1: otherFile.txt   | 1k    | 1250    | 49d | 2020-04-03 10:02:44
-:
 ```
 
 Many functions are available on a List object. One frequently used is "nth", which
@@ -313,12 +220,153 @@ For details of available functions, as always use the help system:
 ```
 $ List help
 ```
-
-To create file with multiple lines, or to add multiple lines, we use lists.
+# Files
 
 ```
-File("x.txt").create( ListExpression )
-File("x.txt").append( ListExpression )
+$ File("x.txt")
+<obj: File>
+x.txt   DOES-NOT-EXIST
+```
+
+The File() function requires a name, and returns a File object. As seen
+above, the file needs not exist.
+
+
+File objects created with a simple file name (no path), are always located in
+the CFT home directory. This gives predictability for certain data files etc.
+
+
+To access or create files in other directories, enter an absolute or relative
+path in the parameter to File(), or use the file() function inside
+some Dir object:
+
+```
+$ SomeDirExpression.file("x.txt")
+```
+## Create file
+
+
+To create a file with a single text line:
+
+```
+File("x.txt").create("one line")
+```
+
+If the file already exists, it is overwritten with the new content.
+
+
+Usually, we create files with more than one line, and this is done supplying a List
+instead of a single value, as parameter to the File.create() function.
+
+## Read file
+
+
+To read an existing text file:
+
+```
+File("x.txt").read
+```
+
+This returns a list of all lines in the file.
+
+## Append to file
+
+
+To append a single line to a file:
+
+```
+File("x.txt").append("another line")
+```
+
+To append multiple lines, append a list instead.
+
+## Page through a file
+
+
+To page through text file
+
+```
+more x.txt
+```
+## Show bytes of file
+
+
+To page through list of bytes (hex)
+
+```
+File("x.txt").hex
+```
+## Encoding
+
+
+Default encoding is "ISO_8859_1", but this can be changed, for example:
+
+```
+File("x.txt").encoding("UTF-8")
+```
+## Delete a file
+
+```
+File("x.txt").delete
+```
+# Directories
+
+```
+$ Dir
+<obj: Dir>
+ConfigTool/ d:5 f:20
+```
+
+Calling the Dir function with no parameters returns a Dir object for the current directory. The Dir
+object offers multiple member functions, one of which is 
+**.files()**, which produces a list of files in
+the directory. We can also call the Dir function with a path parameter.
+
+## Create a subdirectory
+
+```
+Dir.sub("someDir").create
+```
+## Parent directory
+
+
+To get the parent directory of a Dir object:
+
+```
+Dir.sub("..")
+```
+## Get files in a directory
+
+```
+Dir.files
+```
+## Create a file in a directory
+
+```
+Dir.file("x.txt").create("something")
+```
+## Get immediate directories in a directory
+
+```
+Dir.dirs
+```
+## Get all files recursively under a directory
+
+```
+Dir.allFiles
+```
+## Get all directories recursively under a directory:
+
+```
+Dir.allDirs
+```
+## Delete a sub-directory
+
+
+The sub-directory must be empty
+
+```
+Dir.sub("something").delete
 ```
 # The shell() function
 
@@ -374,7 +422,7 @@ $ '"' + "'a'" + '"'
 Also, backslash is not used as escape character, which means backslash is just another character,
 simplifying those Windows paths.
 
-# List processing
+# List iteration / filtering
 
 
 Lists are essential for all processing with CFT.
@@ -446,6 +494,14 @@ In addition to controlling loops with assert/reject and break, there is the cond
 statement, which takes a boolean condition as first parameter, and the value to
 be sent out as second parameter. Can be useful some times.
 
+```
+$ List(1,2,3,2,1)->
+x condOut(x
+<2,"(") out("b") condOut(x
+<2,")") | _.concat
+<String>
+(b)bbb(b)
+```
 ## List addition
 
 
@@ -562,6 +618,68 @@ library code, used by most other scripts.
 This means you are free to save a script using the name "Lib", and it will be written to
 the code.work directory. Doing this means it will hide the version in the code.lib directory.
 Which may be perfectly fine, as long as it is what you intended.
+
+# Protecting files and directories
+
+
+To save typing, one often create functions that just return some directory, or
+some files.  The JavaFiles example above illustrates this.
+
+
+The protect mechanism in CFT lets us attach a protect state to any Dir and File object,
+which guarantees that:
+
+
+
+- all files and directories derived from it are also protected
+
+
+- blocks destructive modifications
+
+
+## Example
+
+
+Adding .protect to each file that the JavaFiles function generates, ensures that all
+files returned from this function are blocked against accidental delete and modifications.
+
+```
+$ Dir.allFiles-> f assert(f.name.endsWith(".java")) out(f.protect)
+$ /JavaFiles
+```
+
+Demonstration:
+
+```
+$ JavaFiles.nth.append("")   # Trying to append empty line to first file
+ERROR: [input:16] INVALID-OP append : /home/roar/Prosjekter/Java/CFT/src/rf/configtool/main/SourceException.java (PROTECTED: -) (java.lang.Exception)
+```
+
+The .protect() function can also take a description string, which if present, is displayed in this error.
+
+## No guarantee
+
+
+Calling .protect on a Dir object, before using it to locate files, will propagate the protected
+state to all those files. However, creating a new Dir object for the same path, without calling
+.protect() on it, and then accessing content via this, does not protect anything.
+
+
+Note also that .protect can not detect for example using the path of a protected File object in
+an external program, or even to create a new File object (which will not be protected). Example:
+
+```
+File(protectedFile.path)
+```
+## Laziness is our friend
+
+
+Usually we will reuse an existing function over creating a new one that does the same.
+
+
+It may be good design to create functions that return top directories, and protect those
+where we don't want to introduce changes, with secondary functions for locating sub-content,
+depending on the first function to produce the start point.
 
 # CFT as a functional programming language
 
@@ -821,6 +939,15 @@ The when() expression is good for handling multiple-choice ladders ("switch" in 
 when (mode==1, SomeFunction(...))
 when (mode==2, SomeOtherFunction(...))
 when (mode==3, ... )
+```
+## error() expression
+
+
+The error() expression is another that contains a conditional part, and if true, throws
+an exception with the string part, terminating current execution.
+
+```
+$ error(1+1==2,"oops")
 ```
 # Block expressions
 
@@ -1966,7 +2093,8 @@ Parameters are given as a list of values inside ()'s and may be omitted if no pa
 
 
 In order to avoid accidental delete or modifications, both Dir and File have
-a function .protect("desc") which attaches a protection status to that object.
+a function .protect() which takes an optional description string,  and
+which attaches a protection status to that object.
 
 
 Any Dir and File objects created from such an object, inherit the protection status.
@@ -1976,19 +2104,48 @@ Dir("src").protect("Source")
 /dirSrc
 ```
 
-A protected directory does not allow create, delete or copy file into dir. This includes blocking
-File.uncompress when target dir is protected.
-
-
-A protected file does not allow delete, create, append, copyFrom (target), copyTo or move (source or target).
-
-
 Invalid operations result in an error, where the operation is described, along with the
 protection code (String).
 
 
 All source directories when searching should be protected, as well as log directories, if originals
 matter.
+
+### A protected directory does not allow
+
+
+
+- create
+
+
+- delete
+
+
+- copy file into dir - includes blocking
+File.uncompress when target dir is protected
+
+
+### A protected file does not allow
+
+
+
+- delete
+
+
+- create
+
+
+- append
+
+
+- copyFrom (target)
+
+
+- copyTo
+
+
+- move (source or target)
+
 
 ## Working with text lines from stdin
 
@@ -2315,7 +2472,7 @@ $ !x:out!assert(f.name.endsWith(".txt")) out(f)
 $ /x!
 ```
 
-Note: this only applies to single-line scripts.
+Note: this only applies to single-line functions.
 
 ## Macros
 
@@ -2397,13 +2554,11 @@ lists its content.
 The following code is an effective way of using PowerShell from CFT, saving lots of typing.
 
 ```
-# Run remote PowerShell script-block
-P(1)=host
-P(2)=cmd
+P(1)=host P(2)=cmd ## Run remote PowerShell script-block
 List("powershell","invoke-command","-computername",host,"-scriptblock","{" + cmd + "}") =fullCmd
 Dir.run(fullCmd)
 /PSRun
-# List services via PowerShell
+# List services via PowerShell (interactive)
 Input("Host").get =host
 Input("Service name (including wildcards)").get =service
 "get-service -name " + service =cmd  # no splitting
@@ -2434,49 +2589,24 @@ Dir.runCapture("whoami").nth
 # Reference: Colon commands
 
 
-Savefile management
+Colon commands are best described by entering a single colon at the CFT prompt.
 
 ```
-:save Ident
-:load Ident
-:new
-```
-
-Managing named functions
-
-```
-:delete Ident [,Ident]*
-:copy Ident1 Ident2
-```
-
-Turn on/off debug - for showing stack traces
-
-```
-:debug
-```
-
-Turn on/off line wrapping
-
-```
-:wrap
-```
-
-Synthesizing last value to code
-
-```
-:syn
-```
-
-Synthesizing entry when last value is list
-
-```
-:NN
-```
-
-Quit CFT
-
-```
-:quit
+$ :
+Colon commands
+--------------
+:save [ident]?           - save script
+:load [ident]?           - load script
+:new                     - create new empty script
+:sw [ident]?             - switch between loaded scripts
+:delete ident [, ident]* - delete function(s)
+:copy ident ident        - copy function
+:wrap                    - line wrap on/off
+:debug                   - enter or leave debug mode
+:syn                     - synthesize last result
+:<int>                   - synthesize a row from last result (must be list)
+:quit                    - terminate CFT
+$
 ```
 # Reference: Synthesizable types
 
