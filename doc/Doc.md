@@ -496,9 +496,7 @@ be sent out as second parameter. Can be useful some times.
 
 ```
 $ List(1,2,3,2,1)->
-x condOut(x
-<2,"(") out("b") condOut(x
-<2,")") | _.concat
+x condOut(x<2,"(") out("b") condOut(x<2,")") | _.concat
 <String>
 (b)bbb(b)
 ```
