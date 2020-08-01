@@ -188,7 +188,7 @@ The first produces a list of global functions, the second of functions inside st
 the third displayes the functions inside Dir objects. The fourth lists functions available on
 int, and the last for float values.
 
-# Lists
+# List basics
 
 
 Lists are created with the global List() function, which creates
@@ -495,8 +495,7 @@ statement, which takes a boolean condition as first parameter, and the value to
 be sent out as second parameter. Can be useful some times.
 
 ```
-$ List(1,2,3,2,1)->
-x condOut(x<2,"(") out("b") condOut(x<2,")") | _.concat
+$ List(1,2,3,2,1)->x condOut(x<2,"(") out("b") condOut(x<2,")") | _.concat
 <String>
 (b)bbb(b)
 ```
@@ -975,7 +974,8 @@ like a function call, or some variable lookup.
 
 
 Block expressions occur literally inside other code, and have their variable scope
-extend out into the calling environment, but they are still somewhat function-like. This means:
+extend out into the calling environment, but they are not just code blocks, as in Java.
+Instead they are a but function-like. This means:
 
 
 
@@ -1014,8 +1014,7 @@ Block expressions can contain looping and the code can be partitioned into a
 number of loop spaces (with the "pipe" symbol). Example:
 
 ```
-List(1,2,3)=a {a->
-x assert(x%2==1) out(x) | _.sum}
+List(1,2,3)=a {a->x assert(x%2==1) out(x) | _.sum}
 <int>
 4
 ```
@@ -1032,6 +1031,7 @@ $ Dir.run ( list|...)
 $ Dir.runCapture ( list | ...)
 $ Dir.runDetach ( list|...)
 $ Dir.runProcess ( stdinFile, stdoutFile, stdErrFile, list|... )
+$ Dir.runProcessWait ( stdinFile, stdoutFile, stdErrFile, list|... )
 ```
 
 The parameters written as "list|..." means either a List object, or a list of
@@ -1081,13 +1081,66 @@ $ Dir.runDetach("leafpad", Sys.savefile.path)
 This example runs the (linux) leapad editor in the background, with the path of the current savefile as
 argument.
 
-## Dir.runProcess()
+## Dir.runProcess() / .runProcessWait()
 
 
-Similar to Dir.runDetach(), but for cases where we need to provide non-interactive input,
+Dir.runProcess() is similar to Dir.runDetach(), and Dir.runProcessWait() is similar to
+Dir.run(), but for cases where we need to provide non-interactive input,
 and inspect the output, as this uses files for stdin, stdout and stderr.
 
-# Editing save files
+
+At this level of complexity, one-line functions get a bit less readable, so the example below
+is spread out across multiple lines, and depends on editing the script file directly.
+
+```
+P(1)=name ## Create temp-file
+Dir("/tmp").file(name + "." + currentTimeMillis)
+/TmpFile
+# Call ssh to list remote processes with ps -efal
+P(1)=target ## target must be user@host as required by ssh
+#
+# Create temp files
+#
+TmpFile("in") =stdin
+TmpFile("out") =stdout
+TmpFile("err") =stderr
+#
+# stdin contains the command(s) we want to run remotely
+#
+stdin.create("ps -efal")
+#
+# Call ssh (requires passwordless login)
+#
+Dir.runProcessWait(stdin, stdout, stderr, "ssh", target)
+#
+# get list of output from the "ps" command
+#
+stdout.read =result
+#
+# delete temp-files
+#
+stdin.delete
+stdout.delete
+when(stderr.exists, stderr.delete)
+#
+# return value
+#
+result
+/ListRemoteFiles
+```
+### ssh without password
+
+
+To set up ssh login without password, create and distribute an ssh key.
+
+
+The script "SSH" under code.examples contains code for doing this.
+
+```
+$ :load SSH
+$ Readme
+```
+# Editing script files
 
 ## Using editor for entering code
 

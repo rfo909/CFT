@@ -20,7 +20,7 @@ CFT as a shell
 
 The help system
 
-Lists
+List basics
 
 Files
  * Create file
@@ -98,9 +98,10 @@ Running external programs
  * Dir.run()
  * Dir.runCapture()
  * Dir.runDetach()
- * Dir.runProcess()
+ * Dir.runProcess() / .runProcessWait()
+ |   ssh without password
 
-Editing save files
+Editing script files
  * Using editor for entering code
  * Auto reload
  * No auto save!!

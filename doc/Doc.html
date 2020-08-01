@@ -219,7 +219,7 @@ int, and the last for float values.
 
 
 
-<h1>Lists</h1>
+<h1>List basics</h1>
 <p>
   Lists are created with the global List() function, which creates
   a list from all its parameters.
@@ -265,11 +265,11 @@ int, and the last for float values.
 
 
 <h1>Files</h1>
-<pre>
+  <pre>
   $ File("x.txt")
    &lt;obj: File&gt;
    x.txt   DOES-NOT-EXIST 
- </pre>
+  </pre>
 
  <p>
   The File() function requires a name, and returns a File object. As seen
@@ -562,7 +562,7 @@ To create a file with a single text line:
   be sent out as second parameter. Can be useful some times.
 </p>
 <pre>
-  $ List(1,2,3,2,1)->x condOut(x&lt;2,"(") out("b") condOut(x&lt;2,")") | _.concat
+  $ List(1,2,3,2,1)-&gt;x condOut(x&lt;2,"(") out("b") condOut(x&lt;2,")") | _.concat
   &lt;String&gt;
   (b)bbb(b)
 </pre>
@@ -1120,7 +1120,8 @@ codeDirs = . ; code.examples ; code.lib
 <h2>Pitfalls</h2>
 <p>
   Block expressions occur literally inside other code, and have their variable scope
-  extend out into the calling environment, but they are still somewhat function-like. This means:
+  extend out into the calling environment, but they are not just code blocks, as in Java. 
+  Instead they are a but function-like. This means:
 </p>
 <ul>
   <li>
@@ -1162,7 +1163,7 @@ codeDirs = . ; code.examples ; code.lib
   number of loop spaces (with the "pipe" symbol). Example:
 </p>
 <pre>
-  List(1,2,3)=a {a->x assert(x%2==1) out(x) | _.sum} 
+  List(1,2,3)=a {a-&gt;x assert(x%2==1) out(x) | _.sum} 
   &lt;int&gt;
   4
 </pre>
@@ -1186,6 +1187,7 @@ codeDirs = . ; code.examples ; code.lib
   $ Dir.runCapture ( list | ...)
   $ Dir.runDetach ( list|...)
   $ Dir.runProcess ( stdinFile, stdoutFile, stdErrFile, list|... )
+  $ Dir.runProcessWait ( stdinFile, stdoutFile, stdErrFile, list|... )
 </pre>
 
 <p>
@@ -1249,19 +1251,71 @@ codeDirs = . ; code.examples ; code.lib
 
 
 
-<h2>Dir.runProcess()</h2>
+<h2>Dir.runProcess() / .runProcessWait()</h2>
 <p>
-  Similar to Dir.runDetach(), but for cases where we need to provide non-interactive input, 
+  Dir.runProcess() is similar to Dir.runDetach(), and Dir.runProcessWait() is similar to
+  Dir.run(), but for cases where we need to provide non-interactive input, 
   and inspect the output, as this uses files for stdin, stdout and stderr.
 </p>
+<p>
+  At this level of complexity, one-line functions get a bit less readable, so the example below
+  is spread out across multiple lines, and depends on editing the script file directly.
+</p>
+<pre>
+  P(1)=name ## Create temp-file
+    Dir("/tmp").file(name + "." + currentTimeMillis)
+  /TmpFile
+
+  # Call ssh to list remote processes with ps -efal
+  P(1)=target ## target must be user@host as required by ssh
+    # 
+    # Create temp files
+    #
+    TmpFile("in") =stdin
+    TmpFile("out") =stdout
+    TmpFile("err") =stderr
+    #
+    # stdin contains the command(s) we want to run remotely
+    #
+    stdin.create("ps -efal")
+    #
+    # Call ssh (requires passwordless login)
+    #
+    Dir.runProcessWait(stdin, stdout, stderr, "ssh", target)
+    #
+    # get list of output from the "ps" command
+    #
+    stdout.read =result
+    #
+    # delete temp-files 
+    #
+    stdin.delete
+    stdout.delete
+    when(stderr.exists, stderr.delete)
+    #
+    # return value
+    #
+    result
+  /ListRemoteFiles
+</pre>
+
+<h3>ssh without password</h3>
+<p>
+  To set up ssh login without password, create and distribute an ssh key. 
+</p>
+<p>
+  The script "SSH" under code.examples contains code for doing this.
+</p>
+<pre>
+  $ :load SSH
+  $ Readme
+</pre>
 
 
 
 
 
-
-
-<h1>Editing save files</h1>
+<h1>Editing script files</h1>
 
 
 <h2>Using editor for entering code</h2>

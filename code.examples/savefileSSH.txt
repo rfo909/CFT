@@ -31,20 +31,23 @@ Input("sshTarget: name@host").get
 
 
 
-# Copy ssh key to remote target host - if problems, ensure .ssh dir exists in home dir of sshTarget
+# Copy ssh key to remote target host - interactive
 	GetSSHTarget =sshTarget
-	Input("Local home dir -- containing .ssh/id_rsa.pub").get =localHome
+	Input("Enter local home dir -- containing .ssh/id_rsa.pub").get =localHome
 	
-	println("Copy key file to remote home dir")
+	println("* Ensuring .ssh directory exists at target")
+	remoteCommand(sshTarget, "mkdir .ssh")
+	
+	println("* Copy key file to remote home dir")
 	Dir.run("scp",localHome+"/.ssh/id_rsa.pub",sshTarget+":.")
 	
-	println("Appending to remote .ssh/authorized_keys")
+	println("* Appending to remote .ssh/authorized_keys")
 	remoteCommand(sshTarget,"cat id_rsa.pub >> .ssh/authorized_keys")
 
-	println("Deleting remote copy of id_rsa.pub")
+	println("* Deleting remote copy of id_rsa.pub")
 	remoteCommand(sshTarget,"rm id_rsa.pub")	
 	
-	println("Ensuring 700 access on remote .ssh dir")
+	println("* Ensuring 700 access on remote .ssh dir")
 	remoteCommand(sshTarget,"chmod 700 .ssh")
 /sshEnable
 
@@ -61,6 +64,7 @@ P(1)=sshTarget P(2,"ls")=cmd
 
 
 # Interactive call to remoteShell
+	# Also invoked via @rsh shortcut - do not delete
 	remoteShell(GetSSHTarget)
 /rsh
 
