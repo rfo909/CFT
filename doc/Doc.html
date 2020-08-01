@@ -121,35 +121,49 @@ $ Dir.files.length
   When calling a function without parameters, the parantheses () are optional. 
 </p>
 
-<h2>Coding vs purely interactive use</h2>
+<h2>Mission-critical operations</h2>
 
 <p>
-  Working on mission-critical systems, one must at all costs avoid issuing the wrong commands. 
+  Working on live systems, one must at all costs avoid issuing the wrong commands. 
   Creating functions, and preferrably adding code to validate input, to reject specific server
-  names or domains, etc, plus the .protect() mechanism for Dir and File objects, helps you avoid doing
+  names or domains, plus the .protect() mechanism for Dir and File objects, helps you avoid doing
   seriously bad things. 
-<p>
-  Better use a little time to step-wise develop some function with proper checking of
-  parameters from users or other functions, before you let it actually do anything, rather
-  than interactively mistype, and kill the wrong database or VM.
 </p>
-<p> 
-  Even boring stuff has the potential for serious consequences, if you delete the original log
-  files, instead of the copy you unzipped. Use the protect() mechanism routinely when pointing
-  a Dir at a location where destructive updates must not happen, and save yourself from
-  some of those "just need to do this in a hurry" typing mishaps.
+<p>
+  Code that sanity checks values before doing dangerous operations, can save you from
+  killing the wrong database or VM. Plus it documents what you did.
 </p>
 
-<h2>Typical use</h2>
+<h2>Non-critical tasks</h2>
+<p> 
+  Even mundane operations still have the potential for unwanted consequences, such as deleting
+  the original log files at the remote server, instead of the copy you unzipped locally.
+</p>
+<p>
+  The protect() mechanism is created for these scenarios.
+</p>
+<p>
+  It lets us block Dir or File objects against destructive operations, and is inherited by all
+  Dir and File objects derived from these. The aim is to protect us from mistyping in
+  those "in a hurry" situations, where one may enter interactive commands like this.
+</p>
+<pre>
+  $ someDir.allFiles-&gt;f f.delete
+</pre>
+
+
+
+
+<h2>Typical uses</h2>
   <ul>
   <li> copying files</li>
   <li> searching source code and logs</li>
   <li> deploying jar files to test environments</li>
   <li> restart services</li>
-  <li> delete logs older than X days - carefully</li>
+  <li> identify log files between certain dates</li>
   <li> verify that a bunch of VM's can be pinged</li>
   <li> generate netplan config files</li>
-  <li> automated management via ssh</li>
+  <li> remote management via ssh</li>
   <li> automate git and powershell and other things that require you to type too much</li>
 </ul>
 

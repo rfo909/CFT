@@ -96,25 +96,36 @@ $ Dir.files.length
 
 When calling a function without parameters, the parantheses () are optional.
 
-## Coding vs purely interactive use
+## Mission-critical operations
 
 
-Working on mission-critical systems, one must at all costs avoid issuing the wrong commands.
+Working on live systems, one must at all costs avoid issuing the wrong commands.
 Creating functions, and preferrably adding code to validate input, to reject specific server
-names or domains, etc, plus the .protect() mechanism for Dir and File objects, helps you avoid doing
+names or domains, plus the .protect() mechanism for Dir and File objects, helps you avoid doing
 seriously bad things.
 
-Better use a little time to step-wise develop some function with proper checking of
-parameters from users or other functions, before you let it actually do anything, rather
-than interactively mistype, and kill the wrong database or VM.
+
+Code that sanity checks values before doing dangerous operations, can save you from
+killing the wrong database or VM. Plus it documents what you did.
+
+## Non-critical tasks
 
 
-Even boring stuff has the potential for serious consequences, if you delete the original log
-files, instead of the copy you unzipped. Use the protect() mechanism routinely when pointing
-a Dir at a location where destructive updates must not happen, and save yourself from
-some of those "just need to do this in a hurry" typing mishaps.
+Even mundane operations still have the potential for unwanted consequences, such as deleting
+the original log files at the remote server, instead of the copy you unzipped locally.
 
-## Typical use
+
+The protect() mechanism is created for these scenarios.
+
+
+It lets us block Dir or File objects against destructive operations, and is inherited by all
+Dir and File objects derived from these. The aim is to protect us from mistyping in
+those "in a hurry" situations, where one may enter interactive commands like this.
+
+```
+$ someDir.allFiles->f f.delete
+```
+## Typical uses
 
 
 
@@ -130,7 +141,7 @@ some of those "just need to do this in a hurry" typing mishaps.
 -  restart services
 
 
--  delete logs older than X days - carefully
+-  identify log files between certain dates
 
 
 -  verify that a bunch of VM's can be pinged
@@ -139,7 +150,7 @@ some of those "just need to do this in a hurry" typing mishaps.
 -  generate netplan config files
 
 
--  automated management via ssh
+-  remote management via ssh
 
 
 -  automate git and powershell and other things that require you to type too much

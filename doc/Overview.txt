@@ -11,8 +11,9 @@ What CFT is not
 So what is it for?
  * Functions example
  |   No parantheses?
- * Coding vs purely interactive use
- * Typical use
+ * Mission-critical operations
+ * Non-critical tasks
+ * Typical uses
 
 CFT as a shell
  * Navigating directories
