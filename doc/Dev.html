@@ -13,6 +13,19 @@
 
 <h1>CFT Change log</h1>
 
+
+<h3>v1.1.3 2020-08-01 File.tail</h3>
+<p>
+	Using RandomAccessFile, calculating a likely offset from end of file. This is done via
+	an assumed max line length (in bytes), which defaults to 256. This means the 
+	tail() function uses same amount of
+	time regardless of file size. If lines are on average longer, then fewer lines will be
+	returned.
+</p>
+
+<h2 class="tag">2020-08-01 Tagging v1.1.2</h2>
+
+
 <h3>v1.1.2 2020-08-01 root input loop</h3>
 <p>
 	Added logic so that input loop displays prompt only when no buffered input lines, as

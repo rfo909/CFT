@@ -881,9 +881,12 @@ public class ObjFile extends Obj {
             return "tail";
         }
         public String getShortDesc() {
-            return "tail(count) - returns list of lines from end of file (empty list if file doesn't exist)";
+            return "tail(count) - returns list of lines from the tail end of file";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	// Using random access for big files
+        	final int BYTES_PER_LINE = 256;
+        	
         	if (params.size() != 1) throw new Exception("Expected count parameter");
         	final int count=(int) getInt("count", params, 0);
         	String[] lines=new String[count];
@@ -894,13 +897,18 @@ public class ObjFile extends Obj {
             	List<Value> list=new ArrayList<Value>();
             	return new ValueList(list);
             }
+            long seekPos=f.length()-(count*BYTES_PER_LINE);
+            if (seekPos < 0) seekPos=0;
 
             BufferedReader br=null;
+            RandomAccessFile raf=new RandomAccessFile(f,"r");
             int readLines=0;
             try {
+                //System.out.println("Seeking to " + seekPos);
+                raf.seek(seekPos);
             	br = new BufferedReader(
          			   new InputStreamReader(
-         	                      new FileInputStream(f), encoding));
+         	                      new FileInputStream(raf.getFD()), encoding));
 
                 for (;;) {
                     String line=br.readLine();
@@ -917,11 +925,12 @@ public class ObjFile extends Obj {
                 	if (lineNo < 0) continue;
                 	String s=lines[pos];
                 	String deTabbed=TabUtil.substituteTabs(s, 4);
-                	result.add(new ValueObjFileLine(deTabbed, lineNo, self()));
+                	result.add(new ValueObjFileLine(deTabbed, seekPos==0 ? lineNo : -1, self()));
                 }
                 
                 return new ValueList(result);
             } finally {
+                if (raf != null) try {raf.close();} catch (Exception ex) {};
                 if (br != null) try {br.close();} catch (Exception ex) {};
             }
         	
