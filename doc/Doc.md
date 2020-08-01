@@ -1092,12 +1092,16 @@ and inspect the output, as this uses files for stdin, stdout and stderr.
 At this level of complexity, one-line functions get a bit less readable, so the example below
 is spread out across multiple lines, and depends on editing the script file directly.
 
+
+(note: may be less readable on .md format - open Doc.html instead)
+
 ```
-P(1)=name ## Create temp-file
+## --- create temp-file
+P(1)=name
 Dir("/tmp").file(name + "." + currentTimeMillis)
 /TmpFile
-# Call ssh to list remote processes with ps -efal
-P(1)=target ## target must be user@host as required by ssh
+## --- Call ssh to list remote processes with ps -efal
+P(1,Input("Enter ssh-target on format user@host").get)=target
 #
 # Create temp files
 #

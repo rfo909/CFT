@@ -173,29 +173,33 @@ public class Root {
 					return;
 				}
 				
-				// Run the prompt code line to produce possibly dynamic prompt
-				String promptCode = propsFile.getPromptCode();
-				SourceLocation loc = new SourceLocation("prompt", 0, 0);
-				
-				CodeLines codeLines = new CodeLines(promptCode, loc);
-				
 				ObjGlobal objGlobal = currScript.getObjGlobal();
 
-				String pre;
-				try {
-					Value ret = objGlobal.getRuntime().processCodeLines(codeLines, new FunctionState());
-					pre=ret.getValAsString();
-				} catch (Exception ex) {
-					if (debugMode) {
-						pre="ERROR";
-						ex.printStackTrace();
-					} else {
-						pre="$";
-					}
-				}
 
-				// Stdio can only do line output, so using System.out directly
-				System.out.print(pre);
+				if (!stdio.hasBufferedInputLines()) {
+					// Only produce prompt when non-buffered lines
+					
+					// Run the prompt code line to produce possibly dynamic prompt
+					String promptCode = propsFile.getPromptCode();
+					SourceLocation loc = new SourceLocation("prompt", 0, 0);
+					CodeLines codeLines = new CodeLines(promptCode, loc);
+	
+					String pre;
+					try {
+						Value ret = objGlobal.getRuntime().processCodeLines(codeLines, new FunctionState());
+						pre=ret.getValAsString();
+					} catch (Exception ex) {
+						if (debugMode) {
+							pre="ERROR";
+							ex.printStackTrace();
+						} else {
+							pre="$";
+						}
+					}
+	
+					// Stdio can only do line output, so using System.out directly
+					System.out.print(pre);
+				}
 				String line = stdio.getInputLine().trim();
 
 				refreshIfSavefileUpdated();
