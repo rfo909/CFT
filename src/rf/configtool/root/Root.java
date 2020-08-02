@@ -429,6 +429,9 @@ public class Root {
 		
 			Iterator<String> keys = scriptStates.keySet().iterator();
 			boolean foundAny=false;
+
+			String partialMatch=null;
+			
 			while (keys.hasNext()) {
 				String scriptName=keys.next();
 				if (scriptName.trim().length()==0) {
@@ -436,15 +439,23 @@ public class Root {
 					continue;
 				}
 				if (ident != null) {
-					if (scriptName.contains(ident)) {
-						// got a match, switch to it
+					if (scriptName.equals(ident)) {
+						// got an exact match, switching to it
 						currScript=getScriptState(scriptName, false);
 						return;
+					} else if (scriptName.contains(ident)) {
+						// got a match, switch to it
+						partialMatch=scriptName;
 					}
 				} else {
 					stdio.println("- " + scriptName);
 					foundAny=true;
 				}
+			}
+			if (partialMatch != null) {
+				currScript=getScriptState(partialMatch, false);
+				return;
+
 			}
 			if (!foundAny) {
 				stdio.println("(no scripts loaded)");
