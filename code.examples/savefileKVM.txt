@@ -24,10 +24,93 @@
 # Script readme
 <<< EOF
 --------------------------------------------------------------
+NOTE: You MUST run CFT as root for this script to work.
+--------------------------------------------------------------
+
 This script manages creation, cloning, delete, start and stop
 of Virtual Machines using KVM on Linux.
 
-You must CFT as root to use this script.
+To get started, perform the following tasks:
+
+* install and enable kvm
+* modify network config to create bridge 'br0'
+* create first VM
+
+Install KVM
+-----------
+> sudo apt-get install qemu-kvm libvirt-bin virtinst bridge-utils cpu-checker
+> sudo systemctl enable libvirtd
+> sudo systemctl start libvirtd
+
+Then copy at least one OS image into /var/lib/libvirt/boot. That's where 
+this script expects to find them.
+
+Create network bridge on host server
+------------------------------------
+This script requires there to exist a network bridge 'br0', which all
+VM's use. Configuring this on a server with two network cards is easy
+with netplan:
+
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    enp2s0f0:
+      dhcp4: no
+      gateway4: 10.0.0.138
+      nameservers:
+        addresses: [10.0.0.3, 10.0.0.4]
+      addresses: [10.0.11.51/16]
+    enp2s0f1:
+      dhcp4: true
+  bridges:
+    br0:
+      interfaces: [enp2s0f1]
+
+Modify the gateway4, nameserver addresses and the address(es) for the 
+server itself (10.0.11.51/16 in above example).
+
+Also ensure you use correct network device names. These are
+displayed with
+
+> ip addr
+
+
+Create first VM
+---------------
+To create the first VM, run the interactive Create function. It
+asks for details, then creates a VM. Often its good to create
+a template VM, then clone this to individual VM's.
+
+If you are running on a server with X windows, select headless no,
+and then after installation has started, just from a terminal:
+
+> sudo bash
+> virt-manager
+
+If no X-windows, enter "yes" for headless. You must then use 
+VNC to complete the install. Run the VNCHelp function, to look up
+the port number (usually 5900), then follow the instructions to 
+transport the port number to another PC, where you run VNC. 
+
+--
+
+The script VM under code.examples is meant for running on 
+VM's after creation, and is tested with VM's running Ubuntu 
+Server 18.04. It sets up hostname and netplan config file. Please 
+modify the functions Gateway4 and Nameservers in the VM script 
+before running it on your template VM.
+
+After cloning the template VM, ssh into the IP of the template, 
+then run the VM script
+
+> sudo bash
+> cd CFT
+> ./cft VM Run
+
+Enter hostname and IP address (remember /8 or /16 etc).
+^C
+> reboot
 --------------------------------------------------------------
 >>> EOF
 /Readme
@@ -140,7 +223,7 @@ P(1,"someTarget")=target
         call "Lib:ReadValueBoolean" ("Headless", headless) =headless
 
         call "Lib:ReadValueInt" ("RAM MB", ram) =ram
-	call "Lib:ReadValueInt" ("CPU's", cpus) =cpus
+		call "Lib:ReadValueInt" ("CPU's", cpus) =cpus
         call "Lib:ReadValueInt" ("Disk GB", disk) =disk
         call "Lib:ReadValueBoolean" ("Enter 'yes' to confirm this is okay", false) =ok
         break(ok)
@@ -207,7 +290,7 @@ this is listed below.
 
 Then from remote computer open an ssh:
 
-ssh <user>@${host} -L$<PORT>:127.0.0.1:<PORT>
+ssh <user>@<server> -L<PORT>:127.0.0.1:<PORT>
 
 The port is identified by running 
 
