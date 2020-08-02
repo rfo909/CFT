@@ -155,6 +155,20 @@ public class ObjGrep extends Obj {
         }
     }
     
+    /**
+     * Applies matching rules to line, and returns true if line matches
+     */
+    public boolean keepLine (String line) throws Exception {
+        boolean keep=true;
+        for (Match m:matchList) {
+            if (!m.match(line)) {
+                keep=false;
+                break;
+            }
+        }
+        return keep;
+    }
+    
     class FunctionFile extends Function {
         public String getName() {
             return "file";
@@ -187,13 +201,7 @@ public class ObjGrep extends Obj {
                     if (line==null) break;
                     lineNo++;
                     
-                    boolean keep=true;
-                    for (Match m:matchList) {
-                        if (!m.match(line)) {
-                            keep=false;
-                            break;
-                        }
-                    }
+                    boolean keep=keepLine(line);
                     
                     if (keep) {
                         String deTabbed=TabUtil.substituteTabs(line,4);

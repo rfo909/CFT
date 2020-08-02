@@ -74,6 +74,10 @@ public class ObjDate extends Obj {
         return sdf.format(new Date(timeValue));
     }
     
+    public long getTimeValue() {
+    	return timeValue;
+    }
+    
 
     @Override
     public boolean eq(Obj x) {
