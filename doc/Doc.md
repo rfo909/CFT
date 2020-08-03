@@ -1,8 +1,8 @@
 # CFT / ConfigTool
 
 ```
-Last updated: 2020-07-31 RFO
-v1.1.2
+Last updated: 2020-08-03 RFO
+v1.1.3
 ```
 # Introduction
 
@@ -1601,6 +1601,17 @@ DateSort.asc(lines)->line
 report(line.file.name, line.lineNumber, line)
 /SearchLog
 ```
+## DateSort.search()
+
+
+As of v1.1.3 DateSort has been extended with an advanced option for searching HUGE log files
+by date/time interval. It uses random access of start and end to identify if the file contains log lines
+within the range, and then binary search to locate where to start reading. There is also the option
+of supplying a Grep object, to filter lines within that time interval.
+
+```
+DateSort.search(file, fromTimeMillis, toTimeMillis, Grep?)
+```
 # Generalized sorting
 
 
@@ -1961,10 +1972,10 @@ editing a separate file, is to use a special feature of the script files, called
 of text are converted into code on the fly, becoming a List object.
 
 ```
-<<< SomeMarker
+<<<<<<<<<<<< Identifier
 This is
 some text
->>> SomeMarker
+>>>>>>>>>>>> Identifier
 /myTemplate
 ```
 
@@ -1976,6 +1987,9 @@ $ myTemplate
 0: This is
 1: some text
 ```
+
+There needs to be at least three of the '<' or '>' followed by space and an identifier.
+
 ### A more complex example
 
 ```
@@ -2068,6 +2082,14 @@ Value of b: ${b}
 ->line
 out(line.merge(data))
 /myMergedTemplate
+```
+
+If missing parameters is a problem, use the Dict.hasNullValue() function, which returns true
+if one or more values of the Dict is null.
+
+```
+PDict("a","b").mergeCodes =data
+error(data.hasNullValue,"Expected parameters a,b")
 ```
 # Use as a calculator
 
@@ -2672,7 +2694,6 @@ Colon commands
 :syn                     - synthesize last result
 :<int>                   - synthesize a row from last result (must be list)
 :quit                    - terminate CFT
-$
 ```
 # Reference: Synthesizable types
 

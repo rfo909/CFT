@@ -1,0 +1,322 @@
+<<<<<<<<<<<<<<<<<<<<<<<<< EOF
+** EXPERIMENTAL **
+
+Install mongodb in High Availability configuration 
+
+Requirements: 
+	- servers must have access to shared directory with DEB packages 
+	- servers must allow ssh without passwords
+	- servers must allow sudo without passwords
+
+	For more info
+	$ :load SSH
+	$ Readme
+>>>>>>>>>>>>>>>>>>>>>>>>> EOF
+/Readme
+
+
+# Config
+"/mnt/storage/ISO/mongodb-org-server_4.2.3_amd64.deb"
+/CfgMongod
+
+# Config
+"/mnt/storage/ISO/mongodb-org-shell_4.2.3_amd64.deb"
+/CfgMongoShell
+
+# Config
+"/mnt/storage/ISO/mongodb-org-mongos_4.2.3_amd64.deb"
+/CfgMongos
+
+
+
+P(1,true)=debug
+	call "ServersMaintenance:setDebug" (debug)
+/setDebug
+
+P(1)=target P(2)=cmd
+	if(cmd.?nth, cmd, cmd.split(";"))=cmd 
+	call "ServersMaintenance:RemoteCommandSet" (target, cmd)
+/run
+
+P(1)=cmd
+	run(GetTarget,cmd)
+/r
+
+P(1)=target P(2,List)=cmd P(3,Dict)=codes
+	if(cmd.?nth, cmd, cmd.split(";")) =cmd
+	call "ServersMaintenance:RemoteCommandSetCoded" (target, cmd, codes)
+/runCoded
+
+
+
+
+P(1,"temp")=name
+	Dir("/tmp").file(name + "." + currentTimeMillis)
+/TmpFile
+
+
+
+
+# Config data
+	# Note: the config replica set name 'conf' must not be changed, unless
+	# also modifying the MongosStartScript function, which depends on it
+	(
+	"mcfg1.v:conf:configsvr mcfg2.v:conf:configsvr mcfg3.v:conf:configsvr"
+	+ " m11.v:s1:shardsvr m12.v:s1:shardsvr m13.v:s1:shardsvr"
+	+ " m21.v:s2:shardsvr m22.v:s2:shardsvr m23.v:s2:shardsvr"
+	).split->x
+		x.split(":").push(3,"") =host =replSetName =clusterRole
+		out(Dict.set("host",host).set("replSetName",replSetName).set("clusterRole",clusterRole))
+/MongodData
+
+
+
+# Config data
+	(
+	"m.v"
+	)
+/MongosHosts
+
+
+
+Input("Target: user@host").get
+/GetTarget
+
+
+
+
+
+P(1,GetTarget)=target
+	println("* Installing mongodb shell")
+	run(target, "sudo bash;apt install -y " + CfgMongoShell)
+
+	println("* Verifying install")
+	runCoded(target, "which mongo", Dict.set("/mongo","ok")).contains("ok") =ok
+	
+	when (ok, {println("* ok")} )
+/InstallMongoShell
+
+
+
+
+
+# InstallMongod
+	loop
+		P(1,GetTarget)=target
+		P(2,Input("replSetName").get)=replSetName
+		P(3,Input("clusterRole").get)=clusterRole
+		P(4,true)=interactive
+		
+		break(!interactive)
+
+		call "Lib:ReadValueBoolean" ("Confirm by typing 'yes'", false) =confirmed
+		break(confirmed)
+	|
+	println("* Removing /etc/mongod.conf if exists as apt install doesn't like it")
+	run(target, "sudo rm /etc/mongod.conf")
+
+	println("* Installing mongodb server")
+	run(target, "sudo bash;apt install -y " + CfgMongod)
+
+	println("* Enabling mongo service")
+	run(target, "sudo systemctl enable mongod")
+
+	target.after("@")=host
+
+	println("* Creating mondod.cfg file")
+	TmpFile("configfile") =f
+	f.create(CreateMongoConfig(replSetName, clusterRole))
+
+	println("* Copying file to server in home dir")
+	Dir.run("rcp", f.path, target + ":./mongod.conf")   
+
+	println("* Moving file at server to /etc")
+	run(target,"sudo bash;cp ./mongod.conf /etc")
+
+	println("* Stopping mongod - if already running")
+	run(target,"sudo systemctl stop mongod")
+
+	println("* Starting mongod")
+	run(target,"sudo systemctl start mongod")
+	f.delete
+
+	println("Waiting 5 seconds, then reading /var/log/mongodb/mongod.log")
+	Sys.sleep(5000)
+	#run(target,"sudo tail -n 10 /var/log/mongodb/mongod.log")->line println(line) |
+
+	runCoded(target, 
+		"sudo tail -n 20 /var/log/mongodb/mongod.log", 
+			Dict.set("waiting for connections","ok")).contains("ok") =ok
+
+	when (ok, {println("* Mongod installed and running")})
+	
+/InstallMongod
+
+
+
+
+
+P(1,GetTarget)=target
+	println("* Installing mongos")
+	run(target, "sudo bash;apt install -y " + CfgMongos)
+
+	println("* Creating Mongos start script")
+	TmpFile("mongos")=f
+	f.create(MongosStartScript)
+
+	println("* Copying file to server in home dir as start_mongos.sh")
+	Dir.run("rcp", f.path, target + ":./start_mongos.sh")   
+
+	println("* Setting executable flag on start_mongos.sh")
+	run(target,"chmod 755 ./start_mongos.sh")
+
+	println("* Collecting path to remote home dir")
+	"./start_mongos.sh" =fullPath
+
+	call "Systemd:CreateService" (target, "mongos", "Mongos for HA cluster", fullPath, false)
+
+/InstallMongos
+
+
+
+
+
+Input("ssh user").get=user
+	MongodData->d
+		d.host =host
+		d.replSetName =replSetName
+		d.clusterRole =clusterRole
+		println
+		println("----------------------")
+		println("mongod: host=" + host + " replSetName=" + replSetName + " clusterRole=" + clusterRole)
+		println("----------------------")
+		InstallMongod(user+"@"+host, replSetName, clusterRole, false)
+/InstallMongodAll
+
+
+
+Input("ssh user").get=user
+	MongosHosts->host
+		println("----------------------")
+		println("mongos: host=" + host)
+		println("----------------------")
+		InstallMongos(user+"@"+host)
+/InstallMongosAll
+		
+
+
+
+Input("ssh user").get=user
+	MongodData->d out(d.host) | _=hosts
+	
+	hosts + MongosHosts =hosts
+	
+	hosts->host
+		println("----------------------")
+		println("mongos: host=" + host)
+		println("----------------------")
+		InstallMongoShell(user+"@"+host)
+/InstallMongoShellAll
+
+
+
+
+
+## Info on how to initialize any replica set
+Input("Replica set name").get =rsName
+	0 =count
+	MongodData->d
+		assert(d.replSetName==rsName) 
+		out("{ _id: " + count + ", host: " + '"' + d.host+":27017" + '" }') 
+		count+1 =count
+	| _.concat(",") =members
+	TmpFile("init")=f
+	"rs.initiate({ _id: '" + rsName + "', members: [" + members + "] })" =js
+	
+	println("Connect with mongo shell to one of the " + rsName + " servers")
+	println("Enter the following command")
+	println
+	println(js)
+	println
+
+	true
+/HowToInitRS
+
+
+
+
+
+## Create Mongos start script
+	MongodData->d 
+		assert(d.replSetName=="conf") 
+		out(d.host+":27017") 
+	| _.concat(",")  =confServers
+	Dict.set("confServers",confServers).mergeCodes =data
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< EOF
+#!/bin/bash
+
+mongos \
+	--configdb conf/${confServers} \
+	--bind_ip_all \
+	--port 27017
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> EOF
+->line
+	out(line.merge(data))
+/MongosStartScript
+
+
+
+
+PDict("replSetName","clusterRole").mergeCodes=data ## Create mongod.conf
+error(data.hasNullValue,"Expected parameters replSetName, clusterRole")
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< EOF
+# mongod.conf
+
+# for documentation of all options, see:
+#   http://docs.mongodb.org/manual/reference/configuration-options/
+
+# Where and how to store data.
+storage:
+  dbPath: /var/lib/mongodb
+  journal:
+    enabled: true
+#  engine:
+#  mmapv1:
+#  wiredTiger:
+
+# where to write logging data.
+systemLog:
+  destination: file
+  logAppend: true
+  path: /var/log/mongodb/mongod.log
+
+# network interfaces
+net:
+  port: 27017
+  bindIpAll: true
+
+
+# how the process runs
+processManagement:
+  timeZoneInfo: /usr/share/zoneinfo
+
+#security:
+
+#operationProfiling:
+
+replication:
+  replSetName: '${replSetName}'
+
+sharding:
+  clusterRole: '${clusterRole}'
+
+## Enterprise-Only Options:
+
+#auditLog:
+
+#snmp:
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> EOF
+->line
+	out(line.merge(data))
+/CreateMongoConfig
+

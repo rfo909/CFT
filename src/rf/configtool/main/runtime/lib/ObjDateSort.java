@@ -189,7 +189,7 @@ public class ObjDateSort extends Obj {
             return "search";
         }
         public String getShortDesc() {
-            return "search(file, fromTime, toTime, Grep?) - get lines between time values (millis), empty list if none";
+            return "search(file, fromTimeMillis, toTimeMillis, Grep?) - get lines between time values (millis), empty list if none";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() < 3 || params.size() > 4) throw new Exception("Expected parameters file, fromTime, toTime, Grep?");

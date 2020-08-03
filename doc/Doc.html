@@ -15,8 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2020-07-31 RFO
-v1.1.2
+Last updated: 2020-08-03 RFO
+v1.1.3
 
 </pre>
 
@@ -1852,6 +1852,16 @@ The following is used to switch drive letter in Windows.
     report(line.file.name, line.lineNumber, line)
   /SearchLog
 </pre>
+<h2>DateSort.search()</h2>
+<p>
+  As of v1.1.3 DateSort has been extended with an advanced option for searching HUGE log files
+  by date/time interval. It uses random access of start and end to identify if the file contains log lines
+  within the range, and then binary search to locate where to start reading. There is also the option
+  of supplying a Grep object, to filter lines within that time interval.
+</p>
+<pre>
+  DateSort.search(file, fromTimeMillis, toTimeMillis, Grep?)
+</pre>
 
 
 
@@ -2273,10 +2283,10 @@ The following is used to switch drive letter in Windows.
   of text are converted into code on the fly, becoming a List object.
 </p>
 <pre>
-  &lt;&lt;&lt; SomeMarker
+  &lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt; Identifier
   This is
   some text
-  &gt;&gt;&gt; SomeMarker
+  &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; Identifier
   /myTemplate
 </pre>
  <p>
@@ -2288,6 +2298,9 @@ The following is used to switch drive letter in Windows.
   0: This is
   1: some text
 </pre>
+<p>
+  There needs to be at least three of the '&lt;' or '&gt;' followed by space and an identifier.
+</p>
 
 <h3>A more complex example</h3>
 <pre>
@@ -2393,6 +2406,14 @@ The following is used to switch drive letter in Windows.
     out(line.merge(data))
   /myMergedTemplate
 </pre>
+<p>
+  If missing parameters is a problem, use the Dict.hasNullValue() function, which returns true
+  if one or more values of the Dict is null.
+</p>
+<pre>
+  PDict("a","b").mergeCodes =data
+  error(data.hasNullValue,"Expected parameters a,b")
+</pre>  
 
 
 
@@ -3101,7 +3122,6 @@ Colon commands
 :&lt;int&gt;                   - synthesize a row from last result (must be list)
 :quit                    - terminate CFT
 
-$ 
 </pre>
 
 

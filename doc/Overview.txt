@@ -133,6 +133,7 @@ Searching files / report()
  |   Limiting search to a few files
 
 Searching log files / DateSort
+ * DateSort.search()
 
 Generalized sorting
  * Example: file size

@@ -1,0 +1,121 @@
+<<<<<<<<<<<<<<<<<<<<<< EOF
+** EXPERIMENTAL **
+
+Code to set up systemd service on remote server,
+as identified by target string on format user@host.
+
+Main function is CreateService
+
+It runs both interactive and with parameters.
+>>>>>>>>>>>>>>>>>>>>>> EOF
+/Readme
+
+
+
+
+P(1,true)=debug
+	call "ServersMaintenance:setDebug" (debug)
+/setDebug
+
+P(1)=target P(2)=cmd
+	if(cmd.?nth, cmd, cmd.split(";"))=cmd 
+	call "ServersMaintenance:RemoteCommandSet" (target, cmd)
+/run
+
+
+P(1)=target P(2,List)=cmd P(3,Dict)=codes
+	if(cmd.?nth, cmd, cmd.split(";")) =cmd
+	call "ServersMaintenance:RemoteCommandSetCoded" (target, cmd, codes)
+/runCoded
+
+
+P(1,"temp")=name
+	Dir("/tmp").file(name + "." + currentTimeMillis)
+/TmpFile
+
+
+
+
+
+
+Input("Target: user@host").get
+/GetTarget
+
+
+
+
+# Set up systemd service
+	println("* Creating systemd service")
+	loop
+		P(1,GetTarget) =target
+		P(2,Input("service name").get) =serviceName
+		P(3,Input("service description").get) =desc
+		P(4,Input("remote path to script (will be copied)").get) =script
+		P(5,true) =interactive
+
+		break(!interactive)
+		call "Lib:ReadValueBoolean" ("Confirm by typing 'yes'", false) =confirmed
+		break(confirmed)
+	|
+
+	println("* Adding user " + serviceName)
+	run(target,"sudo adduser "+serviceName)
+
+	"/home/"+serviceName =homeDir
+	script.afterLast("/") =scriptName
+	homeDir + "/" + scriptName =scriptPath
+
+	println("* Copying " + script + " to " + scriptPath)
+	run(target,"sudo cp " + script + " " + scriptPath)
+
+	println("* chown " + serviceName + ":" + serviceName + " on " + scriptPath)
+	run(target,"sudo chown " + serviceName + ":" + serviceName + " " + scriptPath)
+
+	TmpFile("systemd")=f
+	f.create(SystemdServiceFile(serviceName, desc, scriptPath))
+
+	serviceName + ".service" =serviceFile
+
+	println("* Copying systemd service file as ./" + serviceFile)
+	Dir.run("scp", f.path, target+":./" + serviceFile)
+
+	println("* Copying ./" + serviceFile + " to /etc/systemd/system")
+	run(target,"sudo cp ./" + serviceFile + " /etc/systemd/system")
+	
+	println("* Starting service")
+	run(target,"sudo systemctl start " + serviceName)
+ 
+	println("* Enabling service")
+	run(target,"sudo systemctl enable " + serviceName)
+ 
+
+	f.delete
+	
+	
+/CreateService
+
+
+
+
+# Create systemd service file
+PDict("user","desc","path").mergeCodes =data
+error(data.hasNullValue,"Takes three parameters: user, desc, path")
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< EOF
+[Unit]
+Description=${desc}
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=${user}
+ExecStart=${path}
+
+[Install]
+WantedBy=multi-user.target
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> EOF
+->line
+	out(line.merge(data))
+/SystemdServiceFile

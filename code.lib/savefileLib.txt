@@ -179,12 +179,23 @@ EditFileFromHistory
 	P(1,List)=options
 	P(2,{* "name"})=macroGetElementName
 	P(3,false)=emptyMeansNone
-		readLine("Enter part of name? ") =sel
-		options->opt
-		    assert(macroGetElementName.call(opt).contains(sel))
-		    out(opt)
-		| =result
-		when(emptyMeansNone && sel.trim=="", {List =result})
+		readLine("Enter exact or part of value?").trim =sel
+		if (emptyMeansNone && sel=="", {
+			# empty list
+			List =result
+		}, {
+			# Look for exact match first, then if no hits, partial
+			options->opt
+				assert(macroGetElementName.call(opt)==sel)
+				out(opt)
+			| =result
+			when (result.empty, {
+				options->opt
+					assert(macroGetElementName.call(opt).contains(sel))
+					out(opt)
+				| =result
+			})
+		})
 		result
 /SelectOptions
 

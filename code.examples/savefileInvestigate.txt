@@ -26,7 +26,8 @@ Creating an investigation log when working with finding out why
 a system behaves as it does. Uses Sys.lastResult to obtain
 data.
 
-EXPERIMENTAL
+To start new log or save existing, just open the LogFile
+in an editor.
 -------------------------------------------------------------------
 >>> EOF
 /Readme
@@ -103,9 +104,4 @@ File(".investigate")
 
 LogFile.read
 /Show
-
-# clear investigation file
-readLine('Are you really sure you want to delete investigation log? Type "yes" to confirm') =x
-when(x=="yes", LogFile.create(""))
-/clear
 

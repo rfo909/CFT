@@ -161,6 +161,12 @@ public class CodeHistory {
         return;
     }
     
+    private String getInlineIdentifier(String s, SourceLocation loc, String err) throws Exception {
+    	int pos=s.indexOf(" ");
+    	if (pos < 0) throw new SourceException(loc, err);
+    	return s.substring(pos).trim();
+    }
+    
     public void load(String saveName) throws Exception {
         namedLines.clear();
         namesInSequence.clear();
@@ -193,7 +199,7 @@ public class CodeHistory {
 
             if (inlineDoc != null) {
                 // check for end marker
-                if (trimmed.startsWith(">>>") && inlineDoc.matchesEofMark(trimmed.substring(3).trim())) {
+                if (trimmed.startsWith(">>>") && inlineDoc.matchesEofMark(getInlineIdentifier(trimmed, loc, "expected identifier following sequence of >>> and space"))) {
                 	lines.add(new CodeLine(loc,s,CodeLine.TYPE_LINE_ORIGINAL));
                     // add generated code line
                     lines.add(new CodeLine(loc,inlineDoc.createCodeLine(),CodeLine.TYPE_LINE_GENERATED));
@@ -206,7 +212,7 @@ public class CodeHistory {
                 continue;
             }
             if (trimmed.startsWith("<<<")) {
-                String inlineEofMark=trimmed.substring(3).trim();
+                String inlineEofMark=getInlineIdentifier(trimmed, loc, "expected identifier following sequence of <<< and space");
                 inlineDoc=new CodeInlineDocument(inlineEofMark, loc);
                 lines.add(new CodeLine(loc, s, CodeLine.TYPE_LINE_ORIGINAL));
                 continue;

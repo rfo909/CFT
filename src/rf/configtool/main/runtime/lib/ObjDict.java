@@ -55,6 +55,8 @@ public class ObjDict extends Obj {
         baseFunctions.add(new FunctionShow());
         baseFunctions.add(new FunctionSetStr());
         baseFunctions.add(new FunctionMergeCodes());
+        baseFunctions.add(new FunctionHasNullValue());
+        
         
         init();
     }
@@ -354,6 +356,31 @@ public class ObjDict extends Obj {
             if (params.size() != 0) throw new Exception("Expected no parameters");
             return values.get(propertyName);
         }
+    }
+
+
+     class FunctionHasNullValue extends Function {
+         public String getName() {
+            return "hasNullValue";
+        }
+        public String getShortDesc() {
+            return "hasNullValue() - true if at least one value is null";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            
+            boolean found=false;
+            Iterator<String> keys=values.keySet().iterator();
+            while(keys.hasNext()) {
+                String key=keys.next();
+                if (values.get(key) instanceof ValueNull) {
+                	found=true;
+                	break;
+                }
+            }
+            return new ValueBoolean(found);
+            
+         }
     }
 
 
