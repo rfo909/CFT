@@ -16,7 +16,7 @@ CFT / ConfigTool
 <pre style="padding-left:0; margin-left:0">
 
 Last updated: 2020-08-03 RFO
-v1.1.3
+v1.14
 
 </pre>
 
@@ -52,6 +52,7 @@ v1.1.3
 
 
 
+
 <h1>What CFT is not</h1>
 <p>
   CFT does not allow classes or objects apart from those predefined. That would
@@ -63,10 +64,9 @@ v1.1.3
   external programs. It is a Domain Specific Language, not general purpose.
 </p>
 <p>
-  Writing big functions is certainly possible. Letting scripts call each other is 
-  also both supported and used. But writing complex applications, or introducing
-  abstractions, is not the intention
-  behind this application.
+  Writing big functions is no problem. Letting scripts call each other is 
+  also both supported and heavily used. However, it is not a language that
+  supports any level of abstractions.
 </p>
 <p>
   <em>It is a do-this-then-that type of language.</em> 
@@ -130,11 +130,15 @@ $ Dir.files.length
   seriously bad things. 
 </p>
 <p>
-  Code that sanity checks values before doing dangerous operations, can save you from
-  killing the wrong database or VM. Plus it documents what you did.
+  Functions will often ask you to enter data, and this means you need proper sanity checks
+  before doing dangerous operations. Nothing ruins the day like killing the wrong database
+  or VM. 
 </p>
 
+
+
 <h2>Non-critical tasks</h2>
+
 <p> 
   Even mundane operations still have the potential for unwanted consequences, such as deleting
   the original log files at the remote server, instead of the copy you unzipped locally.
@@ -145,7 +149,7 @@ $ Dir.files.length
 <p>
   It lets us block Dir or File objects against destructive operations, and is inherited by all
   Dir and File objects derived from these. The aim is to protect us from mistyping in
-  those "in a hurry" situations, where one may enter interactive commands like this.
+  those "in a hurry" situations, where one may directly enter commands like this.
 </p>
 <pre>
   $ someDir.allFiles-&gt;f f.delete
@@ -153,8 +157,15 @@ $ Dir.files.length
 
 
 
+<h2>The boring stuff</h2>
+<p>
+  Apart from all kinds of security measures possible with functions, there is the obvious: they
+  can be run over and over again.
+</p>
+<p>
+  Here are some typical areas of boring tasks that CFT handles easily.
+</p>
 
-<h2>Typical uses</h2>
   <ul>
   <li> copying files</li>
   <li> searching source code and logs</li>
@@ -176,6 +187,11 @@ $ Dir.files.length
 <h2>Navigating directories</h2>
 <p>
   CFT started out as an interactive shell-like app. It runs in a terminal window, and offers a simple '$' prompt, where one enters commands.
+</p>
+<p>
+  <i>As of v1.1.1 the prompt is now "live", being a macro defined in the CFT.props file. By default it displays
+  the name of the current script before the '$' character. It can easily be changed to display current
+  directory, time of day, and anything else you care write code for.</i>
 </p>
 
 <pre>
@@ -2500,8 +2516,10 @@ The following is used to switch drive letter in Windows.
 
 
 
-<h1>Various advanced topics</h1>
-
+<h1>Various topics</h1>
+<p>
+  In no particular order
+</p>
 
 
 
@@ -2512,12 +2530,15 @@ The following is used to switch drive letter in Windows.
 </p>
 <p>
  Then follows zero
-  or more command lines, on string format. Example:
+  or more command lines, on string format. For values containing space or otherwise 
+  have meaning to the shell, use quotes. Example:
 </p>
 <pre>
-  ./cft Code "S"
+  ./cft Projects Curr
 </pre>
-
+<p>
+  This loads script Projects, then calls the Curr function inside.
+</p>
 
 
 
@@ -2569,8 +2590,7 @@ The following is used to switch drive letter in Windows.
 <ul>
 <li>create</li>
 <li>delete</li>
-<li>copy file into dir - includes blocking 
-  File.uncompress when target dir is protected</li>
+<li>copy file into dir - includes blocking File.uncompress when target dir is protected</li>
 </ul>
 
 
@@ -2589,7 +2609,7 @@ The following is used to switch drive letter in Windows.
 
 
 
-<h2>Working with text lines from stdin</h2>
+<h2>Working with pasted text lines from stdin</h2>
 <p>
   If you've got some text in the copy-paste buffer that you want to work with, the 
   readLines() global functions can be used. It takes one parameter, which is an end-marker, which must 
@@ -2662,7 +2682,7 @@ The following is used to switch drive letter in Windows.
   if the call was ok or not.
 </p>
 <p>
-  Dotted calls are made into predicate calls, by adding a '?' questionmark between the dot 
+  All dotted calls are made into predicate calls, by adding a '?' questionmark between the dot 
   and the function name. 
 <pre>
   "sdf".?parseInt
@@ -2684,7 +2704,7 @@ The following is used to switch drive letter in Windows.
   to be assigned in "logical" order, and allows us to supply a default value if list too short.
 </p>
 <pre>
-  $ List("x","y").split.push(3,"*")=a=b=c a+":"+b+":"+c
+  $ List("x","y").split.push(3,"*") =a =b =c a+":"+b+":"+c
   &lt;String&gt;
   x:y:*
 </pre>
@@ -2722,6 +2742,8 @@ The following is used to switch drive letter in Windows.
 
 
 
+
+
 <h2>Dict fields as functions</h2>
 <p>
   For readability, values with names that are valid identifiers, and don't collide with regular 
@@ -2734,6 +2756,7 @@ The following is used to switch drive letter in Windows.
   &lt;String&gt;
   b
 </pre>  
+
 
 
 
@@ -2849,7 +2872,8 @@ The following is used to switch drive letter in Windows.
 
 
 
-<h2>String.esc() and .unEsc()</h2>
+
+<h2>String .esc() and .unEsc()</h2>
 <p>
   As was mentioned initially, CFT doesn't use backslash as an escape character. 
   However, we still require a way of converting "difficult" strings to code,
@@ -2911,7 +2935,8 @@ The following is used to switch drive letter in Windows.
 
 
 
-<h2>Running colon commands</h2>
+
+<h2>Running colon commands from script code</h2>
 <p>
   Using the Sys.stdin() statement without being followed by Input.get() or readLine(), is just 
   another way of entering commands. This means colon commands are available from CFT code.
@@ -2971,9 +2996,9 @@ The following is used to switch drive letter in Windows.
 
 <h2>Macros</h2>
 <p>
-  In addition to inline block expressions that are executed immediately, there is the option of creating
-  "independent" block expressions, which are not executed immediately, but instead are considered
-  expressions that return a value of type Macro.
+  In addition to block expressions that are executed immediately, there is the option of creating
+  "independent" block expressions, which are not executed immediately, but instead return
+  an object of type Macro.
 </p>
 <p>
   A macro is like a regular function, except it is also a value, which means it can be stored
@@ -2982,12 +3007,12 @@ The following is used to switch drive letter in Windows.
 <p>
   A macro is written in the same way as a block expression, just that the body starts with 
   a single asterisk (*), indicating
-  that the code can run anywhere, as it will always run in an isolated context, not
+  that the code can run anywhere, as it will always run in an isolated context, like functions, not
   seeing any state of the caller, which block expressions naturally do. 
 </p>
 <p>
-  To call a Macro, apply the .call() function on it, with parameters as needed, which are
-  picked up insicde the code in the same way as in functions.
+  To call a Macro, invoke its .call() function, with parameters as needed, which are
+  picked up inside the code in the same way as in functions.
 </p>
 
 <h3>Simple example</h3>
@@ -3008,6 +3033,7 @@ The following is used to switch drive letter in Windows.
 
 
 
+
 <h2>CFT.props - mCat, mEdit and mMore macros</h2>
 <p>
   The configuration fields mCat, mEdit and mMore ("m" for macro) define macros
@@ -3016,6 +3042,7 @@ The following is used to switch drive letter in Windows.
   file, otherwise "Lib:e2" which presents a history of documents edited. The
   mMore macro calls "Lib:m", while the mCat macro just calls .read on file parameter.
 </p>
+
 
 
 
@@ -3123,6 +3150,117 @@ Colon commands
 :quit                    - terminate CFT
 
 </pre>
+<p>
+  Confusing colon commands with shortcuts? You're not alone.
+</p>
+<p>
+  Colon commands exist outside the language, and are fixed (written in Java), while shortcuts run CFT program
+  code, and are defined in the CFT.props file. So far all good.
+</p>
+<p>
+  The "problem" is that CFT code (and so shortcuts) can run colon commands via "abusing" the Sys.stdin() command.
+</p>
+
+
+
+<h1>Fun and strange stuff</h1>
+
+<h2>Using Sys.stdin to run colon commands etc</h2>
+<p>
+  That functionality an example of an "unexpected feature", as the Sys.stdin() was created to automate functions that used
+  Input and readLine(). There was a moment of confusion when discovering what happened to input lines not consumed
+  by those interactive functions.
+</p>
+<p>
+   Fun, right? :-)
+</p>
+
+<h2>Why Input("label").get?</h2>
+<p>
+  Why can't the Input() function just ask the user for input? Why the .get()?
+</p>
+<p>
+  This is because it was envisioned more functions on the Input object, such as 
+  programming it to reset its remembered values, or get values from other sources.
+</p>
+<p>
+  This never came to fruition, and with Input() being a pretty old function, Input("xxx") remains an object, with a single .get() function inside.
+</p>
+<p>
+  At least it leaves us with the option of adding clever stuff later.
+</p>
+
+<h2>Block expressions are strange</h2>
+<p>
+  The block expressions do not resemble code blocks in Java, because in reality they are automatically
+  executing macros, with scope extending out to the calling environment. Macros and block expressions were
+  an afterthought, something created because it was possible. There was no real need, and in the first versions
+  of the doc, there were some really odd examples of what these could be used for.
+</p>
+<p>
+  The good thing about being separate contexts is that you can do loops and pipes and stuff. The bad thing
+  is that you can not break loops in the caller. This is okay, as assert() and reject() with boolean 
+  expressions are really old constructs since v0.0.1 if there were such a thing.
+</p>
+<p>
+  The only real need for block expressions initially, was that of conditionally assigning values to variables
+  in a more elegant way than the if-expression.
+</p>
+<pre>
+  if (addOne, value+1, value) =value
+</pre>
+
+<h2>Function name AFTER code?</h2>
+<pre>
+  Dir.files
+  /showFiles
+</pre>
+<p>
+  This stems back to the time of entering code line by line. Having to decide the name of a function before
+  seeing how much functionality you got crammed into one line, made little sense. Instead you write some code
+  that does something useful, then decides what to call it.
+</p>
+<p>
+  This might at some point be changed, at least for script files, as it still feels backward, but this 
+  is why.
+</p>
+
+
+<h2>Stack-based assignment?</h2>
+<p>
+  Why let assignment be the opposite of what everybody is used to?
+</p>
+<pre>
+  4 =value
+</pre>
+<p>
+  Primarily because it was a bit easier to implement. The syntax of CFT is made so that parsing it only
+  requires a lookahead of one token. 
+</p>
+<p>
+  The actual changes required to support normal assignment turned out not to be too hard, only 
+  extending the lookahead by one. However, the script code base has prohibited the change.
+</p>
+<p>
+  An attempt was made to allow both, but this failed. To do this, we would have to use a different
+  assignment token for each form, say "=" and ":=", which would just be confusing.</p>
+<p>
+  Besides, the postfix assignment has grown on me, for the same reason as why function name follows AFTER
+  the function code: one types code, and at some point decide that for readability, it's time
+  to assign a local variable, which is then used on the next lines. Almost like punctuation when
+  writing prose.
+</p>
+<p>
+  Deciding the variable name beforehand restricts how you write code. I see that frequently
+  when programming java. One starts declaring a variable followed by an expression, which turns
+  out more complex than you thought, and you end up going back to change the variable name, for
+  the code line to be split, and to make sense.
+</p>
+<p>
+  Also note that there are no global variables in CFT, only local helpers inside functions/macros. 
+</p>
+
+
 
 
 

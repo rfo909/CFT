@@ -1,7 +1,7 @@
 ------------------------------------------------------------------
 Generated file - see script file savefileOverview.txt
 
-v1.1.3
+v1.1.4
 ------------------------------------------------------------------
 
 Introduction
@@ -13,7 +13,7 @@ So what is it for?
  |   No parantheses?
  * Mission-critical operations
  * Non-critical tasks
- * Typical uses
+ * The boring stuff
 
 CFT as a shell
  * Navigating directories
@@ -176,13 +176,13 @@ Use as a calculator
  * Lib.Convert
  * Lib.Plot
 
-Various advanced topics
+Various topics
  * Command line args
  * Calling functions in external scripts
  * Protecting directories and files
  |   A protected directory does not allow
  |   A protected file does not allow
- * Working with text lines from stdin
+ * Working with pasted text lines from stdin
  * Differing between Windows and Linux
  * Session state
  * Predicate calls
@@ -194,10 +194,10 @@ Various advanced topics
  * Function parameters as List or Dict
  * The general loop statement
  * Storing CFT data structures to file - syn() and eval()
- * String.esc() and .unEsc()
+ * String .esc() and .unEsc()
  |   Escape codes
  * Automating interactive functions / Sys.stdin()
- * Running colon commands
+ * Running colon commands from script code
  * Simple line editing
  |   Develop complex code in steps
  * Macros
@@ -211,5 +211,12 @@ Various example code
  * Linux get user name
 
 Reference: Colon commands
+
+Fun and strange stuff
+ * Using Sys.stdin to run colon commands etc
+ * Why Input("label").get?
+ * Block expressions are strange
+ * Function name AFTER code?
+ * Stack-based assignment?
 
 Reference: Synthesizable types

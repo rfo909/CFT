@@ -2,7 +2,7 @@
 
 ```
 Last updated: 2020-08-03 RFO
-v1.1.3
+v1.14
 ```
 # Introduction
 
@@ -42,10 +42,9 @@ CFT is meant for automation tasks, such as moving files, searching and running
 external programs. It is a Domain Specific Language, not general purpose.
 
 
-Writing big functions is certainly possible. Letting scripts call each other is
-also both supported and used. But writing complex applications, or introducing
-abstractions, is not the intention
-behind this application.
+Writing big functions is no problem. Letting scripts call each other is
+also both supported and heavily used. However, it is not a language that
+supports any level of abstractions.
 
 
 **It is a do-this-then-that type of language.**
@@ -105,8 +104,9 @@ names or domains, plus the .protect() mechanism for Dir and File objects, helps 
 seriously bad things.
 
 
-Code that sanity checks values before doing dangerous operations, can save you from
-killing the wrong database or VM. Plus it documents what you did.
+Functions will often ask you to enter data, and this means you need proper sanity checks
+before doing dangerous operations. Nothing ruins the day like killing the wrong database
+or VM.
 
 ## Non-critical tasks
 
@@ -120,12 +120,19 @@ The protect() mechanism is created for these scenarios.
 
 It lets us block Dir or File objects against destructive operations, and is inherited by all
 Dir and File objects derived from these. The aim is to protect us from mistyping in
-those "in a hurry" situations, where one may enter interactive commands like this.
+those "in a hurry" situations, where one may directly enter commands like this.
 
 ```
 $ someDir.allFiles->f f.delete
 ```
-## Typical uses
+## The boring stuff
+
+
+Apart from all kinds of security measures possible with functions, there is the obvious: they
+can be run over and over again.
+
+
+Here are some typical areas of boring tasks that CFT handles easily.
 
 
 
@@ -163,6 +170,10 @@ $ someDir.allFiles->f f.delete
 
 CFT started out as an interactive shell-like app. It runs in a terminal window, and offers a simple '$' prompt, where one enters commands.
 
+
+**As of v1.1.1 the prompt is now "live", being a macro defined in the CFT.props file. By default it displays
+the name of the current script before the '$' character. It can easily be changed to display current
+directory, time of day, and anything else you care write code for.**
 ```
 $ ls
 $ cd subdir
@@ -2150,7 +2161,10 @@ f.delete
 
 The above code generates an example plot as a png file in the current directory.
 
-# Various advanced topics
+# Various topics
+
+
+In no particular order
 
 ## Command line args
 
@@ -2160,11 +2174,15 @@ that is, a savefile minus the "savefile" prefix and ".txt" ending.
 
 
 Then follows zero
-or more command lines, on string format. Example:
+or more command lines, on string format. For values containing space or otherwise
+have meaning to the shell, use quotes. Example:
 
 ```
-./cft Code "S"
+./cft Projects Curr
 ```
+
+This loads script Projects, then calls the Curr function inside.
+
 ## Calling functions in external scripts
 
 
@@ -2209,8 +2227,7 @@ matter.
 - delete
 
 
-- copy file into dir - includes blocking
-File.uncompress when target dir is protected
+- copy file into dir - includes blocking File.uncompress when target dir is protected
 
 
 ### A protected file does not allow
@@ -2235,7 +2252,7 @@ File.uncompress when target dir is protected
 - move (source or target)
 
 
-## Working with text lines from stdin
+## Working with pasted text lines from stdin
 
 
 If you've got some text in the copy-paste buffer that you want to work with, the
@@ -2294,7 +2311,7 @@ where one calls a function in a special way, resulting in a boolean value that t
 if the call was ok or not.
 
 
-Dotted calls are made into predicate calls, by adding a '?' questionmark between the dot
+All dotted calls are made into predicate calls, by adding a '?' questionmark between the dot
 and the function name.
 ```
 "sdf".?parseInt
@@ -2311,7 +2328,7 @@ The push() function of the List object pushes a number of value from the list on
 to be assigned in "logical" order, and allows us to supply a default value if list too short.
 
 ```
-$ List("x","y").split.push(3,"*")=a=b=c a+":"+b+":"+c
+$ List("x","y").split.push(3,"*") =a =b =c a+":"+b+":"+c
 <String>
 x:y:*
 ```
@@ -2446,7 +2463,7 @@ eval(file.read.nth)
 
 This can be used to save arbitrarily big structures, as long as they are synthesizable.
 
-## String.esc() and .unEsc()
+## String .esc() and .unEsc()
 
 
 As was mentioned initially, CFT doesn't use backslash as an escape character.
@@ -2513,7 +2530,7 @@ Note that both Input.get() and readLine() detect if there is buffered input, and
 if so, do not display the prompt or other info. Particularly useful for Input.get(),
 since buffering the empty string "" with Sys.stdin() means repeating the last value.
 
-## Running colon commands
+## Running colon commands from script code
 
 
 Using the Sys.stdin() statement without being followed by Input.get() or readLine(), is just
@@ -2565,9 +2582,9 @@ Note: this only applies to single-line functions.
 ## Macros
 
 
-In addition to inline block expressions that are executed immediately, there is the option of creating
-"independent" block expressions, which are not executed immediately, but instead are considered
-expressions that return a value of type Macro.
+In addition to block expressions that are executed immediately, there is the option of creating
+"independent" block expressions, which are not executed immediately, but instead return
+an object of type Macro.
 
 
 A macro is like a regular function, except it is also a value, which means it can be stored
@@ -2576,12 +2593,12 @@ in Dict objects, lists and sent as parameters, etc.
 
 A macro is written in the same way as a block expression, just that the body starts with
 a single asterisk (*), indicating
-that the code can run anywhere, as it will always run in an isolated context, not
+that the code can run anywhere, as it will always run in an isolated context, like functions, not
 seeing any state of the caller, which block expressions naturally do.
 
 
-To call a Macro, apply the .call() function on it, with parameters as needed, which are
-picked up insicde the code in the same way as in functions.
+To call a Macro, invoke its .call() function, with parameters as needed, which are
+picked up inside the code in the same way as in functions.
 
 ### Simple example
 
@@ -2695,6 +2712,113 @@ Colon commands
 :<int>                   - synthesize a row from last result (must be list)
 :quit                    - terminate CFT
 ```
+
+Confusing colon commands with shortcuts? You're not alone.
+
+
+Colon commands exist outside the language, and are fixed (written in Java), while shortcuts run CFT program
+code, and are defined in the CFT.props file. So far all good.
+
+
+The "problem" is that CFT code (and so shortcuts) can run colon commands via "abusing" the Sys.stdin() command.
+
+# Fun and strange stuff
+
+## Using Sys.stdin to run colon commands etc
+
+
+That functionality an example of an "unexpected feature", as the Sys.stdin() was created to automate functions that used
+Input and readLine(). There was a moment of confusion when discovering what happened to input lines not consumed
+by those interactive functions.
+
+
+Fun, right? :-)
+
+## Why Input("label").get?
+
+
+Why can't the Input() function just ask the user for input? Why the .get()?
+
+
+This is because it was envisioned more functions on the Input object, such as
+programming it to reset its remembered values, or get values from other sources.
+
+
+This never came to fruition, and with Input() being a pretty old function, Input("xxx") remains an object, with a single .get() function inside.
+
+
+At least it leaves us with the option of adding clever stuff later.
+
+## Block expressions are strange
+
+
+The block expressions do not resemble code blocks in Java, because in reality they are automatically
+executing macros, with scope extending out to the calling environment. Macros and block expressions were
+an afterthought, something created because it was possible. There was no real need, and in the first versions
+of the doc, there were some really odd examples of what these could be used for.
+
+
+The good thing about being separate contexts is that you can do loops and pipes and stuff. The bad thing
+is that you can not break loops in the caller. This is okay, as assert() and reject() with boolean
+expressions are really old constructs since v0.0.1 if there were such a thing.
+
+
+The only real need for block expressions initially, was that of conditionally assigning values to variables
+in a more elegant way than the if-expression.
+
+```
+if (addOne, value+1, value) =value
+```
+## Function name AFTER code?
+
+```
+Dir.files
+/showFiles
+```
+
+This stems back to the time of entering code line by line. Having to decide the name of a function before
+seeing how much functionality you got crammed into one line, made little sense. Instead you write some code
+that does something useful, then decides what to call it.
+
+
+This might at some point be changed, at least for script files, as it still feels backward, but this
+is why.
+
+## Stack-based assignment?
+
+
+Why let assignment be the opposite of what everybody is used to?
+
+```
+4 =value
+```
+
+Primarily because it was a bit easier to implement. The syntax of CFT is made so that parsing it only
+requires a lookahead of one token.
+
+
+The actual changes required to support normal assignment turned out not to be too hard, only
+extending the lookahead by one. However, the script code base has prohibited the change.
+
+
+An attempt was made to allow both, but this failed. To do this, we would have to use a different
+assignment token for each form, say "=" and ":=", which would just be confusing.
+
+
+Besides, the postfix assignment has grown on me, for the same reason as why function name follows AFTER
+the function code: one types code, and at some point decide that for readability, it's time
+to assign a local variable, which is then used on the next lines. Almost like punctuation when
+writing prose.
+
+
+Deciding the variable name beforehand restricts how you write code. I see that frequently
+when programming java. One starts declaring a variable followed by an expression, which turns
+out more complex than you thought, and you end up going back to change the variable name, for
+the code line to be split, and to make sense.
+
+
+Also note that there are no global variables in CFT, only local helpers inside functions/macros.
+
 # Reference: Synthesizable types
 
 

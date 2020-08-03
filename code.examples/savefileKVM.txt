@@ -172,8 +172,8 @@ P(1,"someTarget")=target
 
 
 P(1,"someTarget")=target
-    when(DoNotDelete.contains(target), 
-        error("Can not delete target " + target + ": remove from DoNotDelete list first"))
+    error(DoNotDelete.contains(target),
+    	"Can not delete target " + target + ": remove from DoNotDelete list first"))
     Stop(target)
     Util.exec.call("virsh undefine --domain " + target)
     Dir("/var/lib/libvirt/images").file(target + ".qcow2").delete
@@ -231,7 +231,7 @@ P(1,"someTarget")=target
     call "Lib:ReadValueBoolean" ("Enter 'yes' to continue", false, "yes","abort") =continue
     when (!continue,{
         println("Aborting")
-        error("Aborting")
+        error(true,"Aborting")
     })
 
     List("virt-install",
