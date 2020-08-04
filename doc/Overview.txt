@@ -212,11 +212,11 @@ Various example code
 
 Reference: Colon commands
 
+Reference: Synthesizable types
+
 Fun and strange stuff
- * Using Sys.stdin to run colon commands etc
  * Why Input("label").get?
  * Block expressions are strange
  * Function name AFTER code?
  * Stack-based assignment?
-
-Reference: Synthesizable types
+ * Using Sys.stdin to run colon commands etc

@@ -2722,103 +2722,6 @@ code, and are defined in the CFT.props file. So far all good.
 
 The "problem" is that CFT code (and so shortcuts) can run colon commands via "abusing" the Sys.stdin() command.
 
-# Fun and strange stuff
-
-## Using Sys.stdin to run colon commands etc
-
-
-That functionality an example of an "unexpected feature", as the Sys.stdin() was created to automate functions that used
-Input and readLine(). There was a moment of confusion when discovering what happened to input lines not consumed
-by those interactive functions.
-
-
-Fun, right? :-)
-
-## Why Input("label").get?
-
-
-Why can't the Input() function just ask the user for input? Why the .get()?
-
-
-This is because it was envisioned more functions on the Input object, such as
-programming it to reset its remembered values, or get values from other sources.
-
-
-This never came to fruition, and with Input() being a pretty old function, Input("xxx") remains an object, with a single .get() function inside.
-
-
-At least it leaves us with the option of adding clever stuff later.
-
-## Block expressions are strange
-
-
-The block expressions do not resemble code blocks in Java, because in reality they are automatically
-executing macros, with scope extending out to the calling environment. Macros and block expressions were
-an afterthought, something created because it was possible. There was no real need, and in the first versions
-of the doc, there were some really odd examples of what these could be used for.
-
-
-The good thing about being separate contexts is that you can do loops and pipes and stuff. The bad thing
-is that you can not break loops in the caller. This is okay, as assert() and reject() with boolean
-expressions are really old constructs since v0.0.1 if there were such a thing.
-
-
-The only real need for block expressions initially, was that of conditionally assigning values to variables
-in a more elegant way than the if-expression.
-
-```
-if (addOne, value+1, value) =value
-```
-## Function name AFTER code?
-
-```
-Dir.files
-/showFiles
-```
-
-This stems back to the time of entering code line by line. Having to decide the name of a function before
-seeing how much functionality you got crammed into one line, made little sense. Instead you write some code
-that does something useful, then decides what to call it.
-
-
-This might at some point be changed, at least for script files, as it still feels backward, but this
-is why.
-
-## Stack-based assignment?
-
-
-Why let assignment be the opposite of what everybody is used to?
-
-```
-4 =value
-```
-
-Primarily because it was a bit easier to implement. The syntax of CFT is made so that parsing it only
-requires a lookahead of one token.
-
-
-The actual changes required to support normal assignment turned out not to be too hard, only
-extending the lookahead by one. However, the script code base has prohibited the change.
-
-
-An attempt was made to allow both, but this failed. To do this, we would have to use a different
-assignment token for each form, say "=" and ":=", which would just be confusing.
-
-
-Besides, the postfix assignment has grown on me, for the same reason as why function name follows AFTER
-the function code: one types code, and at some point decide that for readability, it's time
-to assign a local variable, which is then used on the next lines. Almost like punctuation when
-writing prose.
-
-
-Deciding the variable name beforehand restricts how you write code. I see that frequently
-when programming java. One starts declaring a variable followed by an expression, which turns
-out more complex than you thought, and you end up going back to change the variable name, for
-the code line to be split, and to make sense.
-
-
-Also note that there are no global variables in CFT, only local helpers inside functions/macros.
-
 # Reference: Synthesizable types
 
 
@@ -2873,5 +2776,115 @@ Also note that there are no global variables in CFT, only local helpers inside f
 
 - Regex
 
+
+# Fun and strange stuff
+
+## Why Input("label").get?
+
+
+Why can't the Input() function just ask the user for input? Why the .get()?
+
+
+This is because it was envisioned more functions on the Input object, such as
+programming it to reset its remembered values, or get values from other sources.
+
+
+This never came to fruition, and with Input() being a pretty old function, Input("xxx") remains an object, with a single .get() function inside.
+
+
+At least it leaves us with the option of adding clever stuff later.
+
+## Block expressions are strange
+
+
+The block expressions do not resemble code blocks in Java, because in reality they are automatically
+executing macros, with scope extending out to the calling environment. Macros and block expressions were
+an afterthought, something created because it was possible. There was no real need, and in the first versions
+of the doc, there were some really odd examples of what these could be used for.
+
+
+The good thing about being separate contexts is that you can do loops and pipes and stuff. The bad thing
+is that you can not break loops in the caller. This is okay, as assert() and reject() with boolean
+expressions are really old constructs since v0.0.1 if there were such a thing.
+
+
+The only real need for block expressions initially, was that of conditionally assigning values to variables
+in a more elegant way than the if-expression.
+
+```
+if (addOne, value+1, value) =value
+```
+## Function name AFTER code?
+
+```
+Dir.files
+/showFiles
+```
+
+This stems back to the time of entering code line by line. Having to decide the name of a function before
+seeing how much functionality you got crammed into one line, made little sense. Instead you write some code
+that does something useful, then decides what to call it.
+
+
+Also there is the issue of not assigning a name until you have a code line that 
+**works**.
+
+
+This might at some point be changed, at least for script files, as it still feels backward, but this
+is why.
+
+
+The syntax with the slash and an identifier was inspired by PostScript.
+
+## Stack-based assignment?
+
+
+Why let assignment be the opposite of what everybody is used to?
+
+```
+4 =value
+```
+
+Primarily because it was a bit easier to implement. The syntax of CFT is made so that parsing it only
+requires a lookahead of one token.
+
+
+The actual changes required to support normal assignment turned out not to be too hard, only
+extending the lookahead by one. However, the script code base has prohibited the change.
+
+
+An attempt was made to allow both, but this failed. To do this, we would have to use a different
+assignment token for each form, say "=" and ":=", which would just be confusing.
+
+
+Besides, the postfix assignment has grown on me, for the same reason as why function name follows AFTER
+the function code: one types code, and at some point decide that for readability, it's time
+to assign a local variable, which is then used on the next lines. Almost like punctuation when
+writing prose.
+
+
+Deciding the variable name beforehand restricts how you write code. I see that frequently
+when programming java. One starts declaring a variable followed by an expression, which turns
+out more complex than you thought, and you end up going back to change the variable name, making the
+expression simpler, by breaking it into parts.
+
+
+Also note that there are no global variables (*) in CFT, only local helpers inside functions/macros, so
+all variable assignments come about in this way.
+
+
+(*) Session values are of course global variables, but they
+are defined and accessed using very different syntax, to emphasize how they are
+not meant as "helpers" in expressions.
+
+## Using Sys.stdin to run colon commands etc
+
+
+That functionality an example of an "unexpected feature", as the Sys.stdin() was created to automate functions that used
+Input and readLine(). There was a moment of confusion when discovering what happened to input lines not consumed
+by those interactive functions.
+
+
+Fun, right? :-)
 
 

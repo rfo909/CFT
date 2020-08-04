@@ -245,6 +245,30 @@ Input("Replica set name").get =rsName
 
 
 
+## Info on how to add shard to config
+Input("Replica set name").get =rsName
+	0 =count
+	MongodData->d
+		assert(d.replSetName==rsName) 
+		out(d.host+":27017") 
+		count+1 =count
+	| _.concat(",") =members
+	TmpFile("init")=f
+	"sh.addShard('"+rsName+"/"+members+"')" =js
+	
+	println("Connect with mongo shell to one of these mongos servers:")
+	println("      " + (MongosHosts.concat(", ")) )
+	println("Enter the following command")
+	println
+	println(js)
+	println
+
+	true
+/HowToAddShard
+
+
+
+
 
 ## Create Mongos start script
 	MongodData->d 

@@ -3163,17 +3163,37 @@ Colon commands
 
 
 
+
+
+<h1>Reference: Synthesizable types</h1>
+<ul>
+  <li>boolean</li>
+  <li>int</li>
+  <li>float</li>
+  <li>string</li>
+  <li>null</li>
+  <li>List</li>
+  <li>Dir</li>
+  <li>File</li>
+  <li>FileLine</li>
+  <li>Date</li>
+  <li>Date.Duration</li>
+  <li>Int</li>
+  <li>Float</li>
+  <li>Str</li>
+  <li>Dict</li>
+  <li>Glob</li>
+  <li>Regex</li>
+</ul>
+
+
+
+
+
+
 <h1>Fun and strange stuff</h1>
 
-<h2>Using Sys.stdin to run colon commands etc</h2>
-<p>
-  That functionality an example of an "unexpected feature", as the Sys.stdin() was created to automate functions that used
-  Input and readLine(). There was a moment of confusion when discovering what happened to input lines not consumed
-  by those interactive functions.
-</p>
-<p>
-   Fun, right? :-)
-</p>
+
 
 <h2>Why Input("label").get?</h2>
 <p>
@@ -3221,8 +3241,14 @@ Colon commands
   that does something useful, then decides what to call it.
 </p>
 <p>
+  Also there is the issue of not assigning a name until you have a code line that <em>works</em>. 
+</p>
+<p>
   This might at some point be changed, at least for script files, as it still feels backward, but this 
   is why.
+</p>
+<p>
+  The syntax with the slash and an identifier was inspired by PostScript.
 </p>
 
 
@@ -3253,36 +3279,32 @@ Colon commands
 <p>
   Deciding the variable name beforehand restricts how you write code. I see that frequently
   when programming java. One starts declaring a variable followed by an expression, which turns
-  out more complex than you thought, and you end up going back to change the variable name, for
-  the code line to be split, and to make sense.
+  out more complex than you thought, and you end up going back to change the variable name, making the
+  expression simpler, by breaking it into parts. 
 </p>
 <p>
-  Also note that there are no global variables in CFT, only local helpers inside functions/macros. 
+  Also note that there are no global variables (*) in CFT, only local helpers inside functions/macros, so
+  all variable assignments come about in this way.
+</p>
+<p>
+   (*) Session values are of course global variables, but they
+  are defined and accessed using very different syntax, to emphasize how they are 
+  not meant as "helpers" in expressions. 
 </p>
 
 
 
+<h2>Using Sys.stdin to run colon commands etc</h2>
+<p>
+  That functionality an example of an "unexpected feature", as the Sys.stdin() was created to automate functions that used
+  Input and readLine(). There was a moment of confusion when discovering what happened to input lines not consumed
+  by those interactive functions.
+</p>
+<p>
+   Fun, right? :-)
+</p>
 
 
-<h1>Reference: Synthesizable types</h1>
-<ul>
-  <li>boolean</li>
-  <li>int</li>
-  <li>float</li>
-  <li>string</li>
-  <li>null</li>
-  <li>List</li>
-  <li>Dir</li>
-  <li>File</li>
-  <li>FileLine</li>
-  <li>Date</li>
-  <li>Date.Duration</li>
-  <li>Int</li>
-  <li>Float</li>
-  <li>Str</li>
-  <li>Dict</li>
-  <li>Glob</li>
-  <li>Regex</li>
-</ul>
+
 
 </body></html>
