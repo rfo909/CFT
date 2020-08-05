@@ -12,6 +12,7 @@ Requirements:
 	$ :load SSH
 	$ Readme
 
+- SetHostNamesPrefix
 - InstallMongodAll
 - InstallMongoShellAll
 - HowToInitRS for all RS names (conf, s1, s2)
@@ -64,6 +65,26 @@ P(1,"temp")=name
 
 
 
+println("------------------------------------------------------------------")
+println("The HostNamesPrefix is a way of working with multiple MongoDB HA")
+println("configurations, using the same code to manage them.")
+println
+println("The current value is " + Val("HostNamesPrefix"))
+println("------------------------------------------------------------------")
+readLine("Enter current HostNamePrefix, Enter for none") =x
+println
+ValDef("HostNamesPrefix",x)
+/SetHostNamesPrefix
+
+
+
+Val("HostNamesPrefix")=x
+error(x==null,"Run SetHostNamesPrefix function first")
+x
+/HostNamesPrefix
+
+
+
 # Config data
 	# Note: the config replica set name 'conf' must not be changed, unless
 	# also modifying the MongosStartScript function, which depends on it
@@ -73,7 +94,7 @@ P(1,"temp")=name
 	+ " m21.v:s2:shardsvr m22.v:s2:shardsvr m23.v:s2:shardsvr"
 	).split->x
 		x.split(":").push(3,"") =host =replSetName =clusterRole
-		out(Dict.set("host",host).set("replSetName",replSetName).set("clusterRole",clusterRole))
+		out(Dict.set("host",HostNamesPrefix+host).set("replSetName",replSetName).set("clusterRole",clusterRole))
 /MongodData
 
 
@@ -81,7 +102,7 @@ P(1,"temp")=name
 # Config data
 	(
 	"m.v"
-	).split
+	).split->x out(HostNamesPrefix+x)
 /MongosHosts
 
 

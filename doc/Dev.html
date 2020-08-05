@@ -13,6 +13,13 @@
 
 <h1>CFT Change log</h1>
 
+<h3>v1.1.4 2020-08-05 MongoHA</h3>
+<p>
+	Added support for a prefix to all host names, so that mcfg1, mcfg2, mcfg3 and so on becomes
+	bmcfg1, bmcfg2, ... if prefix is "b". Creating VM's with these names and separate IP-addresses,
+	lets us configure multiple MongoDB HA enviroments with the same script.
+</p>
+
 <h3>v1.1.4 2020-08-05 Scripts</h3>
 <p>
 	Added functions to ServersMaintenance to set /etc/hostname and configure /etc/netplan
