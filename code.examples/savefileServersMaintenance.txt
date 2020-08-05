@@ -10,6 +10,8 @@ to work, the remote server must
 
 To do this, see the SSH script and its Readme
 function.
+
+A single main function run() handles all cases.
 ------------------------------------------------
 >>> EOF
 /Readme
@@ -118,6 +120,15 @@ P(1)=target P(2,List)=commands P(3,Dict)=codes # returns list of codes
 /RemoteCommandSetCoded
 
 
+
+P(1)=target P(2)=cmd P(3,null)=codes  ## 
+	if (!cmd.?nth, List(cmd), cmd) =cmd  # now it's always a list
+	if (codes != null,
+		RemoteCommandSetCoded(target, cmd, codes)
+		,
+		RemoteCommandSet(target, cmd)
+	)
+/run
 
 
 # Example on how to classify java support on remote server (interactive)
