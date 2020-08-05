@@ -160,20 +160,23 @@ d
 
 
 P(1,"someTarget")=target
+    println("STARTING " + target)
     Util.exec.call("virsh start --domain " + target)
     status
 /Start
 
 
 P(1,"someTarget")=target
+    println("STOPPING " + target)
     Util.exec.call("virsh destroy --domain " + target)
     status
 /Stop
 
 
 P(1,"someTarget")=target
+    println("DELETING " + target)
     error(DoNotDelete.contains(target),
-    	"Can not delete target " + target + ": remove from DoNotDelete list first"))
+    	"Can not delete target " + target + ": remove from DoNotDelete list first")
     Stop(target)
     Util.exec.call("virsh undefine --domain " + target)
     Dir("/var/lib/libvirt/images").file(target + ".qcow2").delete
@@ -186,10 +189,14 @@ P(1,"someTarget")=target
     call "Lib:Header" ("Cloning existing VM")
     null=original
     null=cloneName
+    null=originalIp
+    null=newIp
     loop
         status
         call "Lib:ReadValue" ("Original VM", original) =original
-        call "Lib:ReadValue" ("New VM", cloneName) =cloneName
+        call "Lib:ReadValue" ("New VM name / will also be host name", cloneName) =cloneName
+        call "Lib:ReadValue" ("Original IP address or name (kubsXX.v)", originalIp) =originalIp
+        call "Lib:ReadValue" ("New IP address and mask: xx.xx.xx.xx/MM", newIp) =newIp
         call "Lib:ReadValueBoolean" ("Ok", false) =ok
         break(ok)
     |
@@ -198,7 +205,40 @@ P(1,"someTarget")=target
         + " --file /var/lib/libvirt/images/" + cloneName + ".qcow2")
     Start(cloneName)
     status
+
+    println
+    println("* Waiting for new node to respond to ping")
+    call "ServersMaintenance:WaitForPing" (originalIp, 30)
+
+    println
+    Input("Enter ssh user name").get =sshUser
+
+    println
+    println("*** NOTE ***")
+    println("------------")
+    println("Ensure you can SSH into " + sshUser + "@" + originalIp + " without password being root,")
+    println("as this script must always run as root (for KVM cloning etc).")
+    println
+    println("Also verify that you can run sudo without password.")
+    readLine("(Press Enter)")
+    println
+
+    sshUser+"@"+originalIp =target
+	
+    println("* Configuring hostname")
+    call "ServersMaintenance:VMSetHostname" (target, cloneName)
+
+    println("* Configuring netplan")
+    call "ServersMaintenance:VMConfigureNetplan" (target, newIp)
+
+    println("* Rebooting new VM")
+    call "ServersMaintenance:run" (target, "sudo reboot")
+
+    "Done"
 /Clone
+
+
+
 
 
 

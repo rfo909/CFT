@@ -11,6 +11,13 @@ Requirements:
 	For more info
 	$ :load SSH
 	$ Readme
+
+- InstallMongodAll
+- InstallMongoShellAll
+- HowToInitRS for all RS names (conf, s1, s2)
+- InstallMongosAll
+-- reboot all mongos servers
+- HowToAddShard
 >>>>>>>>>>>>>>>>>>>>>>>>> EOF
 /Readme
 
@@ -194,6 +201,16 @@ Input("ssh user").get=user
 /InstallMongodAll
 
 
+Input("ssh user").get=user
+Input("host").get=host
+	MongodData->d
+		assert(d.host==host)
+		d.replSetName =replSetName
+		d.clusterRole =clusterRole
+		InstallMongod(user+"@"+host, replSetName, clusterRole, false)
+/InstallMongodOne
+
+
 
 Input("ssh user").get=user
 	MongosHosts->host
@@ -213,10 +230,11 @@ Input("ssh user").get=user
 	
 	hosts->host
 		println("----------------------")
-		println("mongos: host=" + host)
+		println("mongo shell: host=" + host)
 		println("----------------------")
 		InstallMongoShell(user+"@"+host)
 /InstallMongoShellAll
+
 
 
 

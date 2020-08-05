@@ -169,7 +169,8 @@ P(1,Input("SSH target user@host").get)=target
 P(2,Input("IP address xx.xx.xx.xx/MM").get) =ip
 	error(!ip.contains("/"), "IP address missing mask? xx.xx.xx.xx/MM")
 	
-	println("* Doing ip addr to determine network device name")
+	println("* Running remote command 'ip addr' to list network device names")
+	println("---------------------------------------------------------------")
 	run(target,"ip addr")->line
 		println("    " + line)
 	|
