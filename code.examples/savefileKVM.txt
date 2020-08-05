@@ -95,22 +95,23 @@ transport the port number to another PC, where you run VNC.
 
 --
 
-The script VM under code.examples is meant for running on 
-VM's after creation, and is tested with VM's running Ubuntu 
+The Clone functionality depends on there existing template VM's with
+static IP addresses, that can be reached after clone.
+
+--
+
+The script VM under code.examples was meant for running on 
+VM's after creation, and has been tested with VM's running Ubuntu 
 Server 18.04. It sets up hostname and netplan config file. Please 
 modify the functions Gateway4 and Nameservers in the VM script 
 before running it on your template VM.
 
-After cloning the template VM, ssh into the IP of the template, 
-then run the VM script
+---
 
-> sudo bash
-> cd CFT
-> ./cft VM Run
-
-Enter hostname and IP address (remember /8 or /16 etc).
-^C
-> reboot
+Note that as of v1.1.4 the KVM Clone() function handles 
+setting up hostname and netplan on the newly created clone,
+using SSH management. The VM script is becoming obsolete, at least
+once the template VM has been created.
 --------------------------------------------------------------
 >>> EOF
 /Readme
@@ -205,6 +206,16 @@ P(1,"someTarget")=target
         + " --file /var/lib/libvirt/images/" + cloneName + ".qcow2")
     Start(cloneName)
     status
+    
+    println
+    println("----------------------------------------------------------")
+	println("The Clone function can now configure hostname and ")
+	println("netplan for the new VM. This requires password-less SSH")
+	println("and also sudo without passwords (on the template VM)")
+    println("----------------------------------------------------------")
+	println
+	call "Lib:ReadValueBoolean" ("Type 'no' to abort or Enter to continue", true) =confirm
+	error(!confirm,"Aborting config of VM via SSH")
 
     println
     println("* Waiting for new node to respond to ping")

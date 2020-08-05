@@ -13,6 +13,17 @@
 
 <h1>CFT Change log</h1>
 
+<h3>v1.1.4 2020-08-05 Scripts</h3>
+<p>
+	Added functions to ServersMaintenance to set /etc/hostname and configure /etc/netplan
+	for VM's. Added code to the KVM Clone() function to use these, so that it now configures
+	the newly created clone then reboots it. 
+</p>
+<p>
+	This means there is no need as such to install CFT on the clone template VM, as
+	all initial setup is managed from the outside. The VM script is becoming obsolete.
+</p>
+
 <h3>v1.1.4 2020-08-03 Doc</h3>
 <p>
 	Had to add a section "Fun and strange stuff", since there are a bit of those.
