@@ -121,7 +121,7 @@ P(1)=target P(2,List)=commands P(3,Dict)=codes # returns list of codes
 
 
 
-P(1)=target P(2)=cmd P(3,null)=codes  ## 
+P(1)=target P(2)=cmd P(3,null)=codes  ## Run external single / list command with or without Dict codes
 	if (!cmd.?nth, List(cmd), cmd) =cmd  # now it's always a list
 	if (codes != null,
 		RemoteCommandSetCoded(target, cmd, codes)
@@ -129,6 +129,85 @@ P(1)=target P(2)=cmd P(3,null)=codes  ##
 		RemoteCommandSet(target, cmd)
 	)
 /run
+
+
+P(1,Input("IP address to wait for").get)=ip P(2,10)=retries
+loop
+	error(retries<=0,"No Ping response from " + ip)
+	retries-1 =retries
+	true =ok
+	{ Dir.runCapture("ping","-c","1",ip)->line 
+		when(line.contains("100% packet loss"), {false=ok})
+	}
+	break(ok)
+	Sys.sleep(500)
+|
+true
+/WaitForPing
+
+
+P(1,Input("SSH target user@host").get)=target
+P(2,Input("Host name").get)=hostname
+	TmpFile("hn")=f 
+	f.create(hostname)
+	
+	println("* Copying hostname file to target")
+	Dir.run("rcp", f.path, target+":./hostname")
+	
+	println("* Moving hostname file to /etc")
+	run(target,"sudo cp ./hostname /etc")
+	
+	println("* Deleting hostname from home dir")
+	run(target,"rm ./hostname")
+	
+	f.delete
+/VMSetHostname
+
+
+
+P(1,Input("SSH target user@host").get)=target
+P(2,Input("IP address xx.xx.xx.xx/MM").get) =ip
+	error(!ip.contains("/"), "IP address missing mask? xx.xx.xx.xx/MM")
+	
+	println("* Doing ip addr to determine network device name")
+	run(target,"ip addr")->line
+		println("    " + line)
+	|
+	
+	println
+	Input("Enter network device name").get=nic
+	
+	TmpFile("np")=f
+	f.create(VMNetplan(ip,nic))
+	
+	println("* Copying netplan to target")
+	Dir.run("rcp", f.path, target+":./netplan.txt")
+	
+	println("* Deleting all files under /etc/netplan")
+	run(target, "sudo rm -f /etc/netplan/*")
+	
+	println("* Moving netplan file into /etc")
+	run(target, "sudo mv ./netplan.txt /etc/netplan/50-cloud-init.yaml")
+/VMConfigureNetplan
+
+	
+PDict("ip","nic").mergeCodes=data
+error(data.hasNullValue,"Expected parameter for IP address and mask on format xx.xx.xx.xx/MM")
+<<< EOF
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    ${nic}:
+      dhcp4: no
+      gateway4: 10.0.0.138
+      addresses: [${ip}]
+      nameservers:
+        addresses: [10.0.0.3, 10.0.0.4]
+>>> EOF
+->line
+	out(line.merge(data))
+/VMNetplan
 
 
 # Example on how to classify java support on remote server (interactive)
