@@ -15,8 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2020-08-03 RFO
-v1.14
+Last updated: 2020-08-06 RFO
+v1.1.4
 
 </pre>
 
@@ -1844,19 +1844,22 @@ The following is used to switch drive letter in Windows.
 
 
 
-<h1>Searching log files / DateSort</h1>
+<h1>Searching log files</h1>
+
+<h2>Lib.LogFiles.DateSort</h2>
 <p>
-  Lines written to log files often will start with date and time. Further, actions that we want to
+  Lines written to log files usually start with date and time. Further, actions that we want to
   trace may span several log files, for example when messages are sent between different services,
-  each with its own log. To clearly trace such activity, we search the log files for some text,
-  and then sort the lines on the date/time at the start of each line. 
+  each with its own log. To clearly trace such activity, we may search the individual log files for some text,
+  and then sort all lines found on the date/time at the start of each line. 
 </p>
 <p>
-  A custom function / object has been created for this purpose, to make it easy to use.
+  The Lib.LogFiles.DateSort function/object has been created for this purpose.
 </p>
 
 <pre>
   Input("Enter search term").get =st
+  Lib.LogFiles.DateSort =dateSort
   Grep(st)=grep
   ProjectDir.allFiles-&gt;f
     assert(FileQualified(f))
@@ -1864,11 +1867,13 @@ The following is used to switch drive letter in Windows.
       out(line)
   |
   =lines
-  DateSort.asc(lines)-&gt;line
+  dateSort.asc(lines)-&gt;line
     report(line.file.name, line.lineNumber, line)
   /SearchLog
 </pre>
-<h2>DateSort.search()</h2>
+
+
+<h3>DateSort.search()</h3>
 <p>
   As of v1.1.3 DateSort has been extended with an advanced option for searching HUGE log files
   by date/time interval. It uses random access of start and end to identify if the file contains log lines
@@ -1876,8 +1881,25 @@ The following is used to switch drive letter in Windows.
   of supplying a Grep object, to filter lines within that time interval.
 </p>
 <pre>
-  DateSort.search(file, fromTimeMillis, toTimeMillis, Grep?)
+  Lib.LogFiles.DateSort.search(file, fromTimeMillis, toTimeMillis, Grep?)
 </pre>
+
+
+<h2>Lib.LogFiles.FileReader(file)</h2>
+<p>
+  Processing big files, you can't use File.read(), as you will run out of memory.
+</p>
+<pre>
+  Lib.LogFiles.FileReader(somefile) =reader
+  loop
+    reader.read=line
+    break(line==null)
+    ....
+</pre>
+
+
+
+
 
 
 

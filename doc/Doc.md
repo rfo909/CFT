@@ -1,8 +1,8 @@
 # CFT / ConfigTool
 
 ```
-Last updated: 2020-08-03 RFO
-v1.14
+Last updated: 2020-08-06 RFO
+v1.1.4
 ```
 # Introduction
 
@@ -1588,19 +1588,22 @@ grep.file(f)->line
 report(line.file.name, line.lineNumber, line)
 /Search
 ```
-# Searching log files / DateSort
+# Searching log files
+
+## Lib.LogFiles.DateSort
 
 
-Lines written to log files often will start with date and time. Further, actions that we want to
+Lines written to log files usually start with date and time. Further, actions that we want to
 trace may span several log files, for example when messages are sent between different services,
-each with its own log. To clearly trace such activity, we search the log files for some text,
-and then sort the lines on the date/time at the start of each line.
+each with its own log. To clearly trace such activity, we may search the individual log files for some text,
+and then sort all lines found on the date/time at the start of each line.
 
 
-A custom function / object has been created for this purpose, to make it easy to use.
+The Lib.LogFiles.DateSort function/object has been created for this purpose.
 
 ```
 Input("Enter search term").get =st
+Lib.LogFiles.DateSort =dateSort
 Grep(st)=grep
 ProjectDir.allFiles->f
 assert(FileQualified(f))
@@ -1608,11 +1611,11 @@ grep.file(f)->line
 out(line)
 |
 =lines
-DateSort.asc(lines)->line
+dateSort.asc(lines)->line
 report(line.file.name, line.lineNumber, line)
 /SearchLog
 ```
-## DateSort.search()
+### DateSort.search()
 
 
 As of v1.1.3 DateSort has been extended with an advanced option for searching HUGE log files
@@ -1621,7 +1624,19 @@ within the range, and then binary search to locate where to start reading. There
 of supplying a Grep object, to filter lines within that time interval.
 
 ```
-DateSort.search(file, fromTimeMillis, toTimeMillis, Grep?)
+Lib.LogFiles.DateSort.search(file, fromTimeMillis, toTimeMillis, Grep?)
+```
+## Lib.LogFiles.FileReader(file)
+
+
+Processing big files, you can't use File.read(), as you will run out of memory.
+
+```
+Lib.LogFiles.FileReader(somefile) =reader
+loop
+reader.read=line
+break(line==null)
+....
 ```
 # Generalized sorting
 

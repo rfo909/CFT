@@ -32,6 +32,12 @@ public abstract class ObjPersistent extends Obj {
     public void initPersistentObj() {
         // empty
     }
+    /**
+     * Called every time an expression resolves to an existing persistent object
+     */
+    public void refreshPersistentObj() {
+    	// empty
+    }
     public void cleanupOnExit() {
         // empty
     }

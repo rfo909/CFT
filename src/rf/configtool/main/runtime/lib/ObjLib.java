@@ -44,6 +44,7 @@ public class ObjLib extends Obj {
         this.add(new FunctionData());
         this.add(new FunctionMath());
         this.add(new FunctionConvert());
+        this.add(new FunctionLogFiles());
     }
     
     @Override
@@ -145,5 +146,17 @@ public class ObjLib extends Obj {
     }
     
 
+    class FunctionLogFiles extends Function {
+        public String getName() {
+            return "LogFiles";
+        }
+        public String getShortDesc() {
+            return "LogFiles() - create log files analysis object";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueObj(new ObjLogFiles());
+        }
+    } 
 
 }

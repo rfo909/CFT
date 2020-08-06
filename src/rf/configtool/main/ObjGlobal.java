@@ -100,7 +100,6 @@ public class ObjGlobal extends Obj {
         add(new FunctionFilter());
         add(new FunctionGrep());
         add(new FunctionObjInput());
-        add(new FunctionDateSort());
         add(new FunctionInt());
         add(new FunctionFloat());
         add(new FunctionStr());
@@ -196,7 +195,9 @@ public class ObjGlobal extends Obj {
             sessionObjects.put(obj.getPersistenceId(), obj);
             x=obj;
             x.initPersistentObj();
-        } 
+        } else {
+        	x.refreshPersistentObj();
+        }
         return new ValueObj(x);
     }
     
@@ -397,24 +398,6 @@ public class ObjGlobal extends Obj {
             throw new Exception("Expected label (string) parameter");
         }
     }
-    
-    class FunctionDateSort extends Function {
-        public String getName() {
-            return "DateSort";
-        }
-        public String getShortDesc() {
-            return "DateSort() - DateSort object, for sorting lines starting with date/time";
-        }
-        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() == 0) {
-                ObjDateSort x=new ObjDateSort();
-                return new ValueObj(x);
-            } 
-
-            throw new Exception("Expected no parameters");
-        }
-    }
-    
     
 
     class FunctionInt extends Function {

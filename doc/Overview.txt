@@ -132,8 +132,10 @@ Searching files / report()
  |   Counting hits
  |   Limiting search to a few files
 
-Searching log files / DateSort
- * DateSort.search()
+Searching log files
+ * Lib.LogFiles.DateSort
+ |   DateSort.search()
+ * Lib.LogFiles.FileReader(file)
 
 Generalized sorting
  * Example: file size
