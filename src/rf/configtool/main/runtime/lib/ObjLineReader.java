@@ -4,29 +4,47 @@ import java.io.*;
 import java.util.List;
 
 import rf.configtool.main.Ctx;
+import rf.configtool.main.CtxCloseHook;
 import rf.configtool.main.runtime.ColList;
 import rf.configtool.main.runtime.Function;
 import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueBoolean;
 import rf.configtool.main.runtime.ValueNull;
+import rf.configtool.main.runtime.ValueObj;
 
-public class ObjLineReader extends ObjPersistent {
+public class ObjLineReader extends ObjPersistent implements CtxCloseHook {
     
 	private ObjFile file;
 	private BufferedReader br;
 	private long lineNumber;
 	
-    public ObjLineReader(ObjFile file) {
+    public ObjLineReader(ObjFile file, Ctx ctx) {
     	this.file=file;
     	
-    	init();
-    	
+    	this.add(new FunctionStart());
     	this.add(new FunctionRead());
-        this.add(new FunctionClose());
+    }
+
+    @Override
+    public void ctxClosing(Ctx ctx) {
+    	// When the context where start() was called, terminates, the
+    	// file is closed
+    	try {
+            br.close();
+            br=null;
+            ctx.addSystemMessage("Closed LineReader file " + file.getName());
+    	} catch (Exception ex) {
+    		//
+    	}
     }
     
-    private void init() {
+    public Obj self() {
+    	return this;
+    }
+    
+    
+    private void init(Ctx ctx) {
     	try {
     		lineNumber=1;
     		
@@ -42,6 +60,7 @@ public class ObjLineReader extends ObjPersistent {
         	br = new BufferedReader(
       			   new InputStreamReader(
       	                      new FileInputStream(f), encoding));
+        	ctx.addCtxCloseHook(this);
     	} catch (Exception ex) {
     		br=null;
     	}
@@ -77,21 +96,31 @@ public class ObjLineReader extends ObjPersistent {
     }
     
     
-    @Override
-    public void refreshPersistentObj() {
-    	// read from start
-    	init();
-    }
-    
+     
     @Override
     public void cleanupOnExit() {
     	try {
-    		br.close();
+    		if (br != null) br.close();
     	} catch (Exception ex) {
     		// 
     	}
     }
 
+    class FunctionStart extends Function {
+        public String getName() {
+            return "start";
+        }
+        public String getShortDesc() {
+            return "start() - open file for reading - returns self";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            init(ctx);
+            return new ValueObj(self());
+        }
+    }
+ 
+    
     class FunctionRead extends Function {
         public String getName() {
             return "read";
@@ -101,26 +130,13 @@ public class ObjLineReader extends ObjPersistent {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
-            if (br==null) throw new Exception("No such file '" + file.getPath() + "'");
+            if (br==null) throw new Exception("File not open - call start() to open");
             String line=br.readLine();
             if (line==null) return new ValueNull(); // EOF
             return new ValueObjFileLine(line, lineNumber++, file);  
         }
     }
  
-    class FunctionClose extends Function {
-        public String getName() {
-            return "close";
-        }
-        public String getShortDesc() {
-            return "close() - close file reader";
-        }
-        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 0) throw new Exception("Expected no parameters");
-            br.close();
-            return new ValueBoolean(true);
-        }
-    }
     
     
     

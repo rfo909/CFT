@@ -14,12 +14,18 @@
 <h1>CFT Change log</h1>
 
 
+<h3>v1.1.5a 2020-08-07 Added CtxCloseHook</h3>
+<p>
+	Letting LineReader register via this hook, via its start() function. Removed LineReader.close() function and
+	updated Doc.html.
+</p>
+
 <h2 class="tag">2020-08-06 Tagging v1.1.4</h2> 
 
 
-<h3>v1.1.4 2020-08-06 Lib.LogFiles.FileReader</h3>
+<h3>v1.1.4 2020-08-06 Lib.LogFiles.LineReader</h3>
 <p>
-	Created FileReader function and persistent object, for reading lines from a file.
+	Created LineReader function and persistent object, for reading lines from a file.
 </p>
 <p>
 	Every time the LineReader() function is invoked for the same file object, it

@@ -1,8 +1,8 @@
 # CFT / ConfigTool
 
 ```
-Last updated: 2020-08-06 RFO
-v1.1.4
+Last updated: 2020-08-07 RFO
+v1.1.5a
 ```
 # Introduction
 
@@ -1626,18 +1626,22 @@ of supplying a Grep object, to filter lines within that time interval.
 ```
 Lib.LogFiles.DateSort.search(file, fromTimeMillis, toTimeMillis, Grep?)
 ```
-## Lib.LogFiles.FileReader(file)
+## Lib.LogFiles.LineReader(file)
 
 
-Processing big files, you can't use File.read(), as you will run out of memory.
+Processing big files, you can't use File.read(), which produces a list of lines, as you will run out of memory.
 
 ```
-Lib.LogFiles.FileReader(somefile) =reader
+Lib.LogFiles.LineReader(somefile).start =reader
 loop
 reader.read=line
 break(line==null)
 ....
+|
 ```
+
+The LineReader automatically closes the file when the context where .start() was called, terminates.
+
 # Generalized sorting
 
 

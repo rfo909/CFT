@@ -15,8 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2020-08-06 RFO
-v1.1.4
+Last updated: 2020-08-07 RFO
+v1.1.5a
 
 </pre>
 
@@ -1885,17 +1885,21 @@ The following is used to switch drive letter in Windows.
 </pre>
 
 
-<h2>Lib.LogFiles.FileReader(file)</h2>
+<h2>Lib.LogFiles.LineReader(file)</h2>
 <p>
-  Processing big files, you can't use File.read(), as you will run out of memory.
+  Processing big files, you can't use File.read(), which produces a list of lines, as you will run out of memory.
 </p>
 <pre>
-  Lib.LogFiles.FileReader(somefile) =reader
+  Lib.LogFiles.LineReader(somefile).start =reader
   loop
     reader.read=line
     break(line==null)
     ....
+  |
 </pre>
+<p>
+  The LineReader automatically closes the file when the context where .start() was called, terminates.
+</p>
 
 
 

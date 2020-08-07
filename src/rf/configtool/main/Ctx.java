@@ -48,6 +48,8 @@ public class Ctx {
     private boolean abortIterationFlag; // "next"
     private boolean breakLoopFlag;  // "break"
     
+    private List<CtxCloseHook> ctxCloseHooks=new ArrayList<CtxCloseHook>();
+    
 
     public Ctx(ObjGlobal objGlobal, FunctionState functionState) {
         this(null, new OutData(), new OutText(), objGlobal, functionState);
@@ -99,6 +101,13 @@ public class Ctx {
     	}
     }
     
+    public void addSystemMessage (String s) {
+    	objGlobal.addSystemMessage(s);
+    }
+    
+    public void addCtxCloseHook (CtxCloseHook callback) {
+    	ctxCloseHooks.add(callback);
+    }
     
     /**
      * Called from StmtIterate and StmtLoop. Could have used the occurrence of loop variables (which are
@@ -128,6 +137,8 @@ public class Ctx {
     }
     
     public Value getResult() {
+    	callCtxCloseHooks();
+    	
         // if program contains looping, then always return data from out(), even
         // if empty
         if (programContainsLooping) {
@@ -142,6 +153,12 @@ public class Ctx {
         return null;
     }
     
+    
+    private void callCtxCloseHooks() {
+    	for (CtxCloseHook x: ctxCloseHooks) {
+    		x.ctxClosing(this);
+    	}
+    }
 
     
     /**
