@@ -1,8 +1,8 @@
 # CFT / ConfigTool
 
 ```
-Last updated: 2020-08-07 RFO
-v1.1.5a
+Last updated: 2020-08-08 RFO
+v1.1.5d
 ```
 # Introduction
 
@@ -1641,6 +1641,9 @@ break(line==null)
 ```
 
 The LineReader automatically closes the file when the context where .start() was called, terminates.
+
+
+The Grep object has a method .line() which can be used to match single lines.
 
 # Generalized sorting
 
