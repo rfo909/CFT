@@ -136,7 +136,7 @@ public class Ctx {
         objGlobal.outln();
     }
     
-    public Value getResult() {
+    public Value getResult() throws Exception {
     	callCtxCloseHooks();
     	
         // if program contains looping, then always return data from out(), even
@@ -154,7 +154,7 @@ public class Ctx {
     }
     
     
-    private void callCtxCloseHooks() {
+    private void callCtxCloseHooks() throws Exception {
     	for (CtxCloseHook x: ctxCloseHooks) {
     		x.ctxClosing(this);
     	}
