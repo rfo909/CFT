@@ -19,7 +19,7 @@ public class ObjLineReader extends ObjPersistent implements CtxCloseHook {
 	private BufferedReader br;
 	private long lineNumber;
 	
-    public ObjLineReader(ObjFile file, Ctx ctx) {
+    public ObjLineReader(ObjFile file) {
     	this.file=file;
     	
     	this.add(new FunctionStart());
@@ -27,15 +27,15 @@ public class ObjLineReader extends ObjPersistent implements CtxCloseHook {
     }
 
     @Override
-    public void ctxClosing(Ctx ctx) {
+    public void ctxClosing(Ctx ctx) throws Exception {
     	// When the context where start() was called, terminates, the
     	// file is closed
     	try {
-            br.close();
-            br=null;
-            ctx.addSystemMessage("Closed LineReader file " + file.getName());
+    		br.close();
+    		br=null;
     	} catch (Exception ex) {
-    		//
+    		ctx.addSystemMessage("LineReader closing file " + file.getName() + " fails with exception");
+    		throw ex;
     	}
     }
     

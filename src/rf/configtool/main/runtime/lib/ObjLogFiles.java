@@ -103,7 +103,7 @@ public class ObjLogFiles extends Obj {
             		throw new Exception("File " + f.getPath() + " not found");
             	}
             	
-                ObjLineReader x=new ObjLineReader(f,ctx);
+                ObjLineReader x=new ObjLineReader(f);
                 return ctx.getObjGlobal().getOrAddPersistentObject(x);
             } 
 
