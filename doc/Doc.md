@@ -1,8 +1,8 @@
 # CFT / ConfigTool
 
 ```
-Last updated: 2020-08-08 RFO
-v1.1.5d
+Last updated: 2020-08-11 RFO
+v1.1.5e
 ```
 # Introduction
 
@@ -1590,7 +1590,7 @@ report(line.file.name, line.lineNumber, line)
 ```
 # Searching log files
 
-## Lib.LogFiles.DateSort
+## Lib.Files.DateSort
 
 
 Lines written to log files usually start with date and time. Further, actions that we want to
@@ -1599,11 +1599,11 @@ each with its own log. To clearly trace such activity, we may search the individ
 and then sort all lines found on the date/time at the start of each line.
 
 
-The Lib.LogFiles.DateSort function/object has been created for this purpose.
+The Lib.Files.DateSort function/object has been created for this purpose.
 
 ```
 Input("Enter search term").get =st
-Lib.LogFiles.DateSort =dateSort
+Lib.Files.DateSort =dateSort
 Grep(st)=grep
 ProjectDir.allFiles->f
 assert(FileQualified(f))
@@ -1624,15 +1624,15 @@ within the range, and then binary search to locate where to start reading. There
 of supplying a Grep object, to filter lines within that time interval.
 
 ```
-Lib.LogFiles.DateSort.search(file, fromTimeMillis, toTimeMillis, Grep?)
+Lib.Files.DateSort.search(file, fromTimeMillis, toTimeMillis, Grep?)
 ```
-## Lib.LogFiles.LineReader(file)
+## Lib.Files.LineReader(file)
 
 
 Processing big files, you can't use File.read(), which produces a list of lines, as you will run out of memory.
 
 ```
-Lib.LogFiles.LineReader(somefile).start =reader
+Lib.Files.LineReader(somefile).start =reader
 loop
 reader.read=line
 break(line==null)

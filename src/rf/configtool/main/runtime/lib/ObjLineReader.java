@@ -81,7 +81,7 @@ public class ObjLineReader extends ObjPersistent implements CtxCloseHook {
 
     @Override
     public String getTypeName() {
-        return "LogFiles";
+        return "LineReader";
     }
     
 
@@ -105,7 +105,34 @@ public class ObjLineReader extends ObjPersistent implements CtxCloseHook {
     		// 
     	}
     }
+    
+    
+    /**
+     * API for FilterReader and others
+     */
+    public Value readLine() throws Exception {
+        if (br==null) throw new Exception("File not open - call start() to open");
+        String line=br.readLine();
+        if (line==null) return new ValueNull(); // EOF
+        return new ValueObjFileLine(line, lineNumber++, file);  
+    }
+ 
+    /**
+     * API for FilterReader and others
+     */
+    public Value readLine(ObjGrep grep) throws Exception {
+        if (br==null) throw new Exception("File not open - call start() to open");
+    	for(;;) {
+    		String line=br.readLine();
+    		if (line==null) break;
+    		if (grep.keepLine(line)) {
+    	        return new ValueObjFileLine(line, lineNumber++, file);  
+    		}
+    	}
+    	return new ValueNull(); // EOF
+    }
 
+    
     class FunctionStart extends Function {
         public String getName() {
             return "start";
@@ -130,11 +157,8 @@ public class ObjLineReader extends ObjPersistent implements CtxCloseHook {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
-            if (br==null) throw new Exception("File not open - call start() to open");
-            String line=br.readLine();
-            if (line==null) return new ValueNull(); // EOF
-            return new ValueObjFileLine(line, lineNumber++, file);  
-        }
+            return readLine();
+         }
     }
  
     

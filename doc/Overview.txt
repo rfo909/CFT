@@ -131,9 +131,9 @@ Searching files / report()
  |   Limiting search to a few files
 
 Searching log files
- * Lib.LogFiles.DateSort
+ * Lib.Files.DateSort
  |   DateSort.search()
- * Lib.LogFiles.LineReader(file)
+ * Lib.Files.LineReader(file)
 
 Generalized sorting
  * Example: file size

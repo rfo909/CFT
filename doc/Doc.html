@@ -15,8 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2020-08-08 RFO
-v1.1.5d
+Last updated: 2020-08-11 RFO
+v1.1.5e
 
 </pre>
 
@@ -1846,7 +1846,7 @@ The following is used to switch drive letter in Windows.
 
 <h1>Searching log files</h1>
 
-<h2>Lib.LogFiles.DateSort</h2>
+<h2>Lib.Files.DateSort</h2>
 <p>
   Lines written to log files usually start with date and time. Further, actions that we want to
   trace may span several log files, for example when messages are sent between different services,
@@ -1854,12 +1854,12 @@ The following is used to switch drive letter in Windows.
   and then sort all lines found on the date/time at the start of each line. 
 </p>
 <p>
-  The Lib.LogFiles.DateSort function/object has been created for this purpose.
+  The Lib.Files.DateSort function/object has been created for this purpose.
 </p>
 
 <pre>
   Input("Enter search term").get =st
-  Lib.LogFiles.DateSort =dateSort
+  Lib.Files.DateSort =dateSort
   Grep(st)=grep
   ProjectDir.allFiles-&gt;f
     assert(FileQualified(f))
@@ -1881,16 +1881,16 @@ The following is used to switch drive letter in Windows.
   of supplying a Grep object, to filter lines within that time interval.
 </p>
 <pre>
-  Lib.LogFiles.DateSort.search(file, fromTimeMillis, toTimeMillis, Grep?)
+  Lib.Files.DateSort.search(file, fromTimeMillis, toTimeMillis, Grep?)
 </pre>
 
 
-<h2>Lib.LogFiles.LineReader(file)</h2>
+<h2>Lib.Files.LineReader(file)</h2>
 <p>
   Processing big files, you can't use File.read(), which produces a list of lines, as you will run out of memory.
 </p>
 <pre>
-  Lib.LogFiles.LineReader(somefile).start =reader
+  Lib.Files.LineReader(somefile).start =reader
   loop
     reader.read=line
     break(line==null)
