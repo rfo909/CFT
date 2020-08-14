@@ -198,7 +198,12 @@ P(1,"someTarget")=target
         call "Lib:ReadValue" ("New VM name / will also be host name", cloneName) =cloneName
         call "Lib:ReadValue" ("Original IP address or name (kubsXX.v)", originalIp) =originalIp
         call "Lib:ReadValue" ("New IP address and mask: xx.xx.xx.xx/MM", newIp) =newIp
-        call "Lib:ReadValueBoolean" ("Ok", false) =ok
+        false =ok
+        if (!newIp.contains("/"),{
+        	println("*** Missing '/MM' net mask from IP address")
+        }, {
+        	call "Lib:ReadValueBoolean" ("Ok", false) =ok
+        })
         break(ok)
     |
     Stop(original)
@@ -243,7 +248,7 @@ P(1,"someTarget")=target
     call "ServersMaintenance:VMConfigureNetplan" (target, newIp)
 
     println("* Rebooting new VM")
-    call "ServersMaintenance:run" (target, "sudo reboot")
+    call "ServersMaintenance:run" (target, List("sudo bash","reboot"))
 
     "Done"
 /Clone

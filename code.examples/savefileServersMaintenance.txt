@@ -155,7 +155,7 @@ P(2,Input("Host name").get)=hostname
 	Dir.run("rcp", f.path, target+":./hostname")
 	
 	println("* Moving hostname file to /etc")
-	run(target,"sudo cp ./hostname /etc")
+	run(target,List("sudo bash","cp ./hostname /etc"))
 	
 	println("* Deleting hostname from home dir")
 	run(target,"rm ./hostname")
@@ -185,10 +185,10 @@ P(2,Input("IP address xx.xx.xx.xx/MM").get) =ip
 	Dir.run("rcp", f.path, target+":./netplan.txt")
 	
 	println("* Deleting all files under /etc/netplan")
-	run(target, "sudo rm -f /etc/netplan/*")
+	run(target, List("sudo bash","rm -f /etc/netplan/*"))
 	
 	println("* Moving netplan file into /etc")
-	run(target, "sudo mv ./netplan.txt /etc/netplan/50-cloud-init.yaml")
+	run(target, List("sudo bash","mv ./netplan.txt /etc/netplan/50-cloud-init.yaml"))
 /VMConfigureNetplan
 
 	
