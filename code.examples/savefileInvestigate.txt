@@ -38,10 +38,56 @@ File(".investigate")
 
 
 
+# Input mode
+loop
+	readLine("Enter text, or .[xxx] for paste, '..c', '..m', '..e' or '..q' or just '..' for quit").trim =line
+	false =terminate
+	false =done
+	when(line=="",{LogFile.append("")})
+	reject(line=="")
 
-# Log with data
-	List("","D:"+Date.fmt,"----") =list
+	when(line.startsWith(".."), {
+		line.sub(2)=cmd
+		when(cmd.startsWith("c"),{  ## cat
+			{Lib.Data.each(0,10)->x println}
+			{LogFile.read->line println(line)}
+			true =done
+		})
+		when(cmd.startsWith("m"),{ ## more
+			{Lib.Data.each(0,10)->x println}
+			Show
+			true =done
+		})
+		when(cmd.startsWith("e"),{ ## edit
+			Edit
+			true =done
+		})
+		when(cmd=="" || cmd.startsWith("q"),{ ## quit
+			true =terminate
+		})
+	})
+	break(terminate)
+	assert(!done)
+	(line.startsWith(".."))
+	if (line.startsWith("."), {
+		line.sub(1)=marker
+		if(marker=="",".",marker)=marker
+		println("End-marker: '" + marker + "'")
+		readLines(marker) =lines
+		List =list
+		list.add("")
+		{lines->line list.add("# " + line)}
+		list.add("")
+		LogFile.append(list)
+	},{
+		LogFile.append(Date.fmt + " " + line)
+	})
+/InputMode
 
+
+
+
+# Log data
 	Sys.lastResult =res
 	res.?nth =isList
 
@@ -49,59 +95,41 @@ File(".investigate")
 		readLine("Element number (Enter for all)") =num
 		when(num.?parseInt, {res.nth(num.parseInt) =res})
 	})
-	
-	0 =count
+
+	List =list
+	list.add("")	
 	res->x 
 		list.add("# " +x) 
-		count+1 =count
-	|
-	list.add("----")
-
-	loop
-		readLine("Comment, blank when done") =line
-		break(line=="")
-		list.add("C:" + line)
 	|
 	list.add("")
-	
 	LogFile.append(list)
-/LogWithData
+/LogData
 
 
-# Log multiple lines, no data
+# Log text
 	List("","D:"+Date.fmt) =list
 
-	loop
-		readLine("Comment, blank when done") =line
-		break(line=="")
-		list.add("C:" + line)
-	|
-	list.add("")
-	LogFile.append(list)
-/LogNoData
+	readLine("Comment") =line
+	LogFile.append(Date.fmt + " " + line)
+/LogText
 
 
 # Log pasted text
-	List("","D:"+Date.fmt,"----") =list
-
 	readLine("End marker") =endMarker
 	readLines(endMarker) =lines
 	
+	List =list
+	list.add("")
 	lines->line list.add("# " + line) |
-	
-	list.add("----")
-	loop
-		readLine("Comment, blank when done") =line
-		break(line=="")
-		list.add("C:" + line)
-	|
-	
 	list.add("")
 	LogFile.append(list)
 /LogPastedText
 
 
 
-LogFile.read
+call "Lib:m" (LogFile)
 /Show
+
+call "Lib:e" (LogFile)
+/Edit
 
