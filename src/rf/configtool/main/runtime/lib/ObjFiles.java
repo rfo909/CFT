@@ -51,7 +51,7 @@ public class ObjFiles extends Obj {
 
     @Override
     public String getTypeName() {
-        return "LogFiles";
+        return "Files";
     }
     
 
@@ -62,7 +62,7 @@ public class ObjFiles extends Obj {
 
     
     private String getDesc() {
-        return "LogFiles";
+        return "Files";
     }
     
     private Obj self () {

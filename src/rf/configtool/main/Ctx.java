@@ -25,6 +25,9 @@ import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueList;
 import rf.configtool.parser.SourceLocation;
 
+/**
+ * Ctx means context and is a collection of objects required to execute CFT code.
+ */
 public class Ctx {
     
     private Ctx parent;
@@ -158,6 +161,7 @@ public class Ctx {
     	for (CtxCloseHook x: ctxCloseHooks) {
     		x.ctxClosing(this);
     	}
+    	ctxCloseHooks.clear();
     }
 
     

@@ -45,6 +45,7 @@ public class ObjLib extends Obj {
         this.add(new FunctionMath());
         this.add(new FunctionConvert());
         this.add(new FunctionFiles());
+        this.add(new FunctionExp());
     }
     
     @Override
@@ -156,6 +157,20 @@ public class ObjLib extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
             return new ValueObj(new ObjFiles());
+        }
+    } 
+
+
+    class FunctionExp extends Function {
+        public String getName() {
+            return "Exp";
+        }
+        public String getShortDesc() {
+            return "Exp() - create object for experimental code";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueObj(new ObjExp());
         }
     } 
 
