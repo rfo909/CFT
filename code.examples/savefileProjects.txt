@@ -117,30 +117,45 @@ when (Val("Project")==null, ChangeProject)
 
 
 # Produce list of files to search
-    CheckProject
-    CurrProject =pr
-    pr.Dir->dirName
-        assert({
-            true =keep
-            pr.IgnoreDir->x 
-                when(dirName.contains(x), {false=keep})
-                break (!keep)
-            |
-            keep
-        })
-        Dir(dirName).allFiles->f
-            #println("Checking file " + f.path)
-            f.name.afterLast(".")=type
-            assert(pr.Type.contains(type))
-            assert({
-                true =keep
-                pr.IgnoreFile->xx
-                    when(f.name==xx, {false =keep})
-                    break(!keep)
-                |
-                keep
-            })
-            out(f)
+
+	CheckProject
+	CurrProject =pr
+
+	{* P(1)=d 
+		true =keep 
+		CurrProject.IgnoreDir->x 
+			when(d.name==x,{false =keep}) 
+			break(!keep)
+		|
+		keep
+	} =checkDir
+	
+	# Generate initial list of all directories in project
+	{
+		pr.Dir->dirName 
+			Dir(dirName)=startDir
+			out(startDir)
+			startDir.allDirs->d out(d)
+	} =allDirs
+
+	# Filter out directories that don't pass checkDir macro call
+	{
+		allDirs->d 
+			assert(checkDir.call(d))
+			out(d)
+	} =allDirs
+
+	# Identify files that have desired type
+	{
+		allDirs->d
+			d.files->f
+				f.name.afterLast(".")=type
+				assert(pr.Type.contains(type))
+				out(f)
+	} =allFiles
+
+	# return value
+	allFiles
 /TextFiles
 
 
