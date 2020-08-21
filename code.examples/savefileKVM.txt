@@ -203,7 +203,7 @@ P(1,"someTarget")=target
         	println("*** Missing '/MM' net mask from IP address")
         }, {
         	call "Lib:ReadValueBoolean" ("Ok", false) =ok
-        })6
+        })
         break(ok)
     |
     Stop(original)
