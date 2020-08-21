@@ -112,6 +112,7 @@ public class Ctx {
     	ctxCloseHooks.add(callback);
     }
     
+      
     /**
      * Called from StmtIterate and StmtLoop. Could have used the occurrence of loop variables (which are
      * stored in the Ctx instances) if it wasn't for the "loop" statement, which has no loop variable.

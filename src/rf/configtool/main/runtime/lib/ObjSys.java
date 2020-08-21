@@ -24,6 +24,7 @@ import java.util.*;
 import rf.configtool.data.Expr;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.CtxCloseHook;
+import rf.configtool.main.LastExtProgramStatus;
 import rf.configtool.main.OutText;
 import rf.configtool.main.PropsFile;
 import rf.configtool.main.Version;
@@ -56,6 +57,8 @@ public class ObjSys extends Obj {
         add(new FunctionSavefile());
         add(new FunctionScriptName());
         add(new FunctionUptime());
+        add(new FunctionLastEPS());
+        add(new FunctionLastEPSData());
 	}
 
 	@Override
@@ -314,6 +317,53 @@ public class ObjSys extends Obj {
 				throw new Exception("Expected no parameters");
 			long uptime=System.currentTimeMillis() - ctx.getObjGlobal().getRoot().getStartTime();
 			ObjDuration d=new ObjDuration(uptime);
+			return new ValueObj(d);
+		}
+	}
+	
+	
+	class FunctionLastEPS extends Function {
+		public String getName() {
+			return "lastEPS";
+		}
+
+		public String getShortDesc() {
+			return "lastEPS() - returns last ExternalProgramStatus as int (-999 if undefined)";
+		}
+
+		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+			if (params.size() != 0)
+				throw new Exception("Expected no parameters");
+			
+			LastExtProgramStatus eps=ctx.getObjGlobal().getLastExtProgramStatus();
+			if (eps==null) return new ValueInt(-999);
+			
+			return new ValueInt(eps.getStatus());
+		}
+	}
+
+	
+	class FunctionLastEPSData extends Function {
+		public String getName() {
+			return "lastEPSData";
+		}
+
+		public String getShortDesc() {
+			return "lastEPSData() - returns last ExternalProgramStatus data as Dict or null if no data";
+		}
+
+		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+			if (params.size() != 0)
+				throw new Exception("Expected no parameters");
+			
+			LastExtProgramStatus eps=ctx.getObjGlobal().getLastExtProgramStatus();
+			if (eps==null) return new ValueNull();
+			
+			Map<String,Value> map=new HashMap<String,Value>();
+			map.put("status", new ValueInt(eps.getStatus()));
+			map.put("command", new ValueString(eps.getCommand()));
+			map.put("duration", new ValueInt(eps.getDuration()));
+			ObjDict d=new ObjDict(map);
 			return new ValueObj(d);
 		}
 	}

@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import rf.configtool.main.Ctx;
+import rf.configtool.main.LastExtProgramStatus;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.OutText;
 import rf.configtool.main.Stdio;
@@ -495,6 +496,7 @@ public class ObjDir extends Obj {
     }
     
    private void callExternalProgram (Ctx ctx, boolean foreground, Stdio stdio, OutText outText, RunCaptureOutput capture, List<Value> params) throws Exception {
+	    ctx.getObjGlobal().clearLastExtProgramStatus();
         List<Value> args;
         if (params.size()==1) {
             if (params.get(0) instanceof ValueString) {
@@ -541,13 +543,17 @@ public class ObjDir extends Obj {
             } finally {
                 if (br != null) br.close();
             }
-        } else {
-            if (foreground && capture==null) {
-                process.waitFor();
-                long endTime=System.currentTimeMillis();
-                //ctx.getObjGlobal().addSystemMessage("Running " + program + " completed: " + (endTime-startTime) + "ms");
-            }
         }
+        
+        if (foreground) {
+        	String desc=program;
+        	int returnCode=process.waitFor();
+            long endTime=System.currentTimeMillis();
+            long duration=endTime-startTime; 
+            LastExtProgramStatus eps=new LastExtProgramStatus(returnCode, desc, duration);
+        	ctx.getObjGlobal().setLastExtProgramStatus(eps);
+        }
+
     }
 
     class FunctionRun extends Function {
@@ -594,8 +600,10 @@ public class ObjDir extends Obj {
     }
 
 
-    private void startProcess (File input, File output, File stderr, List<Value> params, boolean waitForExit) throws Exception {
-        List<Value> args;
+    private void startProcess (Ctx ctx, File input, File output, File stderr, List<Value> params, boolean waitForExit) throws Exception {
+	    ctx.getObjGlobal().clearLastExtProgramStatus();
+
+	    List<Value> args;
         if (params.size()==1) {
             if (params.get(0) instanceof ValueString) {
                 args=new ArrayList<Value>();
@@ -626,9 +634,16 @@ public class ObjDir extends Obj {
         // set current directory
         processBuilder.directory(new File(name));
         
+        long startTime=System.currentTimeMillis();
         Process process = processBuilder.start();
         if (waitForExit) {
-        	process.waitFor(5,TimeUnit.MINUTES);
+
+           	String desc=program;
+        	int returnCode=process.waitFor();
+            long endTime=System.currentTimeMillis();
+            long duration=endTime-startTime; 
+            LastExtProgramStatus eps=new LastExtProgramStatus(returnCode, desc, duration);
+        	ctx.getObjGlobal().setLastExtProgramStatus(eps);
         }
         
         
@@ -651,7 +666,7 @@ public class ObjDir extends Obj {
               for (int i=3; i<params.size(); i++) cmd.add(params.get(i));
             
             
-            startProcess(stdin.getFile(), stdout.getFile(), stderr.getFile(), cmd, false);
+            startProcess(ctx, stdin.getFile(), stdout.getFile(), stderr.getFile(), cmd, false);
             return new ValueObj(self());
 
         }
@@ -674,7 +689,7 @@ public class ObjDir extends Obj {
               for (int i=3; i<params.size(); i++) cmd.add(params.get(i));
             
             
-            startProcess(stdin.getFile(), stdout.getFile(), stderr.getFile(), cmd, true);
+            startProcess(ctx, stdin.getFile(), stdout.getFile(), stderr.getFile(), cmd, true);
             return new ValueObj(self());
 
         }

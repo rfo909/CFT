@@ -13,6 +13,20 @@
 
 <h1>CFT Change log</h1>
 
+<h3>v1.1.7 2020-08-21 Added LastExtProgramStatus java class</h3>
+<p>
+	Pointer to one such object inside ObjGlobal. Method to clear it, set it
+	and get it.
+</p>
+<p>
+	Created function Sys.lastEPS() which returns the status as int, or -999 if undefined. Also
+	created function Sys.lastEPSData() which returns Dict or null if undefined.
+</p>
+<p>
+	Implemented for Dir.run() and Dir.runCapture(), plus Dir.runProcessWait()
+</p>
+
+
 <h3>v1.1.6b 2020-08-19 Added Lib.Exp.onCtxClose(macro)</h3>
 <p>
 	Mostly for testing, but might be nice to have if creating return() statement, acts like
