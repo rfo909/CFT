@@ -24,7 +24,7 @@ import java.util.*;
 import rf.configtool.data.Expr;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.CtxCloseHook;
-import rf.configtool.main.LastExtProgramStatus;
+import rf.configtool.main.ExternalProgramStatus;
 import rf.configtool.main.OutText;
 import rf.configtool.main.PropsFile;
 import rf.configtool.main.Version;
@@ -335,7 +335,7 @@ public class ObjSys extends Obj {
 			if (params.size() != 0)
 				throw new Exception("Expected no parameters");
 			
-			LastExtProgramStatus eps=ctx.getObjGlobal().getLastExtProgramStatus();
+			ExternalProgramStatus eps=ctx.getObjGlobal().getLastExternalProgramStatus();
 			if (eps==null) return new ValueInt(-999);
 			
 			return new ValueInt(eps.getStatus());
@@ -356,7 +356,7 @@ public class ObjSys extends Obj {
 			if (params.size() != 0)
 				throw new Exception("Expected no parameters");
 			
-			LastExtProgramStatus eps=ctx.getObjGlobal().getLastExtProgramStatus();
+			ExternalProgramStatus eps=ctx.getObjGlobal().getLastExternalProgramStatus();
 			if (eps==null) return new ValueNull();
 			
 			Map<String,Value> map=new HashMap<String,Value>();

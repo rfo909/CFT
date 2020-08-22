@@ -15,8 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2020-08-11 RFO
-v1.1.5e
+Last updated: 2020-08-22 RFO
+v1.1.7
 
 </pre>
 
@@ -1345,6 +1345,33 @@ codeDirs = . ; code.examples ; code.lib
   $ Readme
 </pre>
 
+
+<h2>External Program Status</h2>
+<p>
+  To obtain the exit code from an external program:
+</p>
+<pre>
+  Sys.lastEPS           # int or -999 if no value
+  Sys.lastEPSData       # Dict or null if no value
+</pre>
+<p>
+  The exit code is collected for the following ways of running external programs:
+</p>
+<ul>
+  <li>Dir.run()</li>
+  <li>Dir.runCapture()</li>
+  <li>Dir.runProcessWait()</li>
+</ul>
+<h3>Example</h3>
+<p>
+  Traditionally, exit code 0 means all ok.
+</p>
+<pre>
+  $ Dir.run("which","unknownCommand")
+  $ Sys.lastEPS
+  &lt;int&gt;
+  1
+</pre>
 
 
 

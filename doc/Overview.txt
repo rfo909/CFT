@@ -99,6 +99,8 @@ Running external programs
  * Dir.runDetach()
  * Dir.runProcess() / .runProcessWait()
  |   ssh without password
+ * External Program Status
+ |   Example
 
 Editing script files
  * Using editor for entering code

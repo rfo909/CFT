@@ -1,8 +1,8 @@
 # CFT / ConfigTool
 
 ```
-Last updated: 2020-08-11 RFO
-v1.1.5e
+Last updated: 2020-08-22 RFO
+v1.1.7
 ```
 # Introduction
 
@@ -1165,6 +1165,40 @@ The script "SSH" under code.examples contains code for doing this.
 ```
 $ :load SSH
 $ Readme
+```
+## External Program Status
+
+
+To obtain the exit code from an external program:
+
+```
+Sys.lastEPS           # int or -999 if no value
+Sys.lastEPSData       # Dict or null if no value
+```
+
+The exit code is collected for the following ways of running external programs:
+
+
+
+- Dir.run()
+
+
+- Dir.runCapture()
+
+
+- Dir.runProcessWait()
+
+
+### Example
+
+
+Traditionally, exit code 0 means all ok.
+
+```
+$ Dir.run("which","unknownCommand")
+$ Sys.lastEPS
+<int>
+1
 ```
 # Editing script files
 

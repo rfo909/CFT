@@ -63,7 +63,7 @@ public class ObjGlobal extends Obj {
     private HashMap<String,Value> sessionValues=new HashMap<String,Value>();
     private final Runtime runtime;
     private List<String> systemMessages=new ArrayList<String>();
-    private LastExtProgramStatus lastExtProgramStatus;
+    private ExternalProgramStatus lastExtProgramStatus;
 
     public void outln (String s) {
         stdio.println(s);
@@ -85,15 +85,15 @@ public class ObjGlobal extends Obj {
     	return root.isDebugMode();
     }
     
-    public void clearLastExtProgramStatus() {
+    public void clearLastExternalProgramStatus() {
     	lastExtProgramStatus=null;
     }
     
-    public void setLastExtProgramStatus (LastExtProgramStatus x) {
+    public void setLastExternalProgramStatus (ExternalProgramStatus x) {
     	this.lastExtProgramStatus=x;
     }
     
-    public LastExtProgramStatus getLastExtProgramStatus() {
+    public ExternalProgramStatus getLastExternalProgramStatus() {
     	return this.lastExtProgramStatus;
     }
 

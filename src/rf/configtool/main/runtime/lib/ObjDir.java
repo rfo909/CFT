@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import rf.configtool.main.Ctx;
-import rf.configtool.main.LastExtProgramStatus;
+import rf.configtool.main.ExternalProgramStatus;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.OutText;
 import rf.configtool.main.Stdio;
@@ -496,7 +496,7 @@ public class ObjDir extends Obj {
     }
     
    private void callExternalProgram (Ctx ctx, boolean foreground, Stdio stdio, OutText outText, RunCaptureOutput capture, List<Value> params) throws Exception {
-	    ctx.getObjGlobal().clearLastExtProgramStatus();
+	    ctx.getObjGlobal().clearLastExternalProgramStatus();
         List<Value> args;
         if (params.size()==1) {
             if (params.get(0) instanceof ValueString) {
@@ -550,8 +550,8 @@ public class ObjDir extends Obj {
         	int returnCode=process.waitFor();
             long endTime=System.currentTimeMillis();
             long duration=endTime-startTime; 
-            LastExtProgramStatus eps=new LastExtProgramStatus(returnCode, desc, duration);
-        	ctx.getObjGlobal().setLastExtProgramStatus(eps);
+            ExternalProgramStatus eps=new ExternalProgramStatus(returnCode, desc, duration);
+        	ctx.getObjGlobal().setLastExternalProgramStatus(eps);
         }
 
     }
@@ -601,7 +601,7 @@ public class ObjDir extends Obj {
 
 
     private void startProcess (Ctx ctx, File input, File output, File stderr, List<Value> params, boolean waitForExit) throws Exception {
-	    ctx.getObjGlobal().clearLastExtProgramStatus();
+	    ctx.getObjGlobal().clearLastExternalProgramStatus();
 
 	    List<Value> args;
         if (params.size()==1) {
@@ -642,8 +642,8 @@ public class ObjDir extends Obj {
         	int returnCode=process.waitFor();
             long endTime=System.currentTimeMillis();
             long duration=endTime-startTime; 
-            LastExtProgramStatus eps=new LastExtProgramStatus(returnCode, desc, duration);
-        	ctx.getObjGlobal().setLastExtProgramStatus(eps);
+            ExternalProgramStatus eps=new ExternalProgramStatus(returnCode, desc, duration);
+        	ctx.getObjGlobal().setLastExternalProgramStatus(eps);
         }
         
         
