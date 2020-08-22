@@ -63,7 +63,7 @@ shortcut:i    = "---- Investigate log text ----"          call "Investigate:LogT
 shortcut:ii   = "---- Investigate log loop ----"          call "Investigate:InputMode"
 shortcut:id   = "---- Investigate log with data ----"     call "Investigate:LogData"
 shortcut:ip   = "---- Investigate log pasted text ----"   call "Investigate:LogPastedText"
-shortcut:is   = "---- Investigate show log ----"          call "Investigate:Show"
+shortcut:ic   = "---- Investigate cat log ----"           call "Investigate:Show"
 
 
 # List available shortcuts when typing '@' only

@@ -75,7 +75,7 @@ loop
 			Edit
 			true =done
 		})
-		when(cmd=="" || cmd.startsWith("q"),{ ## quit
+		when(cmd=="",{ ## quit
 			true =terminate
 		})
 	})
@@ -84,15 +84,21 @@ loop
 	(line.startsWith(".."))
 	if (line.startsWith("."), {
 		line.sub(1)=marker
-		if(marker=="",".",marker)=marker
-		println("End-marker: '" + marker + "'")
-		println("---")
-		readLines(marker) =lines
-		List =list
-		list.add("")
-		{lines->line list.add("# " + line)}
-		list.add("")
-		LogFile.append(list)
+
+		# basic sanity checking
+		if(marker.startsWith(".") || marker.length>10,  {
+			println("Invalid end marker: '" + marker + "'")
+		}, {
+			if(marker=="",".",marker)=marker
+			println("End-marker: '" + marker + "'")
+			println("---")
+			readLines(marker) =lines
+			List =list
+			list.add("")
+			{lines->line list.add("# " + line)}
+			list.add("")
+			LogFile.append(list)
+		})
 	},{
 		LogFile.append(Date.fmt + " " + line)
 	})
