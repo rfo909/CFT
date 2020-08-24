@@ -33,7 +33,14 @@ in an editor.
 /Readme
 
 
-File(".investigate")
+
+
+# file to append investigation data to
+	Date.setFormat("yyyy-MM-dd").fmt =today
+	Sys.homeDir.sub("investigate.d") =dir
+	when (!dir.exists, dir.create)
+	# return value
+	dir.file(today+".txt")
 /LogFile
 
 

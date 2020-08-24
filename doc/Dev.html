@@ -13,6 +13,21 @@
 
 <h1>CFT Change log</h1>
 
+<h3>v1.1.8 2020-08-24</h3>
+<p>
+	- Added Sys.homeDir() function.
+</p>
+<p>
+	- Modified Investigate script, putting investigation files into "investigate.d" directory under 
+	home directory. Breaking logs into files named by date. Adjusted ".gitignore". Removed file
+	reference to ".investigate" (old log file in home dir) from Release script.
+</p>
+<p>
+	- Added Dir.unprotect() and File.unprotect(). These require the dir or file to be protected,
+	otherwise throwing exception, as these are not to be used routinely.
+</p>
+
+
 <h3>v1.1.7 2020-08-21 Added LastExtProgramStatus java class</h3>
 <p>
 	Pointer to one such object inside ObjGlobal. Method to clear it, set it

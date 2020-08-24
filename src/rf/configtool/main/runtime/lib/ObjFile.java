@@ -50,7 +50,7 @@ public class ObjFile extends Obj {
         this.protection=protection;
         
         if (protection==null) {
-        	throw new Exception("protection==null is invalid, use Protection.NONE");
+        	throw new Exception("protection==null is invalid, use Protection.NoProtection");
         }
 
         if (!isSymlink()) {
@@ -88,6 +88,7 @@ public class ObjFile extends Obj {
         add(new FunctionReadBytes());
         add(new FunctionEncoding());
         add(new FunctionProtect());
+        add(new FunctionUnprotect());
         add(new FunctionTail());
         add(new FunctionHead());
     }
@@ -874,6 +875,25 @@ public class ObjFile extends Obj {
             return new ValueObj(self());
         }
     }
+    
+    class FunctionUnprotect extends Function {
+        public String getName() {
+            return "unprotect";
+        }
+        public String getShortDesc() {
+            return "unprotect() - unprotect protected file - error if not protected - returns self";
+            	// Because if we unprotect something and it isn't protected, we don't have
+            	// control of what we are doing, and the protection mechanism is all 
+            	// about ensuring control
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	if (!protection.isActive()) throw new Exception("unprotect: " + name + " - not protected.");
+        	protection=Protection.NoProtection;
+            return new ValueObj(self());
+        }
+    }
+    
+
     
 
     class FunctionTail extends Function {

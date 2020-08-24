@@ -82,6 +82,7 @@ public class ObjDir extends Obj {
         add(new FunctionRunCapture());
         add(new FunctionShowTree());
         add(new FunctionProtect());
+        add(new FunctionUnprotect());
 
     }
     
@@ -771,6 +772,24 @@ public class ObjDir extends Obj {
         		desc=getString("desc", params, 0);
         	}
         	protection = new Protection(desc);
+            return new ValueObj(self());
+        }
+    }
+    
+
+    class FunctionUnprotect extends Function {
+        public String getName() {
+            return "unprotect";
+        }
+        public String getShortDesc() {
+            return "unprotect() - unprotect protected directory - error if not protected - returns self";
+            	// Because if we unprotect something and it isn't protected, we don't have
+            	// control of what we are doing, and the protection mechanism is all 
+            	// about ensuring control
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	if (!protection.isActive()) throw new Exception("unprotect: " + name + " - not protected.");
+        	protection=Protection.NoProtection;
             return new ValueObj(self());
         }
     }

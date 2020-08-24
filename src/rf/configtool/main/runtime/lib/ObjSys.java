@@ -59,6 +59,7 @@ public class ObjSys extends Obj {
         add(new FunctionUptime());
         add(new FunctionLastEPS());
         add(new FunctionLastEPSData());
+        add(new FunctionHomeDir());
 	}
 
 	@Override
@@ -368,6 +369,24 @@ public class ObjSys extends Obj {
 		}
 	}
 
-	
+	class FunctionHomeDir extends Function {
+		public String getName() {
+			return "homeDir";
+		}
+
+		public String getShortDesc() {
+			return "homeDir() - returns Dir object for CFT start dir";
+		}
+
+		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+			if (params.size() != 0)
+				throw new Exception("Expected no parameters");
+			File f=new File(".");
+			String path=f.getCanonicalPath();
+			ObjDir x=new ObjDir(path, Protection.NoProtection);
+			return new ValueObj(x);
+		}
+	}
+
 
 }

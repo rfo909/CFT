@@ -54,7 +54,6 @@ Add, Commit and Push.
 	HomeDir.files(Glob("savefile*"))  
 	+ HomeDir.files(Glob(".editHistory"))
 	+ HomeDir.file("projects.txt")
-	+ HomeDir.file(".investigate")
 	=FilesToMove
 
 	# Create temp-dir

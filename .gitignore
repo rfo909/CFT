@@ -4,6 +4,9 @@ src/ebuild/
 src/.classpath
 src/.project
 
+# Investigate script log directory
+investigate.d/
+
 # Compiled class file
 *.class
 
