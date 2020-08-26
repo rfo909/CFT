@@ -45,6 +45,7 @@ public class ValueList extends Value {
         add(new FunctionInsert());
         add(new FunctionPush());
         add(new FunctionEmpty());
+        add(new FunctionLast());
         
     }
     
@@ -508,6 +509,20 @@ public class ValueList extends Value {
         }
     }
 
+    class FunctionLast extends Function {
+        public String getName() {
+            return "last";
+        }
+        public String getShortDesc() {
+            return "last() - returns last element or null if empty";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            if(val.size()==0) return new ValueNull();
+            return val.get(val.size()-1);
+        }
+    }
+    
 
 
 }

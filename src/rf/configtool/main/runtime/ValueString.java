@@ -55,6 +55,7 @@ public class ValueString extends Value {
         add(new FunctionAfter());
         add(new FunctionBeforeLast());
         add(new FunctionAfterLast());
+        add(new FunctionChars());
         
         add(new FunctionEsc());
         add(new FunctionUnEsc());
@@ -624,4 +625,23 @@ public class ValueString extends Value {
         }
     }
     
+    
+    class FunctionChars extends Function {
+        public String getName() {
+            return "chars";
+        }
+        public String getShortDesc() {
+            return "chars() returns list of characters";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            String delimiters;
+            if (params.size()!=0) throw new Exception("Expected no parameters");
+            List<Value> parts=new ArrayList<Value>();
+            for (int i=0; i<val.length(); i++) {
+            	parts.add(new ValueString(""+val.charAt(i)));
+            }
+            return new ValueList(parts);
+        }
+
+    }
 }

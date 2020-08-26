@@ -1,0 +1,126 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
+
+# Readme
+<<<<<<<<<<<<<<<<<<< EOF
+------------------------------------------------------------------
+Primitive database
+
+	Add(Dict.set("a",1).set("b",2))
+	Add(Dict.set("a",3).set("b",4))
+	Find({*P(1).a==3})
+	Add(Dict.set("a",3).set("b",5))
+	Find({*P(1).a==3})
+
+Note that there is nothing preventing you from storing anything.
+Add("test")
+
+But if you mix, the Find() macro becomes more complex
+
+	Find({*P(1).a==3})
+	ERROR: [input:8] [input:12] test no method 'a' (java.lang.Exception)
+
+To avoid this, if we want to allow strings in our database, for example:
+
+	Find({*P(1)=x x.?keys && x.a==3})
+
+Alternatively remove non-Dict values
+
+	Delete({*!P(1).?keys})
+
+------------------------------------------------------------------
+>>>>>>>>>>>>>>>>>>> EOF
+/Readme
+
+
+
+
+# DbDir is "Db" under Sys.homeDir
+Sys.homeDir.sub("Db")=d
+when (!d.exists, d.create)
+d
+/DbDir
+
+# Get db-file for collection (optional) - created with valid
+P(1,"default")=collection
+DbDir.file(collection+".txt") =file
+when (!file.exists, file.create("# Created " + Date.fmt))
+file
+/DbFile
+
+# Add value to database
+P(1)=val
+P(2,"default")=collection
+	{* P(1)=val syn(val) } =x
+	error(x.?call(val)==false, "Value must be synthesizable")
+	DbFile.append(syn(val))
+	true
+/Add
+
+# List database
+P(1,"default")=collection
+	DbFile(collection).read
+/Show
+
+# Find all data objects that satisfy condition
+P(1,{*P(1) false})=matchMacro
+P(2,"default")=collection
+	DbFile(collection).read->line
+		reject(line.startsWith("#"))
+		eval(line) =data
+		assert(matchMacro.call(data))
+		out(data)
+/FindAll
+
+# Find last object that satisfies condition
+P(1,{*P(1) false})=matchMacro
+P(2,"default")=collection
+	FindAll(matchMacro,collection).last
+/Find
+
+
+# Delete all data objects that satisfy condition
+P(1,{*P(1) false})=matchMacro
+P(2,"default")=collection
+	DbFile(collection).read->line
+		condOut(line.startsWith("#"), line)
+		reject(line.startsWith("#"))
+		
+		eval(line) =data
+		reject(matchMacro.call(data))
+		out(line)
+| _=lines
+	DbFile(collection).create(lines)
+/Delete
+
+
+# Delete all but last data object that satisfies condition
+P(1,{*P(1) false})=matchMacro
+P(2,"default")=collection
+	Find(matchMacro,collection) =last
+	Delete(matchMacro,collection)
+	Add(last,collection)
+/DeleteHistory
+
+
+
+

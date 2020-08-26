@@ -7,6 +7,9 @@ src/.project
 # Investigate script log directory
 investigate.d/
 
+# Db directory
+Db/
+
 # Compiled class file
 *.class
 

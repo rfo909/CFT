@@ -100,20 +100,42 @@ public class CodeHistory {
                 if (name.length() > nameMaxLength) nameMaxLength=name.length();
             }
 
+            List<String> matchingNames=new ArrayList<String>();
+            
             for (int i=0; i<namesInSequence.size(); i++) {
                 String name=namesInSequence.get(i);
                 
-                if (symbolSubStr != null && !name.startsWith(symbolSubStr)) continue; 
+                if (symbolSubStr != null && !name.startsWith(symbolSubStr)) continue;
+                matchingNames.add(name);
+            }
+            
+            boolean showFull = (matchingNames.size()==1 && symbolSubStr != null);
+            for (String name:matchingNames) {
                 
                 String label=name;
                 while(label.length()<nameMaxLength) label=label+" ";
-                String namedLine=getNamedCodeLines(name).getFirstNonBlankLine();
-                
-                String s="| " + label + ": " + TabUtil.substituteTabs(namedLine,1);
-
-                if (s.length() > available) s=s.substring(0,available-1)+"+";
-
-                stdio.println(s);
+                if (showFull) {
+                	CodeLines codeLines = getNamedCodeLines(name);
+                	List<String> text = codeLines.getSaveFormat();
+                	boolean foundContent=false;
+                	stdio.println();
+                	for (String line:text) {
+                		if (!foundContent && line.trim().length()==0) continue;
+                		foundContent=true;
+                		if (line.length() > available) line=line.substring(0,available-1)+"+";
+                		stdio.println(line);
+                	}
+                	stdio.println("/" + name);
+                	stdio.println();
+                } else {
+	                String namedLine=getNamedCodeLines(name).getFirstNonBlankLine();
+	                
+	                String s="| " + label + ": " + TabUtil.substituteTabs(namedLine,1);
+	
+	                if (s.length() > available) s=s.substring(0,available-1)+"+";
+	
+	                stdio.println(s);
+                } 
             }
 
         }
