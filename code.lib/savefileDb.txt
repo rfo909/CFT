@@ -107,5 +107,31 @@ P(2,"default")=collection
 /Purge
 
 
+# Set temp value (in memory only)
+P(1)=key
+P(2)=value
+P(3,"default")=collection
+	when (Val("temp")==null, {ValDef("temp",Dict) }) 
+	Val("temp").get(collection,Dict).set(key,value)
+	true
+/TempSet
+
+# Set temp value (in memory only)
+P(1)=key
+P(2,"default")=collection
+	when (Val("temp")==null, {ValDef("temp",Dict) }) 
+	Val("temp").get(collection,Dict) =coll
+	if (coll.has(key), coll.get(key,null), null)
+/TempGet
+
+# Show temp values
+	when (Val("temp")==null, {ValDef("temp",Dict) })
+	Val("temp").keys->collection
+		Val("temp").get(collection).keys->name
+			report(collection, name, Val("temp").get(collection).get(name))
+/TempShow
+
+
+
 
 
