@@ -54,7 +54,7 @@ P(3,"default")=collection
 		.set("key",key)
 		.set("value",val)
 	=dict
-	DbFile.append(syn(dict))
+	DbFile(collection).append(syn(dict))
 	true
 /Add
 
