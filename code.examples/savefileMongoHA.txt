@@ -1,6 +1,8 @@
 <<<<<<<<<<<<<<<<<<<<<<<<< EOF
 ** EXPERIMENTAL **
 
+*** NOT UPGRADED AFTER SSH and ServersMaintenance scripts rewrite 2020-08-29 ***
+
 Install mongodb in High Availability configuration 
 
 Requirements: 

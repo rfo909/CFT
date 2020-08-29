@@ -29,109 +29,17 @@ P(1)=debug
 	ValDef("showDebug", debug)
 /setDebug
 
-
-
-P(1)=target	# Check if server fails to respond on ping
-	if(target.contains("@"), target.after("@"), target) =host
-	Dir.runCapture("ping","-c","1",host)->line assert(line.contains("0 received")) out(line) | _.length>0 =failure
-	!failure
-/HostOk
-
-
-P(1)=target P(2)=singleCommand # Run single command via ssh command line, returns output lines (stderr to screen)
-	Dir.runCapture("ssh",target,singleCommand) =lines
-	when(showDebug,{
-		println(" : " + singleCommand)
-		lines->line println("   ## " + line)
-	})
-	# Return value
-	lines
-/RemoteCommand
-
-
-
-P(1)=name Dir("/tmp").file(name + currentTimeMillis)  # Create temp file under /tmp
-/TmpFile
-
-
-
-P(1)=target P(2,List)=commands  # Multiple commands in single ssh session via stdin, returns stdout and stderr lines
-
-	# ensure commands is a list
-	when(!commands.?nth, {
-		List(commands) =commands
-	})
-
-	when(showDebug, {
-		println("target=" + target)
-		commands->x println(" : " + x)
-	})
-	
-	"------ Starting " + Sys.version + " ------" =marker
-	
-	# prefix commands with recognizable line
-	'echo "' + marker + '"' =echo
-	List(echo) + commands =cmd
-
-	TmpFile("in") =inFile
-	TmpFile("out") =outFile
-	TmpFile("err") =errFile
-	
-	inFile.create(cmd)
-	Dir.runProcessWait(inFile,outFile,errFile,"ssh",target)
-	
-	false =foundMarker
-	outFile.read->line
-		condOut(foundMarker,"(stdout) " + line)
-		when(line.contains(marker), {true=foundMarker})
-	| _=outLines
-	
-	List =errLines
-	when (errFile.exists, {
-		errFile.read->line out("(stderr) "+line) | _=errLines
-	})
-
-	outLines + errLines =outputLines
-	
-	{* P(1)=f when(f.exists, f.delete) } =Del
-	
-	Del.call(inFile)
-	Del.call(outFile)
-	Del.call(errFile)
-	
-	when(showDebug, {
-		outputLines->line println("   ## " + line)
-	})
-	# return value
-	outputLines
-/RemoteCommandSet
-
-
-
-P(1)=target P(2,List)=commands P(3,Dict)=codes # returns list of codes
-	RemoteCommandSet(target, commands) =output
-	List =result
-	output->line 
-		codes.keys->key
-			when(line.contains(key), result.add(codes.get(key)))
-	|
-	# return value
-	result.unique
-/RemoteCommandSetCoded
-
-
-
-P(1)=target P(2)=cmd P(3,null)=codes  ## Run external single / list command with or without Dict codes
-	if (!cmd.?nth, List(cmd), cmd) =cmd  # now it's always a list
-	if (codes != null,
-		RemoteCommandSetCoded(target, cmd, codes)
-		,
-		RemoteCommandSet(target, cmd)
-	)
+P(1,ReadSSHTarget)=target
+P(2,readLine("Command"))=command
+P(3,Dict)=codes
+P(4,false)=showDebug
+	call "SSH:run" (target,command,codes,showDebug)
 /run
 
 
-P(1,Input("IP address to wait for").get)=ip P(2,10)=retries
+
+P(1,Input("IP address to wait for").get)=ip 
+P(2,10)=retries
 loop
 	error(retries<=0,"No Ping response from " + ip)
 	retries-1 =retries
@@ -171,7 +79,7 @@ P(2,Input("IP address xx.xx.xx.xx/MM").get) =ip
 	
 	println("* Running remote command 'ip addr' to list network device names")
 	println("---------------------------------------------------------------")
-	run(target,"ip addr")->line
+	run(target,"ip addr").get("stdout")->line
 		println("    " + line)
 	|
 	
@@ -223,7 +131,7 @@ network:
 
 	List("java -version")=commands
 	
-	call "ServersMaintenance:RemoteCommandSetCoded" (target, commands, codes) =result
+	run (target, commands, codes) =result
 	!result.contains("notfound") =hasJava
 	println("Java status for " + target + " -> hasJava=" + hasJava + ", all codes = " + result.concat(" "))
 /ExampleCodedResponse

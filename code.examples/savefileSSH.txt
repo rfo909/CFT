@@ -25,56 +25,139 @@ username	ALL=(ALL) NOPASSWD:ALL
 /Readme
 
 
-
-Input("sshTarget: name@host").get
-/GetSSHTarget
-
+Input("SSH target on format username@server").get
+/ReadSSHTarget
 
 
-# Copy ssh key to remote target host - interactive
-	GetSSHTarget =sshTarget
-	Input("Enter local home dir -- containing .ssh/id_rsa.pub").get =localHome
-
-	Dir(localHome).sub(".ssh").file("id_rsa.pub").protect =f
-	error(!f.exists, "No file found: " + f.path)
-	
-	println("* Ensuring .ssh directory exists at target")
-	remoteCommand(sshTarget, "mkdir .ssh")
-	
-	println("* Copy key file to remote home dir")
-	Dir.run("scp",localHome+"/.ssh/id_rsa.pub",sshTarget+":./id_rsa.pub")
-	
-	println("* Appending to remote .ssh/authorized_keys")
-	remoteCommand(sshTarget,"cat ./id_rsa.pub >> .ssh/authorized_keys")
-
-	println("* Deleting remote copy of id_rsa.pub")
-	remoteCommand(sshTarget,"rm id_rsa.pub")	
-	
-	println("* Ensuring 700 access on remote .ssh dir")
-	remoteCommand(sshTarget,"chmod 700 .ssh")
-/sshEnable
+Val("showDebug")
+/showDebug
 
 
+P(1)=debug
+	ValDef("showDebug", debug)
+/setDebug
 
-P(1)=sshTarget
+# Open ssh connection to target
+# Called via @rsh shortcut
+P(1,ReadSSHTarget)=sshTarget
 	Dir.run("ssh", sshTarget)
 /remoteShell
 
 
-P(1)=sshTarget P(2,"ls")=cmd
-	Dir.run("ssh", sshTarget, cmd)
-/remoteCommand
+# Copy ssh key to remote target host
+P(1,ReadSSHTarget) =sshTarget
+	Dir.run("ssh-copy-id",sshTarget)
+/sshEnable
 
 
-# Interactive call to remoteShell
-	# Also invoked via @rsh shortcut - do not delete
-	remoteShell(GetSSHTarget)
-/rsh
+P(1)=target	# Check if server fails to respond on ping
+	if(target.contains("@"), target.after("@"), target) =host
+	Dir.runCapture("ping","-c","1",host)->line assert(line.contains("0 received")) out(line) | _.length>0 =failure
+	!failure
+/HostOk
 
-# Interactive call to remoteCommand
-	GetSSHTarget =target
-	Input("Remote command").get =cmd
-	remoteCommand(target, cmd)
-/rcmd
 
+# Returns boolean indicating if sudo without password ok
+P(1,ReadSSHTarget) =sshTarget
+	run (sshTarget,"sudo ls") =result
+	result.get("exitCode") == 0
+/VerifySudo
+
+
+
+
+# Create name of temp file under /tmp
+P(1)=name 
+	Dir("/tmp").file(name + currentTimeMillis)  
+/TmpFile
+
+
+
+# Single or multiple commands (string or list), returns Dict object
+P(1)=target 
+P(2)=commands
+P(3,Dict)=codes  
+P(4,false)=showDebug
+
+	# ensure commands is a list
+	when(!commands.?nth, {
+		List(commands) =commands
+	})
+
+	when(showDebug, {
+		println("- target=" + target)
+		println("- stdin:")
+		commands->line println("    " + line) |
+	})
+
+	# Add echo command with string to check for later, to avoid login messages etc
+	"--- " + Sys.scriptName + ".run ---" =mark
+	List('echo "' + mark + '"') + commands =cmd
+		
+	TmpFile("in") =inFile
+	TmpFile("out") =outFile
+	TmpFile("err") =errFile
+	
+	inFile.create(cmd)
+	Dir.runProcessWait(inFile,outFile,errFile,"ssh",target)
+	
+	# Filter stdout to include lines following one containing mark
+	false =found
+	if(outFile.exists,outFile.read,List)->line
+		condOut(found, line)
+		when(line.contains(mark), {true =found})
+	| _=outLines
+		
+	Dict =result
+	result.set("stdout",outLines)
+	result.set("stderr",if(errFile.exists,errFile.read,List))
+	result.set("stdin",commands)
+	result.set("exitCode", Sys.lastEPS)
+	
+	{* P(1)=f when(f.exists, f.delete) } =Del
+	
+	Del.call(inFile)
+	Del.call(outFile)
+	Del.call(errFile)
+	
+	List =codeHits
+	result.get("stdout")->line
+		codes.keys->key
+			when(line.contains(key), codeHits.add(codes.get(key)))
+	|
+	
+	result.set("codeHits",codeHits.unique)
+	
+	when(showDebug,{
+		println("- exitCode = " + result.get("exitCode"))
+		if(result.get("codeHits").length==0, "NONE", result.get("codeHits").concat(" ")) =codeHits
+		println("- codeHits = " + codeHits)
+		println("- stdin:")
+		result.get("stdin")->line println("   # " + line) |
+		println("- stdout:")
+		result.get("stdout")->line println("   # " + line) |
+		println("- stderr:")
+		result.get("stderr")->line println("   # " + line) |
+		println
+	})
+	
+	# return value
+	result
+/run
+
+
+P(1)=target 
+P(2)=commands
+P(3,Dict)=codes  
+P(4,false)=showDebug
+	when(!commands.?nth, {
+		List(commands) =commands
+	})
+	List("sudo bash")+commands =commands
+	run(target,commands,codes,showDebug)
+/sudo
+
+
+sudo("roar@s04.s","which ls",Dict.set("/ls","ok"),true)
+/t
 

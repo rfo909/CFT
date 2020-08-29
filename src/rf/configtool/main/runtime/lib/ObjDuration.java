@@ -17,15 +17,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.main.runtime.lib;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import rf.configtool.main.Ctx;
-import rf.configtool.main.OutText;
 import rf.configtool.main.runtime.*;
 
 /**
- * Duration can only be created from inside Date (by subtracting two dates etc)
+ * Duration is an absolute value, no negatives allowed, for addition or subtraction from Date values.
  */
 public class ObjDuration extends Obj {
     
@@ -49,7 +47,7 @@ public class ObjDuration extends Obj {
         }
         
         public String fmt() {
-            return days + " days " + f(hours,2) + ":" + f(minutes,2) + ":" + f(seconds,2) + "." + f(millis,3);
+            return days + " d " + f(hours,2) + ":" + f(minutes,2) + ":" + f(seconds,2) + "." + f(millis,3);
         }
     }
     
@@ -69,6 +67,8 @@ public class ObjDuration extends Obj {
         add(new FunctionMinutes());
         add(new FunctionSeconds());
         add(new FunctionMillis());
+        add(new FunctionFmt());
+        
     }
     
     private void preventNegative() {
@@ -195,4 +195,18 @@ public class ObjDuration extends Obj {
         }
     }
 
+    class FunctionFmt extends Function {
+        public String getName() {
+            return "fmt";
+        }
+        public String getShortDesc() {
+            return "fmt() - returns formatted string presentation";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueString(""+(new Details(timeValue)).fmt());
+        }
+    }
+
+    
 }

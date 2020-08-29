@@ -12,27 +12,15 @@ It runs both interactive and with parameters.
 
 
 
-
-P(1,true)=debug
-	call "ServersMaintenance:setDebug" (debug)
-/setDebug
-
-P(1)=target P(2)=cmd
-	if(cmd.?nth, cmd, cmd.split(";"))=cmd 
-	call "ServersMaintenance:RemoteCommandSet" (target, cmd)
+P(1)=target P(2)=cmd P(3)=codes P(4)=showDebug
+	call "SSH:run" (target, cmd, codes, showDebug) =dict
 /run
 
-
-P(1)=target P(2,List)=cmd P(3,Dict)=codes
-	if(cmd.?nth, cmd, cmd.split(";")) =cmd
-	call "ServersMaintenance:RemoteCommandSetCoded" (target, cmd, codes)
-/runCoded
 
 
 P(1,"temp")=name
 	Dir("/tmp").file(name + "." + currentTimeMillis)
 /TmpFile
-
 
 
 

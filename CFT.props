@@ -46,7 +46,7 @@ shortcutPrefix = @
 shortcut:e    = "---- open script in editor ----"         if(Sys.savefile != null, call "Lib:e" (Sys.savefile),"No savefile")
 shortcut:term = "---- Update terminal size ----"          call "Lib:GetTerminalSize"
 shortcut:top  = "---- Run top command ----"               Dir.run("top")
-shortcut:rsh  = "---- Remote shell via ssh ----"          call "SSH:rsh"
+shortcut:rsh  = "---- Remote shell via ssh ----"          call "SSH:remoteShell"
 
 # Release script
 shortcut:rel  = "---- Release ----"                       Sys.stdin(":load Release","?")
