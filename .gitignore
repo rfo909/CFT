@@ -1,13 +1,10 @@
 TODO/
+private/
 build/
 src/ebuild/
 src/.classpath
 src/.project
-
-# Investigate script log directory
 investigate.d/
-
-# Db directory
 Db/
 
 # Compiled class file

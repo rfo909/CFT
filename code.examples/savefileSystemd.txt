@@ -12,9 +12,13 @@ It runs both interactive and with parameters.
 
 
 
-P(1)=target P(2)=cmd P(3)=codes P(4)=showDebug
-	call "SSH:run" (target, cmd, codes, showDebug) =dict
+P(1)=target P(2)=cmd P(3)=acceptErors P(4)=showDebug
+	call "SSH:run" (target, cmd, acceptErrors, showDebug) =dict
 /run
+
+P(1)=target P(2)=cmd P(3)=acceptErors P(4)=showDebug
+	call "SSH:sudo" (target, cmd, acceptErrors, showDebug) =dict
+/sudo
 
 
 
@@ -47,17 +51,17 @@ Input("Target: user@host").get
 	|
 
 	println("* Adding user " + serviceName)
-	run(target,"sudo adduser "+serviceName)
+	sudo(target,"adduser "+serviceName)
 
 	"/home/"+serviceName =homeDir
 	script.afterLast("/") =scriptName
 	homeDir + "/" + scriptName =scriptPath
 
 	println("* Copying " + script + " to " + scriptPath)
-	run(target,"sudo cp " + script + " " + scriptPath)
+	sudo(target,"cp " + script + " " + scriptPath)
 
 	println("* chown " + serviceName + ":" + serviceName + " on " + scriptPath)
-	run(target,"sudo chown " + serviceName + ":" + serviceName + " " + scriptPath)
+	sudo(target,"chown " + serviceName + ":" + serviceName + " " + scriptPath)
 
 	TmpFile("systemd")=f
 	f.create(SystemdServiceFile(serviceName, desc, scriptPath))
@@ -68,13 +72,13 @@ Input("Target: user@host").get
 	Dir.run("scp", f.path, target+":./" + serviceFile)
 
 	println("* Copying ./" + serviceFile + " to /etc/systemd/system")
-	run(target,"sudo cp ./" + serviceFile + " /etc/systemd/system")
+	sudo(target,"cp ./" + serviceFile + " /etc/systemd/system")
 	
 	println("* Starting service")
-	run(target,"sudo systemctl start " + serviceName)
+	sudo(target,"systemctl start " + serviceName)
  
 	println("* Enabling service")
-	run(target,"sudo systemctl enable " + serviceName)
+	sudo(target,"systemctl enable " + serviceName)
  
 
 	f.delete

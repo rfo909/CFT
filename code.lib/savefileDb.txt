@@ -132,6 +132,38 @@ P(2,"default")=collection
 /TempShow
 
 
+# Get or enter string value if missing
+P(1)=key
+P(2)=prompt
+P(3)=collection
+	Get(key,collection) =val
+	when(val==null,{
+		readLine(prompt) =val
+		Add(key,val,collection)
+	})
+	val
+/GetOrEnter
+
+
+# Get, enter or confirm string value 
+P(1)=key
+P(2)=prompt
+P(3)=collection
+	Get(key,collection) =val
+	if (val==null, {
+		readLine(prompt) =val
+		Add(key,val,collection)
+	},{
+		call "Lib:ReadValue" (prompt, val) =val2
+		when (val2 != val, Add(key,val2,collection))
+		val2 =val
+	})
+	val
+/GetEnterOrConfirm
+
+
+		
+	
 
 
 

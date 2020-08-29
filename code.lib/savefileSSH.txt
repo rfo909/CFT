@@ -1,24 +1,26 @@
 # Readme
 <<< EOF
 -------------------------------------------------
-Script file for distributing ssh key to remote
+Script file running remote commands via SSH.
+Require login without password and sudo without
+password (for selected user).  
+
+Also has code for distributing ssh key to remote
 servers, to enable ssh without password. If you
 have not done so, first create an rsa key, by
 running the following command in Linux shell
 
-$ shell
 ssh-keygen -t rsa
-exit
 
-Then run sshEnable, to copy that file to 
-remote hosts. 
+Then run the sshEnable function, to copy the
+ssh key to remote hosts.
 
 Sudo without password
 ---------------------
-Log in as root, add the following line to 
+Log in as root, then add the following line to 
 /etc/sudoers
 
-username	ALL=(ALL) NOPASSWD:ALL
+<username>	ALL=(ALL) NOPASSWD:ALL
 
 -------------------------------------------------
 >>> EOF
@@ -29,16 +31,9 @@ Input("SSH target on format username@server").get
 /ReadSSHTarget
 
 
-Val("showDebug")
-/showDebug
-
-
-P(1)=debug
-	ValDef("showDebug", debug)
-/setDebug
-
 # Open ssh connection to target
 # Called via @rsh shortcut
+#
 P(1,ReadSSHTarget)=sshTarget
 	Dir.run("ssh", sshTarget)
 /remoteShell
@@ -50,7 +45,8 @@ P(1,ReadSSHTarget) =sshTarget
 /sshEnable
 
 
-P(1)=target	# Check if server fails to respond on ping
+# Check if server responds on ping
+P(1)=target
 	if(target.contains("@"), target.after("@"), target) =host
 	Dir.runCapture("ping","-c","1",host)->line assert(line.contains("0 received")) out(line) | _.length>0 =failure
 	!failure
@@ -59,8 +55,11 @@ P(1)=target	# Check if server fails to respond on ping
 
 # Returns boolean indicating if sudo without password ok
 P(1,ReadSSHTarget) =sshTarget
-	run (sshTarget,"sudo ls") =result
-	result.get("exitCode") == 0
+	sshTarget.before("@")=user
+	if (user == "ubuntu", true, {    # ubuntu on RPI default user has sudo without password ok
+		run (sshTarget,"sudo ls") =result
+		result.get("exitCode") == 0
+	})
 /VerifySudo
 
 
@@ -76,8 +75,11 @@ P(1)=name
 # Single or multiple commands (string or list), returns Dict object
 P(1)=target 
 P(2)=commands
-P(3,Dict)=codes  
+P(3,false)=acceptErrors
 P(4,false)=showDebug
+
+	error(target==null || !target.contains("@"), "Invalid target: '" + target + "'")
+	error(commands==null, "Invalid commands: can not be null")
 
 	# ensure commands is a list
 	when(!commands.?nth, {
@@ -120,18 +122,21 @@ P(4,false)=showDebug
 	Del.call(outFile)
 	Del.call(errFile)
 	
-	List =codeHits
-	result.get("stdout")->line
-		codes.keys->key
-			when(line.contains(key), codeHits.add(codes.get(key)))
-	|
+	(result.get("exitCode") != 0 && !acceptErrors) =FAILED
 	
-	result.set("codeHits",codeHits.unique)
+	when(FAILED, {
+		when (!showDebug, {
+			# Repeat logging from top of function
+			println("- target=" + target)
+			println("- stdin:")
+			commands->line println("    " + line) |
+
+			true=showDebug
+		})
+	})
 	
 	when(showDebug,{
 		println("- exitCode = " + result.get("exitCode"))
-		if(result.get("codeHits").length==0, "NONE", result.get("codeHits").concat(" ")) =codeHits
-		println("- codeHits = " + codeHits)
 		println("- stdin:")
 		result.get("stdin")->line println("   # " + line) |
 		println("- stdout:")
@@ -141,6 +146,8 @@ P(4,false)=showDebug
 		println
 	})
 	
+	error(FAILED, "Failed with error code")
+	
 	# return value
 	result
 /run
@@ -148,16 +155,20 @@ P(4,false)=showDebug
 
 P(1)=target 
 P(2)=commands
-P(3,Dict)=codes  
+P(3,false)=acceptErrors
 P(4,false)=showDebug
 	when(!commands.?nth, {
 		List(commands) =commands
 	})
 	List("sudo bash")+commands =commands
-	run(target,commands,codes,showDebug)
+	run(target,commands,acceptErrors,showDebug)
 /sudo
 
 
-sudo("roar@s04.s","which ls",Dict.set("/ls","ok"),true)
+sudo("roar@s04.s",
+	"which lasds",
+	Dict.set("/ls","ok"),
+	false,
+	true)
 /t
 

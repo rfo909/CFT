@@ -1,8 +1,8 @@
 # Readme
 <<< EOF
 ------------------------------------------------
-Collection of functions for querying and 
-managing servers remotely via SSH. For scripts
+Collection of functions for managing 
+servers remotely via SSH. For scripts
 to work, the remote server must
 
 - allow ssh without password
@@ -10,8 +10,6 @@ to work, the remote server must
 
 To do this, see the SSH script and its Readme
 function.
-
-A single main function run() handles all cases.
 ------------------------------------------------
 >>> EOF
 /Readme
@@ -20,14 +18,6 @@ A single main function run() handles all cases.
 Input("SSH target on format username@server").get
 /ReadSSHTarget
 
-
-Val("showDebug")
-/showDebug
-
-
-P(1)=debug
-	ValDef("showDebug", debug)
-/setDebug
 
 P(1,ReadSSHTarget)=target
 P(2,readLine("Command"))=command
@@ -117,24 +107,6 @@ network:
 ->line
 	out(line.merge(data))
 /VMNetplan
-
-
-# Example on how to classify java support on remote server (interactive)
-	ReadSSHTarget =target
-	Dict
-		# Maps output strings to result codes
-		.set("not found","notfound")
-		.set("OpenJDK","openjdk")
-		.set('"11.0.', "v11")
-		.set('"14.0.', "v14")
-		=codes
-
-	List("java -version")=commands
-	
-	run (target, commands, codes) =result
-	!result.contains("notfound") =hasJava
-	println("Java status for " + target + " -> hasJava=" + hasJava + ", all codes = " + result.concat(" "))
-/ExampleCodedResponse
 
 
 
