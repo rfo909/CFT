@@ -57,7 +57,7 @@ P(1)=target
 P(1,ReadSSHTarget) =sshTarget
 	sshTarget.before("@")=user
 	if (user == "ubuntu", true, {    # ubuntu on RPI default user has sudo without password ok
-		run (sshTarget,"sudo ls") =result
+		run (sshTarget,"sudo ls",true) =result
 		result.get("exitCode") == 0
 	})
 /VerifySudo

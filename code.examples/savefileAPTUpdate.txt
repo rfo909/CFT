@@ -1,0 +1,76 @@
+
+# Readme
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< EOF
+
+APT update and upgrade
+----------------------
+This script performs regular updates on
+targets, using database to remember last
+check, preventing too frequent checking,
+when running scripts multiple times for
+overlapping groups of hosts.
+
+Functions
+---------
+VerifyAPTUpdate (target, prefix)
+	# target is user@host
+	# prefix is indentation string, defaults to ""
+	
+Interactive if no target given.
+
+>>>>>>>>>>>>>>>>>>>>>>>>> EOF
+/Readme
+
+
+# Shortcut
+P(1)=target 
+P(2)=commands
+P(3,false)=acceptErrors
+P(4,false)=showDebug
+	call "SSH:run" (target,commands,acceptErrors,showDebug)
+/run
+
+
+# Shortcut
+P(1)=target 
+P(2)=commands
+P(3,false)=acceptErrors
+P(4,false)=showDebug
+	call "SSH:sudo" (target,commands,acceptErrors,showDebug)
+/sudo
+
+
+
+Input("Enter ssh target on format user@host").get
+/GetSSHTarget
+
+# Install or upgrade Java
+P(1,GetSSHTarget)=target
+P(2,"")=prefix
+
+	println(prefix+"APT update and upgrade")
+
+	target.after("@") =host
+	Sys.scriptName =dbCollection
+	Date.sub(Date.Duration.days(365)) =defaultValue
+	
+	println(prefix+"Looking up time of last run for host")
+	call "Db:Get" (host, dbCollection, defaultValue) =lastUpdated
+	Date.diff(lastUpdated) =timeSinceUpdate
+	if(timeSinceUpdate.get < 20*3600*1000, {
+		println(prefix+"Last updated: " + timeSinceUpdate.fmt + " ago")
+		println(prefix+"Limit for repeat update: 20 hours")
+	}, {
+		println(prefix+"Performing update")
+		sudo(target,"apt-get -y update")
+		
+		println(prefix+"Performing upgrade")
+		sudo(target,"apt-get -y upgrade")
+		
+		println(prefix+"Writing date to database")
+		call "Db:Add" (host, Date, dbCollection)
+		
+		println(prefix+"Done")
+	})
+/VerifyAPTUpdate
+

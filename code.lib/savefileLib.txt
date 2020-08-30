@@ -269,22 +269,23 @@ P(1,"label")=label P(2)=currVal P(3,"yes")=trueVal P(4,"no")=falseVal
 
 
 
-# Look for multiple patterns at the same time (Dict keys), and when found, add corresponding values to result list
-P(1,List)=lines
-P(2,Dict)=dict
-	List =result
-	lines->line
-		dict.keys->key 
-			when(line.contains(key), {result.add(dict.get(key))})
-	|
-	result.unique
-/LinesContain
 
 
-
-# Look for single element in list of lines
+# If value is Dict, for each key found, return corresponding value (as list). Otherwise true if value found, false if not found
 P(1,List)=lines
 P(2)=value
-	lines->line assert(line.contains(value)) out(line) | _.length>0
-/LinesContainSingle
+	if(value.?keys, {
+		# match keys and result corresponding values as list
+		value =dict
+		List =result
+		lines->line
+			dict.keys->key 
+				when(line.contains(key), {result.add(dict.get(key))})
+		|
+		result.unique
+	},{	
+		# check for single value
+		lines->line assert(line.contains(value)) out(line) | _.length>0
+	})
+/LinesContain
 

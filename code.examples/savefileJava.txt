@@ -1,0 +1,169 @@
+
+# Readme
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< EOF
+
+Java install or upgrade
+-----------------------
+This script detects existing version of 
+OpenJDK Java, and if obsolete version, 
+uninstalls it, before installing target
+version, which is 
+
+	${target}
+
+
+Identification
+--------------
+Script has been tested with the following
+OpenJDK installs:
+
+openjdk-8-jre-headless
+openjdk-11-jre-headless
+openjdk-13-jre-headless
+openjdk-14-jre-headless
+
+openjdk-8-jdk-headless
+openjdk-11-jdk-headless
+openjdk-13-jdk-headless
+openjdk-14-jdk-headless
+
+Functions
+---------
+VerifyJava (target, prefix)
+VerifyAnt (target, prefix)    # calls VerifyJava
+	# target is user@host
+	# prefix is indentation string, defaults to ""
+	
+Both functions are interactive if no target given.
+
+>>>>>>>>>>>>>>>>>>>>>>>>> EOF
+=lines
+Dict.set("${target}",targetPackage) =data
+lines->line out(line.merge(data))
+/Readme
+
+
+
+"openjdk-14-jdk-headless"
+/targetPackage
+
+
+
+# Shortcut
+P(1)=target 
+P(2)=commands
+P(3,false)=acceptErrors
+P(4,false)=showDebug
+	call "SSH:run" (target,commands,acceptErrors,showDebug)
+/run
+
+
+# Shortcut
+P(1)=target 
+P(2)=commands
+P(3,false)=acceptErrors
+P(4,false)=showDebug
+	call "SSH:sudo" (target,commands,acceptErrors,showDebug)
+/sudo
+
+
+
+Input("Enter ssh target on format user@host").get
+/GetSSHTarget
+
+# Install or upgrade Java
+P(1,GetSSHTarget)=target
+P(2,"")=prefix
+
+	println(prefix+"Checking if java installed")
+	run(target,"java -version",true)=result
+	result.get("stdout") + result.get("stderr") =lines
+	
+	(result.get("exitCode")==0) =hasJava
+
+	println(prefix+"hasJava=" + hasJava)
+	
+	#{lines->line println(" ## " + line) }
+	
+	call "Lib:LinesContain" (lines,"OpenJDK") =isOpenJdk
+	
+	
+	error(hasJava && !isOpenJdk, 
+		"Java on " + target + " is not an OpenJDK install, can not continue")
+
+
+	when (hasJava, {
+
+		println(prefix+"Checking version")
+
+		# There probably are better ways of determining which
+		# version package is installed, but this works.
+		Dict
+			.set('version "1.8.', 8)
+			.set('version "11.', 11)
+			.set('version "13.', 13)
+			.set('version "14.', 14)
+			=codes
+			
+		call "Lib:LinesContain" (lines, codes) =result
+		error(result.length != 1,
+			"Unknown java version: '" + result.concat(",")+"'")
+
+		result.nth =version
+
+		
+		println(prefix+"Checking for jdk vs jre")
+		null =jdkJre
+		if(
+			run(target,"which javac",true).get("exitCode")==0,
+			{"jdk" =jdkJre},
+			{"jre" =jdkJre}
+		)
+		
+		"openjdk-"+version+"-"+jdkJre+"-headless" =package
+		
+		println(prefix+"Found installed package = " + package)
+		
+		if (version<14 || jdkJre != "jdk", {
+			println(prefix+"Requiring " + targetPackage + " - removing obsolete package " + package)
+			sudo(target,"apt-get -y remove " + package)
+			
+			false =hasJava
+		},{
+			println(prefix+"Java version ok")
+		})
+
+	})
+	
+	when (!hasJava,{
+		println(prefix+"Running Update")
+		sudo(target,"apt-get -y update")
+		
+		println(prefix+"Installing " + targetPackage)
+		sudo(target,"apt-get -y install " + targetPackage)	
+	})
+	
+	println(prefix+"Java ok")
+	
+/VerifyJava	
+
+
+# Install ANT if missing - calls VerifyJava
+P(1,GetSSHTarget)=target
+P(2,"")=prefix
+	println(prefix+"Preparing to install ANT")
+	VerifyJava(target,prefix+"   ")
+
+	run(target,"which ant",true) =result
+	if(result.get("exitCode") != 0, {
+		println(prefix+"Installing ANT")
+		sudo(target,"apt-get -y install ant")
+	}, {
+		println(prefix+"ANT found on system")
+	})
+	println(prefix+"ANT ok")
+/VerifyAnt
+	
+
+	
+

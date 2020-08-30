@@ -79,8 +79,13 @@ P(2,"default")=collection
 # Get last object for key
 P(1)=key
 P(2,"default")=collection
-	FindAll(key,collection).last
+P(3)=defaultValue
+	FindAll(key,collection).last =x
+	if (x != null, x, defaultValue)
 /Get
+
+
+
 
 
 # Delete all data objects for key
