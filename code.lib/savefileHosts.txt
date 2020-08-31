@@ -1,0 +1,172 @@
+# Readme
+<<<<<<<<<<<< EOF
+
+A descriptive format for describing attributes with hosts, for
+managing automatic updates.
+
+Processes Hosts.txt file on following format:
+
+[Property=Value]
+HOST
+HOST
+HOST [OverrideValue]?
+ :
+ 
+
+>>>>>>>>>>>> EOF
+/Readme
+
+
+# Data file
+File("private/Hosts.txt")
+/HostsFile
+
+# Internal
+	P(1,"[A=B]")=line
+	error(!line.startsWith("["), "not header line: " + line)
+	line.after("[").before("]").split("=") =parts
+	parts.nth.trim =a
+	parts.nth(1).trim=b
+	# return value
+	List(a,b)
+/parseHeader
+
+
+# Internal
+	P(1)=line
+	P(2)=name
+	P(3)=value
+
+	line.before("[").trim =host
+	line.after("[").before("]") =override 
+
+	if (override != "", override, value) =overriddenVal
+	
+	Val("data").get(host,Dict).has(name) =alreadyDefined
+	when(alreadyDefined,{
+		println("WARNING host="+host 
+			+ " field="+name 
+			+ " new value='" + overriddenVal 
+			+ "' conflicts with '" + Val("data").get(host,Dict).get(name) + "'")
+	})
+	
+	Val("data").get(host,Dict).set(name,overriddenVal)
+/parseData
+
+
+# Process Hosts file and store it in session state
+	println("INFO Processing file " + HostsFile.path)
+	ValDef("data",Dict)
+	
+	null=settingName
+	null=settingValue
+	HostsFile.read->origLine
+		origLine.trim =line
+		
+		reject(line=="")
+		reject(line.startsWith("#"))
+		
+		if(line.startsWith("["), {
+			parseHeader(line).push(2,"") =settingName=settingValue
+		},{
+			parseData(line,settingName,settingValue)
+		})
+	|
+	# Check which hosts are missing settings 
+	# Note, can not call GetFields or GetHosts, since that causes infinite recursion
+	Val("data").keys->host
+		Val("data").get(host).keys->field
+			out(field)
+	| _.unique.sort =allFields
+
+/ProcessHostsFile
+
+
+# Internal
+	false =flag
+	when (Val("time")==null, {true =flag})
+	when (Val("time") != null && Val("time") != HostsFile.lastModified, {true =flag})
+	when (Val("data")==null, {true =flag})
+	when (flag, {
+		ProcessHostsFile
+		ValDef("time",HostsFile.lastModified)
+	})
+	true
+/CheckData
+
+
+# Explore data interactively
+	CheckData
+	P(1,readLine("Search term"))=searchTerm
+	Val("data")=root
+	root.keys.sort->host
+		root.get(host)=data
+		data.keys.sort->field
+			data.get(field)=value
+				assert(host.contains(searchTerm) || field.contains(searchTerm) || value.contains(searchTerm))
+				report(host,field,value)
+/Search
+
+# Get host list
+	CheckData
+	Val("data").keys.sort
+/GetHosts
+
+
+# Get all known fields
+	CheckData
+	Val("data").keys->host
+		Val("data").get(host).keys->field out(field)
+	| _.unique.sort
+/GetFields
+
+
+# Get value for host + field
+	CheckData
+	P(1)=host
+	P(2)=field
+
+	error(!Val("data").has(host), "Invalid host " + host)
+	Val("data").get(host).get(field,null)
+/GetValue
+
+
+# Get value for host + field, then return true if it matches expected value
+	CheckData
+	P(1)=host
+	P(2)=field
+	P(3)=expectedValue
+
+	error(!Val("data").has(host), "Invalid host " + host)
+	Val("data").get(host).get(field,null) == expectedValue
+/Has
+
+
+# Shortcut
+	Search
+/S
+
+# Shortcut
+	CheckData
+/C
+
+
+# View host status
+	call "Hosts:GetHosts" =hosts
+	
+	hosts->host
+		call "Hosts:GetValue" (host, "SSHUser") =sshUser
+		assert(sshUser != null)
+		
+		sshUser+"@"+host =target
+		println("Checking host " + target)
+		
+		call "SSH:HostOk" (target) =hostOk
+		call "SSH:VerifySudo" (target) =sudoOk
+		
+		{*P(1)=x if(x,"ok","<<FAIL>>")} =show
+		report("Host: " + host, "Ping: " + show.call(hostOk), "Sudo: "+show.call(sudoOk))
+/ShowHostsStatus
+
+
+

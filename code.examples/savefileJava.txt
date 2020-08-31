@@ -43,8 +43,11 @@ lines->line out(line.merge(data))
 /Readme
 
 
+11
+/MinimumVersion
 
-"openjdk-14-jdk-headless"
+
+"openjdk-"+MinimumVersion+"-jdk-headless"
 /targetPackage
 
 

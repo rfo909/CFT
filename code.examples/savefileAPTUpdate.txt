@@ -44,7 +44,8 @@ P(4,false)=showDebug
 Input("Enter ssh target on format user@host").get
 /GetSSHTarget
 
-# Install or upgrade Java
+
+# Run Update and Upgrade on target, unless it has been updated within 20 hours
 P(1,GetSSHTarget)=target
 P(2,"")=prefix
 
@@ -57,9 +58,9 @@ P(2,"")=prefix
 	println(prefix+"Looking up time of last run for host")
 	call "Db:Get" (host, dbCollection, defaultValue) =lastUpdated
 	Date.diff(lastUpdated) =timeSinceUpdate
-	if(timeSinceUpdate.get < 20*3600*1000, {
+	if(timeSinceUpdate.get < 48*3600*1000, {
 		println(prefix+"Last updated: " + timeSinceUpdate.fmt + " ago")
-		println(prefix+"Limit for repeat update: 20 hours")
+		println(prefix+"Limit for repeat update: 48 hours")
 	}, {
 		println(prefix+"Performing update")
 		sudo(target,"apt-get -y update")
@@ -72,5 +73,5 @@ P(2,"")=prefix
 		
 		println(prefix+"Done")
 	})
-/VerifyAPTUpdate
+/APTUpdateUpgrade
 

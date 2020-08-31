@@ -144,7 +144,7 @@ public class ObjDict extends Obj {
             return "get";
         }
         public String getShortDesc() {
-            return "get(name, defaultValue?) - get value for given property name";
+            return "get(name, defaultValue?) - get value for given property name. If not set, both set it to defaultValue, and return it.";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             String key=null;
