@@ -252,7 +252,7 @@ P(1,"someTarget")=target
     call "ServersMaintenance:VMConfigureNetplan" (target, newIp)
 
     println("* Rebooting new VM")
-    call "SSH:sudo" (target, "reboot")
+    call "SSH:sudo" (target, "reboot", true)
 
     "Done"
 /Clone

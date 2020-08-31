@@ -52,7 +52,7 @@ Add, Commit and Push.
 
 	# Identify files to move temporarily out of the way, so as not to be included in git add .
 	HomeDir.files(Glob("savefile*"))  
-	+ HomeDir.files(Glob(".editHistory"))
+	+ HomeDir.file(".editHistory")
 	+ HomeDir.file("projects.txt")
 	=FilesToMove
 
@@ -63,6 +63,7 @@ Add, Commit and Push.
 
 	# Move files to TempDir
     FilesToMove->f
+	assert(f.exists)
         println("Copying file " + f.name + " to " + TempDir.path)
         when (!TempDir.copy(f), error("Failed to copy file"))
         println("Deleting file " + f.name)
