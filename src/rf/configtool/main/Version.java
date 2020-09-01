@@ -17,9 +17,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.main;
 
+
 public class Version {
 
     public String getVersion() {
-        return "v1.1.15";
+        return "v1.1.16";
     }
 }

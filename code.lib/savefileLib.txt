@@ -88,12 +88,12 @@ EditFileFromHistory
 # Add to edit-history
 	P(1)=file
 	EditHistory.add(file) =list
-	File(".editHistory").create(syn(list))
+	File("private/.editHistory").create(syn(list))
 /EditHistoryAdd
 
 # Get edit-history 
 	# Get from file if exists
-	File(".editHistory") =f
+	File("private/.editHistory") =f
 	List =list
 	when (f.exists && f.read.length==1, {
 		eval(f.read.nth) =list
@@ -109,7 +109,7 @@ EditFileFromHistory
 		newList.remove(0)
 	|	
 	# Update file
-	File(".editHistory").create(syn(newList))
+	File("private/.editHistory").create(syn(newList))
 	newList
 /EditHistory
 

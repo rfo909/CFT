@@ -52,8 +52,6 @@ Add, Commit and Push.
 
 	# Identify files to move temporarily out of the way, so as not to be included in git add .
 	HomeDir.files(Glob("savefile*"))  
-	+ HomeDir.file(".editHistory")
-	+ HomeDir.file("projects.txt")
 	=FilesToMove
 
 	# Create temp-dir

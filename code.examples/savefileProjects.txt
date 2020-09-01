@@ -67,8 +67,8 @@ There can be multiples of every line, including Dir.
 /Init
 
 # projects.txt file contains all data
-	File("projects.txt")=f
-	error(!f.exists,"File " + f.path + " missing - run Readme() for details")
+    File("private/projects.txt")=f
+    error(!f.exists,"File " + f.path + " missing - run Readme() for details")
     DataFile(f,"###").comment("#")
 /ProjectsFile
 
@@ -118,44 +118,42 @@ when (Val("Project")==null, ChangeProject)
 
 # Produce list of files to search
 
-	CheckProject
-	CurrProject =pr
+    CheckProject
+    CurrProject =pr
 
-	{* P(1)=d 
-		true =keep 
-		CurrProject.IgnoreDir->x 
-			when(d.name==x,{false =keep}) 
-			break(!keep)
-		|
-		keep
-	} =checkDir
-	
-	# Generate initial list of all directories in project
-	{
-		pr.Dir->dirName 
-			Dir(dirName)=startDir
-			out(startDir)
-			startDir.allDirs->d out(d)
-	} =allDirs
+    {* P(1)=d 
+        true =keep 
+        CurrProject.IgnoreDir->x 
+            when(d.name==x,{false =keep}) 
+            break(!keep)
+        |
+        keep
+    } =checkDir
+    
+    # Generate initial list of all directories in project
+        pr.Dir->dirName 
+            Dir(dirName)=startDir
+            out(startDir)
+            error(!startDir.exists, "Project dir " + dirName + " not found")
+            startDir.allDirs->d out(d)
+        | =allDirs
+    
+    # Filter out directories that don't pass checkDir macro call
+        allDirs->d 
+            assert(checkDir.call(d))
+            out(d)
+    	| =allDirs
 
-	# Filter out directories that don't pass checkDir macro call
-	{
-		allDirs->d 
-			assert(checkDir.call(d))
-			out(d)
-	} =allDirs
+    # Identify files that have desired type
+        allDirs->d
+            d.files->f
+                f.name.afterLast(".")=type
+                assert(pr.Type.contains(type))
+                out(f)
+    	| =allFiles
 
-	# Identify files that have desired type
-	{
-		allDirs->d
-			d.files->f
-				f.name.afterLast(".")=type
-				assert(pr.Type.contains(type))
-				out(f)
-	} =allFiles
-
-	# return value
-	allFiles
+    # return value
+    allFiles
 /TextFiles
 
 
@@ -308,7 +306,3 @@ ChangeProject
 
 TextFiles
 /TF
-
-
-
-
