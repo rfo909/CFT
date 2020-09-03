@@ -1,8 +1,8 @@
 # CFT / ConfigTool
 
 ```
-Last updated: 2020-08-22 RFO
-v1.1.7
+Last updated: 2020-09-03 RFO
+v1.2.0 # new section Lib.Text.Lexer
 ```
 # Introduction
 
@@ -2707,7 +2707,7 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
 This means that typing @r loads the Release script, then executes the '?' command, which
 lists its content.
 
-# Various example code
+# Some example code
 
 ## Windows PowerShell
 
@@ -2746,6 +2746,96 @@ DirProject.run("cmd","/c","git","push","origin","master")
 ```
 Dir.runCapture("whoami").nth
 /GetUser
+```
+# Lib.Text.Lexer
+
+
+**v1.2.0**
+
+The Lib.Text.Lexer objects adds
+capability to match complex tokens with CFT, using the same Java tokenizer that is used when
+parsing CFT script code.
+
+## Concept
+
+
+The concept is that of a tree of maps, each map maps single characters to other maps, and so on.
+If map A contains mapping of digits 0-9 pointing at map B, and our parse process so far has led
+us to map A, with next input character being 0,1,2,3..., then that character is "consumed", which is
+fancy speak for matched, and the current map becomes B. The process then repeates.
+
+
+If the current map has no mapping for the current next character, then one of the following happen:
+
+
+
+- If the current map is marked with "this is a token", then parsing succeeds
+
+
+- Otherwise, we backtrack, unconsuming previourly consumed characters, until finding a map that "is a token"
+
+<lI>
+Or ,if no map in our parse tree has the "this is a token" mark set, then parsing fails
+
+
+## Implementation
+
+
+In the CFT functions, such maps are called nodes. They are created via one of the following functions:
+
+```
+$ Lib.Text.Lexer help
+# Empty(firstChars?) - create Empty node, possibly identifying firstChars list
+# Identifier() - create Identifier node
+```
+
+The nodes in turn contain the following:
+
+```
+$ Lib.Text.Lexer.Empty help
+# addToken(token) - create mappings for token string, returns resulting Node
+# match(Str) - returns number of characters matched
+# setDefault(targetNode?) - map all non-specified characters to node, returns target node
+# setIsToken() - if parsing stops here, it is a valid token - returns self
+# sub(chars, targetNode) or sub(chars) or sub(targetNode) - add mapping, returns target Node
+```
+
+A simple example:
+
+```
+Lib.Text.Lexer.Empty =top
+top.sub("0123456789") =x   # new node
+x.sub("0123456789",x)  # x points to itself for digits
+x.setIsToken  # ok to stop here, when no more digits found
+top.parse("300xx")  # returns 3, matching sequence '300'
+```
+### .sub()
+
+
+The sub() function of any node is used to connect pointers from one map to another. It takes
+three forms:
+
+```
+(1)
+someNode.sub("abc",someOtherNode)
+# when at someNode and one of the characters ("abc") are next character in input
+# string, then consume character, and move to that other node, which may of course
+# be the same node or some other node
+(2)
+someNode.sub("abc")
+# When no node parameter, an empty node is created, which "abc" points to from
+# someNode. The new node is returned
+(3)
+someNode.sub(someOtherNode)
+# When creating libraries of reusable nodes, they always must define a set of
+# characters which are called "firstChars". These are the characters that indicate
+# the start of some sort of data. For example for Lib.Text.Lexer.Identifier, the
+# "firstChars" is "abcdef...xyzABCD..XYZ_". It's the letters an identifier can start
+# with. Similarly we can create our own library node functions, by supplying a
+# firstChars list as parameter to Lib.Text.Lexer.Empty.
+#
+# So what happens is that inside someNode pointers are added to someOtherNode for
+# all characters in that node's firstChars.
 ```
 # Reference: Colon commands
 

@@ -207,10 +207,15 @@ Various topics
  * CFT.props - mCat, mEdit and mMore macros
  * CFT.props - shortcuts
 
-Various example code
+Some example code
  * Windows PowerShell
  * Windows CMD
  * Linux get user name
+
+Lib.Text.Lexer
+ * Concept
+ * Implementation
+ |   .sub()
 
 Reference: Colon commands
 

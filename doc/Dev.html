@@ -13,6 +13,101 @@
 
 <h1>CFT Change log</h1>
 
+
+<h3>v1.2.0 2020-09-03</h3>
+<p>
+	Added Lib.Text.Lexer functionality, to enable advanced matching of strings. Built on the internal
+	rf.configtool.parser.CharSet implementation. Made in preparation for (recursive-descent) line parser 
+	implementation, for full logfile processing, etc.
+</p>
+<p>
+	Lib.Text.Lexer functions:
+</p>
+<pre>
+	Test $ Lib.Text.Lexer help
+  # Empty(firstChars?) - create Empty node, possibly identifying firstChars list
+  # Identifier() - create Identifier node
+  # LPAR() - create LPAR node - matches '('
+  # RPAR() - create RPAR node - matches ')'
+</pre>
+
+<p>
+	Examples (from functional testing):
+</p>
+<pre>
+
+# test 1
+	Lib.Text.Lexer.Empty =top
+	Lib.Text.Lexer.Identifier =ident
+	top.sub(ident)   # first characters of identifier lead to identifier node
+	ident.setIsToken
+
+	"this is 2 some test".split-&amp;word
+		report(word,top.match(word))
+	|
+	# should give 4,2,0,4,4
+/t1
+
+# test 2
+	Lib.Text.Lexer.Empty =top
+	"this is a test".split-&amp;word 
+		top.addToken(word)=endNode 
+		endNode.setIsToken 
+	|
+	"this is some test".split-&amp;word
+		report(word,top.match(word))
+	|
+	# should return 4 2 0 4
+/t2
+	
+	
+# test 3
+	Lib.Text.Lexer.Empty =top
+	top.addToken("abc")=endNode
+	endNode.setIsToken
+	println(top.match("abc "))
+	# should return 3
+/t3
+
+# test 4 - match string in double quotes
+	Lib.Text.Lexer.Empty =top
+	top.sub('"') =str
+	str.setDefault(str)
+	str.sub('"') =end
+	end.setIsToken
+	
+	'"this is a test" xyz' =str
+	println(top.match(str))
+	# Should return 16, which is length of string included quotes 
+/t4
+
+
+# create hex parser
+	"0123456789ABCDEFabcdef" =chars
+	Lib.Text.Lexer.Empty(chars) =hex
+	hex.sub(chars, hex)
+	hex
+/hex
+
+
+
+# Match hex colon hex 
+	Lib.Text.Lexer.Empty =top
+	hex =h1
+	hex =h2
+	top.sub(h1)
+	h1.sub(":") =colon
+	colon.sub(h2)
+	h2.setIsToken
+
+	"3a:59d0 is 9a 9a: 9a:94xx".split-&amp;word
+		report(word,top.match(word))
+	|
+	# Should return 7,0,0,0,5
+/t5
+</pre>
+
+
 <h3>v1.1.16 2020-09-01</h3>
 <p>
 	Small script fixes

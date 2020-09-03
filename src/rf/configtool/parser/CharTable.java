@@ -41,8 +41,16 @@ public class CharTable {
         }
     }
 
+    public void setMapping (char ch, CharTable ct) {
+        map.put(ch, ct);
+    }
+
     public void setDefaultMapping (CharTable ct) {
         defaultMapping=ct;
+    }
+    
+    public CharTable getMapping (char c) {
+    	return map.get(c);
     }
 
     public void addToken (String token, int tokenType) {

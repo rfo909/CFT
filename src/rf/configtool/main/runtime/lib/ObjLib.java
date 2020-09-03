@@ -34,6 +34,7 @@ import rf.configtool.main.runtime.ValueList;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
 import rf.configtool.main.runtime.lib.conversions.ObjConvert;
+import rf.configtool.main.runtime.lib.text.ObjText;
 
 import java.awt.Color;
 
@@ -46,6 +47,8 @@ public class ObjLib extends Obj {
         this.add(new FunctionConvert());
         this.add(new FunctionFiles());
         this.add(new FunctionExp());
+        this.add(new FunctionText());
+        
     }
     
     @Override
@@ -171,6 +174,20 @@ public class ObjLib extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
             return new ValueObj(new ObjExp());
+        }
+    } 
+    
+
+    class FunctionText extends Function {
+        public String getName() {
+            return "Text";
+        }
+        public String getShortDesc() {
+            return "Text() - create Text object";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueObj(new ObjText());
         }
     } 
     
