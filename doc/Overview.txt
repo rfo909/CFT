@@ -216,6 +216,7 @@ Lib.Text.Lexer
  * Concept
  * Implementation
  |   .sub()
+ * Reusable nodes - integer sequence
 
 Reference: Colon commands
 

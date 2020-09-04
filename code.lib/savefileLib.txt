@@ -58,6 +58,11 @@ EditFileFromHistory
 	)
 /m
 
+# Edit history file
+Sys.homeDir.sub("private") =dir
+when (!dir.exists, dir.create)
+dir.file(".editHistory")
+/editHistoryFile
 
 
 # Update Cfg with terminal size (if possible)
@@ -88,12 +93,12 @@ EditFileFromHistory
 # Add to edit-history
 	P(1)=file
 	EditHistory.add(file) =list
-	File("private/.editHistory").create(syn(list))
+	editHistoryFile.create(syn(list))
 /EditHistoryAdd
 
 # Get edit-history 
 	# Get from file if exists
-	File("private/.editHistory") =f
+	editHistoryFile =f
 	List =list
 	when (f.exists && f.read.length==1, {
 		eval(f.read.nth) =list
@@ -109,7 +114,7 @@ EditFileFromHistory
 		newList.remove(0)
 	|	
 	# Update file
-	File("private/.editHistory").create(syn(newList))
+	editHistoryFile.create(syn(newList))
 	newList
 /EditHistory
 

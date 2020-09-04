@@ -101,9 +101,11 @@ public class Parser {
         numInt.setMapping("0123456789", numInt);
         
         // --- floats ---
+        CharTable dot=new CharTable();
         CharTable numFloat=new CharTable();
+        numInt.setMapping(".", dot);
+        dot.setMapping("0123456789", numFloat);
         numFloat.setTokenType(Token.TOK_FLOAT);
-        numInt.setMapping(".", numFloat);
         numFloat.setMapping("0123456789", numFloat);
         
         // --- strings ---

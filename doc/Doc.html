@@ -3240,8 +3240,9 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
   x.sub("0123456789",x)  # x points to itself for digits
   x.setIsToken  # ok to stop here, when no more digits found
 
-  top.parse("300xx")  # returns 3, matching sequence '300'
+  top.match("300xx")  # returns 3, matching sequence '300'
 </pre>
+
 
 <h3>.sub()</h3>
 <p>
@@ -3265,13 +3266,52 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
     # When creating libraries of reusable nodes, they always must define a set of
     # characters which are called "firstChars". These are the characters that indicate
     # the start of some sort of data. For example for Lib.Text.Lexer.Identifier, the
-    # "firstChars" is "abcdef...xyzABCD..XYZ_". It's the letters an identifier can start
+    # "firstChars" are "a-zA-Z_". It's the letters an identifier can start
     # with. Similarly we can create our own library node functions, by supplying a
     # firstChars list as parameter to Lib.Text.Lexer.Empty. 
     #
-    # So what happens is that inside someNode pointers are added to someOtherNode for
+    # So what happens is that inside someNode, pointers are added to someOtherNode for
     # all characters in that node's firstChars.
-  </pre>
+</pre>
+
+
+<h2>Reusable nodes - integer sequence</h2>
+<p>
+  To create a reusable node, we need to specify the "firstChars" of a node, which are given
+  as parameter when creating an Empty node. This means adding it as "sub" under some other node,
+  lets those characters point at it.
+</p>
+
+<pre>
+  # Create reusable node for integers. 
+    "0123456789"=digits
+    Lib.Text.Lexer.Empty(digits) =x
+    x.sub(digits,x)
+    x
+  /NodeInt
+
+  # Now we can for example match a IP v4 address
+    Lib.Text.Lexer.Empty =top
+    NodeInt =a
+    NodeInt =b
+    NodeInt =c
+    NodeInt =d
+    
+    top.sub(a)
+    a.sub(".").sub(b) # creates intermediary nodes for the dots
+    b.sub(".").sub(c)
+    c.sub(".").sub(d)
+    d.setIsToken
+
+    top
+  /MatchIPAddress
+
+  # Test
+  "192.168.1.1 255.255.x 10.0.0.1 1.2.3 .4".split-&gt;word
+    report(word, MatchIPAddress.match(word))
+    # should return 11,0,8,0,0
+  /t1
+</pre>
 
 
 
