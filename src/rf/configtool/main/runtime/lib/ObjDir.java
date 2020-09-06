@@ -337,7 +337,6 @@ public class ObjDir extends Obj {
             	ctx.getObjGlobal().addSystemMessage("Not a dir   " + f.getCanonicalPath());
                 return new ValueBoolean(false);
             } else {
-            	ctx.getObjGlobal().addSystemMessage("Dir exists  " + f.getCanonicalPath());
                 return new ValueBoolean(false);
             }
         }

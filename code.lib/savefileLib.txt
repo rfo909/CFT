@@ -59,9 +59,7 @@ EditFileFromHistory
 /m
 
 # Edit history file
-Sys.homeDir.sub("private") =dir
-when (!dir.exists, dir.create)
-dir.file(".editHistory")
+DirPrivate.file(".editHistory")
 /editHistoryFile
 
 
@@ -171,6 +169,11 @@ dir.file(".editHistory")
 /ClearEditor
 
 
+
+Sys.homeDir.sub("private")=d
+when (!d.exists, d.create)
+d
+/DirPrivate
 
 
 # Show a list of options

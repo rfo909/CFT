@@ -86,11 +86,6 @@ P(4,false)=showDebug
 		List(commands) =commands
 	})
 
-	when(showDebug, {
-		println("- target=" + target)
-		println("- stdin:")
-		commands->line println("    " + line) |
-	})
 
 	# Add echo command with string to check for later, to avoid login messages etc
 	"--- " + Sys.scriptName + ".run ---" =mark
@@ -121,21 +116,17 @@ P(4,false)=showDebug
 	Del.call(inFile)
 	Del.call(outFile)
 	Del.call(errFile)
-	
-	(result.get("exitCode") != 0 && !acceptErrors) =FAILED
-	
-	when(FAILED, {
-		when (!showDebug, {
-			# Repeat logging from top of function
-			println("- target=" + target)
-			println("- stdin:")
-			commands->line println("    " + line) |
 
-			true=showDebug
-		})
+	false =FAIL
+	when (result.get("exitCode") != 0 && !acceptErrors, {
+		true =FAIL
 	})
 	
-	when(showDebug,{
+	when(showDebug || FAIL,{
+		println("- target=" + target)
+		println("- stdin:")
+		commands->line println("    " + line) |
+
 		println("- exitCode = " + result.get("exitCode"))
 		println("- stdin:")
 		result.get("stdin")->line println("   # " + line) |
@@ -146,7 +137,7 @@ P(4,false)=showDebug
 		println
 	})
 	
-	error(FAILED, "Failed with error code")
+	error(FAIL,"run failed with error: " + target)
 	
 	# return value
 	result
@@ -157,6 +148,7 @@ P(1)=target
 P(2)=commands
 P(3,false)=acceptErrors
 P(4,false)=showDebug
+	# ensure commands is a list
 	when(!commands.?nth, {
 		List(commands) =commands
 	})
@@ -165,10 +157,4 @@ P(4,false)=showDebug
 /sudo
 
 
-sudo("roar@s04.s",
-	"which lasds",
-	Dict.set("/ls","ok"),
-	false,
-	true)
-/t
 

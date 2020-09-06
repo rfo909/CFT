@@ -210,6 +210,14 @@ The first produces a list of global functions, the second of functions inside st
 the third displayes the functions inside Dir objects. The fourth lists functions available on
 int, and the last for float values.
 
+
+Example
+
+```
+$ 3.bin
+</String>
+00000011
+```
 # List basics
 
 
@@ -221,7 +229,7 @@ $ List(1,2,3,4)
 ```
 
 Lists are also returned from many other functions, for example
-calling Dir.files() function produces a list of File objects inside that
+calling the Dir.files() function produces a list of File objects inside that
 directory object.
 
 ```

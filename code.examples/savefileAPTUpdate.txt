@@ -55,23 +55,54 @@ P(2,"")=prefix
 	Sys.scriptName =dbCollection
 	Date.sub(Date.Duration.days(365)) =defaultValue
 	
-	println(prefix+"Looking up time of last run for host")
+	println(prefix+"Looking up time of last run for host ")
 	call "Db:Get" (host, dbCollection, defaultValue) =lastUpdated
+	println(prefix+" ... lastUpdated = " + lastUpdated)
 	Date.diff(lastUpdated) =timeSinceUpdate
 	if(timeSinceUpdate.get < 48*3600*1000, {
 		println(prefix+"Last updated: " + timeSinceUpdate.fmt + " ago")
 		println(prefix+"Limit for repeat update: 48 hours")
 	}, {
 		println(prefix+"Performing update")
-		sudo(target,"apt-get -y update")
+		sudo(target,"apt-get -y update", true) =result
+	
+		result.get("exitCode") != 0  =FAIL 
 		
-		println(prefix+"Performing upgrade")
-		sudo(target,"apt-get -y upgrade")
+		when (!FAIL,{
+			println(prefix+"Performing upgrade")
+			sudo(target,"apt-get -y upgrade", true) =result
+			result.get("exitCode") != 0  =FAIL 
+		})
 		
-		println(prefix+"Writing date to database")
-		call "Db:Add" (host, Date, dbCollection)
+		when (!FAIL,{
+			println(prefix+"Writing date and time to database")
+			call "Db:Add" (host, Date, dbCollection)
+		})
 		
-		println(prefix+"Done")
+		println(prefix+
+			if (FAIL,"APTUpdateUpgrade failed with ERROR","Done"))
+			
+		when (FAIL, {
+			(call "Lib:DirPrivate").sub(Sys.scriptName)=dir
+			dir.create
+			#println("dir=" + dir.path)
+			dir.file(""+(Date.setFormat("yyyy-MM-dd").fmt) + "_" + target + ".txt") =logFile
+			logFile.create("# " + Date.fmt)
+			logFile.append(List("","- target = " + target,""))
+			
+			logFile.append("- exitCode = " + result.get("exitCode"))
+			logFile.append("")
+			logFile.append("- stdin:")
+			
+			result.get("stdin")->line logFile.append("   # " + line) |
+			logFile.append("- stdout:")
+			result.get("stdout")->line logFile.append("   # " + line) |
+			logFile.append("- stderr:")
+			result.get("stderr")->line logFile.append("   # " + line) |
+
+			println(prefix+"Written log file " + logFile.path)
+		})
 	})
+	
 /APTUpdateUpgrade
 
