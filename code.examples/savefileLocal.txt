@@ -1,0 +1,48 @@
+# Readme
+<<< EOF
+#
+# Common utility functions for interactive use
+#
+>>> EOF
+/Readme
+
+# Search file, defaults to syslog
+	P(1,File("/var/log/syslog")) =file
+	P(2,Input("Search term").get) =st
+		Grep(st).limitLast(1000).file(file)->line
+			report(line.lineNumber, line)
+/Search
+
+# Systemctl status for service
+	P(1,Input("Service name").get)=service
+	Dir.run("systemctl","status",service)
+/SCStatus
+
+# Systemctl start service
+	P(1,Input("Service name").get)=service
+	Dir.run("systemctl","start",service)
+/SCStart
+
+# Systemctl stop service
+	P(1,Input("Service name").get)=service
+	Dir.run("systemctl","stop",service)
+/SCStop
+
+# Syslog status for service
+	P(1,Input("Service name").get)=service
+	Search(File("/var/log/syslog"), service)
+/SLStatus
+
+# Show and filter processes
+	P(1,Input("Process search term").get)=st
+	Dir.runCapture("ps","-efal")->line
+		assert(line.contains(st))
+		out(line)
+/PS
+
+# Edit file 
+	P(1,Input("Edit file").get)=fileName
+	call "Lib:e" (File(fileName))
+/e
+
+
