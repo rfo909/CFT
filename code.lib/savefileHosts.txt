@@ -205,6 +205,14 @@ P(1)=glob
         Dir.run("ssh-copy-id",target)
 /CheckSSHKeys
 
+# Check if debian based host should be rebooted
+        P(1)=target
+        call "SSH:sudo" (target, "ls /var/run/reboot-required", true) =result
+        # true when file found (return code 0)
+        result.get("exitCode") == 0
+/DebianHostNeedsReboot
+
+
 
 # Run update/upgrade
     call "Hosts:GetHosts" =hosts
@@ -222,19 +230,25 @@ P(1)=glob
         call "Hosts:Has" (host, "Auto.reboot","yes") =canBeRebooted
 
         when(needsReboot && canBeRebooted, {
-                println("   Automatically rebooting " + host)
-                call "SSH:sudo" (target, "reboot")
+                println("   *** Automatically rebooting " + host)
+                call "SSH:sudo" (target, "reboot", true)
+                		# acceptErrors=true, as the reboot means immediate disconnect
         })
 
         when(needsReboot && !canBeRebooted, {
-                println("   Host " + host + " should be rebooted - can not do this automatically")
+                println("   *** Host " + host + " should be rebooted - can not do this automatically")
         })
 /UpdateAPT
 
-# Check if debian based host should be rebooted
-        P(1)=target
-        call "SSH:sudo" (target, "ls /var/run/reboot-required", true) =result
-        # true when file found (return code 0)
-        result.get("exitCode") == 0
-/DebianHostNeedsReboot
 
+# Display hosts that should be rebooted
+	call "Hosts:GetHosts"->host
+		assert(call "Hosts:Has" (host,"OSFamily","Debian"))
+		call "Hosts:GetValue" (host, "SSHUser") =sshUser
+
+		sshUser+"@"+host =target
+		DebianHostNeedsReboot(target)=x
+		if(x,"NEEDS REBOOT","ok")=status
+		println(target + ": " + status)
+		
+/NeedReboot		
