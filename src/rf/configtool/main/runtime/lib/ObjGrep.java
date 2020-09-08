@@ -88,7 +88,7 @@ public class ObjGrep extends Obj {
     
     private List<Match> matchList=new ArrayList<Match>();
     private int limit=DEFAULT_LIMIT; 
-    private boolean limitKeepFirst=true;
+    private boolean limitKeepFirst=false;
         // if limit is N > 0, if true, keep first N lines, otherwise last N lines
     
     private Obj self() {

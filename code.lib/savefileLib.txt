@@ -40,14 +40,9 @@ choice.
 
 # Edit file
 	P(1,Sys.savefile)=file
-	EditHistoryAdd(file)
 	if(Sys.isWindows, Dir.runDetach("cmd","/c","notepad",file.path), ShowLinuxEditor(file))
 /e
 
-
-# Edit file from history
-EditFileFromHistory
-/e2
 
 
 # Page through file
@@ -57,10 +52,6 @@ EditFileFromHistory
 		Dir.run("more", file.path)
 	)
 /m
-
-# Edit history file
-DirPrivate.file(".editHistory")
-/editHistoryFile
 
 
 # Update Cfg with terminal size (if possible)
@@ -86,55 +77,6 @@ DirPrivate.file(".editHistory")
 	if(updated, Cfg, null)
 /GetTerminalSize
 			
-
-
-# Add to edit-history
-	P(1)=file
-	EditHistory.add(file) =list
-	editHistoryFile.create(syn(list))
-/EditHistoryAdd
-
-# Get edit-history 
-	# Get from file if exists
-	editHistoryFile =f
-	List =list
-	when (f.exists && f.read.length==1, {
-		eval(f.read.nth) =list
-		when(list==null, {List =list})
-	}) 
-	
-	# Validate files exist, then remove duplicates
-	list->x assert(f.?exists && f.exists) out(f) | _->f out(Str(f.path,f)) | _.unique->x out(x.data) | _=newList
-
-	# Trim list down to N newest entries
-	loop
-		break(newList.length <= 20)
-		newList.remove(0)
-	|	
-	# Update file
-	editHistoryFile.create(syn(newList))
-	newList
-/EditHistory
-
-
-# Show edit history, and select one to edit, or cancel (called from e2())
-	EditHistory =data
-	{* P(1).path } =macroGetElementName
-	Header("Enter part of file name to edit")
-
-	loop
-		ShowOptions(data, macroGetElementName)
-		println("")
-		println("(Press enter to cancel)")
-		SelectOptions(data, macroGetElementName, true) =result
-		when(result.length==1, e(result.nth))
-		break(result.length==1) # just started editor
-		break(result.length==0) # User pressed Enter
-		println("Not unique")
-/EditFileFromHistory
-
-
-
 
 
 # Select Linux editor and remember selection for next time, open file in editor
