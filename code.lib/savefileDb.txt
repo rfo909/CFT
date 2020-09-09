@@ -48,7 +48,7 @@ multiple collections.
 P(1)=key
 P(2)=val
 P(3,"default")=collection
-    {* P(1)=val syn(val) } =x
+    Lambda { P(1)=val syn(val) } =x
     error(x.?call(val)==false, "Value must be synthesizable")
     Dict
         .set("key",key)
@@ -116,7 +116,7 @@ P(2,"default")=collection
 P(1)=key
 P(2)=value
 P(3,"default")=collection
-    ?(Val("temp")==null, {ValDef("temp",Dict) }) 
+    ?(Val("temp")==null, Inner{ValDef("temp",Dict) }) 
     Val("temp").get(collection,Dict).set(key,value)
     true
 /TempSet
@@ -124,13 +124,13 @@ P(3,"default")=collection
 # Set temp value (in memory only)
 P(1)=key
 P(2,"default")=collection
-    ?(Val("temp")==null, {ValDef("temp",Dict) }) 
+    ?(Val("temp")==null, Inner{ValDef("temp",Dict) }) 
     Val("temp").get(collection,Dict) =coll
     ?(coll.has(key), coll.get(key,null), null)
 /TempGet
 
 # Show temp values
-    ?(Val("temp")==null, {ValDef("temp",Dict) })
+    ?(Val("temp")==null, Inner{ValDef("temp",Dict) })
     Val("temp").keys->collection
         Val("temp").get(collection).keys->name
             report(collection, name, Val("temp").get(collection).get(name))
@@ -142,7 +142,7 @@ P(1)=key
 P(2)=prompt
 P(3)=collection
     Get(key,collection) =val
-    ?(val==null,{
+    ?(val==null,Inner{
         readLine(prompt) =val
         Add(key,val,collection)
     })
@@ -155,10 +155,10 @@ P(1)=key
 P(2)=prompt
 P(3)=collection
     Get(key,collection) =val
-    ?(val==null, {
+    ?(val==null, Inner{
         readLine(prompt) =val
         Add(key,val,collection)
-    },{
+    },Inner{
         call "Lib:ReadValue" (prompt, val) =val2
         ?(val2 != val, Add(key,val2,collection))
         val2 =val

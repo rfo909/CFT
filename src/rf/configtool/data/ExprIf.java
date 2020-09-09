@@ -35,8 +35,9 @@ public class ExprIf extends LexicalElement {
         bool=new Expr(ts);
         ts.matchStr(",", "expected comma following boolean expr");
         exprIf=new Expr(ts);
+        
         if (!ts.matchStr(")")) {
-        	ts.matchStr(",", "expected comma or ')' following boolean expr");
+        	ts.matchStr(",", "expected comma or ')' following true expr");
         	exprElse=new Expr(ts);
             ts.matchStr(")", "expected ')' closing '?' expression");
         }

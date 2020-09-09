@@ -25,11 +25,11 @@ winShell = powershell
 # may be null or point to a file.
 # ----
 
-mCat = {* P(1)=file error(file==null, 'cat: no file') file.read->line out(line) }
+mCat = Lambda { P(1)=file error(file==null, 'cat: no file') file.read->line out(line) }
 
-mEdit = {* P(1)=file error(file==null, 'edit: no file') call 'Lib:e' (file) }
+mEdit = Lambda { P(1)=file error(file==null, 'edit: no file') call 'Lib:e' (file) }
 
-mMore = {* P(1)=file error(file==null, 'more: no file') call 'Lib:m' (file) }
+mMore = Lambda { P(1)=file error(file==null, 'more: no file') call 'Lib:m' (file) }
 
 
 # Shortcuts

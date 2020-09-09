@@ -66,7 +66,7 @@ DocDir.file("Doc.html").protect("Original")
 
     <<< EOF
 ------------------------------------------------------------------
-Generated file - see script file ${savefile}
+Generated file - see script file $Inner{savefile}
 ------------------------------------------------------------------
     >>> EOF
 

@@ -75,14 +75,14 @@ There can be multiples of every line, including Dir.
 # List projects and select 
     Val("Project") =result
     ProjectsFile.get("ActiveProjects")->line out(line.trim) | _=names
-    {* P(1) } =showName
+    Lambda { P(1) } =showName
     loop
         println
         call "Lib:Header" ("Select project, curr=" + result)
         call "Lib:ShowOptions" (names, showName)
         call "Lib:SelectOptions" (names, showName, true) =resultList
-        ?(resultList.length>1, {println("** not unique **") null=result} )
-        ?(resultList.length==1, {resultList.nth =result} )
+        ?(resultList.length>1, Inner{println("** not unique **") null=result} )
+        ?(resultList.length==1, Inner{resultList.nth =result} )
         break(result != null)
     |
     ValDef("Project", result)
@@ -121,10 +121,10 @@ There can be multiples of every line, including Dir.
     CheckProject
     CurrProject =pr
 
-    {* P(1)=d 
+    Lambda { P(1)=d 
         true =keep 
         CurrProject.IgnoreDir->x 
-            ?(d.name==x,{false =keep}) 
+            ?(d.name==x,Inner{false =keep}) 
             break(!keep)
         |
         keep
@@ -164,7 +164,7 @@ There can be multiples of every line, including Dir.
 P(1,Grep)=grep
     CheckProject
     
-    {* P(1)=file 
+    Lambda { P(1)=file 
         Val("FileFilter")=filter
         ?(filter != null, file.name.contains(filter), true)
     } =filter
@@ -193,7 +193,7 @@ P(1,Grep)=grep
 
 # Show info on current FileFilter (if defined)
     Val("FileFilter") =filter
-    ?(filter!=null, {
+    ?(filter!=null, Inner{
         println
         println("** Filtering file names on: " + '"' + filter + '"')
         println
@@ -288,14 +288,14 @@ Search(Grep(a).reject(b))
     0 =lineNo
     lines->line
         # Pad lineNo to 3 characters
-        {""+lineNo =s loop break(s.length>=3) " "+s =s | s} =lineNoStr
+        Inner{""+lineNo =s loop break(s.length>=3) " "+s =s | s} =lineNoStr
         
         println(lineNoStr + ": " + line)
         lineNo+1 =lineNo
     |
     println
     readLine("Enter number to edit, or blank to skip") =inp
-    ?(inp != "", {
+    ?(inp != "", Inner{
         call "Lib:e" (fileList.nth(inp.parseInt))
     })
     true

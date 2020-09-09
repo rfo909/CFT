@@ -39,14 +39,22 @@ public class ExprMacro extends LexicalElement {
 
     public ExprMacro (TokenStream ts) throws Exception {
         super(ts);
-        ts.matchStr("{", "expected '{'");
-        
-        localCodeBlock=true;
-        
-        if (ts.matchStr("*")) {  // indicates it can run "anywhere"
-            localCodeBlock=false;
+        if (ts.matchStr("Inner")) {
+        	localCodeBlock=true;
+        	ts.matchStr("{","expected '{'");
+        } else if (ts.matchStr("Lambda")) {
+        	localCodeBlock=false;
+        	ts.matchStr("{","expected '{'");
+//        } else {
+//	        ts.matchStr("{", "expected '{'");
+//	        
+//	        localCodeBlock=true;
+//	        
+//	        if (ts.matchStr("*")) {  // indicates it can run "anywhere"
+//	            localCodeBlock=false;
+//	        }
         }
-        
+	        
         List<ProgramLine> progLines=new ArrayList<ProgramLine>();
         for(;;) {
             progLines.add(new ProgramLine(ts));

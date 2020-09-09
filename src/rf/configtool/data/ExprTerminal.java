@@ -100,7 +100,7 @@ public class ExprTerminal extends LexicalElement {
             literalValue=new ValueBoolean(false);
             return;
         }
-        if (ts.peekStr("{")) {
+        if (ts.peekStr("Inner") || ts.peekStr("Lambda")) {
             exprMacro = new ExprMacro(ts);
             return;
         }

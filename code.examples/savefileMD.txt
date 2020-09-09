@@ -40,8 +40,8 @@ DocDir.file("Doc.html")
 false =enable
 Source.read->line
     false =skipThis
-    ?(line.contains("<body"), { true =enable true=skipThis })
-    ?(line.contains("</body"), {false =enable })
+    ?(line.contains("<body"), Inner{ true =enable true=skipThis })
+    ?(line.contains("</body"), Inner{false =enable })
     assert(enable && !skipThis)
     line.trim =s
     assert(s.length>0)
@@ -94,10 +94,10 @@ List(
     Str("</i",PREJOIN+"**")
 )=rules
 Parts->p
-    {
+    Inner{
         null =result
         rules->r 
-            ?(p.startsWith(r), {r.data =result})
+            ?(p.startsWith(r), Inner{r.data =result})
             break(result != null)
         |
         result

@@ -78,7 +78,7 @@ Run('docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker
 
 
 # Start kibana container
-Run('docker run --link ' + getId("elasticsearch") + ':elasticsearch -p 5601:5601 docker.elastic.co/kibana/kibana:7.8.0')  # {docker-repo}:{version}
+Run('docker run --link ' + getId("elasticsearch") + ':elasticsearch -p 5601:5601 docker.elastic.co/kibana/kibana:7.8.0')  # Inner{docker-repo}:Inner{version}
 /kibRun
 
 

@@ -9,7 +9,7 @@ OpenJDK Java, and if obsolete version,
 uninstalls it, before installing target
 version, which is 
 
-    ${target}
+    $Inner{target}
 
 
 Identification
@@ -38,7 +38,7 @@ Both functions are interactive if no target given.
 
 >>>>>>>>>>>>>>>>>>>>>>>>> EOF
 =lines
-Dict.set("${target}",targetPackage) =data
+Dict.set("$Inner{target}",targetPackage) =data
 lines->line out(line.merge(data))
 /Readme
 
@@ -86,7 +86,7 @@ P(2,"")=prefix
 
     println(prefix+"hasJava=" + hasJava)
     
-    #{lines->line println(" ## " + line) }
+    #Inner{lines->line println(" ## " + line) }
     
     call "Lib:LinesContain" (lines,"OpenJDK") =isOpenJdk
     
@@ -95,7 +95,7 @@ P(2,"")=prefix
         "Java on " + target + " is not an OpenJDK install, can not continue")
 
 
-    ?(hasJava, {
+    ?(hasJava, Inner{
 
         println(prefix+"Checking version")
 
@@ -119,26 +119,26 @@ P(2,"")=prefix
         null =jdkJre
         ?(
             run(target,"which javac",true).get("exitCode")==0,
-            {"jdk" =jdkJre},
-            {"jre" =jdkJre}
+            Inner{"jdk" =jdkJre},
+            Inner{"jre" =jdkJre}
         )
         
         "openjdk-"+version+"-"+jdkJre+"-headless" =package
         
         println(prefix+"Found installed package = " + package)
         
-        ?(version<14 || jdkJre != "jdk", {
+        ?(version<14 || jdkJre != "jdk", Inner{
             println(prefix+"Requiring " + targetPackage + " - removing obsolete package " + package)
             sudo(target,"apt-get -y remove " + package)
             
             false =hasJava
-        },{
+        },Inner{
             println(prefix+"Java version ok")
         })
 
     })
     
-    ?(!hasJava,{
+    ?(!hasJava,Inner{
         println(prefix+"Running Update")
         sudo(target,"apt-get -y update")
         
@@ -158,10 +158,10 @@ P(2,"")=prefix
     VerifyJava(target,prefix+"   ")
 
     run(target,"which ant",true) =result
-    ?(result.get("exitCode") != 0, {
+    ?(result.get("exitCode") != 0, Inner{
         println(prefix+"Installing ANT")
         sudo(target,"apt-get -y install ant")
-    }, {
+    }, Inner{
         println(prefix+"ANT found on system")
     })
     println(prefix+"ANT ok")

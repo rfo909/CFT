@@ -56,7 +56,7 @@ P(1)=target
 # Returns boolean indicating if sudo without password ok
 P(1,ReadSSHTarget) =sshTarget
     sshTarget.before("@")=user
-    ?(user == "ubuntu", true, {    # ubuntu on RPI default user has sudo without password ok
+    ?(user == "ubuntu", true, Inner{    # ubuntu on RPI default user has sudo without password ok
         run (sshTarget,"sudo ls",true) =result
         result.get("exitCode") == 0
     })
@@ -82,7 +82,7 @@ P(4,false)=showDebug
     error(commands==null, "Invalid commands: can not be null")
 
     # ensure commands is a list
-    ?(!commands.?nth, {
+    ?(!commands.?nth, Inner{
         List(commands) =commands
     })
 
@@ -102,7 +102,7 @@ P(4,false)=showDebug
     false =found
     ?(outFile.exists,outFile.read,List)->line
         condOut(found, line)
-        ?(line.contains(mark), {true =found})
+        ?(line.contains(mark), Inner{true =found})
     | _=outLines
         
     Dict =result
@@ -111,18 +111,18 @@ P(4,false)=showDebug
     result.set("stdin",commands)
     result.set("exitCode", Sys.lastEPS)
     
-    {* P(1)=f ?(f.exists, f.delete) } =Del
+    Lambda { P(1)=f ?(f.exists, f.delete) } =Del
     
     Del.call(inFile)
     Del.call(outFile)
     Del.call(errFile)
 
     false =FAIL
-    ?(result.get("exitCode") != 0 && !acceptErrors, {
+    ?(result.get("exitCode") != 0 && !acceptErrors, Inner{
         true =FAIL
     })
     
-    ?(showDebug || FAIL,{
+    ?(showDebug || FAIL,Inner{
         println("- target=" + target)
         println("- stdin:")
         commands->line println("    " + line) |
@@ -149,7 +149,7 @@ P(2)=commands
 P(3,false)=acceptErrors
 P(4,false)=showDebug
     # ensure commands is a list
-    ?(!commands.?nth, {
+    ?(!commands.?nth, Inner{
         List(commands) =commands
     })
     List("sudo bash")+commands =commands

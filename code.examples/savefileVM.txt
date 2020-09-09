@@ -76,12 +76,12 @@ network:
   version: 2
   renderer: networkd
   ethernets:
-    ${nicMain}:
+    $Inner{nicMain}:
       dhcp4: no
-      gateway4: ${Gateway4}
-      addresses: [${ipMain}]
+      gateway4: $Inner{Gateway4}
+      addresses: [$Inner{ipMain}]
       nameservers:
-        addresses: [${NameServers}]
+        addresses: [$Inner{NameServers}]
 >>> EOF
     ->line out(line.merge(data))
 /TemplateNetplan

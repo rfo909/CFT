@@ -39,8 +39,8 @@ loop
     error(retries<=0,"No Ping response from " + ip)
     retries-1 =retries
     true =ok
-    { Dir.runCapture("ping","-c","1",ip)->line 
-        ?(line.contains("100% packet loss"), {false=ok})
+    Inner{ Dir.runCapture("ping","-c","1",ip)->line 
+        ?(line.contains("100% packet loss"), Inner{false=ok})
     }
     break(ok)
     Sys.sleep(500)
@@ -102,10 +102,10 @@ network:
   version: 2
   renderer: networkd
   ethernets:
-    ${nic}:
+    $Inner{nic}:
       dhcp4: no
       gateway4: 10.0.0.138
-      addresses: [${ip}]
+      addresses: [$Inner{ip}]
       nameservers:
         addresses: [10.0.0.3, 10.0.0.4]
 >>> EOF

@@ -56,11 +56,11 @@ P(1)=glob
 
     ?(override != "", override, value) =overriddenVal
     
-    ?(host.contains("*"), {
+    ?(host.contains("*"), Inner{
         # assign value for all hosts matching glob expression
         GlobHosts(host)->oneHost
             Val("data").get(oneHost,Dict).set(name, overriddenVal)
-    }, {
+    }, Inner{
         # regular assign
         Val("data").get(host,Dict).set(name,overriddenVal)
     })
@@ -79,9 +79,9 @@ P(1)=glob
         reject(line=="")
         reject(line.startsWith("#"))
         
-        ?(line.startsWith("["), {
+        ?(line.startsWith("["), Inner{
             parseHeader(line).push(2,"") =settingName=settingValue
-        },{
+        },Inner{
             parseData(line,settingName,settingValue)
         })
     |
@@ -97,10 +97,12 @@ P(1)=glob
 
 # Internal
     false =flag
-    ?(Val("time")==null, {true =flag})
-    ?(Val("time") != null && Val("time") != HostsFile.lastModified, {true =flag})
-    ?(Val("data")==null, {true =flag})
-    ?(flag, {
+    
+    ?(Val("time")==null, Inner{true =flag})
+    
+    ?(Val("time") != null && Val("time") != HostsFile.lastModified, Inner{true =flag})
+    ?(Val("data")==null, Inner{true =flag})
+    ?(flag, Inner{
         ProcessHostsFile
         ValDef("time",HostsFile.lastModified)
     })
@@ -178,7 +180,7 @@ P(1)=glob
         call "SSH:HostOk" (target) =hostOk
         call "SSH:VerifySudo" (target) =sudoOk
         
-        {*P(1)=x ?(x,"ok","<<FAIL>>")} =show
+        Lambda {P(1)=x ?(x,"ok","<<FAIL>>")} =show
         report("Host: " + host, "Ping: " + show.call(hostOk), "Sudo: "+show.call(sudoOk))
 /ShowHostsStatus
 
@@ -193,7 +195,7 @@ P(1)=glob
     
     hosts->host
         call "Hosts:GetValue" (host, "SSHUser") =sshUser
-        ?(sshUser==null, {
+        ?(sshUser==null, Inner{
             println("----- WARNING: " + host + " has no SSHUser")
         })
         assert(sshUser != null)
@@ -229,13 +231,13 @@ P(1)=glob
         DebianHostNeedsReboot(target) =needsReboot
         call "Hosts:Has" (host, "Auto.reboot","yes") =canBeRebooted
 
-        ?(needsReboot && canBeRebooted, {
+        ?(needsReboot && canBeRebooted, Inner{
                 println("   *** Automatically rebooting " + host)
                 call "SSH:sudo" (target, "reboot", true)
                         # acceptErrors=true, as the reboot means immediate disconnect
         })
 
-        ?(needsReboot && !canBeRebooted, {
+        ?(needsReboot && !canBeRebooted, Inner{
                 println("   *** Host " + host + " should be rebooted - can not do this automatically")
         })
 /UpdateAPT

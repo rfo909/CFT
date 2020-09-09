@@ -56,17 +56,17 @@ choice.
 
 # Update Cfg with terminal size (if possible)
     false =updated
-    ?(!Sys.isWindows,{
+    ?(!Sys.isWindows,Inner{
         # Linux
         Dir.runCapture("which","stty").nth.contains("/stty") =hasStty
-        ?(hasStty, {
+        ?(hasStty, Inner{
             Dir.runCapture("stty","size").nth.split =list
             #debug("list=" + list)
             Cfg.h(list.nth(0).parseInt)
             Cfg.w(list.nth(1).parseInt)
             true =updated
         })
-    },{
+    },Inner{
         # Windows (a bit slow)
         Dir.runCapture("powershell","(Get-Host).UI.RawUI.WindowSize.Width").nth.parseInt =w
         Dir.runCapture("powershell","(Get-Host).UI.RawUI.WindowSize.Height").nth.parseInt =h
@@ -84,19 +84,19 @@ choice.
   P(1,Sys.savefile) =file
     List(
         Dict.set("label","sublime")
-            .set("action", {* P(1)=file Dir.runDetach("subl",file.path) }),
+            .set("action", Lambda { P(1)=file Dir.runDetach("subl",file.path) }),
         Dict.set("label","gedit")
-            .set("action", {* P(1)=file Dir.runDetach("gedit",file.path) }),
+            .set("action", Lambda { P(1)=file Dir.runDetach("gedit",file.path) }),
         Dict.set("label","leafpad")
-            .set("action", {* P(1)=file Dir.runDetach("leafpad",file.path) }),
+            .set("action", Lambda { P(1)=file Dir.runDetach("leafpad",file.path) }),
         Dict.set("label","nano")
-            .set("action", {* P(1)=file Dir.run("nano", file.path) }),
+            .set("action", Lambda { P(1)=file Dir.run("nano", file.path) }),
         Dict.set("label","micro")
-            .set("action", {* P(1)=file Dir.run("micro", file.path) })
+            .set("action", Lambda { P(1)=file Dir.run("micro", file.path) })
     ) =linuxEditors
 
-    ?(Val("linuxEditor")==null,{
-        MenuSelect(linuxEditors, {* P(1).get("label")},"Select editor") =ed
+    ?(Val("linuxEditor")==null,Inner{
+        MenuSelect(linuxEditors, Lambda { P(1).get("label")},"Select editor") =ed
         ValDef("linuxEditor", ed)
     })
 
@@ -120,7 +120,7 @@ d
 
 # Show a list of options
     P(1,List)=options
-    P(2,{* "name"})=macroGetElementName
+    P(2,Lambda { "name"})=macroGetElementName
         options->x
             println("- " + macroGetElementName.call(x))
 /ShowOptions
@@ -130,19 +130,19 @@ d
 # Select zero or more from list of options
 # --
     P(1,List)=options
-    P(2,{* "name"})=macroGetElementName
+    P(2,Lambda { "name"})=macroGetElementName
     P(3,false)=emptyMeansNone
         readLine("Enter exact or part of value?").trim =sel
-        ?(emptyMeansNone && sel=="", {
+        ?(emptyMeansNone && sel=="", Inner{
             # empty list
             List =result
-        }, {
+        }, Inner{
             # Look for exact match first, then if no hits, partial
             options->opt
                 assert(macroGetElementName.call(opt)==sel)
                 out(opt)
             | =result
-            ?(result.empty, {
+            ?(result.empty, Inner{
                 options->opt
                     assert(macroGetElementName.call(opt).contains(sel))
                     out(opt)
@@ -164,7 +164,7 @@ d
 
 
 
-P(1,List) =options P(2,{* "name"}) =macroGetElementName P(3) =title 
+P(1,List) =options P(2,Lambda { "name"}) =macroGetElementName P(3) =title 
 #
     null =selectedElement
     loop
@@ -175,7 +175,7 @@ P(1,List) =options P(2,{* "name"}) =macroGetElementName P(3) =title
         println("")
         SelectOptions(options, macroGetElementName) =result
         
-        ?(result.length==1, { result.nth =selectedElement})
+        ?(result.length==1, Inner{ result.nth =selectedElement})
         break(selectedElement != null)
         println("** No match or not unique")
     | selectedElement
@@ -197,7 +197,7 @@ P(1,"label")=label P(2)=currVal
     null =gotResult
     loop
         ReadValue(label,""+currVal) =val
-        ?(val.?parseInt,{val.parseInt =gotResult})
+        ?(val.?parseInt,Inner{val.parseInt =gotResult})
         break(gotResult != null)
         println("** Integer required")
     |
@@ -212,8 +212,8 @@ P(1,"label")=label P(2)=currVal P(3,"yes")=trueVal P(4,"no")=falseVal
     loop
         ?(currVal != null, ?(currVal, trueVal, falseVal), null) =currStrVal
         ReadValue(label,currStrVal) =val
-        ?(val==trueVal, {true =gotResult})
-        ?(val==falseVal, {false =gotResult})
+        ?(val==trueVal, Inner{true =gotResult})
+        ?(val==falseVal, Inner{false =gotResult})
         break(gotResult != null)
         println("** Please enter '" + trueVal + "' or '"  + falseVal + "'")
     |
@@ -227,16 +227,16 @@ P(1,"label")=label P(2)=currVal P(3,"yes")=trueVal P(4,"no")=falseVal
 # If value is Dict, for each key found, return corresponding value (as list). Otherwise true if value found, false if not found
 P(1,List)=lines
 P(2)=value
-    ?(value.?keys, {
+    ?(value.?keys, Inner{
         # match keys and result corresponding values as list
         value =dict
         List =result
         lines->line
             dict.keys->key 
-                ?(line.contains(key), {result.add(dict.get(key))})
+                ?(line.contains(key), Inner{result.add(dict.get(key))})
         |
         result.unique
-    },{   
+    },Inner{   
         # check for single value
         lines->line assert(line.contains(value)) out(line) | _.length>0
     })
