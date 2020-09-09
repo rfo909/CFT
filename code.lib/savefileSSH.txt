@@ -20,7 +20,7 @@ Sudo without password
 Log in as root, then add the following line to 
 /etc/sudoers
 
-<username>	ALL=(ALL) NOPASSWD:ALL
+<username>  ALL=(ALL) NOPASSWD:ALL
 
 -------------------------------------------------
 >>> EOF
@@ -35,31 +35,31 @@ Input("SSH target on format username@server").get
 # Called via @rsh shortcut
 #
 P(1,ReadSSHTarget)=sshTarget
-	Dir.run("ssh", sshTarget)
+    Dir.run("ssh", sshTarget)
 /remoteShell
 
 
 # Copy ssh key to remote target host
 P(1,ReadSSHTarget) =sshTarget
-	Dir.run("ssh-copy-id",sshTarget)
+    Dir.run("ssh-copy-id",sshTarget)
 /sshEnable
 
 
 # Check if server responds on ping
 P(1)=target
-	if(target.contains("@"), target.after("@"), target) =host
-	Dir.runCapture("ping","-c","1",host)->line assert(line.contains("0 received")) out(line) | _.length>0 =failure
-	!failure
+    ?(target.contains("@"), target.after("@"), target) =host
+    Dir.runCapture("ping","-c","1",host)->line assert(line.contains("0 received")) out(line) | _.length>0 =failure
+    !failure
 /HostOk
 
 
 # Returns boolean indicating if sudo without password ok
 P(1,ReadSSHTarget) =sshTarget
-	sshTarget.before("@")=user
-	if (user == "ubuntu", true, {    # ubuntu on RPI default user has sudo without password ok
-		run (sshTarget,"sudo ls",true) =result
-		result.get("exitCode") == 0
-	})
+    sshTarget.before("@")=user
+    ?(user == "ubuntu", true, {    # ubuntu on RPI default user has sudo without password ok
+        run (sshTarget,"sudo ls",true) =result
+        result.get("exitCode") == 0
+    })
 /VerifySudo
 
 
@@ -67,7 +67,7 @@ P(1,ReadSSHTarget) =sshTarget
 
 # Create name of temp file under /tmp
 P(1)=name 
-	Dir("/tmp").file(name + currentTimeMillis)  
+    Dir("/tmp").file(name + currentTimeMillis)  
 /TmpFile
 
 
@@ -78,69 +78,69 @@ P(2)=commands
 P(3,false)=acceptErrors
 P(4,false)=showDebug
 
-	error(target==null || !target.contains("@"), "Invalid target: '" + target + "'")
-	error(commands==null, "Invalid commands: can not be null")
+    error(target==null || !target.contains("@"), "Invalid target: '" + target + "'")
+    error(commands==null, "Invalid commands: can not be null")
 
-	# ensure commands is a list
-	when(!commands.?nth, {
-		List(commands) =commands
-	})
+    # ensure commands is a list
+    ?(!commands.?nth, {
+        List(commands) =commands
+    })
 
 
-	# Add echo command with string to check for later, to avoid login messages etc
-	"--- " + Sys.scriptName + ".run ---" =mark
-	List('echo "' + mark + '"') + commands =cmd
-		
-	TmpFile("in") =inFile
-	TmpFile("out") =outFile
-	TmpFile("err") =errFile
-	
-	inFile.create(cmd)
-	Dir.runProcessWait(inFile,outFile,errFile,"ssh",target)
-	
-	# Filter stdout to include lines following one containing mark
-	false =found
-	if(outFile.exists,outFile.read,List)->line
-		condOut(found, line)
-		when(line.contains(mark), {true =found})
-	| _=outLines
-		
-	Dict =result
-	result.set("stdout",outLines)
-	result.set("stderr",if(errFile.exists,errFile.read,List))
-	result.set("stdin",commands)
-	result.set("exitCode", Sys.lastEPS)
-	
-	{* P(1)=f when(f.exists, f.delete) } =Del
-	
-	Del.call(inFile)
-	Del.call(outFile)
-	Del.call(errFile)
+    # Add echo command with string to check for later, to avoid login messages etc
+    "--- " + Sys.scriptName + ".run ---" =mark
+    List('echo "' + mark + '"') + commands =cmd
+        
+    TmpFile("in") =inFile
+    TmpFile("out") =outFile
+    TmpFile("err") =errFile
+    
+    inFile.create(cmd)
+    Dir.runProcessWait(inFile,outFile,errFile,"ssh",target)
+    
+    # Filter stdout to include lines following one containing mark
+    false =found
+    ?(outFile.exists,outFile.read,List)->line
+        condOut(found, line)
+        ?(line.contains(mark), {true =found})
+    | _=outLines
+        
+    Dict =result
+    result.set("stdout",outLines)
+    result.set("stderr",?(errFile.exists,errFile.read,List))
+    result.set("stdin",commands)
+    result.set("exitCode", Sys.lastEPS)
+    
+    {* P(1)=f ?(f.exists, f.delete) } =Del
+    
+    Del.call(inFile)
+    Del.call(outFile)
+    Del.call(errFile)
 
-	false =FAIL
-	when (result.get("exitCode") != 0 && !acceptErrors, {
-		true =FAIL
-	})
-	
-	when(showDebug || FAIL,{
-		println("- target=" + target)
-		println("- stdin:")
-		commands->line println("    " + line) |
+    false =FAIL
+    ?(result.get("exitCode") != 0 && !acceptErrors, {
+        true =FAIL
+    })
+    
+    ?(showDebug || FAIL,{
+        println("- target=" + target)
+        println("- stdin:")
+        commands->line println("    " + line) |
 
-		println("- exitCode = " + result.get("exitCode"))
-		println("- stdin:")
-		result.get("stdin")->line println("   # " + line) |
-		println("- stdout:")
-		result.get("stdout")->line println("   # " + line) |
-		println("- stderr:")
-		result.get("stderr")->line println("   # " + line) |
-		println
-	})
-	
-	error(FAIL,"run failed with error: " + target)
-	
-	# return value
-	result
+        println("- exitCode = " + result.get("exitCode"))
+        println("- stdin:")
+        result.get("stdin")->line println("   # " + line) |
+        println("- stdout:")
+        result.get("stdout")->line println("   # " + line) |
+        println("- stderr:")
+        result.get("stderr")->line println("   # " + line) |
+        println
+    })
+    
+    error(FAIL,"run failed with error: " + target)
+    
+    # return value
+    result
 /run
 
 
@@ -148,12 +148,12 @@ P(1)=target
 P(2)=commands
 P(3,false)=acceptErrors
 P(4,false)=showDebug
-	# ensure commands is a list
-	when(!commands.?nth, {
-		List(commands) =commands
-	})
-	List("sudo bash")+commands =commands
-	run(target,commands,acceptErrors,showDebug)
+    # ensure commands is a list
+    ?(!commands.?nth, {
+        List(commands) =commands
+    })
+    List("sudo bash")+commands =commands
+    run(target,commands,acceptErrors,showDebug)
 /sudo
 
 

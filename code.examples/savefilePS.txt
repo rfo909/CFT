@@ -37,22 +37,22 @@ Running remote commands with PowerShell.
 
 
 P(1)=host P(2,"get-service -name tomcat")=code
-	println("Executing " + code)
-	List("powershell","invoke-command","-computername",host,"-scriptblock","{" + code + "}") =cmd
-	Dir.run(cmd)
+    println("Executing " + code)
+    List("powershell","invoke-command","-computername",host,"-scriptblock","{" + code + "}") =cmd
+    Dir.run(cmd)
 /Call
 
 
 P(1)=host P(2)=service
-	Call(host,"stop-service " + service)
+    Call(host,"stop-service " + service)
 /StopService
 
 P(1)=host P(2)=service
-	Call(host,"start-service " + service)
+    Call(host,"start-service " + service)
 /StartService
 
 P(1)=host P(2)=service
-	Call(host,"get-service " + service)
+    Call(host,"get-service " + service)
 /GetService
 
 

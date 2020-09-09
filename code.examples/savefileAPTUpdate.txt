@@ -13,9 +13,9 @@ overlapping groups of hosts.
 Functions
 ---------
 VerifyAPTUpdate (target, prefix)
-	# target is user@host
-	# prefix is indentation string, defaults to ""
-	
+    # target is user@host
+    # prefix is indentation string, defaults to ""
+    
 Interactive if no target given.
 
 >>>>>>>>>>>>>>>>>>>>>>>>> EOF
@@ -27,7 +27,7 @@ P(1)=target
 P(2)=commands
 P(3,false)=acceptErrors
 P(4,false)=showDebug
-	call "SSH:run" (target,commands,acceptErrors,showDebug)
+    call "SSH:run" (target,commands,acceptErrors,showDebug)
 /run
 
 
@@ -36,7 +36,7 @@ P(1)=target
 P(2)=commands
 P(3,false)=acceptErrors
 P(4,false)=showDebug
-	call "SSH:sudo" (target,commands,acceptErrors,showDebug)
+    call "SSH:sudo" (target,commands,acceptErrors,showDebug)
 /sudo
 
 
@@ -49,60 +49,60 @@ Input("Enter ssh target on format user@host").get
 P(1,GetSSHTarget)=target
 P(2,"")=prefix
 
-	println(prefix+"APT update and upgrade")
+    println(prefix+"APT update and upgrade")
 
-	target.after("@") =host
-	Sys.scriptName =dbCollection
-	Date.sub(Date.Duration.days(365)) =defaultValue
-	
-	println(prefix+"Looking up time of last run for host ")
-	call "Db:Get" (host, dbCollection, defaultValue) =lastUpdated
-	println(prefix+" ... lastUpdated = " + lastUpdated)
-	Date.diff(lastUpdated) =timeSinceUpdate
-	if(timeSinceUpdate.get < 48*3600*1000, {
-		println(prefix+"Last updated: " + timeSinceUpdate.fmt + " ago")
-		println(prefix+"Limit for repeat update: 48 hours")
-	}, {
-		println(prefix+"Performing update")
-		sudo(target,"apt-get -y update", true) =result
-	
-		result.get("exitCode") != 0  =FAIL 
-		
-		when (!FAIL,{
-			println(prefix+"Performing upgrade")
-			sudo(target,"apt-get -y upgrade", true) =result
-			result.get("exitCode") != 0  =FAIL 
-		})
-		
-		when (!FAIL,{
-			println(prefix+"Writing date and time to database")
-			call "Db:Add" (host, Date, dbCollection)
-		})
-		
-		println(prefix+
-			if (FAIL,"APTUpdateUpgrade failed with ERROR","Done"))
-			
-		when (FAIL, {
-			(call "Lib:DirPrivate").sub(Sys.scriptName)=dir
-			dir.create
-			#println("dir=" + dir.path)
-			dir.file(""+(Date.setFormat("yyyy-MM-dd").fmt) + "_" + target + ".txt") =logFile
-			logFile.create("# " + Date.fmt)
-			logFile.append(List("","- target = " + target,""))
-			
-			logFile.append("- exitCode = " + result.get("exitCode"))
-			logFile.append("")
-			logFile.append("- stdin:")
-			
-			result.get("stdin")->line logFile.append("   # " + line) |
-			logFile.append("- stdout:")
-			result.get("stdout")->line logFile.append("   # " + line) |
-			logFile.append("- stderr:")
-			result.get("stderr")->line logFile.append("   # " + line) |
+    target.after("@") =host
+    Sys.scriptName =dbCollection
+    Date.sub(Date.Duration.days(365)) =defaultValue
+    
+    println(prefix+"Looking up time of last run for host ")
+    call "Db:Get" (host, dbCollection, defaultValue) =lastUpdated
+    println(prefix+" ... lastUpdated = " + lastUpdated)
+    Date.diff(lastUpdated) =timeSinceUpdate
+    ?(timeSinceUpdate.get < 48*3600*1000, {
+        println(prefix+"Last updated: " + timeSinceUpdate.fmt + " ago")
+        println(prefix+"Limit for repeat update: 48 hours")
+    }, {
+        println(prefix+"Performing update")
+        sudo(target,"apt-get -y update", true) =result
+    
+        result.get("exitCode") != 0  =FAIL 
+        
+        ?(!FAIL,{
+            println(prefix+"Performing upgrade")
+            sudo(target,"apt-get -y upgrade", true) =result
+            result.get("exitCode") != 0  =FAIL 
+        })
+        
+        ?(!FAIL,{
+            println(prefix+"Writing date and time to database")
+            call "Db:Add" (host, Date, dbCollection)
+        })
+        
+        println(prefix+
+            ?(FAIL,"APTUpdateUpgrade failed with ERROR","Done"))
+            
+        ?(FAIL, {
+            (call "Lib:DirPrivate").sub(Sys.scriptName)=dir
+            dir.create
+            #println("dir=" + dir.path)
+            dir.file(""+(Date.setFormat("yyyy-MM-dd").fmt) + "_" + target + ".txt") =logFile
+            logFile.create("# " + Date.fmt)
+            logFile.append(List("","- target = " + target,""))
+            
+            logFile.append("- exitCode = " + result.get("exitCode"))
+            logFile.append("")
+            logFile.append("- stdin:")
+            
+            result.get("stdin")->line logFile.append("   # " + line) |
+            logFile.append("- stdout:")
+            result.get("stdout")->line logFile.append("   # " + line) |
+            logFile.append("- stderr:")
+            result.get("stderr")->line logFile.append("   # " + line) |
 
-			println(prefix+"Written log file " + logFile.path)
-		})
-	})
-	
+            println(prefix+"Written log file " + logFile.path)
+        })
+    })
+    
 /APTUpdateUpgrade
 

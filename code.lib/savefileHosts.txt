@@ -22,164 +22,164 @@ HOST [OverrideValue]?
 /HostsFile
 
 # Internal
-	P(1,"[A=B]")=line
-	error(!line.startsWith("["), "not header line: " + line)
-	line.after("[").before("]").split("=") =parts
-	parts.nth.trim =a
-	parts.nth(1).trim=b
-	# return value
-	List(a,b)
+    P(1,"[A=B]")=line
+    error(!line.startsWith("["), "not header line: " + line)
+    line.after("[").before("]").split("=") =parts
+    parts.nth.trim =a
+    parts.nth(1).trim=b
+    # return value
+    List(a,b)
 /parseHeader
 
 
 # Internal - create list of hosts based on expression with '*'
 P(1)=glob
-	""=regex
-	glob.chars->c
-		false =done
-		if (c=='*', ".*", "["+c+"]") =x regex+x=regex
-	|
-	Regex(regex) =re
-	Val("data").keys.sort->hostName
-		assert(re.match(hostName))
-		out(hostName)
+    ""=regex
+    glob.chars->c
+        false =done
+        ?(c=='*', ".*", "["+c+"]") =x regex+x=regex
+    |
+    Regex(regex) =re
+    Val("data").keys.sort->hostName
+        assert(re.match(hostName))
+        out(hostName)
 /GlobHosts
 
 
 # Internal
-	P(1)=line
-	P(2)=name
-	P(3)=value
+    P(1)=line
+    P(2)=name
+    P(3)=value
 
-	line.before("[").trim =host
-	line.after("[").before("]") =override 
+    line.before("[").trim =host
+    line.after("[").before("]") =override 
 
-	if (override != "", override, value) =overriddenVal
-	
-	if(host.contains("*"), {
-		# assign value for all hosts matching glob expression
-		GlobHosts(host)->oneHost
-			Val("data").get(oneHost,Dict).set(name, overriddenVal)
-	}, {
-		# regular assign
-		Val("data").get(host,Dict).set(name,overriddenVal)
-	})
+    ?(override != "", override, value) =overriddenVal
+    
+    ?(host.contains("*"), {
+        # assign value for all hosts matching glob expression
+        GlobHosts(host)->oneHost
+            Val("data").get(oneHost,Dict).set(name, overriddenVal)
+    }, {
+        # regular assign
+        Val("data").get(host,Dict).set(name,overriddenVal)
+    })
 /parseData
 
 
 # Process Hosts file and store it in session state
-	println("INFO Processing file " + HostsFile.path)
-	ValDef("data",Dict)
-	
-	null=settingName
-	null=settingValue
-	HostsFile.read->origLine
-		origLine.trim =line
-		
-		reject(line=="")
-		reject(line.startsWith("#"))
-		
-		if(line.startsWith("["), {
-			parseHeader(line).push(2,"") =settingName=settingValue
-		},{
-			parseData(line,settingName,settingValue)
-		})
-	|
-	# Check which hosts are missing settings 
-	# Note, can not call GetFields or GetHosts, since that causes infinite recursion
-	Val("data").keys->host
-		Val("data").get(host).keys->field
-			out(field)
-	| _.unique.sort =allFields
+    println("INFO Processing file " + HostsFile.path)
+    ValDef("data",Dict)
+    
+    null=settingName
+    null=settingValue
+    HostsFile.read->origLine
+        origLine.trim =line
+        
+        reject(line=="")
+        reject(line.startsWith("#"))
+        
+        ?(line.startsWith("["), {
+            parseHeader(line).push(2,"") =settingName=settingValue
+        },{
+            parseData(line,settingName,settingValue)
+        })
+    |
+    # Check which hosts are missing settings 
+    # Note, can not call GetFields or GetHosts, since that causes infinite recursion
+    Val("data").keys->host
+        Val("data").get(host).keys->field
+            out(field)
+    | _.unique.sort =allFields
 
 /ProcessHostsFile
 
 
 # Internal
-	false =flag
-	when (Val("time")==null, {true =flag})
-	when (Val("time") != null && Val("time") != HostsFile.lastModified, {true =flag})
-	when (Val("data")==null, {true =flag})
-	when (flag, {
-		ProcessHostsFile
-		ValDef("time",HostsFile.lastModified)
-	})
-	true
+    false =flag
+    ?(Val("time")==null, {true =flag})
+    ?(Val("time") != null && Val("time") != HostsFile.lastModified, {true =flag})
+    ?(Val("data")==null, {true =flag})
+    ?(flag, {
+        ProcessHostsFile
+        ValDef("time",HostsFile.lastModified)
+    })
+    true
 /CheckData
 
 
 # Explore data interactively
-	CheckData
-	P(1,readLine("Search term"))=searchTerm
-	Val("data")=root
-	root.keys.sort->host
-		root.get(host)=data
-		data.keys.sort->field
-			data.get(field)=value
-			assert(host.contains(searchTerm) || field.contains(searchTerm) || value.contains(searchTerm))
-			report(host,field,value)
+    CheckData
+    P(1,readLine("Search term"))=searchTerm
+    Val("data")=root
+    root.keys.sort->host
+        root.get(host)=data
+        data.keys.sort->field
+            data.get(field)=value
+            assert(host.contains(searchTerm) || field.contains(searchTerm) || value.contains(searchTerm))
+            report(host,field,value)
 /Search
 
 # Get host list
-	CheckData
-	Val("data").keys.sort
+    CheckData
+    Val("data").keys.sort
 /GetHosts
 
 
 # Get all known fields
-	CheckData
-	Val("data").keys->host
-		Val("data").get(host).keys->field out(field)
-	| _.unique.sort
+    CheckData
+    Val("data").keys->host
+        Val("data").get(host).keys->field out(field)
+    | _.unique.sort
 /GetFields
 
 
 # Get value for host + field
-	CheckData
-	P(1)=host
-	P(2)=field
+    CheckData
+    P(1)=host
+    P(2)=field
 
-	error(!Val("data").has(host), "Invalid host " + host)
-	Val("data").get(host).get(field)
+    error(!Val("data").has(host), "Invalid host " + host)
+    Val("data").get(host).get(field)
 /GetValue
 
 
 # Get value for host + field, then return true if it matches expected value
-	CheckData
-	P(1)=host
-	P(2)=field
-	P(3)=expectedValue
+    CheckData
+    P(1)=host
+    P(2)=field
+    P(3)=expectedValue
 
-	error(!Val("data").has(host), "Invalid host " + host)
-	
-	Val("data").get(host).get(field,null) == expectedValue
+    error(!Val("data").has(host), "Invalid host " + host)
+    
+    Val("data").get(host).get(field,null) == expectedValue
 /Has
 
 
 # Shortcut
-	Search
+    Search
 /S
 
 # Shortcut
-	CheckData
+    CheckData
 /C
 
 
 # View host status
-	call "Hosts:GetHosts" =hosts
-	
-	hosts->host
-		call "Hosts:GetValue" (host, "SSHUser") =sshUser
-		assert(sshUser != null)
-		
-		sshUser+"@"+host =target
-		println("Checking host " + target)
-		
-		call "SSH:HostOk" (target) =hostOk
-		call "SSH:VerifySudo" (target) =sudoOk
-		
-		{*P(1)=x if(x,"ok","<<FAIL>>")} =show
-		report("Host: " + host, "Ping: " + show.call(hostOk), "Sudo: "+show.call(sudoOk))
+    call "Hosts:GetHosts" =hosts
+    
+    hosts->host
+        call "Hosts:GetValue" (host, "SSHUser") =sshUser
+        assert(sshUser != null)
+        
+        sshUser+"@"+host =target
+        println("Checking host " + target)
+        
+        call "SSH:HostOk" (target) =hostOk
+        call "SSH:VerifySudo" (target) =sudoOk
+        
+        {*P(1)=x ?(x,"ok","<<FAIL>>")} =show
+        report("Host: " + host, "Ping: " + show.call(hostOk), "Sudo: "+show.call(sudoOk))
 /ShowHostsStatus
 
 
@@ -193,12 +193,12 @@ P(1)=glob
     
     hosts->host
         call "Hosts:GetValue" (host, "SSHUser") =sshUser
-        when (sshUser==null, {
+        ?(sshUser==null, {
             println("----- WARNING: " + host + " has no SSHUser")
         })
         assert(sshUser != null)
 
-		sshUser + "@" + host =target
+        sshUser + "@" + host =target
         println
         println("----- " + target)
 
@@ -229,26 +229,26 @@ P(1)=glob
         DebianHostNeedsReboot(target) =needsReboot
         call "Hosts:Has" (host, "Auto.reboot","yes") =canBeRebooted
 
-        when(needsReboot && canBeRebooted, {
+        ?(needsReboot && canBeRebooted, {
                 println("   *** Automatically rebooting " + host)
                 call "SSH:sudo" (target, "reboot", true)
-                		# acceptErrors=true, as the reboot means immediate disconnect
+                        # acceptErrors=true, as the reboot means immediate disconnect
         })
 
-        when(needsReboot && !canBeRebooted, {
+        ?(needsReboot && !canBeRebooted, {
                 println("   *** Host " + host + " should be rebooted - can not do this automatically")
         })
 /UpdateAPT
 
 
 # Display hosts that should be rebooted
-	call "Hosts:GetHosts"->host
-		assert(call "Hosts:Has" (host,"OSFamily","Debian"))
-		call "Hosts:GetValue" (host, "SSHUser") =sshUser
+    call "Hosts:GetHosts"->host
+        assert(call "Hosts:Has" (host,"OSFamily","Debian"))
+        call "Hosts:GetValue" (host, "SSHUser") =sshUser
 
-		sshUser+"@"+host =target
-		DebianHostNeedsReboot(target)=x
-		if(x,"NEEDS REBOOT","ok")=status
-		println(target + ": " + status)
-		
-/NeedReboot		
+        sshUser+"@"+host =target
+        DebianHostNeedsReboot(target)=x
+        ?(x,"NEEDS REBOOT","ok")=status
+        println(target + ": " + status)
+        
+/NeedReboot     

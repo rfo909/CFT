@@ -31,57 +31,57 @@ multiple collections.
 
 
 # DbDir is "Db" under Sys.homeDir
-	Sys.homeDir.sub("Db")=d
-	when (!d.exists, d.create)
-	d
+    Sys.homeDir.sub("Db")=d
+    ?(!d.exists, d.create)
+    d
 /DbDir
 
 
 # Get db-file for collection (optional) - created with valid
-	P(1,"default")=collection
-	DbDir.file(collection+".txt") =file
-	when (!file.exists, file.create("# Created " + Date.fmt))
-	file
+    P(1,"default")=collection
+    DbDir.file(collection+".txt") =file
+    ?(!file.exists, file.create("# Created " + Date.fmt))
+    file
 /DbFile
 
 # Add value to database
 P(1)=key
 P(2)=val
 P(3,"default")=collection
-	{* P(1)=val syn(val) } =x
-	error(x.?call(val)==false, "Value must be synthesizable")
-	Dict
-		.set("key",key)
-		.set("value",val)
-	=dict
-	DbFile(collection).append(syn(dict))
-	true
+    {* P(1)=val syn(val) } =x
+    error(x.?call(val)==false, "Value must be synthesizable")
+    Dict
+        .set("key",key)
+        .set("value",val)
+    =dict
+    DbFile(collection).append(syn(dict))
+    true
 /Add
 
 # List database
 P(1,"default")=collection
-	DbFile(collection).read->line
-		reject(line.startsWith("#"))
-		eval(line)=dict
-		report(dict.key, dict.value)
+    DbFile(collection).read->line
+        reject(line.startsWith("#"))
+        eval(line)=dict
+        report(dict.key, dict.value)
 /Show
 
 # Find all data objects for key
 P(1)=key
 P(2,"default")=collection
-	DbFile(collection).read->line
-		reject(line.startsWith("#"))
-		eval(line) =dict
-		assert(dict.key==key)
-		out(dict.value)
+    DbFile(collection).read->line
+        reject(line.startsWith("#"))
+        eval(line) =dict
+        assert(dict.key==key)
+        out(dict.value)
 /FindAll
 
 # Get last object for key
 P(1)=key
 P(2,"default")=collection
 P(3)=defaultValue
-	FindAll(key,collection).last =x
-	if (x != null, x, defaultValue)
+    FindAll(key,collection).last =x
+    ?(x != null, x, defaultValue)
 /Get
 
 
@@ -91,24 +91,24 @@ P(3)=defaultValue
 # Delete all data objects for key
 P(1)=key
 P(2,"default")=collection
-	DbFile(collection).read->line
-		condOut(line.startsWith("#"), line)
-		reject(line.startsWith("#"))
-		
-		eval(line) =dict
-		reject(dict.key==key)
-		out(line)
+    DbFile(collection).read->line
+        condOut(line.startsWith("#"), line)
+        reject(line.startsWith("#"))
+        
+        eval(line) =dict
+        reject(dict.key==key)
+        out(line)
 | _=lines
-	DbFile(collection).create(lines)
+    DbFile(collection).create(lines)
 /Delete
 
 
 # Delete all but last data object for key
 P(1)=key
 P(2,"default")=collection
-	Get(key,collection) =last
-	Delete(key,collection)
-	Add(key,last,collection)
+    Get(key,collection) =last
+    Delete(key,collection)
+    Add(key,last,collection)
 /Purge
 
 
@@ -116,24 +116,24 @@ P(2,"default")=collection
 P(1)=key
 P(2)=value
 P(3,"default")=collection
-	when (Val("temp")==null, {ValDef("temp",Dict) }) 
-	Val("temp").get(collection,Dict).set(key,value)
-	true
+    ?(Val("temp")==null, {ValDef("temp",Dict) }) 
+    Val("temp").get(collection,Dict).set(key,value)
+    true
 /TempSet
 
 # Set temp value (in memory only)
 P(1)=key
 P(2,"default")=collection
-	when (Val("temp")==null, {ValDef("temp",Dict) }) 
-	Val("temp").get(collection,Dict) =coll
-	if (coll.has(key), coll.get(key,null), null)
+    ?(Val("temp")==null, {ValDef("temp",Dict) }) 
+    Val("temp").get(collection,Dict) =coll
+    ?(coll.has(key), coll.get(key,null), null)
 /TempGet
 
 # Show temp values
-	when (Val("temp")==null, {ValDef("temp",Dict) })
-	Val("temp").keys->collection
-		Val("temp").get(collection).keys->name
-			report(collection, name, Val("temp").get(collection).get(name))
+    ?(Val("temp")==null, {ValDef("temp",Dict) })
+    Val("temp").keys->collection
+        Val("temp").get(collection).keys->name
+            report(collection, name, Val("temp").get(collection).get(name))
 /TempShow
 
 
@@ -141,12 +141,12 @@ P(2,"default")=collection
 P(1)=key
 P(2)=prompt
 P(3)=collection
-	Get(key,collection) =val
-	when(val==null,{
-		readLine(prompt) =val
-		Add(key,val,collection)
-	})
-	val
+    Get(key,collection) =val
+    ?(val==null,{
+        readLine(prompt) =val
+        Add(key,val,collection)
+    })
+    val
 /GetOrEnter
 
 
@@ -154,21 +154,21 @@ P(3)=collection
 P(1)=key
 P(2)=prompt
 P(3)=collection
-	Get(key,collection) =val
-	if (val==null, {
-		readLine(prompt) =val
-		Add(key,val,collection)
-	},{
-		call "Lib:ReadValue" (prompt, val) =val2
-		when (val2 != val, Add(key,val2,collection))
-		val2 =val
-	})
-	val
+    Get(key,collection) =val
+    ?(val==null, {
+        readLine(prompt) =val
+        Add(key,val,collection)
+    },{
+        call "Lib:ReadValue" (prompt, val) =val2
+        ?(val2 != val, Add(key,val2,collection))
+        val2 =val
+    })
+    val
 /GetEnterOrConfirm
 
 
-		
-	
+        
+    
 
 
 

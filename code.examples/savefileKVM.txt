@@ -177,7 +177,7 @@ P(1,"someTarget")=target
 P(1,"someTarget")=target
     println("DELETING " + target)
     error(DoNotDelete.contains(target),
-    	"Can not delete target " + target + ": remove from DoNotDelete list first")
+        "Can not delete target " + target + ": remove from DoNotDelete list first")
     Stop(target)
     Util.exec.call("virsh undefine --domain " + target)
     Dir("/var/lib/libvirt/images").file(target + ".qcow2").delete
@@ -199,10 +199,10 @@ P(1,"someTarget")=target
         call "Lib:ReadValue" ("Original IP address or name (kubsXX.v)", originalIp) =originalIp
         call "Lib:ReadValue" ("New IP address and mask: xx.xx.xx.xx/MM", newIp) =newIp
         false =ok
-        if (!newIp.contains("/"),{
-        	println("*** Missing '/MM' net mask from IP address")
+        ?(!newIp.contains("/"),{
+            println("*** Missing '/MM' net mask from IP address")
         }, {
-        	call "Lib:ReadValueBoolean" ("Ok", false) =ok
+            call "Lib:ReadValueBoolean" ("Ok", false) =ok
         })
         break(ok)
     |
@@ -216,15 +216,15 @@ P(1,"someTarget")=target
     
     println
     println("----------------------------------------------------------")
-	println("The Clone function can now configure hostname and ")
-	println("netplan for the new VM. This requires password-less SSH")
-	println("for your current user: " + currUser)
-	println
-	println("Also need sudo without passwords (on the template VM)")
+    println("The Clone function can now configure hostname and ")
+    println("netplan for the new VM. This requires password-less SSH")
+    println("for your current user: " + currUser)
+    println
+    println("Also need sudo without passwords (on the template VM)")
     println("----------------------------------------------------------")
-	println
-	call "Lib:ReadValueBoolean" ("Type 'no' to abort or Enter to continue", true) =confirm
-	error(!confirm,"Aborting config of VM via SSH")
+    println
+    call "Lib:ReadValueBoolean" ("Type 'no' to abort or Enter to continue", true) =confirm
+    error(!confirm,"Aborting config of VM via SSH")
 
     println
     println("* Waiting for new node to respond to ping")
@@ -244,7 +244,7 @@ P(1,"someTarget")=target
     println
 
     sshUser+"@"+originalIp =target
-	
+    
     println("* Configuring hostname")
     call "ServersMaintenance:VMSetHostname" (target, cloneName)
 
@@ -283,13 +283,13 @@ P(1,"someTarget")=target
         call "Lib:ReadValueBoolean" ("Headless", headless) =headless
 
         call "Lib:ReadValueInt" ("RAM MB", ram) =ram
-		call "Lib:ReadValueInt" ("CPU's", cpus) =cpus
+        call "Lib:ReadValueInt" ("CPU's", cpus) =cpus
         call "Lib:ReadValueInt" ("Disk GB", disk) =disk
         call "Lib:ReadValueBoolean" ("Enter 'yes' to confirm this is okay", false) =ok
         break(ok)
     |
     call "Lib:ReadValueBoolean" ("Enter 'yes' to continue", false, "yes","abort") =continue
-    when (!continue,{
+    ?(!continue,{
         println("Aborting")
         error(true,"Aborting")
     })
@@ -304,7 +304,7 @@ P(1,"someTarget")=target
         "--disk","path=/var/lib/libvirt/images/"+name+".qcow2,size="+disk+",bus=virtio,format=qcow2",
         "--cdrom",bootImage.path
     ) =cmd
-    if(headless, 
+    ?(headless, 
         cmd+List("--graphics","vnc"),  
         cmd
     ) =cmd
@@ -329,21 +329,21 @@ P(1,"someTarget")=target
 
 
 # Info on using VNC for installation
-	readLine("VM name") =vm
+    readLine("VM name") =vm
 
-	Dir.runCapture("hostname").nth.trim =host
+    Dir.runCapture("hostname").nth.trim =host
 
-	Dir.runCapture("virsh","dumpxml",vm)->line
-		assert(line.contains("vnc")) out(line)
-	| _.nth =portInfo
+    Dir.runCapture("virsh","dumpxml",vm)->line
+        assert(line.contains("vnc")) out(line)
+    | _.nth =portInfo
 
-	Dict
-		.set("host",host)
-		.set("portInfo",portInfo)
-		.set("vm",vm)
-		.mergeCodes =data
+    Dict
+        .set("host",host)
+        .set("portInfo",portInfo)
+        .set("vm",vm)
+        .mergeCodes =data
 
-	<<< EOF
+    <<< EOF
 ----------------------------------------------
 To connect with VNC, locate the port number,
 this is listed below. 
@@ -361,9 +361,9 @@ This produces the following line:
 
 ${portInfo}
 ----------------------------------------------
-	>>> EOF
-	->line
-		out(line.merge(data))
+    >>> EOF
+    ->line
+        out(line.merge(data))
 /VNCHelp
 
 

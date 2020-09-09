@@ -28,7 +28,7 @@ P(1,ReadSSHTarget)=target
 P(2,readLine("Command"))=command
 P(3,Dict)=codes
 P(4,false)=showDebug
-	call "SSH:run" (target,command,codes,showDebug)
+    call "SSH:run" (target,command,codes,showDebug)
 /run
 
 
@@ -36,14 +36,14 @@ P(4,false)=showDebug
 P(1,Input("IP address to wait for").get)=ip 
 P(2,10)=retries
 loop
-	error(retries<=0,"No Ping response from " + ip)
-	retries-1 =retries
-	true =ok
-	{ Dir.runCapture("ping","-c","1",ip)->line 
-		when(line.contains("100% packet loss"), {false=ok})
-	}
-	break(ok)
-	Sys.sleep(500)
+    error(retries<=0,"No Ping response from " + ip)
+    retries-1 =retries
+    true =ok
+    { Dir.runCapture("ping","-c","1",ip)->line 
+        ?(line.contains("100% packet loss"), {false=ok})
+    }
+    break(ok)
+    Sys.sleep(500)
 |
 true
 /WaitForPing
@@ -51,50 +51,50 @@ true
 
 P(1,Input("SSH target user@host").get)=target
 P(2,Input("Host name").get)=hostname
-	TmpFile("hn")=f 
-	f.create(hostname)
-	
-	println("* Copying hostname file to target")
-	Dir.run("rcp", f.path, target+":./hostname")
-	
-	println("* Moving hostname file to /etc")
-	run(target,List("sudo bash","cp ./hostname /etc"))
-	
-	println("* Deleting hostname from home dir")
-	run(target,"rm ./hostname")
-	
-	f.delete
+    TmpFile("hn")=f 
+    f.create(hostname)
+    
+    println("* Copying hostname file to target")
+    Dir.run("rcp", f.path, target+":./hostname")
+    
+    println("* Moving hostname file to /etc")
+    run(target,List("sudo bash","cp ./hostname /etc"))
+    
+    println("* Deleting hostname from home dir")
+    run(target,"rm ./hostname")
+    
+    f.delete
 /VMSetHostname
 
 
 
 P(1,Input("SSH target user@host").get)=target
 P(2,Input("IP address xx.xx.xx.xx/MM").get) =ip
-	error(!ip.contains("/"), "IP address missing mask? xx.xx.xx.xx/MM")
-	
-	println("* Running remote command 'ip addr' to list network device names")
-	println("---------------------------------------------------------------")
-	run(target,"ip addr").get("stdout")->line
-		println("    " + line)
-	|
-	
-	println
-	Input("Enter network device name").get=nic
-	
-	TmpFile("np")=f
-	f.create(VMNetplan(ip,nic))
-	
-	println("* Copying netplan to target")
-	Dir.run("rcp", f.path, target+":./netplan.txt")
-	
-	println("* Deleting all files under /etc/netplan")
-	run(target, List("sudo bash","rm -f /etc/netplan/*"))
-	
-	println("* Moving netplan file into /etc")
-	run(target, List("sudo bash","mv ./netplan.txt /etc/netplan/50-cloud-init.yaml"))
+    error(!ip.contains("/"), "IP address missing mask? xx.xx.xx.xx/MM")
+    
+    println("* Running remote command 'ip addr' to list network device names")
+    println("---------------------------------------------------------------")
+    run(target,"ip addr").get("stdout")->line
+        println("    " + line)
+    |
+    
+    println
+    Input("Enter network device name").get=nic
+    
+    TmpFile("np")=f
+    f.create(VMNetplan(ip,nic))
+    
+    println("* Copying netplan to target")
+    Dir.run("rcp", f.path, target+":./netplan.txt")
+    
+    println("* Deleting all files under /etc/netplan")
+    run(target, List("sudo bash","rm -f /etc/netplan/*"))
+    
+    println("* Moving netplan file into /etc")
+    run(target, List("sudo bash","mv ./netplan.txt /etc/netplan/50-cloud-init.yaml"))
 /VMConfigureNetplan
 
-	
+    
 PDict("ip","nic").mergeCodes=data
 error(data.hasNullValue,"Expected parameter for IP address and mask on format xx.xx.xx.xx/MM")
 <<< EOF
@@ -110,7 +110,7 @@ network:
         addresses: [10.0.0.3, 10.0.0.4]
 >>> EOF
 ->line
-	out(line.merge(data))
+    out(line.merge(data))
 /VMNetplan
 
 

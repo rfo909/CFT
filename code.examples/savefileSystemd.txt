@@ -13,17 +13,17 @@ It runs both interactive and with parameters.
 
 
 P(1)=target P(2)=cmd P(3)=acceptErors P(4)=showDebug
-	call "SSH:run" (target, cmd, acceptErrors, showDebug) =dict
+    call "SSH:run" (target, cmd, acceptErrors, showDebug) =dict
 /run
 
 P(1)=target P(2)=cmd P(3)=acceptErors P(4)=showDebug
-	call "SSH:sudo" (target, cmd, acceptErrors, showDebug) =dict
+    call "SSH:sudo" (target, cmd, acceptErrors, showDebug) =dict
 /sudo
 
 
 
 P(1,"temp")=name
-	Dir("/tmp").file(name + "." + currentTimeMillis)
+    Dir("/tmp").file(name + "." + currentTimeMillis)
 /TmpFile
 
 
@@ -37,53 +37,53 @@ Input("Target: user@host").get
 
 
 # Set up systemd service
-	println("* Creating systemd service")
-	loop
-		P(1,GetTarget) =target
-		P(2,Input("service name").get) =serviceName
-		P(3,Input("service description").get) =desc
-		P(4,Input("remote path to script (will be copied)").get) =script
-		P(5,true) =interactive
+    println("* Creating systemd service")
+    loop
+        P(1,GetTarget) =target
+        P(2,Input("service name").get) =serviceName
+        P(3,Input("service description").get) =desc
+        P(4,Input("remote path to script (will be copied)").get) =script
+        P(5,true) =interactive
 
-		break(!interactive)
-		call "Lib:ReadValueBoolean" ("Confirm by typing 'yes'", false) =confirmed
-		break(confirmed)
-	|
+        break(!interactive)
+        call "Lib:ReadValueBoolean" ("Confirm by typing 'yes'", false) =confirmed
+        break(confirmed)
+    |
 
-	println("* Adding user " + serviceName)
-	sudo(target,"adduser "+serviceName)
+    println("* Adding user " + serviceName)
+    sudo(target,"adduser "+serviceName)
 
-	"/home/"+serviceName =homeDir
-	script.afterLast("/") =scriptName
-	homeDir + "/" + scriptName =scriptPath
+    "/home/"+serviceName =homeDir
+    script.afterLast("/") =scriptName
+    homeDir + "/" + scriptName =scriptPath
 
-	println("* Copying " + script + " to " + scriptPath)
-	sudo(target,"cp " + script + " " + scriptPath)
+    println("* Copying " + script + " to " + scriptPath)
+    sudo(target,"cp " + script + " " + scriptPath)
 
-	println("* chown " + serviceName + ":" + serviceName + " on " + scriptPath)
-	sudo(target,"chown " + serviceName + ":" + serviceName + " " + scriptPath)
+    println("* chown " + serviceName + ":" + serviceName + " on " + scriptPath)
+    sudo(target,"chown " + serviceName + ":" + serviceName + " " + scriptPath)
 
-	TmpFile("systemd")=f
-	f.create(SystemdServiceFile(serviceName, desc, scriptPath))
+    TmpFile("systemd")=f
+    f.create(SystemdServiceFile(serviceName, desc, scriptPath))
 
-	serviceName + ".service" =serviceFile
+    serviceName + ".service" =serviceFile
 
-	println("* Copying systemd service file as ./" + serviceFile)
-	Dir.run("scp", f.path, target+":./" + serviceFile)
+    println("* Copying systemd service file as ./" + serviceFile)
+    Dir.run("scp", f.path, target+":./" + serviceFile)
 
-	println("* Copying ./" + serviceFile + " to /etc/systemd/system")
-	sudo(target,"cp ./" + serviceFile + " /etc/systemd/system")
-	
-	println("* Starting service")
-	sudo(target,"systemctl start " + serviceName)
+    println("* Copying ./" + serviceFile + " to /etc/systemd/system")
+    sudo(target,"cp ./" + serviceFile + " /etc/systemd/system")
+    
+    println("* Starting service")
+    sudo(target,"systemctl start " + serviceName)
  
-	println("* Enabling service")
-	sudo(target,"systemctl enable " + serviceName)
+    println("* Enabling service")
+    sudo(target,"systemctl enable " + serviceName)
  
 
-	f.delete
-	
-	
+    f.delete
+    
+    
 /CreateService
 
 
@@ -109,5 +109,5 @@ ExecStart=${path}
 WantedBy=multi-user.target
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> EOF
 ->line
-	out(line.merge(data))
+    out(line.merge(data))
 /SystemdServiceFile

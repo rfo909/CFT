@@ -32,7 +32,6 @@ public class ExprTerminal extends LexicalElement {
     private Expr negExpr;
     private ExprPop pop;
     private ExprIf exprIf;
-    private ExprWhen exprWhen;
     private ExprPwd exprPwd;
     private boolean nullValue;
     private ExprCall exprCall;
@@ -64,12 +63,8 @@ public class ExprTerminal extends LexicalElement {
             pop=new ExprPop(ts);
             return;
         }
-        if (ts.peekStr("if")) {
+        if (ts.peekStr("?")) {
             exprIf=new ExprIf(ts);
-            return;
-        }
-        if (ts.peekStr("when")) {
-            exprWhen=new ExprWhen(ts);
             return;
         }
         if (ts.peekStr("pwd")) {
@@ -142,7 +137,6 @@ public class ExprTerminal extends LexicalElement {
 	        }
 	        if (pop != null) return pop.resolve(ctx);
 	        if (exprIf != null) return exprIf.resolve(ctx);
-	        if (exprWhen != null) return exprWhen.resolve(ctx);
 	        if (exprPwd != null) return exprPwd.resolve(ctx);
 	        if (nullValue) return new ValueNull();
 	        if (exprCall != null) return exprCall.resolve(ctx);

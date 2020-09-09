@@ -39,13 +39,13 @@ DocDir.file("Doc.html")
 
 false =enable
 Source.read->line
-	false =skipThis
-	when (line.contains("<body"), { true =enable true=skipThis })
-	when (line.contains("</body"), {false =enable })
-	assert(enable && !skipThis)
-	line.trim =s
-	assert(s.length>0)
-	out(s)	
+    false =skipThis
+    ?(line.contains("<body"), { true =enable true=skipThis })
+    ?(line.contains("</body"), {false =enable })
+    assert(enable && !skipThis)
+    line.trim =s
+    assert(s.length>0)
+    out(s)  
 /Lines
 
 
@@ -53,7 +53,7 @@ Source.read->line
 # Uses newline as special character
 "^n".unEsc =NL
 Lines->line
-	line.replace("<",NL+"<").replace(">",">"+NL).split(NL)->part out(part)
+    line.replace("<",NL+"<").replace(">",">"+NL).split(NL)->part out(part)
 /Parts
 
 
@@ -71,58 +71,58 @@ Lines->line
 
 # Replace by tags
 List(
-	Str("<h1","# "+JOIN),
-	Str("<h2","## "+JOIN),
-	Str("<h3","### "+JOIN),
-	Str("<h4","#### "+JOIN),
-	Str("</h",NL),
-	Str("<pre","```"+NL),
-	Str("</pre","```"+NL),
-	Str("<p",NL),
-	Str("</p",NL),
-	Str("<ul", NL),
-	Str("</ul",NL),
-	Str("<ol", NL),
-	Str("</ol",NL),
-	Str("<li", NL+"- "+JOIN),
-	Str("</li>", NL),
-	Str("<em","**"),
-	Str("</em",PREJOIN+"**"),
-	Str("<b","**"),
-	Str("</b",PREJOIN+"**"),
-	Str("<i","**"),
-	Str("</i",PREJOIN+"**")
+    Str("<h1","# "+JOIN),
+    Str("<h2","## "+JOIN),
+    Str("<h3","### "+JOIN),
+    Str("<h4","#### "+JOIN),
+    Str("</h",NL),
+    Str("<pre","```"+NL),
+    Str("</pre","```"+NL),
+    Str("<p",NL),
+    Str("</p",NL),
+    Str("<ul", NL),
+    Str("</ul",NL),
+    Str("<ol", NL),
+    Str("</ol",NL),
+    Str("<li", NL+"- "+JOIN),
+    Str("</li>", NL),
+    Str("<em","**"),
+    Str("</em",PREJOIN+"**"),
+    Str("<b","**"),
+    Str("</b",PREJOIN+"**"),
+    Str("<i","**"),
+    Str("</i",PREJOIN+"**")
 )=rules
 Parts->p
-	{
-		null =result
-		rules->r 
-			when(p.startsWith(r), {r.data =result})
-			break(result != null)
-		|
-		result
-	} =result
-	if (result != null, result, p+NL) =result
-	out(result)
+    {
+        null =result
+        rules->r 
+            ?(p.startsWith(r), {r.data =result})
+            break(result != null)
+        |
+        result
+    } =result
+    ?(result != null, result, p+NL) =result
+    out(result)
 /ProcessTags
-		
+        
 
 ProcessTags.concat =str
 Dict
-	.set(NL+PREJOIN,"")
-	.set(JOIN+NL,"^n".unEsc)
-	=data
+    .set(NL+PREJOIN,"")
+    .set(JOIN+NL,"^n".unEsc)
+    =data
 str.merge(data) =str
 #
 Dict
-	.set(NL,"^n".unEsc)
-	.set(JOIN,"")
-	=data
+    .set(NL,"^n".unEsc)
+    .set(JOIN,"")
+    =data
 str.merge(data) =str
 Dict
-	.set("&lt;","<")
-	.set("&gt;",">")
-	=data
+    .set("&lt;","<")
+    .set("&gt;",">")
+    =data
 str.merge(data) =str
 DocDir.file("Doc.md").create(str)
 /Run

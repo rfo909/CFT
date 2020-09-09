@@ -1,8 +1,8 @@
 # CFT / ConfigTool
 
 ```
-Last updated: 2020-09-03 RFO
-v1.2.0 # new section Lib.Text.Lexer
+Last updated: 2020-09-09 RFO
+v1.2.3 # new section Lib.Text.Lexer
 ```
 # Introduction
 

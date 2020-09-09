@@ -39,126 +39,126 @@ choice.
 
 
 # Edit file
-	P(1,Sys.savefile)=file
-	if(Sys.isWindows, Dir.runDetach("cmd","/c","notepad",file.path), ShowLinuxEditor(file))
+    P(1,Sys.savefile)=file
+    ?(Sys.isWindows, Dir.runDetach("cmd","/c","notepad",file.path), ShowLinuxEditor(file))
 /e
 
 
 
 # Page through file
-	P(1,Sys.savefile)=file
-	if(Sys.isWindows,
-		Dir.run("cmd", "/c", "more", file.path),
-		Dir.run("more", file.path)
-	)
+    P(1,Sys.savefile)=file
+    ?(Sys.isWindows,
+        Dir.run("cmd", "/c", "more", file.path),
+        Dir.run("more", file.path)
+    )
 /m
 
 
 # Update Cfg with terminal size (if possible)
-	false =updated
-	if (!Sys.isWindows,{
-		# Linux
-		Dir.runCapture("which","stty").nth.contains("/stty") =hasStty
-		when(hasStty, {
-			Dir.runCapture("stty","size").nth.split =list
-			#debug("list=" + list)
-			Cfg.h(list.nth(0).parseInt)
-			Cfg.w(list.nth(1).parseInt)
-			true =updated
-		})
-	},{
-		# Windows (a bit slow)
-		Dir.runCapture("powershell","(Get-Host).UI.RawUI.WindowSize.Width").nth.parseInt =w
-		Dir.runCapture("powershell","(Get-Host).UI.RawUI.WindowSize.Height").nth.parseInt =h
-		Cfg.w(w)
-		Cfg.h(h)
-		true =updated
-	})
-	if(updated, Cfg, null)
+    false =updated
+    ?(!Sys.isWindows,{
+        # Linux
+        Dir.runCapture("which","stty").nth.contains("/stty") =hasStty
+        ?(hasStty, {
+            Dir.runCapture("stty","size").nth.split =list
+            #debug("list=" + list)
+            Cfg.h(list.nth(0).parseInt)
+            Cfg.w(list.nth(1).parseInt)
+            true =updated
+        })
+    },{
+        # Windows (a bit slow)
+        Dir.runCapture("powershell","(Get-Host).UI.RawUI.WindowSize.Width").nth.parseInt =w
+        Dir.runCapture("powershell","(Get-Host).UI.RawUI.WindowSize.Height").nth.parseInt =h
+        Cfg.w(w)
+        Cfg.h(h)
+        true =updated
+    })
+    ?(updated, Cfg, null)
 /GetTerminalSize
-			
+            
 
 
 # Select Linux editor and remember selection for next time, open file in editor
 # --
- 	P(1,Sys.savefile) =file
-	List(
-		Dict.set("label","sublime")
-		    .set("action", {* P(1)=file Dir.runDetach("subl",file.path) }),
-		Dict.set("label","gedit")
-		    .set("action", {* P(1)=file Dir.runDetach("gedit",file.path) }),
-		Dict.set("label","leafpad")
-		    .set("action", {* P(1)=file Dir.runDetach("leafpad",file.path) }),
-		Dict.set("label","nano")
-		    .set("action", {* P(1)=file Dir.run("nano", file.path) }),
-		Dict.set("label","micro")
-		    .set("action", {* P(1)=file Dir.run("micro", file.path) })
-	) =linuxEditors
+  P(1,Sys.savefile) =file
+    List(
+        Dict.set("label","sublime")
+            .set("action", {* P(1)=file Dir.runDetach("subl",file.path) }),
+        Dict.set("label","gedit")
+            .set("action", {* P(1)=file Dir.runDetach("gedit",file.path) }),
+        Dict.set("label","leafpad")
+            .set("action", {* P(1)=file Dir.runDetach("leafpad",file.path) }),
+        Dict.set("label","nano")
+            .set("action", {* P(1)=file Dir.run("nano", file.path) }),
+        Dict.set("label","micro")
+            .set("action", {* P(1)=file Dir.run("micro", file.path) })
+    ) =linuxEditors
 
-	when (Val("linuxEditor")==null,{
-		MenuSelect(linuxEditors, {* P(1).get("label")},"Select editor") =ed
-		ValDef("linuxEditor", ed)
-	})
+    ?(Val("linuxEditor")==null,{
+        MenuSelect(linuxEditors, {* P(1).get("label")},"Select editor") =ed
+        ValDef("linuxEditor", ed)
+    })
 
-	Val("linuxEditor").get("action").call(file)
+    Val("linuxEditor").get("action").call(file)
 /ShowLinuxEditor
 
 
 
 # Clear selected Linux editor
-	ValDef("linuxEditor",null)
-	"Linux editor selection cleared"
+    ValDef("linuxEditor",null)
+    "Linux editor selection cleared"
 /ClearEditor
 
 
 
 Sys.homeDir.sub("private")=d
-when (!d.exists, d.create)
+?(!d.exists, d.create)
 d
 /DirPrivate
 
 
 # Show a list of options
-	P(1,List)=options
-	P(2,{* "name"})=macroGetElementName
-		options->x
-		    println("- " + macroGetElementName.call(x))
+    P(1,List)=options
+    P(2,{* "name"})=macroGetElementName
+        options->x
+            println("- " + macroGetElementName.call(x))
 /ShowOptions
 
 
 
 # Select zero or more from list of options
 # --
-	P(1,List)=options
-	P(2,{* "name"})=macroGetElementName
-	P(3,false)=emptyMeansNone
-		readLine("Enter exact or part of value?").trim =sel
-		if (emptyMeansNone && sel=="", {
-			# empty list
-			List =result
-		}, {
-			# Look for exact match first, then if no hits, partial
-			options->opt
-				assert(macroGetElementName.call(opt)==sel)
-				out(opt)
-			| =result
-			when (result.empty, {
-				options->opt
-					assert(macroGetElementName.call(opt).contains(sel))
-					out(opt)
-				| =result
-			})
-		})
-		result
+    P(1,List)=options
+    P(2,{* "name"})=macroGetElementName
+    P(3,false)=emptyMeansNone
+        readLine("Enter exact or part of value?").trim =sel
+        ?(emptyMeansNone && sel=="", {
+            # empty list
+            List =result
+        }, {
+            # Look for exact match first, then if no hits, partial
+            options->opt
+                assert(macroGetElementName.call(opt)==sel)
+                out(opt)
+            | =result
+            ?(result.empty, {
+                options->opt
+                    assert(macroGetElementName.call(opt).contains(sel))
+                    out(opt)
+                | =result
+            })
+        })
+        result
 /SelectOptions
 
 
 
 # Display text with line under
-	P(1,"Title") =title
-	println
-	println(title)
-	println( Lib.Data.yes(title.length,"-").concat )
+    P(1,"Title") =title
+    println
+    println(title)
+    println( Lib.Data.yes(title.length,"-").concat )
 /Header
 
 
@@ -166,58 +166,58 @@ d
 
 P(1,List) =options P(2,{* "name"}) =macroGetElementName P(3) =title 
 #
-	null =selectedElement
-	loop
-		println("")
-		if (title != null, Header(title), 0)
+    null =selectedElement
+    loop
+        println("")
+        ?(title != null, Header(title), 0)
 
-		ShowOptions(options, macroGetElementName)
-		println("")
-		SelectOptions(options, macroGetElementName) =result
-		
-		when (result.length==1, { result.nth =selectedElement})
-		break(selectedElement != null)
-		println("** No match or not unique")
-	| selectedElement
+        ShowOptions(options, macroGetElementName)
+        println("")
+        SelectOptions(options, macroGetElementName) =result
+        
+        ?(result.length==1, { result.nth =selectedElement})
+        break(selectedElement != null)
+        println("** No match or not unique")
+    | selectedElement
 /MenuSelect
 
 
 
 P(1,"label")=label P(2)=currVal
     println("")
-    (label + if(currVal," ["+currVal+"]","") + " : ") =prompt
+    (label + ?(currVal," ["+currVal+"]","") + " : ") =prompt
     readLine(prompt) =line
-    if (line.trim=="", currVal, line)
+    ?(line.trim=="", currVal, line)
 /ReadValue
 
 
 
 
 P(1,"label")=label P(2)=currVal
-	null =gotResult
-	loop
-		ReadValue(label,""+currVal) =val
-		when (val.?parseInt,{val.parseInt =gotResult})
-		break(gotResult != null)
-		println("** Integer required")
-	|
-	gotResult
+    null =gotResult
+    loop
+        ReadValue(label,""+currVal) =val
+        ?(val.?parseInt,{val.parseInt =gotResult})
+        break(gotResult != null)
+        println("** Integer required")
+    |
+    gotResult
 /ReadValueInt
 
 
 
 
 P(1,"label")=label P(2)=currVal P(3,"yes")=trueVal P(4,"no")=falseVal
-	null =gotResult
-	loop
-		if (currVal != null, if(currVal, trueVal, falseVal), null) =currStrVal
-		ReadValue(label,currStrVal) =val
-		when (val==trueVal, {true =gotResult})
-		when (val==falseVal, {false =gotResult})
-		break(gotResult != null)
-		println("** Please enter '" + trueVal + "' or '"  + falseVal + "'")
-	|
-	gotResult
+    null =gotResult
+    loop
+        ?(currVal != null, ?(currVal, trueVal, falseVal), null) =currStrVal
+        ReadValue(label,currStrVal) =val
+        ?(val==trueVal, {true =gotResult})
+        ?(val==falseVal, {false =gotResult})
+        break(gotResult != null)
+        println("** Please enter '" + trueVal + "' or '"  + falseVal + "'")
+    |
+    gotResult
 /ReadValueBoolean
 
 
@@ -227,18 +227,18 @@ P(1,"label")=label P(2)=currVal P(3,"yes")=trueVal P(4,"no")=falseVal
 # If value is Dict, for each key found, return corresponding value (as list). Otherwise true if value found, false if not found
 P(1,List)=lines
 P(2)=value
-	if(value.?keys, {
-		# match keys and result corresponding values as list
-		value =dict
-		List =result
-		lines->line
-			dict.keys->key 
-				when(line.contains(key), {result.add(dict.get(key))})
-		|
-		result.unique
-	},{	
-		# check for single value
-		lines->line assert(line.contains(value)) out(line) | _.length>0
-	})
+    ?(value.?keys, {
+        # match keys and result corresponding values as list
+        value =dict
+        List =result
+        lines->line
+            dict.keys->key 
+                ?(line.contains(key), {result.add(dict.get(key))})
+        |
+        result.unique
+    },{   
+        # check for single value
+        lines->line assert(line.contains(value)) out(line) | _.length>0
+    })
 /LinesContain
 

@@ -38,43 +38,43 @@ DocDir.file("Doc.html").protect("Original")
 
 # Generate content from Doc.html - no params
 # --
-	Dict
-		.set("<h1>","^n".unEsc)
-		.set("<h2>"," * ")
-		.set("<h3>"," |   ")
-		.set("<h4>"," |     ")
-		.set("</h1>","")
-		.set("</h2>","")
-		.set("</h3>","")
-		.set("</h4>","")
-		=data
+    Dict
+        .set("<h1>","^n".unEsc)
+        .set("<h2>"," * ")
+        .set("<h3>"," |   ")
+        .set("<h4>"," |     ")
+        .set("</h1>","")
+        .set("</h2>","")
+        .set("</h3>","")
+        .set("</h4>","")
+        =data
 
-	Grep.match("<h1> <h2> <h3> <h4>".split) =grep
-	grep.file(FileDocHtml) ->line
-		out(line.trim.merge(data)) 
+    Grep.match("<h1> <h2> <h3> <h4>".split) =grep
+    grep.file(FileDocHtml) ->line
+        out(line.trim.merge(data)) 
 /content
 
 
 
 # Generate header - no params
-	Dict
-		.set("savefile",Sys.savefile.name)
-		.set("date", Date.fmt)
-		.set("version", Sys.version)
-		.mergeCodes
-		=data
+    Dict
+        .set("savefile",Sys.savefile.name)
+        .set("date", Date.fmt)
+        .set("version", Sys.version)
+        .mergeCodes
+        =data
 
-	<<< EOF
+    <<< EOF
 ------------------------------------------------------------------
 Generated file - see script file ${savefile}
 ------------------------------------------------------------------
-	>>> EOF
+    >>> EOF
 
-	->line out(line.merge(data))
+    ->line out(line.merge(data))
 /header
 
 
 
 # Main function - no params
-	DocDir.file("Overview.txt").create(header+content)
+    DocDir.file("Overview.txt").create(header+content)
 /CreateOverview

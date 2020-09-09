@@ -36,123 +36,123 @@ in an editor.
 
 
 # file to append investigation data to
-	Date.setFormat("yyyy-MM-dd").fmt =today
-	Sys.homeDir.sub("investigate.d") =dir
-	when (!dir.exists, dir.create)
-	# return value
-	dir.file(today+".txt")
+    Date.setFormat("yyyy-MM-dd").fmt =today
+    Sys.homeDir.sub("investigate.d") =dir
+    ?(!dir.exists, dir.create)
+    # return value
+    dir.file(today+".txt")
 /LogFile
 
 
 
 # Input mode
 loop
-	readLine("Enter text, '..' to quit or '..h' for help").trim =line
-	false =terminate
-	false =done
-	when(line=="",{LogFile.append("")})
-	reject(line=="")
+    readLine("Enter text, '..' to quit or '..h' for help").trim =line
+    false =terminate
+    false =done
+    ?(line=="",{LogFile.append("")})
+    reject(line=="")
 
-	when(line.startsWith(".."), {
-		line.sub(2)=cmd
-		when(cmd.startsWith("h"), { ## help
-			println
-			println
-			println("---")
-			println(".xxx              - read pasted input lines, with end-marker 'xxx'")
-			println(".                 - read pasted input lines, with end-marker '.'")
-			println("..h               - help, this page")
-			println("..c               - show log file (cat)")
-			println("..m               - show log file (more)")
-			println("..e               - edit log file")
-			println("..                - quit")
-			println("---")
-			println
-			true =done
-		})
-		when(cmd.startsWith("c"),{  ## cat
-			{LogFile.read->line println(line)}
-			true =done
-		})
-		when(cmd.startsWith("m"),{ ## more
-			call "Lib:m" (LogFile)
-			true =done
-		})
-		when(cmd.startsWith("e"),{ ## edit
-			Edit
-			true =done
-		})
-		when(cmd=="",{ ## quit
-			true =terminate
-		})
-	})
-	break(terminate)
-	assert(!done)
-	(line.startsWith(".."))
-	if (line.startsWith("."), {
-		line.sub(1)=marker
+    ?(line.startsWith(".."), {
+        line.sub(2)=cmd
+        ?(cmd.startsWith("h"), { ## help
+            println
+            println
+            println("---")
+            println(".xxx              - read pasted input lines, with end-marker 'xxx'")
+            println(".                 - read pasted input lines, with end-marker '.'")
+            println("..h               - help, this page")
+            println("..c               - show log file (cat)")
+            println("..m               - show log file (more)")
+            println("..e               - edit log file")
+            println("..                - quit")
+            println("---")
+            println
+            true =done
+        })
+        ?(cmd.startsWith("c"),{  ## cat
+            {LogFile.read->line println(line)}
+            true =done
+        })
+        ?(cmd.startsWith("m"),{ ## more
+            call "Lib:m" (LogFile)
+            true =done
+        })
+        ?(cmd.startsWith("e"),{ ## edit
+            Edit
+            true =done
+        })
+        ?(cmd=="",{ ## quit
+            true =terminate
+        })
+    })
+    break(terminate)
+    assert(!done)
+    (line.startsWith(".."))
+    ?(line.startsWith("."), {
+        line.sub(1)=marker
 
-		# basic sanity checking
-		if(marker.startsWith(".") || marker.length>10,  {
-			println("Invalid end marker: '" + marker + "'")
-		}, {
-			if(marker=="",".",marker)=marker
-			println("End-marker: '" + marker + "'")
-			println("---")
-			readLines(marker) =lines
-			List =list
-			list.add("")
-			{lines->line list.add("# " + line)}
-			list.add("")
-			LogFile.append(list)
-		})
-	},{
-		LogFile.append(Date.fmt + " " + line)
-	})
+        # basic sanity checking
+        ?(marker.startsWith(".") || marker.length>10,  {
+            println("Invalid end marker: '" + marker + "'")
+        }, {
+            ?(marker=="",".",marker)=marker
+            println("End-marker: '" + marker + "'")
+            println("---")
+            readLines(marker) =lines
+            List =list
+            list.add("")
+            {lines->line list.add("# " + line)}
+            list.add("")
+            LogFile.append(list)
+        })
+    },{
+        LogFile.append(Date.fmt + " " + line)
+    })
 /InputMode
 
 
 
 
 # Log data
-	Sys.lastResult =res
-	res.?nth =isList
+    Sys.lastResult =res
+    res.?nth =isList
 
-	when(isList,{
-		readLine("Element number (Enter for all)") =num
-		when(num.?parseInt, {res.nth(num.parseInt) =res})
-	})
+    ?(isList,{
+        readLine("Element number (Enter for all)") =num
+        ?(num.?parseInt, {res.nth(num.parseInt) =res})
+    })
 
-	List =list
-	list.add("")	
-	res->x 
-		list.add("# " +x) 
-	|
-	list.add("")
-	LogFile.append(list)
+    List =list
+    list.add("")    
+    res->x 
+        list.add("# " +x) 
+    |
+    list.add("")
+    LogFile.append(list)
 /LogData
 
 
 # Log text
-	List("","D:"+Date.fmt) =list
+    List("","D:"+Date.fmt) =list
 
-	readLine("Comment") =line
-	LogFile.append(Date.fmt + " " + line)
+    readLine("Comment") =line
+    LogFile.append(Date.fmt + " " + line)
 /LogText
 
 
 # Log pasted text
-	readLine("Type end marker, or just press Enter to use '.'").trim =endMarker
-	if(endMarker=="",".",endMarker) =endMarker
-	println("End-marker: '" + endMarker + "'")
-	println("---")
-	readLines(endMarker) =lines
-	
-	List =list
-	list.add("")
-	lines->line list.add("# " + line) |
-	list.add("")
-	LogFile.append(list)
+    readLine("Type end marker, or just press Enter to use '.'").trim =endMarker
+    ?(endMarker=="",".",endMarker) =endMarker
+    println("End-marker: '" + endMarker + "'")
+    println("---")
+    readLines(endMarker) =lines
+    
+    List =list
+    list.add("")
+    lines->line list.add("# " + line) |
+    list.add("")
+    LogFile.append(list)
 /LogPastedText
 
 

@@ -36,27 +36,27 @@ File("/etc/hostname")
 
 
 # Main function
-	Input("host name").get =hostName
-	Input("IP address on form nn.nn.nn.nn/mm  ?").get =ipMain
-	FileNetplan.create(TemplateNetplan(ipMain))
-	FileHostname.create(hostName)
+    Input("host name").get =hostName
+    Input("IP address on form nn.nn.nn.nn/mm  ?").get =ipMain
+    FileNetplan.create(TemplateNetplan(ipMain))
+    FileHostname.create(hostName)
 
-	Show
+    Show
 /Run
 
 
 # Show result files
-	println
-	println(FileHostname.path)
-	println("---")
-	FileHostname.read->line println(line) |
-	println("---")
-	println
-	println(FileNetplan.path)
-	println("---")
-	FileNetplan.read->line println(line) |
-	println("---")
-	true
+    println
+    println(FileHostname.path)
+    println("---")
+    FileHostname.read->line println(line) |
+    println("---")
+    println
+    println(FileNetplan.path)
+    println("---")
+    FileNetplan.read->line println(line) |
+    println("---")
+    true
 /Show
 
 
@@ -64,13 +64,13 @@ File("/etc/hostname")
 
 P(1,"10.0.30.254/16")=ipMain
 P(2,"ens3")=nicMain
-	Dict
-		.set("ipMain",ipMain)
-		.set("nicMain",nicMain)
-		.set("Gateway4",Gateway4)
-		.set("NameServers",NameServers)
-		.mergeCodes
-	=data
+    Dict
+        .set("ipMain",ipMain)
+        .set("nicMain",nicMain)
+        .set("Gateway4",Gateway4)
+        .set("NameServers",NameServers)
+        .mergeCodes
+    =data
 <<< EOF
 network:
   version: 2
@@ -83,6 +83,6 @@ network:
       nameservers:
         addresses: [${NameServers}]
 >>> EOF
-	->line out(line.merge(data))
+    ->line out(line.merge(data))
 /TemplateNetplan
 

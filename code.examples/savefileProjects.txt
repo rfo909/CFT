@@ -81,15 +81,15 @@ There can be multiples of every line, including Dir.
         call "Lib:Header" ("Select project, curr=" + result)
         call "Lib:ShowOptions" (names, showName)
         call "Lib:SelectOptions" (names, showName, true) =resultList
-        when(resultList.length>1, {println("** not unique **") null=result} )
-        when(resultList.length==1, {resultList.nth =result} )
+        ?(resultList.length>1, {println("** not unique **") null=result} )
+        ?(resultList.length==1, {resultList.nth =result} )
         break(result != null)
     |
     ValDef("Project", result)
 /ChangeProject
 
 
-when (Val("Project")==null, ChangeProject)
+?(Val("Project")==null, ChangeProject)
 /CheckProject
 
 
@@ -124,7 +124,7 @@ when (Val("Project")==null, ChangeProject)
     {* P(1)=d 
         true =keep 
         CurrProject.IgnoreDir->x 
-            when(d.name==x,{false =keep}) 
+            ?(d.name==x,{false =keep}) 
             break(!keep)
         |
         keep
@@ -142,7 +142,7 @@ when (Val("Project")==null, ChangeProject)
         allDirs->d 
             assert(checkDir.call(d))
             out(d)
-    	| =allDirs
+        | =allDirs
 
     # Identify files that have desired type
         allDirs->d
@@ -150,7 +150,7 @@ when (Val("Project")==null, ChangeProject)
                 f.name.afterLast(".")=type
                 assert(pr.Type.contains(type))
                 out(f)
-    	| =allFiles
+        | =allFiles
 
     # return value
     allFiles
@@ -166,7 +166,7 @@ P(1,Grep)=grep
     
     {* P(1)=file 
         Val("FileFilter")=filter
-        if (filter != null, file.name.contains(filter), true)
+        ?(filter != null, file.name.contains(filter), true)
     } =filter
 
     # Count matches first
@@ -186,14 +186,14 @@ P(1,Grep)=grep
 
 # Limit search to file names containing a certain string
     readLine("Enter file filter string").trim=str
-    if (str=="",null,str) =val
+    ?(str=="",null,str) =val
     ValDef("FileFilter",val)
 /SetFileFilter
 
 
 # Show info on current FileFilter (if defined)
     Val("FileFilter") =filter
-    when(filter!=null, {
+    ?(filter!=null, {
         println
         println("** Filtering file names on: " + '"' + filter + '"')
         println
@@ -295,7 +295,7 @@ Search(Grep(a).reject(b))
     |
     println
     readLine("Enter number to edit, or blank to skip") =inp
-    when(inp != "", {
+    ?(inp != "", {
         call "Lib:e" (fileList.nth(inp.parseInt))
     })
     true
