@@ -764,15 +764,21 @@ public class ObjGlobal extends Obj {
             return "error";
         }
         public String getShortDesc() {
-            return "error(expr, value) - if expr is true, throws exception, terminating code execution";
+            return "error(cond?, msg) - if expr is true, throws exception, if not present, then unconditional";
         }
         @Override
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 2) throw new Exception("Expected parameters cond, message");
-            boolean cond=params.get(0).getValAsBoolean();
-            String s=params.get(1).getValAsString();
-            if (cond) throw new Exception(s);
-            return new ValueNull();
+            if (params.size() == 2) {
+	            boolean cond=params.get(0).getValAsBoolean();
+	            String s=params.get(1).getValAsString();
+	            if (cond) throw new Exception(s);
+	            return new ValueNull(); 
+            } else if (params.size() ==1) {
+	            String s=params.get(0).getValAsString();
+	            throw new Exception(s);
+            } else {
+            	throw new Exception("Expected parameters [cond,] message");
+            }
         }
     }
 

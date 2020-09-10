@@ -46,29 +46,32 @@ P(1)=glob
 /GlobHosts
 
 
-# Internal
-    P(1)=line
-    P(2)=name
-    P(3)=value
-
-    line.before("[").trim =host
-    line.after("[").before("]") =override 
-
-    if(override != "", override, value) =overriddenVal
-    
-    if(host.contains("*"), Inner{
-        # assign value for all hosts matching glob expression
-        GlobHosts(host)->oneHost
-            Val("data").get(oneHost,Dict).set(name, overriddenVal)
-    }, Inner{
-        # regular assign
-        Val("data").get(host,Dict).set(name,overriddenVal)
-    })
-/parseData
 
 
 # Process Hosts file and store it in session state
+	Lambda {
+	# Internal
+		P(1)=line
+		P(2)=name
+		P(3)=value
+
+		line.before("[").trim =host
+		line.after("[").before("]") =override 
+
+		if(override != "", override, value) =overriddenVal
+		
+		if(host.contains("*"), Inner{
+		    # assign value for all hosts matching glob expression
+		    GlobHosts(host)->oneHost
+		        Val("data").get(oneHost,Dict).set(name, overriddenVal)
+		}, Inner{
+		    # regular assign
+		    Val("data").get(host,Dict).set(name,overriddenVal)
+		})
+	} =parseData
+
     println("INFO Processing file " + HostsFile.path)
+
     ValDef("data",Dict)
     
     null=settingName
@@ -82,7 +85,7 @@ P(1)=glob
         if(line.startsWith("["), Inner{
             parseHeader(line).push(2,"") =settingName=settingValue
         },Inner{
-            parseData(line,settingName,settingValue)
+            parseData.call(line,settingName,settingValue)
         })
     |
     # Check which hosts are missing settings 
@@ -95,20 +98,27 @@ P(1)=glob
 /ProcessHostsFile
 
 
-# Internal
-    false =flag
-    
-    if(Val("time")==null, Inner{true =flag})
-    
-    if(Val("time") != null && Val("time") != HostsFile.lastModified, Inner{true =flag})
-    if(Val("data")==null, Inner{true =flag})
-    if(flag, Inner{
-        ProcessHostsFile
-        ValDef("time",HostsFile.lastModified)
-    })
-    true
-/CheckData
 
+# Common function called internally
+	false =flag
+	
+	if(Val("time")==null) {
+		true =flag
+	}
+	
+	if(Val("time") != null && Val("time") != HostsFile.lastModified) {
+		true =flag
+	}
+	
+	if(Val("data")==null) {
+		true =flag
+	}
+	if(flag) {
+	    ProcessHostsFile
+	    ValDef("time",HostsFile.lastModified)
+	}
+	true
+/CheckData
 
 # Explore data interactively
     CheckData
@@ -227,19 +237,19 @@ P(1)=glob
         println("Updating host " + target)
         call "APTUpdate:APTUpdateUpgrade" (target, "   ")
 
-       # Check if needs reboot and can be rebooted
+        # Check if needs reboot and can be rebooted
         DebianHostNeedsReboot(target) =needsReboot
         call "Hosts:Has" (host, "Auto.reboot","yes") =canBeRebooted
 
-        if(needsReboot && canBeRebooted, Inner{
+        if(needsReboot && canBeRebooted) {
                 println("   *** Automatically rebooting " + host)
                 call "SSH:sudo" (target, "reboot", true)
                         # acceptErrors=true, as the reboot means immediate disconnect
-        })
+        }
 
-        if(needsReboot && !canBeRebooted, Inner{
+        if(needsReboot && !canBeRebooted) {
                 println("   *** Host " + host + " should be rebooted - can not do this automatically")
-        })
+        }
 /UpdateAPT
 
 

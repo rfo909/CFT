@@ -30,18 +30,25 @@ public class StmtBreak extends Stmt {
         super(ts);
         
         ts.matchStr("break","expected 'break'");
-        ts.matchStr("(", "expected '(' following break");
-        expr=new Expr(ts);
-        ts.matchStr(")", "expected ')' closing break statement");
+        if (ts.matchStr("(")) {
+	        expr=new Expr(ts);
+	        ts.matchStr(")", "expected ')' closing break statement");
+        }
     }
     
     public void execute (Ctx ctx) throws Exception {
-        Value v=expr.resolve(ctx);
-        boolean breakLoop=v.getValAsBoolean();
-        
-        if (breakLoop) {
-            ctx.setBreakLoopFlag();
-        }
+    	if (expr == null) {
+    		// unconditional break
+    		ctx.setBreakLoopFlag();
+    	} else {
+    		// conditional break
+	        Value v=expr.resolve(ctx);
+	        boolean breakLoop=v.getValAsBoolean();
+	        
+	        if (breakLoop) {
+	            ctx.setBreakLoopFlag();
+	        }
+    	} 
     }
 
 

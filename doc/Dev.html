@@ -35,18 +35,84 @@
 	containing environment. There is nothing preventing use of loops inside local blocks, but it is
 	better to do so inside Inner blocks. 
 
-</li><li><b>TODO: v1.3.0 (f)</b><br/>
-	Must let assert(), reject() and break() propagate up to nearest loop. Currently the loops run each
-	statement in the same Ctx, and checks hasBreakLoopFlag() and hasAbortIterationFlag() after each statement.
+</li><li><b>v1.3.0 (f)</b><br/>
+	Modified assert(), reject() and break() to propagate up to first ctx marked with containing a loop.
+	See Ctx.setAbortIterationFlag() and .setBreakLoopFlag() 
 	<br/>
-	This nulls out the idea of letting local blocks terminate loops unconditionally, as the condition
-	is handled by an if.
+	Then did some testing, which is included here, as it is useful for understanding how loops
+	are controlled, see below. 
 	<br/>
-	Will iterating up the Ctx list until finding one with programContainsLooping==true?
+	But the following works now:
 	<br/>
-	Ctx.setAbortIterationFlag() and .setBreakLoopFlag()
+	loop if(cond) {break(true)}
+	<br/>
+	Ditto for assert(cond) and reject(cond).
+	<br/>
+	Changed break to be both unconditional (no params) and conditional. 
+	<br/>
+	Changed global function error(cond, msg) to make condition optional.
 </li></ol>
 
+<pre>
+
+List(1,2,3)-&gt;x 
+	# Result: b2, c2, b3, c3
+	# 
+    # The following block is one statement (expression) seen from the loop above,
+    # and loops check for loop controls after each statement. So here we get the result
+    # we expect
+    
+    {
+    println("juhu")
+	assert(x&gt;=2)
+	}
+	
+	List("a","b","c")-&gt;y 
+		{assert(y=="b" || y=="c")}
+		out(y+x)
+	
+/Test5
+
+
+List(1,2,3)-&gt;x 
+	# Result: b1, c1, b2, c2, b3, c3
+	#
+    # The local block makes the following one BIG statement (expression), and as
+    # loop checks after each stmt, the result is correct!
+    
+    {
+    println("juhu")
+	assert(x&gt;=2)
+	
+	List("a","b","c")-&gt;y 
+		{assert(y=="b" || y=="c")}
+		out(y+x)
+	}		
+/Test6
+
+
+List(1,2,3)-&gt;x 
+    # Unknown symbol y
+    #
+    # Somewhat insane example, but still useful, because loop variables are
+    # (currently) represented differently from function state variables.
+    #
+	# Loops never extend past '}', and also loop variables are not function
+	# state variables. Function state variables are global within function, while
+	# loop variables exist in the loop contexts, and the code following the 
+	# local block hence does not recognize variable y
+
+    {
+	    println("juhu")
+		assert(x&gt;=2)
+		
+		List("a","b","c")-&gt;y 
+	}
+		{assert(y=="b" || y=="c")}
+		out(y+x)
+		
+/Test7
+</pre>
 
 <h3>v1.2.3 2020-09-08</h3>
 <p>

@@ -181,6 +181,7 @@ public class Ctx {
      */
     public void setAbortIterationFlag() {
         abortIterationFlag=true;
+        if (!programContainsLooping && parent != null) parent.setAbortIterationFlag();
     }
     
     public boolean hasAbortIterationFlag() {
@@ -189,6 +190,7 @@ public class Ctx {
     
     public void setBreakLoopFlag() {
         breakLoopFlag=true;
+        if (!programContainsLooping && parent != null) parent.setBreakLoopFlag();
     }
     
     public boolean hasBreakLoopFlag() {
