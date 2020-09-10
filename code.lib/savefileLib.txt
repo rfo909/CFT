@@ -40,14 +40,14 @@ choice.
 
 # Edit file
     P(1,Sys.savefile)=file
-    ?(Sys.isWindows, Dir.runDetach("cmd","/c","notepad",file.path), ShowLinuxEditor(file))
+    if(Sys.isWindows, Dir.runDetach("cmd","/c","notepad",file.path), ShowLinuxEditor(file))
 /e
 
 
 
 # Page through file
     P(1,Sys.savefile)=file
-    ?(Sys.isWindows,
+    if(Sys.isWindows,
         Dir.run("cmd", "/c", "more", file.path),
         Dir.run("more", file.path)
     )
@@ -56,10 +56,10 @@ choice.
 
 # Update Cfg with terminal size (if possible)
     false =updated
-    ?(!Sys.isWindows,Inner{
+    if(!Sys.isWindows,Inner{
         # Linux
         Dir.runCapture("which","stty").nth.contains("/stty") =hasStty
-        ?(hasStty, Inner{
+        if(hasStty, Inner{
             Dir.runCapture("stty","size").nth.split =list
             #debug("list=" + list)
             Cfg.h(list.nth(0).parseInt)
@@ -74,7 +74,7 @@ choice.
         Cfg.h(h)
         true =updated
     })
-    ?(updated, Cfg, null)
+    if(updated, Cfg, null)
 /GetTerminalSize
             
 
@@ -95,7 +95,7 @@ choice.
             .set("action", Lambda { P(1)=file Dir.run("micro", file.path) })
     ) =linuxEditors
 
-    ?(Val("linuxEditor")==null,Inner{
+    if(Val("linuxEditor")==null,Inner{
         MenuSelect(linuxEditors, Lambda { P(1).get("label")},"Select editor") =ed
         ValDef("linuxEditor", ed)
     })
@@ -113,7 +113,7 @@ choice.
 
 
 Sys.homeDir.sub("private")=d
-?(!d.exists, d.create)
+if(!d.exists, d.create)
 d
 /DirPrivate
 
@@ -133,7 +133,7 @@ d
     P(2,Lambda { "name"})=macroGetElementName
     P(3,false)=emptyMeansNone
         readLine("Enter exact or part of value?").trim =sel
-        ?(emptyMeansNone && sel=="", Inner{
+        if(emptyMeansNone && sel=="", Inner{
             # empty list
             List =result
         }, Inner{
@@ -142,7 +142,7 @@ d
                 assert(macroGetElementName.call(opt)==sel)
                 out(opt)
             | =result
-            ?(result.empty, Inner{
+            if(result.empty, Inner{
                 options->opt
                     assert(macroGetElementName.call(opt).contains(sel))
                     out(opt)
@@ -169,13 +169,13 @@ P(1,List) =options P(2,Lambda { "name"}) =macroGetElementName P(3) =title
     null =selectedElement
     loop
         println("")
-        ?(title != null, Header(title), 0)
+        if(title != null, Header(title), 0)
 
         ShowOptions(options, macroGetElementName)
         println("")
         SelectOptions(options, macroGetElementName) =result
         
-        ?(result.length==1, Inner{ result.nth =selectedElement})
+        if(result.length==1, Inner{ result.nth =selectedElement})
         break(selectedElement != null)
         println("** No match or not unique")
     | selectedElement
@@ -185,9 +185,9 @@ P(1,List) =options P(2,Lambda { "name"}) =macroGetElementName P(3) =title
 
 P(1,"label")=label P(2)=currVal
     println("")
-    (label + ?(currVal," ["+currVal+"]","") + " : ") =prompt
+    (label + if(currVal," ["+currVal+"]","") + " : ") =prompt
     readLine(prompt) =line
-    ?(line.trim=="", currVal, line)
+    if(line.trim=="", currVal, line)
 /ReadValue
 
 
@@ -197,7 +197,7 @@ P(1,"label")=label P(2)=currVal
     null =gotResult
     loop
         ReadValue(label,""+currVal) =val
-        ?(val.?parseInt,Inner{val.parseInt =gotResult})
+        if(val.?parseInt,Inner{val.parseInt =gotResult})
         break(gotResult != null)
         println("** Integer required")
     |
@@ -210,10 +210,10 @@ P(1,"label")=label P(2)=currVal
 P(1,"label")=label P(2)=currVal P(3,"yes")=trueVal P(4,"no")=falseVal
     null =gotResult
     loop
-        ?(currVal != null, ?(currVal, trueVal, falseVal), null) =currStrVal
+        if(currVal != null, if(currVal, trueVal, falseVal), null) =currStrVal
         ReadValue(label,currStrVal) =val
-        ?(val==trueVal, Inner{true =gotResult})
-        ?(val==falseVal, Inner{false =gotResult})
+        if(val==trueVal, Inner{true =gotResult})
+        if(val==falseVal, Inner{false =gotResult})
         break(gotResult != null)
         println("** Please enter '" + trueVal + "' or '"  + falseVal + "'")
     |
@@ -227,13 +227,13 @@ P(1,"label")=label P(2)=currVal P(3,"yes")=trueVal P(4,"no")=falseVal
 # If value is Dict, for each key found, return corresponding value (as list). Otherwise true if value found, false if not found
 P(1,List)=lines
 P(2)=value
-    ?(value.?keys, Inner{
+    if(value.?keys, Inner{
         # match keys and result corresponding values as list
         value =dict
         List =result
         lines->line
             dict.keys->key 
-                ?(line.contains(key), Inner{result.add(dict.get(key))})
+                if(line.contains(key), Inner{result.add(dict.get(key))})
         |
         result.unique
     },Inner{   

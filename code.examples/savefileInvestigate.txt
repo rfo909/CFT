@@ -38,7 +38,7 @@ in an editor.
 # file to append investigation data to
     Date.setFormat("yyyy-MM-dd").fmt =today
     Sys.homeDir.sub("investigate.d") =dir
-    ?(!dir.exists, dir.create)
+    if(!dir.exists, dir.create)
     # return value
     dir.file(today+".txt")
 /LogFile
@@ -50,12 +50,12 @@ loop
     readLine("Enter text, '..' to quit or '..h' for help").trim =line
     false =terminate
     false =done
-    ?(line=="",Inner{LogFile.append("")})
+    if(line=="",Inner{LogFile.append("")})
     reject(line=="")
 
-    ?(line.startsWith(".."), Inner{
+    if(line.startsWith(".."), Inner{
         line.sub(2)=cmd
-        ?(cmd.startsWith("h"), Inner{ ## help
+        if(cmd.startsWith("h"), Inner{ ## help
             println
             println
             println("---")
@@ -70,33 +70,33 @@ loop
             println
             true =done
         })
-        ?(cmd.startsWith("c"),Inner{  ## cat
+        if(cmd.startsWith("c"),Inner{  ## cat
             Inner{LogFile.read->line println(line)}
             true =done
         })
-        ?(cmd.startsWith("m"),Inner{ ## more
+        if(cmd.startsWith("m"),Inner{ ## more
             call "Lib:m" (LogFile)
             true =done
         })
-        ?(cmd.startsWith("e"),Inner{ ## edit
+        if(cmd.startsWith("e"),Inner{ ## edit
             Edit
             true =done
         })
-        ?(cmd=="",Inner{ ## quit
+        if(cmd=="",Inner{ ## quit
             true =terminate
         })
     })
     break(terminate)
     assert(!done)
     (line.startsWith(".."))
-    ?(line.startsWith("."), Inner{
+    if(line.startsWith("."), Inner{
         line.sub(1)=marker
 
         # basic sanity checking
-        ?(marker.startsWith(".") || marker.length>10,  Inner{
+        if(marker.startsWith(".") || marker.length>10,  Inner{
             println("Invalid end marker: '" + marker + "'")
         }, Inner{
-            ?(marker=="",".",marker)=marker
+            if(marker=="",".",marker)=marker
             println("End-marker: '" + marker + "'")
             println("---")
             readLines(marker) =lines
@@ -118,9 +118,9 @@ loop
     Sys.lastResult =res
     res.?nth =isList
 
-    ?(isList,Inner{
+    if(isList,Inner{
         readLine("Element number (Enter for all)") =num
-        ?(num.?parseInt, Inner{res.nth(num.parseInt) =res})
+        if(num.?parseInt, Inner{res.nth(num.parseInt) =res})
     })
 
     List =list
@@ -143,7 +143,7 @@ loop
 
 # Log pasted text
     readLine("Type end marker, or just press Enter to use '.'").trim =endMarker
-    ?(endMarker=="",".",endMarker) =endMarker
+    if(endMarker=="",".",endMarker) =endMarker
     println("End-marker: '" + endMarker + "'")
     println("---")
     readLines(endMarker) =lines

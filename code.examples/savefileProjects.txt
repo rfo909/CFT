@@ -81,15 +81,15 @@ There can be multiples of every line, including Dir.
         call "Lib:Header" ("Select project, curr=" + result)
         call "Lib:ShowOptions" (names, showName)
         call "Lib:SelectOptions" (names, showName, true) =resultList
-        ?(resultList.length>1, Inner{println("** not unique **") null=result} )
-        ?(resultList.length==1, Inner{resultList.nth =result} )
+        if(resultList.length>1, Inner{println("** not unique **") null=result} )
+        if(resultList.length==1, Inner{resultList.nth =result} )
         break(result != null)
     |
     ValDef("Project", result)
 /ChangeProject
 
 
-?(Val("Project")==null, ChangeProject)
+if(Val("Project")==null, ChangeProject)
 /CheckProject
 
 
@@ -124,7 +124,7 @@ There can be multiples of every line, including Dir.
     Lambda { P(1)=d 
         true =keep 
         CurrProject.IgnoreDir->x 
-            ?(d.name==x,Inner{false =keep}) 
+            if(d.name==x,Inner{false =keep}) 
             break(!keep)
         |
         keep
@@ -166,7 +166,7 @@ P(1,Grep)=grep
     
     Lambda { P(1)=file 
         Val("FileFilter")=filter
-        ?(filter != null, file.name.contains(filter), true)
+        if(filter != null, file.name.contains(filter), true)
     } =filter
 
     # Count matches first
@@ -186,14 +186,14 @@ P(1,Grep)=grep
 
 # Limit search to file names containing a certain string
     readLine("Enter file filter string").trim=str
-    ?(str=="",null,str) =val
+    if(str=="",null,str) =val
     ValDef("FileFilter",val)
 /SetFileFilter
 
 
 # Show info on current FileFilter (if defined)
     Val("FileFilter") =filter
-    ?(filter!=null, Inner{
+    if(filter!=null, Inner{
         println
         println("** Filtering file names on: " + '"' + filter + '"')
         println
@@ -295,7 +295,7 @@ Search(Grep(a).reject(b))
     |
     println
     readLine("Enter number to edit, or blank to skip") =inp
-    ?(inp != "", Inner{
+    if(inp != "", Inner{
         call "Lib:e" (fileList.nth(inp.parseInt))
     })
     true

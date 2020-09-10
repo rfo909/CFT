@@ -40,8 +40,8 @@ DocDir.file("Doc.html")
 false =enable
 Source.read->line
     false =skipThis
-    ?(line.contains("<body"), Inner{ true =enable true=skipThis })
-    ?(line.contains("</body"), Inner{false =enable })
+    if(line.contains("<body"), Inner{ true =enable true=skipThis })
+    if(line.contains("</body"), Inner{false =enable })
     assert(enable && !skipThis)
     line.trim =s
     assert(s.length>0)
@@ -97,12 +97,12 @@ Parts->p
     Inner{
         null =result
         rules->r 
-            ?(p.startsWith(r), Inner{r.data =result})
+            if(p.startsWith(r), Inner{r.data =result})
             break(result != null)
         |
         result
     } =result
-    ?(result != null, result, p+NL) =result
+    if(result != null, result, p+NL) =result
     out(result)
 /ProcessTags
         

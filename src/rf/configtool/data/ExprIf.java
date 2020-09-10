@@ -29,18 +29,29 @@ public class ExprIf extends LexicalElement {
     
     public ExprIf (TokenStream ts) throws Exception {
         super(ts);
-    	ts.matchStr("?", "expected '?'");
-
-        ts.matchStr("(", "expected '(' following symbol '?'");
-        bool=new Expr(ts);
-        ts.matchStr(",", "expected comma following boolean expr");
-        exprIf=new Expr(ts);
         
-        if (!ts.matchStr(")")) {
-        	ts.matchStr(",", "expected comma or ')' following true expr");
-        	exprElse=new Expr(ts);
-            ts.matchStr(")", "expected ')' closing '?' expression");
+    	if (!ts.matchStr("if")) {
+    		ts.matchStr("when","expected 'if' or 'when'");
+    	}
+
+        ts.matchStr("(", "expected '(' following 'if");
+        bool=new Expr(ts);
+        if (ts.matchStr(")")) {
+        	// traditional syntax: if(expr) expr [else expr]
+        	exprIf=new Expr(ts);
+        	if (ts.matchStr("else")) exprElse=new Expr(ts);
+        } else {
+        	// single function call syntax: if(expr,ifExpr[,elseExpr])
+            ts.matchStr(",", "expected comma following boolean expr");
+            exprIf=new Expr(ts);
+            
+            if (!ts.matchStr(")")) {
+            	ts.matchStr(",", "expected comma or ')' following true expr");
+            	exprElse=new Expr(ts);
+                ts.matchStr(")", "expected ')' closing 'if' expression");
+            }
         }
+        
     }
     
     public Value resolve (Ctx ctx) throws Exception {

@@ -199,7 +199,7 @@ P(1,"someTarget")=target
         call "Lib:ReadValue" ("Original IP address or name (kubsXX.v)", originalIp) =originalIp
         call "Lib:ReadValue" ("New IP address and mask: xx.xx.xx.xx/MM", newIp) =newIp
         false =ok
-        ?(!newIp.contains("/"),Inner{
+        if(!newIp.contains("/"),Inner{
             println("*** Missing '/MM' net mask from IP address")
         }, Inner{
             call "Lib:ReadValueBoolean" ("Ok", false) =ok
@@ -289,7 +289,7 @@ P(1,"someTarget")=target
         break(ok)
     |
     call "Lib:ReadValueBoolean" ("Enter 'yes' to continue", false, "yes","abort") =continue
-    ?(!continue,Inner{
+    if(!continue,Inner{
         println("Aborting")
         error(true,"Aborting")
     })
@@ -304,7 +304,7 @@ P(1,"someTarget")=target
         "--disk","path=/var/lib/libvirt/images/"+name+".qcow2,size="+disk+",bus=virtio,format=qcow2",
         "--cdrom",bootImage.path
     ) =cmd
-    ?(headless, 
+    if(headless, 
         cmd+List("--graphics","vnc"),  
         cmd
     ) =cmd

@@ -47,7 +47,7 @@ P(1,ReadSSHTarget) =sshTarget
 
 # Check if server responds on ping
 P(1)=target
-    ?(target.contains("@"), target.after("@"), target) =host
+    if(target.contains("@"), target.after("@"), target) =host
     Dir.runCapture("ping","-c","1",host)->line assert(line.contains("0 received")) out(line) | _.length>0 =failure
     !failure
 /HostOk
@@ -56,7 +56,7 @@ P(1)=target
 # Returns boolean indicating if sudo without password ok
 P(1,ReadSSHTarget) =sshTarget
     sshTarget.before("@")=user
-    ?(user == "ubuntu", true, Inner{    # ubuntu on RPI default user has sudo without password ok
+    if(user == "ubuntu", true, Inner{    # ubuntu on RPI default user has sudo without password ok
         run (sshTarget,"sudo ls",true) =result
         result.get("exitCode") == 0
     })
@@ -82,7 +82,7 @@ P(4,false)=showDebug
     error(commands==null, "Invalid commands: can not be null")
 
     # ensure commands is a list
-    ?(!commands.?nth, Inner{
+    if(!commands.?nth, Inner{
         List(commands) =commands
     })
 
@@ -100,29 +100,29 @@ P(4,false)=showDebug
     
     # Filter stdout to include lines following one containing mark
     false =found
-    ?(outFile.exists,outFile.read,List)->line
+    if(outFile.exists,outFile.read,List)->line
         condOut(found, line)
-        ?(line.contains(mark), Inner{true =found})
+        if(line.contains(mark), Inner{true =found})
     | _=outLines
         
     Dict =result
     result.set("stdout",outLines)
-    result.set("stderr",?(errFile.exists,errFile.read,List))
+    result.set("stderr",if(errFile.exists,errFile.read,List))
     result.set("stdin",commands)
     result.set("exitCode", Sys.lastEPS)
     
-    Lambda { P(1)=f ?(f.exists, f.delete) } =Del
+    Lambda { P(1)=f if(f.exists, f.delete) } =Del
     
     Del.call(inFile)
     Del.call(outFile)
     Del.call(errFile)
 
     false =FAIL
-    ?(result.get("exitCode") != 0 && !acceptErrors, Inner{
+    if(result.get("exitCode") != 0 && !acceptErrors, Inner{
         true =FAIL
     })
     
-    ?(showDebug || FAIL,Inner{
+    if(showDebug || FAIL,Inner{
         println("- target=" + target)
         println("- stdin:")
         commands->line println("    " + line) |
@@ -149,7 +149,7 @@ P(2)=commands
 P(3,false)=acceptErrors
 P(4,false)=showDebug
     # ensure commands is a list
-    ?(!commands.?nth, Inner{
+    if(!commands.?nth, Inner{
         List(commands) =commands
     })
     List("sudo bash")+commands =commands

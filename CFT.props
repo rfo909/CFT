@@ -43,7 +43,7 @@ mMore = Lambda { P(1)=file error(file==null, 'more: no file') call 'Lib:m' (file
 shortcutPrefix = @
 
 
-shortcut:e    = "---- open script in editor ----"         ?(Sys.savefile != null, call "Lib:e" (Sys.savefile),"No savefile")
+shortcut:e    = "---- open script in editor ----"         if(Sys.savefile != null, call "Lib:e" (Sys.savefile),"No savefile")
 shortcut:ee   = "---- clear editor selection ----"        call "Lib:ClearEditor"
 shortcut:term = "---- Update terminal size ----"          call "Lib:GetTerminalSize"
 shortcut:top  = "---- Run top command ----"               Dir.run("top")
@@ -77,7 +77,7 @@ shortcut:     = "---- Show all shortcuts ----"            File("CFT.props").read
 # The prompt setting is a line of code, just as with the shortcuts
 # ---
 
-prompt = Sys.scriptName=x ?(x==null,"$ ",x+" $ ")
+prompt = Sys.scriptName=x if(x==null,"$ ",x+" $ ")
 
 
 

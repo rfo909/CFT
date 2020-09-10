@@ -40,7 +40,7 @@ loop
     retries-1 =retries
     true =ok
     Inner{ Dir.runCapture("ping","-c","1",ip)->line 
-        ?(line.contains("100% packet loss"), Inner{false=ok})
+        if(line.contains("100% packet loss"), Inner{false=ok})
     }
     break(ok)
     Sys.sleep(500)

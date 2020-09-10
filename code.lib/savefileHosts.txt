@@ -37,7 +37,7 @@ P(1)=glob
     ""=regex
     glob.chars->c
         false =done
-        ?(c=='*', ".*", "["+c+"]") =x regex+x=regex
+        if(c=='*', ".*", "["+c+"]") =x regex+x=regex
     |
     Regex(regex) =re
     Val("data").keys.sort->hostName
@@ -54,9 +54,9 @@ P(1)=glob
     line.before("[").trim =host
     line.after("[").before("]") =override 
 
-    ?(override != "", override, value) =overriddenVal
+    if(override != "", override, value) =overriddenVal
     
-    ?(host.contains("*"), Inner{
+    if(host.contains("*"), Inner{
         # assign value for all hosts matching glob expression
         GlobHosts(host)->oneHost
             Val("data").get(oneHost,Dict).set(name, overriddenVal)
@@ -79,7 +79,7 @@ P(1)=glob
         reject(line=="")
         reject(line.startsWith("#"))
         
-        ?(line.startsWith("["), Inner{
+        if(line.startsWith("["), Inner{
             parseHeader(line).push(2,"") =settingName=settingValue
         },Inner{
             parseData(line,settingName,settingValue)
@@ -98,11 +98,11 @@ P(1)=glob
 # Internal
     false =flag
     
-    ?(Val("time")==null, Inner{true =flag})
+    if(Val("time")==null, Inner{true =flag})
     
-    ?(Val("time") != null && Val("time") != HostsFile.lastModified, Inner{true =flag})
-    ?(Val("data")==null, Inner{true =flag})
-    ?(flag, Inner{
+    if(Val("time") != null && Val("time") != HostsFile.lastModified, Inner{true =flag})
+    if(Val("data")==null, Inner{true =flag})
+    if(flag, Inner{
         ProcessHostsFile
         ValDef("time",HostsFile.lastModified)
     })
@@ -180,7 +180,7 @@ P(1)=glob
         call "SSH:HostOk" (target) =hostOk
         call "SSH:VerifySudo" (target) =sudoOk
         
-        Lambda {P(1)=x ?(x,"ok","<<FAIL>>")} =show
+        Lambda {P(1)=x if(x,"ok","<<FAIL>>")} =show
         report("Host: " + host, "Ping: " + show.call(hostOk), "Sudo: "+show.call(sudoOk))
 /ShowHostsStatus
 
@@ -195,7 +195,7 @@ P(1)=glob
     
     hosts->host
         call "Hosts:GetValue" (host, "SSHUser") =sshUser
-        ?(sshUser==null, Inner{
+        if(sshUser==null, Inner{
             println("----- WARNING: " + host + " has no SSHUser")
         })
         assert(sshUser != null)
@@ -231,13 +231,13 @@ P(1)=glob
         DebianHostNeedsReboot(target) =needsReboot
         call "Hosts:Has" (host, "Auto.reboot","yes") =canBeRebooted
 
-        ?(needsReboot && canBeRebooted, Inner{
+        if(needsReboot && canBeRebooted, Inner{
                 println("   *** Automatically rebooting " + host)
                 call "SSH:sudo" (target, "reboot", true)
                         # acceptErrors=true, as the reboot means immediate disconnect
         })
 
-        ?(needsReboot && !canBeRebooted, Inner{
+        if(needsReboot && !canBeRebooted, Inner{
                 println("   *** Host " + host + " should be rebooted - can not do this automatically")
         })
 /UpdateAPT
@@ -250,7 +250,7 @@ P(1)=glob
 
         sshUser+"@"+host =target
         DebianHostNeedsReboot(target)=x
-        ?(x,"NEEDS REBOOT","ok")=status
+        if(x,"NEEDS REBOOT","ok")=status
         println(target + ": " + status)
         
 /NeedReboot     

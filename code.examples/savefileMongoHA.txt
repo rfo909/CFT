@@ -44,7 +44,7 @@ P(1,true)=debug
 /setDebug
 
 P(1)=target P(2)=cmd
-    ?(cmd.?nth, cmd, cmd.split(";"))=cmd 
+    if(cmd.?nth, cmd, cmd.split(";"))=cmd 
     call "ServersMaintenance:RemoteCommandSet" (target, cmd)
 /run
 
@@ -53,7 +53,7 @@ P(1)=cmd
 /r
 
 P(1)=target P(2,List)=cmd P(3,Dict)=codes
-    ?(cmd.?nth, cmd, cmd.split(";")) =cmd
+    if(cmd.?nth, cmd, cmd.split(";")) =cmd
     call "ServersMaintenance:RemoteCommandSetCoded" (target, cmd, codes)
 /runCoded
 
@@ -123,7 +123,7 @@ P(1,GetTarget)=target
     println("* Verifying install")
     runCoded(target, "which mongo", Dict.set("/mongo","ok")).contains("ok") =ok
     
-    ?(ok, Inner{println("* ok")} )
+    if(ok, Inner{println("* ok")} )
 /InstallMongoShell
 
 
@@ -178,7 +178,7 @@ P(1,GetTarget)=target
         "sudo tail -n 20 /var/log/mongodb/mongod.log", 
             Dict.set("waiting for connections","ok")).contains("ok") =ok
 
-    ?(ok, Inner{println("* Mongod installed and running")})
+    if(ok, Inner{println("* Mongod installed and running")})
     
 /InstallMongod
 

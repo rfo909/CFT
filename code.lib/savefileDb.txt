@@ -32,7 +32,7 @@ multiple collections.
 
 # DbDir is "Db" under Sys.homeDir
     Sys.homeDir.sub("Db")=d
-    ?(!d.exists, d.create)
+    if(!d.exists, d.create)
     d
 /DbDir
 
@@ -40,7 +40,7 @@ multiple collections.
 # Get db-file for collection (optional) - created with valid
     P(1,"default")=collection
     DbDir.file(collection+".txt") =file
-    ?(!file.exists, file.create("# Created " + Date.fmt))
+    if(!file.exists, file.create("# Created " + Date.fmt))
     file
 /DbFile
 
@@ -81,7 +81,7 @@ P(1)=key
 P(2,"default")=collection
 P(3)=defaultValue
     FindAll(key,collection).last =x
-    ?(x != null, x, defaultValue)
+    if(x != null, x, defaultValue)
 /Get
 
 
@@ -116,7 +116,7 @@ P(2,"default")=collection
 P(1)=key
 P(2)=value
 P(3,"default")=collection
-    ?(Val("temp")==null, Inner{ValDef("temp",Dict) }) 
+    if(Val("temp")==null, Inner{ValDef("temp",Dict) }) 
     Val("temp").get(collection,Dict).set(key,value)
     true
 /TempSet
@@ -124,13 +124,13 @@ P(3,"default")=collection
 # Set temp value (in memory only)
 P(1)=key
 P(2,"default")=collection
-    ?(Val("temp")==null, Inner{ValDef("temp",Dict) }) 
+    if(Val("temp")==null, Inner{ValDef("temp",Dict) }) 
     Val("temp").get(collection,Dict) =coll
-    ?(coll.has(key), coll.get(key,null), null)
+    if(coll.has(key), coll.get(key,null), null)
 /TempGet
 
 # Show temp values
-    ?(Val("temp")==null, Inner{ValDef("temp",Dict) })
+    if(Val("temp")==null, Inner{ValDef("temp",Dict) })
     Val("temp").keys->collection
         Val("temp").get(collection).keys->name
             report(collection, name, Val("temp").get(collection).get(name))
@@ -142,7 +142,7 @@ P(1)=key
 P(2)=prompt
 P(3)=collection
     Get(key,collection) =val
-    ?(val==null,Inner{
+    if(val==null,Inner{
         readLine(prompt) =val
         Add(key,val,collection)
     })
@@ -155,12 +155,12 @@ P(1)=key
 P(2)=prompt
 P(3)=collection
     Get(key,collection) =val
-    ?(val==null, Inner{
+    if(val==null, Inner{
         readLine(prompt) =val
         Add(key,val,collection)
     },Inner{
         call "Lib:ReadValue" (prompt, val) =val2
-        ?(val2 != val, Add(key,val2,collection))
+        if(val2 != val, Add(key,val2,collection))
         val2 =val
     })
     val

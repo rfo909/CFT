@@ -14,16 +14,24 @@
 <h1>CFT Change log</h1>
 
 <h3>v1.3.0 branch</h3>
-<table>
-<tr><td>v1.3.0</td><td>
+<ol>
+	<li><b>v1.3.0</b><br/>
 	Changed ExprIf from if(cond,a,b) to ?(cond,a,b) and ?(cond,a) eliminating ExprWhen. Converted
 	all script code.
-</td></tr>
-<tr><td>v1.3.0b</td><td>
+</li><li><b>v1.3.0 (b)</b><br/>
 	Changed {* ...} blocks to "Lambda {...}" and {...} to "Inner {...}". Converted all script code and
 	tested.
-</td></tr></table>
-
+</li><li><b>v1.3.0 (c)</b><br/>
+	Reverted ?(...) to if(...), and currently mapping both if and when to ExprIf.<br/>
+	Also extended parsing of ExprIf to handle two forms: if(expr,expr[,expr]) and if(expr) expr [else expr]
+</li><li><b>NEXT STEP</b><br/>
+	Introduce local block, which is {...} and runs in same context. It is still an expression, so it
+	is compatible with the existing code base.
+</li><li><b>NEXT STEP</b><br/>
+	Finally may create the "public" function, and figure out if we can modify the parser to process
+	prefix assignment only inside those. Low priority. The real news is the CodeBlock, which makes
+	code more logically constructed. Will in turn change error(expr,str) to also accept just error(str).
+</li></ol>
 
 
 <h3>v1.2.3 2020-09-08</h3>
