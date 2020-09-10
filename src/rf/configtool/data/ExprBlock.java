@@ -23,36 +23,37 @@ import rf.configtool.main.ObjGlobal;
 import rf.configtool.main.Runtime;
 import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
-import rf.configtool.main.runtime.ValueMacro;
+import rf.configtool.main.runtime.ValueBlock;
 import rf.configtool.parser.Token;
 import rf.configtool.parser.TokenStream;
 import java.util.*;
 
-public class ExprMacro extends LexicalElement {
+public class ExprBlock extends LexicalElement {
 
+	public static final int MODE_INNER = 0;
+	public static final int MODE_LAMBDA = 1;
+	public static final int MODE_LOCAL = 2;
+	
     private boolean localCodeBlock;
+    private int mode;
     
     private List<ProgramLine> programLines=new ArrayList<ProgramLine>();
     
     // See Runtime.processCodeLines() method to extend to loops and supporting PROGRAM_LINE_SEPARATOR - must in addition 
     // add '}' as terminator character inside ProgramLine
 
-    public ExprMacro (TokenStream ts) throws Exception {
+    public ExprBlock (TokenStream ts) throws Exception {
         super(ts);
         if (ts.matchStr("Inner")) {
         	localCodeBlock=true;
+        	mode=MODE_INNER;
         	ts.matchStr("{","expected '{'");
         } else if (ts.matchStr("Lambda")) {
         	localCodeBlock=false;
+        	mode=MODE_LAMBDA;
         	ts.matchStr("{","expected '{'");
-//        } else {
-//	        ts.matchStr("{", "expected '{'");
-//	        
-//	        localCodeBlock=true;
-//	        
-//	        if (ts.matchStr("*")) {  // indicates it can run "anywhere"
-//	            localCodeBlock=false;
-//	        }
+        } else if (ts.matchStr("{")) {
+        	mode=MODE_LOCAL;
         }
 	        
         List<ProgramLine> progLines=new ArrayList<ProgramLine>();
@@ -61,19 +62,31 @@ public class ExprMacro extends LexicalElement {
             if (ts.matchStr(CodeLines.PROGRAM_LINE_SEPARATOR)) continue;
             break;
         }
-    	ts.matchStr("}","expected '}' closing " + (localCodeBlock ? "code block" : "macro"));
+    	ts.matchStr("}","expected '}' closing " + getBlockModeName());
     	
         this.programLines=progLines;
     
     }
     
+    private String getBlockModeName() {
+    	if (mode==MODE_INNER) return "inner block";
+    	if (mode==MODE_LAMBDA) return "lambda block";
+    	if (mode==MODE_LOCAL) return "local block";
+    	throw new RuntimeException("Unknown mode: " + mode);
+    }
+    
     
     public Value resolve (Ctx ctx) throws Exception {
-        ValueMacro m=new ValueMacro(programLines);
-        if (localCodeBlock) {
-            return m.callLocalMacro(ctx);
+        ValueBlock b=new ValueBlock(programLines);
+        if (mode==MODE_INNER) {
+            return b.callInnerBlock(ctx);
+        } else if (mode==MODE_LAMBDA) {
+        	return b;  // Lambda is a Value
+        } else if (mode==MODE_LOCAL) {
+        	return b.callInnerBlock(ctx); // TEMPORARY, JUST TO TEST SYNTAX
+        } else {
+        	throw new Exception("Invalid mode: " + mode);
         }
-        return m;
     }
 
 

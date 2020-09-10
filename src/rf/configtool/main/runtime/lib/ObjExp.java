@@ -26,7 +26,7 @@ import rf.configtool.main.runtime.Function;
 import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueBoolean;
-import rf.configtool.main.runtime.ValueMacro;
+import rf.configtool.main.runtime.ValueBlock;
 
 /**
  * Experimental code
@@ -74,8 +74,8 @@ public class ObjExp extends Obj {
 		}
 		
 		class Hook implements CtxCloseHook {
-			private ValueMacro m;
-			public Hook (ValueMacro m) {
+			private ValueBlock m;
+			public Hook (ValueBlock m) {
 				this.m=m;
 			}
 			public void ctxClosing(Ctx ctx) throws Exception {
@@ -88,9 +88,9 @@ public class ObjExp extends Obj {
 			if (params.size() != 1)
 				throw new Exception("Expected macro parameter");
 			Value v=params.get(0);
-			if (!(v instanceof ValueMacro)) throw new Exception("Expected macro parameter");
+			if (!(v instanceof ValueBlock)) throw new Exception("Expected macro parameter");
 			
-			ctx.addCtxCloseHook(new Hook( (ValueMacro) v));
+			ctx.addCtxCloseHook(new Hook( (ValueBlock) v));
 			return new ValueBoolean(true);
 		}
 	}

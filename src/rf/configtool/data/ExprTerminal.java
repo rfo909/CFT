@@ -39,7 +39,7 @@ public class ExprTerminal extends LexicalElement {
     private Value literalValue;
     private ParamLookup paramLookup;
     private ParamLookupDict paramLookupDict;
-    private ExprMacro exprMacro;
+    private ExprBlock exprMacro;
     private LookupOrCall lookupCall; // lookup or call
     
     public ExprTerminal (TokenStream ts) throws Exception {
@@ -100,8 +100,8 @@ public class ExprTerminal extends LexicalElement {
             literalValue=new ValueBoolean(false);
             return;
         }
-        if (ts.peekStr("Inner") || ts.peekStr("Lambda")) {
-            exprMacro = new ExprMacro(ts);
+        if (ts.peekStr("Inner") || ts.peekStr("Lambda") || ts.peekStr("{")) {
+            exprMacro = new ExprBlock(ts);
             return;
         }
         if (ts.peekStr("P")) {

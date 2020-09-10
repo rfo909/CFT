@@ -32,7 +32,7 @@ import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueInt;
 import rf.configtool.main.runtime.ValueList;
-import rf.configtool.main.runtime.ValueMacro;
+import rf.configtool.main.runtime.ValueBlock;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
 import rf.configtool.main.runtime.lib.ObjDir;
@@ -117,9 +117,9 @@ public class StmtCatEditMore extends StmtShellInteractive {
     	CodeLines codeLines=new CodeLines(macro, loc);
     	
     	Value ret = ctx.getObjGlobal().getRuntime().processCodeLines(codeLines, new FunctionState());
-    	if (!(ret instanceof ValueMacro)) throw new Exception("Not a macro: " + macro + " ---> " + ret.synthesize());
+    	if (!(ret instanceof ValueBlock)) throw new Exception("Not a macro: " + macro + " ---> " + ret.synthesize());
     	
-    	ValueMacro macroObj=(ValueMacro) ret;
+    	ValueBlock macroObj=(ValueBlock) ret;
     	
     	List<Value> params=new ArrayList<Value>();
     	if (file != null) {

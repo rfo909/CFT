@@ -16,7 +16,7 @@ import rf.configtool.main.Stdio;
 import rf.configtool.main.Version;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueList;
-import rf.configtool.main.runtime.ValueMacro;
+import rf.configtool.main.runtime.ValueBlock;
 import rf.configtool.main.runtime.ValueNull;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.reporttool.Report;

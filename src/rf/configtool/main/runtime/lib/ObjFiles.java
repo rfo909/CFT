@@ -30,7 +30,7 @@ import rf.configtool.main.runtime.ValueBoolean;
 import rf.configtool.main.runtime.ValueFloat;
 import rf.configtool.main.runtime.ValueInt;
 import rf.configtool.main.runtime.ValueList;
-import rf.configtool.main.runtime.ValueMacro;
+import rf.configtool.main.runtime.ValueBlock;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
 import java.awt.Color;

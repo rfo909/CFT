@@ -30,15 +30,13 @@ import rf.configtool.main.runtime.lib.ObjGrep;
 import rf.configtool.main.runtime.reporttool.Report;
 
 /**
- * A macro is by default a local code block that is executed immediately, and is a way of grouping
- * multiple statements and expressions as a single expression. But it can also be created as a
- * stand-alone object, that is invoked via .call(params). It then runs in an independent context.
+ * Block of code
  */
-public class ValueMacro extends Value {
+public class ValueBlock extends Value {
     
     private List<ProgramLine> programLines;
     
-    public ValueMacro (List<ProgramLine> programLines) {
+    public ValueBlock (List<ProgramLine> programLines) {
         this.programLines=programLines;
         
         add(new FunctionCall());
@@ -68,7 +66,7 @@ public class ValueMacro extends Value {
     }
 
     
-    private Value invoke (Ctx ctxMacro) throws Exception {
+    private Value callLambda (Ctx ctxMacro) throws Exception {
     	Value retVal=null;
         
         for (ProgramLine progLine:programLines) {
@@ -98,11 +96,11 @@ public class ValueMacro extends Value {
      * Call local macro ("in line code block"). It runs in sub-context, and inherits
      * lookup of as well parameters and variables. 
      */
-    public Value callLocalMacro (Ctx ctx) throws Exception {
+    public Value callInnerBlock (Ctx ctx) throws Exception {
         // Execute local macro, which means it has Ctx lookup up the Ctx stack, including
         // parameters to the function, but that the loop flag stops
         Ctx sub=ctx.subContextForCodeBlock(); 
-        return invoke(sub);
+        return callLambda(sub);
     }
     
     
@@ -111,7 +109,7 @@ public class ValueMacro extends Value {
      */
     public Value call (Ctx ctx, List<Value> params) throws Exception {
         Ctx sub=new Ctx(ctx.getObjGlobal(), new FunctionState(params));
-        return invoke(sub);
+        return callLambda(sub);
     }
     
     public Value call (Ctx ctx) throws Exception {
