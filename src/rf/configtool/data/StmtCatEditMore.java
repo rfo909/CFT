@@ -126,7 +126,7 @@ public class StmtCatEditMore extends StmtShellInteractive {
     		params.add(new ValueObj(file));
     	}
     	
-    	Value result = macroObj.call(ctx.sub(), params);
+    	Value result = macroObj.callLambda(ctx.sub(), params);
     	ctx.push(result);
     }
 }

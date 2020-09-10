@@ -78,10 +78,20 @@ public class Ctx {
     }
               
     /**
-     * Code block is a macro that is invoked immediately, and that has access up the
+     * An Inner code block is a code block that is invoked immediately, and that has access up the
      * Ctx stack, but with separate OutData object, to avoid mixing result data from environment.
+     * 
+     * It also setting the programmingContainsLoopingInfoStopsHere flag, which means propagation up the
+     * chain of ctx objects when a loop is executed, stops here. That propagation is the one which
+     * in turn decides the output result being the list from out() or report() - if there is a loop,
+     * or the topmost element - if no loop.
+     * 
+     * This makes an Inner block something between local blocks, and Lambdas. Local blocks run all 
+     * statements in a simple sub-context from the Ctx outside the block, while lambdas run in
+     * a separate environment unrelated to the caller, in the same way as functions do, with function
+     * parameters as well.
      */
-    public Ctx subContextForCodeBlock () {
+    public Ctx subContextForInnerBlock () {
         Ctx ctx = new Ctx(this,new OutData(),outText,objGlobal,functionState);
         ctx.programContainsLoopingInfoStopsHere=true;
         return ctx;

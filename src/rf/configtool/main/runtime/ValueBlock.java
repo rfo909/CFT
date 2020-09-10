@@ -44,7 +44,7 @@ public class ValueBlock extends Value {
     
     @Override
     public String getTypeName() {
-        return "Macro";
+        return "Lambda";
     }
 
 
@@ -66,11 +66,12 @@ public class ValueBlock extends Value {
     }
 
     
-    private Value callLambda (Ctx ctxMacro) throws Exception {
+    private Value execute (Ctx ctx) throws Exception {
     	Value retVal=null;
         
         for (ProgramLine progLine:programLines) {
-            Ctx sub=ctxMacro.sub();
+            Ctx sub=ctx.sub();
+            
             if (retVal != null) sub.push(retVal);
             
             progLine.execute(sub);
@@ -93,27 +94,37 @@ public class ValueBlock extends Value {
     }
 
     /**
-     * Call local macro ("in line code block"). It runs in sub-context, and inherits
+     * Call Inner code block. It runs in sub-context, and inherits
      * lookup of as well parameters and variables. 
      */
     public Value callInnerBlock (Ctx ctx) throws Exception {
-        // Execute local macro, which means it has Ctx lookup up the Ctx stack, including
+        // Execute as Inner code block, which means it has Ctx lookup up the Ctx stack, including
         // parameters to the function, but that the loop flag stops
-        Ctx sub=ctx.subContextForCodeBlock(); 
-        return callLambda(sub);
+        Ctx sub=ctx.subContextForInnerBlock(); 
+        return execute(sub);
+    }
+    
+    
+    
+    /**
+     * Call Local code block.
+     */
+    public Value callLocalBlock (Ctx ctx) throws Exception {
+    	// Execute code as if it were statements in same context as outside the block. 
+        return execute(ctx);
     }
     
     
     /**
      * Call independent macro which runs in an isolated Ctx
      */
-    public Value call (Ctx ctx, List<Value> params) throws Exception {
-        Ctx sub=new Ctx(ctx.getObjGlobal(), new FunctionState(params));
-        return callLambda(sub);
+    public Value callLambda (Ctx ctx, List<Value> params) throws Exception {
+        Ctx independentCtx=new Ctx(ctx.getObjGlobal(), new FunctionState(params));
+        return execute(independentCtx);
     }
     
-    public Value call (Ctx ctx) throws Exception {
-    	return call(ctx,new ArrayList<Value>());
+    public Value callLambda (Ctx ctx) throws Exception {
+    	return callLambda(ctx,new ArrayList<Value>());
     }
     
     // -----------------------------------------------------------
@@ -123,10 +134,10 @@ public class ValueBlock extends Value {
             return "call";
         }
         public String getShortDesc() {
-            return "call(...) - call macro with parameters";
+            return "call(...) - call lambda with parameters";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            return call(ctx,params);
+            return callLambda(ctx,params);
         }
     }
 

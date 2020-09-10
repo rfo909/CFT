@@ -28,18 +28,23 @@
 	Renamed ExprMacro to ExprBlock, and ValueMacro to ValueBlock.<br/>
 	Added support for three modes: INNER, LAMBDA and LOCAL. Currently
 	LOCAL equals INNER, just to get the syntax tested.
+</li><li><b>v1.3.0 (e)</b><br/>
+	Implemented local block, which is {...} and runs in same context, similar to statements outside the
+	block. <br/>
+	Looping inside a local block may cause strange effects, as it shares out-data with its
+	containing environment. There is nothing preventing use of loops inside local blocks, but it is
+	better to do so inside Inner blocks. 
 
-
-</li><li><b>NEXT STEP</b><br/>
-	Introduce local block, which is {...} and runs in same context. It is still an expression, so it
-	is compatible with the existing code base. 
-</li><li><b>NEXT STEP</b><br/>
-	Should probably split Lambda processing from the other two, as lambdas are objects, while the other
-	two are not, at least seen from the CFT script code.
-</li><li><b>FURTHER</b><br/>
-	Finally may create the "public" function, and figure out if we can modify the parser to process
-	prefix assignment only inside those. Low priority. The real news is the CodeBlock, which makes
-	code more logically constructed. Will in turn change error(expr,str) to also accept just error(str).
+</li><li><b>TODO: v1.3.0 (f)</b><br/>
+	Must let assert(), reject() and break() propagate up to nearest loop. Currently the loops run each
+	statement in the same Ctx, and checks hasBreakLoopFlag() and hasAbortIterationFlag() after each statement.
+	<br/>
+	This nulls out the idea of letting local blocks terminate loops unconditionally, as the condition
+	is handled by an if.
+	<br/>
+	Will iterating up the Ctx list until finding one with programContainsLooping==true?
+	<br/>
+	Ctx.setAbortIterationFlag() and .setBreakLoopFlag()
 </li></ol>
 
 

@@ -78,12 +78,16 @@ public class ExprBlock extends LexicalElement {
     
     public Value resolve (Ctx ctx) throws Exception {
         ValueBlock b=new ValueBlock(programLines);
+        if (mode==MODE_LAMBDA) {
+        	return b;  // ValueBlock
+        }
+        
+        // directly executing alternatives
+        
         if (mode==MODE_INNER) {
             return b.callInnerBlock(ctx);
-        } else if (mode==MODE_LAMBDA) {
-        	return b;  // Lambda is a Value
         } else if (mode==MODE_LOCAL) {
-        	return b.callInnerBlock(ctx); // TEMPORARY, JUST TO TEST SYNTAX
+        	return b.callLocalBlock(ctx);
         } else {
         	throw new Exception("Invalid mode: " + mode);
         }
