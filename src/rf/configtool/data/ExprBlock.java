@@ -34,7 +34,6 @@ public class ExprBlock extends LexicalElement {
 	public static final int MODE_LAMBDA = 1;
 	public static final int MODE_LOCAL = 2;
 	
-    private boolean localCodeBlock;
     private int mode;
     
     private List<ProgramLine> programLines=new ArrayList<ProgramLine>();
@@ -45,11 +44,9 @@ public class ExprBlock extends LexicalElement {
     public ExprBlock (TokenStream ts) throws Exception {
         super(ts);
         if (ts.matchStr("Inner")) {
-        	localCodeBlock=true;
         	mode=MODE_INNER;
         	ts.matchStr("{","expected '{'");
         } else if (ts.matchStr("Lambda")) {
-        	localCodeBlock=false;
         	mode=MODE_LAMBDA;
         	ts.matchStr("{","expected '{'");
         } else if (ts.matchStr("{")) {

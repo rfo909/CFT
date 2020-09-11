@@ -40,6 +40,7 @@ public class ValueBlock extends Value {
         this.programLines=programLines;
         
         add(new FunctionCall());
+        add(new FunctionIsLambda());
     }
     
     @Override
@@ -123,10 +124,6 @@ public class ValueBlock extends Value {
         return execute(independentCtx);
     }
     
-    public Value callLambda (Ctx ctx) throws Exception {
-    	return callLambda(ctx,new ArrayList<Value>());
-    }
-    
     // -----------------------------------------------------------
     
     class FunctionCall extends Function {
@@ -138,6 +135,19 @@ public class ValueBlock extends Value {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             return callLambda(ctx,params);
+        }
+    }
+
+
+    class FunctionIsLambda extends Function {
+        public String getName() {
+            return "isLambda";
+        }
+        public String getShortDesc() {
+            return "isLambda() - returns true";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            return new ValueBoolean(true);
         }
     }
 

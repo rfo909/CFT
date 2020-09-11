@@ -79,7 +79,7 @@ public class ObjExp extends Obj {
 				this.m=m;
 			}
 			public void ctxClosing(Ctx ctx) throws Exception {
-				m.callLambda(ctx);
+				m.callLambda(ctx,null);
 			}
 
 		}

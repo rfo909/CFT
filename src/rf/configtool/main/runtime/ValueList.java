@@ -289,20 +289,25 @@ public class ValueList extends Value {
             return "keep";
         }
         public String getShortDesc() {
-            return "keep(from,to) - returns sub-list";
+            return "keep(from,to?) - returns sub-list";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (!argCount(params,2) || !isInt(params,0) || !isInt(params,1)) {
-                throw new Exception("Expected int parameters from, to");
-            }
-            int a=(int) getInt(getName(), params, 0);
-            int b=(int) getInt(getName(), params, 1);
-            
-            if (a < 0) a=0;
-            if (b >= val.size()) b=val.size()-1;
-            
+        	if (params.size() != 1 && params.size() != 2) throw new Exception("Expected in parameter(s) from, to?");
+        	
+        	int from=(int) getInt("from", params, 0);
+        	if (from < 0) from=0;
+        	
+        	int to;
+        	if (params.size() == 2) {
+        		to=(int) getInt("to", params, 1);
+        		if (to >= val.size()) to=val.size()-1;
+        	} else {
+        		to=val.size()-1;
+        	}
+       
+
             List<Value> newVal=new ArrayList<Value>();
-            for (int i=a; i<=b; i++) {
+            for (int i=from; i<=to; i++) {
                 newVal.add(val.get(i));
             }
             
