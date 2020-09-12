@@ -392,7 +392,7 @@ simplifying those Windows paths.
 ## Dictionaries
 
 
-Dictionaries are maps that store any value identified by names (as strings).
+Dictionaries are maps that store any value identified by names (strings).
 
 ```
 $ Dict=x x.set("a",1) x.get("a")
