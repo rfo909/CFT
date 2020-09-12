@@ -1,0 +1,301 @@
+<html>
+<body>
+<h1>Various</h1>
+
+<h2>Working with huge logs - counting hits</h2>
+<p>
+  The Grep instances are by default set up with a limit of the 1000 first matches. Passing
+  that limit produces an error. The limit can be changed as follows:
+</p>
+<pre>
+  $ Grep("...").limitFirst(100)
+  $ Grep("...").limitLast(100)
+</pre>
+
+
+<h3>Counting hits</h3>
+<p>
+  When working with big files, one can also decide to initially do a count of hits,
+  to narrow down the search terms before doing an actual search. 
+</p>
+<p>
+  The following example shows a function for searching through a set of java files and
+  counting the hits in each, summing these up, using Grep.fileCount() function instead
+  of Grep.file(), which produces result lines.
+</p>
+<p>
+  Counting hits is not subject to the limits above, as those exist in order to 
+  avoid uncontrolled memory use.
+</p>
+<pre>
+  Input("Enter search term").get =st
+  Grep(st) =grep
+  ProjectDir.allFiles-&gt;f
+    assert(f.name.endsWith(".java"))
+    grep.fileCount(f) =count
+    out(count)
+  | _.sum
+  /SearchCount
+</pre>
+
+
+<h3>Limiting search to a few files</h3>
+<p>
+  When working with huge data sets, we can count the number of hits in each file. This
+  could be presented as a sum, as above, or as a sorted list, displaying the number of hits
+  per file.
+</p>
+<pre>
+  Input("Enter search term").get =st
+  Grep(st) =grep
+  ProjectDir.allFiles-&gt;f
+    assert(f.name.endsWith(".java"))
+    grep.fileCount(f) =count
+    out(Int(count,f))        # &lt;--- see section on "Generalized sorting"
+  | _.sort-&gt;x
+    report(x.data.name, x)
+  /ShowHitCount
+</pre>
+<p>
+  The next step is then to extend the regular search function, with an input for (part of)
+  the file name(s) to search:
+</p>
+<pre>
+  Input("Enter search term").get =st
+  Grep(st) =grep
+  Input("(Part of) file name").get =fn
+  ProjectDir.allFiles-&gt;f
+    assert(f.name.endsWith(".java"))
+    assert(f.name.contains(fn))    # &lt;--- new
+    grep.file(f)-&gt;line
+      report(line.file.name, line.lineNumber, line)
+  /Search
+</pre>
+
+
+
+
+
+
+
+<h1>Searching log files</h1>
+
+<h2>Lib.Files.DateSort</h2>
+<p>
+  Lines written to log files usually start with date and time. Further, actions that we want to
+  trace may span several log files, for example when messages are sent between different services,
+  each with its own log. To clearly trace such activity, we may search the individual log files for some text,
+  and then sort all lines found on the date/time at the start of each line. 
+</p>
+<p>
+  The Lib.Files.DateSort function/object has been created for this purpose.
+</p>
+
+<pre>
+  Input("Enter search term").get =st
+  Lib.Files.DateSort =dateSort
+  Grep(st)=grep
+  ProjectDir.allFiles-&gt;f
+    assert(FileQualified(f))
+    grep.file(f)-&gt;line 
+      out(line)
+  |
+  =lines
+  dateSort.asc(lines)-&gt;line
+    report(line.file.name, line.lineNumber, line)
+  /SearchLog
+</pre>
+
+
+<h3>DateSort.search()</h3>
+<p>
+  As of v1.1.3 DateSort has been extended with an advanced option for searching HUGE log files
+  by date/time interval. It uses random access of start and end to identify if the file contains log lines
+  within the range, and then binary search to locate where to start reading. There is also the option
+  of supplying a Grep object, to filter lines within that time interval.
+</p>
+<pre>
+  Lib.Files.DateSort.search(file, fromTimeMillis, toTimeMillis, Grep?)
+</pre>
+
+
+<h2>Lib.Files.LineReader(file)</h2>
+<p>
+  Processing big files, you can't use File.read(), which produces a list of lines, as you will run out of memory.
+</p>
+<pre>
+  Lib.Files.LineReader(somefile).start =reader
+  loop
+    reader.read=line
+    break(line==null)
+    ....
+  |
+</pre>
+<p>
+  The LineReader automatically closes the file when the context where .start() was called, terminates.
+</p>
+<p>
+  The Grep object has a method .line() which can be used to match single lines.
+</p>
+
+
+
+
+
+
+
+<h1>Generalized sorting</h1>
+<p>
+  The List object has a function sort(), which does one of two things: 
+</p>
+<ol>
+  <li>if the list contains only numbers (int or float or a mix), sorts them by number value</li>
+  <li>... otherwise, sort as strings</li>
+</ol>
+<p>
+  The result is a new list. To sort in reverse order, we just apply the function ".reverse()" 
+  on the finished list.
+</p>
+<p>
+  The trick to sorting is to <em>make all types of objects to be sorted into a number or a string</em>.
+</p>
+<p>
+  This is done by three wrapper functions called "Int()", "Float()" and "Str()". They create objects that
+  are subclasses of the regular int, float and
+  string types, but also contain a "data" member that can be extracted after sorting, via the ".data()"
+  function.
+</p>
+
+<h2>Example: file size</h2>
+<p>
+  Let's sort the files in the current directory so that the biggest files are listed first.
+</p>
+<pre>
+  $ Dir.files-&gt;f out(Int(f.length,f)) | _.sort.reverse-&gt;x out(x.data)
+</pre>
+
+<p>
+  For each file, we output an Int wrapper object, with value set to file length, and data
+  pointing to the file. The resulting list is sorted, reversed, then iterated to output
+  the data values, which are the original File object. 
+</p>
+
+<p>
+  Could also sort on time, as File.lastModified is another int value, with CFT int values
+  corresponding to long in Java.
+</p>
+
+<h2>Example: file name</h2>
+<p>
+  To sort on file names, we use the Str() wrapper function / object.
+</p>
+<pre>
+  $ Dir.files-&gt;f out(Str(f.name,f)) | _.sort-&gt; out(x.data)
+</pre>
+
+
+
+<h1>Dictionary objects / Dict()</h1>
+<p>
+  When working with multiple projects, or sources of log files, we want to quickly flip
+  between directories, file types and perhaps other settings. This is done using dictionary
+  objects. 
+</p>
+<p>
+  Dictionary objects are key-value stored, like Map in Java.
+</p>
+<p>
+  Maintaining these types structures is best done when editing the script file with an editor.
+</p>
+<pre>
+  Dict
+    .set("dir",Dir("/home/user/project1"))
+    .set("types","java txt".split)
+  /Project1
+
+  Dict
+    .set("dir",Dir("/home/user/project2"))
+    .set("types","js css html".split)
+  /Project2
+
+  Project1
+  /CurrProject
+</pre>
+
+<p>
+  Now we can build code that searches files and performs other operations on CurrProject. 
+</p>
+<p>
+  Switching between projects is done by redefining the CurrProject function. 
+<pre>
+  $ Project2
+  $ /CurrProject!
+</pre>
+
+<p>
+  To get a named value from a Dict object, use the get(name) function.
+</p>
+
+<pre>
+  $ Dict.set("a",23).get("a")
+  &lt;int&gt;
+  23
+</pre>
+
+
+
+
+<h1>Date and time processing</h1>
+
+<h2>Milliseconds</h2>
+<p>
+  If we want to produce a list of files modified within the last 30 minutes, we can do this
+  easily, using the global function currentTimeMillis, and the File.lastModified function.
+</p>
+<pre>
+  Dir.files-&gt;f assert(currentTimeMillis-f.lastModified&gt;30*60*1000) out(f)
+  /FilesModifiedLast30Minutes
+</pre>
+
+<h2>The Date object</h2>
+<p>
+  The Date() function can be invoked without parameters, producing a Date object that represents
+  current date and time, or it can be called with an int value, which is milliseconds, such as 
+  that returned from File.lastModified. Functions exist to decide if a date is before or after 
+  another date, as well as for accessing individual properties, such as year, day of month, and so
+  on.
+</p>
+
+<p>
+  To list all files that were changed between two date/times now becomes easy
+</p>
+
+<pre>
+  P(1,Date)=fromDate
+  P(2,Date)=toDate
+    Dir.files-&gt;f
+      Date(f.lastModified) =fileDate
+      assert(fileDate.after(fromDate) && fileDate.before(toDate))
+      out(f)
+  /FilesBetweenDates
+</pre>
+
+
+
+<h2>The Date.Duration object</h2>
+<p>
+  The Date object in turn contains a function Duration() which creates a Date.Duration object. This
+  is both output from Date.diff, which calculates the amount of time between two dates, and used 
+  as input to the Date.add and Date.sub functions, which are used to calculate other dates. 
+</p>
+
+<p>
+  Example: calculating the date (and time) 300 days ago
+</p>
+<pre>
+  $ Date.Duration.days(300) =x Date.sub(x)
+</pre>
+</body>
+</html>
+
+

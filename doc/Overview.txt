@@ -4,31 +4,26 @@ Generated file - see script file $Inner{savefile}
 
 Introduction
 
-What CFT is not
+Functionality
+ * System functions and objects
 
-So what is it for?
- * Functions example
- |   No parantheses?
- * Mission-critical operations
- * Non-critical tasks
- * The boring stuff
+Getting help
+ * Show all global functions
+ * Show functions inside objects
+ * Show your own functions
 
 CFT as a shell
- * Navigating directories
  * Show content of file
+ * Open a file in editor
 
-The help system
+Automation - creating functions
 
 List basics
 
 Files
- * Create file
- * Read file
- * Append to file
  * Page through a file
  * Show bytes of file
  * Encoding
- * Delete a file
 
 Directories
  * Create a subdirectory
@@ -44,6 +39,7 @@ The shell() function
 
 Core types
  * String literals
+ * Dictionaries
 
 List iteration / filtering
  * Iterating over list content
@@ -54,7 +50,6 @@ List iteration / filtering
 Creating functions
  * Naming lines of code
  * Calling a function
- * Listing custom functions
 
 Savefiles
  * Save
@@ -68,29 +63,33 @@ Protecting files and directories
  * No guarantee
  * Laziness is our friend
 
-CFT as a functional programming language
- * Code only
+More programming
  * Local variables
- * Stack vs expressions
  * Nested loops
  * Loop spaces - "pipes"
  * Result value from a loop space
  |   If the loop space contains looping ...
  |   Otherwise ...
+ * Editing script files
+ |   Comments
  * Function parameters
  |   Simple example
- |   Asking for missing value
-
-Conditional execution
- * List filtering
- * if() expression
- * when() expression
- * error() expression
-
-Block expressions
- * Block expressions are real expressions
- * Pitfalls
- * Full functionality
+ * User input
+ * Block expressions
+ |   Local blocks
+ |   Lambdas
+ |   Inner blocks
+ |   Summary
+ * Conditionals - if expression
+ |   Inline form
+ |   Traditional form
+ |   Functionally identical
+ * Lazy evaluation
+ |     Lazy if
+ |     Lazy AND, OR - &amp;&amp; ||
+ |     Lazy P(N,defaultExpr)
+ * The error() function
+ * Output
 
 Running external programs
  * Summary
@@ -102,61 +101,15 @@ Running external programs
  * External Program Status
  |   Example
 
-Editing script files
- * Using editor for entering code
- * Auto reload
- * No auto save!!
- |   Losing changes
- * Multi-line functions
- * Comments
- * First line of a function ...
- * Debug
-
-Interactive use
- * Change current directory: cd
- |   Change drive letter in Windows
- |   Paths with space
- * List files: ls
- * Display text file: cat, more, edit
- |   Editing a previous file again
- |   cat, more, edit - implementation
- * Print working directory: pwd
- * Using cd, ls, cat, more and edit inside (function) code
- * Get data from user: Input() and readLine()
-
-Searching files / report()
- * report()
- * Multi-line example
- * Grep - complex example
- * Working with huge logs - counting hits
- |   Counting hits
- |   Limiting search to a few files
-
-Searching log files
- * Lib.Files.DateSort
- |   DateSort.search()
- * Lib.Files.LineReader(file)
-
-Generalized sorting
- * Example: file size
- * Example: file name
-
-Dictionary objects / Dict()
-
-Date and time processing
- * Milliseconds
- * The Date object
- * The Date.Duration object
-
-Session persistent data / ValDef / Val
+Session persistent data
+ * ValDef
+ * Val
 
 Synthesis
  * The problem
  * Creating code from values
  * Example using :syn
  * Example using :NN
-
-Repeat last program line
 
 Output format / Cfg
  * The @term shortcut
@@ -189,7 +142,7 @@ Various topics
  * Session state
  * Predicate calls
  * List.push()
- * Dict set strings
+ * Dict set with strings
  * Dict fields as functions
  * Dict.get with default value
  * List.nth() negative indexes
@@ -202,10 +155,9 @@ Various topics
  * Running colon commands from script code
  * Simple line editing
  |   Develop complex code in steps
- * Macros
- |   Simple example
- * CFT.props - mCat, mEdit and mMore macros
+ * CFT.props - mCat, mEdit and mMore lambdas
  * CFT.props - shortcuts
+ |   Show all shortcuts
 
 Some example code
  * Windows PowerShell
@@ -213,6 +165,7 @@ Some example code
  * Linux get user name
 
 Lib.Text.Lexer
+ * Motivation
  * Concept
  * Implementation
  |   .sub()
@@ -224,7 +177,7 @@ Reference: Synthesizable types
 
 Fun and strange stuff
  * Why Input("label").get?
- * Block expressions are strange
+ * Inner blocks??
  * Function name AFTER code?
  * Stack-based assignment?
  * Using Sys.stdin to run colon commands etc

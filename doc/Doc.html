@@ -15,24 +15,28 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2020-09-09 RFO
-v1.2.3 # new section Lib.Text.Lexer
+Last updated: 2020-09-12 RFO
+v1.3
 
 </pre>
 
 <h1>Introduction</h1>
 
 <p>
-  CFT is a programmers tool, in the form of a Java application that runs in a 
-  terminal window. It has no graphical
-  elements, which means it can run everywhere. From the start it has been developed
-  as an interactive environment, with strong emphasis on automation. The syntax is compact, 
-  in the interest of getting useful work out of even a single line of code.
+  CFT is an interactive programmable shell-like application, for automation of all kinds.
 </p>
-
+<p>
+  It is a Java application that runs on the command line, and has no graphical elements, which
+  means it can run everywhere. The syntax is compact, so as to be able to do useful
+  work even entering code interactively, one line at a time.
+</p>
+<p>
+  Automating tasks is done by creating functions, which initially are named sequences
+  of code. Functions call each other, as well as a library of global functions.
+</p>
 <p>
   CFT is tested on Linux and Windows, and easily integrates with external commands
-  on both, such as PowerShell, git, ssh. It should run everywhere that supports Java.
+  on both, such as PowerShell, git, ssh. It should run anywhere that supports Java.
 </p>
 
 <p>
@@ -40,167 +44,121 @@ v1.2.3 # new section Lib.Text.Lexer
   marked a certain level of robustness and error
   handling, being mature enough for open source release on github. 
 </p>
-<p>
-  It started out purely as an interactive
-  tool, with emphasis on compact syntax, since all code was entered via the command line. After
-  a while it evolved into editing the savefiles, or "script files". 
-</p>
 
 <p>
-  Functionality has been driven partially by needs and partially by what's fun to implement.
+  As the language evolved, CFT has been moving away from strictly entering code via the
+  command line, to editing the save files, which are referred to as "script files". This allows
+  multiple-line functions, and makes CFT suitable for more complex tasks. 
 </p>
 
 
 
 
-<h1>What CFT is not</h1>
+<h1>Functionality</h1>
 <p>
-  CFT does not allow classes or objects apart from those predefined. That would
-  increase complexity a lot, be harder to implement (scope rules, inheritance etc), 
-  and is not what was needed.
+  The CFT programming language is thought to act as glue between library functions and objects,
+  and the ability to run external programs. In that respect, CFT is similar to shell scripts,
+  where major functionality depends on external programs.
 </p>
 <p>
-  CFT is meant for automation tasks, such as moving files, searching and running
-  external programs. It is a Domain Specific Language, not general purpose.
-</p>
-<p>
-  Writing big functions is no problem. Letting scripts call each other is 
-  also both supported and heavily used. However, it is not a language that
-  supports any level of abstractions.
-</p>
-<p>
-  <em>It is a do-this-then-that type of language.</em> 
-</p>
-<p>
-  Also, for many purposes, we will call external programs. In this respect, CFT is a shell, in that it
-  depends on external programs. Still, CFT is not a full shell. You will usually also need regular shells 
-  for all kinds of interactive commands, as well as file managers etc.
-</p>
-<p>
-  CFT doesn't support autocomplete, since its interactivity is line based. 
-</p>
-
-
-<h1>So what is it for?</h1>
-<p>
-  Commands like "ls" and "cd" exist, with globbing, as well as "more" and "edit" (which opens a file
-  in an editor), and they are meant for moving around the directory tree. Actually changing 
-  and moving files and directories is supposed to be scripted with code. 
-</p>
-<p>
-  Everything in CFT is functions, and defining your own is super easy, and <em>this is the point of CFT</em>, 
-  the automation aspect, and that automation should be a simple and interactive process.
-</p>
-
-<h2>Functions example</h2>
-
-<p>
-  CFT is object oriented, as opposed to traditional *ix shells such as bash, which process text.
-</p>
-<p>
-  This means that the return value from some function always is an object that has other functions
-  inside. Strings, integers and floats are all objects.
-</p>
-<p>
-Example:
+  CFT is object oriented in the sense that everything is objects. Entering the integer 1 on the
+  command line, is an expression which resolves into a value object of type "int". All objects
+  have member functions, for example the "bin()" function on integers, that returns the number
+  as a binary string.
 </p>
 <pre>
-$ Dir.files.length
-
-# means: 
-# - call global function Dir() with no parameters
-# - returns Dir object for current directory
-# - call .files() inside the Dir object 
-# - returns list of File objects
-# - call .length() function on the list object
-# - returns an int
+  $ 1.bin
+  &lt;String&gt;
+  00000001
 </pre>
-
-<h3>No parantheses?</h3>
 <p>
-  When calling a function without parameters, the parantheses () are optional. 
-</p>
-
-<h2>Mission-critical operations</h2>
-
-<p>
-  Working on live systems, one must at all costs avoid issuing the wrong commands. 
-  Creating functions, and preferrably adding code to validate input, to reject specific server
-  names or domains, plus the .protect() mechanism for Dir and File objects, helps you avoid doing
-  seriously bad things. 
+  Here the '$' is the prompt.
 </p>
 <p>
-  Functions will often ask you to enter data, and this means you need proper sanity checks
-  before doing dangerous operations. Nothing ruins the day like killing the wrong database
-  or VM. 
+  The ".bin" calls the function "bin" inside the integer object. Parantheses are optional when no parameters.
 </p>
 
 
-
-<h2>Non-critical tasks</h2>
-
-<p> 
-  Even mundane operations still have the potential for unwanted consequences, such as deleting
-  the original log files at the remote server, instead of the copy you unzipped locally.
+<h2>System functions and objects</h2>
+<p>
+  A number of global functions are available, and all produce objects of some sort, where
+  we may in turn call other functions, and so on. 
 </p>
 <p>
-  The protect() mechanism is created for these scenarios.
-</p>
-<p>
-  It lets us block Dir or File objects against destructive operations, and is inherited by all
-  Dir and File objects derived from these. The aim is to protect us from mistyping in
-  those "in a hurry" situations, where one may directly enter commands like this.
+  The global functions are available from the command line as follows:
 </p>
 <pre>
-  $ someDir.allFiles-&gt;f f.delete
+  $ help
 </pre>
-
-
-
-<h2>The boring stuff</h2>
 <p>
-  Apart from all kinds of security measures possible with functions, there is the obvious: they
-  can be run over and over again.
+  Global functions give access to objects of different types. Some of the most important
+  and frequently used are:
 </p>
-<p>
-  Here are some typical areas of boring tasks that CFT handles easily.
-</p>
-
-  <ul>
-  <li> copying files</li>
-  <li> searching source code and logs</li>
-  <li> deploying jar files to test environments</li>
-  <li> restart services</li>
-  <li> identify log files between certain dates</li>
-  <li> verify that a bunch of VM's can be pinged</li>
-  <li> generate netplan config files</li>
-  <li> remote management via ssh</li>
-  <li> automate git and powershell and other things that require you to type too much</li>
+<ul>
+  <li>lists</li>
+  <li>directories</li>
+  <li>files</li>
+  <li>dictionaries</li>
 </ul>
 
+
+
+<h1>Getting help</h1>
+
+<h2>Show all global functions</h2>
+<pre>
+  $ help
+</pre>
+
+
+<h2>Show functions inside objects</h2>
+<p>
+  To show all functions inside an object, create an instance of that object followed by the word help. 
+  Specifically, the help statement takes the value on top of the stack and lists it's available
+  functions.
+</p>
+<pre>
+  $ 1 help               # integer
+  # 3.14 help            # float
+  $ "xxx" help           # string
+  $ List help
+  $ Dict help
+  $ Dir help
+  $ File("x.txt") help   # the file needs not exist
+</pre>
+
+
+
+<h2>Show your own functions</h2>
+<p>
+  List the functions that you have defined by typing
+</p>
+<pre>
+  $ ?
+</pre>
 
 
 
 
 <h1>CFT as a shell</h1>
-
-<h2>Navigating directories</h2>
 <p>
-  CFT started out as an interactive shell-like app. It runs in a terminal window, and offers a simple '$' prompt, where one enters commands.
+  Commands like "ls" and "cd" exist, with globbing, as well as "more" and "edit" (which opens a file
+  in an editor), and they are meant for moving around the directory tree.
 </p>
 <p>
-  <i>As of v1.1.1 the prompt is now "live", being a macro defined in the CFT.props file. By default it displays
-  the name of the current script before the '$' character. It can easily be changed to display current
-  directory, time of day, and anything else you care write code for.</i>
+  Actually changing 
+  and moving files and directories is supposed to be scripted with code.
 </p>
-
 <pre>
-  $ ls
-  $ cd subdir
-  $ cd ..
   $ pwd
-  $ ls ../someDir/*.txt
+  $ cd ..
+  $ ls *.txt
 </pre>
+
+<p>
+  CFT differs from traditional *ix / *ux shells, in that it works with objects, not just strings.
+</p>
+
 
 
 
@@ -212,43 +170,49 @@ $ Dir.files.length
 <pre>
   $ cat TODO.txt
   $ more TODO.txt
+</pre>
+
+<h2>Open a file in editor</h2>
+<pre>
   $ edit TODO.txt
 </pre>
 
 
 
 
-
-
-<h1>The help system</h1>
+<h1>Automation - creating functions</h1>
 <p>
-  To get information about what global functions are available, type "help" and press Enter. A list of global
-  functions is displayed with a short description for each. To get help for functions available inside an
-  object, put an object of that type on the stack followed by help.
+  Automation is in its simplest form to assign a name to a sequences of statements.
 </p>
 
 <pre>
-  $ help
-  $ "" help
-  $ Dir help
-  $ 3 help
-  $ 0.1 help
+  $ Dir.allFiles(Glob("*.java"))
 </pre>
-
 <p>
-The first produces a list of global functions, the second of functions inside string objects, and
-the third displayes the functions inside Dir objects. The fourth lists functions available on
-int, and the last for float values.
+  This line of code generates a list of all java files under the current directory or sub-directories. 
+  To save typing, we may want to assign a name to the code. This is done by entering a slash followed by
+  an identifier.
 </p>
 
+<pre>
+  $ /JavaFiles
+</pre>
 <p>
-  Example
+  Now every time we want the list of java files, we just type JavaFiles.
 </p>
 <pre>
-  $ 3.bin
-  &lt;/String&gt;
-  00000011
+  $ JavaFiles-&gt;f out(f.read.length) | _.sum
 </pre>
+<p>
+  This single line of code now counts the number of lines in all the files, and sums them up. 
+</p>
+<ol>
+  <li>the "arrow" followed by an identifier is the "for each" construct</li>
+  <li>the out() statement generates output from the loop</li>
+  <li>the "pipe" character terminates the loop, and delivers the result to the next part, where ...</li>
+  <li>the special expression '_' just means "get value on top of stack", which in this case is a list ...</li>
+  <li>on which we call the "sum()" function</li>
+</ol>
 
 
 
@@ -256,22 +220,17 @@ int, and the last for float values.
 
 <h1>List basics</h1>
 <p>
-  Lists are created with the global List() function, which creates
-  a list from all its parameters.
+  Lists are return value from many functions, such as getting the files in a directoryu. Lists
+  can also be created 
+  with the global List() function, which takes any number of parameters, and creates a List object
+  from those values.
 </p>
 <pre>
   $ List(1,2,3,4)
-</pre>
 
-<p>
-  Lists are also returned from many other functions, for example
-  calling the Dir.files() function produces a list of File objects inside that
-  directory object.
-</p>
-
-
-<pre>
   $ Dir.files
+  $ "abcdef".chars
+  $ "one two three".split
 </pre>
 
 <p>
@@ -290,8 +249,6 @@ int, and the last for float values.
 <pre>
   $ List help
 </pre>
-
-
 
 
 
@@ -324,46 +281,7 @@ int, and the last for float values.
 </pre>
 
 
-<h2>Create file</h2>
-<p>
-To create a file with a single text line:
-</p>
 
-<pre>
-  File("x.txt").create("one line")
-</pre>
-
-<p>
-  If the file already exists, it is overwritten with the new content.
-</p>
-<p>
-  Usually, we create files with more than one line, and this is done supplying a List
-  instead of a single value, as parameter to the File.create() function.
-</p>
-
-<h2>Read file</h2>
-
-<p>
-  To read an existing text file:
-</p>
-<pre>
-  File("x.txt").read
-</pre>
-<p>
-  This returns a list of all lines in the file.
-</p>
-
-<h2>Append to file</h2>
-
-<p>
-  To append a single line to a file:
-</p>
-<pre>
-  File("x.txt").append("another line")
-</pre>
-<p>
-  To append multiple lines, append a list instead.
-</p>
 
 <h2>Page through a file</h2>
 
@@ -376,11 +294,13 @@ To create a file with a single text line:
 
 <h2>Show bytes of file</h2>
 <p>
-  To page through list of bytes (hex)
+  To page through hex listing of file
 </p>
 <pre>
   File("x.txt").hex
 </pre>
+
+
 
 <h2>Encoding</h2>
 <p>
@@ -390,10 +310,7 @@ To create a file with a single text line:
   File("x.txt").encoding("UTF-8")
 </pre>
 
-<h2>Delete a file</h2>
-<pre>
-  File("x.txt").delete
-</pre>
+
 
 
 
@@ -405,15 +322,21 @@ To create a file with a single text line:
 </pre>
 
 <p>
-  Calling the Dir function with no parameters returns a Dir object for the current directory. The Dir
-  object offers multiple member functions, one of which is <b>.files()</b>, which produces a list of files in 
-  the directory. We can also call the Dir function with a path parameter.
+  Calling the Dir function with no parameters returns a Dir object for the current directory.
 </p>
+<p>
+   The Dir
+  object offers multiple member functions, one of which is <b>.files()</b>, which produces a list of files in 
+  the directory. Another is <b>.allFiles()</b> which return files from all subdirectories as well.
+</p>
+
 
 <h2>Create a subdirectory</h2>
 <pre>
   Dir.sub("someDir").create
 </pre>
+
+
 <h2>Parent directory</h2>
 <p>
   To get the parent directory of a Dir object:
@@ -421,14 +344,17 @@ To create a file with a single text line:
 <pre>
   Dir.sub("..")
 </pre>
+
 <h2>Get files in a directory</h2>
 <pre>
   Dir.files
 </pre>
+
 <h2>Create a file in a directory</h2>
 <pre>
   Dir.file("x.txt").create("something")
 </pre>
+
 <h2>Get immediate directories in a directory</h2>
 <pre>
   Dir.dirs
@@ -482,6 +408,7 @@ To create a file with a single text line:
   <li>float - (Java double)</li>
   <li>boolean</li>
   <li>List</li>
+  <li>Dict</li>
 </ul>
 <p>
   All values in CFT are objects, which may contain functions. Strings can be written using double
@@ -494,6 +421,9 @@ To create a file with a single text line:
   for all kinds of combinations.
 </p>
 <pre>
+  $ "double quotes"
+  $ 'single quotes'
+
   $ "'a'"
   &lt;String&gt;
   'a'
@@ -504,10 +434,19 @@ To create a file with a single text line:
 </pre>
 <p>
   Also, backslash is not used as escape character, which means backslash is just another character,
-  simplifying those Windows paths. 
+  simplifying those Windows paths.
 </p>
 
 
+<h2>Dictionaries</h2>
+<p>
+  Dictionaries are maps that store any value identified by names (as strings). 
+</p>
+<pre>
+  $ Dict=x x.set("a",1) x.get("a")
+  &lt;int&gt;
+  1
+</pre>
 
 
 
@@ -554,7 +493,7 @@ To create a file with a single text line:
 
 <p>
   The result is a list of strings, as displayed.
-  </p>
+</p>
 
 
 
@@ -618,6 +557,17 @@ To create a file with a single text line:
   3
 </pre>
 
+<p>
+  Also, elements can be added to a list with "+" as long as the list comes first.
+</p>
+<pre>
+  List(1,2)+3
+  &lt;List&gt;
+  1
+  2
+  3
+</pre>
+
 
 
 
@@ -639,8 +589,11 @@ To create a file with a single text line:
 </p>
 
 <pre>
-  $ Dir.allFiles-&gt; f assert(f.name.endsWith(".java")) out(f)
-  $ /JavaFiles
+  $ "java txt html".split
+  $ /Types
+
+  $ Dir.allFiles-&gt; f assert(Types.contains(f.name.afterLast("."))) out(f)
+  $ /TextFiles
 </pre>
 
 
@@ -650,32 +603,8 @@ To create a file with a single text line:
   To call the above function, just enter its name.
 </p>
 <pre>
-  JavaFiles
+  TextFiles
 </pre>
-
-<h2>Listing custom functions</h2>
-<p>
-  Enter '?' and press Enter.
-</p>
-
-<pre>
-  $ ?
-  +-----------------------------------------------------
-  | JavaFiles: Dir.allFiles-&gt;f assert(f.name.endsWith(".java")) out(f)
-  +-----------------------------------------------------
-  | .        : Dir.allFiles-&gt;f assert(f.name.endsWith(".java")) out(f)
-  +-----------------------------------------------------
-</pre>
-
-<p>
-  Here we see function 'JavaFiles' and its code. We also see the last entered code line, with
-  a dot '.' in front of it. The last code line is the one that can be given a name, and further,
-  the last code line can be repeated by entering a single dot and pressing enter.
-</p>
-
-
-
-
 
 
 
@@ -782,6 +711,7 @@ codeDirs = . ; code.examples ; code.lib
 </p>
 
 
+
 <h2>No guarantee</h2>
 <p>
   Calling .protect on a Dir object, before using it to locate files, will propagate the protected
@@ -811,52 +741,7 @@ codeDirs = . ; code.examples ; code.lib
 
 
 
-
-
-
-
-
-
-
-
-<h1>CFT as a functional programming language</h1>
-
-
-
-<h2>Code only</h2>
-<p>
-  A major point of CFT is that when we define names using "/name", these names are functions, which
-  mean they point to code. When entering code, it is immediately executed, leaving us with a result. When we are happy with the outcome, we may assign a name to the function.</p>
-<p>
- The point is that it is the function code that is named, not the result.
-</p>
-
-<pre>
-  $ "1 2 3".split
-  &lt;List&gt;
-   0: 1
-   1: 2
-   2: 3
-  $ /data
-</pre>
-
-<p>
-  Entering the "/data" command
-  assigns a name to the last code line, not the data it returned. Every reference to the
-  custom function "data" will now run the code over again, and produce (the same) result.
-</p>
-<p>
-  Entering '?' to list your defined functions, you see this clearly.
-</p>
-
-<pre>
-  $ ?
-  +-----------------------------------------------------
-  | data: "1 2 3".split
-  +-----------------------------------------------------
-  | .   : "1 2 3".split
-  +-----------------------------------------------------
-</pre>
+<h1>More programming</h1>
 
 
 
@@ -875,19 +760,6 @@ codeDirs = . ; code.examples ; code.lib
 </pre>
 
 
-
-
-
-<h2>Stack vs expressions</h2>
-
-<p>
-  Even though CFT uses a data stack, expressions are not stack-based.
-</p>
-<p>
-  This is because  writing postfix expressions is too bothersome (ex. "3 2 +"), so CFT 
-  only understands expressions using regular infix notation ("3+2"). Respecting normal cardinality rules,
-  we have that 2+3*5 becomes 17.
-</p>
 
 
 
@@ -919,7 +791,7 @@ codeDirs = . ; code.examples ; code.lib
 
 <h2>Loop spaces - "pipes"</h2>
 <p>
-  The body of any loop is the rest of the code, or until a "pipe" symbol
+  The body of any loop is the rest of the code of the function, or until a "pipe" symbol
   is found. The pipe symbol ("|") more accurately breaks the code into a sequence of
   <em>loop spaces</em>, which means acting as an end-point for 
   running loops.
@@ -951,14 +823,11 @@ codeDirs = . ; code.examples ; code.lib
   following is perfectly legal, although a little silly.
 </p>
 <pre>
-  $ 2+3 | | | | =x x | =y y | _ |
+  $ 2+3 | | | | =x x | =y y | _ _ _ |
 </pre>
 <p>
   Yes, it returns 5.
 </p>
-
-
-
 
 
 
@@ -983,6 +852,32 @@ codeDirs = . ; code.examples ; code.lib
   element on the stack after all code has executed. If there is no value on the stack,
   the return value is <em>null</em>.
 </p>
+
+
+
+
+<h2>Editing script files</h2>
+<p>
+  After saving, a script file is created. It can be edited with any editor. CFT automatically detects
+  if it has been changed, and reloads it when issuing the next interactive command.
+</p>
+<p>
+  There also exists a shortcut, which opens the current script file in an editor:
+</p>
+<pre>
+  $ @e
+</pre>
+
+
+<h3>Comments</h3>
+<p>
+  The hash character '#' indicates that the rest of the line is a comment.
+</p>
+
+
+
+
+
 
 
 
@@ -1053,10 +948,23 @@ codeDirs = . ; code.examples ; code.lib
 
 
 
-<h3>Asking for missing value</h3>
+<h2>User input</h2>
 <p>
-  The default expression of P() can also be used to ask for a value when the parameters
-  is missing.
+  CFT contains the following for asking the user to enter input:
+</p>
+<pre>
+  Input("Enter value").get =value
+  readLine("Enter value") =value
+</pre>
+<p>
+  The difference is that Input remembers the last input values, and lets the user
+  press enter to use the last value, or may enter colon to select between previous
+  values. The readLine() is much simpler, and allows for empty input, as enter
+  doesn't mean "last value" as for Input.
+</p>
+<p>
+  The optional default value parameter to the P() expression for grabbing parameters to
+  functions, can be used to produce functions that ask for missing values.
 </p>
 <pre>
   P(1,Input("Enter value").get) =value ...
@@ -1065,143 +973,191 @@ codeDirs = . ; code.examples ; code.lib
 
 
 
-<h1>Conditional execution</h1>
+
+
+
+
+
+<h2>Block expressions</h2>
 <p>
-  Conditional execution in CFT takes two basic forms.
-</p>
-<h2>List filtering</h2>
-<p>
-  The assert(), reject() and break() statements inside loops decide if the rest of the loop body is to 
-  be executed or not, and provide the data filtering mechanism in CFT.
+  The traditional blocks inside curly braces are present in CFT as well, and are used for different
+  things.
 </p>
 
-<h2>if() expression</h2>
-<p>
-  The if() statement takes three parameters, the condition, the if-expression, and the 
-  else-expression. Depending on the condition only one of the two following expressions
-  are resolved. 
-</p>
-<p>
-  In this example we call SomeFunction, then use an if() expression to replace return value 'null' 
-  with integer 0 (zero).
-</p>
 
-<pre>
-  SomeFunction(...) =a
-  if(a==null, 0, a) =a  # provides a default value if a is null
-</pre>
-
-<h2>when() expression</h2>
+<h3>Local blocks</h3>
 <p>
-  The when() expression is like an if() expression minus the else-part. 
+  Local blocks are just for grouping code that runs in the same context as the code around it. Technically
+  they are considered expressions.
 </p>
 <pre>
-  if (bool, expr)
-</pre>
-<p>
-  If the boolean expression resolves to true, then the 'expr' is resolved, and this becomes the return
-  value. Otherwise, the 'expr' is not resolved, and the return value is null.
-</p>
-<p>
-  The when() expression is good for handling multiple-choice ladders ("switch" in Java).
-</p>
-<pre>
-  when (mode==1, SomeFunction(...))
-  when (mode==2, SomeOtherFunction(...))
-  when (mode==3, ... )
+  if (a&gt;b) {
+    ...
+  }
 </pre>
 
-<h2>error() expression</h2>
+
+<h3>Lambdas</h3>
+<p>
+  A Lambda is an object (a value) that contains code, so it can be called, with parameters. The code
+  inside runs detached from the caller, and behaves exactly like a function.
+</p>
+<pre>
+  Lambda { P(1)+P(2) } =x x.call(1,2)
+</pre>
+<p>
+  Great for local functions inside regular functions, and for sending as parameters to other functions,
+  or lambdas.
+</p>
+
+
+
+<h3>Inner blocks</h3>
+<p>
+  An inner block is a cross between local blocks and the Lambda. An Inner block is executed
+  immediately, and has access to the local variables inside the function, but maintain a separate
+  context for loops and loop output. Technically, inner blocks are expressions, just as with local
+  blocks. 
+</p>
+<p>
+  In other words: Inner blocks define their own loop space.
+</p>
+<pre>
+  Inner {
+    someList->x out(x+1)
+  } =resultList 
+  ...
+</pre>
+<p>
+  Inner blocks are a way of running loops isolated from the environment. Remember that loops by 
+  default extend to the end of the function, or until hitting a "pipe". The third thing that 
+  terminates loops are hitting the end of the current block.
+</p>
+<p>
+  Even the end of local blocks terminate loops, but they share the loop space of the surrounding code, 
+  providing somewhat "complicated" outcomes.
+</p>
+<p>
+
+
+
+
+<h3>Summary</h3>
+<p>
+  Local (plain) blocks for non-looping blocks of code, typically used with "if". Running in
+  the same loop space as outside the block, means it can call break() and out() as well as
+  assert() and reject() and affect the (innermost) loop of those outside the block. 
+</p>
+<p>
+  Inner blocks for isolated processing loops inside other code. This means calling break() and
+  out() and assert() and reject() have no effect on loops outside the block.
+</p>
+<p>
+  Lambdas are "functions" as values.
+</p>
+
+
+
+
+
+<h2>Conditionals - if expression</h2>
+<p>
+  Conditional execution of code is done in two ways in CFT, with the first being how we
+  control processing loops with assert, reject and break.
+</p>
+<p>
+  Then there is the if-exression. It takes two forms, but is always considered an expression, not a statement. The
+  difference is that expressions always return a value, which statements need not.
+</p>
+<h3>Inline form</h3>
+<pre>
+  if (condition, expr1, expr2)
+  if (condition, expr1)
+</pre>
+<p>
+  The first selects between the two expressions, based on the condition, evaluating and returning 
+  expr1 if condition is true, otherwise expr2. The second conditionally evaluates expr1, or if 
+  the condition is false, returns null.
+</p>
+
+<h3>Traditional form</h3>
+<pre>
+  if (condition) expr1 else expr2
+  if (condition) expr1
+</pre>
+
+<h3>Functionally identical</h3>
+<p>
+  The two forms are functionally the same. To select between two simple expressions, the inline
+  form is probably most readable, while when using block expressions, the traditional form
+  usually feels more natural. Also note that block expressions allow us to call statements, 
+  such as out() and break() as well as assignments.
+</p>
+<pre>
+  # Example: produce a default value if null
+  if (value != null, value, "x") =value
+
+  # Example: call statements inside blocks
+  1 =i
+  loop
+    if (i>10) {
+       break
+    } else {
+      i+1 =i
+    }
+</pre>
+
+
+
+
+<h2>Lazy evaluation</h2>
+<h4>Lazy if</h4>
+<p>
+  The if-expression uses lazy evaluation, which means that only the selected
+  value expression (if any) gets evaluated. This is the same as every other
+  language.
+</p>
+<h4>Lazy AND, OR - &amp;&amp; ||</h4>
+<p>
+  Boolean expressions with logical AND and OR, are lazy, again as in
+  every other language. 
+</p>
+<h4>Lazy P(N,defaultExpr)</h4>
+<p>
+  The P() expression to access function parameters only evaluates the default
+  expression if parameter N is null.
+</p>
+
+
+
+
+
+<h2>The error() function</h2>
 <p>
   The error() expression is another that contains a conditional part, and if true, throws
-  an exception with the string part, terminating current execution.
+  an exception with the string part, terminating current execution. Alternatively it can
+  be used without the condition, which means it always throws an exception.
 </p>
 <pre>
-  $ error(1+1==2,"oops")
+  error(1+1==2,"this should not happen")
+
+  if (1+1==2) {
+    error("oops again")
+  }
 </pre>
 
 
 
-
-
-<h1>Block expressions</h1>
+<h2>Output</h2>
 <p>
-  Block expressions are sequences of code
-  inside curly braces, and are frequently used with if() and when(). 
+  Output to screen
 </p>
 <pre>
-  false =ok
-  when (someCondition, {
-    println("hello there")
-    true =ok
-  })
+  println("a")
+  debug("b")
 </pre>
 
 
-
-
-<h2>Block expressions are real expressions</h2>
-<p>
-  Though mostly used with when() and if(), block expressions are general expressions, just
-  like a function call, or some variable lookup.
-</p>
-<pre>
-  {2+3}.bin
-  &lt;String&gt;
-  00000101
-</pre>
-
-
-<h2>Pitfalls</h2>
-<p>
-  Block expressions occur literally inside other code, and have their variable scope
-  extend out into the calling environment, but they are not just code blocks, as in Java. 
-  Instead they are a but function-like. This means:
-</p>
-<ul>
-  <li>
-    One can not pass data to or from block expressions via the stack, as they operate their
-    own stack internally
-  </li>
-  <li>
-    Loop control does not extend from inside a block expressions to the surrounding code, partially
-    because block expressions can have their own loops. This means that
-    for example calling break(true) has no effect on the caller.
-  </li>
-</ul>
-<p>
-  Example:
-</p>
-<pre>
-  "a b c".split-&gt;x
-  when(x=="b", {break(true)})  # does not break loop
-</pre>
-<p>
-  The call to break() inside a block expression does not affect the loop running outside
-  the block expression. 
-</p>
-<p>
-  With break() taking a boolean value, the above example is a bit artificial, as the solution 
-  here is to write:
-</p>
-<pre>
-  "a b c".split-&gt;x
-  break(x=="b")
-</pre>
-
-
-
-
-<h2>Full functionality</h2>
-<p>
-  Block expressions can contain looping and the code can be partitioned into a
-  number of loop spaces (with the "pipe" symbol). Example:
-</p>
-<pre>
-  List(1,2,3)=a {a-&gt;x assert(x%2==1) out(x) | _.sum} 
-  &lt;int&gt;
-  4
-</pre>
 
 
 
@@ -1340,14 +1296,12 @@ codeDirs = . ; code.examples ; code.lib
 
 <h3>ssh without password</h3>
 <p>
-  To set up ssh login without password, create and distribute an ssh key. 
-</p>
-<p>
-  The script "SSH" under code.examples contains code for doing this.
+  To set up ssh login without password, create and distribute an ssh key, then
+  copy it to the target host, as follows (in Linux shell).
 </p>
 <pre>
-  $ :load SSH
-  $ Readme
+  $ ssh-keygen -t rsa
+  $ ssh-copy-id user@host
 </pre>
 
 
@@ -1379,733 +1333,25 @@ codeDirs = . ; code.examples ; code.lib
 </pre>
 
 
-
-
-<h1>Editing script files</h1>
-
-
-<h2>Using editor for entering code</h2>
-
+<h1>Session persistent data</h1>
 <p>
-  As was illustrated above, in the case of Dir.runDetach(), we can create a function that opens
-  the current savefile in an editor. This of course requires a current savefile, which is created
-  by colon command save. The Sys.savefile() function returns a File object for the savefile,
-  or null if no savefile exists.
-</p>
-
-<p>
-  Since this is functionality is used very frequently, there exists a global shortcut that does this.
-</p>
-<pre>
-  $ @e
-</pre>
-
-
-
-
-
-
-<h2>Auto reload</h2>
-<p>
-  After modifying a script in an editor, and saving it, CFT automatically reloads it the next
-  time you run something.
-</p>
-
-
-<h2>No auto save!!</h2>
-<p>
-  Note that when modifying a script from within CFT, by defining or redefining functions, there
-  is <em>no auto save</em>. This is to allow experimentation without making changes permanent, 
-  but requires that you remember to save manually when done. 
-</p>
-<p>
-  If you have never saved the script, you must enter a name:
-</p>
-<pre>
-  $ :save SomeName
-</pre>
-<p>
-  Having saved the script before, you need only enter the following:
-</p>
-<pre>
-  $ :save
-</pre>
-
-
-<h3>Losing changes</h3>
-<p>
-  Doing changes to a script inside CFT, but forgetting to save, then opening the savefile
-  in an editor, and saving, causes CFT to automatically reload the savefile, losing the initial
-  changes. 
-</p>
-<p>
-  After doing interactive changes inside CFT, always save. Also either refresh file in open
-  editor, or close editor and open new.
-</p>
-
-
-
-
-
-
-<h2>Multi-line functions</h2>
-<p>
-  Editing the savefile lets us write more complex functions as we can break function
-  code across multiple lines, using indentation and comments. The same rules apply as for 
-  single lines, regarding how the "pipe" symbol sections the code into multiple
-  loop spaces.
-</p>
-
-
-
-
-<h2>Comments</h2>
-<p>
-  The hash character '#' indicates that the rest of the line is a comment.
-</p>
-
-<p>
-  Note that ALL TEXT following one function assigment ("/name") is included as the 
-  code body of the next function. 
-</p>
-
-
-
-
-
-<h2>First line of a function ...</h2>
-<p>
-  The interactive command '?' is used to see the defined functions. For functions entered
-  interactively there is only one line, and that line is shown. For multiline functions, 
-  the first line is displayed. 
-</p>
-<p>
-  Letting the first line of a multi-line function be a comment is a great way of 
-  producing meaningful content for the interactive '?' command.
-</p>
-<p>
-  Alternatively, putting all parameter grabs on a single first line, serves as great
-  documentation of function interface when seen with the '?' command.
-</p>
-
-
-
-
-
-<h2>Debug</h2>
-<p>
-  When creating complex code, we may need to display debug output. This is done with the global
-  debug() function, or you can use the println() function.
-</p>
-
-<pre>
-  $ debug("data")
-  %DEBUG% data
-</pre>
-<p>
-  You can of course also just call println(...)
-</p>
-
-
-
-
-
-
-
-<h1>Interactive use</h1>
-
-<h2>Change current directory: cd</h2>
-<p>
-  The "cd" command should function mostly as expected. CFT has no autocomplete feature, since
-  it only reads lines, not key-presses.
-</p>
-<p>
-  CFT handles globbing with '*' in the last part of the path, so you can enter:
-</p>
-<pre>
-  $ cd Proj*
-  $ cd ../OtherProj*  # will fail if more than one match
-</pre>
-<p>
-  The "cd" command also has a "funtion mode", where you can enter 
-</p>
-<pre>
-  $ cd (expr)
-</pre>
-<p>
-  The expression must resolve into a Dir object.
-</p>
-
-
-<h3>Change drive letter in Windows</h3>
-<p>
-The following is used to switch drive letter in Windows.
-</p>
-<pre>
-  $ cd d:\
-</pre>
-
-<h3>Paths with space</h3>
-<p>
-  Also note, that paths with space in them need to be put into
-  quotes.
-</p>
-<pre>
-  $ cd "c:\Program Files\blah\blah"
-</pre>
-
-
-<h2>List files: ls</h2>
-<p>
-  The "ls" command comes in three variants:
-</p>
-<ul>
-  <li> "ls" - lists directories and files</li>
-  <li> "lsd" - lists directories only</li>
-  <li> "lsf" - lists files only</li>
-</ul>
-
-<p>
-  As with "cd", it handles globbing with '*' in the last part of the path:
-</p>
-<pre>
-  $ ls *.txt
-  $ ls ../OtherProject/*.xml
-</pre>
-<p>
-  Also as with "cd", the "ls" command has a "function mode", where it takes an
-  expression inside ()'s.
-</p>
-<pre>
-  $ ls (expr)
-</pre>
-<p>
-  The expr should resolve into a Dir object.
-</p>
-
-
-
-<h2>Display text file: cat, more, edit</h2>
-<p>
-  The "cat" command lists the content of a file, while "more" pages through the file, and
-  "edit" opens an editor with the file. All these also understand globbing in the same way
-  as "cd" and "ls" 
-</p>
-<pre>
-  $ cat README*
-  $ more README*
-  $ edit README*
-  $ cat ../OtherProject/build*.xml   # will fail if more than one match
-</pre>
-<p>
-  As with "ls" and "cd", these also handle "function mode", where we pass an expression
-  inside ()'s. Example:
-</p>
-<pre>
-  $ edit (Sys.savefile)
-</pre>
-
-
-
-<h3>Editing a previous file again</h3>
-<p>
-  Each time "edit" is used to display a file in an editor, a history log is maintained. To
-  display this log, and select a file from it, just type enter with nothing following. This
-  only works in interactive mode.
-</p>
-<pre>
-  $ edit
-</pre>
-
-<h3>cat, more, edit - implementation</h3>
-<p>
-  These three commands (statements) are defined via macros in the CFT.props file, which for
-  "edit" and "more" calls functions inside the Lib script (under code.lib).
-</p>
-<o>
-  This means that their functionality are not complete defined within the CFT java code, and
-  that their functionality can be modified without recompiling the code.
-</p>
-
-
-
-
-<h2>Print working directory: pwd</h2>
-<p>
-  The command "pwd" is also implemented as an expression, and returns the current directory. This
-  is the same as the "Dir" expression.
-</p>
-<pre>
-  $ pwd
-</pre>
-
-
-
-<h2>Using cd, ls, cat, more and edit inside (function) code</h2>
-<p>
-  Quick answer: <b>this should be avoided.</b>
-</p>
-<p>
-  These statements, unless called in "function mode", with ()'s, WILL consume all tokens up to the
-  end of the function, or the next PIPE. They will mess up your code, and fail. For use on the
-  interactive command line only.
-</p>
-<p>
-  In script code, there generally is no point in navigating to a current directory. The
-  "current directory" is really a concept for interactive use. Once you get to a 
-  directory you need to write code for:
-</p>
-<pre>
-  $ pwd
-  $ :syn
-  $ /MyDir
-</pre>
-<p>
-  The :syn command synthesizes code from the value returned from pwd, and then we assign it
-  to a function. From then on, using MyDir to access sub-directories or files, gets the
-  same results independent of the current directory. 
-</p>
-<p>
-  To start an editor or page through a file from code, please use the following:
-</p>
-<pre>
-  $ call "Lib:e" (file)  # open editor
-  $ call "Lib:m" (file)  # page through file with more
-</pre>
-<p>
-  This is what the "edit" and "more" commands uses internally anyway.
-</p>
-<p>
-  See CFT.props for the cat, more and edit macros for details.
-</p>
-
-
-
-
-
-<h2>Get data from user: Input() and readLine()</h2>
-<p>
-  To stop and ask the user to enter something, we got two options. The Input() function
-  produces an Input object which maintains a
-  session state, remembering earlier values, and suggesting the last value entered as default,
-  with the ability to show and select earlier values. 
-</p>
-<p>
-  You need to call the ".get()" function on the Input object to actually ask the user to enter
-  data.
-</p>
-<p>
-  The readLine() function just pauses and reads a line. Both Input() and readLine() take a
-  prompt parameter. For Input objects, the session state remembering previous inputs, is
-  tied to the prompt string. 
-</p>
-<pre>
-  $ Input("Enter search text").get =text
-  $ readLine("Enter name") =name
-</pre>
-
-
-
-
-<h1>Searching files / report()</h1>
-<p>
-  To search files, we usually use the Grep object. It takes a list of alternatives to look for,
-  and can optionally be instructed with patterns to reject. It has a .file(File) function that
-  runs the search on a file, and returns a list of lines that meet the requirements.
-</p>
-
-<p>
-  But the lines returned from "Grep.file()" are not
-  just strings, they are extended strings, of a type called "FileLine", which contains
-  two additional additional functions, ".file()" to get the
-  file object and ".lineNumber()" which returns the line number in that file.
-</p>
-
-<p>
-  The File.read() function also produces a list of FileLine, rather than regular string
-  values.
-</p>
-
-
-
-
-<h2>report()</h2>
-<p>
-  We already know that iterative loops can generate output using out(), but there is a second way,
-  which is the report() statement. It can take one or more parameters, and results in a list of strings that
-  are formatted into columns, for readability.
-</p>
-<p>
-  The formatted text is added to the same list of output as data via out(), but only after the 
-  loop space has completed. This means that the formatted output from report() is data (strings),
-  just like values from out().
-</p>
-
-
-<h2>Multi-line example</h2>
-<p>
-  Below we will show a multi-line example function, which we create editing the savefile,
-  that asks the user for a search text, then searches
-  some directory for all source files (java), and look for the pattern in each. The result is presented
-  in readable format, using report()
-</p>
-
-<pre>
-  Dir("/home/user/project1")
-  /ProjectDir
-
-  Input("Enter search term").get =st
-  Grep(st) =grep
-  ProjectDir.allFiles-&gt;f
-    assert(f.name.endsWith(".java"))
-    grep.file(f)-&gt;line
-      report(line.file.name, line.lineNumber, line)
-  /Search
-</pre>
-
-<p>
-  After adding the text to the script file using an editor, save it, then run Search in the 
-  CFT terminal window.
-</p>
-<pre>
-  $ Search
-  Enter search term
-  class
-  &lt;List&gt;
-   0: ProgramLine.java       | 11  | public class ProgramLine extends LexicalElement {
-   1: StmtDebug.java         | 9   | public class StmtDebug extends Stmt {
-   2: ExprIf.java            | 9   | public class ExprIf extends LexicalElement {
-   3: LexicalElement.java    | 5   | public class LexicalElement {
-        :
-        :
-</pre>
-
-
-
-
-
-<h2>Grep - complex example</h2>
-<pre>
-  # Match lines containing "a" or "b", and that do not contain "c" or "d"
-  Grep.match("a","b").reject("c","d")  
-
-  # Match lines containing "a" AND "b"
-  Grep.match("a").match("b")
-
-  # Regular expressions - matching lines with 8 digits in sequence
-  Grep.matchRegex("[0-9]{8}")
-</pre>
-
-
-
-
-
-<h2>Working with huge logs - counting hits</h2>
-<p>
-  The Grep instances are by default set up with a limit of the 1000 first matches. Passing
-  that limit produces an error. The limit can be changed as follows:
-</p>
-<pre>
-  $ Grep("...").limitFirst(100)
-  $ Grep("...").limitLast(100)
-</pre>
-
-
-<h3>Counting hits</h3>
-<p>
-  When working with big files, one can also decide to initially do a count of hits,
-  to narrow down the search terms before doing an actual search. 
-</p>
-<p>
-  The following example shows a function for searching through a set of java files and
-  counting the hits in each, summing these up, using Grep.fileCount() function instead
-  of Grep.file(), which produces result lines.
-</p>
-<p>
-  Counting hits is not subject to the limits above, as those exist in order to 
-  avoid uncontrolled memory use.
-</p>
-<pre>
-  Input("Enter search term").get =st
-  Grep(st) =grep
-  ProjectDir.allFiles-&gt;f
-    assert(f.name.endsWith(".java"))
-    grep.fileCount(f) =count
-    out(count)
-  | _.sum
-  /SearchCount
-</pre>
-
-
-<h3>Limiting search to a few files</h3>
-<p>
-  When working with huge data sets, we can count the number of hits in each file. This
-  could be presented as a sum, as above, or as a sorted list, displaying the number of hits
-  per file.
-</p>
-<pre>
-  Input("Enter search term").get =st
-  Grep(st) =grep
-  ProjectDir.allFiles-&gt;f
-    assert(f.name.endsWith(".java"))
-    grep.fileCount(f) =count
-    out(Int(count,f))        # &lt;--- see section on "Generalized sorting"
-  | _.sort-&gt;x
-    report(x.data.name, x)
-  /ShowHitCount
-</pre>
-<p>
-  The next step is then to extend the regular search function, with an input for (part of)
-  the file name(s) to search:
-</p>
-<pre>
-  Input("Enter search term").get =st
-  Grep(st) =grep
-  Input("(Part of) file name").get =fn
-  ProjectDir.allFiles-&gt;f
-    assert(f.name.endsWith(".java"))
-    assert(f.name.contains(fn))    # &lt;--- new
-    grep.file(f)-&gt;line
-      report(line.file.name, line.lineNumber, line)
-  /Search
-</pre>
-
-
-
-
-
-
-
-<h1>Searching log files</h1>
-
-<h2>Lib.Files.DateSort</h2>
-<p>
-  Lines written to log files usually start with date and time. Further, actions that we want to
-  trace may span several log files, for example when messages are sent between different services,
-  each with its own log. To clearly trace such activity, we may search the individual log files for some text,
-  and then sort all lines found on the date/time at the start of each line. 
-</p>
-<p>
-  The Lib.Files.DateSort function/object has been created for this purpose.
-</p>
-
-<pre>
-  Input("Enter search term").get =st
-  Lib.Files.DateSort =dateSort
-  Grep(st)=grep
-  ProjectDir.allFiles-&gt;f
-    assert(FileQualified(f))
-    grep.file(f)-&gt;line 
-      out(line)
-  |
-  =lines
-  dateSort.asc(lines)-&gt;line
-    report(line.file.name, line.lineNumber, line)
-  /SearchLog
-</pre>
-
-
-<h3>DateSort.search()</h3>
-<p>
-  As of v1.1.3 DateSort has been extended with an advanced option for searching HUGE log files
-  by date/time interval. It uses random access of start and end to identify if the file contains log lines
-  within the range, and then binary search to locate where to start reading. There is also the option
-  of supplying a Grep object, to filter lines within that time interval.
-</p>
-<pre>
-  Lib.Files.DateSort.search(file, fromTimeMillis, toTimeMillis, Grep?)
-</pre>
-
-
-<h2>Lib.Files.LineReader(file)</h2>
-<p>
-  Processing big files, you can't use File.read(), which produces a list of lines, as you will run out of memory.
-</p>
-<pre>
-  Lib.Files.LineReader(somefile).start =reader
-  loop
-    reader.read=line
-    break(line==null)
-    ....
-  |
-</pre>
-<p>
-  The LineReader automatically closes the file when the context where .start() was called, terminates.
-</p>
-<p>
-  The Grep object has a method .line() which can be used to match single lines.
-</p>
-
-
-
-
-
-
-
-<h1>Generalized sorting</h1>
-<p>
-  The List object has a function sort(), which does one of two things: 
-</p>
-<ol>
-  <li>if the list contains only numbers (int or float or a mix), sorts them by number value</li>
-  <li>... otherwise, sort as strings</li>
-</ol>
-<p>
-  The result is a new list. To sort in reverse order, we just apply the function ".reverse()" 
-  on the finished list.
-</p>
-<p>
-  The trick to sorting is to <em>make all types of objects to be sorted into a number or a string</em>.
-</p>
-<p>
-  This is done by three wrapper functions called "Int()", "Float()" and "Str()". They create objects that
-  are subclasses of the regular int, float and
-  string types, but also contain a "data" member that can be extracted after sorting, via the ".data()"
-  function.
-</p>
-
-<h2>Example: file size</h2>
-<p>
-  Let's sort the files in the current directory so that the biggest files are listed first.
-</p>
-<pre>
-  $ Dir.files-&gt;f out(Int(f.length,f)) | _.sort.reverse-&gt;x out(x.data)
-</pre>
-
-<p>
-  For each file, we output an Int wrapper object, with value set to file length, and data
-  pointing to the file. The resulting list is sorted, reversed, then iterated to output
-  the data values, which are the original File object. 
-</p>
-
-<p>
-  Could also sort on time, as File.lastModified is another int value, with CFT int values
-  corresponding to long in Java.
-</p>
-
-<h2>Example: file name</h2>
-<p>
-  To sort on file names, we use the Str() wrapper function / object.
-</p>
-<pre>
-  $ Dir.files-&gt;f out(Str(f.name,f)) | _.sort-&gt; out(x.data)
-</pre>
-
-
-
-<h1>Dictionary objects / Dict()</h1>
-<p>
-  When working with multiple projects, or sources of log files, we want to quickly flip
-  between directories, file types and perhaps other settings. This is done using dictionary
-  objects. 
-</p>
-<p>
-  Dictionary objects are key-value stored, like Map in Java.
-</p>
-<p>
-  Maintaining these types structures is best done when editing the script file with an editor.
-</p>
-<pre>
-  Dict
-    .set("dir",Dir("/home/user/project1"))
-    .set("types","java txt".split)
-  /Project1
-
-  Dict
-    .set("dir",Dir("/home/user/project2"))
-    .set("types","js css html".split)
-  /Project2
-
-  Project1
-  /CurrProject
-</pre>
-
-<p>
-  Now we can build code that searches files and performs other operations on CurrProject. 
-</p>
-<p>
-  Switching between projects is done by redefining the CurrProject function. 
-<pre>
-  $ Project2
-  $ /CurrProject!
-</pre>
-
-<p>
-  To get a named value from a Dict object, use the get(name) function.
-</p>
-
-<pre>
-  $ Dict.set("a",23).get("a")
-  &lt;int&gt;
-  23
-</pre>
-
-
-
-
-<h1>Date and time processing</h1>
-
-<h2>Milliseconds</h2>
-<p>
-  If we want to produce a list of files modified within the last 30 minutes, we can do this
-  easily, using the global function currentTimeMillis, and the File.lastModified function.
-</p>
-<pre>
-  Dir.files-&gt;f assert(currentTimeMillis-f.lastModified&gt;30*60*1000) out(f)
-  /FilesModifiedLast30Minutes
-</pre>
-
-<h2>The Date object</h2>
-<p>
-  The Date() function can be invoked without parameters, producing a Date object that represents
-  current date and time, or it can be called with an int value, which is milliseconds, such as 
-  that returned from File.lastModified. Functions exist to decide if a date is before or after 
-  another date, as well as for accessing individual properties, such as year, day of month, and so
-  on.
-</p>
-
-<p>
-  To list all files that were changed between two date/times now becomes easy
-</p>
-
-<pre>
-  P(1,Date)=fromDate
-  P(2,Date)=toDate
-    Dir.files-&gt;f
-      Date(f.lastModified) =fileDate
-      assert(fileDate.after(fromDate) && fileDate.before(toDate))
-      out(f)
-  /FilesBetweenDates
-</pre>
-
-
-
-<h2>The Date.Duration object</h2>
-<p>
-  The Date object in turn contains a function Duration() which creates a Date.Duration object. This
-  is both output from Date.diff, which calculates the amount of time between two dates, and used 
-  as input to the Date.add and Date.sub functions, which are used to calculate other dates. 
-</p>
-
-<p>
-  Example: calculating the date (and time) 300 days ago
-</p>
-<pre>
-  $ Date.Duration.days(300) =x Date.sub(x)
-</pre>
-
-
-
-
-
-<h1>Session persistent data / ValDef / Val</h1>
-<p>
-  When working interactively with large sets of data, we have the option of saving those
+  When working interactively with large sets of data, or in order to remember
+  certain selections, we have the option of saving those
   data into a session persistent data store. Two global functions let us define
   a named value, and access it.
 </p>
+<h2>ValDef</h2>
+<p>
+  Store a value under a name.
+</p>
 <pre>
   $ ValDef("a",12)
+</pre>
+<h2>Val</h2>
+<p>
+  Get value by name, or null if not defined.
+</p>
+<pre>
   $ Val("a")
   &lt;int&gt;
   12
@@ -2211,41 +1457,6 @@ The following is used to switch drive letter in Windows.
 
 <p>
   If the last value was not a list, the ":NN" command will fail with an error.
-</p>
-
-
-
-<h1>Repeat last program line</h1>
-<p>
-  The last program line entered (not colon commands or function name assignment) can be
-  repeated by entering "." (dot), then possibly be followed by additional code.
-</p>
-
-<p>
-  As the synthesize functions create a new code line, they then insert it into the history as
-  the last command, which means it can be assigned a name by "/name", but also that it can
-  be immediately run using the dot command, and extended on the fly, for example like this.
-</p>
-<pre>
-  $ ls
-  &lt;List&gt;
-   0: runtime/              | d:2 | f:12
-   1: CallScriptFunc.java   | 1k  | 1398  |             | 2020-02-28 22:38:09
-   2: CodeHistory.java      | 10k | 10980 | 2d_22:23:24 | 2020-06-07 12:57:49
-   3: CommandProcessor.java | 0k  | 365   |             | 2020-02-28 22:38:09
-
-  $ :2
-  synthesize ok
-  +-----------------------------------------------------
-  | .  : File("/home/roar/Prosjekter/Java/ConfigTool/src/rf/configtool/main/CodeHistory.java")
-  +-----------------------------------------------------
-  Assign to name by /xxx as usual  
-
-  $ ..more
-</pre>
-<p>
-  Here the first dot is the File("...") code line that was synthesized, then ".more" calls
-  the more() function on the File object.
 </p>
 
 
@@ -2773,7 +1984,7 @@ The following is used to switch drive letter in Windows.
 
 
 
-<h2>Dict set strings</h2>
+<h2>Dict set with strings</h2>
 <p>
   Reading name-value assignments from a property file or similar, is best done via the .setStr()
   function on the Dict object. It strips whitespace and accepts both colon and '='.
@@ -3055,53 +2266,12 @@ The following is used to switch drive letter in Windows.
 
 
 
-<h2>Macros</h2>
+<h2>CFT.props - mCat, mEdit and mMore lambdas</h2>
 <p>
-  In addition to block expressions that are executed immediately, there is the option of creating
-  "independent" block expressions, which are not executed immediately, but instead return
-  an object of type Macro.
-</p>
-<p>
-  A macro is like a regular function, except it is also a value, which means it can be stored
-  in Dict objects, lists and sent as parameters, etc.
-</p>
-<p>
-  A macro is written in the same way as a block expression, just that the body starts with 
-  a single asterisk (*), indicating
-  that the code can run anywhere, as it will always run in an isolated context, like functions, not
-  seeing any state of the caller, which block expressions naturally do. 
-</p>
-<p>
-  To call a Macro, invoke its .call() function, with parameters as needed, which are
-  picked up inside the code in the same way as in functions.
-</p>
-
-<h3>Simple example</h3>
-<p>
-  Simple example, using a macro to save typing.
-</p>
-<pre>
-  {* P(1)=name Dict.set("name",name)} =m
-  List(
-    m.call("x"), m.call("y")
-  )
-</pre>
-<p>
-  See savefileLib.txt for examples of macros used to implement generic
-  menu system, as applied to select editor for Linux.
-</p>
-
-
-
-
-
-<h2>CFT.props - mCat, mEdit and mMore macros</h2>
-<p>
-  The configuration fields mCat, mEdit and mMore ("m" for macro) define macros
+  The configuration fields mCat, mEdit and mMore ("m" for macro) define lambdas
   that are called for interactive commands cat/edit/more. This means it is possible
-  to redefine what edit means. Currently, mEdit calls either "Lib:e" if there is a
-  file, otherwise "Lib:e2" which presents a history of documents edited. The
-  mMore macro calls "Lib:m", while the mCat macro just calls .read on file parameter.
+  to redefine what edit means. Currently, mEdit calls either "Lib:e". The
+  mMore lambda calls "Lib:m", while the mCat macro just calls .read on file parameter.
 </p>
 
 
@@ -3137,7 +2307,18 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
   lists its content.
 </p>
 
-
+<h3>Show all shortcuts</h3>
+<p>
+  To list defined shortcut, just type 
+</p>
+<pre>
+  $ @
+</pre>
+<p>
+  This is a shortcut itself, that traverses the CFT.props file and identifies and 
+  displays the
+  shortcut definitions from it.
+</p>
 
 
 
@@ -3191,13 +2372,23 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
 
 <h1>Lib.Text.Lexer</h1>
 <p>
-  <i>v1.2.0</i>
+  <i>v1.2.0 EXPERIMENTAL</i>
 </p>
 <p>
   The Lib.Text.Lexer objects adds 
   capability to match complex tokens with CFT, using the same Java tokenizer that is used when
   parsing CFT script code. 
 </p>
+<h2>Motivation</h2>
+<p>
+  Working with log data, it would be nice identifying data in log lines beyond
+  doing free text searches. The Lexer is the first step, and will in time be followed by 
+  some more classes, including a basic recursive-descent parser.
+</p>
+<p>
+  But mostly because parsing is fun.
+</p>
+
 <h2>Concept</h2>
 <p>
   The concept is that of a tree of maps, each map maps single characters to other maps, and so on.
@@ -3403,25 +2594,29 @@ Colon commands
   At least it leaves us with the option of adding clever stuff later.
 </p>
 
-<h2>Block expressions are strange</h2>
+<h2>Inner blocks??</h2>
 <p>
-  The block expressions do not resemble code blocks in Java, because in reality they are automatically
-  executing macros, with scope extending out to the calling environment. Macros and block expressions were
-  an afterthought, something created because it was possible. There was no real need, and in the first versions
-  of the doc, there were some really odd examples of what these could be used for.
+  The first block expression was what is now called the Inner block. The immediately followed
+  macros, now called Lambdas. The local blocks were introduced in the v1.3 major overhaul. 
 </p>
 <p>
-  The good thing about being separate contexts is that you can do loops and pipes and stuff. The bad thing
-  is that you can not break loops in the caller. This is okay, as assert() and reject() with boolean 
-  expressions are really old constructs since v0.0.1 if there were such a thing.
-</p>
-<p>
-  The only real need for block expressions initially, was that of conditionally assigning values to variables
-  in a more elegant way than the if-expression.
+  The Inner block expressions do not resemble code blocks in Java, because in reality they are automatically
+  executing lambdas, with scope extending out to the calling environment. Lambdas and block expressions were
+  an afterthought, something created because it was possible. There was no real need, apart from 
+  simplifying the odd conditional assigment .....
 </p>
 <pre>
-  if (addOne, value+1, value) =value
+  if(addOne, value+1, value) =value
 </pre>
+<p>
+  In the first versions
+  of the doc, there were some really artificial examples of what "macros" and expression blocks 
+  could be used for.
+</p>
+<p>
+  Now, with local block expressions added in v1.3, code can be organized much more logically
+  for your average (Java, C, JS, ...) programmer.
+</p>
 
 <h2>Function name AFTER code?</h2>
 <pre>
@@ -3430,15 +2625,13 @@ Colon commands
 </pre>
 <p>
   This stems back to the time of entering code line by line. Having to decide the name of a function before
-  seeing how much functionality you got crammed into one line, made little sense. Instead you write some code
+  seeing how much functionality you got crammed into one line, or if it at all worked,
+  made little sense. Instead you write some code
   that does something useful, then decides what to call it.
 </p>
 <p>
-  Also there is the issue of not assigning a name until you have a code line that <em>works</em>. 
-</p>
-<p>
   This might at some point be changed, at least for script files, as it still feels backward, but this 
-  is why.
+  is the reason.
 </p>
 <p>
   The syntax with the slash and an identifier was inspired by PostScript.
@@ -3457,23 +2650,21 @@ Colon commands
   requires a lookahead of one token. 
 </p>
 <p>
-  The actual changes required to support normal assignment turned out not to be too hard, only 
-  extending the lookahead by one. However, the script code base has prohibited the change.
+  The actual changes required to support normal assignment turned out not to be too hard. 
+  However, the script code base has prohibited the change.
 </p>
 <p>
   An attempt was made to allow both, but this failed. To do this, we would have to use a different
-  assignment token for each form, say "=" and ":=", which would just be confusing.</p>
+  assignment token for each form, say "=" and ":=", which would just be confusing.
+</p>
 <p>
-  Besides, the postfix assignment has grown on me, for the same reason as why function name follows AFTER
+  Besides, the stack-based assignment has grown on me, for the same reason as why function name follows AFTER
   the function code: one types code, and at some point decide that for readability, it's time
   to assign a local variable, which is then used on the next lines. Almost like punctuation when
   writing prose.
 </p>
 <p>
-  Deciding the variable name beforehand restricts how you write code. I see that frequently
-  when programming java. One starts declaring a variable followed by an expression, which turns
-  out more complex than you thought, and you end up going back to change the variable name, making the
-  expression simpler, by breaking it into parts. 
+  It may be a consequence of thinking bottom-up rather than top-down.
 </p>
 <p>
   Also note that there are no global variables (*) in CFT, only local helpers inside functions/macros, so

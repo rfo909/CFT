@@ -30,7 +30,7 @@ function CreateOverview()
 /Readme
 
 
-Sys.savefile.dir.sub("..").sub("doc")
+Sys.homeDir.sub("doc")
 /DocDir
 
 DocDir.file("Doc.html").protect("Original")

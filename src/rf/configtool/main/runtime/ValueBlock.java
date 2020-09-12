@@ -120,6 +120,7 @@ public class ValueBlock extends Value {
      * Call independent macro which runs in an isolated Ctx
      */
     public Value callLambda (Ctx ctx, List<Value> params) throws Exception {
+    	if (params==null) params=new ArrayList<Value>();
         Ctx independentCtx=new Ctx(ctx.getObjGlobal(), new FunctionState(params));
         return execute(independentCtx);
     }

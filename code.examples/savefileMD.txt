@@ -30,7 +30,7 @@ Generate MD version of Doc.html
 
 
 
-Sys.savefile.dir.sub("..").sub("doc")
+Sys.homeDir.sub("doc")
 /DocDir
 
 

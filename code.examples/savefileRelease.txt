@@ -36,7 +36,7 @@ Add, Commit and Push.
 
 
 # Project home directory
-    Sys.savefile.dir.sub("..")
+    Sys.homeDir
 /HomeDir
 
 
