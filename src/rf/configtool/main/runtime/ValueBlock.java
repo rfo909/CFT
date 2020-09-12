@@ -26,6 +26,7 @@ import rf.configtool.main.FunctionState;
 import rf.configtool.main.ObjGlobal;
 import rf.configtool.main.OutData;
 import rf.configtool.main.OutText;
+import rf.configtool.main.runtime.lib.ObjDict;
 import rf.configtool.main.runtime.lib.ObjGrep;
 import rf.configtool.main.runtime.reporttool.Report;
 
@@ -117,11 +118,21 @@ public class ValueBlock extends Value {
     
     
     /**
-     * Call independent macro which runs in an isolated Ctx
+     * Call lambda, running in an isolated Ctx
      */
     public Value callLambda (Ctx ctx, List<Value> params) throws Exception {
+    	return callLambda(ctx, new ObjDict(), params);
+    }
+    
+    /**
+     * Call lambda with "self" dictionary - this is a Closure feature. The
+     * dictionary is stored in the "self" variable inside the lambda.
+     */
+    public Value callLambda (Ctx ctx, ObjDict dict, List<Value> params) throws Exception {
     	if (params==null) params=new ArrayList<Value>();
-        Ctx independentCtx=new Ctx(ctx.getObjGlobal(), new FunctionState(params));
+    	FunctionState fs=new FunctionState(params);
+    	fs.set("self", new ValueObj(dict));
+        Ctx independentCtx=new Ctx(ctx.getObjGlobal(), fs);
         return execute(independentCtx);
     }
     

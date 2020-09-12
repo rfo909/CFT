@@ -56,6 +56,9 @@ public class ObjDict extends Obj {
         baseFunctions.add(new FunctionSetStr());
         baseFunctions.add(new FunctionMergeCodes());
         baseFunctions.add(new FunctionHasNullValue());
+        baseFunctions.add(new FunctionBind());
+        baseFunctions.add(new FunctionInvoke());
+        
         
         
         init();
@@ -380,6 +383,43 @@ public class ObjDict extends Obj {
             }
             return new ValueBoolean(found);
             
+         }
+    }
+
+
+     class FunctionBind extends Function {
+         public String getName() {
+            return "bind";
+        }
+        public String getShortDesc() {
+            return "bind(lambda) - returns closure";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected lambda parameter");
+            if (!(params.get(0) instanceof ValueBlock)) throw new Exception("Expected lambda parameter");
+            ValueBlock lambda=(ValueBlock) params.get(0);
+            
+            return new ValueObj(new ObjClosure(theDict(), lambda));
+         }
+    }
+
+     
+
+     class FunctionInvoke extends Function {
+         public String getName() {
+            return "invoke";
+        }
+        public String getShortDesc() {
+            return "invoke(name, ...) - invoke lambda stored under given name, with this dict as 'self'";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() < 1) throw new Exception("Expected parameters name, ...");
+            String name=getString("name",params,0);
+            Value v=values.get(name);
+            if (v==null || !(v instanceof ValueBlock)) throw new Exception("No such lambda: '" + name + "'");
+            ValueBlock lambda=(ValueBlock) v;
+            params.remove(0);
+            return lambda.callLambda(ctx, theDict(), params);
          }
     }
 

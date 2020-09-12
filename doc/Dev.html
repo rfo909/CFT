@@ -13,6 +13,87 @@
 
 <h1>CFT Change log</h1>
 
+<h3>v1.3.1 2020-09-12 Created Dict.invoke</h3>
+<p>
+	Storing data and lambdas in a Dict, and invoking a lambda via Dict.invoke,
+	we have simple objects, as the Dict.invoke calls the lambda with itself
+	as the "self" value.
+</p>
+<h4>Test code</h4>
+
+<pre>
+# Creating Dict with data and lambda, calling lambda, inspecting data change
+# Also illustrates lambdas calling each other, via the "self" variable.
+	Dict
+		.set("i",1)
+		.set("incr",Lambda{
+			self.get("i")+P(1,1) =x 
+			self.set("i",x) 
+		})
+		.set("plus50",Lambda{
+			self.invoke("incr",50)
+		})
+		=data
+	
+	data.invoke("incr",2)
+	println("result=" + data.i)  # 3
+	data.invoke("plus50")
+	println("result=" + data.i)  # 53
+/test2
+</pre>
+
+
+<h3>v1.3.1 2020-09-12 Created Closure</h3>
+<p>
+	A closure is created by binding a Lambda to a dictionary. It has 
+	a .call() function just like a Lambda. When run, the Lambda accesses
+	the dictionary via the "self" variable. 
+</p>
+<p>
+	The implementation assures even when a Lambda is invoked directly, 
+	not via a Closure object, 
+	then the variable "self" points to an empty Dict object.
+</p>
+<pre>
+	# this means that
+	Lambda{self}.call
+	# returns an empty Dict
+</pre>
+<h4>
+	Initial test code.
+</h4>
+
+<pre>
+# Function called with Lambda, which in turn gets called on certain condition
+	P(1,Lambda{P(1)}) =eventHandler
+
+	readLine("generate event (enter for none)") =val
+	if (val != "") {
+		eventHandler.call(val)
+	}
+/eventGenerator
+
+
+
+# Function setting up empty data Dict, and Lambda, creating Closure, calling eventGenerator, then reporting result
+	Dict =data
+	Lambda{
+		self.set("value",P(1))
+	} =event
+	data.bind(event) =closure
+	
+	event.call("x")  # not invoked via closure - should not access same Dict
+	
+	eventGenerator(closure)
+	if(data.has("value")) {
+	  println("event was called: " + data.get("value"))
+	} else {
+	  println("No event")
+	}
+/test 	
+</pre>
+
+
 <h3>v1.3.0 branch</h3>
 <ol>
 	<li><b>v1.3.0</b><br/>
@@ -52,6 +133,8 @@
 	<br/>
 	Changed global function error(cond, msg) to make condition optional.
 </li></ol>
+
+<p>2020-09-12 branch merged into master</p>
 
 <pre>
 

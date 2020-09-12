@@ -16,7 +16,7 @@ CFT / ConfigTool
 <pre style="padding-left:0; margin-left:0">
 
 Last updated: 2020-09-12 RFO
-v1.3
+v1.3.1
 
 </pre>
 
@@ -2511,6 +2511,83 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
 
 
 
+
+<h1>Closures</h1>
+<p><i>v1.3.1</i></p>
+<p>
+  A closure is created by binding a Lambda to a Dict object. The Closure
+  has a .call function just like the Lambda, and invokes the lambda, with
+  the Dict object referenced via "self" variable.
+</p>
+<p>
+  Nice for event based callbacks.
+</p>
+<pre>
+  Dict =data
+  data.bind(Lambda{
+    self.set("received_value", P(1))
+  }) =closure
+
+  closure.call("test")
+  data.get("received_value")  # returns "test"
+</pre>
+<p>
+  For robustness and testing, when lambdas are run, also when not called from
+  a Closure object, there is a "self" variable. When called directly, it points
+  at an empty Dict object.
+</p>
+
+
+
+
+
+
+
+<h1>Primitive objects</h1>
+<p><i>v1.3.1</i></p>
+<p>
+  Storing both data and lambdas inside a Dict, and using the .invoke() function of the
+  Dict, we can now call a lambda stored under some name, with the dictionary object
+  accessed via the "self" variable.
+</p>
+<pre>
+  Dict
+    .set("i",1)
+    .set("incr",Lambda{
+      P(1,1) =amount
+      self.set(self.i+amount)
+    })
+    =data
+
+    data.invoke("incr",10) # data.i is now 11
+</pre>
+
+<h4>Member lambdas calling each other</h4>
+<p>
+  One such lambda function can in turn call other Dict member functions in the same way,
+  via self.invoke(...)
+</p>
+<pre>
+  Dict
+    .set("i",1)
+    .set("incr",Lambda{
+      P(1,1) =amount
+      self.set(self.i+amount)
+    })
+    .set("incr50",Lambda{
+      self.invoke("incr",50)
+    })
+    =data
+
+    data.invoke("incr50")  # data.i is now 51
+</pre>
+
+
+
+
+
+
+
 <h1>Reference: Colon commands</h1>
 <p>
   Colon commands are best described by entering a single colon at the CFT prompt.
@@ -2686,6 +2763,14 @@ Colon commands
 </p>
 <p>
    Fun, right? :-)
+</p>
+
+
+<h2>Closures and objects</h2>
+<p>
+  Mainly for fun. After giving it some thought, the solution ended up very easy to
+  implement. Closures can be useful for executing menu actions from library code
+  that handles the menu rendering (Lib). 
 </p>
 
 

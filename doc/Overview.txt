@@ -171,6 +171,11 @@ Lib.Text.Lexer
  |   .sub()
  * Reusable nodes - integer sequence
 
+Closures
+
+Primitive objects
+ |     Member lambdas calling each other
+
 Reference: Colon commands
 
 Reference: Synthesizable types
@@ -181,3 +186,4 @@ Fun and strange stuff
  * Function name AFTER code?
  * Stack-based assignment?
  * Using Sys.stdin to run colon commands etc
+ * Closures and objects
