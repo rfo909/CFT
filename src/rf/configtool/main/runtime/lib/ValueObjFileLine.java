@@ -46,6 +46,13 @@ public class ValueObjFileLine extends ValueString {
         return "FileLine(" + super.synthesize() + "," + lineNo + "," + file.synthesize() + ")";
     }
 
+    public ObjFile getFile() {
+    	return file;
+    }
+    
+    public Long getLineNo() {
+    	return lineNo;
+    }
     
 
     class FunctionLineNumber extends Function {

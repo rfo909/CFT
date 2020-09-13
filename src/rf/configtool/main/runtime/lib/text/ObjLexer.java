@@ -32,15 +32,19 @@ import rf.configtool.main.runtime.ValueInt;
 import rf.configtool.main.runtime.ValueList;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
+import rf.configtool.main.runtime.lib.ValueObjFileLine;
+import rf.configtool.parser.CharSource;
+import rf.configtool.parser.CharTable;
+
 import java.awt.Color;
 
 public class ObjLexer extends Obj {
     
     public ObjLexer() {
-    	this.add(new FunctionEmpty());
-    	this.add(new FunctionIdentifier());
-    	this.add(new FunctionLPAR());
-    	this.add(new FunctionRPAR());
+    	this.add(new FunctionNode());
+    	this.add(new FunctionProcessLine());
+    	this.add(new FunctionGetTokens());
+    	this.add(new FunctionGetTokenStream());
     }
     
     @Override
@@ -71,12 +75,12 @@ public class ObjLexer extends Obj {
     
 
     
-    class FunctionEmpty extends Function {
+    class FunctionNode extends Function {
         public String getName() {
-            return "Empty";
+            return "Node";
         }
         public String getShortDesc() {
-            return "Empty(firstChars?) - create Empty node, possibly identifying firstChars list";
+            return "Node(firstChars?) - create empty node, possibly identifying firstChars list";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
         	String firstChars=ObjLexerNode.NO_CHARS;
@@ -88,48 +92,97 @@ public class ObjLexer extends Obj {
     }
     
     
-    class FunctionIdentifier extends Function {
+   
+    private List<ObjLexerToken> tokenList=new ArrayList<ObjLexerToken>();
+    
+    
+    
+    class FunctionProcessLine extends Function {
         public String getName() {
-            return "Identifier";
+            return "processLine";
         }
         public String getShortDesc() {
-            return "Identifier() - create Identifier node";
+            return "processLine(rootNode,line,eolTokenType?) - processes line, adds to internal token list - returns self";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 0) throw new Exception("Expected no parameters");
-            return new ValueObj(new ObjLexerNodeIdentifier());
+            if (params.size() < 2 || params.size() > 3) throw new Exception("Expected parameters rootNode, line, eolTokenType?");
+            
+            Obj obj=getObj("rootNode",params,0);
+            if (!(obj instanceof ObjLexerNode)) throw new Exception("Expected parameters rootNode and line");
+             
+            CharTable charTable=((ObjLexerNode) obj).getCharTable();
+            
+            // if the line was read from a file, then it is a ValueObjFileLine (which subclasses ValueString)
+            String filePlusLineNo="";
+            if (params.get(1) instanceof ValueObjFileLine) {
+            	ValueObjFileLine x = (ValueObjFileLine) params.get(1);
+            	filePlusLineNo=x.getFile().getPath() + " line=" + x.getLineNo() + " ";
+            }
+            // get line string
+        	String line = getString("line",params, 1);
+        	CharSource cs=new CharSource(line);
+        	
+        	// get optional token type to add at end of line, useful when parsing files
+        	Integer eolTokType=null;
+        	if (params.size()==3) {
+        		eolTokType=(int) getInt("eolTokenType", params, 2);
+        	}
+        	
+        	while (!cs.eol()) {
+        		String sourceLocation=filePlusLineNo+"pos=" + (cs.getPos()+1);
+        		
+        		int startPos=cs.getPos();
+	        	Integer tokenType = charTable.parse(cs);
+	        	if (tokenType == null) {
+	        		if (!cs.eol()) throw new Exception(sourceLocation + ": lexer failed, current char = '" + cs.getChar() + "'");
+	        	}
+	        	
+	        	if (tokenType < 0) continue; // ignoring these: whitespace and comments
+	        	
+	        	int nextPos=cs.getPos();
+	        	ObjLexerToken token=new ObjLexerToken(sourceLocation, tokenType, line.substring(startPos, nextPos));
+	        	tokenList.add(token);
+        	}
+        	
+        	if (eolTokType != null) {
+        		String sourceLocation=filePlusLineNo + "(end-of-line)";
+        		tokenList.add(new ObjLexerToken(sourceLocation, eolTokType, "(end-of-line)"));
+        	}
+        	
+        	return new ValueObj(theObj());
+        }
+        	
+    }
+    
+   
+    class FunctionGetTokens extends Function {
+        public String getName() {
+            return "getTokens";
+        }
+        public String getShortDesc() {
+            return "getTokens() - get list of tokens identified via calls to processLine";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	List<Value> valueList=new ArrayList<Value>();
+        	for (ObjLexerToken t:tokenList) {
+        		valueList.add(new ValueObj(t));
+        	}
+        	return new ValueList(valueList);
         }
     }
     
 
-    class FunctionLPAR extends Function {
+    class FunctionGetTokenStream extends Function {
         public String getName() {
-            return "LPAR";
+            return "getTokenStream";
         }
         public String getShortDesc() {
-            return "LPAR() - create LPAR node - matches '('";
+            return "getTokenStream() - get list of tokens identified via processLine as TokenStream object";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 0) throw new Exception("Expected no parameters");
-            return new ValueObj(new ObjLexerNodeSingleChar('('));
+        	return new ValueObj(new ObjLexerTokenStream(tokenList));
         }
     }
-    
-
-    class FunctionRPAR extends Function {
-        public String getName() {
-            return "RPAR";
-        }
-        public String getShortDesc() {
-            return "RPAR() - create RPAR node - matches ')'";
-        }
-        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 0) throw new Exception("Expected no parameters");
-            return new ValueObj(new ObjLexerNodeSingleChar(')'));
-        }
-    }
-    
-
     
 
 }

@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2020-09-12 RFO
-v1.3.1
+Last updated: 2020-09-13 RFO
+v1.3.2
 ```
 # Introduction
 
@@ -1125,7 +1125,7 @@ stdout.read =result
 #
 stdin.delete
 stdout.delete
-when(stderr.exists, stderr.delete)
+if(stderr.exists, stderr.delete)
 #
 # return value
 #
@@ -2066,7 +2066,7 @@ Dir.runCapture("whoami").nth
 # Lib.Text.Lexer
 
 
-**v1.2.0 EXPERIMENTAL**
+**v1.2.0 EXPERIMENTAL******v1.3.2 Lexer stabilizing**
 
 The Lib.Text.Lexer objects adds
 capability to match complex tokens with CFT, using the same Java tokenizer that is used when
@@ -2078,9 +2078,6 @@ parsing CFT script code.
 Working with log data, it would be nice identifying data in log lines beyond
 doing free text searches. The Lexer is the first step, and will in time be followed by
 some more classes, including a basic recursive-descent parser.
-
-
-But mostly because parsing is fun.
 
 ## Concept
 
@@ -2111,30 +2108,35 @@ In the CFT functions, such maps are called nodes. They are created via one of th
 
 ```
 $ Lib.Text.Lexer help
-# Empty(firstChars?) - create Empty node, possibly identifying firstChars list
-# Identifier() - create Identifier node
+# Node(firstChars?) - create empty node, possibly identifying firstChars list
+# getTokenStream() - get list of tokens identified via processLine as TokenStream object
+# getTokens() - get list of tokens identified via calls to processLine
+# processLine(rootNode,line,eolTokenType?) - processes line, adds to internal token list - returns self
 ```
 
 The nodes in turn contain the following:
 
 ```
-$ Lib.Text.Lexer.Empty help
+$ Lib.Text.Lexer.Node help
 # addToken(token) - create mappings for token string, returns resulting Node
 # match(Str) - returns number of characters matched
 # setDefault(targetNode?) - map all non-specified characters to node, returns target node
-# setIsToken() - if parsing stops here, it is a valid token - returns self
+# setIsToken(tokenType) - tokenType is an int - returns self
 # sub(chars, targetNode) or sub(chars) or sub(targetNode) - add mapping, returns target Node
 ```
 
 A simple example:
 
 ```
-Lib.Text.Lexer.Empty =top
+Lib.Text.Lexer.Node =top
 top.sub("0123456789") =x   # new node
 x.sub("0123456789",x)  # x points to itself for digits
-x.setIsToken  # ok to stop here, when no more digits found
+x.setIsToken(1) # token type: non-negative numbers for regular tokens
 top.match("300xx")  # returns 3, matching sequence '300'
 ```
+
+The match() function is for testing only.
+
 ### .sub()
 
 
@@ -2158,7 +2160,7 @@ someNode.sub(someOtherNode)
 # the start of some sort of data. For example for Lib.Text.Lexer.Identifier, the
 # "firstChars" are "a-zA-Z_". It's the letters an identifier can start
 # with. Similarly we can create our own library node functions, by supplying a
-# firstChars list as parameter to Lib.Text.Lexer.Empty.
+# firstChars list as parameter to Lib.Text.Lexer.Node
 #
 # So what happens is that inside someNode, pointers are added to someOtherNode for
 # all characters in that node's firstChars.
@@ -2167,18 +2169,19 @@ someNode.sub(someOtherNode)
 
 
 To create a reusable node, we need to specify the "firstChars" of a node, which are given
-as parameter when creating an Empty node. This means adding it as "sub" under some other node,
+as parameter when creating an Node node. This means adding it as "sub" under some other node,
 lets those characters point at it.
 
 ```
 # Create reusable node for integers.
 "0123456789"=digits
-Lib.Text.Lexer.Empty(digits) =x
+Lib.Text.Lexer.Node(digits) =x
 x.sub(digits,x)
+x.setIsToken(1)
 x
 /NodeInt
 # Now we can for example match a IP v4 address
-Lib.Text.Lexer.Empty =top
+Lib.Text.Lexer.Node =top
 NodeInt =a
 NodeInt =b
 NodeInt =c
@@ -2187,7 +2190,7 @@ top.sub(a)
 a.sub(".").sub(b) # creates intermediary nodes for the dots
 b.sub(".").sub(c)
 c.sub(".").sub(d)
-d.setIsToken
+d.setIsToken(2)
 top
 /MatchIPAddress
 # Test
@@ -2196,6 +2199,87 @@ report(word, MatchIPAddress.match(word))
 # should return 11,0,8,0,0
 /t1
 ```
+## Processing single lines
+
+
+To process all text in a line, we need to build a root node to which we add
+pointers to sub-nodes for all valid tokens. For simplicity, let us match only
+identifiers.
+
+
+Since identifiers are separated by space, we also need to match
+whitespace. Since we are not interested in whitespace, we assign whitespace
+tokens a negative token type, as those get automatically ignored.
+
+```
+# Identifiers
+"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_" =firstChars
+firstChars+"0123456789" =innerChars
+Lib.Text.Lexer.Node(firstChars) =ident
+ident.sub(innerChars,ident)
+ident.setIsToken(1)
+ident
+/Identifiers
+# Whitespace
+" ^t^n^r".unEsc =chars
+Lib.Text.Lexer.Node(chars) =ws
+ws.sub(chars,ws)
+ws.setIsToken(-1)
+ws
+/WhitesSpace
+# Root node
+Lib.Text.Lexer.Node =root
+root.sub(Identifiers)
+root.sub(WhiteSpace)
+/Root
+```
+
+With the Root node ready, we can now parse strings consisting of identifiers and space,
+ignoring space.
+
+```
+# Test
+Lib.Text.Lexer.processLine(Root,"this is a test").getTokens->
+token
+report(token.sourceLocation, token.str, token.tokenType)
+/test
+```
+
+Now running the test we get
+
+```
+$ test
+<List>
+0: pos=1  | this | 1
+1: pos=6  | is   | 1
+2: pos=9  | a    | 1
+3: pos=11 | test | 1
+```
+## Processing files
+
+
+Processing files is easy, using File.read and iterating over those, calling .processLine
+on the same Lexer object. If we want, we can let the lexer add "newline"-tokens at the end
+of each line, by just defining a token type, here we use 100.
+
+```
+# Process file
+Root =root
+Lib.Text.Lexer =lexer
+File("...").read->line
+lexer.processLine(root,lexer,100)
+|
+lexer.processLine(Root,"this is a test").getTokens->
+token
+report(token.sourceLocation, token.str, token.tokenType)
+/ProcessFile
+```
+
+The Lexer.processLine is smart enough to detect when lines are read from a file, as
+lines read from file are not regular strings, but a subtype of String, which contain
+filename and line number. This info is included in the sourceLocation available
+for each token.
+
 # Closures
 
 
@@ -2345,7 +2429,7 @@ The "problem" is that CFT code (and so shortcuts) can run colon commands via "ab
 - Regex
 
 
-# Fun and strange stuff
+# Fun and strange stuff, comments
 
 ## Why Input("label").get?
 
@@ -2361,30 +2445,6 @@ This never came to fruition, and with Input() being a pretty old function, Input
 
 
 At least it leaves us with the option of adding clever stuff later.
-
-## Inner blocks??
-
-
-The first block expression was what is now called the Inner block. The immediately followed
-macros, now called Lambdas. The local blocks were introduced in the v1.3 major overhaul.
-
-
-The Inner block expressions do not resemble code blocks in Java, because in reality they are automatically
-executing lambdas, with scope extending out to the calling environment. Lambdas and block expressions were
-an afterthought, something created because it was possible. There was no real need, apart from
-simplifying the odd conditional assigment .....
-
-```
-if(addOne, value+1, value) =value
-```
-
-In the first versions
-of the doc, there were some really artificial examples of what "macros" and expression blocks
-could be used for.
-
-
-Now, with local block expressions added in v1.3, code can be organized much more logically
-for your average (Java, C, JS, ...) programmer.
 
 ## Function name AFTER code?
 
@@ -2451,13 +2511,117 @@ Input and readLine(). There was a moment of confusion when discovering what happ
 by those interactive functions.
 
 
-Fun, right? :-)
+Great fun!
 
-## Closures and objects
+## 2020-09-12 Inner blocks??
 
 
-Mainly for fun. After giving it some thought, the solution ended up very easy to
-implement. Closures can be useful for executing menu actions from library code
-that handles the menu rendering (Lib).
+The first block expression added to CFT, was what is now called the Inner block. Then immediately followed
+macros, now called Lambdas. The local blocks were introduced in the v1.3 overhaul.
+
+
+The previous "odd" syntax for creating macros has gotten more explicit, and who talks
+about "macros" these days? The functionality is the same, though.
+A search/replace on all the script files fixed the renaming easily.
+
+```
+{* ...} =macro  # old syntax - no longer supported
+Lambda{...} =lambda
+```
+
+The Inner block expressions do not resemble code blocks in Java, because in reality they are automatically
+executing lambdas, with scope extending out to the calling environment. Lambdas and block expressions were
+an afterthought, something created because it was possible. There was no real need, apart from
+simplifying the odd conditional assigment .....
+
+```
+if(addOne, value+1, value) =value
+```
+
+In the first versions
+of the doc, there were some really artificial examples of what "macros" and expression blocks
+could be used for.
+
+
+Now, with local block expressions added in v1.3, and the "if" expression accepting dual syntax,
+code can be organized much more logically
+for Java/C/JS programmers.
+
+## 2020-09-12 Closures and objects
+
+
+After creating v1.3.0 which rearranged two block expressions into three (Lambda, Inner and Local),
+I had pondered how to do closures and objects.
+
+
+These were created mainly created for fun, though they of course have uses.
+
+
+The solution ended up being very easy to implement, and is fairly elegant,
+as they really are about using the same mechanism, being that all running
+lambdas have a "self" variable pointing to some Dict object.
+
+## 2020-09-12 A lexical analysis discovery
+
+
+As the Lib.Text.Lexer object was created, and I experimented with it, I discovered
+that what I had thought to be a limitation in the parser, was an error made by me.
+
+
+The problem was that CFT did not handle calling functions inside integer literals,
+except with a space between the number and the dot, like this:
+
+```
+$ 3 .bin
+```
+
+The problem was that my configuration for parsing floating point numbers
+was flawed. Basically it looked like this (converted to Lib.Text.Lexer syntax)
+
+```
+"0123456780"=digits
+Lib.Text.Lexer.Empty(digits) =intMatcher
+intMatcher.sub(digits,intMatcher)
+intMatcher.setIsToken  # so far all good
+intMatcher.sub(".") =afterDot
+afterDot.sub(digits, afterDot)
+afterDot.setIsToken
+```
+
+The problem here is that when the intMatcher finds a ".", and follows the link to
+the afterDot node, that node has the is-token flag set, so even if there are no
+digits following the dot, the matcher believes it has matched a float. The result
+is that "3." is considered a valid float, and that the the text following now is "bin",
+which is correctly recognized as an identifier, but the parser does not recognize it
+as a dotted call, as the dot has been incorrectly consumed.
+
+
+The fix is simple. The "." must point to a node that does not have the is-token flag set,
+but instead has pointers for digits 0-9 to another node, which does, and which
+gobbles up any additional digits via a self-loop.
+
+```
+"0123456780"=digits
+Lib.Text.Lexer.Empty(digits) =intMatcher
+intMatcher.sub(digits,intMatcher)
+intMatcher.setIsToken(3)
+intMatcher.sub(".") =afterDot
+afterDot.sub(digits) =afterDotDigits  # new node
+afterDotDigits.setIsToken(4)
+afterDotDigits.sub(digits,afterDotDigits)
+```
+
+Lexing and parsing is fun, and I really enjoyed learning new things about my own code after 2+ years
+of assuming I had hit a limitation.
+
+
+I am going to enjoy writing the parser. CFT uses a "hard-coded" recursive descent
+parser, with Java classes calling each other.
+
+
+This means that a parser that is configurable from CFT code has to be written from
+scratch. With the v1.3.0 branch safely merged into master, and closures and dictionaries
+as objects implemented, it's time to start
+considering parsing again.
 
 

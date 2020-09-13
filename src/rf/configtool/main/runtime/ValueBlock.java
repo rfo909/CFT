@@ -41,7 +41,6 @@ public class ValueBlock extends Value {
         this.programLines=programLines;
         
         add(new FunctionCall());
-        add(new FunctionIsLambda());
     }
     
     @Override
@@ -151,18 +150,6 @@ public class ValueBlock extends Value {
     }
 
 
-    class FunctionIsLambda extends Function {
-        public String getName() {
-            return "isLambda";
-        }
-        public String getShortDesc() {
-            return "isLambda() - returns true";
-        }
-        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            return new ValueBoolean(true);
-        }
-    }
-
-
+ 
 
 }

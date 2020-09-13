@@ -13,6 +13,24 @@
 
 <h1>CFT Change log</h1>
 
+<h3>v1.3.2 2020-09-13 Lib.Text.Lexer</h3>
+<ul>
+	<li>Removed Identifier and LPAR, RPAR.</li>
+	<li>Renamed function Empty() to Node().</li>
+	<li>Added required integer token type parameter to LexerNode.setIsToken().</li>
+	<li>Created ObjLexerToken class.</li>
+	<li>Created ObjLexer.processLine, which adds tokens to internal list</li>
+	<li>Created ObjLexer.getTokens and .getTokenStream to get tokens.</li>
+	<li>The processLine function detects if lines were read from file, and
+	supplies file name and line number into the source location of tokens.
+	</li>
+	<li>Created ObjLexerTokenStream class, but its functionality is not clear yet.</li>
+	<li>Tested and updated doc</li>
+</ul>
+
+
+
+
 <h3>v1.3.1 2020-09-12 Created Dict.invoke</h3>
 <p>
 	Storing data and lambdas in a Dict, and invoking a lambda via Dict.invoke,

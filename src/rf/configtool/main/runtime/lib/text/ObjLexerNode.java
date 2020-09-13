@@ -217,11 +217,12 @@ public class ObjLexerNode extends Obj {
             return "setIsToken";
         }
         public String getShortDesc() {
-            return "setIsToken() - if parsing stops here, it is a valid token - returns self";
+            return "setIsToken(tokenType) - tokenType is an int - returns self";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 0) throw new Exception("Expected no parameters");
-        	charTable.setTokenType(1);
+        	if (params.size() != 1) throw new Exception("Expected tokenType (int) parameter");
+        	int tokenType=(int) getInt("tokenType",params,0);
+        	charTable.setTokenType(tokenType);
         	return new ValueObj(self());
         }
     }
