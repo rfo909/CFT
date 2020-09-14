@@ -2405,7 +2405,8 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
 
 <h2>Implementation</h2>
 <p>
-  In the CFT functions, such maps are called nodes. They are created via one of the following functions:
+  In the CFT functions, such maps are called nodes. They are created via the
+  Lib.Text.Lexer.Node function.
 </p>
 <pre>
   $ Lib.Text.Lexer help
@@ -2604,6 +2605,40 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
 </p>
 
 
+<h2>Limitations</h2>
+<p>
+  As there is at most one pointer per character in each node, we can not both recognize
+  identifiers AND certain keywords, such as "begin" and "end", separately. Unless of course
+  the keywords start with a different sequence of characters in front, that make them
+  unique from identifiers.
+</p>
+<p>
+  With the "symbols" we can easily recognize both "=" and "==" as symbols, because the second
+  is an extension of the first, and the "=" node is not configured to match any stream
+  of "=", such as identifiers are for letters and numbers.
+</p>
+<p>
+  This also means we can not both match integer and dates on numeric format, such as
+</p>
+<pre>
+  2020   # integer
+  2020-09-12   # date
+</pre>
+
+<h3>Different uses</h3>
+<p>
+  Parsing a programming language or JSON structure, requires us to identify every
+  token in the string. The lexer tree must house them all.
+</p>
+<p>
+  Parsing a log line piece by piece does not have this requirement. Different 
+  lexer nodes may be used for each part of the line, some allowing for alternatives,
+  most just looking to match a fixed format string, for which regular expressions
+  would also be suited.
+</p>
+
+
+
 
 
 
@@ -2631,8 +2666,27 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
   a Closure object, there is a "self" variable. When called directly, it points
   at an empty Dict object.
 </p>
-
-
+<p>
+  Example:
+</p>
+<pre>
+# Create Closure that strips N characters of start and end of a string
+  P(1)=n
+  Dict.set("n",n).bind(Lambda{
+    P(1)=s 
+    self.get("n")=n
+    s.sub(n,s.length-n)
+  })
+/Strip
+</pre>
+<p>
+  Test:
+</p>
+<pre>
+  $ Strip(2).call("this is a test")
+  &lt;String&gt;
+  is is a te
+</pre>
 
 
 

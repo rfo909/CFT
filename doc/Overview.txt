@@ -172,6 +172,8 @@ Lib.Text.Lexer
  * Reusable nodes - integer sequence
  * Processing single lines
  * Processing files
+ * Limitations
+ |   Different uses
 
 Closures
 

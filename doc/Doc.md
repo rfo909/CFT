@@ -2104,7 +2104,8 @@ Or ,if no map in our parse tree has the "this is a token" mark set, then parsing
 ## Implementation
 
 
-In the CFT functions, such maps are called nodes. They are created via one of the following functions:
+In the CFT functions, such maps are called nodes. They are created via the
+Lib.Text.Lexer.Node function.
 
 ```
 $ Lib.Text.Lexer help
@@ -2280,6 +2281,38 @@ lines read from file are not regular strings, but a subtype of String, which con
 filename and line number. This info is included in the sourceLocation available
 for each token.
 
+## Limitations
+
+
+As there is at most one pointer per character in each node, we can not both recognize
+identifiers AND certain keywords, such as "begin" and "end", separately. Unless of course
+the keywords start with a different sequence of characters in front, that make them
+unique from identifiers.
+
+
+With the "symbols" we can easily recognize both "=" and "==" as symbols, because the second
+is an extension of the first, and the "=" node is not configured to match any stream
+of "=", such as identifiers are for letters and numbers.
+
+
+This also means we can not both match integer and dates on numeric format, such as
+
+```
+2020   # integer
+2020-09-12   # date
+```
+### Different uses
+
+
+Parsing a programming language or JSON structure, requires us to identify every
+token in the string. The lexer tree must house them all.
+
+
+Parsing a log line piece by piece does not have this requirement. Different
+lexer nodes may be used for each part of the line, some allowing for alternatives,
+most just looking to match a fixed format string, for which regular expressions
+would also be suited.
+
 # Closures
 
 
@@ -2305,6 +2338,27 @@ For robustness and testing, when lambdas are run, also when not called from
 a Closure object, there is a "self" variable. When called directly, it points
 at an empty Dict object.
 
+
+Example:
+
+```
+# Create Closure that strips N characters of start and end of a string
+P(1)=n
+Dict.set("n",n).bind(Lambda{
+P(1)=s
+self.get("n")=n
+s.sub(n,s.length-n)
+})
+/Strip
+```
+
+Test:
+
+```
+$ Strip(2).call("this is a test")
+<String>
+is is a te
+```
 # Primitive objects
 
 

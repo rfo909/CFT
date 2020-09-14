@@ -66,7 +66,7 @@ public class ObjLexerToken extends Obj {
 
     @Override
     public String getTypeName() {
-        return "LexerToken";
+        return "Lexer.Token";
     }
     
 
@@ -77,7 +77,7 @@ public class ObjLexerToken extends Obj {
 
     
     private String getDesc() {
-        return "LexerToken";
+        return "Lexer.Token";
     }
     
     private Obj theObj () {

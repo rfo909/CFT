@@ -107,21 +107,21 @@ public class ValueString extends Value {
             return "sub";
         }
         public String getShortDesc() {
-            return "sub(start,count) or sub(start) - returns substring";
+            return "sub(start,end) or sub(start) - returns substring";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size()==2) {
                 if (!isInt(params,0) || !isInt(params,1)) {
-                    throw new Exception("Expected parameters: startPos, count");
+                    throw new Exception("Expected parameters: startPos, endPos");
                 }
                 int a=(int) getInt("startPos", params, 0);
-                int b=(int) getInt("count", params, 1);
+                int b=(int) getInt("endPos", params, 1);
                 
                 if (a < 0) a=0;
                 if (b > val.length()) b=val.length();
                 if (a > b || a > val.length()) return new ValueString(""); 
                 
-                return new ValueString(val.substring(a,(a+b)));
+                return new ValueString(val.substring(a,b));
                 
             } else if (params.size()==1) {
                 if (!isInt(params,0)) {
@@ -131,7 +131,7 @@ public class ValueString extends Value {
                 return new ValueString(val.substring(a));
                 
             } else {
-                throw new Exception("Expected parameters: (startPos,count) or (startPos)");
+                throw new Exception("Expected parameters: (startPos,endPos) or (startPos)");
             }
         }
 
