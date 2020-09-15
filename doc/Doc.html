@@ -2593,7 +2593,7 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
     lexer.processLine(root,lexer,100) 
   |
   
-  lexer.processLine(Root,"this is a test").getTokens->token
+  lexer.getTokens-&gt;token
     report(token.sourceLocation, token.str, token.tokenType)
 /ProcessFile
 </pre>

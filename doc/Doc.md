@@ -2270,8 +2270,7 @@ Lib.Text.Lexer =lexer
 File("...").read->line
 lexer.processLine(root,lexer,100)
 |
-lexer.processLine(Root,"this is a test").getTokens->
-token
+lexer.getTokens->token
 report(token.sourceLocation, token.str, token.tokenType)
 /ProcessFile
 ```

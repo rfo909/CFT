@@ -13,6 +13,12 @@
 
 <h1>CFT Change log</h1>
 
+<h3>v1.3.4 2020-09-15 Lib.Text.Parser</h3>
+<p>
+	Changed Node.setIsToken() so that tokenType is optional, and defaults to 0, because
+	when using the Parser, we often will not care about type, only match / non-match.
+</p>
+
 <h3>v1.3.3 2020-09-14 Lib.Text.Parser</h3>
 <p>
 	Have by now mostly figured out how the Parser should behave. For CFT we process the complete
@@ -38,12 +44,22 @@
 	implementation a bit, but greatly simplifies the grammar.
 </p>
 <ul>
-	Created Lib.Text.Parser object
-	Created Parser.readme
-	Created Parser.production (just validates parameters)
-	Fixed String.sub from (start,count) to (start,end)
-	Checked Lib code: String.sub is never used
+	<li>Created Lib.Text.Parser object</li>
+	<li>Created Parser.readme</li>
+	<li>Created Parser.production (just validates parameters)</li>
+	<li>Fixed String.sub from (start,count) to (start,end)</li>
+	<li>Checked Lib code: String.sub is never used</li>
+	<li>Added Lib.Text.Lexer.Node.addTokenComplex function</li>
 </ul>
+<p>
+	Example of addTokenComplex
+</p>
+<pre>
+Lib.Text.Lexer.Node =date
+date.addTokenComplex("iiii-ii-ii", Dict.set("i","0123456789")).setIsToken
+</pre>
+
+
 
 <h3>v1.3.2 2020-09-13 Lib.Text.Lexer</h3>
 <ul>

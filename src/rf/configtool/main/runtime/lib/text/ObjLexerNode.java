@@ -32,6 +32,7 @@ import rf.configtool.main.runtime.ValueInt;
 import rf.configtool.main.runtime.ValueList;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
+import rf.configtool.main.runtime.lib.ObjDict;
 import rf.configtool.parser.CharSource;
 import rf.configtool.parser.CharTable;
 import rf.configtool.parser.Parser;
@@ -55,6 +56,7 @@ public class ObjLexerNode extends Obj {
 		this.add(new FunctionSetDefault());
 		this.add(new FunctionSetIsToken());
 		this.add(new FunctionMatch());
+		this.add(new FunctionAddTokenComplex());
 	}
 
 	public ObjLexerNode(String firstChars) {
@@ -102,6 +104,36 @@ public class ObjLexerNode extends Obj {
 				sub = new CharTable();
 				curr.setMapping(c, sub);
 			}
+			curr = sub;
+		}
+		return new ObjLexerNode(curr);
+	}
+
+	/**
+	 * The charMap maps single characters to multiple characters, so that
+	 * the token may be defined as "iiii-ii-ii", mapping "i" to "0123456789" in
+	 * order to match dates. NOte: can not be as "nice" as addToken(), which
+	 * checks if there exists sub-nodes for mapping. This one runs blindly and
+	 * overwrites any other "shared" mappings.
+	 */
+	private ObjLexerNode addTokenComplex(String token, ObjDict charMap) {
+		CharTable curr = charTable;
+
+		for (int i = 0; i < token.length(); i++) {
+			char x = token.charAt(i);
+
+			String chars;
+			// check if x maps to set of characters
+			Value v=charMap.getValue(""+x);
+			if (v != null) {
+				chars=v.getValAsString();
+			} else {
+				chars=""+x;
+			}
+			
+			CharTable sub = new CharTable();
+			curr.setMapping(chars, sub);
+
 			curr = sub;
 		}
 		return new ObjLexerNode(curr);
@@ -212,13 +244,18 @@ public class ObjLexerNode extends Obj {
 		}
 
 		public String getShortDesc() {
-			return "setIsToken(tokenType) - tokenType is an int - returns self";
+			return "setIsToken(tokenType?) - tokenType is an int, which defaults to 0 - returns self";
 		}
 
 		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-			if (params.size() != 1)
-				throw new Exception("Expected tokenType (int) parameter");
-			int tokenType = (int) getInt("tokenType", params, 0);
+			if (params.size() > 1)
+				throw new Exception("Expected optional tokenType (int) parameter");
+			int tokenType;
+			if (params.size()==1) {
+				tokenType = (int) getInt("tokenType", params, 0);
+			} else {
+				tokenType=0;
+			}
 			charTable.setTokenType(tokenType);
 			return new ValueObj(self());
 		}
@@ -247,5 +284,29 @@ public class ObjLexerNode extends Obj {
 			}
 		}
 	}
+	
+	class FunctionAddTokenComplex extends Function {
+		public String getName() {
+			return "addTokenComplex";
+		}
+
+		public String getShortDesc() {
+			return "addToken(token, charMapDict) - create mappings for complex string, returns resulting Node";
+		}
+
+		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+			if (params.size() != 2)
+				throw new Exception("Expected parameters token (string) and charMapDict");
+			String token = getString("token", params, 0);
+			Obj obj = getObj("charMapDict", params, 1);
+			if (!(obj instanceof ObjDict)) {
+				throw new Exception("Expected parameters token (string) and charMapDict");
+			}
+			ObjDict charMap=(ObjDict) obj;
+			return new ValueObj(addTokenComplex(token, charMap));
+		}
+	}
+
+
 
 }
