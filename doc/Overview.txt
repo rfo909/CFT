@@ -173,7 +173,10 @@ Lib.Text.Lexer
  * Processing single lines
  * Processing files
  * Limitations
- |   Different uses
+ * Different uses
+ * Complex tokens
+ |   Regular Node.addToken() example
+ |   Node.addTokenComplex() example
 
 Closures
 

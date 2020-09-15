@@ -2300,7 +2300,7 @@ This also means we can not both match integer and dates on numeric format, such 
 2020   # integer
 2020-09-12   # date
 ```
-### Different uses
+## Different uses
 
 
 Parsing a programming language or JSON structure, requires us to identify every
@@ -2311,6 +2311,52 @@ Parsing a log line piece by piece does not have this requirement. Different
 lexer nodes may be used for each part of the line, some allowing for alternatives,
 most just looking to match a fixed format string, for which regular expressions
 would also be suited.
+
+## Complex tokens
+
+
+For the case where we want to identify parts of a log line, one token at a time,
+individual token definitions may not co-exist under a shared root, but that is
+exactly the point: we have clear expectations for what we look for, at any time.
+
+
+The Node.addTokenComplex() function is not one that lives happily together with
+others.
+
+### Regular Node.addToken() example
+
+
+With the normal .addToken() function, we can do something like this:
+
+```
+Lib.Text.Node =grade
+"A AA AAA B C".split->
+x grade.addToken(x).setIsToken
+```
+
+Overlapping definitions, such as "A" and "AA" and "AAA" is not a problem for Node.addToken()
+
+### Node.addTokenComplex() example
+
+
+This function adds a token, where some of the characters in the token string map to
+sets of characters, via a Dict object. This function does not have the freedom to
+expand and reuse existing (overlapping) nodes, as with the regular .addToken() function.
+
+
+It is meant for matching one thing only, and not for collecting all token definitions
+under a shared root, as before. It is targeted at the Parser object, as well as stand-alone
+specific matching.
+
+```
+Lib.Text.Node =date
+Dict.set("i","0123456789") =mappings
+date.setTokenComplex("iiii-ii-ii", mappings).setIsToken
+date.match("2020-09-15xxx")  # returns 10 (characters matched)
+date.match("2020-009-15xxx") # returns 0 (no match)
+```
+
+Feels like Regex character classes, no?
 
 # Closures
 

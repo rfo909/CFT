@@ -2625,7 +2625,7 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
   2020-09-12   # date
 </pre>
 
-<h3>Different uses</h3>
+<h2>Different uses</h2>
 <p>
   Parsing a programming language or JSON structure, requires us to identify every
   token in the string. The lexer tree must house them all.
@@ -2636,6 +2636,58 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
   most just looking to match a fixed format string, for which regular expressions
   would also be suited.
 </p>
+
+
+<h2>Complex tokens</h2>
+<p>
+  For the case where we want to identify parts of a log line, one token at a time, 
+  individual token definitions may not co-exist under a shared root, but that is
+  exactly the point: we have clear expectations for what we look for, at any time.
+</p>
+<p>
+  The Node.addTokenComplex() function is not one that lives happily together with
+  others.
+</p>
+
+<h3>Regular Node.addToken() example</h3>
+<p>
+  With the normal .addToken() function, we can do something like this:
+</p>
+<pre>
+  Lib.Text.Node =grade
+  "A AA AAA B C".split->x grade.addToken(x).setIsToken
+</pre>
+<p>
+  Overlapping definitions, such as "A" and "AA" and "AAA" is not a problem for Node.addToken()
+</p>
+
+
+
+
+<h3>Node.addTokenComplex() example</h3>
+<p>
+  This function adds a token, where some of the characters in the token string map to 
+  sets of characters, via a Dict object. This function does not have the freedom to
+  expand and reuse existing (overlapping) nodes, as with the regular .addToken() function.
+</p>
+<p>
+  It is meant for matching one thing only, and not for collecting all token definitions
+  under a shared root, as before. It is targeted at the Parser object, as well as stand-alone
+  specific matching.
+</p>
+<pre>
+  Lib.Text.Node =date
+  Dict.set("i","0123456789") =mappings
+  date.setTokenComplex("iiii-ii-ii", mappings).setIsToken
+
+  date.match("2020-09-15xxx")  # returns 10 (characters matched)
+  date.match("2020-009-15xxx") # returns 0 (no match)
+</pre>
+<p>
+  Feels like Regex character classes, no?
+</p>
+
+
 
 
 

@@ -18,6 +18,15 @@
 	Changed Node.setIsToken() so that tokenType is optional, and defaults to 0, because
 	when using the Parser, we often will not care about type, only match / non-match.
 </p>
+<p>	
+	Added Lib.Text.Lexer.Node.addTokenComplex function
+</p>
+
+<pre>
+Lib.Text.Lexer.Node =date
+date.addTokenComplex("iiii-ii-ii", Dict.set("i","0123456789")).setIsToken
+</pre>
+
 
 <h3>v1.3.3 2020-09-14 Lib.Text.Parser</h3>
 <p>
@@ -49,15 +58,7 @@
 	<li>Created Parser.production (just validates parameters)</li>
 	<li>Fixed String.sub from (start,count) to (start,end)</li>
 	<li>Checked Lib code: String.sub is never used</li>
-	<li>Added Lib.Text.Lexer.Node.addTokenComplex function</li>
 </ul>
-<p>
-	Example of addTokenComplex
-</p>
-<pre>
-Lib.Text.Lexer.Node =date
-date.addTokenComplex("iiii-ii-ii", Dict.set("i","0123456789")).setIsToken
-</pre>
 
 
 
