@@ -48,18 +48,29 @@ P(1,ReadSSHTarget) =sshTarget
 # Check if server responds on ping
 P(1)=target
     if(target.contains("@"), target.after("@"), target) =host
-    Dir.runCapture("ping","-c","1",host)->line assert(line.contains("0 received")) out(line) | _.length>0 =failure
+    Dir.runCapture("ping","-c","1",host)->line 
+    	assert(line.contains("0 received")) out(line) 
+    | _.length>0 =failure
+
     !failure
 /HostOk
+
+
+# Check if ok with SSH
+P(1)=target
+	run(target,"ls",true).get("exitCode")==0
+/HostOkSSH
 
 
 # Returns boolean indicating if sudo without password ok
 P(1,ReadSSHTarget) =sshTarget
     sshTarget.before("@")=user
-    if(user == "ubuntu", true, Inner{    # ubuntu on RPI default user has sudo without password ok
+    if(user == "ubuntu") {
+    	true    # ubuntu on RPI default user has sudo without password ok
+    } else {
         run (sshTarget,"sudo ls",true) =result
         result.get("exitCode") == 0
-    })
+    }
 /VerifySudo
 
 
@@ -82,9 +93,9 @@ P(4,false)=showDebug
     error(commands==null, "Invalid commands: can not be null")
 
     # ensure commands is a list
-    if(!commands.?nth, Inner{
+    if(!commands.?nth) {
         List(commands) =commands
-    })
+    }
 
 
     # Add echo command with string to check for later, to avoid login messages etc
@@ -100,29 +111,35 @@ P(4,false)=showDebug
     
     # Filter stdout to include lines following one containing mark
     false =found
-    if(outFile.exists,outFile.read,List)->line
+    if(outFile.exists, outFile.read, List)->line
         condOut(found, line)
-        if(line.contains(mark), Inner{true =found})
+        if (line.contains(mark)) {
+        	true =found
+        }
     | _=outLines
         
-    Dict =result
-    result.set("stdout",outLines)
-    result.set("stderr",if(errFile.exists,errFile.read,List))
-    result.set("stdin",commands)
-    result.set("exitCode", Sys.lastEPS)
+    Dict
+    	.set("stdout",outLines)
+    	.set("stderr",if(errFile.exists,errFile.read,List))
+    	.set("stdin",commands)
+    	.set("exitCode", Sys.lastEPS)
+    =result
     
-    Lambda { P(1)=f if(f.exists, f.delete) } =Del
+    Lambda { 
+    	P(1)=f 
+    	if(f.exists) f.delete 
+    } =Del
     
     Del.call(inFile)
     Del.call(outFile)
     Del.call(errFile)
 
     false =FAIL
-    if(result.get("exitCode") != 0 && !acceptErrors, Inner{
+    if (result.get("exitCode") != 0 && !acceptErrors) {
         true =FAIL
-    })
+    }
     
-    if(showDebug || FAIL,Inner{
+    if(showDebug || FAIL) {
         println("- target=" + target)
         println("- stdin:")
         commands->line println("    " + line) |
@@ -135,7 +152,7 @@ P(4,false)=showDebug
         println("- stderr:")
         result.get("stderr")->line println("   # " + line) |
         println
-    })
+    }
     
     error(FAIL,"run failed with error: " + target)
     
@@ -149,9 +166,10 @@ P(2)=commands
 P(3,false)=acceptErrors
 P(4,false)=showDebug
     # ensure commands is a list
-    if(!commands.?nth, Inner{
+    if(!commands.?nth) {
         List(commands) =commands
-    })
+    }
+    
     List("sudo bash")+commands =commands
     run(target,commands,acceptErrors,showDebug)
 /sudo

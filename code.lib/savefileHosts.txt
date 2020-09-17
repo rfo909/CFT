@@ -82,18 +82,12 @@ P(1)=glob
         reject(line=="")
         reject(line.startsWith("#"))
         
-        if(line.startsWith("["), Inner{
+        if(line.startsWith("[")) {
             parseHeader(line).push(2,"") =settingName=settingValue
-        },Inner{
+        } else {
             parseData.call(line,settingName,settingValue)
-        })
+        }
     |
-    # Check which hosts are missing settings 
-    # Note, can not call GetFields or GetHosts, since that causes infinite recursion
-    Val("data").keys->host
-        Val("data").get(host).keys->field
-            out(field)
-    | _.unique.sort =allFields
 
 /ProcessHostsFile
 
@@ -217,6 +211,8 @@ P(1)=glob
         Dir.run("ssh-copy-id",target)
 /CheckSSHKeys
 
+
+
 # Check if debian based host should be rebooted
         P(1)=target
         call "SSH:sudo" (target, "ls /var/run/reboot-required", true) =result
@@ -259,8 +255,46 @@ P(1)=glob
         call "Hosts:GetValue" (host, "SSHUser") =sshUser
 
         sshUser+"@"+host =target
+
+        call "SSH:HostOkSSH" (target) =hostOk
+        if (!hostOk) {
+        	println(target + ": -offline-")
+        	assert(false)
+        }
+
         DebianHostNeedsReboot(target)=x
         if(x,"NEEDS REBOOT","ok")=status
         println(target + ": " + status)
         
 /NeedReboot     
+
+
+# Update or install CFT
+	Date.Duration.hours(16).get =minTimeSinceLastRun
+	
+    call "Hosts:GetHosts" =hosts
+    hosts->host
+        assert(call "Hosts:Has" (host,"Install.CFT","1"))
+        call "Hosts:GetValue" (host, "SSHUser") =sshUser
+        assert(sshUser != null)
+
+        call "Db:Get" (host, "CFT") =lastDate
+       	if (lastDate != null) {
+	    	Date.diff(lastDate).get =timeSinceLastRun
+	    	if (timeSinceLastRun < minTimeSinceLastRun) {
+	    		println("Host " + host + " was last checked " + lastDate.fmt)
+	    		assert(false) # next
+	    	}
+	    }
+
+        assert(call "SSH:HostOk" (host))
+        
+        sshUser+"@"+host =target
+        println("Updating " + target)
+        
+		assert(call "SSH:HostOkSSH" (target))
+
+        call "Java:VerifyCFT" (target, "   ")
+        call "Db:Add" (host, Date, "CFT")
+/UpdateCFT
+

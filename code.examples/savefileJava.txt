@@ -46,28 +46,12 @@ lines->line out(line.merge(data))
 11
 /MinimumVersion
 
+11
+/InstallVersion
 
-"openjdk-"+MinimumVersion+"-jdk-headless"
+"openjdk-"+InstallVersion+"-jdk-headless"
 /targetPackage
 
-
-
-# Shortcut
-P(1)=target 
-P(2)=commands
-P(3,false)=acceptErrors
-P(4,false)=showDebug
-    call "SSH:run" (target,commands,acceptErrors,showDebug)
-/run
-
-
-# Shortcut
-P(1)=target 
-P(2)=commands
-P(3,false)=acceptErrors
-P(4,false)=showDebug
-    call "SSH:sudo" (target,commands,acceptErrors,showDebug)
-/sudo
 
 
 
@@ -77,16 +61,20 @@ Input("Enter ssh target on format user@host").get
 # Install or upgrade Java
 P(1,GetSSHTarget)=target
 P(2,"")=prefix
+P(3,false)=showDebug
 
     println(prefix+"Checking if java installed")
-    run(target,"java -version",true)=result
+    
+    call "SSH:run" (target,"java -version",true)=result
     result.get("stdout") + result.get("stderr") =lines
     
     (result.get("exitCode")==0) =hasJava
 
     println(prefix+"hasJava=" + hasJava)
     
-    #Inner{lines->line println(" ## " + line) }
+    if (showDebug) {
+    	lines->line println(prefix+" ## " + line) 
+    }
     
     call "Lib:LinesContain" (lines,"OpenJDK") =isOpenJdk
     
@@ -95,7 +83,7 @@ P(2,"")=prefix
         "Java on " + target + " is not an OpenJDK install, can not continue")
 
 
-    if(hasJava, Inner{
+    if (hasJava) {
 
         println(prefix+"Checking version")
 
@@ -117,34 +105,33 @@ P(2,"")=prefix
         
         println(prefix+"Checking for jdk vs jre")
         null =jdkJre
-        if(
-            run(target,"which javac",true).get("exitCode")==0,
-            Inner{"jdk" =jdkJre},
-            Inner{"jre" =jdkJre}
-        )
+        if (call "SSH:run" (target,"which javac",true).get("exitCode")==0) {
+            "jdk" =jdkJre
+        } else {
+           	"jre" =jdkJre
+        }
+       
         
         "openjdk-"+version+"-"+jdkJre+"-headless" =package
         
-        println(prefix+"Found installed package = " + package)
-        
-        if(version<14 || jdkJre != "jdk", Inner{
+        if(version<MinimumVersion || jdkJre != "jdk") {
             println(prefix+"Requiring " + targetPackage + " - removing obsolete package " + package)
-            sudo(target,"apt-get -y remove " + package)
+            call "SSH:sudo"(target,"apt-get -y remove " + package)
             
             false =hasJava
-        },Inner{
-            println(prefix+"Java version ok")
-        })
+        } else {
+            println(prefix+"Java version ok: " + package)
+        }
 
-    })
+    }  # if hasJava
     
-    if(!hasJava,Inner{
+    if(!hasJava) {
         println(prefix+"Running Update")
-        sudo(target,"apt-get -y update")
+        call "SSH:sudo" (target,"apt-get -y update")
         
         println(prefix+"Installing " + targetPackage)
-        sudo(target,"apt-get -y install " + targetPackage)  
-    })
+        call "SSH:sudo"(target,"apt-get -y install " + targetPackage)  
+    }
     
     println(prefix+"Java ok")
     
@@ -157,16 +144,44 @@ P(2,"")=prefix
     println(prefix+"Preparing to install ANT")
     VerifyJava(target,prefix+"   ")
 
-    run(target,"which ant",true) =result
-    if(result.get("exitCode") != 0, Inner{
+    call "SSH:run" (target,"which ant",true) =result
+    if(result.get("exitCode") != 0) {
         println(prefix+"Installing ANT")
-        sudo(target,"apt-get -y install ant")
-    }, Inner{
-        println(prefix+"ANT found on system")
-    })
+        call "SSH:sudo" (target,"apt-get -y install ant")
+    }
     println(prefix+"ANT ok")
 /VerifyAnt
-    
+
+
+# Install or upgrade CFT - calls VerifyAnt
+P(1,GetSSHTarget)=target
+P(2,"")=prefix
+	println(prefix+"Verifying ANT (and Java) ok")
+	VerifyAnt(target, prefix+"   ")
+
+	# Check if CFT already installed
+	{
+		call "SSH:run" (target,"cd CFT").get("exitCode")==0 
+	} =hasCFT
+	
+	if (!hasCFT) {
+		println(prefix+"Installing and compiling CFT")
+		List(
+			"git clone https://github.com/rfo909/CFT.git",
+			"cd CFT",
+			"ant"
+		) 
+	} else {
+		println(prefix+"Pull latest CFT then compile")
+		List(
+			"cd CFT",
+			"git pull origin master",
+			"ant"
+		)
+	}
+	=cmd
+	call "SSH:run" (target, cmd)
+/VerifyCFT
 
     
 
