@@ -270,7 +270,7 @@ P(1)=glob
 
 
 # Update or install CFT
-	Date.Duration.hours(16).get =minTimeSinceLastRun
+	Date.Duration.minutes(30).get =minTimeSinceLastRun
 	
     call "Hosts:GetHosts" =hosts
     hosts->host
