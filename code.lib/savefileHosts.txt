@@ -145,7 +145,7 @@ P(1)=glob
     P(1)=host
     P(2)=field
 
-    error(!Val("data").has(host), "Invalid host " + host)
+    error(!Val("data").has(host), "No config for host " + host)
     Val("data").get(host).get(field)
 /GetValue
 
@@ -161,6 +161,16 @@ P(1)=glob
     Val("data").get(host).get(field,null) == expectedValue
 /Has
 
+
+# Return true if host has value for field
+    CheckData
+    P(1)=host
+    P(2)=field
+
+    error(!Val("data").has(host), "Invalid host " + host)
+    
+    Val("data").get(host).get(field,null) != null
+/HasField
 
 # Shortcut
     Search
@@ -246,7 +256,7 @@ P(1)=glob
         if(needsReboot && !canBeRebooted) {
                 println("   *** Host " + host + " should be rebooted - can not do this automatically")
         }
-/UpdateAPT
+/UpgradeAPT
 
 
 # Display hosts that should be rebooted
@@ -297,4 +307,5 @@ P(1)=glob
         call "Java:VerifyCFT" (target, "   ")
         call "Db:Add" (host, Date, "CFT")
 /UpdateCFT
+
 

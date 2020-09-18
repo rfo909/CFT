@@ -1,0 +1,148 @@
+<<< EOF
+ElasticSearch related installs
+>>> EOF
+/Readme
+
+Input("ssh target user@host").get
+/GetTarget
+
+Dir("/tmp").file("tmp."+currentTimeMillis)
+/tmpFile
+
+# Install Logstash - enables service, but does not start
+	P(1,GetTarget)=target
+	P(2,"")=prefix
+
+	# Check if logstash already installed
+	call "SSH:sudo" (target, "systemctl status logstash.service", true).get("exitCode")==4 _.not =found
+	if (found) {
+		println(prefix+"Logstash already installed")
+	} else {
+		# Requires java 8, 11 or 14
+		println(prefix+"Setting up logstash")
+		call "Java:VerifyJava" (target, prefix+"   ")
+
+		List(
+			'wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -',
+			'apt-get install apt-transport-https',
+			'echo "deb https://artifacts.elastic.co/packages/7.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-7.x.list',
+			'sudo apt-get update && sudo apt-get install logstash',
+			'systemctl enable logstash.service'
+		)=cmd
+
+		println(prefix+"Installing logstash")
+		call "SSH:sudo" (target, cmd)
+	}
+/InstallLogstash
+
+
+
+# Configure / update logstash
+	P(1,Input("Host"))=host
+	P(2,"")=prefix
+	
+	call "Hosts:GetValue" (host, "SSHUser") =sshUser
+	sshUser +"@" + host =target
+
+	println(prefix+"Verifying logstash install")
+	InstallLogstash(target,prefix+"   ")
+
+	println(prefix+"Loading parameters for config file for host " + host)
+	call "Hosts:GetValue" (host, "ElasticSearch.Logstash.listenPort") =listenPort
+	call "Hosts:GetValue" (host, "ElasticSearch.Logstash.esIndex") =esIndex
+	call "Hosts:GetValue" (host, "ElasticSearch.Logstash.esHosts") =esHosts
+
+	println(prefix+"Creating config file")
+	tmpFile =f
+	f.create(LogstashConfigTest(listenPort, esIndex, esHosts))
+	#f.read->line println(line) |
+
+	println(prefix+"Copying config file to " + target)
+	Dir.run("rcp", f.path, target + ":.main.conf")
+	Dir.run("rm",f.path)
+	error(Sys.lastEPS != 0, "Remote copy failed")
+
+	println(prefix+"Stopping service if exists")
+	call "SSH:sudo" (target, "systemctl stop logstash.service", true)
+	
+	println(prefix+"Deploying config file on server, starting service")
+	List(
+		"cp ./main.conf /etc/logstash/conf.d/main.conf",
+		"systemctl start logstash.service"
+	)=cmd
+	call "SSH:sudo" (target, cmd)
+	
+/ConfigureLogstash
+	
+
+# Update or install logstash + config on all targets
+	P(1,"")=prefix
+	call "Hosts:GetHosts" -> host
+		assert(call "Hosts:HasField" (host, "ElasticSearch.Logstash.esIndex"))
+		println(prefix+"*** Checking host " + host)
+		ConfigureLogstash(host,prefix+"   ")
+/VerifyLogstash
+
+
+
+
+# Create dynamic configuration file, to be stored under /etc/logstash/conf.d on remote host
+#
+PDict("((listenPort))","((esIndex))","((esHosts))")=data
+#
+# "5044" is default port
+# "logs01" is current esIndex
+# "elastic01.v:9200", "elastic02.v:9200" is esHosts
+#
+error(data.hasNullValue, "Missing parameters: expected listenPort esIndex, esHosts")
+#
+<<<<<<<<<<<<<<<<<<<<<<<<< EOF
+input {
+        beats {
+                port => ((listenPort))
+        }
+}
+
+filter {
+  dissect {
+        mapping => {
+          "message" => "%{ts} %{+ts} %{logLevel} [%{javaClass}] {{%{threadId}}} %{logMessage}"
+        }
+  }
+  date {
+        match => [ "ts", "yyyy-MM-dd HH:mm:ss,SSS" ]
+  }
+  mutate {
+        remove_field => [ "message", "ts" ]
+  }
+}
+
+
+output {
+        #stdout { codec => rubydebug }
+        elasticsearch {
+               index => ((esIndex))
+               hosts => [ ((esHosts)) ]
+        }
+}
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> EOF
+->line
+	out(line.merge(data))
+/LogstashConfigTest
+
+
+
+
+
+
+<<< EOF
+
+wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
+apt-get install apt-transport-https
+echo "deb https://artifacts.elastic.co/packages/7.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-7.x.list
+sudo apt-get update && sudo apt-get install logstash
+
+Run as service: systemd (systemctl ...)
+
+>>> EOF
+/notes
