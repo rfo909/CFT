@@ -354,12 +354,12 @@ ssh <user>@<server> -L<PORT>:127.0.0.1:<PORT>
 
 The port is identified by running 
 
-virsh dumpxml $Inner{vm} | grep vnc
+virsh dumpxml ${vm} | grep vnc
 
 where <VM> is the name of the VM. 
 This produces the following line:
 
-$Inner{portInfo}
+${portInfo}
 ----------------------------------------------
     >>> EOF
     ->line

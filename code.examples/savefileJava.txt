@@ -9,7 +9,7 @@ OpenJDK Java, and if obsolete version,
 uninstalls it, before installing target
 version, which is 
 
-    $Inner{target}
+    ${target}
 
 
 Identification
@@ -38,7 +38,7 @@ Both functions are interactive if no target given.
 
 >>>>>>>>>>>>>>>>>>>>>>>>> EOF
 =lines
-Dict.set("$Inner{target}",targetPackage) =data
+Dict.set("${target}",targetPackage) =data
 lines->line out(line.merge(data))
 /Readme
 
@@ -73,7 +73,7 @@ P(3,false)=showDebug
     println(prefix+"hasJava=" + hasJava)
     
     if (showDebug) {
-    	lines->line println(prefix+" ## " + line) 
+        lines->line println(prefix+" ## " + line) 
     }
     
     call "Lib:LinesContain" (lines,"OpenJDK") =isOpenJdk
@@ -108,7 +108,7 @@ P(3,false)=showDebug
         if (call "SSH:run" (target,"which javac",true).get("exitCode")==0) {
             "jdk" =jdkJre
         } else {
-           	"jre" =jdkJre
+              "jre" =jdkJre
         }
        
         
@@ -156,31 +156,31 @@ P(2,"")=prefix
 # Install or upgrade CFT - calls VerifyAnt
 P(1,GetSSHTarget)=target
 P(2,"")=prefix
-	println(prefix+"Verifying ANT (and Java) ok")
-	VerifyAnt(target, prefix+"   ")
+    println(prefix+"Verifying ANT (and Java) ok")
+    VerifyAnt(target, prefix+"   ")
 
-	# Check if CFT already installed
-	{
-		call "SSH:run" (target,"cd CFT").get("exitCode")==0 
-	} =hasCFT
-	
-	if (!hasCFT) {
-		println(prefix+"Installing and compiling CFT")
-		List(
-			"git clone https://github.com/rfo909/CFT.git",
-			"cd CFT",
-			"ant"
-		) 
-	} else {
-		println(prefix+"Pull latest CFT then compile")
-		List(
-			"cd CFT",
-			"git pull origin master",
-			"ant"
-		)
-	}
-	=cmd
-	call "SSH:run" (target, cmd)
+    # Check if CFT already installed
+    {
+        call "SSH:run" (target,"cd CFT").get("exitCode")==0 
+    } =hasCFT
+    
+    if (!hasCFT) {
+        println(prefix+"Installing and compiling CFT")
+        List(
+            "git clone https://github.com/rfo909/CFT.git",
+            "cd CFT",
+            "ant"
+        ) 
+    } else {
+        println(prefix+"Pull latest CFT then compile")
+        List(
+            "cd CFT",
+            "git pull origin master",
+            "ant"
+        )
+    }
+    =cmd
+    call "SSH:run" (target, cmd)
 /VerifyCFT
 
     
