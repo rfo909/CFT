@@ -55,20 +55,22 @@ Dir("/tmp").file("tmp."+currentTimeMillis)
 	println(prefix+"Creating config file")
 	tmpFile =f
 	f.create(LogstashConfigTest(listenPort, esIndex, esHosts))
-	#f.read->line println(line) |
+	println("--------------------------------")
+	f.read->line println("    -> " + line) |
+	println("--------------------------------")
 
 	println(prefix+"Copying config file to " + target)
-	Dir.run("rcp", f.path, target + ":.main.conf")
-	Dir.run("rm",f.path)
+	Dir.run("rcp", f.path, target + ":./main.conf")
 	error(Sys.lastEPS != 0, "Remote copy failed")
+	Dir.run("rm",f.path)
 
 	println(prefix+"Stopping service if exists")
 	call "SSH:sudo" (target, "systemctl stop logstash.service", true)
 	
 	println(prefix+"Deploying config file on server, starting service")
 	List(
-		"cp ./main.conf /etc/logstash/conf.d/main.conf",
-		"systemctl start logstash.service"
+		"cp ./main.conf /etc/logstash/conf.d/main.conf"
+		, "systemctl start logstash.service"
 	)=cmd
 	call "SSH:sudo" (target, cmd)
 	

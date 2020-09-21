@@ -309,3 +309,25 @@ P(1)=glob
 /UpdateCFT
 
 
+# View host status
+	readLine("Hosts filter") =filter
+    call "Hosts:GetHosts" =hosts
+    
+    hosts->host
+    	assert(host.contains(filter))
+    	
+        call "Hosts:GetValue" (host, "SSHUser") =sshUser
+        assert(sshUser != null)
+        
+        sshUser+"@"+host =target
+    	assert(call "SSH:HostOk" (host))
+
+        println("------ " + host)
+        call "SSH:run" (target, "which mpstat", true).get("exitCode") != 0 =install
+        if(install) {
+            println("    (installing sysstat)")
+        	call "SSH:sudo" (target, "apt-get -y install sysstat")
+        }
+        call "SSH:run" (target, "mpstat").get("stdout")->line
+        	report(host,line)
+/MPStat
