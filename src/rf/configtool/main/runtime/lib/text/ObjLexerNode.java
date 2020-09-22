@@ -26,6 +26,7 @@ import rf.configtool.main.runtime.ColList;
 import rf.configtool.main.runtime.Function;
 import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
+import rf.configtool.main.runtime.ValueBlock;
 import rf.configtool.main.runtime.ValueBoolean;
 import rf.configtool.main.runtime.ValueFloat;
 import rf.configtool.main.runtime.ValueInt;
@@ -48,6 +49,7 @@ public class ObjLexerNode extends Obj {
 
 	private String firstChars;
 	private CharTable charTable;
+	private ValueBlock postLambda;
 	
 
 	private ObjLexerNode() {
@@ -57,6 +59,7 @@ public class ObjLexerNode extends Obj {
 		this.add(new FunctionSetIsToken());
 		this.add(new FunctionMatch());
 		this.add(new FunctionAddTokenComplex());
+		this.add(new FunctionPost());
 	}
 
 	public ObjLexerNode(String firstChars) {
@@ -92,6 +95,14 @@ public class ObjLexerNode extends Obj {
 	public void setDefaultMapping(ObjLexerNode node) {
 		charTable.setDefaultMapping(node.getCharTable());
 	}
+	
+	public ValueBlock getPostLambda() {
+		return postLambda;
+	}
+	
+	public Obj theObj() {
+		return this;
+	}
 
 	private ObjLexerNode addToken(String token) {
 		CharTable curr = charTable;
@@ -112,7 +123,7 @@ public class ObjLexerNode extends Obj {
 	/**
 	 * The charMap maps single characters to multiple characters, so that
 	 * the token may be defined as "iiii-ii-ii", mapping "i" to "0123456789" in
-	 * order to match dates. NOte: can not be as "nice" as addToken(), which
+	 * order to match dates. Note: can not be as "nice" as addToken(), which
 	 * checks if there exists sub-nodes for mapping. This one runs blindly and
 	 * overwrites any other "shared" mappings.
 	 */
@@ -304,6 +315,27 @@ public class ObjLexerNode extends Obj {
 			}
 			ObjDict charMap=(ObjDict) obj;
 			return new ValueObj(addTokenComplex(token, charMap));
+		}
+	}
+
+
+	class FunctionPost extends Function {
+		public String getName() {
+			return "post";
+		}
+
+		public String getShortDesc() {
+			return "post(lambda) - adds post-processing lambda P(1) - returns self";
+		}
+
+		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+			if (params.size() != 1)
+				throw new Exception("Expected lambda parameter");
+			
+			if (!(params.get(0) instanceof ValueBlock)) throw new Exception("Expected lambda parameter");
+			
+			postLambda = (ValueBlock) params.get(0); 
+			return new ValueObj(theObj());
 		}
 	}
 

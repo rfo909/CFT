@@ -13,7 +13,13 @@
 
 <h1>CFT Change log</h1>
 
-<h3>v1.3.4 2020-09-15 Lib.Text.Parser</h3>
+<h3>v1.4.0 2020-09-22 Added "normal" assign</h3>
+<p>
+	$ a:3 b:3 a+b
+	5
+</p>
+
+<h3>v1.4.0 2020-09-15 Lib.Text.Parser</h3>
 <p>
 	Changed Node.setIsToken() so that tokenType is optional, and defaults to 0, because
 	when using the Parser, we often will not care about type, only match / non-match.
