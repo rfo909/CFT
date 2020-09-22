@@ -25,6 +25,9 @@ public class CharSource  {
     public int getPos() {
         return pos;
     }
+    public void setPos (int pos) {
+    	this.pos=pos;
+    }
     public char getChar() {
         if (eol()) throw new RuntimeException("end of line");
         return s.charAt(pos++);

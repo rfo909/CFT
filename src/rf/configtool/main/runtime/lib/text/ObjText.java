@@ -87,7 +87,7 @@ public class ObjText extends Obj {
             return "Parser";
         }
         public String getShortDesc() {
-            return "Parser() - create object for grammar-driven parsing";
+            return "Parser() - create parser object";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
