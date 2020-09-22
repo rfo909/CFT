@@ -94,7 +94,7 @@ PDict("user","desc","path").mergeCodes =data
 error(data.hasNullValue,"Takes three parameters: user, desc, path")
 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< EOF
 [Unit]
-Description=$Inner{desc}
+Description=${desc}
 After=network.target
 StartLimitIntervalSec=0
 
@@ -102,8 +102,8 @@ StartLimitIntervalSec=0
 Type=simple
 Restart=always
 RestartSec=1
-User=$Inner{user}
-ExecStart=$Inner{path}
+User=${user}
+ExecStart=${path}
 
 [Install]
 WantedBy=multi-user.target

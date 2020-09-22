@@ -44,7 +44,7 @@ shortcutPrefix = @
 
 
 shortcut:e    = "---- open script in editor ----"         if(Sys.savefile != null, call "Lib:e" (Sys.savefile),"No savefile")
-shortcut:ee   = "---- clear editor selection ----"        call "Lib:ClearEditor"
+shortcut:ee   = "---- clear editor selection ----"        call "Lib:ClearEditor" if(Sys.savefile != null, call "Lib:e" (Sys.savefile),"No savefile")
 shortcut:term = "---- Update terminal size ----"          call "Lib:GetTerminalSize"
 shortcut:top  = "---- Run top command ----"               Dir.run("top")
 shortcut:rsh  = "---- Remote shell via ssh ----"          call "SSH:remoteShell"

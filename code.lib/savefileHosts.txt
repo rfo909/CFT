@@ -49,26 +49,26 @@ P(1)=glob
 
 
 # Process Hosts file and store it in session state
-	Lambda {
-	# Internal
-		P(1)=line
-		P(2)=name
-		P(3)=value
+    Lambda {
+    # Internal
+        P(1)=line
+        P(2)=name
+        P(3)=value
 
-		line.before("[").trim =host
-		line.after("[").before("]") =override 
+        line.before("[").trim =host
+        line.after("[").before("]") =override 
 
-		if(override != "", override, value) =overriddenVal
-		
-		if(host.contains("*"), Inner{
-		    # assign value for all hosts matching glob expression
-		    GlobHosts(host)->oneHost
-		        Val("data").get(oneHost,Dict).set(name, overriddenVal)
-		}, Inner{
-		    # regular assign
-		    Val("data").get(host,Dict).set(name,overriddenVal)
-		})
-	} =parseData
+        if(override != "", override, value) =overriddenVal
+        
+        if(host.contains("*"), Inner{
+            # assign value for all hosts matching glob expression
+            GlobHosts(host)->oneHost
+                Val("data").get(oneHost,Dict).set(name, overriddenVal)
+        }, Inner{
+            # regular assign
+            Val("data").get(host,Dict).set(name,overriddenVal)
+        })
+    } =parseData
 
     println("INFO Processing file " + HostsFile.path)
 
@@ -94,24 +94,24 @@ P(1)=glob
 
 
 # Common function called internally
-	false =flag
-	
-	if(Val("time")==null) {
-		true =flag
-	}
-	
-	if(Val("time") != null && Val("time") != HostsFile.lastModified) {
-		true =flag
-	}
-	
-	if(Val("data")==null) {
-		true =flag
-	}
-	if(flag) {
-	    ProcessHostsFile
-	    ValDef("time",HostsFile.lastModified)
-	}
-	true
+    false =flag
+    
+    if(Val("time")==null) {
+        true =flag
+    }
+    
+    if(Val("time") != null && Val("time") != HostsFile.lastModified) {
+        true =flag
+    }
+    
+    if(Val("data")==null) {
+        true =flag
+    }
+    if(flag) {
+        ProcessHostsFile
+        ValDef("time",HostsFile.lastModified)
+    }
+    true
 /CheckData
 
 # Explore data interactively
@@ -145,7 +145,7 @@ P(1)=glob
     P(1)=host
     P(2)=field
 
-    error(!Val("data").has(host), "Invalid host " + host)
+    error(!Val("data").has(host), "No config for host " + host)
     Val("data").get(host).get(field)
 /GetValue
 
@@ -161,6 +161,16 @@ P(1)=glob
     Val("data").get(host).get(field,null) == expectedValue
 /Has
 
+
+# Return true if host has value for field
+    CheckData
+    P(1)=host
+    P(2)=field
+
+    error(!Val("data").has(host), "Invalid host " + host)
+    
+    Val("data").get(host).get(field,null) != null
+/HasField
 
 # Shortcut
     Search
@@ -246,7 +256,7 @@ P(1)=glob
         if(needsReboot && !canBeRebooted) {
                 println("   *** Host " + host + " should be rebooted - can not do this automatically")
         }
-/UpdateAPT
+/UpgradeAPT
 
 
 # Display hosts that should be rebooted
@@ -258,8 +268,8 @@ P(1)=glob
 
         call "SSH:HostOkSSH" (target) =hostOk
         if (!hostOk) {
-        	println(target + ": -offline-")
-        	assert(false)
+            println(target + ": -offline-")
+            assert(false)
         }
 
         DebianHostNeedsReboot(target)=x
@@ -270,8 +280,8 @@ P(1)=glob
 
 
 # Update or install CFT
-	Date.Duration.minutes(30).get =minTimeSinceLastRun
-	
+    Date.Duration.minutes(30).get =minTimeSinceLastRun
+    
     call "Hosts:GetHosts" =hosts
     hosts->host
         assert(call "Hosts:Has" (host,"Install.CFT","1"))
@@ -279,22 +289,45 @@ P(1)=glob
         assert(sshUser != null)
 
         call "Db:Get" (host, "CFT") =lastDate
-       	if (lastDate != null) {
-	    	Date.diff(lastDate).get =timeSinceLastRun
-	    	if (timeSinceLastRun < minTimeSinceLastRun) {
-	    		println("Host " + host + " was last checked " + lastDate.fmt)
-	    		assert(false) # next
-	    	}
-	    }
+          if (lastDate != null) {
+            Date.diff(lastDate).get =timeSinceLastRun
+            if (timeSinceLastRun < minTimeSinceLastRun) {
+                println("Host " + host + " was last checked " + lastDate.fmt)
+                assert(false) # next
+            }
+        }
 
         assert(call "SSH:HostOk" (host))
         
         sshUser+"@"+host =target
         println("Updating " + target)
         
-		assert(call "SSH:HostOkSSH" (target))
+        assert(call "SSH:HostOkSSH" (target))
 
         call "Java:VerifyCFT" (target, "   ")
         call "Db:Add" (host, Date, "CFT")
 /UpdateCFT
 
+
+# View host status
+	readLine("Hosts filter") =filter
+    call "Hosts:GetHosts" =hosts
+    
+    hosts->host
+    	assert(host.contains(filter))
+    	
+        call "Hosts:GetValue" (host, "SSHUser") =sshUser
+        assert(sshUser != null)
+        
+        sshUser+"@"+host =target
+    	assert(call "SSH:HostOk" (host))
+
+        println("------ " + host)
+        call "SSH:run" (target, "which mpstat", true).get("exitCode") != 0 =install
+        if(install) {
+            println("    (installing sysstat)")
+        	call "SSH:sudo" (target, "apt-get -y install sysstat")
+        }
+        call "SSH:run" (target, "mpstat").get("stdout")->line
+        	report(host,line)
+/MPStat

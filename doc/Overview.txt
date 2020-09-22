@@ -1,5 +1,5 @@
 ------------------------------------------------------------------
-Generated file - see script file $Inner{savefile}
+Generated file - see script file savefileOverview.txt
 ------------------------------------------------------------------
 
 Introduction

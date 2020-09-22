@@ -321,7 +321,7 @@ Input("Replica set name").get =rsName
 #!/bin/bash
 
 mongos \
-    --configdb conf/$Inner{confServers} \
+    --configdb conf/${confServers} \
     --bind_ip_all \
     --port 27017
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> EOF
@@ -370,10 +370,10 @@ processManagement:
 #operationProfiling:
 
 replication:
-  replSetName: '$Inner{replSetName}'
+  replSetName: '${replSetName}'
 
 sharding:
-  clusterRole: '$Inner{clusterRole}'
+  clusterRole: '${clusterRole}'
 
 ## Enterprise-Only Options:
 

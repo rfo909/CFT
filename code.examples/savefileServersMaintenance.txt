@@ -102,10 +102,10 @@ network:
   version: 2
   renderer: networkd
   ethernets:
-    $Inner{nic}:
+    ${nic}:
       dhcp4: no
       gateway4: 10.0.0.138
-      addresses: [$Inner{ip}]
+      addresses: [${ip}]
       nameservers:
         addresses: [10.0.0.3, 10.0.0.4]
 >>> EOF
