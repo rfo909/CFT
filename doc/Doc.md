@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2020-09-13 RFO
-v1.3.2
+Last updated: 2020-09-15 RFO
+v1.3.4
 ```
 # Introduction
 
@@ -2379,9 +2379,8 @@ closure.call("test")
 data.get("received_value")  # returns "test"
 ```
 
-For robustness and testing, when lambdas are run, also when not called from
-a Closure object, there is a "self" variable. When called directly, it points
-at an empty Dict object.
+For robustness and testing, when lambdas are run directly (not via closures)
+there is also a "self" variable, which points at an empty Dict object.
 
 
 Example:
