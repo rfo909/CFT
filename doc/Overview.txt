@@ -190,7 +190,6 @@ Reference: Synthesizable types
 Fun and strange stuff, comments
  * Why Input("label").get?
  * Function name AFTER code?
- * Stack-based assignment?
  * Using Sys.stdin to run colon commands etc
  * 2020-09-12 Inner blocks??
  * 2020-09-12 Closures and objects

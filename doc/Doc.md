@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2020-09-15 RFO
-v1.3.4
+Last updated: 2020-09-22 RFO
+v1.5.0
 ```
 # Introduction
 
@@ -401,7 +401,7 @@ simplifying those Windows paths.
 Dictionaries are maps that store any value identified by names (strings).
 
 ```
-$ Dict=x x.set("a",1) x.get("a")
+$ x=Dict x.set("a",1) x.get("a")
 <int>
 1
 ```
@@ -660,13 +660,19 @@ depending on the first function to produce the start point.
 ## Local variables
 
 
-The inside of a function may use local variables for simplifying expressions etc. Variable
-assignment is "stack based", in that it is the current value from the stack that is assigned
-to the local variable.
+The inside of a function may use local variables for simplifying expressions etc.
 
 ```
-$ 3 =a 2 =b a+b
+$ a=3 b=2 a+b
 <int>
+5
+```
+
+Can also use "stack based" notation, where the assignment picks the current value
+off the stack and stores it into a variable:
+
+```
+3=>a 2=>b a+b
 5
 ```
 ## Nested loops
@@ -705,7 +711,7 @@ return value from that loop space and putting it onto the stack for the next loo
 space to work with (or do something else). Example:
 
 ```
-$ Dir.files->f out(f.length) | =sizes sizes.sum
+$ Dir.files->f out(f.length) | =>sizes sizes.sum
 ```
 
 This single line of code first contains a loop, which outputs a list of integers for
@@ -726,7 +732,7 @@ As we see from the above code, a loop spaces don't
 following is perfectly legal, although a little silly.
 
 ```
-$ 2+3 | | | | =x x | =y y | _ _ _ |
+$ 2+3 | | | | =>x x | =>y y | _ _ _ |
 ```
 
 Yes, it returns 5.
@@ -779,7 +785,7 @@ identifies the parameter by position. Note that
 **parameter position is 1-based**.
 
 ```
-$ P(1)=a P(2)=b a+b   # fails!
+$ P(1)=>a P(2)=>b a+b   # fails!
 ```
 
 If you enter the above code interactively, it will fail, complaining that you can not add
@@ -808,7 +814,7 @@ and may then ask the user to input the value.
 Here we make an improved version of the JavaFiles function, that takes a directory parameter, and if none given, uses the current directory ("Dir").
 
 ```
-$ P(1,Dir) =dir dir.allFiles->f assert(f.name.endsWith(".java")) out(f)
+$ P(1,Dir) =>dir dir.allFiles->f assert(f.name.endsWith(".java")) out(f)
 :
 : (code result)
 :
@@ -839,8 +845,8 @@ $ JavaFiles(DirProject1)
 CFT contains the following for asking the user to enter input:
 
 ```
-Input("Enter value").get =value
-readLine("Enter value") =value
+value = Input("Enter value").get
+value = readLine("Enter value")
 ```
 
 The difference is that Input remembers the last input values, and lets the user
@@ -853,7 +859,7 @@ The optional default value parameter to the P() expression for grabbing paramete
 functions, can be used to produce functions that ask for missing values.
 
 ```
-P(1,Input("Enter value").get) =value ...
+P(1,Input("Enter value").get) =>value ...
 ```
 ## Block expressions
 
@@ -879,7 +885,7 @@ A Lambda is an object (a value) that contains code, so it can be called, with pa
 inside runs detached from the caller, and behaves exactly like a function.
 
 ```
-Lambda { P(1)+P(2) } =x x.call(1,2)
+Lambda { P(1)+P(2) } =>x x.call(1,2)
 ```
 
 Great for local functions inside regular functions, and for sending as parameters to other functions,
@@ -900,7 +906,7 @@ In other words: Inner blocks define their own loop space.
 Inner {
 someList->
 x out(x+1)
-} =resultList
+} =>resultList
 ...
 ```
 
@@ -964,15 +970,15 @@ such as out() and break() as well as assignments.
 
 ```
 # Example: produce a default value if null
-if (value != null, value, "x") =value
+if (value != null, value, "x") =>value
 # Example: call statements inside blocks
-1 =i
+i=1
 loop
 if (i>
 10) {
 break
 } else {
-i+1 =i
+i=i+1
 }
 ```
 ## Lazy evaluation
@@ -1065,7 +1071,7 @@ This works the same as Dir.run(), but returns a List of strings representing std
 external program, to be processed further.
 
 ```
-Dir.run("which","leafpad") =lines lines.length>0 && lines.nth.contains("leafpad")
+Dir.run("which","leafpad") =>lines lines.length>0 && lines.nth.contains("leafpad")
 /HasLeafpad
 ```
 ## Dir.runDetach()
@@ -1097,17 +1103,17 @@ is spread out across multiple lines, and depends on editing the script file dire
 
 ```
 ## --- create temp-file
-P(1)=name
+name = P(1)
 Dir("/tmp").file(name + "." + currentTimeMillis)
 /TmpFile
 ## --- Call ssh to list remote processes with ps -efal
-P(1,Input("Enter ssh-target on format user@host").get)=target
+P(1,Input("Enter ssh-target on format user@host").get)=>target
 #
 # Create temp files
 #
-TmpFile("in") =stdin
-TmpFile("out") =stdout
-TmpFile("err") =stderr
+stdin = TmpFile("in")
+stdout = TmpFile("out")
+stderr = TmpFile("err")
 #
 # stdin contains the command(s) we want to run remotely
 #
@@ -1119,7 +1125,7 @@ Dir.runProcessWait(stdin, stdout, stderr, "ssh", target)
 #
 # get list of output from the "ps" command
 #
-stdout.read =result
+result = stdout.read
 #
 # delete temp-files
 #
@@ -1365,7 +1371,7 @@ file, which we then iterate over and apply the merge data.
 ```
 File("myTemplate.txt")
 /templateFile
-P(1,Dict)=data
+P(1,Dict)=>data
 templateFile.read->line
 out(line.merge(data))
 /generate
@@ -1400,13 +1406,13 @@ There needs to be at least three of the '<' or '>' followed by space and an iden
 ### A more complex example
 
 ```
-P(1,"a")=a
-P(2,"b")=b
+P(1,"a")=>a
+P(2,"b")=>b
 Dict
 .set("a",a)
 .set("b",b)
 .mergeCodes
-=data
+=>data
 <<< SomeMarker
 Value of a: ${a}
 Value of b: ${b}
@@ -1481,7 +1487,7 @@ For missing parameters, the value null is stored in the Dict.
 The String.merge() function logic replaces value null for a merge field with empty string.
 
 ```
-PDict("a","b").mergeCodes =data
+data = PDict("a","b").mergeCodes
 <<< SomeMarker
 Value of a: ${a}
 Value of b: ${b}
@@ -1495,7 +1501,7 @@ If missing parameters is a problem, use the Dict.hasNullValue() function, which 
 if one or more values of the Dict is null.
 
 ```
-PDict("a","b").mergeCodes =data
+data = PDict("a","b").mergeCodes
 error(data.hasNullValue,"Expected parameters a,b")
 ```
 # Use as a calculator
@@ -1546,7 +1552,7 @@ package should be invoked.
 ```
 File("/tmp/" + currentTimeMillis+".txt")
 /tmpFile
-tmpFile =f
+f = tmpFile
 Lib.Data.each(0,720)->i
 f.append(""+Lib.Math.sin(i) + "," + Lib.Math.cos(i))
 |
@@ -1724,7 +1730,7 @@ The push() function of the List object pushes a number of value from the list on
 to be assigned in "logical" order, and allows us to supply a default value if list too short.
 
 ```
-$ List("x","y").split.push(3,"*") =a =b =c a+":"+b+":"+c
+$ List("x","y").split.push(3,"*") =>a =>b =>c a+":"+b+":"+c
 <String>
 x:y:*
 ```
@@ -1746,8 +1752,8 @@ To process a property file, assuming commented lines start with '#', we can do
 this:
 
 ```
-P(1) =propFile
-Dict =d
+P(1) =>propFile
+Dict =>d
 propFile.read->line
 reject(line.trim.startsWith("#"))
 assert(line.contains(":") || line.contains("="))
@@ -1822,7 +1828,7 @@ loop variable, and loops forever, until break() is called. It also obeys assert(
 and reject() as with list iteration.
 
 ```
-0=a loop break(a>3) out(a) a+1 =a
+a=0 loop break(a>3) out(a) a=a+1
 <List>
 0
 1
@@ -1848,11 +1854,11 @@ consuming computations.
 
 To restore the structure, we use the global eval() function.
 ```
-P(1)=file
-P(2,"data") =data
+P(1)=>file
+P(2,"data") =>data
 file.create(syn(data))
 /saveData
-P(1)=file
+P(1)=>file
 eval(file.read.nth)
 /restoreData
 ```
@@ -2031,14 +2037,14 @@ shortcut definitions from it.
 The following code is an effective way of using PowerShell from CFT, saving lots of typing.
 
 ```
-P(1)=host P(2)=cmd ## Run remote PowerShell script-block
-List("powershell","invoke-command","-computername",host,"-scriptblock","{" + cmd + "}") =fullCmd
+host=P(1) cmd=P(2) ## Run remote PowerShell script-block
+List("powershell","invoke-command","-computername",host,"-scriptblock","{" + cmd + "}") =>fullCmd
 Dir.run(fullCmd)
 /PSRun
 # List services via PowerShell (interactive)
-Input("Host").get =host
+Input("Host").get =>host
 Input("Service name (including wildcards)").get =service
-"get-service -name " + service =cmd  # no splitting
+"get-service -name " + service =>cmd  # no splitting
 PSRun(host, cmd)
 /PSGetServ
 ```
@@ -2052,7 +2058,7 @@ Dir("...")
 /DirProject
 # Add, commit and push with git
 DirProject.run("cmd","/c","git","add",".")
-Input("Commit message").get =msg
+msg=Input("Commit message").get
 DirProject.run("cmd","/c","git","commit","-m",msg)
 DirProject.run("cmd","/c","git","push","origin","master")
 /GitPush
@@ -2129,8 +2135,8 @@ $ Lib.Text.Lexer.Node help
 A simple example:
 
 ```
-Lib.Text.Lexer.Node =top
-top.sub("0123456789") =x   # new node
+top=Lib.Text.Lexer.Node
+x=top.sub("0123456789")   # new node
 x.sub("0123456789",x)  # x points to itself for digits
 x.setIsToken(1) # token type: non-negative numbers for regular tokens
 top.match("300xx")  # returns 3, matching sequence '300'
@@ -2175,18 +2181,18 @@ lets those characters point at it.
 
 ```
 # Create reusable node for integers.
-"0123456789"=digits
-Lib.Text.Lexer.Node(digits) =x
+"0123456789"=>digits
+Lib.Text.Lexer.Node(digits) =>x
 x.sub(digits,x)
 x.setIsToken(1)
 x
 /NodeInt
 # Now we can for example match a IP v4 address
 Lib.Text.Lexer.Node =top
-NodeInt =a
-NodeInt =b
-NodeInt =c
-NodeInt =d
+a=NodeInt
+b=NodeInt
+c=NodeInt
+d=NodeInt
 top.sub(a)
 a.sub(".").sub(b) # creates intermediary nodes for the dots
 b.sub(".").sub(c)
@@ -2214,22 +2220,22 @@ tokens a negative token type, as those get automatically ignored.
 
 ```
 # Identifiers
-"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_" =firstChars
-firstChars+"0123456789" =innerChars
-Lib.Text.Lexer.Node(firstChars) =ident
+"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_" =>firstChars
+firstChars+"0123456789" =>innerChars
+ident = Lib.Text.Lexer.Node(firstChars)
 ident.sub(innerChars,ident)
 ident.setIsToken(1)
 ident
 /Identifiers
 # Whitespace
-" ^t^n^r".unEsc =chars
-Lib.Text.Lexer.Node(chars) =ws
+" ^t^n^r".unEsc =>chars
+Lib.Text.Lexer.Node(chars) =>ws
 ws.sub(chars,ws)
 ws.setIsToken(-1)
 ws
 /WhitesSpace
 # Root node
-Lib.Text.Lexer.Node =root
+Lib.Text.Lexer.Node =>root
 root.sub(Identifiers)
 root.sub(WhiteSpace)
 /Root
@@ -2265,8 +2271,8 @@ of each line, by just defining a token type, here we use 100.
 
 ```
 # Process file
-Root =root
-Lib.Text.Lexer =lexer
+Root =>root
+Lib.Text.Lexer =>lexer
 File("...").read->line
 lexer.processLine(root,lexer,100)
 |
@@ -2329,7 +2335,7 @@ others.
 With the normal .addToken() function, we can do something like this:
 
 ```
-Lib.Text.Node =grade
+Lib.Text.Node =>grade
 "A AA AAA B C".split->
 x grade.addToken(x).setIsToken
 ```
@@ -2349,8 +2355,8 @@ under a shared root, as before. It is targeted at the Parser object, as well as 
 specific matching.
 
 ```
-Lib.Text.Node =date
-Dict.set("i","0123456789") =mappings
+Lib.Text.Node =>date
+Dict.set("i","0123456789") =>mappings
 date.setTokenComplex("iiii-ii-ii", mappings).setIsToken
 date.match("2020-09-15xxx")  # returns 10 (characters matched)
 date.match("2020-009-15xxx") # returns 0 (no match)
@@ -2371,7 +2377,7 @@ the Dict object referenced via "self" variable.
 Nice for event based callbacks.
 
 ```
-Dict =data
+Dict =>data
 data.bind(Lambda{
 self.set("received_value", P(1))
 }) =closure
@@ -2387,10 +2393,10 @@ Example:
 
 ```
 # Create Closure that strips N characters of start and end of a string
-P(1)=n
+P(1)=>
 Dict.set("n",n).bind(Lambda{
-P(1)=s
-self.get("n")=n
+P(1)=>s
+self.get("n")=>n
 s.sub(n,s.length-n)
 })
 /Strip
@@ -2419,7 +2425,7 @@ Dict
 P(1,1) =amount
 self.set(self.i+amount)
 })
-=data
+=>data
 data.invoke("incr",10) # data.i is now 11
 ```
 #### Member lambdas calling each other
@@ -2562,44 +2568,6 @@ is the reason.
 
 
 The syntax with the slash and an identifier was inspired by PostScript.
-
-## Stack-based assignment?
-
-
-Why let assignment be the opposite of what everybody is used to?
-
-```
-4 =value
-```
-
-Primarily because it was a bit easier to implement. The syntax of CFT is made so that parsing it only
-requires a lookahead of one token.
-
-
-The actual changes required to support normal assignment turned out not to be too hard.
-However, the script code base has prohibited the change.
-
-
-An attempt was made to allow both, but this failed. To do this, we would have to use a different
-assignment token for each form, say "=" and ":=", which would just be confusing.
-
-
-Besides, the stack-based assignment has grown on me, for the same reason as why function name follows AFTER
-the function code: one types code, and at some point decide that for readability, it's time
-to assign a local variable, which is then used on the next lines. Almost like punctuation when
-writing prose.
-
-
-It may be a consequence of thinking bottom-up rather than top-down.
-
-
-Also note that there are no global variables (*) in CFT, only local helpers inside functions/macros, so
-all variable assignments come about in this way.
-
-
-(*) Session values are of course global variables, but they
-are defined and accessed using very different syntax, to emphasize how they are
-not meant as "helpers" in expressions.
 
 ## Using Sys.stdin to run colon commands etc
 

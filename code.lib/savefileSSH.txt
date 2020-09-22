@@ -34,41 +34,41 @@ Input("SSH target on format username@server").get
 # Open ssh connection to target
 # Called via @rsh shortcut
 #
-P(1,ReadSSHTarget)=sshTarget
+P(1,ReadSSHTarget) =>sshTarget
     Dir.run("ssh", sshTarget)
 /remoteShell
 
 
 # Copy ssh key to remote target host
-P(1,ReadSSHTarget) =sshTarget
+P(1,ReadSSHTarget) =>sshTarget
     Dir.run("ssh-copy-id",sshTarget)
 /sshEnable
 
 
 # Check if server responds on ping
-P(1)=target
-    if(target.contains("@"), target.after("@"), target) =host
+P(1) =>target
+    if(target.contains("@"), target.after("@"), target) =>host
     Dir.runCapture("ping","-c","1",host)->line 
         assert(line.contains("0 received")) out(line) 
-    | _.length>0 =failure
+    | _.length>0 =>failure
 
     !failure
 /HostOk
 
 
 # Check if ok with SSH
-P(1)=target
+P(1) =>target
     run(target,"ls",true).get("exitCode")==0
 /HostOkSSH
 
 
 # Returns boolean indicating if sudo without password ok
-P(1,ReadSSHTarget) =sshTarget
-    sshTarget.before("@")=user
+P(1,ReadSSHTarget) =>sshTarget
+    sshTarget.before("@") =>user
     if(user == "ubuntu") {
         true    # ubuntu on RPI default user has sudo without password ok
     } else {
-        run (sshTarget,"sudo ls",true) =result
+        run (sshTarget,"sudo ls",true) =>result
         result.get("exitCode") == 0
     }
 /VerifySudo
@@ -77,70 +77,70 @@ P(1,ReadSSHTarget) =sshTarget
 
 
 # Create name of temp file under /tmp
-P(1)=name 
+P(1) =>name 
     Dir("/tmp").file(name + currentTimeMillis)  
 /TmpFile
 
 
 
 # Single or multiple commands (string or list), returns Dict object
-P(1)=target 
-P(2)=commands
-P(3,false)=acceptErrors
-P(4,false)=showDebug
+P(1) =>target 
+P(2) =>commands
+P(3,false) =>acceptErrors
+P(4,false) =>showDebug
 
     error(target==null || !target.contains("@"), "Invalid target: '" + target + "'")
     error(commands==null, "Invalid commands: can not be null")
 
     # ensure commands is a list
     if(!commands.?nth) {
-        List(commands) =commands
+        List(commands) =>commands
     }
 
 
     # Add echo command with string to check for later, to avoid login messages etc
-    "--- " + Sys.scriptName + ".run ---" =mark
-    List('echo "' + mark + '"') + commands =cmd
+    "--- " + Sys.scriptName + ".run ---" =>mark
+    List('echo "' + mark + '"') + commands =>cmd
         
-    TmpFile("in") =inFile
-    TmpFile("out") =outFile
-    TmpFile("err") =errFile
+    TmpFile("in") =>inFile
+    TmpFile("out") =>outFile
+    TmpFile("err") =>errFile
     
     inFile.create(cmd)
     Dir.runProcessWait(inFile,outFile,errFile,"ssh",target)
     
     # Filter stdout to include lines following one containing mark
-    false =found
+    false =>found
     if(outFile.exists, outFile.read, List)->line
         condOut(found, line)
         if (line.contains(mark)) {
-            true =found
+            true =>found
         }
-    | _=outLines
+    | _ =>outLines
         
     Dict
         .set("stdout",outLines)
         .set("stderr",if(errFile.exists,errFile.read,List))
         .set("stdin",commands)
         .set("exitCode", Sys.lastEPS)
-    =result
+    =>result
     
     Lambda { 
-        P(1)=f 
+        P(1) =>f 
         if(f.exists) f.delete 
-    } =Del
+    } =>Del
     
     Del.call(inFile)
     Del.call(outFile)
     Del.call(errFile)
 
-    false =FAIL
+    false =>FAIL
     if (result.get("exitCode") != 0 && !acceptErrors) {
-        true =FAIL
+        true =>FAIL
     }
     
     if(showDebug || FAIL) {
-        println("- target=" + target)
+        println("- target = " + target)
         println("- stdin:")
         commands->line println("    " + line) |
 
@@ -161,16 +161,16 @@ P(4,false)=showDebug
 /run
 
 
-P(1)=target 
-P(2)=commands
-P(3,false)=acceptErrors
-P(4,false)=showDebug
+P(1) =>target 
+P(2) =>commands
+P(3,false) =>acceptErrors
+P(4,false) =>showDebug
     # ensure commands is a list
     if(!commands.?nth) {
-        List(commands) =commands
+        List(commands) =>commands
     }
     
-    List("sudo bash")+commands =commands
+    List("sudo bash")+commands =>commands
     run(target,commands,acceptErrors,showDebug)
 /sudo
 

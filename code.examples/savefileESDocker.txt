@@ -35,7 +35,7 @@ but the containers continued running.
 
 
 # Run command string (must split correctly)
-P(1,"dir")=cmd
+P(1,"dir") =>cmd
     println("---> " + cmd)
     Dir.run(cmd.split)
 /Run
@@ -60,12 +60,12 @@ Run("docker pull docker.elastic.co/kibana/kibana:7.8.0")
 
 
 # --- Util: get id for Docker container
-P(1,"elasticsearch")=name
-Dir.runCapture("docker container list".split) =data
-null =result
+P(1,"elasticsearch") =>name
+Dir.runCapture("docker container list".split) =>data
+null =>result
 data->line
     assert(line.contains(name))
-    line.split.nth =result
+    line.split.nth =>result
     break(result != null)
 |
 result
@@ -84,14 +84,14 @@ Run('docker run --link ' + getId("elasticsearch") + ':elasticsearch -p 5601:5601
 
 
 # Stop and remove elasticsearch container
-getId("elasticsearch") =id
+getId("elasticsearch") =>id
 Run("docker stop " + id)
 Run("docker rm " + id)
 /esRemove
 
 
 # Stop and remove kibana container
-getId("kibana") =id
+getId("kibana") =>id
 Run("docker stop " + id)
 Run("docker rm " + id)
 /kibRemove

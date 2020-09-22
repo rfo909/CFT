@@ -39,14 +39,17 @@ choice.
 
 
 # Edit file
-    P(1,Sys.savefile)=file
-    if(Sys.isWindows, Dir.runDetach("cmd","/c","notepad",file.path), ShowLinuxEditor(file))
+    P(1,Sys.savefile) =>file
+    if(Sys.isWindows)
+        Dir.runDetach("cmd","/c","notepad",file.path)
+    else
+        ShowLinuxEditor(file)
 /e
 
 
 
 # Page through file
-    P(1,Sys.savefile)=file
+    P(1,Sys.savefile) =>file
     if(Sys.isWindows,
         Dir.run("cmd", "/c", "more", file.path),
         Dir.run("more", file.path)
@@ -55,24 +58,24 @@ choice.
 
 
 # Update Cfg with terminal size (if possible)
-    false =updated
+    false =>updated
     if(!Sys.isWindows,Inner{
         # Linux
-        Dir.runCapture("which","stty").nth.contains("/stty") =hasStty
+        Dir.runCapture("which","stty").nth.contains("/stty") =>hasStty
         if(hasStty, Inner{
-            Dir.runCapture("stty","size").nth.split =list
+            Dir.runCapture("stty","size").nth.split =>list
             #debug("list=" + list)
             Cfg.h(list.nth(0).parseInt)
             Cfg.w(list.nth(1).parseInt)
-            true =updated
+            true =>updated
         })
     },Inner{
         # Windows (a bit slow)
-        Dir.runCapture("powershell","(Get-Host).UI.RawUI.WindowSize.Width").nth.parseInt =w
-        Dir.runCapture("powershell","(Get-Host).UI.RawUI.WindowSize.Height").nth.parseInt =h
+        Dir.runCapture("powershell","(Get-Host).UI.RawUI.WindowSize.Width").nth.parseInt =>w
+        Dir.runCapture("powershell","(Get-Host).UI.RawUI.WindowSize.Height").nth.parseInt =>h
         Cfg.w(w)
         Cfg.h(h)
-        true =updated
+        true =>updated
     })
     if(updated, Cfg, null)
 /GetTerminalSize
@@ -81,22 +84,22 @@ choice.
 
 # Select Linux editor and remember selection for next time, open file in editor
 # --
-  P(1,Sys.savefile) =file
+  P(1,Sys.savefile) =>file
     List(
         Dict.set("label","sublime")
-            .set("action", Lambda { P(1)=file Dir.runDetach("subl",file.path) }),
+            .set("action", Lambda { P(1) =>file Dir.runDetach("subl",file.path) }),
         Dict.set("label","gedit")
-            .set("action", Lambda { P(1)=file Dir.runDetach("gedit",file.path) }),
+            .set("action", Lambda { P(1) =>file Dir.runDetach("gedit",file.path) }),
         Dict.set("label","leafpad")
-            .set("action", Lambda { P(1)=file Dir.runDetach("leafpad",file.path) }),
+            .set("action", Lambda { P(1) =>file Dir.runDetach("leafpad",file.path) }),
         Dict.set("label","nano")
-            .set("action", Lambda { P(1)=file Dir.run("nano", file.path) }),
+            .set("action", Lambda { P(1) =>file Dir.run("nano", file.path) }),
         Dict.set("label","micro")
-            .set("action", Lambda { P(1)=file Dir.run("micro", file.path) })
-    ) =linuxEditors
+            .set("action", Lambda { P(1) =>file Dir.run("micro", file.path) })
+    ) =>linuxEditors
 
     if(Val("linuxEditor")==null,Inner{
-        MenuSelect(linuxEditors, Lambda { P(1).get("label")},"Select editor") =ed
+        MenuSelect(linuxEditors, Lambda { P(1).get("label")},"Select editor") =>ed
         ValDef("linuxEditor", ed)
     })
 
@@ -112,15 +115,15 @@ choice.
 
 
 
-Sys.homeDir.sub("private")=d
+Sys.homeDir.sub("private") =>d
 if(!d.exists, d.create)
 d
 /DirPrivate
 
 
 # Show a list of options
-    P(1,List)=options
-    P(2,Lambda { "name"})=macroGetElementName
+    P(1,List) =>options
+    P(2,Lambda { "name"}) =>macroGetElementName
         options->x
             println("- " + macroGetElementName.call(x))
 /ShowOptions
@@ -129,24 +132,24 @@ d
 
 # Select zero or more from list of options
 # --
-    P(1,List)=options
-    P(2,Lambda { "name"})=macroGetElementName
-    P(3,false)=emptyMeansNone
-        readLine("Enter exact or part of value?").trim =sel
+    P(1,List) =>options
+    P(2,Lambda { "name"}) =>macroGetElementName
+    P(3,false) =>emptyMeansNone
+        readLine("Enter exact or part of value?").trim =>sel
         if(emptyMeansNone && sel=="", Inner{
             # empty list
-            List =result
+            List =>result
         }, Inner{
             # Look for exact match first, then if no hits, partial
             options->opt
                 assert(macroGetElementName.call(opt)==sel)
                 out(opt)
-            | =result
+            | =>result
             if(result.empty, Inner{
                 options->opt
                     assert(macroGetElementName.call(opt).contains(sel))
                     out(opt)
-                | =result
+                | =>result
             })
         })
         result
@@ -155,7 +158,7 @@ d
 
 
 # Display text with line under
-    P(1,"Title") =title
+    P(1,"Title") =>title
     println
     println(title)
     println( Lib.Data.yes(title.length,"-").concat )
@@ -164,18 +167,18 @@ d
 
 
 
-P(1,List) =options P(2,Lambda { "name"}) =macroGetElementName P(3) =title 
+P(1,List) =>options P(2,Lambda { "name"}) =>macroGetElementName P(3) =>title 
 #
-    null =selectedElement
+    null =>selectedElement
     loop
         println("")
         if(title != null, Header(title), 0)
 
         ShowOptions(options, macroGetElementName)
         println("")
-        SelectOptions(options, macroGetElementName) =result
+        SelectOptions(options, macroGetElementName) =>result
         
-        if(result.length==1, Inner{ result.nth =selectedElement})
+        if(result.length==1, Inner{ result.nth =>selectedElement})
         break(selectedElement != null)
         println("** No match or not unique")
     | selectedElement
@@ -183,21 +186,21 @@ P(1,List) =options P(2,Lambda { "name"}) =macroGetElementName P(3) =title
 
 
 
-P(1,"label")=label P(2)=currVal
+P(1,"label") =>label P(2) =>currVal
     println("")
-    (label + if(currVal," ["+currVal+"]","") + " : ") =prompt
-    readLine(prompt) =line
+    (label + if(currVal," ["+currVal+"]","") + " : ") =>prompt
+    readLine(prompt) =>line
     if(line.trim=="", currVal, line)
 /ReadValue
 
 
 
 
-P(1,"label")=label P(2)=currVal
-    null =gotResult
+P(1,"label") =>label P(2) =>currVal
+    null =>gotResult
     loop
-        ReadValue(label,""+currVal) =val
-        if(val.?parseInt,Inner{val.parseInt =gotResult})
+        ReadValue(label,""+currVal) =>val
+        if(val.?parseInt,Inner{val.parseInt =>gotResult})
         break(gotResult != null)
         println("** Integer required")
     |
@@ -207,13 +210,13 @@ P(1,"label")=label P(2)=currVal
 
 
 
-P(1,"label")=label P(2)=currVal P(3,"yes")=trueVal P(4,"no")=falseVal
-    null =gotResult
+P(1,"label") =>label P(2) =>currVal P(3,"yes") =>trueVal P(4,"no") =>falseVal
+    null =>gotResult
     loop
-        if(currVal != null, if(currVal, trueVal, falseVal), null) =currStrVal
-        ReadValue(label,currStrVal) =val
-        if(val==trueVal, Inner{true =gotResult})
-        if(val==falseVal, Inner{false =gotResult})
+        if(currVal != null, if(currVal, trueVal, falseVal), null) =>currStrVal
+        ReadValue(label,currStrVal) =>val
+        if(val==trueVal, Inner{true =>gotResult})
+        if(val==falseVal, Inner{false =>gotResult})
         break(gotResult != null)
         println("** Please enter '" + trueVal + "' or '"  + falseVal + "'")
     |
@@ -225,12 +228,12 @@ P(1,"label")=label P(2)=currVal P(3,"yes")=trueVal P(4,"no")=falseVal
 
 
 # If value is Dict, for each key found, return corresponding value (as list). Otherwise true if value found, false if not found
-P(1,List)=lines
-P(2)=value
+P(1,List) =>lines
+P(2) =>value
     if(value.?keys, Inner{
         # match keys and result corresponding values as list
-        value =dict
-        List =result
+        value =>dict
+        List =>result
         lines->line
             dict.keys->key 
                 if(line.contains(key), Inner{result.add(dict.get(key))})

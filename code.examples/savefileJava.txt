@@ -37,8 +37,8 @@ VerifyAnt (target, prefix)    # calls VerifyJava
 Both functions are interactive if no target given.
 
 >>>>>>>>>>>>>>>>>>>>>>>>> EOF
-=lines
-Dict.set("${target}",targetPackage) =data
+ =>lines
+Dict.set("${target}",targetPackage) =>data
 lines->line out(line.merge(data))
 /Readme
 
@@ -59,24 +59,24 @@ Input("Enter ssh target on format user@host").get
 /GetSSHTarget
 
 # Install or upgrade Java
-P(1,GetSSHTarget)=target
-P(2,"")=prefix
-P(3,false)=showDebug
+P(1,GetSSHTarget) =>target
+P(2,"") =>prefix
+P(3,false) =>showDebug
 
     println(prefix+"Checking if java installed")
     
-    call "SSH:run" (target,"java -version",true)=result
-    result.get("stdout") + result.get("stderr") =lines
+    call "SSH:run" (target,"java -version",true) =>result
+    result.get("stdout") + result.get("stderr") =>lines
     
-    (result.get("exitCode")==0) =hasJava
+    (result.get("exitCode")==0) =>hasJava
 
-    println(prefix+"hasJava=" + hasJava)
+    println(prefix+"hasJava =>" + hasJava)
     
     if (showDebug) {
         lines->line println(prefix+" ## " + line) 
     }
     
-    call "Lib:LinesContain" (lines,"OpenJDK") =isOpenJdk
+    call "Lib:LinesContain" (lines,"OpenJDK") =>isOpenJdk
     
     
     error(hasJava && !isOpenJdk, 
@@ -94,31 +94,31 @@ P(3,false)=showDebug
             .set('version "11.', 11)
             .set('version "13.', 13)
             .set('version "14.', 14)
-            =codes
+            =>codes
             
-        call "Lib:LinesContain" (lines, codes) =result
+        call "Lib:LinesContain" (lines, codes) =>result
         error(result.length != 1,
             "Unknown java version: '" + result.concat(",")+"'")
 
-        result.nth =version
+        result.nth =>version
 
         
         println(prefix+"Checking for jdk vs jre")
-        null =jdkJre
+        null =>jdkJre
         if (call "SSH:run" (target,"which javac",true).get("exitCode")==0) {
-            "jdk" =jdkJre
+            "jdk" =>jdkJre
         } else {
-              "jre" =jdkJre
+              "jre" =>jdkJre
         }
        
         
-        "openjdk-"+version+"-"+jdkJre+"-headless" =package
+        "openjdk-"+version+"-"+jdkJre+"-headless" =>package
         
         if(version<MinimumVersion || jdkJre != "jdk") {
             println(prefix+"Requiring " + targetPackage + " - removing obsolete package " + package)
             call "SSH:sudo"(target,"apt-get -y remove " + package)
             
-            false =hasJava
+            false =>hasJava
         } else {
             println(prefix+"Java version ok: " + package)
         }
@@ -139,12 +139,12 @@ P(3,false)=showDebug
 
 
 # Install ANT if missing - calls VerifyJava
-P(1,GetSSHTarget)=target
-P(2,"")=prefix
+P(1,GetSSHTarget) =>target
+P(2,"") =>prefix
     println(prefix+"Preparing to install ANT")
     VerifyJava(target,prefix+"   ")
 
-    call "SSH:run" (target,"which ant",true) =result
+    call "SSH:run" (target,"which ant",true) =>result
     if(result.get("exitCode") != 0) {
         println(prefix+"Installing ANT")
         call "SSH:sudo" (target,"apt-get -y install ant")
@@ -154,15 +154,15 @@ P(2,"")=prefix
 
 
 # Install or upgrade CFT - calls VerifyAnt
-P(1,GetSSHTarget)=target
-P(2,"")=prefix
+P(1,GetSSHTarget) =>target
+P(2,"") =>prefix
     println(prefix+"Verifying ANT (and Java) ok")
     VerifyAnt(target, prefix+"   ")
 
     # Check if CFT already installed
     {
         call "SSH:run" (target,"cd CFT").get("exitCode")==0 
-    } =hasCFT
+    } =>hasCFT
     
     if (!hasCFT) {
         println(prefix+"Installing and compiling CFT")
@@ -179,7 +179,7 @@ P(2,"")=prefix
             "ant"
         )
     }
-    =cmd
+    =>cmd
     call "SSH:run" (target, cmd)
 /VerifyCFT
 

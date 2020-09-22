@@ -25,11 +25,11 @@ winShell = powershell
 # may be null or point to a file.
 # ----
 
-mCat = Lambda { P(1)=file error(file==null, 'cat: no file') file.read->line out(line) }
+mCat = Lambda { P(1)=>file error(file==null, 'cat: no file') file.read->line out(line) }
 
-mEdit = Lambda { P(1)=file error(file==null, 'edit: no file') call 'Lib:e' (file) }
+mEdit = Lambda { P(1)=>file error(file==null, 'edit: no file') call 'Lib:e' (file) }
 
-mMore = Lambda { P(1)=file error(file==null, 'more: no file') call 'Lib:m' (file) }
+mMore = Lambda { P(1)=>file error(file==null, 'more: no file') call 'Lib:m' (file) }
 
 
 # Shortcuts
@@ -77,7 +77,7 @@ shortcut:     = "---- Show all shortcuts ----"            File("CFT.props").read
 # The prompt setting is a line of code, just as with the shortcuts
 # ---
 
-prompt = Sys.scriptName=x if(x==null,"$ ",x+" $ ")
+prompt = Sys.scriptName=>x if(x==null,"$ ",x+" $ ")
 
 
 

@@ -12,17 +12,17 @@ It runs both interactive and with parameters.
 
 
 
-P(1)=target P(2)=cmd P(3)=acceptErors P(4)=showDebug
-    call "SSH:run" (target, cmd, acceptErrors, showDebug) =dict
+P(1) =>target P(2) =>cmd P(3) =>acceptErors P(4) =>showDebug
+    call "SSH:run" (target, cmd, acceptErrors, showDebug) =>dict
 /run
 
-P(1)=target P(2)=cmd P(3)=acceptErors P(4)=showDebug
-    call "SSH:sudo" (target, cmd, acceptErrors, showDebug) =dict
+P(1) =>target P(2) =>cmd P(3) =>acceptErors P(4) =>showDebug
+    call "SSH:sudo" (target, cmd, acceptErrors, showDebug) =>dict
 /sudo
 
 
 
-P(1,"temp")=name
+P(1,"temp") =>name
     Dir("/tmp").file(name + "." + currentTimeMillis)
 /TmpFile
 
@@ -39,23 +39,23 @@ Input("Target: user@host").get
 # Set up systemd service
     println("* Creating systemd service")
     loop
-        P(1,GetTarget) =target
-        P(2,Input("service name").get) =serviceName
-        P(3,Input("service description").get) =desc
-        P(4,Input("remote path to script (will be copied)").get) =script
-        P(5,true) =interactive
+        P(1,GetTarget) =>target
+        P(2,Input("service name").get) =>serviceName
+        P(3,Input("service description").get) =>desc
+        P(4,Input("remote path to script (will be copied)").get) =>script
+        P(5,true) =>interactive
 
         break(!interactive)
-        call "Lib:ReadValueBoolean" ("Confirm by typing 'yes'", false) =confirmed
+        call "Lib:ReadValueBoolean" ("Confirm by typing 'yes'", false) =>confirmed
         break(confirmed)
     |
 
     println("* Adding user " + serviceName)
     sudo(target,"adduser "+serviceName)
 
-    "/home/"+serviceName =homeDir
-    script.afterLast("/") =scriptName
-    homeDir + "/" + scriptName =scriptPath
+    "/home/"+serviceName =>homeDir
+    script.afterLast("/") =>scriptName
+    homeDir + "/" + scriptName =>scriptPath
 
     println("* Copying " + script + " to " + scriptPath)
     sudo(target,"cp " + script + " " + scriptPath)
@@ -63,10 +63,10 @@ Input("Target: user@host").get
     println("* chown " + serviceName + ":" + serviceName + " on " + scriptPath)
     sudo(target,"chown " + serviceName + ":" + serviceName + " " + scriptPath)
 
-    TmpFile("systemd")=f
+    TmpFile("systemd") =>f
     f.create(SystemdServiceFile(serviceName, desc, scriptPath))
 
-    serviceName + ".service" =serviceFile
+    serviceName + ".service" =>serviceFile
 
     println("* Copying systemd service file as ./" + serviceFile)
     Dir.run("scp", f.path, target+":./" + serviceFile)
@@ -90,7 +90,7 @@ Input("Target: user@host").get
 
 
 # Create systemd service file
-PDict("user","desc","path").mergeCodes =data
+PDict("user","desc","path").mergeCodes =>data
 error(data.hasNullValue,"Takes three parameters: user, desc, path")
 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< EOF
 [Unit]

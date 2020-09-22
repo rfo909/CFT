@@ -31,56 +31,56 @@ multiple collections.
 
 
 # DbDir is "Db" under Sys.homeDir
-    Sys.homeDir.sub("Db")=d
+    Sys.homeDir.sub("Db") =>d
     if(!d.exists) d.create
     d
 /DbDir
 
 
 # Get db-file for collection (optional) - created with valid
-    P(1,"default")=collection
-    DbDir.file(collection+".txt") =file
+    P(1,"default") =>collection
+    DbDir.file(collection+".txt") =>file
     if(!file.exists) file.create("# Created " + Date.fmt)
     file
 /DbFile
 
 # Add value to database
-P(1)=key
-P(2)=val
-P(3,"default")=collection
-    Lambda { P(1)=val syn(val) } =x
+P(1) =>key
+P(2) =>val
+P(3,"default") =>collection
+    Lambda { P(1) =>val syn(val) } =>x
     error(x.?call(val)==false, "Value must be synthesizable")
     Dict
         .set("key",key)
         .set("value",val)
-    =dict
+    =>dict
     DbFile(collection).append(syn(dict))
     true
 /Add
 
 # List database
-P(1,"default")=collection
+P(1,"default") =>collection
     DbFile(collection).read->line
         reject(line.startsWith("#"))
-        eval(line)=dict
+        eval(line) =>dict
         report(dict.key, dict.value)
 /Show
 
 # Find all data objects for key
-P(1)=key
-P(2,"default")=collection
+P(1) =>key
+P(2,"default") =>collection
     DbFile(collection).read->line
         reject(line.startsWith("#"))
-        eval(line) =dict
+        eval(line) =>dict
         assert(dict.key==key)
         out(dict.value)
 /FindAll
 
 # Get last object for key
-P(1)=key
-P(2,"default")=collection
-P(3)=defaultValue
-    FindAll(key,collection).last =x
+P(1) =>key
+P(2,"default") =>collection
+P(3) =>defaultValue
+    FindAll(key,collection).last =>x
     if(x != null, x, defaultValue)
 /Get
 
@@ -89,33 +89,33 @@ P(3)=defaultValue
 
 
 # Delete all data objects for key
-P(1)=key
-P(2,"default")=collection
+P(1) =>key
+P(2,"default") =>collection
     DbFile(collection).read->line
         condOut(line.startsWith("#"), line)
         reject(line.startsWith("#"))
         
-        eval(line) =dict
+        eval(line) =>dict
         reject(dict.key==key)
         out(line)
-| _=lines
+| _ =>lines
     DbFile(collection).create(lines)
 /Delete
 
 
 # Delete all but last data object for key
-P(1)=key
-P(2,"default")=collection
-    Get(key,collection) =last
+P(1) =>key
+P(2,"default") =>collection
+    Get(key,collection) =>last
     Delete(key,collection)
     Add(key,last,collection)
 /Purge
 
 
 # Set temp value (in memory only)
-P(1)=key
-P(2)=value
-P(3,"default")=collection
+P(1) =>key
+P(2) =>value
+P(3,"default") =>collection
     if(Val("temp")==null) {
         ValDef("temp",Dict)
     } 
@@ -124,12 +124,12 @@ P(3,"default")=collection
 /TempSet
 
 # Set temp value (in memory only)
-P(1)=key
-P(2,"default")=collection
+P(1) =>key
+P(2,"default") =>collection
     if(Val("temp")==null) {
         ValDef("temp",Dict)
     } 
-    Val("temp").get(collection,Dict) =coll
+    Val("temp").get(collection,Dict) =>coll
     if(coll.has(key), coll.get(key,null), null)
 /TempGet
 
@@ -144,12 +144,12 @@ P(2,"default")=collection
 
 
 # Get or enter string value if missing
-P(1)=key
-P(2)=prompt
-P(3)=collection
-    Get(key,collection) =val
+P(1) =>key
+P(2) =>prompt
+P(3) =>collection
+    Get(key,collection) =>val
     if(val==null) {
-        readLine(prompt) =val
+        readLine(prompt) =>val
         Add(key,val,collection)
     }
     val
@@ -157,17 +157,17 @@ P(3)=collection
 
 
 # Get, enter or confirm string value 
-P(1)=key
-P(2)=prompt
-P(3)=collection
-    Get(key,collection) =val
+P(1) =>key
+P(2) =>prompt
+P(3) =>collection
+    Get(key,collection) =>val
     if(val==null) {
-        readLine(prompt) =val
+        readLine(prompt) =>val
         Add(key,val,collection)
     } else {
-        call "Lib:ReadValue" (prompt, val) =val2
+        call "Lib:ReadValue" (prompt, val) =>val2
         if(val2 != val, Add(key,val2,collection))
-        val2 =val
+        val2 =>val
     }
     val
 /GetEnterOrConfirm

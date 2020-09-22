@@ -15,8 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2020-09-15 RFO
-v1.3.4
+Last updated: 2020-09-22 RFO
+v1.5.0
 
 </pre>
 
@@ -443,7 +443,7 @@ v1.3.4
   Dictionaries are maps that store any value identified by names (strings). 
 </p>
 <pre>
-  $ Dict=x x.set("a",1) x.get("a")
+  $ x=Dict x.set("a",1) x.get("a")
   &lt;int&gt;
   1
 </pre>
@@ -748,17 +748,23 @@ codeDirs = . ; code.examples ; code.lib
 
 <h2>Local variables</h2>
 <p>
-  The inside of a function may use local variables for simplifying expressions etc. Variable
-  assignment is "stack based", in that it is the current value from the stack that is assigned
-  to the local variable.  
+  The inside of a function may use local variables for simplifying expressions etc.   
 </p>
 
 <pre>
-  $ 3 =a 2 =b a+b
+  $ a=3 b=2 a+b
   &lt;int&gt;
   5 
 </pre>
 
+<p>
+  Can also use "stack based" notation, where the assignment picks the current value
+  off the stack and stores it into a variable:
+</p>
+<pre>
+  3=&gt;a 2=&gt;b a+b
+  5
+</pre>
 
 
 
@@ -802,7 +808,7 @@ codeDirs = . ; code.examples ; code.lib
   space to work with (or do something else). Example:
 </p>
 <pre>
-  $ Dir.files-&gt;f out(f.length) | =sizes sizes.sum
+  $ Dir.files-&gt;f out(f.length) | =&gt;sizes sizes.sum
 </pre>
 <p>
   This single line of code first contains a loop, which outputs a list of integers for
@@ -823,7 +829,7 @@ codeDirs = . ; code.examples ; code.lib
   following is perfectly legal, although a little silly.
 </p>
 <pre>
-  $ 2+3 | | | | =x x | =y y | _ _ _ |
+  $ 2+3 | | | | =&gt;x x | =&gt;y y | _ _ _ |
 </pre>
 <p>
   Yes, it returns 5.
@@ -890,7 +896,7 @@ codeDirs = . ; code.examples ; code.lib
   identifies the parameter by position. Note that <em>parameter position is 1-based</em>.  
 </p>
 <pre>
-  $ P(1)=a P(2)=b a+b   # fails!
+  $ P(1)=&gt;a P(2)=&gt;b a+b   # fails!
 </pre>
 <p>
   If you enter the above code interactively, it will fail, complaining that you can not add
@@ -918,7 +924,7 @@ codeDirs = . ; code.examples ; code.lib
   Here we make an improved version of the JavaFiles function, that takes a directory parameter, and if none given, uses the current directory ("Dir").
 </p>
 <pre>
-  $ P(1,Dir) =dir dir.allFiles-&gt;f assert(f.name.endsWith(".java")) out(f)
+  $ P(1,Dir) =&gt;dir dir.allFiles-&gt;f assert(f.name.endsWith(".java")) out(f)
      :
      : (code result)
      :
@@ -953,8 +959,8 @@ codeDirs = . ; code.examples ; code.lib
   CFT contains the following for asking the user to enter input:
 </p>
 <pre>
-  Input("Enter value").get =value
-  readLine("Enter value") =value
+  value = Input("Enter value").get
+  value = readLine("Enter value")
 </pre>
 <p>
   The difference is that Input remembers the last input values, and lets the user
@@ -967,7 +973,7 @@ codeDirs = . ; code.examples ; code.lib
   functions, can be used to produce functions that ask for missing values.
 </p>
 <pre>
-  P(1,Input("Enter value").get) =value ...
+  P(1,Input("Enter value").get) =&gt;value ...
 </pre>
 
 
@@ -1003,7 +1009,7 @@ codeDirs = . ; code.examples ; code.lib
   inside runs detached from the caller, and behaves exactly like a function.
 </p>
 <pre>
-  Lambda { P(1)+P(2) } =x x.call(1,2)
+  Lambda { P(1)+P(2) } =&gt;x x.call(1,2)
 </pre>
 <p>
   Great for local functions inside regular functions, and for sending as parameters to other functions,
@@ -1025,7 +1031,7 @@ codeDirs = . ; code.examples ; code.lib
 <pre>
   Inner {
     someList->x out(x+1)
-  } =resultList 
+  } =&gt;resultList 
   ...
 </pre>
 <p>
@@ -1095,15 +1101,15 @@ codeDirs = . ; code.examples ; code.lib
 </p>
 <pre>
   # Example: produce a default value if null
-  if (value != null, value, "x") =value
+  if (value != null, value, "x") =&gt;value
 
   # Example: call statements inside blocks
-  1 =i
+  i=1
   loop
     if (i>10) {
        break
     } else {
-      i+1 =i
+      i=i+1
     }
 </pre>
 
@@ -1219,7 +1225,7 @@ codeDirs = . ; code.examples ; code.lib
 </p>
 
 <pre>
-  Dir.run("which","leafpad") =lines lines.length&gt;0 && lines.nth.contains("leafpad")
+  Dir.run("which","leafpad") =&gt;lines lines.length&gt;0 && lines.nth.contains("leafpad")
   /HasLeafpad
 </pre>
 
@@ -1257,18 +1263,18 @@ codeDirs = . ; code.examples ; code.lib
 </p>
 <pre>
   ## --- create temp-file
-  P(1)=name 
+  name = P(1) 
     Dir("/tmp").file(name + "." + currentTimeMillis)
   /TmpFile
 
   ## --- Call ssh to list remote processes with ps -efal
-  P(1,Input("Enter ssh-target on format user@host").get)=target
+  P(1,Input("Enter ssh-target on format user@host").get)=&gt;target
     # 
     # Create temp files
     #
-    TmpFile("in") =stdin
-    TmpFile("out") =stdout
-    TmpFile("err") =stderr
+    stdin = TmpFile("in")
+    stdout = TmpFile("out")
+    stderr = TmpFile("err")
     #
     # stdin contains the command(s) we want to run remotely
     #
@@ -1280,7 +1286,7 @@ codeDirs = . ; code.examples ; code.lib
     #
     # get list of output from the "ps" command
     #
-    stdout.read =result
+    result = stdout.read
     #
     # delete temp-files 
     #
@@ -1555,7 +1561,7 @@ codeDirs = . ; code.examples ; code.lib
   File("myTemplate.txt")
   /templateFile
 
-  P(1,Dict)=data
+  P(1,Dict)=&gt;data
   templateFile.read-&gt;line
     out(line.merge(data))
   /generate
@@ -1592,13 +1598,13 @@ codeDirs = . ; code.examples ; code.lib
 
 <h3>A more complex example</h3>
 <pre>
-  P(1,"a")=a
-  P(2,"b")=b
+  P(1,"a")=&gt;a
+  P(2,"b")=&gt;b
   Dict
     .set("a",a)
     .set("b",b)
     .mergeCodes
-  =data
+  =&gt;data
   &lt;&lt;&lt; SomeMarker
   Value of a: ${a}
   Value of b: ${b}
@@ -1685,7 +1691,7 @@ codeDirs = . ; code.examples ; code.lib
   The String.merge() function logic replaces value null for a merge field with empty string.
 </p>
 <pre>
-  PDict("a","b").mergeCodes =data
+  data = PDict("a","b").mergeCodes
   &lt;&lt;&lt; SomeMarker
   Value of a: ${a}
   Value of b: ${b}
@@ -1699,7 +1705,7 @@ codeDirs = . ; code.examples ; code.lib
   if one or more values of the Dict is null.
 </p>
 <pre>
-  PDict("a","b").mergeCodes =data
+  data = PDict("a","b").mergeCodes
   error(data.hasNullValue,"Expected parameters a,b")
 </pre>  
 
@@ -1766,7 +1772,7 @@ codeDirs = . ; code.examples ; code.lib
   /tmpFile
 
   
-  tmpFile =f
+  f = tmpFile
   Lib.Data.each(0,720)-&gt;i
     f.append(""+Lib.Math.sin(i) + "," + Lib.Math.cos(i))
   |
@@ -1976,7 +1982,7 @@ codeDirs = . ; code.examples ; code.lib
   to be assigned in "logical" order, and allows us to supply a default value if list too short.
 </p>
 <pre>
-  $ List("x","y").split.push(3,"*") =a =b =c a+":"+b+":"+c
+  $ List("x","y").split.push(3,"*") =&gt;a =&gt;b =&gt;c a+":"+b+":"+c
   &lt;String&gt;
   x:y:*
 </pre>
@@ -2001,8 +2007,8 @@ codeDirs = . ; code.examples ; code.lib
   this:
 </p>
 <pre>
-  P(1) =propFile
-    Dict =d
+  P(1) =&gt;propFile
+    Dict =&gt;d
     propFile.read-&gt;line
       reject(line.trim.startsWith("#"))
       assert(line.contains(":") || line.contains("="))
@@ -2098,7 +2104,7 @@ codeDirs = . ; code.examples ; code.lib
   and reject() as with list iteration. 
 </p>
 <pre>
-  0=a loop break(a&gt;3) out(a) a+1 =a
+  a=0 loop break(a&gt;3) out(a) a=a+1
   &lt;List&gt;
   0
   1
@@ -2129,12 +2135,12 @@ codeDirs = . ; code.examples ; code.lib
 
 <pre>
 
-  P(1)=file
-  P(2,"data") =data
+  P(1)=&gt;file
+  P(2,"data") =&gt;data
     file.create(syn(data))
   /saveData
 
-  P(1)=file
+  P(1)=&gt;file
   eval(file.read.nth)
   /restoreData
 </pre>
@@ -2329,15 +2335,15 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
   The following code is an effective way of using PowerShell from CFT, saving lots of typing.
 </p>
 <pre>
-  P(1)=host P(2)=cmd ## Run remote PowerShell script-block 
-    List("powershell","invoke-command","-computername",host,"-scriptblock","{" + cmd + "}") =fullCmd
+  host=P(1) cmd=P(2) ## Run remote PowerShell script-block 
+    List("powershell","invoke-command","-computername",host,"-scriptblock","{" + cmd + "}") =&gt;fullCmd
     Dir.run(fullCmd)
   /PSRun
 
   # List services via PowerShell (interactive)
-    Input("Host").get =host
+    Input("Host").get =&gt;host
     Input("Service name (including wildcards)").get =service
-    "get-service -name " + service =cmd  # no splitting
+    "get-service -name " + service =&gt;cmd  # no splitting
     PSRun(host, cmd)
   /PSGetServ
 
@@ -2354,7 +2360,7 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
 
   # Add, commit and push with git
     DirProject.run("cmd","/c","git","add",".")
-    Input("Commit message").get =msg
+    msg=Input("Commit message").get
     DirProject.run("cmd","/c","git","commit","-m",msg)
     DirProject.run("cmd","/c","git","push","origin","master")
   /GitPush
@@ -2432,8 +2438,8 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
   A simple example:
 </p>
 <pre>
-  Lib.Text.Lexer.Node =top
-  top.sub("0123456789") =x   # new node
+  top=Lib.Text.Lexer.Node
+  x=top.sub("0123456789")   # new node
   x.sub("0123456789",x)  # x points to itself for digits
   x.setIsToken(1) # token type: non-negative numbers for regular tokens
 
@@ -2485,8 +2491,8 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
 
 <pre>
   # Create reusable node for integers. 
-    "0123456789"=digits
-    Lib.Text.Lexer.Node(digits) =x
+    "0123456789"=&gt;digits
+    Lib.Text.Lexer.Node(digits) =&gt;x
     x.sub(digits,x)
     x.setIsToken(1)
 
@@ -2495,10 +2501,10 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
 
   # Now we can for example match a IP v4 address
     Lib.Text.Lexer.Node =top
-    NodeInt =a
-    NodeInt =b
-    NodeInt =c
-    NodeInt =d
+    a=NodeInt
+    b=NodeInt
+    c=NodeInt
+    d=NodeInt
     
     top.sub(a)
     a.sub(".").sub(b) # creates intermediary nodes for the dots
@@ -2530,10 +2536,10 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
 </p>
 <pre>
 # Identifiers
-  "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_" =firstChars
-  firstChars+"0123456789" =innerChars
+  "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_" =&gt;firstChars
+  firstChars+"0123456789" =&gt;innerChars
   
-  Lib.Text.Lexer.Node(firstChars) =ident
+  ident = Lib.Text.Lexer.Node(firstChars)
   ident.sub(innerChars,ident)
   ident.setIsToken(1)
   
@@ -2541,8 +2547,8 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
 /Identifiers
 
 # Whitespace
-  " ^t^n^r".unEsc =chars
-  Lib.Text.Lexer.Node(chars) =ws
+  " ^t^n^r".unEsc =&gt;chars
+  Lib.Text.Lexer.Node(chars) =&gt;ws
   ws.sub(chars,ws)
   ws.setIsToken(-1)
     
@@ -2550,7 +2556,7 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
 /WhitesSpace
 
 # Root node
-  Lib.Text.Lexer.Node =root
+  Lib.Text.Lexer.Node =&gt;root
   root.sub(Identifiers)
   root.sub(WhiteSpace)
 /Root
@@ -2586,8 +2592,8 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
 </p>
 <pre>
 # Process file
-  Root =root
-  Lib.Text.Lexer =lexer
+  Root =&gt;root
+  Lib.Text.Lexer =&gt;lexer
 
   File("...").read-&gt;line 
     lexer.processLine(root,lexer,100) 
@@ -2654,7 +2660,7 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
   With the normal .addToken() function, we can do something like this:
 </p>
 <pre>
-  Lib.Text.Node =grade
+  Lib.Text.Node =&gt;grade
   "A AA AAA B C".split->x grade.addToken(x).setIsToken
 </pre>
 <p>
@@ -2676,8 +2682,8 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
   specific matching.
 </p>
 <pre>
-  Lib.Text.Node =date
-  Dict.set("i","0123456789") =mappings
+  Lib.Text.Node =&gt;date
+  Dict.set("i","0123456789") =&gt;mappings
   date.setTokenComplex("iiii-ii-ii", mappings).setIsToken
 
   date.match("2020-09-15xxx")  # returns 10 (characters matched)
@@ -2705,7 +2711,7 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
   Nice for event based callbacks.
 </p>
 <pre>
-  Dict =data
+  Dict =&gt;data
   data.bind(Lambda{
     self.set("received_value", P(1))
   }) =closure
@@ -2722,10 +2728,10 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
 </p>
 <pre>
 # Create Closure that strips N characters of start and end of a string
-  P(1)=n
+  P(1)=&gt;
   Dict.set("n",n).bind(Lambda{
-    P(1)=s 
-    self.get("n")=n
+    P(1)=&gt;s 
+    self.get("n")=&gt;n
     s.sub(n,s.length-n)
   })
 /Strip
@@ -2757,7 +2763,7 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
       P(1,1) =amount
       self.set(self.i+amount)
     })
-    =data
+    =&gt;data
 
     data.invoke("incr",10) # data.i is now 11
 </pre>
@@ -2891,44 +2897,6 @@ Colon commands
   The syntax with the slash and an identifier was inspired by PostScript.
 </p>
 
-
-<h2>Stack-based assignment?</h2>
-<p>
-  Why let assignment be the opposite of what everybody is used to?
-</p>
-<pre>
-  4 =value
-</pre>
-<p>
-  Primarily because it was a bit easier to implement. The syntax of CFT is made so that parsing it only
-  requires a lookahead of one token. 
-</p>
-<p>
-  The actual changes required to support normal assignment turned out not to be too hard. 
-  However, the script code base has prohibited the change.
-</p>
-<p>
-  An attempt was made to allow both, but this failed. To do this, we would have to use a different
-  assignment token for each form, say "=" and ":=", which would just be confusing.
-</p>
-<p>
-  Besides, the stack-based assignment has grown on me, for the same reason as why function name follows AFTER
-  the function code: one types code, and at some point decide that for readability, it's time
-  to assign a local variable, which is then used on the next lines. Almost like punctuation when
-  writing prose.
-</p>
-<p>
-  It may be a consequence of thinking bottom-up rather than top-down.
-</p>
-<p>
-  Also note that there are no global variables (*) in CFT, only local helpers inside functions/macros, so
-  all variable assignments come about in this way.
-</p>
-<p>
-   (*) Session values are of course global variables, but they
-  are defined and accessed using very different syntax, to emphasize how they are 
-  not meant as "helpers" in expressions. 
-</p>
 
 
 

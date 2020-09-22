@@ -33,7 +33,7 @@ public class StmtAssign2 extends Stmt {
     public StmtAssign2 (TokenStream ts) throws Exception {
         super(ts);
         varName=ts.matchIdentifier("expected variable name");
-        ts.matchStr(":","expected ':'");
+        ts.matchStr("=","expected '='");
         expr=new Expr(ts);
        
     }

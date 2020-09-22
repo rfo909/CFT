@@ -30,7 +30,7 @@ public class StmtAssign extends Stmt {
     private String varName;
     public StmtAssign (TokenStream ts) throws Exception {
         super(ts);
-        ts.matchStr("=","expected '='");
+        ts.matchStr("=>","expected '=>'");
         varName=ts.matchIdentifier("expected variable name");
     }
 

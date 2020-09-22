@@ -118,7 +118,7 @@ once the template VM has been created.
 
 
 
-Dir("/var/lib/libvirt/boot") =d
+Dir("/var/lib/libvirt/boot") =>d
 error(!d.exists,"Missing directory: " + d.path)
 d
 /BootImagesDir
@@ -132,8 +132,8 @@ d
 
 # Selects boot image
 # --
-    BootImagesDir.files =data
-    Lambda { P(1).name } =macroGetElementName
+    BootImagesDir.files =>data
+    Lambda { P(1).name } =>macroGetElementName
     call "Lib:MenuSelect" (data, macroGetElementName) 
 /BootImage
 
@@ -143,7 +143,7 @@ d
 # --
     Dict
         .set("noSpace", Lambda { P(1).replace(" ","_").replace("^t".unEsc,"_") })
-        .set("exec", Lambda { P(1,"ls -l")=cmd println("------> " + cmd) println("") Dir.run(cmd.split) })
+        .set("exec", Lambda { P(1,"ls -l") =>cmd println("------> " + cmd) println("") Dir.run(cmd.split) })
 /Util
 
 
@@ -160,21 +160,21 @@ d
 
 
 
-P(1,"someTarget")=target
+P(1,"someTarget") =>target
     println("STARTING " + target)
     Util.exec.call("virsh start --domain " + target)
     status
 /Start
 
 
-P(1,"someTarget")=target
+P(1,"someTarget") =>target
     println("STOPPING " + target)
     Util.exec.call("virsh destroy --domain " + target)
     status
 /Stop
 
 
-P(1,"someTarget")=target
+P(1,"someTarget") =>target
     println("DELETING " + target)
     error(DoNotDelete.contains(target),
         "Can not delete target " + target + ": remove from DoNotDelete list first")
@@ -188,21 +188,21 @@ P(1,"someTarget")=target
 # Interactive cloning of existing VM - stops original
 # --
     call "Lib:Header" ("Cloning existing VM")
-    null=original
-    null=cloneName
-    null=originalIp
-    null=newIp
+    null =>original
+    null =>cloneName
+    null =>originalIp
+    null =>newIp
     loop
         status
-        call "Lib:ReadValue" ("Original VM", original) =original
-        call "Lib:ReadValue" ("New VM name / will also be host name", cloneName) =cloneName
-        call "Lib:ReadValue" ("Original IP address or name (kubsXX.v)", originalIp) =originalIp
-        call "Lib:ReadValue" ("New IP address and mask: xx.xx.xx.xx/MM", newIp) =newIp
-        false =ok
+        call "Lib:ReadValue" ("Original VM", original) =>original
+        call "Lib:ReadValue" ("New VM name / will also be host name", cloneName) =>cloneName
+        call "Lib:ReadValue" ("Original IP address or name (kubsXX.v)", originalIp) =>originalIp
+        call "Lib:ReadValue" ("New IP address and mask: xx.xx.xx.xx/MM", newIp) =>newIp
+        false =>ok
         if(!newIp.contains("/"),Inner{
             println("*** Missing '/MM' net mask from IP address")
         }, Inner{
-            call "Lib:ReadValueBoolean" ("Ok", false) =ok
+            call "Lib:ReadValueBoolean" ("Ok", false) =>ok
         })
         break(ok)
     |
@@ -212,7 +212,7 @@ P(1,"someTarget")=target
     Start(cloneName)
     status
     
-    Dir.runCapture("whoami").nth =currUser
+    Dir.runCapture("whoami").nth =>currUser
     
     println
     println("----------------------------------------------------------")
@@ -223,7 +223,7 @@ P(1,"someTarget")=target
     println("Also need sudo without passwords (on the template VM)")
     println("----------------------------------------------------------")
     println
-    call "Lib:ReadValueBoolean" ("Type 'no' to abort or Enter to continue", true) =confirm
+    call "Lib:ReadValueBoolean" ("Type 'no' to abort or Enter to continue", true) =>confirm
     error(!confirm,"Aborting config of VM via SSH")
 
     println
@@ -231,7 +231,7 @@ P(1,"someTarget")=target
     call "ServersMaintenance:WaitForPing" (originalIp, 30)
 
     println
-    Input("Enter ssh user name").get =sshUser
+    Input("Enter ssh user name").get =>sshUser
 
     println
     println("*** NOTE ***")
@@ -243,7 +243,7 @@ P(1,"someTarget")=target
     readLine("(Press Enter)")
     println
 
-    sshUser+"@"+originalIp =target
+    sshUser+"@"+originalIp =>target
     
     println("* Configuring hostname")
     call "ServersMaintenance:VMSetHostname" (target, cloneName)
@@ -263,32 +263,32 @@ P(1,"someTarget")=target
 
 
 # Create new VM from scratch - fully interactive
-    null =bootImage
-    null =name
-    false =headless
-    8192 =ram
-    4 =cpus
-    32 =disk
+    null =>bootImage
+    null =>name
+    false =>headless
+    8192 =>ram
+    4 =>cpus
+    32 =>disk
     loop
         call "Lib:Header" ("Create new KVM Virtual Machine")
 
-        BootImage =bootImage
+        BootImage =>bootImage
         println("# Selected " + bootImage.path)
 
-        call "Lib:ReadValue" ("New VM name", name) =name
+        call "Lib:ReadValue" ("New VM name", name) =>name
 
         println("")
-        println("# Headless = no means use virt-manager") 
-        println("# Headless = yes (advanced) means use VNC to complete installation")
-        call "Lib:ReadValueBoolean" ("Headless", headless) =headless
+        println("# Headless => no means use virt-manager") 
+        println("# Headless => yes (advanced) means use VNC to complete installation")
+        call "Lib:ReadValueBoolean" ("Headless", headless) =>headless
 
-        call "Lib:ReadValueInt" ("RAM MB", ram) =ram
-        call "Lib:ReadValueInt" ("CPU's", cpus) =cpus
-        call "Lib:ReadValueInt" ("Disk GB", disk) =disk
-        call "Lib:ReadValueBoolean" ("Enter 'yes' to confirm this is okay", false) =ok
+        call "Lib:ReadValueInt" ("RAM MB", ram) =>ram
+        call "Lib:ReadValueInt" ("CPU's", cpus) =>cpus
+        call "Lib:ReadValueInt" ("Disk GB", disk) =>disk
+        call "Lib:ReadValueBoolean" ("Enter 'yes' to confirm this is okay", false) =>ok
         break(ok)
     |
-    call "Lib:ReadValueBoolean" ("Enter 'yes' to continue", false, "yes","abort") =continue
+    call "Lib:ReadValueBoolean" ("Enter 'yes' to continue", false, "yes","abort") =>continue
     if(!continue,Inner{
         println("Aborting")
         error(true,"Aborting")
@@ -296,18 +296,18 @@ P(1,"someTarget")=target
 
     List("virt-install",
         "--name",name,
-        "--ram="+ram,
-        "--vcpus="+cpus,
+        "--ram =>"+ram,
+        "--vcpus =>"+cpus,
         "--cpu","host",
         "--hvm",
-        "--network=bridge=br0,model=virtio",
-        "--disk","path=/var/lib/libvirt/images/"+name+".qcow2,size="+disk+",bus=virtio,format=qcow2",
+        "--network =>bridge =>br0,model =>virtio",
+        "--disk","path =>/var/lib/libvirt/images/"+name+".qcow2,size =>"+disk+",bus =>virtio,format =>qcow2",
         "--cdrom",bootImage.path
-    ) =cmd
+    ) =>cmd
     if(headless, 
         cmd+List("--graphics","vnc"),  
         cmd
-    ) =cmd
+    ) =>cmd
 
     debug(cmd.concat(" "))
     Dir.runDetach(cmd)
@@ -329,19 +329,19 @@ P(1,"someTarget")=target
 
 
 # Info on using VNC for installation
-    readLine("VM name") =vm
+    readLine("VM name") =>vm
 
-    Dir.runCapture("hostname").nth.trim =host
+    Dir.runCapture("hostname").nth.trim =>host
 
     Dir.runCapture("virsh","dumpxml",vm)->line
         assert(line.contains("vnc")) out(line)
-    | _.nth =portInfo
+    | _.nth =>portInfo
 
     Dict
         .set("host",host)
         .set("portInfo",portInfo)
         .set("vm",vm)
-        .mergeCodes =data
+        .mergeCodes =>data
 
     <<< EOF
 ----------------------------------------------

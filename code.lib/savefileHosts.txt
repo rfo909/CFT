@@ -22,24 +22,24 @@ HOST [OverrideValue]?
 /HostsFile
 
 # Internal
-    P(1,"[A=B]")=line
+    P(1,"[A=B]") =>line
     error(!line.startsWith("["), "not header line: " + line)
-    line.after("[").before("]").split("=") =parts
-    parts.nth.trim =a
-    parts.nth(1).trim=b
+    line.after("[").before("]").split("=") =>parts
+    parts.nth.trim =>a
+    parts.nth(1).trim =>b
     # return value
     List(a,b)
 /parseHeader
 
 
 # Internal - create list of hosts based on expression with '*'
-P(1)=glob
-    ""=regex
+P(1) =>glob
+    "" =>regex
     glob.chars->c
-        false =done
-        if(c=='*', ".*", "["+c+"]") =x regex+x=regex
+        false =>done
+        if(c=='*', ".*", "["+c+"]") =>x regex+x =>regex
     |
-    Regex(regex) =re
+    Regex(regex) =>re
     Val("data").keys.sort->hostName
         assert(re.match(hostName))
         out(hostName)
@@ -51,14 +51,14 @@ P(1)=glob
 # Process Hosts file and store it in session state
     Lambda {
     # Internal
-        P(1)=line
-        P(2)=name
-        P(3)=value
+        P(1) =>line
+        P(2) =>name
+        P(3) =>value
 
-        line.before("[").trim =host
-        line.after("[").before("]") =override 
+        line.before("[").trim =>host
+        line.after("[").before("]") =>override 
 
-        if(override != "", override, value) =overriddenVal
+        if(override != "", override, value) =>overriddenVal
         
         if(host.contains("*"), Inner{
             # assign value for all hosts matching glob expression
@@ -68,22 +68,22 @@ P(1)=glob
             # regular assign
             Val("data").get(host,Dict).set(name,overriddenVal)
         })
-    } =parseData
+    } =>parseData
 
     println("INFO Processing file " + HostsFile.path)
 
     ValDef("data",Dict)
     
-    null=settingName
-    null=settingValue
+    null =>settingName
+    null =>settingValue
     HostsFile.read->origLine
-        origLine.trim =line
+        origLine.trim =>line
         
         reject(line=="")
         reject(line.startsWith("#"))
         
         if(line.startsWith("[")) {
-            parseHeader(line).push(2,"") =settingName=settingValue
+            parseHeader(line).push(2,"") =>settingName =>settingValue
         } else {
             parseData.call(line,settingName,settingValue)
         }
@@ -94,18 +94,18 @@ P(1)=glob
 
 
 # Common function called internally
-    false =flag
+    false =>flag
     
     if(Val("time")==null) {
-        true =flag
+        true =>flag
     }
     
     if(Val("time") != null && Val("time") != HostsFile.lastModified) {
-        true =flag
+        true =>flag
     }
     
     if(Val("data")==null) {
-        true =flag
+        true =>flag
     }
     if(flag) {
         ProcessHostsFile
@@ -116,12 +116,12 @@ P(1)=glob
 
 # Explore data interactively
     CheckData
-    P(1,readLine("Search term"))=searchTerm
-    Val("data")=root
+    P(1,readLine("Search term")) =>searchTerm
+    Val("data") =>root
     root.keys.sort->host
-        root.get(host)=data
+        root.get(host) =>data
         data.keys.sort->field
-            data.get(field)=value
+            data.get(field) =>value
             assert(host.contains(searchTerm) || field.contains(searchTerm) || value.contains(searchTerm))
             report(host,field,value)
 /Search
@@ -142,8 +142,8 @@ P(1)=glob
 
 # Get value for host + field
     CheckData
-    P(1)=host
-    P(2)=field
+    P(1) =>host
+    P(2) =>field
 
     error(!Val("data").has(host), "No config for host " + host)
     Val("data").get(host).get(field)
@@ -152,9 +152,9 @@ P(1)=glob
 
 # Get value for host + field, then return true if it matches expected value
     CheckData
-    P(1)=host
-    P(2)=field
-    P(3)=expectedValue
+    P(1) =>host
+    P(2) =>field
+    P(3) =>expectedValue
 
     error(!Val("data").has(host), "Invalid host " + host)
     
@@ -164,8 +164,8 @@ P(1)=glob
 
 # Return true if host has value for field
     CheckData
-    P(1)=host
-    P(2)=field
+    P(1) =>host
+    P(2) =>field
 
     error(!Val("data").has(host), "Invalid host " + host)
     
@@ -182,19 +182,19 @@ P(1)=glob
 
 
 # View host status
-    call "Hosts:GetHosts" =hosts
+    call "Hosts:GetHosts" =>hosts
     
     hosts->host
-        call "Hosts:GetValue" (host, "SSHUser") =sshUser
+        call "Hosts:GetValue" (host, "SSHUser") =>sshUser
         assert(sshUser != null)
         
-        sshUser+"@"+host =target
+        sshUser+"@"+host =>target
         println("Checking host " + target)
         
-        call "SSH:HostOk" (target) =hostOk
-        call "SSH:VerifySudo" (target) =sudoOk
+        call "SSH:HostOk" (target) =>hostOk
+        call "SSH:VerifySudo" (target) =>sudoOk
         
-        Lambda {P(1)=x if(x,"ok","<<FAIL>>")} =show
+        Lambda {P(1) =>x if(x,"ok","<<FAIL>>")} =>show
         report("Host: " + host, "Ping: " + show.call(hostOk), "Sudo: "+show.call(sudoOk))
 /ShowHostsStatus
 
@@ -202,19 +202,19 @@ P(1)=glob
 
 
 # Verify all hosts have copy of SSH key
-    call "Hosts:GetHosts" =hosts
+    call "Hosts:GetHosts" =>hosts
 
     println("Distributing ssh key to all hosts!")
     readLine("Press Enter")
     
     hosts->host
-        call "Hosts:GetValue" (host, "SSHUser") =sshUser
+        call "Hosts:GetValue" (host, "SSHUser") =>sshUser
         if(sshUser==null, Inner{
             println("----- WARNING: " + host + " has no SSHUser")
         })
         assert(sshUser != null)
 
-        sshUser + "@" + host =target
+        sshUser + "@" + host =>target
         println
         println("----- " + target)
 
@@ -224,8 +224,8 @@ P(1)=glob
 
 
 # Check if debian based host should be rebooted
-        P(1)=target
-        call "SSH:sudo" (target, "ls /var/run/reboot-required", true) =result
+        P(1) =>target
+        call "SSH:sudo" (target, "ls /var/run/reboot-required", true) =>result
         # true when file found (return code 0)
         result.get("exitCode") == 0
 /DebianHostNeedsReboot
@@ -233,19 +233,19 @@ P(1)=glob
 
 
 # Run update/upgrade
-    call "Hosts:GetHosts" =hosts
+    call "Hosts:GetHosts" =>hosts
     hosts->host
         assert(call "Hosts:Has" (host,"PackageManager","apt"))
-        call "Hosts:GetValue" (host, "SSHUser") =sshUser
+        call "Hosts:GetValue" (host, "SSHUser") =>sshUser
         assert(sshUser != null)
         
-        sshUser+"@"+host =target
+        sshUser+"@"+host =>target
         println("Updating host " + target)
         call "APTUpdate:APTUpdateUpgrade" (target, "   ")
 
         # Check if needs reboot and can be rebooted
-        DebianHostNeedsReboot(target) =needsReboot
-        call "Hosts:Has" (host, "Auto.reboot","yes") =canBeRebooted
+        DebianHostNeedsReboot(target) =>needsReboot
+        call "Hosts:Has" (host, "Auto.reboot","yes") =>canBeRebooted
 
         if(needsReboot && canBeRebooted) {
                 println("   *** Automatically rebooting " + host)
@@ -262,35 +262,35 @@ P(1)=glob
 # Display hosts that should be rebooted
     call "Hosts:GetHosts"->host
         assert(call "Hosts:Has" (host,"OSFamily","Debian"))
-        call "Hosts:GetValue" (host, "SSHUser") =sshUser
+        call "Hosts:GetValue" (host, "SSHUser") =>sshUser
 
-        sshUser+"@"+host =target
+        sshUser+"@"+host =>target
 
-        call "SSH:HostOkSSH" (target) =hostOk
+        call "SSH:HostOkSSH" (target) =>hostOk
         if (!hostOk) {
             println(target + ": -offline-")
             assert(false)
         }
 
-        DebianHostNeedsReboot(target)=x
-        if(x,"NEEDS REBOOT","ok")=status
+        DebianHostNeedsReboot(target) =>x
+        if(x,"NEEDS REBOOT","ok") =>status
         println(target + ": " + status)
         
 /NeedReboot     
 
 
 # Update or install CFT
-    Date.Duration.minutes(30).get =minTimeSinceLastRun
+    Date.Duration.minutes(30).get =>minTimeSinceLastRun
     
-    call "Hosts:GetHosts" =hosts
+    call "Hosts:GetHosts" =>hosts
     hosts->host
         assert(call "Hosts:Has" (host,"Install.CFT","1"))
-        call "Hosts:GetValue" (host, "SSHUser") =sshUser
+        call "Hosts:GetValue" (host, "SSHUser") =>sshUser
         assert(sshUser != null)
 
-        call "Db:Get" (host, "CFT") =lastDate
+        call "Db:Get" (host, "CFT") =>lastDate
           if (lastDate != null) {
-            Date.diff(lastDate).get =timeSinceLastRun
+            Date.diff(lastDate).get =>timeSinceLastRun
             if (timeSinceLastRun < minTimeSinceLastRun) {
                 println("Host " + host + " was last checked " + lastDate.fmt)
                 assert(false) # next
@@ -299,7 +299,7 @@ P(1)=glob
 
         assert(call "SSH:HostOk" (host))
         
-        sshUser+"@"+host =target
+        sshUser+"@"+host =>target
         println("Updating " + target)
         
         assert(call "SSH:HostOkSSH" (target))
@@ -310,24 +310,24 @@ P(1)=glob
 
 
 # View host status
-	readLine("Hosts filter") =filter
-    call "Hosts:GetHosts" =hosts
+    readLine("Hosts filter") =>filter
+    call "Hosts:GetHosts" =>hosts
     
     hosts->host
-    	assert(host.contains(filter))
-    	
-        call "Hosts:GetValue" (host, "SSHUser") =sshUser
+        assert(host.contains(filter))
+        
+        call "Hosts:GetValue" (host, "SSHUser") =>sshUser
         assert(sshUser != null)
         
-        sshUser+"@"+host =target
-    	assert(call "SSH:HostOk" (host))
+        sshUser+"@"+host =>target
+        assert(call "SSH:HostOk" (host))
 
         println("------ " + host)
-        call "SSH:run" (target, "which mpstat", true).get("exitCode") != 0 =install
+        call "SSH:run" (target, "which mpstat", true).get("exitCode") != 0 =>install
         if(install) {
             println("    (installing sysstat)")
-        	call "SSH:sudo" (target, "apt-get -y install sysstat")
+            call "SSH:sudo" (target, "apt-get -y install sysstat")
         }
         call "SSH:run" (target, "mpstat").get("stdout")->line
-        	report(host,line)
+            report(host,line)
 /MPStat

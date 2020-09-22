@@ -22,7 +22,7 @@ Grep(Input("Search term").get)
 /GetGrepObj
  
  
-GetGrepObj =grepObj SourceFiles->f 
+grepObj=GetGrepObj SourceFiles->f 
 	grepObj.file(f)->line 
 		report(line.file.name, line.lineNumber, line)
 /Search

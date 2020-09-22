@@ -23,19 +23,19 @@ Interactive if no target given.
 
 
 # Shortcut
-P(1)=target 
-P(2)=commands
-P(3,false)=acceptErrors
-P(4,false)=showDebug
+P(1) =>target 
+P(2) =>commands
+P(3,false) =>acceptErrors
+P(4,false) =>showDebug
     call "SSH:run" (target,commands,acceptErrors,showDebug)
 /run
 
 
 # Shortcut
-P(1)=target 
-P(2)=commands
-P(3,false)=acceptErrors
-P(4,false)=showDebug
+P(1) =>target 
+P(2) =>commands
+P(3,false) =>acceptErrors
+P(4,false) =>showDebug
     call "SSH:sudo" (target,commands,acceptErrors,showDebug)
 /sudo
 
@@ -46,19 +46,19 @@ Input("Enter ssh target on format user@host").get
 
 
 # Run Update and Upgrade on target, unless it has been updated within 20 hours
-P(1,GetSSHTarget)=target
-P(2,"")=prefix
+P(1,GetSSHTarget) =>target
+P(2,"") =>prefix
 
     println(prefix+"APT update and upgrade")
 
-    target.after("@") =host
-    Sys.scriptName =dbCollection
-    Date.sub(Date.Duration.days(365)) =defaultValue
+    target.after("@") =>host
+    Sys.scriptName =>dbCollection
+    Date.sub(Date.Duration.days(365)) =>defaultValue
     
     println(prefix+"Looking up time of last run for host ")
-    call "Db:Get" (host, dbCollection, defaultValue) =lastUpdated
+    call "Db:Get" (host, dbCollection, defaultValue) =>lastUpdated
     println(prefix+" ... lastUpdated = " + lastUpdated)
-    Date.diff(lastUpdated) =timeSinceUpdate
+    Date.diff(lastUpdated) =>timeSinceUpdate
     
     println(prefix+"Last updated: " + lastUpdated.fmt)
 
@@ -66,14 +66,14 @@ P(2,"")=prefix
         println(prefix+"Limit for repeat update: 48 hours")
     } else {
         println(prefix+"Performing update")
-        sudo(target,"apt-get -y update", true) =result
+        sudo(target,"apt-get -y update", true) =>result
     
-        result.get("exitCode") != 0  =FAIL 
+        result.get("exitCode") != 0  =>FAIL 
         
         if (!FAIL) {
             println(prefix+"Performing upgrade")
-            sudo(target,"apt-get -y upgrade", true) =result
-            result.get("exitCode") != 0  =FAIL 
+            sudo(target,"apt-get -y upgrade", true) =>result
+            result.get("exitCode") != 0  =>FAIL 
         }
         
         if (!FAIL) {
@@ -85,10 +85,10 @@ P(2,"")=prefix
             if(FAIL,"APTUpdateUpgrade failed with ERROR","Done"))
             
         if (FAIL) {
-            (call "Lib:DirPrivate").sub(Sys.scriptName)=dir
+            (call "Lib:DirPrivate").sub(Sys.scriptName) =>dir
             dir.create
-            #println("dir=" + dir.path)
-            dir.file(""+(Date.setFormat("yyyy-MM-dd").fmt) + "_" + target + ".txt") =logFile
+            #println("dir = " + dir.path)
+            dir.file(""+(Date.setFormat("yyyy-MM-dd").fmt) + "_" + target + ".txt") =>logFile
             logFile.create("# " + Date.fmt)
             logFile.append(List("","- target = " + target,""))
             

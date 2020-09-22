@@ -15,7 +15,7 @@ function.
 /Readme
 
 
-P(1,"x")=name
+P(1,"x") =>name
 Dir("/tmp").file(""+name+currentTimeMillis)
 /TmpFile
 
@@ -24,23 +24,23 @@ Input("SSH target on format username@server").get
 /ReadSSHTarget
 
 
-P(1,ReadSSHTarget)=target
-P(2,readLine("Command"))=command
-P(3,Dict)=codes
-P(4,false)=showDebug
+P(1,ReadSSHTarget) =>target
+P(2,readLine("Command")) =>command
+P(3,Dict) =>codes
+P(4,false) =>showDebug
     call "SSH:run" (target,command,codes,showDebug)
 /run
 
 
 
-P(1,Input("IP address to wait for").get)=ip 
-P(2,10)=retries
+P(1,Input("IP address to wait for").get) =>ip 
+P(2,10) =>retries
 loop
     error(retries<=0,"No Ping response from " + ip)
-    retries-1 =retries
-    true =ok
+    retries-1 =>retries
+    true =>ok
     Inner{ Dir.runCapture("ping","-c","1",ip)->line 
-        if(line.contains("100% packet loss"), Inner{false=ok})
+        if(line.contains("100% packet loss"), Inner{false =>ok})
     }
     break(ok)
     Sys.sleep(500)
@@ -49,9 +49,9 @@ true
 /WaitForPing
 
 
-P(1,Input("SSH target user@host").get)=target
-P(2,Input("Host name").get)=hostname
-    TmpFile("hn")=f 
+P(1,Input("SSH target user@host").get) =>target
+P(2,Input("Host name").get) =>hostname
+    TmpFile("hn") =>f 
     f.create(hostname)
     
     println("* Copying hostname file to target")
@@ -68,8 +68,8 @@ P(2,Input("Host name").get)=hostname
 
 
 
-P(1,Input("SSH target user@host").get)=target
-P(2,Input("IP address xx.xx.xx.xx/MM").get) =ip
+P(1,Input("SSH target user@host").get) =>target
+P(2,Input("IP address xx.xx.xx.xx/MM").get) =>ip
     error(!ip.contains("/"), "IP address missing mask? xx.xx.xx.xx/MM")
     
     println("* Running remote command 'ip addr' to list network device names")
@@ -79,9 +79,9 @@ P(2,Input("IP address xx.xx.xx.xx/MM").get) =ip
     |
     
     println
-    Input("Enter network device name").get=nic
+    Input("Enter network device name").get =>nic
     
-    TmpFile("np")=f
+    TmpFile("np") =>f
     f.create(VMNetplan(ip,nic))
     
     println("* Copying netplan to target")
@@ -95,7 +95,7 @@ P(2,Input("IP address xx.xx.xx.xx/MM").get) =ip
 /VMConfigureNetplan
 
     
-PDict("ip","nic").mergeCodes=data
+PDict("ip","nic").mergeCodes =>data
 error(data.hasNullValue,"Expected parameter for IP address and mask on format xx.xx.xx.xx/MM")
 <<< EOF
 network:

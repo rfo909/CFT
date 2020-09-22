@@ -67,22 +67,22 @@ There can be multiples of every line, including Dir.
 /Init
 
 # projects.txt file contains all data
-    (call "Lib:DirPrivate").file("projects.txt")=f
+    (call "Lib:DirPrivate").file("projects.txt") =>f
     error(!f.exists,"File " + f.path + " missing - run Readme() for details")
     DataFile(f,"###").comment("#")
 /ProjectsFile
 
 # List projects and select 
-    Val("Project") =result
-    ProjectsFile.get("ActiveProjects")->line out(line.trim) | _=names
-    Lambda { P(1) } =showName
+    Val("Project") =>result
+    ProjectsFile.get("ActiveProjects")->line out(line.trim) | _ =>names
+    Lambda { P(1) } =>showName
     loop
         println
         call "Lib:Header" ("Select project, curr=" + result)
         call "Lib:ShowOptions" (names, showName)
-        call "Lib:SelectOptions" (names, showName, true) =resultList
-        if(resultList.length>1, Inner{println("** not unique **") null=result} )
-        if(resultList.length==1, Inner{resultList.nth =result} )
+        call "Lib:SelectOptions" (names, showName, true) =>resultList
+        if(resultList.length>1, Inner{println("** not unique **") null =>result} )
+        if(resultList.length==1, Inner{resultList.nth =>result} )
         break(result != null)
     |
     ValDef("Project", result)
@@ -101,15 +101,15 @@ if(Val("Project")==null, ChangeProject)
         .set("Type",List)
         .set("IgnoreDir",List)
         .set("IgnoreFile",List)
-        =dict
+        =>dict
 
-    Val("Project") =pName
-    ProjectsFile.get(pName) =dataLines
+    Val("Project") =>pName
+    ProjectsFile.get(pName) =>dataLines
     error(dataLines.length==0, "No data for project " + pName)
 
     dataLines->line
-        line.before(":").trim =field
-        line.after(":").trim =val
+        line.before(":").trim =>field
+        line.after(":").trim =>val
         dict.get(field,List).add(val)
     |
     dict
@@ -119,38 +119,38 @@ if(Val("Project")==null, ChangeProject)
 # Produce list of files to search
 
     CheckProject
-    CurrProject =pr
+    CurrProject =>pr
 
-    Lambda { P(1)=d 
-        true =keep 
+    Lambda { P(1) =>d 
+        true =>keep 
         CurrProject.IgnoreDir->x 
-            if(d.name==x,Inner{false =keep}) 
+            if(d.name==x,Inner{false =>keep}) 
             break(!keep)
         |
         keep
-    } =checkDir
+    } =>checkDir
     
     # Generate initial list of all directories in project
         pr.Dir->dirName 
-            Dir(dirName)=startDir
+            Dir(dirName) =>startDir
             out(startDir)
             error(!startDir.exists, "Project dir " + dirName + " not found")
             startDir.allDirs->d out(d)
-        | =allDirs
+        | =>allDirs
     
     # Filter out directories that don't pass checkDir macro call
         allDirs->d 
             assert(checkDir.call(d))
             out(d)
-        | =allDirs
+        | =>allDirs
 
     # Identify files that have desired type
         allDirs->d
             d.files->f
-                f.name.afterLast(".")=type
+                f.name.afterLast(".") =>type
                 assert(pr.Type.contains(type))
                 out(f)
-        | =allFiles
+        | =>allFiles
 
     # return value
     allFiles
@@ -161,19 +161,19 @@ if(Val("Project")==null, ChangeProject)
 
 
 
-P(1,Grep)=grep
+P(1,Grep) =>grep
     CheckProject
     
-    Lambda { P(1)=file 
-        Val("FileFilter")=filter
+    Lambda { P(1) =>file 
+        Val("FileFilter") =>filter
         if(filter != null, file.name.contains(filter), true)
-    } =filter
+    } =>filter
 
     # Count matches first
     TextFiles->tf 
         assert(filter.call(tf))
         out(grep.fileCount(tf)) 
-    | _.sum =count
+    | _.sum =>count
     # If too many hits, just cancel
     error(count>10000, "Search matches " + count + " lines - not shown")
 
@@ -185,14 +185,14 @@ P(1,Grep)=grep
 
 
 # Limit search to file names containing a certain string
-    readLine("Enter file filter string").trim=str
-    if(str=="",null,str) =val
+    readLine("Enter file filter string").trim =>str
+    if(str=="",null,str) =>val
     ValDef("FileFilter",val)
 /SetFileFilter
 
 
 # Show info on current FileFilter (if defined)
-    Val("FileFilter") =filter
+    Val("FileFilter") =>filter
     if(filter!=null, Inner{
         println
         println("** Filtering file names on: " + '"' + filter + '"')
@@ -213,7 +213,7 @@ ValDef("FileFilter",null)
 # Search with one parameter
 CheckProject
 ShowFileFilter
-Input("Search1").get =a
+Input("Search1").get =>a
 Search(Grep(a))
 /S
 
@@ -221,8 +221,8 @@ Search(Grep(a))
 # Search with two parameters
 CheckProject
 ShowFileFilter
-Input("Search2a ... ").get =a
-Input("... AND Search2b").get =b
+Input("Search2a ... ").get =>a
+Input("... AND Search2b").get =>b
 Search(Grep.match(a).match(b))
 /S2
 
@@ -230,21 +230,21 @@ Search(Grep.match(a).match(b))
 # Search with three parameters
 CheckProject
 ShowFileFilter
-Input("Search3a ... ").get=a
-Input("... AND Search3b").get=b
-Input("... AND Search3c").get=c
+Input("Search3a ... ").get =>a
+Input("... AND Search3b").get =>b
+Input("... AND Search3c").get =>c
 /S3
 
 # Search with one positive and one negative parameter
 CheckProject
 ShowFileFilter
-Input("Search1").get =a
-Input("Search1n (reject)").get =b
+Input("Search1").get =>a
+Input("Search1n (reject)").get =>b
 Search(Grep(a).reject(b))
 /SN
 
 # Locate file by partial name
-    P(1,"java")=fn
+    P(1,"java") =>fn
     CheckProject
 
     TextFiles->tf
@@ -256,7 +256,7 @@ Search(Grep(a).reject(b))
 # Display current project
     CheckProject
     
-    CurrProject =pr
+    CurrProject =>pr
     println
     pr.Desc->d
         println("** " + d)
@@ -274,27 +274,27 @@ Search(Grep(a).reject(b))
 # Interactive call to FileLocator, sorted presentation, newest first
     CheckProject
     
-    Input("Enter part of file name").get =fn
-    FileLocator(fn) =fileList
+    Input("Enter part of file name").get =>fn
+    FileLocator(fn) =>fileList
     fileList->file
         out(Int(file.lastModified, file))
     | _.sort->x 
-        x.data =file 
+        x.data =>file 
         report(file.path, file.length, Date(file.lastModified).fmt)
-    | =lines  # the report(...) outputs
+    | =>lines  # the report(...) outputs
     
 
     # Display report lines, and create line numbers
-    0 =lineNo
+    0 =>lineNo
     lines->line
         # Pad lineNo to 3 characters
-        Inner{""+lineNo =s loop break(s.length>=3) " "+s =s | s} =lineNoStr
+        Inner{""+lineNo =>s loop break(s.length>=3) " "+s =>s | s} =>lineNoStr
         
         println(lineNoStr + ": " + line)
-        lineNo+1 =lineNo
+        lineNo+1 =>lineNo
     |
     println
-    readLine("Enter number to edit, or blank to skip") =inp
+    readLine("Enter number to edit, or blank to skip") =>inp
     if(inp != "", Inner{
         call "Lib:e" (fileList.nth(inp.parseInt))
     })

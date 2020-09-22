@@ -39,28 +39,31 @@ Requirements:
 
 
 
-P(1,true)=debug
+P(1,true) =>debug
     call "ServersMaintenance:setDebug" (debug)
 /setDebug
 
-P(1)=target P(2)=cmd
-    if(cmd.?nth, cmd, cmd.split(";"))=cmd 
+P(1) =>target 
+P(2) =>cmd
+    if(cmd.?nth, cmd, cmd.split(";")) =>cmd 
     call "ServersMaintenance:RemoteCommandSet" (target, cmd)
 /run
 
-P(1)=cmd
+P(1) =>cmd
     run(GetTarget,cmd)
 /r
 
-P(1)=target P(2,List)=cmd P(3,Dict)=codes
-    if(cmd.?nth, cmd, cmd.split(";")) =cmd
+P(1) =>target 
+P(2,List) =>cmd 
+P(3,Dict) =>codes
+    if(cmd.?nth, cmd, cmd.split(";")) =>cmd
     call "ServersMaintenance:RemoteCommandSetCoded" (target, cmd, codes)
 /runCoded
 
 
 
 
-P(1,"temp")=name
+P(1,"temp") =>name
     Dir("/tmp").file(name + "." + currentTimeMillis)
 /TmpFile
 
@@ -73,14 +76,14 @@ println("configurations, using the same code to manage them.")
 println
 println("The current value is " + Val("HostNamesPrefix"))
 println("------------------------------------------------------------------")
-readLine("Enter current HostNamePrefix, Enter for none") =x
+readLine("Enter current HostNamePrefix, Enter for none") =>x
 println
 ValDef("HostNamesPrefix",x)
 /SetHostNamesPrefix
 
 
 
-Val("HostNamesPrefix")=x
+Val("HostNamesPrefix") =>x
 error(x==null,"Run SetHostNamesPrefix function first")
 x
 /HostNamesPrefix
@@ -95,7 +98,7 @@ x
     + " m11.v:s1:shardsvr m12.v:s1:shardsvr m13.v:s1:shardsvr"
     + " m21.v:s2:shardsvr m22.v:s2:shardsvr m23.v:s2:shardsvr"
     ).split->x
-        x.split(":").push(3,"") =host =replSetName =clusterRole
+        x.split(":").push(3,"") =>host =>replSetName =>clusterRole
         out(Dict.set("host",HostNamesPrefix+host).set("replSetName",replSetName).set("clusterRole",clusterRole))
 /MongodData
 
@@ -116,12 +119,12 @@ Input("Target: user@host").get
 
 
 
-P(1,GetTarget)=target
+P(1,GetTarget) =>target
     println("* Installing mongodb shell")
     run(target, "sudo bash;apt install -y " + CfgMongoShell)
 
     println("* Verifying install")
-    runCoded(target, "which mongo", Dict.set("/mongo","ok")).contains("ok") =ok
+    runCoded(target, "which mongo", Dict.set("/mongo","ok")).contains("ok") =>ok
     
     if(ok, Inner{println("* ok")} )
 /InstallMongoShell
@@ -132,14 +135,14 @@ P(1,GetTarget)=target
 
 # InstallMongod
     loop
-        P(1,GetTarget)=target
-        P(2,Input("replSetName").get)=replSetName
-        P(3,Input("clusterRole").get)=clusterRole
-        P(4,true)=interactive
+        P(1,GetTarget) =>target
+        P(2,Input("replSetName").get) =>replSetName
+        P(3,Input("clusterRole").get) =>clusterRole
+        P(4,true) =>interactive
         
         break(!interactive)
 
-        call "Lib:ReadValueBoolean" ("Confirm by typing 'yes'", false) =confirmed
+        call "Lib:ReadValueBoolean" ("Confirm by typing 'yes'", false) =>confirmed
         break(confirmed)
     |
     println("* Removing /etc/mongod.conf if exists as apt install doesn't like it")
@@ -151,10 +154,10 @@ P(1,GetTarget)=target
     println("* Enabling mongo service")
     run(target, "sudo systemctl enable mongod")
 
-    target.after("@")=host
+    target.after("@") =>host
 
     println("* Creating mondod.cfg file")
-    TmpFile("configfile") =f
+    TmpFile("configfile") =>f
     f.create(CreateMongoConfig(replSetName, clusterRole))
 
     println("* Copying file to server in home dir")
@@ -176,7 +179,7 @@ P(1,GetTarget)=target
 
     runCoded(target, 
         "sudo tail -n 20 /var/log/mongodb/mongod.log", 
-            Dict.set("waiting for connections","ok")).contains("ok") =ok
+            Dict.set("waiting for connections","ok")).contains("ok") =>ok
 
     if(ok, Inner{println("* Mongod installed and running")})
     
@@ -186,12 +189,12 @@ P(1,GetTarget)=target
 
 
 
-P(1,GetTarget)=target
+P(1,GetTarget) =>target
     println("* Installing mongos")
     run(target, "sudo bash;apt install -y " + CfgMongos)
 
     println("* Creating Mongos start script")
-    TmpFile("mongos")=f
+    TmpFile("mongos") =>f
     f.create(MongosStartScript)
 
     println("* Copying file to server in home dir as start_mongos.sh")
@@ -201,7 +204,7 @@ P(1,GetTarget)=target
     run(target,"chmod 755 ./start_mongos.sh")
 
     println("* Collecting path to remote home dir")
-    "./start_mongos.sh" =fullPath
+    "./start_mongos.sh" =>fullPath
 
     call "Systemd:CreateService" (target, "mongos", "Mongos for HA cluster", fullPath, false)
 
@@ -211,11 +214,11 @@ P(1,GetTarget)=target
 
 
 
-Input("ssh user").get=user
+Input("ssh user").get =>user
     MongodData->d
-        d.host =host
-        d.replSetName =replSetName
-        d.clusterRole =clusterRole
+        d.host =>host
+        d.replSetName =>replSetName
+        d.clusterRole =>clusterRole
         println
         println("----------------------")
         println("mongod: host=" + host + " replSetName=" + replSetName + " clusterRole=" + clusterRole)
@@ -224,21 +227,21 @@ Input("ssh user").get=user
 /InstallMongodAll
 
 
-Input("ssh user").get=user
-Input("host").get=host
+Input("ssh user").get =>user
+Input("host").get =>host
     MongodData->d
         assert(d.host==host)
-        d.replSetName =replSetName
-        d.clusterRole =clusterRole
+        d.replSetName =>replSetName
+        d.clusterRole =>clusterRole
         InstallMongod(user+"@"+host, replSetName, clusterRole, false)
 /InstallMongodOne
 
 
 
-Input("ssh user").get=user
+Input("ssh user").get =>user
     MongosHosts->host
         println("----------------------")
-        println("mongos: host=" + host)
+        println("mongos: host =>" + host)
         println("----------------------")
         InstallMongos(user+"@"+host)
 /InstallMongosAll
@@ -246,14 +249,14 @@ Input("ssh user").get=user
 
 
 
-Input("ssh user").get=user
-    MongodData->d out(d.host) | _=hosts
+Input("ssh user").get =>user
+    MongodData->d out(d.host) | _ =>hosts
     
-    hosts + MongosHosts =hosts
+    hosts + MongosHosts =>hosts
     
     hosts->host
         println("----------------------")
-        println("mongo shell: host=" + host)
+        println("mongo shell: host =>" + host)
         println("----------------------")
         InstallMongoShell(user+"@"+host)
 /InstallMongoShellAll
@@ -264,15 +267,15 @@ Input("ssh user").get=user
 
 
 ## Info on how to initialize any replica set
-Input("Replica set name").get =rsName
-    0 =count
+Input("Replica set name").get =>rsName
+    0 =>count
     MongodData->d
         assert(d.replSetName==rsName) 
         out("Inner{ _id: " + count + ", host: " + '"' + d.host+":27017" + '" }') 
-        count+1 =count
-    | _.concat(",") =members
-    TmpFile("init")=f
-    "rs.initiate(Inner{ _id: '" + rsName + "', members: [" + members + "] })" =js
+        count+1 =>count
+    | _.concat(",") =>members
+    TmpFile("init") =>f
+    "rs.initiate(Inner{ _id: '" + rsName + "', members: [" + members + "] })" =>js
     
     println("Connect with mongo shell to one of the " + rsName + " servers")
     println("Enter the following command")
@@ -287,15 +290,15 @@ Input("Replica set name").get =rsName
 
 
 ## Info on how to add shard to config
-Input("Replica set name").get =rsName
-    0 =count
+Input("Replica set name").get =>rsName
+    0 =>count
     MongodData->d
         assert(d.replSetName==rsName) 
         out(d.host+":27017") 
-        count+1 =count
-    | _.concat(",") =members
-    TmpFile("init")=f
-    "sh.addShard('"+rsName+"/"+members+"')" =js
+        count+1 =>count
+    | _.concat(",") =>members
+    TmpFile("init") =>f
+    "sh.addShard('"+rsName+"/"+members+"')" =>js
     
     println("Connect with mongo shell to one of these mongos servers:")
     println("      " + (MongosHosts.concat(", ")) )
@@ -315,8 +318,8 @@ Input("Replica set name").get =rsName
     MongodData->d 
         assert(d.replSetName=="conf") 
         out(d.host+":27017") 
-    | _.concat(",")  =confServers
-    Dict.set("confServers",confServers).mergeCodes =data
+    | _.concat(",")  =>confServers
+    Dict.set("confServers",confServers).mergeCodes =>data
 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< EOF
 #!/bin/bash
 
@@ -332,7 +335,7 @@ mongos \
 
 
 
-PDict("replSetName","clusterRole").mergeCodes=data ## Create mongod.conf
+PDict("replSetName","clusterRole").mergeCodes =>data ## Create mongod.conf
 error(data.hasNullValue,"Expected parameters replSetName, clusterRole")
 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< EOF
 # mongod.conf
