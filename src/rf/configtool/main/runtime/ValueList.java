@@ -46,7 +46,6 @@ public class ValueList extends Value {
         add(new FunctionPush());
         add(new FunctionEmpty());
         add(new FunctionLast());
-        
     }
     
     protected ValueList self() {
@@ -527,6 +526,8 @@ public class ValueList extends Value {
             return val.get(val.size()-1);
         }
     }
+    
+
     
 
 

@@ -874,6 +874,20 @@ codeDirs = . ; code.examples ; code.lib
   $ @e
 </pre>
 
+<p>
+  For windows, it starts notepad. For linux, there is a selection list, where one identifies 
+  which editor to use. This is remembered for the rest of the session.
+</p>
+<p>
+  To reset the selection:
+</p>
+<pre>
+  $ @ee
+</pre>
+
+<p>
+  Shortcuts are user-defineable in the CFT.props file
+</p>
 
 <h3>Comments</h3>
 <p>
@@ -1009,7 +1023,7 @@ codeDirs = . ; code.examples ; code.lib
   inside runs detached from the caller, and behaves exactly like a function.
 </p>
 <pre>
-  Lambda { P(1)+P(2) } =&gt;x x.call(1,2)
+  myLambda = Lambda { P(1)+P(2) } myLambda.call(1,2)
 </pre>
 <p>
   Great for local functions inside regular functions, and for sending as parameters to other functions,
@@ -1901,7 +1915,7 @@ codeDirs = . ; code.examples ; code.lib
   readLines("XXX")
   (paste or enter text, then enter end-marker manually)
   XXX
-  &lgt;list&gt;
+  &lt;list&gt;
   0: ...
   1: ...
 
@@ -1919,10 +1933,10 @@ codeDirs = . ; code.examples ; code.lib
 <h2>Differing between Windows and Linux</h2>
 <p>
   Calling function Sys.isWindows() is used to differ between the two in code. It does this
-  by checking if File.separator is a backslash.
+  by checking if (Java) File.separator is a backslash.
 </p>
 <pre>
-  Sys.isWindows
+  $ Sys.isWindows
   &lt;boolean&gt;
   false
 </pre>
@@ -1971,6 +1985,7 @@ codeDirs = . ; code.examples ; code.lib
   &lt;boolean&gt;
   true
 </pre>
+
 
 
 
@@ -2714,7 +2729,7 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
   Dict =&gt;data
   data.bind(Lambda{
     self.set("received_value", P(1))
-  }) =closure
+  }) =&gt;closure
 
   closure.call("test")
   data.get("received_value")  # returns "test"
@@ -2728,7 +2743,7 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
 </p>
 <pre>
 # Create Closure that strips N characters of start and end of a string
-  P(1)=&gt;
+  P(1)=&gt;n
   Dict.set("n",n).bind(Lambda{
     P(1)=&gt;s 
     self.get("n")=&gt;n

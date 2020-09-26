@@ -133,6 +133,7 @@ public class ObjGlobal extends Obj {
         add(new FunctionFileLine());
         add(new FunctionError());
         add(new FunctionShell());
+        add(new FunctionGetType());
 
         
         // name spaces
@@ -816,6 +817,28 @@ public class ObjGlobal extends Obj {
             }
             callExternalProgram(shellCommand, ctx);
             return new ValueBoolean(true);
+        }
+    }
+    
+    
+    class FunctionGetType extends Function {
+        public String getName() {
+            return "getType";
+        }
+        public String getShortDesc() {
+            return "getType(any) - get value or object type";
+        }
+        @Override
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected parameter any");
+            Value v=params.get(0);
+            String s;
+            if (v instanceof ValueObj) {
+            	s=((ValueObj) v).getVal().getTypeName();
+            } else {
+            	s=v.getTypeName();
+            }
+            return new ValueString(s);
         }
     }
     

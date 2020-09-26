@@ -772,6 +772,19 @@ There also exists a shortcut, which opens the current script file in an editor:
 ```
 $ @e
 ```
+
+For windows, it starts notepad. For linux, there is a selection list, where one identifies
+which editor to use. This is remembered for the rest of the session.
+
+
+To reset the selection:
+
+```
+$ @ee
+```
+
+Shortcuts are user-defineable in the CFT.props file
+
 ### Comments
 
 
@@ -885,7 +898,7 @@ A Lambda is an object (a value) that contains code, so it can be called, with pa
 inside runs detached from the caller, and behaves exactly like a function.
 
 ```
-Lambda { P(1)+P(2) } =>x x.call(1,2)
+myLambda = Lambda { P(1)+P(2) } myLambda.call(1,2)
 ```
 
 Great for local functions inside regular functions, and for sending as parameters to other functions,
@@ -1669,7 +1682,7 @@ some function name, using synthesis.
 readLines("XXX")
 (paste or enter text, then enter end-marker manually)
 XXX
-&lgt;list>
+<list>
 0: ...
 1: ...
 :syn
@@ -1680,10 +1693,10 @@ XXX
 
 
 Calling function Sys.isWindows() is used to differ between the two in code. It does this
-by checking if File.separator is a backslash.
+by checking if (Java) File.separator is a backslash.
 
 ```
-Sys.isWindows
+$ Sys.isWindows
 <boolean>
 false
 ```
@@ -2380,7 +2393,7 @@ Nice for event based callbacks.
 Dict =>data
 data.bind(Lambda{
 self.set("received_value", P(1))
-}) =closure
+}) =>closure
 closure.call("test")
 data.get("received_value")  # returns "test"
 ```
@@ -2393,7 +2406,7 @@ Example:
 
 ```
 # Create Closure that strips N characters of start and end of a string
-P(1)=>
+P(1)=>n
 Dict.set("n",n).bind(Lambda{
 P(1)=>s
 self.get("n")=>n
