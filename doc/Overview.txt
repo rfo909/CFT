@@ -141,6 +141,7 @@ Various topics
  * Differing between Windows and Linux
  * Session state
  * Predicate calls
+ * Get type of value
  * List.push()
  * Dict set with strings
  * Dict fields as functions

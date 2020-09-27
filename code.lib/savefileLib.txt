@@ -230,7 +230,7 @@ P(1,"label") =>label P(2) =>currVal P(3,"yes") =>trueVal P(4,"no") =>falseVal
 # If value is Dict, for each key found, return corresponding value (as list). Otherwise true if value found, false if not found
 P(1,List) =>lines
 P(2) =>value
-    if(value.?keys) Inner{
+    if(getType(value)=="Dict") Inner{
         # match keys and result corresponding values as list
         dict=value
         result=List
@@ -242,6 +242,6 @@ P(2) =>value
     } else Inner{   
         # check for single value
         lines->line assert(line.contains(value)) out(line) | _.length>0
-    })
+    }
 /LinesContain
 

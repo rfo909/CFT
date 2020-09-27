@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2020-09-22 RFO
-v1.5.0
+Last updated: 2020-09-26 RFO
+v1.5.1
 ```
 # Introduction
 
@@ -1735,6 +1735,20 @@ false
 "123".?parseInt
 <boolean>
 true
+```
+## Get type of value
+
+
+The global function getType() takes one parameter, and returns
+the type name of that value, as a string
+
+```
+$ getType(3)
+<String>
+int
+$ getType(Dict)
+<String>
+Dict
 ```
 ## List.push()
 

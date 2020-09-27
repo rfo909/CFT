@@ -116,12 +116,12 @@ loop
 
 # Log data
     Sys.lastResult =>res
-    res.?nth =>isList
+    getType(res)=="List" =>isList
 
-    if(isList,Inner{
+    if(isList) {
         readLine("Element number (Enter for all)") =>num
-        if(num.?parseInt, Inner{res.nth(num.parseInt) =>res})
-    })
+        if(num.?parseInt) {res.nth(num.parseInt) =>res}
+    }
 
     List =>list
     list.add("")    

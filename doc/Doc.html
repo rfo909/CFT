@@ -15,8 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2020-09-22 RFO
-v1.5.0
+Last updated: 2020-09-26 RFO
+v1.5.1
 
 </pre>
 
@@ -1986,6 +1986,23 @@ codeDirs = . ; code.examples ; code.lib
   true
 </pre>
 
+
+
+
+
+<h2>Get type of value</h2>
+<p>
+  The global function getType() takes one parameter, and returns 
+  the type name of that value, as a string
+</p>
+<pre>
+  $ getType(3)
+  &lt;String&gt;
+  int
+  $ getType(Dict)
+  &lt;String&gt;
+  Dict
+</pre>
 
 
 

@@ -93,7 +93,7 @@ P(4,false) =>showDebug
     error(commands==null, "Invalid commands: can not be null")
 
     # ensure commands is a list
-    if(!commands.?nth) {
+    if(getType(commands)!="List") {
         List(commands) =>commands
     }
 
@@ -166,7 +166,7 @@ P(2) =>commands
 P(3,false) =>acceptErrors
 P(4,false) =>showDebug
     # ensure commands is a list
-    if(!commands.?nth) {
+    if(getType(commands)!="List") {
         List(commands) =>commands
     }
     
