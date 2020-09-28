@@ -22,10 +22,22 @@ import java.util.*;
 
 import rf.configtool.main.runtime.*;
 import rf.configtool.root.Root;
+import rf.configtool.main.Version;
 
 public class Main {
     
     public static void main (String[] args) throws Exception {
+    	if (args.length == 1 && args[0].startsWith("-")) {
+    		if (args[0].equals("-version")) {
+	    		System.out.println(Version.getVersion());
+	    		System.exit(0);
+	    	} else {
+    			System.out.println("Valid options:");
+    			System.out.println("  -version");
+    			System.exit(1);
+    		}
+    	}
+	    	
         BufferedReader stdin=new BufferedReader(new InputStreamReader(System.in));
         PrintStream stdout=System.out;
         

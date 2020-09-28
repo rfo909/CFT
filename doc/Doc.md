@@ -1739,8 +1739,9 @@ true
 ## Try-catch
 
 
-Catching of exceptions in CFT is implemented as a global function, tryUnsafe() which
-invokes an expression, and returns a Dict object.
+Catching of exceptions in CFT is implemented as a global function, tryUnsafe(expr) which
+invokes the given expression, and returns a Dict object, detailing the outcome, and
+preventing exceptions from terminating the running of CFT script code.
 
 ```
 tryUnsafe(xxx) =x
