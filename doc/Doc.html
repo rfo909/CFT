@@ -15,8 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2020-09-26 RFO
-v1.5.1
+Last updated: 2020-09-28 RFO
+v1.5.2
 
 </pre>
 
@@ -1988,6 +1988,26 @@ codeDirs = . ; code.examples ; code.lib
 
 
 
+<h2>Try-catch</h2>
+<p>
+  Catching of exceptions in CFT is implemented as a global function, tryUnsafe() which
+  invokes an expression, and returns a Dict object.
+</p>
+<pre>
+  tryUnsafe(xxx) =x
+
+  # Contains
+  #    ok           - boolean
+  #    result       - if ok, null if not
+  #    msg          - exception message if not ok
+  #    stack        - stack trace
+</pre>
+<p>
+  Remember that blocks of code are expressions also.
+</p>
+
+
+
 
 
 <h2>Get type of value</h2>
@@ -2755,11 +2775,12 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
   For robustness and testing, when lambdas are run directly (not via closures)
   there is also a "self" variable, which points at an empty Dict object.
 </p>
+<h2>Another example</h2>
 <p>
-  Example:
+  Here we create a Closure that when called strips N characters from the
+  start and end of a string.
 </p>
 <pre>
-# Create Closure that strips N characters of start and end of a string
   P(1)=&gt;n
   Dict.set("n",n).bind(Lambda{
     P(1)=&gt;s 
@@ -2793,7 +2814,7 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
     .set("i",1)
     .set("incr",Lambda{
       P(1,1) =amount
-      self.set(self.i+amount)
+      self.set("i",self.i+amount)
     })
     =&gt;data
 
@@ -2810,7 +2831,7 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
     .set("i",1)
     .set("incr",Lambda{
       P(1,1) =amount
-      self.set(self.i+amount)
+      self.set("i",self.i+amount)
     })
     .set("incr50",Lambda{
       self.invoke("incr",50)

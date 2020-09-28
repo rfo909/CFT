@@ -141,6 +141,7 @@ Various topics
  * Differing between Windows and Linux
  * Session state
  * Predicate calls
+ * Try-catch
  * Get type of value
  * List.push()
  * Dict set with strings
@@ -180,6 +181,7 @@ Lib.Text.Lexer
  |   Node.addTokenComplex() example
 
 Closures
+ * Another example
 
 Primitive objects
  |     Member lambdas calling each other

@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2020-09-26 RFO
-v1.5.1
+Last updated: 2020-09-28 RFO
+v1.5.2
 ```
 # Introduction
 
@@ -1736,6 +1736,23 @@ false
 <boolean>
 true
 ```
+## Try-catch
+
+
+Catching of exceptions in CFT is implemented as a global function, tryUnsafe() which
+invokes an expression, and returns a Dict object.
+
+```
+tryUnsafe(xxx) =x
+# Contains
+#    ok           - boolean
+#    result       - if ok, null if not
+#    msg          - exception message if not ok
+#    stack        - stack trace
+```
+
+Remember that blocks of code are expressions also.
+
 ## Get type of value
 
 
@@ -2415,11 +2432,13 @@ data.get("received_value")  # returns "test"
 For robustness and testing, when lambdas are run directly (not via closures)
 there is also a "self" variable, which points at an empty Dict object.
 
+## Another example
 
-Example:
+
+Here we create a Closure that when called strips N characters from the
+start and end of a string.
 
 ```
-# Create Closure that strips N characters of start and end of a string
 P(1)=>n
 Dict.set("n",n).bind(Lambda{
 P(1)=>s
@@ -2450,7 +2469,7 @@ Dict
 .set("i",1)
 .set("incr",Lambda{
 P(1,1) =amount
-self.set(self.i+amount)
+self.set("i",self.i+amount)
 })
 =>data
 data.invoke("incr",10) # data.i is now 11
@@ -2466,7 +2485,7 @@ Dict
 .set("i",1)
 .set("incr",Lambda{
 P(1,1) =amount
-self.set(self.i+amount)
+self.set("i",self.i+amount)
 })
 .set("incr50",Lambda{
 self.invoke("incr",50)
