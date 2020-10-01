@@ -171,24 +171,26 @@ P(4,false) => showDebug
     if (result.get("exitCode") != 0 && !acceptErrors) {
         FAIL = true
     }
-    
+
+
     if(showDebug || FAIL) {
-        println("- cmd:")
-        result.get("cmd")->line println("    " + line) |
+    	Inner {  # "hide" loops inside inner block, so as not to affect return value of function
+	        println("- cmd:")
+	        result.get("cmd")->line println("    " + line) |
 
-        println("- exitCode = " + result.get("exitCode"))
+	        println("- exitCode = " + result.get("exitCode"))
 
-        println("- stdin:")
-        result.get("stdin")->line println("   # " + line) |
+	        println("- stdin:")
+	        result.get("stdin")->line println("   # " + line) |
 
-        println("- stdout:")
-        result.get("stdout")->line println("   # " + line) |
+	        println("- stdout:")
+	        result.get("stdout")->line println("   # " + line) |
 
-        println("- stderr:")
-        result.get("stderr")->line println("   # " + line) |
-        println
+	        println("- stderr:")
+	        result.get("stderr")->line println("   # " + line) |
+	        println
+		}
     }
-    
     error(FAIL,"run failed with error")
     
     # return value

@@ -64,13 +64,7 @@ P(1) =>target
 
 # Returns boolean indicating if sudo without password ok
 P(1,ReadSSHTarget) =>sshTarget
-    sshTarget.before("@") =>user
-    if(user == "ubuntu") {
-        true    # ubuntu on RPI default user has sudo without password ok
-    } else {
-        run (sshTarget,"sudo ls",true) =>result
-        result.get("exitCode") == 0
-    }
+	sudo(sshTarget,"ls",true).get("exitCode")==0
 /VerifySudo
 
 
@@ -83,7 +77,8 @@ P(1) =>name
 
 
 
-# Run single or multiple commands (string or list), returns Dict object
+# Run single or multiple commands (string or list) on remote target via SSH, returns Dict object
+#
 P(1) => target 
 P(2) => commands
 P(3,false) => acceptErrors
@@ -93,17 +88,17 @@ P(4,false) => showDebug
     error(commands==null, "Invalid commands: can not be null")
 
     # ensure commands is a list
-    if(getType(commands)!="List") {
-        List(commands) =>commands
+    if(getType(commands) != "List") {
+        commands = List(commands)
     }
 
 
-    # Add echo command with string to check for later, to avoid login messages etc
-    "--- " + Sys.scriptName + ".run ---" => mark
+    # Add echo command with string to check for later, to strip away login messages etc
+    "--- Output-mark: " + Date + " - " + Sys.scriptName + ".run ---" => mark
     List('echo "' + mark + '"') + commands => cmd
         
-    result = call "Lib:run" (List("ssh",target), cmd, acceptErrors, showDebug)
-    
+    result = call "Lib:run" (List("ssh",target), cmd, acceptErrors, false)
+
     # Modify stdout, by only including lines following the mark
 
     found = false
@@ -114,6 +109,23 @@ P(4,false) => showDebug
         }
     | _ =>outLines
     result.set("stdout",outLines) # overwrite
+
+    if (showDebug) Inner {
+		println("- cmd:")
+		result.get("cmd")->line println("    " + line) |
+
+		println("- exitCode = " + result.get("exitCode"))
+
+		println("- stdin:")
+		result.get("stdin")->line println("   # " + line) |
+
+		println("- stdout:")
+		result.get("stdout")->line println("   # " + line) |
+
+		println("- stderr:")
+		result.get("stderr")->line println("   # " + line) |
+		println
+    }
 
     # return value
     result
