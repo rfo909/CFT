@@ -161,7 +161,7 @@ P(2,"") =>prefix
 
     # Check if CFT already installed
     {
-        call "SSH:run" (target,"cd CFT").get("exitCode")==0 
+        call "SSH:run" (target,"cd CFT",true).get("exitCode")==0 
     } =>hasCFT
     
     if (!hasCFT) {

@@ -241,7 +241,7 @@ P(1) =>glob
         
         sshUser+"@"+host =>target
         println("Updating host " + target)
-        call "APTUpdate:APTUpdateUpgrade" (target, "   ")
+        tryUnsafe(call "APTUpdate:APTUpdateUpgrade" (target, "   "))
 
         # Check if needs reboot and can be rebooted
         DebianHostNeedsReboot(target) =>needsReboot
@@ -280,10 +280,12 @@ P(1) =>glob
 
 
 # Update or install CFT
+P(1,"")=>hostPattern
     Date.Duration.minutes(30).get =>minTimeSinceLastRun
     
     call "Hosts:GetHosts" =>hosts
     hosts->host
+    	assert(host.contains(hostPattern))
         assert(call "Hosts:Has" (host,"Install.CFT","1"))
         call "Hosts:GetValue" (host, "SSHUser") =>sshUser
         assert(sshUser != null)
@@ -304,7 +306,7 @@ P(1) =>glob
         
         assert(call "SSH:HostOkSSH" (target))
 
-        call "Java:VerifyCFT" (target, "   ")
+        tryUnsafe(call "Java:VerifyCFT" (target, "   "))
         call "Db:Add" (host, Date, "CFT")
 /UpdateCFT
 
@@ -331,3 +333,9 @@ P(1) =>glob
         call "SSH:run" (target, "mpstat").get("stdout")->line
             report(host,line)
 /MPStat
+
+
+
+UpgradeAPT
+UpdateCFT
+/runAll
