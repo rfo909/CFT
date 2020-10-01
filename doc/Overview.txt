@@ -34,6 +34,7 @@ Directories
  * Get all files recursively under a directory
  * Get all directories recursively under a directory:
  * Delete a sub-directory
+ * Set current directory
 
 The shell() function
 
@@ -97,10 +98,12 @@ Running external programs
  * Dir.run()
  * Dir.runCapture()
  * Dir.runDetach()
- * Dir.runProcess() / .runProcessWait()
- |   ssh without password
+ * Dir.runProcessWait()
+ |   Lib:run
+ |   Doing ssh
+ * Dir.runProcess()
+ |   Side note: ssh without password
  * External Program Status
- |   Example
 
 Session persistent data
  * ValDef

@@ -336,6 +336,14 @@ The sub-directory must be empty
 ```
 Dir.sub("something").delete
 ```
+## Set current directory
+
+
+Apart from navigating interactively, to set current directory via code:
+
+```
+Dir.setAsCurrentDir
+```
 # The shell() function
 
 
@@ -1090,21 +1098,14 @@ $ Dir.run("cmd","/c","git","pull","origin","master")
 Many Windows programs require the "cmd","/c" in front of the actual program.
 For proper operating systems (Linux) you naturally skip the two first elements of the command list.
 
-
-Often it is easier to use String.split in this case, as Dir.run() accept a single List value
-instead of a list of values.
-
-```
-Dir.run("cmd /c git pull origin master".split)
-```
 ## Dir.runCapture()
 
 
 This works the same as Dir.run(), but returns a List of strings representing stdout from the
-external program, to be processed further.
+external program, to be processed further. Not suited for interactive use.
 
 ```
-Dir.run("which","leafpad") =>lines lines.length>0 && lines.nth.contains("leafpad")
+Dir.runCapture("which","leafpad") =>lines lines.length>0 && lines.nth.contains("leafpad")
 /HasLeafpad
 ```
 ## Dir.runDetach()
@@ -1117,61 +1118,69 @@ off the background process. Nice for editors etc.
 $ Dir.runDetach("leafpad", Sys.savefile.path)
 ```
 
-This example runs the (linux) leapad editor in the background, with the path of the current savefile as
+This example runs the leapad editor in the background, with the path of the current savefile as
 argument.
 
-## Dir.runProcess() / .runProcessWait()
+## Dir.runProcessWait()
 
 
-Dir.runProcess() is similar to Dir.runDetach(), and Dir.runProcessWait() is similar to
-Dir.run(), but for cases where we need to provide non-interactive input,
-and inspect the output, as this uses files for stdin, stdout and stderr.
+Runs external program, reading input lines from text file, and deliver stdout and stderr to
+files. Waits for external program to terminate, then returns exit code.
 
 
-At this level of complexity, one-line functions get a bit less readable, so the example below
-is spread out across multiple lines, and depends on editing the script file directly.
-
-
-(note: may be less readable on .md format - open Doc.html instead)
+This function is the "work horse" of invoking external programs from script code, but
+as it is a bit complex to call, a library function "Lib:run" has been created. It takes
+four parameters, but often only the first is used:
 
 ```
-## --- create temp-file
-name = P(1)
-Dir("/tmp").file(name + "." + currentTimeMillis)
-/TmpFile
-## --- Call ssh to list remote processes with ps -efal
-P(1,Input("Enter ssh-target on format user@host").get)=>target
-#
-# Create temp files
-#
-stdin = TmpFile("in")
-stdout = TmpFile("out")
-stderr = TmpFile("err")
-#
-# stdin contains the command(s) we want to run remotely
-#
-stdin.create("ps -efal")
-#
-# Call ssh (requires passwordless login)
-#
-Dir.runProcessWait(stdin, stdout, stderr, "ssh", target)
-#
-# get list of output from the "ps" command
-#
-result = stdout.read
-#
-# delete temp-files
-#
-stdin.delete
-stdout.delete
-if(stderr.exists, stderr.delete)
-#
-# return value
-#
-result
-/ListRemoteFiles
+call "Lib:run" (List("ls","-l")) => result
 ```
-### ssh without password
+
+The result object is a Dict with the following fields:
+
+
+
+- cmd - the command (list)
+
+
+- stdin - the stdin lines (list)
+
+
+- stdout - stdout lines (list)
+
+
+- stderr - stderr lines (list)
+
+
+- exitCode - int
+
+
+### Lib:run
+
+
+This function uses the Dir.runProcessWait(), and handles creating and deleting temporary
+files (on Linux). Ideally you never need interfacing Dir.runProcessWait() directly.
+
+
+For external programs that depend on running from a specific directly, either navigate to current directory
+interactively, or just let your code call the .setAsCurrentDir() function on some Dir object before
+calling "Lib:run".
+
+### Doing ssh
+
+
+If you need to run SSH commands on remote targets, use the SSH library script, which
+contains two major functions: run() and sudo(), These call "Lib:run" then filter the output
+to stdout using a marker to eliminate the welcome text when logging in etc.
+
+## Dir.runProcess()
+
+
+This function is similar to Dir.runProcessWait(), as its use of files for input and output,
+but the program is then detached from the main thread, and with runProcess() returning immediately.
+For this reason it can not give the exit status of the external program.
+
+### Side note: ssh without password
 
 
 To set up ssh login without password, create and distribute an ssh key, then
@@ -1184,36 +1193,18 @@ $ ssh-copy-id user@host
 ## External Program Status
 
 
-To obtain the exit code from an external program:
+The function Dir.runProcessWait() returns the exit code of the external program.
+
+
+It can be a bit cumbersome in use, as it requires setting up files for stdin, stdout
+and stderr, but the Lib script contains a function "run" which hides the complexities,
+and returns a Dict with all info.
 
 ```
-Sys.lastEPS           # int or -999 if no value
-Sys.lastEPSData       # Dict or null if no value
-```
-
-The exit code is collected for the following ways of running external programs:
-
-
-
-- Dir.run()
-
-
-- Dir.runCapture()
-
-
-- Dir.runProcessWait()
-
-
-### Example
-
-
-Traditionally, exit code 0 means all ok.
-
-```
-$ Dir.run("which","unknownCommand")
-$ Sys.lastEPS
-<int>
-1
+call "Lib:run" (List("ls","-l")) => result
+if (result.exitCode != 0) {
+....
+}
 ```
 # Session persistent data
 

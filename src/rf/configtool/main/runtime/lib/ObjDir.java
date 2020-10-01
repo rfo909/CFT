@@ -82,6 +82,7 @@ public class ObjDir extends Obj {
         add(new FunctionShowTree());
         add(new FunctionProtect());
         add(new FunctionUnprotect());
+        add(new FunctionSetAsCurrentDir());
 
     }
     
@@ -785,6 +786,22 @@ public class ObjDir extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
         	if (!protection.isActive()) throw new Exception("unprotect: " + name + " - not protected.");
         	protection=Protection.NoProtection;
+            return new ValueObj(self());
+        }
+    }
+    
+
+  
+    class FunctionSetAsCurrentDir extends Function {
+        public String getName() {
+            return "setAsCurrentDir";
+        }
+        public String getShortDesc() {
+            return "setAsCurrentDir() - use this Dir as current work dir - returns self";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 0) throw new Exception("Expected no parameters");
+        	ctx.getObjGlobal().setCurrDir(name);
             return new ValueObj(self());
         }
     }
