@@ -318,7 +318,7 @@ public class FileInfo {
             a.setZipEntryType("txt");
             PrintWriter pw=a.getPrintWriter();
             for (int i=0; i<100; i++) {
-                pw.println(i + ": dette er en test æøå");
+                pw.println(i + ": dette er en");
             }
             pw.close();
 
