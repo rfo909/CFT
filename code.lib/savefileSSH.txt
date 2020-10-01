@@ -132,10 +132,12 @@ P(4,false) => showDebug
 /run
 
 
-P(1) =>target 
-P(2) =>commands
-P(3,false) =>acceptErrors
-P(4,false) =>showDebug
+# Run single or multiple commands (string or list) as root on remote target via SSH, returns Dict object
+#
+P(1) => target 
+P(2) => commands
+P(3,false) => acceptErrors
+P(4,false) => showDebug
     # ensure commands is a list
     if(getType(commands)!="List") {
         List(commands) =>commands
@@ -145,5 +147,18 @@ P(4,false) =>showDebug
     run(target,commands,acceptErrors,showDebug)
 /sudo
 
+
+# Copy local file via rcp to remote target, returns Dict object
+#
+P(1) => localFile
+P(2) => target
+P(3) => remoteName
+P(4, false) => acceptErrors
+P(5, false) => showDebug
+	if (getType(localFile)=="File") {
+		localFile=localFile.path
+	}
+	call "Lib:run" (List("scp", localFile, target+":"+remoteName), List, acceptErrors, showDebug)
+/copy
 
 

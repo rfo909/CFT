@@ -188,6 +188,9 @@ P(1,"someTarget") =>target
 # Interactive cloning of existing VM - stops original
 # --
     call "Lib:Header" ("Cloning existing VM")
+    Dir.runCapture("whoami").nth=="root" =>ok
+    error(!ok, "Must be logged in as root")
+    
     null =>original
     null =>cloneName
     null =>originalIp
