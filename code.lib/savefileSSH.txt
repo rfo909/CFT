@@ -148,7 +148,7 @@ P(4,false) => showDebug
 /sudo
 
 
-# Copy local file via rcp to remote target, returns Dict object
+# Copy local file via scp (secure copy over SSH) to remote target, returns Dict object
 #
 P(1) => localFile
 P(2) => target

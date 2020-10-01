@@ -60,8 +60,7 @@ Dir("/tmp").file("tmp."+currentTimeMillis)
     println("--------------------------------")
 
     println(prefix+"Copying config file to " + target)
-    call "Lib:run" (List("rcp", f.path, target + ":./main.conf")) =>result
-    error(result.exitCode != 0, "Remote copy failed")
+    call "SSH:copy" (f, target, "./main.conf"))
     Dir.run("rm",f.path)
 
     println(prefix+"Stopping service if exists")

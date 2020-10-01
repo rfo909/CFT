@@ -55,7 +55,7 @@ P(2,Input("Host name").get) =>hostname
     f.create(hostname)
     
     println("* Copying hostname file to target")
-    Dir.run("rcp", f.path, target+":./hostname")
+    call "SSH:copy" (f, target, "./hostname")
     
     println("* Moving hostname file to /etc")
     run(target,List("sudo bash","cp ./hostname /etc"))
@@ -85,7 +85,7 @@ P(2,Input("IP address xx.xx.xx.xx/MM").get) =>ip
     f.create(VMNetplan(ip,nic))
     
     println("* Copying netplan to target")
-    Dir.run("rcp", f.path, target+":./netplan.txt")
+    call "SSH:copy" (f, target, "./netplan.txt")
     
     println("* Deleting all files under /etc/netplan")
     run(target, List("sudo bash","rm -f /etc/netplan/*"))
