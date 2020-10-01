@@ -121,6 +121,85 @@ d
 /DirPrivate
 
 
+# Create name of temp file under /tmp
+P(1) =>name 
+    Dir("/tmp").file(name + currentTimeMillis)  
+/TmpFile
+
+
+
+
+# Run external program and collect stdout, stderr and exitCode - returns Dict
+# with fields cmd, stdin, stdout, stderr, exitCode
+#
+P(1,List("ls","-l")) => cmd
+P(2,List) => stdinLines
+P(3,false) => acceptErrors
+P(4,false) => showDebug
+
+	if (getType(cmd) != "List") {
+		cmd=List(cmd) # wrap as list
+	}
+	if (getType(stdinLines) != "List") {
+		stdinLines=List(stdinLines) # wrap as
+	}
+	
+    TmpFile("in") =>inFile
+    TmpFile("out") =>outFile
+    TmpFile("err") =>errFile
+    
+    inFile.create(stdinLines)
+    exitCode = Dir.runProcessWait(inFile,outFile,errFile,cmd)
+    Dict
+        .set("cmd", cmd)
+        .set("stdin", stdinLines)
+        .set("stdout",if(outFile.exists,outFile.read,List))
+        .set("stderr",if(errFile.exists,errFile.read,List))
+        .set("exitCode", exitCode)
+    =>result
+    
+    Lambda { 
+        P(1) =>f 
+        if(f.exists) f.delete 
+    } =>Del
+    
+    Del.call(inFile)
+    Del.call(outFile)
+    Del.call(errFile)
+
+    FAIL = false
+    if (result.get("exitCode") != 0 && !acceptErrors) {
+        FAIL = true
+    }
+    
+    if(showDebug || FAIL) {
+        println("- cmd:")
+        result.get("cmd")->line println("    " + line) |
+
+        println("- exitCode = " + result.get("exitCode"))
+
+        println("- stdin:")
+        result.get("stdin")->line println("   # " + line) |
+
+        println("- stdout:")
+        result.get("stdout")->line println("   # " + line) |
+
+        println("- stderr:")
+        result.get("stderr")->line println("   # " + line) |
+        println
+    }
+    
+    error(FAIL,"run failed with error")
+    
+    # return value
+    result
+/run
+
+
+
+
+
+
 # Show a list of options
     P(1,List) =>options
     P(2,Lambda { "name"}) =>macroGetElementName

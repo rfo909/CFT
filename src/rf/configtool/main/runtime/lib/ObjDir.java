@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import rf.configtool.main.Ctx;
-import rf.configtool.main.ExternalProgramStatus;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.OutText;
 import rf.configtool.main.Stdio;
@@ -496,7 +495,6 @@ public class ObjDir extends Obj {
     }
     
    private void callExternalProgram (Ctx ctx, boolean foreground, Stdio stdio, OutText outText, RunCaptureOutput capture, List<Value> params) throws Exception {
-	    ctx.getObjGlobal().clearLastExternalProgramStatus();
         List<Value> args;
         if (params.size()==1) {
             if (params.get(0) instanceof ValueString) {
@@ -550,8 +548,6 @@ public class ObjDir extends Obj {
         	int returnCode=process.waitFor();
             long endTime=System.currentTimeMillis();
             long duration=endTime-startTime; 
-            ExternalProgramStatus eps=new ExternalProgramStatus(returnCode, desc, duration);
-        	ctx.getObjGlobal().setLastExternalProgramStatus(eps);
         }
 
     }
@@ -600,9 +596,10 @@ public class ObjDir extends Obj {
     }
 
 
-    private void startProcess (Ctx ctx, File input, File output, File stderr, List<Value> params, boolean waitForExit) throws Exception {
-	    ctx.getObjGlobal().clearLastExternalProgramStatus();
+    private int startProcess (Ctx ctx, File input, File output, File stderr, List<Value> params, boolean waitForExit) throws Exception {
 
+    	int exitCode=-999;
+    	
 	    List<Value> args;
         if (params.size()==1) {
             if (params.get(0) instanceof ValueString) {
@@ -639,13 +636,12 @@ public class ObjDir extends Obj {
         if (waitForExit) {
 
            	String desc=program;
-        	int returnCode=process.waitFor();
+        	exitCode=process.waitFor();
             long endTime=System.currentTimeMillis();
             long duration=endTime-startTime; 
-            ExternalProgramStatus eps=new ExternalProgramStatus(returnCode, desc, duration);
-        	ctx.getObjGlobal().setLastExternalProgramStatus(eps);
         }
-        
+      
+        return exitCode;
         
     }
 
@@ -689,8 +685,8 @@ public class ObjDir extends Obj {
               for (int i=3; i<params.size(); i++) cmd.add(params.get(i));
             
             
-            startProcess(ctx, stdin.getFile(), stdout.getFile(), stderr.getFile(), cmd, true);
-            return new ValueObj(self());
+            int exitCode = startProcess(ctx, stdin.getFile(), stdout.getFile(), stderr.getFile(), cmd, true);
+            return new ValueInt(exitCode);
 
         }
     }

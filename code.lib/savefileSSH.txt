@@ -83,11 +83,11 @@ P(1) =>name
 
 
 
-# Single or multiple commands (string or list), returns Dict object
-P(1) =>target 
-P(2) =>commands
-P(3,false) =>acceptErrors
-P(4,false) =>showDebug
+# Run single or multiple commands (string or list), returns Dict object
+P(1) => target 
+P(2) => commands
+P(3,false) => acceptErrors
+P(4,false) => showDebug
 
     error(target==null || !target.contains("@"), "Invalid target: '" + target + "'")
     error(commands==null, "Invalid commands: can not be null")
@@ -99,63 +99,22 @@ P(4,false) =>showDebug
 
 
     # Add echo command with string to check for later, to avoid login messages etc
-    "--- " + Sys.scriptName + ".run ---" =>mark
-    List('echo "' + mark + '"') + commands =>cmd
+    "--- " + Sys.scriptName + ".run ---" => mark
+    List('echo "' + mark + '"') + commands => cmd
         
-    TmpFile("in") =>inFile
-    TmpFile("out") =>outFile
-    TmpFile("err") =>errFile
+    result = call "Lib:run" (List("ssh",target), cmd, acceptErrors, showDebug)
     
-    inFile.create(cmd)
-    Dir.runProcessWait(inFile,outFile,errFile,"ssh",target)
-    
-    # Filter stdout to include lines following one containing mark
-    false =>found
-    if(outFile.exists, outFile.read, List)->line
+    # Modify stdout, by only including lines following the mark
+
+    found = false
+    result.get("stdout")->line
         condOut(found, line)
         if (line.contains(mark)) {
-            true =>found
+            found=true
         }
     | _ =>outLines
-        
-    Dict
-        .set("stdout",outLines)
-        .set("stderr",if(errFile.exists,errFile.read,List))
-        .set("stdin",commands)
-        .set("exitCode", Sys.lastEPS)
-    =>result
-    
-    Lambda { 
-        P(1) =>f 
-        if(f.exists) f.delete 
-    } =>Del
-    
-    Del.call(inFile)
-    Del.call(outFile)
-    Del.call(errFile)
+    result.set("stdout",outLines) # overwrite
 
-    false =>FAIL
-    if (result.get("exitCode") != 0 && !acceptErrors) {
-        true =>FAIL
-    }
-    
-    if(showDebug || FAIL) {
-        println("- target = " + target)
-        println("- stdin:")
-        commands->line println("    " + line) |
-
-        println("- exitCode = " + result.get("exitCode"))
-        println("- stdin:")
-        result.get("stdin")->line println("   # " + line) |
-        println("- stdout:")
-        result.get("stdout")->line println("   # " + line) |
-        println("- stderr:")
-        result.get("stderr")->line println("   # " + line) |
-        println
-    }
-    
-    error(FAIL,"run failed with error: " + target)
-    
     # return value
     result
 /run

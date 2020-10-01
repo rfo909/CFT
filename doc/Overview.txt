@@ -84,6 +84,7 @@ More programming
  |   Inline form
  |   Traditional form
  |   Functionally identical
+ |   if-ladders
  * Lazy evaluation
  |     Lazy if
  |     Lazy AND, OR - &amp;&amp; ||

@@ -994,6 +994,26 @@ break
 i=i+1
 }
 ```
+### if-ladders
+
+
+The implementation in CFT supports chaining multiple if after each other.
+
+```
+if (cond) {
+...
+} else if (condB) {
+...
+} else if (condC) {
+...
+}
+```
+
+Decoding some value x into a numeric code, we can enter the following
+
+```
+code = if (x=="a") 1 else if (x=="b") 2 else if (x=="c") 3 else 4
+```
 ## Lazy evaluation
 
 #### Lazy if
