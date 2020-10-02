@@ -241,7 +241,7 @@ P(1) =>glob
         
         sshUser+"@"+host =>target
         println("Updating host " + target)
-        tryUnsafe(call "APTUpdate:APTUpdateUpgrade" (target, "   "))
+        tryCatch(call "APTUpdate:APTUpdateUpgrade" (target, "   "))
 
         # Check if needs reboot and can be rebooted
         DebianHostNeedsReboot(target) =>needsReboot
@@ -306,7 +306,7 @@ P(1,"")=>hostPattern
         
         assert(call "SSH:HostOkSSH" (target))
 
-        tryUnsafe(call "Java:VerifyCFT" (target, "   "))
+        tryCatch(call "Java:VerifyCFT" (target, "   "))
         call "Db:Add" (host, Date, "CFT")
 /UpdateCFT
 

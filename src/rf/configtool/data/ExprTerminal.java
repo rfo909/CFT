@@ -35,7 +35,7 @@ public class ExprTerminal extends LexicalElement {
     private ExprPwd exprPwd;
     private boolean nullValue;
     private ExprCall exprCall;
-    private ExprTryUnsafe exprTryUnsafe;
+    private ExprTryCatch exprTryCatch;
     
     private Value literalValue;
     private ParamLookup paramLookup;
@@ -80,8 +80,8 @@ public class ExprTerminal extends LexicalElement {
             exprCall=new ExprCall(ts);
             return;
         }
-        if (ts.peekStr("tryUnsafe")) {
-            exprTryUnsafe=new ExprTryUnsafe(ts);
+        if (ts.peekStr("tryCatch")) {
+        	exprTryCatch=new ExprTryCatch(ts);
             return;
         }
         
@@ -145,7 +145,7 @@ public class ExprTerminal extends LexicalElement {
 	        if (exprPwd != null) return exprPwd.resolve(ctx);
 	        if (nullValue) return new ValueNull();
 	        if (exprCall != null) return exprCall.resolve(ctx);
-	        if (exprTryUnsafe != null) return exprTryUnsafe.resolve(ctx);
+	        if (exprTryCatch != null) return exprTryCatch.resolve(ctx);
 	        
 	        if (literalValue != null) return literalValue;
 	        if (paramLookup != null) return paramLookup.resolve(ctx);

@@ -102,7 +102,6 @@ Running external programs
  |   Lib:run
  |   Doing ssh
  * Dir.runProcess()
- |   Side note: ssh without password
  * External Program Status
 
 Session persistent data
@@ -145,7 +144,7 @@ Various topics
  * Differing between Windows and Linux
  * Session state
  * Predicate calls
- * Try-catch
+ * Try/catch
  * Get type of value
  * List.push()
  * Dict set with strings

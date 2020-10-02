@@ -36,16 +36,16 @@ import rf.configtool.parser.TokenStream;
 /**
  * Return directory object for current directory
  */
-public class ExprTryUnsafe extends LexicalElement {
+public class ExprTryCatch extends LexicalElement {
 	
 	private Expr expr;
 
-    public ExprTryUnsafe (TokenStream ts) throws Exception {
+    public ExprTryCatch (TokenStream ts) throws Exception {
         super(ts);
-        ts.matchStr("tryUnsafe","expected 'tryUnsafe'");
-        ts.matchStr("(", "expected '(' following tryUnsafe");
+        ts.matchStr("tryCatch","expected 'tryCatch'");
+        ts.matchStr("(", "expected '(' following tryCatch");
         expr=new Expr(ts);
-        ts.matchStr(")", "expected ')' closing tryUnsafe() expression");
+        ts.matchStr(")", "expected ')' closing tryCatch() expression");
     }
     
     public Value resolve (Ctx ctx) throws Exception {

@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2020-09-28 RFO
-v1.5.2
+Last updated: 2020-19-02 RFO
+v1.5.4
 ```
 # Introduction
 
@@ -1173,15 +1173,8 @@ If you need to run SSH commands on remote targets, use the SSH library script, w
 contains two major functions: run() and sudo(), These call "Lib:run" then filter the output
 to stdout using a marker to eliminate the welcome text when logging in etc.
 
-## Dir.runProcess()
 
-
-This function is similar to Dir.runProcessWait(), as its use of files for input and output,
-but the program is then detached from the main thread, and with runProcess() returning immediately.
-For this reason it can not give the exit status of the external program.
-
-### Side note: ssh without password
-
+**Side note: ssh without password**
 
 To set up ssh login without password, create and distribute an ssh key, then
 copy it to the target host, as follows (in Linux shell).
@@ -1190,6 +1183,16 @@ copy it to the target host, as follows (in Linux shell).
 $ ssh-keygen -t rsa
 $ ssh-copy-id user@host
 ```
+## Dir.runProcess()
+
+
+This function is similar to Dir.runProcessWait(), as it uses files for input and output,
+but the program is then detached from the main thread, with runProcess() returning immediately.
+For this reason it can not give the exit status of the external program.
+
+
+The external program terminates when it has completed, or the process is killed.
+
 ## External Program Status
 
 
@@ -1747,15 +1750,15 @@ false
 <boolean>
 true
 ```
-## Try-catch
+## Try/catch
 
 
-Catching of exceptions in CFT is implemented as a global function, tryUnsafe(expr) which
+Catching of exceptions in CFT is implemented as a global expression, tryCatch(expr) which
 invokes the given expression, and returns a Dict object, detailing the outcome, and
 preventing exceptions from terminating the running of CFT script code.
 
 ```
-tryUnsafe(xxx) =x
+x = tryCatch(xxx)
 # Contains
 #    ok           - boolean
 #    result       - if ok, null if not

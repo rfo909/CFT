@@ -14,7 +14,7 @@
 <h1>CFT Change log</h1>
 
 
-<h3>v1.5.4 2020-09-30 Dir.runProcessWait() return value</h3>
+<h3>v1.5.4 2020-09-30 Various changes</h3>
 <p>
 	Changed return value for Dir.runProcessWait() from self to the exit-code. This makes the function
 	thread-safe, in that there is no need to call Sys.lastEPS.
@@ -31,7 +31,17 @@
 </p>
 
 <p>
+	Renamed function Sys.tryUnsafe() to the more logical tryCatch()
+	Changed in scripts as well.
+</p>
+
+<p>
 	Added function Dir.setAsCurrentDir to programmatically set working directory.
+</p>
+
+<p>
+	Various fixes in scripts as a consequence of the above changes, including getting
+	MongoHA script up to date again.
 </p>
 
 

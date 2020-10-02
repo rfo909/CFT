@@ -15,8 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2020-09-28 RFO
-v1.5.2
+Last updated: 2020-19-02 RFO
+v1.5.4
 
 </pre>
 
@@ -1325,21 +1325,8 @@ codeDirs = . ; code.examples ; code.lib
   to stdout using a marker to eliminate the welcome text when logging in etc.
 </p>
 
-
-<h2>Dir.runProcess()</h2>
+<p><b>Side note: ssh without password</b></p>
 <p>
-  This function is similar to Dir.runProcessWait(), as its use of files for input and output,
-  but the program is then detached from the main thread, and with runProcess() returning immediately.
-  For this reason it can not give the exit status of the external program.
-</p>
-
-
-
-
-
-<h3>Side note: ssh without password</h3>
-<p>
-
   To set up ssh login without password, create and distribute an ssh key, then
   copy it to the target host, as follows (in Linux shell).
 </p>
@@ -1347,6 +1334,22 @@ codeDirs = . ; code.examples ; code.lib
   $ ssh-keygen -t rsa
   $ ssh-copy-id user@host
 </pre>
+
+
+<h2>Dir.runProcess()</h2>
+<p>
+  This function is similar to Dir.runProcessWait(), as it uses files for input and output,
+  but the program is then detached from the main thread, with runProcess() returning immediately.
+  For this reason it can not give the exit status of the external program.
+</p>
+<p>
+  The external program terminates when it has completed, or the process is killed.
+</p>
+
+
+
+
+
 
 
 
@@ -2006,14 +2009,14 @@ codeDirs = . ; code.examples ; code.lib
 
 
 
-<h2>Try-catch</h2>
+<h2>Try/catch</h2>
 <p>
-  Catching of exceptions in CFT is implemented as a global function, tryUnsafe(expr) which
+  Catching of exceptions in CFT is implemented as a global expression, tryCatch(expr) which
   invokes the given expression, and returns a Dict object, detailing the outcome, and 
   preventing exceptions from terminating the running of CFT script code.
 </p>
 <pre>
-  tryUnsafe(xxx) =x
+  x = tryCatch(xxx)
 
   # Contains
   #    ok           - boolean
