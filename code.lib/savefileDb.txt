@@ -23,7 +23,8 @@
 <<<<<<<< EOF
 ----------------------------------------------
 Simple key/value database organized into 
-multiple collections. 
+multiple collections, persisted to files under
+Sys.homeDir.sub("Db")
 ----------------------------------------------
 >>>>>>>> EOF
 /Readme
@@ -75,6 +76,7 @@ P(2,"default") =>collection
         assert(dict.key==key)
         out(dict.value)
 /FindAll
+
 
 # Get last object for key
 P(1) =>key
@@ -171,6 +173,68 @@ P(3) =>collection
     }
     val
 /GetEnterOrConfirm
+
+
+
+
+# Find all keys in collection
+P(1,"default") =>collection
+    DbFile(collection).read->line
+        reject(line.startsWith("#"))
+        eval(line) =>dict
+        out(dict.key)
+    | _.unique.sort
+/GetCollectionKeys
+
+
+
+# Ultra primitive Db GUI - for maintaining data sets
+#
+Inner {
+	DbDir.files(Glob("*.txt"))->f
+		out(f.name.before(".txt"))
+	| _.sort.concat(" ") =>allCollections
+} 
+println
+println("* Defined collections: " + allCollections)
+println
+collection = readLine("Collection name?") 
+loop
+	println
+	Inner {
+		GetCollectionKeys(collection)->key
+			s=(key+"                     ").sub(0,20)
+			println("   " + s + " : " + Get(key,collection))
+	}
+	println
+	cmd = readLine("Command? (s=set/d=delete/D=deleteMany/q=quit)")
+	break(cmd.startsWith("q"))
+	
+	if (cmd.startsWith("s")) {
+		readLine("key")=>key
+		readLine("value")=>value
+		Add(key,value,collection)
+		Purge(key,collection)  # remove previous values for key
+		
+	} else if (cmd.startsWith("d")) {
+		readLine("delete key")=>key
+		Delete(key,collection)
+		
+	} else if (cmd.startsWith("D")) {
+		readLine("delete keys starting with") => x
+		Inner {
+			GetCollectionKeys(collection)->key 
+				assert(key.startsWith(x))
+				Delete(key,collection)
+		}
+		
+	} else {
+		println("%% Unknown command")
+	}
+		
+/GUI
+	
+	
 
 
         
