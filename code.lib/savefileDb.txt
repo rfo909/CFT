@@ -227,7 +227,7 @@ loop
 		
 	} else if (cmd.startsWith("D")) {
 		readLine("delete keys starting with") => x
-		Inner {
+		if (x != "") Inner {
 			GetCollectionKeys(collection)->key 
 				assert(key.startsWith(x))
 				Delete(key,collection)
