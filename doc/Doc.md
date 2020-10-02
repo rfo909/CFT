@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2020-19-02 RFO
-v1.5.4
+Last updated: 2020-10-02 RFO
+v1.6.0
 ```
 # Introduction
 
@@ -1133,7 +1133,7 @@ as it is a bit complex to call, a library function "Lib:run" has been created. I
 four parameters, but often only the first is used:
 
 ```
-call "Lib:run" (List("ls","-l")) => result
+Lib:run (List("ls","-l")) => result
 ```
 
 The result object is a Dict with the following fields:
@@ -1170,7 +1170,7 @@ calling "Lib:run".
 
 
 If you need to run SSH commands on remote targets, use the SSH library script, which
-contains two major functions: run() and sudo(), These call "Lib:run" then filter the output
+contains two major functions: run() and sudo(), These call Lib:run then filter the output
 to stdout using a marker to eliminate the welcome text when logging in etc.
 
 
@@ -1204,7 +1204,7 @@ and stderr, but the Lib script contains a function "run" which hides the complex
 and returns a Dict with all info.
 
 ```
-call "Lib:run" (List("ls","-l")) => result
+Lib:run (List("ls","-l")) => result
 if (result.exitCode != 0) {
 ....
 }
@@ -1616,10 +1616,12 @@ This loads script Projects, then calls the Curr function inside.
 
 
 Sometimes we want to call a useful function in another script file. This is
-implemented with the "call" expression below.
+implemented with with the following syntax:
 
 ```
-call "Script:Function" (....)
+Script:Function (...)
+Example:
+Lib:Header("This is a test")
 ```
 
 Parameters are given as a list of values inside ()'s and may be omitted if no parameters.

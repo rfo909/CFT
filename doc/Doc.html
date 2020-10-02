@@ -15,8 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2020-19-02 RFO
-v1.5.4
+Last updated: 2020-10-02 RFO
+v1.6.0
 
 </pre>
 
@@ -1293,7 +1293,7 @@ codeDirs = . ; code.examples ; code.lib
   four parameters, but often only the first is used:
 </p>
 <pre>
-  call "Lib:run" (List("ls","-l")) =&gt; result
+  Lib:run (List("ls","-l")) =&gt; result
 </pre>
 <p>
   The result object is a Dict with the following fields:
@@ -1321,7 +1321,7 @@ codeDirs = . ; code.examples ; code.lib
 <h3>Doing ssh</h3>
 <p>
   If you need to run SSH commands on remote targets, use the SSH library script, which
-  contains two major functions: run() and sudo(), These call "Lib:run" then filter the output
+  contains two major functions: run() and sudo(), These call Lib:run then filter the output
   to stdout using a marker to eliminate the welcome text when logging in etc.
 </p>
 
@@ -1364,7 +1364,7 @@ codeDirs = . ; code.examples ; code.lib
   and returns a Dict with all info.
 </p>
 <pre>
-  call "Lib:run" (List("ls","-l")) =&gt; result
+  Lib:run (List("ls","-l")) =&gt; result
   if (result.exitCode != 0) { 
     ....
   }
@@ -1861,14 +1861,18 @@ codeDirs = . ; code.examples ; code.lib
 <h2>Calling functions in external scripts</h2>
 <p>
   Sometimes we want to call a useful function in another script file. This is
-  implemented with the "call" expression below.
+  implemented with with the following syntax:
 </p>
 <pre>
-  call "Script:Function" (....)
+  Script:Function (...)
+
+  Example: 
+    Lib:Header("This is a test")
 </pre>
 <p>
   Parameters are given as a list of values inside ()'s and may be omitted if no parameters.
 </p>
+
 
 
 
