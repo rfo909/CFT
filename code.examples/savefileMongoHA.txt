@@ -14,10 +14,10 @@ Requirements:
 
 - InstallMongodAll
 - InstallMongoShellAll
-- HowToInitRS for all RS names (conf, s1, s2)
+- HowToInitRS for all RS names (function displays defined replica set names)
 - InstallMongosAll
 - RebootMongosServers
-- HowToAddShard
+- HowToAddShard - run for each of the data shards
 >>>>>>>>>>>>>>>>>>>>>>>>> EOF
 /Readme
 
@@ -215,7 +215,7 @@ Input("host").get =>host
 ## Info on how to initialize any replica set
 #
 	MongodData->d out(d.replSetName) | _.unique.concat(" ") =>availableRS
-	println("Available RS names: " + availableRS)
+	println("** Available RS names: " + availableRS)
 
 	Input("Replica set name").get =>rsName
 
@@ -238,8 +238,6 @@ Input("host").get =>host
 /HowToInitRS
 
 
-
-### HIT###
 
 
 # Install mongos on single target
@@ -296,17 +294,17 @@ Input("ssh user").get => user
 	println("function.")
 	println
 	
-	MongodData->d out(d.replSetName) | _.unique.concat(" ") =>availableRS
-	println("Available RS names: " + availableRS)
+	MongodData->d assert(d.clusterRole=="shardsvr") out(d.replSetName) | _.unique.concat(" ") =>availableRS
+	println("** Available RS names with clusterRole 'shardsvr': " + availableRS)
 
 	Input("Replica set name").get =>rsName
-    0 =>count
+    #count=0
     MongodData->d
         assert(d.replSetName==rsName) 
         out(d.host+":27017") 
-        count+1 =>count
+        #count=count+1
     | _.concat(",") =>members
-    TmpFile("init") =>f
+    #TmpFile("init") =>f
     "sh.addShard('"+rsName+"/"+members+"')" =>js
     
     println("Connect with mongo shell to one of these mongos servers:")
