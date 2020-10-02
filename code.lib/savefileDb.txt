@@ -190,17 +190,22 @@ P(1,"default") =>collection
 
 # Ultra primitive Db GUI - for maintaining data sets
 #
-Inner {
-	DbDir.files(Glob("*.txt"))->f
-		out(f.name.before(".txt"))
-	| _.sort.concat(" ") =>allCollections
-} 
-println
-println("* Defined collections: " + allCollections)
-println
-collection = readLine("Collection name?") 
+P(1) => collection
+if (collection == null) {
+	Inner {
+		DbDir.files(Glob("*.txt"))->f
+			out(f.name.before(".txt"))
+		| _.sort.concat(" ") =>allCollections
+	} 
+	println
+	println("* Defined collections: " + allCollections)
+	println
+	collection = readLine("Collection name?") 
+}
 loop
 	println
+	call "Lib:Header" ("Collection: " + collection)
+	
 	Inner {
 		GetCollectionKeys(collection)->key
 			s=(key+"                     ").sub(0,20)
