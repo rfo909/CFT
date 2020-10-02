@@ -47,8 +47,8 @@ Add, Commit and Push.
 # ---
 
     # Update the Overview.txt file
-    call "Overview:CreateOverview"
-    call "MD:Run"
+    Overview:CreateOverview
+    MD:Run
 
     # Identify files to move temporarily out of the way, so as not to be included in git add .
     HomeDir.files(Glob("savefile*"))  
@@ -88,7 +88,7 @@ Add, Commit and Push.
 
 # Commit changes
     GitStatus
-    call "Lib:ReadValue" ("Commit message?", Sys.version) =>msg
+    Lib:ReadValue ("Commit message?", Sys.version) =>msg
     HomeDir.run("git","commit","-m",msg)
 /Commit
 

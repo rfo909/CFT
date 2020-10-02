@@ -167,7 +167,7 @@ P(3) =>collection
         readLine(prompt) =>val
         Add(key,val,collection)
     } else {
-        call "Lib:ReadValue" (prompt, val) =>val2
+        Lib:ReadValue (prompt, val) =>val2
         if(val2 != val, Add(key,val2,collection))
         val2 =>val
     }
@@ -192,54 +192,54 @@ P(1,"default") =>collection
 #
 P(1) => collection
 if (collection == null) {
-	Inner {
-		DbDir.files(Glob("*.txt"))->f
-			out(f.name.before(".txt"))
-		| _.sort.concat(" ") =>allCollections
-	} 
-	println
-	println("* Defined collections: " + allCollections)
-	println
-	collection = readLine("Collection name?") 
+    Inner {
+        DbDir.files(Glob("*.txt"))->f
+            out(f.name.before(".txt"))
+        | _.sort.concat(" ") =>allCollections
+    } 
+    println
+    println("* Defined collections: " + allCollections)
+    println
+    collection = readLine("Collection name?") 
 }
 loop
-	println
-	call "Lib:Header" ("Collection: " + collection)
-	
-	Inner {
-		GetCollectionKeys(collection)->key
-			s=(key+"                     ").sub(0,20)
-			println("   " + s + " : " + Get(key,collection))
-	}
-	println
-	cmd = readLine("Command? (s=set/d=delete/D=deleteMany/q=quit)")
-	break(cmd.startsWith("q"))
-	
-	if (cmd.startsWith("s")) {
-		readLine("key")=>key
-		readLine("value")=>value
-		Add(key,value,collection)
-		Purge(key,collection)  # remove previous values for key
-		
-	} else if (cmd.startsWith("d")) {
-		readLine("delete key")=>key
-		Delete(key,collection)
-		
-	} else if (cmd.startsWith("D")) {
-		readLine("delete keys starting with") => x
-		if (x != "") Inner {
-			GetCollectionKeys(collection)->key 
-				assert(key.startsWith(x))
-				Delete(key,collection)
-		}
-		
-	} else {
-		println("%% Unknown command")
-	}
-		
+    println
+    Lib:Header ("Collection: " + collection)
+    
+    Inner {
+        GetCollectionKeys(collection)->key
+            s=(key+"                     ").sub(0,20)
+            println("   " + s + " : " + Get(key,collection))
+    }
+    println
+    cmd = readLine("Command? (s=set/d=delete/D=deleteMany/q=quit)")
+    break(cmd.startsWith("q"))
+    
+    if (cmd.startsWith("s")) {
+        readLine("key")=>key
+        readLine("value")=>value
+        Add(key,value,collection)
+        Purge(key,collection)  # remove previous values for key
+        
+    } else if (cmd.startsWith("d")) {
+        readLine("delete key")=>key
+        Delete(key,collection)
+        
+    } else if (cmd.startsWith("D")) {
+        readLine("delete keys starting with") => x
+        if (x != "") Inner {
+            GetCollectionKeys(collection)->key 
+                assert(key.startsWith(x))
+                Delete(key,collection)
+        }
+        
+    } else {
+        println("%% Unknown command")
+    }
+        
 /GUI
-	
-	
+    
+    
 
 
         

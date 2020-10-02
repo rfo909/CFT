@@ -13,11 +13,11 @@ It runs both interactive and with parameters.
 
 
 P(1) =>target P(2) =>cmd P(3) =>acceptErrors P(4) =>showDebug
-    call "SSH:run" (target, cmd, acceptErrors, showDebug) =>dict
+    SSH:run (target, cmd, acceptErrors, showDebug) =>dict
 /run
 
 P(1) =>target P(2) =>cmd P(3) =>acceptErrors P(4) =>showDebug
-    call "SSH:sudo" (target, cmd, acceptErrors, showDebug) =>dict
+    SSH:sudo (target, cmd, acceptErrors, showDebug) =>dict
 /sudo
 
 
@@ -46,7 +46,7 @@ Input("Target: user@host").get
         P(5,true) => interactive
 
         break(!interactive)
-        call "Lib:ReadValueBoolean" ("Confirm by typing 'yes'", false) =>confirmed
+        Lib:ReadValueBoolean ("Confirm by typing 'yes'", false) =>confirmed
         break(confirmed)
     |
 
@@ -69,7 +69,7 @@ Input("Target: user@host").get
     serviceName + ".service" =>serviceFile
 
     println("* Copying systemd service file as ./" + serviceFile)
-    call "SSH:copy" (f,target,"./"+serviceFile)
+    SSH:copy (f,target,"./"+serviceFile)
 
     println("* Copying ./" + serviceFile + " to /etc/systemd/system")
     sudo(target,"cp ./" + serviceFile + " /etc/systemd/system")

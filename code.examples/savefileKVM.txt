@@ -134,7 +134,7 @@ d
 # --
     BootImagesDir.files =>data
     Lambda { P(1).name } =>macroGetElementName
-    call "Lib:MenuSelect" (data, macroGetElementName) 
+    Lib:MenuSelect (data, macroGetElementName) 
 /BootImage
 
 
@@ -187,7 +187,7 @@ P(1,"someTarget") =>target
 
 # Interactive cloning of existing VM - stops original
 # --
-    call "Lib:Header" ("Cloning existing VM")
+    Lib:Header ("Cloning existing VM")
     Dir.runCapture("whoami").nth=="root" =>ok
     error(!ok, "Must be logged in as root")
     
@@ -197,15 +197,15 @@ P(1,"someTarget") =>target
     null =>newIp
     loop
         status
-        call "Lib:ReadValue" ("Original VM", original) =>original
-        call "Lib:ReadValue" ("New VM name / will also be host name", cloneName) =>cloneName
-        call "Lib:ReadValue" ("Original IP address or name (kubsXX.v)", originalIp) =>originalIp
-        call "Lib:ReadValue" ("New IP address and mask: xx.xx.xx.xx/MM", newIp) =>newIp
+        Lib:ReadValue ("Original VM", original) =>original
+        Lib:ReadValue ("New VM name / will also be host name", cloneName) =>cloneName
+        Lib:ReadValue ("Original IP address or name (kubsXX.v)", originalIp) =>originalIp
+        Lib:ReadValue ("New IP address and mask: xx.xx.xx.xx/MM", newIp) =>newIp
         false =>ok
         if(!newIp.contains("/"),Inner{
             println("*** Missing '/MM' net mask from IP address")
         }, Inner{
-            call "Lib:ReadValueBoolean" ("Ok", false) =>ok
+            Lib:ReadValueBoolean ("Ok", false) =>ok
         })
         break(ok)
     |
@@ -226,12 +226,12 @@ P(1,"someTarget") =>target
     println("Also need sudo without passwords (on the template VM)")
     println("----------------------------------------------------------")
     println
-    call "Lib:ReadValueBoolean" ("Type 'no' to abort or Enter to continue", true) =>confirm
+    Lib:ReadValueBoolean ("Type 'no' to abort or Enter to continue", true) =>confirm
     error(!confirm,"Aborting config of VM via SSH")
 
     println
     println("* Waiting for new node to respond to ping")
-    call "ServersMaintenance:WaitForPing" (originalIp, 30)
+    ServersMaintenance:WaitForPing (originalIp, 30)
 
     println
     Input("Enter ssh user name").get =>sshUser
@@ -249,13 +249,13 @@ P(1,"someTarget") =>target
     sshUser+"@"+originalIp =>target
     
     println("* Configuring hostname")
-    call "ServersMaintenance:VMSetHostname" (target, cloneName)
+    ServersMaintenance:VMSetHostname (target, cloneName)
 
     println("* Configuring netplan")
-    call "ServersMaintenance:VMConfigureNetplan" (target, newIp)
+    ServersMaintenance:VMConfigureNetplan (target, newIp)
 
     println("* Rebooting new VM")
-    call "SSH:sudo" (target, "reboot", true)
+    SSH:sudo (target, "reboot", true)
 
     "Done"
 /Clone
@@ -273,25 +273,25 @@ P(1,"someTarget") =>target
     4 =>cpus
     32 =>disk
     loop
-        call "Lib:Header" ("Create new KVM Virtual Machine")
+        Lib:Header ("Create new KVM Virtual Machine")
 
         BootImage =>bootImage
         println("# Selected " + bootImage.path)
 
-        call "Lib:ReadValue" ("New VM name", name) =>name
+        Lib:ReadValue ("New VM name", name) =>name
 
         println("")
         println("# Headless => no means use virt-manager") 
         println("# Headless => yes (advanced) means use VNC to complete installation")
-        call "Lib:ReadValueBoolean" ("Headless", headless) =>headless
+        Lib:ReadValueBoolean ("Headless", headless) =>headless
 
-        call "Lib:ReadValueInt" ("RAM MB", ram) =>ram
-        call "Lib:ReadValueInt" ("CPU's", cpus) =>cpus
-        call "Lib:ReadValueInt" ("Disk GB", disk) =>disk
-        call "Lib:ReadValueBoolean" ("Enter 'yes' to confirm this is okay", false) =>ok
+        Lib:ReadValueInt ("RAM MB", ram) =>ram
+        Lib:ReadValueInt ("CPU's", cpus) =>cpus
+        Lib:ReadValueInt ("Disk GB", disk) =>disk
+        Lib:ReadValueBoolean ("Enter 'yes' to confirm this is okay", false) =>ok
         break(ok)
     |
-    call "Lib:ReadValueBoolean" ("Enter 'yes' to continue", false, "yes","abort") =>continue
+    Lib:ReadValueBoolean ("Enter 'yes' to continue", false, "yes","abort") =>continue
     if(!continue,Inner{
         println("Aborting")
         error(true,"Aborting")

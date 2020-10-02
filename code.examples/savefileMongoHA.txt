@@ -43,19 +43,19 @@ P(1,"temp") =>name
     # Note: the config replica set name 'conf' must not be changed, unless
     # also modifying the MongosStartScript function, which depends on it
     create = Lambda { 
-    	P(1,"mcfg1.v mcfg2.v mcfg3.v").split=>hosts 
-    	P(2,"conf")=>replSetName
-    	P(3,"configsvr")=>clusterRole
-    	hosts->host
-	        out(Dict.set("host",host).set("replSetName",replSetName).set("clusterRole",clusterRole))
-	}
+        P(1,"mcfg1.v mcfg2.v mcfg3.v").split=>hosts 
+        P(2,"conf")=>replSetName
+        P(3,"configsvr")=>clusterRole
+        hosts->host
+            out(Dict.set("host",host).set("replSetName",replSetName).set("clusterRole",clusterRole))
+    }
 
-	# Result list
-	create.call("mcfg1.v mcfg2.v mcfg3.v","conf","configsvr")
-	+
-	create.call("md11.v md12.v md13.v","s1","shardsvr")
-	+
-	create.call("md21.v md22.v md23.v","s2","shardsvr")
+    # Result list
+    create.call("mcfg1.v mcfg2.v mcfg3.v","conf","configsvr")
+    +
+    create.call("md11.v md12.v md13.v","s1","shardsvr")
+    +
+    create.call("md21.v md22.v md23.v","s2","shardsvr")
 /MongodData
 
 
@@ -63,9 +63,9 @@ P(1,"temp") =>name
 # Show MongodData on readable format
 #
 MongodData->d
-	Inner {d.keys->key out(""+key+"="+d.get(key))} _.concat(" ")=>x out(x)
-/MongodDataShow	
-	
+    Inner {d.keys->key out(""+key+"="+d.get(key))} _.concat(" ")=>x out(x)
+/MongodDataShow   
+    
 
 # Config
 "roar"
@@ -90,22 +90,22 @@ Input("Target: user@host").get
 #
 P(1,GetTarget) =>target
     println("* Checking install")
-    call "SSH:run" (target, "which mongo",true) =>result
+    SSH:run (target, "which mongo",true) =>result
     found = (result.exitCode==0)
 
-	if (found) {
-		println("* mongodb shell already installed")
-	} else {
-	    println("* Installing mongodb shell")
+    if (found) {
+        println("* mongodb shell already installed")
+    } else {
+        println("* Installing mongodb shell")
 
-	    call "SSH:sudo" (target, List("apt update","apt -y install " + CfgMongoShell))
+        SSH:sudo (target, List("apt update","apt -y install " + CfgMongoShell))
 
-	    println("* Verifying install")
-	    call "SSH:run" (target, "which mongo") =>result
-	    ok = (result.exitCode==0)
-	    
-	    if(ok) {println("* ok")}
-	} 
+        println("* Verifying install")
+        SSH:run (target, "which mongo") =>result
+        ok = (result.exitCode==0)
+        
+        if(ok) {println("* ok")}
+    } 
 /InstallMongoShell
 
 
@@ -128,16 +128,16 @@ P(1,GetTarget) =>target
 #
 P(1,GetTarget) =>target
 
-	call "SSH:sudo" (target, "systemctl status mongod",true) =>result
+    SSH:sudo (target, "systemctl status mongod",true) =>result
 
-	# return value
-	if (result.exitCode==0) {
-		"running"
-	} else if (result.exitCode==3) {
-		"stopped"
-	} else {
-		"undefined"
-	}
+    # return value
+    if (result.exitCode==0) {
+        "running"
+    } else if (result.exitCode==3) {
+        "stopped"
+    } else {
+        "undefined"
+    }
 /CheckMongodService
 
 
@@ -151,17 +151,17 @@ P(1,GetTarget) =>target
         
         break(!interactive)
 
-        call "Lib:ReadValueBoolean" ("Confirm by typing 'yes'", false) =>confirmed
+        Lib:ReadValueBoolean ("Confirm by typing 'yes'", false) =>confirmed
         break(confirmed)
     |
     println("* Removing /etc/mongod.conf if exists as apt install doesn't like it")
-    call "SSH:sudo" (target, "rm /etc/mongod.conf", true)
+    SSH:sudo (target, "rm /etc/mongod.conf", true)
 
     println("* Installing mongodb server")
-    call "SSH:sudo" (target, "apt install -y " + CfgMongod)
+    SSH:sudo (target, "apt install -y " + CfgMongod)
 
     println("* Enabling mongo service")
-    call "SSH:sudo" (target, "systemctl enable mongod")
+    SSH:sudo (target, "systemctl enable mongod")
 
     target.after("@") =>host
 
@@ -170,16 +170,16 @@ P(1,GetTarget) =>target
     f.create(CreateMongoConfig(replSetName, clusterRole))
 
     println("* Copying file to server in home dir")
-    call "SSH:copy" (f, target, "./mongod.conf") 
+    SSH:copy (f, target, "./mongod.conf") 
 
     println("* Moving file at server to /etc")
-    call "SSH:sudo" (target,"cp ./mongod.conf /etc")
+    SSH:sudo (target,"cp ./mongod.conf /etc")
 
     println("* Stopping mongod - if already running")
-    call "SSH:sudo" (target,"systemctl stop mongod", true)
+    SSH:sudo (target,"systemctl stop mongod", true)
 
     println("* Starting mongod")
-    call "SSH:sudo" (target,"systemctl start mongod")
+    SSH:sudo (target,"systemctl start mongod")
   
 /InstallMongod
 
@@ -214,10 +214,10 @@ Input("host").get =>host
 
 ## Info on how to initialize any replica set
 #
-	MongodData->d out(d.replSetName) | _.unique.concat(" ") =>availableRS
-	println("** Available RS names: " + availableRS)
+    MongodData->d out(d.replSetName) | _.unique.concat(" ") =>availableRS
+    println("** Available RS names: " + availableRS)
 
-	Input("Replica set name").get =>rsName
+    Input("Replica set name").get =>rsName
 
     0 =>count
     MongodData->d
@@ -244,22 +244,22 @@ Input("host").get =>host
 #
 P(1,GetTarget) =>target
     println("* Installing mongos")
-    call "SSH:sudo" (target, "apt install -y " + CfgMongos)
+    SSH:sudo (target, "apt install -y " + CfgMongos)
 
     println("* Creating Mongos start script")
     TmpFile("mongos") =>f
     f.create(MongosStartScript)
 
     println("* Copying file to server in home dir as start_mongos.sh")
-    call "SSH:copy" (f, target, "./start_mongos.sh")
+    SSH:copy (f, target, "./start_mongos.sh")
  
     println("* Setting executable flag on start_mongos.sh")
-    call "SSH:run" (target,"chmod 755 ./start_mongos.sh")
+    SSH:run (target,"chmod 755 ./start_mongos.sh")
 
     println("* Collecting path to remote home dir")
     "./start_mongos.sh" =>fullPath
 
-    call "Systemd:CreateService" (target, "mongos", "Mongos for HA cluster", fullPath, false)
+    Systemd:CreateService (target, "mongos", "Mongos for HA cluster", fullPath, false)
 
 /InstallMongos
 
@@ -278,9 +278,9 @@ Input("ssh user").get =>user
 
 # Reboot the Mongos servers after installing Mongos
 Input("ssh user").get => user
-	MongosHosts->host
-	println("* Rebooting host " + host)
-	call "SSH:sudo" (user+"@"+host, "reboot", true)  # allow failure because reboot causes the connection to close
+    MongosHosts->host
+    println("* Rebooting host " + host)
+    SSH:sudo (user+"@"+host, "reboot", true)  # allow failure because reboot causes the connection to close
 /RebootMongosServers
 
 
@@ -288,16 +288,16 @@ Input("ssh user").get => user
 
 
 ## Info on how to add shard to config
-	println("To add a shard, create the VM's then extend")
-	println("the MongodHosts with the new hosts and their")
-	println("replSetName and clusterRole. Then run this")
-	println("function.")
-	println
-	
-	MongodData->d assert(d.clusterRole=="shardsvr") out(d.replSetName) | _.unique.concat(" ") =>availableRS
-	println("** Available RS names with clusterRole 'shardsvr': " + availableRS)
+    println("To add a shard, create the VM's then extend")
+    println("the MongodHosts with the new hosts and their")
+    println("replSetName and clusterRole. Then run this")
+    println("function.")
+    println
+    
+    MongodData->d assert(d.clusterRole=="shardsvr") out(d.replSetName) | _.unique.concat(" ") =>availableRS
+    println("** Available RS names with clusterRole 'shardsvr': " + availableRS)
 
-	Input("Replica set name").get =>rsName
+    Input("Replica set name").get =>rsName
     #count=0
     MongodData->d
         assert(d.replSetName==rsName) 

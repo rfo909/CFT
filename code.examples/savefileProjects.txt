@@ -67,7 +67,7 @@ There can be multiples of every line, including Dir.
 /Init
 
 # projects.txt file contains all data
-    (call "Lib:DirPrivate").file("projects.txt") =>f
+    (Lib:DirPrivate).file("projects.txt") =>f
     error(!f.exists,"File " + f.path + " missing - run Readme() for details")
     DataFile(f,"###").comment("#")
 /ProjectsFile
@@ -78,9 +78,9 @@ There can be multiples of every line, including Dir.
     Lambda { P(1) } =>showName
     loop
         println
-        call "Lib:Header" ("Select project, curr=" + result)
-        call "Lib:ShowOptions" (names, showName)
-        call "Lib:SelectOptions" (names, showName, true) =>resultList
+        Lib:Header ("Select project, curr=" + result)
+        Lib:ShowOptions (names, showName)
+        Lib:SelectOptions (names, showName, true) =>resultList
         if(resultList.length>1, Inner{println("** not unique **") null =>result} )
         if(resultList.length==1, Inner{resultList.nth =>result} )
         break(result != null)
@@ -296,7 +296,7 @@ Search(Grep(a).reject(b))
     println
     readLine("Enter number to edit, or blank to skip") =>inp
     if(inp != "", Inner{
-        call "Lib:e" (fileList.nth(inp.parseInt))
+        Lib:e (fileList.nth(inp.parseInt))
     })
     true
 /FL

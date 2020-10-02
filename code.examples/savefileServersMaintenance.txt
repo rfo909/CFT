@@ -28,7 +28,7 @@ P(1,ReadSSHTarget) =>target
 P(2,readLine("Command")) =>command
 P(3,Dict) =>codes
 P(4,false) =>showDebug
-    call "SSH:run" (target,command,codes,showDebug)
+    SSH:run (target,command,codes,showDebug)
 /run
 
 
@@ -55,7 +55,7 @@ P(2,Input("Host name").get) =>hostname
     f.create(hostname)
     
     println("* Copying hostname file to target")
-    call "SSH:copy" (f, target, "./hostname")
+    SSH:copy (f, target, "./hostname")
     
     println("* Moving hostname file to /etc")
     run(target,List("sudo bash","cp ./hostname /etc"))
@@ -85,7 +85,7 @@ P(2,Input("IP address xx.xx.xx.xx/MM").get) =>ip
     f.create(VMNetplan(ip,nic))
     
     println("* Copying netplan to target")
-    call "SSH:copy" (f, target, "./netplan.txt")
+    SSH:copy (f, target, "./netplan.txt")
     
     println("* Deleting all files under /etc/netplan")
     run(target, List("sudo bash","rm -f /etc/netplan/*"))

@@ -64,7 +64,7 @@ P(1) =>target
 
 # Returns boolean indicating if sudo without password ok
 P(1,ReadSSHTarget) =>sshTarget
-	sudo(sshTarget,"ls",true).get("exitCode")==0
+    sudo(sshTarget,"ls",true).get("exitCode")==0
 /VerifySudo
 
 
@@ -97,7 +97,7 @@ P(4,false) => showDebug
     "--- Output-mark: " + Date + " - " + Sys.scriptName + ".run ---" => mark
     List('echo "' + mark + '"') + commands => cmd
         
-    result = call "Lib:run" (List("ssh",target), cmd, acceptErrors, false)
+    result = Lib:run (List("ssh",target), cmd, acceptErrors, false)
 
     # Modify stdout, by only including lines following the mark
 
@@ -111,20 +111,20 @@ P(4,false) => showDebug
     result.set("stdout",outLines) # overwrite
 
     if (showDebug) Inner {
-		println("- cmd:")
-		result.get("cmd")->line println("    " + line) |
+        println("- cmd:")
+        result.get("cmd")->line println("    " + line) |
 
-		println("- exitCode = " + result.get("exitCode"))
+        println("- exitCode = " + result.get("exitCode"))
 
-		println("- stdin:")
-		result.get("stdin")->line println("   # " + line) |
+        println("- stdin:")
+        result.get("stdin")->line println("   # " + line) |
 
-		println("- stdout:")
-		result.get("stdout")->line println("   # " + line) |
+        println("- stdout:")
+        result.get("stdout")->line println("   # " + line) |
 
-		println("- stderr:")
-		result.get("stderr")->line println("   # " + line) |
-		println
+        println("- stderr:")
+        result.get("stderr")->line println("   # " + line) |
+        println
     }
 
     # return value
@@ -155,10 +155,10 @@ P(2) => target
 P(3) => remoteName
 P(4, false) => acceptErrors
 P(5, false) => showDebug
-	if (getType(localFile)=="File") {
-		localFile=localFile.path
-	}
-	call "Lib:run" (List("scp", localFile, target+":"+remoteName), List, acceptErrors, showDebug)
+    if (getType(localFile)=="File") {
+        localFile=localFile.path
+    }
+    Lib:run (List("scp", localFile, target+":"+remoteName), List, acceptErrors, showDebug)
 /copy
 
 

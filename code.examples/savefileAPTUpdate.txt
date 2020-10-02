@@ -27,7 +27,7 @@ P(1) =>target
 P(2) =>commands
 P(3,false) =>acceptErrors
 P(4,false) =>showDebug
-    call "SSH:run" (target,commands,acceptErrors,showDebug)
+    SSH:run (target,commands,acceptErrors,showDebug)
 /run
 
 
@@ -36,7 +36,7 @@ P(1) =>target
 P(2) =>commands
 P(3,false) =>acceptErrors
 P(4,false) =>showDebug
-    call "SSH:sudo" (target,commands,acceptErrors,showDebug)
+    SSH:sudo (target,commands,acceptErrors,showDebug)
 /sudo
 
 
@@ -56,7 +56,7 @@ P(2,"") =>prefix
     Date.sub(Date.Duration.days(365)) =>defaultValue
     
     println(prefix+"Looking up time of last run for host ")
-    call "Db:Get" (host, dbCollection, defaultValue) =>lastUpdated
+    Db:Get (host, dbCollection, defaultValue) =>lastUpdated
     println(prefix+" ... lastUpdated = " + lastUpdated)
     Date.diff(lastUpdated) =>timeSinceUpdate
     
@@ -78,14 +78,14 @@ P(2,"") =>prefix
         
         if (!FAIL) {
             println(prefix+"Writing date and time to database")
-            call "Db:Add" (host, Date, dbCollection)
+            Db:Add (host, Date, dbCollection)
         }
         
         println(prefix+
             if(FAIL,"APTUpdateUpgrade failed with ERROR","Done"))
             
         if (FAIL) {
-            (call "Lib:DirPrivate").sub(Sys.scriptName) =>dir
+            (Lib:DirPrivate).sub(Sys.scriptName) =>dir
             dir.create
             #println("dir = " + dir.path)
             dir.file(""+(Date.setFormat("yyyy-MM-dd").fmt) + "_" + target + ".txt") =>logFile

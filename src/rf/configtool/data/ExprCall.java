@@ -40,16 +40,18 @@ import java.util.*;
  */
 public class ExprCall extends LexicalElement {
 
-    private Expr target;
+    private String script;
+    private String func;
     private List<Expr> params;
     
     // call "savefile:name" with Data (...)
     
     public ExprCall (TokenStream ts) throws Exception {
         super(ts);
-        ts.matchStr("call","expected 'call'");
-        target=new Expr(ts); // "savefile:func"
-        
+        script=ts.matchIdentifier("expected script name (identifier)");
+        ts.matchStr(":", "expected ':'");
+        func=ts.matchIdentifier("expected function name following '" + script + ":'");
+
         params=new ArrayList<Expr>();
         if (ts.matchStr("(")) {
             boolean comma=false;
@@ -62,23 +64,8 @@ public class ExprCall extends LexicalElement {
 
     }
     
-    private String asString(Ctx ctx, Expr expr, String name) throws Exception {
-        Value v=expr.resolve(ctx);
-        if (v==null || !(v instanceof ValueString)) throw ex(name + " - expected string parameter");
-        return ((ValueString) v).getVal();
-    }
-    
+      public Value resolve (Ctx ctx) throws Exception {
 
-    
-    public Value resolve (Ctx ctx) throws Exception {
-        String t=asString(ctx,target,"script:function").trim();
-        int pos=t.indexOf(":");
-        if (pos < 0) throw ex("Expected script:function");
-        
-        String script=t.substring(0,pos);
-        
-        String func=t.substring(pos+1);
-          
         List<Value> args=new ArrayList<Value>();
         for (Expr expr:params) args.add(expr.resolve(ctx));
         

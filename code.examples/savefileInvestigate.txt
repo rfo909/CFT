@@ -75,7 +75,7 @@ loop
             true =>done
         })
         if(cmd.startsWith("m"),Inner{ ## more
-            call "Lib:m" (LogFile)
+            Lib:m (LogFile)
             true =>done
         })
         if(cmd.startsWith("e"),Inner{ ## edit
@@ -160,6 +160,6 @@ loop
 LogFile.read->line println(line)
 /Show
 
-call "Lib:e" (LogFile)
+Lib:e (LogFile)
 /Edit
 

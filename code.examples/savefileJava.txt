@@ -65,7 +65,7 @@ P(3,false) =>showDebug
 
     println(prefix+"Checking if java installed")
     
-    call "SSH:run" (target,"java -version",true) =>result
+    SSH:run (target,"java -version",true) =>result
     result.get("stdout") + result.get("stderr") =>lines
     
     (result.get("exitCode")==0) =>hasJava
@@ -76,7 +76,7 @@ P(3,false) =>showDebug
         lines->line println(prefix+" ## " + line) 
     }
     
-    call "Lib:LinesContain" (lines,"OpenJDK") =>isOpenJdk
+    Lib:LinesContain (lines,"OpenJDK") =>isOpenJdk
     
     
     error(hasJava && !isOpenJdk, 
@@ -96,7 +96,7 @@ P(3,false) =>showDebug
             .set('version "14.', 14)
             =>codes
             
-        call "Lib:LinesContain" (lines, codes) =>result
+        Lib:LinesContain (lines, codes) =>result
         error(result.length != 1,
             "Unknown java version: '" + result.concat(",")+"'")
 
@@ -105,7 +105,7 @@ P(3,false) =>showDebug
         
         println(prefix+"Checking for jdk vs jre")
         null =>jdkJre
-        if (call "SSH:run" (target,"which javac",true).get("exitCode")==0) {
+        if (SSH:run (target,"which javac",true).get("exitCode")==0) {
             "jdk" =>jdkJre
         } else {
               "jre" =>jdkJre
@@ -116,7 +116,7 @@ P(3,false) =>showDebug
         
         if(version<MinimumVersion || jdkJre != "jdk") {
             println(prefix+"Requiring " + targetPackage + " - removing obsolete package " + package)
-            call "SSH:sudo"(target,"apt-get -y remove " + package)
+            SSH:sudo(target,"apt-get -y remove " + package)
             
             false =>hasJava
         } else {
@@ -127,10 +127,10 @@ P(3,false) =>showDebug
     
     if(!hasJava) {
         println(prefix+"Running Update")
-        call "SSH:sudo" (target,"apt-get -y update")
+        SSH:sudo (target,"apt-get -y update")
         
         println(prefix+"Installing " + targetPackage)
-        call "SSH:sudo"(target,"apt-get -y install " + targetPackage)  
+        SSH:sudo(target,"apt-get -y install " + targetPackage)  
     }
     
     println(prefix+"Java ok")
@@ -144,10 +144,10 @@ P(2,"") =>prefix
     println(prefix+"Preparing to install ANT")
     VerifyJava(target,prefix+"   ")
 
-    call "SSH:run" (target,"which ant",true) =>result
+    SSH:run (target,"which ant",true) =>result
     if(result.get("exitCode") != 0) {
         println(prefix+"Installing ANT")
-        call "SSH:sudo" (target,"apt-get -y install ant")
+        SSH:sudo (target,"apt-get -y install ant")
     }
     println(prefix+"ANT ok")
 /VerifyAnt
@@ -161,7 +161,7 @@ P(2,"") =>prefix
 
     # Check if CFT already installed
     {
-        call "SSH:run" (target,"cd CFT",true).get("exitCode")==0 
+        SSH:run (target,"cd CFT",true).get("exitCode")==0 
     } =>hasCFT
     
     if (!hasCFT) {
@@ -180,7 +180,7 @@ P(2,"") =>prefix
         )
     }
     =>cmd
-    call "SSH:run" (target, cmd)
+    SSH:run (target, cmd)
 /VerifyCFT
 
     

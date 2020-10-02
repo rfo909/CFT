@@ -26,8 +26,8 @@
 --------------------------------------------------
 OS independent editor functionality
 
-To edit a file: call "Lib:e" (File)
-To page a file: call "Lib:m" (File)
+To edit a file: Lib:e (File)
+To page a file: Lib:m (File)
 
 For windows runs notepad, for Linux there is
 choice. 
@@ -137,13 +137,13 @@ P(2,List) => stdinLines
 P(3,false) => acceptErrors
 P(4,false) => showDebug
 
-	if (getType(cmd) != "List") {
-		cmd=List(cmd) # wrap as list
-	}
-	if (getType(stdinLines) != "List") {
-		stdinLines=List(stdinLines) # wrap as
-	}
-	
+    if (getType(cmd) != "List") {
+        cmd=List(cmd) # wrap as list
+    }
+    if (getType(stdinLines) != "List") {
+        stdinLines=List(stdinLines) # wrap as
+    }
+    
     TmpFile("in") =>inFile
     TmpFile("out") =>outFile
     TmpFile("err") =>errFile
@@ -174,22 +174,22 @@ P(4,false) => showDebug
 
 
     if(showDebug || FAIL) {
-    	Inner {  # "hide" loops inside inner block, so as not to affect return value of function
-	        println("- cmd:")
-	        result.get("cmd")->line println("    " + line) |
+        Inner {  # "hide" loops inside inner block, so as not to affect return value of function
+            println("- cmd:")
+            result.get("cmd")->line println("    " + line) |
 
-	        println("- exitCode = " + result.get("exitCode"))
+            println("- exitCode = " + result.get("exitCode"))
 
-	        println("- stdin:")
-	        result.get("stdin")->line println("   # " + line) |
+            println("- stdin:")
+            result.get("stdin")->line println("   # " + line) |
 
-	        println("- stdout:")
-	        result.get("stdout")->line println("   # " + line) |
+            println("- stdout:")
+            result.get("stdout")->line println("   # " + line) |
 
-	        println("- stderr:")
-	        result.get("stderr")->line println("   # " + line) |
-	        println
-		}
+            println("- stderr:")
+            result.get("stderr")->line println("   # " + line) |
+            println
+        }
     }
     error(FAIL,"run failed with error")
     

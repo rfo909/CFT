@@ -1164,7 +1164,7 @@ files (on Linux). Ideally you never need interfacing Dir.runProcessWait() direct
 
 For external programs that depend on running from a specific directly, either navigate to current directory
 interactively, or just let your code call the .setAsCurrentDir() function on some Dir object before
-calling "Lib:run".
+calling Lib:run.
 
 ### Doing ssh
 

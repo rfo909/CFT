@@ -25,11 +25,11 @@ winShell = powershell
 # may be null or point to a file.
 # ----
 
-mCat = Lambda { P(1)=>file error(file==null, 'cat: no file') file.read->line out(line) }
+mCat = Lambda { P(1)=>file error(file==null, 'cat: no file') file.read->line println(line) }
 
-mEdit = Lambda { P(1)=>file error(file==null, 'edit: no file') call 'Lib:e' (file) }
+mEdit = Lambda { P(1)=>file error(file==null, 'edit: no file') Lib:e(file) }
 
-mMore = Lambda { P(1)=>file error(file==null, 'more: no file') call 'Lib:m' (file) }
+mMore = Lambda { P(1)=>file error(file==null, 'more: no file') Lib:m(file) }
 
 
 # Shortcuts
@@ -43,28 +43,27 @@ mMore = Lambda { P(1)=>file error(file==null, 'more: no file') call 'Lib:m' (fil
 shortcutPrefix = @
 
 
-shortcut:e    = "---- open script in editor ----"         if(Sys.savefile != null, call "Lib:e" (Sys.savefile),"No savefile")
-shortcut:ee   = "---- clear editor selection ----"        call "Lib:ClearEditor" if(Sys.savefile != null, call "Lib:e" (Sys.savefile),"No savefile")
-shortcut:term = "---- Update terminal size ----"          call "Lib:GetTerminalSize"
+shortcut:e    = "---- open script in editor ----"         if(Sys.savefile != null, Lib:e(Sys.savefile),"No savefile")
+shortcut:ee   = "---- clear editor selection ----"        Lib:ClearEditor if(Sys.savefile != null, Lib:e(Sys.savefile),"No savefile")
+shortcut:term = "---- Update terminal size ----"          Lib:GetTerminalSize
 shortcut:top  = "---- Run top command ----"               Dir.run("top")
-shortcut:rsh  = "---- Remote shell via ssh ----"          call "SSH:remoteShell"
+shortcut:rsh  = "---- Remote shell via ssh ----"          SSH:remoteShell
 
 # Release script
 shortcut:rel  = "---- Release ----"                       Sys.stdin(":load Release","?")
 
 # Projects script 
 shortcut:P    = "---- Projects ----"                      Sys.stdin(":load Projects","Curr")
-shortcut:PS   = "---- Projects perform search ----"       call "Projects:Curr" call "Projects:S"
-shortcut:PSS  = "---- Projects repeat last search ----"   Sys.stdin("") call "Projects:S"
-shortcut:PP   = "---- Projects change project ----"       call "Projects:ChangeProject"
+shortcut:PS   = "---- Projects perform search ----"       Projects:Curr Projects:S
+shortcut:PP   = "---- Projects change project ----"       Projects:ChangeProject
 
 # Investigate script (experimental)
 shortcut:INV  = "---- Investigate ----"                   Sys.stdin(":load Investigate","?")
-shortcut:i    = "---- Investigate log text ----"          call "Investigate:LogText"
-shortcut:ii   = "---- Investigate log loop ----"          call "Investigate:InputMode"
-shortcut:id   = "---- Investigate log with data ----"     call "Investigate:LogData"
-shortcut:ip   = "---- Investigate log pasted text ----"   call "Investigate:LogPastedText"
-shortcut:ic   = "---- Investigate cat log ----"           call "Investigate:Show"
+shortcut:i    = "---- Investigate log text ----"          Investigate:LogText
+shortcut:ii   = "---- Investigate log loop ----"          Investigate:InputMode
+shortcut:id   = "---- Investigate log with data ----"     Investigate:LogData
+shortcut:ip   = "---- Investigate log pasted text ----"   Investigate:LogPastedText
+shortcut:ic   = "---- Investigate cat log ----"           Investigate:Show
 
 
 # List available shortcuts when typing '@' only

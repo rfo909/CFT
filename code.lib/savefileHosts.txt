@@ -18,7 +18,7 @@ HOST [OverrideValue]?
 
 
 # Data file
-(call "Lib:DirPrivate").file("Hosts.txt")
+(Lib:DirPrivate).file("Hosts.txt")
 /HostsFile
 
 # Internal
@@ -182,17 +182,17 @@ P(1) =>glob
 
 
 # View host status
-    call "Hosts:GetHosts" =>hosts
+    Hosts:GetHosts =>hosts
     
     hosts->host
-        call "Hosts:GetValue" (host, "SSHUser") =>sshUser
+        Hosts:GetValue (host, "SSHUser") =>sshUser
         assert(sshUser != null)
         
         sshUser+"@"+host =>target
         println("Checking host " + target)
         
-        call "SSH:HostOk" (target) =>hostOk
-        call "SSH:VerifySudo" (target) =>sudoOk
+        SSH:HostOk (target) =>hostOk
+        SSH:VerifySudo (target) =>sudoOk
         
         Lambda {P(1) =>x if(x,"ok","<<FAIL>>")} =>show
         report("Host: " + host, "Ping: " + show.call(hostOk), "Sudo: "+show.call(sudoOk))
@@ -202,13 +202,13 @@ P(1) =>glob
 
 
 # Verify all hosts have copy of SSH key
-    call "Hosts:GetHosts" =>hosts
+    Hosts:GetHosts =>hosts
 
     println("Distributing ssh key to all hosts!")
     readLine("Press Enter")
     
     hosts->host
-        call "Hosts:GetValue" (host, "SSHUser") =>sshUser
+        Hosts:GetValue (host, "SSHUser") =>sshUser
         if(sshUser==null, Inner{
             println("----- WARNING: " + host + " has no SSHUser")
         })
@@ -225,7 +225,7 @@ P(1) =>glob
 
 # Check if debian based host should be rebooted
         P(1) =>target
-        call "SSH:sudo" (target, "ls /var/run/reboot-required", true) =>result
+        SSH:sudo (target, "ls /var/run/reboot-required", true) =>result
         # true when file found (return code 0)
         result.get("exitCode") == 0
 /DebianHostNeedsReboot
@@ -233,23 +233,23 @@ P(1) =>glob
 
 
 # Run update/upgrade
-    call "Hosts:GetHosts" =>hosts
+    Hosts:GetHosts =>hosts
     hosts->host
-        assert(call "Hosts:Has" (host,"PackageManager","apt"))
-        call "Hosts:GetValue" (host, "SSHUser") =>sshUser
+        assert(Hosts:Has (host,"PackageManager","apt"))
+        Hosts:GetValue (host, "SSHUser") =>sshUser
         assert(sshUser != null)
         
         sshUser+"@"+host =>target
         println("Updating host " + target)
-        tryCatch(call "APTUpdate:APTUpdateUpgrade" (target, "   "))
+        tryCatch(APTUpdate:APTUpdateUpgrade (target, "   "))
 
         # Check if needs reboot and can be rebooted
         DebianHostNeedsReboot(target) =>needsReboot
-        call "Hosts:Has" (host, "Auto.reboot","yes") =>canBeRebooted
+        Hosts:Has (host, "Auto.reboot","yes") =>canBeRebooted
 
         if(needsReboot && canBeRebooted) {
                 println("   *** Automatically rebooting " + host)
-                call "SSH:sudo" (target, "reboot", true)
+                SSH:sudo (target, "reboot", true)
                         # acceptErrors=true, as the reboot means immediate disconnect
         }
 
@@ -260,13 +260,13 @@ P(1) =>glob
 
 
 # Display hosts that should be rebooted
-    call "Hosts:GetHosts"->host
-        assert(call "Hosts:Has" (host,"OSFamily","Debian"))
-        call "Hosts:GetValue" (host, "SSHUser") =>sshUser
+    Hosts:GetHosts->host
+        assert(Hosts:Has (host,"OSFamily","Debian"))
+        Hosts:GetValue (host, "SSHUser") =>sshUser
 
         sshUser+"@"+host =>target
 
-        call "SSH:HostOkSSH" (target) =>hostOk
+        SSH:HostOkSSH (target) =>hostOk
         if (!hostOk) {
             println(target + ": -offline-")
             assert(false)
@@ -283,14 +283,14 @@ P(1) =>glob
 P(1,"")=>hostPattern
     Date.Duration.minutes(30).get =>minTimeSinceLastRun
     
-    call "Hosts:GetHosts" =>hosts
+    Hosts:GetHosts =>hosts
     hosts->host
-    	assert(host.contains(hostPattern))
-        assert(call "Hosts:Has" (host,"Install.CFT","1"))
-        call "Hosts:GetValue" (host, "SSHUser") =>sshUser
+        assert(host.contains(hostPattern))
+        assert(Hosts:Has (host,"Install.CFT","1"))
+        Hosts:GetValue (host, "SSHUser") =>sshUser
         assert(sshUser != null)
 
-        call "Db:Get" (host, "CFT") =>lastDate
+        Db:Get (host, "CFT") =>lastDate
           if (lastDate != null) {
             Date.diff(lastDate).get =>timeSinceLastRun
             if (timeSinceLastRun < minTimeSinceLastRun) {
@@ -299,38 +299,38 @@ P(1,"")=>hostPattern
             }
         }
 
-        assert(call "SSH:HostOk" (host))
+        assert(SSH:HostOk (host))
         
         sshUser+"@"+host =>target
         println("Updating " + target)
         
-        assert(call "SSH:HostOkSSH" (target))
+        assert(SSH:HostOkSSH (target))
 
-        tryCatch(call "Java:VerifyCFT" (target, "   "))
-        call "Db:Add" (host, Date, "CFT")
+        tryCatch(Java:VerifyCFT (target, "   "))
+        Db:Add (host, Date, "CFT")
 /UpdateCFT
 
 
 # View host status
     readLine("Hosts filter") =>filter
-    call "Hosts:GetHosts" =>hosts
+    Hosts:GetHosts =>hosts
     
     hosts->host
         assert(host.contains(filter))
         
-        call "Hosts:GetValue" (host, "SSHUser") =>sshUser
+        Hosts:GetValue (host, "SSHUser") =>sshUser
         assert(sshUser != null)
         
         sshUser+"@"+host =>target
-        assert(call "SSH:HostOk" (host))
+        assert(SSH:HostOk (host))
 
         println("------ " + host)
-        call "SSH:run" (target, "which mpstat", true).get("exitCode") != 0 =>install
+        SSH:run (target, "which mpstat", true).get("exitCode") != 0 =>install
         if(install) {
             println("    (installing sysstat)")
-            call "SSH:sudo" (target, "apt-get -y install sysstat")
+            SSH:sudo (target, "apt-get -y install sysstat")
         }
-        call "SSH:run" (target, "mpstat").get("stdout")->line
+        SSH:run (target, "mpstat").get("stdout")->line
             report(host,line)
 /MPStat
 

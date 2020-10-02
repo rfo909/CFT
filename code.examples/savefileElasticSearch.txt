@@ -14,13 +14,13 @@ Dir("/tmp").file("tmp."+currentTimeMillis)
     P(2,"") =>prefix
 
     # Check if logstash already installed
-    call "SSH:sudo" (target, "systemctl status logstash.service", true).get("exitCode")==4 _.not =>found
+    SSH:sudo (target, "systemctl status logstash.service", true).get("exitCode")==4 _.not =>found
     if (found) {
         println(prefix+"Logstash already installed")
     } else {
         # Requires java 8, 11 or 14
         println(prefix+"Setting up logstash")
-        call "Java:VerifyJava" (target, prefix+"   ")
+        Java:VerifyJava (target, prefix+"   ")
 
         List(
             'wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -',
@@ -31,7 +31,7 @@ Dir("/tmp").file("tmp."+currentTimeMillis)
         ) =>cmd
 
         println(prefix+"Installing logstash")
-        call "SSH:sudo" (target, cmd)
+        SSH:sudo (target, cmd)
     }
 /InstallLogstash
 
@@ -41,16 +41,16 @@ Dir("/tmp").file("tmp."+currentTimeMillis)
     P(1,Input("Host")) =>host
     P(2,"") =>prefix
     
-    call "Hosts:GetValue" (host, "SSHUser") =>sshUser
+    Hosts:GetValue (host, "SSHUser") =>sshUser
     sshUser +"@" + host =>target
 
     println(prefix+"Verifying logstash install")
     InstallLogstash(target,prefix+"   ")
 
     println(prefix+"Loading parameters for config file for host " + host)
-    call "Hosts:GetValue" (host, "ElasticSearch.Logstash.listenPort") =>listenPort
-    call "Hosts:GetValue" (host, "ElasticSearch.Logstash.esIndex") =>esIndex
-    call "Hosts:GetValue" (host, "ElasticSearch.Logstash.esHosts") =>esHosts
+    Hosts:GetValue (host, "ElasticSearch.Logstash.listenPort") =>listenPort
+    Hosts:GetValue (host, "ElasticSearch.Logstash.esIndex") =>esIndex
+    Hosts:GetValue (host, "ElasticSearch.Logstash.esHosts") =>esHosts
 
     println(prefix+"Creating config file")
     tmpFile =>f
@@ -60,26 +60,26 @@ Dir("/tmp").file("tmp."+currentTimeMillis)
     println("--------------------------------")
 
     println(prefix+"Copying config file to " + target)
-    call "SSH:copy" (f, target, "./main.conf"))
+    SSH:copy (f, target, "./main.conf"))
     Dir.run("rm",f.path)
 
     println(prefix+"Stopping service if exists")
-    call "SSH:sudo" (target, "systemctl stop logstash.service", true)
+    SSH:sudo (target, "systemctl stop logstash.service", true)
     
     println(prefix+"Deploying config file on server, starting service")
     List(
         "cp ./main.conf /etc/logstash/conf.d/main.conf"
         , "systemctl start logstash.service"
     ) =>cmd
-    call "SSH:sudo" (target, cmd)
+    SSH:sudo (target, cmd)
     
 /ConfigureLogstash
     
 
 # Update or install logstash + config on all targets
     P(1,"") =>prefix
-    call "Hosts:GetHosts" -> host
-        assert(call "Hosts:HasField" (host, "ElasticSearch.Logstash.esIndex"))
+    Hosts:GetHosts -> host
+        assert(Hosts:HasField (host, "ElasticSearch.Logstash.esIndex"))
         println(prefix+"*** Checking host " + host)
         ConfigureLogstash(host,prefix+"   ")
 /VerifyLogstash

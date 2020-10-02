@@ -42,7 +42,7 @@
 
 # Edit file 
     P(1,Input("Edit file").get) =>fileName
-    call "Lib:e" (File(fileName))
+    Lib:e (File(fileName))
 /e
 
 
