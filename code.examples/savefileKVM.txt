@@ -197,10 +197,10 @@ P(1,"someTarget") =>target
     null =>newIp
     loop
         status
-        Lib:ReadValue ("Original VM", original) =>original
-        Lib:ReadValue ("New VM name / will also be host name", cloneName) =>cloneName
-        Lib:ReadValue ("Original IP address or name (kubsXX.v)", originalIp) =>originalIp
-        Lib:ReadValue ("New IP address and mask: xx.xx.xx.xx/MM", newIp) =>newIp
+        Input("Original VM").get =>original
+        Input("New VM name / will also be host name").get =>cloneName
+       	Input("Original IP address or name (kubsXX.v)").get =>originalIp
+        Input("New IP address and mask: xx.xx.xx.xx/MM").get =>newIp
         false =>ok
         if(!newIp.contains("/"),Inner{
             println("*** Missing '/MM' net mask from IP address")
@@ -226,7 +226,7 @@ P(1,"someTarget") =>target
     println("Also need sudo without passwords (on the template VM)")
     println("----------------------------------------------------------")
     println
-    Lib:ReadValueBoolean ("Type 'no' to abort or Enter to continue", true) =>confirm
+    Lib:ReadValueBoolean ("Continue", true) =>confirm
     error(!confirm,"Aborting config of VM via SSH")
 
     println
