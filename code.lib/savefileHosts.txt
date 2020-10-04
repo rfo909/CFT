@@ -78,15 +78,24 @@ P(1) =>glob
     null =>settingValue
     HostsFile.read->origLine
         origLine.trim =>line
-        
         reject(line=="")
         reject(line.startsWith("#"))
         
-        if(line.startsWith("[")) {
-            parseHeader(line).push(2,"") =>settingName =>settingValue
-        } else {
-            parseData.call(line,settingName,settingValue)
-        }
+        tryCatch({
+	        if(line.startsWith("[")) {
+	        	#println("Parsing header " + line)
+	            parseHeader(line).push(2,"") =>settingName =>settingValue
+	        } else {
+	            parseData.call(line,settingName,settingValue)
+	        }
+	    })=>st
+	    if (!st.ok) {
+	    	println("-------------------------------------")
+	    	println(origLine.file.name + " line " + origLine.lineNumber + ": " + origLine)
+	    	println("-------------------------------------")
+	    	println(st.msg)
+	    	error("Failed reading hosts file")
+	    }
     |
 
 /ProcessHostsFile
