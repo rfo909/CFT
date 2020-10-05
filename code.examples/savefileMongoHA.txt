@@ -12,6 +12,7 @@ Requirements:
     $ :load SSH
     $ Readme
 
+- Hosts:CheckSSHKeys
 - InstallMongodAll
 - InstallMongoShellAll
 - HowToInitRS for all RS names (function displays defined replica set names)

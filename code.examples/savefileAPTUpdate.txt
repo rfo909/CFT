@@ -53,7 +53,7 @@ P(2,"") =>prefix
 
     target.after("@") =>host
     Sys.scriptName =>dbCollection
-    Date.sub(Date.Duration.days(365)) =>defaultValue
+    Date.sub(Date.Duration.days(3650)) =>defaultValue
     
     println(prefix+"Looking up time of last run for host ")
     Db:Get (host, dbCollection, defaultValue) =>lastUpdated
@@ -62,8 +62,8 @@ P(2,"") =>prefix
     
     println(prefix+"Last updated: " + lastUpdated.fmt)
 
-    if(timeSinceUpdate.get < 48*3600*1000) {
-        println(prefix+"Limit for repeat update: 48 hours")
+    if(timeSinceUpdate.get < 12*3600*1000) {
+        println(prefix+"Limit for repeat update: 12 hours")
     } else {
         println(prefix+"Performing update")
         sudo(target,"apt-get -y update", true) =>result

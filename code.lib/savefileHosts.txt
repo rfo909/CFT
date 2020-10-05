@@ -83,7 +83,7 @@ P(1) =>glob
         
         tryCatch({
 	        if(line.startsWith("[")) {
-	        	#println("Parsing header " + line)
+	        	println("Parsing header " + line)
 	            parseHeader(line).push(2,"") =>settingName =>settingValue
 	        } else {
 	            parseData.call(line,settingName,settingValue)
@@ -242,8 +242,10 @@ P(1) =>glob
 
 
 # Run update/upgrade
+P(1,"")=>h
     Hosts:GetHosts =>hosts
     hosts->host
+    	assert(host.contains(h))
         assert(Hosts:Has (host,"PackageManager","apt"))
         Hosts:GetValue (host, "SSHUser") =>sshUser
         assert(sshUser != null)
@@ -321,11 +323,13 @@ P(1,"")=>hostPattern
 
 
 # View host status
-    readLine("Hosts filter") =>filter
-    Hosts:GetHosts =>hosts
+P(1,"mpstat") => command
+P(2,Lambda{true})  => lineFilter
+
+    x = Input("Hosts glob filter").get
+    hosts = GlobHosts(x)
     
     hosts->host
-        assert(host.contains(filter))
         
         Hosts:GetValue (host, "SSHUser") =>sshUser
         assert(sshUser != null)
@@ -339,10 +343,36 @@ P(1,"")=>hostPattern
             println("    (installing sysstat)")
             SSH:sudo (target, "apt-get -y install sysstat")
         }
-        SSH:run (target, "mpstat").get("stdout")->line
+        SSH:run (target, command).get("stdout")->line
+        	assert(lineFilter.call(line))
             report(host,line)
+/SysStat
+
+
+SysStat("mpstat")
 /MPStat
 
+SysStat("iostat", Lambda{P(1).contains("vda")})
+/IOStat
+
+# Fix resolv.conf problem
+	readLine("Softlinks /run/systemd/resolve/resolv.conf to /etc/resolv.conf, yes to continue") =yesno
+	error(yesno != "yes", "Aborted")
+	
+	Hosts:GetHosts =>hosts
+	hosts->host
+		assert(Hosts:GetValue(host, "OSFamily")=="Debian")
+		       
+        Hosts:GetValue (host, "SSHUser") =>sshUser
+        assert(sshUser != null)
+
+        target=sshUser+"@"+host
+ 
+		println("--- " + host + ": fixing resolv.conf link")
+		tryCatch(
+			SSH:sudo (target, List("rm /etc/resolv.conf", "ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf"))
+		)
+/FixResolvConf
 
 
 UpgradeAPT
