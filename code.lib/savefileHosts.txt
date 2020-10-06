@@ -32,28 +32,25 @@ HOST [OverrideValue]?
 /parseHeader
 
 
-# Internal - create list of hosts based on expression with '*'
-P(1) =>glob
-    "" =>regex
-    glob.chars->c
-        false =>done
-        if(c=='*', ".*", "["+c+"]") =>x regex+x =>regex
-    |
-    Regex(regex) =>re
-    Val("data").keys.sort->hostName
-        assert(re.match(hostName))
-        out(hostName)
-/GlobHosts
-
-
-
 
 # Process Hosts file and store it in session state
-    Lambda {
-    # Internal
+    parseData = Lambda {
         P(1) =>line
         P(2) =>name
         P(3) =>value
+
+		getHosts = Lambda{ 
+			P(1) =>glob
+			    "" =>regex
+			    glob.chars->c
+			        false =>done
+			        regex = regex + if(c=='*', ".*", "["+c+"]")
+			    |
+			    Regex(regex) =>re
+			    Val("data").keys.sort->hostName
+			        assert(re.match(hostName))
+			        out(hostName)
+		}
 
         line.before("[").trim =>host
         line.after("[").before("]") =>override 
@@ -62,13 +59,13 @@ P(1) =>glob
         
         if(host.contains("*"), Inner{
             # assign value for all hosts matching glob expression
-            GlobHosts(host)->oneHost
+            getHosts.call(host)->oneHost
                 Val("data").get(oneHost,Dict).set(name, overriddenVal)
         }, Inner{
             # regular assign
             Val("data").get(host,Dict).set(name,overriddenVal)
         })
-    } =>parseData
+    } 
 
     println("INFO Processing file " + HostsFile.path)
 
@@ -139,6 +136,20 @@ P(1) =>glob
     CheckData
     Val("data").keys.sort
 /GetHosts
+
+
+# Get host list sorted via Glob expr
+P(1) =>glob
+    "" =>regex
+    glob.chars->c
+        false =>done
+        regex = regex + if(c=='*', ".*", "["+c+"]")
+    |
+    Regex(regex) =>re
+    GetHosts->hostName
+        assert(re.match(hostName))
+        out(hostName)
+/GlobHosts
 
 
 # Get all known fields
@@ -356,7 +367,7 @@ SysStat("iostat", Lambda{P(1).contains("vda")})
 /IOStat
 
 # Fix resolv.conf problem
-	readLine("Softlinks /run/systemd/resolve/resolv.conf to /etc/resolv.conf, yes to continue") =yesno
+	readLine("Softlinks /run/systemd/resolve/resolv.conf to /etc/resolv.conf, yes to continue") =>yesno
 	error(yesno != "yes", "Aborted")
 	
 	Hosts:GetHosts =>hosts
@@ -367,11 +378,21 @@ SysStat("iostat", Lambda{P(1).contains("vda")})
         assert(sshUser != null)
 
         target=sshUser+"@"+host
- 
-		println("--- " + host + ": fixing resolv.conf link")
-		tryCatch(
-			SSH:sudo (target, List("rm /etc/resolv.conf", "ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf"))
-		)
+
+        println("--- " + host + ": checking resolv.conf")
+        replace=false
+        tryCatch(Inner {
+        	SSH:sudo(target,"ls -l /etc/resolv.conf").get("stdout")=>stdout
+        	stdout->line println("    " + line) |
+        	replace = Lib:LinesContain(stdout,"stub-resolv.conf")
+        })
+
+ 		if(replace) {
+			println("    CHANGING to /run/systemd/resolve/resolv.conf")
+			tryCatch(
+				SSH:sudo (target, List("rm /etc/resolv.conf", "ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf"))
+			)
+		} 
 /FixResolvConf
 
 
