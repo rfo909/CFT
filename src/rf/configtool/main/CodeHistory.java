@@ -102,13 +102,30 @@ public class CodeHistory {
 
             List<String> matchingNames=new ArrayList<String>();
             
-            for (int i=0; i<namesInSequence.size(); i++) {
-                String name=namesInSequence.get(i);
-                
-                if (symbolSubStr != null && !name.startsWith(symbolSubStr)) continue;
-                matchingNames.add(name);
+            if (symbolSubStr != null) {
+	            
+	            // Check for exact match first
+	            for (int i=0; i<namesInSequence.size(); i++) {
+	                String name=namesInSequence.get(i);
+	                if (name.equals(symbolSubStr)) {
+	                	matchingNames.add(name);
+	                }
+	            }
+	            if (matchingNames.isEmpty()) {
+	                for (int i=0; i<namesInSequence.size(); i++) {
+	                    String name=namesInSequence.get(i);
+	                    if (name.startsWith(symbolSubStr)) {
+	                    	matchingNames.add(name);
+	                    }
+	                }
+	            } 
+            } else {
+            	// include all
+            	for (int i=0; i<namesInSequence.size(); i++) {
+            		matchingNames.add(namesInSequence.get(i));
+            	}
             }
-            
+	            
             boolean showFull = (matchingNames.size()==1 && symbolSubStr != null);
             for (String name:matchingNames) {
                 

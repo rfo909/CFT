@@ -13,6 +13,16 @@
 
 <h1>CFT Change log</h1>
 
+
+<h3>v1.6.1 2020-10-02</h3>
+<p>
+	Fixed '?xxx' command so that if exact match, show code, then check for startsWith().
+</p>
+<p>
+	Improved Investigate script with support for topics, so that log files
+	are properly named.
+</p>
+
 <h3>v1.6.0 2020-10-02</h3>
 <p>
 	Added simplified call syntax for calling code in other scripts. 
@@ -96,11 +106,11 @@
 </pre>
 
 <h3>v1.5.0 2020-09-22 Assignment change</h3>
-<p>
+<pre>
 	$ 3=a    # NOW INVALID
 	$ 3=>a   # OK
 	$ a=3    # OK
-</p>
+</pre>
 
 
 <h3>v1.4.0 2020-09-15 Lib.Text.Parser</h3>
