@@ -123,7 +123,9 @@ d
 
 # Create name of temp file under /tmp
 P(1) =>name 
-    Dir("/tmp").file(name + currentTimeMillis)  
+    if (Sys.isWindows,
+	Dir("c:\temp").file(name+currentTimeMillis),
+    	Dir("/tmp").file(name + currentTimeMillis) )
 /TmpFile
 
 
@@ -173,7 +175,7 @@ P(4,false) => showDebug
     }
 
 
-    if(showDebug || FAIL) {
+    if(!acceptErrors && (showDebug || FAIL)) {
         Inner {  # "hide" loops inside inner block, so as not to affect return value of function
             println("- cmd:")
             result.get("cmd")->line println("    " + line) |
