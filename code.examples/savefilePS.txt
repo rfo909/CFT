@@ -39,7 +39,7 @@ Running remote commands with PowerShell.
 P(1) =>host 
 P(2,"get-service -name tomcat") =>code
     println("Executing " + code)
-    List("powershell","invoke-command","-computername",host,"-scriptblock","Inner{" + code + "}") =>cmd
+    List("powershell","invoke-command","-computername",host,"-scriptblock","{" + code + "}") =>cmd
     Dir.run(cmd)
 /Call
 
