@@ -121,7 +121,7 @@ d
 /DirPrivate
 
 
-# Create name of temp file under /tmp
+# Create name of temp file under /tmp or under c:\temp if windows
 P(1) =>name 
     if (Sys.isWindows,
 	Dir("c:\temp").file(name+currentTimeMillis),
@@ -175,7 +175,7 @@ P(4,false) => showDebug
     }
 
 
-    if(!acceptErrors && (showDebug || FAIL)) {
+    if(showDebug || FAIL) {
         Inner {  # "hide" loops inside inner block, so as not to affect return value of function
             println("- cmd:")
             result.get("cmd")->line println("    " + line) |
@@ -193,6 +193,7 @@ P(4,false) => showDebug
             println
         }
     }
+    
     error(FAIL,"run failed with error")
     
     # return value

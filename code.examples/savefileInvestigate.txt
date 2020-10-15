@@ -108,9 +108,13 @@ loop
 			println("End-marker: '" + marker + "'")
 			println("---")
 			readLines(marker) =>lines
+			LogFile.append("")
+			LogFile.append("<<<<<<<<<<<<<<<< x")
 			Inner {
-				lines->line LogFile.append("# " + line) 
+				lines->line LogFile.append(line) 
 			}
+			LogFile.append(">>>>>>>>>>>>>>>> x")
+			LogFile.append("")
 		} else { 
 			# parse commands
 		    cmd = line.sub(1)
@@ -148,8 +152,8 @@ loop
 		    } 
 		}        
 	} else {
-		Date.setFormat("HH:MM:ss").fmt =>time
-		LogFile.append(time + " " + line)
+		#Date.setFormat("HH:mm:ss").fmt =>time
+		LogFile.append(line)
 	}
 	
 /InputMode
@@ -178,8 +182,8 @@ loop
 
 # Log text
     readLine("[" + GetCurrentTopic +"] Comment") =>line
-	Date.setFormat("HH:MM:ss").fmt =>time
-	LogFile.append(time + " " + line)
+	#Date.setFormat("HH:MM:ss").fmt =>time
+	LogFile.append(line)
 /LogText
 
 
@@ -190,11 +194,11 @@ loop
     println("---")
     readLines(endMarker) =>lines
     
-    List =>list
-    list.add("")
-    lines->line list.add("# " + line) |
-    list.add("")
-    LogFile.append(list)
+	LogFile.append("")
+	LogFile.append("<<<<<<<<<<<<<<<< x")
+    lines->line LogFile.append(line) |
+    LogFile.append(">>>>>>>>>>>>>>>> x")
+    LogFile.append("")
 /LogPastedText
 
 
