@@ -13,6 +13,58 @@
 
 <h1>CFT Change log</h1>
 
+<h3>v1.7.0 2020-10-02 Templating improvement</h3>
+<p>
+	Added expressions Sequence and CondSequence, which are used to create
+	lists, in compact format, and also with separating comma optional.
+</p>
+<pre>
+	Sequence(1,2)+CondSequence(false 3 4)+CondSequence(true 5 6)
+	&lt;List&gt;
+	1
+	2
+	5
+	6
+</pre>
+
+<p>
+	Added "RAW" string type, using '@' and extending to end of line. Not particularly suited
+	for interactive use, but great for templates. 
+</p>
+<pre>
+	lines = Sequence(
+		@ bind:
+		@   all
+	)+CondSequence(isAlive,
+		@ alive:
+		@   true
+	)+Sequence(
+		@ over:
+		@   and out
+	)
+</pre>
+<p>
+	Lines starting with '@' + space, have the "@ " sequence removed from the start of the line.
+	Lines starting with '@@' have that sequence removed from the start of the line.
+	For other cases, only the single '@' is stripped.
+</p>
+<p>
+	This is an alternative to the "here" documents using &lt;&lt;&lt; EOF marks, for
+	both greater readability, as the text lines can be properly indented, and flexibility
+	with conditional sequences of lines.
+</p>
+<p>
+	To test from command line, remember that by default '@' indicates a shortcut.
+</p>
+<pre>
+	$ "" + @ this is a test
+	&lt;String&gt;
+	this is a test
+</pre>
+
+
+
+
 
 <h3>v1.6.1 2020-10-02</h3>
 <p>
@@ -23,7 +75,7 @@
 	are properly named.
 </p>
 
-<h3>v1.6.0 2020-10-02</h3>
+<h3>v1.6.0 2020-10-02 changed syntax for calling function in other script</h3>
 <p>
 	Added simplified call syntax for calling code in other scripts. 
 </p>

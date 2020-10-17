@@ -123,12 +123,18 @@ public class Parser {
             stringComplete.setTokenType(Token.TOK_STRING);
         }
 
+        // --- raw strings ---
+        CharTable rawString=new CharTable();
+        root.setMapping("@", rawString);
+        rawString.setDefaultMapping(rawString); // eat rest of line
+        rawString.setTokenType(Token.TOK_RAW_STRING);
+
         // --- special symbols ---
         // sequence is irrelevant, always trying to match as much as possible
         String[] specials={
                 "|", "...", "..", "->", "<-", "&&", "||", ">=", "<=", ">", "<", "==", "!=", "!", "<>",
                 "=", "{", "}", "[", "]", "&", "(", ")", ".", ";", ":", ",",
-                "?", "+", "-", "*", "/", "%", "$", "^", "<<<", "@","=>",
+                "?", "+", "-", "*", "/", "%", "$", "^", "<<<", "=>",
                 "\\"
         };
 

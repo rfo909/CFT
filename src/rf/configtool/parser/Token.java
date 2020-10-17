@@ -23,7 +23,8 @@ public class Token {
     public static final int TOK_INT = 2;
     public static final int TOK_FLOAT = 3;
     public static final int TOK_STRING = 4;
-    public static final int TOK_SPECIAL = 5;
+    public static final int TOK_RAW_STRING = 5;  // do not strip quotes, then map to TOK_STRING
+    public static final int TOK_SPECIAL = 6;
     public static final int TOK_EOF = 99;
     
     private int type; 
@@ -33,10 +34,15 @@ public class Token {
     
     public Token (SourceLocation loc, int type, String str) {
         this.loc=loc;
-        this.type=type;
         if (type==TOK_STRING) {
             str=str.substring(1,str.length()-1);  // strip quotes
         }
+        if (type==TOK_RAW_STRING) {
+        	if (str.startsWith("@ ") || str.startsWith("@@")) str=str.substring(2);
+        	else str=str.substring(1);
+        	type=TOK_STRING;
+        }
+        this.type=type;
         this.str=str;
     }
     

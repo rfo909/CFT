@@ -126,6 +126,7 @@ Templating
  * Using DataFile
  |   Include blank lines
  |   Filter away comments
+ * Sequence and raw strings
  * PDict()
 
 Use as a calculator

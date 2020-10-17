@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2020-10-02 RFO
-v1.6.0
+Last updated: 2020-10-17 RFO
+v1.7.0
 ```
 # Introduction
 
@@ -1500,6 +1500,51 @@ $ /df
 
 Now all lines starting with "//" are automatically stripped from any output.
 
+## Sequence and raw strings
+
+
+Added in 
+**v1.7.0**
+
+Raw strings start with '@' and consist of the rest of the line.
+In addition, two expressions have been added, called Sequence() and CondSequence(). These
+generate List elements, but with a relaxed syntax, making commas between values optional,
+for max readability when creating a template.
+
+```
+Sequence(
+@ this is a line
+@ and this
+)+CondSequence(a>
+b
+@ conditional line
+)+Sequence(
+@ footer
+)
+```
+
+What happens here is that the Sequence() and CondSequence() expressions result in List
+objects, which are then concatenated via the "+" operator. Remember that a CondSequence without
+a condition, will use the next value as condition. Apart from boolean false, the null value is
+also mapped to false, with all other values, including empty lists, mapping to boolean true.
+
+
+The "@" type "raw" strings can be used in regular code as well. The behaviour is as follows:
+
+
+
+- When "@" is followed by single space, that single space is removed from the string
+
+
+- When "@" is followed by another "@", all characters following that sequence becomes the string
+
+
+- When "@" is followed by anything else, all of the rest of the line becomes the string
+
+
+
+
+Raw strings were ad
 ## PDict()
 
 

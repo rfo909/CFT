@@ -36,6 +36,7 @@ public class ExprTerminal extends LexicalElement {
     private boolean nullValue;
     private ExprCall exprCall;
     private ExprTryCatch exprTryCatch;
+    private ExprSequence exprSequence;
     
     private Value literalValue;
     private ParamLookup paramLookup;
@@ -83,6 +84,14 @@ public class ExprTerminal extends LexicalElement {
         if (ts.peekStr("tryCatch")) {
         	exprTryCatch=new ExprTryCatch(ts);
             return;
+        }
+        if (ts.peekStr("Sequence")) {
+        	exprSequence = new ExprSequence(false,ts);
+        	return;
+        }
+        if (ts.peekStr("CondSequence")) {
+        	exprSequence = new ExprSequence(true,ts);
+        	return;
         }
         
         if (ts.peekType(Token.TOK_INT)) {
@@ -146,6 +155,7 @@ public class ExprTerminal extends LexicalElement {
 	        if (nullValue) return new ValueNull();
 	        if (exprCall != null) return exprCall.resolve(ctx);
 	        if (exprTryCatch != null) return exprTryCatch.resolve(ctx);
+	        if (exprSequence != null) return exprSequence.resolve(ctx);
 	        
 	        if (literalValue != null) return literalValue;
 	        if (paramLookup != null) return paramLookup.resolve(ctx);
