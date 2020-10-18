@@ -1448,7 +1448,7 @@ Value of b: ${b}
 out(line.merge(data))
 /myMergedTemplate
 ```
-## Using DataFile
+## DataFile
 
 
 Another mechanism for templating, particularly if the text blocks are big, is the
@@ -1500,10 +1500,9 @@ $ /df
 
 Now all lines starting with "//" are automatically stripped from any output.
 
-## Sequence and raw strings
+## Sequence() and raw strings
 
 
-Added in 
 **v1.7.0**
 
 Raw strings start with '@' and consist of the rest of the line.
@@ -1513,11 +1512,10 @@ for max readability when creating a template.
 
 ```
 Sequence(
-@ this is a line
-@ and this
-)+CondSequence(a>
-b
-@ conditional line
+@ header
+)+CondSequence(x>
+y
+@ optional-part
 )+Sequence(
 @ footer
 )
@@ -1543,8 +1541,11 @@ The "@" type "raw" strings can be used in regular code as well. The behaviour is
 
 
 
+The advantage of this notation over that of "here"-documents, is that it allows proper
+indentation, for greatly improved readability in script code, and that it's easy to
+add conditional blocks, while the "here"-document means we can paste original text
+directly into the script code.
 
-Raw strings were ad
 ## PDict()
 
 
@@ -1560,11 +1561,10 @@ The String.merge() function logic replaces value null for a merge field with emp
 
 ```
 data = PDict("a","b").mergeCodes
-<<< SomeMarker
-Value of a: ${a}
-Value of b: ${b}
->>> SomeMarker
-->line
+Sequence(
+@ Value of a: ${a}
+@ Value of b: ${b}
+) ->line
 out(line.merge(data))
 /myMergedTemplate
 ```

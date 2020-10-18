@@ -123,10 +123,10 @@ Templating
  * Using individual template files
  * Script file "here" documents
  |   A more complex example
- * Using DataFile
+ * DataFile
  |   Include blank lines
  |   Filter away comments
- * Sequence and raw strings
+ * Sequence() and raw strings
  * PDict()
 
 Use as a calculator

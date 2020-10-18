@@ -1653,7 +1653,7 @@ codeDirs = . ; code.examples ; code.lib
 
 
 
-<h2>Using DataFile</h2>
+<h2>DataFile</h2>
 <p>
   Another mechanism for templating, particularly if the text blocks are big, is the 
   DataFile function and object, which processes
@@ -1712,9 +1712,9 @@ codeDirs = . ; code.examples ; code.lib
 
 
 
-<h2>Sequence and raw strings</h2>
+<h2>Sequence() and raw strings</h2>
 <p>
-  Added in <b>v1.7.0</b>
+  <i>v1.7.0</i>
 </p>
 <p>
   Raw strings start with '@' and consist of the rest of the line.
@@ -1724,10 +1724,9 @@ codeDirs = . ; code.examples ; code.lib
 </p>
 <pre>
   Sequence(
-    @ this is a line
-    @ and this
-  )+CondSequence(a>b
-    @ conditional line
+    @ header
+  )+CondSequence(x>y
+    @ optional-part 
   )+Sequence(
     @ footer
   )
@@ -1746,11 +1745,14 @@ codeDirs = . ; code.examples ; code.lib
   <li>When "@" is followed by another "@", all characters following that sequence becomes the string</li>
   <li>When "@" is followed by anything else, all of the rest of the line becomes the string</li>
  </ul>
-
-
+ <p>
+  The advantage of this notation over that of "here"-documents, is that it allows proper
+  indentation, for greatly improved readability in script code, and that it's easy to
+  add conditional blocks, while the "here"-document means we can paste original text
+  directly into the script code.
 </p>
-<p>
-  Raw strings were ad
+
+
 
 <h2>PDict()</h2>
 <p>
@@ -1766,11 +1768,10 @@ codeDirs = . ; code.examples ; code.lib
 </p>
 <pre>
   data = PDict("a","b").mergeCodes
-  &lt;&lt;&lt; SomeMarker
-  Value of a: ${a}
-  Value of b: ${b}
-  &gt;&gt;&gt; SomeMarker
-  -&gt;line 
+  Sequence(
+   @ Value of a: ${a}
+   @ Value of b: ${b}
+  ) -&gt;line 
     out(line.merge(data))
   /myMergedTemplate
 </pre>
