@@ -119,24 +119,29 @@ loop
 			# parse commands
 		    cmd = line.sub(1)
 		    if(cmd=='?') { ## help
-		        println
-		        println
-		        println("---")
-		        println(".                 - read pasted input lines, with end-marker '.'")
-		        println("..xxx             - read pasted input lines, with end-marker 'xxx'")
-		        println(".?                - help, this page")
-		        println(".h                - create header")
-		        println(".t                - change topic")
-		        println(".T                - show recent topics (7 days)")
-		        println(".c                - show log file (cat)")
-		        println(".m                - show log file (more)")
-		        println(".e                - edit log file")
-		        println(".q                - quit")
-		        println("---")
-		        println
+			Sequence(
+				@
+				@
+				@ ---
+				@ .                 - read pasted input lines, with end-marker '.'
+		        	@ ..xxx             - read pasted input lines, with end-marker 'xxx'
+		        	@ .?                - help, this page
+		        	@ .h                - create header
+				@ .d                - insert date/time stamp
+		        	@ .t                - change topic
+		        	@ .T                - show recent topics (7 days)
+		        	@ .c                - show log file (cat)
+		        	@ .m                - show log file (more)
+		        	@ .e                - edit log file
+		        	@ .q                - quit
+		        	@ ---
+				@
+			)->line println(line)
 		        true =>done
 		    } else if(cmd=='h') { ## Header
 		    	LogHeader
+			} else if (cmd=='d') { ## date/time stamp
+				LogFile.append(List("",Date.fmt))
 			} else if (cmd=='t') { ## change topic
 				SetTopic
 			} else if (cmd=='T') { ## show topics
