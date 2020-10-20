@@ -35,28 +35,46 @@ Running remote commands with PowerShell.
 /Readme
 
 
-
+# Run PowerShell command on remote host, such as "get-service -name *"
+# To invoke a remote PowerShell script:  ". c:\temp\myscript.ps1 ..."
+# To invoke external program: "& git status"
+# --
 P(1) =>host 
-P(2,"get-service -name tomcat") =>code
-    println("Executing " + code)
+P(2,"get-service") =>code
+P(3,List) => stdin
+P(4,false) => acceptError
+    println("[" + host + "] Executing " + code)
     List("powershell","invoke-command","-computername",host,"-scriptblock","{" + code + "}") =>cmd
-    Dir.run(cmd)
+    Lib:run(cmd, stdin, acceptError)
 /Call
 
 
+
+# Run PowerShell command on remote host. Works like Call, but interactively
+# --
 P(1) =>host 
-P(2) =>service
-    Call(host,"stop-service " + service)
+P(2,"get-service") =>code
+    println("[" + host + "] Executing " + code)
+    List("powershell","invoke-command","-computername",host,"-scriptblock","{" + code + "}") =>cmd
+    Dir.run(cmd)
+/CallInteractive
+
+
+P(1, Input("Enter remote host").get) =>host 
+P(2, Input("Enter service").get) =>service
+    CallInteractive(host,"stop-service " + service)
 /StopService
 
-P(1) =>host 
-P(2) =>service
-    Call(host,"start-service " + service)
+P(1, Input("Enter remote host").get) =>host 
+P(2, Input("Enter service").get) =>service
+    CallInteractive(host,"start-service " + service)
 /StartService
 
-P(1) =>host 
-P(2) =>service
-    Call(host,"get-service " + service)
+
+
+P(1, Input("Enter remote host").get) =>host 
+P(2, Input("Enter service").get) =>service
+    CallInteractive(host,"get-service " + service)
 /GetService
 
 
