@@ -122,13 +122,24 @@ d
 
 
 # Create name of temp file under /tmp or under c:\temp if windows
-P(1) =>name 
+P(1,"tmp") =>name 
     if (Sys.isWindows,
 	Dir("c:\temp").file(name+currentTimeMillis),
     	Dir("/tmp").file(name + currentTimeMillis) )
 /TmpFile
 
 
+# Create temporary directory - remember to delete it when done
+P(1,"tmp") => name
+	if (Sys.isWindows,
+		Dir("c:\temp\"+name+currentTimeMillis),
+		Dir("/tmp/"+name+currentTimeMillis)
+	) =>d
+	if (!d.exists) {
+		d.create
+	}
+	d
+/TmpDir
 
 
 # Run external program and collect stdout, stderr and exitCode - returns Dict

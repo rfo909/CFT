@@ -51,20 +51,17 @@ Add, Commit and Push.
     MD:Run
 
     # Identify files to move temporarily out of the way, so as not to be included in git add .
-    HomeDir.files(Glob("savefile*"))  
+    HomeDir.files(Glob("savefile*"))+HomeDir.files(Glob("CFT.props"))  
     =>FilesToMove
 
     # Create temp-dir
-    Dir("/tmp/release"+currentTimeMillis) =>d
-    if(!d.exists, d.create)
-    d =>TempDir
+    Lib:TmpDir("release") => TempDir
 
     # Move files to TempDir
     FilesToMove->f
     assert(f.exists)
-        println("Copying file " + f.name + " to " + TempDir.path)
+        println("Moving file " + f.name + " to " + TempDir.path)
         if(!TempDir.copy(f), error("Failed to copy file"))
-        println("Deleting file " + f.name)
         f.delete
     |
 
@@ -80,8 +77,8 @@ Add, Commit and Push.
     |
 
     # Delete temp-dir (should be empty)
-    println("Deleting temp dir " + d.path)
-    d.delete
+    println("Deleting temp dir " + TempDir.path)
+    TempDir.delete
 /Add
 
 

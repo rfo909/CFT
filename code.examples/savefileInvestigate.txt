@@ -91,6 +91,14 @@ in an editor.
 /LogFile
 
 
+# Get all files for current topic, sorted 
+	GetCurrentTopic => topic
+	InvDir.files->f
+		assert(f.name.contains(topic))
+		out(Str(f.name,f))
+	| _.sort->x out(x.data)
+/GetTopicLogFiles
+
 # Input mode
 loop
     readLine("[" + GetCurrentTopic + "] Enter text, '.' to paste text, '.q' to quit or '.?' for help").trim =>line
@@ -130,7 +138,7 @@ loop
 				@ .d                - insert date/time stamp
 		        	@ .t                - change topic
 		        	@ .T                - show recent topics (7 days)
-		        	@ .c                - show log file (cat)
+		        	@ .c                - show 3 latest topic log files (cat)
 		        	@ .m                - show log file (more)
 		        	@ .e                - edit log file
 		        	@ .q                - quit
@@ -147,7 +155,7 @@ loop
 			} else if (cmd=='T') { ## show topics
 				ShowTopics
 		 	} else if(cmd=='c') { ## cat
-		        Inner{LogFile.read->line println(line)}
+				Show
 		    } else if(cmd=='m') { ## more
 		        Lib:m (LogFile)
 		    } else if(cmd=='e') { ## edit
@@ -213,7 +221,14 @@ loop
 /LogHeader
 
 
-LogFile.read->line println(line)
+# Show lines for 3 newest files for current topic
+	files = GetTopicLogFiles 
+	if (files.length > 3) {
+		files=files.keep(files.length-3,files.length)
+	}
+	files->f
+		f.read->line
+			println(line)
 /Show
 
 Lib:e (LogFile)
