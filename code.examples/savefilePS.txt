@@ -39,7 +39,7 @@ Running remote commands with PowerShell.
 #
 # To invoke a remote PowerShell script:  
 #   ". c:\temp\myscript.ps1 ..."
-# To invoke external program: 
+# To invoke remote external program: 
 #   "& git status"
 # To invoke cmd features: 
 #   "& cmd /c dir"
@@ -65,6 +65,25 @@ P(2,"get-service") =>code
 /CallInteractive
 
 
+
+# Run a Powershell script on remote host
+# --
+	P(1, Input("Enter remote host").get) =>host 
+	P(2, List("cd c:\temp","dir")) => scriptCode
+
+	# The Invoke-Command can run command from local ps1-file on remote server!
+
+	Dir("c:\temp").file("tmp"+currentTimeMillis+".ps1") => ps1file
+		# The script to be invoked must be named *.ps1
+	ps1file.create(scriptCode)
+	List("powershell","Invoke-Command","-ComputerName",host,"-FilePath",ps1file.path) => cmd
+	Lib:run(cmd,List,true) => result
+	ps1file.delete
+	result
+/RunScriptRemote
+
+
+
 P(1, Input("Enter remote host").get) =>host 
 P(2, Input("Enter service").get) =>service
     CallInteractive(host,"stop-service " + service)
@@ -81,5 +100,6 @@ P(1, Input("Enter remote host").get) =>host
 P(2, Input("Enter service").get) =>service
     CallInteractive(host,"get-service " + service)
 /GetService
+
 
 
