@@ -48,6 +48,7 @@ shortcut:ee   = "---- clear editor selection ----"        Lib:ClearEditor if(Sys
 shortcut:term = "---- Update terminal size ----"          Lib:GetTerminalSize
 shortcut:top  = "---- Run top command ----"               Dir.run("top")
 shortcut:rsh  = "---- Remote shell via ssh ----"          SSH:remoteShell
+shortcut:S    = "---- Show all scripts ----"              Lib:Scripts
 
 # Release script
 shortcut:rel  = "---- Release ----"                       Sys.stdin(":load Release","?")

@@ -340,3 +340,18 @@ P(2) =>value
     }
 /LinesContain
 
+
+
+# List available save files across all code directories
+#
+# --
+	Sys.codeDirs.reverse->d
+		Lib:Header(d.path)
+		Inner {
+			d.files(Glob("savefile*.txt"))->f 
+				out(Str(f.name,f)) 
+			| _.sort->x
+				f=x.data
+				println("   " + f.name.after("savefile").before(".txt"))
+		}
+/Scripts
