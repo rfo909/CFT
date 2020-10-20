@@ -11,6 +11,8 @@ public class PropsFile {
 
 	public static final String PROPS_FILE = "CFT.props";
 	
+	private String customScriptDir; // -d xxx on command line, see Main
+	
 	private String codeDirs;
 	private String prompt;   // line of code
 	
@@ -28,7 +30,8 @@ public class PropsFile {
 	// detect changes 
 	private String fileInfo="";;
 
-	public PropsFile () throws Exception {
+	public PropsFile (String customScriptDir) throws Exception {
+		this.customScriptDir=customScriptDir;
 		refreshFromFile();
 	}
 	
@@ -105,6 +108,7 @@ public class PropsFile {
 	 */
 	public List<String> getCodeDirs() {
 		List<String> list=new ArrayList<String>();
+		if (customScriptDir != null) list.add(customScriptDir);
 		StringTokenizer st=new StringTokenizer(codeDirs,";",false);
 		while (st.hasMoreElements()) {
 			list.add(st.nextToken().trim());

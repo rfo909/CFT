@@ -51,7 +51,7 @@ Add, Commit and Push.
     MD:Run
 
     # Identify files to move temporarily out of the way, so as not to be included in git add .
-    HomeDir.files(Glob("savefile*"))+HomeDir.files(Glob("CFT.props"))  
+    HomeDir.files(Glob("savefile*"))  
     =>FilesToMove
 
     # Create temp-dir

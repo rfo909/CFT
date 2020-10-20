@@ -25,33 +25,64 @@ import rf.configtool.root.Root;
 import rf.configtool.main.Version;
 
 public class Main {
+	
+	static class Args {
+		private String[] args;
+		private int pos;
+		
+		public Args (String[] args) { this.args=args; }
+		
+		public boolean hasNext() {
+			return args.length > pos;
+		}
+		public String peek() {
+			return args[pos];
+		}
+		public String get(String msg) throws Exception {
+			if (!hasNext()) throw new Exception(msg);
+			return args[pos++];
+		}
+	}
     
-    public static void main (String[] args) throws Exception {
-    	if (args.length == 1 && args[0].startsWith("-")) {
-    		if (args[0].equals("-version")) {
-	    		System.out.println(Version.getVersion());
-	    		System.exit(0);
-	    	} else {
-    			System.out.println("Valid options:");
-    			System.out.println("  -version");
-    			System.exit(1);
+    public static void main (String[] argsArray) throws Exception {
+    	Args args=new Args(argsArray);
+    	String scriptDir=null;
+    	
+    	if (args.hasNext()) {
+    		if (args.peek().startsWith("-")) {
+    			if (args.peek().equals("-version")) {
+    	    		System.out.println(Version.getVersion());
+    	    		System.exit(0);
+    			} else if (args.peek().equals("-d")) {
+    				args.get("advance past known -d");
+    				scriptDir=args.get("scriptDir following -d");
+    			} else if (args.peek().equals("-help")) {
+    				System.out.println("Valid options:");
+    				System.out.println("  -version");
+    				System.out.println("  -help");
+    				System.out.println("  -d scriptDir [scriptName [command-lines]]");
+    				System.out.println("or just");
+    				System.out.println("  [scriptName [command-lines]]");
+    				System.exit(0);
+    			}
     		}
+    	
     	}
 	    	
         BufferedReader stdin=new BufferedReader(new InputStreamReader(System.in));
         PrintStream stdout=System.out;
         
         Stdio stdio=new Stdio(stdin, stdout);
-        Root root=new Root(stdio);
+        Root root=new Root(stdio, scriptDir);
         
-        if (args.length >= 1) {
-            String scriptName=args[0];
+        if (args.hasNext()) {
+            String scriptName=args.get("scriptname");
             root.loadScript(scriptName);
         }
         
         List<String> commands=new ArrayList<String>();
-        for (int i=1; i<args.length; i++) {
-            commands.add(args[i]);
+        while (args.hasNext()) {
+        	commands.add(args.get("command-string"));
         }
         root.setInitialCommands(commands);
         

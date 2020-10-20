@@ -43,10 +43,10 @@ public class Root {
 	private final long startTime;
 	private boolean terminationFlag = false;
 
-	public Root(Stdio stdio) throws Exception {
+	public Root(Stdio stdio, String customScriptDir) throws Exception {
 		this.startTime=System.currentTimeMillis();
 		this.stdio = stdio;
-    	propsFile=new PropsFile();
+    	propsFile=new PropsFile(customScriptDir);
         objCfg=new ObjCfg();
 
         createNewScript();
