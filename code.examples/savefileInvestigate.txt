@@ -222,10 +222,7 @@ loop
 
 
 # Show lines for 3 newest files for current topic
-	files = GetTopicLogFiles 
-	if (files.length > 3) {
-		files=files.keep(files.length-3,files.length)
-	}
+	files = GetTopicLogFiles.last(3)
 	files->f
 		f.read->line
 			println(line)
