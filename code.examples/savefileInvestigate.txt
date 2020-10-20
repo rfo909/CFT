@@ -37,7 +37,7 @@ in an editor.
 	P(1,"Header") => header
 	P(2,"-") => lineChar
 	Lib.Data.yes(header.length,"-").concat =>line
-	List("",header,line,"")
+	List("",line,header,line,"")
 /Header	
 
 # The investigation logs are stored in text filed under this directory
