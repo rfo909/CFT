@@ -138,6 +138,8 @@ Use as a calculator
 Various topics
  * Command line args
  * Calling functions in external scripts
+ * Examining external scripts
+ * Displaying all scripts
  * Protecting directories and files
  |   A protected directory does not allow
  |   A protected file does not allow

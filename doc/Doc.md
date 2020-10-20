@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2020-10-17 RFO
-v1.7.0
+Last updated: 2020-10-20 RFO
+v1.7.2
 ```
 # Introduction
 
@@ -123,6 +123,16 @@ List the functions that you have defined by typing
 ```
 $ ?
 ```
+
+To show the code of a function:
+
+```
+$ ? name
+```
+
+If the name doesn't match one function, it is used as a prefix to list a subset
+of all functions.
+
 # CFT as a shell
 
 
@@ -1657,6 +1667,13 @@ have meaning to the shell, use quotes. Example:
 
 This loads script Projects, then calls the Curr function inside.
 
+```
+./cft
+./cft scriptName [commandLines]*
+./cft -version
+./cft -help
+./cft -d scriptDir [scriptName [commandLines]*]?
+```
 ## Calling functions in external scripts
 
 
@@ -1670,6 +1687,25 @@ Lib:Header("This is a test")
 ```
 
 Parameters are given as a list of values inside ()'s and may be omitted if no parameters.
+
+## Examining external scripts
+
+
+The '?' interactive command has an extended syntax that allows you to list functions inside
+another script, as well as listing the code of particular function.
+
+```
+$ ?Lib:                  # lists functions inside Lib
+$ ?Lib:m                 # displays code of function 'm'
+```
+## Displaying all scripts
+
+
+The function Lib:Scripts displays all available scripts, sorted by the directories given
+in the CFT.props file.
+
+
+The shortcut @S calls this function.
 
 ## Protecting directories and files
 

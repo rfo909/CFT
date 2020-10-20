@@ -310,14 +310,50 @@ public class Root {
 			if (ts.matchStr("?")) {
 
 				String ident = ts.matchIdentifier();
+				
 				if (ident != null) {
-					codeHistory.report(ident);
+					boolean colon = ts.matchStr(":");
+					if (colon) {
+						// colon means ident is a script name
+						ScriptState sstate=null;
+						try {
+							// try the "switch" functionality first
+							sstate = getScriptState(ident, false);
+						} catch (Exception ex) {
+							sstate=null;
+						}
+						
+						if (sstate==null) try {
+							// use "load"
+							sstate = getScriptState(ident, true);
+						} catch (Exception ex) {
+							sstate=null;
+						}
+						if (sstate==null) {
+							throw new Exception("No such script: " + ident);
+						}
+						
+						CodeHistory hist = sstate.getObjGlobal().getCodeHistory();
+
+						// script: may in turn be followed by another identifier for partial or
+						// complete match, as before
+						String ident2=ts.matchIdentifier();
+						if (ident2 != null) {
+							hist.report(ident2);
+						} else {
+							hist.reportAll();
+						}
+					} else {
+						// no colon
+						codeHistory.report(ident);
+					}
 				} else {
 					codeHistory.reportAll();
 				}
 				String scriptName = objGlobal.getScriptName();
-				if (scriptName != null)
+				if (scriptName != null) {
 					objGlobal.outln("Current script name: " + scriptName);
+				}
 				return; // abort further processing
 			}
 			if (ts.matchStr(":")) {

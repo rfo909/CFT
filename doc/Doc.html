@@ -15,8 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2020-10-17 RFO
-v1.7.0
+Last updated: 2020-10-20 RFO
+v1.7.2
 
 </pre>
 
@@ -136,6 +136,16 @@ v1.7.0
 <pre>
   $ ?
 </pre>
+<p>
+  To show the code of a function:
+</p>
+<pre>
+  $ ? name
+</pre>
+<p>
+  If the name doesn't match one function, it is used as a prefix to list a subset
+  of all functions.
+</p>
 
 
 
@@ -1892,6 +1902,14 @@ codeDirs = . ; code.examples ; code.lib
 <p>
   This loads script Projects, then calls the Curr function inside.
 </p>
+<pre>
+  ./cft
+  ./cft scriptName [commandLines]*
+  ./cft -version
+  ./cft -help
+  ./cft -d scriptDir [scriptName [commandLines]*]?
+</pre>
+
 
 
 
@@ -1912,6 +1930,38 @@ codeDirs = . ; code.examples ; code.lib
 <p>
   Parameters are given as a list of values inside ()'s and may be omitted if no parameters.
 </p>
+
+
+
+
+
+<h2>Examining external scripts</h2>
+<p>
+  The '?' interactive command has an extended syntax that allows you to list functions inside
+  another script, as well as listing the code of particular function.
+</p>
+<pre>
+  $ ?Lib:                  # lists functions inside Lib
+  $ ?Lib:m                 # displays code of function 'm'
+</pre>
+
+
+
+
+
+
+
+<h2>Displaying all scripts</h2>
+<p>
+  The function Lib:Scripts displays all available scripts, sorted by the directories given
+  in the CFT.props file.
+</p>
+<p>
+  The shortcut @S calls this function.
+</p>
+
+
+
 
 
 

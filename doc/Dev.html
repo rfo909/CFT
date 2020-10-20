@@ -13,6 +13,20 @@
 
 <h1>CFT Change log</h1>
 
+<h3>v1.7.2 2020-10-20 Extend interactive '?' function</h3>
+<pre>
+	$ ?              show all functions
+	$ ?x             show functions x*
+	$ ?s:            show all functions in script s
+	$ ?s:y           show functions x* in script s
+</pre>
+<p>
+	Also extended List.last() function to take optional count.
+</p>
+<p>
+	Extended comment on PS:Call function, on how to invoke cmd functions like "dir".
+</p>
+
 <h3>v1.7.1 2020-10-20 Added -d startup option</h3>
 <p>
 	Added support for setting custom script directory, with
@@ -23,6 +37,13 @@
 <p>
 	Also added support for -help
 </p>
+<pre>
+  ./cft
+  ./cft scriptName [commandLines]*
+  ./cft -version
+  ./cft -help
+  ./cft -d scriptDir [scriptName [commandLines]*]?
+</pre>
 
 <h3>v1.7.0 2020-10-17 Templating improvement</h3>
 <p>

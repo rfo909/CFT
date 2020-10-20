@@ -518,12 +518,29 @@ public class ValueList extends Value {
             return "last";
         }
         public String getShortDesc() {
-            return "last() - returns last element or null if empty";
+            return "last(count?) - returns last element or null if empty, or if count given: list of N last elements";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 0) throw new Exception("Expected no parameters");
-            if(val.size()==0) return new ValueNull();
-            return val.get(val.size()-1);
+        	
+            if (params.size() == 0) {
+            	if(val.size()==0) return new ValueNull();
+            	return val.get(val.size()-1);
+            } else if (params.size() == 1) {
+            	int count=(int) getInt("count", params, 0);
+            	if (val.size()==0) return new ValueList(new ArrayList<Value>());
+            	
+            	List<Value> result=new ArrayList<Value>();
+            	int from=val.size()-count;
+            	if (from < 0) from=0;
+            	
+            	for (int i=from; i<val.size(); i++) {
+            		result.add(val.get(i));
+            	}
+            	return new ValueList(result);
+            	
+            } else {
+            	throw new Exception("Expected optional count parameter");
+            }
         }
     }
     

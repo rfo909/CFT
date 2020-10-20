@@ -36,8 +36,13 @@ Running remote commands with PowerShell.
 
 
 # Run PowerShell command on remote host, such as "get-service -name *"
-# To invoke a remote PowerShell script:  ". c:\temp\myscript.ps1 ..."
-# To invoke external program: "& git status"
+#
+# To invoke a remote PowerShell script:  
+#   ". c:\temp\myscript.ps1 ..."
+# To invoke external program: 
+#   "& git status"
+# To invoke cmd features: 
+#   "& cmd /c dir"
 # --
 P(1) =>host 
 P(2,"get-service") =>code
