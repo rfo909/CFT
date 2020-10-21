@@ -103,3 +103,62 @@ P(2, Input("Enter service").get) =>service
 
 
 
+
+# Primitive remote shell to multiple windows hosts via PowerShell
+# --
+P(1,Input("Shell Host").get) => host
+if (Val("sh.dirs")==null) {
+	ValDef("sh.dirs",Dict)
+}
+currDirs = Val("sh.dirs")  # default directories
+loop
+	println
+	readLine("[" + host + " " + currDirs.get(host,"c:\temp") + "] '.q' to quit, '.?' for help") => mode
+	break(mode==".q")
+
+	if (mode==".?") {
+		Sequence(
+			@ Enter command or type
+			@
+			@ '.h'  - change host
+			@ '.d'  - set directory manually
+			@ '.'   - enter or paste multiple lines - end with '.'
+			@ '.q'  - quit
+		)->line println(line)
+	} else if (mode==".h") {
+		Input("Shell Host").get => host
+		currDirs.get("host","c:\temp")
+	} else if (mode==".d")  {
+		readLine("New current directory") => dir
+		currDirs.set(host, dir)
+	} else {
+		if (mode==".") {
+			println("Enter code lines, then '.' to send")
+			scriptLines = readLines(".")
+		} else {
+			scriptLines=List(mode)
+		}
+		currDir = currDirs.get(host,"c:\temp")
+		scriptLines = List("cd " + currDir) + scriptLines + Sequence(
+			@ Write-Host "----------Output-Stops-Here----------"
+			@ $xxxxxx=Get-Location
+			@ Write-Host "RemotePath: $xxxxxx"
+		)
+
+
+		PS:RunScriptRemote(host,scriptLines) => status
+
+		# Process stdout
+		Inner { 
+			marker=false
+			status.stdout->line 
+				if(line.contains("---------Output-Stops-Here---------")) {marker=true}
+				if (!marker) println("    " + line)
+				if (marker && line.startsWith("RemotePath:")) {
+					currDirs.set(host, line.after(":").trim)
+				}
+		}	
+		# Process stdout				
+		Inner { status.stderr->line println("ERR " + line) }
+	}
+/sh
