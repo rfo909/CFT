@@ -217,7 +217,7 @@ loop
 
 # Create header
 	header = readLine("Enter header")
-	LogFile.append(Header(header))
+	LogFile.append(Header(Date.fmt + "  " + header))
 /LogHeader
 
 
