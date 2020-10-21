@@ -117,11 +117,9 @@ loop
 			println("---")
 			readLines(marker) =>lines
 			LogFile.append("")
-			LogFile.append("<<<<<<<<<<<<<<<< x")
 			Inner {
-				lines->line LogFile.append(line) 
+				lines->line LogFile.append("	" + line) 
 			}
-			LogFile.append(">>>>>>>>>>>>>>>> x")
 			LogFile.append("")
 		} else { 
 			# parse commands
@@ -208,9 +206,7 @@ loop
     readLines(endMarker) =>lines
     
 	LogFile.append("")
-	LogFile.append("<<<<<<<<<<<<<<<< x")
-    lines->line LogFile.append(line) |
-    LogFile.append(">>>>>>>>>>>>>>>> x")
+    lines->line LogFile.append("	" + line) |
     LogFile.append("")
 /LogPastedText
 
