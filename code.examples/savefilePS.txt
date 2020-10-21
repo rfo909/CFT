@@ -114,7 +114,7 @@ loop
 
 	if (mode==".?") {
 		Sequence(
-			@ Enter command or type
+			@ Enter multiple commands separated by semicolon or type
 			@
 			@ '.h'  - change host
 			@ '.d'  - set directory manually
@@ -132,10 +132,10 @@ loop
 			println("Enter code lines, then '.' to send")
 			scriptLines = readLines(".")
 		} else {
-			scriptLines=List(mode)
+			scriptLines=mode.split(";")
 		}
 		currDir = currDirs.get(host,"c:\temp")
-		scriptLines = List("cd " + currDir) + scriptLines + Sequence(
+		scriptLines = List("cd '" + currDir + "'") + scriptLines + Sequence(
 			@ Write-Host "----------Output-Stops-Here----------"
 			@ $xxxxxx=Get-Location
 			@ Write-Host "RemotePath: $xxxxxx"
