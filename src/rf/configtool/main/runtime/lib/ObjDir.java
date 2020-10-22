@@ -597,7 +597,7 @@ public class ObjDir extends Obj {
     }
 
 
-    private int startProcess (Ctx ctx, File input, File output, File stderr, List<Value> params, boolean waitForExit) throws Exception {
+    private Process startProcess (Ctx ctx, File input, File output, File stderr, List<Value> params) throws Exception {
 
     	int exitCode=-999;
     	
@@ -634,15 +634,8 @@ public class ObjDir extends Obj {
         
         long startTime=System.currentTimeMillis();
         Process process = processBuilder.start();
-        if (waitForExit) {
 
-           	String desc=program;
-        	exitCode=process.waitFor();
-            long endTime=System.currentTimeMillis();
-            long duration=endTime-startTime; 
-        }
-      
-        return exitCode;
+        return process;
         
     }
 
@@ -652,7 +645,7 @@ public class ObjDir extends Obj {
             return "runProcess";
         }
         public String getShortDesc() {
-            return "runProcess(stdinFile, stdoutFile, stdErrFile, list|...) - execute external program in background with file I/O";
+            return "runProcess(stdinFile, stdoutFile, stdErrFile, list|...) - execute external program in - returns Process object";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             ObjFile stdin = (ObjFile) getObj("stdinFile", params, 0);
@@ -663,9 +656,9 @@ public class ObjDir extends Obj {
               for (int i=3; i<params.size(); i++) cmd.add(params.get(i));
             
             
-            startProcess(ctx, stdin.getFile(), stdout.getFile(), stderr.getFile(), cmd, false);
-            return new ValueObj(self());
+            Process process = startProcess(ctx, stdin.getFile(), stdout.getFile(), stderr.getFile(), cmd);
 
+            return new ValueObj(new ObjProcess(process));
         }
     }
     
@@ -686,12 +679,13 @@ public class ObjDir extends Obj {
               for (int i=3; i<params.size(); i++) cmd.add(params.get(i));
             
             
-            int exitCode = startProcess(ctx, stdin.getFile(), stdout.getFile(), stderr.getFile(), cmd, true);
+            Process process = startProcess(ctx, stdin.getFile(), stdout.getFile(), stderr.getFile(), cmd);
+            int exitCode=process.waitFor();
+            
             return new ValueInt(exitCode);
 
         }
     }
-    
 
     class FunctionShowTree extends Function {
         public String getName() {

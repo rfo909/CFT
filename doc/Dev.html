@@ -13,6 +13,32 @@
 
 <h1>CFT Change log</h1>
 
+<h3>v1.7.3 2020-10-22 Process object</h3>
+<p>
+	Modified Dir.runProcess to return a Process object, with functions to 
+	detect if process is still alive, obtain its exit code, and destroy it.
+</p>
+<pre>
+# test
+	stdin  = Lib:TmpFile("in")
+	stdout = Lib:TmpFile("out")
+	stderr = Lib:TmpFile("err")
+
+	stdin.create("")
+	
+	process=Dir.runProcess(stdin,stdout,stderr,"ps -efal".split)
+	loop
+		println("Waiting")
+		Sys.sleep(1)
+		break(!process.isAlive)
+	|
+	println("exitCode=" + process.exitCode)
+	stdin.delete
+	if(stdout.exists) stdout.delete
+	if(stderr.exists) stderr.delete
+/t
+</pre>
+
 <h3>v1.7.2 2020-10-20 Extend interactive '?' function</h3>
 <pre>
 	$ ?              show all functions

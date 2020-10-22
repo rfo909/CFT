@@ -59,7 +59,7 @@ public class ExprBlock extends LexicalElement {
             if (ts.matchStr(CodeLines.PROGRAM_LINE_SEPARATOR)) continue;
             break;
         }
-    	ts.matchStr("}","expected '}' closing " + getBlockModeName());
+    	ts.matchStr("}","expected '}' closing " + getBlockModeName() + " starting at " + this.getSourceLocation());
     	
         this.programLines=progLines;
     
