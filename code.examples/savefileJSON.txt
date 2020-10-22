@@ -1,0 +1,134 @@
+# Readme
+<<<< EOF
+Simple recursive-descent parser for JSON. Works fine as long
+as the JSON string is correct.
+
+Run exampleParse() to test
+
+>>>> EOF
+/Readme
+
+
+
+# Build root Node for all known tokens in JSON
+# --
+	Lib.Text.Lexer.Node => root
+	
+	root.sub("{}:,[]").setIsToken(1)  # specials
+	root.sub(" ^n^r^t".unEsc).setIsToken(-1) # whitespace
+
+	digits = "0123456789"
+	root.sub(digits).setIsToken(2) => integer
+	integer.sub(digits,integer) # loop back
+	integer.sub(".").sub(digits).setIsToken(2) => float 
+	float.sub(digits,float) # loop back
+	
+	identFirstChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"
+	identInnerChars = identFirstChars + "0123456789"
+	
+	root.sub(identFirstChars).setIsToken(3) => ident
+	ident.sub(identInnerChars, ident) # loop back
+	
+	List('"',"'")->c 
+		root.sub(c) => insideString
+		insideString.setDefault(insideString)
+		insideString.sub(c).setIsToken(4)
+	|
+	
+	# return value is the root node
+	root
+/RootNode
+
+
+# Example JSON code
+# ---
+	Sequence(
+		@ {
+		@    'test': true,
+		@    number: 42,
+		@    'data' : {
+		@        ok : true
+		@    },
+		@    list : [
+		@       "a",11,"cc",{
+		@          "id" : "xyz", "number": 1
+		@       }
+		@    ]
+		@ }
+	)
+/exampleJSON
+
+
+# Example code for creating TokenStream
+# --
+	RootNode => root
+	Lib.Text.Lexer => lexer
+	exampleJSON->line lexer.processLine(root,line) |
+	lexer.getTokenStream
+/exampleTokenStream
+
+
+# RUNME: JSON parser
+ 
+	ts = exampleTokenStream
+	dict = MatchObject(ts)
+	println("parse ok")
+	println
+	exampleJSON->line println(line) |
+	println
+	
+	println("accessing list[3].id")
+	println("--------------------")
+	println(dict.get("list").nth(3).get('"id"'))
+/exampleParse
+
+	
+
+# object
+	P(1) => ts
+	obj = Dict
+	ts.match("{","expected '{'")
+	comma=false
+	loop
+		break(ts.match("}"))
+		if (comma) ts.match(",","expected comma or '}'") 
+		# match string or identifier + colon + Value
+		name=ts.peek  # optimistic parsing for now  
+		ts.next
+		ts.match(":","expected colon")
+		value=MatchValue(ts)
+		obj.set(name,value)
+		comma=true
+	|
+	obj
+/MatchObject
+
+# Value
+	P(1)=> ts
+	if (ts.peek()=="{") {
+		MatchObject(ts)
+	} else if (ts.peek()=="[") {
+		MatchList(ts)
+	} else {
+		str=ts.peek
+		ts.next
+		str
+	}
+/MatchValue
+
+# List
+	P(1) => ts
+	list = List
+	ts.match("[","expected '['")
+	comma=false
+	loop
+		break(ts.match("]"))
+		if (comma) ts.match(",","expected comma or ']'")
+		list.add(MatchValue(ts))
+		comma=true
+	|
+	list
+/MatchList
+		
+		
+		

@@ -7,80 +7,19 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2020-10-20 RFO
-v1.7.2
+Last updated: 2020-10-22 RFO
+v1.7.3
 ```
 # Introduction
 
 
-CFT is an interactive programmable shell-like application, for automation of all kinds.
+CFT is an interactive programmable environment for automation.
 
 
-It is a Java application that runs on the command line, and has no graphical elements, which
-means it can run everywhere. The syntax is compact, so as to be able to do useful
-work even entering code interactively, one line at a time.
+Automating tasks is done by creating functions, which are named sequences
+of code. Functions call each other, as well as a library of global functions, and functions
+inside system objects, such as:
 
-
-Automating tasks is done by creating functions, which initially are named sequences
-of code. Functions call each other, as well as a library of global functions.
-
-
-CFT is tested on Linux and Windows, and easily integrates with external commands
-on both, such as PowerShell, git, ssh. It should run anywhere that supports Java.
-
-
-Development has been going on since May 2018, and v1.0 towards end of June 2020
-marked a certain level of robustness and error
-handling, being mature enough for open source release on github.
-
-
-As the language evolved, CFT has been moving away from strictly entering code via the
-command line, to editing the save files, which are referred to as "script files". This allows
-multiple-line functions, and makes CFT suitable for more complex tasks.
-
-# Functionality
-
-
-The CFT programming language is thought to act as glue between library functions and objects,
-and the ability to run external programs. In that respect, CFT is similar to shell scripts,
-where major functionality depends on external programs.
-
-
-CFT is object oriented in the sense that everything is objects. Entering the integer 1 on the
-command line, is an expression which resolves into a value object of type "int". All objects
-have member functions, for example the "bin()" function on integers, that returns the number
-as a binary string.
-
-```
-$ 1.bin
-<String>
-00000001
-```
-
-Here the '$' is the prompt.
-
-
-The ".bin" calls the function "bin" inside the integer object. Parantheses are optional when no parameters.
-
-## System functions and objects
-
-
-A number of global functions are available, and all produce objects of some sort, where
-we may in turn call other functions, and so on.
-
-
-The global functions are available from the command line as follows:
-
-```
-$ help
-```
-
-Global functions give access to objects of different types. Some of the most important
-and frequently used are:
-
-
-
-- lists
 
 
 - directories
@@ -89,7 +28,53 @@ and frequently used are:
 - files
 
 
+- lists
+
+
 - dictionaries
+
+
+
+CFT is tested on Linux and Windows, and easily integrates with external commands
+on both, such as PowerShell, git, ssh. It should run anywhere that supports Java.
+
+
+Development has been going on since May 2018, and on github since July 2020.
+
+# Functionality
+
+
+The CFT programming language is thought to act as glue between library functions and objects
+(including user input) and running external programs in different ways.
+
+
+CFT is object oriented in the sense that everything is objects. Entering the integer 1 on the
+command line, it is seen as an expression which resolves into a value object of type "int". All objects
+have member functions, for example the "bin()" function on integers, that returns the number
+as a binary string. The '$' is the CFT prompt.
+
+```
+$ 1.bin
+<String>
+00000001
+```
+
+The ".bin" calls the function "bin" inside the integer object. Parantheses are optional when no parameters.
+
+```
+$ Dir.files.length
+<int>
+12
+```
+
+
+- The "Dir" global function returns the current directory as a Dir-object
+
+
+- We call the "files" function in the directory object, it returns a list object
+
+
+- We call the "length" function in the list object, it returns an int object
 
 
 # Getting help
@@ -115,7 +100,24 @@ $ Dict help
 $ Dir help
 $ File("x.txt") help   # the file needs not exist
 ```
-## Show your own functions
+# Create functions
+
+```
+$ Dir.files.length
+<int>
+12
+$ /filesInDir
+```
+
+The code line that gives us the number of files in the current directory is now named "filesInDir", and can
+be run again as follows:
+
+```
+$ filesInDir
+<int>
+12
+```
+## Show your functions
 
 
 List the functions that you have defined by typing
@@ -133,15 +135,58 @@ $ ? name
 If the name doesn't match one function, it is used as a prefix to list a subset
 of all functions.
 
+# Save and load
+
+
+Functions are saved into script files, via "colon" commands, which are system commands outside
+the CFT language.
+
+```
+$ :save myscript
+$ :load otherscript
+```
+# Edit script file
+
+
+Instead of entering code via the command line, the script file can easily be opened in
+an editor. To do this, the current script must be saved, then enter the following:
+
+```
+$ @e
+```
+
+This opens the script in an editor. On linux you will be asked which editor you prefer.
+This is remembered within the session. To use a different editor, type @ee instead.
+
+
+After changing a script in the editor, and saving, CFT automatically detects the change, and
+reloads the script the next time you press ENTER.
+
+# Shortcuts vs colon commands
+
+
+Shortcuts are ways of running code, while colon commands are system commands.
+
+
+View all colon commands:
+
+```
+$ :
+```
+
+View all shortcuts:
+
+```
+$ @
+```
+
+Shortcuts are defined in the CFT.props file.
+
 # CFT as a shell
 
 
 Commands like "ls" and "cd" exist, with globbing, as well as "more" and "edit" (which opens a file
 in an editor), and they are meant for moving around the directory tree.
-
-
-Actually changing
-and moving files and directories is supposed to be scripted with code.
 
 ```
 $ pwd
@@ -149,8 +194,22 @@ $ cd ..
 $ ls *.txt
 ```
 
-CFT differs from traditional *ix / *ux shells, in that it works with objects, not just strings.
+Performing changes, such as copying, deleting and creating files, is supposed to be scripted
+with code, so no "command line" style functionality exists for this. Example:
 
+```
+$ Dir.file("xxx.txt").delete
+```
+
+Or you can run the global "shell" function, perform your changes there, then return via "exit":
+
+```
+$ shell
+roar@pc01$ rm xxx.txt
+roar@pc01$ exit
+# Running bash completed
+$
+```
 ## Show content of file
 
 
@@ -165,52 +224,41 @@ $ more TODO.txt
 ```
 $ edit TODO.txt
 ```
-# Automation - creating functions
-
-
-Automation is in its simplest form to assign a name to a sequences of statements.
+# Introduction to loops
 
 ```
 $ Dir.allFiles(Glob("*.java"))
 ```
 
 This line of code generates a list of all java files under the current directory or sub-directories.
-To save typing, we may want to assign a name to the code. This is done by entering a slash followed by
-an identifier.
+When we are satisfied with the result of the code line, we give it a name.
 
 ```
 $ /JavaFiles
 ```
 
-Now every time we want the list of java files, we just type JavaFiles.
+Now every time we want the list of java files, we just type JavaFiles. Now we use it to create
+the "linecount" function, which sums up number of lines in all the java files.
 
 ```
 $ JavaFiles->f out(f.read.length) | _.sum
+<int>
+18946
+/linecount
 ```
 
-This single line of code now counts the number of lines in all the files, and sums them up.
+The "arrow" followed by an identifier is the "for each" construct, and the out() statement
+is used to generate output from the loop.
 
 
-
-- the "arrow" followed by an identifier is the "for each" construct
-
-
-- the out() statement generates output from the loop
-
-
-- the "pipe" character terminates the loop, and delivers the result to the next part, where ...
-
-
-- the special expression '_' just means "get value on top of stack", which in this case is a list ...
-
-
-- on which we call the "sum()" function
-
+The "pipe" character terminates the loop, and delivers the result (list of int) to the next part,
+where the "_" (underscore) symbol picks it off the stack, then calls the sum() function on it,
+returning a single int value.
 
 # List basics
 
 
-Lists are return value from many functions, such as getting the files in a directoryu. Lists
+Lists are return value from many functions, such as getting the files in a directory. Lists
 can also be created
 with the global List() function, which takes any number of parameters, and creates a List object
 from those values.
@@ -220,6 +268,7 @@ $ List(1,2,3,4)
 $ Dir.files
 $ "abcdef".chars
 $ "one two three".split
+$ "one:two:three".split(":")
 ```
 
 Many functions are available on a List object. One frequently used is "nth", which
@@ -231,7 +280,7 @@ $ List("a","b","c").nth
 a
 ```
 
-For details of available functions, as always use the help system:
+For details of available functions, use the help system:
 
 ```
 $ List help
@@ -257,7 +306,7 @@ path in the parameter to File(), or use the file() function inside
 some Dir object:
 
 ```
-$ SomeDirExpression.file("x.txt")
+$ Dir.sub("src").file("x.txt")
 ```
 ## Page through a file
 
@@ -366,6 +415,14 @@ $ shell
 exit
 # Running /usr/bin/bash completed: 25529ms
 $
+```
+
+The shell function is configured in the CFT.props file which must exist in the CFT
+home directory.
+
+```
+shell = bash
+winShell = powershell
 ```
 # Core types
 
@@ -522,34 +579,6 @@ List(1,2)+3
 2
 3
 ```
-# Creating functions
-
-## Naming lines of code
-
-
-When some code does what we want, we typically create a function from it. This is done by entering
-
-```
-... (some code) ...
-/name
-```
-
-This assigns the name "name" to the last line, and we have now created a custom function.
-
-```
-$ "java txt html".split
-$ /Types
-$ Dir.allFiles-> f assert(Types.contains(f.name.afterLast("."))) out(f)
-$ /TextFiles
-```
-## Calling a function
-
-
-To call the above function, just enter its name.
-
-```
-TextFiles
-```
 # Savefiles
 
 ## Save
@@ -663,16 +692,6 @@ an external program, or even to create a new File object (which will not be prot
 ```
 File(protectedFile.path)
 ```
-## Laziness is our friend
-
-
-Usually we will reuse an existing function over creating a new one that does the same.
-
-
-It may be good design to create functions that return top directories, and protect those
-where we don't want to introduce changes, with secondary functions for locating sub-content,
-depending on the first function to produce the start point.
-
 # More programming
 
 ## Local variables
@@ -778,31 +797,6 @@ element on the stack after all code has executed. If there is no value on the st
 the return value is 
 **null**.
 
-## Editing script files
-
-
-After saving, a script file is created. It can be edited with any editor. CFT automatically detects
-if it has been changed, and reloads it when issuing the next interactive command.
-
-
-There also exists a shortcut, which opens the current script file in an editor:
-
-```
-$ @e
-```
-
-For windows, it starts notepad. For linux, there is a selection list, where one identifies
-which editor to use. This is remembered for the rest of the session.
-
-
-To reset the selection:
-
-```
-$ @ee
-```
-
-Shortcuts are user-defineable in the CFT.props file
-
 ### Comments
 
 
@@ -816,19 +810,22 @@ identifies the parameter by position. Note that
 **parameter position is 1-based**.
 
 ```
-$ P(1)=>a P(2)=>b a+b   # fails!
+$ P(1)=>a P(2)=>b a+b
 ```
 
-If you enter the above code interactively, it will fail, complaining that you can not add
-"null + null". This is because there is no call yet, and so there are no parameter values. This is
-fixed by letting the P() expression take a second parameters, which is a default value expression.
+This is a valid function, but entering it interactively fails, because it is immediately
+parsed and executed, and there are no parameters. To overcome this, the P() expressions
+take a second parameter, which is a default value.
 
 
-The default value parameter to P() is important for three reasons.
+The default value parameter to P() is important for several reasons.
 
 
 
 - Allows the function code to execute while being developed interactively
+
+
+- Allows for default values when function is called without parameters, or when called with null-values
 
 
 - May act as documentation in the source
@@ -839,36 +836,17 @@ as the default expression is evaluated only when parameter is not given (or is n
 and may then ask the user to input the value.
 
 
-### Simple example
 
-
-Here we make an improved version of the JavaFiles function, that takes a directory parameter, and if none given, uses the current directory ("Dir").
+Above example again, now with default values for parameters:
 
 ```
-$ P(1,Dir) =>dir dir.allFiles->f assert(f.name.endsWith(".java")) out(f)
-:
-: (code result)
-:
-$ /JavaFiles
-```
-
-Typing this code interactively means it gets executed directly, with no actuall call
-parameters. This means P(1) is null, and so the default value ("Dir") is used, which means
-the code runs on current directory.
-
-
-After defining the function, we may call it without parameters, or supply null for
-a given parameter, which again means the
-default expression is used, and the code again executes on current directory.
-
-
-But now we can let this function run on a custom Dir object, regardless of the current
-directory.
-
-```
-$ Dir("/home/user/project1")
-$ /DirProject1
-$ JavaFiles(DirProject1)
+$ P(1,1)=>a P(2,2)=>b a+b
+<int>
+3
+$ /f
+$ f(5,10)
+<int>
+15
 ```
 ## User input
 
@@ -1197,11 +1175,9 @@ $ ssh-copy-id user@host
 
 
 This function is similar to Dir.runProcessWait(), as it uses files for input and output,
-but the program is then detached from the main thread, with runProcess() returning immediately.
-For this reason it can not give the exit status of the external program.
-
-
-The external program terminates when it has completed, or the process is killed.
+but the program is then detached from the main thread, returning a Process object, with
+functions to check is process is alive, to get exit code (after it has terminated) or
+destroy it forcefully.
 
 ## External Program Status
 

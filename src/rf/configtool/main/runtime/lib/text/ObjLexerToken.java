@@ -58,6 +58,10 @@ public class ObjLexerToken extends Obj {
     	return tokenType;
     }
     
+    public String getStr() {
+    	return str;
+    }
+    
     @Override
     public boolean eq(Obj x) {
         return x==this;

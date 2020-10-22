@@ -15,56 +15,48 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2020-10-20 RFO
-v1.7.2
+Last updated: 2020-10-22 RFO
+v1.7.3
 
 </pre>
 
 <h1>Introduction</h1>
 
 <p>
-  CFT is an interactive programmable shell-like application, for automation of all kinds.
+  CFT is an interactive programmable environment for automation.
 </p>
 <p>
-  It is a Java application that runs on the command line, and has no graphical elements, which
-  means it can run everywhere. The syntax is compact, so as to be able to do useful
-  work even entering code interactively, one line at a time.
+  Automating tasks is done by creating functions, which are named sequences
+  of code. Functions call each other, as well as a library of global functions, and functions
+  inside system objects, such as:
 </p>
-<p>
-  Automating tasks is done by creating functions, which initially are named sequences
-  of code. Functions call each other, as well as a library of global functions.
-</p>
+<ul>
+  <li>directories</li>
+  <li>files</li>
+  <li>lists</li>
+  <li>dictionaries</li>
+</ul>
 <p>
   CFT is tested on Linux and Windows, and easily integrates with external commands
   on both, such as PowerShell, git, ssh. It should run anywhere that supports Java.
 </p>
 
 <p>
-  Development has been going on since May 2018, and v1.0 towards end of June 2020
-  marked a certain level of robustness and error
-  handling, being mature enough for open source release on github. 
+  Development has been going on since May 2018, and on github since July 2020.
 </p>
-
-<p>
-  As the language evolved, CFT has been moving away from strictly entering code via the
-  command line, to editing the save files, which are referred to as "script files". This allows
-  multiple-line functions, and makes CFT suitable for more complex tasks. 
-</p>
-
 
 
 
 <h1>Functionality</h1>
 <p>
-  The CFT programming language is thought to act as glue between library functions and objects,
-  and the ability to run external programs. In that respect, CFT is similar to shell scripts,
-  where major functionality depends on external programs.
+  The CFT programming language is thought to act as glue between library functions and objects
+  (including user input) and running external programs in different ways.
 </p>
 <p>
   CFT is object oriented in the sense that everything is objects. Entering the integer 1 on the
-  command line, is an expression which resolves into a value object of type "int". All objects
+  command line, it is seen as an expression which resolves into a value object of type "int". All objects
   have member functions, for example the "bin()" function on integers, that returns the number
-  as a binary string.
+  as a binary string. The '$' is the CFT prompt.
 </p>
 <pre>
   $ 1.bin
@@ -72,36 +64,19 @@ v1.7.2
   00000001
 </pre>
 <p>
-  Here the '$' is the prompt.
-</p>
-<p>
   The ".bin" calls the function "bin" inside the integer object. Parantheses are optional when no parameters.
 </p>
 
-
-<h2>System functions and objects</h2>
-<p>
-  A number of global functions are available, and all produce objects of some sort, where
-  we may in turn call other functions, and so on. 
-</p>
-<p>
-  The global functions are available from the command line as follows:
-</p>
 <pre>
-  $ help
+  $ Dir.files.length
+  &lt;int&gt;
+  12
 </pre>
-<p>
-  Global functions give access to objects of different types. Some of the most important
-  and frequently used are:
-</p>
-<ul>
-  <li>lists</li>
-  <li>directories</li>
-  <li>files</li>
-  <li>dictionaries</li>
-</ul>
-
-
+<ol>
+  <li>The "Dir" global function returns the current directory as a Dir-object</li>
+  <li>We call the "files" function in the directory object, it returns a list object</li>
+  <li>We call the "length" function in the list object, it returns an int object</li>
+</ol>
 
 <h1>Getting help</h1>
 
@@ -129,7 +104,26 @@ v1.7.2
 
 
 
-<h2>Show your own functions</h2>
+<h1>Create functions</h1>
+<pre>
+  $ Dir.files.length
+  &lt;int&gt;
+  12
+  $ /filesInDir
+</pre>
+<p>
+  The code line that gives us the number of files in the current directory is now named "filesInDir", and can
+  be run again as follows:
+</p>
+<pre>
+  $ filesInDir
+  &lt;int&gt;
+  12
+</pre>
+
+
+
+<h2>Show your functions</h2>
 <p>
   List the functions that you have defined by typing
 </p>
@@ -149,15 +143,67 @@ v1.7.2
 
 
 
+<h1>Save and load</h1>
+<p>
+  Functions are saved into script files, via "colon" commands, which are system commands outside
+  the CFT language.
+</p>
+<pre>
+  $ :save myscript
+  $ :load otherscript
+</pre>
+
+
+
+<h1>Edit script file</h1>
+<p>
+  Instead of entering code via the command line, the script file can easily be opened in
+  an editor. To do this, the current script must be saved, then enter the following:
+</p>
+<pre>
+  $ @e
+</pre>
+<p>
+  This opens the script in an editor. On linux you will be asked which editor you prefer.
+  This is remembered within the session. To use a different editor, type @ee instead.
+</p>
+<p>
+  After changing a script in the editor, and saving, CFT automatically detects the change, and
+  reloads the script the next time you press ENTER.
+</p>
+
+
+
+<h1>Shortcuts vs colon commands</h1>
+<p>
+  Shortcuts are ways of running code, while colon commands are system commands.
+</p>
+<p>
+  View all colon commands:
+</p>
+<pre>
+  $ :
+</pre>
+
+<p>
+  View all shortcuts:
+</p>
+<pre>
+  $ @
+</pre>
+<p>
+  Shortcuts are defined in the CFT.props file.
+</p>
+
+
+
+
+
 
 <h1>CFT as a shell</h1>
 <p>
   Commands like "ls" and "cd" exist, with globbing, as well as "more" and "edit" (which opens a file
   in an editor), and they are meant for moving around the directory tree.
-</p>
-<p>
-  Actually changing 
-  and moving files and directories is supposed to be scripted with code.
 </p>
 <pre>
   $ pwd
@@ -166,9 +212,22 @@ v1.7.2
 </pre>
 
 <p>
-  CFT differs from traditional *ix / *ux shells, in that it works with objects, not just strings.
+  Performing changes, such as copying, deleting and creating files, is supposed to be scripted
+  with code, so no "command line" style functionality exists for this. Example:
 </p>
-
+<pre>
+  $ Dir.file("xxx.txt").delete
+</pre>
+<p>
+  Or you can run the global "shell" function, perform your changes there, then return via "exit":
+</p>
+<pre>
+  $ shell
+  roar@pc01$ rm xxx.txt
+  roar@pc01$ exit
+    # Running bash completed
+  $
+</pre>
 
 
 
@@ -190,39 +249,42 @@ v1.7.2
 
 
 
-<h1>Automation - creating functions</h1>
-<p>
-  Automation is in its simplest form to assign a name to a sequences of statements.
-</p>
+<h1>Introduction to loops</h1>
 
 <pre>
   $ Dir.allFiles(Glob("*.java"))
 </pre>
 <p>
-  This line of code generates a list of all java files under the current directory or sub-directories. 
-  To save typing, we may want to assign a name to the code. This is done by entering a slash followed by
-  an identifier.
+  This line of code generates a list of all java files under the current directory or sub-directories.
+  When we are satisfied with the result of the code line, we give it a name.
 </p>
 
 <pre>
   $ /JavaFiles
 </pre>
+
 <p>
-  Now every time we want the list of java files, we just type JavaFiles.
+  Now every time we want the list of java files, we just type JavaFiles. Now we use it to create
+  the "linecount" function, which sums up number of lines in all the java files.
 </p>
 <pre>
   $ JavaFiles-&gt;f out(f.read.length) | _.sum
+  &lt;int&gt;
+  18946
+  /linecount
 </pre>
+
+
 <p>
-  This single line of code now counts the number of lines in all the files, and sums them up. 
+  The "arrow" followed by an identifier is the "for each" construct, and the out() statement
+  is used to generate output from the loop.
 </p>
-<ol>
-  <li>the "arrow" followed by an identifier is the "for each" construct</li>
-  <li>the out() statement generates output from the loop</li>
-  <li>the "pipe" character terminates the loop, and delivers the result to the next part, where ...</li>
-  <li>the special expression '_' just means "get value on top of stack", which in this case is a list ...</li>
-  <li>on which we call the "sum()" function</li>
-</ol>
+<p>
+  The "pipe" character terminates the loop, and delivers the result (list of int) to the next part,
+  where the "_" (underscore) symbol picks it off the stack, then calls the sum() function on it,
+  returning a single int value.
+</p>
+
 
 
 
@@ -230,17 +292,17 @@ v1.7.2
 
 <h1>List basics</h1>
 <p>
-  Lists are return value from many functions, such as getting the files in a directoryu. Lists
+  Lists are return value from many functions, such as getting the files in a directory. Lists
   can also be created 
   with the global List() function, which takes any number of parameters, and creates a List object
   from those values.
 </p>
 <pre>
   $ List(1,2,3,4)
-
   $ Dir.files
   $ "abcdef".chars
   $ "one two three".split
+  $ "one:two:three".split(":")
 </pre>
 
 <p>
@@ -254,7 +316,7 @@ v1.7.2
 </pre>
 
 <p>
-  For details of available functions, as always use the help system:
+  For details of available functions, use the help system:
 </p>
 <pre>
   $ List help
@@ -287,7 +349,7 @@ v1.7.2
   some Dir object:
 </p>
 <pre>
-  $ SomeDirExpression.file("x.txt")
+  $ Dir.sub("src").file("x.txt")
 </pre>
 
 
@@ -301,6 +363,8 @@ v1.7.2
 <pre>
   more x.txt
 </pre>
+
+
 
 <h2>Show bytes of file</h2>
 <p>
@@ -407,6 +471,15 @@ v1.7.2
   # Running /usr/bin/bash completed: 25529ms
   $
 </pre>
+<p>
+  The shell function is configured in the CFT.props file which must exist in the CFT 
+  home directory.
+</p>
+<pre>
+  shell = bash
+  winShell = powershell
+</pre>
+
 
 
 
@@ -588,42 +661,6 @@ v1.7.2
 
 
 
-<h1>Creating functions</h1>
-
-
-
-<h2>Naming lines of code</h2>
-<p>
-  When some code does what we want, we typically create a function from it. This is done by entering
-</p>
-<pre>
-  ... (some code) ...
-  /name
-</pre>
-<p>
-  This assigns the name "name" to the last line, and we have now created a custom function.
-</p>
-
-<pre>
-  $ "java txt html".split
-  $ /Types
-
-  $ Dir.allFiles-&gt; f assert(Types.contains(f.name.afterLast("."))) out(f)
-  $ /TextFiles
-</pre>
-
-
-
-<h2>Calling a function</h2>
-<p>
-  To call the above function, just enter its name.
-</p>
-<pre>
-  TextFiles
-</pre>
-
-
-
 <h1>Savefiles</h1>
 <h2>Save</h2>
 <p>
@@ -742,15 +779,6 @@ codeDirs = . ; code.examples ; code.lib
   File(protectedFile.path)
 </pre>
 
-<h2>Laziness is our friend</h2>
-<p>
-  Usually we will reuse an existing function over creating a new one that does the same.
-</p>
-<p>
-  It may be good design to create functions that return top directories, and protect those
-  where we don't want to introduce changes, with secondary functions for locating sub-content, 
-  depending on the first function to produce the start point. 
-</p>
 
 
 
@@ -878,32 +906,6 @@ codeDirs = . ; code.examples ; code.lib
 
 
 
-<h2>Editing script files</h2>
-<p>
-  After saving, a script file is created. It can be edited with any editor. CFT automatically detects
-  if it has been changed, and reloads it when issuing the next interactive command.
-</p>
-<p>
-  There also exists a shortcut, which opens the current script file in an editor:
-</p>
-<pre>
-  $ @e
-</pre>
-
-<p>
-  For windows, it starts notepad. For linux, there is a selection list, where one identifies 
-  which editor to use. This is remembered for the rest of the session.
-</p>
-<p>
-  To reset the selection:
-</p>
-<pre>
-  $ @ee
-</pre>
-
-<p>
-  Shortcuts are user-defineable in the CFT.props file
-</p>
 
 <h3>Comments</h3>
 <p>
@@ -926,18 +928,19 @@ codeDirs = . ; code.examples ; code.lib
   identifies the parameter by position. Note that <em>parameter position is 1-based</em>.  
 </p>
 <pre>
-  $ P(1)=&gt;a P(2)=&gt;b a+b   # fails!
+  $ P(1)=&gt;a P(2)=&gt;b a+b
 </pre>
 <p>
-  If you enter the above code interactively, it will fail, complaining that you can not add
-  "null + null". This is because there is no call yet, and so there are no parameter values. This is 
-  fixed by letting the P() expression take a second parameters, which is a default value expression.
+  This is a valid function, but entering it interactively fails, because it is immediately
+  parsed and executed, and there are no parameters. To overcome this, the P() expressions
+  take a second parameter, which is a default value.
 </p>
 <p>
-  The default value parameter to P() is important for three reasons.
+  The default value parameter to P() is important for several reasons.
 </p>
 <ol>
   <li>Allows the function code to execute while being developed interactively</li> 
+  <li>Allows for default values when function is called without parameters, or when called with null-values</li>
   <li>May act as documentation in the source</li>
   <li>
     Provides an elegant way of making functions interactive and non-interactive at the same time, 
@@ -945,42 +948,20 @@ codeDirs = . ; code.examples ; code.lib
     and may then ask the user to input the value.
 </li>
 </ol>
-
-
-
-
-<h3>Simple example</h3>
 <p>
-  Here we make an improved version of the JavaFiles function, that takes a directory parameter, and if none given, uses the current directory ("Dir").
+  Above example again, now with default values for parameters:
 </p>
 <pre>
-  $ P(1,Dir) =&gt;dir dir.allFiles-&gt;f assert(f.name.endsWith(".java")) out(f)
-     :
-     : (code result)
-     :
-  $ /JavaFiles
+  $ P(1,1)=&gt;a P(2,2)=&gt;b a+b
+  &lt;int&gt;
+  3
+  $ /f
+  $ f(5,10)
+  &lt;int&gt;
+  15
 </pre>
 
-<p>
-  Typing this code interactively means it gets executed directly, with no actuall call
-  parameters. This means P(1) is null, and so the default value ("Dir") is used, which means
-  the code runs on current directory.
-</p>
-<p>
-  After defining the function, we may call it without parameters, or supply null for
-  a given parameter, which again means the 
-  default expression is used, and the code again executes on current directory.
-</p>
-<p>
-  But now we can let this function run on a custom Dir object, regardless of the current
-  directory.
-</p>
-<pre>
-  $ Dir("/home/user/project1")
-  $ /DirProject1
 
-  $ JavaFiles(DirProject1)
-</pre>
 
 
 
@@ -1349,11 +1330,9 @@ codeDirs = . ; code.examples ; code.lib
 <h2>Dir.runProcess()</h2>
 <p>
   This function is similar to Dir.runProcessWait(), as it uses files for input and output,
-  but the program is then detached from the main thread, with runProcess() returning immediately.
-  For this reason it can not give the exit status of the external program.
-</p>
-<p>
-  The external program terminates when it has completed, or the process is killed.
+  but the program is then detached from the main thread, returning a Process object, with
+  functions to check is process is alive, to get exit code (after it has terminated) or
+  destroy it forcefully.
 </p>
 
 

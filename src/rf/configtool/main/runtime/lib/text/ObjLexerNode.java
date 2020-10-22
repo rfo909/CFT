@@ -49,7 +49,6 @@ public class ObjLexerNode extends Obj {
 
 	private String firstChars;
 	private CharTable charTable;
-	private ValueBlock postLambda;
 	
 
 	private ObjLexerNode() {
@@ -59,7 +58,6 @@ public class ObjLexerNode extends Obj {
 		this.add(new FunctionSetIsToken());
 		this.add(new FunctionMatch());
 		this.add(new FunctionAddTokenComplex());
-		this.add(new FunctionPost());
 	}
 
 	public ObjLexerNode(String firstChars) {
@@ -94,10 +92,6 @@ public class ObjLexerNode extends Obj {
 
 	public void setDefaultMapping(ObjLexerNode node) {
 		charTable.setDefaultMapping(node.getCharTable());
-	}
-	
-	public ValueBlock getPostLambda() {
-		return postLambda;
 	}
 	
 	public Obj theObj() {
@@ -315,27 +309,6 @@ public class ObjLexerNode extends Obj {
 			}
 			ObjDict charMap=(ObjDict) obj;
 			return new ValueObj(addTokenComplex(token, charMap));
-		}
-	}
-
-
-	class FunctionPost extends Function {
-		public String getName() {
-			return "post";
-		}
-
-		public String getShortDesc() {
-			return "post(lambda) - adds post-processing lambda P(1) - returns self";
-		}
-
-		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-			if (params.size() != 1)
-				throw new Exception("Expected lambda parameter");
-			
-			if (!(params.get(0) instanceof ValueBlock)) throw new Exception("Expected lambda parameter");
-			
-			postLambda = (ValueBlock) params.get(0); 
-			return new ValueObj(theObj());
 		}
 	}
 

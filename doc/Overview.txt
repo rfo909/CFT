@@ -5,18 +5,25 @@ Generated file - see script file savefileOverview.txt
 Introduction
 
 Functionality
- * System functions and objects
 
 Getting help
  * Show all global functions
  * Show functions inside objects
- * Show your own functions
+
+Create functions
+ * Show your functions
+
+Save and load
+
+Edit script file
+
+Shortcuts vs colon commands
 
 CFT as a shell
  * Show content of file
  * Open a file in editor
 
-Automation - creating functions
+Introduction to loops
 
 List basics
 
@@ -48,10 +55,6 @@ List iteration / filtering
  * The condOut() statement
  * List addition
 
-Creating functions
- * Naming lines of code
- * Calling a function
-
 Savefiles
  * Save
  * Load
@@ -62,7 +65,6 @@ Savefiles
 Protecting files and directories
  * Example
  * No guarantee
- * Laziness is our friend
 
 More programming
  * Local variables
@@ -71,10 +73,8 @@ More programming
  * Result value from a loop space
  |   If the loop space contains looping ...
  |   Otherwise ...
- * Editing script files
  |   Comments
  * Function parameters
- |   Simple example
  * User input
  * Block expressions
  |   Local blocks

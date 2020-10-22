@@ -43,6 +43,20 @@ public class ObjLexerTokenStream extends Obj {
     	this.tokens=tokens;
     	
     	this.add(new FunctionSourceLocation());
+    	this.add(new FunctionEOF());
+    	this.add(new FunctionPeek());
+    	this.add(new FunctionMatch());
+    	this.add(new FunctionPeekType());
+    	this.add(new FunctionNext());
+    }
+    
+    private ObjLexerToken curr() throws Exception {
+    	if (pos >= tokens.size()) throw new Exception("At EOF");
+    	return tokens.get(pos);
+    }
+    
+    private Obj self() {
+    	return this;
     }
     
     @Override
@@ -88,6 +102,92 @@ public class ObjLexerTokenStream extends Obj {
         	return new ValueString(tokens.get(pos).getSourceLocation());
         }
     }
+    
+    
+    class FunctionEOF extends Function {
+        public String getName() {
+            return "EOF";
+        }
+        public String getShortDesc() {
+            return "EOF() - true when end of data";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 0) throw new Exception("Expected no parameters");
+        	return new ValueBoolean(pos >= tokens.size());
+        }
+    }
+    
+    class FunctionPeek extends Function {
+        public String getName() {
+            return "peek";
+        }
+        public String getShortDesc() {
+            return "peek() - string represenation of next token";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 0) throw new Exception("Expected no parameters");
+        	return new ValueString(curr().getStr());
+        }
+    }
+    
+    class FunctionMatch extends Function {
+        public String getName() {
+            return "match";
+        }
+        public String getShortDesc() {
+            return "match(str, errMsg?) - if match, advance curr pos and return true, otherwise, if errMsg, return error, otherwise just return false";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	String str;
+        	String errMsg;
+        	if (params.size() == 1 || params.size() == 2) {
+               	str=getString("str", params, 0);
+               	if (params.size()==2) {
+               		errMsg=getString("errMsg", params, 1);
+               	} else {
+               		errMsg=null;
+               	}
+        	} else {
+        		throw new Exception("Expected parameters str, errMsg?");
+        	}
+        	
+        	if (curr().getStr().equals(str)) {
+        		pos++;
+        		return new ValueBoolean(true);
+        	} else {
+        		if (errMsg != null) throw new Exception(curr().getSourceLocation() + " " + errMsg);
+        		return new ValueBoolean(false);
+        	}
+        }
+    }
+    
+    class FunctionPeekType extends Function {
+        public String getName() {
+            return "peekType";
+        }
+        public String getShortDesc() {
+            return "peekType() - type (int) of next token";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 0) throw new Exception("Expected no parameters");
+        	return new ValueInt(curr().getTokenType());
+        }
+    }
+    	
+    class FunctionNext extends Function {
+        public String getName() {
+            return "next";
+        }
+        public String getShortDesc() {
+            return "next() - move to next token";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 0) throw new Exception("Expected no parameters");
+        	pos++;
+        	return new ValueObj(self());
+        }
+    }
+
     
     
     
