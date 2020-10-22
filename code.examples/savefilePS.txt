@@ -44,7 +44,10 @@ P(1) =>host
 P(2,"get-service") =>code
 P(3,List) => stdin
 P(4,false) => acceptError
-    println("[" + host + "] Executing " + code)
+P(5,false) => verbose
+    if (verbose) {
+        println("[" + host + "] Executing " + code)
+    }
     List("powershell","invoke-command","-computername",host,"-scriptblock","{" + code + "}") =>cmd
     Lib:run(cmd, stdin, acceptError)
 /Call
