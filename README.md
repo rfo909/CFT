@@ -3,36 +3,16 @@
 
 
 CFT is a shell-like terminal based Java application, and a programming language, created to interactively
-build code for all kinds of automation.
+build code for all kinds of automation: creating configuration files, copying files, searching through
+logs and running external programs to start/stop services, etc.
 
-```
-Dir("/home/user/projects/whatever/src")
-/SourceDir
-
-
-"c h cpp".split
-/FileTypes
-
-
-SourceDir.allFiles->f assert(FileTypes.contains(f.name.afterLast("."))) out(f)
-/SourceFiles
-
-
-Grep(Input("Search term").get)
-/GetGrepObj
- 
- 
-grepObj=GetGrepObj SourceFiles->f 
-	grepObj.file(f)->line 
-		report(line.file.name, line.lineNumber, line)
-/Search
-```
 
 # Download and compile
 
 The project is written in Java and built using Apache ANT, which results in a single JAR file. 
 It runs on both Linux and 
 Windows, and has no dependencies outside of standard Java libraries.
+
 
 Once built, the application is started 
 
@@ -70,8 +50,6 @@ $ Dir.files.length
 # - call .length() function on the list object
 # - returns an int
 ```
-
-Parantheses are optional when calling functions with no parameters, for compact and readable syntax.
 
 
 
@@ -117,41 +95,6 @@ To create functions that take parameters, read the doc.
 
 
 
-### Terminal window size
-
-When running searches, you may find that long lines wrap and mess up the screen.
-
-CFT needs to know the terminal windows size, to determine where to cut the lines if wrapping is off,
-which it is by default. To get the terminal settings, enter
-
-```
-$ @term
-```
-
-This should work on both Linux and Windows. To turn wrapping on or off, enter
-
-```
-$ :wrap
-```
-
-#### About these commands
-
-The first is a global shortcut, which means it runs code. List them all by entering
-
-```
-$ @
-```
-
-Shortcuts are defined in the CFT.props file. 
-
-The second is a "colon command", which are system commands outside the programming language. To
-list all, just type
-
-```
-$ :
-```
-
-
 ## Save and load scripts
 
 ```
@@ -167,62 +110,6 @@ To create a new empty script, just type
 ```
 $ :new
 ```
-
-
-## Display functions
-
-To display all your defined functions, type
-
-```
-$ ?
-```
-
-To display all global functions, type
-
-```
-$ help
-```
-
-All values in CFT are objects, including integers and strings. To display all functions inside an object, create 
-an instance of that object (on the stack) followed by help. Examples:
-
-```
-$ "" help
-$ 1 help
-$ Dir help
-$ List help
-$ File("x") help
-$ Date help
-$ Lib help
-$ Lib.Math help
-$ Sys help
-```
-
-The global File() function requires a string parameter. Here we just use "x", to create a valid File object.
-The file does not need to exist.
-
-The global Lib function creates a Lib object, which effectively works as a name space. Inside 
-the Lib object there are functions for creating still other objects, such as the Math
-object, where you find math related functions for calculating sine and cosine.
-
-Sys is another such namespace function / object.
-
-
-
-
-# Edit current script file in editor
-
-If the current script has been saved, you can always edit it by entering the following:
-
-```
-$ @e
-```
-
-This allows you to break function code across multiple lines, and use indentation to make it more readable. 
-
-After saving the script code in the editor, CFT automatically reloads the code when you press Enter, so there is
-no need to reload.
-
 
 
 
