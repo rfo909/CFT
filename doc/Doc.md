@@ -44,14 +44,14 @@ Development has been going on since May 2018, and on github since July 2020.
 # Functionality
 
 
-The CFT programming language is thought to act as glue between library functions and objects
-(including user input) and running external programs in different ways.
+The CFT programming language is a glue between library functions and -objects, user input, and
+running external programs.
 
 
-CFT is object oriented in the sense that everything is objects. Entering the integer 1 on the
-command line, it is seen as an expression which resolves into a value object of type "int". All objects
-have member functions, for example the "bin()" function on integers, that returns the number
-as a binary string. The '$' is the CFT prompt.
+It is command line based, but complex functions are created using editors.
+
+The language is object oriented, with all values being objects. Here we call a
+function "bin()" inside an integer object.
 
 ```
 $ 1.bin
@@ -60,6 +60,8 @@ $ 1.bin
 ```
 
 The ".bin" calls the function "bin" inside the integer object. Parantheses are optional when no parameters.
+
+## Another example
 
 ```
 $ Dir.files.length
@@ -102,6 +104,12 @@ $ File("x.txt") help   # the file needs not exist
 ```
 # Create functions
 
+
+Everything you type in at the prompt is considered code, and executed.
+
+
+Then, if you want, you can assign a name to the last line of code, and now you have a function.
+
 ```
 $ Dir.files.length
 <int>
@@ -117,10 +125,10 @@ $ filesInDir
 <int>
 12
 ```
-## Show your functions
+# Show your functions
 
 
-List the functions that you have defined by typing
+List all functions in current script
 
 ```
 $ ?
@@ -224,46 +232,18 @@ $ more TODO.txt
 ```
 $ edit TODO.txt
 ```
-# Introduction to loops
-
-```
-$ Dir.allFiles(Glob("*.java"))
-```
-
-This line of code generates a list of all java files under the current directory or sub-directories.
-When we are satisfied with the result of the code line, we give it a name.
-
-```
-$ /JavaFiles
-```
-
-Now every time we want the list of java files, we just type JavaFiles. Now we use it to create
-the "linecount" function, which sums up number of lines in all the java files.
-
-```
-$ JavaFiles->f out(f.read.length) | _.sum
-<int>
-18946
-/linecount
-```
-
-The "arrow" followed by an identifier is the "for each" construct, and the out() statement
-is used to generate output from the loop.
-
-
-The "pipe" character terminates the loop, and delivers the result (list of int) to the next part,
-where the "_" (underscore) symbol picks it off the stack, then calls the sum() function on it,
-returning a single int value.
-
 # List basics
 
 
-Lists are return value from many functions, such as getting the files in a directory. Lists
-can also be created
+Lists are return value from many functions, such as getting the files in a directory.
+
+
+Lists can also be created
 with the global List() function, which takes any number of parameters, and creates a List object
 from those values.
 
 ```
+$ List                 # empty list
 $ List(1,2,3,4)
 $ Dir.files
 $ "abcdef".chars
@@ -284,6 +264,78 @@ For details of available functions, use the help system:
 
 ```
 $ List help
+```
+# Introduction to loops
+
+
+Loops in CFT are mostly concerned with iterating over lists. Let's create a list:
+
+```
+$ Dir.allFiles(Glob("*.java"))
+```
+
+This line of code generates a list of all java files under the current directory or sub-directories.
+When we are satisfied with the result of the code line, we give it a name.
+
+```
+$ /JavaFiles
+```
+
+We then iterate over the list of files returned, and count the number of lines in each, then
+sum it all up, creating the "linecount" function.
+
+```
+$ JavaFiles->f out(f.read.length) | _.sum
+<int>
+18946
+/linecount
+```
+
+The "arrow" followed by an identifier is the "for each" construct, with the identifier becoming
+the "loop variable".  The out() statement is used to generate output from the loop.
+
+
+The "pipe" character terminates the loop, and delivers the result from the loop (list of int) to the next part,
+where the "_" (underscore) symbol picks it off the stack, then calls the sum() function on it,
+returning a single int value.
+
+
+**Note:** loop variables are not regular variables, and can not be reassigned.
+
+## Filtering
+
+
+Filtering list data is essential in CFT. Here is a simple example:
+
+```
+$ List(1,2,3,4,3,2,1)->
+x assert(x>
+2) out(x)
+<List>
+3
+4
+3
+```
+
+The assert() works like "if condition not satisfied, continue with next value"
+
+# Local variables
+
+
+Function code may use local variables for simplifying expressions.
+
+```
+$ a=3 b=2 a+b
+<int>
+5
+```
+
+Can also use "stack based" notation, where the assignment picks the current value
+off the stack and stores it into a variable:
+
+```
+3=>a 2=>b a+b
+5
 ```
 # Files
 
@@ -640,79 +692,7 @@ This means you are free to save a script using the name "Lib", and it will be wr
 the code.work directory. Doing this means it will hide the version in the code.lib directory.
 Which may be perfectly fine, as long as it is what you intended.
 
-# Protecting files and directories
-
-
-To save typing, one often create functions that just return some directory, or
-some files.  The JavaFiles example above illustrates this.
-
-
-The protect mechanism in CFT lets us attach a protect state to any Dir and File object,
-which guarantees that:
-
-
-
-- all files and directories derived from it are also protected
-
-
-- blocks destructive modifications
-
-
-## Example
-
-
-Adding .protect to each file that the JavaFiles function generates, ensures that all
-files returned from this function are blocked against accidental delete and modifications.
-
-```
-$ Dir.allFiles-> f assert(f.name.endsWith(".java")) out(f.protect)
-$ /JavaFiles
-```
-
-Demonstration:
-
-```
-$ JavaFiles.nth.append("")   # Trying to append empty line to first file
-ERROR: [input:16] INVALID-OP append : /home/roar/Prosjekter/Java/CFT/src/rf/configtool/main/SourceException.java (PROTECTED: -) (java.lang.Exception)
-```
-
-The .protect() function can also take a description string, which if present, is displayed in this error.
-
-## No guarantee
-
-
-Calling .protect on a Dir object, before using it to locate files, will propagate the protected
-state to all those files. However, creating a new Dir object for the same path, without calling
-.protect() on it, and then accessing content via this, does not protect anything.
-
-
-Note also that .protect can not detect for example using the path of a protected File object in
-an external program, or even to create a new File object (which will not be protected). Example:
-
-```
-File(protectedFile.path)
-```
-# More programming
-
-## Local variables
-
-
-The inside of a function may use local variables for simplifying expressions etc.
-
-```
-$ a=3 b=2 a+b
-<int>
-5
-```
-
-Can also use "stack based" notation, where the assignment picks the current value
-off the stack and stores it into a variable:
-
-```
-3=>a 2=>b a+b
-5
-```
-## Nested loops
+# Nested loops
 
 
 Loops are implemented using the "for each" functionality of "-> var". Loops may well be nested.
@@ -734,7 +714,7 @@ $ List(1,2,3)->x List(1,2,3)->y  out(x*y)
 In this case, the body of each loop is all code following the "-> var"
 construct. But this can be changed using the "pipe" symbol, which "closes" all loops.
 
-## Loop spaces - "pipes"
+# Loop spaces - "pipes"
 
 
 The body of any loop is the rest of the code of the function, or until a "pipe" symbol
@@ -797,12 +777,12 @@ element on the stack after all code has executed. If there is no value on the st
 the return value is 
 **null**.
 
-### Comments
+# Comments
 
 
 The hash character '#' indicates that the rest of the line is a comment.
 
-## Function parameters
+# Function parameters
 
 
 Custom functions can also take parameters. This is done using the P() expression, which
@@ -848,7 +828,7 @@ $ f(5,10)
 <int>
 15
 ```
-## User input
+# User input
 
 
 CFT contains the following for asking the user to enter input:
@@ -870,13 +850,13 @@ functions, can be used to produce functions that ask for missing values.
 ```
 P(1,Input("Enter value").get) =>value ...
 ```
-## Block expressions
+# Block expressions
 
 
 The traditional blocks inside curly braces are present in CFT as well, and are used for different
 things.
 
-### Local blocks
+## Local blocks
 
 
 Local blocks are just for grouping code that runs in the same context as the code around it. Technically
@@ -887,7 +867,7 @@ if (a>b) {
 ...
 }
 ```
-### Lambdas
+## Lambdas
 
 
 A Lambda is an object (a value) that contains code, so it can be called, with parameters. The code
@@ -900,7 +880,7 @@ myLambda = Lambda { P(1)+P(2) } myLambda.call(1,2)
 Great for local functions inside regular functions, and for sending as parameters to other functions,
 or lambdas.
 
-### Inner blocks
+## Inner blocks
 
 
 An inner block is a cross between local blocks and the Lambda. An Inner block is executed
@@ -928,7 +908,7 @@ Even the end of local blocks terminate loops, but they share the loop space of t
 providing somewhat "complicated" outcomes.
 
 
-### Summary
+## Block expressions summary
 
 
 Local (plain) blocks for non-looping blocks of code, typically used with "if". Running in
@@ -942,7 +922,7 @@ out() and assert() and reject() have no effect on loops outside the block.
 
 Lambdas are "functions" as values.
 
-## Conditionals - if expression
+# Conditionals - if expression
 
 
 Conditional execution of code is done in two ways in CFT, with the first being how we
@@ -990,7 +970,7 @@ break
 i=i+1
 }
 ```
-### if-ladders
+## if-ladders
 
 
 The implementation in CFT supports chaining multiple if after each other.
@@ -1031,7 +1011,7 @@ every other language.
 The P() expression to access function parameters only evaluates the default
 expression if parameter N is null.
 
-## The error() function
+# The error() function
 
 
 The error() expression is another that contains a conditional part, and if true, throws
@@ -1044,14 +1024,63 @@ if (1+1==2) {
 error("oops again")
 }
 ```
-## Output
-
-
-Output to screen
+# Output to screen
 
 ```
 println("a")
 debug("b")
+```
+# Protecting files and directories
+
+
+To save typing, one often create functions that just return some directory, or
+some files.  The JavaFiles example above illustrates this.
+
+
+The protect mechanism in CFT lets us attach a protect state to any Dir and File object,
+which guarantees that:
+
+
+
+- all files and directories derived from it are also protected
+
+
+- blocks destructive modifications
+
+
+## Example
+
+
+Adding .protect to each file that the JavaFiles function generates, ensures that all
+files returned from this function are blocked against accidental delete and modifications.
+
+```
+$ Dir.allFiles-> f assert(f.name.endsWith(".java")) out(f.protect)
+$ /JavaFiles
+```
+
+Demonstration:
+
+```
+$ JavaFiles.nth.append("")   # Trying to append empty line to first file
+ERROR: [input:16] INVALID-OP append : /home/roar/Prosjekter/Java/CFT/src/rf/configtool/main/SourceException.java (PROTECTED: -) (java.lang.Exception)
+```
+
+The .protect() function can also take a description string, which if present, is displayed in this error.
+
+## No guarantee
+
+
+Calling .protect on a Dir object, before using it to locate files, will propagate the protected
+state to all those files. However, creating a new Dir object for the same path, without calling
+.protect() on it, and then accessing content via this, does not protect anything.
+
+
+Note also that .protect can not detect for example using the path of a protected File object in
+an external program, or even to create a new File object (which will not be protected). Example:
+
+```
+File(protectedFile.path)
 ```
 # Running external programs
 
@@ -2711,8 +2740,8 @@ about "macros" these days? The functionality is the same, though.
 A search/replace on all the script files fixed the renaming easily.
 
 ```
-{* ...} =macro  # old syntax - no longer supported
-Lambda{...} =lambda
+{* ...} =>macro  # old syntax - no longer supported
+Lambda{...} =>lambda
 ```
 
 The Inner block expressions do not resemble code blocks in Java, because in reality they are automatically
@@ -2747,11 +2776,11 @@ The solution ended up being very easy to implement, and is fairly elegant,
 as they really are about using the same mechanism, being that all running
 lambdas have a "self" variable pointing to some Dict object.
 
-## 2020-09-12 A lexical analysis discovery
+## 2020-09-12 A lexical analysis revelation
 
 
 As the Lib.Text.Lexer object was created, and I experimented with it, I discovered
-that what I had thought to be a limitation in the parser, was an error made by me.
+that what I had thought to be a limitation in the parser, was a "user error" made by me.
 
 
 The problem was that CFT did not handle calling functions inside integer literals,
@@ -2765,11 +2794,11 @@ The problem was that my configuration for parsing floating point numbers
 was flawed. Basically it looked like this (converted to Lib.Text.Lexer syntax)
 
 ```
-"0123456780"=digits
-Lib.Text.Lexer.Empty(digits) =intMatcher
+"0123456780"=>digits
+Lib.Text.Lexer.Empty(digits) =>intMatcher
 intMatcher.sub(digits,intMatcher)
 intMatcher.setIsToken  # so far all good
-intMatcher.sub(".") =afterDot
+intMatcher.sub(".") =>afterDot
 afterDot.sub(digits, afterDot)
 afterDot.setIsToken
 ```
@@ -2787,12 +2816,12 @@ but instead has pointers for digits 0-9 to another node, which does, and which
 gobbles up any additional digits via a self-loop.
 
 ```
-"0123456780"=digits
-Lib.Text.Lexer.Empty(digits) =intMatcher
+"0123456780"=>digits
+Lib.Text.Lexer.Empty(digits) =>intMatcher
 intMatcher.sub(digits,intMatcher)
 intMatcher.setIsToken(3)
-intMatcher.sub(".") =afterDot
-afterDot.sub(digits) =afterDotDigits  # new node
+intMatcher.sub(".") =>afterDot
+afterDot.sub(digits) =>afterDotDigits  # new node
 afterDotDigits.setIsToken(4)
 afterDotDigits.sub(digits,afterDotDigits)
 ```

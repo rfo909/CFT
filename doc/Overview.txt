@@ -5,13 +5,15 @@ Generated file - see script file savefileOverview.txt
 Introduction
 
 Functionality
+ * Another example
 
 Getting help
  * Show all global functions
  * Show functions inside objects
 
 Create functions
- * Show your functions
+
+Show your functions
 
 Save and load
 
@@ -23,9 +25,12 @@ CFT as a shell
  * Show content of file
  * Open a file in editor
 
-Introduction to loops
-
 List basics
+
+Introduction to loops
+ * Filtering
+
+Local variables
 
 Files
  * Page through a file
@@ -62,36 +67,42 @@ Savefiles
  * The @e shortcut
  * CFT.props - codeDirs
 
-Protecting files and directories
- * Example
- * No guarantee
+Nested loops
 
-More programming
- * Local variables
- * Nested loops
- * Loop spaces - "pipes"
+Loop spaces - "pipes"
  * Result value from a loop space
  |   If the loop space contains looping ...
  |   Otherwise ...
- |   Comments
- * Function parameters
- * User input
- * Block expressions
- |   Local blocks
- |   Lambdas
- |   Inner blocks
- |   Summary
- * Conditionals - if expression
+
+Comments
+
+Function parameters
+
+User input
+
+Block expressions
+ * Local blocks
+ * Lambdas
+ * Inner blocks
+ * Block expressions summary
+
+Conditionals - if expression
  |   Inline form
  |   Traditional form
  |   Functionally identical
- |   if-ladders
+ * if-ladders
  * Lazy evaluation
  |     Lazy if
  |     Lazy AND, OR - &amp;&amp; ||
  |     Lazy P(N,defaultExpr)
- * The error() function
- * Output
+
+The error() function
+
+Output to screen
+
+Protecting files and directories
+ * Example
+ * No guarantee
 
 Running external programs
  * Summary
@@ -202,4 +213,4 @@ Fun and strange stuff, comments
  * Using Sys.stdin to run colon commands etc
  * 2020-09-12 Inner blocks??
  * 2020-09-12 Closures and objects
- * 2020-09-12 A lexical analysis discovery
+ * 2020-09-12 A lexical analysis revelation
