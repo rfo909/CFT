@@ -95,7 +95,7 @@ v1.7.3
 </p>
 <pre>
   $ 1 help               # integer
-  # 3.14 help            # float
+  $ 3.14 help            # float
   $ "xxx" help           # string
   $ List help
   $ Dict help
@@ -382,6 +382,19 @@ v1.7.3
   5
 </pre>
 
+<p>
+  Example:
+</p>
+<pre>
+  List("java","txt")
+  /types
+
+  Dir.allFiles-&gt;f type=f.name.afterLast(".") assert(types.contains(type)) out(f)
+  /textfiles
+</pre>
+<p>
+  This function lists all files of type .java and .txt
+</p>
 
 
 

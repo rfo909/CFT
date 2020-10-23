@@ -95,7 +95,7 @@ functions.
 
 ```
 $ 1 help               # integer
-# 3.14 help            # float
+$ 3.14 help            # float
 $ "xxx" help           # string
 $ List help
 $ Dict help
@@ -337,6 +337,18 @@ off the stack and stores it into a variable:
 3=>a 2=>b a+b
 5
 ```
+
+Example:
+
+```
+List("java","txt")
+/types
+Dir.allFiles->f type=f.name.afterLast(".") assert(types.contains(type)) out(f)
+/textfiles
+```
+
+This function lists all files of type .java and .txt
+
 # Files
 
 ```
