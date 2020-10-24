@@ -60,12 +60,20 @@ List iteration / filtering
  * The condOut() statement
  * List addition
 
-Savefiles
+Savefiles - "scripts"
  * Save
  * Load
  * Create new empty script
  * The @e shortcut
  * CFT.props - codeDirs
+
+Comments
+
+Calling functions in other scripts
+
+Examining external scripts
+
+Displaying all known scripts
 
 Nested loops
 
@@ -73,8 +81,6 @@ Loop spaces - "pipes"
  * Result value from a loop space
  |   If the loop space contains looping ...
  |   Otherwise ...
-
-Comments
 
 Function parameters
 
@@ -102,6 +108,8 @@ Output to screen
 
 Protecting files and directories
  * Example
+ * A protected directory does not allow
+ * A protected file does not allow
  * No guarantee
 
 Running external programs
@@ -131,14 +139,16 @@ Output format / Cfg
 
 Templating
  * Merging text with Dict
- * Using individual template files
+ * PDict()
+ * Example using raw strings and Sequence()
+
+Processing text
+ * Reading text files
  * Script file "here" documents
- |   A more complex example
  * DataFile
  |   Include blank lines
  |   Filter away comments
  * Sequence() and raw strings
- * PDict()
 
 Use as a calculator
  * Expressions and "variables"
@@ -146,36 +156,44 @@ Use as a calculator
  * Lib.Convert
  * Lib.Plot
 
-Various topics
- * Command line args
- * Calling functions in external scripts
- * Examining external scripts
- * Displaying all scripts
- * Protecting directories and files
- |   A protected directory does not allow
- |   A protected file does not allow
- * Working with pasted text lines from stdin
- * Differing between Windows and Linux
- * Session state
- * Predicate calls
- * Try/catch
- * Get type of value
- * List.push()
- * Dict set with strings
- * Dict fields as functions
- * Dict.get with default value
- * List.nth() negative indexes
- * Function parameters as List or Dict
- * The general loop statement
- * Storing CFT data structures to file - syn() and eval()
- * String .esc() and .unEsc()
- |   Escape codes
- * Automating interactive functions / Sys.stdin()
+Command line args
+
+Working with pasted text lines from stdin
+
+Differing between Windows and Linux
+
+Predicate calls
+
+Try/catch
+
+Get type of value
+
+List.push()
+
+Dict set with strings
+
+Dict.get with default value
+
+List.nth() negative indexes
+
+Function parameters as List or Dict
+
+The general loop statement
+
+Storing CFT data structures to file - syn() and eval()
+
+String .esc() and .unEsc()
+ * Escape codes
+
+Automating interactive functions / Sys.stdin()
  * Running colon commands from script code
- * Simple line editing
+
+Simple line editing
  |   Develop complex code in steps
- * CFT.props - mCat, mEdit and mMore lambdas
- * CFT.props - shortcuts
+
+CFT.props - mCat, mEdit and mMore lambdas
+
+CFT.props - shortcuts
  |   Show all shortcuts
 
 Some example code
@@ -207,10 +225,13 @@ Reference: Colon commands
 
 Reference: Synthesizable types
 
-Fun and strange stuff, comments
+Comments and digressions
  * Why Input("label").get?
  * Function name AFTER code?
  * Using Sys.stdin to run colon commands etc
  * 2020-09-12 Inner blocks??
  * 2020-09-12 Closures and objects
  * 2020-09-12 A lexical analysis revelation
+ * 2020-10-24 Objects ...
+ * 2020-10-24 cleaning up - Java Parser
+ * 2020-10-24 loop spaces / the "pipe"
