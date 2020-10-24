@@ -150,8 +150,8 @@ P(1,"tmp") => name
 # Run external program in background.
 #
 # Example of use:
-#     runBg(...)  => a
-#     runBg(...)  => b
+#     runProcess(...)  => a
+#     runProcess(...)  => b
 #     a.wait.call => aResult
 #     b.wait.call => bResult
 # --
@@ -235,7 +235,7 @@ P(4,false) => showDebug
     
     result
 
-/runBg
+/runProcess
 
 
 # Run external program and collect stdout, stderr and exitCode - returns Dict
@@ -246,7 +246,7 @@ P(2,List) => stdinLines
 P(3,false) => acceptErrors
 P(4,false) => showDebug
 
-	runBg(cmd,stdinLines,acceptErrors,showDebug) => processDict
+	runProcess (cmd,stdinLines,acceptErrors,showDebug) => processDict
 	
 	# return value
 	processDict.wait.call
