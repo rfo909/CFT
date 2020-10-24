@@ -38,7 +38,6 @@ public class ObjText extends Obj {
     
     public ObjText() {
         this.add(new FunctionLexer());
-        this.add(new FunctionParser());
     }
     
     @Override
@@ -81,19 +80,6 @@ public class ObjText extends Obj {
             return new ValueObj(new ObjLexer());
         }
     }
-    
-    class FunctionParser extends Function {
-        public String getName() {
-            return "Parser";
-        }
-        public String getShortDesc() {
-            return "Parser() - create parser object";
-        }
-        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 0) throw new Exception("Expected no parameters");
-            return new ValueObj(new ObjParser());
-        }
-    }
-    
+  
 
 }

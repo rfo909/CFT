@@ -13,6 +13,34 @@
 
 <h1>CFT Change log</h1>
 
+
+<h3>v1.7.5 2020-10-24 Lib.Text.Parser deleted</h3>
+<p>
+	The skeleton code for Parser has been deleted, as writing a recursive descent
+	parser in CFT was rather easy. May want to have another go at processing
+	full grammars, but retired the code for now.
+</p>
+
+<h3>v1.7.5 2020-10-24 Lib:runProcess</h3>
+<p>
+	Wrote new function for Lib script, which has same call interface as Lib:run, but runs
+	external program in background, and manage it via the new Process object, as well
+	as the Dict as object mechanism.
+</p>
+<p>
+	As most of the code came from Lib:run, and as the new code tested ok, Lib:run is now
+	implemented by calling Lib:runProcess and then calling the "wait" closure in the
+	intermediate Dict object. The call signature of Lib:run is unchanged.
+</p>
+<p>
+	Considering that Dir.runProcess was a hack to fork off Node processes to populate
+	MongoDB, with no regard for what happened after, other than regularly reading the stdout
+	file to generate statistics, and left to terminate or be killed from the OS, the
+	humble Dir.runProcess has come a long way.
+</p>
+
+
+
 <h3>v1.7.5 2020-10-24 Dict as object</h3>
 <p>
 	Improved the "primitive objects" implementation by letting Dict.set

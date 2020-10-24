@@ -69,17 +69,23 @@ Run exampleParse() to test
 
 
 # RUNME: JSON parser
- 
+# --
 	ts = exampleTokenStream
-	dict = MatchObject(ts)
-	println("parse ok")
-	println
-	exampleJSON->line println(line) |
-	println
-	
-	println("accessing list[3].id")
-	println("--------------------")
-	println(dict.get("list").nth(3).get('"id"'))
+	tc = tryCatch(MatchObject(ts))
+	if (tc.ok) {
+		println("parse ok")
+		dict = tc.result  # the JSON root object
+		
+		println
+		exampleJSON->line println(line) |
+		println
+		
+		println("accessing list[3].id")
+		println("--------------------")
+		println(dict.get("list").nth(3).get('"id"'))
+	} else {
+		println("Parse failed: " + tc.msg)
+	}
 /exampleParse
 
 	
