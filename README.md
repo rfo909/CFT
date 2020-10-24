@@ -1,42 +1,6 @@
 
-# CFT ("ConfigTool")
 
-
-CFT is a terminal based Java application, and a programming language, created to interactively
-build and run code for all kinds of automation.
-
-Create configuration files, install software, copy files, search logs.
-
-
-# Download and compile
-
-Written in Java and built using Apache ANT, which results in a single JAR file. 
-Runs on both Linux and 
-Windows, and has no dependencies outside of standard Java libraries.
-
-
-Once built, the application is started 
-
-```
-./cft
-```
-
-On Windows, run
-
-```
-.\cft.cmd
-```
-
-To leave type ":quit" or just type CTRL-C.
-
-
-
-# Introduction
-
-An object oriented DSL for automation.
-
-
-Example:
+# CFT (ConfigTool) - example script code 
 
 ```
 # Define a list of hosts
@@ -121,10 +85,36 @@ $ RecentlyChangedFiles(7)
     :
 ```
 
+# What it is
 
-# More documentation
+An object oriented DSL for automation.
 
-[Detailed documentation](doc/Doc.md).
+A terminal based Java application, and an interpreted programming language.
+
+Create configuration files, install software, copy files, search logs.
+
+
+# Download and compile
+
+Written in Java and built using Apache ANT, which results in a single JAR file. 
+
+Tested on both Linux and Windows. Has no dependencies outside of standard Java libraries.
+
+
+Linux: 
+
+```
+./cft
+```
+
+Windows:
+
+```
+.\cft.cmd
+```
+
+To leave type ":quit" or just type CTRL-C.
+
 
 
 # Goals
@@ -134,3 +124,5 @@ $ RecentlyChangedFiles(7)
 - Automation tool
 
 
+
+[Detailed documentation](doc/Doc.md).
