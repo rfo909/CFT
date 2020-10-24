@@ -1,6 +1,10 @@
 
 
-# CFT (ConfigTool) - example script code 
+# CFT (ConfigTool)
+
+Configurable personal shell, automation tool.
+
+## Example script file
 
 ```
 # Define a list of hosts
@@ -35,9 +39,7 @@ DebianHosts->host
 
 ```
 
-
-
-# An interactive environment
+# Interactive use
 
 
 ```
@@ -62,7 +64,6 @@ $ ?SSH:
 +-----------------------------------------------------
 
 
-
 $ ?SSH:run
 +-----------------------------------------------------
 
@@ -78,8 +79,10 @@ P(4,false) => showDebug
 
 	:
 
-
 $ cd ../project1/src
+$ ls
+$ more somefile.txt
+
 $ RecentlyChangedFiles(7)
     
     :
