@@ -181,7 +181,6 @@ Various topics
 Some example code
  * Windows PowerShell
  * Windows CMD
- * Linux get user name
 
 Lib.Text.Lexer
  * Motivation
@@ -200,8 +199,9 @@ Lib.Text.Lexer
 Closures
  * Another example
 
-Primitive objects
- |     Member lambdas calling each other
+Closures v2 - Objects
+ * Member lambdas calling each other
+ * Cloning dictionaries
 
 Reference: Colon commands
 

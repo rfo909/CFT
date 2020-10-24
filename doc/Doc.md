@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2020-10-22 RFO
-v1.7.3
+Last updated: 2020-10-24 RFO
+v1.7.5
 ```
 # Introduction
 
@@ -2222,16 +2222,10 @@ DirProject.run("cmd","/c","git","commit","-m",msg)
 DirProject.run("cmd","/c","git","push","origin","master")
 /GitPush
 ```
-## Linux get user name
-
-```
-Dir.runCapture("whoami").nth
-/GetUser
-```
 # Lib.Text.Lexer
 
 
-**v1.2.0 EXPERIMENTAL******v1.3.2 Lexer stabilizing**
+**v1.3.2**
 
 The Lib.Text.Lexer objects adds
 capability to match complex tokens with CFT, using the same Java tokenizer that is used when
@@ -2570,43 +2564,100 @@ $ Strip(2).call("this is a test")
 <String>
 is is a te
 ```
-# Primitive objects
+# Closures v2 - Objects
 
 
-**v1.3.1**
+**v1.7.5**
 
-Storing both data and lambdas inside a Dict, and using the .invoke() function of the
-Dict, we can now call a lambda stored under some name, with the dictionary object
-accessed via the "self" variable.
+Letting the dictionary .set function detect lambdas, they are automatically wrapped inside
+closures, with "self" pointing to the dictionary in question.
+
+
+This means we can now do this:
 
 ```
 Dict
 .set("i",1)
 .set("incr",Lambda{
-P(1,1) =amount
+amount=P(1,1)
 self.set("i",self.i+amount)
 })
 =>data
-data.invoke("incr",10) # data.i is now 11
+data.incr.call(10) # data.i is now 11
+println(data.i)
+/test
 ```
-#### Member lambdas calling each other
+## Member lambdas calling each other
 
 
-One such lambda function can in turn call other Dict member functions in the same way,
-via self.invoke(...)
+The mechanism of letting individual "member" lambdas have a shared idea of "self", also allows for this:
 
 ```
 Dict
 .set("i",1)
 .set("incr",Lambda{
-P(1,1) =amount
+amount=P(1,1)
 self.set("i",self.i+amount)
 })
 .set("incr50",Lambda{
-self.invoke("incr",50)
+self.incr.call(50)
 })
-=data
-data.invoke("incr50")  # data.i is now 51
+=>data
+data.incr50.call  # data.i is now 51
+println(data.i)
+/test
+```
+
+The incr50 lambda calls the incr lambda within the environment defined by the Dict object.
+
+## Cloning dictionaries
+
+
+The Dict.set function also detects when it is fed a closure, unwrapping the
+Lambda inside, then wrapping it inside a new closure pointing back to
+itself (via "self" variable in lambda).
+
+
+This means that if we create a function to clone a Dict, the new object will
+be independent of the first.
+
+```
+# Clone dictionary
+P(1)=>orig
+error(getType(orig) != "Dict", "Require Dict")
+new = Dict
+orig.keys->
+key
+new.set(key,orig.get(key))
+|
+new
+/CloneDict
+# Test-code
+# --
+Dict
+.set("i",1)
+.set("a",Lambda{
+self.b.call
+})
+.set("b",Lambda{
+self.set("i",self.i+1)
+self.i
+})
+=> d1
+# Clone d1 into d2, then change its state
+CloneDict(d1) => d2
+d2.set("i",10)
+println("d1.a.call " + d1.a.call)
+println("d1.a.call " + d1.a.call)
+println("d2.a.call " + d2.a.call)
+println("d2.a.call " + d2.a.call)
+/test
+# Output
+#
+# d1.a.call 2
+# d1.a.call 3
+# d2.a.call 11
+# d2.a.call 12
 ```
 # Reference: Colon commands
 

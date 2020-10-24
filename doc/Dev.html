@@ -13,6 +13,67 @@
 
 <h1>CFT Change log</h1>
 
+<h3>v1.7.5 2020-10-24 Dict as object</h3>
+<p>
+	Improved the "primitive objects" implementation by letting Dict.set
+	detect Lambdas and wrapping them inside Closures, with current dict
+	becoming the "self" object
+</p>
+<pre>
+	Dict
+		.set("a",Lambda{self.b.call}) 
+		.set("b",Lambda{"this is b"})
+		=> x
+	x.a.call
+
+	# results in "this is b"
+</pre>
+<p>
+	Further, we also let Dict.set detect Closures, extracting the Lambda
+	and rewrapping in new Closure, with current Dict as "self". This means
+	obtaining a lambda (really a closure) from one Dict, and storing it
+	in another, a new closure is created, so calling it via the new Dict
+	means "self" points to it, and not the original Dict.
+</p>
+<pre>
+# Clone dictionary
+  P(1)=&gt;orig
+  error(getType(orig) != "Dict", "Require Dict")
+  new = Dict
+  orig.keys->key new.set(key,orig.get(key)) |
+  new
+/CloneDict
+
+# Test-code
+# --
+  Dict
+  .set("i",1)
+  .set("a",Lambda{self.b.call})
+  .set("b",Lambda{
+    self.set("i",self.i+1)
+    self.i
+  })
+  =&gt; d1
+  
+  # Clone d1 into d2, then change its state
+  CloneDict(d1) =&gt; d2
+  d2.set("i",10)
+
+  println("d1.a.call " + d1.a.call)
+  println("d1.a.call " + d1.a.call)
+  println("d2.a.call " + d2.a.call)
+  println("d2.a.call " + d2.a.call)
+/test
+
+# Output
+#
+# d1.a.call 2
+# d1.a.call 3
+# d2.a.call 11
+# d2.a.call 12
+</pre>
+
+
 <h3>v1.7.4 2020-10-22 Lib.Text</h3>
 <p>
 	Added code to the TokenStream object, to use for parsing JSON

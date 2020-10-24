@@ -15,8 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2020-10-22 RFO
-v1.7.3
+Last updated: 2020-10-24 RFO
+v1.7.5
 
 </pre>
 
@@ -2560,19 +2560,11 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
 </pre>
 
 
-<h2>Linux get user name</h2>
-<pre>
-  Dir.runCapture("whoami").nth
-  /GetUser
-</pre>
-
-
 
 
 <h1>Lib.Text.Lexer</h1>
 <p>
-  <i>v1.2.0 EXPERIMENTAL</i><br/>
-  <i>v1.3.2 Lexer stabilizing</i>
+  <i>v1.3.2</i>
 </p>
 <p>
   The Lib.Text.Lexer objects adds 
@@ -2943,44 +2935,112 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
 
 
 
-<h1>Primitive objects</h1>
-<p><i>v1.3.1</i></p>
+<h1>Closures v2 - Objects</h1>
+<p><i>v1.7.5</i></p>
 <p>
-  Storing both data and lambdas inside a Dict, and using the .invoke() function of the
-  Dict, we can now call a lambda stored under some name, with the dictionary object
-  accessed via the "self" variable.
+  Letting the dictionary .set function detect lambdas, they are automatically wrapped inside
+  closures, with "self" pointing to the dictionary in question.
+</p>
+<p>
+   This means we can now do this:
 </p>
 <pre>
-  Dict
-    .set("i",1)
-    .set("incr",Lambda{
-      P(1,1) =amount
-      self.set("i",self.i+amount)
-    })
-    =&gt;data
+Dict
+  .set("i",1)
+  .set("incr",Lambda{
+    amount=P(1,1)
+    self.set("i",self.i+amount)
+  })
+  =&gt;data
 
-    data.invoke("incr",10) # data.i is now 11
+  data.incr.call(10) # data.i is now 11
+  println(data.i)
+/test
 </pre>
 
-<h4>Member lambdas calling each other</h4>
+
+
+<h2>Member lambdas calling each other</h2>
 <p>
-  One such lambda function can in turn call other Dict member functions in the same way,
-  via self.invoke(...)
+  The mechanism of letting individual "member" lambdas have a shared idea of "self", also allows for this:
 </p>
 <pre>
-  Dict
-    .set("i",1)
-    .set("incr",Lambda{
-      P(1,1) =amount
-      self.set("i",self.i+amount)
-    })
-    .set("incr50",Lambda{
-      self.invoke("incr",50)
-    })
-    =data
+Dict
+  .set("i",1)
+  .set("incr",Lambda{
+    amount=P(1,1)
+    self.set("i",self.i+amount)
+  })
+  .set("incr50",Lambda{
+    self.incr.call(50)
+  })
+  =&gt;data
 
-    data.invoke("incr50")  # data.i is now 51
+  data.incr50.call  # data.i is now 51
+  println(data.i)
+/test
 </pre>
+<p>
+  The incr50 lambda calls the incr lambda within the environment defined by the Dict object.
+</p>
+
+
+
+
+<h2>Cloning dictionaries</h2>
+<p>
+  The Dict.set function also detects when it is fed a closure, unwrapping the
+  Lambda inside, then wrapping it inside a new closure pointing back to 
+  itself (via "self" variable in lambda).
+</p>
+<p>
+  This means that if we create a function to clone a Dict, the new object will
+  be independent of the first.
+</p>
+<pre>
+# Clone dictionary
+  P(1)=&gt;orig
+  error(getType(orig) != "Dict", "Require Dict")
+  new = Dict
+  orig.keys->key 
+    new.set(key,orig.get(key)) 
+  |
+  new
+/CloneDict
+
+# Test-code
+# --
+  Dict
+  .set("i",1)
+  .set("a",Lambda{
+    self.b.call
+  })
+  .set("b",Lambda{
+    self.set("i",self.i+1)
+    self.i
+  })
+  =&gt; d1
+  
+  # Clone d1 into d2, then change its state
+  CloneDict(d1) =&gt; d2
+  d2.set("i",10)
+
+  println("d1.a.call " + d1.a.call)
+  println("d1.a.call " + d1.a.call)
+  println("d2.a.call " + d2.a.call)
+  println("d2.a.call " + d2.a.call)
+/test
+
+# Output
+#
+# d1.a.call 2
+# d1.a.call 3
+# d2.a.call 11
+# d2.a.call 12
+</pre>
+
+
+
 
 
 

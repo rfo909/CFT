@@ -46,6 +46,10 @@ public class ObjClosure extends Obj {
         this.add(new FunctionCall());
     }
     
+    public ValueBlock getLambda() {
+    	return lambda;
+    }
+    
     @Override
     public boolean eq(Obj x) {
         return x==this;
