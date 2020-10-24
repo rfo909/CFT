@@ -2,15 +2,16 @@
 # CFT ("ConfigTool")
 
 
-CFT is a shell-like terminal based Java application, and a programming language, created to interactively
-build code for all kinds of automation: creating configuration files, copying files, searching through
-logs and running external programs to start/stop services, etc.
+CFT is a terminal based Java application, and a programming language, created to interactively
+build and run code for all kinds of automation.
+
+Create configuration files, install software, copy files, search logs.
 
 
 # Download and compile
 
-The project is written in Java and built using Apache ANT, which results in a single JAR file. 
-It runs on both Linux and 
+Written in Java and built using Apache ANT, which results in a single JAR file. 
+Runs on both Linux and 
 Windows, and has no dependencies outside of standard Java libraries.
 
 
@@ -32,92 +33,72 @@ To leave type ":quit" or just type CTRL-C.
 
 # Introduction
 
-The CFT application supports basic shell functions like "cd", "ls" and "pwd", but
-is primarily a Domain Specific Language (DSL) for automation.
+An object oriented DSL for automation.
 
-It is object oriented, as opposed to traditional -ix and -ux shells such as bash, which process text.
 
 Example:
 
 ```
-$ Dir.files.length
+# Define a list of hosts
+# --
+List("host1","host2","host3")
+/DebianHosts
 
-# means: 
-# - call global function Dir() with no parameters
-# - returns Dir object for current directory
-# - call .files() inside the Dir object 
-# - returns list of File objects
-# - call .length() function on the list object
-# - returns an int
-```
+# Run update and upgrade on debian based hosts
+# --
+commands=Sequence(
+	@ apt-get update
+	@ apt-get -y upgrade
+)
+DebianHosts->host 
+	x = SSH:run(host, commands, true)
+	if (x.exitCode != 0) {
+		collection=Sys.savefile.name + "_failed"
+		Db:Add(host,x,collection)
+	} else {
 
+	}
+/AptUpdateUpgrade
 
-
-# An interactive language
-
-CFT reads single lines from the user, and as we press Enter, the line is interpreted. 
-
-There is full expression support, with normal cardinality rules, so CFT can be used as
-a desk calculator. Interactivity makes it easy to experiment.
-
-```
-$ 2+3*5
-$ "a b c d".split
-$ List(1,2,3).concat("x")
-$ ls
-$ cd ..
-```
-
-
-# Create own functions
-
-The power of CFT is defining own functions. This can be done 
-interactively at first, later you may select using an editor. 
-
-Type the following, and press Enter.
+# Identify files changed last N days
+# --
+	P(1,31) => days
+	Date.sub(Date.Duration.days(days)).get => limit
+	Dir.allFiles->f 
+		assert(f.lastModified > limit) 
+		report(f.path, Date(f.lastModified).fmt)
+/RecentlyChangedFiles
 
 ```
-$ Dir.allFiles(Glob("*.java"))
-```
-
-This produces a list of all java files directly and indirectly under the current directory,
-
-After the list of files has displayed, we name this code line, creating a function:
-
-```
-$ /JavaFiles
-```
-
-Every time we now type JavaFiles and press Enter, we call the JavaFiles function and get a list of Java files
-available from the current directory. Since JavaFiles takes no parameters, the ()'s are optional.
-
-To create functions that take parameters, read the doc.
 
 
 
-## Save and load scripts
+# An interactive environment
+
 
 ```
-$ :save MyScript
+$ ?SSH:run
 
-$ :load MyScript
+	# Run single or multiple commands (string or list) on remote target via SSH, returns Dict object
+	#
+	P(1) => target 
+	P(2) => commands
+	P(3,false) => acceptErrors
+	P(4,false) => showDebug
+
+	    error(target==null || !target.contains("@"), "Invalid target: '" + target + "'")
+	    error(commands==null, "Invalid commands: can not be null")
+
+	    :
+
+$ RecentlyChangedFiles(7)
+    :
 ```
-
-## Start a new script
-
-To create a new empty script, just type
-
-```
-$ :new
-```
-
 
 
 # More documentation
 
-[Full documentation](doc/Doc.md).
-
-Also check out the example scripts under "code.examples".
+[Detailed documentation](doc/Doc.md).
 
 
 # Goals
