@@ -77,7 +77,6 @@ public class ObjDir extends Obj {
         add(new FunctionRun());
         add(new FunctionRunDetach());
         add(new FunctionRunProcess());
-        add(new FunctionRunProcessWait());
         add(new FunctionRunCapture());
         add(new FunctionShowTree());
         add(new FunctionProtect());
@@ -662,30 +661,6 @@ public class ObjDir extends Obj {
         }
     }
     
-
-    class FunctionRunProcessWait extends Function {
-        public String getName() {
-            return "runProcessWait";
-        }
-        public String getShortDesc() {
-            return "runProcessWait(stdinFile, stdoutFile, stdErrFile, list|...) - execute external program with file I/O, blocking until it exits";
-        }
-        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            ObjFile stdin = (ObjFile) getObj("stdinFile", params, 0);
-            ObjFile stdout = (ObjFile) getObj("stdoutFile", params, 1);
-            ObjFile stderr = (ObjFile) getObj("stderrFile", params, 2);
-            
-              List<Value> cmd=new ArrayList<Value>();
-              for (int i=3; i<params.size(); i++) cmd.add(params.get(i));
-            
-            
-            Process process = startProcess(ctx, stdin.getFile(), stdout.getFile(), stderr.getFile(), cmd);
-            int exitCode=process.waitFor();
-            
-            return new ValueInt(exitCode);
-
-        }
-    }
 
     class FunctionShowTree extends Function {
         public String getName() {

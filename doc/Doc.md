@@ -1107,7 +1107,6 @@ $ Dir.run ( list|...)
 $ Dir.runCapture ( list | ...)
 $ Dir.runDetach ( list|...)
 $ Dir.runProcess ( stdinFile, stdoutFile, stdErrFile, list|... )
-$ Dir.runProcessWait ( stdinFile, stdoutFile, stdErrFile, list|... )
 ```
 
 The parameters written as "list|..." means either a List object, or a list of
@@ -1150,22 +1149,45 @@ $ Dir.runDetach("leafpad", Sys.savefile.path)
 This example runs the leapad editor in the background, with the path of the current savefile as
 argument.
 
-## Dir.runProcessWait()
+## Dir.runProcess
 
 
 Runs external program, reading input lines from text file, and deliver stdout and stderr to
-files. Waits for external program to terminate, then returns exit code.
+files. Returns a Process object, which is used to monitor, terminate or wait for the
+external process to finish.
 
 
-This function is the "work horse" of invoking external programs from script code, but
-as it is a bit complex to call, a library function "Lib:run" has been created. It takes
-four parameters, but often only the first is used:
+The complexities of creating and removing temporary files, is encapsuled in the library
+function 
+**Lib:runProcess**, which in turn is called from the simpler 
+**Lib:run** function, which
+also handles waiting for the external process to finish, before returning.
+
+
+Both of the Lib functions take the same four parameters, but often only the first is used, as the
+rest have useful defaults.
+
+## Lib:runProcess utility function
+
+
+This is a CFT function in the Lib script, which hides the complexities of
+calling Dir.runProcess (above).
 
 ```
-Lib:run (List("ls","-l")) => result
+Lib:runProcess(List("ls","-l)) => result
 ```
 
-The result object is a Dict with the following fields:
+The result object is a Dict with various system info, representing the running
+process. It has two closures of interest. A closure is a callable object, which
+runs code (via a Lambda tied to a Dict object). Closures and lambdas are invoked
+via their .call(...) function.
+
+```
+result.isCompleted.call     # returns boolean
+result.wait.call            # waits for process to finish, then returns another Dict
+```
+
+The result.wait closure, when called, returns a Dict with the following content:
 
 
 
@@ -1184,18 +1206,42 @@ The result object is a Dict with the following fields:
 - exitCode - int
 
 
-### Lib:run
+
+To show the Lib:runProcess function code
+
+```
+$ ?Lib:runProcess
+```
+
+Warning: it's a bit complex
+
+## Lib:run utility function
+
+```
+Lib:run (List("ls","-l")) => result
+```
+
+The implementation of Lib:run consists of calling Lib:runProcess and then
+calling the wait closure, as seen above, returning the result from that call.
 
 
-This function uses the Dir.runProcessWait(), and handles creating and deleting temporary
-files (on Linux). Ideally you never need interfacing Dir.runProcessWait() directly.
+To show the Lib:run function code
+
+```
+$ ?Lib:run
+```
+## Work directory issues
 
 
 For external programs that depend on running from a specific directly, either navigate to current directory
 interactively, or just let your code call the .setAsCurrentDir() function on some Dir object before
 calling Lib:run.
 
-### Doing ssh
+```
+Dir("/home/user/xyz").setAsCurrentDir
+Lib:run(...) => result
+```
+## Doing ssh
 
 
 If you need to run SSH commands on remote targets, use the SSH library script, which
@@ -1211,30 +1257,6 @@ copy it to the target host, as follows (in Linux shell).
 ```
 $ ssh-keygen -t rsa
 $ ssh-copy-id user@host
-```
-## Dir.runProcess()
-
-
-This function is similar to Dir.runProcessWait(), as it uses files for input and output,
-but the program is then detached from the main thread, returning a Process object, with
-functions to check is process is alive, to get exit code (after it has terminated) or
-destroy it forcefully.
-
-## External Program Status
-
-
-The function Dir.runProcessWait() returns the exit code of the external program.
-
-
-It can be a bit cumbersome in use, as it requires setting up files for stdin, stdout
-and stderr, but the Lib script contains a function "run" which hides the complexities,
-and returns a Dict with all info.
-
-```
-Lib:run (List("ls","-l")) => result
-if (result.exitCode != 0) {
-....
-}
 ```
 # Session persistent data
 

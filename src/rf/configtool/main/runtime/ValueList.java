@@ -46,6 +46,7 @@ public class ValueList extends Value {
         add(new FunctionPush());
         add(new FunctionEmpty());
         add(new FunctionLast());
+        add(new FunctionFirst());
     }
     
     protected ValueList self() {
@@ -513,6 +514,11 @@ public class ValueList extends Value {
         }
     }
 
+    
+    /*
+     * The last() and first() functions differ from nth, int that return null if no elements
+     */
+
     class FunctionLast extends Function {
         public String getName() {
             return "last";
@@ -534,6 +540,41 @@ public class ValueList extends Value {
             	if (from < 0) from=0;
             	
             	for (int i=from; i<val.size(); i++) {
+            		result.add(val.get(i));
+            	}
+            	return new ValueList(result);
+            	
+            } else {
+            	throw new Exception("Expected optional count parameter");
+            }
+        }
+    }
+    
+
+    
+
+
+    class FunctionFirst extends Function {
+        public String getName() {
+            return "first";
+        }
+        public String getShortDesc() {
+            return "first(count?) - returns first element or null if empty, or if count given: list of N first elements";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	
+            if (params.size() == 0) {
+            	if(val.size()==0) return new ValueNull();
+            	return val.get(0);
+            } else if (params.size() == 1) {
+            	int count=(int) getInt("count", params, 0);
+            	if (val.size()==0) return new ValueList(new ArrayList<Value>());
+            	
+            	List<Value> result=new ArrayList<Value>();
+            	int to=count;
+            	if (to>val.size()) to=val.size();
+            	
+            	for (int i=0; i<to; i++) {
             		result.add(val.get(i));
             	}
             	return new ValueList(result);

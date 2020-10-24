@@ -109,11 +109,11 @@ Running external programs
  * Dir.run()
  * Dir.runCapture()
  * Dir.runDetach()
- * Dir.runProcessWait()
- |   Lib:run
- |   Doing ssh
- * Dir.runProcess()
- * External Program Status
+ * Dir.runProcess
+ * Lib:runProcess utility function
+ * Lib:run utility function
+ * Work directory issues
+ * Doing ssh
 
 Session persistent data
  * ValDef
