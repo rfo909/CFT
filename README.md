@@ -52,11 +52,11 @@ commands=Sequence(
 )
 DebianHosts->host 
 	x = SSH:run(host, commands, true)
+	collection = Sys.savefile.name.beforeLast(".")
 	if (x.exitCode != 0) {
-		collection=Sys.savefile.name + "_failed"
-		Db:Add(host,x,collection)
+		Db:Add(host,x,collection+"_failed")
 	} else {
-
+		Db:Add(host,Date,collection+"_ok")
 	}
 /AptUpdateUpgrade
 
@@ -77,21 +77,45 @@ DebianHosts->host
 
 
 ```
+$ @term
+  <obj: Cfg>
+  24x80 :wrap=false
+
+
+$ ?SSH:
++-----------------------------------------------------
+| Readme       : # Readme
+| ReadSSHTarget: Input("SSH target on format username@server").get
+| remoteShell  : # Open ssh connection to target
+| sshEnable    : # Copy ssh key to remote target host
+| HostOk       : # Check if server responds on ping
+| HostOkSSH    : # Check if ok with SSH
+| VerifySudo   : # Returns boolean indicating if sudo without password ok
+| TmpFile      : # Create name of temp file under /tmp
+| run          : # Run single or multiple commands (string or list) on remote target via SSH, return+
+| sudo         : # Run single or multiple commands (string or list) as root on remote target via SSH+
+| copy         : # Copy local file via scp (secure copy over SSH) to remote target, returns Dict obj+
++-----------------------------------------------------
+
+
 $ ?SSH:run
++-----------------------------------------------------
 
-	# Run single or multiple commands (string or list) on remote target via SSH, returns Dict object
-	#
-	P(1) => target 
-	P(2) => commands
-	P(3,false) => acceptErrors
-	P(4,false) => showDebug
+# Run single or multiple commands (string or list) on remote target via SSH, returns Dict object
+#
+P(1) => target 
+P(2) => commands
+P(3,false) => acceptErrors
+P(4,false) => showDebug
 
-	    error(target==null || !target.contains("@"), "Invalid target: '" + target + "'")
-	    error(commands==null, "Invalid commands: can not be null")
+    error(target==null || !target.contains("@"), "Invalid target: '" + target + "'")
+    error(commands==null, "Invalid commands: can not be null")
 
-	    :
+	:
+
 
 $ RecentlyChangedFiles(7)
+    
     :
 ```
 
