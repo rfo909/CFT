@@ -79,7 +79,7 @@ DebianHosts->host
 ```
 $ @term
   <obj: Cfg>
-  24x80 :wrap=false
+  24x72 :wrap=false
 
 
 $ ?SSH:
@@ -90,30 +90,32 @@ $ ?SSH:
 | sshEnable    : # Copy ssh key to remote target host
 | HostOk       : # Check if server responds on ping
 | HostOkSSH    : # Check if ok with SSH
-| VerifySudo   : # Returns boolean indicating if sudo without password ok
+| VerifySudo   : # Returns boolean indicating if sudo without password +
 | TmpFile      : # Create name of temp file under /tmp
-| run          : # Run single or multiple commands (string or list) on remote target via SSH, return+
-| sudo         : # Run single or multiple commands (string or list) as root on remote target via SSH+
-| copy         : # Copy local file via scp (secure copy over SSH) to remote target, returns Dict obj+
+| run          : # Run single or multiple commands (string or list) on +
+| sudo         : # Run single or multiple commands (string or list) as +
+| copy         : # Copy local file via scp (secure copy over SSH) to re+
 +-----------------------------------------------------
+
 
 
 $ ?SSH:run
 +-----------------------------------------------------
 
-# Run single or multiple commands (string or list) on remote target via SSH, returns Dict object
+## Run single or multiple commands (string or list) on remote target via+
 #
 P(1) => target 
 P(2) => commands
 P(3,false) => acceptErrors
 P(4,false) => showDebug
 
-    error(target==null || !target.contains("@"), "Invalid target: '" + target + "'")
+    error(target==null || !target.contains("@"), "Invalid target: '" + +
     error(commands==null, "Invalid commands: can not be null")
 
 	:
 
 
+$ cd ../project1/src
 $ RecentlyChangedFiles(7)
     
     :
