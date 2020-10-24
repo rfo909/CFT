@@ -142,9 +142,19 @@ P(1,"tmp") => name
 /TmpDir
 
 
-# Run external program and collect stdout, stderr and exitCode - returns Dict
-# with fields cmd, stdin, stdout, stderr, exitCode
+# Run external program and collect stdout, stderr and exitCode - returns intermediate Dict
+# representing the running process, with a member closure called "wait", which in turn
+# delivers a result Dict with the following fields:
+# 		cmd, stdin, stdout, stderr, exitCode
 #
+# Run external program in background.
+#
+# Example of use:
+#     runBg(...)  => a
+#     runBg(...)  => b
+#     a.wait.call => aResult
+#     b.wait.call => bResult
+# --
 P(1,List("ls","-l")) => cmd
 P(2,List) => stdinLines
 P(3,false) => acceptErrors
@@ -154,61 +164,93 @@ P(4,false) => showDebug
         cmd=List(cmd) # wrap as list
     }
     if (getType(stdinLines) != "List") {
-        stdinLines=List(stdinLines) # wrap as
+        stdinLines=List(stdinLines) # wrap as List
     }
     
-    TmpFile("in") =>inFile
-    TmpFile("out") =>outFile
-    TmpFile("err") =>errFile
+    Lib:TmpFile("in") =>inFile
+    Lib:TmpFile("out") =>outFile
+    Lib:TmpFile("err") =>errFile
     
     inFile.create(stdinLines)
-    exitCode = Dir.runProcessWait(inFile,outFile,errFile,cmd)
+    process = Dir.runProcess(inFile,outFile,errFile,cmd)
     Dict
         .set("cmd", cmd)
-        .set("stdin", stdinLines)
-        .set("stdout",if(outFile.exists,outFile.read,List))
-        .set("stderr",if(errFile.exists,errFile.read,List))
-        .set("exitCode", exitCode)
+        .set("acceptErrors", acceptErrors)
+        .set("showDebug", showDebug)
+        .set("stdin", inFile)
+        .set("stdout", outFile)
+        .set("stderr", errFile)
+        .set("process", process)
+        .set("isCompleted", Lambda {
+        	!self.process.isAlive
+        })
+        .set("wait", Lambda{
+        	loop 
+        		break(!self.process.isAlive) 
+        		Sys.sleep(5) 
+        	|
+        	result = Dict
+        		.set("cmd", self.cmd)
+        		.set("stdin", self.stdin.read)
+        		.set("stdout", if(self.stdout.exists, self.stdout.read, List))
+        		.set("stderr", if(self.stderr.exists, self.stderr.read, List))
+        		.set("exitCode", self.process.exitCode)
+
+        	Del = Lambda  {P(1)=>f if(f.exists) f.delete}
+        	Del.call(self.stdin)
+        	Del.call(self.stdout)
+        	Del.call(self.stderr)
+        	
+    	    FAIL = false
+		    if (result.exitCode != 0 && !self.acceptErrors) {
+		        FAIL = true
+		    }
+
+		    if(self.showDebug || FAIL) {
+		        Inner {  # "hide" loops inside inner block, so as not to affect return value of function
+		            println("- cmd:")
+		            result.get("cmd")->line println("    " + line) |
+
+		            println("- exitCode = " + result.get("exitCode"))
+
+		            println("- stdin:")
+		            result.get("stdin")->line println("   # " + line) |
+
+		            println("- stdout:")
+		            result.get("stdout")->line println("   # " + line) |
+
+		            println("- stderr:")
+		            result.get("stderr")->line println("   # " + line) |
+		            println
+		        }
+		    }
+		    
+		    error(FAIL,"run failed with error")
+		    
+		    # return value
+		    result
+
+        })  # Lambda "wait"
     =>result
     
-    Lambda { 
-        P(1) =>f 
-        if(f.exists) f.delete 
-    } =>Del
-    
-    Del.call(inFile)
-    Del.call(outFile)
-    Del.call(errFile)
-
-    FAIL = false
-    if (result.get("exitCode") != 0 && !acceptErrors) {
-        FAIL = true
-    }
-
-
-    if(showDebug || FAIL) {
-        Inner {  # "hide" loops inside inner block, so as not to affect return value of function
-            println("- cmd:")
-            result.get("cmd")->line println("    " + line) |
-
-            println("- exitCode = " + result.get("exitCode"))
-
-            println("- stdin:")
-            result.get("stdin")->line println("   # " + line) |
-
-            println("- stdout:")
-            result.get("stdout")->line println("   # " + line) |
-
-            println("- stderr:")
-            result.get("stderr")->line println("   # " + line) |
-            println
-        }
-    }
-    
-    error(FAIL,"run failed with error")
-    
-    # return value
     result
+
+/runBg
+
+
+# Run external program and collect stdout, stderr and exitCode - returns Dict
+# with fields cmd, stdin, stdout, stderr, exitCode
+# --
+P(1,List("ls","-l")) => cmd
+P(2,List) => stdinLines
+P(3,false) => acceptErrors
+P(4,false) => showDebug
+
+	runBg(cmd,stdinLines,acceptErrors,showDebug) => processDict
+	
+	# return value
+	processDict.wait.call
+
 /run
 
 
