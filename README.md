@@ -39,14 +39,13 @@ DebianHosts->host
 
 ```
 
-# Interactive use
+## Interactive use
 
 
 ```
 $ @term
   <obj: Cfg>
   24x72 :wrap=false
-
 
 $ ?SSH:
 +-----------------------------------------------------
@@ -94,8 +93,16 @@ An object oriented DSL for automation.
 
 A terminal based Java application, and an interpreted programming language.
 
-Create configuration files, install software, copy files, search logs.
+A personal interactive shell.
 
+# What it does
+
+- Install software
+- Create config files
+- Copy, delete, move files and directories
+- Search logs
+- Remote management with SSH and Powershell
+- Built-in help system
 
 # Download and compile
 
@@ -116,7 +123,7 @@ Windows:
 .\cft.cmd
 ```
 
-To leave type ":quit" or just type CTRL-C.
+To leave type ":quit" or just CTRL-C.
 
 
 
