@@ -21,6 +21,7 @@ import java.util.List;
 
 import rf.configtool.main.Ctx;
 import rf.configtool.main.ObjGlobal;
+import rf.configtool.main.SourceException;
 import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.parser.TokenStream;
@@ -40,6 +41,7 @@ public class StmtAssign2 extends Stmt {
 
     public void execute (Ctx ctx) throws Exception {
         Value v=expr.resolve(ctx);
+        if (ctx.isLoopVariable(varName)) throw new SourceException(getSourceLocation(), "Invalid assign: '" + varName + "' is a loop variable");
         ctx.getFunctionState().set(varName, v);
     }
 

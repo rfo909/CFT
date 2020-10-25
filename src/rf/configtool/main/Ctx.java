@@ -202,6 +202,10 @@ public class Ctx {
         this.loopVariableValue=value;
     }
     
+    public boolean isLoopVariable (String name) {
+    	return getLoopVariable(name) != null;
+    }
+    
     public Value getVariable (String name) {
         Value v=getLoopVariable(name);
         if (v != null) return v;
