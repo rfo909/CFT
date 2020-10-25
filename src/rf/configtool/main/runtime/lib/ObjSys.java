@@ -24,6 +24,7 @@ import java.util.*;
 import rf.configtool.data.Expr;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.CtxCloseHook;
+import rf.configtool.main.DictException;
 import rf.configtool.main.OutText;
 import rf.configtool.main.PropsFile;
 import rf.configtool.main.Version;
@@ -339,6 +340,7 @@ public class ObjSys extends Obj {
 			return new ValueObj(x);
 		}
 	}
+
 
 
 }

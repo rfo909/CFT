@@ -13,6 +13,49 @@
 
 <h1>CFT Change log</h1>
 
+<h3>v1.8.0 2020-10-25 throwDict() and tryCatchDict()</h3>
+<p>
+	Created global function throwDict(message, Dict), which
+	throws a special exception that the tryCatchDict() catches. If not caught by a tryCatchDict(),
+	then it will be caught by tryCatch() or be subject to normal error handling.
+</p>
+<pre>
+# Throw CFT exception
+# --
+P(1)=&gt;x
+	if (x&gt;10) throwDict("invalid x",Dict.set("x",x))
+	println("x=" + x)
+/f
+
+# Catch CFT exception
+# --
+tryCatchDict({
+	f(9)
+	f(10)
+	f(11)
+}) =&gt; tcd
+if (!tcd.ok) {
+	println("Failed: "+ tcd.msg + " for x=" + tcd.dict.x)
+}
+/test
+
+# Output
+#
+# x=9
+# x=10
+# Failed: invalid x for x=11
+
+</pre>
+<p>
+	Return data from tryCatchDict()
+</p>
+<pre>
+$ tryCatchDict(throwDict("sdf",Dict))
+  &lt;obj: Dict&gt;
+  Dict: result msg dict ok
+</pre>
+
+
 
 <h3>v1.7.6 2020-10-25 loop variables</h3>
 <p>

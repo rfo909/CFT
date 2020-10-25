@@ -121,6 +121,7 @@ public class ObjGlobal extends Obj {
         add(new FunctionError());
         add(new FunctionShell());
         add(new FunctionGetType());
+        add(new FunctionThrowDict());
 
         
         // name spaces
@@ -830,6 +831,32 @@ public class ObjGlobal extends Obj {
     }
     
     
+	class FunctionThrowDict extends Function {
+		public String getName() {
+			return "throwDict";
+		}
+
+		public String getShortDesc() {
+			return "throwDict(message,Dict) - throws exception to be captured by tryCatchDict()";
+		}
+
+		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+			if (params.size() != 2) {
+				throw new Exception("Expected parameters message, dict");
+			}
+			String message=getString("message",params,0);
+			ObjDict dict=null;
+
+			Obj obj=getObj("dict",params,1);
+			if (!(obj instanceof ObjDict)) throw new Exception("Expected parameters message, dict?");
+			dict=(ObjDict) obj;
+
+			throw new DictException(message,dict);
+		}
+	}
+	
+	
+	
     
     private void callExternalProgram (String cmd, Ctx ctx) throws Exception {
         List<String> strArgs=new ArrayList<String>();
