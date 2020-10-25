@@ -10,7 +10,7 @@ Run exampleParse() to test
 
 
 
-# Build root Node for all known tokens in JSON
+# Build root lexer Node for all known tokens in JSON
 # --
 	Lib.Text.Lexer.Node => root
 	
@@ -71,7 +71,7 @@ Run exampleParse() to test
 # RUNME: JSON parser
 # --
 	ts = exampleTokenStream
-	tc = tryCatch(MatchObject(ts))
+	tc = tryCatchSoft(MatchObject(ts))
 	if (tc.ok) {
 		println("parse ok")
 		dict = tc.result  # the JSON root object

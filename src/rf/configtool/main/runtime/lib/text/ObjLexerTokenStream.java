@@ -22,6 +22,7 @@ import java.util.*;
 
 import rf.configtool.main.Ctx;
 import rf.configtool.main.OutText;
+import rf.configtool.main.SoftException;
 import rf.configtool.main.runtime.ColList;
 import rf.configtool.main.runtime.Function;
 import rf.configtool.main.runtime.Obj;
@@ -135,7 +136,7 @@ public class ObjLexerTokenStream extends Obj {
             return "match";
         }
         public String getShortDesc() {
-            return "match(str, errMsg?) - if match, advance curr pos and return true, otherwise, if errMsg, return error, otherwise just return false";
+            return "match(str, errMsg?) - if match, advance curr pos and return true, otherwise, if errMsg, throw soft error, otherwise just return false";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
         	String str;
@@ -155,7 +156,7 @@ public class ObjLexerTokenStream extends Obj {
         		pos++;
         		return new ValueBoolean(true);
         	} else {
-        		if (errMsg != null) throw new Exception(curr().getSourceLocation() + " " + errMsg);
+        		if (errMsg != null) throw new SoftException(curr().getSourceLocation() + " " + errMsg);
         		return new ValueBoolean(false);
         	}
         }
