@@ -34,7 +34,7 @@ import rf.configtool.main.runtime.lib.Protection;
 import rf.configtool.parser.TokenStream;
 
 /**
- * Return directory object for current directory
+ * Try-catch for all errors (hard and soft). For soft only, use tryCatchSoft()
  */
 public class ExprTryCatch extends LexicalElement {
 	
@@ -59,10 +59,10 @@ public class ExprTryCatch extends LexicalElement {
     		msg=new ValueString(ex.getMessage());
     	}
     	HashMap<String,Value> data=new HashMap<String,Value>();
-    	data.put("result", result);
+    	if (result != null) data.put("result", result);
     	data.put("ok", new ValueBoolean(result != null));
-    	data.put("stack", stackTrace);
-    	data.put("msg", msg==null ? new ValueNull() : msg);
+    	if (stackTrace != null) data.put("stack", stackTrace);
+    	if (msg != null) data.put("msg", msg);
     	return new ValueObj(new ObjDict(data));
     }
     

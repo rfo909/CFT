@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import rf.configtool.main.Ctx;
-import rf.configtool.main.DictException;
+import rf.configtool.main.SoftException;
 import rf.configtool.main.SourceException;
 import rf.configtool.main.runtime.*;
 import rf.configtool.main.runtime.lib.ObjDict;
@@ -35,50 +35,46 @@ import rf.configtool.main.runtime.lib.Protection;
 import rf.configtool.parser.TokenStream;
 
 /**
- * Catch DictException - let others pass
+ * Try-catch for soft errors (created by error()) 
  */
-public class ExprTryCatchDict extends LexicalElement {
+public class ExprTryCatchSoft extends LexicalElement {
 	
 	private Expr expr;
 
-    public ExprTryCatchDict (TokenStream ts) throws Exception {
+    public ExprTryCatchSoft (TokenStream ts) throws Exception {
         super(ts);
-        ts.matchStr("tryCatchDict","expected 'tryCatchDict'");
-        ts.matchStr("(", "expected '(' following tryCatchDict");
+        ts.matchStr("tryCatchSoft","expected 'tryCatchSoft'");
+        ts.matchStr("(", "expected '(' following tryCatchSoft");
         expr=new Expr(ts);
-        ts.matchStr(")", "expected ')' closing tryCatchDict() expression");
+        ts.matchStr(")", "expected ')' closing tryCatchSoft() expression");
     }
     
     public Value resolve (Ctx ctx) throws Exception {
-    	Value result = new ValueNull();
-    	ValueBoolean ok = new ValueBoolean(false);
-    	DictException dex=null;
+    	SoftException softEx=null;
+    	
+    	Value result=null;
 
     	try {
     		result = expr.resolve(ctx);
-    		ok=new ValueBoolean(true);
     	} catch (Exception ex) {
-    		if (ex instanceof DictException) {
-    			dex=(DictException) ex;
+    		// examine if SoftException
+    		//
+    		if (ex instanceof SoftException) {
+    			softEx=(SoftException) ex;
     		} else if (ex instanceof SourceException) {
     			Exception inner=((SourceException) ex).getOriginalException();
-    			if (inner != null && (inner instanceof DictException)) {
-    				dex=(DictException) inner;
+    			if (inner != null && (inner instanceof SoftException)) {
+    				softEx=(SoftException) inner;
     			}
-    		} 
-    		
-    		if (dex==null) {
-    			throw ex;
     		}
-    	
+    		if (softEx==null) throw ex;  
     	}
-
+    	
     	HashMap<String,Value> data=new HashMap<String,Value>();
-    	data.put("ok", ok);
-    	data.put("result", result);
-    	data.put("msg", new ValueString(dex.getDictExceptionMessage()));
-    	data.put("dict", new ValueObj(dex.getDict()));
-   
+    	if (result != null) data.put("result", result);
+    	data.put("ok", new ValueBoolean(result != null));
+    	if (softEx != null) data.put("msg", new ValueString(softEx.getMessage()));
+  
     	return new ValueObj(new ObjDict(data));
     }
     

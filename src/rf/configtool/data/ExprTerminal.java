@@ -36,7 +36,7 @@ public class ExprTerminal extends LexicalElement {
     private boolean nullValue;
     private ExprCall exprCall;
     private ExprTryCatch exprTryCatch;
-    private ExprTryCatchDict exprTryCatchDict;
+    private ExprTryCatchSoft exprTryCatchSoft;
     private ExprSequence exprSequence;
     
     private Value literalValue;
@@ -86,8 +86,8 @@ public class ExprTerminal extends LexicalElement {
         	exprTryCatch=new ExprTryCatch(ts);
             return;
         }
-        if (ts.peekStr("tryCatchDict")) {
-        	exprTryCatchDict=new ExprTryCatchDict(ts);
+        if (ts.peekStr("tryCatchSoft")) {
+        	exprTryCatchSoft=new ExprTryCatchSoft(ts);
             return;
         }
         if (ts.peekStr("Sequence")) {
@@ -160,7 +160,7 @@ public class ExprTerminal extends LexicalElement {
 	        if (nullValue) return new ValueNull();
 	        if (exprCall != null) return exprCall.resolve(ctx);
 	        if (exprTryCatch != null) return exprTryCatch.resolve(ctx);
-	        if (exprTryCatchDict != null) return exprTryCatchDict.resolve(ctx);
+	        if (exprTryCatchSoft != null) return exprTryCatchSoft.resolve(ctx);
 	        
 	        if (exprSequence != null) return exprSequence.resolve(ctx);
 	        

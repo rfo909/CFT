@@ -164,7 +164,9 @@ Differing between Windows and Linux
 
 Predicate calls
 
-Try/catch
+Error handling
+ * Soft errors
+ * Hard errors
 
 Get type of value
 

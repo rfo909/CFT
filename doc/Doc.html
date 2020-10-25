@@ -15,8 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2020-10-24 RFO
-v1.7.5
+Last updated: 2020-10-25 RFO
+v1.8.0
 
 </pre>
 
@@ -2146,24 +2146,59 @@ codeDirs = . ; code.examples ; code.lib
 
 
 
-<h1>Try/catch</h1>
+<h1>Error handling</h1>
 <p>
-  Catching of exceptions in CFT is implemented as a global expression, tryCatch(expr) which
-  invokes the given expression, and returns a Dict object, detailing the outcome, and 
-  preventing exceptions from terminating the running of CFT script code.
+  Exception handling in CFT is split into two parts, reflecting two types of
+  situations:
+</p>
+<ol>
+  <li>CFT logical or data errors, called <b>soft errors</b></li>
+  <li>General errors, stemming from underlying Java code, network situations etc, called <b>hard errors</b></li>
+</ol>
+</p>
+<h2>Soft errors</h2>
+<p>
+  Soft errors are created by calling the error() function. 
+</p>
+<p>
+  They can be specifically
+  caught with tryCatchSoft(), which returns a Dict containing either:
 </p>
 <pre>
-  x = tryCatch(xxx)
+  ok: true
+  result: ANY
 
-  # Contains
-  #    ok           - boolean
-  #    result       - if ok, null if not
-  #    msg          - exception message if not ok
-  #    stack        - stack trace
+  or
+
+  ok: false
+  msg: string
 </pre>
 <p>
-  Remember that blocks of code are expressions also.
+  Hard errors propagate right through tryCatchSoft().
 </p>
+
+<h2>Hard errors</h2>
+<p>
+  Hard errors are all kind of error situations arising from the Java code running CFT.
+</p>
+<p> 
+  The tryCatch() expression catches both hard and soft errors, and returns a Dict containing
+</p>
+<pre>
+  ok: true
+  result: ANY
+
+  or 
+
+  ok: false
+  msg: string
+  stack: List of string
+</pre>
+<p>
+  An example of a hard error is trying to access a variable or function that doesn't
+  exist.
+</p>
+
 
 
 

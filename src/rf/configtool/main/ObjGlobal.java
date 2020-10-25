@@ -121,7 +121,6 @@ public class ObjGlobal extends Obj {
         add(new FunctionError());
         add(new FunctionShell());
         add(new FunctionGetType());
-        add(new FunctionThrowDict());
 
         
         // name spaces
@@ -753,18 +752,18 @@ public class ObjGlobal extends Obj {
             return "error";
         }
         public String getShortDesc() {
-            return "error(cond?, msg) - if expr is true, throws exception, if not present, then unconditional";
+            return "error(cond?, msg) - if expr is true or no expr, throw soft error exception";
         }
         @Override
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() == 2) {
 	            boolean cond=params.get(0).getValAsBoolean();
 	            String s=params.get(1).getValAsString();
-	            if (cond) throw new Exception(s);
+	            if (cond) throw new SoftException(s);
 	            return new ValueNull(); 
             } else if (params.size() ==1) {
 	            String s=params.get(0).getValAsString();
-	            throw new Exception(s);
+	            throw new SoftException(s);
             } else {
             	throw new Exception("Expected parameters [cond,] message");
             }
@@ -830,30 +829,7 @@ public class ObjGlobal extends Obj {
         }
     }
     
-    
-	class FunctionThrowDict extends Function {
-		public String getName() {
-			return "throwDict";
-		}
 
-		public String getShortDesc() {
-			return "throwDict(message,Dict) - throws exception to be captured by tryCatchDict()";
-		}
-
-		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-			if (params.size() != 2) {
-				throw new Exception("Expected parameters message, dict");
-			}
-			String message=getString("message",params,0);
-			ObjDict dict=null;
-
-			Obj obj=getObj("dict",params,1);
-			if (!(obj instanceof ObjDict)) throw new Exception("Expected parameters message, dict?");
-			dict=(ObjDict) obj;
-
-			throw new DictException(message,dict);
-		}
-	}
 	
 	
 	
