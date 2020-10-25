@@ -19,7 +19,7 @@ commands=Sequence(
 	@ apt-get -y upgrade
 )
 DebianHosts->host 
-	x = SSH:run(host, commands, true)
+	x = SSH:sudo(host, commands, true)
 	collection = Sys.savefile.name.beforeLast(".")
 	if (x.exitCode != 0) {
 		Db:Add(host,x,collection+"_failed")

@@ -2937,7 +2937,7 @@ considering parsing again.
 
 The v1.7.5 "dictionary-as-object" turned out really nice, letting lambdas stored inside Dict's
 be wrapped into closures pointing at that dict. This eliminated the first syntax from v1.3.2 or
-thereabouts, with a separate ".invoke".
+thereabouts, which included a separate ".invoke"-function.
 
 
 The fact is that this is one of those features that came about, not from a grand plan, but
@@ -2948,7 +2948,7 @@ like the Process object.
 ## 2020-10-24 cleaning up - Java Parser
 
 
-Decided to delete the Lib.Text.Parser that was to triumpally (is that a word?) follow the
+Decided to delete the Lib.Text.Parser that was to triumphantly (is that a word?) follow the
 Lib.Text.Lexer. It got stuck, from lack of inspiration, and then I went ahead and created
 a rudimentary JSON parser in pure CFT in under 150 lines.
 
@@ -2969,7 +2969,7 @@ and efficient notation, and frequently used, loop spaces will not be purged from
 just yet.
 
 
-The "pipe" is completely optional, as Inner blocks can do all that "loop spaces" do, but
+The "pipe" is completely optional, as Inner blocks can do all that "loop spaces" do (and more), but
 at the cost of a bit more notation.
 
 

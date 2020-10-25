@@ -65,7 +65,7 @@ public class ExprTerminal extends LexicalElement {
             pop=new ExprPop(ts);
             return;
         }
-        if (ts.peekStr("if") || ts.peekStr("when")) {
+        if (ts.peekStr("if")) {
             exprIf=new ExprIf(ts);
             return;
         }
