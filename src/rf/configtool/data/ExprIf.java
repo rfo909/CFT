@@ -25,7 +25,12 @@ import rf.configtool.parser.TokenStream;
 
 public class ExprIf extends LexicalElement {
 
+	// The inline form uses expressions, while the "traditional" form
+	// uses statements, which in turn may well be expressions, but also
+	// everything else.
+	
     private Expr bool, exprIf, exprElse;
+    private Stmt stmtIf, stmtElse;
     
     public ExprIf (TokenStream ts) throws Exception {
         super(ts);
@@ -37,9 +42,9 @@ public class ExprIf extends LexicalElement {
         ts.matchStr("(", "expected '(' following 'if");
         bool=new Expr(ts);
         if (ts.matchStr(")")) {
-        	// traditional syntax: if(expr) expr [else expr]
-        	exprIf=new Expr(ts);
-        	if (ts.matchStr("else")) exprElse=new Expr(ts);
+        	// traditional syntax: if(expr) stmt [else stmt]
+        	stmtIf=Stmt.parse(ts);
+        	if (ts.matchStr("else")) stmtElse=Stmt.parse(ts);
         } else {
         	// single function call syntax: if(expr,ifExpr[,elseExpr])
             ts.matchStr(",", "expected comma following boolean expr");
@@ -58,10 +63,20 @@ public class ExprIf extends LexicalElement {
         boolean b=bool.resolve(ctx).getValAsBoolean();
         Value result;
         if (b) {
-            result = exprIf.resolve(ctx);
+        	if (exprIf != null) {
+        		result = exprIf.resolve(ctx);
+        	} else {
+        		stmtIf.execute(ctx);
+        		result=ctx.pop();
+        		if (result==null) result=new ValueNull();
+        	}
         } else {
         	if (exprElse != null) {
         		result = exprElse.resolve(ctx);
+        	} else if (stmtElse != null) {
+        		stmtElse.execute(ctx);
+        		result=ctx.pop();
+        		if (result==null) result=new ValueNull();
         	} else {
         		result = new ValueNull();
         	}
