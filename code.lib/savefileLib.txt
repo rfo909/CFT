@@ -163,7 +163,7 @@ P(3,false) => verbose
 		if(!d2.exists) d2.create
 		copyDirTree(d,d2,verbose)
 	|
-/copyDirTree
+/CopyDirTree
 
 
 # Delete directory tree, asks for interactive confirm
@@ -186,7 +186,7 @@ P(1)=>xdir
 	
 	xdir.allFiles->f f.delete |
 	xdir.allDirs->d d.delete |
-/DelTree
+/DelDirTree
 
 
 
