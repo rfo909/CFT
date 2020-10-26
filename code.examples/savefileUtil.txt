@@ -1,0 +1,10 @@
+
+# Show YAML file without comment lines
+# --
+P(1) => file
+	file.read->line
+		s=line.trim
+		reject(s.startsWith("#") || s=="")
+		out(line)
+/YAMLClean
+
