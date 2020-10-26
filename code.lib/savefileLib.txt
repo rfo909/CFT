@@ -166,6 +166,27 @@ P(3,false) => verbose
 /copyDirTree
 
 
+# Delete directory tree, asks for interactive confirm
+# Leaves root directory
+# --
+P(1)=>xdir
+	Sequence(
+		@
+		@ ------------------------------------------
+		@     Deleting directory tree confirm
+		@ ------------------------------------------
+		@
+		xdir.path
+		@
+		@ ------------------------------------------
+		@
+	)->x println(x) |
+	readLine("Are you really SURE? Type 'Yes'")=="Yes" =>ok
+	error(!ok,"Aborting")
+	
+	xdir.allFiles->f f.delete |
+	xdir.allDirs->d d.delete |
+/DelTree
 
 
 
