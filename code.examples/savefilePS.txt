@@ -66,15 +66,22 @@ P(2,"get-service") =>code
 
 
 # Run a Powershell script on remote host
+# The script is created locally and run remotely via Invoke-Command.
 # --
 	P(1, Input("Enter remote host").get) =>host 
 	P(2, List("cd c:\temp","dir")) => scriptCode
+	P(2, false) => asAdmin
 
 	# The Invoke-Command can run command from local ps1-file on remote server!
 
-	Dir("c:\temp").file("tmp"+currentTimeMillis+".ps1") => ps1file
+	Lib:TmpFile("script","ps1") => ps1file
 		# The script to be invoked must be named *.ps1
-	ps1file.create(scriptCode)
+		
+	ps1file.create("")
+	if (asAdmin) {
+		ps1file.append("start-process powershell -verb runas")
+	}
+	ps1file.append(scriptCode)
 	List("powershell","Invoke-Command","-ComputerName",host,"-FilePath",ps1file.path) => cmd
 	Lib:run(cmd,List,true) => result
 	ps1file.delete

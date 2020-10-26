@@ -123,9 +123,11 @@ d
 
 # Create name of temp file under /tmp or under c:\temp if windows
 P(1,"tmp") =>name 
+P(2,"txt") => type
     if (Sys.isWindows,
-	Dir("c:\temp").file(name+currentTimeMillis),
-    	Dir("/tmp").file(name + currentTimeMillis) )
+		Dir("c:\temp").file(name+currentTimeMillis+"."+type),
+    	Dir("/tmp").file(name + currentTimeMillis+"."+type) 
+    )
 /TmpFile
 
 
