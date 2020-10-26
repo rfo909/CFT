@@ -161,7 +161,7 @@ P(3,false) => verbose
 	fromDir.dirs->d 
 		toDir.sub(d.name) => d2
 		if(!d2.exists) d2.create
-		copyDirTree(d,d2,verbose)
+		CopyDirTree(d,d2,verbose)
 	|
 /CopyDirTree
 
