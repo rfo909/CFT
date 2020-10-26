@@ -759,11 +759,11 @@ public class ObjGlobal extends Obj {
             if (params.size() == 2) {
 	            boolean cond=params.get(0).getValAsBoolean();
 	            String s=params.get(1).getValAsString();
-	            if (cond) throw new SoftException(s);
+	            if (cond) throw new SoftErrorException(s);
 	            return new ValueNull(); 
             } else if (params.size() ==1) {
 	            String s=params.get(0).getValAsString();
-	            throw new SoftException(s);
+	            throw new SoftErrorException(s);
             } else {
             	throw new Exception("Expected parameters [cond,] message");
             }

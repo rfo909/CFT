@@ -22,7 +22,7 @@ import java.util.*;
 
 import rf.configtool.main.Ctx;
 import rf.configtool.main.OutText;
-import rf.configtool.main.SoftException;
+import rf.configtool.main.SoftErrorException;
 import rf.configtool.main.runtime.ColList;
 import rf.configtool.main.runtime.Function;
 import rf.configtool.main.runtime.Obj;
@@ -156,7 +156,7 @@ public class ObjLexerTokenStream extends Obj {
         		pos++;
         		return new ValueBoolean(true);
         	} else {
-        		if (errMsg != null) throw new SoftException(curr().getSourceLocation() + " " + errMsg);
+        		if (errMsg != null) throw new SoftErrorException(curr().getSourceLocation() + " " + errMsg);
         		return new ValueBoolean(false);
         	}
         }

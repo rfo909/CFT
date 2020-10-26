@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import rf.configtool.main.Ctx;
-import rf.configtool.main.SoftException;
+import rf.configtool.main.SoftErrorException;
 import rf.configtool.main.SourceException;
 import rf.configtool.main.runtime.*;
 import rf.configtool.main.runtime.lib.ObjDict;
@@ -50,7 +50,7 @@ public class ExprTryCatchSoft extends LexicalElement {
     }
     
     public Value resolve (Ctx ctx) throws Exception {
-    	SoftException softEx=null;
+    	SoftErrorException softEx=null;
     	
     	Value result=null;
 
@@ -59,12 +59,12 @@ public class ExprTryCatchSoft extends LexicalElement {
     	} catch (Exception ex) {
     		// examine if SoftException
     		//
-    		if (ex instanceof SoftException) {
-    			softEx=(SoftException) ex;
+    		if (ex instanceof SoftErrorException) {
+    			softEx=(SoftErrorException) ex;
     		} else if (ex instanceof SourceException) {
     			Exception inner=((SourceException) ex).getOriginalException();
-    			if (inner != null && (inner instanceof SoftException)) {
-    				softEx=(SoftException) inner;
+    			if (inner != null && (inner instanceof SoftErrorException)) {
+    				softEx=(SoftErrorException) inner;
     			}
     		}
     		if (softEx==null) throw ex;  

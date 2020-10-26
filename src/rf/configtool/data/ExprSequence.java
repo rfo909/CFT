@@ -66,7 +66,9 @@ public class ExprSequence extends LexicalElement {
     public Value resolve (Ctx ctx) throws Exception {
     	if (expr.size()==0) return new ValueList(new ArrayList<Value>());
     	if (guarded) {
-    		boolean ok = expr.get(0).resolve(ctx).getValAsBoolean();
+    		Value v=expr.get(0).resolve(ctx);
+    		if (!(v instanceof ValueBoolean)) throw new Exception("CondSequence: first parameter not a boolean");
+    		boolean ok = v.getValAsBoolean();
     		if (!ok) return new ValueList(new ArrayList<Value>()); // empty list
     	}
     	boolean isFirst=true;
