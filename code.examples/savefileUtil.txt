@@ -1,4 +1,27 @@
 
+# Show content of dictionary
+# --
+P(1)=>dict
+	dict.keys.sort->key
+		report(key,dict.get(key))
+/ShowDict
+
+
+# Create / access counter
+# --
+P(1) => name
+P(2,9999999999999999) => maxValue
+	error(name==null,"P(1) name missing")
+	id="counter:"+name
+	if (Val(id)==null) ValDef(id,0)
+	
+	i=Val(id)
+	next=(i+1) % maxValue
+	ValDef(id,next)
+	i
+/Counter
+	
+
 # Show YAML file without comment lines
 # --
 P(1) => file
@@ -7,4 +30,5 @@ P(1) => file
 		reject(s.startsWith("#") || s=="")
 		out(line)
 /YAMLClean
+
 
