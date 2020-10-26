@@ -142,6 +142,33 @@ P(1,"tmp") => name
 /TmpDir
 
 
+# Copy directory tree. Both fromDir and toDir must exist
+# --
+P(1) => fromDir
+P(2) => toDir
+P(3,false) => verbose
+	error(!fromDir.exists, "Invalid fromDir: " + fromDir.path)
+	error(!toDir.exists, "Invalid toDir: " + toDir.path)
+	error(fromDir.path==toDir.path, "fromDir == toDir")
+
+	fromDir.files->f 
+		if(verbose) {
+			println("FROM: " + f.path) 
+			println("TO  : " + toDir.path)
+		}
+		toDir.copy(f) 
+	|
+	fromDir.dirs->d 
+		toDir.sub(d.name) => d2
+		if(!d2.exists) d2.create
+		copyDirTree(d,d2,verbose)
+	|
+/copyDirTree
+
+
+
+
+
 # Run external program and collect stdout, stderr and exitCode - returns intermediate Dict
 # representing the running process, with a member closure called "wait", which in turn
 # delivers a result Dict with the following fields:
