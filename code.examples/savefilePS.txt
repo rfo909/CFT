@@ -110,7 +110,7 @@ P(2, Input("Enter service").get) =>service
 
 
 
-# Primitive remote shell to multiple windows hosts via PowerShell
+# Simple remote shell to multiple windows hosts via PowerShell.
 # --
 P(1,Input("Shell Host").get) => host
 if (Val("sh.dirs")==null) {
@@ -119,24 +119,43 @@ if (Val("sh.dirs")==null) {
 currDirs = Val("sh.dirs")  # default directories
 loop
 	println
-	readLine("[" + host + " " + currDirs.get(host,"c:\temp") + "] '.q' to quit, '.?' for help") => mode
+	readLine("[" + host + " " + currDirs.get(host,"c:\temp") + "] '.q' to quit, '?' for help") => mode
 	break(mode==".q")
 
-	if (mode==".?") {
+	if (mode=="?") {
 		Sequence(
 			@ Enter multiple commands separated by semicolon or type
 			@
 			@ '.h'  - change host
 			@ '.d'  - set directory manually
+			@ '.e'  - edit file
 			@ '.'   - enter or paste multiple lines - end with '.'
 			@ '.q'  - quit
 		)->line println(line)
 	} else if (mode==".h") {
-		Input("Shell Host").get => host
-		currDirs.get("host","c:\temp")
+		knownHosts = currDirs.keys.sort
+		Lib:Header("Known hosts")
+		Inner{knownHosts->h println("  " + h) }
+		println
+		Input("Enter shell Host (ENTER to keep " + host + ")").get => x
+		if (x.trim != "") {
+			host = x
+			currDirs.get(host,"c:\temp")
+		}
 	} else if (mode==".d")  {
 		readLine("New current directory") => dir
 		currDirs.set(host, dir)
+	} else if (mode==".e") {
+		dir = Dir("\\" + host + "\" + convertPath(currDirs.get(host,"c:\temp")))
+		files = dir.files
+		Inner {
+			i=0
+			files->f println(""+i+": " + f.name) i=i+1
+		}
+		tryCatch({
+			i=readLine("Index (blank to cancel)").parseInt
+			Lib:e (files.nth(i))
+		})
 	} else {
 		if (mode==".") {
 			println("Enter code lines, then '.' to send")
