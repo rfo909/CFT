@@ -129,6 +129,7 @@ loop
 			@ '.h'  - change host
 			@ '.d'  - set directory manually
 			@ '.e'  - edit file
+			@ '.y'  - show YAML minus comments
 			@ '.'   - enter or paste multiple lines - end with '.'
 			@ '.q'  - quit
 		)->line println(line)
@@ -147,15 +148,16 @@ loop
 		currDirs.set(host, dir)
 	} else if (mode==".e") {
 		dir = Dir("\\" + host + "\" + convertPath(currDirs.get(host,"c:\temp")))
-		files = dir.files
-		Inner {
-			i=0
-			files->f println(""+i+": " + f.name) i=i+1
+		file = Util:SelectFile(dir)
+		if (file != null) {
+			Lib:e (file)
 		}
-		tryCatch({
-			i=readLine("Index (blank to cancel)").parseInt
-			Lib:e (files.nth(i))
-		})
+	} else if (mode==".y") {
+		dir = Dir("\\" + host + "\" + convertPath(currDirs.get(host,"c:\temp")))
+		file = Util:SelectFile(dir)
+		if (file != null) {
+			Util:UncommentFile (file)->line println(line)
+		}
 	} else {
 		if (mode==".") {
 			println("Enter code lines, then '.' to send")

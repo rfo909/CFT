@@ -22,13 +22,33 @@ P(2,9999999999999999) => maxValue
 /Counter
 	
 
-# Show YAML file without comment lines
+# Show file without comment lines
 # --
 P(1) => file
+P(2,"#") => commentStart
 	file.read->line
 		s=line.trim
-		reject(s.startsWith("#") || s=="")
+		reject(s.startsWith(commentStart) || s=="")
 		out(line)
-/YAMLClean
+/UncommentFile
+
+
+# Select file from directory
+# --
+P(1) => dir
+P(2,"*") => globPattern
+	i=0
+	files = dir.files(Glob(globPattern))
+	files->f 
+		println(""+i + ": " + f.name)
+		i=i+1
+	|
+	result=null
+	tryCatch({
+		readLine("Enter index / blank for none").parseInt => i
+		result=files.nth(i)
+	})
+	result
+/SelectFile
 
 
