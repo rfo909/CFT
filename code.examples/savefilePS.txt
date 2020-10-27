@@ -129,7 +129,7 @@ loop
 			@ '.h'  - change host
 			@ '.d'  - set directory manually
 			@ '.e'  - edit file
-			@ '.y'  - show YAML minus comments
+			@ '.u X'- show file minus comments (starting with '#' or X if given)
 			@ '.'   - enter or paste multiple lines - end with '.'
 			@ '.q'  - quit
 		)->line println(line)
@@ -152,11 +152,18 @@ loop
 		if (file != null) {
 			Lib:e (file)
 		}
-	} else if (mode==".y") {
+	} else if (mode.startsWith(".u")) {
 		dir = Dir("\\" + host + "\" + convertPath(currDirs.get(host,"c:\temp")))
+		comment="#"
+		if (mode.split.length==2) comment=mode.split.nth(1)
+
 		file = Util:SelectFile(dir)
 		if (file != null) {
-			Util:UncommentFile (file)->line println(line)
+			println("--------------")
+			Inner{
+				Util:UncommentFile (file, comment)->line println(line) 
+			}
+			println("--------------")
 		}
 	} else {
 		if (mode==".") {
