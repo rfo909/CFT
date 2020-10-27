@@ -189,6 +189,13 @@ loop
 /sh
 
 
+# Convert path c:\xxx to c$\xxx etc
+# --
+P(1)=>path
+	error(path.chars.nth(1) != ":" || path.chars.nth(2) != "\", "Invalid path, must start with c:\... or similar")
+	path.chars.nth + "$" + path.sub(2)
+/convertPath
+
 
 
 # Check if host1 can access TCP port on host2, true if connect ok, false if not
