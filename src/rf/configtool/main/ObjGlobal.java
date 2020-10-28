@@ -605,12 +605,24 @@ public class ObjGlobal extends Obj {
             return "Val";
         }
         public String getShortDesc() {
-            return "Val(name) - get session value created with ValDef";
+            return "Val(name,default?) - get session value created with ValDef - if not set, set to default and return it";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() == 1) {
                 String name=getString("name", params, 0);
                 return ctx.getObjGlobal().getPersistentValue(name);
+            } else if (params.size()==2) {
+                String name=getString("name", params, 0);
+                Value defaultVal=params.get(1);
+           
+                Value x=ctx.getObjGlobal().getPersistentValue(name);
+
+                if (x==null || (x instanceof ValueNull)) {
+                	ctx.getObjGlobal().setPersistentValue(name, defaultVal);
+                	return defaultVal;
+                } else {
+                	return x;
+                }
             } else {
                 throw new Exception("Expected parameters name, defaultValue");
             }
