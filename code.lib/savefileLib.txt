@@ -115,10 +115,28 @@ choice.
 
 
 
+# Get the private dir
+# --
 Sys.homeDir.sub("private") =>d
 if(!d.exists) d.create
 d
 /DirPrivate
+
+
+
+# Get (or define) hostname
+# --
+	f = DirPrivate.file("hostname.txt")
+	if (!f.exists) {
+		println println println("*** *** ***")
+		Input("** Enter hostname to store in " + f.path).get => x
+		f.create(x)
+	}
+	f.read.nth.trim
+/Hostname
+
+
+
 
 
 # Create name of temp file under /tmp or under c:\temp if windows
@@ -222,7 +240,17 @@ P(4,false) => showDebug
     Lib:TmpFile("err") =>errFile
     
     inFile.create(stdinLines)
-    process = Dir.runProcess(inFile,outFile,errFile,cmd)
+
+    tryCatch({
+    	process = Dir.runProcess(inFile,outFile,errFile,cmd)
+    }) => xxx
+
+    if (!xxx.ok) {
+    	process=null
+    	errFile.append("Dir.runProcess failed with exception")
+    	errFile.append(xxx.get("msg","<No message>"))
+    	errFile.append(xxx.get("stack",List))
+    }
     Dict
         .set("cmd", cmd)
         .set("acceptErrors", acceptErrors)
@@ -232,11 +260,11 @@ P(4,false) => showDebug
         .set("stderr", errFile)
         .set("process", process)
         .set("isCompleted", Lambda {
-        	!self.process.isAlive
+        	self.process==null || !self.process.isAlive
         })
         .set("wait", Lambda{
         	loop 
-        		break(!self.process.isAlive) 
+        		break(self.process==null || !self.process.isAlive) 
         		Sys.sleep(5) 
         	|
         	result = Dict
@@ -244,7 +272,7 @@ P(4,false) => showDebug
         		.set("stdin", self.stdin.read)
         		.set("stdout", if(self.stdout.exists, self.stdout.read, List))
         		.set("stderr", if(self.stderr.exists, self.stderr.read, List))
-        		.set("exitCode", self.process.exitCode)
+        		.set("exitCode", if(self.process==null, -1, self.process.exitCode))
 
         	Del = Lambda  {P(1)=>f if(f.exists) f.delete}
         	Del.call(self.stdin)
