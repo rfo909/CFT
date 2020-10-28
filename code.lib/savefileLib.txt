@@ -127,7 +127,7 @@ d
 # Get (or define) hostname
 # --
 	f = DirPrivate.file("hostname.txt")
-	if (f.exists, f.read.nth.trim, "-")
+	if (f.exists, f.read.nth.trim, "")
 /Hostname
 
 
