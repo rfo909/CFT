@@ -124,16 +124,6 @@ d
 
 
 
-# Various private macros
-# --
-    Dict
-        .set("noSpace", Lambda { P(1).replace(" ","_").replace("^t".unEsc,"_") })
-        .set("exec", Lambda { P(1,"ls -l") =>cmd println("------> " + cmd) println("") Dir.run(cmd.split) })
-/Util
-
-
-
-
 # Run virsh to display status for all defined VM's
 	println
 	Lib:run(List("virsh","list","--all")).stdout->line println(line) |
@@ -173,89 +163,8 @@ P(1,"someTarget") =>target
 /Delete
 
 
-# Interactive cloning of existing VM - stops original - 
-#  # See AutoClone for newest version
-# --
-    Lib:Header ("Cloning existing VM")
-    Dir.runCapture("whoami").nth=="root" =>ok
-    error(!ok, "Must be logged in as root")
-    
-    null =>original
-    null =>cloneName
-    null =>originalIp
-    null =>newIp
-    loop
-        status
-        Input("Original VM").get =>original
-        Input("New VM name / will also be host name").get =>cloneName
-       	Input("Original IP address or name (kubsXX.v)").get =>originalIp
-        Input("New IP address and mask: xx.xx.xx.xx/MM").get =>newIp
-        false =>ok
-        if(!newIp.contains("/"),Inner{
-            println("*** Missing '/MM' net mask from IP address")
-        }, Inner{
-            Lib:ReadValueBoolean ("Ok", false) =>ok
-        })
-        break(ok)
-    |
-    Stop(original)
-    Util.exec.call("virt-clone --original " + original + " --name " + cloneName + " --auto-clone"
-        + " --file /var/lib/libvirt/images/" + cloneName + ".qcow2")
-    Start(cloneName)
-    status
-    
-    Dir.runCapture("whoami").nth =>currUser
-    
-    println
-    println("----------------------------------------------------------")
-    println("The Clone function can now configure hostname and ")
-    println("netplan for the new VM. This requires password-less SSH")
-    println("for your current user: " + currUser)
-    println
-    println("Also need sudo without passwords (on the template VM)")
-    println("----------------------------------------------------------")
-    println
-    Lib:ReadValueBoolean ("Continue", true) =>confirm
-    error(!confirm,"Aborting config of VM via SSH")
 
-    println
-    println("* Waiting for new node to respond to ping")
-    ServersMaintenance:WaitForPing (originalIp, 30)
-
-    println
-    Input("Enter ssh user name").get =>sshUser
-
-    println
-    println("*** NOTE ***")
-    println("------------")
-    println("Ensure you can SSH into " + sshUser + "@" + originalIp + " without password being root,")
-    println("as this script must always run as root (for KVM cloning etc).")
-    println
-    println("Also verify that you can run sudo without password.")
-    readLine("(Press Enter)")
-    println
-
-    sshUser+"@"+originalIp =>target
-    
-    println("* Configuring hostname")
-    ServersMaintenance:VMSetHostname (target, cloneName)
-
-    println("* Configuring netplan")
-    ServersMaintenance:VMConfigureNetplan (target, newIp)
-
-    println("* Rebooting new VM")
-    SSH:sudo (target, "reboot", true)
-
-    "Done"
-/Clone
-
-
-
-
-
-
-
-# Automatic cloning of existing VM - stops original
+# Automatic (and manual) cloning of existing VM (which will be stopped if running)
 # --
 	P(1) => original           # original VM ("kubsXX")
 	P(2) => cloneName          # new VM name
@@ -265,7 +174,17 @@ P(1,"someTarget") =>target
 	P(6) => nic                # VM network card to configure ("ens3" etc) - run "ip addr" on original VM
 
 	PDict("original","cloneName","originalIp","newIp","sshUser") => pdict
-	error(pdict.hasNullValue,"Missing parameter(s)")
+	if (pdict.hasNullValue) Inner {
+		loop
+			status
+			Lib:ReadValue("Template VM (will be stopped if running)", original) => original
+			Lib:ReadValue("New VM name", cloneName) => cloneName
+			Lib:ReadValue("Template VM IP address", originalIp) => originalIp
+			Lib:ReadValue("New VM IP address (including /NN netmask)", newIp) => newIp
+			Lib:ReadValue("SSH user", sshUser) => sshUser
+			Lib:ReadValue("Network card (nic) to configure, ex. ens3", nic) => nic
+			break(Lib:ReadValueBoolean("Confirm", false))
+	}
 	error(!newIp.contains("/"), "Invalid newIp - must contain /NN netmask")
 
     Lib:Header ("Cloning existing VM")
@@ -310,7 +229,7 @@ P(1,"someTarget") =>target
     SSH:sudo (target, "reboot", true)
 
     "Done"
- /AutoClone
+ /Clone
 
 
 
@@ -433,31 +352,25 @@ ${portInfo}
 
 
 Sequence(
-    H("mcfg1.v","10.0.6.4")
-    H("mcfg2.v","10.0.6.5")
-    H("mcfg3.v","10.0.6.6")
-    H("md11.v","10.0.6.7")
-    H("md12.v","10.0.6.8")
-    H("md13.v","10.0.6.9")
-    H("md21.v","10.0.6.10")
-    H("md22.v","10.0.6.11")
-    H("md23.v","10.0.6.12")
-    H("mongos.v","10.0.6.13")
+    H("elastic01.v","10.0.5.11")
+    H("elastic02.v","10.0.5.12")
+    H("elastic03.v","10.0.5.13")
+    H("elastic04.v","10.0.5.14")
+    H("elastic05.v","10.0.5.15")
 )
-/MongoHosts
+/Hosts
 
-MongoHosts->x out(x.host)
+Hosts->x out(x.host)
 /hosts
 
 
 # Create one clone
-# The template VM has IP = 10.0.6.254
 # --
 P(1) => host
 P(2) => ip
-    original="kubs"  # k-series Ubuntu Server
+    original="kubs05"  # k-series Ubuntu Server
     cloneName=host
-    originalIp="10.0.6.254"
+    originalIp="10.0.5.254"   # original VM ip
     sshUser="roar"
     nic="ens3"  ## run "ip addr"  on original VM to decide
     
@@ -466,9 +379,11 @@ P(2) => ip
 
 # Main function - creates all nodes
 # --
-    MongoHosts -> x
+    Hosts -> x
     CreateClone(x.host, x.ip)
-/CreateMongoCluster
+/CreateAll
+
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> EOF
 ->line println(line)
 /ExampleAutoClone
+
