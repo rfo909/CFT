@@ -127,12 +127,7 @@ d
 # Get (or define) hostname
 # --
 	f = DirPrivate.file("hostname.txt")
-	if (!f.exists) {
-		println println println("*** *** ***")
-		Input("** Enter hostname to store in " + f.path).get => x
-		f.create(x)
-	}
-	f.read.nth.trim
+	if (f.exists, f.read.nth.trim, "-")
 /Hostname
 
 

@@ -36,6 +36,10 @@ Requirements:
 "/mnt/storage/ISO/mongodb_ent/mongodb-enterprise-mongos_4.4.1_amd64.deb"
 /CfgMongos
 
+# Config
+"/mnt/storage/ISO/mongodb_ent/mongodb-mms_4.4.4.103.20201006T2226Z-1_x86_64.deb"
+/CfgOPSManager
+
 
 P(1,"temp") =>name
 	Lib:TmpFile(name)
@@ -399,3 +403,11 @@ sharding:
     out(line.merge(data))
 /CreateMongoConfig
 
+
+
+
+# OPS Manager
+# --
+
+	CfgOPSManager
+/t
