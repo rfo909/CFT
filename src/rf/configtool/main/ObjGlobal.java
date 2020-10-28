@@ -624,7 +624,7 @@ public class ObjGlobal extends Obj {
                 	return x;
                 }
             } else {
-                throw new Exception("Expected parameters name, defaultValue");
+                throw new Exception("Expected parameters name, defaultValue?");
             }
         }
     } 

@@ -319,7 +319,7 @@ public class ObjDir extends Obj {
             return "create";
         }
         public String getShortDesc() {
-            return "create() - return boolean true if is created, otherwise false";
+            return "create() - returns self";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
@@ -331,13 +331,11 @@ public class ObjDir extends Obj {
             if (!f.exists()) {
                 boolean ok = f.mkdirs();
                 if (!ok) throw new Exception("Could not create dir " + f.getCanonicalPath());
-                return new ValueBoolean(true);
+                return new ValueObj(self());
             } else if (!f.isDirectory()) {
-            	ctx.getObjGlobal().addSystemMessage("Not a dir   " + f.getCanonicalPath());
-                return new ValueBoolean(false);
-            } else {
-                return new ValueBoolean(false);
+            	throw new Exception ("Exists, but not a dir " + f.getCanonicalPath());
             }
+            return new ValueObj(self());
         }
     }
 
