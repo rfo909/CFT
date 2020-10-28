@@ -296,6 +296,25 @@ P(1,"someTarget") =>target
 /Create
 
 
+
+
+
+# Reconfigure a VM by editing its XML config file
+# --
+	status
+
+	P(1,Input("VM to reconfigure").get) => vm
+
+	println("8GB=" + (8*1024*1024) + " Kb")
+	println("16GB=" + (16*1024*1024) + " Kb")
+	println("32GB=" + (32*1024*1024) + " Kb")
+
+	Stop(vm)
+	Dir.run("virsh","edit",vm)
+/ReconfigureVM
+	
+	
+
 # Run virt-manager (required X-windows)
     Dir.run("virt-manager")
 /mgr
