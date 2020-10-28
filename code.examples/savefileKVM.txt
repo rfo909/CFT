@@ -94,24 +94,9 @@ the port number (usually 5900), then follow the instructions to
 transport the port number to another PC, where you run VNC. 
 
 --
-
-The Clone functionality depends on there existing template VM's with
-static IP addresses, that can be reached after clone.
-
---
-
-The script VM under code.examples was meant for running on 
-VM's after creation, and has been tested with VM's running Ubuntu 
-Server 18.04. It sets up hostname and netplan config file. Please 
-modify the functions Gateway4 and Nameservers in the VM script 
-before running it on your template VM.
-
----
-
-Note that as of v1.1.4 the KVM Clone() function handles 
-setting up hostname and netplan on the newly created clone,
-using SSH management. The VM script is becoming obsolete, at least
-once the template VM has been created.
+AutoClone is the preferred way of creating new VM's, as
+it includes the necessary waits and checks for ping/ssh before
+going on.
 --------------------------------------------------------------
 >>> EOF
 /Readme
@@ -150,7 +135,9 @@ d
 
 
 # Run virsh to display status for all defined VM's
-    Util.exec.call("virsh list --all")
+	println
+	Lib:run(List("virsh","list","--all")).stdout->line println(line) |
+	println
 /status
 
 
@@ -162,14 +149,14 @@ d
 
 P(1,"someTarget") =>target
     println("STARTING " + target)
-    Util.exec.call("virsh start --domain " + target)
+    Lib:run(List("virsh","start","--domain",target),List,true)
     status
 /Start
 
 
 P(1,"someTarget") =>target
     println("STOPPING " + target)
-    Util.exec.call("virsh destroy --domain " + target)
+    Lib:run(List("virsh","destroy","--domain", target),List,true)
     status
 /Stop
 
@@ -179,13 +166,15 @@ P(1,"someTarget") =>target
     error(DoNotDelete.contains(target),
         "Can not delete target " + target + ": remove from DoNotDelete list first")
     Stop(target)
-    Util.exec.call("virsh undefine --domain " + target)
-    Dir("/var/lib/libvirt/images").file(target + ".qcow2").delete
+    Lib:run(List("virsh","undefine","--domain",target),List,true)
+    vdisk = Dir("/var/lib/libvirt/images").file(target + ".qcow2")
+    if(vdisk.exists) vdisk.delete
     status
 /Delete
 
 
-# Interactive cloning of existing VM - stops original
+# Interactive cloning of existing VM - stops original - 
+#  # See AutoClone for newest version
 # --
     Lib:Header ("Cloning existing VM")
     Dir.runCapture("whoami").nth=="root" =>ok
@@ -259,6 +248,69 @@ P(1,"someTarget") =>target
 
     "Done"
 /Clone
+
+
+
+
+
+
+
+# Automatic cloning of existing VM - stops original
+# --
+	P(1) => original           # original VM ("kubsXX")
+	P(2) => cloneName          # new VM name
+	P(3) => originalIp         # ip of the VM that got cloned
+	P(4) => newIp			   # ip/NN
+	P(5) => sshUser            # for config
+	P(6) => nic                # VM network card to configure ("ens3" etc) - run "ip addr" on original VM
+
+	PDict("original","cloneName","originalIp","newIp","sshUser") => pdict
+	error(pdict.hasNullValue,"Missing parameter(s)")
+	error(!newIp.contains("/"), "Invalid newIp - must contain /NN netmask")
+
+    Lib:Header ("Cloning existing VM")
+    Dir.runCapture("whoami").nth=="root" =>ok
+    error(!ok, "Must be logged in as root")
+
+	println("* Stopping original VM " + original)
+    Stop(original)
+
+    println("* Creating clone " + cloneName)
+
+    cmd = "virt-clone --original " + original + " --name " + cloneName + " --auto-clone"
+            + " --file /var/lib/libvirt/images/" + cloneName + ".qcow2"
+    
+    Lib:run(cmd.split)
+
+    println("Starting clone")
+    Start(cloneName)
+
+    
+    
+    println("* Waiting for new node to respond to ping")
+    ServersMaintenance:WaitForPing (originalIp, 30)
+
+    target = sshUser+"@"+originalIp
+
+    println("* Wait for SSH ok")
+    Inner {
+    	Lib.Data.yes(20,"x") -> dummy
+    		break(SSH:HostOkSSH(target))
+    		Sys.sleep(1000)
+    }
+
+    
+    println("* Configuring hostname")
+    ServersMaintenance:VMSetHostname (target, cloneName)
+
+    println("* Configuring netplan")
+    ServersMaintenance:VMConfigureNetplan (target, newIp, nic)
+
+    println("* Rebooting new VM: " + cloneName)
+    SSH:sudo (target, "reboot", true)
+
+    "Done"
+ /AutoClone
 
 
 
@@ -371,3 +423,52 @@ ${portInfo}
 
 
 
+
+# Example using AutoClone 
+# --
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< EOF
+# Utility
+    PDict("host","ip")
+/H
+
+
+Sequence(
+    H("mcfg1.v","10.0.6.4")
+    H("mcfg2.v","10.0.6.5")
+    H("mcfg3.v","10.0.6.6")
+    H("md11.v","10.0.6.7")
+    H("md12.v","10.0.6.8")
+    H("md13.v","10.0.6.9")
+    H("md21.v","10.0.6.10")
+    H("md22.v","10.0.6.11")
+    H("md23.v","10.0.6.12")
+    H("mongos.v","10.0.6.13")
+)
+/MongoHosts
+
+MongoHosts->x out(x.host)
+/hosts
+
+
+# Create one clone
+# The template VM has IP = 10.0.6.254
+# --
+P(1) => host
+P(2) => ip
+    original="kubs"  # k-series Ubuntu Server
+    cloneName=host
+    originalIp="10.0.6.254"
+    sshUser="roar"
+    nic="ens3"  ## run "ip addr"  on original VM to decide
+    
+    KVM:AutoClone(original, host, originalIp, ip+"/16", sshUser, nic)
+/CreateClone
+
+# Main function - creates all nodes
+# --
+    MongoHosts -> x
+    CreateClone(x.host, x.ip)
+/CreateMongoCluster
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> EOF
+->line println(line)
+/ExampleAutoClone

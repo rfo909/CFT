@@ -282,6 +282,11 @@ P(4,false) => showDebug
 
         })  # Lambda "wait"
     =>result
+
+	if (showDebug) Inner{
+		println("--- runProcess result ---")
+    	Util:ShowDict(result)->line println(line)
+    }
     
     result
 
