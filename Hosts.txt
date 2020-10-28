@@ -1,0 +1,110 @@
+# Making a simple text format for expressing
+# details about servers, to control various
+# automatic maintenance
+#
+# See script Hosts as well as Local
+#
+# 2020-09-12 RFO
+
+[KnownHost=1]
+	# So that "*"-expressions means the same everywhere
+s02.s
+s03.s
+s04.s
+s05.s
+s06.s
+s07.s
+
+r11.s
+r12.s
+r13.s
+
+dns1.s
+dns2.s
+
+elastic01.v
+elastic02.v
+elastic03.v
+elastic04.v
+elastic05.v
+
+mcfg1.v
+mcfg2.v
+mcfg3.v
+md11.v
+md12.v
+md13.v
+md21.v
+md22.v
+md23.v
+mongos.v
+mops01.v
+mops02.v
+mops03.v
+
+dev02.v
+game02.v
+
+
+[Arch=AMD64]
+*
+r*.s [RPI]
+dns*.s [RPI]
+
+[OSFamily=Debian]
+*
+s02.s [Windows]
+
+
+[PackageManager=apt]
+*
+s02.s [Windows7]
+
+
+# SSH user
+#
+# RPi with Ubuntu Server = "ubuntu"
+# RPi with Raspbian = "pi"
+# Default: "roar"
+
+[SSHUser=roar]
+*
+r*.s      [ubuntu]
+dns*.s    [ubuntu]
+
+
+#
+# Install java (jdk), ant and CFT
+# If already installed, do CFT update and build
+#
+
+[Install.CFT=1]
+s*.s
+s03.s [0]   # s03 is used as PC, will have active user session
+s04.s [0]   # PC, active session
+s02.s [0]   # windows7
+r*.s
+*.v
+
+
+
+#
+# When host indicates it needs reboot, can it
+# be automatically rebooted?
+#
+
+[Auto.reboot=yes]
+dns2.s
+*.v
+elastic*.v [no]
+dev02.v [yes]
+r*.s [yes]
+md1*.v [no]
+md2*.v [no]
+mcfg*.v [no]
+mongos.v [no]
+
+
+
+
+
