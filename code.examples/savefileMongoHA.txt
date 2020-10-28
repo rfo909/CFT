@@ -1,5 +1,6 @@
 <<<<<<<<<<<<<<<<<<<<<<<<< EOF
 CFT v1.5.4
+CFT v1.8.1
 
 Install mongodb in High Availability configuration 
 
@@ -24,20 +25,20 @@ Requirements:
 
 
 # Config
-"/mnt/storage/ISO/mongodb-org-server_4.2.3_amd64.deb"
+"/mnt/storage/ISO/mongodb_ent/mongodb-enterprise-server_4.4.1_amd64.deb"
 /CfgMongod
 
 # Config
-"/mnt/storage/ISO/mongodb-org-shell_4.2.3_amd64.deb"
+"/mnt/storage/ISO/mongodb_ent/mongodb-enterprise-shell_4.4.1_amd64.deb"
 /CfgMongoShell
 
 # Config
-"/mnt/storage/ISO/mongodb-org-mongos_4.2.3_amd64.deb"
+"/mnt/storage/ISO/mongodb_ent/mongodb-enterprise-mongos_4.4.1_amd64.deb"
 /CfgMongos
 
 
 P(1,"temp") =>name
-    Dir("/tmp").file(name + "." + currentTimeMillis)
+	Lib:TmpFile(name)
 /TmpFile
 
 # Config data
@@ -74,9 +75,7 @@ MongodData->d
 
 
 # Config data
-    (
-    "mongos.v"
-    ).split
+    List("mongos.v")
 /MongosHosts
 
 
