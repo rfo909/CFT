@@ -240,16 +240,16 @@ P(4,false) => showDebug
     
     inFile.create(stdinLines)
 
-    tryCatch({
+#    tryCatch({
     	process = Dir.runProcess(inFile,outFile,errFile,cmd)
-    }) => xxx
+#    }) => xxx
 
-    if (!xxx.ok) {
-    	process=null
-    	errFile.append("Dir.runProcess failed with exception")
-    	errFile.append(xxx.get("msg","<No message>"))
-    	errFile.append(xxx.get("stack",List))
-    }
+#    if (!xxx.ok) {
+#    	process=null
+#    	errFile.append("Dir.runProcess failed with exception")
+#    	errFile.append(xxx.get("msg","<No message>"))
+#    	errFile.append(xxx.get("stack",List))
+#    }
     Dict
         .set("cmd", cmd)
         .set("acceptErrors", acceptErrors)
