@@ -124,12 +124,16 @@ d
 
 
 
-# Get (or define) hostname
+# Get hostname if defined
 # --
-	f = DirPrivate.file("hostname.txt")
-	if (f.exists, f.read.nth.trim, "")
+	Db:Get("hostname","Lib")
 /Hostname
 
+
+
+# Set hostname
+	Db:Add("hostname", readLine("Hostname"),"Lib")
+/SetHostname
 
 
 
