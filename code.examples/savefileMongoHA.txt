@@ -78,9 +78,7 @@ MongodData->d
 /SSHUser
 
 
-# Config data
-    List("mongos.v")
-/MongosHosts
+
 
 
 
@@ -242,6 +240,11 @@ Input("host").get =>host
 /HowToInitRS
 
 
+# Identify conf servers
+	MongodData->d
+		assert(d.clusterRole=="configsvr")
+		out(d.host)	
+/MongosHosts
 
 
 # Install mongos on single target
@@ -252,7 +255,7 @@ P(1,GetTarget) =>target
 
     println("* Creating Mongos start script")
     TmpFile("mongos") =>f
-    f.create(MongosStartScript)
+    f.create(MongosStartScript(27018))
 
     println("* Copying file to server in home dir as start_mongos.sh")
     SSH:copy (f, target, "./start_mongos.sh")
@@ -268,7 +271,7 @@ P(1,GetTarget) =>target
 /InstallMongos
 
 
-# Install mongos on all MongosHosts
+# Install mongos on all conf hosts
 #
 Input("ssh user").get =>user
     MongosHosts->host
@@ -330,18 +333,20 @@ Input("ssh user").get => user
 
 
 ## Create Mongos start script
+## --
+	P(1,27018) => port
     MongodData->d 
         assert(d.replSetName=="conf") 
         out(d.host+":27017") 
     | _.concat(",")  =>confServers
-    Dict.set("confServers",confServers).mergeCodes =>data
+    Dict.set("port",port).set("confServers",confServers).mergeCodes =>data
 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< EOF
 #!/bin/bash
 
 mongos \
     --configdb conf/${confServers} \
     --bind_ip_all \
-    --port 27017
+    --port ${port}
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> EOF
 ->line
     out(line.merge(data))
