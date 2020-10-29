@@ -118,3 +118,12 @@ P(1) => collection
 	CollectionDict(collection).keys.sort
 /Keys
 
+
+
+# Show content
+# --
+	P(1)=>collection
+	Keys(collection)->key
+		report(collection, key, Get(collection,key))
+/Show
+
