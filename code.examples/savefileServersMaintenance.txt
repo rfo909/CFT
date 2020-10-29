@@ -42,10 +42,10 @@ loop
     Lib:run(List("ping","-c","1",ip),List,true) => x
 
 	println("Retries left: " + retries)
-    Inner {
-    	println("--- Waiting for PING")
-    	Util:ShowDict(x)->line println(line)
-    }
+    #Inner {
+    #	println("--- Waiting for PING")
+    #	Util:ShowDict(x)->line println(line)
+    #}
     break(x.exitCode==0)
     Sys.sleep(3000)
 |
