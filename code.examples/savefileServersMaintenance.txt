@@ -34,18 +34,20 @@ P(4,false) =>showDebug
 
 
 P(1,Input("IP address to wait for").get) =>ip 
-300 => retries
+100 => retries
 loop
     error(retries<=0,"No Ping response from " + ip)
     retries = retries-1
     ok = true
     Lib:run(List("ping","-c","1",ip),List,true) => x
 
-    #Inner {
-    #	Util:ShowDict(x)->line println(line)
-    #}
+	println("Retries left: " + retries)
+    Inner {
+    	println("--- Waiting for PING")
+    	Util:ShowDict(x)->line println(line)
+    }
     break(x.exitCode==0)
-    Sys.sleep(500)
+    Sys.sleep(3000)
 |
 true
 /WaitForPing
