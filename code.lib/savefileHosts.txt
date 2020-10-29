@@ -253,7 +253,7 @@ P(1) =>glob
 
 
 # Run update/upgrade
-P(1,"")=>h
+P(1,Input("Enter part of host name, enter for all").get)=>h
 	Lib:DirPrivate.sub("APTUpdate").files->f 
 		assert(f.lastModified < Date.sub(Date.Duration.days(3)).get)
 		f.delete 
