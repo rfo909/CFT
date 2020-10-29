@@ -317,7 +317,7 @@ P(1,"")=>hostPattern
         Hosts:GetValue (host, "SSHUser") =>sshUser
         assert(sshUser != null)
 
-        Db2:Get ("CFT", host) =>lastDate
+        Db:Get (host, "CFT") =>lastDate
           if (lastDate != null) {
             Date.diff(lastDate).get =>timeSinceLastRun
             if (timeSinceLastRun < minTimeSinceLastRun) {
@@ -334,7 +334,7 @@ P(1,"")=>hostPattern
         assert(SSH:HostOkSSH (target))
 
         tryCatch(Java:VerifyCFT (target, "   "))
-        Db2:Set ("CFT", host, Date)
+        Db:Add (host, Date, "CFT")
 /UpdateCFT
 
 

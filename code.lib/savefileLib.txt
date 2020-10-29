@@ -126,13 +126,13 @@ d
 
 # Get hostname if defined
 # --
-	Db2:Get("Lib","hostname")
+	Db:Get("hostname","Lib")
 /Hostname
 
 
 
 # Set hostname
-	Db2:Set("Lib","hostname", readLine("Hostname"))
+	Db:Add("hostname", readLine("Hostname"), "Lib")
 /SetHostname
 
 
