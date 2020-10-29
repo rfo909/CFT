@@ -1,0 +1,152 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
+# Readme
+<<<<<<<< EOF
+----------------------------------------------
+Simple key/value database organized into 
+multiple collections, persisted to files under
+Sys.homeDir.sub("Db")
+----------------------------------------------
+>>>>>>>> EOF
+/Readme
+
+
+
+# DbDir is "Db" under Lib:DirPrivate
+	Lib:DirPrivate.sub("Db").create
+/DbDir
+
+
+# Get collection dict
+# --
+	P(1) => collection
+	error(collection==null,"Collection name is null")
+	root=Val("Collections",Dict)
+	if (!root.has(collection)) {
+		file=DbDir.file(collection)
+		if (file.exists) {
+			root.set(collection,eval(file.read.nth))
+		} 
+	}
+	root.get(collection,Dict)
+/Db
+
+
+
+# Save collection
+# --
+	P(1) => collection
+	DbDir.file(collection).create(syn(Db(collection)))
+/DbCollectionSave
+
+
+
+# Set value in database
+# --
+	P(1) => collection
+	P(2) => key
+	P(3) => val
+    Lambda { P(1) =>val syn(val) } =>x
+    error(x.?call(val)==false, "Value must be synthesizable")
+
+	Db(collection).set(""+key,val)
+	DbCollectionSave(collection)
+/Set
+
+
+
+# Get value
+# --
+	P(1) => collection
+	P(2) => key
+	P(3) => defaultValue
+	val = Db(collection).get(""+key,null)
+	if (val != null, val, defaultValue)
+/Get
+
+
+
+
+
+# Delete 
+# --
+	P(1) => collection
+	P(1) => key
+	Db(collection).set(""+key,null)
+	DbCollectionSave(collection)
+/Delete
+
+
+
+
+
+# Get or enter string value if missing
+	P(1) => collection
+	P(2) => key
+	P(3) => prompt
+    Get(key,collection) =>val
+    if(val==null) {
+        readLine(prompt) =>val
+        Add(key,val,collection)
+    }
+    val
+/GetOrEnter
+
+
+# Get, enter or confirm string value 
+	P(1) => collection
+	P(2) => key
+	P(3) => prompt
+    Get(key,collection) =>val
+    if(val==null) {
+        readLine(prompt) =>val
+        Add(key,val,collection)
+    } else {
+        Lib:ReadValue (prompt, val) =>val2
+        if(val2 != val, Add(key,val2,collection))
+        val2 =>val
+    }
+    val
+/GetEnterOrConfirm
+
+
+
+
+# List database
+# --
+	P(1) => collection
+	db=Db(collection)
+	db.keys.sort->key
+		report(key, db.get(key))
+/Show
+
+
+
+
+# Find all keys in collection
+	P(1) =>collection
+	Db(collection).keys.sort
+/Keys
+
+
+
+
