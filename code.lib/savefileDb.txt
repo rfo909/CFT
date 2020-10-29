@@ -25,6 +25,8 @@
 Simple key/value database organized into 
 multiple collections, persisted to files under
 Lib:DirPrivate.sub("Db")
+
+So primitive it hurts, but serves for now.
 ----------------------------------------------
 >>>>>>>> EOF
 /Readme
@@ -112,6 +114,22 @@ P(2,"default") =>collection
     Delete(key,collection)
     Add(key,last,collection)
 /Purge
+
+
+# Purge all keys for all collection
+	allCollections=List
+    Inner {
+        DbDir.files(Glob("*.txt"))->f
+            out(f.name.before(".txt"))
+        | _.sort =>allCollections
+    } 
+
+	allCollections->collection
+		println("Purging " + collection)
+		GetCollectionKeys(collection)->key
+			Purge(key,collection)
+/PurgeAll
+	
 
 
 # Set temp value (in memory only)
