@@ -127,7 +127,7 @@ HOST [OverrideValue]?
     root.keys.sort->host
         root.get(host) =>data
         data.keys.sort->field
-            data.get(field) =>value
+            ""+data.get(field) =>value
             assert(host.contains(searchTerm) || field.contains(searchTerm) || value.contains(searchTerm))
             report(host,field,value)
 /Search
@@ -317,7 +317,7 @@ P(1,"")=>hostPattern
         Hosts:GetValue (host, "SSHUser") =>sshUser
         assert(sshUser != null)
 
-        Db:Get (host, "CFT") =>lastDate
+        Db2:Get ("CFT", host) =>lastDate
           if (lastDate != null) {
             Date.diff(lastDate).get =>timeSinceLastRun
             if (timeSinceLastRun < minTimeSinceLastRun) {
@@ -334,7 +334,7 @@ P(1,"")=>hostPattern
         assert(SSH:HostOkSSH (target))
 
         tryCatch(Java:VerifyCFT (target, "   "))
-        Db:Add (host, Date, "CFT")
+        Db2:Set ("CFT", host, Date)
 /UpdateCFT
 
 

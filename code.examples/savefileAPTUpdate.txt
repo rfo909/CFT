@@ -57,7 +57,7 @@ P(3,36) =>hoursSinceLast
     Date.sub(Date.Duration.days(3650)) =>defaultValue
     
     println(prefix+"Looking up time of last run for host ")
-    Db:Get (host, dbCollection, defaultValue) =>lastUpdated
+    Db2:Get (dbCollection, host, defaultValue) =>lastUpdated
     println(prefix+" ... lastUpdated = " + lastUpdated)
     Date.diff(lastUpdated) =>timeSinceUpdate
     
@@ -79,7 +79,7 @@ P(3,36) =>hoursSinceLast
         
         if (!FAIL) {
             println(prefix+"Writing date and time to database")
-            Db:Add (host, Date, dbCollection)
+            Db2:Set (dbCollection, host, Date)
         }
         
         println(prefix+

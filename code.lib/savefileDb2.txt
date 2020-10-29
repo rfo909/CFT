@@ -79,8 +79,11 @@ Sys.homeDir.sub("Db")
 	P(1) => collection
 	P(2) => key
 	P(3) => defaultValue
-	val = Db(collection).get(""+key,null)
-	if (val != null, val, defaultValue)
+	db = Db(collection)
+	if (db.has(""+key))
+		db.get(""+key)
+	else
+		defaultValue
 /Get
 
 
@@ -91,7 +94,7 @@ Sys.homeDir.sub("Db")
 # --
 	P(1) => collection
 	P(1) => key
-	Db(collection).set(""+key,null)
+	Db(collection).remove(""+key)
 	DbCollectionSave(collection)
 /Delete
 

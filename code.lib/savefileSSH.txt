@@ -35,7 +35,7 @@ Input("SSH target on format username@server").get
 # Called via @rsh shortcut
 #
 P(1,ReadSSHTarget) =>sshTarget
-    Dir.run("ssh", sshTarget)
+    Dir.run("ssh", "-o", "StrictHostKeyChecking=false", sshTarget)
 /remoteShell
 
 
@@ -97,7 +97,7 @@ P(4,false) => showDebug
     "--- Output-mark: " + Date + " - " + Sys.scriptName + ".run ---" => mark
     List('echo "' + mark + '"') + commands => cmd
         
-    result = Lib:run (List("ssh",target), cmd, acceptErrors, false)
+    result = Lib:run (List("ssh","-o","StrictHostKeyChecking=false",target), cmd, acceptErrors, false)
 
     # Modify stdout, by only including lines following the mark
 
