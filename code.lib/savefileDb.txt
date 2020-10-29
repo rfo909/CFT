@@ -24,7 +24,7 @@
 ----------------------------------------------
 Simple key/value database organized into 
 multiple collections, persisted to files under
-Sys.homeDir.sub("Db")
+Lib:DirPrivate.sub("Db")
 ----------------------------------------------
 >>>>>>>> EOF
 /Readme
@@ -32,7 +32,7 @@ Sys.homeDir.sub("Db")
 
 
 # DbDir is "Db" under Sys.homeDir
-    Sys.homeDir.sub("Db") =>d
+    Lib:DirPrivate.sub("Db") =>d
     if(!d.exists) d.create
     d
 /DbDir
