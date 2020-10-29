@@ -48,6 +48,7 @@ Input("Enter ssh target on format user@host").get
 # Run Update and Upgrade on target, unless it has been updated within 20 hours
 P(1,GetSSHTarget) =>target
 P(2,"") =>prefix
+P(3,36) =>hoursSinceLast
 
     println(prefix+"APT update and upgrade")
 
@@ -62,8 +63,8 @@ P(2,"") =>prefix
     
     println(prefix+"Last updated: " + lastUpdated.fmt)
 
-    if(timeSinceUpdate.get < 12*3600*1000) {
-        println(prefix+"Limit for repeat update: 12 hours")
+    if(timeSinceUpdate.get < hoursSinceLast*3600*1000) {
+        println(prefix+"Limit for repeat update: " + hoursSinceLast + " hours")
     } else {
         println(prefix+"Performing update")
         sudo(target,"apt-get -y update", true) =>result

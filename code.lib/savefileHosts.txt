@@ -139,7 +139,7 @@ HOST [OverrideValue]?
 
 
 # Get host list sorted via Glob expr
-P(1) =>glob
+P(1,"*") =>glob
     "" =>regex
     glob.chars->c
         false =>done
@@ -253,9 +253,9 @@ P(1) =>glob
 
 
 # Run update/upgrade
-P(1,Input("Enter part of host name, enter for all").get)=>h
+P(1,readLine("Enter part of host name, enter for all"))=>h
 	Lib:DirPrivate.sub("APTUpdate").files->f 
-		assert(f.lastModified < Date.sub(Date.Duration.days(3)).get)
+		#assert(f.lastModified < Date.sub(Date.Duration.days(3)).get)
 		f.delete 
 	|
 	
