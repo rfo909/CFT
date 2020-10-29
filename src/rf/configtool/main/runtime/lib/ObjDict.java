@@ -341,17 +341,24 @@ public class ObjDict extends Obj {
             return "mergeCodes";
         }
         public String getShortDesc() {
-            return "mergeCodes() - create copy where all keys are rewritten as ${key}";
+            return "mergeCodes([pre,post]?) - create copy where all keys are rewritten as ${key} or <pre>key<post>";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 0) throw new Exception("Expected no parameters");
-            
+        	String pre="${";
+        	String post="}";
+        	if (params.size()==2) {
+        		pre=getString("pre",params,0);
+        		post=getString("post",params,1);
+        	} else if (params.size() != 0) {
+        		throw new Exception("Expected no parameters or two parameters: pre,post");
+        	}
+        
             Map<String,Value> map=new HashMap<String,Value>();
             
             Iterator<String> keys=values.keySet().iterator();
             while(keys.hasNext()) {
                 String key=keys.next();
-                map.put("${" + key + "}", values.get(key));
+                map.put(pre + key + post, values.get(key));
             }
             
             return new ValueObj(new ObjDict(map));

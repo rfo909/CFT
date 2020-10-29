@@ -15,8 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2020-10-25 RFO
-v1.8.0
+Last updated: 2020-10-29 RFO
+v1.8.1
 
 </pre>
 
@@ -1543,6 +1543,18 @@ codeDirs = . ; code.examples ; code.lib
   &lt;int&gt;
   12
 </pre>
+<p>
+  Get value by name, supplying default. If no value set, the default is stored then return. 
+  That makes this a conditional set as well.
+</p>
+<pre>
+  $ Val("newSymbol",2)
+  &lt;int&gt;
+  2
+  $ Val("newSymbol",3)
+  &lt;int&gt;
+  2
+</pre>
 
 <p>
   Being tied to the session, these data are lost when quitting CFT.
@@ -1720,6 +1732,8 @@ codeDirs = . ; code.examples ; code.lib
   Dear Julius 
 </pre>
 
+<h2>Dict.mergeCodes()</h2>
+
 <p>
   The merge is based on a direct match. Often we like to mark our merge codes. The Dict
   object has a function, ".mergeCodes()", which returns a new Dict object, where all names of fields
@@ -1734,11 +1748,25 @@ codeDirs = . ; code.examples ; code.lib
   Dear Julius 
 </pre>
 
+<h3>Custom merge codes</h3>
+<p>
+  The Dict.mergeCodes() also take an optional two parameters, which are the pre and post
+  strings for creating the merge codes. Note that either none or both of these must be
+  given.
+</p>
+<pre>
+  $ Dict.set("name","Julius").mergeCodes("[","]")
+  $ /data
+  $ "Dear [name]".merge(data)
+  &lt;String&gt;
+  Dear Julius 
+</pre>
+
 
 <h2>PDict()</h2>
 <p>
   With many parameters to be merged into the template text, the special expression PDict() saves
-  us some writing. Instead of having to do this:
+  us some typing. Instead of having to do this:
 </p>
 <pre>
   P(1) => name
@@ -1749,7 +1777,7 @@ codeDirs = . ; code.examples ; code.lib
     .mergeCodes =&gt; data
 </pre>
 <p>
-  ... we can instead just do:
+  ... we can instead just say:
 </p>
 <pre>
   PDict("name","ip").mergeCodes =&gt; data

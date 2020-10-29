@@ -139,6 +139,8 @@ Output format / Cfg
 
 Templating
  * Merging text with Dict
+ * Dict.mergeCodes()
+ |   Custom merge codes
  * PDict()
  * Example using raw strings and Sequence()
 
