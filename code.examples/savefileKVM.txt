@@ -270,12 +270,12 @@ P(1,"someTarget") =>target
 
     List("virt-install",
         "--name",name,
-        "--ram =>"+ram,
-        "--vcpus =>"+cpus,
+        "--ram="+ram,
+        "--vcpus="+cpus,
         "--cpu","host",
         "--hvm",
-        "--network =>bridge =>br0,model =>virtio",
-        "--disk","path =>/var/lib/libvirt/images/"+name+".qcow2,size =>"+disk+",bus =>virtio,format =>qcow2",
+        "--network=bridge=br0,model=virtio",
+        "--disk","path=/var/lib/libvirt/images/"+name+".qcow2,size="+disk+",bus=virtio,format=qcow2",
         "--cdrom",bootImage.path
     ) =>cmd
     if(headless, 
@@ -322,6 +322,7 @@ P(1,"someTarget") =>target
 
 
 # Info on using VNC for installation
+	status
     readLine("VM name") =>vm
 
     Dir.runCapture("hostname").nth.trim =>host
