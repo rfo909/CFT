@@ -112,14 +112,14 @@ P(2, Input("Enter service").get) =>service
 
 # Simple remote shell to multiple windows hosts via PowerShell.
 # --
-P(1,Input("Shell Host").get) => host
-if (Val("sh.dirs")==null) {
-	ValDef("sh.dirs",Dict)
-}
-currDirs = Val("sh.dirs")  # default directories
+P(1,Input("Enter shell Host").get) => host
+
+getDir=Lambda{P(1)=>host Db2:Get("PS_Shell",host,"c:\temp")}
+setDir=Lambda{P(1)=>host P(2)=>dir Db2:Set("PS_Shell",host,dir)}
+knownHosts=Lambda{Db2:Keys("PS_Shell")}
 loop
 	println
-	readLine("[" + host + "] CFT [" + currDirs.get(host,"c:\temp") + "] '.q' to quit, '?' for help") => mode
+	readLine("[" + host + "] CFT [" + getDir.call(host) + "] '.q' to quit, '?' for help") => mode
 	break(mode==".q")
 
 	if (mode=="?") {
@@ -134,26 +134,23 @@ loop
 			@ '.q'  - quit
 		)->line println(line)
 	} else if (mode==".h") {
-		knownHosts = currDirs.keys.sort
 		Lib:Header("Known hosts")
-		Inner{knownHosts->h println("  " + h) }
-		println
-		Input("Enter shell Host (ENTER to keep " + host + ")").get => x
-		if (x.trim != "") {
-			host = x
-			currDirs.get(host,"c:\temp")
+		Inner {
+			knownHosts.call->h println("   " + h)
 		}
+		Input("Enter shell Host").get => host
 	} else if (mode==".d")  {
 		readLine("New current directory") => dir
-		currDirs.set(host, dir)
+		setDir.call(host,dir)
 	} else if (mode==".e") {
-		dir = Dir("\\" + host + "\" + convertPath(currDirs.get(host,"c:\temp")))
+		dir = Dir("\\" + host + "\" + convertPath(getDir.call(host)))
+		println("dir=" + dir.path)
 		file = Util:SelectFile(dir)
 		if (file != null) {
 			Lib:e (file)
 		}
 	} else if (mode.startsWith(".u")) {
-		dir = Dir("\\" + host + "\" + convertPath(currDirs.get(host,"c:\temp")))
+		dir = Dir("\\" + host + "\" + convertPath(getDir.call(host)))
 		comment="#"
 		if (mode.split.length==2) comment=mode.split.nth(1)
 
@@ -172,7 +169,7 @@ loop
 		} else {
 			scriptLines=mode.split(";")
 		}
-		currDir = currDirs.get(host,"c:\temp")
+		currDir = getDir.call(host)
 		scriptLines = List("cd '" + currDir + "'") + scriptLines + Sequence(
 			@ Write-Host "----------Output-Stops-Here----------"
 			@ $xxxxxx=Get-Location
@@ -189,9 +186,12 @@ loop
 				if(line.contains("---------Output-Stops-Here---------")) {marker=true}
 				if (!marker) println(line)
 				if (marker && line.startsWith("RemotePath:")) {
-					currDirs.set(host, line.after(":").trim)
+					d=line.after(":").trim
+					if (d != getDir.call(host)) {
+						setDir.call(host, line.after(":").trim)
+					}
 				}
-		}	
+		}
 		# Process stdout				
 		Inner { status.stderr->line println("ERR " + line) }
 	}
@@ -232,30 +232,46 @@ P(1)=>path
 	P(1,Input("Host").get) => host
 	P(2,null) => logName
 	P(3,null) => minutes
+	P(4,null) => searchTerm
 
 	if(logName==null) {
 		choices = "Application Security System".split
 		Lib:MenuSelect(choices,Lambda{P(1)},"Select log name") => logName
 	}
 	if (minutes==null) {
-		readLine("Enter minutes back, default=30") => m
-		if (m.?parseInt, m.parseInt, 30) => minutes
+		readLine("Enter minutes back, default=60") => m
+		if (m.?parseInt, m.parseInt, 60) => minutes
+	}
+	if (searchTerm==null) {
+		readLine("Enter search term") => searchTerm
+	}
+	searchPart=""
+	if (searchTerm.trim != "") {
+		searchPart=' | where message -like "*' + searchTerm.trim + '*"'
 	}
 
-	i=6
-	Call(host,"get-eventlog "+logName+" -after (get-date).addminutes(-" + minutes + ")").stdout.reverse->line
+	cmd="get-eventlog "+logName+" -after (get-date).addminutes(-" + minutes + ")"+searchPart
+	#readLine(cmd)
+
+	i=5
+	Call(host,cmd).stdout.reverse->line
 		println(line) 
 		i=i-1
 		if(i<=0) { 
 			println
-			i=6
+			i=5
 		}
 	|
-	readLine("["+ logName + ":" + minutes + "min] Enter index of event to view") =>x
-	if (x.?parseInt) {
-		index=x.parseInt
-		Call(host,"get-eventlog "+logName + " | where index -eq " + index + " | format-list *").stdout->line 
-			println(line) 
-		|
+	println("["+ logName + ":" + minutes + "min]")
+	println(cmd)
+	readLine("Enter index of event(s) to view separated by space") =>x
+	x.split->part
+		if (part.trim.?parseInt) {
+			index=part.trim.parseInt
+			Inner {
+				Call(host,"get-eventlog "+logName + " | where index -eq " + index + " | format-list *").stdout->line 
+					println(line) 
+			}
+		}
 	}
 /GetEventLog
