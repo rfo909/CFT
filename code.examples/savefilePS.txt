@@ -119,7 +119,7 @@ if (Val("sh.dirs")==null) {
 currDirs = Val("sh.dirs")  # default directories
 loop
 	println
-	readLine("[" + host + " " + currDirs.get(host,"c:\temp") + "] '.q' to quit, '?' for help") => mode
+	readLine("[" + host + "] CFT [" + currDirs.get(host,"c:\temp") + "] '.q' to quit, '?' for help") => mode
 	break(mode==".q")
 
 	if (mode=="?") {
@@ -187,7 +187,7 @@ loop
 			marker=false
 			status.stdout->line 
 				if(line.contains("---------Output-Stops-Here---------")) {marker=true}
-				if (!marker) println("    " + line)
+				if (!marker) println(line)
 				if (marker && line.startsWith("RemotePath:")) {
 					currDirs.set(host, line.after(":").trim)
 				}
@@ -224,3 +224,38 @@ P(1)=>path
 	}
 	connectOk
 /VerifyTCPConnect
+
+
+
+# Get event-log
+# --
+	P(1,Input("Host").get) => host
+	P(2,null) => logName
+	P(3,null) => minutes
+
+	if(logName==null) {
+		choices = "Application Security System".split
+		Lib:MenuSelect(choices,Lambda{P(1)},"Select log name") => logName
+	}
+	if (minutes==null) {
+		readLine("Enter minutes back, default=30") => m
+		if (m.?parseInt, m.parseInt, 30) => minutes
+	}
+
+	i=6
+	Call(host,"get-eventlog "+logName+" -after (get-date).addminutes(-" + minutes + ")").stdout.reverse->line
+		println(line) 
+		i=i-1
+		if(i<=0) { 
+			println
+			i=6
+		}
+	|
+	readLine("["+ logName + ":" + minutes + "min] Enter index of event to view") =>x
+	if (x.?parseInt) {
+		index=x.parseInt
+		Call(host,"get-eventlog "+logName + " | where index -eq " + index + " | format-list *").stdout->line 
+			println(line) 
+		|
+	}
+/GetEventLog
