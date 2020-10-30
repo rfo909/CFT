@@ -127,3 +127,18 @@ P(1) => collection
 		report(collection, key, Get(collection,key))
 /Show
 
+
+
+# Compress collection
+#   # Must only be run when nobody is using the database
+# --
+	P(1)=>collection
+	data=CollectionDict(collection)
+	file=CollectionFile(collection)
+	file.delete
+
+	data.keys->key
+		value=eval(data.get(key))
+		Set(collection,key,value)
+/CompressCollection
+

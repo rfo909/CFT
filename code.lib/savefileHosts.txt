@@ -329,15 +329,25 @@ P(1,"")=>hostPattern
 
         println("# PROCESSING host " + host)
 
-        assert(SSH:HostOk (host))
+        if (!SSH:HostOk (host)) {
+        	Dict.set("date",Date).set("msg","No SSH connection") => err
+        	Db2:Set("CFT_err",host,err)
+        	assert(false)  # next
+        }
+        
         
         sshUser+"@"+host =>target
         println("Updating " + target)
         
         assert(SSH:HostOkSSH (target))
 
-        tryCatch(Java:VerifyCFT (target, "   "))
-        Db2:Set ("CFT", host, Date)
+        tryCatch(Java:VerifyCFT (target, "   ")) => tc
+        if (tc.ok) {
+        	Db2:Set ("CFT", host, Date)
+        } else {
+        	Dict.set("date",Date).set("tryCatch",tc) => err
+        	Db2:Set("CFT_err",host,err)
+        }
 /UpdateCFT
 
 
