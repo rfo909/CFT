@@ -61,35 +61,35 @@ public class Stdio {
         
     }
 
-    public String getInputLine() throws Exception {
+    public synchronized String getInputLine() throws Exception {
         if (!bufferedInputLines.isEmpty()) {
             return bufferedInputLines.remove(0);
         }
         return readLine();
     }
     
-    private String readLine() throws Exception {
+    private synchronized String readLine() throws Exception {
         if (stdin == null) throw new Exception("stdin disconnected - no buffered lines");
         return stdin.readLine();
     }
     
     
-    public boolean hasBufferedInputLines() {
+    public synchronized boolean hasBufferedInputLines() {
         return bufferedInputLines.size()>0;
     }
 
     /**
      * Used by the stdin() statement
      */
-    public void addBufferedInputLine (String s) {
+    public synchronized void addBufferedInputLine (String s) {
         bufferedInputLines.add(s);
     }
     
-    public void clearBufferedInputLines() {
+    public synchronized void clearBufferedInputLines() {
         bufferedInputLines.clear();
     }
     
-    public int getCachedInputLineCount() {
+    public synchronized int getCachedInputLineCount() {
     	return bufferedInputLines.size();
     }
 
@@ -97,7 +97,7 @@ public class Stdio {
      * Output text
      */
    
-    public void println (String s) {
+    public synchronized void println (String s) {
         outputLines[outputPos]=s;
         outputPos = (outputPos+1)%outputLines.length;
         if (stdout != null) stdout.println(s);
