@@ -79,5 +79,9 @@ shortcut:     = "---- Show all shortcuts ----"            File("CFT.props").read
 
 prompt = x=Sys.scriptName h=Lib:Hostname if(h==null,"",h+" ") + if(x==null,"$ ",x+" $ ")
 
+#
+# Lib.Db2
+#
 
+db2Dir = private/Db2
 

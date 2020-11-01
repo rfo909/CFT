@@ -26,9 +26,15 @@ public class PropsFile {
 	private String shortcutPrefix;
 	private Map<String,String> shortcuts;
 	
+	private String db2Dir;
+	
 
 	// detect changes 
-	private String fileInfo="";;
+	private String fileInfo="";
+	
+	public PropsFile () throws Exception {
+		refreshFromFile();
+	}
 
 	public PropsFile (String customScriptDir) throws Exception {
 		this.customScriptDir=customScriptDir;
@@ -52,13 +58,15 @@ public class PropsFile {
 		shell = "/usr/bin/bash";
 		winShell = "powershell";
 		
-		mCat  = "{* error('mCat macro undefined in " + PROPS_FILE + "') }";
-		mEdit = "{* error('mEdit macro undefined in " + PROPS_FILE + "') }";
-		mMore = "{* error('mMore macro undefined in " + PROPS_FILE + "') }";
+		mCat  = "Lambda {error('mCat macro undefined in " + PROPS_FILE + "') }";
+		mEdit = "Lambda {error('mEdit macro undefined in " + PROPS_FILE + "') }";
+		mMore = "Lambda{error('mMore macro undefined in " + PROPS_FILE + "') }";
 		
 		shortcutPrefix = "@";
 		shortcuts=new HashMap<String,String>();
 
+		db2Dir = "Db";
+		
 		// process file
 		BufferedReader br=null;
 		try {
@@ -74,21 +82,41 @@ public class PropsFile {
 					String name=line.substring(0,pos).trim();
 					String value=line.substring(pos+1).trim();
 					
-					if (name.equals("codeDirs")) codeDirs=value;
-					if (name.equals("prompt")) prompt=value;
+					if (name.equals("codeDirs")) {
+						codeDirs=value;
+					} else 
+					if (name.equals("prompt")) {
+						prompt=value;
+					} else
+					if (name.equals("shell")) {
+						shell=value;
+					} else
+					if (name.equals("winShell")) {
+						winShell=value;
+					} else
 					
-					if (name.equals("shell")) shell=value;
-					if (name.equals("winShell")) winShell=value;
+					if (name.equals("mCat")) {
+						mCat=value;
+					} else
+					if (name.equals("mEdit")) {
+						mEdit=value;
+					} else 
+					if (name.equals("mMore")) {
+						mMore=value;
+					} else
 					
-					if (name.equals("mCat")) mCat=value;
-					if (name.equals("mEdit")) mEdit=value;
-					if (name.equals("mMore")) mMore=value;
-					
-					if (name.equals("shortcutPrefix")) shortcutPrefix=value;
+					if (name.equals("shortcutPrefix")) {
+						shortcutPrefix=value;
+					} else
 					if (name.startsWith("shortcut:")) {
 						int colonPos=name.indexOf(':');
 						String shortcutName=name.substring(colonPos+1);
 						shortcuts.put(shortcutName, value);  // macro
+					} else
+					if (name.equals("db2Dir")) {
+						db2Dir=value;
+					} else {
+						throw new Exception("Invalid configuration field: " + name);
 					}
 				}
 			}
@@ -187,6 +215,10 @@ public class PropsFile {
 			if (f.exists()) return f;
 		}
 		throw new Exception("No such file: " + name);
+	}
+	
+	public String getDb2Dir() {
+		return db2Dir;
 	}
 
 }

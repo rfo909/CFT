@@ -34,6 +34,7 @@ import rf.configtool.main.runtime.ValueList;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
 import rf.configtool.main.runtime.lib.conversions.ObjConvert;
+import rf.configtool.main.runtime.lib.db2.ObjDb2;
 import rf.configtool.main.runtime.lib.text.ObjText;
 
 import java.awt.Color;
@@ -48,6 +49,7 @@ public class ObjLib extends Obj {
         this.add(new FunctionFiles());
         this.add(new FunctionExp());
         this.add(new FunctionText());
+        this.add(new FunctionDb2());
         
     }
     
@@ -188,6 +190,20 @@ public class ObjLib extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
             return new ValueObj(new ObjText());
+        }
+    } 
+    
+    class FunctionDb2 extends Function {
+        public String getName() {
+            return "Db2";
+        }
+        public String getShortDesc() {
+            return "Db2(collection) - create Db object";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected collection parameter");
+            String collection=getString("collection",params,0);
+            return new ValueObj(new ObjDb2(collection));
         }
     } 
     

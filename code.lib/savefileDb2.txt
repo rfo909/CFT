@@ -1,64 +1,14 @@
 # Readme
 # --
 <<< EOF
-Simple file based database v2
+Simple file based database v2 - now using Java implementation Lib.Db2 (2020-11-01)
 >>> EOF
 /Readme
 
 
-P(1,false) => showDebug
+P(1,true) => showDebug
 	ValDef("debug",showDebug)
-/ShowDebug
-
-
-# Database dir
-	d=Lib:DirPrivate.sub("Db2")
-	if (!d.exists) d.create
-	d
-/DbDir
-
-# Collection file
-# --
-P(1) => collection
-	fname=(""+collection).replace(" ","_")+".txt"
-	DbDir.file(fname)
-/CollectionFile
-
-
-# Get collection data
-# --
-	P(1) => collection
-
-	file=CollectionFile(collection)
-	fname=file.name
-	
-	if (file.exists) {
-		filekey=""+file.lastModified+"_"+file.length
-
-		if (Val("stats",Dict).get(fname,"") != filekey) Inner {
-			# file has changed
-			
-			linecount=0
-			reader = Lib.Files.LineReader(file).start
-			fileData=Dict
-			loop
-				line=reader.read
-				break(line==null)
-				linecount=linecount+1
-				key=line.before(" ")
-				value=line.after(" ")
-				fileData.set(key,value)
-			|
-			if (Val("debug",false)) println("[debug] Db2: read file " + fname + " lines=" + linecount)
-			Val("filedata",Dict).set(fname, fileData)
-		} 
-		Val("stats",Dict).set(fname, filekey)
-	} 
-	
-	Val("filedata",Dict).get(fname, Dict)
-/CollectionDict
-
-
+/EnableDebug
 
 			
 # Store data
@@ -69,12 +19,12 @@ P(1) => collection
 	
 	start=currentTimeMillis
 	
-	key=(""+key).replace(" ","_")
 	x = Lambda {syn(P(1))}
 	error (x.?call(value)==false, "Value not synthesizable")
-
-	CollectionFile(collection).append(key + " "+syn(value))
+	value = syn(value)
 	
+	Lib.Db2(collection).set(key,value)
+
 	end=currentTimeMillis
 	if(Val("debug",false)) println("[debug] Db2: Set " + collection + " " + (end-start) + " ms")
 /Set
@@ -92,21 +42,14 @@ P(1) => collection
 	
 	start=currentTimeMillis
 
-	key=(""+key).replace(" ","_")
-	coll = CollectionDict(collection)
-
-	if (coll.has(key)) {
-		eval(coll.get(key))
-	} else {
-		defaultValue
-	}
-	=> result
+	value=Lib.Db2(collection).get(key)
+	value = if (value == null, defaultValue, eval(value))
 
 	end=currentTimeMillis
 
 	if(Val("debug",false)) println("[debug] Db2: Get " + collection + " " + (end-start) + " ms")
 	
-	result
+	value
 /Get
 
 
@@ -114,8 +57,7 @@ P(1) => collection
 # Get keys
 # --
 	P(1)=>collection
-	
-	CollectionDict(collection).keys.sort
+	Lib.Db2(collection).keys.sort
 /Keys
 
 
