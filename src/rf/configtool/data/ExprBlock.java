@@ -52,15 +52,23 @@ public class ExprBlock extends LexicalElement {
         } else if (ts.matchStr("{")) {
         	mode=MODE_LOCAL;
         }
-	        
+        
         List<ProgramLine> progLines=new ArrayList<ProgramLine>();
-        for(;;) {
-            progLines.add(new ProgramLine(ts));
-            if (ts.matchStr(CodeLines.PROGRAM_LINE_SEPARATOR)) continue;
-            break;
+        if (mode==MODE_LOCAL) {
+        	// only one program line as PROGRAM_LINE_SEPARATOR not allowed
+        	boolean loopingAllowed = false;
+            progLines.add(new ProgramLine(ts,loopingAllowed));
+        	ts.matchStr("}","expected '}' closing " + getBlockModeName() + " starting at " + this.getSourceLocation());
+        } else {
+        	// INNER and LAMBDA
+        	boolean loopingAllowed = true;
+	        for(;;) {
+	            progLines.add(new ProgramLine(ts,loopingAllowed));
+	            if (ts.matchStr(CodeLines.PROGRAM_LINE_SEPARATOR)) continue;
+	            break;
+	        }
+	    	ts.matchStr("}","expected '}' closing " + getBlockModeName() + " starting at " + this.getSourceLocation());
         }
-    	ts.matchStr("}","expected '}' closing " + getBlockModeName() + " starting at " + this.getSourceLocation());
-    	
         this.programLines=progLines;
     
     }

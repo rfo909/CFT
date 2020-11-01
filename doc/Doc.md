@@ -612,7 +612,7 @@ $ List(1,2,3,2,1)->x reject(x>2) out(x)
 1
 ```
 
-The break() statement terminates the loop if the condition is true.
+The break() statement terminates ALL LOOPS if the condition is true.
 
 ```
 List(1,2,3,2,1)->x break(x>2) out(x)
@@ -779,7 +779,7 @@ construct. But this can be changed using the "pipe" symbol, which "closes" all l
 
 
 The body of any loop is the rest of the code of the function, or until a "pipe" symbol
-is found. The pipe symbol ("|") more accurately breaks the code into a sequence of
+is found. The pipe symbol ("|") more accurately partitions the code into a sequence of
 **loop spaces**, which means acting as an end-point for
 running loops.
 

@@ -21,6 +21,7 @@ import rf.configtool.main.CodeLines;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.ObjGlobal;
 import rf.configtool.main.Runtime;
+import rf.configtool.main.SourceException;
 import rf.configtool.main.runtime.Obj;
 import rf.configtool.parser.Token;
 import rf.configtool.parser.TokenStream;
@@ -31,9 +32,19 @@ public class ProgramLine extends LexicalElement {
     private List<Stmt> statements=new ArrayList<Stmt>();
 
     public ProgramLine (TokenStream ts) throws Exception {
+    	this(ts,true);
+    }
+
+    public ProgramLine (TokenStream ts, boolean loopingAllowed) throws Exception {
         super(ts);
         while (!ts.atEOF() && !ts.peekStr(CodeLines.PROGRAM_LINE_SEPARATOR) && !ts.peekStr("}")) {
-            statements.add(Stmt.parse(ts));
+        	Stmt stmt=Stmt.parse(ts);
+        	if (!loopingAllowed) {
+        		if ((stmt instanceof StmtLoop) || (stmt instanceof StmtIterate)) {
+        			throw new SourceException(getSourceLocation(), "Loop statements invalid here");
+        		}
+        	}
+            statements.add(stmt);
         }
     }
     

@@ -691,7 +691,7 @@ v1.8.1
   1
 </pre>
 <p>
-  The break() statement terminates the loop if the condition is true.
+  The break() statement terminates ALL LOOPS if the condition is true.
 </p>
 <pre>
   List(1,2,3,2,1)-&gt;x break(x&gt;2) out(x)
@@ -912,7 +912,7 @@ codeDirs = . ; code.examples ; code.lib
 <h1>Loop spaces - "pipes"</h1>
 <p>
   The body of any loop is the rest of the code of the function, or until a "pipe" symbol
-  is found. The pipe symbol ("|") more accurately breaks the code into a sequence of
+  is found. The pipe symbol ("|") more accurately partitions the code into a sequence of
   <em>loop spaces</em>, which means acting as an end-point for 
   running loops.
 </p>
