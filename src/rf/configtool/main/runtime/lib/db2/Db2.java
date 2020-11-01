@@ -84,7 +84,10 @@ public class Db2 {
 		if (key.contains("\r") || key.contains("\n") || key.contains(" ")) throw new Exception("Invalid key: \\r\\n + space forbidden");
 		if (value.contains("\r") || value.contains("\n")) throw new Exception("Invalid value: \\r\\n forbidden");
 		
-		Map<String,String> cMap=getCollectionMap(collection);  // ensure it is read from file
+		Map<String,String> cMap=getCollectionMap(collection);
+		String oldValue=cMap.get(key);
+		if (oldValue != null && oldValue.equals(value)) return;
+		
 		addToFile(collection, key, value);
 		cMap.put(key,value);
 	}
