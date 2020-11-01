@@ -72,7 +72,7 @@ P(3,false) =>showDebug
 
     println(prefix+"hasJava =>" + hasJava)
     
-    if (showDebug) {
+    if (showDebug) Inner{
         lines->line println(prefix+" ## " + line) 
     }
     

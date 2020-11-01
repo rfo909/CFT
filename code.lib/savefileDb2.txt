@@ -36,8 +36,8 @@ P(1,true) => showDebug
 
 # Get data
 # --
-	P(1)=>collection
-	P(2)=>key
+	P(1,Input("collection").get)=>collection
+	P(2,Input("key").get)=>key
 	P(3)=>defaultValue
 	
 	start=currentTimeMillis
@@ -64,10 +64,11 @@ P(1,true) => showDebug
 
 # Show content
 # --
-	P(1)=>collection
+	P(1,Input("collection").get)=>collection
 	Keys(collection)->key
 		report(collection, key, Get(collection,key))
 /Show
+
 
 
 
