@@ -417,3 +417,38 @@ SysStat("iostat", Lambda{P(1).contains("vda")})
 UpgradeAPT
 UpdateCFT
 /runAll
+
+
+
+
+
+
+
+data=Dict
+GetHosts->host
+	Inner {
+		GetFields->field
+			assert(HasField(host,field))
+			value=GetValue(host,field)
+			data.get(host,Dict).set(field,value)
+	}
+|
+Db2:Set("hosts","data",data)
+/t
+
+GetFields->field
+	println("Field="+field)
+	Db2:Set("hosts.field", field, field)
+/t2
+
+GetHosts->host
+	Db2:Set("hosts.host", host, host)
+/t3
+
+GetHosts->host
+		GetFields->field
+			assert(HasField(host,field))
+			value=GetValue(host,field)
+			Db2:Set("hosts.setting",host+"="+field,value)
+/t4
+

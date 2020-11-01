@@ -60,7 +60,7 @@ Simple file based database v2 - now using Java implementation Lib.Db2 (2020-11-0
 
 # Get keys
 # --
-	P(1)=>collection
+	P(1,inputCollection)=>collection
 	Lib.Db2(collection).keys.sort
 /Keys
 
