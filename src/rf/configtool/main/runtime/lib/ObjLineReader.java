@@ -110,7 +110,7 @@ public class ObjLineReader extends ObjPersistent implements CtxCloseHook {
     /**
      * API for FilterReader and others
      */
-    public Value readLine() throws Exception {
+    public synchronized Value readLine() throws Exception {
         if (br==null) throw new Exception("File not open - call start() to open");
         String line=br.readLine();
         if (line==null) return new ValueNull(); // EOF
@@ -120,7 +120,7 @@ public class ObjLineReader extends ObjPersistent implements CtxCloseHook {
     /**
      * API for FilterReader and others
      */
-    public Value readLine(ObjGrep grep) throws Exception {
+    public synchronized Value readLine(ObjGrep grep) throws Exception {
         if (br==null) throw new Exception("File not open - call start() to open");
     	for(;;) {
     		String line=br.readLine();

@@ -68,13 +68,13 @@ public class ObjInput extends ObjPersistent {
         return ColList.list().regular("Input: " + label);
     }
         
-    private void showOptions(Ctx ctx) {
+    private synchronized void showOptions(Ctx ctx) {
         for (int i=0; i<uniqueValues.size(); i++) {
             ctx.outln("" + (i<10?" ":"") + i + "  : " + uniqueValues.get(i));
         }
     }
     
-    private void addUnique (String s) {
+    private synchronized void addUnique (String s) {
         // add last used value to end of list
         uniqueValues.remove(s);
         uniqueValues.add(s);
@@ -82,7 +82,7 @@ public class ObjInput extends ObjPersistent {
         while (uniqueValues.size() > 10) uniqueValues.remove(0);
     }
     
-    private String getOption (String pos) {
+    private synchronized String getOption (String pos) {
         try {
             int x=Integer.parseInt(pos.trim());
             if (x<0 || x>=uniqueValues.size()) return null;
