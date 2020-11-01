@@ -9,13 +9,6 @@ Simple file based database v2 - now using Java implementation Lib.Db2 (2020-11-0
 # Helper
 # --
 	Lib:Header("Enter collection.")
-	coll = Collections
-
-	if (coll.length==0) {
-		println("- None created")
-	} else {
-		println("- Existing collections: " + coll.concat(" "))
-	}
 
 	Input("collection").get
 /inputCollection
@@ -28,9 +21,7 @@ Simple file based database v2 - now using Java implementation Lib.Db2 (2020-11-0
 	P(2)=>key
 	P(3)=>value
 
-	error(collection.startsWith("@"), "Invalid collection, '@' indicates system collections")
-	
-	Lib.Db2("@collections").set(collection,collection)
+	error(collection.startsWith("."), "Invalid collection, '.' indicates system collections")
 	
 	x = Lambda {syn(P(1))}
 	error (x.?call(value)==false, "Value not synthesizable")
@@ -66,11 +57,6 @@ Simple file based database v2 - now using Java implementation Lib.Db2 (2020-11-0
 
 
 
-
-# Show collections
-# --
-	Lib.Db2("@collections").keys.sort
-/Collections
 
 
 # Show content
