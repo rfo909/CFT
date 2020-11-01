@@ -13,6 +13,7 @@
 
 <h1>CFT Change log</h1>
 
+
 <h2>v1.9.4 2020-11-01 spawn()</h2>
 <p>
 	Added global statement spawn() which takes an expression as parameter, and executes it
@@ -45,6 +46,15 @@ hello3
 	Ctx object, hiding the one accessed via ObjGlobal. These instances must properly block on reads,
 	and be made available via some Process type.
 </p>
+<p>
+	Renamed return object from Dir.runProcess from "Process" to "ExtProcess". That leaves the Process
+	type free for spawn().
+</p>
+<p>
+	Removed Val() and ValDef() from ObjGlobal, as well as from Doc, added text on Db2.
+</p>
+
+
 
 <h3>v1.9.3 2020-11-01 Val() and ValDef()</h3>
 <p>

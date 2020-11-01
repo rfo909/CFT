@@ -123,10 +123,6 @@ Running external programs
  * Work directory issues
  * Doing ssh
 
-Session persistent data
- * ValDef
- * Val
-
 Synthesis
  * The problem
  * Creating code from values
@@ -185,6 +181,8 @@ Function parameters as List or Dict
 The general loop statement
 
 Storing CFT data structures to file - syn() and eval()
+
+The CFT database
 
 String .esc() and .unEsc()
  * Escape codes

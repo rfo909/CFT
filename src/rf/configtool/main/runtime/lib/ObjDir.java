@@ -655,7 +655,7 @@ public class ObjDir extends Obj {
             
             Process process = startProcess(ctx, stdin.getFile(), stdout.getFile(), stderr.getFile(), cmd);
 
-            return new ValueObj(new ObjProcess(process));
+            return new ValueObj(new ObjExtProcess(process));
         }
     }
     

@@ -15,8 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2020-10-29 RFO
-v1.8.1
+Last updated: 2020-11-01 RFO
+v1.9.4
 
 </pre>
 
@@ -1408,7 +1408,7 @@ codeDirs = . ; code.examples ; code.lib
 <h2>Dir.runProcess</h2>
 <p>
   Runs external program, reading input lines from text file, and deliver stdout and stderr to 
-  files. Returns a Process object, which is used to monitor, terminate or wait for the
+  files. Returns an ExtProcess object, which is used to monitor, terminate or wait for the
   external process to finish.
 </p>
 <p>
@@ -1515,51 +1515,6 @@ codeDirs = . ; code.examples ; code.lib
   $ ssh-keygen -t rsa
   $ ssh-copy-id user@host
 </pre>
-
-
-
-
-
-<h1>Session persistent data</h1>
-<p>
-  When working interactively with large sets of data, or in order to remember
-  certain selections, we have the option of saving those
-  data into a session persistent data store. Two global functions let us define
-  a named value, and access it.
-</p>
-<h2>ValDef</h2>
-<p>
-  Store a value under a name.
-</p>
-<pre>
-  $ ValDef("a",12)
-</pre>
-<h2>Val</h2>
-<p>
-  Get value by name, or null if not defined.
-</p>
-<pre>
-  $ Val("a")
-  &lt;int&gt;
-  12
-</pre>
-<p>
-  Get value by name, supplying default. If no value set, the default is stored then return. 
-  That makes this a conditional set as well.
-</p>
-<pre>
-  $ Val("newSymbol",2)
-  &lt;int&gt;
-  2
-  $ Val("newSymbol",3)
-  &lt;int&gt;
-  2
-</pre>
-
-<p>
-  Being tied to the session, these data are lost when quitting CFT.
-</p>
-
 
 
 
@@ -2305,14 +2260,10 @@ codeDirs = . ; code.examples ; code.lib
 </p>
 
 <pre>
-  ValDef("data",Dict)
-  Val("data").get("a",3)
-  &lt;int&gt;
-  3
-
-  Val("data").keys
-  &lt;List&gt;
-  0: a
+  data=Dict
+  data.get("a",3)  # returns 3
+  data.keys        # returns list with "a"
+  data.get("a",5)  # returns 3 as it was set above
 </pre>
 
 
@@ -2377,11 +2328,9 @@ codeDirs = . ; code.examples ; code.lib
 
 
 <h1>Storing CFT data structures to file - syn() and eval()</h1>
+
 <p>
-  Session persistent data are stored and retrieved with ValDef() and Val(), but are obviously
-  lost when the session ends.
-<p>
-  A more persistent solution is to store a data structure to file. This is done using
+  A  persistent solution for storing data is to store a data structure to file. This is done using
   the synthesis functionality, which is made available as a global function as well as the
   "colon command" used before. This means we can write huge lists and sets of files and
   directory objects to file, and restore it later, without going through possibly time
@@ -2404,6 +2353,25 @@ codeDirs = . ; code.examples ; code.lib
 <p>
   This can be used to save arbitrarily big structures, as long as they are synthesizable.
 </p>
+
+
+
+
+<h1>The CFT database</h1>
+<p><i>v1.9.2</i></p>
+<p>
+  CFT implements its own primitive database, as found in Net.Db2, and which is usually
+  interfaced via the Db2 script.
+</p>
+<pre>
+  Db2:Set("myCollection", "field", "test")
+</pre>
+<p>
+  The Db2 persists data to file, and handles all values that can be synthesized to code.
+</p>
+
+
+
 
 
 

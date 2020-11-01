@@ -35,11 +35,11 @@ import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
 import java.awt.Color;
 
-public class ObjProcess extends Obj {
+public class ObjExtProcess extends Obj {
 	
 	private Process process;
 	
-    public ObjProcess(Process process) {
+    public ObjExtProcess(Process process) {
     	this.process=process;
         this.add(new FunctionIsAlive());
         this.add(new FunctionExitCode());
@@ -53,7 +53,7 @@ public class ObjProcess extends Obj {
 
 
     public String getTypeName() {
-        return "Process";
+        return "ExtProcess";
     }
     
 
@@ -63,7 +63,7 @@ public class ObjProcess extends Obj {
 
     
     private String getDesc() {
-        return "Process";
+        return "ExtProcess";
     }
     
   

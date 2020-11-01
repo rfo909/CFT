@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2020-10-29 RFO
-v1.8.1
+Last updated: 2020-11-01 RFO
+v1.9.4
 ```
 # Introduction
 
@@ -1232,7 +1232,7 @@ argument.
 
 
 Runs external program, reading input lines from text file, and deliver stdout and stderr to
-files. Returns a Process object, which is used to monitor, terminate or wait for the
+files. Returns an ExtProcess object, which is used to monitor, terminate or wait for the
 external process to finish.
 
 
@@ -1345,47 +1345,6 @@ copy it to the target host, as follows (in Linux shell).
 $ ssh-keygen -t rsa
 $ ssh-copy-id user@host
 ```
-# Session persistent data
-
-
-When working interactively with large sets of data, or in order to remember
-certain selections, we have the option of saving those
-data into a session persistent data store. Two global functions let us define
-a named value, and access it.
-
-## ValDef
-
-
-Store a value under a name.
-
-```
-$ ValDef("a",12)
-```
-## Val
-
-
-Get value by name, or null if not defined.
-
-```
-$ Val("a")
-<int>
-12
-```
-
-Get value by name, supplying default. If no value set, the default is stored then return.
-That makes this a conditional set as well.
-
-```
-$ Val("newSymbol",2)
-<int>
-2
-$ Val("newSymbol",3)
-<int>
-2
-```
-
-Being tied to the session, these data are lost when quitting CFT.
-
 # Synthesis
 
 ## The problem
@@ -2030,13 +1989,10 @@ associated with the name, but in that case the default value is
 dictionary.
 
 ```
-ValDef("data",Dict)
-Val("data").get("a",3)
-<int>
-3
-Val("data").keys
-<List>
-0: a
+data=Dict
+data.get("a",3)  # returns 3
+data.keys        # returns list with "a"
+data.get("a",5)  # returns 3 as it was set above
 ```
 # List.nth() negative indexes
 
@@ -2085,10 +2041,7 @@ the loop may never terminate, and CFT has to be killed with ^C
 # Storing CFT data structures to file - syn() and eval()
 
 
-Session persistent data are stored and retrieved with ValDef() and Val(), but are obviously
-lost when the session ends.
-
-A more persistent solution is to store a data structure to file. This is done using
+A  persistent solution for storing data is to store a data structure to file. This is done using
 the synthesis functionality, which is made available as a global function as well as the
 "colon command" used before. This means we can write huge lists and sets of files and
 directory objects to file, and restore it later, without going through possibly time
@@ -2107,6 +2060,20 @@ eval(file.read.nth)
 ```
 
 This can be used to save arbitrarily big structures, as long as they are synthesizable.
+
+# The CFT database
+
+
+**v1.9.2**
+
+CFT implements its own primitive database, as found in Net.Db2, and which is usually
+interfaced via the Db2 script.
+
+```
+Db2:Set("myCollection", "field", "test")
+```
+
+The Db2 persists data to file, and handles all values that can be synthesized to code.
 
 # String .esc() and .unEsc()
 

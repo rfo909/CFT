@@ -111,8 +111,8 @@ public class ObjGlobal extends Obj {
         add(new FunctionDataFile());
         add(new FunctionEval());
         add(new FunctionSyn());
-        add(new FunctionVal());
-        add(new FunctionValDef());
+//        add(new FunctionVal());
+//        add(new FunctionValDef());
         add(new FunctionReadLines());
         add(new FunctionReadLine());
         add(new FunctionCfg());
@@ -600,57 +600,57 @@ public class ObjGlobal extends Obj {
     }
 
 
-    class FunctionVal extends Function {
-        public String getName() {
-            return "Val";
-        }
-        public String getShortDesc() {
-            return "Val(name,default?) - get session value created with ValDef - if not set, set to default and return it";
-        }
-        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() == 1) {
-                String name=getString("name", params, 0);
-                return ctx.getObjGlobal().getPersistentValue(name);
-            } else if (params.size()==2) {
-                String name=getString("name", params, 0);
-                Value defaultVal=params.get(1);
-                
-           
-                Value x=ctx.getObjGlobal().getPersistentValue(name);
-
-                if (x==null || (x instanceof ValueNull)) {
-                    System.out.println("## Val/ValDef: " + defaultVal.getTypeName());
-                	ctx.getObjGlobal().setPersistentValue(name, defaultVal);
-                	return defaultVal;
-                } else {
-                	return x;
-                }
-            } else {
-                throw new Exception("Expected parameters name, defaultValue?");
-            }
-        }
-    } 
-
-
-    class FunctionValDef extends Function {
-        public String getName() {
-            return "ValDef";
-        }
-        public String getShortDesc() {
-            return "ValDef(name,value) - set session value";
-        }
-        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() == 2) {
-                String name=getString("name", params, 0);
-                Value value=params.get(1);
-                System.out.println("## Val/ValDef: " + value.getTypeName());
-                ctx.getObjGlobal().setPersistentValue(name, value);
-                return value;
-            } else {
-                throw new Exception("Expected parameters name, value");
-            }
-        }
-    } 
+//    class FunctionVal extends Function {
+//        public String getName() {
+//            return "Val";
+//        }
+//        public String getShortDesc() {
+//            return "Val(name,default?) - get session value created with ValDef - if not set, set to default and return it";
+//        }
+//        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+//            if (params.size() == 1) {
+//                String name=getString("name", params, 0);
+//                return ctx.getObjGlobal().getPersistentValue(name);
+//            } else if (params.size()==2) {
+//                String name=getString("name", params, 0);
+//                Value defaultVal=params.get(1);
+//                
+//           
+//                Value x=ctx.getObjGlobal().getPersistentValue(name);
+//
+//                if (x==null || (x instanceof ValueNull)) {
+//                    System.out.println("## Val/ValDef: " + defaultVal.getTypeName());
+//                	ctx.getObjGlobal().setPersistentValue(name, defaultVal);
+//                	return defaultVal;
+//                } else {
+//                	return x;
+//                }
+//            } else {
+//                throw new Exception("Expected parameters name, defaultValue?");
+//            }
+//        }
+//    } 
+//
+//
+//    class FunctionValDef extends Function {
+//        public String getName() {
+//            return "ValDef";
+//        }
+//        public String getShortDesc() {
+//            return "ValDef(name,value) - set session value";
+//        }
+//        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+//            if (params.size() == 2) {
+//                String name=getString("name", params, 0);
+//                Value value=params.get(1);
+//                System.out.println("## Val/ValDef: " + value.getTypeName());
+//                ctx.getObjGlobal().setPersistentValue(name, value);
+//                return value;
+//            } else {
+//                throw new Exception("Expected parameters name, value");
+//            }
+//        }
+//    } 
 
     class FunctionReadLines extends Function {
         public String getName() {
