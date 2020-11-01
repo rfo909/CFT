@@ -10,14 +10,34 @@ P(1,true) => showDebug
 	ValDef("debug",showDebug)
 /EnableDebug
 
-			
+
+# Helper
+# --
+	Lib:Header("Enter collection.")
+	coll = Collections
+
+	if (coll.length==0) {
+		println("- None created")
+	} else {
+		println("- Existing collections: " + coll.concat(" "))
+	}
+
+	Input("collection").get
+/inputCollection
+
+
+		
 # Store data
 # --
 	P(1)=>collection
 	P(2)=>key
 	P(3)=>value
+
+	error(collection.startsWith("@"), "Invalid collection, '@' indicates system collections")
 	
 	start=currentTimeMillis
+
+	Lib.Db2("@collections").set(collection,collection)
 	
 	x = Lambda {syn(P(1))}
 	error (x.?call(value)==false, "Value not synthesizable")
@@ -36,7 +56,7 @@ P(1,true) => showDebug
 
 # Get data
 # --
-	P(1,Input("collection").get)=>collection
+	P(1,inputCollection)=>collection
 	P(2,Input("key").get)=>key
 	P(3)=>defaultValue
 	
@@ -62,26 +82,18 @@ P(1,true) => showDebug
 
 
 
+
+# Show collections
+# --
+	Lib.Db2("@collections").keys.sort
+/Collections
+
+
 # Show content
 # --
-	P(1,Input("collection").get)=>collection
+	P(1,inputCollection)=>collection
 	Keys(collection)->key
 		report(collection, key, Get(collection,key))
 /Show
 
-
-
-
-# Compress collection
-#   # Must only be run when nobody is using the database
-# --
-	P(1)=>collection
-	data=CollectionDict(collection)
-	file=CollectionFile(collection)
-	file.delete
-
-	data.keys->key
-		value=eval(data.get(key))
-		Set(collection,key,value)
-/CompressCollection
 
