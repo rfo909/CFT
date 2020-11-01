@@ -85,31 +85,28 @@ choice.
 # Select Linux editor and remember selection for next time, open file in editor
 # --
   P(1,Sys.savefile) =>file
-    List(
-        Dict.set("label","sublime")
-            .set("action", Lambda { P(1)=>file Dir.runDetach("subl",file.path) }),
-        Dict.set("label","gedit")
-            .set("action", Lambda { P(1)=>file Dir.runDetach("gedit",file.path) }),
-        Dict.set("label","leafpad")
-            .set("action", Lambda { P(1)=>file Dir.runDetach("leafpad",file.path) }),
-        Dict.set("label","nano")
-            .set("action", Lambda { P(1)=>file Dir.run("nano", file.path) }),
-        Dict.set("label","micro")
-            .set("action", Lambda { P(1)=>file Dir.run("micro", file.path) })
-    ) =>linuxEditors
+  	Dict
+  		.set("sublime",Lambda { P(1)=>file Dir.runDetach("subl",file.path) })
+  		.set("gedit", Lambda { P(1)=>file Dir.runDetach("gedit",file.path) })
+  		.set("leafpad",Lambda { P(1)=>file Dir.runDetach("leafpad",file.path) })
+  		.set("nano", Lambda { P(1)=>file Dir.run("nano", file.path) })
+  		.set("micro",Lambda { P(1)=>file Dir.run("micro", file.path) })
+  	=> actions
 
-    if(Val("linuxEditor")==null) {
-        MenuSelect(linuxEditors, Lambda { P(1).get("label")},"Select editor") =>ed
-        ValDef("linuxEditor", ed)
+   if(Db2:Get("Lib","linuxEditor")==null) {
+        MenuSelect(actions.keys, Lambda { P(1) },"Select editor") =>ed
+        Db2:Set("Lib","linuxEditor", ed)
     }
 
-    Val("linuxEditor").get("action").call(file)
+
+	ed = Db2:Get("Lib","linuxEditor")
+    actions.get(ed).call(file)
 /ShowLinuxEditor
 
 
 
 # Clear selected Linux editor
-    ValDef("linuxEditor",null)
+    Db2:Set("Lib","linuxEditor",null)
     "Linux editor selection cleared"
 /ClearEditor
 

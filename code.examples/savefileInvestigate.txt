@@ -47,24 +47,24 @@ in an editor.
 /InvDir
 
 # Current topic
-	if(Val("topic")==null) {
+	if(Db2:Get("Investigate","topic")==null) {
 		ShowTopics
 		readLine("Enter topic to use, ENTER for 'default'").trim => topic
 		if (topic=="") {topic="default"}
-		ValDef("topic",topic)
+		Db2:Set("Investigate","topic",topic)
 	}
-	Val("topic")
+	Db2:Get("Investigate","topic")
 /GetCurrentTopic
 
 # Change topic
-	if (Val("topic")==null) {
+	if (Db2:Get("Investigate","topic")==null) {
 		GetCurrentTopic  # asks for current
 	} else {
 		ShowTopics
 		readLine("[" + GetCurrentTopic + "] Change topic, ENTER to keep current").trim => newTopic
 
 		if (newTopic != "") {
-			ValDef("topic",newTopic)
+			Db2:Set("Investigate","topic",newTopic)
 		}
 	}
 	
@@ -126,7 +126,7 @@ loop
 		} else { 
 			# parse commands
 		    cmd = line.sub(1)
-		    if(cmd=='?') { ## help
+		    if(cmd=='?') Inner { ## help
 			Sequence(
 				@
 				@

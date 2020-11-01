@@ -614,10 +614,12 @@ public class ObjGlobal extends Obj {
             } else if (params.size()==2) {
                 String name=getString("name", params, 0);
                 Value defaultVal=params.get(1);
+                
            
                 Value x=ctx.getObjGlobal().getPersistentValue(name);
 
                 if (x==null || (x instanceof ValueNull)) {
+                    System.out.println("## Val/ValDef: " + defaultVal.getTypeName());
                 	ctx.getObjGlobal().setPersistentValue(name, defaultVal);
                 	return defaultVal;
                 } else {
@@ -641,6 +643,7 @@ public class ObjGlobal extends Obj {
             if (params.size() == 2) {
                 String name=getString("name", params, 0);
                 Value value=params.get(1);
+                System.out.println("## Val/ValDef: " + value.getTypeName());
                 ctx.getObjGlobal().setPersistentValue(name, value);
                 return value;
             } else {

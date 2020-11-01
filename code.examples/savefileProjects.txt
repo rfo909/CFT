@@ -73,7 +73,7 @@ There can be multiples of every line, including Dir.
 /ProjectsFile
 
 # List projects and select 
-    Val("Project") =>result
+    Db2:Get("Projects","Project") =>result
     ProjectsFile.get("ActiveProjects")->line out(line.trim) | _ =>names
     Lambda { P(1) } =>showName
     loop
@@ -85,11 +85,11 @@ There can be multiples of every line, including Dir.
         if(resultList.length==1, Inner{resultList.nth =>result} )
         break(result != null)
     |
-    ValDef("Project", result)
+    Db2:Set("Projects","Project", result)
 /ChangeProject
 
 
-if(Val("Project")==null, ChangeProject)
+if(Db2:Get("Projects","Project")==null, ChangeProject)
 /CheckProject
 
 
@@ -103,7 +103,7 @@ if(Val("Project")==null, ChangeProject)
         .set("IgnoreFile",List)
         =>dict
 
-    Val("Project") =>pName
+    Db2:Get("Projects","Project") =>pName
     ProjectsFile.get(pName) =>dataLines
     error(dataLines.length==0, "No data for project " + pName)
 
@@ -165,7 +165,7 @@ P(1,Grep) =>grep
     CheckProject
     
     Lambda { P(1) =>file 
-        Val("FileFilter") =>filter
+        Db2:Get("Projects","FileFilter") =>filter
         if(filter != null, file.name.contains(filter), true)
     } =>filter
 
@@ -187,12 +187,12 @@ P(1,Grep) =>grep
 # Limit search to file names containing a certain string
     readLine("Enter file filter string").trim =>str
     if(str=="",null,str) =>val
-    ValDef("FileFilter",val)
+    Db2:Set("Projects","FileFilter",val)
 /SetFileFilter
 
 
 # Show info on current FileFilter (if defined)
-    Val("FileFilter") =>filter
+    Db2:Get("Projects","FileFilter") =>filter
     if(filter!=null, Inner{
         println
         println("** Filtering file names on: " + '"' + filter + '"')
@@ -202,10 +202,13 @@ P(1,Grep) =>grep
 /ShowFileFilter
 
 
-# Clear current file filter
-ValDef("FileFilter",null)
-"File filter cleared"
+# Clear file filter
+# --
+	Db2:Set("Projects","FileFilter",null)
 /ClearFileFilter
+
+
+
 
 
 

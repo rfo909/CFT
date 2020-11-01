@@ -6,11 +6,6 @@ Simple file based database v2 - now using Java implementation Lib.Db2 (2020-11-0
 /Readme
 
 
-P(1,true) => showDebug
-	ValDef("debug",showDebug)
-/EnableDebug
-
-
 # Helper
 # --
 	Lib:Header("Enter collection.")
@@ -35,8 +30,6 @@ P(1,true) => showDebug
 
 	error(collection.startsWith("@"), "Invalid collection, '@' indicates system collections")
 	
-	start=currentTimeMillis
-
 	Lib.Db2("@collections").set(collection,collection)
 	
 	x = Lambda {syn(P(1))}
@@ -45,8 +38,6 @@ P(1,true) => showDebug
 	
 	Lib.Db2(collection).set(key,value)
 
-	end=currentTimeMillis
-	if(Val("debug",false)) println("[debug] Db2: Set " + collection + " " + (end-start) + " ms")
 /Set
 
 
@@ -60,16 +51,9 @@ P(1,true) => showDebug
 	P(2,Input("key").get)=>key
 	P(3)=>defaultValue
 	
-	start=currentTimeMillis
-
 	value=Lib.Db2(collection).get(key)
-	value = if (value == null, defaultValue, eval(value))
 
-	end=currentTimeMillis
-
-	if(Val("debug",false)) println("[debug] Db2: Get " + collection + " " + (end-start) + " ms")
-	
-	value
+	if (value == null, defaultValue, eval(value))
 /Get
 
 

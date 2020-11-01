@@ -12,12 +12,12 @@ P(1)=>dict
 P(1) => name
 P(2,9999999999999999) => maxValue
 	error(name==null,"P(1) name missing")
-	id="counter:"+name
-	if (Val(id)==null) ValDef(id,0)
 	
-	i=Val(id)
+	id="counter:"+(name.replace(" ","_"))
+	i = Db2:Get("Util", id, 0)
+	
 	next=(i+1) % maxValue
-	ValDef(id,next)
+	Db2:Set("Util",id,next)
 	i
 /Counter
 	

@@ -54,7 +54,7 @@ shortcut:S    = "---- Show all scripts ----"              Lib:Scripts
 shortcut:rel  = "---- Release ----"                       Sys.stdin(":load Release","?")
 
 # Projects script 
-shortcut:P    = "---- Projects ----"                      Sys.stdin(":load Projects","Curr")
+shortcut:P    = "---- Projects ----"                      Sys.stdin(":load Projects","ChangeProject")
 shortcut:PS   = "---- Projects perform search ----"       Projects:Curr Projects:S
 shortcut:PP   = "---- Projects change project ----"       Projects:ChangeProject
 
