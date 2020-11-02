@@ -49,7 +49,7 @@ public class ObjLib extends Obj {
         this.add(new FunctionFiles());
         this.add(new FunctionExp());
         this.add(new FunctionText());
-        this.add(new FunctionDb2());
+        this.add(new FunctionDb());
         
     }
     
@@ -193,19 +193,19 @@ public class ObjLib extends Obj {
         }
     } 
     
-    class FunctionDb2 extends Function {
+    class FunctionDb extends Function {
         public String getName() {
-            return "Db2";
+            return "Db";
         }
         public String getShortDesc() {
-            return "Db2(collection) - create Db object";
+            return "Db() - create Db object for database related functions";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 1) throw new Exception("Expected collection parameter");
-            String collection=getString("collection",params,0);
-            return new ValueObj(new ObjDb2(collection));
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueObj(new ObjDb());
         }
     } 
     
+   
 
 }
