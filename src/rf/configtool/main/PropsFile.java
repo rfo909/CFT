@@ -42,6 +42,10 @@ public class PropsFile {
 	}
 	
 	
+	private String fixDir (String s) {
+		return s.replace("/", File.separator);
+	}
+	
 	public void refreshFromFile() throws Exception {
 		File f=new File(PROPS_FILE);
 
@@ -114,7 +118,7 @@ public class PropsFile {
 						shortcuts.put(shortcutName, value);  // macro
 					} else
 					if (name.equals("db2Dir")) {
-						db2Dir=value;
+						db2Dir=fixDir(value);
 					} else {
 						throw new Exception("Invalid configuration field: " + name);
 					}
