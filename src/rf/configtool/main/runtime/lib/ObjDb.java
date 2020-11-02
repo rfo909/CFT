@@ -46,6 +46,7 @@ public class ObjDb extends Obj {
 
     public ObjDb () {    	
         this.add(new FunctionDb2());
+        this.add(new FunctionUUID());
     }
     
     private ObjDb self() {
@@ -73,12 +74,25 @@ public class ObjDb extends Obj {
             return "Db2";
         }
         public String getShortDesc() {
-            return "Db2(collection) - create Db object";
+            return "Db2() - create Db object";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 1) throw new Exception("Expected collection parameter");
-            String collection=getString("collection",params,0);
-            return new ValueObj(new ObjDb2(collection));
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueObj(new ObjDb2());
+        }
+    } 
+    
+    
+    class FunctionUUID extends Function {
+        public String getName() {
+            return "UUID";
+        }
+        public String getShortDesc() {
+            return "UUID() - generate random UUID string";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueString(UUID.randomUUID().toString());
         }
     } 
  

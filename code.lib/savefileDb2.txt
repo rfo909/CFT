@@ -1,7 +1,11 @@
 # Readme
 # --
 <<< EOF
-Simple file based database v2 - now using Java implementation Lib.Db2 (2020-11-01)
+
+Simple file based database v2 - using Java implementation Lib.Db.Db2
+Also see script file Db2Obj
+
+
 >>> EOF
 /Readme
 
@@ -27,7 +31,7 @@ Simple file based database v2 - now using Java implementation Lib.Db2 (2020-11-0
 	error (x.?call(value)==false, "Value not synthesizable")
 	value = syn(value)
 	
-	Lib.Db.Db2(collection).set(key,value)
+	Lib.Db.Db2.set(collection,key,value)
 
 /Set
 
@@ -42,7 +46,7 @@ Simple file based database v2 - now using Java implementation Lib.Db2 (2020-11-0
 	P(2,Input("key").get)=>key
 	P(3)=>defaultValue
 	
-	value=Lib.Db.Db2(collection).get(key)
+	value=Lib.Db.Db2.get(collection,key)
 
 	if (value == null, defaultValue, eval(value))
 /Get
@@ -52,9 +56,15 @@ Simple file based database v2 - now using Java implementation Lib.Db2 (2020-11-0
 # Get keys
 # --
 	P(1,inputCollection)=>collection
-	Lib.Db.Db2(collection).keys.sort
+	Lib.Db.Db2.keys(collection)
 /Keys
 
+
+
+# Get collections
+# --
+	Lib.Db.Db2.collections.sort
+/Collections
 
 
 
@@ -62,8 +72,17 @@ Simple file based database v2 - now using Java implementation Lib.Db2 (2020-11-0
 # Show content
 # --
 	P(1,inputCollection)=>collection
-	Keys(collection)->key
+	Keys(collection).sort->key
 		report(collection, key, Get(collection,key))
 /Show
+
+
+
+
+# Shortcut for Collections
+	Collections
+/Coll
+
+
 
 

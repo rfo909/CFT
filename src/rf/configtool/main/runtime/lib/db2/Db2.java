@@ -42,7 +42,6 @@ public class Db2 {
 		return cMap;
 	}
 	
-	
 	private File getCollectionFile (String collection) {
 		return new File(db2Dir+File.separator+"LibDb2_"+collection+".txt");
 	}
@@ -102,5 +101,22 @@ public class Db2 {
 		while (iter.hasNext()) list.add(iter.next());
 		return list;
 	}
+	
+	
+	public synchronized List<String> getCollections() throws Exception {
+		List<String> result = new ArrayList<String>();
+		for (File f: (new File(db2Dir)).listFiles()) {
+			String name=f.getName();
+			final String pre="LibDb2_";
+			final String post=".txt";
+			if (f.isFile() && name.startsWith(pre) && name.endsWith(post)) {
+				name=name.substring(pre.length(),name.length()-post.length());
+				result.add(name);
+			}
+		}
+		return result;
+	}
+
+
 
 }

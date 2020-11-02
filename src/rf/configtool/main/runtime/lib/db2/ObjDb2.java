@@ -43,16 +43,15 @@ import rf.configtool.main.runtime.ValueString;
 
 public class ObjDb2 extends Obj {
 
-	private String collection;
 	private Db2 db2;
 	
-    public ObjDb2 (String collection) {
-    	this.collection=collection;
+    public ObjDb2 () {
     	this.db2=Db2.getInstance();
     	
     	this.add(new FunctionSet());
     	this.add(new FunctionGet());
     	this.add(new FunctionKeys());
+    	this.add(new FunctionCollections());
     }
     
     private ObjDb2 self() {
@@ -72,7 +71,7 @@ public class ObjDb2 extends Obj {
     
     @Override
     public ColList getContentDescription() {
-        return ColList.list().regular(collection);
+        return ColList.list().regular("Db2");
     }
     
     class FunctionSet extends Function {
@@ -83,9 +82,10 @@ public class ObjDb2 extends Obj {
             return "set(key,value) - returns self";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 2) throw new Exception("Expected string parameters key, value");
-            String key=getString("key",params,0);
-            String value=getString("value",params,1);
+            if (params.size() != 3) throw new Exception("Expected string parameters collection, key, value");
+            String collection=getString("collection",params,0);
+            String key=getString("key",params,1);
+            String value=getString("value",params,2);
             db2.set(collection,key,value);
             
             return new ValueObj(self());
@@ -100,8 +100,9 @@ public class ObjDb2 extends Obj {
             return "get(key) - returns string or null";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 1) throw new Exception("Expected string parameter key");
-            String key=getString("key",params,0);
+            if (params.size() != 2) throw new Exception("Expected string parameters collection, key");
+            String collection=getString("collection", params, 0);
+            String key=getString("key",params,1);
             String value = db2.get(collection,key);
             if (value==null) {
             	return new ValueNull();
@@ -119,11 +120,30 @@ public class ObjDb2 extends Obj {
             return "keys() - return list of keys";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 0) throw new Exception("Expected no parameters");
+            if (params.size() != 1) throw new Exception("Expected parameter collection");
+            String collection=getString("collection",params,0);
             List<String> keys=db2.getKeys(collection);
             List<Value> list=new ArrayList<Value>();
             for (String key:keys) {
             	list.add(new ValueString(key));
+            }
+            return new ValueList(list);
+        }
+    }
+
+    class FunctionCollections extends Function {
+        public String getName() {
+            return "collections";
+        }
+        public String getShortDesc() {
+            return "collections() - return list of collection names";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            List<String> collections=db2.getCollections();
+            List<Value> list=new ArrayList<Value>();
+            for (String c:collections) {
+            	list.add(new ValueString(c));
             }
             return new ValueList(list);
         }

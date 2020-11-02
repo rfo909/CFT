@@ -1,0 +1,90 @@
+# Readme
+<<< EOF
+Simple object oriented extension of the Db2 script.
+
+Objects are stored and identified via UUID's.
+Objects can be updated and deleted (set to null)
+Objects can be sorted on date of last update, and located using a lambda.
+>>> EOF
+/Readme
+
+
+
+
+# Get collections
+	Db2:Collections
+/Collections
+
+
+
+# Object interface: Store some value wrapped inside a Dict with id and date + value - returns new Dict
+# --
+	P(1)=>collection
+	P(2)=>value
+	uuid=Lib.Db.UUID
+	data=Dict.set("id",uuid).set("date",Date).set("value",value)
+	Db2:Set(collection, uuid, data)
+	data
+/AddObject
+
+
+# Object interface: Find objects that satisfy given lambda
+# --
+	P(1)=>collection
+	P(2,Lambda{P(1) true})=>lambdaCheck  # (value)->boolean
+	Db2:Keys(collection)->key
+		obj=Db2:Get(collection,key)
+		assert(obj.value != null)
+		assert(lambdaCheck.call(obj))
+		out(obj)
+/FindObjects
+
+
+
+# Object interface: Get collection objects sorted by date
+# --
+	P(1,Db2:inputCollection)=>collection
+	Db2:Keys(collection)->key
+		obj=Db2:Get(collection,key)
+		assert(obj.value != null)
+		out(Int(obj.date.get,obj))
+	| _.sort->x out(x.data)
+/SortedObjectsByDate
+
+	
+	
+# Object interface: Show objects sorted by last update
+# --
+	P(1,Db2:inputCollection)=>collection
+	SortedObjectsByDate(collection)->obj
+		report(obj.id, obj.date, obj.value)
+/ShowObjects
+
+
+
+# Overwrite object by uuid
+# --
+	P(1)=>collection
+	P(2)=>uuid
+	P(3)=>value
+	data=Dict.set("id",uuid).set("date",Date).set("value",value)
+	Db2:Set(collection,uuid,data)
+/UpdateObject
+
+
+
+
+# Example use for FindObjects - find objects in collection newer than N minutes
+# Must use a closure, which is automatically created when storing a Lambda in a Dict.
+# --
+	P(1,Db2:inputCollection) => collection
+	P(2,readLine("minutes").parseInt) => minutes
+	
+	obj = Dict.set("minutes",minutes).set("x",Lambda {
+		P(1) => obj
+		obj.date.after(Date.sub(Date.Duration.minutes(self.minutes)))  # true if newer than N minutes
+	})
+	FindObjects(collection, obj.x)
+/FindNewObjects
+
+
