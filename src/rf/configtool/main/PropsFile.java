@@ -87,7 +87,7 @@ public class PropsFile {
 					String value=line.substring(pos+1).trim();
 					
 					if (name.equals("codeDirs")) {
-						codeDirs=value;
+						codeDirs=fixDir(value);
 					} else 
 					if (name.equals("prompt")) {
 						prompt=value;
