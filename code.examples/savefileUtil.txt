@@ -22,6 +22,32 @@ P(2,9999999999999999) => maxValue
 /Counter
 	
 
+
+
+# Set time mark
+# --
+P(1) => name
+	id="counter:"+(name.replace(" ","_"))
+	Db2:Set("Util", id, Date)
+/SetTimeMark
+
+
+
+# Check time mark 
+# --
+P(1) => name
+P(2,3600) => seconds
+	Date.sub(Date.Duration.seconds(seconds)) => limit
+
+	id="counter:"+(name.replace(" ","_"))
+	val = Db2:Get("Util", id)
+
+	val==null || val.before(limit)
+/HasTimedOut
+	
+
+
+
 # Show file without comment lines
 # --
 P(1) => file

@@ -122,7 +122,7 @@ loop
 	readLine("[" + host + "] CFT [" + getDir.call(host) + "] '.q' to quit, '?' for help") => mode
 	break(mode==".q")
 
-	if (mode=="?") {
+	if (mode=="?") Inner {
 		Sequence(
 			@ Enter multiple commands separated by semicolon or type
 			@
