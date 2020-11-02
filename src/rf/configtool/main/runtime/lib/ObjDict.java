@@ -57,6 +57,7 @@ public class ObjDict extends Obj {
         baseFunctions.add(new FunctionMergeCodes());
         baseFunctions.add(new FunctionHasNullValue());
         baseFunctions.add(new FunctionBind());
+        baseFunctions.add(new FunctionGetMany());
         
         
         
@@ -433,6 +434,26 @@ public class ObjDict extends Obj {
 
      
 
+     class FunctionGetMany extends Function {
+         public String getName() {
+             return "getMany";
+         }
+         public String getShortDesc() {
+             return "getMany(keyList) - return list of values for list of keys";
+         }
+         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	 if (params.size() != 1) throw new Exception("Expected single list of keys");
+        	 List<Value> keys = getList("keyList",params,0);
+        	 List<Value> result=new ArrayList<Value>();
+        	 
+        	 for (Value key:keys) {
+        		 String s=key.getValAsString();
+        		 Value value=values.get(s);
+        		 if (value==null) result.add(new ValueNull()); else result.add(value);
+        	 }
+        	 return new ValueList(result);
+         }
+     }
 
 
 }

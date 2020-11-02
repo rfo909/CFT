@@ -21,6 +21,7 @@ import java.util.*;
 
 import rf.configtool.main.Ctx;
 import rf.configtool.main.runtime.Value;
+import rf.configtool.main.runtime.ValueList;
 import rf.configtool.parser.TokenStream;
 
 public class StmtReport extends Stmt {
@@ -44,6 +45,10 @@ public class StmtReport extends Stmt {
         for (Expr expr:values) {
             result.add(expr.resolve(ctx));
         }
+        if (result.size()==1 && (result.get(0) instanceof ValueList)) {
+        	result=((ValueList) result.get(0)).getVal();
+        }
+
         ctx.getOutText().addReportData(result);
     }
 

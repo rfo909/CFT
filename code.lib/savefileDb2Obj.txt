@@ -17,7 +17,7 @@ Objects can be sorted on date of last update, and located using a lambda.
 
 
 
-# Object interface: Store some value wrapped inside a Dict with id and date + value - returns new Dict
+# Store some value wrapped inside a Dict with id and date + value - returns new Dict
 # --
 	P(1)=>collection
 	P(2)=>value
@@ -28,7 +28,7 @@ Objects can be sorted on date of last update, and located using a lambda.
 /AddObject
 
 
-# Object interface: Find objects that satisfy given lambda
+# Find objects that satisfy given lambda
 # --
 	P(1)=>collection
 	P(2,Lambda{P(1) true})=>lambdaCheck  # (value)->boolean
@@ -41,7 +41,7 @@ Objects can be sorted on date of last update, and located using a lambda.
 
 
 
-# Object interface: Get collection objects sorted by date
+# Get collection objects sorted by date
 # --
 	P(1,Db2:inputCollection)=>collection
 	Db2:Keys(collection)->key
@@ -53,12 +53,27 @@ Objects can be sorted on date of last update, and located using a lambda.
 
 	
 	
-# Object interface: Show objects sorted by last update
+# Show objects sorted by last update
 # --
 	P(1,Db2:inputCollection)=>collection
 	SortedObjectsByDate(collection)->obj
 		report(obj.id, obj.date, obj.value)
 /ShowObjects
+
+
+# Interactive reporting function: Show object fields, sorted by last update
+# --
+	P(1,Db2:inputCollection)=>collection
+	P(2,Input("Fields").get.split)=>fields
+	SortedObjectsByDate(collection)->obj
+		data = List(obj.id, obj.date) 
+		if (getType(obj.value)=="Dict") {
+			data = data + obj.value.getMany(fields)
+		} else {
+			data = data + obj.value
+		}
+		report(data)
+/ShowObjectFields
 
 
 
