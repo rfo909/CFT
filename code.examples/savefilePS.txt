@@ -112,11 +112,12 @@ P(2, Input("Enter service").get) =>service
 
 # Simple remote shell to multiple windows hosts via PowerShell.
 # --
-P(1,Input("Enter shell Host").get) => host
+
+knownHosts=Lambda{Db2:Keys("PS_Shell")}
+P(1,Inner{knownHosts.call->host println("   "+host) | Input("Enter shell Host").get}) => host
 
 getDir=Lambda{P(1)=>host Db2:Get("PS_Shell",host,"c:\temp")}
 setDir=Lambda{P(1)=>host P(2)=>dir Db2:Set("PS_Shell",host,dir)}
-knownHosts=Lambda{Db2:Keys("PS_Shell")}
 loop
 	println
 	readLine("[" + host + "] CFT [" + getDir.call(host) + "] '.q' to quit, '?' for help") => mode
