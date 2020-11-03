@@ -173,6 +173,9 @@ P(1,"someTarget") =>target
 	P(5) => sshUser            # for config
 	P(6) => nic                # VM network card to configure ("ens3" etc) - run "ip addr" on original VM
 
+    Dir.runCapture("whoami").nth=="root" =>ok
+    error(!ok, "Must be logged in as root")
+
 	PDict("original","cloneName","originalIp","newIp","sshUser") => pdict
 	if (pdict.hasNullValue) Inner {
 		loop
@@ -188,8 +191,6 @@ P(1,"someTarget") =>target
 	error(!newIp.contains("/"), "Invalid newIp - must contain /NN netmask")
 
     Lib:Header ("Cloning existing VM")
-    Dir.runCapture("whoami").nth=="root" =>ok
-    error(!ok, "Must be logged in as root")
 
 	println("* Stopping original VM " + original)
     Stop(original)
@@ -237,6 +238,9 @@ P(1,"someTarget") =>target
 
 
 # Create new VM from scratch - fully interactive
+    Dir.runCapture("whoami").nth=="root" =>ok
+    error(!ok, "Must be logged in as root")
+
     null =>bootImage
     null =>name
     false =>headless

@@ -79,7 +79,7 @@ P(3) => nic
 
     error(!ip.contains("/"), "IP address missing mask? xx.xx.xx.xx/MM")
 
-    if (nic==null) {
+    if (nic==null) Inner{
 	    println("* Running remote command 'ip addr' to list network device names")
 	    println("---------------------------------------------------------------")
 	    run(target,"ip addr").get("stdout")->line
