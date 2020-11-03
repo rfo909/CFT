@@ -72,7 +72,7 @@ public class Main {
         BufferedReader stdin=new BufferedReader(new InputStreamReader(System.in));
         PrintStream stdout=System.out;
         
-        Stdio stdio=new Stdio(stdin, stdout);
+        StdioReal stdio=new StdioReal(stdin, stdout);
         Root root=new Root(stdio, scriptDir);
         
         if (args.hasNext()) {

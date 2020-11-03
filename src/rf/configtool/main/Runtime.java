@@ -50,7 +50,7 @@ public class Runtime {
      * Returns value from executing program line. Note may return java null if no return
      * value identified
      */
-    public Value processCodeLines (CodeLines lines, FunctionState functionState) throws Exception {
+    public Value processCodeLines (Stdio stdio, CodeLines lines, FunctionState functionState) throws Exception {
 
         if (functionState==null) functionState=new FunctionState();
         
@@ -60,7 +60,7 @@ public class Runtime {
         Value retVal=null;
         
         for (ProgramLine progLine:progLines) {
-            Ctx ctx=new Ctx(objGlobal, functionState);
+            Ctx ctx=new Ctx(stdio, objGlobal, functionState);
             if (retVal != null) ctx.push(retVal);
             
             progLine.execute(ctx);

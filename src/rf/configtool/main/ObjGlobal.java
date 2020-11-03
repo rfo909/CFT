@@ -52,7 +52,7 @@ import rf.configtool.root.Root;
 public class ObjGlobal extends Obj {
     
 	private Root root;
-    private Stdio stdio;
+    private StdioReal stdio;
 
     private String currDir;
     private CodeHistory codeHistory;
@@ -76,7 +76,7 @@ public class ObjGlobal extends Obj {
     	return root;
     }
     
-    public Stdio getStdio() {
+    public StdioReal getStdioActual() {
         return stdio;
     }
     
@@ -84,7 +84,7 @@ public class ObjGlobal extends Obj {
     	return root.isDebugMode();
     }
     
-    public ObjGlobal(Root root, Stdio stdio) throws Exception {
+    public ObjGlobal(Root root, StdioReal stdio) throws Exception {
     	this.root=root;
         this.stdio=stdio;
         //props.report(stdio);
@@ -580,7 +580,7 @@ public class ObjGlobal extends Obj {
             if (params.size() != 1) throw new Exception("Expected parameter str");
             String str=getString("str",params,0);
             SourceLocation loc=new SourceLocation("<eval>", 0, 0);
-            return runtime.processCodeLines(new CodeLines(str, loc),null);
+            return runtime.processCodeLines(ctx.getStdio(), new CodeLines(str, loc),null);
         }
     }
 

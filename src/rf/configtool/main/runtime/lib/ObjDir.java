@@ -429,7 +429,7 @@ public class ObjDir extends Obj {
                 throw new Exception("Expected optional Glob parameter only");
             }
             List<File> allFiles=new ArrayList<File>();
-            traverse(ctx.getObjGlobal().getStdio(), new File(name), null, allFiles);
+            traverse(ctx.getStdio(), new File(name), null, allFiles);
             
             
             List<Value> result=new ArrayList<Value>();
@@ -459,7 +459,7 @@ public class ObjDir extends Obj {
             }
 
             List<File> allDirs=new ArrayList<File>();
-            traverse(ctx.getObjGlobal().getStdio(), new File(name), allDirs, null);
+            traverse(ctx.getStdio(), new File(name), allDirs, null);
             
             
             List<Value> result=new ArrayList<Value>();

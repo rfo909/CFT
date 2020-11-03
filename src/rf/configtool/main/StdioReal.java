@@ -17,10 +17,34 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.main;
 
+import java.io.BufferedReader;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
-public class Version {
+/**
+ * 2020-11 RFO
+ *
+ * Actual input and output, connected to global stdin and stdout, hence no buffering of output lines.
+ */
+public class StdioReal extends Stdio {
 
-    public static String getVersion() {
-        return "v1.9.7";
+    private PrintStream stdout;
+    
+//    public StdioReal (InputStream in, OutputStream out) {
+//    	super(new BufferedReader(new InputStreamReader(in)));
+//    	this.stdout=new PrintStream(out);
+//    }
+    
+    public StdioReal(BufferedReader stdin, PrintStream stdout) {
+    	super(stdin);
+        this.stdout=stdout;
     }
+   
+    @Override
+    public synchronized void println (String s) {
+        stdout.println(s);
+    }
+
+
 }

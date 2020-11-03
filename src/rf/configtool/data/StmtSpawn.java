@@ -20,41 +20,28 @@ package rf.configtool.data;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueBoolean;
+import rf.configtool.main.runtime.ValueObj;
+import rf.configtool.main.runtime.lib.ObjProcess;
 import rf.configtool.parser.TokenStream;
 
 public class StmtSpawn extends Stmt {
-    
-    private Expr expr;
 
-    public StmtSpawn (TokenStream ts) throws Exception {
-        super(ts);
-        
-        ts.matchStr("spawn","expected 'spawn'");
-        ts.matchStr("(","expected '('");
-	    expr=new Expr(ts);
-	    ts.matchStr(")", "expected ')' closing spawn statement");
-    }
-    
-    class Runner implements Runnable {
-    	private Ctx ctx;
-    	private Expr expr;
-    	public Runner (Ctx ctx, Expr expr) {
-    		this.ctx=ctx;
-    		this.expr=expr;
-    	}
-    	
-    	public void run() {
-    		try {
-    			expr.resolve(ctx);
-    		} catch (Exception ex) {
-    			// ignore
-    		}
-    	}
-    }
-    public void execute (Ctx ctx) throws Exception {
-    	Runner runner=new Runner(ctx,expr);
-    	(new Thread(runner)).start();
-    }
+	private Expr expr;
 
+	public StmtSpawn(TokenStream ts) throws Exception {
+		super(ts);
+
+		ts.matchStr("spawn", "expected 'spawn'");
+		ts.matchStr("(", "expected '('");
+		expr = new Expr(ts);
+		ts.matchStr(")", "expected ')' closing spawn statement");
+	}
+
+	public void execute(Ctx ctx) throws Exception {
+		ObjProcess process = new ObjProcess(expr);
+		process.start(ctx);
+		ctx.push(new ValueObj(process));
+		;
+	}
 
 }

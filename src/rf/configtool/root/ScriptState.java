@@ -12,7 +12,6 @@ import rf.configtool.main.Runtime;
 public class ScriptState {
 	private String scriptName;
 	private ObjGlobal objGlobal;
-	private Stdio stdio;
 	
 	// Default state
 	public ScriptState(ObjGlobal objGlobal) throws Exception {
@@ -40,14 +39,14 @@ public class ScriptState {
 		return objGlobal;
 	}
 	
-	public Value invokeFunction (String func, List<Value> params) throws Exception {
+	public Value invokeFunction (Stdio stdio, String func, List<Value> params) throws Exception {
 	
 	  // Code lookup
 	  CodeLines codeLines=objGlobal.getCodeHistory().getNamedCodeLines(func);
 	  if (codeLines != null) {
 	      // execute code line
 	      Runtime rt=new Runtime(objGlobal);
-	      Value v = rt.processCodeLines(codeLines, new FunctionState(params));
+	      Value v = rt.processCodeLines(stdio, codeLines, new FunctionState(params));
 	      return v;
 	  }
 	  

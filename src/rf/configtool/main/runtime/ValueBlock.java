@@ -131,7 +131,7 @@ public class ValueBlock extends Value {
     	if (params==null) params=new ArrayList<Value>();
     	FunctionState fs=new FunctionState(params);
     	fs.set("self", new ValueObj(dict));
-        Ctx independentCtx=new Ctx(ctx.getObjGlobal(), fs);
+        Ctx independentCtx=new Ctx(ctx.getStdio(), ctx.getObjGlobal(), fs);
         return execute(independentCtx);
     }
     

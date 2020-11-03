@@ -46,6 +46,7 @@ public class Ctx {
 
     
     private Stack<Value> stack=new Stack<Value>();
+    private Stdio stdio;
     private ObjGlobal objGlobal;
     
     private boolean abortIterationFlag; // "next"
@@ -54,27 +55,28 @@ public class Ctx {
     private List<CtxCloseHook> ctxCloseHooks=new ArrayList<CtxCloseHook>();
     
 
-    public Ctx(ObjGlobal objGlobal, FunctionState functionState) {
-        this(null, new OutData(), new OutText(), objGlobal, functionState);
+    public Ctx(Stdio stdio, ObjGlobal objGlobal, FunctionState functionState) {
+        this(null, new OutData(), new OutText(), stdio, objGlobal, functionState);
     }
     
-    private Ctx (Ctx parent, OutData outData,  OutText outText, ObjGlobal objGlobal, FunctionState functionState) {
+    private Ctx (Ctx parent, OutData outData,  OutText outText, Stdio stdio, ObjGlobal objGlobal, FunctionState functionState) {
         if (functionState==null) functionState=new FunctionState();
         
         this.parent=parent;
         this.outData=outData;
         this.outText=outText;
+        this.stdio=stdio;
         this.objGlobal=objGlobal;
         this.functionState=functionState;
         
     }
     
     public Stdio getStdio() {
-        return objGlobal.getStdio();
+        return stdio;
     }
 
     public Ctx sub() {
-        return new Ctx(this,outData,outText,objGlobal,functionState);
+        return new Ctx(this,outData,outText,stdio,objGlobal,functionState);
     }
               
     /**
@@ -92,7 +94,7 @@ public class Ctx {
      * parameters as well.
      */
     public Ctx subContextForInnerBlock () {
-        Ctx ctx = new Ctx(this,new OutData(),outText,objGlobal,functionState);
+        Ctx ctx = new Ctx(this,new OutData(),outText,stdio,objGlobal,functionState);
         ctx.programContainsLoopingInfoStopsHere=true;
         return ctx;
     }

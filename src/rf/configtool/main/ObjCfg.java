@@ -117,10 +117,10 @@ public class ObjCfg extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() == 0) {
                 for (int i=100; i>=5; i--) {
-                    ctx.getObjGlobal().getStdio().println(""+i);
+                    ctx.getStdio().println(""+i);
                 }
                 // doing direct output, to avoid problems with formatting
-                ctx.getObjGlobal().getStdio().println("h="+h);
+                ctx.getStdio().println("h="+h);
             } else if (params.size()==1) {
                 h=(int) getInt("val",params,0);
             } else {

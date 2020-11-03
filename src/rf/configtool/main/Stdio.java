@@ -17,50 +17,39 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.main;
 
-import java.io.BufferedReader;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 2020-02-28 RFO
+ * 2020-11 RFO
  * 
- * This class makes standard in and out a little more abstract. The idea is to use multiple
- * sessions or background tasks, each with its own ObjGlobal instance, which contains one
- * Stdio object. 
+ * In order to virtualize Stdio for multiple threads, created via StmtSpawn, we need
+ * to separate real Stdio from virtual Stdio. The real Stdio is available via the
+ * ObjGlobal objects, and for all code running in the foreground. 
  * 
- * For output, the Stdio object should buffer a certain amount of output, while for input,
- * it should block until receiving input from the outside.
+ * StmtSpawn creates a Process object, with a virtual Stdio. The code does not know
+ * the difference, as the virtual Stdio also received an input stream, it's just
+ * that it is a pipe stored in the Thread object. 
+ * 
+ * This lets us send data to it one line at a time. The virtual Stdio object also buffers
+ * output internally. Since care has been taken to only communicate lines (never partial
+ * lines) formatting should be good.
  */
-public class Stdio {
+public abstract class Stdio {
+	
 
-    public static final int CircBufferedOutput = 1000;
-    
-    // stdin and stdout may be null (disconnected)
-    private BufferedReader stdin;
-    private PrintStream stdout;
-    
     private List<String> bufferedInputLines=new ArrayList<String>();
-    private String[] outputLines;
-    private int outputPos=0;
+    private BufferedReader stdin;
     
-    public Stdio (InputStream in, OutputStream out) {
-    	this.stdin=new BufferedReader(new InputStreamReader(in));
-    	this.stdout=new PrintStream(out);
-
-    	outputLines=new String[CircBufferedOutput];
-        for (int i=0; i<outputLines.length; i++) outputLines[i]="";
+     public Stdio (BufferedReader stdin) {
+    	this.stdin=stdin;
     }
     
-    public Stdio(BufferedReader stdin, PrintStream stdout) {
-        this.stdin=stdin;
-        this.stdout=stdout;
-
-        outputLines=new String[CircBufferedOutput];
-        for (int i=0; i<outputLines.length; i++) outputLines[i]="";
-        
-    }
-
+    /**
+     * Used by the stdin() statement
+     */
+    
     public synchronized String getInputLine() throws Exception {
         if (!bufferedInputLines.isEmpty()) {
             return bufferedInputLines.remove(0);
@@ -92,17 +81,13 @@ public class Stdio {
     public synchronized int getCachedInputLineCount() {
     	return bufferedInputLines.size();
     }
-
+   
     /**
      * Output text
      */
    
-    public synchronized void println (String s) {
-        outputLines[outputPos]=s;
-        outputPos = (outputPos+1)%outputLines.length;
-        if (stdout != null) stdout.println(s);
-    }
-
+    public abstract void println (String s);
+    
     public void println () {
         println("");
     }

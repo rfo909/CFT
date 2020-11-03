@@ -123,7 +123,7 @@ public class CodeLines {
      
 
     
-    public Value execute (ObjGlobal objGlobal, FunctionState functionState) throws Exception {
+    public Value execute (Stdio stdio, ObjGlobal objGlobal, FunctionState functionState) throws Exception {
 
         if (functionState==null) functionState=new FunctionState();
         
@@ -133,7 +133,7 @@ public class CodeLines {
         Value retVal=null;
         
         for (ProgramLine progLine:progLines) {
-            Ctx ctx=new Ctx(objGlobal, functionState);
+            Ctx ctx=new Ctx(stdio, objGlobal, functionState);
             if (retVal != null) ctx.push(retVal);
             
             progLine.execute(ctx);

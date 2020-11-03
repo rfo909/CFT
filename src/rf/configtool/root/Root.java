@@ -13,6 +13,7 @@ import rf.configtool.main.ObjGlobal;
 import rf.configtool.main.PropsFile;
 import rf.configtool.main.SourceException;
 import rf.configtool.main.Stdio;
+import rf.configtool.main.StdioReal;
 import rf.configtool.main.Version;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueList;
@@ -32,7 +33,7 @@ public class Root {
 
 	private static final Version VERSION = new Version();
 
-	private Stdio stdio;
+	private StdioReal stdio;
 	private PropsFile propsFile;
     private ObjCfg objCfg;
 
@@ -43,7 +44,7 @@ public class Root {
 	private final long startTime;
 	private boolean terminationFlag = false;
 
-	public Root(Stdio stdio, String customScriptDir) throws Exception {
+	public Root(StdioReal stdio, String customScriptDir) throws Exception {
 		this.startTime=System.currentTimeMillis();
 		this.stdio = stdio;
     	propsFile=new PropsFile(customScriptDir);
@@ -186,7 +187,7 @@ public class Root {
 	
 					String pre;
 					try {
-						Value ret = objGlobal.getRuntime().processCodeLines(codeLines, new FunctionState());
+						Value ret = objGlobal.getRuntime().processCodeLines(stdio, codeLines, new FunctionState());
 						pre=ret.getValAsString();
 					} catch (Exception ex) {
 						if (debugMode) {
@@ -234,7 +235,7 @@ public class Root {
 
 				CodeLines codeLines = new CodeLines(shortcutCode, loc);
 
-				Value ret = objGlobal.getRuntime().processCodeLines(codeLines, new FunctionState());
+				Value ret = objGlobal.getRuntime().processCodeLines(stdio, codeLines, new FunctionState());
 				postProcessResult(ret);
 				showSystemLog();
 
@@ -365,7 +366,7 @@ public class Root {
 			if (line.trim().length() > 0) {
 				// program line
 				codeHistory.setCurrLine(line);
-				Value result = objGlobal.getRuntime().processCodeLines(new CodeLines(line, loc), null);
+				Value result = objGlobal.getRuntime().processCodeLines(stdio, new CodeLines(line, loc), null);
 
 				postProcessResult(result);
 				showSystemLog();
@@ -410,7 +411,7 @@ public class Root {
 		List<String> lines = report.displayValueLines(result);
 		int width = objCfg.getScreenWidth();
 
-		Stdio stdio = objGlobal.getStdio();
+		Stdio stdio = objGlobal.getStdioActual();
 
 		// Display lines cut off at screenWidth, for readability
 		for (String s : lines) {

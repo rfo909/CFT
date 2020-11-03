@@ -35,6 +35,9 @@ import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
 import java.awt.Color;
 
+/**
+ * Created when running external programs via Dir.runProcess
+ */
 public class ObjExtProcess extends Obj {
 	
 	private Process process;

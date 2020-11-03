@@ -70,11 +70,11 @@ public class ExprCall extends LexicalElement {
         for (Expr expr:params) args.add(expr.resolve(ctx));
         
         ObjGlobal objGlobal=ctx.getObjGlobal();
-        Stdio stdio=objGlobal.getStdio();
+        Stdio stdio=ctx.getStdio();
         
         //return objGlobal.getRoot().invokeScriptFunction(script, func, args);
         ScriptState x=objGlobal.getRoot().getScriptState(script, false);
-        Value retVal=x.invokeFunction (func, args);
+        Value retVal=x.invokeFunction (stdio, func, args);
         return retVal;
     }
 }
