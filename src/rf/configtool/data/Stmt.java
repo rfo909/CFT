@@ -84,9 +84,6 @@ public abstract class Stmt extends LexicalElement {
         if (ts.peekStr("debug")) {
             return new StmtDebug(ts);
         }
-        if (ts.peekStr("SpawnProcess")) {
-        	return new StmtSpawnProcess(ts);
-        }
     
         // otherwise it must be an expression
         return new StmtExpr(ts);

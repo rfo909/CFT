@@ -38,6 +38,7 @@ public class ExprTerminal extends LexicalElement {
     private ExprTryCatch exprTryCatch;
     private ExprTryCatchSoft exprTryCatchSoft;
     private ExprSequence exprSequence;
+    private ExprSpawnProcess exprSpawn;
     
     private Value literalValue;
     private ParamLookup paramLookup;
@@ -96,6 +97,10 @@ public class ExprTerminal extends LexicalElement {
         }
         if (ts.peekStr("CondSequence")) {
         	exprSequence = new ExprSequence(true,ts);
+        	return;
+        }
+        if (ts.peekStr("SpawnProcess")) {
+        	exprSpawn = new ExprSpawnProcess(ts);
         	return;
         }
         
@@ -163,6 +168,7 @@ public class ExprTerminal extends LexicalElement {
 	        if (exprTryCatchSoft != null) return exprTryCatchSoft.resolve(ctx);
 	        
 	        if (exprSequence != null) return exprSequence.resolve(ctx);
+	        if (exprSpawn != null) return exprSpawn.resolve(ctx);
 	        
 	        if (literalValue != null) return literalValue;
 	        if (paramLookup != null) return paramLookup.resolve(ctx);

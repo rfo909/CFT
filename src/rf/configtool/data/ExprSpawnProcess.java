@@ -17,21 +17,20 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.data;
 
+import java.util.List;
+
 import rf.configtool.main.Ctx;
-import rf.configtool.main.runtime.Obj;
-import rf.configtool.main.runtime.Value;
-import rf.configtool.main.runtime.ValueBoolean;
-import rf.configtool.main.runtime.ValueObj;
+import rf.configtool.main.runtime.*;
 import rf.configtool.main.runtime.lib.ObjDict;
 import rf.configtool.main.runtime.lib.ObjProcess;
 import rf.configtool.parser.TokenStream;
 
-public class StmtSpawnProcess extends Stmt {
+public class ExprSpawnProcess extends LexicalElement {
 
 	private Expr expr;
 	private Expr exprDict;
 
-	public StmtSpawnProcess(TokenStream ts) throws Exception {
+	public ExprSpawnProcess(TokenStream ts) throws Exception {
 		super(ts);
 
 		ts.matchStr("SpawnProcess", "expected 'spawn'");
@@ -43,7 +42,7 @@ public class StmtSpawnProcess extends Stmt {
 		ts.matchStr(")", "expected ')' closing spawn statement");
 	}
 
-	public void execute(Ctx ctx) throws Exception {
+    public Value resolve (Ctx ctx) throws Exception {
 		Value d = exprDict.resolve(ctx);
 		if (d instanceof ValueObj) {
 			Obj obj=((ValueObj) d).getVal();
@@ -52,11 +51,9 @@ public class StmtSpawnProcess extends Stmt {
 				
 				ObjProcess process = new ObjProcess(dict, expr);
 				process.start(ctx);
-				ctx.push(new ValueObj(process));
-				return;
+				return (new ValueObj(process));
 			}
 		}
 		throw new Exception("Expected parameters Dict : Expr");
 	}
-
 }
