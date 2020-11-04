@@ -33,11 +33,16 @@ import java.io.PrintStream;
  */
 public class ObjProcess extends Obj {
 
+	// Ensure exitValue is not read and updated at the same time
+	private final Object EXIT_LOCK = "EXIT_LOCK";
+	
 	private ObjDict dict;
 	private Expr expr;
 	
 	private StdioVirtual stdioVirtual;
 	private PrintStream processInput;
+	
+	private Value exitValue;
 
 	public ObjProcess(ObjDict dict, Expr expr) {
 		this.dict=dict;
@@ -46,9 +51,18 @@ public class ObjProcess extends Obj {
 		this.add(new FunctionOutput());
 		this.add(new FunctionSendLine());
 		this.add(new FunctionClose());
+		this.add(new FunctionIsAlive());
+		this.add(new FunctionIsDone());
+		this.add(new FunctionExitValue());
 
 	}
 
+	protected void setExitValue (Value exitValue) {
+		synchronized(EXIT_LOCK) {
+			this.exitValue=exitValue;
+		}
+	}
+	
 	public void start(Ctx ctx) throws Exception {
 		PipedOutputStream out;
 		PipedInputStream in;
@@ -77,29 +91,10 @@ public class ObjProcess extends Obj {
 
 		Ctx processCtx = new Ctx(stdioVirtual, ctx.getObjGlobal(), functionState);
 
-		Runner runner = new Runner(processCtx, expr);
+		Runner runner = new Runner(processCtx, expr, this);
 		(new Thread(runner)).start();
 
 	}
-
-// Moved to Value class
-//
-//	private Value evalSynConvert (Ctx callCtx, Value v) throws Exception {
-//		try {
-//			String s=v.synthesize();
-//
-//			Parser p=new Parser();
-//			p.processLine(new CodeLine(new SourceLocation(), s));
-//			TokenStream ts = p.getTokenStream();
-//			ProgramLine progLine=new ProgramLine(ts,false);
-//			
-//			Ctx ctx=callCtx.sub();
-//			progLine.execute(ctx);
-//			return ctx.pop();
-//		} catch (Exception ex) {
-//			throw new Exception("Value could not be run through eval(syn()) - must be synthesizable");
-//		}
-//	}
 
 	@Override
 	public boolean eq(Obj x) {
@@ -117,20 +112,37 @@ public class ObjProcess extends Obj {
 	private String getDesc() {
 		return "Process";
 	}
+	
+	public List<String> getAndClearOutput() {
+		return stdioVirtual.getAndClearOutputBuffer();
+	}
+	
+	public void sendLine (String line) throws Exception {
+		processInput.println(line);
+	}
+
+	public void close() throws Exception {
+		processInput.close();
+	}
+	
+
+
 
 	class Runner implements Runnable {
 		private Ctx ctx;
 		private Expr expr;
+		private ObjProcess process;
 
-		public Runner(Ctx ctx, Expr expr) {
+		public Runner(Ctx ctx, Expr expr, ObjProcess process) {
 			this.ctx = ctx;
 			this.expr = expr;
+			this.process = process;
 		}
 
 		public void run() {
 			try {
-				expr.resolve(ctx);
-				ctx.getStdio().println("% Process terminating");
+				Value v = expr.resolve(ctx);
+				process.setExitValue(v);
 			} catch (Exception ex) {
 				System.out.println("Process fails with Exception: " + ex);
 				// ignore
@@ -138,11 +150,6 @@ public class ObjProcess extends Obj {
 		}
 	}
 
-	public List<String> getAndClearOutput() {
-		return stdioVirtual.getAndClearOutputBuffer();
-	}
-	
-	
 	
 	class FunctionOutput extends Function {
 		public String getName() {
@@ -160,10 +167,6 @@ public class ObjProcess extends Obj {
 				result.add(new ValueString(s));
 			return new ValueList(result);
 		}
-	}
-	
-	public void sendLine (String line) throws Exception {
-		processInput.println(line);
 	}
 
 	class FunctionSendLine extends Function {
@@ -183,10 +186,6 @@ public class ObjProcess extends Obj {
 		}
 	}
 	
-	public void close() throws Exception {
-		processInput.close();
-	}
-	
 	class FunctionClose extends Function {
 		public String getName() {
 			return "close";
@@ -200,6 +199,61 @@ public class ObjProcess extends Obj {
 			if (params.size() != 0) throw new Exception("Expected no parameters");
 			processInput.close();
 			return new ValueBoolean(true);
+		}
+	}
+	
+
+	class FunctionIsAlive extends Function {
+		public String getName() {
+			return "isAlive";
+		}
+
+		public String getShortDesc() {
+			return "isAlive() - true if process running";
+		}
+
+		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+			if (params.size() != 0) throw new Exception("Expected no parameters");
+			synchronized(EXIT_LOCK) {
+				return new ValueBoolean(exitValue==null);
+			}
+		}
+	}
+	
+
+	class FunctionIsDone extends Function {
+		public String getName() {
+			return "isDone";
+		}
+
+		public String getShortDesc() {
+			return "isDone() - true if process completed running";
+		}
+
+		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+			if (params.size() != 0) throw new Exception("Expected no parameters");
+			synchronized(EXIT_LOCK) {
+				return new ValueBoolean(exitValue!=null);
+			}
+		}
+	}
+	
+
+	class FunctionExitValue extends Function {
+		public String getName() {
+			return "exitValue";
+		}
+
+		public String getShortDesc() {
+			return "exitValue() - returns exit value or null if still running";
+		}
+
+		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+			if (params.size() != 0) throw new Exception("Expected no parameters");
+			synchronized(EXIT_LOCK) {
+				if (exitValue==null) return new ValueNull();
+				return exitValue;
+			}
 		}
 	}
 	

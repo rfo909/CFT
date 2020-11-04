@@ -1973,8 +1973,10 @@ For details:
 
 ```
 $ SpawnProcess(Dict,1) help
-# clone() - creates clone via eval(syn()) - error if value not synthesizable
 # close() - close stdin for process
+# exitValue() - returns exit value or null if still running
+# isAlive() - true if process running
+# isDone() - true if process completed running
 # output() - get buffered output
 # sendLine(line) - send input line to process
 ```
