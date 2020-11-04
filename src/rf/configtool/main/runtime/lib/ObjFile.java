@@ -27,6 +27,7 @@ import java.util.List;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.OutText;
+import rf.configtool.main.Stdio;
 import rf.configtool.main.runtime.*;
 import rf.configtool.util.FileInfo;
 import rf.configtool.util.TabUtil;
@@ -486,6 +487,8 @@ public class ObjFile extends Obj {
 
 
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	Stdio stdio=ctx.getStdio();
+
             final int lines=ctx.getObjGlobal().getRoot().getObjCfg().getScreenHeight()-2; // room for info line + input line
             final int width=ctx.getObjGlobal().getRoot().getObjCfg().getScreenWidth()-2; // a little space to the right
 
@@ -504,7 +507,7 @@ public class ObjFile extends Obj {
                 for (;;) {
                     String line=br.readLine();
                     if (line==null) {
-                        ctx.outln("[" + f.getName() + " | EOF]");
+                        stdio.println("[" + f.getName() + " | EOF]");
                         break;
                     }
                     
@@ -516,13 +519,13 @@ public class ObjFile extends Obj {
                     if (line.length()>width-1) {
                         line=line.substring(0,width-1) + "+";
                     }
-                    ctx.outln(line);
+                    stdio.println(line);
                     linesDisplayed++;
                     
                     
                     
                     if (linesDisplayed >= lines) {
-                        ctx.outln("[" + f.getName() + " | line:" + lineNo + "] ENTER to continue, 'q' to quit");
+                    	stdio.println("[" + f.getName() + " | line:" + lineNo + "] ENTER to continue, 'q' to quit");
                         String s=ctx.getStdio().getInputLine();
                         if (s.trim().equals("q")) break;
                         linesDisplayed=0;
@@ -755,6 +758,7 @@ public class ObjFile extends Obj {
 
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
+            Stdio stdio=ctx.getStdio();
             
             final int lines=ctx.getObjGlobal().getRoot().getObjCfg().getScreenHeight()-2; // room for info line + input line
             
@@ -780,14 +784,14 @@ public class ObjFile extends Obj {
                     sb2.append(" " + toHex(b));
                     countInLine++;
                     if (countInLine >= ValuesPerLine) {
-                        ctx.outln(createLine(lineNumber++, sb1,sb2));
+                    	stdio.println(createLine(lineNumber++, sb1,sb2));
                         sb1=new StringBuffer();
                         sb2=new StringBuffer();
                         countInLine=0;
 
                         linesDisplayed++;
                         if (linesDisplayed >= lines) {
-                            ctx.outln("[" + f.getName() + "] ENTER to continue, 'q' to quit");
+                        	stdio.println("[" + f.getName() + "] ENTER to continue, 'q' to quit");
                             String s=ctx.getStdio().getInputLine();
                             if (s.trim().equals("q")) break;
                             linesDisplayed=0;
@@ -795,7 +799,7 @@ public class ObjFile extends Obj {
                     }
                 }
                 if (countInLine>0) {
-                    ctx.outln(createLine(lineNumber,sb1,sb2));
+                	stdio.println(createLine(lineNumber,sb1,sb2));
                 }
             } finally {
                 if (fis != null) try {fis.close();} catch (Exception ex) {}

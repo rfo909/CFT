@@ -43,7 +43,7 @@ public class StdioVirtual extends Stdio {
    
 	@Override
     public synchronized void println (String s) {
-		System.out.println("StdioVirtual.println -> " + s);
+		//System.out.println("StdioVirtual.println -> " + s);
     	outputBuffer.add(s);
     }
 	

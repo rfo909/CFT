@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import rf.configtool.main.Ctx;
+import rf.configtool.main.Stdio;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.runtime.*;
 
@@ -69,8 +70,10 @@ public class ObjInput extends ObjPersistent {
     }
         
     private synchronized void showOptions(Ctx ctx) {
+    	Stdio stdio=ctx.getStdio();
+    	
         for (int i=0; i<uniqueValues.size(); i++) {
-            ctx.outln("" + (i<10?" ":"") + i + "  : " + uniqueValues.get(i));
+        	stdio.println("" + (i<10?" ":"") + i + "  : " + uniqueValues.get(i));
         }
     }
     
@@ -100,6 +103,8 @@ public class ObjInput extends ObjPersistent {
             return "get() - get value for question as given when creating Input object";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	Stdio stdio=ctx.getStdio();
+        	
             if (params.size()!=0) throw new Exception("Expected no parameters");
 
             boolean silent=ctx.getStdio().hasBufferedInputLines();
@@ -116,32 +121,32 @@ public class ObjInput extends ObjPersistent {
             // '::sdfsdf' - match text that starts with colon
             // ':xxx' - identify option
             LOOP: for(;;) {
-                ctx.outln("(?) " + label);
-                if (currValue.trim().length()>0) ctx.outln("    enter for '" + currValue + "'");
-                if (uniqueValues.size() > 0) ctx.outln("    ':' for options");
+            	stdio.println("(?) " + label);
+                if (currValue.trim().length()>0) stdio.println("    enter for '" + currValue + "'");
+                if (uniqueValues.size() > 0) stdio.println("    ':' for options");
                 String line=ctx.getStdio().getInputLine();
                 if (line.trim().length()==0) {
                     if (currValue==null) currValue="";
-                    ctx.outln(currValue);
-                    ctx.outln();
+                    stdio.println(currValue);
+                    stdio.println();
                     break LOOP;
                 } else if (line.trim().startsWith("::")) {
                     currValue=line.substring(1); 
                     break;
                 } else if (line.trim().equals(":")) {
                     showOptions(ctx);
-                    ctx.outln("--");
-                    ctx.outln("Use ':N' for numbered value. Use '::' for input text starting with colonl");
-                    ctx.outln("--");
+                    stdio.println("--");
+                    stdio.println("Use ':N' for numbered value. Use '::' for input text starting with colonl");
+                    stdio.println("--");
                 } else if (line.startsWith(":")) {
                     String pos=line.substring(1);
                     String x=getOption(pos);
                     if (x==null) {
-                        ctx.outln("** Invalid reference");
+                    	stdio.println("** Invalid reference");
                         continue;
                     }
-                    ctx.outln(x);  // show selected value
-                    ctx.outln();
+                    stdio.println(x);  // show selected value
+                    stdio.println();
                     currValue=x;
                     break LOOP;
                 } else {

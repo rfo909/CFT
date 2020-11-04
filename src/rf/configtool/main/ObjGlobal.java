@@ -52,7 +52,7 @@ import rf.configtool.root.Root;
 public class ObjGlobal extends Obj {
     
 	private Root root;
-    private StdioReal stdio;
+    private StdioReal stdioReal;
 
     private String currDir;
     private CodeHistory codeHistory;
@@ -64,33 +64,26 @@ public class ObjGlobal extends Obj {
     private final Runtime runtime;
     private List<String> systemMessages=new ArrayList<String>();
 
-    public void outln (String s) {
-        stdio.println(s);
-    }
-    
-    public void outln() {
-        stdio.println();
-    }
-    
+
     public Root getRoot() {
     	return root;
     }
     
     public StdioReal getStdioActual() {
-        return stdio;
+        return stdioReal;
     }
     
     public boolean isDebugMode() {
     	return root.isDebugMode();
     }
     
-    public ObjGlobal(Root root, StdioReal stdio) throws Exception {
+    public ObjGlobal(Root root, StdioReal stdioReal) throws Exception {
     	this.root=root;
-        this.stdio=stdio;
+        this.stdioReal=stdioReal;
         //props.report(stdio);
         
         
-        codeHistory=new CodeHistory(stdio, root.getPropsFile(), root.getObjCfg());
+        codeHistory=new CodeHistory(root.getPropsFile(), root.getObjCfg());
         this.runtime=new Runtime(this);
         
         
@@ -660,7 +653,9 @@ public class ObjGlobal extends Obj {
             return "readLines(endmarker) - read input until label on separate line, returns list of strings";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() == 1 && params.get(0) instanceof ValueString) {
+        	Stdio stdio=ctx.getStdio();
+
+        	if (params.size() == 1 && params.get(0) instanceof ValueString) {
                 String endMarker=getString("endmarker", params, 0);
                 
                 List<Value> list=new ArrayList<Value>();
@@ -687,7 +682,9 @@ public class ObjGlobal extends Obj {
             return "readLine(prompt) - read single input line";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() == 1) {
+        	Stdio stdio=ctx.getStdio();
+
+        	if (params.size() == 1) {
                 String prompt=getString("prompt", params, 0);
                 
                 boolean silent=ctx.getStdio().hasBufferedInputLines();
@@ -725,7 +722,9 @@ public class ObjGlobal extends Obj {
             return "println(str) - print string";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() == 1) {
+        	Stdio stdio=ctx.getStdio();
+
+        	if (params.size() == 1) {
                 String s=params.get(0).getValAsString();
                 stdio.println(s);
                 return new ValueString(s);

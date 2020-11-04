@@ -199,7 +199,7 @@ public class Root {
 					}
 	
 					// Stdio can only do line output, so using System.out directly
-					System.out.print(pre);
+					stdio.print(pre);
 				}
 				String line = stdio.getInputLine().trim();
 
@@ -248,11 +248,11 @@ public class Root {
 				// repeat previous command
 				String currLine = codeHistory.getCurrLine();
 				if (currLine == null) {
-					objGlobal.outln("ERROR: no current line");
+					stdio.println("ERROR: no current line");
 					return;
 				}
 				line = currLine + line.substring(1);
-				objGlobal.outln("$ " + line);
+				stdio.println("$ " + line);
 			} else if (line.startsWith("!")) {
 				int pos = line.indexOf("!", 1);
 				if (pos > 0) {
@@ -269,7 +269,7 @@ public class Root {
 					CodeLines codeLines = codeHistory.getNamedCodeLines(str);
 					if (codeLines != null) {
 						if (codeLines.hasMultipleCodeLines()) {
-							objGlobal.outln("Function '" + str + "' is not a single line of code");
+							stdio.println("Function '" + str + "' is not a single line of code");
 							return;
 						}
 						String codeLine = codeLines.getFirstNonBlankLine();
@@ -280,9 +280,9 @@ public class Root {
 							}
 						}
 						line = codeLine + line.substring(pos + 1);
-						objGlobal.outln("----> " + line);
+						stdio.println("----> " + line);
 					} else {
-						objGlobal.outln("No function '" + str + "' - Usage: !ident! or !ident:pattern!...");
+						stdio.println("No function '" + str + "' - Usage: !ident! or !ident:pattern!...");
 						return;
 					}
 
@@ -304,7 +304,7 @@ public class Root {
 					throw new Exception("Expected '/ident' to save previous program line");
 				boolean success = codeHistory.assignName(ident, force);
 				if (!success) {
-					objGlobal.outln("ERROR: Symbol exists. Use /" + ident + "! to override");
+					stdio.println("ERROR: Symbol exists. Use /" + ident + "! to override");
 				}
 				return;
 			}
@@ -340,20 +340,20 @@ public class Root {
 						// complete match, as before
 						String ident2=ts.matchIdentifier();
 						if (ident2 != null) {
-							hist.report(ident2);
+							hist.report(stdio, ident2);
 						} else {
-							hist.reportAll();
+							hist.reportAll(stdio);
 						}
 					} else {
 						// no colon
-						codeHistory.report(ident);
+						codeHistory.report(stdio, ident);
 					}
 				} else {
-					codeHistory.reportAll();
+					codeHistory.reportAll(stdio);
 				}
 				String scriptName = objGlobal.getScriptName();
 				if (scriptName != null) {
-					objGlobal.outln("Current script name: " + scriptName);
+					stdio.println("Current script name: " + scriptName);
 				}
 				return; // abort further processing
 			}
@@ -378,7 +378,7 @@ public class Root {
 			} catch (Exception ex) {
 				// ignore
 			}
-			objGlobal.outln("ERROR: " + t.getMessage());
+			stdio.println("ERROR: " + t.getMessage());
 			if (debugMode) {
 				if (t instanceof SourceException) {
 					SourceException se=(SourceException) t;
@@ -428,7 +428,7 @@ public class Root {
 		// System messages are written to screen - this applies to help texts etc
 		List<String> messages = objGlobal.getSystemMessages();
 		for (String s : messages) {
-			objGlobal.outln("  # " + s);
+			stdio.println("  # " + s);
 		}
 
 		objGlobal.clearSystemMessages();
@@ -520,66 +520,66 @@ public class Root {
 		} else if (ts.matchStr("debug")) {
 			debugMode = !debugMode;
 			if (debugMode) {
-				objGlobal.outln("DEBUG MODE ON. Repeat :debug command to turn off again.");
+				stdio.println("DEBUG MODE ON. Repeat :debug command to turn off again.");
 			} else {
-				objGlobal.outln("DEBUG MODE OFF");
+				stdio.println("DEBUG MODE OFF");
 			}
 			//objGlobal.outln("Loaded scripts: " + getScriptStateNames());
 			return;
 		} else if (ts.matchStr("wrap")) {
 			boolean wrap = objCfg.changeWrap();
 			if (wrap) {
-				objGlobal.outln("WRAP MODE ON. Repeat :wrap command to turn off again.");
+				stdio.println("WRAP MODE ON. Repeat :wrap command to turn off again.");
 			} else {
-				objGlobal.outln("WRAP MODE OFF (default)");
+				stdio.println("WRAP MODE OFF (default)");
 			}
 			return;
 		} else if (ts.matchStr("syn")) {
 			if (lastResult == null) {
-				objGlobal.outln("No current value, can not synthesize");
+				stdio.println("No current value, can not synthesize");
 				return;
 			}
 			String s = lastResult.synthesize();
 			codeHistory.setCurrLine(s);
-			objGlobal.outln("synthesize ok");
-			objGlobal.outln("+-----------------------------------------------------");
+			stdio.println("synthesize ok");
+			stdio.println("+-----------------------------------------------------");
 			String line = "| .  : " + s;
 			if (line.length() > screenWidth) {
 				line = line.substring(0, screenWidth - 1) + "+";
 			}
-			objGlobal.outln(line);
-			objGlobal.outln("+-----------------------------------------------------");
-			objGlobal.outln("Assign to name by /xxx as usual");
+			stdio.println(line);
+			stdio.println("+-----------------------------------------------------");
+			stdio.println("Assign to name by /xxx as usual");
 			return; // do not modify codeHistory
 		} else if (ts.peekType(Token.TOK_INT)) {
 			int pos = Integer.parseInt(ts.matchType(Token.TOK_INT).getStr());
 			if (lastResult == null) {
-				objGlobal.outln("No current value");
+				stdio.println("No current value");
 				return;
 			}
 			if (!(lastResult instanceof ValueList)) {
-				objGlobal.outln("Current value not a list");
+				stdio.println("Current value not a list");
 				return;
 			}
 
 			List<Value> values = ((ValueList) lastResult).getVal();
 
 			if (pos < 0 || pos >= values.size()) {
-				objGlobal.outln("Invalid index: " + pos);
+				stdio.println("Invalid index: " + pos);
 				return;
 			}
 
 			String s = values.get(pos).synthesize();
 			codeHistory.setCurrLine(s);
-			objGlobal.outln("synthesize ok");
-			objGlobal.outln("+-----------------------------------------------------");
+			stdio.println("synthesize ok");
+			stdio.println("+-----------------------------------------------------");
 			String line = "| .  : " + s;
 			if (line.length() > screenWidth) {
 				line = line.substring(0, screenWidth - 1) + "+";
 			}
-			objGlobal.outln(line);
-			objGlobal.outln("+-----------------------------------------------------");
-			objGlobal.outln("Assign to name by /xxx as usual");
+			stdio.println(line);
+			stdio.println("+-----------------------------------------------------");
+			stdio.println("Assign to name by /xxx as usual");
 			return;
 		} else {
 			stdio.println();

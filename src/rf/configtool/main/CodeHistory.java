@@ -32,7 +32,6 @@ import rf.configtool.util.TabUtil;
 public class CodeHistory {
     
      
-    private Stdio stdio;
     private PropsFile props;
     private Map<String, CodeLines> namedLines=new HashMap<String,CodeLines>();
     private List<String> namesInSequence=new ArrayList<String>();
@@ -40,8 +39,7 @@ public class CodeHistory {
     
     private String currLine;
     
-    public CodeHistory (Stdio stdio, PropsFile props, ObjCfg cfg) {
-        this.stdio=stdio;
+    public CodeHistory (PropsFile props, ObjCfg cfg) {
         this.props=props;
         this.cfg=cfg;
     }
@@ -76,8 +74,8 @@ public class CodeHistory {
     }
     
 
-    public void reportAll() {
-        report(null);
+    public void reportAll(Stdio stdio) {
+        report(stdio, null);
     }
     
     public List<String> getNames() {
@@ -86,7 +84,7 @@ public class CodeHistory {
         return list;
     }
     
-    public void report(String symbolSubStr) {
+    public void report(Stdio stdio, String symbolSubStr) {
         final int available=cfg.getScreenWidth();
         
         String hr = "+-----------------------------------------------------";

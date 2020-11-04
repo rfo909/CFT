@@ -18,30 +18,45 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package rf.configtool.data;
 
 import rf.configtool.main.Ctx;
+import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueBoolean;
 import rf.configtool.main.runtime.ValueObj;
+import rf.configtool.main.runtime.lib.ObjDict;
 import rf.configtool.main.runtime.lib.ObjProcess;
 import rf.configtool.parser.TokenStream;
 
 public class StmtSpawn extends Stmt {
 
 	private Expr expr;
+	private Expr exprDict;
 
 	public StmtSpawn(TokenStream ts) throws Exception {
 		super(ts);
 
 		ts.matchStr("spawn", "expected 'spawn'");
+		
 		ts.matchStr("(", "expected '('");
+		exprDict = new Expr(ts);
+		ts.matchStr(",","Expected ','");
 		expr = new Expr(ts);
 		ts.matchStr(")", "expected ')' closing spawn statement");
 	}
 
 	public void execute(Ctx ctx) throws Exception {
-		ObjProcess process = new ObjProcess(expr);
-		process.start(ctx);
-		ctx.push(new ValueObj(process));
-		;
+		Value d = exprDict.resolve(ctx);
+		if (d instanceof ValueObj) {
+			Obj obj=((ValueObj) d).getVal();
+			if (obj instanceof ObjDict) {
+				ObjDict dict=(ObjDict) obj;
+				
+				ObjProcess process = new ObjProcess(dict, expr);
+				process.start(ctx);
+				ctx.push(new ValueObj(process));
+				return;
+			}
+		}
+		throw new Exception("Expected parameters Dict : Expr");
 	}
 
 }

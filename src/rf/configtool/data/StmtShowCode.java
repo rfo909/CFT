@@ -22,6 +22,7 @@ import java.util.*;
 import rf.configtool.main.CodeHistory;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.ObjCfg;
+import rf.configtool.main.Stdio;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueString;
 import rf.configtool.parser.TokenStream;
@@ -63,6 +64,8 @@ public class StmtShowCode extends Stmt {
     // 2019-03-13 Also supports names on format "a*:Title", and 
     
     public void execute (Ctx ctx) throws Exception {
+    	Stdio stdio=ctx.getStdio();
+    	
         Value v=expr.resolve(ctx);
         if (v==null || !(v instanceof ValueString)) throw new Exception("showCode() - expected string parameter");
         String s=((ValueString) v).getVal();
@@ -92,9 +95,9 @@ public class StmtShowCode extends Stmt {
             List<String> matches=split(x.get(0),",");
             String title=x.get(1);
             
-            ctx.outln();
-            ctx.outln(title);
-            ctx.outln(fmt("-",'-',maxNameLength+2));
+            stdio.println();
+            stdio.println(title);
+            stdio.println(fmt("-",'-',maxNameLength+2));
 
             for (String match:matches) {
                 boolean trunc=false;
@@ -113,7 +116,7 @@ public class StmtShowCode extends Stmt {
                             if (codeLine.length() > maxValueLength) {
                                 codeLine=codeLine.substring(0,maxValueLength-2) + "+";
                             }
-                            ctx.outln(fmt(name,' ',maxNameLength) + " : " + codeLine);
+                            stdio.println(fmt(name,' ',maxNameLength) + " : " + codeLine);
                             found=true;
                             toRemove.add(name);
                             break;
@@ -129,7 +132,7 @@ public class StmtShowCode extends Stmt {
         // To display remaining, include "*:Other" or something at the end
         
         
-        ctx.outln();
+        stdio.println();
         
 //      // then the remaining
 //      ctx.outln();

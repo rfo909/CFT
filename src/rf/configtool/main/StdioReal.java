@@ -46,5 +46,8 @@ public class StdioReal extends Stdio {
         stdout.println(s);
     }
 
+    public synchronized void print (String s) {
+    	stdout.print(s);
+    }
 
 }

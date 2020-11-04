@@ -20,6 +20,7 @@ package rf.configtool.data;
 import java.util.*;
 
 import rf.configtool.main.Ctx;
+import rf.configtool.main.Stdio;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.parser.TokenStream;
 
@@ -36,7 +37,9 @@ public class StmtDebug extends Stmt {
     }
 
     public void execute (Ctx ctx) throws Exception {
-        ctx.outln("%DEBUG% " + value.resolve(ctx).getValAsString());
+    	Stdio stdio=ctx.getStdio();
+    	
+    	stdio.println("%DEBUG% " + value.resolve(ctx).getValAsString());
     }
 
 }

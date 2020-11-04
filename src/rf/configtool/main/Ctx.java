@@ -143,15 +143,7 @@ public class Ctx {
     }
     
 
-              
-    public void outln (String s) {
-        objGlobal.outln(s);
-    }
-    
-    public void outln () {
-        objGlobal.outln();
-    }
-    
+       
     public Value getResult() throws Exception {
     	callCtxCloseHooks();
     	
