@@ -1956,7 +1956,7 @@ b=a.clone.add(4)  # b contains 1,2,3,4 while a remains unchanged
 
 **v1.9.8**
 
-CFT offers the ability to run multiple processes of CFT code, via the SpawnProcess() statement.
+CFT offers the ability to run multiple processes of CFT code, via the SpawnProcess() expression.
 
 
 It takes two parameters, a context dictionary and an expression. The named values from the
@@ -1977,8 +1977,31 @@ $ SpawnProcess(Dict,1) help
 # exitValue() - returns exit value or null if still running
 # isAlive() - true if process running
 # isDone() - true if process completed running
-# output() - get buffered output
+# output() - get buffered output lines
 # sendLine(line) - send input line to process
+```
+
+Lame example
+
+```
+# Test
+# --
+data = Dict.set("a",10).set("b",20)
+proc = SpawnProcess(data,a+b)
+loop
+break(proc.isDone)
+println("tick")
+Sys.sleep(1)
+|
+println("Result=" + proc.exitValue)
+/test
+```
+```
+$ test
+tick
+Result=30
+<String>
+Result=30
 ```
 # List.push()
 

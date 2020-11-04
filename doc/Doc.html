@@ -2220,7 +2220,7 @@ codeDirs = . ; code.examples ; code.lib
 <h1>Multitasking in CFT</h1>
 <p><b>v1.9.8</b></p>
 <p>
-  CFT offers the ability to run multiple processes of CFT code, via the SpawnProcess() statement.
+  CFT offers the ability to run multiple processes of CFT code, via the SpawnProcess() expression.
 </p>
 <p>
   It takes two parameters, a context dictionary and an expression. The named values from the 
@@ -2242,10 +2242,35 @@ codeDirs = . ; code.examples ; code.lib
   # exitValue() - returns exit value or null if still running
   # isAlive() - true if process running
   # isDone() - true if process completed running
-  # output() - get buffered output
+  # output() - get buffered output lines
   # sendLine(line) - send input line to process
-
 </pre>
+
+<p>Lame example</p>
+<pre>
+# Test
+# --
+  data = Dict.set("a",10).set("b",20)
+  proc = SpawnProcess(data,a+b)
+  loop 
+    break(proc.isDone)
+    println("tick")
+    Sys.sleep(1)
+  |
+  println("Result=" + proc.exitValue)
+/test
+</pre>
+<pre>
+$ test
+tick
+Result=30
+  &lt;String&gt;
+  Result=30
+</pre>
+
+
+
+
 
 
 

@@ -157,7 +157,7 @@ public class ObjProcess extends Obj {
 		}
 
 		public String getShortDesc() {
-			return "output() - get buffered output";
+			return "output() - get buffered output lines";
 		}
 
 		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {

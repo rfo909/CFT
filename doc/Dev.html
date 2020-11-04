@@ -13,17 +13,17 @@
 
 <h1>CFT Change log</h1>
 
-<h2>v1.9.8 2020-11-03 Obj.clone</h2>
+<h2>v1.9.8 2020-11-03 Obj.clone + SpawnProcess()</h2>
 <p>
 	Created java function createClone() in the Obj class, and wrapped it as CFT function .clone(),
 	which gets inherited by all Obj and Value objects. It works for synthesizable values by
 	creating a synthesis string, then executing it, getting a perfect copy.  
 </p>
 <p>
-	Renaming StmtSpawn to StmtSpawnProcess, and the CFT name to SpawnProcess.
+	Renaming StmtSpawn to ExprSpawnProcess, and the CFT name to SpawnProcess.
 </p>
 <p>
-	Added call to the ObjProcess start() method, which is called by StmtSpawn, to convert the
+	Added call to the ObjProcess start() method, which is called by ExprSpawnProcess, to convert the
 	content of the Dict parameter to spawn() to the running context of the expression to 
 	execute inside the Process. 
 </p>
@@ -52,6 +52,90 @@ Lib.Data.each(0,3)-&gt;x
 		x.output->line println(line)
 /t
 </pre>
+<p>
+	Tested blocking on input: ok
+</p>
+<pre>
+# test 2̈́
+# -
+	data = Dict.set("a",1)
+	process = SpawnProcess(data,Inner{
+		println("Process running")
+		x=readLine("Enter number").parseInt
+		println("Adding one: " + (x+1))
+		# return value
+		"goodbye"		
+	})
+
+	Sys.sleep(500)
+	process.output-&gt;line println("OUTPUT&gt; " + line) |
+	line = readLine("Enter line to send to the process")
+	process.sendLine(line)
+	readLine("Enter to continue reading output from process")
+	process.output-&gt;line println("OUTPUT&gt; " + line) |
+	println("exitValue: " + process.exitValue)
+/t2	
+
+
+$ t2
+OUTPUT&gt; Process running
+OUTPUT&gt; (?) Enter number
+(?) Enter line to send to the process
+33
+(?) Enter to continue reading output from process
+
+OUTPUT&gt; Adding one: 34
+exitValue: goodbye
+  &lt;String&gt;
+  exitValue: goodbye
+
+</pre>
+
+<p>
+	Testing nested spawns: ok
+</p>
+<pre>
+# test 3
+# --
+	proc = SpawnProcess(Dict,Dir.files)
+	loop
+		break(proc.isDone)
+		Sys.sleep(1)
+		println("tick")
+	|
+	println("t3 done")
+	proc.exitValue
+/t3
+
+# test 4
+# --
+	proc = SpawnProcess(Dict,t3)
+	loop
+		break(proc.isDone)
+		Sys.sleep(1)
+		println("tock")
+	|
+	proc.output-&gt;line println("## " + line) |
+	proc.exitValue
+/t4
+
+
+$ t4
+tock
+tock
+tock
+tock
+## tick
+## tick
+## tick
+## t3 done
+  &lt;List&gt;
+   0: CFT.props             | 3k  | 3094  | d:&lt;1 | 2020-11-04 13:15:44
+       :
+       :
+</pre>
+
+
 
 
 <h2>v1.9.7 2020-11-03 Stdio</h2>
