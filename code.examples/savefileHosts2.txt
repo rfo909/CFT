@@ -11,7 +11,7 @@ HOST
 HOST
 HOST [OverrideValue]?
  :
- 
+H*   [OverrideValue]?
 
 >>>>>>>>>>>> EOF
 /Readme
@@ -24,7 +24,7 @@ HOST [OverrideValue]?
 
 # Parse file, return data object
 # --
-	data = AnsibleDefs:Parse(HostsFile.read)
+	data = AnsibleFile:Parse(HostsFile.read)
 	CheckData(data)
 	data
 /ProcessFile
