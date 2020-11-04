@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2020-11-01 RFO
-v1.9.4
+Last updated: 2020-11-04 RFO
+v1.9.8
 ```
 # Introduction
 
@@ -1941,6 +1941,43 @@ $ getType(Dict)
 <String>
 Dict
 ```
+# Clone any value
+
+
+The common function clone() of all values returns a copy of the value, as long as the value
+in question is synthesizable. If not, an error is returned.
+
+```
+a=List(1,2,3)
+b=a.clone.add(4)  # b contains 1,2,3,4 while a remains unchanged
+```
+# Multitasking in CFT
+
+
+**v1.9.8**
+
+CFT offers the ability to run multiple processes of CFT code, via the SpawnProcess() statement.
+
+
+It takes two parameters, a context dictionary and an expression. The named values from the
+context dictionary become local variables when the expression is executed, which takes
+place in a separate process.
+
+
+The code runs in a virtualized environment. Output is buffered inside the Process object, and
+if the code requires input, it will block, until we supply input lines via the Process
+object.
+
+
+For details:
+
+```
+$ SpawnProcess(Dict,1) help
+# clone() - creates clone via eval(syn()) - error if value not synthesizable
+# close() - close stdin for process
+# output() - get buffered output
+# sendLine(line) - send input line to process
+```
 # List.push()
 
 
@@ -2064,9 +2101,9 @@ This can be used to save arbitrarily big structures, as long as they are synthes
 # The CFT database
 
 
-**v1.9.2**
+**v1.9.6**
 
-CFT implements its own primitive database, as found in Net.Db2, and which is usually
+CFT implements its own primitive database, as found in Lib.Db.Db2, and which is usually
 interfaced via the Db2 script.
 
 ```
@@ -2074,6 +2111,10 @@ Db2:Set("myCollection", "field", "test")
 ```
 
 The Db2 persists data to file, and handles all values that can be synthesized to code.
+
+
+Also there is a Db2Obj script, which saves data objects identified by UUID's, which are
+maode by calling the Lib.Db.UUID function.
 
 # String .esc() and .unEsc()
 

@@ -168,6 +168,10 @@ Error handling
 
 Get type of value
 
+Clone any value
+
+Multitasking in CFT
+
 List.push()
 
 Dict set with strings

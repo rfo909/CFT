@@ -26,15 +26,15 @@ import rf.configtool.main.runtime.lib.ObjDict;
 import rf.configtool.main.runtime.lib.ObjProcess;
 import rf.configtool.parser.TokenStream;
 
-public class StmtSpawn extends Stmt {
+public class StmtSpawnProcess extends Stmt {
 
 	private Expr expr;
 	private Expr exprDict;
 
-	public StmtSpawn(TokenStream ts) throws Exception {
+	public StmtSpawnProcess(TokenStream ts) throws Exception {
 		super(ts);
 
-		ts.matchStr("spawn", "expected 'spawn'");
+		ts.matchStr("SpawnProcess", "expected 'spawn'");
 		
 		ts.matchStr("(", "expected '('");
 		exprDict = new Expr(ts);

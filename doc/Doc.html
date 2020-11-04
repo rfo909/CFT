@@ -15,8 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2020-11-01 RFO
-v1.9.4
+Last updated: 2020-11-04 RFO
+v1.9.8
 
 </pre>
 
@@ -2203,6 +2203,48 @@ codeDirs = . ; code.examples ; code.lib
 
 
 
+<h1>Clone any value</h1>
+<p>
+  The common function clone() of all values returns a copy of the value, as long as the value
+  in question is synthesizable. If not, an error is returned. 
+</p>
+<pre>
+  a=List(1,2,3)
+  b=a.clone.add(4)  # b contains 1,2,3,4 while a remains unchanged
+</pre>
+
+
+
+
+
+<h1>Multitasking in CFT</h1>
+<p><b>v1.9.8</b></p>
+<p>
+  CFT offers the ability to run multiple processes of CFT code, via the SpawnProcess() statement.
+</p>
+<p>
+  It takes two parameters, a context dictionary and an expression. The named values from the 
+  context dictionary become local variables when the expression is executed, which takes
+  place in a separate process.
+</p>
+<p>
+  The code runs in a virtualized environment. Output is buffered inside the Process object, and
+  if the code requires input, it will block, until we supply input lines via the Process
+  object.
+</p>
+<p>
+  For details:
+</p>
+<pre>
+  $ SpawnProcess(Dict,1) help
+
+  # clone() - creates clone via eval(syn()) - error if value not synthesizable
+  # close() - close stdin for process
+  # output() - get buffered output
+  # sendLine(line) - send input line to process
+
+</pre>
+
 
 
 
@@ -2358,9 +2400,9 @@ codeDirs = . ; code.examples ; code.lib
 
 
 <h1>The CFT database</h1>
-<p><i>v1.9.2</i></p>
+<p><i>v1.9.6</i></p>
 <p>
-  CFT implements its own primitive database, as found in Net.Db2, and which is usually
+  CFT implements its own primitive database, as found in Lib.Db.Db2, and which is usually
   interfaced via the Db2 script.
 </p>
 <pre>
@@ -2368,6 +2410,10 @@ codeDirs = . ; code.examples ; code.lib
 </pre>
 <p>
   The Db2 persists data to file, and handles all values that can be synthesized to code.
+</p>
+<p>
+  Also there is a Db2Obj script, which saves data objects identified by UUID's, which are
+  maode by calling the Lib.Db.UUID function.
 </p>
 
 

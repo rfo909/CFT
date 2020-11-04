@@ -50,36 +50,46 @@ public abstract class Stdio {
      * Used by the stdin() statement
      */
     
-    public synchronized String getInputLine() throws Exception {
-        if (!bufferedInputLines.isEmpty()) {
-            return bufferedInputLines.remove(0);
-        }
+    public String getInputLine() throws Exception {
+    	synchronized(bufferedInputLines) {
+	        if (!bufferedInputLines.isEmpty()) {
+	            return bufferedInputLines.remove(0);
+	        }
+    	}
         return readLine();
     }
     
-    private synchronized String readLine() throws Exception {
+    private String readLine() throws Exception {
         if (stdin == null) throw new Exception("stdin disconnected - no buffered lines");
         return stdin.readLine();
     }
     
     
-    public synchronized boolean hasBufferedInputLines() {
-        return bufferedInputLines.size()>0;
+    public boolean hasBufferedInputLines() {
+    	synchronized(bufferedInputLines) {
+    		return bufferedInputLines.size()>0;
+    	}
     }
 
     /**
      * Used by the stdin() statement
      */
-    public synchronized void addBufferedInputLine (String s) {
-        bufferedInputLines.add(s);
+    public void addBufferedInputLine (String s) {
+    	synchronized (bufferedInputLines) {
+    		bufferedInputLines.add(s);
+    	}
     }
     
-    public synchronized void clearBufferedInputLines() {
-        bufferedInputLines.clear();
+    public void clearBufferedInputLines() {
+    	synchronized (bufferedInputLines) {
+    		bufferedInputLines.clear();
+    	}
     }
     
-    public synchronized int getCachedInputLineCount() {
-    	return bufferedInputLines.size();
+    public int getCachedInputLineCount() {
+    	synchronized (bufferedInputLines) {
+    		return bufferedInputLines.size();
+    	}
     }
    
     /**

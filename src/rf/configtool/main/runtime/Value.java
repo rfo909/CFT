@@ -20,6 +20,14 @@ package rf.configtool.main.runtime;
 import java.util.ArrayList;
 import java.util.List;
 
+import rf.configtool.data.ProgramLine;
+import rf.configtool.main.CodeLine;
+import rf.configtool.main.Ctx;
+import rf.configtool.main.runtime.ValueBoolean.FunctionNot;
+import rf.configtool.parser.Parser;
+import rf.configtool.parser.SourceLocation;
+import rf.configtool.parser.TokenStream;
+
 public abstract class Value extends Obj {
     
     public abstract String getTypeName();
@@ -35,6 +43,7 @@ public abstract class Value extends Obj {
      * boolean false, null and empty list are false, all other values are true
      */
     public abstract boolean getValAsBoolean();
+
 
     
 }

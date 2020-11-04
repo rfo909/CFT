@@ -5,6 +5,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import rf.configtool.data.Expr;
+import rf.configtool.data.ProgramLine;
+import rf.configtool.main.CodeLine;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.FunctionState;
 import rf.configtool.main.StdioVirtual;
@@ -12,6 +14,10 @@ import rf.configtool.main.runtime.*;
 import rf.configtool.main.runtime.lib.ObjExtProcess.FunctionDestroy;
 import rf.configtool.main.runtime.lib.ObjExtProcess.FunctionExitCode;
 import rf.configtool.main.runtime.lib.ObjExtProcess.FunctionIsAlive;
+import rf.configtool.parser.CharSource;
+import rf.configtool.parser.Parser;
+import rf.configtool.parser.SourceLocation;
+import rf.configtool.parser.TokenStream;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -54,12 +60,19 @@ public class ObjProcess extends Obj {
 		this.stdioVirtual = new StdioVirtual(br);
 		this.processInput=new PrintStream(out);
 		
+		// Creating empty function state to be populated with local variables matching
+		// the Dictionary content
 		FunctionState functionState = new FunctionState();
+		
+		// Each Dict value must be run through an eval(syn(value)) pipeline, to make them
+		// guaranteed independent of all other internal structures in CFT. 
 		Iterator<String> keys = dict.getKeys();
 		while (keys.hasNext()) {
 			String key=keys.next();
 			Value value=dict.getValue(key);
-			functionState.set(key, value);
+			
+			Value transformedValue=value.createClone(ctx);
+			functionState.set(key, transformedValue);
 		}
 
 		Ctx processCtx = new Ctx(stdioVirtual, ctx.getObjGlobal(), functionState);
@@ -68,6 +81,25 @@ public class ObjProcess extends Obj {
 		(new Thread(runner)).start();
 
 	}
+
+// Moved to Value class
+//
+//	private Value evalSynConvert (Ctx callCtx, Value v) throws Exception {
+//		try {
+//			String s=v.synthesize();
+//
+//			Parser p=new Parser();
+//			p.processLine(new CodeLine(new SourceLocation(), s));
+//			TokenStream ts = p.getTokenStream();
+//			ProgramLine progLine=new ProgramLine(ts,false);
+//			
+//			Ctx ctx=callCtx.sub();
+//			progLine.execute(ctx);
+//			return ctx.pop();
+//		} catch (Exception ex) {
+//			throw new Exception("Value could not be run through eval(syn()) - must be synthesizable");
+//		}
+//	}
 
 	@Override
 	public boolean eq(Obj x) {

@@ -46,6 +46,7 @@ public class ObjDict extends Obj {
     private List<Function> baseFunctions;
     
     public ObjDict () {
+    	super();
         baseFunctions=new ArrayList<Function>();
         baseFunctions.add(new FunctionSet());
         baseFunctions.add(new FunctionGet());
@@ -58,8 +59,6 @@ public class ObjDict extends Obj {
         baseFunctions.add(new FunctionHasNullValue());
         baseFunctions.add(new FunctionBind());
         baseFunctions.add(new FunctionGetMany());
-        
-        
         
         init();
     }

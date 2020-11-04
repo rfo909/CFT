@@ -21,10 +21,16 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.*;
 
+import rf.configtool.data.ProgramLine;
+import rf.configtool.main.CodeLine;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.ObjGlobal;
 import rf.configtool.main.OutText;
 import rf.configtool.main.Version;
+import rf.configtool.main.runtime.Obj.FunctionClone;
+import rf.configtool.parser.Parser;
+import rf.configtool.parser.SourceLocation;
+import rf.configtool.parser.TokenStream;
 
 /**
  * Super class of all object types.
@@ -39,12 +45,17 @@ public abstract class Obj {
         this.functions.put(name, function);
     }
     
+    public Obj() {
+        add (new FunctionClone());
+    }
+    
     /**
      * Dict needs to clear and re-add functions when content changes, to enable
      * field values as functions, for direct dotted lookup
      */
     protected void clearFunctions() {
-        functions=new HashMap<String,Function>();
+    	functions=new HashMap<String,Function>();
+        add (new FunctionClone());
     }
     
     
@@ -129,6 +140,53 @@ public abstract class Obj {
     public String synthesize() throws Exception {
         throw new Exception("Object " + getTypeName() + " can not be synthesized");
     }
+    
+    
+    
+     /**
+     * Create a safe copy of this value, by means of running it through an eval(syn()) pipeline,
+     * which ensures the new value is completely independent. Throws exception if value not synthesizable.
+     */
+	public Value createClone (Ctx callCtx) throws Exception {
+    	Obj obj=this;
+		try {
+			String s=obj.synthesize();
+
+			Parser p=new Parser();
+			p.processLine(new CodeLine(new SourceLocation(), s));
+			TokenStream ts = p.getTokenStream();
+			ProgramLine progLine=new ProgramLine(ts,false);
+			
+			Ctx ctx=callCtx.sub();
+			progLine.execute(ctx);
+			return ctx.pop();
+		} catch (Exception ex) {
+			throw new Exception("Value could not be run through eval(syn()) - must be synthesizable");
+		}
+	}
+
+	
+	
+    
+    
+	   class FunctionClone extends Function {
+	        public String getName() {
+	            return "clone";
+	        }
+	        public String getShortDesc() {
+	            return "clone() - creates clone via eval(syn()) - error if value not synthesizable";
+	        }
+	        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+	            if (params.size() != 0) throw new Exception("Expected no parameters");
+	            return createClone(ctx);
+	        }
+
+	    }
+	    
+
+   
+    
+    
     
     public void generateHelp(Ctx ctx) {
     	ObjGlobal objGlobal=ctx.getObjGlobal();

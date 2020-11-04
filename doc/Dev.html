@@ -13,6 +13,47 @@
 
 <h1>CFT Change log</h1>
 
+<h2>v1.9.8 2020-11-03 Obj.clone</h2>
+<p>
+	Created java function createClone() in the Obj class, and wrapped it as CFT function .clone(),
+	which gets inherited by all Obj and Value objects. It works for synthesizable values by
+	creating a synthesis string, then executing it, getting a perfect copy.  
+</p>
+<p>
+	Renaming StmtSpawn to StmtSpawnProcess, and the CFT name to SpawnProcess.
+</p>
+<p>
+	Added call to the ObjProcess start() method, which is called by StmtSpawn, to convert the
+	content of the Dict parameter to spawn() to the running context of the expression to 
+	execute inside the Process. 
+</p>
+<p>
+	Proof of concept
+</p>
+<pre>
+Lib.Data.each(0,3)-&gt;x
+	list=List(1,2)
+	 
+	Dict
+		.set("list",list)
+		.set("x",x)
+		=&gt; data
+	SpawnProcess(data, Inner{
+		list.add(x)
+		println("x=" + x)
+		list-&gt;e println("list: " + e)
+	}) =&gt; proc
+	
+	out(proc)
+| _=>list
+	Sys.sleep(1000)
+	list-&gt;x
+		println("------")
+		x.output->line println(line)
+/t
+</pre>
+
+
 <h2>v1.9.7 2020-11-03 Stdio</h2>
 <p>
 	Made Stdio class into an abstract, and created StdioReal and StdioVirtual.
@@ -21,6 +62,9 @@
 	Also added ObjProcess and modified StmtSpawn, but it's not right yet. Still, everything seems to
 	work like before. Tagget v1.9.6 at github before checking in this, as a fallback just in case.
 </p>
+
+
+
 
 <h2>v1.9.6 2020-11-02 Db2Obj script</h2>
 <p>
