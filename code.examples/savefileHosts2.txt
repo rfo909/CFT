@@ -1,0 +1,50 @@
+# Readme
+<<<<<<<<<<<< EOF
+
+A descriptive format for describing attributes with hosts, for
+managing automatic updates.
+
+Processes Hosts.txt file on following format:
+
+[Property=Value]
+HOST
+HOST
+HOST [OverrideValue]?
+ :
+ 
+
+>>>>>>>>>>>> EOF
+/Readme
+
+
+# Data file
+(Lib:DirPrivate).file("Hosts.txt")
+/HostsFile
+
+
+
+# Check integrity
+# --
+	P(1)=>data
+	foundError=false
+	data.LAllElements.call->hostname
+		#println("Checking " + hostname)
+		data.LGet.call(hostname,"KnownHost") => x
+		if (x==null) {
+			println("ERROR: Host " + hostName + " not present in KnownHost set")
+			foundError=true
+		}
+	|
+	error(foundError,"Data contains errors")
+	"data integrity ok"
+/CheckData
+
+
+
+# Parse file, return data object
+# --
+	data = AnsibleDefs:Parse(HostsFile.read)
+	CheckData(data)
+	data
+/Main
+
