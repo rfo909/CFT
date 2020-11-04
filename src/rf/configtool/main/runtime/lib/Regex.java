@@ -44,8 +44,8 @@ public class Regex {
         return sb.toString();
     }
     
-    public static String createGlobRegex (String pattern) {
-        return "^" + Regex.createRegex(pattern, false) + "$";
+    public static String createGlobRegex (String pattern, boolean caseSensitive) {
+        return "^" + Regex.createRegex(pattern, caseSensitive) + "$";
     }
     
 }

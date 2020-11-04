@@ -36,17 +36,24 @@ import rf.configtool.main.runtime.lib.ObjDir.FunctionName;
 public class ObjGlob extends Obj {
     
     private String pattern;
+    private boolean ignoreCase;
     private String regex;
 
     private ObjGlob() {
         add(new FunctionAsRegex());
         add(new FunctionMatch());
     }
-
+    
     public ObjGlob (String pattern) {
+    	this(pattern, true);
+    }
+
+    public ObjGlob (String pattern, boolean ignoreCase) {
         this();
         this.pattern=pattern;
-        this.regex=Regex.createGlobRegex(pattern);
+        this.ignoreCase=ignoreCase;
+        boolean caseSensitive = !ignoreCase;
+        this.regex=Regex.createGlobRegex(pattern,caseSensitive);
     }
     
     public boolean matches (String s) {
@@ -64,7 +71,7 @@ public class ObjGlob extends Obj {
 
     @Override
     public String synthesize() throws Exception {
-        return "Glob(" + (new ValueString(pattern)).synthesize() + ")";
+        return "Glob(" + (new ValueString(pattern)).synthesize() + "," + (new ValueBoolean(ignoreCase)).synthesize() + ")";
     }
 
 

@@ -518,12 +518,20 @@ public class ObjGlobal extends Obj {
             return "Glob";
         }
         public String getShortDesc() {
-            return "Glob(pattern) - creates Glob object for file name matching, such as '*.txt'";
+            return "Glob(pattern,ignoreCase?) - creates Glob object for file name matching, such as '*.txt' - ignoreCase defaults to true";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 1) throw new Exception("Expected 1 parameter");
-            String pattern=getString("pattern", params, 0);
-            return new ValueObj(new ObjGlob(pattern));
+            if (params.size() == 1) {
+	            String pattern=getString("pattern", params, 0);
+	            boolean ignoreCase=true;
+	            return new ValueObj(new ObjGlob(pattern,ignoreCase));
+            } else if (params.size() == 2) {
+	            String pattern=getString("pattern", params, 0);
+	            boolean ignoreCase=getBoolean("ignoreCase", params, 1);
+	            return new ValueObj(new ObjGlob(pattern,ignoreCase));
+            } else {
+            	throw new Exception("Expected parameters pattern, ignoreCase?");
+            }
         }
     }
     
