@@ -22,6 +22,13 @@ HOST [OverrideValue]?
 /HostsFile
 
 
+# Parse file, return data object
+# --
+	data = AnsibleDefs:Parse(HostsFile.read)
+	CheckData(data)
+	data
+/ProcessFile
+
 
 # Check integrity
 # --
@@ -41,10 +48,61 @@ HOST [OverrideValue]?
 
 
 
-# Parse file, return data object
+# Explore data
 # --
-	data = AnsibleDefs:Parse(HostsFile.read)
-	CheckData(data)
-	data
-/Main
+	data=ProcessFile
+
+	# Creating an object running the main loop, with
+	# each menu entry being a parameterless lambda 
+	# --
+	Dict
+		.set("data",data)
+		.set("regex",Glob("*",false).regex)
+		.set("done", false)
+		
+		.set("Lselect", Lambda {
+			self.set("regex", Glob(readLine("Glob expr"),false).regex)
+			self.LshowHosts.call
+		})
+		.set("LshowHosts", Lambda {
+			self.data.LAllElements.call->host
+				assert(self.regex.match(host))
+				println(host)
+		})
+		.set("LshowFields", Lambda {
+			self.data.LAllElements.call->host
+				assert(self.regex.match(host))
+				report(host,"","")
+				hInfo=self.data.data.get(host)
+				hInfo.keys.sort->field
+					value=hInfo.get(field)
+					report("",field,value)
+			| _-> line
+				println(line)
+		})
+		.set("Lquit", Lambda {
+			self.set("done",true)
+		})
+		
+		.set("Lmenu", Lambda {
+			d = Lambda{ PDict("name","lambda") }
+			Sequence(
+				d.call("(1) Enter search pattern", self.Lselect)
+				d.call("(2) Show hosts", self.LshowHosts)
+				d.call("(3) Show fields", self.LshowFields)
+				d.call("(9) Quit", self.Lquit)
+			) => options
+			Lib:MenuSelect(options, Lambda{P(1).name}).lambda.call
+		})
+		.set("Lmainloop", Lambda {
+			loop
+				break(self.done)
+				self.Lmenu.call
+		})
+		.Lmainloop.call
+/Explore
+	
+
+
+
 
