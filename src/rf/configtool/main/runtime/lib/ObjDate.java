@@ -97,7 +97,7 @@ public class ObjDate extends Obj {
         if (timeValue != 0) {
             s=getFormattedDate();
         }
-        return ColList.list().regular("Date: " + s);
+        return ColList.list().regular(s);
     }
         
     @Override
