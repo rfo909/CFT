@@ -168,10 +168,12 @@ Error handling
 
 Get type of value
 
-Clone any value
-
 Multitasking in CFT
- |   Example
+ * Example: pinging a list of hosts
+ |   Create and test regular ping function
+ |   Management function, with logging via Db2Obj database script
+ |   Checking results (in database)
+ * Advantages
 
 List.push()
 
@@ -194,6 +196,8 @@ String .esc() and .unEsc()
 
 Automating interactive functions / Sys.stdin()
  * Running colon commands from script code
+
+Clone any value
 
 Simple line editing
  |   Develop complex code in steps
@@ -226,7 +230,7 @@ Closures
 
 Closures v2 - Objects
  * Member lambdas calling each other
- * Cloning dictionaries
+ * Copy lambdas between dictionaries
 
 Reference: Colon commands
 

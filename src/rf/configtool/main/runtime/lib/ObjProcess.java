@@ -56,6 +56,7 @@ public class ObjProcess extends Obj {
 		this.add(new FunctionIsDone());
 		this.add(new FunctionExitValue());
 		this.add(new FunctionWait());
+		this.add(new FunctionData());
 
 	}
 
@@ -87,6 +88,7 @@ public class ObjProcess extends Obj {
 			String key=keys.next();
 			Value value=dict.getValue(key);
 			
+			// Make copies of all context values from dict parameter
 			Value transformedValue=value.createClone(ctx);
 			functionState.set(key, transformedValue);
 		}
@@ -291,6 +293,21 @@ public class ObjProcess extends Obj {
 				Thread.sleep(5);
 			}
 			return new ValueObj(self());
+		}
+	}
+	
+	class FunctionData extends Function {
+		public String getName() {
+			return "data";
+		}
+
+		public String getShortDesc() {
+			return "data() - returns the (original) context dictionary";
+		}
+
+		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+			if (params.size() != 0) throw new Exception("Expected no parameters");
+			return new ValueObj(dict);
 		}
 	}
 	

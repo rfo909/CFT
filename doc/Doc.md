@@ -8,7 +8,7 @@ If you have problems, consider viewing the Doc.html file instead.
 
 ```
 Last updated: 2020-11-05 RFO
-v1.9.9
+v1.9.10
 ```
 # Introduction
 
@@ -1941,16 +1941,6 @@ $ getType(Dict)
 <String>
 Dict
 ```
-# Clone any value
-
-
-The common function clone() of all values returns a copy of the value, as long as the value
-in question is synthesizable. If not, an error is returned.
-
-```
-a=List(1,2,3)
-b=a.clone.add(4)  # b contains 1,2,3,4 while a remains unchanged
-```
 # Multitasking in CFT
 
 
@@ -1969,11 +1959,12 @@ if the code requires input, it will block, until we supply input lines via the P
 object.
 
 
-For details:
+Listing Process functions:
 
 ```
 $ SpawnProcess(Dict,1) help
 # close() - close stdin for process
+# data() - returns the (original) context dictionary
 # exitValue() - returns exit value or null if still running
 # isAlive() - true if process running
 # isDone() - true if process completed running
@@ -1981,30 +1972,145 @@ $ SpawnProcess(Dict,1) help
 # sendLine(line) - send input line to process
 # wait() - wait for process to terminate - returns self
 ```
-### Example
+## Example: pinging a list of hosts
+
+
+The following example show how we can perform system monitoring efficiently using
+SpawnProcess.
+
+
+This example is about pinging a set of servers, to see which are up. We start by creating
+a function for this, and testing it manually.
+
+### Create and test regular ping function
+
+
+It is okay to print out a lot of stuff, as all of that will be collected when
+calling function inside a Process. We will log that to the database if
+function returns false.
 
 ```
-# Fetch content of N directories in parallel
-# In particular for remote directories, this can take time
-# Running each in separate processes means total time equals the longest
-# a single lookup takes. Returns list of lists of files.
+# Ping host, return boolean (true if ok)
 # --
-P(1)=>listOfDirs
-processes=List
+P(1)=>host
+println("Pinging host " + host)
+Lib:run(List("ping","-c","1",host), List, true) =>
+ res
+if (res.exitCode==0) {
+true
+} else {
+println("FAILED with exitCode=" + res.exitCode)
 Inner {
-listOfDirs->dir
-data = Dict.set("dir",dir)
-processes.add(SpawnProcess(data,dir.files))
+res.stdout->line println(line) |
+res.stderr->line println("#ERR# " + line) |
 }
-results=List
-Inner {
-processes->p
-p.wait
-results.add(p.exitValue)
+false
 }
-results
-/FetchDirFiles
+/ping
 ```
+
+After testing the function, we go on to create the function that manages the processes.
+
+### Management function, with logging via Db2Obj database script
+
+
+We now create a function Hosts, which returns a list of the hosts to check, and then
+the function CheckPing, which iterates over these.
+
+```
+"s01.s s02.s s03.s s04.s s05.s s06.s s07.s".split
+/Hosts
+# Delete previous ping stats from database, then run ping on all
+# hosts in parallel, collecting results and store in database.
+# --
+COLLECTION="stats"
+# Clear out results from earlier runs, if any
+# --
+Db2Obj:DeleteObjects(COLLECTION, Lambda{P(1).value.op=="ping"})
+# Iterate over hosts
+# --
+Hosts->host
+# Start individual processes, each calling the ping function with a host
+# --
+data=Dict.set("host",host)
+proc=SpawnProcess(data,ping(host))
+out(proc)
+| _->proc
+# Wait for each process in turn, and collect results
+# --
+proc.wait
+dbObj=Dict
+.set("op","ping")
+.set("host", proc.data.host)  # the data dict from SpawnProcess
+.set("ok",proc.exitValue)
+if (proc.exitValue==false) {
+# failed
+dbObj.set("output", proc.output)
+}
+# Log everything to database
+# --
+Db2Obj:AddObject(COLLECTION, dbObj)
+/CheckPing
+```
+
+The CheckPing function iterates over the hosts, and for each calls SpawnProcess, with the
+host stored in the context data Dict object. This generates a Process object, which is
+is sent on with the out() statement.
+
+
+After the PIPE we now are working with a list of Process objects, which we iterate over,
+and for each, first wait for it finish, then pick values from it, building a dbObj Dict
+with relevant information. THe field "op"="ping" is what is used to identify these
+data, for the initial call to DbObj:DeleteObjects() where we delete any previous stats,
+from earlier runs.
+
+### Checking results (in database)
+
+
+After this has run, we look at the data in the "stats" collection:
+
+```
+$ Db2Obj:ShowFields("stats",List("host","ok"))
+<List>
+0: 2020-11-05 22:48:44 | s01.s | true
+1: 2020-11-05 22:48:44 | s02.s | true
+2: 2020-11-05 22:48:44 | s03.s | true
+3: 2020-11-05 22:48:47 | s04.s | false
+4: 2020-11-05 22:48:47 | s05.s | true
+5: 2020-11-05 22:48:47 | s06.s | true
+6: 2020-11-05 22:48:47 | s07.s | false
+```
+
+Here we list fields "host" and "ok" from the objects. We see that hosts "s04.s" and "s07.s"
+failed. We now check the output log for "s04.s".
+
+```
+$ Db2Obj:FindObjects("stats",Lambda{P(1).value.host=="s04.s"}).first.value.output
+<List>
+0: Pinging host s04.s
+1: FAILED with exitCode=1
+2: PING s04.s (10.0.11.41) 56(84) bytes of data.
+3: From 10.0.0.84 (10.0.0.84) icmp_seq=1 Destination Host Unreachable
+4:
+5: --- s04.s ping statistics ---
+6: 1 packets transmitted, 0 received, +1 errors, 100% packet loss, time 0ms
+7:
+```
+## Advantages
+
+
+The run time of this code should be that of the host that takes the longest
+time to ping (or fail to ping).
+
+
+Collecting stdout from the Process means that the code that does the work (like
+our ping() function) can just print progress and status data via println(), which makes
+the code easy to test separately.
+
+
+Processes also offer full protection from exceptions of all kinds, as they
+are caught and listed in full inside the Process.
+
 # List.push()
 
 
@@ -2229,6 +2335,16 @@ frequently with shortcuts.
 
 ```
 stdin(":load SomeScript","?")
+```
+# Clone any value
+
+
+The common function clone() of all values returns a copy of the value, as long as the value
+in question is synthesizable. If not, an error is returned.
+
+```
+a=List(1,2,3)
+b=a.clone.add(4)  # b contains 1,2,3,4 while a remains unchanged
 ```
 # Simple line editing
 
@@ -2730,55 +2846,13 @@ println(data.i)
 
 The incr50 lambda calls the incr lambda within the environment defined by the Dict object.
 
-## Cloning dictionaries
+## Copy lambdas between dictionaries
 
 
 The Dict.set function also detects when it is fed a closure, unwrapping the
 Lambda inside, then wrapping it inside a new closure pointing back to
 itself (via "self" variable in lambda).
 
-
-This means that if we create a function to clone a Dict, the new object will
-be independent of the first.
-
-```
-# Clone dictionary
-P(1)=>orig
-error(getType(orig) != "Dict", "Require Dict")
-new = Dict
-orig.keys->
-key
-new.set(key,orig.get(key))
-|
-new
-/CloneDict
-# Test-code
-# --
-Dict
-.set("i",1)
-.set("a",Lambda{
-self.b.call
-})
-.set("b",Lambda{
-self.set("i",self.i+1)
-self.i
-})
-=> d1
-# Clone d1 into d2, then change its state
-CloneDict(d1) => d2
-d2.set("i",10)
-println("d1.a.call " + d1.a.call)
-println("d1.a.call " + d1.a.call)
-println("d2.a.call " + d2.a.call)
-println("d2.a.call " + d2.a.call)
-/test
-# Output
-#
-# d1.a.call 2
-# d1.a.call 3
-# d2.a.call 11
-# d2.a.call 12
-```
 # Reference: Colon commands
 
 

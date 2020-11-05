@@ -15,7 +15,7 @@ Objects can be sorted on date of last update, and located using a lambda.
 
 # Get collections
 # --
-	Db2:Collections->name
+	Lib.Db.Db2.collections.sort->name
 		assert(name.startsWith(CollectionPrefix))
 		out(name.sub(CollectionPrefix.length))
 /Collections
@@ -191,4 +191,26 @@ Dir.files -> f
 	FindObjects(collection,Lfilter) -> obj
 		DeleteObject(collection, obj.id)
 /DeleteTestData
+
+
+
+# Delete data in collection
+# --
+	P(1,inputCollection)=>collection
+	P(2,Lambda{false}) => Lfilter
+	FindObjects(collection,Lfilter) -> obj
+		DeleteObject(collection, obj.id)
+/DeleteObjects
+
+
+
+
+# Delete all data in collection
+# --
+	P(1,inputCollection)=>collection
+	DeleteObjects(collection, Lambda{true})
+/DeleteAll
+
+
+
 
