@@ -6,36 +6,84 @@ Configurable personal shell, automation tool.
 
 ## Example script file
 
+Run external program, parallel processes, logging to CFT's own database.
+
 ```
-# Define a list of hosts
-# --
-List("host1","host2","host3")
-/DebianHosts
+"s01.s s02.s s03.s s04.s s05.s s06.s s07.s".split
+/Hosts
 
-# Run update and upgrade on debian based hosts
+# Ping one host, return boolean (true if ok)
 # --
-commands=Sequence(
-	@ apt-get update
-	@ apt-get -y upgrade
-)
-DebianHosts->host 
-	x = SSH:sudo(host, commands, true)
-	collection = Sys.savefile.name.beforeLast(".")
-	if (x.exitCode != 0) {
-		Db:Add(host,x,collection+"_failed")
+	P(1)=>host
+
+	println("Pinging host " + host)
+	Lib:run(List("ping","-c","1",host), List, true) => res
+	
+	if (res.exitCode==0) {
+		true
 	} else {
-		Db:Add(host,Date,collection+"_ok")
+		println("FAILED with exitCode=" + res.exitCode)
+		Inner {
+			res.stdout->line println(line) |
+			res.stderr->line println("#ERR# " + line) |
+		 }
+		 false
 	}
-/AptUpdateUpgrade
+/ping
 
-# Identify files changed last N days
+
+# Delete previous ping stats, then run ping on all
+# hosts as parallel processes, collecting results and store in 
+# database.
 # --
-	P(1,31) => days
-	Date.sub(Date.Duration.days(days)).get => limit
-	Dir.allFiles->f 
-		assert(f.lastModified > limit) 
-		report(f.path, Date(f.lastModified).fmt)
-/RecentlyChangedFiles
+	COLLECTION="stats"
+	Db2Obj:DeleteObjects(COLLECTION, Lambda{P(1).value.op=="ping"})
+
+	Hosts->host
+		data=Dict.set("host",host)
+		proc=SpawnProcess(data,ping(host))
+		out(proc)
+	| _ => runningProcesses
+
+	runningProcesses->proc
+		proc.wait
+
+		dbObj=Dict
+			.set("op","ping")
+			.set("host", proc.data.host)  # the data dict from SpawnProcess
+			.set("ok",proc.exitValue)
+		if (proc.exitValue==false) {
+			# failed
+			dbObj.set("output", proc.output)
+		}
+		# Log everything to database collection stats
+		Db2Obj:AddObject(COLLECTION, dbObj)
+/CheckPing
+
+# To verify database content
+#
+# $ Db2Obj:ShowFields("stats",List("host","ok"))
+#  <List>
+#  	0: 2020-11-05 22:48:44 | s01.s | true
+#   1: 2020-11-05 22:48:44 | s02.s | true
+#   2: 2020-11-05 22:48:44 | s03.s | true
+#   3: 2020-11-05 22:48:47 | s04.s | false
+#   4: 2020-11-05 22:48:47 | s05.s | true
+#   5: 2020-11-05 22:48:47 | s06.s | true
+#   6: 2020-11-05 22:48:47 | s07.s | false
+#
+# To see output from s04.s
+#
+# $ Db2Obj:FindObjects("stats",Lambda{P(1).value.host=="s04.s"}).first.value.output
+#  <List>
+#   0: Pinging host s04.s
+#   1: FAILED with exitCode=1
+#   2: PING s04.s (10.0.11.41) 56(84) bytes of data.
+#   3: From 10.0.0.84 (10.0.0.84) icmp_seq=1 Destination Host Unreachable
+#   4: 
+#   5: --- s04.s ping statistics ---
+#   6: 1 packets transmitted, 0 received, +1 errors, 100% packet loss, time 0ms
+#   7: 
 
 ```
 
