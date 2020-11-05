@@ -13,6 +13,37 @@
 
 <h1>CFT Change log</h1>
 
+<h2>v1.9.9 2020-11-04 Process exception handling</h2>
+<p>
+	If a process terminates with exception, add the full exception log to the
+	virtual stdout of the process.
+</p>
+<p>
+	Also verified there is NO invalid direct use of System.out throughout the code.
+</p>
+<p>
+	Added Process.wait() function, which waits until process terminates, and returns self.
+	This makes it easy to validate error handling, for example:
+</p>
+<pre>
+	$ SpawnProcess(Dict,xxx).wait.output
+ &lt;List&gt;
+   0: Process fails with Exception: [input:19] unknown symbol 'xxx'
+   1:    rf.configtool.data.LookupOrCall.resolve(LookupOrCall.java:80)
+   2:    rf.configtool.data.ExprTerminal.resolve(ExprTerminal.java:177)
+   3:    rf.configtool.data.ExprE.resolve(ExprE.java:40)
+   4:    rf.configtool.data.ExprD.resolve(ExprD.java:55)
+   5:    rf.configtool.data.ExprC.resolve(ExprC.java:54)
+   6:    rf.configtool.data.ExprB.resolve(ExprB.java:51)
+   7:    rf.configtool.data.ExprA.resolve(ExprA.java:50)
+   8:    rf.configtool.data.Expr.resolve(Expr.java:62)
+   9:    rf.configtool.main.runtime.lib.ObjProcess$Runner.run(ObjProcess.java:148)
+  10:    java.base/java.lang.Thread.run(Thread.java:832)
+</pre>
+<p>
+	Updated doc with example of using wait to collect data from set of processes.
+</p>
+
 <h2>v1.9.8 2020-11-03 Obj.clone + SpawnProcess()</h2>
 <p>
 	Created java function createClone() in the Obj class, and wrapped it as CFT function .clone(),

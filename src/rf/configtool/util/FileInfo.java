@@ -312,32 +312,32 @@ public class FileInfo {
         }
     }
 
-    public static void main (String args[]) {
-        try {
-            FileInfo a=new FileInfo("c:\\xxx.zip", "UTF-8");
-            a.setZipEntryType("txt");
-            PrintWriter pw=a.getPrintWriter();
-            for (int i=0; i<100; i++) {
-                pw.println(i + ": dette er en");
-            }
-            pw.close();
-
-            try {
-                FileInfo b=new FileInfo("\\\\someServer\\yyy.zip");
-                b.setZipEntryType("txt");
-                b.copyFrom(a);
-            } catch (Exception ex) {
-                System.out.println("Failed to copy to invalid server");
-            }
-
-            FileInfo c=new FileInfo("c:\\zzz.zip");
-            c.setZipEntryType("txt");
-            c.copyFrom(a);
-            System.out.println("c-copy ok");
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
+//    public static void main (String args[]) {
+//        try {
+//            FileInfo a=new FileInfo("c:\\xxx.zip", "UTF-8");
+//            a.setZipEntryType("txt");
+//            PrintWriter pw=a.getPrintWriter();
+//            for (int i=0; i<100; i++) {
+//                pw.println(i + ": dette er en");
+//            }
+//            pw.close();
+//
+//            try {
+//                FileInfo b=new FileInfo("\\\\someServer\\yyy.zip");
+//                b.setZipEntryType("txt");
+//                b.copyFrom(a);
+//            } catch (Exception ex) {
+//                System.out.println("Failed to copy to invalid server");
+//            }
+//
+//            FileInfo c=new FileInfo("c:\\zzz.zip");
+//            c.setZipEntryType("txt");
+//            c.copyFrom(a);
+//            System.out.println("c-copy ok");
+//        } catch (Exception ex) {
+//            ex.printStackTrace();
+//        }
+//    }
 
 }
 

@@ -15,8 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2020-11-04 RFO
-v1.9.8
+Last updated: 2020-11-05 RFO
+v1.9.9
 
 </pre>
 
@@ -2244,28 +2244,32 @@ codeDirs = . ; code.examples ; code.lib
   # isDone() - true if process completed running
   # output() - get buffered output lines
   # sendLine(line) - send input line to process
+  # wait() - wait for process to terminate - returns self
 </pre>
 
-<p>Lame example</p>
+
+<h3>Example</h3>
 <pre>
-# Test
+# Fetch content of N directories in parallel
+# In particular for remote directories, this can take time
+# Running each in separate processes means total time equals the longest
+# a single lookup takes. Returns list of lists of files.
 # --
-  data = Dict.set("a",10).set("b",20)
-  proc = SpawnProcess(data,a+b)
-  loop 
-    break(proc.isDone)
-    println("tick")
-    Sys.sleep(1)
-  |
-  println("Result=" + proc.exitValue)
-/test
-</pre>
-<pre>
-$ test
-tick
-Result=30
-  &lt;String&gt;
-  Result=30
+  P(1)=&gt;listOfDirs
+  processes=List
+  Inner {
+    listOfDirs-&gt;dir 
+      data = Dict.set("dir",dir)
+      processes.add(SpawnProcess(data,dir.files))
+  }
+  results=List
+  Inner {
+    processes-&gt;p
+      p.wait
+      results.add(p.exitValue)
+  }
+  results
+/FetchDirFiles
 </pre>
 
 

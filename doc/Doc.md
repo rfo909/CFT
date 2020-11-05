@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2020-11-04 RFO
-v1.9.8
+Last updated: 2020-11-05 RFO
+v1.9.9
 ```
 # Introduction
 
@@ -1979,29 +1979,31 @@ $ SpawnProcess(Dict,1) help
 # isDone() - true if process completed running
 # output() - get buffered output lines
 # sendLine(line) - send input line to process
+# wait() - wait for process to terminate - returns self
 ```
-
-Lame example
+### Example
 
 ```
-# Test
+# Fetch content of N directories in parallel
+# In particular for remote directories, this can take time
+# Running each in separate processes means total time equals the longest
+# a single lookup takes. Returns list of lists of files.
 # --
-data = Dict.set("a",10).set("b",20)
-proc = SpawnProcess(data,a+b)
-loop
-break(proc.isDone)
-println("tick")
-Sys.sleep(1)
-|
-println("Result=" + proc.exitValue)
-/test
-```
-```
-$ test
-tick
-Result=30
-<String>
-Result=30
+P(1)=>listOfDirs
+processes=List
+Inner {
+listOfDirs->dir
+data = Dict.set("dir",dir)
+processes.add(SpawnProcess(data,dir.files))
+}
+results=List
+Inner {
+processes->p
+p.wait
+results.add(p.exitValue)
+}
+results
+/FetchDirFiles
 ```
 # List.push()
 

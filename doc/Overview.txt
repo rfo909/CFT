@@ -171,6 +171,7 @@ Get type of value
 Clone any value
 
 Multitasking in CFT
+ |   Example
 
 List.push()
 

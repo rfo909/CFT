@@ -44,7 +44,15 @@ public abstract class Stdio {
     
      public Stdio (BufferedReader stdin) {
     	this.stdin=stdin;
-    }
+     }
+     
+     
+     // NOTE on synchronized:
+     //
+     // Using synchronized on input methods is dangerous, as they
+     // may block, making the Stdio object incommunicable.
+     
+     
     
     /**
      * Used by the stdin() statement

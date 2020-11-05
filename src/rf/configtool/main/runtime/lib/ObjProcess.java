@@ -9,6 +9,7 @@ import rf.configtool.data.ProgramLine;
 import rf.configtool.main.CodeLine;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.FunctionState;
+import rf.configtool.main.Stdio;
 import rf.configtool.main.StdioVirtual;
 import rf.configtool.main.runtime.*;
 import rf.configtool.main.runtime.lib.ObjExtProcess.FunctionDestroy;
@@ -54,6 +55,7 @@ public class ObjProcess extends Obj {
 		this.add(new FunctionIsAlive());
 		this.add(new FunctionIsDone());
 		this.add(new FunctionExitValue());
+		this.add(new FunctionWait());
 
 	}
 
@@ -126,7 +128,9 @@ public class ObjProcess extends Obj {
 	}
 	
 
-
+	private Obj self() {
+		return this;
+	}
 
 	class Runner implements Runnable {
 		private Ctx ctx;
@@ -144,8 +148,20 @@ public class ObjProcess extends Obj {
 				Value v = expr.resolve(ctx);
 				process.setExitValue(v);
 			} catch (Exception ex) {
-				System.out.println("Process fails with Exception: " + ex);
-				// ignore
+				// Generating full exception log to virtual stdout if process fails
+				Throwable t=ex;
+				Stdio stdio = ctx.getStdio();
+				while (t != null) {
+					stdio.println("Process fails with Exception: " + t.getMessage());
+					for (StackTraceElement line : t.getStackTrace()) {
+						stdio.println("   " + line.toString());
+					}
+					t=t.getCause();
+					if (t != null ) {
+						stdio.println("Caused by:");
+					}
+				}
+				process.setExitValue(new ValueNull());
 			}
 		}
 	}
@@ -254,6 +270,27 @@ public class ObjProcess extends Obj {
 				if (exitValue==null) return new ValueNull();
 				return exitValue;
 			}
+		}
+	}
+	
+	class FunctionWait extends Function {
+		public String getName() {
+			return "wait";
+		}
+
+		public String getShortDesc() {
+			return "wait() - wait for process to terminate - returns self";
+		}
+
+		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+			if (params.size() != 0) throw new Exception("Expected no parameters");
+			for (;;) {
+				synchronized(EXIT_LOCK) {
+					if (exitValue!=null) break;
+				}
+				Thread.sleep(5);
+			}
+			return new ValueObj(self());
 		}
 	}
 	
