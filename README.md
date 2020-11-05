@@ -6,7 +6,6 @@ Configurable personal shell, automation tool.
 
 ## Example script file
 
-Run external program, parallel processes, logging to CFT's own database.
 
 ```
 "s01.s s02.s s03.s s04.s s05.s s06.s s07.s".split
@@ -87,6 +86,14 @@ Run external program, parallel processes, logging to CFT's own database.
 
 ```
 
+### Topics in the code
+
+- Lists, dictionaries, strings
+- Functions, function parameters
+- List iterations, conditionals
+- External programs, parallel processes, lambdas
+- CFT's integrated database
+
 ## Interactive use
 
 
@@ -151,6 +158,7 @@ A personal interactive shell.
 - Search logs
 - Remote management with SSH and Powershell
 - Built-in help system
+- Multithreaded
 
 # Download and compile
 
