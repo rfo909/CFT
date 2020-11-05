@@ -41,6 +41,7 @@ Objects can be sorted on date of last update, and located using a lambda.
 /FixCN
 
 
+
 # Store some value wrapped inside a Dict with id and date + value - returns new Dict
 # --
 	P(1)=>collection
@@ -52,6 +53,16 @@ Objects can be sorted on date of last update, and located using a lambda.
 	Db2:Set(FixCN(collection), uuid, data)
 	data
 /AddObject
+
+
+
+# Get object by UUID
+# --
+	P(1)=>collection
+	P(2)=>uuid
+	Db2:Get(FixCN(collection),uuid)
+/Get
+
 
 
 # Overwrite object by uuid

@@ -1,12 +1,21 @@
 # Readme
 # --
-<<< EOF
+<<<<<<<<< EOF
+This script is an interface to the database implementation which exists
+under Lib.Db.Db2, which is a memory-based (hashmap-oriented) store which
+sync's data to files.
 
-Simple file based database v2 - using Java implementation Lib.Db.Db2
-Also see script file Db2Obj
+It is collection-based, each consisting of a number key-value pairs. 
 
+--
 
->>> EOF
+To store larger amounts of objects without having to invent artificial
+keys, see the Db2Obj script. It requires values to be dictionary objects, 
+and autogenerate a UUID value for each stored objects. 
+
+Locating objects are based on examining the content of objects, or by
+knowing the UUID.
+>>>>>>>>> EOF
 /Readme
 
 
@@ -64,7 +73,9 @@ Also see script file Db2Obj
 
 # Get collections
 # --
-	Lib.Db.Db2.collections.sort
+	Lib.Db.Db2.collections.sort->name
+		reject(name.startsWith("Obj."))  # prefix for Db2Obj collections
+		out(name)
 /Collections
 
 
