@@ -59,6 +59,8 @@ public class ObjDict extends Obj {
         baseFunctions.add(new FunctionHasNullValue());
         baseFunctions.add(new FunctionBind());
         baseFunctions.add(new FunctionGetMany());
+        baseFunctions.add(new FunctionCopyFrom());
+        baseFunctions.add(new FunctionSubset());
         
         init();
     }
@@ -454,5 +456,56 @@ public class ObjDict extends Obj {
          }
      }
 
+     class FunctionCopyFrom extends Function {
+         public String getName() {
+             return "copyFrom";
+         }
+         public String getShortDesc() {
+             return "copyFrom(Dict) - add and replace values in current Dict with values from parameter Dict - returns self";
+         }
+         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	 if (params.size() != 1) throw new Exception("Expected Dict parameter");
+        	 Obj obj=getObj("Dict",params,0);
+        	 if (obj instanceof ObjDict) {
+        		 ObjDict d=(ObjDict) obj;
+        		 Iterator<String> keys = d.getKeys();
+        		 while (keys.hasNext()) {
+        			 String key=keys.next();
+        			 Value value=d.getValue(key);
+        			 self().values.put(key, value);
+        		 }
+        	 } else {
+        		 throw new Exception("Expected Dict parameter");
+        	 }
+        	 return new ValueObj(self());
+         }
+     }
+
+
+     class FunctionSubset extends Function {
+         public String getName() {
+             return "subset";
+         }
+         public String getShortDesc() {
+             return "subset(keyList,defaultValue) - create new Dict with keys from keyList, using defaultValue for missing keys";
+         }
+         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	 if (params.size() != 2) throw new Exception("Expected parameters keyList, defaultValue");
+        	 List<Value> list=getList("keyList",params,0);
+        	 Value defaultValue=params.get(1);
+        	 
+        	 Map<String,Value> data=new HashMap<String,Value>();
+        	 for (Value v:list) {
+        		 if (!(v instanceof ValueString)) throw new Exception("Expected keyList parameter to contain strings");
+        		 String key=((ValueString)v).getVal();
+        		 if (self().values.containsKey(key)) {
+        			 data.put(key, self().values.get(key));
+        		 } else {
+        			 data.put(key, defaultValue);
+        		 }
+        	 }
+        	 return new ValueObj(new ObjDict(data));
+         }
+     }
 
 }
