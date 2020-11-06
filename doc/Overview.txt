@@ -53,6 +53,8 @@ The shell() function
 Core types
  * String literals
  * Dictionaries
+ |   Properties as functions
+ |   SymDict
 
 List iteration / filtering
  * Iterating over list content
@@ -168,13 +170,6 @@ Error handling
 
 Get type of value
 
-Multitasking in CFT
- * Example: pinging a list of hosts
- |   Create and test regular ping function
- |   Management function, with logging via Db2Obj database script
- |   Checking results (in database)
- * Advantages
-
 List.push()
 
 Dict set with strings
@@ -190,6 +185,13 @@ The general loop statement
 Storing CFT data structures to file - syn() and eval()
 
 The CFT database
+
+Multitasking in CFT
+ * Example: pinging a list of hosts
+ |   Create and test regular ping function
+ |   Management function, with logging via Db2Obj database script
+ |   Checking results (in database)
+ * Advantages
 
 String .esc() and .unEsc()
  * Escape codes

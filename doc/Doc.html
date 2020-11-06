@@ -15,8 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2020-11-05 RFO
-v1.9.10
+Last updated: 2020-11-06 RFO
+v1.9.11
 
 </pre>
 
@@ -609,9 +609,10 @@ v1.9.10
   1
 </pre>
 
+<h3>Properties as functions</h3>
 <p>
   For readability, values with names that are valid identifiers, and don't conflict with regular 
-  member functions, can be referenced via dotted notation
+  member functions of Dict, can be referenced via dotted notation
 </p>
 <pre>
   Dict.set("a","b")
@@ -620,6 +621,24 @@ v1.9.10
   &lt;String&gt;
   b
 </pre>  
+
+<h3>SymDict</h3>
+<p>
+  A special global expression, SymDict is used to create a dictionary from a list of
+  symbols, which must be present as local variables, or parameterless functions. This
+  saves some typing. Example:
+</p>
+<pre>
+  # Without SymDict()
+  a=1
+  b=2
+  dict=Dict.set("a",a).set("b",b)
+
+  # With SymDict
+  a=1
+  b=2
+  dict=SymDict(a,b)
+</pre>
 
 
 
@@ -2205,6 +2224,180 @@ codeDirs = . ; code.examples ; code.lib
 
 
 
+<h1>List.push()</h1>
+<p>
+  The push() function of the List object pushes a number of value from the list onto the stack
+  to be assigned in "logical" order, and allows us to supply a default value if list too short.
+</p>
+<pre>
+  $ List("x","y").split.push(3,"*") =&gt;a =&gt;b =&gt;c a+":"+b+":"+c
+  &lt;String&gt;
+  x:y:*
+</pre>
+
+
+
+
+<h1>Dict set with strings</h1>
+<p>
+  Reading name-value assignments from a property file or similar, is best done via the .setStr()
+  function on the Dict object. It strips whitespace and accepts both colon and '='.
+</p>
+<pre>
+  Dict.setStr("a : b")
+  /d
+  d.get("a")
+  &lt;String&gt;
+  b
+</pre>
+<p>
+  To process a property file, assuming commented lines start with '#', we can do 
+  this:
+</p>
+<pre>
+  P(1) =&gt;propFile
+    Dict =&gt;d
+    propFile.read-&gt;line
+      reject(line.trim.startsWith("#"))
+      assert(line.contains(":") || line.contains("="))
+      d.setStr(line)
+    |
+    d
+  /GetProps
+</pre>
+
+
+
+
+
+<h1>Dict.get with default value</h1>
+<p>
+  The Dict.get() method takes an optional default-value which is returned if no value
+  associated with the name, but in that case the default value is <em>also stored</em> in the
+  dictionary. 
+</p>
+
+<pre>
+  data=Dict
+  data.get("a",3)  # returns 3
+  data.keys        # returns list with "a"
+  data.get("a",5)  # returns 3 as it was set above
+</pre>
+
+
+
+
+<h1>List.nth() negative indexes</h1>
+<p>
+  Using negative indexes to List.nth() counts from the end of the list. Using value -1 returns the
+  last element, -2 the second last, and so on.
+</p>
+<pre>
+  List(1,2,3,4).nth(-1)
+  &lt;int&gt;
+  
+</pre>
+
+
+
+
+<h1>Function parameters as List or Dict</h1>
+
+<p>
+  In addition to grabbing one parameter at a time, using P(pos), we can also process the
+  parameter values as a list and as a dictionary.
+</p>
+
+<p>
+  The function parameter expression P() when used with no parameters, returns a list of
+  the parameter values as passed to the function.
+</p>
+
+<p>
+  The PDict() expression takes a sequence of names to be mapped to parameters by position,
+  resulting in a Dict object. Missing values lead to the special value null being stored
+  in the dictionary.
+</p>
+
+
+
+
+
+<h1>The general loop statement</h1>
+<p>
+  In addition to looping over lists, there is a general loop construct. It identifies no
+  loop variable, and loops forever, until break() is called. It also obeys assert()
+  and reject() as with list iteration. 
+</p>
+<pre>
+  a=0 loop break(a&gt;3) out(a) a=a+1
+  &lt;List&gt;
+  0
+  1
+  2
+  3
+</pre>
+<p>
+  If you forget to increment the variable a, or forget or create an invalid break(), then
+  the loop may never terminate, and CFT has to be killed with ^C
+</p>
+
+
+
+
+<h1>Storing CFT data structures to file - syn() and eval()</h1>
+
+<p>
+  A  persistent solution for storing data is to store a data structure to file. This is done using
+  the synthesis functionality, which is made available as a global function as well as the
+  "colon command" used before. This means we can write huge lists and sets of files and
+  directory objects to file, and restore it later, without going through possibly time
+  consuming computations.
+</p>
+<p>
+  To restore the structure, we use the global eval() function.
+
+<pre>
+
+  P(1)=&gt;file
+  P(2,"data") =&gt;data
+    file.create(syn(data))
+  /saveData
+
+  P(1)=&gt;file
+  eval(file.read.nth)
+  /restoreData
+</pre>
+<p>
+  This can be used to save arbitrarily big structures, as long as they are synthesizable.
+</p>
+
+
+
+
+<h1>The CFT database</h1>
+<p><i>v1.9.6</i></p>
+<p>
+  CFT implements its own primitive database, as found in Lib.Db.Db2, and which is usually
+  interfaced via the Db2 script.
+</p>
+<pre>
+  Db2:Set("myCollection", "field", "test")
+</pre>
+<p>
+  The Db2 persists data to file, and handles all values that can be synthesized to code.
+</p>
+<p>
+  Also there is a Db2Obj script, which saves data objects identified by UUID's, which are
+  maode by calling the Lib.Db.UUID function.
+</p>
+
+
+
+
+
+
+
 <h1>Multitasking in CFT</h1>
 <p><b>v1.9.8</b></p>
 <p>
@@ -2380,177 +2573,6 @@ $ Db2Obj:FindObjects("stats",Lambda{P(1).value.host=="s04.s"}).first.value.outpu
 </p>
 
 
-
-
-
-
-<h1>List.push()</h1>
-<p>
-  The push() function of the List object pushes a number of value from the list onto the stack
-  to be assigned in "logical" order, and allows us to supply a default value if list too short.
-</p>
-<pre>
-  $ List("x","y").split.push(3,"*") =&gt;a =&gt;b =&gt;c a+":"+b+":"+c
-  &lt;String&gt;
-  x:y:*
-</pre>
-
-
-
-
-<h1>Dict set with strings</h1>
-<p>
-  Reading name-value assignments from a property file or similar, is best done via the .setStr()
-  function on the Dict object. It strips whitespace and accepts both colon and '='.
-</p>
-<pre>
-  Dict.setStr("a : b")
-  /d
-  d.get("a")
-  &lt;String&gt;
-  b
-</pre>
-<p>
-  To process a property file, assuming commented lines start with '#', we can do 
-  this:
-</p>
-<pre>
-  P(1) =&gt;propFile
-    Dict =&gt;d
-    propFile.read-&gt;line
-      reject(line.trim.startsWith("#"))
-      assert(line.contains(":") || line.contains("="))
-      d.setStr(line)
-    |
-    d
-  /GetProps
-</pre>
-
-
-
-
-
-<h1>Dict.get with default value</h1>
-<p>
-  The Dict.get() method takes an optional default-value which is returned if no value
-  associated with the name, but in that case the default value is <em>also stored</em> in the
-  dictionary. 
-</p>
-
-<pre>
-  data=Dict
-  data.get("a",3)  # returns 3
-  data.keys        # returns list with "a"
-  data.get("a",5)  # returns 3 as it was set above
-</pre>
-
-
-
-
-<h1>List.nth() negative indexes</h1>
-<p>
-  Using negative indexes to List.nth() counts from the end of the list. Using value -1 returns the
-  last element, -2 the second last, and so on.
-</p>
-<pre>
-  List(1,2,3,4).nth(-1)
-  &lt;int&gt;
-  
-</pre>
-
-
-
-
-<h1>Function parameters as List or Dict</h1>
-
-<p>
-  In addition to grabbing one parameter at a time, using P(pos), we can also process the
-  parameter values as a list and as a dictionary.
-</p>
-
-<p>
-  The function parameter expression P() when used with no parameters, returns a list of
-  the parameter values as passed to the function.
-</p>
-
-<p>
-  The PDict() expression takes a sequence of names to be mapped to parameters by position,
-  resulting in a Dict object. Missing values lead to the special value null being stored
-  in the dictionary.
-</p>
-
-
-
-
-
-<h1>The general loop statement</h1>
-<p>
-  In addition to looping over lists, there is a general loop construct. It identifies no
-  loop variable, and loops forever, until break() is called. It also obeys assert()
-  and reject() as with list iteration. 
-</p>
-<pre>
-  a=0 loop break(a&gt;3) out(a) a=a+1
-  &lt;List&gt;
-  0
-  1
-  2
-  3
-</pre>
-<p>
-  If you forget to increment the variable a, or forget or create an invalid break(), then
-  the loop may never terminate, and CFT has to be killed with ^C
-</p>
-
-
-
-
-<h1>Storing CFT data structures to file - syn() and eval()</h1>
-
-<p>
-  A  persistent solution for storing data is to store a data structure to file. This is done using
-  the synthesis functionality, which is made available as a global function as well as the
-  "colon command" used before. This means we can write huge lists and sets of files and
-  directory objects to file, and restore it later, without going through possibly time
-  consuming computations.
-</p>
-<p>
-  To restore the structure, we use the global eval() function.
-
-<pre>
-
-  P(1)=&gt;file
-  P(2,"data") =&gt;data
-    file.create(syn(data))
-  /saveData
-
-  P(1)=&gt;file
-  eval(file.read.nth)
-  /restoreData
-</pre>
-<p>
-  This can be used to save arbitrarily big structures, as long as they are synthesizable.
-</p>
-
-
-
-
-<h1>The CFT database</h1>
-<p><i>v1.9.6</i></p>
-<p>
-  CFT implements its own primitive database, as found in Lib.Db.Db2, and which is usually
-  interfaced via the Db2 script.
-</p>
-<pre>
-  Db2:Set("myCollection", "field", "test")
-</pre>
-<p>
-  The Db2 persists data to file, and handles all values that can be synthesized to code.
-</p>
-<p>
-  Also there is a Db2Obj script, which saves data objects identified by UUID's, which are
-  maode by calling the Lib.Db.UUID function.
-</p>
 
 
 

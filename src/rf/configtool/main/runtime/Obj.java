@@ -159,7 +159,9 @@ public abstract class Obj {
 			
 			Ctx ctx=callCtx.sub();
 			progLine.execute(ctx);
-			return ctx.pop();
+			Value retVal=ctx.pop();
+			if (retVal==null) retVal=new ValueNull();
+			return retVal;
 		} catch (Exception ex) {
 			throw new Exception("Value could not be run through eval(syn()) - must be synthesizable");
 		}

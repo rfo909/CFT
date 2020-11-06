@@ -39,6 +39,7 @@ public class ExprTerminal extends LexicalElement {
     private ExprTryCatchSoft exprTryCatchSoft;
     private ExprSequence exprSequence;
     private ExprSpawnProcess exprSpawn;
+    private ExprSymDict symDict;
     
     private Value literalValue;
     private ParamLookup paramLookup;
@@ -103,6 +104,11 @@ public class ExprTerminal extends LexicalElement {
         	exprSpawn = new ExprSpawnProcess(ts);
         	return;
         }
+        if (ts.peekStr("SymDict")) {
+        	symDict=new ExprSymDict(ts);
+        	return;
+        }
+        
         
         if (ts.peekType(Token.TOK_INT)) {
             literalValue=new ValueInt(ts.matchInt("expected integer literal"));
@@ -169,6 +175,7 @@ public class ExprTerminal extends LexicalElement {
 	        
 	        if (exprSequence != null) return exprSequence.resolve(ctx);
 	        if (exprSpawn != null) return exprSpawn.resolve(ctx);
+	        if (symDict != null) return symDict.resolve(ctx);
 	        
 	        if (literalValue != null) return literalValue;
 	        if (paramLookup != null) return paramLookup.resolve(ctx);

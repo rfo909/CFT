@@ -13,13 +13,41 @@
 
 <h1>CFT Change log</h1>
 
-<h2>v1.9.11 2020-11-06 Dict functions</h2>
+<h2>v1.9.11 2020-11-06 Dict .subset() .copyFrom() and global SymDict()</h2>
 <p>
 	Added Dict.subset(keyList,defaultValue). 
 </p>
 <p>
 	Added Dict.copyFrom(Dict)
 </p>
+<p>
+	Added global expression SymDict() which takes as parameters a list of identifier
+	expressions.
+</p>
+<p>
+	Added utility method to Ctx.java : resolveExpr (String s)
+</p>
+
+<pre>
+a=1 b=2 SymDict(a,b)  # returns Dict with a=1, b=2
+</pre>
+<p>
+	It does this by parsing for identifiers, then executing those as code, which resolves
+	to values. It was meant for variables, but also works with output from functions
+	without parameters.
+</p>
+<pre>
+$ a=1 b=2 SymDict(a,b,Dir)=>x Util:ShowDict(x)
+ &lt;List&gt;
+   0: Dir | CFT/ d:11 f:12
+   1: a   | 1
+   2: b   | 2
+</pre>
+<p>
+	The necessary control over parsing requires this to be a global expression, not a
+	member function (in ObjGlobal or elsewhere).
+</p>
+
 
 <h2>v1.9.10 2020-11-05 Added Process.data</h2>
 <p>

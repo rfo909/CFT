@@ -20,10 +20,15 @@ package rf.configtool.main;
 import java.util.*;
 
 import rf.configtool.data.Expr;
+import rf.configtool.data.ProgramLine;
 import rf.configtool.data.Stmt;
+import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueList;
+import rf.configtool.main.runtime.ValueNull;
+import rf.configtool.parser.Parser;
 import rf.configtool.parser.SourceLocation;
+import rf.configtool.parser.TokenStream;
 
 /**
  * Ctx means context and is a collection of objects required to execute CFT code.
@@ -246,4 +251,29 @@ public class Ctx {
     public FunctionState getFunctionState() {
         return functionState;
     }
+    
+    
+    // Utility method
+    /**
+    * Create a safe copy of this value, by means of running it through an eval(syn()) pipeline,
+    * which ensures the new value is completely independent. Throws exception if value not synthesizable.
+    */
+	public Value resolveExpr (String s) throws Exception {
+		try {
+			Parser p=new Parser();
+			p.processLine(new CodeLine(new SourceLocation(), s));
+			TokenStream ts = p.getTokenStream();
+			ProgramLine progLine=new ProgramLine(ts,false);
+			
+			Ctx ctx=this.sub();
+			progLine.execute(ctx);
+			Value retVal=ctx.pop();
+			if (retVal==null) retVal=new ValueNull();
+			return retVal;
+		} catch (Exception ex) {
+			throw new Exception("Value could not be run through eval(syn()) - must be synthesizable");
+		}
+	}
+
+	
 }
