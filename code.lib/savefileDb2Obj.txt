@@ -87,6 +87,15 @@ Objects can be sorted on date of last update, and located using a lambda.
 
 
 
+# Delete collection
+# --
+	P(1)=>collection
+	Db2:DeleteCollection(FixCN(collection))
+/DeleteCollection
+
+
+
+
 # Find objects that satisfy given lambda, sorted by date/time
 # --
 	P(1)=>collection

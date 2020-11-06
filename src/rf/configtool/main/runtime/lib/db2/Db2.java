@@ -31,75 +31,38 @@ public class Db2 {
 		}
 	}
 	
-	private HashMap<String,Map<String,String>> data=new HashMap<String,Map<String,String>>();
+	private static final String PREFIX="LibDb2_";
+	private static final String ENDING=".txt";
 	
-	private Map<String,String> getCollectionMap (String collection) throws Exception {
-		Map<String,String> cMap=data.get(collection);
-		if (cMap==null) {
-			cMap=initializeFromFile(collection);
-			data.put("collection", cMap);
-		}
-		return cMap;
-	}
+	// Collection data
+	private Map<String,Collection> collections=new HashMap<String,Collection>();
 	
+
 	private File getCollectionFile (String collection) {
-		return new File(db2Dir+File.separator+"LibDb2_"+collection+".txt");
+		return new File(db2Dir+File.separator+PREFIX+collection+ENDING);
 	}
 	
-	
-	private Map<String,String> initializeFromFile(String collection) throws Exception {
-		Map<String,String> map = new HashMap<String,String>();
-		File f=getCollectionFile(collection);
-		if (!f.exists()) return map;
-		
-		BufferedReader br=new BufferedReader(new FileReader(f));
-		try {
-			for (;;) {
-				String line=br.readLine();
-				if (line==null) break;
-				if (line.length()==0) continue;
-				int pos=line.indexOf(' ');
-				map.put(line.substring(0,pos), line.substring(pos+1));
-			}
-		} finally {
-			if (br != null) try {br.close();} catch (Exception ex) {};
+	private synchronized Collection getCollection (String collection) throws Exception {
+		Collection x=collections.get(collection);
+		if (x==null) {
+			x=new Collection(new FileInfo(getCollectionFile(collection)));
+			collections.put(collection, x);
 		}
-		return map;
+		return x;
 	}
-	
-	private void addToFile (String collection, String key, String value) throws Exception {
-		File f=getCollectionFile(collection);
-		PrintStream ps = new PrintStream (new FileOutputStream(f, true));
-		try {
-			ps.println(key + " " + value);
-		} finally {
-			if (ps != null) try {ps.close();} catch (Exception ex) {};
-		}
-	}
-	
 	
 	public synchronized void set (String collection, String key, String value) throws Exception {
 		if (collection.contains("\r") || collection.contains("\n") || collection.contains(" ")) throw new Exception("Invalid collection name: \\r\\n + space forbidden");
-		if (key.contains("\r") || key.contains("\n") || key.contains(" ")) throw new Exception("Invalid key: \\r\\n + space forbidden");
-		if (value.contains("\r") || value.contains("\n")) throw new Exception("Invalid value: \\r\\n forbidden");
 		
-		Map<String,String> cMap=getCollectionMap(collection);
-		String oldValue=cMap.get(key);
-		if (oldValue != null && oldValue.equals(value)) return;
-		
-		addToFile(collection, key, value);
-		cMap.put(key,value);
+		getCollection(collection).addData(key, value);
 	}
 	
 	public synchronized String get (String collection, String key) throws Exception {
-		return getCollectionMap(collection).get(key);
+		return getCollection(collection).getData(key);
 	}
 
 	public synchronized List<String> getKeys (String collection) throws Exception {
-		List<String> list=new ArrayList<String>();
-		Iterator<String> iter = getCollectionMap(collection).keySet().iterator();
-		while (iter.hasNext()) list.add(iter.next());
-		return list;
+		return getCollection(collection).getKeys();
 	}
 	
 	
@@ -107,14 +70,16 @@ public class Db2 {
 		List<String> result = new ArrayList<String>();
 		for (File f: (new File(db2Dir)).listFiles()) {
 			String name=f.getName();
-			final String pre="LibDb2_";
-			final String post=".txt";
-			if (f.isFile() && name.startsWith(pre) && name.endsWith(post)) {
-				name=name.substring(pre.length(),name.length()-post.length());
+			if (f.isFile() && name.startsWith(PREFIX) && name.endsWith(ENDING)) {
+				name=name.substring(PREFIX.length(),name.length()-ENDING.length());
 				result.add(name);
 			}
 		}
 		return result;
+	}
+	
+	public synchronized void deleteCollection(String collection) throws Exception {
+		getCollection(collection).deleteCollection();
 	}
 
 

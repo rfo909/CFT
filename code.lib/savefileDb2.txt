@@ -80,6 +80,12 @@ knowing the UUID.
 
 
 
+# Delete collection
+# --
+	P(1,inputCollection)=>collection
+	Lib.Db.Db2.deleteCollection(collection)
+/DeleteCollection
+
 
 # Show content
 # --

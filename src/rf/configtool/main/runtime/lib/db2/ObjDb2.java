@@ -52,6 +52,7 @@ public class ObjDb2 extends Obj {
     	this.add(new FunctionGet());
     	this.add(new FunctionKeys());
     	this.add(new FunctionCollections());
+    	this.add(new FunctionDeleteCollection());
     }
     
     private ObjDb2 self() {
@@ -117,7 +118,7 @@ public class ObjDb2 extends Obj {
             return "keys";
         }
         public String getShortDesc() {
-            return "keys() - return list of keys";
+            return "keys(collection) - return list of keys";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 1) throw new Exception("Expected parameter collection");
@@ -148,5 +149,21 @@ public class ObjDb2 extends Obj {
             return new ValueList(list);
         }
     }
+    
+    class FunctionDeleteCollection extends Function {
+        public String getName() {
+            return "deleteCollection";
+        }
+        public String getShortDesc() {
+            return "keys() - return list of keys";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected parameter collection");
+            String collection=getString("collection",params,0);
+            db2.deleteCollection(collection);
+            return new ValueObj(self());
+        }
+    }
+
 
 }
