@@ -87,7 +87,7 @@ Objects can be sorted on date of last update, and located using a lambda.
 
 
 
-# Find objects that satisfy given lambda
+# Find objects that satisfy given lambda, sorted by date/time
 # --
 	P(1)=>collection
 	P(2,Lambda{P(1) true})=>lambdaCheck  # (value)->boolean
@@ -95,7 +95,9 @@ Objects can be sorted on date of last update, and located using a lambda.
 		obj=Db2:Get(FixCN(collection),key)
 		assert(obj.value != null)
 		assert(lambdaCheck.call(obj))
-		out(obj)
+		out(Int(obj.date.get,obj))
+	| _.sort->x
+		out(x.data)
 /FindObjects
 
 
