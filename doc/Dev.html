@@ -13,14 +13,14 @@
 
 <h1>CFT Change log</h1>
 
-<h2>v1.9.12 2020-11-06 Hardening Db2</h2>
+<h3>v1.9.12 2020-11-06 Hardening Db2</h3>
 <p>
 	Should handle parallel access from multiple active CFT processes on same host, by detecting file updates
 	and reloading when needed. 
 </p>
 
 
-<h2>v1.9.11 2020-11-06 Dict .subset() .copyFrom() and global SymDict()</h2>
+<h3>v1.9.11 2020-11-06 Dict .subset() .copyFrom() and global SymDict()</h3>
 <p>
 	Added Dict.subset(keyList,defaultValue). 
 </p>
@@ -56,7 +56,7 @@ $ a=1 b=2 SymDict(a,b,Dir)=>x Util:ShowDict(x)
 </p>
 
 
-<h2>v1.9.10 2020-11-05 Added Process.data</h2>
+<h3>v1.9.10 2020-11-05 Added Process.data</h3>
 <p>
 	This function returns the context data Dict supplied in the original SpawnProcess()
 	call.
@@ -66,7 +66,7 @@ $ a=1 b=2 SymDict(a,b,Dir)=>x Util:ShowDict(x)
 </p>
 
 
-<h2>v1.9.9 2020-11-04 Process exception handling</h2>
+<h3>v1.9.9 2020-11-04 Process exception handling</h3>
 <p>
 	If a process terminates with exception, add the full exception log to the
 	virtual stdout of the process.
@@ -97,7 +97,7 @@ $ a=1 b=2 SymDict(a,b,Dir)=>x Util:ShowDict(x)
 	Updated doc with example of using wait to collect data from set of processes.
 </p>
 
-<h2>v1.9.8 2020-11-03 Obj.clone + SpawnProcess()</h2>
+<h3>v1.9.8 2020-11-03 Obj.clone + SpawnProcess()</h3>
 <p>
 	Created java function createClone() in the Obj class, and wrapped it as CFT function .clone(),
 	which gets inherited by all Obj and Value objects. It works for synthesizable values by
@@ -222,7 +222,7 @@ tock
 
 
 
-<h2>v1.9.7 2020-11-03 Stdio</h2>
+<h3>v1.9.7 2020-11-03 Stdio</h3>
 <p>
 	Made Stdio class into an abstract, and created StdioReal and StdioVirtual.
 </p>
@@ -234,7 +234,7 @@ tock
 
 
 
-<h2>v1.9.6 2020-11-02 Db2Obj script</h2>
+<h3>v1.9.6 2020-11-02 Db2Obj script</h3>
 <p>
 	Added Lib.Db.Db2.collections function. Updated Db2 script.
 </p>
@@ -253,7 +253,7 @@ tock
 
 
 
-<h2>v1.9.5 2020-11-02 Lib.Db.Db2</h2>
+<h3>v1.9.5 2020-11-02 Lib.Db.Db2</h3>
 <p>
 	Moved Db2 from Lib to new object/function Lib.Db. Updated the "Db2" script.
 </p>
@@ -261,7 +261,7 @@ tock
 	Added Lib.Db.UUID function
 </p>
 
-<h2>v1.9.4 2020-11-01 spawn()</h2>
+<h3>v1.9.4 2020-11-01 spawn()</h3>
 <p>
 	Added global statement spawn() which takes an expression as parameter, and executes it
 	in a separate thread. No return value as of now.
@@ -330,7 +330,7 @@ hello3
 </p>
 
 
-<h3>v1.9.0 2020-11-01 Loops verification</h3>
+<h2>v1.9.0 2020-11-01 Working towards parallelizing CFT</h2>
 <p>
 	Looping and PIPE are forbidden inside local blocks, and will result in errors.
 </p>
@@ -360,7 +360,7 @@ hello3
 	if not given, default to "${" and "}" as before.
 </p>
 
-<h3>v1.8.0 2020-10-25 java class SoftException</h3>
+<h2>v1.8.0 2020-10-25 java class SoftException</h2>
 <p>
 	Differing errors into hard and soft.
 </p>
@@ -607,7 +607,7 @@ hello3
   ./cft -d scriptDir [scriptName [commandLines]*]?
 </pre>
 
-<h3>v1.7.0 2020-10-17 Templating improvement</h3>
+<h2>v1.7.0 2020-10-17 Templating improvement</h2>
 <p>
 	Added expressions Sequence and CondSequence, which are used to create
 	lists, in compact format, and also with separating comma optional.
@@ -669,7 +669,7 @@ hello3
 	are properly named.
 </p>
 
-<h3>v1.6.0 2020-10-02 changed syntax for calling function in other script</h3>
+<h2>v1.6.0 2020-10-02 changed syntax for calling function in other script</h2>
 <p>
 	Added simplified call syntax for calling code in other scripts. 
 </p>
@@ -751,7 +751,7 @@ hello3
 	if (!getType(x)=="List") ...
 </pre>
 
-<h3>v1.5.0 2020-09-22 Assignment change</h3>
+<h2>v1.5.0 2020-09-22 Assignment change</h2>
 <pre>
 	$ 3=a    # NOW INVALID
 	$ 3=>a   # OK
@@ -907,7 +907,7 @@ date.addTokenComplex("iiii-ii-ii", Dict.set("i","0123456789")).setIsToken
 </pre>
 
 
-<h3>v1.3.0 branch</h3>
+<h2>v1.3.0 branch</h2>
 <ol>
 	<li><b>v1.3.0</b><br/>
 	Changed ExprIf from if(cond,a,b) to ?(cond,a,b) and ?(cond,a) eliminating ExprWhen. Converted
@@ -1041,7 +1041,7 @@ List(1,2,3)-&gt;x
 	Fixed parsing of floats. Made Lib script a bit more robust with regards to "private" directory.
 </p>
 
-<h3>v1.2.0 2020-09-03</h3>
+<h2>v1.2.0 2020-09-03</h2>
 <p>
 	Added Lib.Text.Lexer functionality, to enable advanced matching of strings. Built on the internal
 	rf.configtool.parser.CharSet implementation. Made in preparation for (recursive-descent) line parser 
@@ -1276,7 +1276,7 @@ List(1,2,3)-&gt;x
 	updated Doc.html.
 </p>
 
-<h2 class="tag">2020-08-06 Tagging v1.1.4</h2> 
+<h2 class="tag">2020-08-06 Tagging v1.1.4</h3> 
 
 
 <h3>v1.1.4 2020-08-06 Lib.LogFiles.LineReader</h3>
@@ -1317,7 +1317,7 @@ List(1,2,3)-&gt;x
 	Had to add a section "Fun and strange stuff", since there are a bit of those.
 </p>
 
-<h2 class="tag">2020-08-03 Tagging v1.1.3</h2> 
+<h2 class="tag">2020-08-03 Tagging v1.1.3</h3> 
 
 
 <h3>v1.1.3 2020-08-03 various</h3>
@@ -1398,7 +1398,7 @@ List(1,2,3)-&gt;x
 	returned.
 </p>
 
-<h2 class="tag">2020-08-01 Tagging v1.1.2</h2>
+<h2 class="tag">2020-08-01 Tagging v1.1.2</h3>
 
 
 <h3>v1.1.2 2020-08-01 root input loop</h3>
@@ -1464,7 +1464,7 @@ a=false b=false true
 </p>
 
 
-<h2 class="tag">2020-07-27 Tagging v1.1.1</h2>
+<h2 class="tag">2020-07-27 Tagging v1.1.1</h3>
 
 
 <h3>v1.1.1 2020-07-27 created Sys.uptime</h3>
@@ -1545,7 +1545,7 @@ a=false b=false true
 </p>
 
 
-<h2 class="tag">2020-07-21 Tagging v1.1</h2>
+<h2 class="tag">2020-07-21 Tagging v1.1</h3>
 
 <h3>v1.1.0 2020-07-21 P(N,Expr)</h3>
 <p>
@@ -1590,7 +1590,7 @@ P(1,Input("Enter value").get) =value
 	each statement and Expr as it gets executed, and used this to find bug in KVM script.
 </p>
 
-<h2 class="tag">2020-07-19 Tagging v1.0.17</h2>
+<h2 class="tag">2020-07-19 Tagging v1.0.17</h3>
 <pre>
 v1.0.17 is now frozen. Next version is v1.1. 
 Changes since v1.0:
@@ -1715,7 +1715,7 @@ $ savefile.read=x savefile.create(x)
 
 
 
-<h2 class="tag">2020-07-17 Tagging v1.0.16</h2>
+<h2 class="tag">2020-07-17 Tagging v1.0.16</h3>
 
 
 <h3>v1.0.16 2020-07-17 Issue #3</h3>
@@ -1790,7 +1790,7 @@ $ savefile.read=x savefile.create(x)
 </p>
 
 
-<h2 class="tag">2020-07-11 Tagging v1.0.15</h2>
+<h2 class="tag">2020-07-11 Tagging v1.0.15</h3>
 
 
 <h3>v1.0.15 2020-07-10 File.encoding</h3>
@@ -1866,7 +1866,7 @@ A protected file does not allow delete, create, append, copyFrom (target), copyT
 
 
 
-<h2 class="tag">2020-07-10 Tagging v1.0.14</h2>
+<h2 class="tag">2020-07-10 Tagging v1.0.14</h3>
 
 
 
@@ -2112,7 +2112,7 @@ Seems to work.
 	Updated doc on call expression and all over. Renamed macro mode from "global" to "independent".
 </p>
 
-<h2 style="color:blue">2020-06-27 project is "open source" on github</h2>
+<h2 style="color:blue">2020-06-27 project is "open source" on github</h3>
 
 
 
@@ -2160,7 +2160,7 @@ available directories. This means one can enter one or more substrings of
 the target dir.
 </p>
 
-<h2 style="color:blue">2020-06-22 VERSION 1.0</h2>
+<h2 style="color:blue">2020-06-22 VERSION 1.0</h3>
 <p>
 	With the robustness added with regards to parsing script files and
 	reporting errors, the versioning is changed from dates to numbers.

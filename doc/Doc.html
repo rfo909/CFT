@@ -15,8 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2020-11-06 RFO
-v1.9.11
+Last updated: 2020-11-07 RFO
+v1.9.12
 
 </pre>
 
@@ -221,14 +221,50 @@ v1.9.11
 </pre>
 
 <p>
+  The shell <i>does not</i> include commands that move, delete or copy files and directories. This
+  is by choice.
+</p>
+
+<h2>The "protect" mechanism</h2>
+<p>
   Performing changes, such as copying, deleting and creating files, is supposed to be scripted
-  with code, so no "command line" style functionality exists for this. Example:
+  with code, so no "command line" style functionality exists for this.
+</p>
+<p>
+  This of course doesn't exclude these actions from the command line, but the syntax changes 
+  from regular "cp" and "rm" commands typical of unix shells.
 </p>
 <pre>
-  $ Dir.file("xxx.txt").delete
+  $ &lt;DirExpression&gt;.file("xxx.txt").delete
 </pre>
 <p>
-  Or you can run the global "shell" function, perform your changes there, then return via "exit":
+  The point here is that the "DirExpression" as well as functionality to provide sets of files
+  and similar, are CFT code, and CFT has a special provision to avoid deleting or modifying the wrong 
+  files or directories: <i>the "protect" mechanism</i>.
+</p>
+<p>
+  Usually, when working with multiple files and directories, we create functions that return
+  these. The "protect" mechanism means we can do the following:
+</p>
+<pre>
+  $ Dir("/someNFSDir/logs").protect
+  $ /LogDir
+</pre>
+<p>
+  What this does is set an internal flag in the Dir object that the function creates, that prevents
+  operations like deleting or modifying the directory, as well as all Dir and File objects derived
+  from it, for example like this:
+</p>
+<pre>
+  $ LogDir.file("log01.txt").delete
+  ERROR: [input:18] INVALID-OP delete : /someNfsDir/logs/log01.txt (PROTECTED: -) (java.lang.Exception)
+</pre>
+
+ 
+
+<h2>The "shell" command</h2>
+<p>
+  One can also run the global "shell" command, perform changes, and then return via "exit":
 </p>
 <pre>
   $ shell
@@ -2389,7 +2425,7 @@ codeDirs = . ; code.examples ; code.lib
 </p>
 <p>
   Also there is a Db2Obj script, which saves data objects identified by UUID's, which are
-  maode by calling the Lib.Db.UUID function.
+  made by calling the Lib.Db.UUID function.
 </p>
 
 

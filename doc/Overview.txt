@@ -22,6 +22,8 @@ Edit script file
 Shortcuts vs colon commands
 
 CFT as a shell
+ * The "protect" mechanism
+ * The "shell" command
  * Show content of file
  * Open a file in editor
 

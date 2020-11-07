@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2020-11-06 RFO
-v1.9.11
+Last updated: 2020-11-07 RFO
+v1.9.12
 ```
 # Introduction
 
@@ -202,14 +202,50 @@ $ cd ..
 $ ls *.txt
 ```
 
+The shell 
+**does not** include commands that move, delete or copy files and directories. This
+is by choice.
+
+## The "protect" mechanism
+
+
 Performing changes, such as copying, deleting and creating files, is supposed to be scripted
-with code, so no "command line" style functionality exists for this. Example:
+with code, so no "command line" style functionality exists for this.
+
+
+This of course doesn't exclude these actions from the command line, but the syntax changes
+from regular "cp" and "rm" commands typical of unix shells.
 
 ```
-$ Dir.file("xxx.txt").delete
+$ <DirExpression>.file("xxx.txt").delete
 ```
 
-Or you can run the global "shell" function, perform your changes there, then return via "exit":
+The point here is that the "DirExpression" as well as functionality to provide sets of files
+and similar, are CFT code, and CFT has a special provision to avoid deleting or modifying the wrong
+files or directories: 
+**the "protect" mechanism**.
+
+
+Usually, when working with multiple files and directories, we create functions that return
+these. The "protect" mechanism means we can do the following:
+
+```
+$ Dir("/someNFSDir/logs").protect
+$ /LogDir
+```
+
+What this does is set an internal flag in the Dir object that the function creates, that prevents
+operations like deleting or modifying the directory, as well as all Dir and File objects derived
+from it, for example like this:
+
+```
+$ LogDir.file("log01.txt").delete
+ERROR: [input:18] INVALID-OP delete : /someNfsDir/logs/log01.txt (PROTECTED: -) (java.lang.Exception)
+```
+## The "shell" command
+
+
+One can also run the global "shell" command, perform changes, and then return via "exit":
 
 ```
 $ shell
@@ -2096,7 +2132,7 @@ The Db2 persists data to file, and handles all values that can be synthesized to
 
 
 Also there is a Db2Obj script, which saves data objects identified by UUID's, which are
-maode by calling the Lib.Db.UUID function.
+made by calling the Lib.Db.UUID function.
 
 # Multitasking in CFT
 
