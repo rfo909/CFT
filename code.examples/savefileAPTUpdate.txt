@@ -1,118 +1,48 @@
 
-# Readme
-<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< EOF
-
-APT update and upgrade
-----------------------
-This script performs regular updates on
-targets, using database to remember last
-check, preventing too frequent checking,
-when running scripts multiple times for
-overlapping groups of hosts.
-
-Functions
----------
-VerifyAPTUpdate (target, prefix)
-    # target is user@host
-    # prefix is indentation string, defaults to ""
-    
-Interactive if no target given.
-
->>>>>>>>>>>>>>>>>>>>>>>>> EOF
-/Readme
-
-
-# Shortcut
-P(1) =>target 
-P(2) =>commands
-P(3,false) =>acceptErrors
-P(4,false) =>showDebug
-    SSH:run (target,commands,acceptErrors,showDebug)
-/run
-
-
-# Shortcut
-P(1) =>target 
-P(2) =>commands
-P(3,false) =>acceptErrors
-P(4,false) =>showDebug
-    SSH:sudo (target,commands,acceptErrors,showDebug)
-/sudo
-
-
 
 Input("Enter ssh target on format user@host").get
 /GetSSHTarget
 
 
 # Run Update and Upgrade on target, unless it has been updated within 20 hours
+# Returns Dict to be stored in database
+# --
 P(1,GetSSHTarget) =>target
-P(2,"") =>prefix
-P(3,36) =>hoursSinceLast
+P(3,36) => hoursSinceLast
 
-    println(prefix+"APT update and upgrade")
+    println("APT update and upgrade")
 
     target.after("@") =>host
-    Sys.scriptName =>dbCollection
-    Date.sub(Date.Duration.days(3650)) =>defaultValue
-    
-    println(prefix+"Looking up time of last run for host ")
-    Db2:Get (dbCollection, host, defaultValue) =>lastUpdated
-    
-    println(prefix+" ... lastUpdated = " + lastUpdated)
-    Date.diff(lastUpdated) =>timeSinceUpdate
-    
-    println(prefix+"Last updated: " + lastUpdated.fmt)
 
-    if(timeSinceUpdate.get < hoursSinceLast*3600*1000) {
-        println(prefix+"Limit for repeat update: " + hoursSinceLast + " hours")
-    } else {
-        println(prefix+"Performing update")
-        sudo(target,"apt-get -y update", true) =>result
-    
-        result.get("exitCode") != 0  =>FAIL 
-        
-        if (!FAIL) {
-            println(prefix+"Performing upgrade")
-            sudo(target,"apt-get -y upgrade", true) =>result
-            result.get("exitCode") != 0  =>FAIL 
-        }
-        
-        if (!FAIL) {
-            println(prefix+"Writing date and time to database")
-            Db2:Set (dbCollection, host, Date)
-        	Db2:Set(dbCollection+"_err_time", host, null)
-        	Db2:Set(dbCollection+"_err", host, null)
-        } else {
-        	println(prefix+"Writing error log to database")
-        	Db2:Set(dbCollection+"_err_time", host, Date)
-        	Db2:Set(dbCollection+"_err", host, result)
-        }
-        
-        println(prefix+
-            if(FAIL,"APTUpdateUpgrade failed with ERROR","Done"))
-            
-        if (FAIL) {
-            (Lib:DirPrivate).sub(Sys.scriptName) =>dir
-            dir.create
-            #println("dir = " + dir.path)
-            dir.file(""+(Date.setFormat("yyyy-MM-dd").fmt) + "_" + target + ".txt") =>logFile
-            logFile.create("# " + Date.fmt)
-            logFile.append(List("","- target = " + target,""))
-            
-            logFile.append("- exitCode = " + result.get("exitCode"))
-            logFile.append("")
-            logFile.append("- stdin:")
-            
-            result.get("stdin")->line logFile.append("   # " + line) |
-            logFile.append("- stdout:")
-            result.get("stdout")->line logFile.append("   # " + line) |
-            logFile.append("- stderr:")
-            result.get("stderr")->line logFile.append("   # " + line) |
+	tMark=Sys.scriptName+".lastrun."+host
+	if (Util:HasTimedOut(tMark, hoursSinceLast*3600)) {
 
-            println(prefix+"Written log file " + logFile.path)
-        }
-    }
-    
-/APTUpdateUpgrade
+		println("Performing update")
+		result = SSH:sudo(target,"apt-get -y update", true)
+
+		FAIL = result.get("exitCode") != 0 
+		if (FAIL) Inner {
+			Lib:Header("Update failed")
+			result.stdout->line println(line) |
+			result.stdout->line println("##ERR## " + line)
+		} 
+
+	   	if (!FAIL) {
+	        println("Performing upgrade")
+	        SSH:sudo(target,"apt-get -y upgrade", true) =>result
+	        FAIL = result.get("exitCode") != 0 
+			if (FAIL) Inner {
+				Lib:HEader("Upgrade failed")
+				result.stdout->line println(line) |
+				result.stdout->line println("##ERR## " + line)
+			} 
+	   	}
+
+	   	if (!FAIL) {
+	   		Util:SetTimeMark(tMark)
+	   	}
+	} else {
+		println("Ignoring: last checked on " + Util:GetTimeMark(tMark).fmt)
+	}
+/run
 

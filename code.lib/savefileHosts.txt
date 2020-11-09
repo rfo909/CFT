@@ -1,454 +1,173 @@
 # Readme
-<<<<<<<<<<<< EOF
+<<<<<< EOF
+Parsing "Ansible" text format looking like this:
 
-A descriptive format for describing attributes with hosts, for
-managing automatic updates.
+# This is a comment
 
-Processes Hosts.txt file on following format:
+[Auto.reboot=yes]
+*.v 
+s*.s   [no]
 
-[Property=Value]
-HOST
-HOST
-HOST [OverrideValue]?
- :
- 
 
->>>>>>>>>>>> EOF
+
+>>>>>> EOF
 /Readme
 
+# Parse text lines. Returns dictionary with 'data' pointing at the
+# actual data structure, and then the following lambdas, which are
+# used as follows:
+#
+#    LallHosts.call
+#    LallFields.call
+#    Lget.call(elementName,fieldName,defaultValue?)
+#    Ldump.call
+#
+# The data dictionary has keys for all elements, and under each
+# is a Dict with the settings for that element.
+# --
+	file = Lib:DirPrivate.file("Hosts.txt") 
+	data = Dict
+		
+	currProp=null
+	currPropValue=null
 
-# Data file
-(Lib:DirPrivate).file("Hosts.txt")
-/HostsFile
+	LFilter = Lambda{
+		P(1,List) => list
+		P(2) => regex
+		list->s assert(regex.match(s)) out(s)
+	}
+	LApply = Lambda {
+		P(1) => data
+		P(2) => entities
+		P(3) => name
+		P(4) => value
 
-# Internal
-    P(1,"[A=B]") =>line
-    error(!line.startsWith("["), "not header line: " + line)
-    line.after("[").before("]").split("=") =>parts
-    parts.nth.trim =>a
-    parts.nth(1).trim =>b
-    # return value
-    List(a,b)
-/parseHeader
+		entities->e
+			#println(e + "." + name + "=" + value)
+			data.get(e,Dict).set(name,value)
+	}
 
+	file.read->line
+		reject(line.trim.startsWith("#"))
+		reject(line.trim=="")
+		if (line.trim.startsWith("[")) {
+			# property definition with default value
+			line.after("[").before("]").split("=").push(2) => currProp =>currPropValue 
+		} else {
+			# data line with optional exception
+			line.before("[").trim => entity
+			if (entity.contains("*")) {
+				regex=Glob(entity,false).regex
+			
+				# keys of data dict are the entities that we filter
+				entities=LFilter.call(data.keys,regex)
+			} else {
+				entities=List(entity)
+			}
 
-
-# Process Hosts file and store it in session state
-    parseData = Lambda {
-        P(1) =>line
-        P(2) =>name
-        P(3) =>value
-
-		getHosts = Lambda{ 
-			P(1) =>glob
-			    "" =>regex
-			    glob.chars->c
-			        false =>done
-			        regex = regex + if(c=='*', ".*", "["+c+"]")
-			    |
-			    Regex(regex) =>re
-			    Val("data").keys.sort->hostName
-			        assert(re.match(hostName))
-			        out(hostName)
+			# is there an exception?
+			redef=line.after("[").before("]").trim
+			if(redef != "") {
+				LApply.call(data, entities,currProp, redef)
+			} else {
+				LApply.call(data, entities,currProp, currPropValue)
+			}
+										
 		}
+	|
 
-        line.before("[").trim =>host
-        line.after("[").before("]") =>override 
+	# Create return value with lambdas for analyzing the data
+	# --
+	Dict
+		.set("data",data)
+		.set("LallHosts",Lambda{
+			self.data.keys
+		})
+		.set("LallFields", Lambda{
+			self.data.keys->key 
+				self.data.get(key).keys->field
+					out (field)
+			| _.unique.sort
+		})
+		.set("Lget", Lambda{
+			P(1)=>host
+			P(2)=>field
+			P(3)=>defaultValue
 
-        if(override != "", override, value) =>overriddenVal
-        
-        if(host.contains("*"), Inner{
-            # assign value for all hosts matching glob expression
-            getHosts.call(host)->oneHost
-                Val("data").get(oneHost,Dict).set(name, overriddenVal)
-        }, Inner{
-            # regular assign
-            Val("data").get(host,Dict).set(name,overriddenVal)
-        })
-    } 
+			result=defaultValue
 
-    println("INFO Processing file " + HostsFile.path)
+			if (self.data.has(host)) {
+				e=self.data.get(host)
+				if (e.has(field)) {
+					x=e.get(field)
+					if (x != null) result=x
+				}
+			}
 
-    ValDef("data",Dict)
-    
-    null =>settingName
-    null =>settingValue
-    HostsFile.read->origLine
-        origLine.trim =>line
-        reject(line=="")
-        reject(line.startsWith("#"))
-        
-        tryCatch({
-	        if(line.startsWith("[")) {
-	        	println("Parsing header " + line)
-	            parseHeader(line).push(2,"") =>settingName =>settingValue
-	        } else {
-	            parseData.call(line,settingName,settingValue)
-	        }
-	    })=>st
-	    if (!st.ok) {
-	    	println("-------------------------------------")
-	    	println(origLine.file.name + " line " + origLine.lineNumber + ": " + origLine)
-	    	println("-------------------------------------")
-	    	println(st.msg)
-	    	error("Failed reading hosts file")
-	    }
-    |
-
-/ProcessHostsFile
-
-
-
-# Common function called internally
-    false =>flag
-    
-    if(Val("time")==null) {
-        true =>flag
-    }
-    
-    if(Val("time") != null && Val("time") != HostsFile.lastModified) {
-        true =>flag
-    }
-    
-    if(Val("data")==null) {
-        true =>flag
-    }
-    if(flag) {
-        ProcessHostsFile
-        ValDef("time",HostsFile.lastModified)
-    }
-    true
-/CheckData
-
-# Explore data interactively
-    CheckData
-    P(1,readLine("Search term")) =>searchTerm
-    Val("data") =>root
-    root.keys.sort->host
-        root.get(host) =>data
-        data.keys.sort->field
-            ""+data.get(field) =>value
-            assert(host.contains(searchTerm) || field.contains(searchTerm) || value.contains(searchTerm))
-            report(host,field,value)
-/Search
-
-# Get host list
-    CheckData
-    Val("data").keys.sort
-/GetHosts
-
-
-# Get host list sorted via Glob expr
-P(1,"*") =>glob
-    "" =>regex
-    glob.chars->c
-        false =>done
-        regex = regex + if(c=='*', ".*", "["+c+"]")
-    |
-    Regex(regex) =>re
-    GetHosts->hostName
-        assert(re.match(hostName))
-        out(hostName)
-/GlobHosts
-
-
-# Get all known fields
-    CheckData
-    Val("data").keys->host
-        Val("data").get(host).keys->field out(field)
-    | _.unique.sort
-/GetFields
-
-
-# Get value for host + field
-    CheckData
-    P(1) =>host
-    P(2) =>field
-
-    error(!Val("data").has(host), "No config for host " + host)
-    Val("data").get(host).get(field)
-/GetValue
-
-
-# Get value for host + field, then return true if it matches expected value
-    CheckData
-    P(1) =>host
-    P(2) =>field
-    P(3) =>expectedValue
-
-    error(!Val("data").has(host), "Invalid host " + host)
-    
-    Val("data").get(host).get(field,null) == expectedValue
-/Has
-
-
-# Return true if host has value for field
-    CheckData
-    P(1) =>host
-    P(2) =>field
-
-    error(!Val("data").has(host), "Invalid host " + host)
-    
-    Val("data").get(host).get(field,null) != null
-/HasField
-
-# Shortcut
-    Search
-/S
-
-# Shortcut
-    CheckData
-/C
-
-
-# View host status
-    Hosts:GetHosts =>hosts
-    
-    hosts->host
-        Hosts:GetValue (host, "SSHUser") =>sshUser
-        assert(sshUser != null)
-        
-        sshUser+"@"+host =>target
-        println("Checking host " + target)
-        
-        SSH:HostOk (target) =>hostOk
-        SSH:VerifySudo (target) =>sudoOk
-        
-        Lambda {P(1) =>x if(x,"ok","<<FAIL>>")} =>show
-        report("Host: " + host, "Ping: " + show.call(hostOk), "Sudo: "+show.call(sudoOk))
-/ShowHostsStatus
-
+			result
+		})
+		.set("Ldump",Lambda{
+			self.data.keys->host
+				self.data.get(host).keys->field
+					value=self.data.get(host).get(field)
+					out(List(host,field,value))
+		})
+/Parse
 
 
 
 # Verify all hosts have copy of SSH key
-    Hosts:GetHosts =>hosts
-
-    println("Distributing ssh key to all hosts!")
-    readLine("Press Enter")
-    
-    hosts->host
-        Hosts:GetValue (host, "SSHUser") =>sshUser
-        if(sshUser==null, Inner{
-            println("----- WARNING: " + host + " has no SSHUser")
-        })
-        assert(sshUser != null)
-
-        sshUser + "@" + host =>target
-        println
-        println("----- " + target)
-
-        Dir.run("ssh-copy-id",target)
+# --
+	data=Parse
+	data.LallHosts.call->host
+		sshUser=data.Lget.call(host,"SSHUser")
+		assert(sshUser != null)
+		target=sshUser+"@"+host
+		println("------ " + target)
+		Dir.run("ssh-copy-id",target)
 /CheckSSHKeys
+		
 
 
-
-# Check if debian based host should be rebooted
-        P(1) =>target
-        SSH:sudo (target, "ls /var/run/reboot-required", true) =>result
-        # true when file found (return code 0)
-        result.get("exitCode") == 0
-/DebianHostNeedsReboot
-
-
-
-# Run update/upgrade
-P(1,readLine("Enter part of host name, enter for all"))=>h
-	Lib:DirPrivate.sub("APTUpdate").files->f 
-		#assert(f.lastModified < Date.sub(Date.Duration.days(3)).get)
-		f.delete 
-	|
+# Run APT Update / upgrade on hosts
+# --
+	data=Parse
 	
-    Hosts:GetHosts =>hosts
-    hosts->host
-    	assert(host.contains(h))
-        assert(Hosts:Has (host,"PackageManager","apt"))
-        Hosts:GetValue (host, "SSHUser") =>sshUser
-        assert(sshUser != null)
-        
-        sshUser+"@"+host =>target
-        println("Updating host " + target)
-        tryCatch(APTUpdate:APTUpdateUpgrade (target, "   "))
+	allHosts=data.LallHosts
+	lget = data.Lget
 
-        # Check if needs reboot and can be rebooted
-        DebianHostNeedsReboot(target) =>needsReboot
-        Hosts:Has (host, "Auto.reboot","yes") =>canBeRebooted
-
-        if(needsReboot && canBeRebooted) {
-                println("   *** Automatically rebooting " + host)
-                SSH:sudo (target, "reboot", true)
-                        # acceptErrors=true, as the reboot means immediate disconnect
-        }
-
-        if(needsReboot && !canBeRebooted) {
-                println("   *** Host " + host + " should be rebooted - can not do this automatically")
-        }
-/UpgradeAPT
-
-
-# Display hosts that should be rebooted
-    Hosts:GetHosts->host
-        assert(Hosts:Has (host,"OSFamily","Debian"))
-        Hosts:GetValue (host, "SSHUser") =>sshUser
-
-        sshUser+"@"+host =>target
-
-        SSH:HostOkSSH (target) =>hostOk
-        if (!hostOk) {
-            println(target + ": -offline-")
-            assert(false)
-        }
-
-        DebianHostNeedsReboot(target) =>x
-        if(x,"NEEDS REBOOT","ok") =>status
-        println(target + ": " + status)
-        
-/NeedReboot     
-
-
-# Update or install CFT
-P(1,"")=>hostPattern
-    Date.Duration.minutes(30).get =>minTimeSinceLastRun
-    
-    Hosts:GetHosts =>hosts
-    hosts->host
-        assert(host.contains(hostPattern))
-        assert(Hosts:Has (host,"Install.CFT","1"))
-        Hosts:GetValue (host, "SSHUser") =>sshUser
-        assert(sshUser != null)
-
-
-        Db2:Get ("CFT", host) =>lastDate
-          if (lastDate != null) {
-            Date.diff(lastDate).get =>timeSinceLastRun
-            if (timeSinceLastRun < minTimeSinceLastRun) {
-                println("Host " + host + " was last checked " + lastDate.fmt)
-                assert(false) # next
-            }
-        }
-
-        println("# PROCESSING host " + host)
-
-        if (!SSH:HostOk (host)) {
-        	Dict.set("date",Date).set("msg","No SSH connection") => err
-        	Db2:Set("CFT_err",host,err)
-        	assert(false)  # next
-        }
-        
-        
-        sshUser+"@"+host =>target
-        println("Updating " + target)
-        
-        assert(SSH:HostOkSSH (target))
-
-        tryCatch(Java:VerifyCFT (target, "   ")) => tc
-        if (tc.ok) {
-        	Db2:Set ("CFT", host, Date)
-        } else {
-        	Dict.set("date",Date).set("tryCatch",tc) => err
-        	Db2:Set("CFT_err",host,err)
-        }
-/UpdateCFT
-
-
-# View host status
-P(1,"mpstat") => command
-P(2,Lambda{true})  => lineFilter
-
-    x = Input("Hosts glob filter").get
-    hosts = GlobHosts(x)
-    
-    hosts->host
-        
-        Hosts:GetValue (host, "SSHUser") =>sshUser
-        assert(sshUser != null)
-        
-        sshUser+"@"+host =>target
-        assert(SSH:HostOk (host))
-
-        println("------ " + host)
-        SSH:run (target, "which mpstat", true).get("exitCode") != 0 =>install
-        if(install) {
-            println("    (installing sysstat)")
-            SSH:sudo (target, "apt-get -y install sysstat")
-        }
-        SSH:run (target, command).get("stdout")->line
-        	assert(lineFilter.call(line))
-            report(host,line)
-/SysStat
-
-
-SysStat("mpstat")
-/MPStat
-
-SysStat("iostat", Lambda{P(1).contains("vda")})
-/IOStat
-
-# Fix resolv.conf problem
-	readLine("Softlinks /run/systemd/resolve/resolv.conf to /etc/resolv.conf, yes to continue") =>yesno
-	error(yesno != "yes", "Aborted")
 	
-	Hosts:GetHosts =>hosts
-	hosts->host
-		assert(Hosts:GetValue(host, "OSFamily")=="Debian")
-		       
-        Hosts:GetValue (host, "SSHUser") =>sshUser
-        assert(sshUser != null)
+	data.LallHosts.call->host
 
-        target=sshUser+"@"+host
+		pm=data.Lget.call(host,"PackageManager")
+		assert(pm=="apt")
 
-        println("--- " + host + ": checking resolv.conf")
-        replace=false
-        tryCatch(Inner {
-        	SSH:sudo(target,"ls -l /etc/resolv.conf").get("stdout")=>stdout
-        	stdout->line println("    " + line) |
-        	replace = Lib:LinesContain(stdout,"stub-resolv.conf")
-        })
+		sshUser=data.Lget.call(host,"SSHUser")
+		assert(sshUser != null)
 
- 		if(replace) {
-			println("    CHANGING to /run/systemd/resolve/resolv.conf")
-			tryCatch(
-				SSH:sudo (target, List("rm /etc/resolv.conf", "ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf"))
-			)
-		} 
-/FixResolvConf
+		target=sshUser+"@"+host
+		println("Starting process for " + target)
+		processData = SymDict(target)
 
+		process = SpawnProcess(processData, {
+			start=currentTimeMillis
+			APTUpdate:run(target)
+			end=currentTimeMillis
+			println("### time=" + (end-start) + " ms")
+		})
+		out(process)
+	| _-> process
+		target=process.data.target
+		exitValue=process.wait.exitValue
+		output=process.output
 
-UpgradeAPT
-UpdateCFT
-/runAll
-
-
-
+		println("Saving data for " + target)
+			
+		obj=SymDict(target,exitValue,output)
+		
+		Db2Obj:AddObject("Ansible.APTUpdateUpgrade",obj)
+/AptUpgrade
 
 
-
-
-data=Dict
-GetHosts->host
-	Inner {
-		GetFields->field
-			assert(HasField(host,field))
-			value=GetValue(host,field)
-			data.get(host,Dict).set(field,value)
-	}
-|
-Db2:Set("hosts","data",data)
-/t
-
-GetFields->field
-	println("Field="+field)
-	Db2:Set("hosts.field", field, field)
-/t2
-
-GetHosts->host
-	Db2:Set("hosts.host", host, host)
-/t3
-
-GetHosts->host
-		GetFields->field
-			assert(HasField(host,field))
-			value=GetValue(host,field)
-			Db2:Set("hosts.setting",host+"="+field,value)
-/t4
-
+		
+	

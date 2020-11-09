@@ -39,12 +39,23 @@ P(1) => name
 P(2,3600) => seconds
 	Date.sub(Date.Duration.seconds(seconds)) => limit
 
-	id="timemark:"+(name.replace(" ","_"))
+	id="timemark:"+((""+name).replace(" ","_"))
 	val = Db2:Get("Util", id)
 
 	val==null || val.before(limit)
 /HasTimedOut
 	
+
+
+# Get time mark
+# --
+P(1) => name
+	id="timemark:"+((""+name).replace(" ","_"))
+	val = Db2:Get("Util",id)
+	if (val==null) val=Date
+	val
+/GetTimeMark
+
 
 
 
