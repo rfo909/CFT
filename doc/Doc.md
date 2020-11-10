@@ -1228,6 +1228,13 @@ an external program, or even to create a new File object (which will not be prot
 ```
 File(protectedFile.path)
 ```
+## Unprotect
+
+
+If there is an expression that returns some protected directory or some protected files, and we
+are explicitly sure we want to modify it, we can use the .unprotect() function. It removes the
+protect flag, but fails with an error if there is no such flag there when called.
+
 # Running external programs
 
 ## Summary

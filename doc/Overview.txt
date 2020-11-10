@@ -115,6 +115,7 @@ Protecting files and directories
  * A protected directory does not allow
  * A protected file does not allow
  * No guarantee
+ * Unprotect
 
 Running external programs
  * Summary

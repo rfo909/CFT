@@ -186,10 +186,11 @@ Objects can be sorted on date of last update, and located using a lambda.
 Dir.files -> f
 	println(f.name)
 	Dict
-		.set("type","test")
+		.set("type","test")   # type of object, see DeleteTestData
 		.set("name",f.name)
 		.set("path",f.path)
 		.set("size",f.length)
+		.set("inner",Dict.set("fileDate",Date(f.lastModified)))
 		=> data
 	AddObject("test", data)
 /CreateTestData
@@ -225,3 +226,22 @@ Dir.files -> f
 
 
 
+# Reporting function: Show object fields, sorted by last update
+# --
+	P(1,inputCollection)=>collection
+	P(2,Lambda{P(1) List})=>listProducer
+	
+	SortedObjectsByDate(FixCN(collection))->obj
+		report(listProducer.call(obj.value))
+/CustomView
+
+
+# Example of custom view, using example data
+# --
+	collection="test"
+	x=Lambda{
+		P(1)=>obj
+		List(obj.name, obj.size, obj.inner.fileDate)
+	}
+	CustomView(collection, x)
+/CustomViewDemo
