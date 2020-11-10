@@ -229,19 +229,33 @@ Dir.files -> f
 # Reporting function: Show object fields, sorted by last update
 # --
 	P(1,inputCollection)=>collection
-	P(2,Lambda{P(1) List})=>listProducer
+	P(2,Lambda{P(1) true})=>filter
+	P(3,Lambda{P(1) List})=>cols
 	
 	SortedObjectsByDate(FixCN(collection))->obj
-		report(listProducer.call(obj.value))
+		assert(filter.call(obj))
+		report(cols.call(obj))
 /CustomView
 
 
 # Example of custom view, using example data
 # --
-	collection="test"
-	x=Lambda{
-		P(1)=>obj
-		List(obj.name, obj.size, obj.inner.fileDate)
-	}
-	CustomView(collection, x)
+	P(1,24) => hours
+	
+	# Creating object to make lambdas configurable
+	# --
+	x = Dict
+		.set("limit",Date.sub(Date.Duration.hours(hours)))
+		.set("Lfilter",Lambda{
+			P(1)=>obj
+			obj.date.after(self.limit) && obj.value.type=="test"
+		})
+		.set("Lcols",Lambda{
+			P(1).value=>obj
+			List(obj.name, obj.size, obj.inner.fileDate)
+		})
+	Lib:Header("Cols: name, size, inner.fileDate")
+	CustomView("test", x.Lfilter, x.Lcols)
 /CustomViewDemo
+
+
