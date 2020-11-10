@@ -153,16 +153,17 @@ public class ObjProcess extends Obj {
 				// Generating full exception log to virtual stdout if process fails
 				Throwable t=ex;
 				Stdio stdio = ctx.getStdio();
-				while (t != null) {
-					stdio.println("Process fails with Exception: " + t.getMessage());
-					for (StackTraceElement line : t.getStackTrace()) {
-						stdio.println("   " + line.toString());
-					}
-					t=t.getCause();
-					if (t != null ) {
-						stdio.println("Caused by:");
-					}
-				}
+				stdio.println("Process fails with Exception: " + t.getMessage());
+//				while (t != null) {
+//					stdio.println("Process fails with Exception: " + t.getMessage());
+//					for (StackTraceElement line : t.getStackTrace()) {
+//						stdio.println("   " + line.toString());
+//					}
+//					t=t.getCause();
+//					if (t != null ) {
+//						stdio.println("Caused by:");
+//					}
+//				}
 				process.setExitValue(new ValueNull());
 			}
 		}
