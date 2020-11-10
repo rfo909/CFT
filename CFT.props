@@ -77,7 +77,7 @@ shortcut:     = "---- Show all shortcuts ----"            File("CFT.props").read
 # The prompt setting is a line of code, just as with the shortcuts
 # ---
 
-prompt = x=Sys.scriptName h=Lib:Hostname ""+if(h==null,"",h) + if(x==null,"","[" + x+"]") +Dir.path + " $ "
+prompt = x=Sys.scriptName h=Lib:Hostname ""+if(h==null,"",h) + if(x==null,"","[" + x+"]") + " $ "
 
 #
 # Lib.Db2

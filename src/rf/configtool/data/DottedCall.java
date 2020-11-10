@@ -74,7 +74,7 @@ public class DottedCall extends LexicalElement {
         if (f==null) {
             if (checkMode) return new ValueBoolean(false);
             
-            String msg=getSourceLocation() + " " + obj.getDescription() + " no method '" + ident + "'";
+            String msg=getSourceLocation() + " " + obj.getDescription() + " no function '" + ident + "'";
             throw new Exception(msg);
         }
 
