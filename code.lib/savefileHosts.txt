@@ -142,6 +142,14 @@ s*.s   [no]
 		
 
 
+# Run APT Update + upgrade on one host
+# --
+	P(1,Input("target").get)=>target
+	println("Calling APTUpdate:run for target="+target)
+	APTUpdate:run(target,12)
+/AptUpdate
+
+
 # Run APT Update / upgrade on hosts
 # --
 	data=Parse
@@ -161,25 +169,31 @@ s*.s   [no]
 		target=sshUser+"@"+host
 		println("Starting process for " + target)
 		processData = SymDict(target)
+		
 
 		process = SpawnProcess(processData, {
 			start=currentTimeMillis
-			APTUpdate:run(target)
+			AptUpdate(target)
 			end=currentTimeMillis
 			println("### time=" + (end-start) + " ms")
 		})
 		out(process)
 	| _-> process
+		
 		target=process.data.target
+		Lib:Header("Waiting for " + target)
+		
 		exitValue=process.wait.exitValue
 		output=process.output
 
-		println("Saving data for " + target)
-			
+		println("exitValue=" + exitValue)
+		Inner{
+			output->line println("OUT: " + line)
+		}
 		obj=SymDict(target,exitValue,output)
 		
 		Db2Obj:AddObject("Ansible.APTUpdateUpgrade",obj)
-/AptUpgrade
+/AptUpdateAll
 
 
 		
@@ -218,6 +232,9 @@ s*.s   [no]
 	P(1)=>host
 	P(2)=>sshUser
 
+	println("host=" + host)
+	println("sshUser=" + sshUser)
+
 	tMark=Sys.scriptName+".lastrun."+host
 	if (Util:HasTimedOut(tMark)) {
 		println("# host " + host)
@@ -252,9 +269,8 @@ s*.s   [no]
 		process=SpawnProcess(ctx, UpdateCFT(host, sshUser))
 		out(process)
 	| _->process
+		Lib:Header("Waiting for " + process.data.host)
 		process.wait
-		host=process.data.host
-		println("-------------- " + host + " -----------------")
 		Inner {process.output->line println(line)}
 /UpdateCFTAll
 
