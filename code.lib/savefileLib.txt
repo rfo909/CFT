@@ -138,9 +138,11 @@ d
 # Create name of temp file under /tmp or under c:\temp if windows
 P(1,"tmp") =>name 
 P(2,"txt") => type
+	Util:Counter("Lib.TmpFile.id") => x
+	s=name+currentTimeMillis+"-"+x+"."+type
     if (Sys.isWindows,
-		Dir("c:\temp").file(name+currentTimeMillis+"."+type),
-    	Dir("/tmp").file(name + currentTimeMillis+"."+type) 
+		Dir("c:\temp").file(s),
+    	Dir("/tmp").file(s) 
     )
 /TmpFile
 
@@ -230,7 +232,6 @@ P(4,false) => showDebug
     if (getType(stdinLines) != "List") {
         stdinLines=List(stdinLines) # wrap as List
     }
-    
     Lib:TmpFile("in") =>inFile
     Lib:TmpFile("out") =>outFile
     Lib:TmpFile("err") =>errFile

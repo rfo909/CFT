@@ -112,6 +112,19 @@ s*.s   [no]
 					value=self.data.get(host).get(field)
 					out(List(host,field,value))
 		})
+		.set("Lhas", Lambda{
+			P(1)=>host
+			P(2)=>field
+			P(3)=>value
+			ok=false
+			if (self.data.has(host)) {
+				e=self.data.get(host)
+				if (e.has(field)) {
+					if (e.get(field)==value) ok=true
+				}
+			}
+			ok
+		})
 /Parse
 
 
@@ -171,3 +184,163 @@ s*.s   [no]
 
 		
 	
+
+# Decide if debian host should be booted
+# --
+	P(1)=>target
+	SSH:run(target,"ls /var/run/reboot-required",true).exitCode == 0
+/DebianHostNeedsReboot
+
+
+
+# Display hosts that should be rebooted
+	HostData = Hosts:Parse
+	HostData.LallHosts.call.sort->host
+        assert(HostData.Lhas.call (host,"OSFamily","debian"))
+        HostData.Lget.call (host, "SSHUser") =>sshUser
+
+        sshUser+"@"+host =>target
+
+        SSH:HostOkSSH (target) =>hostOk
+        if (!hostOk) {
+            println(host + ": -offline-")
+        } else {
+	        DebianHostNeedsReboot(target) =>x
+	        if(x,"NEEDS REBOOT","ok") =>status
+	        println(host + ": " + status)
+    	}
+    	    
+/NeedReboot     
+
+
+# Update or install CFT
+# --
+	P(1)=>host
+	P(2)=>sshUser
+
+	tMark=Sys.scriptName+".lastrun."+host
+	if (Util:HasTimedOut(tMark)) {
+		println("# host " + host)
+
+	    if (!SSH:HostOk (host)) {
+	    	println("Host unreachable")
+		} else {	    
+		    sshUser+"@"+host =>target
+		    println("Updating " + target)
+		    
+		    assert(SSH:HostOkSSH (target))
+
+		    Java:VerifyCFT (target)
+		    Util:SetTimeMark(tMark)
+		}
+	} else {
+		println("Last checked at " + Util:GetTimeMark(tMark).fmt)
+	}
+/UpdateCFT
+
+
+# Update CFT all
+# --
+	HostData=Hosts:Parse
+	HostData.LallHosts.call.sort->host
+		assert(HostData.Lhas.call(host,"Install.CFT","1"))
+		sshUser=HostData.Lget.call (host,"SSHUser")
+		assert(sshUser != null)
+		#println("Spawning process for host="+host)
+
+		ctx=SymDict(host,sshUser)
+		process=SpawnProcess(ctx, UpdateCFT(host, sshUser))
+		out(process)
+	| _->process
+		process.wait
+		host=process.data.host
+		println("-------------- " + host + " -----------------")
+		Inner {process.output->line println(line)}
+/UpdateCFTAll
+
+
+
+P(1)=>host
+P(2)=>target
+P(3,"mpstat") => command
+P(4)=>lineFilter
+	if (SSH:HostOk (host)) Inner {
+
+	    println("---- " + host + " ----")
+	    SSH:run (target, "which mpstat", true).get("exitCode") != 0 =>install
+	    if(install) {
+	        println("    (installing sysstat)")
+	        SSH:sudo (target, "apt-get -y install sysstat")
+	    }
+	    SSH:run (target, command).get("stdout")->line
+	    	assert(lineFilter == null || line.contains(lineFilter))
+	        report(List(host,line))
+	} 
+/SysStat
+
+
+# View host status
+P(1,"mpstat") => command
+P(2)  => lineFilter
+
+	HostData=Hosts:Parse
+	HostData.LallHosts.call->host
+
+		HostData.Lget.call(host, "OS") => os
+		assert(os=="linux")
+        
+        HostData.Lget.call(host, "SSHUser") =>sshUser
+        assert(sshUser != null)
+        
+        sshUser+"@"+host =>target
+
+        ctx=SymDict(host,target,command,lineFilter)
+        proc=SpawnProcess(ctx,
+        	SysStat(host,target,command,lineFilter)
+        )
+		out(proc)
+	| _-> proc
+		proc.wait
+		Inner {
+			#proc.output->line println(line) |
+			proc.exitValue->line println(line)
+		}		
+/SysStatAll
+
+
+SysStatAll("mpstat")
+/MPStat
+
+SysStatAll("iostat")
+/IOStat
+
+# Fix resolv.conf problem
+	readLine("Softlinks /run/systemd/resolve/resolv.conf to /etc/resolv.conf, yes to continue") =>yesno
+	error(yesno != "yes", "Aborted")
+	
+	HostData=Hosts:Parse
+	HostData.LallHosts.call->host
+		assert(HostData.Lget.call(host, "OSFamily")=="debian")
+		       
+        HostData.Lget.call (host, "SSHUser") =>sshUser
+        assert(sshUser != null)
+
+        target=sshUser+"@"+host
+
+        println("--- " + host + ": checking resolv.conf")
+        replace=false
+        tryCatch(Inner {
+        	SSH:sudo(target,"ls -l /etc/resolv.conf").get("stdout")=>stdout
+        	stdout->line println("    " + line) |
+        	replace = Lib:LinesContain(stdout,"stub-resolv.conf")
+        })
+
+ 		if(replace) {
+			println("    CHANGING to /run/systemd/resolve/resolv.conf")
+			tryCatch(
+				SSH:sudo (target, List("rm /etc/resolv.conf", "ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf"))
+			)
+		} 
+/FixResolvConf
+
+

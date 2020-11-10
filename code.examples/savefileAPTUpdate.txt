@@ -13,6 +13,7 @@ P(3,36) => hoursSinceLast
     println("APT update and upgrade")
 
     target.after("@") =>host
+    error(SSH:HostOkSSH(host),"Target " + target + " not responding")
 
 	tMark=Sys.scriptName+".lastrun."+host
 	if (Util:HasTimedOut(tMark, hoursSinceLast*3600)) {
