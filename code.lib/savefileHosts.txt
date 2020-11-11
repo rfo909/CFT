@@ -146,7 +146,7 @@ s*.s   [no]
 # --
 	P(1,Input("target").get)=>target
 	println("Calling APTUpdate:run for target="+target)
-	APTUpdate:run(target,12)
+	APTUpdate:run(target,3)
 /AptUpdate
 
 
@@ -190,7 +190,9 @@ s*.s   [no]
 		Inner{
 			output->line println("OUT: " + line)
 		}
-		obj=SymDict(target,exitValue,output)
+		type="APTUpdateUpgrade"
+		
+		obj=SymDict(target,exitValue,output,type)
 		
 		Db2Obj:AddObject("Ansible.APTUpdateUpgrade",obj)
 /AptUpdateAll
@@ -357,6 +359,56 @@ SysStatAll("iostat")
 				SSH:sudo (target, List("rm /etc/resolv.conf", "ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf"))
 			)
 		} 
-/FixResolvConf
+/FixResolvConf1
+
+
+
+
+# Fix resolv.conf problem, take 2
+	readLine("Installs and configures resolvconf, yes to continue") => yesno
+	error(yesno != "yes", "Aborted")
+	
+	HostData=Hosts:Parse
+	HostData.LallHosts.call->host
+		assert(HostData.Lget.call(host, "OSFamily")=="debian")
+		       
+        HostData.Lget.call (host, "SSHUser") =>sshUser
+        assert(sshUser != null)
+
+        target=sshUser+"@"+host
+        if (!SSH:HostOkSSH(target)) {
+        	println("* Skipping target " + target)
+        	assert(false)
+        }
+
+		Lib:Header(host)
+		
+        found = SSH:sudo(target,"which resolvconf", true).exitCode==0
+        if (!found) {
+        	println("* Installing resolvconf")
+        	SSH:sudo(target,"apt install resolvconf")
+        }
+
+        println("* Configuring resolvconf")
+        lines = Sequence(
+        	@ options timeout:1 attempts:1 rotate
+        	@
+        	@ nameserver 10.0.0.3
+        	@ nameserver 10.0.0.4
+        )
+        f=Lib:TmpFile("resolv.conf.head")
+        f.create(lines)
+
+        SSH:copy(f,target,"./resolv.conf.head")
+        SSH:sudo(target,"cp ./resolv.conf.head /etc/resolvconf/resolv.conf.d/head")
+
+		println("* Restarting service resolvconf")
+        SSH:sudo(target,"service resolvconf restart")
+
+        #error("stop")
+        
+/FixResolvConf2
+
+
 
 
