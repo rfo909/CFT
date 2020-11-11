@@ -399,7 +399,7 @@ Input("ssh user").get => user
     #TmpFile("init") =>f
     "sh.addShard('"+rsName+"/"+members+"')" =>js
     
-    println("Connect with mongo shell to one of these mongos servers:")
+    println("Connect with mongo shell to one of these mongos servers (port 27018):")
     println("      " + (MongosHosts.concat(", ")) )
     println("Enter the following command")
     println
