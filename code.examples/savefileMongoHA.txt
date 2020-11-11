@@ -63,6 +63,7 @@ P(1,"temp") =>name
 	Lib:Header("Host prefix")
 	prefix = readLine("Enter host prefix, blank for none")
 	Db2:Set("MongoHA.install","hostPrefix",prefix)
+	println("Set to '" + prefix + "'")
 /SetHostPrefix
 
 
@@ -99,6 +100,7 @@ P(1,"temp") =>name
 	if (dbPath.trim=="") dbPath="/var/lib/mongodb"
 
 	Db2:Set("MongoHA.install","dbPath",dbPath)
+	println("Set to '" + dbPath + "'")
 /SetDbPath
 
 
@@ -146,7 +148,7 @@ P(1,"temp") =>name
 #
 MongodData->d
     Inner {d.keys->key out(""+key+"="+d.get(key))} _.concat(" ")=>x out(x)
-/MongodDataShow   
+/MongodDataShow
     
 
 # Config
@@ -164,7 +166,7 @@ Input("Target: user@host").get
 
 
 
-# Called from InstallMongoShellAll
+# Install mongo shell on one server: called from InstallMongoShellAll
 #
 P(1,GetTarget) =>target
     println("* Checking install")
@@ -232,6 +234,10 @@ P(1,GetTarget) =>target
         Lib:ReadValueBoolean ("Confirm by typing 'yes'", false) =>confirmed
         break(confirmed)
     |
+
+	println("* Checking that dbPath " + DbPath + " exists")
+	SSH:sudo (target, "ls " + DbPath)
+    
     println("* Removing /etc/mongod.conf if exists as apt install doesn't like it")
     SSH:sudo (target, "rm /etc/mongod.conf", true)
 
@@ -241,6 +247,9 @@ P(1,GetTarget) =>target
     println("* Enabling mongo service")
     SSH:sudo (target, "systemctl enable mongod")
 
+    println("* Setting permissions on dbPath " + DbPath)
+	SSH:sudo (target, "chown -R mongodb:mongodb " + DbPath)
+	
     target.after("@") =>host
 
     println("* Creating mondod.cfg file")
