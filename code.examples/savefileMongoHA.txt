@@ -1,6 +1,7 @@
 <<<<<<<<<<<<<<<<<<<<<<<<< EOF
 CFT v1.5.4
 CFT v1.8.1
+CFT v1.9.12
 
 Install mongodb in High Availability configuration 
 
@@ -13,6 +14,13 @@ Requirements:
     $ :load SSH
     $ Readme
 
+
+Installation
+------------
+
+- SetHostPrefix
+- SetDbPath
+
 - Hosts:CheckSSHKeys
 - InstallMongodAll
 - InstallMongoShellAll
@@ -20,8 +28,12 @@ Requirements:
 - InstallMongosAll
 - RebootMongosServers
 - HowToAddShard - run for each of the data shards
+
+- ClearHostPrefix
 >>>>>>>>>>>>>>>>>>>>>>>>> EOF
 /Readme
+
+
 
 
 # Config
@@ -45,23 +57,87 @@ P(1,"temp") =>name
 	Lib:TmpFile(name)
 /TmpFile
 
+
+# To enable installing multiple full HA configs, we use a prefix
+# --
+	Lib:Header("Host prefix")
+	prefix = readLine("Enter host prefix, blank for none")
+	Db2:Set("MongoHA.install","hostPrefix",prefix)
+/SetHostPrefix
+
+
+
+# Get host prefix
+# --
+	prefix = Db2:Get("MongoHA.install","hostPrefix")
+	if (prefix==null) SetHostPrefix
+	
+	Db2:Get("MongoHA.install","hostPrefix")
+/HostPrefix
+
+
+
+
+# After install, the prefix should be cleared
+# --
+	Db2:Set("MongoHA.install","hostPrefix",null)
+/ClearHostPrefix
+
+
+
+
+# Where to store data (inserted into mongod.conf)
+# --
+	Lib:Header("dbPath")
+	println("The dbPath is by default /var/lib/mongodb")
+	println
+	currVal=Db2:Get("MongoHA.install", "dbPath")
+	println("- previous value: '" + currVal + "'")
+	println
+	
+	dbPath=readLine("Enter dbPath on VM's (enter for default)")
+	if (dbPath.trim=="") dbPath="/var/lib/mongodb"
+
+	Db2:Set("MongoHA.install","dbPath",dbPath)
+/SetDbPath
+
+
+# Get dbPath value 
+	dbPath=Db2:Get("MongoHA.install","dbPath")
+	if (dbPath==null) SetDbPath
+
+	Db2:Get("MongoHA.install","dbPath")
+/DbPath
+
+
+
+
 # Config data
+	# Get host prefix
+	prefix = HostPrefix
+	error(prefix==null,"No host prefix set - should at least be empty string")
+	
     # Note: the config replica set name 'conf' must not be changed, unless
     # also modifying the MongosStartScript function, which depends on it
     create = Lambda { 
-        P(1,"mcfg1.v mcfg2.v mcfg3.v").split=>hosts 
-        P(2,"conf")=>replSetName
-        P(3,"configsvr")=>clusterRole
+        P(1).split=>hosts 
+        P(2,"")=>prefix
+        P(3,"conf")=>replSetName
+        P(4,"configsvr")=>clusterRole
         hosts->host
-            out(Dict.set("host",host).set("replSetName",replSetName).set("clusterRole",clusterRole))
+        	prefixedHost=prefix+host
+            out(Dict.set("host",prefixedHost)
+            	.set("replSetName",replSetName)
+            	.set("clusterRole",clusterRole)
+            )
     }
 
     # Result list
-    create.call("mcfg1.v mcfg2.v mcfg3.v","conf","configsvr")
+    create.call("mcfg1.v mcfg2.v mcfg3.v",prefix,"conf","configsvr")
     +
-    create.call("md11.v md12.v md13.v","s1","shardsvr")
+    create.call("md11.v md12.v md13.v",prefix,"s1","shardsvr")
     +
-    create.call("md21.v md22.v md23.v","s2","shardsvr")
+    create.call("md21.v md22.v md23.v",prefix,"s2","shardsvr")
 /MongodData
 
 
@@ -355,7 +431,13 @@ mongos \
 
 
 
-PDict("replSetName","clusterRole").mergeCodes =>data ## Create mongod.conf
+
+# Create mongod.conf
+# --
+PDict("replSetName","clusterRole")
+	.set("dbPath", DbPath)
+	.mergeCodes => data 
+
 error(data.hasNullValue,"Expected parameters replSetName, clusterRole")
 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< EOF
 # mongod.conf
@@ -365,7 +447,7 @@ error(data.hasNullValue,"Expected parameters replSetName, clusterRole")
 
 # Where and how to store data.
 storage:
-  dbPath: /var/lib/mongodb
+  dbPath: ${dbPath}
   journal:
     enabled: true
 #  engine:
