@@ -8,13 +8,15 @@ Input("Enter ssh target on format user@host").get
 # Returns Dict to be stored in database
 # --
 P(1,GetSSHTarget) =>target
-P(3,36) => hoursSinceLast
+P(2,36) => hoursSinceLast
 
     println("APT update and upgrade")
 
-    target.after("@") =>host
-    error(SSH:HostOkSSH(host),"Target " + target + " not responding")
+    error(!target.contains("@"), "Invalid target: " + target)
 
+    error(!SSH:HostOkSSH(target),"Target " + target + " not responding")
+
+    target.after("@") =>host
 	tMark=Sys.scriptName+".lastrun."+host
 	if (Util:HasTimedOut(tMark, hoursSinceLast*3600)) {
 

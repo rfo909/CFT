@@ -142,6 +142,14 @@ s*.s   [no]
 		
 
 
+# Run APT Update + upgrade on one host
+# --
+	P(1,Input("target").get)=>target
+	println("Calling APTUpdate:run for target="+target)
+	APTUpdate:run(target,3)
+/AptUpdate
+
+
 # Run APT Update / upgrade on hosts
 # --
 	data=Parse
@@ -161,25 +169,33 @@ s*.s   [no]
 		target=sshUser+"@"+host
 		println("Starting process for " + target)
 		processData = SymDict(target)
+		
 
 		process = SpawnProcess(processData, {
 			start=currentTimeMillis
-			APTUpdate:run(target)
+			AptUpdate(target)
 			end=currentTimeMillis
 			println("### time=" + (end-start) + " ms")
 		})
 		out(process)
 	| _-> process
+		
 		target=process.data.target
+		Lib:Header("Waiting for " + target)
+		
 		exitValue=process.wait.exitValue
 		output=process.output
 
-		println("Saving data for " + target)
-			
-		obj=SymDict(target,exitValue,output)
+		println("exitValue=" + exitValue)
+		Inner{
+			output->line println("OUT: " + line)
+		}
+		type="APTUpdateUpgrade"
+		
+		obj=SymDict(target,exitValue,output,type)
 		
 		Db2Obj:AddObject("Ansible.APTUpdateUpgrade",obj)
-/AptUpgrade
+/AptUpdateAll
 
 
 		
@@ -218,6 +234,9 @@ s*.s   [no]
 	P(1)=>host
 	P(2)=>sshUser
 
+	println("host=" + host)
+	println("sshUser=" + sshUser)
+
 	tMark=Sys.scriptName+".lastrun."+host
 	if (Util:HasTimedOut(tMark)) {
 		println("# host " + host)
@@ -252,9 +271,8 @@ s*.s   [no]
 		process=SpawnProcess(ctx, UpdateCFT(host, sshUser))
 		out(process)
 	| _->process
+		Lib:Header("Waiting for " + process.data.host)
 		process.wait
-		host=process.data.host
-		println("-------------- " + host + " -----------------")
 		Inner {process.output->line println(line)}
 /UpdateCFTAll
 
@@ -341,6 +359,56 @@ SysStatAll("iostat")
 				SSH:sudo (target, List("rm /etc/resolv.conf", "ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf"))
 			)
 		} 
-/FixResolvConf
+/FixResolvConf1
+
+
+
+
+# Fix resolv.conf problem, take 2
+	readLine("Installs and configures resolvconf, yes to continue") => yesno
+	error(yesno != "yes", "Aborted")
+	
+	HostData=Hosts:Parse
+	HostData.LallHosts.call->host
+		assert(HostData.Lget.call(host, "OSFamily")=="debian")
+		       
+        HostData.Lget.call (host, "SSHUser") =>sshUser
+        assert(sshUser != null)
+
+        target=sshUser+"@"+host
+        if (!SSH:HostOkSSH(target)) {
+        	println("* Skipping target " + target)
+        	assert(false)
+        }
+
+		Lib:Header(host)
+		
+        found = SSH:sudo(target,"which resolvconf", true).exitCode==0
+        if (!found) {
+        	println("* Installing resolvconf")
+        	SSH:sudo(target,"apt install resolvconf")
+        }
+
+        println("* Configuring resolvconf")
+        lines = Sequence(
+        	@ options timeout:1 attempts:1 rotate
+        	@
+        	@ nameserver 10.0.0.3
+        	@ nameserver 10.0.0.4
+        )
+        f=Lib:TmpFile("resolv.conf.head")
+        f.create(lines)
+
+        SSH:copy(f,target,"./resolv.conf.head")
+        SSH:sudo(target,"cp ./resolv.conf.head /etc/resolvconf/resolv.conf.d/head")
+
+		println("* Restarting service resolvconf")
+        SSH:sudo(target,"service resolvconf restart")
+
+        #error("stop")
+        
+/FixResolvConf2
+
+
 
 
