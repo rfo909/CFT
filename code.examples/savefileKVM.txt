@@ -97,6 +97,18 @@ transport the port number to another PC, where you run VNC.
 AutoClone is the preferred way of creating new VM's, as
 it includes the necessary waits and checks for ping/ssh before
 going on.
+
+Making SSH work without password
+--------------------------------
+The new template VM must allow access from root on the VM server.
+This is done by:
+
+$ su root
+$ ssh-copy-id user@VM
+
+Also, if there are other hosts that are used for management,
+then do the same there, for the relevant users.
+
 --------------------------------------------------------------
 >>> EOF
 /Readme
