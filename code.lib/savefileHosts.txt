@@ -139,6 +139,33 @@ s*.s   [no]
 		println("------ " + target)
 		Dir.run("ssh-copy-id",target)
 /CheckSSHKeys
+
+
+
+
+# Test SSH (and dns)
+# ---
+	HostData=Hosts:Parse
+	HostData.LallHosts.call.sort->host
+		assert(HostData.Lget.call(host, "OS")=="linux")
+		       
+        HostData.Lget.call (host, "SSHUser") =>sshUser
+        assert(sshUser != null)
+
+        target=sshUser+"@"+host
+        
+        ctx=SymDict(target)
+        proc=SpawnProcess(ctx,{
+			ok = SSH:HostOkSSH(target)
+	        status = if (ok,"OK","-")
+	        println(target + ": " + status)
+	        status
+	    })
+	    out(proc)
+	| _->proc
+		status = proc.wait.exitValue
+		report(proc.data.target, status)
+/HostsStatus
 		
 
 
@@ -364,7 +391,8 @@ SysStatAll("iostat")
 
 
 
-# Fix resolv.conf problem, take 2
+# Fix resolv.conf problem, take 2 - installing resolvconf
+	error("JUST MADE THINGS WORSE!")
 	readLine("Installs and configures resolvconf, yes to continue") => yesno
 	error(yesno != "yes", "Aborted")
 	
@@ -408,6 +436,81 @@ SysStatAll("iostat")
         #error("stop")
         
 /FixResolvConf2
+
+
+
+
+
+# Remove resolvconf deaemon
+	readLine("Removes resolvconf, yes to continue") => yesno
+	error(yesno != "yes", "Aborted")
+	
+	HostData=Hosts:Parse
+	HostData.LallHosts.call->host
+		assert(HostData.Lget.call(host, "OSFamily")=="debian")
+		       
+        HostData.Lget.call (host, "SSHUser") =>sshUser
+        assert(sshUser != null)
+
+        target=sshUser+"@"+host
+        if (!SSH:HostOkSSH(target)) {
+        	println("* Skipping target " + target)
+        	assert(false)
+        }
+
+		Lib:Header(host)
+
+		println("* Stopping service resolvconf")
+        SSH:sudo(target,"service resolvconf stop", true)
+        println("* Removing resolvconf package")
+        SSH:sudo(target,"apt -y remove resolvconf", true)
+
+        #error("stop")
+        
+/FixResolvConf3
+
+
+
+# Remove resolvconf deaemon - restore state to original,
+# which means /etc/resolv.conf points to /run/systemd/resolve/stub-resolve.conf
+# ---
+	HostData=Hosts:Parse
+	HostData.LallHosts.call->host
+		assert(HostData.Lget.call(host, "OSFamily")=="debian")
+		       
+        HostData.Lget.call (host, "SSHUser") =>sshUser
+        assert(sshUser != null)
+
+        target=sshUser+"@"+host
+        if (!SSH:HostOkSSH(target)) {
+        	println("- Skipping target " + target)
+        	assert(false)
+        }
+
+		Lib:Header(host)
+
+	
+
+		println("* Checking /etc/resolv.conf")
+
+		SSH:sudo(target,"ls -l /etc/resolv.conf")=>x
+		if (!Lib:LinesContain(x.stdout,"stub")) {
+			println("* not linked to stub file")
+			SSH:sudo(target,"ls -l /run/systemd/resolve/stub-resolv.conf")=>x
+			if (!x.exitCode==0) {
+				println("* stub file not found")
+			} else {
+				println("* Changing link")
+				SSH:sudo(target,List(
+					"rm /etc/resolv.conf",
+					"ln -s /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf"
+				))
+			}
+		}
+
+        
+/FixResolvConf4
+
 
 
 
