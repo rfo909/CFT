@@ -9,6 +9,7 @@ Input("Enter ssh target on format user@host").get
 # --
 P(1,GetSSHTarget) =>target
 P(2,36) => hoursSinceLast
+P(3,false) => includeDistUpgrade
 
     println("APT update and upgrade")
 
@@ -36,6 +37,17 @@ P(2,36) => hoursSinceLast
 	        FAIL = result.get("exitCode") != 0 
 			if (FAIL) Inner {
 				Lib:HEader("Upgrade failed")
+				result.stdout->line println(line) |
+				result.stdout->line println("##ERR## " + line)
+			} 
+	   	}
+
+	   	if (includeDistUpgrade && !FAIL) {
+	   		println("Performing dist-upgrade")
+	        SSH:sudo(target,"apt-get -y dist-upgrade", true) =>result
+	        FAIL = result.get("exitCode") != 0 
+			if (FAIL) Inner {
+				Lib:HEader("Dist-upgrade failed")
 				result.stdout->line println(line) |
 				result.stdout->line println("##ERR## " + line)
 			} 

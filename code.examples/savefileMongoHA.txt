@@ -90,12 +90,12 @@ P(1,"temp") =>name
 # Where to store data (inserted into mongod.conf)
 # --
 	Lib:Header("dbPath")
-	println("The dbPath is by default /var/lib/mongodb")
-	println
 	currVal=Db2:Get("MongoHA.install", "dbPath")
 	println("- previous value: '" + currVal + "'")
 	println
-	
+	println("Default value is /var/lib/mongodb")
+	println
+
 	dbPath=readLine("Enter dbPath on VM's (enter for default)")
 	if (dbPath.trim=="") dbPath="/var/lib/mongodb"
 
