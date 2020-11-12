@@ -513,5 +513,72 @@ SysStatAll("iostat")
 
 
 
+# Update database with list of debian hosts
+# ---
+	HostData=Hosts:Parse
+	HostData.LallHosts.call->host
+		assert(HostData.Lget.call(host, "OSFamily")=="debian")
+		       
+        HostData.Lget.call (host, "SSHUser") =>sshUser
+        assert(sshUser != null)
+
+        target=sshUser+"@"+host
+
+        data=SymDict(host,sshUser,target)
+        out(data)
+/GetDebianHostsInfo
 
 
+
+# Configure /etc/systemd/resolved.conf
+# ---
+	HostData=Hosts:Parse
+	file=Lib:TmpFile("resolved_conf")
+	file.create(resolved_conf)
+	
+	HostData.LallHosts.call->host
+		assert(HostData.Lget.call(host, "OSFamily")=="debian")
+		       
+        HostData.Lget.call (host, "SSHUser") =>sshUser
+        assert(sshUser != null)
+
+        target=sshUser+"@"+host
+        if (!SSH:HostOkSSH(target)) {
+        	println("- Skipping target " + target)
+        	assert(false)
+        }
+
+		Lib:Header(host)
+		SSH:copy(file, target, "./resolved_conf")
+		SSH:sudo(target,"cp ./resolved_conf /etc/systemd/resolved.conf")
+	|
+	file.delete
+	
+/FixResolve5
+
+
+<<<<< EOF
+#  This file is part of systemd.
+#
+#  systemd is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU Lesser General Public License as published by
+#  the Free Software Foundation; either version 2.1 of the License, or
+#  (at your option) any later version.
+#
+# Entries in this file show the compile time defaults.
+# You can change settings by editing this file.
+# Defaults can be restored by simply deleting this file.
+#
+# See resolved.conf(5) for details
+
+[Resolve]
+DNS=10.0.0.3 10.0.0.4
+#FallbackDNS=
+#Domains=
+#LLMNR=no
+#MulticastDNS=no
+#DNSSEC=no
+#Cache=yes
+#DNSStubListener=yes
+>>>>> EOF
+/resolved_conf
