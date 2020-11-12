@@ -247,6 +247,39 @@ Run exampleParse() to test
 	|
 	println(indent+"]")
 /PPList
+
+
+
+# Receive pasted JSON, parses and pretty-prints it
+# --
+	println("Paste or enter JSON lines, then terminate by '.' on single line")
+	readLines(".") => json
+	
+	start=currentTimeMillis
+
+	RootNode => root
+	Lib.Text.Lexer => lexer
+	json->line lexer.processLine(root,line) 
+
+	|
+
+	ts=lexer.getTokenStream
+
+	tc = tryCatchSoft(
+		MatchValue(ts)
+	)
+
+	end=currentTimeMillis
+	println("# " + (end-start) + " ms")
+	
+	if (tc.ok) {
+		println("parse ok")
+		PPObj(tc.result)
+	}
+	tc.result
+	
+/PP
+
 	
 
 Lib.Text.Lexer.getTokenStream help
