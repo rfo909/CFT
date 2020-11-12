@@ -184,6 +184,8 @@ s*.s   [no]
 	allHosts=data.LallHosts
 	lget = data.Lget
 
+
+	mon=Util:ProcessMonitor
 	
 	data.LallHosts.call->host
 
@@ -194,16 +196,18 @@ s*.s   [no]
 		assert(sshUser != null)
 
 		target=sshUser+"@"+host
-		println("Starting process for " + target)
 		processData = SymDict(target)
 		
-
+		mon.Lwait.call(4)
+		println("Starting process for " + target)
 		process = SpawnProcess(processData, {
 			start=currentTimeMillis
 			AptUpdate(target)
 			end=currentTimeMillis
 			println("### time=" + (end-start) + " ms")
 		})
+		mon.Ladd.call(process)
+		
 		out(process)
 	| _-> process
 		
@@ -253,7 +257,7 @@ s*.s   [no]
 	        println(host + ": " + status)
     	}
     	    
-/NeedReboot     
+/NeedReboot
 
 
 # Update or install CFT
@@ -287,15 +291,22 @@ s*.s   [no]
 
 # Update CFT all
 # --
+	mon=Util:ProcessMonitor
+	
 	HostData=Hosts:Parse
 	HostData.LallHosts.call.sort->host
 		assert(HostData.Lhas.call(host,"Install.CFT","1"))
 		sshUser=HostData.Lget.call (host,"SSHUser")
 		assert(sshUser != null)
-		#println("Spawning process for host="+host)
 
+		mon.Lwait.call(4)
+		println("Spawning process for host="+host)
+		
 		ctx=SymDict(host,sshUser)
 		process=SpawnProcess(ctx, UpdateCFT(host, sshUser))
+
+		mon.Ladd.call(process)
+		
 		out(process)
 	| _->process
 		Lib:Header("Waiting for " + process.data.host)
@@ -358,6 +369,31 @@ SysStatAll("mpstat")
 
 SysStatAll("iostat")
 /IOStat
+
+
+
+
+
+# Update database with list of debian hosts
+# ---
+	HostData=Hosts:Parse
+	HostData.LallHosts.call->host
+		assert(HostData.Lget.call(host, "OSFamily")=="debian")
+		       
+        HostData.Lget.call (host, "SSHUser") =>sshUser
+        assert(sshUser != null)
+
+        target=sshUser+"@"+host
+
+        data=SymDict(host,sshUser,target)
+        out(data)
+/GetDebianHostsInfo
+
+
+
+
+
+
 
 # Fix resolv.conf problem
 	readLine("Softlinks /run/systemd/resolve/resolv.conf to /etc/resolv.conf, yes to continue") =>yesno
@@ -513,23 +549,6 @@ SysStatAll("iostat")
 
 
 
-# Update database with list of debian hosts
-# ---
-	HostData=Hosts:Parse
-	HostData.LallHosts.call->host
-		assert(HostData.Lget.call(host, "OSFamily")=="debian")
-		       
-        HostData.Lget.call (host, "SSHUser") =>sshUser
-        assert(sshUser != null)
-
-        target=sshUser+"@"+host
-
-        data=SymDict(host,sshUser,target)
-        out(data)
-/GetDebianHostsInfo
-
-
-
 # Configure /etc/systemd/resolved.conf
 # ---
 	HostData=Hosts:Parse
@@ -582,3 +601,4 @@ DNS=10.0.0.3 10.0.0.4
 #DNSStubListener=yes
 >>>>> EOF
 /resolved_conf
+
