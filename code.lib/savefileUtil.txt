@@ -89,3 +89,33 @@ P(2,"*") => globPattern
 /SelectFile
 
 
+
+# Process monitor : object to limit number of simultaneously active processes
+#
+# Example of use
+#
+#   # --- create monitor object, set limit of active running processes
+#   mon = Util:ProcessMonitor
+#   limit = 4 
+# 
+#   # --- when about to start a process
+#   mon.Lwait.call(limit)
+#   proc = SpawnProcess(...)
+#   mon.Ladd.call(proc)
+#
+# --
+Dict.set("list",List)
+	.set("LcountRunning",Lambda{
+		self.list->proc assert(proc.isDone) out(proc) | _.length => completed
+		self.list.length-completed
+	})
+	.set("Lwait",Lambda{P(1)=>limit
+		loop
+			break(self.LcountRunning.call < limit)
+			Sys.sleep(100)
+	})
+	.set("Ladd",Lambda{P(1)=>proc
+		self.list.add(proc)
+	})
+/ProcessMonitor
+

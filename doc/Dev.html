@@ -13,7 +13,32 @@
 
 <h1>CFT Change log</h1>
 
-<h3>v1.9.13 2020-11-12</h3>
+<h3>v1.9.13 2020-11-12 ProcessMonitor</h3>
+<p>
+	Added function Util:ProcessMonitor that returns an object with lambdas for flow control when
+	running parallel processes, as currently doing APT upgrade on 30 VM's on the same server
+	takes forever, because of IO wait. Tried first to write in Java, but CFT was so
+	much better suited for the task, with code being 14 lines (same as example of use below).
+</p>
+<pre>
+# Test function
+# --
+	mon = Util:ProcessMonitor
+	Lib.Data.each(0,20)-&gt;x
+		mon.Lwait.call(4)
+		println("Starting process " + x)
+		proc = SpawnProcess(SymDict(x),{
+			Sys.sleep(1000+x*100)
+		})
+		mon.Ladd.call(proc)
+		out(proc)
+	| _-&gt;proc
+		proc.wait
+		println("process " + proc.data.x + " done")
+/t
+</pre>	
+
+<h3>v1.9.13 2020-11-12 File compression</h3>
 <p>
 	Added File.convertCompressed() which converts between various types of compression, based on
 	file name (.z or .gz for GZIP, .zip for ZIP otherwise uncompressed)
@@ -35,6 +60,7 @@
 <p>
 	Lots of script updates
 </p>
+<h4>2020-11-12 emergency fix</h4>
 <p>
 	Added File functions setWriteLF() and setWriteCRLF to dictate how create() and append() work
 </p>
