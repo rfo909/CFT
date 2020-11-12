@@ -45,6 +45,7 @@ public class ObjFile extends Obj {
     private String name;
     private Protection protection;
     private String encoding=DefaultEncoding;
+    private String customEOL; // for overriding CRLF / LF
 
     public ObjFile(String name, Protection protection) throws Exception {
         this.name=name;
@@ -92,6 +93,8 @@ public class ObjFile extends Obj {
         add(new FunctionUnprotect());
         add(new FunctionTail());
         add(new FunctionHead());
+        add(new FunctionSetWriteLF());
+        add(new FunctionSetWriteCRLF());
     }
     
     public Protection getProtection() {
@@ -211,6 +214,17 @@ public class ObjFile extends Obj {
         long k=count/1024;
         return k+"k";
     }
+    
+    // Implenting customEOL override
+    
+    private void outln(PrintStream ps, String line) throws Exception {
+    	if (customEOL==null) {
+    		ps.println(line);
+    	} else {
+    		ps.print(line);
+    		ps.print(customEOL);
+    	}
+    }
 
     class FunctionExists extends Function {
         public String getName() {
@@ -322,10 +336,10 @@ public class ObjFile extends Obj {
                     List<Value> lines=((ValueList)content).getVal();
                     for (Value line:lines) {
                         // process as lines
-                        ps.println(line.getValAsString());
+                    	outln(ps,line.getValAsString());
                     }
                 } else {
-                    ps.println(content.getValAsString());
+                	outln(ps,content.getValAsString());
                 }
             } finally {
                 if (ps != null) try {ps.close();} catch (Exception ex) {};
@@ -356,10 +370,10 @@ public class ObjFile extends Obj {
                     List<Value> lines=((ValueList)content).getVal();
                     for (Value line:lines) {
                         // process as lines
-                        ps.println(line.getValAsString());
+                        outln(ps,line.getValAsString());
                     }
                 } else {
-                    ps.println(content.getValAsString());
+                    outln(ps,content.getValAsString());
                 }
             } finally {
                 if (ps != null) try {ps.close();} catch (Exception ex) {};
@@ -1008,6 +1022,37 @@ public class ObjFile extends Obj {
         }
     }
 
+    
+
+    class FunctionSetWriteLF extends Function {
+        public String getName() {
+            return "setWriteLF";
+        }
+        public String getShortDesc() {
+            return "setWriteLF() - override default newline / CRLF";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 0) throw new Exception("Expected no parameters");
+        	customEOL="\n";
+            return new ValueObj(self());
+        }
+    }
+    
+
+    class FunctionSetWriteCRLF extends Function {
+        public String getName() {
+            return "setWriteCRLF";
+        }
+        public String getShortDesc() {
+            return "setWriteCRLF() - override default newline / CRLF";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 0) throw new Exception("Expected no parameters");
+        	customEOL="\r\n";
+            return new ValueObj(self());
+        }
+    }
+    
 
  
     private String fmt (int i, int n) {
