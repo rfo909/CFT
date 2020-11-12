@@ -195,6 +195,7 @@ Multitasking in CFT
  |   Management function, with logging via Db2Obj database script
  |   Checking results (in database)
  * Advantages
+ * Flow control
 
 String .esc() and .unEsc()
  * Escape codes
@@ -251,3 +252,10 @@ Comments and digressions
  * 2020-10-24 Objects ...
  * 2020-10-24 cleaning up - Java Parser
  * 2020-10-24 loop spaces / the "pipe"
+ * 2020-11-12 Soft and hard errors
+ * 2020-11-12 No more session values
+ * 2020-11-12 CFT greatness
+ |   JSON parser
+ |   Util:ProcessMonitor
+ |   CFT code libraries
+ |   Version 2 upcoming

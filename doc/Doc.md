@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2020-11-07 RFO
-v1.9.12
+Last updated: 2020-11-12 RFO
+v1.9.13
 ```
 # Introduction
 
@@ -2311,6 +2311,31 @@ the code easy to test separately.
 Processes also offer full protection from exceptions of all kinds, as they
 are caught and listed in full inside the Process.
 
+## Flow control
+
+
+In some cases, the number of processes can be huge, and we may need to limit the
+number of active processes. This is done via a function in the Util script, that
+returns an 
+**object** which we use as follows. The names "Lxxx" are used to
+help indicate that they contain lambdas (though strictly they are closures).
+
+```
+# -- Create monitor, decide max parallel processes
+mon=Util:ProcessMonitor
+limit=4
+# -- when about to create new process
+mon.Lwait.call (limit)
+proc=SpawnProcess(...)
+mon.Ladd.call(proc)
+```
+
+The mon.Lwait lambda waits until number of running processes comes below the limit,
+before returning.
+
+
+See separate sections on closures and objects.
+
 # String .esc() and .unEsc()
 
 
@@ -3206,5 +3231,93 @@ just yet.
 
 The "pipe" is completely optional, as Inner blocks can do all that "loop spaces" do (and more), but
 at the cost of a bit more notation.
+
+## 2020-11-12 Soft and hard errors
+
+
+v1.8.x mainly focused on exception handling, separating CFT script errors from problems
+from underlying Java code. Soft errors are those thrown by error() and Java errors are
+hard, with one exception so far, as documented for that function (inside the TokenStream object
+when matching tokens).
+
+
+Some mechanism was needed after writing the first version of the JSON parser in CFT, and from
+the realization that code libraries in CFT will need some way of throwing errors, that
+can be caught separately from hard exceptions.
+
+
+What actually took the most time, was figuring out what to name these two different categories
+of errors.
+
+## 2020-11-12 No more session values
+
+
+As of v1.9 the session values via Val("name") and ValDef("name",value) have been removed from
+the language. The reason is that as v1.9 is about adding multitasking, and none of the data
+types are made thread safe, by eliminating session values, we eliminate concurrent updates.
+
+
+The data stored in the database is synthesized and eval'ed, which means it is always
+new values. This function is also used to create the "context" dictionary of values available
+to the expressions to be run in separate processes, again ensuring no concurrent access
+to CFT data structures.
+
+
+At the same time the internal database was developed, as there is always need to remember
+stuff. The difference is that databases don't null out between sessions. That is good and
+bad news.
+
+## 2020-11-12 CFT greatness
+
+
+**v1.9.13**
+### JSON parser
+
+
+Today I modified the JSON parser written in CFT, to the point that it successfully
+processed multiple random examples from the web. I created a "pretty-printer" too,
+though it's not so pretty yet. I even fed output from the PP through the parser, and it
+still agreed it was valid JSON.
+
+### Util:ProcessMonitor
+
+
+The second issue today was how SpawnProcess() can sometimes generate way too many
+processes hammering away at the same time, for example doing apt upgrade on 30 VM's
+on the same physical host.
+
+
+I tried fitting something into the Java code, but it would be ugly and bulky, and so I abandoned
+it. Then I started testing how to write it in CFT, as I have a script that needs
+this, and ended up creating a neat
+little function that returns an object, with callable lambdas for (1) wait until
+no more than N processes are alive, and (2) register newly spawned process.
+
+
+The finished code is 14 lines, and available as Util:ProcessMonitor. The function doc
+is as long as the code :-)
+
+
+The initial sense when moving to CFT, was that if only I had not removed support for
+session values .... but it forced me making actual objects, which are much better.
+
+### CFT code libraries
+
+
+From my previous project that was actually used by someone, I remember
+it being a special day when discovering that the amount of code written in the
+language, exceeds the amount of code for the interpreter.
+
+
+Having worked extensively with the Hosts, SSH, KVM and PS scripts, to mention some
+of the most important, that point is still a bit off into the future, but the
+examples above indicate that there will be more CFT script code, not less.
+
+### Version 2 upcoming
+
+
+I have implemented more than I envisioned for v2, except a tool for easily
+browsing the databases (Db2 and Db2Obj). The templating possibilities begs
+for letting CFT host a tiny web server, but the jury's still out on this.
 
 
