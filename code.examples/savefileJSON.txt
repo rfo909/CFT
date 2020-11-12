@@ -20,19 +20,19 @@ Run exampleParse() to test
 	digits = "0123456789"
 	root.sub(digits).setIsToken(2) => integer
 	integer.sub(digits,integer) # loop back
-	integer.sub(".").sub(digits).setIsToken(2) => float 
+	integer.sub(".").sub(digits).setIsToken(3) => float 
 	float.sub(digits,float) # loop back
 	
 	identFirstChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"
 	identInnerChars = identFirstChars + "0123456789"
 	
-	root.sub(identFirstChars).setIsToken(3) => ident
+	root.sub(identFirstChars).setIsToken(4) => ident
 	ident.sub(identInnerChars, ident) # loop back
 	
 	List('"',"'")->c 
 		root.sub(c) => insideString
 		insideString.setDefault(insideString)
-		insideString.sub(c).setIsToken(4)
+		insideString.sub(c).setIsToken(5)
 	|
 	
 	# return value is the root node
@@ -70,23 +70,41 @@ Run exampleParse() to test
 
 # RUNME: JSON parser
 # --
+	start=currentTimeMillis
+	
 	ts = exampleTokenStream
-	tc = tryCatchSoft(MatchObject(ts))
+	tc = tryCatchSoft(
+		MatchValue(ts)
+	)
+
+	end=currentTimeMillis
+	println("# " + (end-start) + " ms")
+	
 	if (tc.ok) {
 		println("parse ok")
 		dict = tc.result  # the JSON root object
 		
 		println
-		exampleJSON->line println(line) |
+		Inner {
+			exampleJSON->line println(line)
+		}
 		println
 		
 		println("accessing list[3].id")
 		println("--------------------")
-		println(dict.get("list").nth(3).get('"id"'))
+		println(dict.get("list").nth(3).get('id'))
 	} else {
 		println("Parse failed: " + tc.msg)
 	}
+
+	PPObj(tc.result)
+	tc.result
 /exampleParse
+
+
+
+
+
 
 	
 
@@ -99,7 +117,13 @@ Run exampleParse() to test
 		break(ts.match("}"))
 		if (comma) ts.match(",","expected comma or '}'") 
 		# match string or identifier + colon + Value
-		name=ts.peek  # optimistic parsing for now  
+		name=ts.peek
+		if (ts.peekType == 5) {
+			# String
+			name=name.sub(1,name.length-1)
+		} else if (ts.peekType != 4) { # identifier
+			error(ts.sourceLocation + " Expected String or Identifier for object field name, got '" + name + "'")
+		}
 		ts.next
 		ts.match(":","expected colon")
 		value=MatchValue(ts)
@@ -110,19 +134,44 @@ Run exampleParse() to test
 /MatchObject
 
 # Value
+# 
 	P(1)=> ts
 	if (ts.peek()=="{") {
 		MatchObject(ts)
 	} else if (ts.peek()=="[") {
 		MatchList(ts)
-	} else {
-		str=ts.peek
+	} else if (ts.peek()=="true") {
 		ts.next
-		str
+		true
+	} else if (ts.peek()=="false") {
+		tx.next
+		false
+	} else if (ts.peek()=="null") {
+		ts.next
+		null
+	} else if (ts.peekType()==4) {  # identifier
+		error(""+ts.sourceLocation + " Invalid value: (identifier) " + ts.peek)
+	} else if (ts.peekType()==2) { # int
+		s=ts.peek
+		if (!s.?parseInt) error(""+ts.sourceLocation+" Invalid int: " + s)
+		ts.next
+		s.parseInt
+	} else if (ts.peekType()==3) { # float
+		s=ts.peek
+		if (!s.?parseFloat) error(""+ts.sourceLocation+" Invalid float: " + s)
+		ts.next
+		s.parseFloat
+	} else if (ts.peekType()==5) { # string
+		s=ts.peek
+		ts.next
+		s.sub(1,s.length-1)  # strip quotes
+	} else {
+		error(""+ts.sourceLocation+" Unexpected token: '" + ts.peek + "'")
 	}
 /MatchValue
 
 # List
+# --
 	P(1) => ts
 	list = List
 	ts.match("[","expected '['")
@@ -137,4 +186,68 @@ Run exampleParse() to test
 /MatchList
 		
 		
-		
+
+# Pretty-print value
+# --
+	P(1)=>value
+	P(2,"")=>indent
+
+	indent2=indent+"   "
+
+	t=getType(value)
+
+	if (t=="Dict") {
+		PPObj(value,indent2)
+	} else if (t=="List") {
+		PPList(value,indent2)
+	} else if (t=="Dict") {
+		PPObj(value,indent2)
+	} else if (t=="String") {
+		println(indent2+'"'+value+'"')
+	} else {
+		println(indent2+value)
+	}
+/PPValue
+	
+
+
+# Pretty-print object
+# --
+	P(1,Dict)=>object
+	P(2,"")=>indent
+
+	indent2=indent+"   "
+
+	println(indent+"{")
+
+	comma=false
+	object.keys.sort->key
+		if (comma) println(indent2+",")
+		println(indent2+key+":")
+		value=object.get(key)
+		PPValue(value,indent2)
+		comma=true
+	|
+	println(indent+"}")
+/PPObj	
+
+
+# Pretty-print list
+# --
+	P(1,List)=>list
+	P(2,"")=>indent
+
+	indent2=indent+"   "
+	println(indent+"[")
+	comma=false
+	list->x
+		if (comma) println(indent2+",")
+		PPValue(x,indent2)
+		comma=true
+	|
+	println(indent+"]")
+/PPList
+	
+
+Lib.Text.Lexer.getTokenStream help
+/h
