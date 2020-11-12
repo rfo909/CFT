@@ -95,6 +95,7 @@ public class ObjFile extends Obj {
         add(new FunctionHead());
         add(new FunctionSetWriteLF());
         add(new FunctionSetWriteCRLF());
+        add(new FunctionConvertCompressed());
     }
     
     public Protection getProtection() {
@@ -591,6 +592,29 @@ public class ObjFile extends Obj {
             in.close();
             out.close();
             return new ValueObj(new ObjFile(targetPath, targetDir.getProtection()));
+        }
+    }
+
+    class FunctionConvertCompressed extends Function {
+        public String getName() {
+            return "convertCompressed";
+        }
+        public String getShortDesc() {
+            return "convertCompressed(TargetFile) - compress or uncompress between GZIP (.z and .gz) or ZIP (.zip) or plain (other ending)";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected TargetFile parameter");
+            Obj obj=getObj("TargetFile", params, 0);
+            if (!(obj instanceof ObjFile)) throw new Exception("Expected TargetFile parameter");
+            
+            ObjFile targetFile=(ObjFile) obj;
+            
+            targetFile.validateDestructiveOperation("file compress target");
+            
+            FileInfo source=new FileInfo(self().getPath());
+            FileInfo target=new FileInfo(targetFile.getPath());
+            target.copyFrom(source);
+            return new ValueObj(targetFile);
         }
     }
 

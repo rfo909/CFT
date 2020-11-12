@@ -13,11 +13,37 @@
 
 <h1>CFT Change log</h1>
 
-<h3>v1.9.12 2020-11-06 Hardening Db2</h3>
+<h3>v1.9.13 2020-11-12</h3>
+<p>
+	Added File.convertCompressed() which converts between various types of compression, based on
+	file name (.z or .gz for GZIP, .zip for ZIP otherwise uncompressed)
+</p>
+<pre>
+	File("x.txt").convertCompressed(File("x.txt.zip"))
+	File("x.txt.zip").convertCompressed(File("a.txt"))
+	File("x.txt").hash==File("a.txt").hash
+
+	true
+</pre>
+
+<h3>v1.9.12 2020-11-06</h3>
+<p><b> Hardening Db2</b></p>
 <p>
 	Should handle parallel access from multiple active CFT processes on same host, by detecting file updates
 	and reloading when needed. 
 </p>
+<p>
+	Lots of script updates
+</p>
+<p>
+	Added File functions setWriteLF() and setWriteCRLF to dictate how create() and append() work
+</p>
+<p>
+	Greatly improved JSON parser, and included a PrettyPrinter
+</p>
+<pre>
+	$ JSON:PP
+</pre>
 
 
 <h3>v1.9.11 2020-11-06 Dict .subset() .copyFrom() and global SymDict()</h3>

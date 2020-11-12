@@ -37,6 +37,8 @@ public class FileInfo {
     public static final int UNCOMPRESSED = 1;
     public static final int ZIP = 2;
     public static final int GZIP = 3;
+    
+    public static final String CHARSET_BINARY = "BINARY";
 
     private File f;
     private String completeName;
@@ -52,14 +54,14 @@ public class FileInfo {
     }
 
     /**
-    * Valid values for charSet are ISO-8859-1, UTF-8, UTF-16, UTF-16BE and UTF-16LE
+    * Valid values for charSet are ISO-8859-1, UTF-8, UTF-16, UTF-16BE and UTF-16LE, as well as FileInfo.CHARSET_BINARY for no coversion
     */
     public FileInfo (String completeName, String charSet) {
         this.completeName=completeName;
         if (charSet != null) {
             this.charSet=charSet;
         } else {
-            this.charSet="ISO-8859-1";
+            this.charSet=FileInfo.CHARSET_BINARY;
         }
 
         int pos=completeName.lastIndexOf(File.separator);
@@ -242,7 +244,15 @@ public class FileInfo {
     * short-circuited, and the file is copied raw, not decompressed and recompressed.
     */
     public void copyFrom (FileInfo f) throws Exception {
-        if (f.getCharSet() != this.getCharSet()) {
+    	boolean isBinary=false;
+    	if (f.getCharSet().equals(CHARSET_BINARY) || this.getCharSet().equals(CHARSET_BINARY)) {
+    		// error if not both binary
+    		if (!f.getCharSet().equals(this.getCharSet())) { 
+    			throw new Exception("Can not copy from charset " + f.getCharSet() + " to " + this.getCharSet());
+    		}
+    		isBinary=true;
+    	}
+        if (!isBinary && (f.getCharSet() != this.getCharSet())) {
             BufferedReader reader=null;
             PrintWriter pw=null;
             try {
@@ -260,7 +270,7 @@ public class FileInfo {
                 if (reader != null) try {reader.close();} catch (Exception ex) {}
             }
         } else {
-            // charsets are the same, copy is performed at stream level
+        	// mode isBinary, or charsets are the same, copy is performed at stream level
             boolean rawCopyOk=false;
             if (f.getCompression() == this.getCompression()) {
                 if (this.getCompression() != ZIP) {
