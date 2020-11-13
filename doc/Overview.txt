@@ -261,5 +261,6 @@ Comments and digressions
  * 2020-11-12 CFT greatness
  |   JSON parser
  |   Util:ProcessMonitor
- |   CFT code libraries
+ |   CFT code libraries growing
  |   Version 2 upcoming
+ * 2020-11-13 Script and code size

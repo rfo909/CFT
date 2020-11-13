@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2020-11-12 RFO
-v1.9.13
+Last updated: 2020-11-13 RFO
+v1.9.14
 ```
 # Introduction
 
@@ -3359,17 +3359,18 @@ is as long as the code :-)
 The initial sense when moving to CFT, was that if only I had not removed support for
 session values .... but it forced me making actual objects, which are much better.
 
-### CFT code libraries
+### CFT code libraries growing
 
 
-From my previous project that was actually used by someone, I remember
-it being a special day when discovering that the amount of code written in the
-language, exceeds the amount of code for the interpreter.
+From my previous interpreted language project (called "GNT"), that was and is
+actually being used in production at work, I remember
+it being a special day when I realized that the amount of code written in the
+language, far exceeded the amount of code for the interpreter.
 
 
 Having worked extensively with the Hosts, SSH, KVM and PS scripts, to mention some
 of the most important, that point is still a bit off into the future, but the
-examples above indicate that there will be more CFT script code, not less.
+examples above indicate that the CFT script code base also keeps growing.
 
 ### Version 2 upcoming
 
@@ -3378,4 +3379,73 @@ I have implemented more than I envisioned for v2, except a tool for easily
 browsing the databases (Db2 and Db2Obj). The templating possibilities begs
 for letting CFT host a tiny web server, but the jury's still out on this.
 
+## 2020-11-13 Script and code size
+
+
+As a followup to yesterdays musings about size of code libraries, I had to check
+the numbers.
+
+```
+Script code:      ~5k lines
+Java code:        ~20k lines
+Doc.html:         ~3800 lines
+Dev.html:         ~3300 lines    # change history 2018-08
+Functions:        ~290
+Object types:     ~45
+```
+
+Functions means member functions of all object types (including values)
+
+The object types are:
+
+```
+0: public class ObjRegex extends Obj {
+1: public class ObjDataFile extends Obj {
+2: public class ObjExtProcess extends Obj {
+3: public class ObjDb2 extends Obj {
+4: public class ObjData extends Obj {
+5: public class ObjFile extends Obj {
+6: public class ObjDir extends Obj {
+7: public class ObjDateSort extends Obj {
+8: public class ObjGlob extends Obj {
+9: public class ObjDict extends Obj {
+10: public abstract class ObjPersistent extends Obj {
+11: public class ObjMath extends Obj {
+12: public class ObjProcess extends Obj {
+13: public class ObjFilterReader extends Obj {
+14: public class ObjDuration extends Obj {
+15: public class ObjConvert extends Obj {
+16: public class ObjGrep extends Obj {
+17: public class ObjClosure extends Obj {
+18: public class ObjFilter extends Obj {
+19: public class ObjSys extends Obj {
+20: public class ObjPlot extends Obj {
+21: public class ObjDate extends Obj {
+22: public class ObjExp extends Obj {
+23: public class ObjDb extends Obj {
+24: public class ObjLib extends Obj {
+25: public class ObjLineReader extends ObjPersistent implements CtxCloseHook {
+26: public class ObjInput extends ObjPersistent {
+27: public class ObjLexer extends Obj {
+28: public class ObjLexerNode extends Obj {
+29: public class ObjLexerTokenStream extends Obj {
+30: public class ObjLexerToken extends Obj {
+31: public class ObjText extends Obj {
+32: public class ObjFiles extends Obj {
+33: public abstract class Value extends Obj {
+34: public class ObjGlobal extends Obj {
+35: public class ObjCfg extends Obj {
+0: public class ValueList extends Value {
+1: public class ValueString extends Value {
+2: public class ValueBlock extends Value {
+3: public class ValueObjInt extends ValueInt {
+4: public class ValueObjFloat extends ValueFloat {
+5: public class ValueObjFileLine extends ValueString {
+6: public class ValueObjStr extends ValueString {
+7: public class ValueFloat extends Value {
+8: public class ValueInt extends Value {
+9: public class ValueNull extends Value {
+10: public class ValueBoolean extends Value {
+11: public class ValueObj extends Value {
+```
 
