@@ -709,6 +709,64 @@ List(1,2)+3
 2
 3
 ```
+# List sorting
+
+
+The List object has a single .sort() member function, which does the following:
+
+
+
+- if all values are int, sort ascending on int value
+
+
+- if all values are float, sort ascending on float value
+
+
+- otherwise sort ascending on "string representation" of all values
+
+
+
+Now, to sort other types of values, we use a "trick", which consists of wrapping each
+value inside a special wrapper object, masking the original values as either int, float
+or STring, then sort, and finally extract the actual value from the wrappers.
+
+
+To sort a list of files on their size, biggest first, we do the following:
+
+```
+Dir.files->f
+out(Int(f.lastModified,f))
+| _.sort.reverse->x
+out(x.data)
+```
+
+The first loop wraps each File object inside an Int object, which is created by
+supplying two values to global function Int: the value to sort on, and the object itself.
+
+
+Then the resulting list is "piped" to code that picks it off the stack, sorts and
+reverses it, before iterating over the result, and for each object (now the Int objects),
+outputs the original File object, available via the .data() function.
+
+## Int(), Str() and Float()
+
+
+Similarly there is a global Str() function for sorting on strings, and Float() for
+sorting on floats. Together with Int() function, these produce Str, Float and Int objects,
+which are actually subclasses of the regular "String", "float" and "int" value types, with
+the additional function .data() to retrieve the original value.
+
+## Converting between int and float
+
+
+Both the "int" and "float" type contain two functions for converting to int and float:
+
+```
+2.f     becomes float 2.0
+2.i     remains int   2
+3.14.f  remains float 3.14
+3.14.i  becomes int   3
+```
 # Savefiles - "scripts"
 
 ## Save

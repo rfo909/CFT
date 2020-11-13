@@ -13,6 +13,25 @@
 
 <h1>CFT Change log</h1>
 
+<h3>v1.9.14 2020-11-13 List.sort etc</h3>
+<p>
+	Adding a section to the doc about sorting, it became clear that sorting on floats had never
+	been implemented. It also has not been missed, but it was a quick fix.
+</p>
+<p>
+	Also had some script updates today, and a fix in Db2 for maintaining high throughput for
+	write-intensive cases (not reading the file back to update internal map before needed
+	for queries). 
+</p>
+<p>
+	Finally, yesterday evening the ProcessMonitor object was easily integrated into the Hosts
+	script, for "apt update / upgrade" and "check out and compile latest CFT version". These
+	caused the VM server with 30 VM's being executed simultaneously to spike violently for a long while
+	before catching up. Using ProcessMonitor to run 4 parallel jobs at the time, increased
+	throughput greatly.
+</p>
+
+
 <h3>v1.9.13 2020-11-12 ProcessMonitor</h3>
 <p>
 	Added function Util:ProcessMonitor that returns an object with lambdas for flow control when

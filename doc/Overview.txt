@@ -64,6 +64,10 @@ List iteration / filtering
  * The condOut() statement
  * List addition
 
+List sorting
+ * Int(), Str() and Float()
+ * Converting between int and float
+
 Savefiles - "scripts"
  * Save
  * Load

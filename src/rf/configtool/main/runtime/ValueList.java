@@ -330,11 +330,16 @@ public class ValueList extends Value {
             if (val.size() <= 1) return self();
             
             boolean intSort=true;
+            boolean floatSort=true;
+            
             for (Value v:val) {
                 if (!(v instanceof ValueInt)) {
                     intSort=false;
-                    break;
+                } 
+                if (!(v instanceof ValueFloat)) {
+                	floatSort=false;
                 }
+                if (!intSort && !floatSort) break;
             }
             
             Comparator<Value> c;
@@ -349,6 +354,18 @@ public class ValueList extends Value {
                         
                     }
                 };
+            } else if (floatSort) {
+                c=new Comparator<Value>() {
+                    public int compare(Value a, Value b) {
+                        double fa=((ValueFloat) a).getVal();
+                        double fb=((ValueFloat) b).getVal();
+                        if (fa<fb) return -1;
+                        if (fa==fb) return 0;
+                        return 1;
+                        
+                    }
+                };
+
             } else {
                 c=new Comparator<Value>() {
                     public int compare(Value a, Value b) {
