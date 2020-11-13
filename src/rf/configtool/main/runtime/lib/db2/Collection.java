@@ -18,14 +18,12 @@ public class Collection {
 	public synchronized void addData (String key, String value) throws Exception {
 		if (key.contains("\r") || key.contains("\n") || key.contains(" ")) throw new Exception("Invalid key: \\r\\n + space forbidden");
 		if (value.contains("\r") || value.contains("\n")) throw new Exception("Invalid value: \\r\\n forbidden");
-		
-		checkForUpdate();
 
+		// Can NOT do checkForUpdate here, since it will severely degrade write performance
 		File f=fileInfo.getFile();
 		PrintStream ps = new PrintStream (new FileOutputStream(f, true));
 		try {
 			ps.println(key + " " + value);
-			data.put(key, value);
 		} finally {
 			if (ps != null) try {ps.close();} catch (Exception ex) {};
 		}
