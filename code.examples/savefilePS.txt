@@ -276,3 +276,35 @@ P(1)=>path
 		}
 	}
 /GetEventLog
+
+
+
+
+
+# Check disk usage numbers for remote drives
+# --
+	P(1,Input("host").get)=>host
+	P(2,Input("drive").get)=>drive
+
+	driveLetter=drive.chars.nth  # ignore colon if included
+
+	"get-psdrive " + driveLetter+ " | Select-Object Used,Free" => cmd
+
+	data=Dict
+	PS:Call(host,cmd).stdout->line 
+		assert(line.contains(":"))
+		data.setStr(line)
+	|
+	used=data.Used.parseInt
+	free=data.Free.parseInt
+	total=used+free
+	usagePercent=((used/total)*100).i
+
+	usedGb=(used/1024/1024/1024).i
+	freeGb=(free/1024/1024/1024).i
+
+	# return dictionary
+	SymDict(host,driveLetter,used,free,usagePercent,usedGb,freeGb)
+/GetRemoteDiskUse
+
+
