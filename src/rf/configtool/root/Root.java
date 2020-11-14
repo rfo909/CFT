@@ -611,8 +611,7 @@ public class Root {
 		stdio.println("You should have received a copy of the GNU General Public License");
 		stdio.println("along with this program.  If not, see <https://www.gnu.org/licenses/>");
 		stdio.println("");
-		stdio.println("To obtain latest version:");
-		stdio.println("   git clone https://github.com/rfo909/CFT.git");
+		stdio.println("https://github.com/rfo909/CFT.git");
 		stdio.println("");
 	}
 
