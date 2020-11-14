@@ -13,6 +13,13 @@
 
 <h1>CFT Change log</h1>
 
+<h3>v2.1.1 2020-11-14 Error message from Lexer</h3>
+<p>
+	Fixed function processLine() to maintain internal line counter, to produce more accurate
+	error messages for non-file input lines. For lines from files, there is a line number, 
+	which the code uses along with file name.
+</p>
+
 
 <h3>v2.1.0 2020-11-14 Made Lambda synthesizable</h3>
 <p>
@@ -25,7 +32,11 @@
 </p>
 <p>
 	The string representation for lambdas isn't the prettiest, as it is generated from
-	the tokens consumed while parsing, not the original "character stream". But it works.
+	the tokens consumed while parsing, not the original character stream. But it works. 
+</p>
+<p>
+	An improvement could be to let every token contain a string of all preceding whitespace,
+	and use this to create better formatted synthesized code. Another day.
 </p>
 
 

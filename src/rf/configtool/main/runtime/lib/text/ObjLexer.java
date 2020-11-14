@@ -95,6 +95,7 @@ public class ObjLexer extends Obj {
    
     private List<ObjLexerToken> tokenList=new ArrayList<ObjLexerToken>();
     
+    private int lineNo=0;
     
     
     class FunctionProcessLine extends Function {
@@ -107,6 +108,8 @@ public class ObjLexer extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() < 2 || params.size() > 3) throw new Exception("Expected parameters rootNode, line, eolTokenType?");
             
+            lineNo++;
+            
             Obj obj=getObj("rootNode",params,0);
             if (!(obj instanceof ObjLexerNode)) throw new Exception("Expected parameters rootNode and line");
              
@@ -117,6 +120,8 @@ public class ObjLexer extends Obj {
             if (params.get(1) instanceof ValueObjFileLine) {
             	ValueObjFileLine x = (ValueObjFileLine) params.get(1);
             	filePlusLineNo=x.getFile().getPath() + " line=" + x.getLineNo() + " ";
+            } else {
+            	filePlusLineNo="(nofile) line="+lineNo+" ";
             }
             // get line string
         	String line = getString("line",params, 1);

@@ -3,7 +3,8 @@
 Simple recursive-descent parser for JSON. Works fine as long
 as the JSON string is correct.
 
-Run exampleParse() to test
+Run exampleParse() to use the internal example 
+or PP to paste JSON and have it pretty-printed.
 
 >>>> EOF
 /Readme
@@ -32,6 +33,7 @@ Run exampleParse() to test
 	List('"',"'")->c 
 		root.sub(c) => insideString
 		insideString.setDefault(insideString)
+		insideString.sub("\").setDefault(insideString)
 		insideString.sub(c).setIsToken(5)
 	|
 	
@@ -223,7 +225,7 @@ Run exampleParse() to test
 	comma=false
 	object.keys.sort->key
 		if (comma) println(indent2+",")
-		println(indent2+key+":")
+		println(indent2+'"'+key+'":')
 		value=object.get(key)
 		PPValue(value,indent2)
 		comma=true
@@ -272,11 +274,17 @@ Run exampleParse() to test
 	end=currentTimeMillis
 	println("# " + (end-start) + " ms")
 	
+	Inner {
+		tc.keys->key
+			println(key + ": " + tc.get(key))
+	}
+	
 	if (tc.ok) {
 		println("parse ok")
 		PPObj(tc.result)
+	} else {
+		println("Failed: " + tc.msg)
 	}
-	tc.result
 	
 /PP
 
