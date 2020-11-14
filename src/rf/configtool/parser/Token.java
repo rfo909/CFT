@@ -29,11 +29,14 @@ public class Token {
     
     private int type; 
     private String str;
+    private String originalStringRep;
     private SourceLocation loc;
     
     
     public Token (SourceLocation loc, int type, String str) {
         this.loc=loc;
+        this.originalStringRep=str;
+        
         if (type==TOK_STRING) {
             str=str.substring(1,str.length()-1);  // strip quotes
         }
@@ -65,5 +68,9 @@ public class Token {
     
     public SourceLocation getSourceLocation() {
         return loc;
+    }
+    
+    public String getOriginalStringRep() {
+    	return originalStringRep;
     }
 }

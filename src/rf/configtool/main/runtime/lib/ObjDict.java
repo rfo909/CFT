@@ -130,7 +130,21 @@ public class ObjDict extends Obj {
         Iterator<String> names=values.keySet().iterator();
         while (names.hasNext()) {
             String name=names.next();
-            sb.append(".set(" + new ValueString(name).synthesize() + "," + values.get(name).synthesize() + ")");
+            Value value=values.get(name);
+            
+            // NOTE: closures are not synthesizable, but lambdas are, and setting a field in a Dict to 
+            // a lambda, recreates a closure, so that's how this is handled.
+            if (value instanceof ValueObj) {
+            	Obj obj=((ValueObj) value).getVal();
+            	if (obj instanceof ObjClosure) {
+            		ValueBlock lambda=((ObjClosure) obj).getLambda();
+            		value = lambda;
+            	} 
+            } else if (value instanceof ValueBlock) {
+            	// simple sanity check
+            	throw new Exception("Internal errors: Dict should contain ref to Lambda as it should be auto-wrapped as Closure");
+            }
+            sb.append(".set(" + new ValueString(name).synthesize() + "," + value.synthesize() + ")");
         }
         return sb.toString();
     }

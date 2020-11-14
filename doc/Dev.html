@@ -14,7 +14,19 @@
 <h1>CFT Change log</h1>
 
 
-
+<h3>v2.1.0 2020-11-14 Made Lambda synthesizable</h3>
+<p>
+	Also transferred this to Dict objects. 
+</p>
+<p>
+	Note that lambdas added to a Dict are wrapped into Closures, but closures are not
+	synthesizable. The Dict synthesis function creates code that adds the Lambda, 
+	which just means a Closure object will be created when the code string is eval'ed.
+</p>
+<p>
+	The string representation for lambdas isn't the prettiest, as it is generated from
+	the tokens consumed while parsing, not the original "character stream". But it works.
+</p>
 
 
 <h2 class="tag">2020-11-14 Tagging v2.0.0</h3> 

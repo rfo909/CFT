@@ -31,14 +31,17 @@ import rf.configtool.main.runtime.lib.ObjGrep;
 import rf.configtool.main.runtime.reporttool.Report;
 
 /**
- * Block of code
+ * Block of code - takes three different forms, but only one is available as
+ * a data object, and that's the Lambda form.
  */
 public class ValueBlock extends Value {
     
     private List<ProgramLine> programLines;
+    private String synString;
     
-    public ValueBlock (List<ProgramLine> programLines) {
+    public ValueBlock (List<ProgramLine> programLines, String synString) {
         this.programLines=programLines;
+        this.synString=synString;
         
         add(new FunctionCall());
     }
@@ -64,6 +67,11 @@ public class ValueBlock extends Value {
     @Override
     public boolean getValAsBoolean() {
         return true;
+    }
+
+    @Override
+    public String synthesize() {
+        return synString;
     }
 
     

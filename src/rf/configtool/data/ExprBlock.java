@@ -37,12 +37,15 @@ public class ExprBlock extends LexicalElement {
     private int mode;
     
     private List<ProgramLine> programLines=new ArrayList<ProgramLine>();
+    private String synString;
     
     // See Runtime.processCodeLines() method to extend to loops and supporting PROGRAM_LINE_SEPARATOR - must in addition 
     // add '}' as terminator character inside ProgramLine
 
     public ExprBlock (TokenStream ts) throws Exception {
         super(ts);
+        int tsStart=ts.getCurrPos();
+        
         if (ts.matchStr("Inner")) {
         	mode=MODE_INNER;
         	ts.matchStr("{","expected '{'");
@@ -70,7 +73,15 @@ public class ExprBlock extends LexicalElement {
 	    	ts.matchStr("}","expected '}' closing " + getBlockModeName() + " starting at " + this.getSourceLocation());
         }
         this.programLines=progLines;
-    
+        
+        int tsEnd=ts.getCurrPos();
+        
+        StringBuffer sb=new StringBuffer();
+        for (int i=tsStart; i<tsEnd; i++) {
+        	sb.append(" ");
+        	sb.append(ts.getTokenAtPos(i).getOriginalStringRep());
+        }
+        this.synString=sb.toString();
     }
     
     private String getBlockModeName() {
@@ -82,7 +93,7 @@ public class ExprBlock extends LexicalElement {
     
     
     public Value resolve (Ctx ctx) throws Exception {
-        ValueBlock b=new ValueBlock(programLines);
+        ValueBlock b=new ValueBlock(programLines, synString);
         if (mode==MODE_LAMBDA) {
         	return b;  // ValueBlock
         }

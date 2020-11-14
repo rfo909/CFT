@@ -62,6 +62,9 @@ public class TokenStream {
         return tokens.size();
     }
 
+    public Token getTokenAtPos (int pos) {
+    	return tokens.get(pos);
+    }
     /** 
      * peekStr checks the string representation of the following token, 
      * EXCEPT when the following token is of string type,
