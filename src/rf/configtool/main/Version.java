@@ -21,6 +21,6 @@ package rf.configtool.main;
 public class Version {
 
     public static String getVersion() {
-        return "v1.9.14";
+        return "v2.0.0";
     }
 }
