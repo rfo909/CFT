@@ -58,6 +58,7 @@ public class ObjSys extends Obj {
         add(new FunctionScriptName());
         add(new FunctionUptime());
         add(new FunctionHomeDir());
+        add(new FunctionUchar());
 	}
 
 	@Override
@@ -340,7 +341,31 @@ public class ObjSys extends Obj {
 			return new ValueObj(x);
 		}
 	}
+	
+	
 
+	class FunctionUchar extends Function {
+		public String getName() {
+			return "uchar";
+		}
 
+		public String getShortDesc() {
+			return "uchar(str|int) - create unicode char from \\uXXXX string notation (the \\u part is optional) - or int value";
+		}
+		
+		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+			if (params.size() != 1)
+				throw new Exception("Expected str|int parameter");
+			if (params.get(0) instanceof ValueInt) {
+				char c=(char) getInt("int",params,0);
+				return new ValueString(""+c);
+			}
+			// String parameter
+			String str=getString("str",params,0);
+			if (str.toLowerCase().startsWith("\\u")) str=str.substring(2);
+			char c=(char) (Integer.parseInt(str,16));
+			return new ValueString(""+c);
+		}
+	}
 
 }

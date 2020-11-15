@@ -13,7 +13,7 @@
 
 <h1>CFT Change log</h1>
 
-<h3>v2.1.2 2020-11-15 AppUI / Cfg</h3>
+<h3>v2.1.2 2020-11-15 AppUI / Cfg / Sys.uchar / Curses script</h3>
 <p>
 	Created first version of AppUI script for standardizing application user interface in
 	terminal.
@@ -21,6 +21,23 @@
 <p>
 	Changed Cfg.h and .w to return values without printing to stdout first
 </p>
+<p>
+	Added function Sys.uchar() which can be made to produce any Unicode character, by entering
+	the hex value. The preceding "\u" is optional. For example we can now produce the ANSI Esc
+	character, and control color and cursor.
+</p>
+<pre>
+	Sys.uchar("\u001b")+"[2J"     # print this to clear screen
+</pre>
+<p>
+	Extended Sys.uchar to also allow integer value directly.
+</p>
+<p>
+	Created Script Curses which uses ANSI escape codes for colors, clearing screen,
+	and cursor control.
+</p>
+
+
 
 <h3>v2.1.1 2020-11-14 Error message from Lexer</h3>
 <p>
