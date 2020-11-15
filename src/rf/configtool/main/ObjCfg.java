@@ -88,16 +88,7 @@ public class ObjCfg extends Obj {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() == 0) {
-                // doing direct output, to avoid problems with formatting
-                StringBuffer sb=new StringBuffer();
-                for (int i=1; i<30; i++) {
-                    String s="...................."+(i*10);
-                    s=s.substring(s.length()-10);
-                    sb.append(s);
-                }
-                ctx.getStdio().println(sb.toString());
-                ctx.getStdio().println("w="+w);
-                
+            	// do nothing
             } else if (params.size()==1) {
                 w=(int) getInt("val",params,0);
             } else {
@@ -115,12 +106,8 @@ public class ObjCfg extends Obj {
             return "h(val?) - get or set height of screen in rows";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() == 0) {
-                for (int i=100; i>=5; i--) {
-                    ctx.getStdio().println(""+i);
-                }
-                // doing direct output, to avoid problems with formatting
-                ctx.getStdio().println("h="+h);
+            if (params.size()==0) {
+            	// do nothing
             } else if (params.size()==1) {
                 h=(int) getInt("val",params,0);
             } else {

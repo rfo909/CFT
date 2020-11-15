@@ -1,0 +1,213 @@
+# Readme
+<<<< EOF
+AppUI
+
+For standardized and good looking console user interface
+
+See 'example' function
+
+>>>> EOF
+/Readme
+
+
+# Helper
+# --
+P(1," ")=>char
+P(2,0)=>length
+	Lib.Data.each(1,length)->x out(char) | _.concat
+/Chars
+
+
+
+# Helper
+# --
+P(1) => str
+P(2) => char
+P(3) => len
+	if (str.length<len) str=str+Chars(char,len-str.length)
+	str
+/Pad
+
+
+
+P(1,null) => title
+	titleLine="+--" + if(title!=null," ["+title+"] ","")
+	titleLine=Pad(titleLine,"-",Cfg.w-2)
+	println(titleLine)
+/DoShowTopLine
+	
+	
+P(1,null) => header
+	println("+- " + header)
+	println("|")
+/DoShowHeader
+	
+	
+
+P(1,List) => shortNames
+P(2) => current
+	line1=""
+	line2=""
+	Inner {
+		space=false
+		shortNames->name
+			if (space) {line1=line1+" " line2=line2+" "}
+			line1=line1+name
+			line2=line2+Chars(
+				if (name==current, "^", " "),
+				name.length
+			)
+			space=true
+	}
+	println("| " + line1)
+	println("| " + line2)
+/DoShowContext
+	
+	
+	
+P(1,"Label") => label
+P(2,null) => currValue
+P(3,true) => supportOptions
+	labelLine="+- " + label 
+		+ if(currValue != null, " -- Enter for ["+currValue+"]","") 
+		+ if(supportOptions, " ('.' for options)", "")
+	
+	println(labelLine)
+	println("?")
+	readLine => val
+	println()
+	if (val==".") {
+		DoShowHeader("Dot-commands")
+		println("| .xxx   - jump to other page")
+		println("| .q     - to abort")
+		println("|")
+		println(labelLine)
+		println("?")
+		readLine=>currValue
+	}
+	
+	if (val=="") val=currValue
+	val
+/DoInput
+
+
+Dict
+	.set("data",List)
+	.set("Lrow",Lambda{
+		P(1)=>shortName
+		P(2)=>longName
+		P(3)=>value
+		self.data.add(SymDict(shortName,longName,value))
+	})
+	.set("Lshow",Lambda{
+		sLen=0
+		lLen=0
+		vLen=0
+		self.data->x 
+			sLen=if(x.shortName.length>sLen, x.shortName.length, sLen)
+			lLen=if(x.longName.length>lLen, x.longName.length, lLen)
+			vLen=if(x.value.length>vLen, x.value.length, vLen)
+		|
+		self.data->x
+			line="| " + 
+				Pad(x.shortName + " ","-",sLen+4)
+				+ " " + Pad(x.longName+" ","-",lLen+4)
+				+ " [" + x.value + "]"
+			println(line)
+		|
+		println("|")
+	})
+/DoSummaryObj
+
+
+
+
+P(1,List) => data
+P(2, Lambda{P(1)}) => LambdaLabel
+	println("|")
+	pos=1
+	data->row
+		println("|  " + Pad(""+pos," ",5) + LambdaLabel.call(row))
+		pos=pos+1
+	|
+	println("|")
+	DoInput("Select menu by number",null,false) => str
+	if (str.?parseInt) {
+		n=str.parseInt-1
+		if (n<0 || n>data.length-1) {
+			null
+		} else {
+			data.nth(n)
+		}
+	} else {
+		null
+	}
+/DoMenu
+
+
+
+
+# Space
+# --
+	println("|")
+/DoSpace
+
+
+# Cls
+# --
+	Lib.Data.each(0,Cfg.h)->x println
+/DoCls
+	
+	
+	
+	
+	
+# Test
+# --
+	Lib:GetTerminalSize  # update Cfg
+	
+	
+	DoCls
+	
+	DoShowTopLine("Clone VM")
+	DoShowContext(
+		"Orig Name CPU RAM Disk Nic Confirm".split,
+		"Name"
+		)
+	DoInput(
+		"Name of new VM",
+		"mcfg1.v"
+		)
+
+	# ---
+
+	DoCls
+	
+	DoShowTopLine("Clone VM")
+	DoShowContext(
+		"Orig Name CPU RAM Disk Nic Confirm".split,
+		"Confirm"
+		)
+	DoShowHeader("Confirm")
+	
+	obj=DoSummaryObj
+	obj.Lrow.call("Orig","VM to clone","kubs05.v")
+	obj.Lrow.call("Name","Name of new VM", "mcfg1.v")
+	obj.Lrow.call("CPU","Number of CPUs", "4")
+	obj.Lrow.call("RAM","GB of RAM","8")
+	obj.Lrow.call("Disk","GB of disk","32")
+	obj.Lrow.call("Nic","Network NIC name","ens3")
+	obj.Lshow.call
+	
+	DoInput(
+		"Type 'yes' to confirm",
+		"no"
+		)
+
+	# ---
+	
+	DoCls
+	DoShowTopLine("Top menu")
+	DoMenu(List("Create VM from scratch","Clone existing VM","Show VM status","Start VM", "Stop VM"))
+	
+/example
