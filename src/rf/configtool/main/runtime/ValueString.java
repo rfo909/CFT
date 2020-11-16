@@ -27,6 +27,7 @@ import java.util.StringTokenizer;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.OutText;
 import rf.configtool.main.runtime.lib.ObjDict;
+import rf.configtool.util.Hex;
 
 public class ValueString extends Value {
     
@@ -59,6 +60,8 @@ public class ValueString extends Value {
         
         add(new FunctionEsc());
         add(new FunctionUnEsc());
+        add(new FunctionToHexString());
+        add(new FunctionFromHexString());
         add(new FunctionHash());
         
     }
@@ -80,14 +83,18 @@ public class ValueString extends Value {
     @Override
     public String synthesize() throws Exception {
         if (val==null) return "''";
-        boolean force=val.contains("\r") || val.contains("\n") || val.contains("\t");
-        boolean d=val.contains("\"");
-        boolean s=val.contains("'");
-        if (force || (d && s)) return '"' + escString(val) + '"' + ".unEsc";
-        if (d) return "'" + val + "'";
-        return "\"" + val + "\"";
+        return '"' + toHexString(val) + '"' + ".fromHexString";
+//        
+//        boolean force=val.contains("\r") || val.contains("\n") || val.contains("\t");
+//        boolean d=val.contains("\"");
+//        boolean s=val.contains("'");
+//        if (force || (d && s)) return '"' + toHexString(val) + '"' + ".fromHexString";
+//        if (d) return "'" + val + "'";
+//        return "\"" + val + "\"";
     }
 
+    
+    
     
     @Override
     public boolean eq(Obj v) {
@@ -563,6 +570,17 @@ public class ValueString extends Value {
         return sb.toString();
     }
 
+    public static String toHexString (String s) throws Exception {
+    	byte[] bytes=s.getBytes("UTF-8");
+    	return Hex.toHex(bytes);
+    }
+    
+    public static String fromHexString (String s) throws Exception {
+    	byte[] bytes=Hex.fromHex(s);
+    	return new String(bytes,"UTF-8");
+    }
+    
+
 
     class FunctionEsc extends Function {
         public String getName() {
@@ -593,6 +611,39 @@ public class ValueString extends Value {
             return new ValueString(unEscString(val));
         }
     }
+
+
+
+    class FunctionToHexString extends Function {
+        public String getName() {
+            return "toHexString";
+        }
+        public String getShortDesc() {
+            return "toHexString() - convert to hex format";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) {
+                throw new Exception("Expected no parameters");
+            }
+            return new ValueString(toHexString(val));
+        }
+    }
+
+    class FunctionFromHexString extends Function {
+        public String getName() {
+            return "fromHexString";
+        }
+        public String getShortDesc() {
+            return "fromHexString() - convert hex string back to original content";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) {
+                throw new Exception("Expected no parameters");
+            }
+            return new ValueString(fromHexString(val));
+        }
+    }
+
 
 
 

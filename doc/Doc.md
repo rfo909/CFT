@@ -3084,6 +3084,9 @@ The "problem" is that CFT code (and so shortcuts) can run colon commands via "ab
 - Regex
 
 
+- Lambda
+
+
 # Comments and digressions
 
 ## Why Input("label").get?
