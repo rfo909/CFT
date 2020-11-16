@@ -226,9 +226,10 @@ public class ObjDict extends Obj {
             		value=new ValueObj(new ObjClosure(self(), lambda));
             	}
             }
+            
             values.put(key, value);
             
-            init();
+            if (isIdentifier(key)) init();
             
             return new ValueObj(theDict());
         }
@@ -269,7 +270,7 @@ public class ObjDict extends Obj {
                 values.remove(key);
             } 
             
-            init();
+            if (isIdentifier(key)) init();
             
             return new ValueObj(theDict());
         }
@@ -345,7 +346,7 @@ public class ObjDict extends Obj {
             String value=str.substring(pos+1).trim();
             values.put(key,new ValueString(value));
             
-            init();
+            if (isIdentifier(key)) init();
             
             return new ValueObj(theDict());
         }
