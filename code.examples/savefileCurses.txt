@@ -20,6 +20,11 @@ P(1,true)=>enabled
 # Is curses enabled?
 # --
 	Db2:Get("Curses","Enabled",false)
+/Enabled
+
+
+
+Enabled
 /ena
 
 
