@@ -4,6 +4,7 @@ Color and cursor control with ANSI Escape sequences
 /Readme
 
 
+
 Sys.uchar("\u001b")
 /Esc
 
@@ -42,7 +43,7 @@ Esc+"[37m"
 	P(1,false)=>override
 
 	SymDict(TxtBlack, TxtRed, TxtGreen, TxtYellow, TxtBlue, TxtMagenta, TxtCyan, TxtWhite) => colors
-	col = Db2:Get("Curses","DefaultTxtColor")
+	col = Db2:Get("Curses","TxtColor")
 	if (override) col=null
 
 	if (col==null) Inner {
@@ -52,11 +53,11 @@ Esc+"[37m"
 		|
 		println
 		readLine => col
-
+		
 		println(colors.get(col)+"Changed text color!")
 		println("Okay? (type 'yes')")
 		if(readLine=="yes") {
-			Db2:Set("Curses","DefaultTxtColor", col)
+			Db2:Set("Curses","TxtColor", col)
 		}
 	} else {
 		println
