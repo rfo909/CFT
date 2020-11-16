@@ -41,6 +41,20 @@ on both, such as PowerShell, git, ssh. It should run anywhere that supports Java
 
 Development has been going on since May 2018, and on github since July 2020.
 
+# Platform
+
+
+CFT is written in Java and uses no external libraries. It has been tested on both Linux
+and Windows.
+
+
+For best result on Windows, it is recommended to use "Windows Terminal", as it understands
+the ANSI escape sequences directly.
+
+
+Alternatively, if using a CMD or PowerShell window, disable Curses by running Curses:Disable once.
+The decision is then stored in the local database.
+
 # Functionality
 
 
