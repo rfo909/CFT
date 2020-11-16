@@ -71,6 +71,11 @@ shortcut:ic   = "---- Investigate cat log ----"           Investigate:Show
 # ---
 shortcut:     = "---- Show all shortcuts ----"            File("CFT.props").read->line assert(line.startsWith("shortcut:")) out(line)
 
+# ANSI escape sequences - requires Linux terminal or Windows Terminal
+# ---
+shortcut:cls  = "---- Clear screen ----"                  println(Curses:Cls+Curses:Home) true
+shortcut:tc   = "---- Change text color ----"             Curses:SelectTextColor
+
 
 
 #

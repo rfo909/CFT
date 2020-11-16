@@ -37,6 +37,18 @@ Esc+"[37m"
 /TxtWhite
 
 
+# Select text color
+# --
+	SymDict(TxtBlack, TxtRed, TxtGreen, TxtYellow, TxtBlue, TxtMagenta, TxtCyan, TxtWhite) => colors
+	Lib:Header("Enter color by name")
+	colors.keys.sort->key
+		println(key)
+	|
+	println
+	readLine => x
+	println(eval(x))
+/SelectTextColor
+
 
 Esc+"[40m"
 /BgBlack
