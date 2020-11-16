@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2020-11-13 RFO
-v1.9.14
+Last updated: 2020-11-16 RFO
+v2.1.3
 ```
 # Introduction
 
@@ -49,11 +49,12 @@ and Windows.
 
 
 For best result on Windows, it is recommended to use "Windows Terminal", as it understands
-the ANSI escape sequences directly.
+the ANSI escape sequences directly, if that is desired.
 
 
-Alternatively, if using a CMD or PowerShell window, disable Curses by running Curses:Disable once.
-The decision is then stored in the local database.
+The Curses library contains functions for generating escape codes. By default, the Curses
+library is disabled. To enable, run Curses:Enable(true) once, storing a value
+in the CFT database, which is local to very install.
 
 # Functionality
 
@@ -62,7 +63,7 @@ The CFT programming language is a glue between library functions and -objects, u
 running external programs.
 
 
-It is command line based, but complex functions are created using editors.
+It is command line based, and programmable interactively, but complex functions are usually created using editors.
 
 The language is object oriented, with all values being objects. Here we call a
 function "bin()" inside an integer object.
@@ -73,7 +74,7 @@ $ 1.bin
 00000001
 ```
 
-The ".bin" calls the function "bin" inside the integer object. Parantheses are optional when no parameters.
+Parantheses are optional when no parameters.
 
 ## Another example
 
@@ -3012,6 +3013,38 @@ The Dict.set function also detects when it is fed a closure, unwrapping the
 Lambda inside, then wrapping it inside a new closure pointing back to
 itself (via "self" variable in lambda).
 
+## Lambdas are synthesizable
+
+
+This means we can store function code in the database, or on file.
+
+
+Also, Dict objects (with lambdas) are serializable, because even though Closures are not,
+the serialization of a Dict with Closures is rewritten into adding the original
+Lambda's which will in turn be wrapped into Closures at later runtime.
+
+
+This means stateful objects can be "serialized" to the database as well.
+
+# ANSI escape codes
+
+
+**v2.1.2**
+
+The Curses script contains code for producing ANSI escape sequences to set text color,
+bold and underline, as well as clearing the screen, and moving the cursor, which
+enables drawing boxes, for example.
+
+
+Since curses may not be supported on every device, the ANSI support is disabled
+by default, but can be enabled
+via a call to
+
+```
+Curses:Enable(true)
+```
+This changes all the functions inside Curses from returning empty strings, to return ANSI escape sequences.
+
 # Reference: Colon commands
 
 
@@ -3034,7 +3067,7 @@ Colon commands
 :quit                    - terminate CFT
 ```
 
-Confusing colon commands with shortcuts? You're not alone.
+Confusing colon commands with shortcuts?
 
 
 Colon commands exist outside the language, and are fixed (written in Java), while shortcuts run CFT program
@@ -3465,4 +3498,25 @@ The object types are:
 10: public class ValueBoolean extends Value {
 11: public class ValueObj extends Value {
 ```
+## 2020-11-16 Version 2
+
+
+Version 2 came, and got tagged on November 14 2020. I decided to skip using v2.0.x for
+updates, and instead move to
+v2.1.x, as v2.0.0 was kind of a big deal for me, one I've been planning for
+at least since v1.7 or thereabouts.
+
+
+For me v2 represents a series of major improvements, on many areas, all since v1.1.4. As
+version 1.0 represented a leap, with its ability to report errors correctly for multi-line
+functions, the changes since the ancient time of v1.1.4 (august 2020) are enormous.
+
+
+However, not unexpected, a steady stream of fixes and additions soon moved CFT along,
+leaving the revered v2.0.0 to start its journey into obsolescence.
+
+
+Looking ahead, there are a number of items still on my list, but many have been addressed
+also, so no predictions for version 3 yet.
+
 

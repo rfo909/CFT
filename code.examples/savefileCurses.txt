@@ -7,13 +7,19 @@ Color and cursor control with ANSI Escape sequences.
 # --
 P(1,true)=>enabled
 	Db2:Set("Curses","Enabled",enabled)
+	if (enabled) Inner {
+		List(TxtRed,TxtGreen,TxtBlue,TxtYellow,TxtMagenta,TxtCyan,TxtWhite,TxtBlack,Reversed)->x
+			println(x+"Curses using ANSI escape sequences" + Bold + " ENABLED" + Reset)
+		|
+	}
+	true 
 /Enable
 
 
 
 # Is curses enabled?
 # --
-	Db2:Get("Curses","Enabled",true)
+	Db2:Get("Curses","Enabled",false)
 /ena
 
 
@@ -117,7 +123,7 @@ if(ena,Esc+"["+n+"A","")
 /CurUp
 
 P(1,1)=>n
-if(ena,EscEsc+"["+n+"B","")
+if(ena,Esc+"["+n+"B","")
 /CurDown
 
 P(1,1)=>n
@@ -170,10 +176,12 @@ P(4,12)=>y2
 
 
 
-println(Cls+Home+TxtBlue+"WARNING"+Reset+"This is a test")
-println(Bold+"ERROR: "+Reset+"Xyz")
-println(CurDown(10)+CurLeft(10)+"Test")
-#println(Reversed+Cls+Home)
-Box(10,5,32,12)
-/t
+# Test
+# --
+	println(Clear)
+	List(TxtRed,TxtGreen,TxtBlue,TxtYellow,TxtMagenta,TxtCyan,TxtWhite,TxtBlack,Reversed)->x
+		println(x+"Curses using ANSI escape sequences" + Bold + " ENABLED" + Reset)
+	|
+	Box(10,5,32,12)
+/test
 

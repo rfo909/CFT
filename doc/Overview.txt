@@ -243,6 +243,9 @@ Closures
 Closures v2 - Objects
  * Member lambdas calling each other
  * Copy lambdas between dictionaries
+ * Lambdas are synthesizable
+
+ANSI escape codes
 
 Reference: Colon commands
 
@@ -266,3 +269,4 @@ Comments and digressions
  |   CFT code libraries growing
  |   Version 2 upcoming
  * 2020-11-13 Script and code size
+ * 2020-11-16 Version 2
