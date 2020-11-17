@@ -198,7 +198,7 @@ s*.s   [no]
 		target=sshUser+"@"+host
 		processData = SymDict(target)
 		
-		mon.Lwait.call(4)
+		mon.Lwait.call(8)
 		println("Starting process for " + target)
 		process = SpawnProcess(processData, {
 			start=currentTimeMillis
@@ -247,15 +247,21 @@ s*.s   [no]
         HostData.Lget.call (host, "SSHUser") =>sshUser
 
         sshUser+"@"+host =>target
-
-        SSH:HostOkSSH (target) =>hostOk
-        if (!hostOk) {
-            println(host + ": -offline-")
-        } else {
-	        DebianHostNeedsReboot(target) =>x
-	        if(x,"NEEDS REBOOT","ok") =>status
-	        println(host + ": " + status)
-    	}
+        
+		process = SpawnProcess(SymDict(host,target),{
+	        SSH:HostOkSSH (target) =>hostOk
+	        if (!hostOk) {
+	            println(host + ": -offline-")
+	        } else {
+		        DebianHostNeedsReboot(target) =>x
+		        if(x,"NEEDS REBOOT","ok") =>status
+		        println(host + ": " + status)
+	    	}
+    	})
+    	out(process)
+    | _->process
+    	process.wait
+    	process.output->line println(line)
     	    
 /NeedReboot
 
