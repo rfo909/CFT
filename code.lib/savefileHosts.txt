@@ -401,160 +401,6 @@ SysStatAll("iostat")
 
 
 
-# Fix resolv.conf problem
-	readLine("Softlinks /run/systemd/resolve/resolv.conf to /etc/resolv.conf, yes to continue") =>yesno
-	error(yesno != "yes", "Aborted")
-	
-	HostData=Hosts:Parse
-	HostData.LallHosts.call->host
-		assert(HostData.Lget.call(host, "OSFamily")=="debian")
-		       
-        HostData.Lget.call (host, "SSHUser") =>sshUser
-        assert(sshUser != null)
-
-        target=sshUser+"@"+host
-
-        println("--- " + host + ": checking resolv.conf")
-        replace=false
-        tryCatch(Inner {
-        	SSH:sudo(target,"ls -l /etc/resolv.conf").get("stdout")=>stdout
-        	stdout->line println("    " + line) |
-        	replace = Lib:LinesContain(stdout,"stub-resolv.conf")
-        })
-
- 		if(replace) {
-			println("    CHANGING to /run/systemd/resolve/resolv.conf")
-			tryCatch(
-				SSH:sudo (target, List("rm /etc/resolv.conf", "ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf"))
-			)
-		} 
-/FixResolvConf1
-
-
-
-
-# Fix resolv.conf problem, take 2 - installing resolvconf
-	error("JUST MADE THINGS WORSE!")
-	readLine("Installs and configures resolvconf, yes to continue") => yesno
-	error(yesno != "yes", "Aborted")
-	
-	HostData=Hosts:Parse
-	HostData.LallHosts.call->host
-		assert(HostData.Lget.call(host, "OSFamily")=="debian")
-		       
-        HostData.Lget.call (host, "SSHUser") =>sshUser
-        assert(sshUser != null)
-
-        target=sshUser+"@"+host
-        if (!SSH:HostOkSSH(target)) {
-        	println("* Skipping target " + target)
-        	assert(false)
-        }
-
-		Lib:Header(host)
-		
-        found = SSH:sudo(target,"which resolvconf", true).exitCode==0
-        if (!found) {
-        	println("* Installing resolvconf")
-        	SSH:sudo(target,"apt install resolvconf")
-        }
-
-        println("* Configuring resolvconf")
-        lines = Sequence(
-        	@ options timeout:1 attempts:1 rotate
-        	@
-        	@ nameserver 10.0.0.3
-        	@ nameserver 10.0.0.4
-        )
-        f=Lib:TmpFile("resolv.conf.head")
-        f.create(lines)
-
-        SSH:copy(f,target,"./resolv.conf.head")
-        SSH:sudo(target,"cp ./resolv.conf.head /etc/resolvconf/resolv.conf.d/head")
-
-		println("* Restarting service resolvconf")
-        SSH:sudo(target,"service resolvconf restart")
-
-        #error("stop")
-        
-/FixResolvConf2
-
-
-
-
-
-# Remove resolvconf deaemon
-	readLine("Removes resolvconf, yes to continue") => yesno
-	error(yesno != "yes", "Aborted")
-	
-	HostData=Hosts:Parse
-	HostData.LallHosts.call->host
-		assert(HostData.Lget.call(host, "OSFamily")=="debian")
-		       
-        HostData.Lget.call (host, "SSHUser") =>sshUser
-        assert(sshUser != null)
-
-        target=sshUser+"@"+host
-        if (!SSH:HostOkSSH(target)) {
-        	println("* Skipping target " + target)
-        	assert(false)
-        }
-
-		Lib:Header(host)
-
-		println("* Stopping service resolvconf")
-        SSH:sudo(target,"service resolvconf stop", true)
-        println("* Removing resolvconf package")
-        SSH:sudo(target,"apt -y remove resolvconf", true)
-
-        #error("stop")
-        
-/FixResolvConf3
-
-
-
-# Remove resolvconf deaemon - restore state to original,
-# which means /etc/resolv.conf points to /run/systemd/resolve/stub-resolve.conf
-# ---
-	HostData=Hosts:Parse
-	HostData.LallHosts.call->host
-		assert(HostData.Lget.call(host, "OSFamily")=="debian")
-		       
-        HostData.Lget.call (host, "SSHUser") =>sshUser
-        assert(sshUser != null)
-
-        target=sshUser+"@"+host
-        if (!SSH:HostOkSSH(target)) {
-        	println("- Skipping target " + target)
-        	assert(false)
-        }
-
-		Lib:Header(host)
-
-	
-
-		println("* Checking /etc/resolv.conf")
-
-		SSH:sudo(target,"ls -l /etc/resolv.conf")=>x
-		if (!Lib:LinesContain(x.stdout,"stub")) {
-			println("* not linked to stub file")
-			SSH:sudo(target,"ls -l /run/systemd/resolve/stub-resolv.conf")=>x
-			if (!x.exitCode==0) {
-				println("* stub file not found")
-			} else {
-				println("* Changing link")
-				SSH:sudo(target,List(
-					"rm /etc/resolv.conf",
-					"ln -s /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf"
-				))
-			}
-		}
-
-        
-/FixResolvConf4
-
-
-
 # Configure /etc/systemd/resolved.conf
 # ---
 	HostData=Hosts:Parse
@@ -579,9 +425,11 @@ SysStatAll("iostat")
 	|
 	file.delete
 	
-/FixResolve5
+/FixResolve
 
 
+# /etc/systemd/resolved.conf
+# --
 <<<<< EOF
 #  This file is part of systemd.
 #
