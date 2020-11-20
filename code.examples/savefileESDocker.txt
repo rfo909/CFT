@@ -40,6 +40,11 @@ P(1,"dir") =>cmd
     Dir.run(cmd.split)
 /Run
 
+P(1,"dir") =>cmd
+    println("---> " + cmd)
+    Dir.runDetach(cmd.split)
+/RunDetach
+
 # List docker containers
 Run("docker container list")
 /CList
@@ -73,12 +78,12 @@ result
 
 
 # Start elasticsearch container
-Run('docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.8.0')
+RunDetach('docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.8.0')
 /esRun
 
 
 # Start kibana container
-Run('docker run --link ' + getId("elasticsearch") + ':elasticsearch -p 5601:5601 docker.elastic.co/kibana/kibana:7.8.0')  # Inner{docker-repo}:Inner{version}
+RunDetach('docker run --link ' + getId("elasticsearch") + ':elasticsearch -p 5601:5601 docker.elastic.co/kibana/kibana:7.8.0')  # Inner{docker-repo}:Inner{version}
 /kibRun
 
 

@@ -72,13 +72,23 @@ in an editor.
 
 # List topics
 	println
-	println("Recent topics")
-	println("-------------")
-	Date.sub(Date.Duration.days(7)).get => oldestTime
+	println("Known topics")
+	println("------------")
+	
+	latest=Dict
 	InvDir.files(Glob("*.txt"))->f
-		assert(f.lastModified > oldestTime)
-		out(f.name.beforeLast("_"))
-	| _.sort.unique->x println(x) 
+		out(Int(f.lastModified,f))
+	| _.sort->x
+		file=x.data
+		date=Date(file.lastModified).fmt
+		name=file.name.beforeLast("_")
+		latest.set(name,date)
+	|
+		latest.keys->key
+			date=latest.get(key)
+			out(date + "  " + key)
+	| _.sort->line
+		println(line)
 	| println
 /ShowTopics
 
