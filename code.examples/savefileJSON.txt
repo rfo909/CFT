@@ -146,7 +146,7 @@ or PP to paste JSON and have it pretty-printed.
 		ts.next
 		true
 	} else if (ts.peek()=="false") {
-		tx.next
+		ts.next
 		false
 	} else if (ts.peek()=="null") {
 		ts.next
@@ -252,10 +252,16 @@ or PP to paste JSON and have it pretty-printed.
 
 
 
-# Receive pasted JSON, parses and pretty-prints it
+# Receive pasted JSON, parse and optionally pretty-print
+# Throws soft errors if parse error.
 # --
-	println("Paste or enter JSON lines, then terminate by '.' on single line")
-	readLines(".") => json
+	P(1)=>json
+	P(2,true)=>prettyPrint
+
+	if (json==null) {
+		println("Paste or enter JSON lines, then terminate by '.' on single line")
+		readLines(".") => json
+	}
 	
 	start=currentTimeMillis
 
@@ -267,26 +273,22 @@ or PP to paste JSON and have it pretty-printed.
 
 	ts=lexer.getTokenStream
 
-	tc = tryCatchSoft(
-		MatchValue(ts)
-	)
+	result = MatchValue(ts)
 
 	end=currentTimeMillis
-	println("# " + (end-start) + " ms")
-	
-	Inner {
-		tc.keys->key
-			println(key + ": " + tc.get(key))
+	if (prettyPrint) {
+		println("# " + (end-start) + " ms")
+		PPValue(result)
 	}
 	
-	if (tc.ok) {
-		println("parse ok")
-		PPObj(tc.result)
-	} else {
-		println("Failed: " + tc.msg)
-	}
-	
-/PP
+/Parse
+
+
+
+
+
+
+
 
 	
 
