@@ -1,10 +1,20 @@
 # Readme
 <<<< EOF
-Simple recursive-descent parser for JSON. Works fine as long
-as the JSON string is correct.
+JSON parser written i CFT, using Lexer and TokenStream.
+To get help
 
-Run exampleParse() to use the internal example 
-or PP to paste JSON and have it pretty-printed.
+$ Lib.Text.Lexer help
+$ Lib.Text.Lexer.getTokenStream help
+
+Parse() takes as input text lines, or if missing asks you to paste them, followed by "." on single line.
+PP() takes as input the output from Parse
+
+Handles MongoDB extended syntax, which takes the form of "function calls", like ISODate("2020-11-23T12:29:31.852Z").
+
+Does NOT strip quotes from String values.
+
+Strips quotes from Object fields, for easier access. When pretty-printing or exporting, 
+field values are always put in double quotes.
 
 >>>> EOF
 /Readme
@@ -15,11 +25,11 @@ or PP to paste JSON and have it pretty-printed.
 # --
 	Lib.Text.Lexer.Node => root
 	
-	root.sub("{}:,[]").setIsToken(1)  # specials
+	root.sub("{}:,[]()").setIsToken(1)  # specials
 	root.sub(" ^n^r^t".unEsc).setIsToken(-1) # whitespace
 
 	digits = "0123456789"
-	root.sub(digits).setIsToken(2) => integer
+	root.sub(digits+"-").setIsToken(2) => integer
 	integer.sub(digits,integer) # loop back
 	integer.sub(".").sub(digits).setIsToken(3) => float 
 	float.sub(digits,float) # loop back
@@ -121,7 +131,7 @@ or PP to paste JSON and have it pretty-printed.
 		# match string or identifier + colon + Value
 		name=ts.peek
 		if (ts.peekType == 5) {
-			# String
+			# String - strip quotes
 			name=name.sub(1,name.length-1)
 		} else if (ts.peekType != 4) { # identifier
 			error(ts.sourceLocation + " Expected String or Identifier for object field name, got '" + name + "'")
@@ -152,7 +162,28 @@ or PP to paste JSON and have it pretty-printed.
 		ts.next
 		null
 	} else if (ts.peekType()==4) {  # identifier
-		error(""+ts.sourceLocation + " Invalid value: (identifier) " + ts.peek)
+		func=ts.peek
+		#println("Matching function '" + func + "'")
+		ts.next
+		ts.match("(","exected '(' function call syntax (MongoDB)")
+		func=func+"("
+		Inner {
+			comma=false
+			loop
+				break(ts.match(")"))
+				if (comma) {
+					ts.match(",","Expected comma or ')' closing function call MongoDB style")
+					func=func+","
+				}
+				func=func+MatchValue(ts)
+				comma=true
+				
+			|
+			func=func+")"
+			#println("FUNCTION COMPLETE: " + func)
+		}
+		func
+		#error(""+ts.sourceLocation + " Invalid value: (identifier) " + ts.peek)
 	} else if (ts.peekType()==2) { # int
 		s=ts.peek
 		if (!s.?parseInt) error(""+ts.sourceLocation+" Invalid int: " + s)
@@ -166,7 +197,8 @@ or PP to paste JSON and have it pretty-printed.
 	} else if (ts.peekType()==5) { # string
 		s=ts.peek
 		ts.next
-		s.sub(1,s.length-1)  # strip quotes
+		s
+		##s.sub(1,s.length-1)  # strip quotes
 	} else {
 		error(""+ts.sourceLocation+" Unexpected token: '" + ts.peek + "'")
 	}
@@ -188,6 +220,7 @@ or PP to paste JSON and have it pretty-printed.
 /MatchList
 		
 		
+
 
 # Pretty-print value
 # --
@@ -256,7 +289,6 @@ or PP to paste JSON and have it pretty-printed.
 # Throws soft errors if parse error.
 # --
 	P(1)=>json
-	P(2,true)=>prettyPrint
 
 	if (json==null) {
 		println("Paste or enter JSON lines, then terminate by '.' on single line")
@@ -273,20 +305,73 @@ or PP to paste JSON and have it pretty-printed.
 
 	ts=lexer.getTokenStream
 
-	result = MatchValue(ts)
-
-	end=currentTimeMillis
-	if (prettyPrint) {
-		println("# " + (end-start) + " ms")
-		PPValue(result)
-	}
-	
+	MatchValue(ts)
 /Parse
 
 
 
+# Pretty-print JSON structure
+# --
+	P(1)=>JSONValue
+	PPValue(JSONValue)
+/PP
 
 
+
+
+# Export value
+# --
+	P(1)=>value
+	P(2)=>list
+	if (getType(value)=="Dict") {
+		ExpObj(value,list)
+	} else if (getType(value)=="List") {
+		ExpList(value,list)
+	} else {
+		list.add(value)
+	}
+/ExpValue
+
+
+# Export Object
+# --
+	P(1)=>dict
+	P(2)=>list
+	list.add("{")
+	comma=false
+	dict.keys.sort->key
+		if(comma) list.add(",")
+		list.add('"'+key+'" :')
+		ExpValue(dict.get(key),list)
+		comma=true
+	|
+	list.add("}")
+/ExpObj
+
+
+# Export list
+# --
+	P(1)=>data
+	P(2)=>list
+	list.add("[")
+	comma=false
+	data->value
+		if(comma) list.add(",")
+		ExpValue(value,list)
+		comma=true
+	|
+	list.add("]")
+/ExpList
+
+		
+
+# Generate output version of JSON structure
+# --
+	P(1)=>jsonValue
+	list=List
+	ExpValue(jsonValue,list)
+	list->x out(""+x)
+/Export
 
 
 
