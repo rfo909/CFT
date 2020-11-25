@@ -30,6 +30,10 @@ import rf.configtool.parser.TokenStream;
  * The Root class manages a set of parallel script contexts.
  */
 public class Root {
+	
+	private final String sessionUUID;
+    
+
 
 	private static final Version VERSION = new Version();
 
@@ -43,8 +47,16 @@ public class Root {
 	private Value lastResult;
 	private final long startTime;
 	private boolean terminationFlag = false;
+	
+    /**
+     * Unique value per CFT session, available via Sys.sessionUUID CFT function
+     */
+    public String getSessionUUID() {
+    	return sessionUUID;
+    } 
 
 	public Root(StdioReal stdio, String customScriptDir) throws Exception {
+    	this.sessionUUID = UUID.randomUUID().toString();
 		this.startTime=System.currentTimeMillis();
 		this.stdio = stdio;
     	propsFile=new PropsFile(customScriptDir);

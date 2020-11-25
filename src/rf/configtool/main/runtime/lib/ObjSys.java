@@ -59,6 +59,7 @@ public class ObjSys extends Obj {
         add(new FunctionUptime());
         add(new FunctionHomeDir());
         add(new FunctionUchar());
+        add(new FunctionSessionUUID());
 	}
 
 	@Override
@@ -365,6 +366,21 @@ public class ObjSys extends Obj {
 			if (str.toLowerCase().startsWith("\\u")) str=str.substring(2);
 			char c=(char) (Integer.parseInt(str,16));
 			return new ValueString(""+c);
+		}
+	}
+
+	class FunctionSessionUUID extends Function {
+		public String getName() {
+			return "sessionUUID";
+		}
+
+		public String getShortDesc() {
+			return "sessionUUID() - return per CFT-session UUID - for storing session values in Db etc";
+		}
+		
+		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+			if (params.size() != 0) throw new Exception("Expected no parameters");
+			return new ValueString(ctx.getObjGlobal().getRoot().getSessionUUID());
 		}
 	}
 
