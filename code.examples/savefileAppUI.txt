@@ -35,8 +35,8 @@ P(1,null) => title
 		Lib.Data.yes(Cfg.h,"")->x println
 	}
 		
-	titleLine=Curses:Clear + "+--" + if(title!=null," ["+title+"] ","")
-	titleLine=Pad(titleLine,"-",Cfg.w-2)
+	titleLine="+--" + if(title!=null," ["+title+"] ","")
+	titleLine=Curses:Clear + Pad(titleLine,"-",Cfg.w-2)
 	println(titleLine)
 /DoShowTopLine
 	
