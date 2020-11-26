@@ -4,6 +4,11 @@ AppUI
 
 For standardized and good looking console user interface
 
+Remember doing initial call to  
+
+	Lib:GetTerminalSize
+
+to get terminal proportions right
 See 'example' function
 
 >>>> EOF
