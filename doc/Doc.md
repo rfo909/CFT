@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2020-11-16 RFO
-v2.1.3
+Last updated: 2020-11-25 RFO
+v2.1.5
 ```
 # Introduction
 
@@ -1106,6 +1106,18 @@ out() and assert() and reject() have no effect on loops outside the block.
 
 Lambdas are "functions" as values.
 
+# List filtering with Lambda
+
+
+Instead of using processing loops, filtering lists can also be done
+using .filter() function.
+
+```
+"12345".chars
+.filter(Lambda{P(1).parseInt})
+.sum
+/t
+```
 # Conditionals - if expression
 
 

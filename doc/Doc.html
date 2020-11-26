@@ -15,8 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2020-11-16 RFO
-v2.1.3
+Last updated: 2020-11-25 RFO
+v2.1.5
 
 </pre>
 
@@ -1266,6 +1266,21 @@ codeDirs = . ; code.examples ; code.lib
 <p>
   Lambdas are "functions" as values.
 </p>
+
+
+
+
+<h1>List filtering with Lambda</h1>
+<p>
+  Instead of using processing loops, filtering lists can also be done
+  using .filter() function.
+</p>
+<pre>
+"12345".chars
+.filter(Lambda{P(1).parseInt})
+.sum
+/t
+</pre>
 
 
 

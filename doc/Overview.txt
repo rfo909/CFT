@@ -102,6 +102,8 @@ Block expressions
  * Inner blocks
  * Block expressions summary
 
+List filtering with Lambda
+
 Conditionals - if expression
  |   Inline form
  |   Traditional form
