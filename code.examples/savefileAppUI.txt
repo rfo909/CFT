@@ -45,7 +45,9 @@ P(1,"r---")=>s
 
 	s.chars->c
 		out(map.get(c,c))
-	| _.concat
+	| _.concat => result
+
+	Curses:TxtGreen+result+Curses:Reset
 /fix
 		
 
