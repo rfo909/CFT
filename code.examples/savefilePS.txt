@@ -95,6 +95,8 @@ P(2, Input("Enter service").get) =>service
     CallInteractive(host,"stop-service " + service)
 /StopService
 
+
+
 P(1, Input("Enter remote host").get) =>host 
 P(2, Input("Enter service").get) =>service
     CallInteractive(host,"start-service " + service)
@@ -107,6 +109,54 @@ P(2, Input("Enter service").get) =>service
     CallInteractive(host,"get-service " + service)
 /GetService
 
+
+
+# Set StartupType for Windows Service
+# --
+	P(1,Input("Host").get) => host
+	P(2,Input("Service").get) => service
+	P(3,Input("StartupType") => startupType
+
+	SymDict(service,startupType).mergeCodes=>data
+	script = Inner {
+		Sequence(
+			@ start-process powershell -verb runas
+			@ Set-Service -Name ${service} -StartupType ${startupType}
+		)->line 
+			out(line.merge(data))
+	}
+
+	PS:RunScriptRemote(host, script) => x
+	x
+/SetServiceAutostart
+
+
+
+
+# Show startup type for Windows Service
+# --
+	P(1,Input("Host").get) => host
+	P(2,Input("Service").get) => service
+	
+	SymDict(service).mergeCodes=>data
+	script=Inner{
+		Sequence(
+			@ get-service ${service} | select -property name, starttype
+		)->line
+			out(line.merge(data))
+	}
+
+	PS:RunScriptRemote(host, script) => x
+
+	dict=Dict
+	x.stdout->line 
+		assert(line.contains(":")) 
+		dict.setStr(line) 
+	|
+	dict.get("StartType")
+	
+/GetServiceStartType
+	
 
 
 
