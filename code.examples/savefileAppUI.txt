@@ -31,13 +31,12 @@ P(3) => len
 
 
 P(1,null) => title
-	if (!Curses:Enabled) Inner {
-		Lib.Data.yes(Cfg.h,"")->x println
-	}
+	Lib:GetTerminalSize
 		
 	titleLine="+--" + if(title!=null," ["+title+"] ","")
 	titleLine=Curses:Clear + Pad(titleLine,"-",Cfg.w-2)
 	println(titleLine)
+	""
 /DoShowTopLine
 	
 	
@@ -45,6 +44,8 @@ P(1,null) => header
 	println("+- " + header)
 	println("|")
 /DoShowHeader
+
+
 	
 	
 

@@ -21,6 +21,7 @@ import java.util.*;
 
 import rf.configtool.main.Ctx;
 import rf.configtool.main.OutText;
+import rf.configtool.main.runtime.lib.ObjClosure;
 import rf.configtool.main.runtime.lib.ValueObjInt;
 
 public class ValueList extends Value {
@@ -47,6 +48,7 @@ public class ValueList extends Value {
         add(new FunctionEmpty());
         add(new FunctionLast());
         add(new FunctionFirst());
+        add(new FunctionFilter());
     }
     
     protected ValueList self() {
@@ -601,7 +603,48 @@ public class ValueList extends Value {
             }
         }
     }
+
     
+    class FunctionFilter extends Function {
+        public String getName() {
+            return "filter";
+        }
+        public String getShortDesc() {
+            return "filter(lambda) - invokes lambda/closure on each element, returns list of non-null results";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 1) throw new Exception("Expected single Lambda/Closure parameter");
+
+    		if (params.get(0) instanceof ValueBlock) {
+        		// lambda
+        		ValueBlock lambda=(ValueBlock) params.get(0);
+        		List<Value> result=new ArrayList<Value>();
+        		for (Value v:val) {
+        			List<Value> args=new ArrayList<Value>();
+        			args.add(v);
+        			Value x=lambda.callLambda(ctx, args);
+        			if (!(x instanceof ValueNull)) result.add(x);
+        		}
+        		return new ValueList(result);
+    		}
+    		
+    		Obj obj=getObj("closure",params,0);
+    		if (obj instanceof ObjClosure) {
+        		// closure
+        		ObjClosure closure=(ObjClosure) obj;
+        		List<Value> result=new ArrayList<Value>();
+        		for (Value v:val) {
+        			List<Value> args=new ArrayList<Value>();
+        			args.add(v);
+        			Value x=closure.callClosure(ctx, args);
+        			if (!(x instanceof ValueNull)) result.add(x);
+        		}
+        		return new ValueList(result);
+        	}
+    		throw new Exception("Expected single Lambda/Closure parameter");
+        	
+        }
+    }
 
     
 
