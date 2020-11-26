@@ -29,20 +29,33 @@ P(3) => len
 /Pad
 
 
+P(1,"r---")=>s
+	# https://en.wikipedia.org/wiki/Box-drawing_character
+	Dict
+	.set("r",Sys.uchar("2554"))
+	.set("-", Sys.uchar("2550"))
+	.set("+",Sys.uchar("2560"))
+	.set("|",Sys.uchar("2551"))
+	=> map
+
+	s.chars->c
+		out(map.get(c,c))
+	| _.concat
+/fix
+		
+
 
 P(1,null) => title
-	Lib:GetTerminalSize
-		
-	titleLine="+--" + if(title!=null," ["+title+"] ","")
-	titleLine=Curses:Clear + Pad(titleLine,"-",Cfg.w-2)
+	titleLine=fix("r--") + if(title!=null," ["+title+"] ","")
+	titleLine=Curses:Clear + Pad(titleLine,fix("-"),Cfg.w-2)
 	println(titleLine)
 	""
 /DoShowTopLine
 	
 	
 P(1,null) => header
-	println("+- " + header)
-	println("|")
+	println(fix("+- ") + header)
+	println(fix("|"))
 /DoShowHeader
 
 
@@ -64,17 +77,20 @@ P(2) => current
 			)
 			space=true
 	}
-	println("| " + line1)
-	println("| " + line2)
+	println(fix("| ") + line1)
+	println(fix("| ") + line2)
 /DoShowContext
 	
 	
+
+
 	
 P(1,"Label") => label
 P(2,null) => currValue
 P(3,true) => supportOptions
-	labelLine="+- " + Curses:Bold + label + Curses:Reset 
-		+ if(currValue != null, Curses:Bold + " / Enter for ["+currValue+"]"+Curses:Reset,"") 
+	labelLine=fix("+- ") + Curses:Bold + label  
+		+ if(currValue != null, " / Enter for ["+currValue+"]","") 
+		+ Curses:Reset
 		+ if(supportOptions, " ('.' for options)", "")
 	
 	println(labelLine)
@@ -83,9 +99,9 @@ P(3,true) => supportOptions
 	println()
 	if (val==".") {
 		DoShowHeader("Dot-commands")
-		println("| .xxx   - jump to other page")
-		println("| .q     - to abort")
-		println("|")
+		println(fix("|")+" .xxx   - jump to other page")
+		println(fix("|")+" .q     - to abort")
+		println(fix("|"))
 		println(labelLine)
 		println("?")
 		readLine=>currValue
@@ -94,6 +110,8 @@ P(3,true) => supportOptions
 	if (val=="") val=currValue
 	val
 /DoInput
+
+
 
 
 Dict
@@ -114,13 +132,13 @@ Dict
 			vLen=if(x.value.length>vLen, x.value.length, vLen)
 		|
 		self.data->x
-			line="| " + 
+			line=fix("| ") + 
 				Pad(x.shortName + " ","-",sLen+4)
 				+ " " + Pad(x.longName+" ","-",lLen+4)
 				+ " [" + x.value + "]"
 			println(line)
 		|
-		println("|")
+		println(fix("|"))
 	})
 /DoSummaryObj
 
@@ -129,14 +147,14 @@ Dict
 
 P(1,List) => data
 P(2, Lambda{P(1)}) => LambdaLabel
-	println("|")
+	println(fix("|"))
 	pos=1
 	data->row
-		println("|  " + Pad(""+pos," ",5) + LambdaLabel.call(row))
+		println(fix("|  ") + Pad(""+pos," ",5) + LambdaLabel.call(row))
 		pos=pos+1
 	|
-	println("|")
-	DoInput("Select menu by number",null,false) => str
+	println(fix("|"))
+	DoInput("Enter number",null,false) => str
 	if (str.?parseInt) {
 		n=str.parseInt-1
 		if (n<0 || n>data.length-1) {
