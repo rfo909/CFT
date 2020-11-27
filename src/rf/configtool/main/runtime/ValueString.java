@@ -102,7 +102,7 @@ public class ValueString extends Value {
         boolean force=val.contains("\r") || val.contains("\n") || val.contains("\t");
         boolean d=val.contains("\"");
         boolean s=val.contains("'");
-        if (force || (d && s)) return '"' + toHexString(val) + '"' + ".fromHexString";
+        if (force || (d && s)) return '"' + escString(val) + '"' + ".unEsc";
         if (d) return "'" + val + "'";
         return "\"" + val + "\"";
     }
