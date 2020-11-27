@@ -151,16 +151,17 @@ public class ObjSNode extends Obj {
     	public void run () {
     		while (!terminate) {
     			TCPServerConnection conn = tcpServer.getConnection();
+    				// NOTE: caller has to close connection!
     			if (conn==null) {
     				try {Thread.sleep(10);} catch (Exception ex) {}
     				continue;
     			}
     			IO io=conn.getIO();
+    			io.setId("ObjSNode/Data ");
     			// process connection, then close it
     			try {
     				io.setTimeoutMs(100);
     				String command = io.readInputString();
-    				System.out.println("ObjSNode: data command=" + command);
     				if (command.equals("SAVE")) {
     					String key = io.readInputString();
     					String value = io.readInputString();
@@ -175,9 +176,7 @@ public class ObjSNode extends Obj {
     				}
     			} catch (Exception ex) {
     				// ignore
-    			} finally {
-    				io.close();
-    			}
+    			} 
     		}
     	}
     }
@@ -189,35 +188,40 @@ public class ObjSNode extends Obj {
 
 		public AdminProcess (TCPServer tcpServer, DataProcess dataProcess) {
     		this.tcpServer=tcpServer;
+    		this.dataProcess=dataProcess;
     	}
     	public void run () {
     		while (!terminate) {
     			TCPServerConnection conn = tcpServer.getConnection();
+    				// NOTE: caller has to close connection!
     			if (conn==null) {
     				try {Thread.sleep(10);} catch (Exception ex) {};
     				continue;
     			} 
     			// process connection, then close it
     			IO io=conn.getIO();
+    			io.setId("ObjSNode/Admin ");
     			try {
     				io.setTimeoutMs(100);
     				String command = io.readInputString();
-    				System.out.println("ObjSNode: admin command=" + command);
     				if (command.equals("QUIT")) {
     					terminate=true;
     					io.writeOutputString("Shutting down");
-    				} if (command.equals("GETLOG")) {
+    				} else if (command.equals("GETLOG")) {
+//    					io.writeOutputString("1");
+//    					io.writeOutputString("Hello from ObjSNode");
     					List<String> logLines=dataProcess.getLogLines();
     					io.writeOutputString(""+logLines.size());
-    					for (String s:logLines) io.writeOutputString(s);
+    					for (String s:logLines) {
+    						io.writeOutputString(s);
+    					}
     				} else {
     					io.writeOutputString("Invalid command: " + command);
     				}
     			} catch (Exception ex) {
     				// ignore
-    			} finally {
-    				io.close();
-    			}
+    				ex.printStackTrace();
+    			} 
     		}
     		dataProcess.doTerminate();
     	}

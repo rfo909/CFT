@@ -123,9 +123,11 @@ public class ObjClient extends Obj {
 
 			TCPClient client = new TCPClient(host, portForAdmin);
 			IO io = client.getIO();
+			io.setTimeoutMs(50);
 			io.setId("<Client> ");
 			try {
 				io.writeOutputString("GETLOG");
+				
 				int lines = Integer.parseInt(io.readInputString());
 				List<Value> result = new ArrayList<Value>();
 				for (int i = 0; i < lines; i++)

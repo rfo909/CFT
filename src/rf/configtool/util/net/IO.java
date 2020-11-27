@@ -31,6 +31,9 @@ public class IO {
 		try {
 			socket.setSoTimeout(timeoutMs);
 			int len = in.read();
+			if (len==-1) {
+				throw new RuntimeException("Socket EOF");
+			}
 			byte[] buf = new byte[len];
 			int received = 0;
 			while (received < len) {
@@ -41,7 +44,6 @@ public class IO {
 				received += count;
 			}
 			String s = new String(buf, "UTF-8");
-			System.out.println(id+"IO:readShort = " + s);
 			return s;
 		} catch (Exception ex) {
 			return null;
@@ -49,7 +51,6 @@ public class IO {
 	}
 
 	private void writeOutputStringShort(String s) throws Exception {
-		System.out.println(id+"IO:writeShort = " + s);
 		byte[] buf = s.getBytes("UTF-8");
 		int len = buf.length;
 		if (len > 256)
@@ -59,12 +60,9 @@ public class IO {
 	}
 
 	public String readInputString() {
-		System.out.println(id+"IO:read");
 		try {
 			String lenStr = readInputStringShort();
-			System.out.println(id+"IO:read parseInt on lenStr " + lenStr);
 			int len = Integer.parseInt(lenStr);
-			System.out.println(id+"IO:read len=" + len);
 			byte[] buf = new byte[len];
 			int received = 0;
 			
@@ -74,10 +72,8 @@ public class IO {
 				if (count < 0)
 					throw new Exception("Socket read failed");
 				received += count;
-				System.out.println(id+"IO:read received=" + received);
 			}
 			String s = new String(buf, "UTF-8");
-			System.out.println(id+"IO:read = " + s);
 			return s;
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -86,7 +82,6 @@ public class IO {
 	}
 
 	public void writeOutputString(String s) throws Exception {
-		System.out.println(id+"IO:write = " + s);
 		byte[] buf = s.getBytes("UTF-8");
 		int len = buf.length;
 		writeOutputStringShort("" + len);
