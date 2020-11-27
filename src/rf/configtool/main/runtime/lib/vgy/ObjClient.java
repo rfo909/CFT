@@ -123,8 +123,6 @@ public class ObjClient extends Obj {
 
 			TCPClient client = new TCPClient(host, portForAdmin);
 			IO io = client.getIO();
-			io.setTimeoutMs(50);
-			io.setId("<Client> ");
 			try {
 				io.writeOutputString("GETLOG");
 				

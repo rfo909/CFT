@@ -10,7 +10,6 @@ public class IO {
 	private InputStream in;
 	private OutputStream out;
 	private int timeoutMs;
-	private String id="";
 
 	public IO(Socket socket) throws Exception {
 		this.socket = socket;
@@ -19,10 +18,6 @@ public class IO {
 		setTimeoutMs(1000); // default
 	}
 	
-	public void setId(String id) {
-		this.id=id;
-	}
-
 	public void setTimeoutMs(int ms) throws Exception {
 		this.timeoutMs = ms;
 	}

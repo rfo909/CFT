@@ -157,10 +157,8 @@ public class ObjSNode extends Obj {
     				continue;
     			}
     			IO io=conn.getIO();
-    			io.setId("ObjSNode/Data ");
     			// process connection, then close it
     			try {
-    				io.setTimeoutMs(100);
     				String command = io.readInputString();
     				if (command.equals("SAVE")) {
     					String key = io.readInputString();
@@ -200,16 +198,12 @@ public class ObjSNode extends Obj {
     			} 
     			// process connection, then close it
     			IO io=conn.getIO();
-    			io.setId("ObjSNode/Admin ");
     			try {
-    				io.setTimeoutMs(100);
     				String command = io.readInputString();
     				if (command.equals("QUIT")) {
     					terminate=true;
     					io.writeOutputString("Shutting down");
     				} else if (command.equals("GETLOG")) {
-//    					io.writeOutputString("1");
-//    					io.writeOutputString("Hello from ObjSNode");
     					List<String> logLines=dataProcess.getLogLines();
     					io.writeOutputString(""+logLines.size());
     					for (String s:logLines) {
