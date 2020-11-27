@@ -31,8 +31,10 @@ public class ObjSNode extends Obj {
 	private int portForData = 31033;
 	private int portForAdmin = 31034;
 	private String dataDir=".";
+	private String id;
 	
     public ObjSNode () {
+    	this.id=UUID.randomUUID().toString();
     	this.add(new FunctionGetConfiguration());
     	this.add(new FunctionConfigure());
     	this.add(new FunctionStart());
@@ -74,6 +76,7 @@ public class ObjSNode extends Obj {
             data.put("portForData",  new ValueInt(portForData));
             data.put("portForAdmin",  new ValueInt(portForAdmin));
             data.put("dataDir",new ValueString(dataDir));
+            data.put("id", new ValueString(id));
             
             return new ValueObj(new ObjDict(data));
         }
@@ -98,7 +101,7 @@ public class ObjSNode extends Obj {
             portForData=(int) ((ValueInt) dict.getValue("portForData")).getVal();
             portForAdmin=(int) ((ValueInt) dict.getValue("portForAdmin")).getVal();
             dataDir=((ValueString) dict.getValue("dataDir")).getVal();
-            
+            id=((ValueString) dict.getValue("id")).getVal();
             return new ValueObj(self());
         }
     }
