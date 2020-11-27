@@ -439,8 +439,13 @@ public class Root {
 		ObjGlobal objGlobal = currScript.getObjGlobal();
 		// System messages are written to screen - this applies to help texts etc
 		List<String> messages = objGlobal.getSystemMessages();
+		int limit = objCfg.getScreenWidth()-1;
 		for (String s : messages) {
-			stdio.println("  # " + s);
+			String x="  # " + s;
+			if (x.length() > limit) {
+				x=x.substring(0,limit-1) + "+";
+			}
+			stdio.println(x);
 		}
 
 		objGlobal.clearSystemMessages();
