@@ -20,10 +20,10 @@ public class TCPClient  {
         this.addr=addr;
         this.port=port;
         
-        System.out.println("TCPClient host=" + addr + " port=" + port);
+        //System.out.println("TCPClient host=" + addr + " port=" + port);
         InetAddress address=InetAddress.getByName(addr);
         socket = new Socket(address, port);
-        System.out.println("TCPClient socket ok");
+        //System.out.println("TCPClient socket ok");
         io=new IO(socket);
 	}
     
