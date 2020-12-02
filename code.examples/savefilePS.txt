@@ -180,6 +180,7 @@ loop
 			@ '.h'  - change host
 			@ '.d'  - set directory manually
 			@ '.e'  - edit file
+			@ '.p'  - show full path to current directory
 			@ '.u X'- show file minus comments (starting with '#' or X if given)
 			@ '.'   - enter or paste multiple lines - end with '.'
 			@ '.q'  - quit
@@ -200,6 +201,9 @@ loop
 		if (file != null) {
 			Lib:e (file)
 		}
+	} else if (mode==".p") {
+		dir = Dir("\\" + host + "\" + convertPath(getDir.call(host)))
+		println(dir.path)
 	} else if (mode.startsWith(".u")) {
 		dir = Dir("\\" + host + "\" + convertPath(getDir.call(host)))
 		comment="#"
