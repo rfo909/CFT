@@ -1,0 +1,70 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
+# Readme
+<<< EOF
+--------------------------------------------------------------------
+
+Docker
+
+--------------------------------------------------------------------
+>>> EOF
+/Readme
+
+
+# Run command string (must split correctly)
+P(1,"dir") =>cmd
+    println("---> " + cmd)
+    Dir.run(cmd.split)
+/Run
+
+
+
+# List docker containers
+Run("docker container list")
+/CList
+
+# List docker images
+Run("docker image list")
+/IList
+
+# List docker processes
+Run("docker ps -a")
+/ps
+
+# Delete docker processes by image name
+P(1)=>proc
+	if(proc==null) {
+		ps
+		Input("Remove docker process ('*' for all)").get => proc
+	}
+	Dir.runCapture("docker", "ps", "-a")->line
+		line.split=>cols
+		assert(proc=="*" || cols.nth(1)==proc)
+		cols.last => name
+		Run("docker rm " + name)
+/rm
+
+
+		
+
+
+
