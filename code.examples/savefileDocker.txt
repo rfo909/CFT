@@ -29,6 +29,15 @@ Docker
 >>> EOF
 /Readme
 
+/Interactively run command
+	P(1)=>cmd
+	if(cmd==null) {
+		println("Enter command")
+		readLine=>cmd
+	}
+	Run(cmd)
+/i
+
 
 # Run command string (must split correctly)
 P(1,"dir") =>cmd
@@ -60,11 +69,46 @@ P(1)=>proc
 		line.split=>cols
 		assert(proc=="*" || cols.nth(1)==proc)
 		cols.last => name
+		Run("docker stop " + name)
 		Run("docker rm " + name)
 /rm
 
 
-		
+
+
+# Create or update project data
+	P(1,Dir)=>dir
+	Input("Docker image title").get => title
+	Dict
+		.set("dir",dir)
+		.set("title",title)
+		=> data
+	Db2:Set("Docker","Project",data)
+	dir.path
+/SetProject
+
+# Get project data
+	data = Db2:Get("Docker","Project")
+	error(data==null,"Call SetProject() first, either with project dir current, or as parameter")
+	data
+/GetProject
+
+# Create project image
+	p=GetProject
+	p.dir.run("cmd","/c","docker","build","-t",p.title,".")
+	IList
+/PBuildImage
+
+# Remove process
+	p=GetProject
+	rm(p.title+"_running")  # if exists
+/PRm	
+
+# Run project
+	p=GetProject
+	cmd=List("cmd","/c","docker","run","-it","--rm", "--name",p.title+"_running",p.title)
+	Lib:run(cmd)
+/PRun
 
 
 
