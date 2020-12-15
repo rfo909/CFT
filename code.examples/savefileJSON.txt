@@ -6,7 +6,7 @@ To get help
 $ Lib.Text.Lexer help
 $ Lib.Text.Lexer.getTokenStream help
 
-Parse() takes as input text lines, or if missing asks you to paste them, followed by "." on single line.
+Parse() takes as parameter a list of text lines, or if missing asks you to paste them, followed by "." on single line.
 PP() takes as input the output from Parse
 
 Handles MongoDB extended syntax, which takes the form of "function calls", like ISODate("2020-11-23T12:29:31.852Z").
@@ -71,54 +71,7 @@ field values are always put in double quotes.
 /exampleJSON
 
 
-# Example code for creating TokenStream
-# --
-	RootNode => root
-	Lib.Text.Lexer => lexer
-	exampleJSON->line lexer.processLine(root,line) |
-	lexer.getTokenStream
-/exampleTokenStream
 
-
-# RUNME: JSON parser
-# --
-	start=currentTimeMillis
-	
-	ts = exampleTokenStream
-	tc = tryCatchSoft(
-		MatchValue(ts)
-	)
-
-	end=currentTimeMillis
-	println("# " + (end-start) + " ms")
-	
-	if (tc.ok) {
-		println("parse ok")
-		dict = tc.result  # the JSON root object
-		
-		println
-		Inner {
-			exampleJSON->line println(line)
-		}
-		println
-		
-		println("accessing list[3].id")
-		println("--------------------")
-		println(dict.get("list").nth(3).get('id'))
-	} else {
-		println("Parse failed: " + tc.msg)
-	}
-
-	PPObj(tc.result)
-	tc.result
-/exampleParse
-
-
-
-
-
-
-	
 
 # object
 	P(1) => ts
@@ -144,6 +97,8 @@ field values are always put in double quotes.
 	|
 	obj
 /MatchObject
+
+
 
 # Value
 # 
@@ -203,6 +158,8 @@ field values are always put in double quotes.
 		error(""+ts.sourceLocation+" Unexpected token: '" + ts.peek + "'")
 	}
 /MatchValue
+
+
 
 # List
 # --
@@ -285,7 +242,7 @@ field values are always put in double quotes.
 
 
 
-# Receive pasted JSON, parse and optionally pretty-print
+# Takes json as parameter, or if null, reads from stdin, terminated by '.'
 # Throws soft errors if parse error.
 # --
 	P(1)=>json
@@ -299,8 +256,8 @@ field values are always put in double quotes.
 
 	RootNode => root
 	Lib.Text.Lexer => lexer
-	json->line lexer.processLine(root,line) 
-
+	json->line 
+		lexer.processLine(root,line) 
 	|
 
 	ts=lexer.getTokenStream
@@ -370,12 +327,16 @@ field values are always put in double quotes.
 	P(1)=>jsonValue
 	list=List
 	ExpValue(jsonValue,list)
-	list->x out(""+x)
+	list.concat(" ")
 /Export
 
 
 
 	
 
+Lib.Text.Lexer help
+/h1
+
 Lib.Text.Lexer.getTokenStream help
-/h
+/h2
+

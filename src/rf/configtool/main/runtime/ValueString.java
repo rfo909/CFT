@@ -82,15 +82,29 @@ public class ValueString extends Value {
     
     @Override
     public String synthesize() throws Exception {
+    	
         if (val==null) return "''";
-        return '"' + toHexString(val) + '"' + ".fromHexString";
-//        
-//        boolean force=val.contains("\r") || val.contains("\n") || val.contains("\t");
-//        boolean d=val.contains("\"");
-//        boolean s=val.contains("'");
-//        if (force || (d && s)) return '"' + toHexString(val) + '"' + ".fromHexString";
-//        if (d) return "'" + val + "'";
-//        return "\"" + val + "\"";
+        
+        // if string contains non-printable characters, use hex encoding
+        boolean useHex=false;
+        for (int i=0; i<val.length(); i++) {
+        	char ch=val.charAt(i);
+        	if (ch < 32 || ch >= 127) {
+        		useHex=true;
+        		break;
+        	}
+        }
+        if (useHex) {
+        	return '"' + toHexString(val) + '"' + ".fromHexString";
+        }
+        
+        // decide if using .esc / .unEsc
+        boolean force=val.contains("\r") || val.contains("\n") || val.contains("\t");
+        boolean d=val.contains("\"");
+        boolean s=val.contains("'");
+        if (force || (d && s)) return '"' + escString(val) + '"' + ".unEsc";
+        if (d) return "'" + val + "'";
+        return "\"" + val + "\"";
     }
 
     
