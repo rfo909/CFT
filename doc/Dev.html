@@ -13,6 +13,20 @@
 
 <h1>CFT Change log</h1>
 
+<h3>v2.1.7 2020-12-15 onLoad</h3>
+<p>
+	Created onLoad function processing. Example from Projects script:
+</p>
+<pre>
+# Reset selected projects if new session
+	if (Db2:Get("Projects","session") != Sys.sessionUUID) {
+		Db2:Set("Projects","Project",null)
+		Db2:Set("Projects","session", Sys.sessionUUID)
+	}
+/onLoad
+</pre>	
+
+
 <h3>v2.1.6 2020-11-27</h3>
 
 <p>

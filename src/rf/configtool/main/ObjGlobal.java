@@ -275,8 +275,15 @@ public class ObjGlobal extends Obj {
         if (name==null) throw new Exception("No save name defined");
         scriptName=name;
         codeHistory.load(scriptName);
-        
+
         updateSavefileState();
+
+        
+        CodeLines onLoad = codeHistory.getNamedCodeLines("onLoad");
+        if (onLoad != null) {
+        	this.runtime.processCodeLines(stdioReal, onLoad, new FunctionState());
+        }
+        
     }
 
     public String getScriptName() {

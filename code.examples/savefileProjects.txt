@@ -62,9 +62,15 @@ There can be multiples of every line, including Dir.
 
 
 
-# Set up screen dimensions
-    Cfg.w(130) Cfg.h(25)
-/Init
+# Reset selected projects if new session
+	if (Db2:Get("Projects","session") != Sys.sessionUUID) {
+		Db2:Set("Projects","Project",null)
+		Db2:Set("Projects","session", Sys.sessionUUID)
+	}
+/onLoad
+
+
+
 
 # projects.txt file contains all data
     (Lib:DirPrivate).file("projects.txt") =>f

@@ -2020,6 +2020,12 @@ false
 <boolean>
 true
 ```
+# The onLoad function
+
+
+In order for scripts to run code as the script is loaded, we can define a function
+called onLoad, which is called every time the script file is loaded or reloaded.
+
 # Error handling
 
 

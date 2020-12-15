@@ -175,6 +175,8 @@ Differing between Windows and Linux
 
 Predicate calls
 
+The onLoad function
+
 Error handling
  * Soft errors
  * Hard errors
