@@ -65,19 +65,19 @@ choice.
         if(hasStty, Inner{
             Dir.runCapture("stty","size").nth.split =>list
             #debug("list=" + list)
-            Cfg.h(list.nth(0).parseInt)
-            Cfg.w(list.nth(1).parseInt)
+            Term.h(list.nth(0).parseInt)
+            Term.w(list.nth(1).parseInt)
             true =>updated
         })
     } else {
         # Windows (a bit slow)
         Dir.runCapture("powershell","(Get-Host).UI.RawUI.WindowSize.Width").nth.parseInt =>w
         Dir.runCapture("powershell","(Get-Host).UI.RawUI.WindowSize.Height").nth.parseInt =>h
-        Cfg.w(w)
-        Cfg.h(h)
+        Term.w(w)
+        Term.h(h)
         true =>updated
     }
-    if(updated, Cfg, null)
+    if(updated, Term, null)
 /GetTerminalSize
             
 

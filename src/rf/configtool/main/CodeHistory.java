@@ -35,13 +35,13 @@ public class CodeHistory {
     private PropsFile props;
     private Map<String, CodeLines> namedLines=new HashMap<String,CodeLines>();
     private List<String> namesInSequence=new ArrayList<String>();
-    private ObjCfg cfg;
+    private ObjTerm term;
     
     private String currLine;
     
-    public CodeHistory (PropsFile props, ObjCfg cfg) {
+    public CodeHistory (PropsFile props, ObjTerm cfg) {
         this.props=props;
-        this.cfg=cfg;
+        this.term=cfg;
     }
     
     public void setCurrLine (String line) {
@@ -85,7 +85,7 @@ public class CodeHistory {
     }
     
     public void report(Stdio stdio, String symbolSubStr) {
-        final int available=cfg.getScreenWidth();
+        final int available=term.getScreenWidth();
         
         String hr = "+-----------------------------------------------------";
         

@@ -27,13 +27,13 @@ import rf.configtool.main.runtime.ValueBoolean;
 import rf.configtool.main.runtime.ValueInt;
 import rf.configtool.main.runtime.ValueString;
 
-public class ObjCfg extends Obj {
+public class ObjTerm extends Obj {
     
     private int h=24;
     private int w=130;
     private boolean wrap=false;
     
-    public ObjCfg() {
+    public ObjTerm() {
         this.add(new FunctionW());
         this.add(new FunctionH());
         this.add(new FunctionWrap());
@@ -61,17 +61,17 @@ public class ObjCfg extends Obj {
 
 
     public String getTypeName() {
-        return "Cfg";
+        return "Term";
     }
     
 
     public ColList getContentDescription() {
-        return ColList.list().regular(h+"x"+w).regular(":wrap="+wrap);
+        return ColList.list().regular(w+"x"+h).regular(":wrap="+wrap);
     }
 
     
     private String getDesc() {
-        return "Cfg";
+        return "Term";
     }
     
     private Obj theObj () {

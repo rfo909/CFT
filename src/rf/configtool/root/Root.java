@@ -8,7 +8,7 @@ import rf.configtool.main.CodeLine;
 import rf.configtool.main.CodeLines;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.FunctionState;
-import rf.configtool.main.ObjCfg;
+import rf.configtool.main.ObjTerm;
 import rf.configtool.main.ObjGlobal;
 import rf.configtool.main.PropsFile;
 import rf.configtool.main.SourceException;
@@ -39,7 +39,7 @@ public class Root {
 
 	private StdioReal stdio;
 	private PropsFile propsFile;
-    private ObjCfg objCfg;
+    private ObjTerm objTerm;
 
 	private Map<String, ScriptState> scriptStates = new HashMap<String, ScriptState>();
 	private ScriptState currScript;
@@ -60,7 +60,15 @@ public class Root {
 		this.startTime=System.currentTimeMillis();
 		this.stdio = stdio;
     	propsFile=new PropsFile(customScriptDir);
-        objCfg=new ObjCfg();
+        objTerm=new ObjTerm();
+        
+
+        String globalOnLoad = propsFile.getGlobalOnLoad();
+        if (globalOnLoad != null) {
+        	addInitialCommand(globalOnLoad);
+        }
+        
+
 
         createNewScript();
 	}
@@ -74,8 +82,8 @@ public class Root {
 	}
 
     
-    public ObjCfg getObjCfg() {
-        return objCfg;
+    public ObjTerm getObjTerm() {
+        return objTerm;
     }
     
     public boolean isDebugMode() {
@@ -86,8 +94,7 @@ public class Root {
 		currScript = getScriptState(scriptName, true);
 	}
 
-	public void setInitialCommands(List<String> initialCommands) {
-		for (String line : initialCommands)
+	public void addInitialCommand(String line) {
 			stdio.addBufferedInputLine(line);
 	}
 
@@ -421,7 +428,7 @@ public class Root {
 		// present result
 		Report report = new Report();
 		List<String> lines = report.displayValueLines(result);
-		int width = objCfg.getScreenWidth();
+		int width = objTerm.getScreenWidth();
 
 		Stdio stdio = objGlobal.getStdioActual();
 
@@ -439,7 +446,7 @@ public class Root {
 		ObjGlobal objGlobal = currScript.getObjGlobal();
 		// System messages are written to screen - this applies to help texts etc
 		List<String> messages = objGlobal.getSystemMessages();
-		int limit = objCfg.getScreenWidth()-1;
+		int limit = objTerm.getScreenWidth()-1;
 		for (String s : messages) {
 			String x="  # " + s;
 			if (x.length() > limit) {
@@ -460,7 +467,7 @@ public class Root {
 			return;
 		}
 
-		final int screenWidth = objCfg.getScreenWidth();
+		final int screenWidth = objTerm.getScreenWidth();
 
 		if (ts.matchStr("save")) {
 			String ident = ts.matchIdentifier(); // may be null
@@ -544,7 +551,7 @@ public class Root {
 			//objGlobal.outln("Loaded scripts: " + getScriptStateNames());
 			return;
 		} else if (ts.matchStr("wrap")) {
-			boolean wrap = objCfg.changeWrap();
+			boolean wrap = objTerm.changeWrap();
 			if (wrap) {
 				stdio.println("WRAP MODE ON. Repeat :wrap command to turn off again.");
 			} else {

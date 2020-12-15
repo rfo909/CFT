@@ -27,6 +27,7 @@ public class PropsFile {
 	private Map<String,String> shortcuts;
 	
 	private String db2Dir;
+	private String globalOnLoad;
 	
 
 	// detect changes 
@@ -119,6 +120,8 @@ public class PropsFile {
 					} else
 					if (name.equals("db2Dir")) {
 						db2Dir=fixDir(value);
+					} else if (name.equals("globalOnLoad")) {
+						globalOnLoad=value;
 					} else {
 						throw new Exception("Invalid configuration field: " + name);
 					}
@@ -223,6 +226,10 @@ public class PropsFile {
 	
 	public String getDb2Dir() {
 		return db2Dir;
+	}
+	
+	public String getGlobalOnLoad() {
+		return globalOnLoad;
 	}
 
 }

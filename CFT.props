@@ -90,3 +90,8 @@ prompt = x=Sys.scriptName h=Lib:Hostname Curses:Reset+Curses:Bold+""+if(h==null,
 
 db2Dir = private/Db2
 
+#
+# Global onLoad - when CFT is started
+# 
+
+globalOnLoad = Lib:GetTerminalSize

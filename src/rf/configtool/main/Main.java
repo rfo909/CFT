@@ -84,7 +84,7 @@ public class Main {
         while (args.hasNext()) {
         	commands.add(args.get("command-string"));
         }
-        root.setInitialCommands(commands);
+        for (String line:commands) root.addInitialCommand(line);
         
         root.inputLoop();
     }

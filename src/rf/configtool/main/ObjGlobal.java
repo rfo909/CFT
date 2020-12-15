@@ -83,7 +83,7 @@ public class ObjGlobal extends Obj {
         //props.report(stdio);
         
         
-        codeHistory=new CodeHistory(root.getPropsFile(), root.getObjCfg());
+        codeHistory=new CodeHistory(root.getPropsFile(), root.getObjTerm());
         this.runtime=new Runtime(this);
         
         
@@ -106,7 +106,7 @@ public class ObjGlobal extends Obj {
         add(new FunctionSyn());
         add(new FunctionReadLines());
         add(new FunctionReadLine());
-        add(new FunctionCfg());
+        add(new FunctionTerm());
         add(new FunctionPrintln());
         add(new FunctionFileLine());
         add(new FunctionError());
@@ -277,8 +277,7 @@ public class ObjGlobal extends Obj {
         codeHistory.load(scriptName);
 
         updateSavefileState();
-
-        
+ 
         CodeLines onLoad = codeHistory.getNamedCodeLines("onLoad");
         if (onLoad != null) {
         	this.runtime.processCodeLines(stdioReal, onLoad, new FunctionState());
@@ -663,16 +662,16 @@ public class ObjGlobal extends Obj {
     }
     
 
-    class FunctionCfg extends Function {
+    class FunctionTerm extends Function {
         public String getName() {
-            return "Cfg";
+            return "Term";
         }
         public String getShortDesc() {
-            return "Cfg - get config object";
+            return "Term - get terminal config object";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
-            return new ValueObj(ctx.getObjGlobal().getRoot().getObjCfg());
+            return new ValueObj(ctx.getObjGlobal().getRoot().getObjTerm());
         }
     } 
 

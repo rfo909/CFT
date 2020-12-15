@@ -21,7 +21,7 @@ import java.util.*;
 
 import rf.configtool.main.CodeHistory;
 import rf.configtool.main.Ctx;
-import rf.configtool.main.ObjCfg;
+import rf.configtool.main.ObjTerm;
 import rf.configtool.main.Stdio;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueString;
@@ -72,7 +72,7 @@ public class StmtShowCode extends Stmt {
         
         CodeHistory code = ctx.getObjGlobal().getCodeHistory();
         List<String> names=code.getNames();
-        ObjCfg cfg=ctx.getObjGlobal().getRoot().getObjCfg();
+        ObjTerm term=ctx.getObjGlobal().getRoot().getObjTerm();
         
         
         names.sort(new Comparator<String>() {
@@ -86,7 +86,7 @@ public class StmtShowCode extends Stmt {
             if (name.length()>maxNameLength) maxNameLength=name.length();
         }
         
-        int maxValueLength=cfg.getScreenWidth()-(maxNameLength+2+1);
+        int maxValueLength=term.getScreenWidth()-(maxNameLength+2+1);
         
 
         List<String> groups=split(s,"|;");
