@@ -1,4 +1,4 @@
-# Readme
+''# Readme
 <<<<<< EOF
 Parsing "Ansible" text format looking like this:
 
@@ -189,17 +189,23 @@ s*.s   [no]
 	
 	data.LallHosts.call->host
 
+		println("* " + host)
+
 		pm=data.Lget.call(host,"PackageManager")
 		assert(pm=="apt")
+		println("*   pm==apt ok")
 
 		sshUser=data.Lget.call(host,"SSHUser")
 		assert(sshUser != null)
+		println("*   sshUser != null ok")
 
 		target=sshUser+"@"+host
 		processData = SymDict(target)
-		
+
+		# Block until less than given number of active processes
 		mon.Lwait.call(8)
-		println("Starting process for " + target)
+		
+		println("*   starting process for " + target)
 		process = SpawnProcess(processData, {
 			start=currentTimeMillis
 			AptUpdate(target)
@@ -209,7 +215,12 @@ s*.s   [no]
 		mon.Ladd.call(process)
 		
 		out(process)
-	| _-> process
+	| => processList
+
+	Lib:Header("Press ENTER to await process results")
+	readLine
+
+	processList -> process
 		
 		target=process.data.target
 		Lib:Header("Waiting for " + target)
@@ -456,3 +467,5 @@ DNS=10.0.0.3 10.0.0.4
 >>>>> EOF
 /resolved_conf
 
+Parse.Ldump.call
+/dump
