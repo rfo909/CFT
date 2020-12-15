@@ -137,6 +137,9 @@ d
 
 
 # Run virsh to display status for all defined VM's
+    Dir.runCapture("whoami").nth=="root" =>ok
+    error(!ok, "Must be logged in as root")
+
 	println
 	Lib:run(List("virsh","list","--all")).stdout->line println(line) |
 	println
