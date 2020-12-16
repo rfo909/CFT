@@ -47,10 +47,9 @@ P(1,"dir") =>cmd
 
 # Create or update project data
 	P(1,Dir)=>dir
-	Input("Docker image title").get => title
 	Dict
 		.set("dir",dir)
-		.set("title",title)
+		.set("title",dir.name.toLower)
 		=> data
 	Db2:Set("Docker","Project",data)
 	dir.path
@@ -62,6 +61,11 @@ P(1,"dir") =>cmd
 	data
 /GetProject
 
+
+# Get app dir
+# --
+	GetProject.dir.sub("app")
+/AppDir
 
 
 # List docker containers
@@ -120,4 +124,34 @@ P(1)=>proc
 /bash
 
 
+# Show file types
+# --
+	AppDir.allFiles->f out(f.name.afterLast(".")) | _.unique.sort
+/FileTypes
 
+
+# Locate all Windows Paths
+# --
+	# Ignoring: js txt java json 
+
+	"conf config properties".split => types
+	"package.json".split => ignoreFiles
+
+	regex=Regex("[CcDd][:][\\]")
+	grep=Grep.matchRegex(regex)
+	AppDir.allFiles->f
+		reject(ignoreFiles.contains(f.name))
+		type=f.name.afterLast(".")
+		assert(types.contains(type))
+		grep.file(f)->line
+			report(line.file.name, line.lineNumber, line)
+/S
+
+
+# File locator by (part of) name
+# --
+	P(1,Input("(part of) file name").get)=>name
+	AppDir.allFiles->f
+		assert(f.name.contains(name))
+		out(f)
+/FL
