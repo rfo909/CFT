@@ -50,6 +50,10 @@ shortcut:top  = "---- Run top command ----"               Dir.run("top")
 shortcut:rsh  = "---- Remote shell via ssh ----"          SSH:remoteShell
 shortcut:S    = "---- Show all scripts ----"              Lib:Scripts
 
+# Save and get lastResult
+shortcut:slr  = "---- Save lastResult ----"               Lib:SaveLastResult
+shortcut:lr  =  "---- Get lastResult ----"                Lib:GetLastResult
+
 # Release script
 shortcut:rel  = "---- Release ----"                       Sys.stdin(":load Release","?")
 

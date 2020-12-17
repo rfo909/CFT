@@ -38,6 +38,8 @@ choice.
 /Readme
 
 
+
+
 # Edit file
     P(1,Sys.savefile) =>file
     if(Sys.isWindows) {
@@ -483,3 +485,33 @@ P(2) =>value
 				println("   " + f.name.after("savefile").before(".txt"))
 		}
 /Scripts
+
+
+# Save lastResult to database
+# --
+	value=Sys.lastResult
+	
+	P(1,Input("Enter identifier").get) =>name
+	Db2:Get("Lib.lastResults", Sys.sessionUUID, Dict) => dict
+	dict.set(name, value)
+	Db2:Set("Lib.lastResults", Sys.sessionUUID, dict)
+/SaveLastResult
+
+
+# Get saved lastResult
+# --
+	P(1)=>name
+	if (name==null) {
+		Inner {
+			Db2:Get("Lib.lastResults", Sys.sessionUUID, Dict).keys ->x 
+				println(" -> " + x)
+		}
+		Input("Enter identifier").get =>name
+	}
+	Db2:Get("Lib.lastResults",Sys.sessionUUID,Dict).get(name,null)
+/GetLastResult
+
+
+
+
+

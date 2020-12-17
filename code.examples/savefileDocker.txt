@@ -29,18 +29,9 @@ Docker
 >>> EOF
 /Readme
 
-/Interactively run command
-	P(1)=>cmd
-	if(cmd==null) {
-		println("Enter command")
-		readLine=>cmd
-	}
-	Run(cmd)
-/i
-
 
 # Run command string (must split correctly)
-P(1,"dir") =>cmd
+P(1) => cmd
     println("---> " + cmd)
     Dir.run(cmd.split)
 /Run
@@ -50,10 +41,12 @@ P(1,"dir") =>cmd
 	Dict
 		.set("dir",dir)
 		.set("title",dir.name.toLower)
+		.set("logdirs", List)
 		=> data
 	Db2:Set("Docker","Project",data)
 	dir.path
 /SetProject
+
 
 # Get project data
 	data = Db2:Get("Docker","Project")
@@ -61,6 +54,25 @@ P(1,"dir") =>cmd
 	data
 /GetProject
 
+
+# Extend project with logdir
+	P(1,error("Missing dir parameter")) => dir
+	GetProject => p
+	p.get("logDirs",List).add(dir)
+	Db2:Set("Docker","Project", p)
+/AddProjectLogDir
+
+# Show project
+	p=GetProject
+	println
+	println("title =   " + p.title)
+	println("dir   =   " + p.dir.path)
+	Inner {p.logDirs->d out(d.path) | _.concat} => logDirs
+	println("logDirs = " + logDirs)
+	println
+	"ok"
+/ShowProject
+	
 
 # Get app dir
 # --
@@ -94,6 +106,14 @@ P(1)=>proc
 		Run("docker rm " + name)
 /rm
 
+# Delete all docker images
+	Dir.runCapture("docker","image","ls")->line
+		line.split => cols
+		cols.nth(2) => id
+		reject(id=="IMAGE")  # header
+		Run("docker rmi " + id)
+/ClearImages
+
 # Remove processes for project
 	p=GetProject
 	rm(p.title)  # if exists
@@ -106,22 +126,23 @@ P(1)=>proc
 	IList
 /PBuildImage
 
-# Run project in detached mode (see Dockerfile for command to run)
+# Do full rebuild, then run in detached mode
 	PRm
+	PBuildImage
 	p=GetProject
-	cmd=List("cmd","/c","docker","run","-d","--name",p.title+"_running",p.title)
+	cmd=List("cmd","/c","docker","run","-d","--publish", "8080:8080","--name",p.title+"_running",p.title)
 	Lib:run(cmd)
-/PRunDetach
+/run
 
 
 
-# Run full rebuild, then run interactive bash to examine image
+# Do full rebuild, then run interactive bash to examine image
 	PRm
 	PBuildImage
 	p=GetProject
 	cmd=List("docker","run","-it","--publish", "8080:8080", "--name", p.title+"_running", p.title, "bash")
 	Dir.run(cmd)
-/bash
+/test
 
 
 # Show file types
@@ -130,7 +151,8 @@ P(1)=>proc
 /FileTypes
 
 
-# Locate all Windows Paths
+
+# Locate all Windows Paths in text files
 # --
 	# Ignoring: js txt java json 
 
@@ -145,7 +167,7 @@ P(1)=>proc
 		assert(types.contains(type))
 		grep.file(f)->line
 			report(line.file.name, line.lineNumber, line)
-/S
+/LocateWindowsPaths
 
 
 # File locator by (part of) name
@@ -155,3 +177,19 @@ P(1)=>proc
 		assert(f.name.contains(name))
 		out(f)
 /FL
+
+# Show files recently updated
+# --
+	P(1,Input("Max hours ago").get.parseInt) => hours
+	Date.sub(Date.Duration.hours(hours)).get => timeLimitMs
+	
+	AppDir.allFiles->f
+		assert(f.lastModified > timeLimitMs)
+		out(f)
+/ModifiedFiles
+
+
+	
+
+
+	
