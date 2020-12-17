@@ -52,7 +52,13 @@ shortcut:S    = "---- Show all scripts ----"              Lib:Scripts
 
 # Save and get lastResult
 shortcut:slr  = "---- Save lastResult ----"               Lib:SaveLastResult
-shortcut:lr  =  "---- Get lastResult ----"                Lib:GetLastResult
+shortcut:lr   = "---- Get lastResult ----"                Lib:GetLastResult
+
+# Edit text documents stored in database
+shortcut:DD   = "---- Edit document in database ----"     Lib:DocEdit
+
+# Edit props document stored in database
+shortcut:DP   = "---- Edit props doc in database ----"    Lib:PropsEdit
 
 # Release script
 shortcut:rel  = "---- Release ----"                       Sys.stdin(":load Release","?")
@@ -63,7 +69,6 @@ shortcut:PS   = "---- Projects perform search ----"       Projects:Curr Projects
 shortcut:PP   = "---- Projects change project ----"       Projects:ChangeProject
 
 # Investigate script (experimental)
-shortcut:INV  = "---- Investigate ----"                   Sys.stdin(":load Investigate","?")
 shortcut:i    = "---- Investigate log text ----"          Investigate:LogText
 shortcut:ii   = "---- Investigate log loop ----"          Investigate:InputMode
 shortcut:id   = "---- Investigate log with data ----"     Investigate:LogData
