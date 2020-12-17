@@ -573,7 +573,8 @@ P(2) =>value
 	Lib:TmpFile("props","txt") => f
 	f.create(data)
 	Lib:e(f,false)
-	Db2:Set("Lib.propsDocs",name,f.read)
+	list = Inner { f.read->x out(""+x) } # Convert from FileLine to String
+	Db2:Set("Lib.propsDocs",name,list)
 	f.delete
 /PropsEdit
 
