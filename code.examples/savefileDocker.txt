@@ -30,10 +30,15 @@ Docker
 /Readme
 
 
-# Run command string (must split correctly)
+# Run command list or string (must split correctly)
 P(1) => cmd
-    println("---> " + cmd)
-    Dir.run(cmd.split)
+	if (getType(cmd)=="List") {
+		println("---> " + cmd.concat(" "))
+		Dir.run(cmd)
+	} else {
+		println("---> " + cmd)
+		Dir.run(cmd.split)
+	}
 /Run
 
 # Create or update project data
@@ -58,7 +63,7 @@ P(1) => cmd
 # Extend project with logdir
 	P(1,error("Missing dir parameter")) => dir
 	GetProject => p
-	p.get("logDirs",List).add(dir)
+	p.get("logdirs",List).add(dir)
 	Db2:Set("Docker","Project", p)
 /AddProjectLogDir
 
@@ -67,8 +72,8 @@ P(1) => cmd
 	println
 	println("title =   " + p.title)
 	println("dir   =   " + p.dir.path)
-	Inner {p.logDirs->d out(d.path) | _.concat} => logDirs
-	println("logDirs = " + logDirs)
+	Inner {p.logdirs->d out(d.path) | _.concat} => logDirs
+	println("logdirs = " + logDirs)
 	println
 	"ok"
 /ShowProject
@@ -122,7 +127,10 @@ P(1)=>proc
 
 # Create project image
 	p=GetProject
-	p.dir.run("cmd","/c","docker","build","-t",p.title,".")
+	error(!p.dir.file("Dockerfile").exists,"No Dockerfile in project dir: " + p.dir.path)
+	cmd=List("docker","build","-t",p.title,".")
+	println("---> " + cmd.concat(" "))
+	p.dir.run(cmd)
 	IList
 /PBuildImage
 
@@ -130,8 +138,8 @@ P(1)=>proc
 	PRm
 	PBuildImage
 	p=GetProject
-	cmd=List("cmd","/c","docker","run","-d","--publish", "8080:8080","--name",p.title+"_running",p.title)
-	Lib:run(cmd)
+	cmd=List("docker","run","-d","--publish", "8080:8080","--name",p.title+"_running", p.title)
+	Run(cmd)
 /run
 
 
@@ -141,7 +149,7 @@ P(1)=>proc
 	PBuildImage
 	p=GetProject
 	cmd=List("docker","run","-it","--publish", "8080:8080", "--name", p.title+"_running", p.title, "bash")
-	Dir.run(cmd)
+	Run(cmd)
 /test
 
 
@@ -173,7 +181,10 @@ P(1)=>proc
 # File locator by (part of) name
 # --
 	P(1,Input("(part of) file name").get)=>name
-	AppDir.allFiles->f
+	# Generate file set and store in database, for faster check
+	allFiles=AppDir.allFiles
+	println("#files = " + allFiles.length)
+	allFiles->f
 		assert(f.name.contains(name))
 		out(f)
 /FL
