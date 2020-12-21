@@ -280,7 +280,11 @@ public class ObjGlobal extends Obj {
  
         CodeLines onLoad = codeHistory.getNamedCodeLines("onLoad");
         if (onLoad != null) {
-        	this.runtime.processCodeLines(stdioReal, onLoad, new FunctionState());
+        	try {
+        		this.runtime.processCodeLines(stdioReal, onLoad, new FunctionState());
+        	} catch (Exception ex) {
+        		stdioReal.println("onLoad function failed with exception");
+        	}
         }
         
     }
