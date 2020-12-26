@@ -41,14 +41,12 @@ import rf.configtool.main.runtime.ValueNull;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
 import rf.configtool.main.runtime.lib.db2.ObjDb2;
-import rf.configtool.main.runtime.lib.vgy.ObjVGY;
 
 public class ObjDb extends Obj {
 
     public ObjDb () {    	
         this.add(new FunctionDb2());
         this.add(new FunctionUUID());
-        this.add(new FunctionVGY());
     }
     
     private ObjDb self() {
@@ -99,17 +97,6 @@ public class ObjDb extends Obj {
     } 
  
     
-    class FunctionVGY extends Function {
-        public String getName() {
-            return "VGY";
-        }
-        public String getShortDesc() {
-            return "VGY() - returns VGY object";
-        }
-        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 0) throw new Exception("Expected no parameters");
-            return new ValueObj(new ObjVGY());
-        }
-    } 
+   
  
 }
