@@ -257,6 +257,7 @@ Passwords, encryption, binary data
  * Passwords
  |   Encrypt / decrypt
  |   Binary data
+ |   Session data
 
 Reference: Colon commands
 

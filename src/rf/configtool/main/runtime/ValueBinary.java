@@ -8,12 +8,24 @@ import rf.configtool.util.Hex;
 public class ValueBinary extends Value {
     
     private byte[] val;
-    
+    private boolean secure;
+
     public ValueBinary (byte[] val) {
+    	this(val,false);
+    }
+
+    public ValueBinary (byte[] val, boolean secure) {
         this.val=val;
-        add (new FunctionHex());
-        add (new FunctionLength());
-        add (new FunctionToString());
+        this.secure=secure;
+        if (!secure) {
+	        add (new FunctionHex());
+	        add (new FunctionLength());
+	        add (new FunctionToString());
+        }
+    }
+    
+    public void validateNonSecure (String msg) throws Exception {
+    	if (secure) throw new Exception("ValueBinary is flagged as secure, no access: " + msg);
     }
     
     public byte[] getVal() {
@@ -27,11 +39,15 @@ public class ValueBinary extends Value {
 
     @Override
     public String getValAsString() {
-        return "[...]";
+    	if (secure) {
+    		return "0x???";
+    	} else {
+    		return "0x...";
+    	}
     }
     
 
-    // No synthesis
+    // No synthesis - but IF added, make sure it fails when secure flag is set!
     
     
     

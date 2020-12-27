@@ -34,6 +34,7 @@ import rf.configtool.main.runtime.ColList;
 import rf.configtool.main.runtime.Function;
 import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
+import rf.configtool.main.runtime.ValueBinary;
 import rf.configtool.main.runtime.ValueBoolean;
 import rf.configtool.main.runtime.ValueFloat;
 import rf.configtool.main.runtime.ValueInt;
@@ -63,6 +64,7 @@ public class ObjSys extends Obj {
         add(new FunctionUchar());
         add(new FunctionSessionUUID());
         add(new FunctionReadPassword());
+        add(new FunctionSecureSessionID());
         
 	}
 
@@ -415,5 +417,22 @@ public class ObjSys extends Obj {
 			}
 		}
 	}
+	
+	
+	class FunctionSecureSessionID extends Function {
+		public String getName() {
+			return "secureSessionId";
+		}
+
+		public String getShortDesc() {
+			return "secureSessionId() - return secure session id as secure Binary object";
+		}
+		
+		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+			if (params.size() != 0) throw new Exception("Expected no parameters");
+			return new ValueBinary(ctx.getObjGlobal().getRoot().getSecureSessionID(), true);
+		}
+	}
+	
 
 }

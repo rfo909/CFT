@@ -74,12 +74,17 @@ public class ObjUtil extends Obj {
             return "Encrypt";
         }
         public String getShortDesc() {
-            return "Encrypt(password, salt) - create Encrypt object in encryption mode";
+            return "Encrypt(password, salt?) - create Encrypt object in encryption mode";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 2) throw new Exception("Expected string parameters password + salt");
-            byte[] password=getString("password",params,0).getBytes("UTF-8");
-            byte[] salt=getString("password",params,1).getBytes("UTF-8");
+            if (params.size() != 1 && params.size() != 2) throw new Exception("Expected binary parameter password and optional string parameter salt");
+            byte[] password=getBinary("password",params,0).getVal();
+            byte[] salt;
+            if (params.size() == 2) {
+            	salt=getString("salt",params,1).getBytes("UTF-8");
+            } else {
+            	salt=new byte[0];
+            }
             return new ValueObj(new ObjEncrypt(password,salt, true));
         }
     } 
@@ -90,12 +95,17 @@ public class ObjUtil extends Obj {
             return "Decrypt";
         }
         public String getShortDesc() {
-            return "Decrypt(passwordStr, saltStr) - create Encrypt object in decrypt mode";
+            return "Decrypt(password, salt?) - create Encrypt object in decrypt mode";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 2) throw new Exception("Expected string parameters password + salt");
-            byte[] password=getString("password",params,0).getBytes("UTF-8");
-            byte[] salt=getString("password",params,1).getBytes("UTF-8");
+            if (params.size() != 1 && params.size() != 2) throw new Exception("Expected binary parameter password and optional string parameter salt");
+            byte[] password=getBinary("password",params,0).getVal();
+            byte[] salt;
+            if (params.size() == 2) {
+            	salt=getString("salt",params,1).getBytes("UTF-8");
+            } else {
+            	salt=new byte[0];
+            }
             return new ValueObj(new ObjEncrypt(password,salt, false));
         }
         

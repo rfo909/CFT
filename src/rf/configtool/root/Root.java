@@ -32,7 +32,7 @@ import rf.configtool.parser.TokenStream;
 public class Root {
 	
 	private final String sessionUUID;
-    
+    private final byte[] secureSessionID; 
 
 
 	private static final Version VERSION = new Version();
@@ -55,8 +55,13 @@ public class Root {
     	return sessionUUID;
     } 
 
+    public byte[] getSecureSessionID() {
+    	return secureSessionID;
+    } 
+
 	public Root(StdioReal stdio, String customScriptDir) throws Exception {
     	this.sessionUUID = UUID.randomUUID().toString();
+    	this.secureSessionID = (UUID.randomUUID().toString()+":"+System.currentTimeMillis()).getBytes("UTF-8");
 		this.startTime=System.currentTimeMillis();
 		this.stdio = stdio;
     	propsFile=new PropsFile(customScriptDir);

@@ -13,6 +13,23 @@
 
 <h1>CFT Change log</h1>
 
+<h3>v2.2.1 2020-12-27 More security</h3>
+<p>
+	Added function Sys.secureSessionId() which returns a secure Binary. Extended the
+	ValueBinary to an optionally safe version, which supports no functions, only to 
+	be used as password or salt when encrypting data for storage in databases etc.
+</p>
+<p>
+	Changing Lib.Util.Encrypt and Decrypt to expect Binary value for password, while
+	making salt parameter optional, and of type string.
+</p>
+<p>
+	Added check to File.binaryCreate() so it fails if the Binary is marked
+	as secure, as the secure session binary must NEVER be exposed, as it
+	will protect sensitive content in the database.
+</p>
+
+
 <h3>v2.2.0 2020-12-27 Password and encryption</h3>
 <p>
 	Added function Sys.readPassword(). It requires the Stdio object to be instance of

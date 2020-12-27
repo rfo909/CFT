@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2020-11-25 RFO
-v2.1.5
+Last updated: 2020-12-27 RFO
+v2.2.1
 ```
 # Introduction
 
@@ -3104,9 +3104,11 @@ password, but the salt is not necessarily secret, just a way of differently init
 the encryption engine with the same (secret) password.
 
 ```
-Lib.Util.Encrypt("password","salt").processString("this is a message")
+"password".getBytes("UTF-8")
+/password
+Lib.Util.Encrypt(password).processString("this is a message")
 /x
-Lib.Util.Decrypt("password","salt").processString(x)
+Lib.Util.Decrypt(password).processString(x)
 <String>
 this is a message
 ```
@@ -3126,6 +3128,13 @@ File("x.txt").readBinary             # returns Binary
 File("x.txt").binaryCreate(binary)
 <someBinary>.toString("UTF-8")
 ```
+### Session data
+
+
+In addition to the public Sys.getSessionUUID, there is a secure value returned by
+Sys.getSecureSessionID(). It is a secure Binary object, which means it has no
+functions, and can only be passed as parameter to system functions, like encryption.
+
 # Reference: Colon commands
 
 

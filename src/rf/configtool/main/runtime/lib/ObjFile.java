@@ -1115,7 +1115,8 @@ public class ObjFile extends Obj {
         	if (params.size() != 1) throw new Exception("Expected binary data parameter");
         	ValueBinary data=getBinary("data",params,0);
         	
-            validateDestructiveOperation("createBinary");
+            validateDestructiveOperation("File.binaryCreate");
+            data.validateNonSecure("File.binaryCreate");
 
             
         	OutputStream out=null;
