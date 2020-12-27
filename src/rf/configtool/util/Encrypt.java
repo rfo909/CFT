@@ -75,7 +75,7 @@ public class Encrypt {
 
 	// Number of counters moving independently inside the matrix buffer
 	
-	public static final int N = 10;
+	public static final int N = 8;
 		// with N counters, the number of start positions is calculated
 		// multiplying the N first values from COUNTER_MAX array below. Since all are
 		// (just) above 10k, each counter contributes with 10^4 new possible start values
@@ -110,6 +110,13 @@ public class Encrypt {
 				a=a+256-matrix[readPos[j]];
 			}
 			readPos[j]=(readPos[j]+1)%maxPos[j];
+		}
+		// occasionally move two counters 
+		if (matrix[readPos[0]]>20 && matrix[readPos[1]]>20) {
+			int x=readPos[2]%N;
+			int y=readPos[3]%N;
+			readPos[x]=(readPos[x]+readPos[y]) % maxPos[x];
+			readPos[y]=(readPos[y]+1) % maxPos[y];
 		}
 		return (byte) (a%256);
 	}
