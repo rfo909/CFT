@@ -8,14 +8,30 @@ public class Encrypt {
 	private int[] readPos=new int[N];
 	private int[] maxPos=new int[N];  // different length for maximum period
 
+	
+	private byte[] makeKey (byte[] password, byte[] salt, byte[] post) throws Exception {
+		MessageDigest md1 = MessageDigest.getInstance("SHA1"); // 160 bits = 20 bytes
+		md1.update(password);
+		md1.update(salt);
+		md1.update(post);
+		return md1.digest();
+	}
 
 	public Encrypt (byte[] password, byte[] salt) throws Exception {
-		// 7 x 11 x 17 x 29 = 37961 (max unique sequence)
-		byte[] key1 = "w/-P32w".getBytes("ISO-8859-1");
-		byte[] key2 = "0lu&av#kPoD".getBytes("ISO-8859-1");
-		byte[] key3 = "_u0 Kd0;5-(,e09Um".getBytes("ISO-8859-1");
-		byte[] key4 = "*)8&(/s0t4ZP#xiO;VPfr=L6:b(E.".getBytes("ISO-8859-1");
-
+		final byte[] pre1 = "w/-P0 ;4ZP#xi*)8(E.OKd03Pfr=L2w".getBytes("ISO-8859-1");
+		final byte[] pre2 = "0_ue09Umlu&(/s0t;V6:b&av#5-(,kPoD".getBytes("ISO-8859-1");
+		
+		final byte[] key1=makeKey(password,salt,pre1);
+		final byte[] key2=makeKey(password,salt,pre2);
+		final byte[] key3=makeKey(password,salt,key1);
+		final byte[] key4=makeKey(password,salt,key2);
+		
+		final int len1=7;
+		final int len2=13;
+		final int len3=11;
+		final int len4=19;
+	
+		
 		matrix=new int[11000];
 		
 		int pos1=0;
@@ -26,10 +42,11 @@ public class Encrypt {
 		for (int i=0; i<matrix.length; i++) {
 			int sum=key1[pos1] + key2[pos2] + key3[pos3] + key4[pos4];
 
-			pos1=(pos1+1)%key1.length;
-			pos2=(pos2+1)%key2.length;
-			pos3=(pos3+1)%key3.length;
-			pos4=(pos4+1)%key4.length;
+			pos1=(pos1+1)%len1;
+			pos2=(pos2+1)%len2;
+			pos3=(pos3+1)%len3;
+			pos4=(pos4+1)%len4;
+			
 			if (sum<0) sum=-sum;
 			matrix[i]=sum%25; 
 				// Collapsing many values on to each other
