@@ -118,6 +118,12 @@ public abstract class Obj {
         return ((ValueList) v).getVal();
     }
     
+    protected ValueBinary getBinary(String name, List<Value> args, int pos) throws Exception {
+        Value v=args.get(pos);
+        if (!(v instanceof ValueBinary)) throw new Exception(name + ": type error, expected Binary, got " + v.getTypeName());
+        return (ValueBinary) v;
+    }
+
     protected Obj getObj(String name, List<Value> args, int pos) throws Exception {
         Value v=args.get(pos);
         if (!(v instanceof ValueObj)) throw new Exception(name + ": type error, expected obj, got " + v.getTypeName());

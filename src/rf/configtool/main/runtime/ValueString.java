@@ -57,12 +57,12 @@ public class ValueString extends Value {
         add(new FunctionBeforeLast());
         add(new FunctionAfterLast());
         add(new FunctionChars());
-        
         add(new FunctionEsc());
         add(new FunctionUnEsc());
         add(new FunctionToHexString());
         add(new FunctionFromHexString());
         add(new FunctionHash());
+        add(new FunctionGetBytes());
         
     }
     
@@ -706,6 +706,23 @@ public class ValueString extends Value {
             	parts.add(new ValueString(""+val.charAt(i)));
             }
             return new ValueList(parts);
+        }
+
+    }
+    
+    class FunctionGetBytes extends Function {
+        public String getName() {
+            return "getBytes";
+        }
+        public String getShortDesc() {
+            return "getBytes(charSet) - returns Binary value";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size()!=1) throw new Exception("Expected parameter charset");
+        	String charSet=getString("charset",params,0);
+        	
+        	byte[] bytes = val.getBytes(charSet);
+        	return new ValueBinary(bytes);
         }
 
     }

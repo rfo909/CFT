@@ -2232,6 +2232,29 @@ The Db2 persists data to file, and handles all values that can be synthesized to
 Also there is a Db2Obj script, which saves data objects identified by UUID's, which are
 made by calling the Lib.Db.UUID function.
 
+# onLoad functions
+
+
+**v2.1.7**
+
+Calling a function onLoad results in it being called every time the script is loaded
+and (automatically) reloaded in GNT. Nice for clearing defaults, when new session.
+
+
+Each individual session is identified by a session UUID, which may be stored in the
+database, so the onLoad can detect this and reset state in the database.
+
+
+Below is an onLoad function from the Projects script, which remembers current project
+via the database, but resets it when new session.
+```
+# Reset selected projects if new session
+if (Db2:Get("Projects","session") != Sys.sessionUUID) {
+Db2:Set("Projects","Project",null)
+Db2:Set("Projects","session", Sys.sessionUUID)
+}
+/onLoad
+```
 # Multitasking in CFT
 
 
@@ -3063,6 +3086,46 @@ Curses:Enable(true)
 ```
 This changes all the functions inside Curses from returning empty strings, to return ANSI escape sequences.
 
+# Passwords, encryption, binary data
+
+
+**v2.2.0**
+## Passwords
+
+
+To read a password (no echo), call Sys.readPassword function.
+
+### Encrypt / decrypt
+
+
+The Lib.Util object contains two functions, encrypt() and decrypt(), which both
+take a password string and a salt string. These together form a complete
+password, but the salt is not necessarily secret, just a way of differently initiate
+the encryption engine with the same (secret) password.
+
+```
+Lib.Util.Encrypt("password","salt").processString("this is a message")
+/x
+Lib.Util.Decrypt("password","salt").processString(x)
+<String>
+this is a message
+```
+### Binary data
+
+
+The processString() function of the Encrypt and Decrypt objects, is nice when
+storing encrypted strings in a database that only handles strings, such as Db2.
+
+
+The more generic function process() operates on binary data, and lets us
+save encrypted versions of files.
+
+```
+File("x.txt").readBinary             # returns Binary
+"some string".getBytes("UTF-8")      # returns Binary
+File("x.txt").binaryCreate(binary)
+<someBinary>.toString("UTF-8")
+```
 # Reference: Colon commands
 
 

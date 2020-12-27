@@ -17,24 +17,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.main;
 
-import java.io.BufferedReader;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 2020-11 RFO
- *
  * Actual input and output, connected to global stdin and stdout, hence no buffering of output lines.
  */
 public class StdioReal extends Stdio {
 
     private PrintStream stdout;
-    
-//    public StdioReal (InputStream in, OutputStream out) {
-//    	super(new BufferedReader(new InputStreamReader(in)));
-//    	this.stdout=new PrintStream(out);
-//    }
     
     public StdioReal(BufferedReader stdin, PrintStream stdout) {
     	super(stdin);
@@ -48,6 +40,11 @@ public class StdioReal extends Stdio {
 
     public synchronized void print (String s) {
     	stdout.print(s);
+    }
+    
+    public String readPassword() {
+    	Console console=System.console();
+    	return new String(console.readPassword());
     }
 
 }

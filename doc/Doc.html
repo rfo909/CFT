@@ -2520,6 +2520,8 @@ codeDirs = . ; code.examples ; code.lib
 
 
 
+
+
 <h1>The CFT database</h1>
 <p><i>v1.9.6</i></p>
 <p>
@@ -2538,6 +2540,31 @@ codeDirs = . ; code.examples ; code.lib
 </p>
 
 
+
+
+
+
+<h1>onLoad functions</h1>
+<p><i>v2.1.7</i></p>
+<p>
+  Calling a function onLoad results in it being called every time the script is loaded
+  and (automatically) reloaded in GNT. Nice for clearing defaults, when new session.
+</p>
+<p>
+  Each individual session is identified by a session UUID, which may be stored in the
+  database, so the onLoad can detect this and reset state in the database.
+</p>
+<p>
+  Below is an onLoad function from the Projects script, which remembers current project
+  via the database, but resets it when new session.
+<pre>
+# Reset selected projects if new session
+  if (Db2:Get("Projects","session") != Sys.sessionUUID) {
+    Db2:Set("Projects","Project",null)
+    Db2:Set("Projects","session", Sys.sessionUUID)
+  }
+/onLoad
+</pre>
 
 
 
@@ -3460,6 +3487,52 @@ Dict
 
 
 
+
+
+
+
+<h1>Passwords, encryption, binary data</h1>
+<p><b>v2.2.0</b></p>
+<h2>Passwords</h2>
+<p>
+  To read a password (no echo), call Sys.readPassword function.
+</p>
+
+
+
+<h3>Encrypt / decrypt</h3>
+<p>
+  The Lib.Util object contains two functions, encrypt() and decrypt(), which both
+  take a password string and a salt string. These together form a complete
+  password, but the salt is not necessarily secret, just a way of differently initiate
+  the encryption engine with the same (secret) password.
+</p>
+<pre>
+  Lib.Util.Encrypt("password","salt").processString("this is a message")
+  /x
+  Lib.Util.Decrypt("password","salt").processString(x)
+  &lt;String&gt;
+  this is a message
+</pre>
+
+
+
+<h3>Binary data</h3>
+<p>
+  The processString() function of the Encrypt and Decrypt objects, is nice when
+  storing encrypted strings in a database that only handles strings, such as Db2.
+</p>
+<p>
+  The more generic function process() operates on binary data, and lets us
+  save encrypted versions of files.
+</p>
+<pre>
+  File("x.txt").readBinary             # returns Binary
+  "some string".getBytes("UTF-8")      # returns Binary
+
+  File("x.txt").binaryCreate(binary)
+  &lt;someBinary&gt;.toString("UTF-8")
+</pre>
 
 
 

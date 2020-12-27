@@ -96,6 +96,8 @@ public class ObjFile extends Obj {
         add(new FunctionSetWriteLF());
         add(new FunctionSetWriteCRLF());
         add(new FunctionConvertCompressed());
+        add(new FunctionReadBinary());
+        add(new FunctionBinaryCreate());
     }
     
     public Protection getProtection() {
@@ -1078,7 +1080,58 @@ public class ObjFile extends Obj {
     }
     
 
- 
+    class FunctionReadBinary extends Function {
+        public String getName() {
+            return "readBinary";
+        }
+        public String getShortDesc() {
+            return "readBinary() - returns binary value";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 0) throw new Exception("Expected no parameters");
+        	File f=new File(name);
+        	byte[] buf=new byte[(int) f.length()];
+        	InputStream in=null;
+        	try {
+        		in=new FileInputStream(f);
+        		int count = in.read(buf);
+        		if (count != buf.length) throw new Exception("Invalid read, got " + count + " bytes of " + buf.length); 
+        	} finally  {
+        		if (in != null) try {in.close();} catch (Exception ex) {};
+        	}
+        	return new ValueBinary(buf);
+        }
+    }
+    
+
+    class FunctionBinaryCreate extends Function {
+        public String getName() {
+            return "binaryCreate";
+        }
+        public String getShortDesc() {
+            return "binaryCreate(data) - create file from binary data - returns self";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 1) throw new Exception("Expected binary data parameter");
+        	ValueBinary data=getBinary("data",params,0);
+        	
+            validateDestructiveOperation("createBinary");
+
+            
+        	OutputStream out=null;
+        	File f=new File(name);
+        	try {
+        		out=new FileOutputStream(f);
+        		out.write(data.getVal());
+        	} finally  {
+        		if (out != null) try {out.close();} catch (Exception ex) {};
+        	}
+        	return new ValueObj(self());
+        }
+    }
+    
+
+
     private String fmt (int i, int n) {
         String s=""+i;
         while (s.length()<n) s=" "+s;

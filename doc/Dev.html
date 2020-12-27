@@ -13,6 +13,58 @@
 
 <h1>CFT Change log</h1>
 
+<h3>v2.2.0 2020-12-27 Password and encryption</h3>
+<p>
+	Added function Sys.readPassword(). It requires the Stdio object to be instance of
+	StdioReal (Java), which means it will fail inside parallel processes, example:
+</p>
+<pre>
+$ SpawnProcess(Dict,Sys.readPassword("Enter password")).wait
+/x
+
+$ x.exitValue
+null
+
+$ x.output
+0: Process fails with Exception: [&lt;func&gt; x:22] readPassword() requires StdioReal (java.lang.Exception)
+</pre>
+
+<p>
+	Added new Value type Binary
+</p>
+
+<p>
+	Added function String.getBytes() - returns Binary
+</p>
+
+<p>
+	Added Lib.Util and Lib.Util.Encrypt() and Lib.Util.Decrypt()
+</p>
+
+<p>
+	Added function process() to Encrypt/Decrypt binary data
+</p>
+<p>
+	Added function processString() to Encrypt/Decrypt (same object), that returns hex string
+	when encrypting, for string-only processing
+</p>
+
+<pre>
+$ Lib.Util.Encrypt("roar","test").processString("roar")
+D8EDECF0
+$ /x                                             
+$ Lib.Util.Decrypt("roar","test").processString(x)
+roar
+</pre>
+
+<p>
+	Added functions File.readBinary and File.binaryCreate
+</p>
+
+
+
+
+
 <h3>v2.1.8 2020-12-21 bugfix: onLoad exceptions</h3>
 <p>
 	Reporting error if onLoad fails, but still loads the script.

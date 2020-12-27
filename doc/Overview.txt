@@ -199,6 +199,8 @@ Storing CFT data structures to file - syn() and eval()
 
 The CFT database
 
+onLoad functions
+
 Multitasking in CFT
  * Example: pinging a list of hosts
  |   Create and test regular ping function
@@ -250,6 +252,11 @@ Closures v2 - Objects
  * Lambdas are synthesizable
 
 ANSI escape codes
+
+Passwords, encryption, binary data
+ * Passwords
+ |   Encrypt / decrypt
+ |   Binary data
 
 Reference: Colon commands
 

@@ -1,0 +1,103 @@
+package rf.configtool.main.runtime;
+
+import java.util.List;
+
+import rf.configtool.main.Ctx;
+import rf.configtool.util.Hex;
+
+public class ValueBinary extends Value {
+    
+    private byte[] val;
+    
+    public ValueBinary (byte[] val) {
+        this.val=val;
+        add (new FunctionHex());
+        add (new FunctionLength());
+        add (new FunctionToString());
+    }
+    
+    public byte[] getVal() {
+        return val;
+    }
+    
+    @Override
+    public String getTypeName() {
+        return "Binary";
+    }
+
+    @Override
+    public String getValAsString() {
+        return "[...]";
+    }
+    
+
+    // No synthesis
+    
+    
+    
+    @Override
+    public boolean eq(Obj v) {
+        if (v==this) return true;
+        if (v instanceof ValueBinary) {
+        	byte[] data=((ValueBinary)v).val;
+        	if (data.length != val.length) return false;
+        	for (int i=0; i<val.length; i++) {
+        		if (data[i] != val[i]) return false;
+        	}
+        	return true;
+        }
+        return false;
+    }
+    
+    @Override
+    public boolean getValAsBoolean() {
+        return true;
+    }
+
+
+    
+    class FunctionHex extends Function {
+        public String getName() {
+            return "hex";
+        }
+        public String getShortDesc() {
+            return "hex() - Returns hex string";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueString(Hex.toHex(val));
+        }
+
+    }
+    
+    class FunctionLength extends Function {
+        public String getName() {
+            return "length";
+        }
+        public String getShortDesc() {
+            return "length() - returns number of bytes";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueInt(val.length);
+        }
+
+    }
+    
+    class FunctionToString extends Function {
+        public String getName() {
+            return "toString";
+        }
+        public String getShortDesc() {
+            return "toString(encoding) - returns String";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected encoding parameter");
+            String encoding=getString("encoding",params,0);
+            return new ValueString(new String(val,encoding));
+        }
+
+    }
+    
+  
+}

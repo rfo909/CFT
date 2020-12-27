@@ -25,6 +25,8 @@ import rf.configtool.data.Expr;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.CtxCloseHook;
 import rf.configtool.main.SoftErrorException;
+import rf.configtool.main.Stdio;
+import rf.configtool.main.StdioReal;
 import rf.configtool.main.OutText;
 import rf.configtool.main.PropsFile;
 import rf.configtool.main.Version;
@@ -60,6 +62,8 @@ public class ObjSys extends Obj {
         add(new FunctionHomeDir());
         add(new FunctionUchar());
         add(new FunctionSessionUUID());
+        add(new FunctionReadPassword());
+        
 	}
 
 	@Override
@@ -381,6 +385,34 @@ public class ObjSys extends Obj {
 		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
 			if (params.size() != 0) throw new Exception("Expected no parameters");
 			return new ValueString(ctx.getObjGlobal().getRoot().getSessionUUID());
+		}
+	}
+	
+	
+	class FunctionReadPassword extends Function {
+		public String getName() {
+			return "readPassword";
+		}
+
+		public String getShortDesc() {
+			return "readPassword(prompt?) - returns password or error if stdio != StdioReal";
+		}
+		
+		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+			String prompt="";
+			if (params.size() == 1) {
+				prompt=getString("prompt",params,0);
+			} else if (params.size() != 0) {
+				throw new Exception("Expected optional parameter prompt");
+			}
+			Stdio stdio = ctx.getStdio();
+			if (stdio instanceof StdioReal) {
+				StdioReal real=(StdioReal) stdio;
+				real.print(prompt);
+				return new ValueString(real.readPassword());
+			} else {
+				throw new Exception("readPassword() requires StdioReal"); 
+			}
 		}
 	}
 

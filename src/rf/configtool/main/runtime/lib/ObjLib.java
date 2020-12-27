@@ -47,9 +47,9 @@ public class ObjLib extends Obj {
         this.add(new FunctionMath());
         this.add(new FunctionConvert());
         this.add(new FunctionFiles());
-        this.add(new FunctionExp());
         this.add(new FunctionText());
         this.add(new FunctionDb());
+        this.add(new FunctionUtil());
         
     }
     
@@ -166,19 +166,7 @@ public class ObjLib extends Obj {
     } 
 
 
-    class FunctionExp extends Function {
-        public String getName() {
-            return "Exp";
-        }
-        public String getShortDesc() {
-            return "Exp() - create object for experimental code";
-        }
-        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 0) throw new Exception("Expected no parameters");
-            return new ValueObj(new ObjExp());
-        }
-    } 
-    
+   
 
     class FunctionText extends Function {
         public String getName() {
@@ -203,6 +191,20 @@ public class ObjLib extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
             return new ValueObj(new ObjDb());
+        }
+    } 
+    
+   
+    class FunctionUtil extends Function {
+        public String getName() {
+            return "Util";
+        }
+        public String getShortDesc() {
+            return "Util() - create Util object";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueObj(new ObjUtil());
         }
     } 
     
