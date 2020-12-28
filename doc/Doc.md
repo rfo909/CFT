@@ -3135,6 +3135,9 @@ In addition to the public Sys.getSessionUUID, there is a secure value returned b
 Sys.getSecureSessionID(). It is a secure Binary object, which means it has no
 functions, and can only be passed as parameter to system functions, like encryption.
 
+
+See Db2:GetSessionPassword() function for example.
+
 # Reference: Colon commands
 
 
