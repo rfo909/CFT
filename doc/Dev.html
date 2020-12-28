@@ -13,6 +13,17 @@
 
 <h1>CFT Change log</h1>
 
+<h3>v2.2.2 2020-12-27 Security</h3>
+<p>
+	Improved function Db2:GetSessionPassword to read password twice and check for match,
+	before saving to Db (encrypted with Sys.secureSessionId) and returning it.
+</p>
+<p>
+	Also added Lib.Util.randomBinary() function, that returns an SHA-1 hash of 
+	a string that is sent as parameter + current time as millis + secureSessionId.
+</p>
+
+
 <h3>v2.2.1 2020-12-27 More security</h3>
 <p>
 	Added function Sys.secureSessionId() which returns a secure Binary. Extended the
@@ -34,7 +45,7 @@
 </p>
 
 
-<h3>v2.2.0 2020-12-27 Password and encryption</h3>
+<h3>v2.2.0 2020-12-27 Password and encryption / Binary values</h3>
 <p>
 	Added function Sys.readPassword(). It requires the Stdio object to be instance of
 	StdioReal (Java), which means it will fail inside parallel processes, example:

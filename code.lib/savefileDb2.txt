@@ -75,7 +75,18 @@ knowing the UUID.
 		}
 	}
 	if (password==null) {
-		Sys.readPassword(label+" ") => password
+		password=null
+		Inner {
+			loop 
+				Sys.readPassword(label+" ") => password1
+				Sys.readPassword(label+" ") => password2
+				if (password1==password2) {
+					password=password1
+					break
+				} else {
+					println("** Passwords don't match, try again")
+				}
+		}
 		Lib.Util.Encrypt(Sys.secureSessionId).processString("password:" + password) => encrypted
 		Db2:Set(COLL, key, encrypted)
 	}

@@ -19,6 +19,7 @@ package rf.configtool.main.runtime.lib;
 
 import java.io.*;
 import java.lang.ProcessBuilder.Redirect;
+import java.security.MessageDigest;
 import java.util.*;
 
 import rf.configtool.data.Expr;
@@ -32,6 +33,7 @@ import rf.configtool.main.runtime.ColList;
 import rf.configtool.main.runtime.Function;
 import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
+import rf.configtool.main.runtime.ValueBinary;
 import rf.configtool.main.runtime.ValueBoolean;
 import rf.configtool.main.runtime.ValueFloat;
 import rf.configtool.main.runtime.ValueInt;
@@ -47,6 +49,7 @@ public class ObjUtil extends Obj {
     public ObjUtil () {    	
         this.add(new FunctionEncrypt());
         this.add(new FunctionDecrypt());
+        this.add(new FunctionRandomBinary());
     }
     
     private ObjUtil self() {
@@ -107,6 +110,29 @@ public class ObjUtil extends Obj {
             	salt=new byte[0];
             }
             return new ValueObj(new ObjEncrypt(password,salt, false));
+        }
+        
+    } 
+       
+   
+    class FunctionRandomBinary extends Function {
+        public String getName() {
+            return "randomBinary";
+        }
+        public String getShortDesc() {
+            return "randomBinary(seed) - returns Binary value with 20 random bytes";
+        }
+        private byte[] create (String pre, Ctx ctx) throws Exception {
+    		MessageDigest md1 = MessageDigest.getInstance("SHA1"); // 160 bits = 20 bytes
+    		String s = pre+System.currentTimeMillis();
+        	md1.update(s.getBytes("UTF-8"));
+        	md1.update(ctx.getObjGlobal().getRoot().getSecureSessionID());
+        	return md1.digest();
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected seed string parameter");
+            String seed=getString("seed",params,0);
+            return new ValueBinary(create(seed, ctx));
         }
         
     } 
