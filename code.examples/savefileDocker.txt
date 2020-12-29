@@ -136,7 +136,7 @@ P(1)=>proc
 	PRm
 	PBuildImage
 	p=GetProject
-	cmd=List("docker","run","-d","--publish", "8080:8080","--name",p.title+"_running", p.title)
+	cmd=List("docker","run","-d","--name",p.title+"_running", p.title)
 	Run(cmd)
 /run
 
@@ -147,8 +147,7 @@ P(1)=>proc
 	PRm
 	PBuildImage
 	p=GetProject
-	cmd=List("docker","run","-it","--publish", "8080:8080", "--name", p.title+"_running", p.title, "bash")
+	cmd=List("docker","run","-it", "--name", p.title+"_running", p.title, "bash")
 	Run(cmd)
 /test
 
-	
