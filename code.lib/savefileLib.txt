@@ -601,3 +601,29 @@ P(2) =>value
 # --
 	Db2:Keys("Lib.propsDocs")
 /PropsNames
+
+
+# Current user (linux)
+# --
+	if (!Sys.isWindows) {
+		Dir.runCapture("whoami").nth.trim
+	} else {
+		""
+	}
+/LoggedInUser
+
+
+# Prompt string
+# --
+	x=Sys.scriptName 
+	h=Lib:Hostname 
+	if(Lib:LoggedInUser=="root",
+		Curses:Reset+Curses:TxtRed+"<root>"
+		,""
+	)+Curses:Reset+Curses:Bold
+	+""+if(h==null,"",h) 
+	+ if(x==null,"","[" + x+"]") 
+	+ Dir.path 
+	+ "$ "+Curses:Reset
+/GetPromptString
+

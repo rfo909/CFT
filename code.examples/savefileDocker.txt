@@ -43,10 +43,10 @@ P(1) => cmd
 
 # Create or update project data
 	P(1,Dir)=>dir
+	error(!Dir.file("Dockerfile").exists,"Project dir must contain Dockerfile")
 	Dict
 		.set("dir",dir)
 		.set("title",dir.name.toLower)
-		.set("logdirs", List)
 		=> data
 	Db2:Set("Docker","Project",data)
 	dir.path
@@ -60,20 +60,13 @@ P(1) => cmd
 /GetProject
 
 
-# Extend project with logdir
-	P(1,error("Missing dir parameter")) => dir
-	GetProject => p
-	p.get("logdirs",List).add(dir)
-	Db2:Set("Docker","Project", p)
-/AddProjectLogDir
+
 
 # Show project
 	p=GetProject
 	println
 	println("title =   " + p.title)
 	println("dir   =   " + p.dir.path)
-	Inner {p.logdirs->d out(d.path) | _.concat} => logDirs
-	println("logdirs = " + logDirs)
 	println
 	"ok"
 /ShowProject
@@ -112,6 +105,7 @@ P(1)=>proc
 /rm
 
 # Delete all docker images
+# --
 	Dir.runCapture("docker","image","ls")->line
 		line.split => cols
 		cols.nth(2) => id
@@ -120,12 +114,14 @@ P(1)=>proc
 /ClearImages
 
 # Remove processes for project
+# --
 	p=GetProject
 	rm(p.title)  # if exists
 /PRm
 
 
 # Create project image
+# --
 	p=GetProject
 	error(!p.dir.file("Dockerfile").exists,"No Dockerfile in project dir: " + p.dir.path)
 	cmd=List("docker","build","-t",p.title,".")
@@ -134,7 +130,9 @@ P(1)=>proc
 	IList
 /PBuildImage
 
+
 # Do full rebuild, then run in detached mode
+# --
 	PRm
 	PBuildImage
 	p=GetProject
@@ -145,62 +143,12 @@ P(1)=>proc
 
 
 # Do full rebuild, then run interactive bash to examine image
+# --
 	PRm
 	PBuildImage
 	p=GetProject
 	cmd=List("docker","run","-it","--publish", "8080:8080", "--name", p.title+"_running", p.title, "bash")
 	Run(cmd)
 /test
-
-
-# Show file types
-# --
-	AppDir.allFiles->f out(f.name.afterLast(".")) | _.unique.sort
-/FileTypes
-
-
-
-# Locate all Windows Paths in text files
-# --
-	# Ignoring: js txt java json 
-
-	"conf config properties".split => types
-	"package.json".split => ignoreFiles
-
-	regex=Regex("[CcDd][:][\\]")
-	grep=Grep.matchRegex(regex)
-	AppDir.allFiles->f
-		reject(ignoreFiles.contains(f.name))
-		type=f.name.afterLast(".")
-		assert(types.contains(type))
-		grep.file(f)->line
-			report(line.file.name, line.lineNumber, line)
-/LocateWindowsPaths
-
-
-# File locator by (part of) name
-# --
-	P(1,Input("(part of) file name").get)=>name
-	# Generate file set and store in database, for faster check
-	allFiles=AppDir.allFiles
-	println("#files = " + allFiles.length)
-	allFiles->f
-		assert(f.name.contains(name))
-		out(f)
-/FL
-
-# Show files recently updated
-# --
-	P(1,Input("Max hours ago").get.parseInt) => hours
-	Date.sub(Date.Duration.hours(hours)).get => timeLimitMs
-	
-	AppDir.allFiles->f
-		assert(f.lastModified > timeLimitMs)
-		out(f)
-/ModifiedFiles
-
-
-	
-
 
 	
