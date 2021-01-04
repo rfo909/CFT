@@ -91,7 +91,7 @@ shortcut:tcol = "---- Change text color ----"             Curses:SelectTextColor
 # The prompt setting is a line of code, just as with the shortcuts
 # ---
 
-prompt = x=Sys.scriptName h=Lib:Hostname ""+if(h==null,"",h) + if(x==null,"","[" + x+"]") + Curses:Reset + Curses:Bold + Dir.path + "$ "+Curses:Reset
+prompt = x=Sys.scriptName h=Lib:Hostname u=Lib:LoggedInUser("<",">") Curses:Reset + if(u=="<root>", Curses:TxtRed, Curses:TxtBlue) + u + Curses:Reset + if(h==null,"",h) + if(x==null,"","[" + x+"]") + Curses:Reset + Curses:Bold + Dir.path + "$ "+Curses:Reset
 
 
 #

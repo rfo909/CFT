@@ -605,8 +605,10 @@ P(2) =>value
 
 # Current user (linux)
 # --
+	P(1,"") => pre
+	P(2,"") => post
 	if (!Sys.isWindows) {
-		Dir.runCapture("whoami").nth.trim
+		pre + Dir.runCapture("whoami").nth.trim + post
 	} else {
 		""
 	}
