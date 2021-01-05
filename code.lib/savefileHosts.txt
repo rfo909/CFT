@@ -258,15 +258,21 @@ s*.s   [no]
         HostData.Lget.call (host, "SSHUser") =>sshUser
 
         sshUser+"@"+host =>target
+        HostData.Lhas.call (host, "Auto.reboot", "yes") =>allowReboot
         
-		process = SpawnProcess(SymDict(host,target),{
+		process = SpawnProcess(SymDict(host,target,allowReboot),{
 	        SSH:HostOkSSH (target) =>hostOk
 	        if (!hostOk) {
 	            println(host + ": -offline-")
 	        } else {
 		        DebianHostNeedsReboot(target) =>x
-		        if(x,"NEEDS REBOOT","ok") =>status
-		        println(host + ": " + status)
+		        
+		        if (x && allowReboot) {
+		        	println(host + ": rebooting now")
+		        	SSH:sudo(target,"reboot",true)
+		        } else {
+			        println(host + ": " + if(x,"NEEDS REBOOT","ok"))
+			    }
 	    	}
     	})
     	out(process)
@@ -424,15 +430,17 @@ SysStatAll("iostat")
         HostData.Lget.call (host, "SSHUser") =>sshUser
         assert(sshUser != null)
 
+		Lib:Header(host)
+
         target=sshUser+"@"+host
         if (!SSH:HostOkSSH(target)) {
-        	println("- Skipping target " + target)
+        	println("- Host unreachable - skipping target " + target)
         	assert(false)
         }
 
-		Lib:Header(host)
 		SSH:copy(file, target, "./resolved_conf")
 		SSH:sudo(target,"cp ./resolved_conf /etc/systemd/resolved.conf")
+		println("- Updated file /etc/systemd/resolv.conf")
 	|
 	file.delete
 	
