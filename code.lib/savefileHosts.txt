@@ -1,4 +1,4 @@
-''# Readme
+# Readme
 <<<<<< EOF
 Parsing "Ansible" text format looking like this:
 
@@ -251,7 +251,9 @@ s*.s   [no]
 
 
 
-# Display hosts that should be rebooted
+# Reboot hosts that need reboot and allow reboot. 
+# Display reboot info for all hosts
+# --
 	HostData = Hosts:Parse
 	HostData.LallHosts.call.sort->host
         assert(HostData.Lhas.call (host,"OSFamily","debian"))
@@ -280,7 +282,7 @@ s*.s   [no]
     	process.wait
     	process.output->line println(line)
     	    
-/NeedReboot
+/Reboot
 
 
 # Update or install CFT
@@ -477,3 +479,11 @@ DNS=10.0.0.3 10.0.0.4
 
 Parse.Ldump.call
 /dump
+
+# Run all periodic jobs
+# --
+	UpdateCFTAll
+	AptUpdateAll
+	Reboot
+/run
+
