@@ -27,6 +27,7 @@ import java.util.List;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.OutText;
+import rf.configtool.main.SoftErrorException;
 import rf.configtool.main.Stdio;
 import rf.configtool.main.runtime.*;
 import rf.configtool.util.FileInfo;
@@ -98,6 +99,7 @@ public class ObjFile extends Obj {
         add(new FunctionConvertCompressed());
         add(new FunctionReadBinary());
         add(new FunctionBinaryCreate());
+        add(new FunctionVerify());
     }
     
     public Protection getProtection() {
@@ -1130,6 +1132,27 @@ public class ObjFile extends Obj {
         	return new ValueObj(self());
         }
     }
+    
+    class FunctionVerify extends Function {
+        public String getName() {
+            return "verify";
+        }
+        public String getShortDesc() {
+            return "verify(str) - verify exists, and return self, or throw exception with str";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 1) throw new Exception("Expected str parameter");
+        	String str=getString("str", params, 0);
+        	
+            File f=new File(name);
+            boolean ok=f.exists() && f.isFile();
+            if (!ok) throw new SoftErrorException(str + ": " + name); 
+
+            return new ValueObj(self());
+        }
+    }
+    
+
     
 
 

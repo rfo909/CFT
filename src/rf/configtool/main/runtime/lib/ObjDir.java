@@ -30,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.OutText;
+import rf.configtool.main.SoftErrorException;
 import rf.configtool.main.Stdio;
 import rf.configtool.main.runtime.*;
 
@@ -82,7 +83,7 @@ public class ObjDir extends Obj {
         add(new FunctionProtect());
         add(new FunctionUnprotect());
         add(new FunctionSetAsCurrentDir());
-
+        add(new FunctionVerify());
     }
     
     
@@ -769,6 +770,26 @@ public class ObjDir extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
         	if (params.size() != 0) throw new Exception("Expected no parameters");
         	ctx.getObjGlobal().setCurrDir(name);
+            return new ValueObj(self());
+        }
+    }
+    
+
+    class FunctionVerify extends Function {
+        public String getName() {
+            return "verify";
+        }
+        public String getShortDesc() {
+            return "verify(str) - verify exists, and return self, or throw exception with str";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 1) throw new Exception("Expected str parameter");
+        	String str=getString("str", params, 0);
+        	
+            File f=new File(name);
+            boolean ok=f.exists() && f.isDirectory();
+            if (!ok) throw new SoftErrorException(str + ": " + name); 
+
             return new ValueObj(self());
         }
     }
