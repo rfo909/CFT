@@ -61,6 +61,9 @@ s*.s   [no]
 			
 				# keys of data dict are the entities that we filter
 				entities=LFilter.call(data.keys,regex)
+				if (entities.empty) {
+					println("=== Warning: pattern '" + entity + "' matches nothing")
+				}
 			} else {
 				entities=List(entity)
 			}
