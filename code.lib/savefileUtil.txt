@@ -121,7 +121,7 @@ Dict.set("list",List)
 
 
 
-# Invoke curl
+# Invoke curl - does not work for jsonData on Windows (but ok on Linux / WSL)
 # --
 	P(1)=>HostPort
 	P(2,"GET") => method
