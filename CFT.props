@@ -27,7 +27,7 @@ winShell = powershell
 
 mCat = Lambda { P(1)=>file error(file==null, 'cat: no file') file.read->line println(line) }
 
-mEdit = Lambda { P(1)=>file error(file==null, 'edit: no file') Lib:e(file) }
+mEdit = Lambda { P(1)=>file if(file==null, Sys.savefile, file) => file Lib:e(file) }
 
 mMore = Lambda { P(1)=>file error(file==null, 'more: no file') Lib:m(file) }
 
@@ -91,7 +91,7 @@ shortcut:tcol = "---- Change text color ----"             Curses:SelectTextColor
 # The prompt setting is a line of code, just as with the shortcuts
 # ---
 
-prompt = x=Sys.scriptName h=Lib:Hostname u=Lib:LoggedInUser("<",">") Curses:Reset + if(u=="<root>", Curses:TxtRed, Curses:TxtBlue) + u + Curses:Reset + if(h==null,"",h) + if(x==null,"","[" + x+"]") + Curses:Reset + Curses:Bold + Dir.path + "$ "+Curses:Reset
+prompt = x=Sys.scriptName h=Lib:Hostname u=Lib:LoggedInUser("<",">") Curses:Reset + if(u=="<root>", Curses:TxtRed, Curses:TxtBlue) + u + Curses:Reset + if(h==null,"",h) + if(x==null,"","[" + x+"]") + "$ "
 
 
 #

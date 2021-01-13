@@ -11,10 +11,10 @@ PP() takes as input the output from Parse
 
 Handles MongoDB extended syntax, which takes the form of "function calls", like ISODate("2020-11-23T12:29:31.852Z").
 
-Does NOT strip quotes from String values.
+Quotes are stripped from String values, and added again on Export
+The same goes for Object field names.
 
-Strips quotes from Object fields, for easier access. When pretty-printing or exporting, 
-field values are always put in double quotes.
+Accepts single quote strings when parsing, always exports with double quotes.
 
 >>>> EOF
 /Readme
@@ -85,7 +85,7 @@ field values are always put in double quotes.
 		name=ts.peek
 		if (ts.peekType == 5) {
 			# String - strip quotes
-			name=name.sub(1,name.length-1)
+			name=name.sub(1,name.length-1).replace('\"','"')
 		} else if (ts.peekType != 4) { # identifier
 			error(ts.sourceLocation + " Expected String or Identifier for object field name, got '" + name + "'")
 		}
@@ -153,7 +153,8 @@ field values are always put in double quotes.
 		s=ts.peek
 		ts.next
 		s
-		##s.sub(1,s.length-1)  # strip quotes
+		s.sub(1,s.length-1).replace('\"','"')  # strip quotes and unescape double quotes inside
+		
 	} else {
 		error(""+ts.sourceLocation+" Unexpected token: '" + ts.peek + "'")
 	}
@@ -284,6 +285,13 @@ field values are always put in double quotes.
 		ExpObj(value,list)
 	} else if (getType(value)=="List") {
 		ExpList(value,list)
+	} else if (getType(value)=="String") {
+		if (value.startsWith('"') && value.endsWith('"')) {
+			list.add(value) # as-is
+		} else {
+			quote='"'
+			list.add(quote+value.replace('"','\"')+quote)
+		}
 	} else {
 		list.add(value)
 	}
@@ -298,7 +306,7 @@ field values are always put in double quotes.
 	comma=false
 	dict.keys.sort->key
 		if(comma) list.add(",")
-		list.add('"'+key+'" :')
+		list.add('"'+key.replace('"','\"')+'" :')
 		ExpValue(dict.get(key),list)
 		comma=true
 	|
