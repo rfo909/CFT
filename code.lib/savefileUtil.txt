@@ -119,3 +119,31 @@ Dict.set("list",List)
 	})
 /ProcessMonitor
 
+
+
+# Invoke curl
+# --
+	P(1)=>HostPort
+	P(2,"GET") => method
+	P(3,error("path required"))=>path
+	P(4) => jsonData
+	P(5,false)=>verbose
+	
+	
+	cmd=List("curl","-X",method)
+	if (jsonData != null) {
+		cmd.add("--header")
+		cmd.add("Content-Type: application/json")
+	}
+	
+	url="http://" + HostPort + path
+	cmd.add(url)
+	if (jsonData != null) {
+		cmd.add("-d")
+		cmd.add(if (getType(jsonData)=="String", jsonData, JSON:Export(jsonData)) )
+	}
+	if (verbose) Inner {
+		cmd->x println("% " + x)
+	}
+	Dir.run(cmd)
+/CURL

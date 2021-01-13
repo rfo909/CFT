@@ -1,6 +1,7 @@
 # Readme
 <<<< EOF
 JSON parser written i CFT, using Lexer and TokenStream.
+
 To get help
 
 $ Lib.Text.Lexer help
@@ -14,7 +15,10 @@ Handles MongoDB extended syntax, which takes the form of "function calls", like 
 Quotes are stripped from String values, and added again on Export
 The same goes for Object field names.
 
-Accepts single quote strings when parsing, always exports with double quotes.
+Accepts single quote strings when parsing, always exports with double quotes, and escapes any
+in-string double quotes with backslash.
+
+The PP (pretty-printer) is rather lousy, but still helpful for displaying JSON structures.
 
 >>>> EOF
 /Readme
@@ -56,9 +60,9 @@ Accepts single quote strings when parsing, always exports with double quotes.
 # ---
 	Sequence(
 		@ {
-		@    'test': true,
+		@    "test": true,
 		@    number: 42,
-		@    'data' : {
+		@    "data" : {
 		@        ok : true
 		@    },
 		@    list : [
