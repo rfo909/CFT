@@ -19,7 +19,7 @@ Show your functions
 
 Save and load
 
-Edit script file
+Edit script file - shortcuts
 
 Shortcuts vs colon commands
 
@@ -161,6 +161,8 @@ Processing text
  |   Filter away comments
  * Sequence() and raw strings
 
+Processing JSON
+
 Use as a calculator
  * Expressions and "variables"
  * Lib.Math
@@ -282,3 +284,4 @@ Comments and digressions
  |   Version 2 upcoming
  * 2020-11-13 Script and code size
  * 2020-11-16 Version 2
+ * 2021-01-14 JSON

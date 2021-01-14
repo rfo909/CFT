@@ -7,14 +7,13 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2020-12-27 RFO
-v2.2.1
+Last updated: 2021-01-14 RFO
+v2.2.3
 ```
 # Introduction
 
 
-CFT is an interactive programmable environment for automation.
-
+**CFT is an interactive programmable environment for automation.**
 
 Automating tasks is done by creating functions, which are named sequences
 of code. Functions call each other, as well as a library of global functions, and functions
@@ -46,15 +45,6 @@ Development has been going on since May 2018, and on github since July 2020.
 
 CFT is written in Java and uses no external libraries. It has been tested on both Linux
 and Windows.
-
-
-For best result on Windows, it is recommended to use "Windows Terminal", as it understands
-the ANSI escape sequences directly, if that is desired.
-
-
-The Curses library contains functions for generating escape codes. By default, the Curses
-library is disabled. To enable, run Curses:Enable(true) once, storing a value
-in the CFT database, which is local to very install.
 
 # Functionality
 
@@ -168,7 +158,7 @@ the CFT language.
 $ :save myscript
 $ :load otherscript
 ```
-# Edit script file
+# Edit script file - shortcuts
 
 
 Instead of entering code via the command line, the script file can easily be opened in
@@ -184,6 +174,15 @@ This is remembered within the session. To use a different editor, type @ee inste
 
 After changing a script in the editor, and saving, CFT automatically detects the change, and
 reloads the script the next time you press ENTER.
+
+
+To list all shortcuts
+
+```
+$ @
+```
+
+The shortcut character can be changed in the CFT.props configuration file.
 
 # Shortcuts vs colon commands
 
@@ -1882,6 +1881,17 @@ The advantage of this notation over that of "here"-documents, is that it allows 
 indentation, for greatly improved readability in script code, and that it's easy to
 add conditional blocks, while the "here"-document means we can paste original text
 directly into the script code.
+
+# Processing JSON
+
+
+The "JSON" script handles parsing JSON into a Dict/List structure, and
+conversely, takes a Dict/List structure to JSON format again.
+
+
+Worth noting that the JSON library is a CFT script, not built-in functionality.
+The parser is written in CFT, using the Lib.Text.Lexer to tokenize the input,
+and a plain recursive-descent parser as functions inside the JSON script.
 
 # Use as a calculator
 
@@ -3611,5 +3621,22 @@ leaving the revered v2.0.0 to start its journey into obsolescence.
 
 Looking ahead, there are a number of items still on my list, but many have been addressed
 also, so no predictions for version 3 yet.
+
+## 2021-01-14 JSON
+
+
+Since writing the JSON parser, it has not seen much use, but that changed when
+we needed to generate JSON for use with Util:CURL and the ElasticAPI script which
+automates using the REST API of ElasticSearch.
+
+
+For this I needed to generate JSON from a Dict/List structure, which was already
+supported, but had to work through parsing and generation, so that escaped quotes
+inside strings were handled correctly.
+
+
+It still strikes me as awesome how the JSON recursive-descent parser written in
+CFT, continues to work so well. The "pretty print" function is crap, but parsing
+and exporting now works great!
 
 

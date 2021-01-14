@@ -780,7 +780,7 @@ public class ObjDir extends Obj {
             return "verify";
         }
         public String getShortDesc() {
-            return "verify(str) - verify exists, and return self, or throw exception with str";
+            return "verify(str) - verify exists, and return self, or throw soft error with str";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
         	if (params.size() != 1) throw new Exception("Expected str parameter");
