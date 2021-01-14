@@ -142,8 +142,12 @@ Dict.set("list",List)
 		cmd.add("-d")
 		cmd.add(if (getType(jsonData)=="String", jsonData, JSON:Export(jsonData)) )
 	}
-	if (verbose) Inner {
-		cmd->x println("% " + x)
+	if (verbose) {
+		println
+		Inner {
+			cmd->x println("% " + x)
+		}
+		println
 	}
 	Dir.run(cmd)
 /CURL
