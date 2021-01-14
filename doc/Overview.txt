@@ -60,11 +60,15 @@ Core types
  |   Properties as functions
  |   SymDict
 
-List iteration / filtering
+List processing
  * Iterating over list content
  * Filtering with assert(), reject() and break() + out()
  * The condOut() statement
+ * Produce columns
  * List addition
+ * List subtraction
+ |   Removing a single value from a list
+ |   Removing multiple values from a list
 
 List sorting
  * Int(), Str() and Float()

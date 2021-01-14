@@ -624,7 +624,7 @@ a=1
 b=2
 dict=SymDict(a,b)
 ```
-# List iteration / filtering
+# List processing
 
 
 Lists are essential for all processing with CFT.
@@ -701,6 +701,15 @@ $ List(1,2,3,2,1)->x condOut(x<2,"(") out("b") condOut(x<2,")") | _.concat
 <String>
 (b)bbb(b)
 ```
+## Produce columns
+
+
+Using report() instead of out() lets us produce as output a list of strings,
+where multiple parameters to report() is formatted into columns. Example:
+
+```
+Dir.files->f report(f.name, f.length)
+```
 ## List addition
 
 
@@ -722,6 +731,28 @@ List(1,2)+3
 1
 2
 3
+```
+## List subtraction
+
+
+Using "-", we can remove one or more elements from a list.
+
+### Removing a single value from a list
+
+```
+List(1,2,3,2,1)-2
+<List>
+1
+3
+1
+```
+### Removing multiple values from a list
+
+```
+List(1,2,3,2,1)-List(2,3)
+<List>
+1
+1
 ```
 # List sorting
 

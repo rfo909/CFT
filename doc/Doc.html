@@ -694,7 +694,7 @@ v2.2.3
 
 
 
-<h1>List iteration / filtering</h1>
+<h1>List processing</h1>
 
 <p>
   Lists are essential for all processing with CFT.
@@ -787,6 +787,16 @@ v2.2.3
 
 
 
+<h2>Produce columns</h2>
+<p>
+  Using report() instead of out() lets us produce as output a list of strings,
+  where multiple parameters to report() is formatted into columns. Example:
+</p>
+<pre>
+  Dir.files-&gt;f report(f.name, f.length)
+</pre>
+
+
 
 
 <h2>List addition</h2>
@@ -812,6 +822,30 @@ v2.2.3
   3
 </pre>
 
+
+
+
+<h2>List subtraction</h2>
+<p>
+  Using "-", we can remove one or more elements from a list.
+</p>
+
+<h3>Removing a single value from a list</h3>
+<pre>
+  List(1,2,3,2,1)-2
+  &lt;List&gt;
+  1
+  3
+  1
+</pre>
+
+<h3>Removing multiple values from a list</h3>
+<pre>
+  List(1,2,3,2,1)-List(2,3)
+  &lt;List&gt;
+  1
+  1
+</pre>
 
 
 
