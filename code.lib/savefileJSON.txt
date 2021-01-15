@@ -7,18 +7,21 @@ To get help
 $ Lib.Text.Lexer help
 $ Lib.Text.Lexer.getTokenStream help
 
-Parse() takes as parameter a list of text lines, or if missing asks you to paste them, followed by "." on single line.
-PP() takes as input the output from Parse
+Parse() takes as parameter a list of text lines, or if missing
+asks you to paste them, followed by "." on single line.
 
-Handles MongoDB extended syntax, which takes the form of "function calls", like ISODate("2020-11-23T12:29:31.852Z").
+Handles MongoDB extended syntax, which takes the form
+of "function calls", like ISODate("2020-11-23T12:29:31.852Z").
 
-Quotes are stripped from String values, and added again on Export
-The same goes for Object field names.
+Quotes are stripped from String values and object field names,
+and added again on Export.
 
-Accepts single quote strings when parsing, always exports with double quotes, and escapes any
-in-string double quotes with backslash.
+Accepts single quote strings when parsing, always exports with double quotes,
+and escapes any in-string double quotes with backslash.
 
-The PP (pretty-printer) is rather lousy, but still helpful for displaying JSON structures.
+The Export converts a Dict/List data structure to JSON string.
+Internally it uses the PP() which is a "pretty-print", returning
+nicely formatted JSON.
 
 >>>> EOF
 /Readme
@@ -181,73 +184,8 @@ The PP (pretty-printer) is rather lousy, but still helpful for displaying JSON s
 	list
 /MatchList
 		
-		
 
-
-# Pretty-print value
-# --
-	P(1)=>value
-	P(2,"")=>indent
-
-	indent2=indent+"   "
-
-	t=getType(value)
-
-	if (t=="Dict") {
-		PPObj(value,indent2)
-	} else if (t=="List") {
-		PPList(value,indent2)
-	} else if (t=="Dict") {
-		PPObj(value,indent2)
-	} else if (t=="String") {
-		println(indent2+'"'+value+'"')
-	} else {
-		println(indent2+value)
-	}
-/PPValue
-	
-
-
-# Pretty-print object
-# --
-	P(1,Dict)=>object
-	P(2,"")=>indent
-
-	indent2=indent+"   "
-
-	println(indent+"{")
-
-	comma=false
-	object.keys.sort->key
-		if (comma) println(indent2+",")
-		println(indent2+'"'+key+'":')
-		value=object.get(key)
-		PPValue(value,indent2)
-		comma=true
-	|
-	println(indent+"}")
-/PPObj	
-
-
-# Pretty-print list
-# --
-	P(1,List)=>list
-	P(2,"")=>indent
-
-	indent2=indent+"   "
-	println(indent+"[")
-	comma=false
-	list->x
-		if (comma) println(indent2+",")
-		PPValue(x,indent2)
-		comma=true
-	|
-	println(indent+"]")
-/PPList
-
-
-
-# Takes json as parameter, or if null, reads from stdin, terminated by '.'
+# Takes json string as parameter, or if null, reads from stdin, terminated by '.'
 # Throws soft errors if parse error.
 # --
 	P(1)=>json
@@ -272,83 +210,100 @@ The PP (pretty-printer) is rather lousy, but still helpful for displaying JSON s
 
 
 
-# Pretty-print JSON structure
-# --
-	P(1)=>JSONValue
-	PPValue(JSONValue)
-/PP
-
-
-
-
-# Export value
-# --
-	P(1)=>value
-	P(2)=>list
-	if (getType(value)=="Dict") {
-		ExpObj(value,list)
-	} else if (getType(value)=="List") {
-		ExpList(value,list)
-	} else if (getType(value)=="String") {
-		if (value.startsWith('"') && value.endsWith('"')) {
-			list.add(value) # as-is
-		} else {
-			quote='"'
-			list.add(quote+value.replace('"','\"')+quote)
-		}
-	} else {
-		list.add(value)
-	}
-/ExpValue
-
-
-# Export Object
-# --
-	P(1)=>dict
-	P(2)=>list
-	list.add("{")
-	comma=false
-	dict.keys.sort->key
-		if(comma) list.add(",")
-		list.add('"'+key.replace('"','\"')+'" :')
-		ExpValue(dict.get(key),list)
-		comma=true
-	|
-	list.add("}")
-/ExpObj
-
-
-# Export list
-# --
-	P(1)=>data
-	P(2)=>list
-	list.add("[")
-	comma=false
-	data->value
-		if(comma) list.add(",")
-		ExpValue(value,list)
-		comma=true
-	|
-	list.add("]")
-/ExpList
-
-		
 
 # Generate output version of JSON structure
 # --
 	P(1)=>jsonValue
-	list=List
-	ExpValue(jsonValue,list)
-	list.concat(" ")
+	PP(jsonValue)->line out(line.trim) | _.concat(" ")
 /Export
 
 
 
+# Pretty-print value
+# --
+	P(1)=>value
+	P(2,"")=>indent
+	P(3,Lambda{P(1)})=>LOut
+
+	indent2=indent #+"  "
+
+	t=getType(value)
+
+	if (t=="Dict") {
+		PPObj(value,indent2,LOut)
+	} else if (t=="List") {
+		PPList(value,indent2,LOut)
+	} else if (t=="Dict") {
+		PPObj(value,indent2,LOut)
+	} else if (t=="String") {
+		LOut.call('"' + value.replace('"','\"')+'"')
+	} else {
+		LOut.call(""+value)
+	}
+/PPValue
 	
 
-Lib.Text.Lexer help
-/h1
 
-Lib.Text.Lexer.getTokenStream help
-/h2
+# Pretty-print object
+# --
+	P(1,Dict)=>object
+	P(2,"")=>indent
+	P(3,Lambda{P(1)})=>LOut
+
+	indent2=indent+"  "
+	NEWLINE="^n".unEsc
+
+	LOut.call("{"+NEWLINE)
+
+	comma=false
+	object.keys->key
+		if (comma) LOut.call(","+NEWLINE)
+		LOut.call(indent2+'"' + key.replace('"','\"') + '": ')
+		value=object.get(key)
+		PPValue(value,indent2,LOut)
+		comma=true
+	|
+	LOut.call(NEWLINE+indent+"}")
+/PPObj	
+
+
+# Pretty-print list
+# --
+	P(1,List)=>list
+	P(2,"")=>indent
+	P(3,Lambda{P(1)})=>LOut
+
+	indent2=indent+"  "
+	NEWLINE="^n".unEsc
+
+	LOut.call("["+NEWLINE+indent2)
+	comma=false
+	list->x
+		if (comma) LOut.call(","+NEWLINE+indent2)
+		PPValue(x,indent2,LOut)
+		comma=true
+	|
+	LOut.call(NEWLINE+indent+"]")
+/PPList
+
+
+
+# Pretty-print data structure as formatted JSON
+# --
+	P(1)=>JSONValue
+
+	Dict
+		.set("data",List)
+		.set("LOut",Lambda{
+			self.data.add(P(1))
+		})
+		=> obj
+
+	PPValue(JSONValue,"",obj.LOut)
+	NEWLINE="^n".unEsc
+	obj.data.concat.split(NEWLINE)
+/PP
+
+
+
 
