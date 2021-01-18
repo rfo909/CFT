@@ -3,6 +3,65 @@ package rf.configtool.util;
 import java.security.MessageDigest;
 
 public class Encrypt {
+
+	// Number of counters moving independently inside the matrix buffer
+	
+	public static final int N = 8;
+		// with N counters, the number of start positions is calculated
+		// multiplying the N first values from COUNTER_MAX array below. Since all are
+		// (just) above 10k, each counter contributes with 10^4 new possible start values
+		//
+		// N=5: 10^20
+		// N=6: 10^24
+		// N=7: 10^28
+		// N=8: 10^32
+		// N=9: 10^36
+		// N=10: 10^40
+		//
+
+	/*
+	To break this algorithm, given access to the code, and without guessing the
+	passoword + salt, AND assuming that the code breaker has knows or guesses
+	some plain-text for encrypted data, one then has to guess a combination 
+	of N start points.
+	
+	For each, call process() on the first plain byte. This will most likely fail, and so
+	one must try a new start position, until one gets a match. When this happens, on average
+	every  1/256 attempts, one advances to the next byte, and calls process(). This will
+	match every 1/256, and so on. When a sufficient number of bytes match, one has
+	found the encryption key. If the same password + salt is used on other data, these
+	can be decrypted as well.
+	
+	But the number of starting positions is described above. With N=8 we have 10^32
+	different start positions.
+
+	My laptop CPU (Ryzen 5 5300) manages more than 100 MBytes per second (single thread),
+	which means 10^8 bytes per second. A top CPU may do ten times that, but let's assume
+	hundred times, and also assume 1000 CPU's. 10^8 x 100 x 1000 = 10^13 combinations
+	checked per second.
+
+	Now 10^32 / 10^13 = 10^19 seconds = 3x10^11 years. 
+
+	On average one would find the key in half that time, though .... :-)
+
+	Safe enough for a while. Increasing to 10 pointers, of course increases the
+	start space by factor 10^8.
+
+	Also note, that if the known sequence of plain-text is not at the start of the data,
+	then the same method applies, for finding the key, but in order to find the start
+	condition, one have to calculate backwards. 
+
+	This would have been simple, if it weren't for the occasional "jump" of two pointers,
+	based on a (to the code breaker) unknown original location of those two pointers.
+
+	-
+
+	In addition to proper use of salt, if the application starts by 
+	encrypting a number of random or unknown bytes, such as the hash of the salt, 
+	before adding data, breaking becomes factor (X+1) times harder, where X is the number 
+	of (unknown or secret) bytes prefixing the secret data.
+
+	*/	
 	
 	private int[] matrix;
 	private int[] readPos=new int[N];
@@ -17,6 +76,9 @@ public class Encrypt {
 		return md1.digest();
 	}
 
+	/**
+	* Constructor: sets up matrix, readPos and maxPos for N counters
+	*/
 	public Encrypt (byte[] password, byte[] salt) throws Exception {
 		final byte[] pre1 = "w/-P0 ;4ZP#xi*)8(E.OKd03Pfr=L2w".getBytes("ISO-8859-1");
 		final byte[] pre2 = "0_ue09Umlu&(/s0t;V6:b&av#5-(,kPoD".getBytes("ISO-8859-1");
@@ -58,6 +120,10 @@ public class Encrypt {
 		MessageDigest md1 = MessageDigest.getInstance("SHA1"); // 160 bits = 20 bytes
 		md1.update(password);
 		md1.update(salt);
+		md1.update(key1);
+		md1.update(key2);
+		md1.update(key3);
+		md1.update(key4);
 		final byte[] secretHash=md1.digest(); // used to decide start positions for N counters
 
 		for (int i=0;i<N;i++) {
@@ -66,27 +132,14 @@ public class Encrypt {
 			readPos[i]=(secretHash[i*2])+(secretHash[i*2+1]<<8);
 			while (readPos[i]<0) readPos[i] += maxPos[i];
 			if (readPos[i]>=maxPos[i]) {
-				readPos[i]=(readPos[(i+1)%N] & 0x0AA0) % maxPos[i];
+				readPos[i]=(readPos[(i+1)%N] & 0x0555) % maxPos[i];
 			}
 			//System.out.println(readPos[i]);
 		}
 
 	}
 
-	// Number of counters moving independently inside the matrix buffer
-	
-	public static final int N = 8;
-		// with N counters, the number of start positions is calculated
-		// multiplying the N first values from COUNTER_MAX array below. Since all are
-		// (just) above 10k, each counter contributes with 10^4 new possible start values
-		//
-		// N=5: 10^20
-		// N=6: 10^24
-		// N=7: 10^28
-		// N=8: 10^32
-		// N=9: 10^36
-		// N=10: 10^40
-		//
+
 
 	final int[] COUNTER_MAX= {
 			10357,  10369,  10391,  10399,  10427,  10429,  10433,  10453,  10457,  10459 
@@ -111,8 +164,8 @@ public class Encrypt {
 			}
 			readPos[j]=(readPos[j]+1)%maxPos[j];
 		}
-		// occasionally move two counters 
-		if (matrix[readPos[0]]>20 && matrix[readPos[1]]>20) {
+		// occasionally jump two pointers 
+		if (matrix[readPos[0]]>=20 && matrix[readPos[1]]>=19) {
 			int x=readPos[2]%N;
 			int y=readPos[3]%N;
 			readPos[x]=(readPos[x]+readPos[y]) % maxPos[x];
