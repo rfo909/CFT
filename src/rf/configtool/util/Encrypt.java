@@ -6,7 +6,7 @@ public class Encrypt {
 
 	// Number of counters moving independently inside the matrix buffer
 	
-	public static final int N = 8;
+	public static final int N = 10;
 		// with N counters, the number of start positions is calculated
 		// multiplying the N first values from COUNTER_MAX array below. Since all are
 		// (just) above 10k, each counter contributes with 10^4 new possible start values
@@ -40,7 +40,7 @@ public class Encrypt {
 	hundred times, and also assume 1000 CPU's. 10^8 x 100 x 1000 = 10^13 combinations
 	checked per second.
 
-	Now 10^32 / 10^13 = 10^19 seconds = 3x10^11 years. 
+	10^32 / 10^13 = 10^19 seconds = 3x10^11 years. 
 
 	On average one would find the key in half that time, though .... :-)
 
@@ -110,7 +110,7 @@ public class Encrypt {
 			pos4=(pos4+1)%len4;
 			
 			if (sum<0) sum=-sum;
-			matrix[i]=sum%25; 
+			matrix[i]=sum%50; 
 				// Collapsing many values on to each other
 				// creates a less "crispy" result, which means longer
 				// sequences of known characters will match output before failing - harder to crack
@@ -126,14 +126,18 @@ public class Encrypt {
 		md1.update(key4);
 		final byte[] secretHash=md1.digest(); // used to decide start positions for N counters
 
+		md1.update(key1);
+		md1.update(password);
+		md1.update(salt);
+		md1.update(key2);
+		final byte[] secretHash2=md1.digest(); // used to decide start positions for N counters
+
 		for (int i=0;i<N;i++) {
 			maxPos[i]=COUNTER_MAX[i];
 
-			readPos[i]=(secretHash[i*2])+(secretHash[i*2+1]<<8);
-			while (readPos[i]<0) readPos[i] += maxPos[i];
-			if (readPos[i]>=maxPos[i]) {
-				readPos[i]=(readPos[(i+1)%N] & 0x0555) % maxPos[i];
-			}
+			readPos[i]=(secretHash[i*2])+(secretHash[i*2+1]<<8) + (secretHash2[i*2]<<16) + secretHash2[i*2+1];
+			if (readPos[i]<0) readPos[i] = -readPos[i];
+			readPos[i]=readPos[i] % maxPos[i];
 			//System.out.println(readPos[i]);
 		}
 
@@ -165,11 +169,11 @@ public class Encrypt {
 			readPos[j]=(readPos[j]+1)%maxPos[j];
 		}
 		// occasionally jump two pointers 
-		if (matrix[readPos[0]]>=20 && matrix[readPos[1]]>=19) {
+		if (matrix[readPos[0]]>=45 && matrix[readPos[1]]<=5) {
 			int x=readPos[2]%N;
 			int y=readPos[3]%N;
 			readPos[x]=(readPos[x]+readPos[y]) % maxPos[x];
-			readPos[y]=(readPos[y]+1) % maxPos[y];
+			readPos[y]=(readPos[y]+readPos[4] + 1) % maxPos[y];
 		}
 		return (byte) (a%256);
 	}
