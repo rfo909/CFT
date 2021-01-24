@@ -255,24 +255,19 @@ public class Ctx {
     
     // Utility method
     /**
-    * Create a safe copy of this value, by means of running it through an eval(syn()) pipeline,
-    * which ensures the new value is completely independent. Throws exception if value not synthesizable.
-    */
+     * Resolve expression on string format
+     */
 	public Value resolveExpr (String s) throws Exception {
-		try {
-			Parser p=new Parser();
-			p.processLine(new CodeLine(new SourceLocation(), s));
-			TokenStream ts = p.getTokenStream();
-			ProgramLine progLine=new ProgramLine(ts,false);
-			
-			Ctx ctx=this.sub();
-			progLine.execute(ctx);
-			Value retVal=ctx.pop();
-			if (retVal==null) retVal=new ValueNull();
-			return retVal;
-		} catch (Exception ex) {
-			throw new Exception("Value could not be run through eval(syn()) - must be synthesizable");
-		}
+		Parser p=new Parser();
+		p.processLine(new CodeLine(new SourceLocation(), s));
+		TokenStream ts = p.getTokenStream();
+		ProgramLine progLine=new ProgramLine(ts);
+		
+		Ctx ctx=this.sub();
+		progLine.execute(ctx);
+		Value retVal=ctx.pop();
+		if (retVal==null) retVal=new ValueNull();
+		return retVal;
 	}
 
 	

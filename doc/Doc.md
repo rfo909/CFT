@@ -8,7 +8,7 @@ If you have problems, consider viewing the Doc.html file instead.
 
 ```
 Last updated: 2021-01-14 RFO
-v2.2.3
+v2.3.0
 ```
 # Introduction
 
@@ -1081,6 +1081,11 @@ if (a>b) {
 ...
 }
 ```
+
+Local blocks can contain loops, but can not be split into multiple loop spaces using the PIPE ("|")
+symbol. Since they execute in the same run-context as the code around them, any calls to out() or report()
+add to the result list of the environment.
+
 ## Lambdas
 
 
@@ -1088,11 +1093,11 @@ A Lambda is an object (a value) that contains code, so it can be called, with pa
 inside runs detached from the caller, and behaves exactly like a function.
 
 ```
-myLambda = Lambda { P(1)+P(2) } myLambda.call(1,2)
+myLambda=Lambda{P(1)+P(2)} myLambda.call(1,2)
 ```
 
-Great for local functions inside regular functions, and for sending as parameters to other functions,
-or lambdas.
+Can be used to create local functions inside regular functions, but mostly used to create
+closures and/or Dict objects.
 
 ## Inner blocks
 
@@ -1117,15 +1122,10 @@ Inner blocks are a way of running loops isolated from the environment. Remember 
 default extend to the end of the function, or until hitting a "pipe". The third thing that
 terminates loops are hitting the end of the current block.
 
-
-Even the end of local blocks terminate loops, but they share the loop space of the surrounding code,
-providing somewhat "complicated" outcomes.
-
-
 ## Block expressions summary
 
 
-Local (plain) blocks for non-looping blocks of code, typically used with "if". Running in
+Local (plain) blocks for non-PIPE-separated blocks of code, typically used with "if". Running in
 the same loop space as outside the block, means it can call break() and out() as well as
 assert() and reject() and affect the (innermost) loop of those outside the block.
 
@@ -1136,6 +1136,52 @@ out() and assert() and reject() have no effect on loops outside the block.
 
 Lambdas are "functions" as values.
 
+## Examples: Local vs Inner
+
+```
+List("aaa","bbb")->line
+# Using a local block to limit scope of loop, so that we
+# can follow it by code that runs after the inner loop
+# has completed. Results in list of characters: aaaXbbbX
+{
+line.chars->c out(c)
+}
+out("X")
+/t
+List("aaa","bbb")->line
+# The Inner block below works in a separate context, so the calls
+# to out() don't affect the resulting output list of the function.
+# The Inner block returns a list, but it isn't used in this example.
+Inner {
+line.chars->c out(c)
+}
+out("X")
+/t
+```
+
+Inner blocks are for sub-calculations isolated from the environment where they are
+defined.
+
+```
+Dict
+.set("a",1)
+.set("b",2)
+=>
+ values
+List("aaa","bbb")->line
+# The Inner block calculates a sum from the characters, as represented
+# in that Dict, and that value is stored in local variable 'result' after
+# the Inner block has terminated, then emitted via out().
+#
+# This somewhat strange example delivers a list with the numbers 3 and 6.
+#
+Inner {
+line.chars->c out(values.get(c)) | _.sum
+} =>
+ result
+out(result)
+/t
+```
 # List filtering with Lambda
 
 
@@ -1148,6 +1194,17 @@ using .filter() function.
 .sum
 /t
 ```
+## Removing items
+
+
+To remove items, the Lambda should return null.
+
+```
+"12345".chars.filter (Lambda{ P(1).parseInt=>x if(x>=3,x,null) })
+```
+
+This returns a list of 3,4,5
+
 # Conditionals - if expression
 
 

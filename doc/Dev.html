@@ -13,6 +13,38 @@
 
 <h1>CFT Change log</h1>
 
+<h3>v2.3.0 2021-01-24 Local blocks ...</h3>
+<p>
+	Making loops forbidden inside local blocks was a mistake. What must be forbidden
+	is the pipe symbol, as a loop inside a local block adds data to the
+	environment result list, not a local one, and so pipe has no meaning.
+</p>
+
+<p>
+	This solves a common problem, illustrated by the following.
+</p>
+
+<pre>
+List("aaa","bbb")-&gt;line
+	{
+		line.chars-&gt;c out(c)
+	} 
+	out("x")
+/t
+</pre>
+
+<p>
+	It generates list of characters aaaxbbbx. 
+</p>
+<p>
+	Keeping the "Inner" block, as it is, as described in docs, kind of a mix between
+	lambda and local code. Inner blocks can have PIPE because they run in a separate
+	environment.
+</p>
+
+
+
+
 <h3>v2.2.4 2021-01-18 Security - Encrypt</h3>
 <p>
 	Adjustments to the rf.configtool.util.Encrypt java class.

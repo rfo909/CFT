@@ -35,7 +35,7 @@ import rf.configtool.parser.TokenStream;
  */
 public class CodeLines {
 	
-    public static final String PROGRAM_LINE_SEPARATOR="|"; // separates multiple ProgramLines on same line
+    public static final String PIPE_SYMBOL="|"; // separates multiple ProgramLines on same line
     
 
     private List<CodeLine> saveFormat;
@@ -114,7 +114,7 @@ public class CodeLines {
  	    List<ProgramLine> progLines=new ArrayList<ProgramLine>();
  	    for(;;) {
  	        progLines.add(new ProgramLine(ts));
- 	        if (ts.matchStr(PROGRAM_LINE_SEPARATOR)) continue;
+ 	        if (ts.matchStr(PIPE_SYMBOL)) continue;
  	        break;
  	    }
  	    return progLines;

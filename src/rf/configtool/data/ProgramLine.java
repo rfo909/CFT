@@ -32,18 +32,9 @@ public class ProgramLine extends LexicalElement {
     private List<Stmt> statements=new ArrayList<Stmt>();
 
     public ProgramLine (TokenStream ts) throws Exception {
-    	this(ts,true);
-    }
-
-    public ProgramLine (TokenStream ts, boolean loopingAllowed) throws Exception {
         super(ts);
-        while (!ts.atEOF() && !ts.peekStr(CodeLines.PROGRAM_LINE_SEPARATOR) && !ts.peekStr("}")) {
+        while (!ts.atEOF() && !ts.peekStr(CodeLines.PIPE_SYMBOL) && !ts.peekStr("}")) {
         	Stmt stmt=Stmt.parse(ts);
-        	if (!loopingAllowed) {
-        		if ((stmt instanceof StmtLoop) || (stmt instanceof StmtIterate)) {
-        			throw new SourceException(getSourceLocation(), "Loop statements invalid here");
-        		}
-        	}
             statements.add(stmt);
         }
     }

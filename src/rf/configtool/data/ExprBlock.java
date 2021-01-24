@@ -21,6 +21,7 @@ import rf.configtool.main.CodeLines;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.ObjGlobal;
 import rf.configtool.main.Runtime;
+import rf.configtool.main.SourceException;
 import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueBlock;
@@ -58,16 +59,19 @@ public class ExprBlock extends LexicalElement {
         
         List<ProgramLine> progLines=new ArrayList<ProgramLine>();
         if (mode==MODE_LOCAL) {
-        	// only one program line as PROGRAM_LINE_SEPARATOR not allowed
-        	boolean loopingAllowed = false;
-            progLines.add(new ProgramLine(ts,loopingAllowed));
+        	// only one program line as "PIPE" not allowed
+            progLines.add(new ProgramLine(ts));
+            
+            if (ts.matchStr(CodeLines.PIPE_SYMBOL)) {
+            	// specific exception for this case
+            	throw new SourceException(getSourceLocation(),"Local block can not contain the PIPE '" + CodeLines.PIPE_SYMBOL + "' character");
+            }
         	ts.matchStr("}","expected '}' closing " + getBlockModeName() + " starting at " + this.getSourceLocation());
         } else {
         	// INNER and LAMBDA
-        	boolean loopingAllowed = true;
 	        for(;;) {
-	            progLines.add(new ProgramLine(ts,loopingAllowed));
-	            if (ts.matchStr(CodeLines.PROGRAM_LINE_SEPARATOR)) continue;
+	            progLines.add(new ProgramLine(ts));
+	            if (ts.matchStr(CodeLines.PIPE_SYMBOL)) continue;
 	            break;
 	        }
 	    	ts.matchStr("}","expected '}' closing " + getBlockModeName() + " starting at " + this.getSourceLocation());

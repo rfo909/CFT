@@ -105,8 +105,10 @@ Block expressions
  * Lambdas
  * Inner blocks
  * Block expressions summary
+ * Examples: Local vs Inner
 
 List filtering with Lambda
+ * Removing items
 
 Conditionals - if expression
  |   Inline form

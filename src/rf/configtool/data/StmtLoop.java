@@ -33,7 +33,7 @@ public class StmtLoop extends Stmt {
         
         ts.matchStr("loop","expected keyword 'loop'");
         
-        while (!ts.atEOF() && !ts.peekStr(CodeLines.PROGRAM_LINE_SEPARATOR) && !ts.peekStr("}")) {
+        while (!ts.atEOF() && !ts.peekStr(CodeLines.PIPE_SYMBOL) && !ts.peekStr("}")) {
             body.add(Stmt.parse(ts));
         }
         

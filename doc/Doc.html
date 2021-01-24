@@ -16,7 +16,7 @@ CFT / ConfigTool
 <pre style="padding-left:0; margin-left:0">
 
 Last updated: 2021-01-14 RFO
-v2.2.3
+v2.3.0
 
 </pre>
 
@@ -44,6 +44,7 @@ v2.2.3
 <p>
   Development has been going on since May 2018, and on github since July 2020.
 </p>
+
 
 
 <h1>Platform</h1>
@@ -113,6 +114,8 @@ v2.2.3
 
 
 
+
+
 <h1>Create functions</h1>
 <p>
   Everything you type in at the prompt is considered code, and executed.
@@ -160,6 +163,7 @@ v2.2.3
 
 
 
+
 <h1>Save and load</h1>
 <p>
   Functions are saved into script files, via "colon" commands, which are system commands outside
@@ -169,6 +173,7 @@ v2.2.3
   $ :save myscript
   $ :load otherscript
 </pre>
+
 
 
 
@@ -240,6 +245,8 @@ v2.2.3
   The shell <i>does not</i> include commands that move, delete or copy files and directories. This
   is by choice.
 </p>
+
+
 
 <h2>The "protect" mechanism</h2>
 <p>
@@ -1240,6 +1247,13 @@ codeDirs = . ; code.examples ; code.lib
   }
 </pre>
 
+<p>
+  Local blocks can contain loops, but can not be split into multiple loop spaces using the PIPE ("|")
+  symbol. Since they execute in the same run-context as the code around them, any calls to out() or report()
+  add to the result list of the environment.
+</p>
+
+
 
 <h2>Lambdas</h2>
 <p>
@@ -1247,11 +1261,11 @@ codeDirs = . ; code.examples ; code.lib
   inside runs detached from the caller, and behaves exactly like a function.
 </p>
 <pre>
-  myLambda = Lambda { P(1)+P(2) } myLambda.call(1,2)
+  myLambda=Lambda{P(1)+P(2)} myLambda.call(1,2)
 </pre>
 <p>
-  Great for local functions inside regular functions, and for sending as parameters to other functions,
-  or lambdas.
+  Can be used to create local functions inside regular functions, but mostly used to create
+  closures and/or Dict objects.
 </p>
 
 
@@ -1277,28 +1291,75 @@ codeDirs = . ; code.examples ; code.lib
   default extend to the end of the function, or until hitting a "pipe". The third thing that 
   terminates loops are hitting the end of the current block.
 </p>
-<p>
-  Even the end of local blocks terminate loops, but they share the loop space of the surrounding code, 
-  providing somewhat "complicated" outcomes.
-</p>
-<p>
 
 
 
 
 <h2>Block expressions summary</h2>
 <p>
-  Local (plain) blocks for non-looping blocks of code, typically used with "if". Running in
+  Local (plain) blocks for non-PIPE-separated blocks of code, typically used with "if". Running in
   the same loop space as outside the block, means it can call break() and out() as well as
   assert() and reject() and affect the (innermost) loop of those outside the block. 
 </p>
 <p>
   Inner blocks for isolated processing loops inside other code. This means calling break() and
-  out() and assert() and reject() have no effect on loops outside the block.
+  out() and assert() and reject() have no effect on loops outside the block. 
 </p>
 <p>
   Lambdas are "functions" as values.
 </p>
+
+
+
+<h2>Examples: Local vs Inner</h2>
+<pre>
+
+List("aaa","bbb")-&gt;line
+  # Using a local block to limit scope of loop, so that we
+  # can follow it by code that runs after the inner loop
+  # has completed. Results in list of characters: aaaXbbbX
+  {
+    line.chars-&gt;c out(c)
+  } 
+  out("X")
+/t
+
+
+List("aaa","bbb")-&gt;line
+  # The Inner block below works in a separate context, so the calls
+  # to out() don't affect the resulting output list of the function.
+  # The Inner block returns a list, but it isn't used in this example.
+  Inner {
+    line.chars-&gt;c out(c)
+  } 
+  out("X")
+/t
+</pre>
+
+<p>
+Inner blocks are for sub-calculations isolated from the environment where they are
+defined.
+</p>
+<pre>
+
+Dict
+  .set("a",1)
+  .set("b",2) 
+  => values
+List("aaa","bbb")-&gt;line
+  # The Inner block calculates a sum from the characters, as represented
+  # in that Dict, and that value is stored in local variable 'result' after
+  # the Inner block has terminated, then emitted via out().
+  #
+  # This somewhat strange example delivers a list with the numbers 3 and 6.
+  #
+  Inner {
+    line.chars-&gt;c out(values.get(c)) | _.sum
+  } => result
+  out(result)
+/t
+</pre>
+
 
 
 
@@ -1315,6 +1376,16 @@ codeDirs = . ; code.examples ; code.lib
 /t
 </pre>
 
+<h2>Removing items</h2>
+<p>
+  To remove items, the Lambda should return null.
+</p>
+<pre>
+"12345".chars.filter (Lambda{ P(1).parseInt=&gt;x if(x&gt;=3,x,null) })
+</pre>
+<p>
+  This returns a list of 3,4,5
+</p>
 
 
 

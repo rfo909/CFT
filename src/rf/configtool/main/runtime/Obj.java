@@ -161,7 +161,7 @@ public abstract class Obj {
 			Parser p=new Parser();
 			p.processLine(new CodeLine(new SourceLocation(), s));
 			TokenStream ts = p.getTokenStream();
-			ProgramLine progLine=new ProgramLine(ts,false);
+			ProgramLine progLine=new ProgramLine(ts);
 			
 			Ctx ctx=callCtx.sub();
 			progLine.execute(ctx);
