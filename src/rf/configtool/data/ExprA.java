@@ -26,7 +26,7 @@ import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueBoolean;
 import rf.configtool.parser.TokenStream;
 
-public class ExprA extends LexicalElement {
+public class ExprA extends ExprCommon {
     private String[] sep= {"&&"};
 
     private List<ExprB> parts=new ArrayList<ExprB>();

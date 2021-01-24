@@ -28,7 +28,7 @@ import rf.configtool.parser.TokenStream;
  * Match a list of identifiers (local variables), then execute them as expressions, and put
  * the result into a Dict object.
  */
-public class ExprSymDict extends LexicalElement {
+public class ExprSymDict extends ExprCommon {
 	
 	private List<String> identifiers = new ArrayList<String>();
 	

@@ -25,7 +25,7 @@ import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueBoolean;
 import rf.configtool.parser.TokenStream;
 
-public class Expr extends LexicalElement {
+public class Expr extends ExprCommon {
     
     protected static String matchSeparator (TokenStream ts, String[] sep) {
         for (String s:sep) {

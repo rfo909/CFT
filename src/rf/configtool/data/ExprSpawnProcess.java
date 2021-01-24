@@ -25,7 +25,7 @@ import rf.configtool.main.runtime.lib.ObjDict;
 import rf.configtool.main.runtime.lib.ObjProcess;
 import rf.configtool.parser.TokenStream;
 
-public class ExprSpawnProcess extends LexicalElement {
+public class ExprSpawnProcess extends ExprCommon {
 
 	private Expr expr;
 	private Expr exprDict;

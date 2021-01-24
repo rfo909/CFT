@@ -23,7 +23,7 @@ import rf.configtool.main.Ctx;
 import rf.configtool.main.runtime.*;
 import rf.configtool.parser.TokenStream;
 
-public class ExprPop extends LexicalElement {
+public class ExprPop extends ExprCommon {
 
     public ExprPop (TokenStream ts) throws Exception {
         super(ts);

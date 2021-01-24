@@ -26,19 +26,24 @@ import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.parser.TokenStream;
 
-public class StmtAssign extends Stmt {
+public class ExprAssign2 extends ExprCommon {
 
     private String varName;
-    public StmtAssign (TokenStream ts) throws Exception {
+    private Expr expr;
+    
+    public ExprAssign2 (TokenStream ts) throws Exception {
         super(ts);
-        ts.matchStr("=>","expected '=>'");
         varName=ts.matchIdentifier("expected variable name");
+        ts.matchStr("=","expected '='");
+        expr=new Expr(ts);
+       
     }
 
-    public void execute (Ctx ctx) throws Exception {
-        Value v=ctx.pop();
+    public Value resolve (Ctx ctx) throws Exception {
+        Value v=expr.resolve(ctx);
         if (ctx.isLoopVariable(varName)) throw new SourceException(getSourceLocation(), "Invalid assign: '" + varName + "' is a loop variable");
         ctx.getFunctionState().set(varName, v);
+        return v;
     }
 
 }

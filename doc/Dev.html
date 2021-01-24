@@ -13,6 +13,25 @@
 
 <h1>CFT Change log</h1>
 
+
+<h3>v2.3.1 2021-01-24 Assignment is expr</h3>
+<p>
+	Changed local variable assignments from statements to expressions, which has the
+	advantage of allowing:
+</p>
+<pre>
+	if (cond) a=1 
+
+	a=b=c=0
+
+	0=&gt;a=&gt;b=&gt;c
+</pre>
+<p>
+	Also created common abstract superclass for all Expr classes, ExprCommon, with resolve(), and cleaned up the 
+	ExprTerminal resolve() method. Renamed a few Expr classes to Expr* names.
+</p>
+
+
 <h3>v2.3.0 2021-01-24 Local blocks ...</h3>
 <p>
 	Making loops forbidden inside local blocks was a mistake. What must be forbidden

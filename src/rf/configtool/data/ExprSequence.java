@@ -43,7 +43,7 @@ import rf.configtool.parser.TokenStream;
  * parameter to decide if including the following data in the list or not.
  * 
  */
-public class ExprSequence extends LexicalElement {
+public class ExprSequence extends ExprCommon {
 	
 	private boolean guarded;
 	private List<Expr> expr = new ArrayList<Expr>();

@@ -23,7 +23,7 @@ import rf.configtool.main.Ctx;
 import rf.configtool.main.runtime.*;
 import rf.configtool.parser.TokenStream;
 
-public class ExprIf extends LexicalElement {
+public class ExprIf extends ExprCommon {
 
 	// The inline form uses expressions, while the "traditional" form
 	// uses statements, which in turn may well be expressions, but also

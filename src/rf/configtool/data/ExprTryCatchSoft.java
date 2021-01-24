@@ -37,7 +37,7 @@ import rf.configtool.parser.TokenStream;
 /**
  * Try-catch for soft errors (created by error()) 
  */
-public class ExprTryCatchSoft extends LexicalElement {
+public class ExprTryCatchSoft extends ExprCommon {
 	
 	private Expr expr;
 

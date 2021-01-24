@@ -29,7 +29,7 @@ import rf.configtool.parser.Token;
 import rf.configtool.parser.TokenStream;
 import java.util.*;
 
-public class ExprBlock extends LexicalElement {
+public class ExprBlock extends ExprCommon {
 
 	public static final int MODE_INNER = 0;
 	public static final int MODE_LAMBDA = 1;

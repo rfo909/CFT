@@ -33,7 +33,7 @@ import rf.configtool.parser.TokenStream;
 /**
  * Return directory object for current directory
  */
-public class ExprPwd extends LexicalElement {
+public class ExprPwd extends ExprCommon {
 
     public ExprPwd (TokenStream ts) throws Exception {
         super(ts);

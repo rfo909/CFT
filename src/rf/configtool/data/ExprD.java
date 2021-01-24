@@ -29,7 +29,7 @@ import rf.configtool.main.runtime.ValueList;
 import rf.configtool.main.runtime.ValueString;
 import rf.configtool.parser.TokenStream;
 
-public class ExprD extends LexicalElement {
+public class ExprD extends ExprCommon {
     private String[] sep= {"*","/","%"};
 
     private List<ExprE> parts=new ArrayList<ExprE>();

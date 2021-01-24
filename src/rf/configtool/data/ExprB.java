@@ -27,7 +27,7 @@ import rf.configtool.main.runtime.ValueFloat;
 import rf.configtool.main.runtime.ValueInt;
 import rf.configtool.parser.TokenStream;
 
-public class ExprB extends LexicalElement {
+public class ExprB extends ExprCommon {
     private String[] sep= {">","<",">=","<=","==","!="};
 
     private List<ExprC> parts=new ArrayList<ExprC>();

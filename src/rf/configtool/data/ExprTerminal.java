@@ -25,33 +25,29 @@ import rf.configtool.main.runtime.*;
 import rf.configtool.parser.Token;
 import rf.configtool.parser.TokenStream;
 
-public class ExprTerminal extends LexicalElement {
+public class ExprTerminal extends ExprCommon {
     
-    private Expr innerExpr;
-    private ExprE notExpr;
-    private Expr negExpr;
-    private ExprPop pop;
-    private ExprIf exprIf;
-    private ExprPwd exprPwd;
-    private boolean nullValue;
-    private ExprCall exprCall;
-    private ExprTryCatch exprTryCatch;
-    private ExprTryCatchSoft exprTryCatchSoft;
-    private ExprSequence exprSequence;
-    private ExprSpawnProcess exprSpawn;
-    private ExprSymDict symDict;
-    
+	private ExprCommon expr;
     private Value literalValue;
-    private ParamLookup paramLookup;
-    private ParamLookupDict paramLookupDict;
-    private ExprBlock exprMacro;
-    private LookupOrCall lookupCall; // lookup or call
-    
+	private ExprE notExpr;
+    private Expr negExpr;
+
     public ExprTerminal (TokenStream ts) throws Exception {
         super(ts);
         
+        
+        if (ts.peekStr("=>")) {
+        	expr=new ExprAssign(ts);
+        	return;
+        }
+        if (ts.peekType(Token.TOK_IDENTIFIER) && ts.peekStr(1,"=")) {
+        	expr = new ExprAssign2(ts);
+        	return;
+        }
+        
+        
         if (ts.matchStr("(")) {
-            innerExpr=new Expr(ts);
+            expr=new Expr(ts);
             ts.matchStr(")", "expected ')'");
             return;
         }
@@ -65,47 +61,48 @@ public class ExprTerminal extends LexicalElement {
             return;
         }
         if (ts.peekStr("_")) {
-            pop=new ExprPop(ts);
+            expr=new ExprPop(ts);
             return;
         }
         if (ts.peekStr("if")) {
-            exprIf=new ExprIf(ts);
+            expr=new ExprIf(ts);
             return;
         }
         if (ts.peekStr("pwd")) {
-            exprPwd=new ExprPwd(ts);
+            expr=new ExprPwd(ts);
             return;
         }
+        
         if (ts.matchStr("null")) {
-            nullValue=true;
+        	literalValue=new ValueNull();
             return;
         }
         if (ts.peekStr(1,":")) {
-        	exprCall=new ExprCall(ts);
+        	expr=new ExprCall(ts);
         	return;
         }
         if (ts.peekStr("tryCatch")) {
-        	exprTryCatch=new ExprTryCatch(ts);
+        	expr=new ExprTryCatch(ts);
             return;
         }
         if (ts.peekStr("tryCatchSoft")) {
-        	exprTryCatchSoft=new ExprTryCatchSoft(ts);
+        	expr=new ExprTryCatchSoft(ts);
             return;
         }
         if (ts.peekStr("Sequence")) {
-        	exprSequence = new ExprSequence(false,ts);
+        	expr = new ExprSequence(false,ts);
         	return;
         }
         if (ts.peekStr("CondSequence")) {
-        	exprSequence = new ExprSequence(true,ts);
+        	expr = new ExprSequence(true,ts);
         	return;
         }
         if (ts.peekStr("SpawnProcess")) {
-        	exprSpawn = new ExprSpawnProcess(ts);
+        	expr = new ExprSpawnProcess(ts);
         	return;
         }
         if (ts.peekStr("SymDict")) {
-        	symDict=new ExprSymDict(ts);
+        	expr=new ExprSymDict(ts);
         	return;
         }
         
@@ -131,24 +128,28 @@ public class ExprTerminal extends LexicalElement {
             return;
         }
         if (ts.peekStr("Inner") || ts.peekStr("Lambda") || ts.peekStr("{")) {
-            exprMacro = new ExprBlock(ts);
+            expr = new ExprBlock(ts);
             return;
         }
         if (ts.peekStr("P")) {
-            paramLookup=new ParamLookup(ts);
+            expr=new ExprParamLookup(ts);
             return;
         }
         if (ts.peekStr("PDict")) {
-            paramLookupDict=new ParamLookupDict(ts);
+            expr=new ExprParamLookupDict(ts);
             return;
         }
-        lookupCall=new LookupOrCall(ts);
+        expr=new ExprLookupOrCall(ts);
         
     }
     
     public Value resolve (Ctx ctx) throws Exception {
     	try {
-	        if (innerExpr != null) return innerExpr.resolve(ctx);
+    		if (expr != null) return expr.resolve(ctx);
+
+    		if (literalValue != null) return literalValue;
+	        
+
 	        if (notExpr != null) {
 	            Value v=notExpr.resolve(ctx);
 	            return new ValueBoolean(!v.getValAsBoolean());
@@ -165,24 +166,7 @@ public class ExprTerminal extends LexicalElement {
 	                throw new SourceException(negExpr.getSourceLocation(), "expected numeric value (int/float)");
 	            }
 	        }
-	        if (pop != null) return pop.resolve(ctx);
-	        if (exprIf != null) return exprIf.resolve(ctx);
-	        if (exprPwd != null) return exprPwd.resolve(ctx);
-	        if (nullValue) return new ValueNull();
-	        if (exprCall != null) return exprCall.resolve(ctx);
-	        if (exprTryCatch != null) return exprTryCatch.resolve(ctx);
-	        if (exprTryCatchSoft != null) return exprTryCatchSoft.resolve(ctx);
-	        
-	        if (exprSequence != null) return exprSequence.resolve(ctx);
-	        if (exprSpawn != null) return exprSpawn.resolve(ctx);
-	        if (symDict != null) return symDict.resolve(ctx);
-	        
-	        if (literalValue != null) return literalValue;
-	        if (paramLookup != null) return paramLookup.resolve(ctx);
-	        if (paramLookupDict != null) return paramLookupDict.resolve(ctx);
-	        if (exprMacro != null) return exprMacro.resolve(ctx);
-	        if (lookupCall != null) return lookupCall.resolve(ctx);
-	        
+
 	        throw new RuntimeException("Internal error");
     	} catch (Exception ex) {
     		if (ex instanceof SourceException) {

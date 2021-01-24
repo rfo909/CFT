@@ -23,7 +23,7 @@ import rf.configtool.main.Ctx;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.parser.TokenStream;
 
-public class ExprE extends LexicalElement {
+public class ExprE extends ExprCommon {
     
     private ExprTerminal firstPart;
     private List<DottedCall> dottedLookups=new ArrayList<DottedCall>();

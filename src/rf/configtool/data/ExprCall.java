@@ -38,7 +38,7 @@ import java.util.*;
 /**
  * Return directory object for current directory
  */
-public class ExprCall extends LexicalElement {
+public class ExprCall extends ExprCommon {
 
     private String script;
     private String func;

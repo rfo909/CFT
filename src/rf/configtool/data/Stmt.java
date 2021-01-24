@@ -44,13 +44,6 @@ public abstract class Stmt extends LexicalElement {
         
         // --------
         
-        
-        if (ts.peekStr("=>")) {
-            return new StmtAssign(ts);
-        }
-        if (ts.peekType(Token.TOK_IDENTIFIER) && ts.peekStr(1,"=")) {
-        	return new StmtAssign2(ts);
-        }
         if (ts.peekStr("->")) {
             return new StmtIterate(ts);
         }

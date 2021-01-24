@@ -32,12 +32,12 @@ import rf.configtool.parser.TokenStream;
 /**
  * Lookup of identifier or call of function
  */
-public class LookupOrCall extends LexicalElement {
+public class ExprLookupOrCall extends ExprCommon {
 
     private String ident;
     private List<Expr> params=new ArrayList<Expr>();
     
-    public LookupOrCall (TokenStream ts) throws Exception {
+    public ExprLookupOrCall (TokenStream ts) throws Exception {
         super(ts);
         ident=ts.matchIdentifier("expected lookup identifier");
         if (ts.matchStr("(")) {

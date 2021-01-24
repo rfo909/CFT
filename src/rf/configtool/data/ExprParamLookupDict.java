@@ -24,11 +24,11 @@ import rf.configtool.main.runtime.*;
 import rf.configtool.main.runtime.lib.ObjDict;
 import rf.configtool.parser.TokenStream;
 
-public class ParamLookupDict extends LexicalElement {
+public class ExprParamLookupDict extends ExprCommon {
 
     private List<Expr> names=new ArrayList<Expr>();
     
-    public ParamLookupDict (TokenStream ts) throws Exception {
+    public ExprParamLookupDict (TokenStream ts) throws Exception {
         super(ts);
         ts.matchStr("PDict", "expected 'PDict'");
         

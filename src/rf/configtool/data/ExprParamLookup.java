@@ -23,12 +23,12 @@ import rf.configtool.main.Ctx;
 import rf.configtool.main.runtime.*;
 import rf.configtool.parser.TokenStream;
 
-public class ParamLookup extends LexicalElement {
+public class ExprParamLookup extends ExprCommon {
 
     private Expr pos;
     private Expr defaultValue;
     
-    public ParamLookup (TokenStream ts) throws Exception {
+    public ExprParamLookup (TokenStream ts) throws Exception {
         super(ts);
         ts.matchStr("P", "expected 'P'");
         if (ts.matchStr("(")) {

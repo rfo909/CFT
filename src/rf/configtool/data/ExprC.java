@@ -30,7 +30,7 @@ import rf.configtool.main.runtime.ValueInt;
 import rf.configtool.main.runtime.ValueList;
 import rf.configtool.parser.TokenStream;
 
-public class ExprC extends LexicalElement {
+public class ExprC extends ExprCommon {
     private String[] sep= {"+","-"};
 
     private List<ExprD> parts=new ArrayList<ExprD>();
