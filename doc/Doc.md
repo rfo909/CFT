@@ -1152,6 +1152,7 @@ List("aaa","bbb")->line
 # The Inner block below works in a separate context, so the calls
 # to out() don't affect the resulting output list of the function.
 # The Inner block returns a list, but it isn't used in this example.
+# So function returns list with two X only.
 Inner {
 line.chars->c out(c)
 }
@@ -1166,8 +1167,7 @@ defined.
 Dict
 .set("a",1)
 .set("b",2)
-=>
- values
+=> values
 List("aaa","bbb")->line
 # The Inner block calculates a sum from the characters, as represented
 # in that Dict, and that value is stored in local variable 'result' after
