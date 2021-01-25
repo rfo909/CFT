@@ -43,12 +43,12 @@ To change to different host name, call MyHost(true)
 	) => data
 
 	url = "/"+name+"?pretty"		
-	Util:CURL(MyHost,"PUT", url, data, true)
+	Util:CURL("http",MyHost,"PUT", url, data, true)
 /CreateIndex
 
 
 # Check lifecycle progress
-	Util:CURL(MyHost,"GET","/.ds-timeseries-*/_ilm/explain")
+	Util:CURL("http",MyHost,"GET","/.ds-timeseries-*/_ilm/explain")
 /LifecycleProgress
 
 
@@ -87,7 +87,7 @@ To change to different host name, call MyHost(true)
 	| _.concat(" ") => json
 
 	url="/_ilm/policy/" + ilpName
-	Util:CURL(MyHost,"PUT",url,json,true)
+	Util:CURL("http",MyHost,"PUT",url,json,true)
 /CreateILP
 
 
@@ -113,7 +113,7 @@ To change to different host name, call MyHost(true)
 	json=JSON:Export(data)
 	println(json)
 	println
-	Util:CURL(MyHost,"PUT","/_index_template/main2?pretty",json,true)
+	Util:CURL("http",MyHost,"PUT","/_index_template/main2?pretty",json,true)
 		
 /CreateIndexTemplate
 
@@ -134,7 +134,7 @@ To change to different host name, call MyHost(true)
 		indexName=LIndexName.call(date)
 		Lib:Header("Deleting index: " + indexName)
 		if (enable) {
-			Util:CURL(MyHost,"DELETE","/"+indexName,null,true)
+			Util:CURL("http",MyHost,"DELETE","/"+indexName,null,true)
 		}
 /DeleteIndexes
 

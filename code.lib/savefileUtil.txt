@@ -123,11 +123,12 @@ Dict.set("list",List)
 
 # Invoke curl - does not work for jsonData on Windows (but ok on Linux / WSL)
 # --
-	P(1)=>HostPort
-	P(2,"GET") => method
-	P(3,error("path required"))=>path
-	P(4) => jsonData
-	P(5,false)=>verbose
+	P(1,"http")=>protocol
+	P(2)=>HostPort
+	P(3,"GET") => method
+	P(4,error("path required"))=>path
+	P(5) => jsonData
+	P(6,false)=>verbose
 	
 	
 	cmd=List("curl","-X",method)
@@ -135,8 +136,11 @@ Dict.set("list",List)
 		cmd.add("--header")
 		cmd.add("Content-Type: application/json")
 	}
+
+	if (!protocol.endsWith(":")) protocol=protocol+":"
+	if (!protocol.endsWith("//")) protocol=protocol+"//"
 	
-	url="http://" + HostPort + path
+	url=protocol + HostPort + path
 	cmd.add(url)
 	if (jsonData != null) {
 		cmd.add("-d")
