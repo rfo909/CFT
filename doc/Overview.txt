@@ -191,8 +191,6 @@ Error handling
 
 Get type of value
 
-List.push()
-
 Dict set with strings
 
 Dict.get with default value

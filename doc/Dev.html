@@ -30,6 +30,16 @@
 	Also created common abstract superclass for all Expr classes, ExprCommon, with resolve(), and cleaned up the 
 	ExprTerminal resolve() method. Renamed a few Expr classes to Expr* names.
 </p>
+<p>
+	Removed List.push() function, as the following no longer works:
+</p>
+<pre>
+	List.push(2) =&gt; a =&gt; b
+</pre>
+<p>
+	It had only been used ONCE, so ... no loss.
+</p>
+
 
 
 <h3>v2.3.0 2021-01-24 Local blocks ...</h3>

@@ -52,7 +52,9 @@ s*.s   [no]
 		reject(line.trim=="")
 		if (line.trim.startsWith("[")) {
 			# property definition with default value
-			line.after("[").before("]").split("=").push(2) => currProp =>currPropValue 
+			line.after("[").before("]").split("=")=>x
+			x.nth(0)=>currProp 
+			x.nth(1)=>currPropValue 
 		} else {
 			# data line with optional exception
 			line.before("[").trim => entity

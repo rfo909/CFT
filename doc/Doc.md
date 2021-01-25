@@ -8,7 +8,7 @@ If you have problems, consider viewing the Doc.html file instead.
 
 ```
 Last updated: 2021-01-24 RFO
-v2.3.0
+v2.3.1
 ```
 # Introduction
 
@@ -2191,17 +2191,6 @@ int
 $ getType(Dict)
 <String>
 Dict
-```
-# List.push()
-
-
-The push() function of the List object pushes a number of value from the list onto the stack
-to be assigned in "logical" order, and allows us to supply a default value if list too short.
-
-```
-$ List("x","y").split.push(3,"*") =>a =>b =>c a+":"+b+":"+c
-<String>
-x:y:*
 ```
 # Dict set with strings
 

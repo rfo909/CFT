@@ -44,7 +44,6 @@ public class ValueList extends Value {
         add(new FunctionRemove());
         add(new FunctionSet());
         add(new FunctionInsert());
-        add(new FunctionPush());
         add(new FunctionEmpty());
         add(new FunctionLast());
         add(new FunctionFirst());
@@ -482,41 +481,7 @@ public class ValueList extends Value {
         }
     }
 
-    class FunctionPush extends Function {
-        public String getName() {
-            return "push";
-        }
-        public String getShortDesc() {
-            return "push(count,default?) - push values on stack, to be assigned in natural order";
-        }
-        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() < 1 || params.size() > 2) {
-                throw new Exception("Expected parameter count, default?");
-            }
-            int count=(int) getInt("count",params,0);
-            
-            Value defaultValue;
-            if (params.size()==2) {
-                defaultValue=params.get(1);
-            } else {
-                defaultValue=new ValueNull();
-            }
-            
-            for (int i=count-1; i>=1; i--) {
-                if (val.size() > i) {
-                    ctx.push(val.get(i));
-                } else {
-                    ctx.push(defaultValue);
-                }
-            }
-            // return first value
-            if (val.size() > 0) {
-                return val.get(0);
-            } else {
-                return defaultValue;
-            }
-        }
-    }
+  
     
     class FunctionEmpty extends Function {
         public String getName() {
