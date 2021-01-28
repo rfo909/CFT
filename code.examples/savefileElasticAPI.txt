@@ -9,6 +9,10 @@ Initially asks for host+port on format xxx:NNN, then stores
 this in database. 
 
 To change to different host name, call MyHost(true)
+
+#Note: the Util:CURL function has problems with JSON data
+# on windows. Works fine on Linux / WSL
+
 -------------------------------------------------------------
 >>>> EOF
 /Readme
