@@ -153,5 +153,11 @@ Dict.set("list",List)
 		}
 		println
 	}
-	Dir.run(cmd)
+	result = Lib:run(cmd)
+	if (verbose) {
+		println("exitCode = " + result.exitCode)
+		{result.stdout->line println("(out) " + line)}
+		{result.stderr->line println("(err) " + line)}
+	}
+	result
 /CURL

@@ -136,9 +136,14 @@ To change to different host name, call MyHost(true)
 	Lib.Data.for(scanSinceDays,keepDays,-1)->daysAgo
 		date = Date.sub(Date.Duration.days(daysAgo))
 		indexName=LIndexName.call(date)
-		Lib:Header("Deleting index: " + indexName)
 		if (enable) {
-			Util:CURL("http",MyHost,"DELETE","/"+indexName,null,true)
+			result = Util:CURL("http",MyHost,"DELETE","/"+indexName,null,false)
+			ok = true
+			{result.stdout->line if(line.contains("index_not_found_exception")) ok=false}
+			if (ok) 
+				println("Deleted: " + indexName)
+			else
+				println("Not found: " + indexName)
 		}
 /DeleteIndexes
 
