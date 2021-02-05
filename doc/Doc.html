@@ -15,7 +15,7 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2021-01-24 RFO
+Last updated: 2021-02-05 RFO
 v2.3.1
 
 
@@ -1338,30 +1338,84 @@ List("aaa","bbb")-&gt;line
 /t
 </pre>
 
+
+
+
+<h2>Common confusion</h2>
 <p>
-Inner blocks are for sub-calculations isolated from the environment where they are
-defined.
+  The following example is a common mistake, based in how local blocks are not
+  separate loop spaces.
 </p>
 <pre>
-
-Dict
-  .set("a",1)
-  .set("b",2) 
-  =&gt; values
-List("aaa","bbb")-&gt;line
-  # The Inner block calculates a sum from the characters, as represented
-  # in that Dict, and that value is stored in local variable 'result' after
-  # the Inner block has terminated, then emitted via out().
-  #
-  # This somewhat strange example delivers a list with the numbers 3 and 6.
-  #
-  Inner {
-    line.chars-&gt;c out(values.get(c)) | _.sum
-  } => result
-  out(result)
-/t
+  a={List(1,2,3)-&gt;x out("a"+x)} a
+  &lt;List&gt;
+  a1
+  a2
+  a3
 </pre>
+<p>
+  Okay, so we want to assign local variable 'a' to the result from an iteration, then 
+  put it on the stack as return value.
+</p>
+<p>
+  However, that is not quite what happens here. Had the block been an Inner block, the
+  above description would be correct. Instead, this happens:
+</p>
+<ol>
+  <li>The loop runs inside the local block</li>
+  <li>Since the code contains loops, it returns the list populated via out()</li>
+  <li>This is assigned to variable 'a'</li>
+  <li>Value of 'a' is put on the stack</li>
+  <li><b>but</b> since the function contains loops, the result value becomes the list generated via calls
+    to out, which is the list of (1,2,3). 
+  </li>
+</ol>
+<p>
+  The local block, being an expression, has a return value, and it follows the normal
+  rule, which means that as it contains a loop, it returns a list.
+</p>
+<p>
+  So even though the code returned the expected result, it is for the wrong reason.
+</p>
 
+<h3>Extended example</h3>
+<p>
+  The list that is the return value from the local block expression, is the <em>same list</em> 
+  that is also the return value of the entire code line. This can be demonstrated as follows:
+</p>
+<pre>
+  out("hello") a={List(1,2,3)-&gt;x out("a"+x)} println("a="+a) a
+  a=[hello, a1, a2, a3]
+  &lt;List&gt;
+  hello
+  a1
+  a2
+  a3
+</pre>
+<p>
+  Here we see that 'a' refers to the exact same list that is the return value from
+  the complete line, since the list iteration runs inside a <em>local</em> block.
+</p>
+<p>
+  Putting 'a' on the stack at the end of the code line has no effect, since
+  there is a loop in the line, and then the result is always a list generated
+  via calls to out()
+</p>
+
+
+<h3>Using Inner block</h3>
+<pre>
+  out("hello") a=Inner {List(1,2,3)-&gt;x out("a"+x)} println("a="+a) a
+  a=[a1, a2, a3]
+  &lt;List&gt;
+  a1
+  a2
+  a3
+</pre>
+<p>
+  Using an Inner block, the situation changes. Now the out("hello") has no effect, as
+  there is no loops, since the loop now is isolated inside the Inner block.
+</p>
 
 
 
