@@ -34,7 +34,7 @@ To change to different host name, call MyHost(true)
 
 
 # List indexes
-	Util:CURL(MyHost,"GET","/_cat/indices?pretty",null,true)
+	Util:CURL("http",MyHost,"GET","/_cat/indices?pretty",null,true)
 /ListIndexes
 
 
