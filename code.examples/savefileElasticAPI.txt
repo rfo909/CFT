@@ -17,6 +17,10 @@ To change to different host name, call MyHost(true)
 >>>> EOF
 /Readme
 
+# Known hostnames
+# ---
+	List("hub-test-log3.ad.autopassops.no:9200", "10.115.0.52:9200")
+/KnownHosts
 
 # Get/set hostname
 # --
@@ -25,7 +29,11 @@ To change to different host name, call MyHost(true)
 	Db2:Get("ElasticAPI","host") => name
 
 	if (name==null || change) {
-		Input("Enter elasticsearch host:port (usually :9200)").get => name
+		println("Enter elasticsearch host:port (usually :9200)")
+		Inner{
+			KnownHosts->h println("  - " + h)
+		}
+		readLine("host:port") => name
 		error(!name.contains(":"), "Missing :PORT")
 		Db2:Set("ElasticAPI","host",name)
 	}
@@ -34,7 +42,7 @@ To change to different host name, call MyHost(true)
 
 
 # List indexes
-	Util:CURL(MyHost,"GET","/_cat/indices?pretty",null,true)
+	Util:CURL("http",MyHost,"GET","/_cat/indices?pretty",null,true)
 /ListIndexes
 
 
@@ -142,18 +150,21 @@ To change to different host name, call MyHost(true)
 			{result.stdout->line if(line.contains("index_not_found_exception")) ok=false}
 			if (ok) 
 				println("Deleted: " + indexName)
-			else
-				println("Not found: " + indexName)
+#			else
+#				println("Not found: " + indexName)
+		} else {
+			println("indexName=" + indexName)
 		}
 /DeleteIndexes
 
 
-# Delete day-indexes named on format main2-yyyy.MM.dd or similar
+# Delete day-indexes named on format <prefix><date>
 # --
-	P(1,"main2-")=>prefix
+	P(1,Input("Get index prefix up to date string").get)=>prefix
 	P(2,"yyyy.MM.dd")=>dateFormat
 	P(3,30)=>keepDays
-	P(3,60)=>scanSinceDays	
+	P(4,60)=>scanSinceDays
+	P(5,false)=>enable
 
 	SymDict(prefix,dateFormat).set("LIndexName",
 		Lambda {
@@ -161,6 +172,31 @@ To change to different host name, call MyHost(true)
 			self.prefix + date.setFormat(self.dateFormat).fmt
 		}
 	) => obj
-	DeleteIndexes(keepDays,scanSinceDays,obj.LIndexName,true)
+	DeleteIndexes(keepDays,scanSinceDays,obj.LIndexName,enable)
 /DeletePrefixedDatedIndexes
 
+
+# Delete day-indexes named on format main2-yyyy.MM.dd or similar
+# --
+	"main2-" => prefix
+	"yyyy.MM.dd" => dateFormat
+	30 => keepDays
+	60 => scanSinceDays
+	
+	true => enable
+	
+	DeletePrefixedDatedIndexes(prefix, dateFormat, keepDays, scanSinceDays, enable)
+/DeleteMain2
+
+
+# Delete day-indexes named on format winlogbeat-6.4.2-yyyy.MM.dd or similar
+# --
+	"winlogbeat-6.4.2-" => prefix
+	"yyyy.MM.dd" => dateFormat
+	90 => keepDays
+	180 => scanSinceDays
+	
+	true => enable
+	
+	DeletePrefixedDatedIndexes(prefix, dateFormat, keepDays, scanSinceDays, enable)
+/DeleteWinlogbeat642
