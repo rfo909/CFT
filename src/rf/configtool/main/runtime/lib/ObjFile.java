@@ -1087,21 +1087,44 @@ public class ObjFile extends Obj {
             return "readBinary";
         }
         public String getShortDesc() {
-            return "readBinary() - returns binary value";
+            return "readBinary([offset,count]?) - returns binary value for whole file, or as specified";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 0) throw new Exception("Expected no parameters");
-        	File f=new File(name);
-        	byte[] buf=new byte[(int) f.length()];
-        	InputStream in=null;
-        	try {
-        		in=new FileInputStream(f);
-        		int count = in.read(buf);
-        		if (count != buf.length) throw new Exception("Invalid read, got " + count + " bytes of " + buf.length); 
-        	} finally  {
-        		if (in != null) try {in.close();} catch (Exception ex) {};
-        	}
-        	return new ValueBinary(buf);
+        	if (params.size() == 0) {
+	        	File f=new File(name);
+	        	byte[] buf=new byte[(int) f.length()];
+	        	InputStream in=null;
+	        	try {
+	        		in=new FileInputStream(f);
+	        		int count = in.read(buf);
+	        		if (count != buf.length) throw new Exception("Invalid read, got " + count + " bytes of " + buf.length); 
+	        	} finally  {
+	        		if (in != null) try {in.close();} catch (Exception ex) {};
+	        	}
+	        	return new ValueBinary(buf);
+	        } else if (params.size()==2) {
+	        	int offset=(int) getInt("offset", params, 0);
+	        	int count=(int) getInt("count", params, 1);
+	        	File f=new File(name);
+	        	byte[] buf=new byte[count];
+	        	FileInputStream fis=null;
+	        	try {
+	        		RandomAccessFile raf=new RandomAccessFile(f,"r");
+	        		raf.seek(offset);
+	        		fis=new FileInputStream(raf.getFD());
+	        		int bytesRead = fis.read(buf);
+	        		if (bytesRead != buf.length) {
+	        			byte[] newBuf=new byte[bytesRead];
+	        			for (int i=0; i<bytesRead; i++) newBuf[i]=buf[i];
+	        			buf=newBuf;
+	        		}
+	        		return new ValueBinary(buf);
+	        	} finally {
+	        		if (fis != null) try {fis.close();} catch (Exception ex) {};
+	        	}
+	        } else {
+	        	throw new Exception("Expected either no parameters, or two parameters (offset+count)");
+	        }
         }
     }
     

@@ -21,6 +21,7 @@ public class ValueBinary extends Value {
 	        add (new FunctionHex());
 	        add (new FunctionLength());
 	        add (new FunctionToString());
+	        add (new FunctionPrintableChars());
         }
     }
     
@@ -115,5 +116,48 @@ public class ValueBinary extends Value {
 
     }
     
-  
+    class FunctionPrintableChars extends Function {
+        public String getName() {
+            return "printableChars";
+        }
+        public String getShortDesc() {
+            return "printableChars() - returns String with printable (7-bits) characters";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            StringBuffer sb=new StringBuffer();
+            for (int i=0; i<val.length; i++) {
+            	int x=(int) val[i];
+            	String ch=getChar(x);
+            	if (ch != null) sb.append(ch);
+            }
+            return new ValueString(sb.toString());
+        }
+        
+        private String getChar(int i) {
+            if (i==9) {
+                return "\t";
+            }
+            if (i==13) {
+                return "\r";
+            }
+            if (i==10) {
+                return "\n";
+            }
+
+            if (i>=32 && i <= 126) {
+                byte[] b = { (byte) i };
+                try {
+                    String s=new String(b,"ISO-8859-1");
+                    if (s.length() != 1) return null;
+                    return s;
+                } catch (Exception ex) {
+                    return null;
+                }
+            } else return null;
+        }
+
+    }
+
+    
 }
