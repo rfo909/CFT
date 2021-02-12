@@ -296,7 +296,7 @@ public class ObjLexerNode extends Obj {
 		}
 
 		public String getShortDesc() {
-			return "addToken(token, charMapDict) - create mappings for complex string, returns resulting Node";
+			return "addTokenComplex(token, charMapDict) - create mappings for complex string, returns resulting Node";
 		}
 
 		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {

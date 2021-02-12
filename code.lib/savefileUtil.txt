@@ -161,3 +161,35 @@ Dict.set("list",List)
 	}
 	result
 /CURL
+
+
+# Search for complex pattern (dates etc), in text line, returns list of hits
+# or empty list of no hits. Supply Lambda LPostProcess to convert matched string
+# value, as needed.
+# --
+        P(1,"test 2020-122021-02-12234blabla") => line
+        P(2,"dddd-dd-dd") => pattern
+        P(3,Dict.set("d","0123456789").set("-","-")) => mappings
+        P(4,Lambda{P(1)}) => LPostProcess
+
+        Lib.Text.Lexer.Node => root
+
+        # Must add "non-token" code on first character, since if backtracking from
+        # an invalid match, we must consume one character before trying again
+
+        root.addTokenComplex(pattern.chars.first,mappings).setIsToken(-1) => firstChar
+        firstChar.addTokenComplex(pattern.sub(1),mappings).setIsToken(1)
+
+        # This handles consuming all other single characters
+        # --
+        root.setDefault.setIsToken(-1)
+
+        tryCatch({
+                Lib.Text.Lexer => lexer
+                lexer.processLine(root,line)
+                lexer.getTokens->token
+                        out(LPostProcess.call(token.str))
+        }) => x
+        if (x.ok, x.result, List)
+/ComplexPatternLineSearch
+
