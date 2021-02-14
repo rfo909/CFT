@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2021-02-05 RFO
-v2.3.1
+Last updated: 2021-02-14 RFO
+v2.3.2
 ```
 # Introduction
 
@@ -445,6 +445,22 @@ Default encoding is "ISO_8859_1", but this can be changed, for example:
 
 ```
 File("x.txt").encoding("UTF-8")
+```
+## end-of-line
+
+
+For windows, the default line terminator is CRLF, and for Linux it is LF. This can be
+overridden as follows:
+
+```
+someFile.setWriteCRLF
+someFile.setWriteLF
+```
+
+To ensure a text file has all lines end with for example LF, we can do the following:
+
+```
+f=File("x.txt") lines=f.read f.setWriteLF.create(lines)
 ```
 # Directories
 
@@ -2421,6 +2437,42 @@ The code runs in a virtualized environment. Output is buffered inside the Proces
 if the code requires input, it will block, until we supply input lines via the Process
 object.
 
+## Key concepts
+
+
+CFT objects (as implemented in Java) are generally not thread-safe, but it turns out that they don't
+need to be, as a running CFT thread has no global state. There are no global variables, only in-function
+local variables.
+
+
+The only way a CFT thread can maintain persistent (global) state, is using external storage,
+usually via synthesis and eval, such as implemented by the Db2 internal database. What this means
+is of course that data written to Db2 is converted to code. Reading the data back from the database
+means running (eval) that code, and get a newly created data structure.
+
+
+Logically, this corresponds to 
+**message passing**, in that the writer (sender) and reader (receiver)
+of data are loosely coupled, and that any receivers will always create local copies of the data.
+
+
+Race conditions is still possible with regards to external elements such
+as the file system, FTP servers, other databases, etc.
+
+### Intended use
+
+
+It should be added that the intended use of spawning processes in CFT is for parallelizing
+multiple possibly time consuming jobs, each operating invididually, then collecting the
+results. Typical examples are mass updating tens of virtual machines, as well as getting
+various stats from sets of hosts.
+
+## The Process
+
+
+The Process object represents a separately running thread, executing some CFT expression, in a
+separate environment. Its standard I/O is virtualized by the Process object.
+
 
 Listing Process functions:
 
@@ -2486,7 +2538,7 @@ the function CheckPing, which iterates over these.
 # Delete previous ping stats from database, then run ping on all
 # hosts in parallel, collecting results and store in database.
 # --
-COLLECTION="stats"
+COLLECTION="stats"  ## Database collection name
 # Clear out results from earlier runs, if any
 # --
 Db2Obj:DeleteObjects(COLLECTION, Lambda{P(1).value.op=="ping"})
@@ -2587,10 +2639,18 @@ help indicate that they contain lambdas (though strictly they are closures).
 # -- Create monitor, decide max parallel processes
 mon=Util:ProcessMonitor
 limit=4
-# -- when about to create new process
+someData->data
+# About to spawn new process using data
 mon.Lwait.call (limit)
-proc=SpawnProcess(...)
+proc=SpawnProcess(SymDict(data), ...)
 mon.Ladd.call(proc)
+|
+# Wait for all processes to complete
+mon.Lwait.call
+# Inspect result from the processes
+mon.list->process
+...
+|
 ```
 
 The mon.Lwait lambda waits until number of running processes comes below the limit,
@@ -2640,7 +2700,7 @@ For an escaped string, the escape character is the ^ symbol.
 
 
 
-To gives a way of creating strings with newlines inside.
+This gives a way of creating strings with newlines inside.
 
 ```
 "this^nis^na test".unEsc
@@ -2648,6 +2708,17 @@ To gives a way of creating strings with newlines inside.
 this
 is
 a test
+```
+### Note: CRLF / LF with text files ...
+
+
+Note that when creating a text file using global function File(...) or via Dir.file(...),
+the default end-of-line mark is used (CRLF for windows, LF for Linux). To overrule this,
+the File object has two functions:
+
+```
+someFile.setWriteCRLF
+someFile.setWriteLF
 ```
 # Automating interactive functions / Sys.stdin()
 

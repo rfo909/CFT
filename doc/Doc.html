@@ -15,8 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2021-02-05 RFO
-v2.3.1
+Last updated: 2021-02-14 RFO
+v2.3.2
 
 
 </pre>
@@ -517,6 +517,22 @@ v2.3.1
 </pre>
 
 
+
+<h2>end-of-line</h2>
+<p>
+  For windows, the default line terminator is CRLF, and for Linux it is LF. This can be
+  overridden as follows:
+</p>
+<pre>
+  someFile.setWriteCRLF
+  someFile.setWriteLF
+</pre>
+<p>
+  To ensure a text file has all lines end with for example LF, we can do the following:
+</p>
+<pre>
+  f=File("x.txt") lines=f.read f.setWriteLF.create(lines)
+</pre>
 
 
 
@@ -2746,6 +2762,44 @@ List("aaa","bbb")-&gt;line
   if the code requires input, it will block, until we supply input lines via the Process
   object.
 </p>
+
+<h2>Key concepts</h2>
+<p>
+  CFT objects (as implemented in Java) are generally not thread-safe, but it turns out that they don't
+  need to be, as a running CFT thread has no global state. There are no global variables, only in-function
+  local variables.
+</p>
+<p>
+  The only way a CFT thread can maintain persistent (global) state, is using external storage,
+  usually via synthesis and eval, such as implemented by the Db2 internal database. What this means
+  is of course that data written to Db2 is converted to code. Reading the data back from the database
+  means running (eval) that code, and get a newly created data structure. 
+</p>
+<p>
+  Logically, this corresponds to <em>message passing</em>, in that the writer (sender) and reader (receiver)
+  of data are loosely coupled, and that any receivers will always create local copies of the data.
+</p>
+<p>
+  Race conditions is still possible with regards to external elements such
+  as the file system, FTP servers, other databases, etc.
+</p>
+
+<h3>Intended use</h3>
+<p>
+  It should be added that the intended use of spawning processes in CFT is for parallelizing 
+  multiple possibly time consuming jobs, each operating invididually, then collecting the
+  results. Typical examples are mass updating tens of virtual machines, as well as getting
+  various stats from sets of hosts.
+</p>
+
+
+
+
+<h2>The Process</h2>
+<p>
+  The Process object represents a separately running thread, executing some CFT expression, in a
+  separate environment. Its standard I/O is virtualized by the Process object.
+</p>
 <p>
   Listing Process functions:
 </p>
@@ -2814,7 +2868,7 @@ List("aaa","bbb")-&gt;line
 # Delete previous ping stats from database, then run ping on all
 # hosts in parallel, collecting results and store in database.
 # --
-  COLLECTION="stats"
+  COLLECTION="stats"  ## Database collection name
   
   # Clear out results from earlier runs, if any
   # --
@@ -2918,11 +2972,20 @@ $ Db2Obj:FindObjects("stats",Lambda{P(1).value.host=="s04.s"}).first.value.outpu
   mon=Util:ProcessMonitor   
   limit=4
 
-  # -- when about to create new process
-  mon.Lwait.call (limit)
+  someData-&gt;data
+    # About to spawn new process using data
 
-  proc=SpawnProcess(...)
-  mon.Ladd.call(proc)
+    mon.Lwait.call (limit)
+    proc=SpawnProcess(SymDict(data), ...)
+    mon.Ladd.call(proc)
+  |
+  # Wait for all processes to complete
+  mon.Lwait.call
+
+  # Inspect result from the processes
+  mon.list-&gt;process
+     ...
+  |
 </pre>
 <p>
   The mon.Lwait lambda waits until number of running processes comes below the limit,
@@ -2969,7 +3032,7 @@ $ Db2Obj:FindObjects("stats",Lambda{P(1).value.host=="s04.s"}).first.value.outpu
   <li>The ^ symbol ^^</li>
 </ul>
 <p>
-  To gives a way of creating strings with newlines inside.
+  This gives a way of creating strings with newlines inside.
 </p>
 <pre>
   "this^nis^na test".unEsc
@@ -2980,6 +3043,17 @@ $ Db2Obj:FindObjects("stats",Lambda{P(1).value.host=="s04.s"}).first.value.outpu
   a test 
 </pre>
 
+
+<h3>Note: CRLF / LF with text files ...</h3>
+<p>
+  Note that when creating a text file using global function File(...) or via Dir.file(...), 
+  the default end-of-line mark is used (CRLF for windows, LF for Linux). To overrule this,
+  the File object has two functions:
+</p>
+<pre>
+  someFile.setWriteCRLF
+  someFile.setWriteLF
+</pre>
 
 
 <h1>Automating interactive functions / Sys.stdin()</h1>

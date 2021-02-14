@@ -1114,6 +1114,7 @@ public class ObjFile extends Obj {
 	        		fis=new FileInputStream(raf.getFD());
 	        		int bytesRead = fis.read(buf);
 	        		if (bytesRead != buf.length) {
+	        			// repackage buf to shorter array
 	        			byte[] newBuf=new byte[bytesRead];
 	        			for (int i=0; i<bytesRead; i++) newBuf[i]=buf[i];
 	        			buf=newBuf;

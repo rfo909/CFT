@@ -40,6 +40,7 @@ Files
  * Page through a file
  * Show bytes of file
  * Encoding
+ * end-of-line
 
 Directories
  * Create a subdirectory
@@ -211,6 +212,9 @@ The CFT database
 onLoad functions
 
 Multitasking in CFT
+ * Key concepts
+ |   Intended use
+ * The Process
  * Example: pinging a list of hosts
  |   Create and test regular ping function
  |   Management function, with logging via Db2Obj database script
@@ -220,6 +224,7 @@ Multitasking in CFT
 
 String .esc() and .unEsc()
  * Escape codes
+ |   Note: CRLF / LF with text files ...
 
 Automating interactive functions / Sys.stdin()
  * Running colon commands from script code
