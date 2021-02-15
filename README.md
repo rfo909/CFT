@@ -21,8 +21,6 @@ Written in Java and built using Apache ANT, which results in a single JAR file.
 Tested on both Linux and Windows. Has no dependencies outside of the standard Java libraries.
 
 
-Linux: 
-
 ```
 ./cft
 
@@ -36,18 +34,24 @@ $ "c cpp h".split
    2: h
 $ /Types
 
-$ List(1,2,3)->x out(x+100)
+$ Types
  <List>
-   0: 101
-   1: 102
-   2: 103
+   0: c
+   1: cpp
+   2: h
 
-#
 $ Dir.allFiles->f type=f.name.afterLast(".") assert(Types.contains(type)) out(f)
   (... output ...)
 $ /SourceFiles
 
 
+$ help
+$ Dir help
+$ List help
+$ "" help
+
+$ :save Test
+$ :quit
 
 ```
 
@@ -61,7 +65,7 @@ To leave type ":quit" or just CTRL-C.
 - Compact programming language
 - Automation tool
 - Extensive and up to date docs
-- Growing library of code
+- Interactive help for all objects
 
 
 [Full documentation](doc/Doc.md).
