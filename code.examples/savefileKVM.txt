@@ -244,6 +244,16 @@ P(1,"someTarget") =>target
     println("* Rebooting new VM: " + cloneName)
     SSH:sudo (target, "reboot", true)
 
+    println("* Waiting for VM to stop responding to ping")
+    Inner {
+    	loop
+    		Lib:run(List("ping","-c",1,originalIp),List,true) => x
+    		break(x.exitCode != 0)
+    		println("   sleeping")
+    		Sys.sleep(3000)
+    }
+    println("* Clone completed")
+
     "Done"
  /Clone
 
