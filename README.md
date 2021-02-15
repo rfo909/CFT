@@ -25,25 +25,38 @@ Tested on both Linux and Windows. Has no dependencies outside of the standard Ja
 ./cft
 
 $ 2+2
-   4
+ <int>
+ 4
 
-$ "c cpp h".split
- <List>
-   0: c
-   1: cpp
-   2: h
-$ /Types
 
-$ Types
- <List>
-   0: c
-   1: cpp
-   2: h
+$ Dir.allFiles(Glob("*.java"))
+  (...)
+$ /JavaFiles
 
-$ Dir.allFiles->f type=f.name.afterLast(".") assert(Types.contains(type)) out(f)
-  (... output ...)
-$ /SourceFiles
 
+$ JavaFiles.length
+ <int>
+  144
+$ /NumJavaFiles
+
+
+$ NumJavaFiles
+ <int>
+  144
+
+
+$ P(1,0)=>a P(2,0)=>b a*b+1
+ <int>
+ 1
+$ /calc
+
+
+$ calc(3,5)
+ <int>
+ 16
+
+
+$ ?
 
 $ help
 $ Dir help
