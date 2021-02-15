@@ -281,19 +281,6 @@ Comments and digressions
  * Why Input("label").get?
  * Function name AFTER code?
  * Using Sys.stdin to run colon commands etc
- * 2020-09-12 Inner blocks??
- * 2020-09-12 Closures and objects
- * 2020-09-12 A lexical analysis revelation
- * 2020-10-24 Objects ...
- * 2020-10-24 cleaning up - Java Parser
- * 2020-10-24 loop spaces / the "pipe"
- * 2020-11-12 Soft and hard errors
- * 2020-11-12 No more session values
- * 2020-11-12 CFT greatness
- |   JSON parser
- |   Util:ProcessMonitor
- |   CFT code libraries growing
- |   Version 2 upcoming
+ * Loop spaces / the "pipe"
  * 2020-11-13 Script and code size
- * 2020-11-16 Version 2
- * 2021-01-14 JSON
+ * Poor man's EXIF date parser

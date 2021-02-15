@@ -3500,247 +3500,18 @@ function X (a,b) { ... }
 ## Using Sys.stdin to run colon commands etc
 
 
-That functionality an example of an "unexpected feature", as the Sys.stdin() was created to automate
+This functionality is an example of an "unexpected feature", as the Sys.stdin() was created to automate
 functions that used
 Input and readLine(). There was a moment of confusion when discovering what happened to input lines not consumed
 by those interactive functions.
 
-## 2020-09-12 Inner blocks??
-
-
-The first block expression added to CFT, was what is now called the Inner block. Then immediately followed
-macros, now called Lambdas. The local blocks were introduced in the v1.3 overhaul.
-
-
-The previous "odd" syntax for creating macros has gotten more explicit, but who talks
-about "macros" these days? The functionality is the same, though.
-
-
-A search/replace on all the script files fixed the renaming easily.
-
-```
-{* ...} =>macro  # old syntax - no longer supported
-Lambda{...} =>lambda
-```
-
-The Inner block expressions do not resemble code blocks in Java, because in reality they are automatically
-executing lambdas, with scope extending out to the calling environment. Lambdas and block expressions were
-an afterthought, something created because it was possible. There was no real need, apart from
-simplifying the odd conditional assigment .....
-
-```
-if(addOne, value+1, value) =value
-```
-
-Now, with local block expressions added in v1.3, and the "if" expression accepting dual syntax,
-code can be organized much more logically
-for Java/C/JS programmers.
-
-## 2020-09-12 Closures and objects
-
-
-After creating v1.3.0 which rearranged two block expressions into three (Lambda, Inner and Local),
-I had pondered how to do closures and objects.
-
-
-These were created mainly created for fun, though they of course have uses.
-
-
-The solution ended up being very easy to implement, and is fairly elegant,
-as they really are about using the same mechanism, being that all running
-lambdas have a "self" variable pointing to some Dict object.
-
-## 2020-09-12 A lexical analysis revelation
-
-
-As the Lib.Text.Lexer object was created, and I experimented with it, I discovered
-that what I had thought to be a limitation in the parser, was a "user error" made by me.
-
-
-The problem was that CFT did not handle calling functions inside integer literals,
-except with a space between the number and the dot, like this:
-
-```
-$ 3 .bin
-```
-
-The problem was that my configuration for parsing floating point numbers
-was flawed. Basically it looked like this (converted to Lib.Text.Lexer syntax)
-
-```
-"0123456780"=>digits
-Lib.Text.Lexer.Empty(digits) =>intMatcher
-intMatcher.sub(digits,intMatcher)
-intMatcher.setIsToken  # so far all good
-intMatcher.sub(".") =>afterDot
-afterDot.sub(digits, afterDot)
-afterDot.setIsToken
-```
-
-The problem here is that when the intMatcher finds a ".", and follows the link to
-the afterDot node, that node has the is-token flag set, so even if there are no
-digits following the dot, the matcher believes it has matched a float. The result
-is that "3." is considered a valid float, and that the the text following now is "bin",
-which is correctly recognized as an identifier, but the parser does not recognize it
-as a dotted call, as the dot has been incorrectly consumed.
-
-
-The fix is simple. The "." must point to a node that does not have the is-token flag set,
-but instead has pointers for digits 0-9 to another node, which does, and which
-gobbles up any additional digits via a self-loop.
-
-```
-"0123456780"=>digits
-Lib.Text.Lexer.Empty(digits) =>intMatcher
-intMatcher.sub(digits,intMatcher)
-intMatcher.setIsToken(3)
-intMatcher.sub(".") =>afterDot
-afterDot.sub(digits) =>afterDotDigits  # new node
-afterDotDigits.setIsToken(4)
-afterDotDigits.sub(digits,afterDotDigits)
-```
-
-Lexing and parsing is fun, and I really enjoyed learning new things about my own code after 2+ years
-of assuming I had hit a limitation.
-
-
-I am going to enjoy writing the parser. CFT uses a "hard-coded" recursive descent
-parser, with Java classes calling each other.
-
-
-This means that a parser that is configurable from CFT code has to be written from
-scratch. With the v1.3.0 branch safely merged into master, and closures and dictionaries
-as objects implemented, it's time to start
-considering parsing again.
-
-## 2020-10-24 Objects ...
-
-
-The v1.7.5 "dictionary-as-object" turned out really nice, letting lambdas stored inside Dict's
-be wrapped into closures pointing at that dict. This eliminated the first syntax from v1.3.2 or
-thereabouts, which included a separate ".invoke"-function.
-
-
-The fact is that this is one of those features that came about, not from a grand plan, but
-because it was possible and quite easy to implement, and only hours after upgrading to
-the v1.7.5 syntax, I wrote the Lib:runProcess, which uses this and some other new features,
-like the Process object.
-
-## 2020-10-24 cleaning up - Java Parser
-
-
-Decided to delete the Lib.Text.Parser that was to triumphantly (is that a word?) follow the
-Lib.Text.Lexer. It got stuck, from lack of inspiration, and then I went ahead and created
-a rudimentary JSON parser in pure CFT in under 150 lines.
-
-
-Though grammars are fun, for now they will have to wait.
-
-## 2020-10-24 loop spaces / the "pipe"
-
-
-Having worked extensively through this document for the last days, it struck me as odd
-that I did not earlier add musings about the "loop space" concept, which decidedly is
-a bit ... odd?
+## Loop spaces / the "pipe"
 
 
 This all stems from the "one-line-at-a-time" period, where scripts were entered from
-the command line, and looooong before block expressions. Being a fairly compact
-and efficient notation, and frequently used, loop spaces will not be purged from the language
-just yet.
-
-
-The "pipe" is completely optional, as Inner blocks can do all that "loop spaces" do (and more), but
-at the cost of a bit more notation.
-
-## 2020-11-12 Soft and hard errors
-
-
-v1.8.x mainly focused on exception handling, separating CFT script errors from problems
-from underlying Java code. Soft errors are those thrown by error() and Java errors are
-hard, with one exception so far, as documented for that function (inside the TokenStream object
-when matching tokens).
-
-
-Some mechanism was needed after writing the first version of the JSON parser in CFT, and from
-the realization that code libraries in CFT will need some way of throwing errors, that
-can be caught separately from hard exceptions.
-
-
-What actually took the most time, was figuring out what to name these two different categories
-of errors.
-
-## 2020-11-12 No more session values
-
-
-As of v1.9 the session values via Val("name") and ValDef("name",value) have been removed from
-the language. The reason is that as v1.9 is about adding multitasking, and none of the data
-types are made thread safe, by eliminating session values, we eliminate concurrent updates.
-
-
-The data stored in the database is synthesized and eval'ed, which means it is always
-new values. This function is also used to create the "context" dictionary of values available
-to the expressions to be run in separate processes, again ensuring no concurrent access
-to CFT data structures.
-
-
-At the same time the internal database was developed, as there is always need to remember
-stuff. The difference is that databases don't null out between sessions. That is good and
-bad news.
-
-## 2020-11-12 CFT greatness
-
-
-**v1.9.13**
-### JSON parser
-
-
-Today I modified the JSON parser written in CFT, to the point that it successfully
-processed multiple random examples from the web. I created a "pretty-printer" too,
-though it's not so pretty yet. I even fed output from the PP through the parser, and it
-still agreed it was valid JSON.
-
-### Util:ProcessMonitor
-
-
-The second issue today was how SpawnProcess() can sometimes generate way too many
-processes hammering away at the same time, for example doing apt upgrade on 30 VM's
-on the same physical host.
-
-
-I tried fitting something into the Java code, but it would be ugly and bulky, and so I abandoned
-it. Then I started testing how to write it in CFT, as I have a script that needs
-this, and ended up creating a neat
-little function that returns an object, with callable lambdas for (1) wait until
-no more than N processes are alive, and (2) register newly spawned process.
-
-
-The finished code is 14 lines, and available as Util:ProcessMonitor. The function doc
-is as long as the code :-)
-
-
-The initial sense when moving to CFT, was that if only I had not removed support for
-session values .... but it forced me making actual objects, which are much better.
-
-### CFT code libraries growing
-
-
-From my previous interpreted language project (called "GNT"), that was and is
-actually being used in production at work, I remember
-it being a special day when I realized that the amount of code written in the
-language, far exceeded the amount of code for the interpreter.
-
-
-Having worked extensively with the Hosts, SSH, KVM and PS scripts, to mention some
-of the most important, that point is still a bit off into the future, but the
-examples above indicate that the CFT script code base also keeps growing.
-
-### Version 2 upcoming
-
-
-I have implemented more than I envisioned for v2, except a tool for easily
-browsing the databases (Db2 and Db2Obj). The templating possibilities begs
-for letting CFT host a tiny web server, but the jury's still out on this.
+the command line, at a time long before introducing block expressions. Being a fairly compact
+and efficient notation, and frequently used, loop spaces and the "pipe" symbol will
+remain in the language.
 
 ## 2020-11-13 Script and code size
 
@@ -3811,42 +3582,41 @@ The object types are:
 10: public class ValueBoolean extends Value {
 11: public class ValueObj extends Value {
 ```
-## 2020-11-16 Version 2
+## Poor man's EXIF date parser
 
 
-Version 2 came, and got tagged on November 14 2020. I decided to skip using v2.0.x for
-updates, and instead move to
-v2.1.x, as v2.0.0 was kind of a big deal for me, one I've been planning for
-at least since v1.7 or thereabouts.
+Need to sort camera photos by date? JPG files created by a camera, or via image processing
+software like Darktable, LightRoom and so on, will contain an initial block of metadata
+called EXIF, which contains numerous fields and values, and which may occupy up to
+64 Kb at the start of the file.
 
 
-For me v2 represents a series of major improvements, on many areas, all since v1.1.4. As
-version 1.0 represented a leap, with its ability to report errors correctly for multi-line
-functions, the changes since the ancient time of v1.1.4 (august 2020) are enormous.
+Not having written or included any third party implementation for parsing the EXIF data,
+the easy solution was to implement a function printableChars in the Binary value type, and
+search for dates using the Lib.Text.Lexer.
 
 
-However, not unexpected, a steady stream of fixes and additions soon moved CFT along,
-leaving the revered v2.0.0 to start its journey into obsolescence.
+The Lib.Text.Lexer.Node has support for "complex tokens", where we define a character
+string like "dddd-dd-dd", and then define what each chacter means, so that "d" may map
+to "0123456789", while letting "-" map only to itself.
 
 
-Looking ahead, there are a number of items still on my list, but many have been addressed
-also, so no predictions for version 3 yet.
+A utility function Util:ComplexPatternLineSearch was created for managing the details.
 
-## 2021-01-14 JSON
-
-
-Since writing the JSON parser, it has not seen much use, but that changed when
-we needed to generate JSON for use with Util:CURL and the ElasticAPI script which
-automates using the REST API of ElasticSearch.
-
-
-For this I needed to generate JSON from a Dict/List structure, which was already
-supported, but had to work through parsing and generation, so that escaped quotes
-inside strings were handled correctly.
-
-
-It still strikes me as awesome how the JSON recursive-descent parser written in
-CFT, continues to work so well. The "pretty print" function is crap, but parsing
-and exporting now works great!
-
+```
+# Get EXIF date (as Date object) or return null
+# --
+P(1) =>
+ jpegFile
+pattern = "dddd:dd:dd"
+map = Dict.set("d","0123456789").set(":",":")
+str = jpegFile.readBinary(0,64*1024).printableChars
+date = Util:CompledPatternLineSearh(printableChars, pattern, map).first
+if (date != null) {
+Date.setFormat("yyyy:MM:dd").parse(date)
+} else {
+null
+}
+/GetJpgExifDate
+```
 
