@@ -45,6 +45,12 @@ $ NumJavaFiles
   144
 
 
+$ JavaFiles->f out(f.read.length) | _.sum
+ <int>
+  20870
+$ /JavaLineCount
+
+
 $ P(1,0)=>a P(2,0)=>b a*b+1
  <int>
  1
