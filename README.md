@@ -11,14 +11,14 @@ For all levels of automation, from searching groups of files to deploying softwa
 Powerful templating functions for generating custom configuration files.
 
 
-[Youtube videos](https://www.youtube.com/channel/UCT2V2_xjtUVzISdT0YjwZ_Q)
+[Full Youtube tutorial](https://www.youtube.com/channel/UCT2V2_xjtUVzISdT0YjwZ_Q)
 
 
 # Download and compile
 
 Written in Java and built using Apache ANT, which results in a single JAR file. 
 
-Tested on both Linux and Windows. No dependencies outside of the standard Java libraries.
+Tested on both Linux and Windows. Has no dependencies outside of the standard Java libraries.
 
 
 Linux: 
@@ -28,6 +28,7 @@ Linux:
 
 $ 2+2
    4
+
 $ "c cpp h".split
  <List>
    0: c
@@ -35,29 +36,19 @@ $ "c cpp h".split
    2: h
 $ /Types
 
+$ List(1,2,3)->x out(x+100)
+ <List>
+   0: 101
+   1: 102
+   2: 103
+
+#
 $ Dir.allFiles->f type=f.name.afterLast(".") assert(Types.contains(type)) out(f)
-   :
-   :
-/SourceFiles
+  (... output ...)
+$ /SourceFiles
 
-$ Input("Search term").get => st Grep(st)
-(?) Search term
-test
-  <obj: Grep>
-  Grep
-$ /GetGrep
 
-$ g=GetGrep SourceFiles->f g.file(f)->line report(line.file.name, line.lineNumber, line)
-    :
-    :
-$ /Search
 
-```
-
-Windows:
-
-```
-.\cft.cmd
 ```
 
 To leave type ":quit" or just CTRL-C.
@@ -70,7 +61,8 @@ To leave type ":quit" or just CTRL-C.
 - Compact programming language
 - Automation tool
 - Extensive and up to date docs
+- Growing library of code
 
 
-[Detailed documentation](doc/Doc.md).
+[Full documentation](doc/Doc.md).
 
