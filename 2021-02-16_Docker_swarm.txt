@@ -1,0 +1,60 @@
+
+-----------------------
+Docker swarm 2021-02-16
+-----------------------
+
+https://docs.docker.com/engine/swarm/key-concepts/
+https://docs.docker.com/engine/swarm/stack-deploy/
+
+The ComposeFile defines a number of services, with
+number of replicas, ports etc defined
+
+
+Services run tasks, which are "slots" for containers
+
+Registry
+--------
+
+docker service create --name registry --publish published=5000,target=5000 registry:2
+docker service ls
+curl http://localhost:5000/v2/
+
+(returns {})
+
+
+https://docs.docker.com/compose/install/
+
+docker-compose up -d
+docker-compose ps
+
+curl http://localhost:8000
+
+Works locally (on manager 1)
+Works from external host (directed at manager 1)
+DOES NOT work with manager 2
+
+Stopping and pushing to registry
+--------------------------------
+docker-compose down --volumes
+
+docker service create --name registry --publish published=5000,target=5000 registry:2
+docker-compose push
+docker stack deploy --compose-file docker-compose.yml stackdemo
+
+Check that running:
+docker stack services stackdemo
+
+-> Now curl with both t1.v and t2.v works!
+   AND all the workers!
+
+docker stack rm stackdemo
+
+* Stopping the (last?) service seems to terminate the registry as well
+
+-> No: docker service ls
+It still runs!
+
+AND being a service it is available from all swarm nodes with
+curl http://t5.v:5000/v2/
+:-)
+

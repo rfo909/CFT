@@ -86,7 +86,7 @@ s*.s   [no]
 	Dict
 		.set("data",data)
 		.set("LallHosts",Lambda{
-			self.data.keys
+			self.data.keys.sort
 		})
 		.set("LallFields", Lambda{
 			self.data.keys->key 
@@ -329,7 +329,7 @@ s*.s   [no]
 		sshUser=HostData.Lget.call (host,"SSHUser")
 		assert(sshUser != null)
 
-		mon.Lwait.call(4)
+		mon.Lwait.call(8)
 		println("Spawning process for host="+host)
 		
 		ctx=SymDict(host,sshUser)
