@@ -1,0 +1,125 @@
+# Get target
+	P(1,"Enter target on form user@host")=>label
+	Input(label).get
+/GetTarget
+
+
+
+# Install Docker
+# https://docs.docker.com/engine/install/ubuntu/
+# --
+	P(1,GetTarget) => target
+	P(2,true) => debug
+
+	println(""+target + " Installing Docker")
+	
+	# Remove old version if installed
+	SSH:sudo(target,"apt-get remove docker docker-engine docker.io containerd runc", true, debug)
+	SSH:sudo(target,"apt-get update", false, debug)
+	SSH:sudo(target,"apt-get install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common",false,debug)
+	SSH:sudo(target,"curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -", false, debug)
+	SSH:sudo(target,"apt-key fingerprint 0EBFCD88", false, debug)
+	SSH:sudo(target,'add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"', false, debug)
+	SSH:sudo(target,"apt-get update", false, debug)
+	SSH:sudo(target,"apt-get -y install docker-ce docker-ce-cli containerd.io", false, debug)
+/Install
+
+
+
+
+# Create first swarm manager 
+# --
+	P(1,GetTarget) => target
+	P(2,true) => debug
+
+	println(""+target+": Create first swarm manager")
+	SSH:sudo(target,"docker swarm init",false,debug)
+/SwarmFirstManager
+
+
+
+
+# Add as additional manager
+# --
+	P(1,GetTarget) => target
+	P(2,GetTarget("Enter existing manager target on form user@host").get) => existingManager
+	P(3,true) => debug
+
+	# Obtain join command from existingManager
+	joinCommand=null
+	println(""+existingManager+": getting join-command for manager")
+	SSH:sudo(existingManager,"docker swarm join-token manager", false, debug).stdout->line
+		assert(line.trim.startsWith("docker swarm join"))
+		joinCommand=line.trim
+	|
+	error(joinCommand==null,"No join-command for manager received from " + existingManager)
+
+	# Run this command on target
+	println(""+target+": joining additional manager to swarm")
+	SSH:sudo(target, joinCommand, false, debug)
+	
+/SwarmManagerJoin
+	
+
+
+# Join worker to swarm
+# -- 
+	P(1,GetTarget) => target
+	P(2,GetTarget("Enter existing manager target on form user@host").get) => existingManager
+	P(3,true) => debug
+
+	# Obtain join command from existingManager
+	joinCommand=null
+	println(""+existingManager+": getting join-command for worker")
+	SSH:sudo(existingManager,"docker swarm join-token worker", false, debug).stdout->line
+		assert(line.trim.startsWith("docker swarm join"))
+		joinCommand=line.trim
+	|
+	error(joinCommand==null,"No join-command for manager received from " + existingManager)
+
+	println(""+target+": Joining worker to swarm")
+	SSH:sudo(target,joinCommand, false, debug)
+/SwarmWorkerJoin
+	
+
+
+# Leave swarm (workers and managers)
+# -- 
+	P(1,GetTarget) => target
+	P(2,true) => debug
+
+	println(""+target+": Swarm leave")
+	SSH:sudo(target,"docker swarm leave --force", true, debug)
+/SwarmLeave
+
+
+
+
+
+# Test script
+# --
+	"roar@t1.v roar@t2.v roar@t3.v roar@t4.v roar@t5.v roar@t6.v roar@t7.v roar@t8.v".split => targets
+
+	#targets->t
+	#	Install(t)
+	#|
+
+
+	# --- Clear up old swarm config
+
+	targets->t
+		SwarmLeave(t,false)
+	|
+
+	SwarmFirstManager("roar@t1.v", false)
+	SwarmManagerJoin("roar@t2.v", "roar@t1.v",false)
+	SwarmManagerJoin("roar@t3.v", "roar@t1.v",false)
+
+	SwarmWorkerJoin("roar@t4.v", "roar@t1.v", false)
+	SwarmWorkerJoin("roar@t5.v", "roar@t1.v", false)
+	SwarmWorkerJoin("roar@t6.v", "roar@t1.v", false)
+	SwarmWorkerJoin("roar@t7.v", "roar@t1.v", false)
+	SwarmWorkerJoin("roar@t8.v", "roar@t1.v", false)
+/test
+
+

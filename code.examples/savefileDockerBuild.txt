@@ -22,7 +22,7 @@
 # Readme
 <<< EOF
 --------------------------------------------------------------------
-Docker management
+Docker build management
 
 Linux: run as root
 
