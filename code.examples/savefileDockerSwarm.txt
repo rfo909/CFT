@@ -46,6 +46,11 @@ If the swarm has more than one manager, it should be an odd number.
 	SSH:sudo(target,'add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"', false, debug)
 	SSH:sudo(target,"apt-get update", false, debug)
 	SSH:sudo(target,"apt-get -y install docker-ce docker-ce-cli containerd.io", false, debug)
+
+	println(""+target + " Installing Docker Compose")
+	SSH:sudo(target,'curl -L "https://github.com/docker/compose/releases/download/1.28.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose', false, debug)
+	SSH:sudo(target,'chmod +x /usr/local/bin/docker-compose', false, debug)
+
 /Install
 
 
@@ -150,30 +155,37 @@ If the swarm has more than one manager, it should be an odd number.
 
 
 
+# Test targets
+# --
+	"roar@t1.v roar@t2.v roar@t3.v roar@t4.v roar@t5.v roar@t6.v roar@t7.v roar@t8.v".split
+/TestTargets
+
+
+# Install all test targets
+# --
+	TestTargets->t
+		Install(t)
+/TestTargetsInstall
+
+
 # Test script
 # --
-	"roar@t1.v roar@t2.v roar@t3.v roar@t4.v roar@t5.v roar@t6.v roar@t7.v roar@t8.v".split => targets
-
-	#targets->t
-	#	Install(t)
-	#|
-
 
 	# --- Clear up old swarm config
 
-	targets->t
+	TestTargets->t
 		SwarmLeave(t,false)
 	|
 
 	SwarmFirstManager("roar@t1.v", false)
-	SwarmManagerJoin("roar@t2.v", "roar@t1.v",false)
-	SwarmManagerJoin("roar@t3.v", "roar@t1.v",false)
+	SwarmManagerJoin("roar@t2.v", "roar@t1.v", false)
+	SwarmManagerJoin("roar@t3.v", "roar@t1.v", false)
 
 	SwarmWorkerJoin("roar@t4.v", "roar@t1.v", false)
 	SwarmWorkerJoin("roar@t5.v", "roar@t1.v", false)
 	SwarmWorkerJoin("roar@t6.v", "roar@t1.v", false)
 	SwarmWorkerJoin("roar@t7.v", "roar@t1.v", false)
 	SwarmWorkerJoin("roar@t8.v", "roar@t1.v", false)
-/test
+/TestTargetsSwarm
 
 
