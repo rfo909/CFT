@@ -1,20 +1,44 @@
+# Readme
+# --
+<<< EOF
+Configuring a Docker swarm cluster
+
+See test() function for example of use. 
+
+If the swarm has more than one manager, it should be an odd number.
+
+---> https://docs.docker.com/engine/swarm/admin_guide/
+>>> EOF
+/Readme
+
+
+
 # Get target
 	P(1,"Enter target on form user@host")=>label
 	Input(label).get
 /GetTarget
 
 
+# Get existing manager target
+# --
+	GetTarget("Enter existing manager target on form user@host")
+/GetManager
 
-# Install Docker
+
+
+# Install Docker on host
+# Can be run multiple times without problems
+#
 # https://docs.docker.com/engine/install/ubuntu/
 # --
 	P(1,GetTarget) => target
-	P(2,true) => debug
+	P(2,false) => debug
 
 	println(""+target + " Installing Docker")
 	
 	# Remove old version if installed
 	SSH:sudo(target,"apt-get remove docker docker-engine docker.io containerd runc", true, debug)
+	
 	SSH:sudo(target,"apt-get update", false, debug)
 	SSH:sudo(target,"apt-get install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common",false,debug)
 	SSH:sudo(target,"curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -", false, debug)
@@ -27,32 +51,46 @@
 
 
 
-# Create first swarm manager 
+# Create first swarm manager in cluster 
 # --
 	P(1,GetTarget) => target
 	P(2,true) => debug
 
-	println(""+target+": Create first swarm manager")
+	println(""+target+": Create first swarm manager with docker swarm init")
 	SSH:sudo(target,"docker swarm init",false,debug)
 /SwarmFirstManager
 
 
 
 
-# Add as additional manager
+# Get join command from manager
 # --
-	P(1,GetTarget) => target
-	P(2,GetTarget("Enter existing manager target on form user@host").get) => existingManager
-	P(3,true) => debug
+	P(1,GetManager) => existingManager
+	P(2,Input("Enter role: 'worker' or 'manager'").get) => role
+	P(3,false) => debug
 
 	# Obtain join command from existingManager
 	joinCommand=null
-	println(""+existingManager+": getting join-command for manager")
-	SSH:sudo(existingManager,"docker swarm join-token manager", false, debug).stdout->line
+	println(""+existingManager+": getting join-command for role=" + role)
+	SSH:sudo(existingManager,"docker swarm join-token "+role, false, debug).stdout->line
 		assert(line.trim.startsWith("docker swarm join"))
 		joinCommand=line.trim
 	|
-	error(joinCommand==null,"No join-command for manager received from " + existingManager)
+	error(joinCommand==null,"No join-command for role=" + role + " received from " + existingManager)
+	joinCommand
+/GetJoinCommand
+
+
+
+
+# Add target host as additional manager in swarm
+# --
+	P(1,GetTarget) => target
+	P(2,GetManager) => existingManager
+	P(3,true) => debug
+
+	# Obtain join command from existingManager
+	joinCommand=GetJoinCommand(existingManager,"manager")
 
 	# Run this command on target
 	println(""+target+": joining additional manager to swarm")
@@ -65,17 +103,11 @@
 # Join worker to swarm
 # -- 
 	P(1,GetTarget) => target
-	P(2,GetTarget("Enter existing manager target on form user@host").get) => existingManager
+	P(2,GetManager) => existingManager
 	P(3,true) => debug
 
 	# Obtain join command from existingManager
-	joinCommand=null
-	println(""+existingManager+": getting join-command for worker")
-	SSH:sudo(existingManager,"docker swarm join-token worker", false, debug).stdout->line
-		assert(line.trim.startsWith("docker swarm join"))
-		joinCommand=line.trim
-	|
-	error(joinCommand==null,"No join-command for manager received from " + existingManager)
+	joinCommand=GetJoinCommand(existingManager,"worker")
 
 	println(""+target+": Joining worker to swarm")
 	SSH:sudo(target,joinCommand, false, debug)
@@ -93,6 +125,28 @@
 /SwarmLeave
 
 
+
+# List docker nodes
+# --
+	P(1,GetManager) => target
+	P(2,false) => debug
+
+	SSH:sudo(target,"docker node ls", false, debug) => result
+
+	result.stdout
+/NodesList
+
+
+
+# Call docker system info - displays Swarm info
+# --
+	P(1,GetTarget) => target
+	P(2,false) => debug
+
+	SSH:sudo(target,"docker system info", false, debug) => result
+
+	result.stdout
+/SystemInfo
 
 
 
