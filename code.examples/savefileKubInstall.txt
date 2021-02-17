@@ -1,0 +1,216 @@
+# Readme
+<<< EOF
+https://phoenixnap.com/kb/install-kubernetes-on-ubuntu
+
+Complete script for setting up Kubernetes cluster.
+
+Start with configuring the Hosts and Targets functions, then
+run
+	PrepareInstallAll
+
+Then run the following functions one by one, monitoring
+output. The join command for workers is stored in a text file
+in step where the master is initialized, as is stdout and stderr
+of following steps.
+
+>>> EOF
+/Readme
+
+# Ask for target
+# --
+	Input("Enter ssh target (user@host)").get
+/GetTarget
+
+
+# Hosts - first us used as master, the others become worker1, worker2 and so on
+	#"k1.v k2.v k3.v k4.v k5.v k6.v k7.v k8.v".split
+	"k1.v k2.v k3.v".split
+/Hosts
+
+
+# Targets
+	Hosts->h 
+		out("roar@"+h)
+/Targets
+
+
+
+# Install docker
+# --
+	P(1,GetTarget) => target
+	P(2,false) => debug
+
+	DockerSwarm:Install(target)
+	SSH:sudo(target,'systemctl enable docker', false, debug)
+	SSH:sudo(target,'systemctl start docker', true, debug)
+/InstallDocker
+
+
+
+# Add software repositories
+# --
+	P(1,GetTarget) => target
+	P(2,false) => debug
+
+	SSH:sudo(target,'curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add', false, debug)
+	SSH:sudo(target,'apt-add-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main"', false, debug)
+/InstallSoftwareRepos
+
+
+
+# Kubernetes Installation Tools
+# --
+	P(1,GetTarget) => target
+	P(2,false) => debug
+
+	println(""+target+": " + installation tools")
+	SSH:sudo(target,'apt-get install -y kubeadm kubelet kubectl', false, debug)
+	SSH:sudo(target,'apt-mark hold kubeadm kubelet kubectl', false, debug)
+
+	println("Verifying install getting kubeadm version")
+	SSH:sudo(target,'kubeadm version', false, false).stdout->line
+		println(line)
+	|
+/InstallationTools
+
+
+
+# Turn off swapping
+# --
+	P(1,GetTarget) => target
+	P(2, false) => debug
+
+	println(""+target+": turning off swap")
+	SSH:sudo(target,'swapoff -a', false, debug)
+/SwappingOff
+
+
+# Run all above!!
+#
+# May take a while. Not parallelized, as we want exceptions 
+# from SSH:sudo if something fails.
+# --
+	P(1,Targets) => targets
+	
+	targets->target
+		InstallDocker(target)
+		InstallSoftwareRepos(target)
+		InstallationTools(target)
+		SwappingOff(target)
+/PrepareInstallAll
+
+
+
+# Assign host names with hostnamectl
+# --
+	P(1,Targets.first(3)) => targets
+	P(2,true) => debug
+	
+	i=0
+	targets->target
+		cmd = if (i==0) {
+			"hostnamectl set-hostname master-node"
+		} else {
+			"hostnamectl set-hostname worker0"+i
+		}
+		SSH:sudo(target,cmd,false,debug)
+		i=i+1
+/AssignHostnames
+
+
+# Initialize Kubernetes on Master node
+# --
+	P(1,Targets.first) => masterNode
+	P(2,false) => debug
+	
+	SSH:sudo(masterNode,'sudo kubeadm init --pod-network-cidr=10.244.0.0/16',false,debug).stdout => stdout
+	File("KUB_Master_init.txt") => f
+	f.create(stdout)
+	ShowMainInitOutput
+	println("--- Stdout stored: " + f.path)
+/InitMasterNode
+
+
+
+# Show KUB_Master_init log
+# --
+	File("KUB_Master_init.txt").read->line println(line)
+/ShowMainInitOutput
+
+
+# Make HOME/.kube config
+# --
+	P(1,Targets.first) => masterNode
+	P(2,false) => debug
+
+	SSH:sudo(masterNode,'mkdir -p $HOME/.kube',true, debug)
+	SSH:sudo(masterNode,'cp -i /etc/kubernetes/admin.conf $HOME/.kube/config', false, debug)
+	SSH:sudo(masterNode,'chown $(id -u):$(id -g) $HOME/.kube/config', false, debug)
+/CreateHomeKubeConfig
+
+
+# Pod network - flannel
+# --
+	P(1,Targets.first) => masterNode
+	P(2,false) => debug
+
+	SSH:sudo(masterNode,'kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml', false, debug) => result
+	File("KUB_Flannel_init_out.txt").create(result.stdout)
+	File("KUB_Flannel_init_err.txt").create(result.stderr)
+
+	result.stdout->line println(line) |
+/DeployPodNetwork		
+
+
+# Verify Pod network
+# --
+	P(1,Targets.first) => masterNode
+	P(2,false) => debug
+
+	SSH:sudo(masterNode,'kubectl get pods --all-namespaces', false, debug).stdout->line
+		println(line)
+/VerifyPodNetwork
+
+
+
+# Join worker nodes to network
+# --
+	P(1,true) => debug
+
+	ShowMainInitOutput
+	
+	Lib:Header("Paste join command")
+	println("Terminate with '.' on separate line")
+	println
+	readLines(".")->line
+		if (line.endsWith("\")) {
+			out(line.sub(0,line.length-1).trim)
+		} else {
+			out(line.trim)
+		}
+	| _.concat(" ") => cmd
+
+	Lib:Header("Complete command")
+	println(cmd)
+
+	println
+	readLine("Enter to continue")
+
+	Targets.keep(1)->worker
+		SSH:sudo(worker,cmd,false,debug) => result
+		worker.after("@") => host
+		File("KUB_Worker_" + host + ".txt") => f
+		f.create(result.stdout)
+		result.stderr->line f.append("ERR " + line) |
+/JoinWorkers
+
+
+# Verify workers
+# --
+	P(1,Targets.first) => masterNode
+	P(2,false) => debug
+
+	SSH:sudo(masterNode,'kubectl get nodes', false, debug).stdout->line
+		println(line)
+/VerifyWorkers
+
