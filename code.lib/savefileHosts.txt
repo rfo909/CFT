@@ -208,7 +208,7 @@ s*.s   [no]
 		processData = SymDict(target)
 
 		# Block until less than given number of active processes
-		mon.Lwait.call(8)
+		mon.Lwait.call(8, true)
 		
 		println("*   starting process for " + target)
 		process = SpawnProcess(processData, {
@@ -222,8 +222,11 @@ s*.s   [no]
 		out(process)
 	| => processList
 
-	Lib:Header("Press ENTER to await process results")
+	mon.Lwait.call(0,true)  # verbose
+
+	Lib:Header("Press ENTER to see results")
 	readLine
+
 
 	processList -> process
 		
@@ -267,7 +270,7 @@ s*.s   [no]
         sshUser+"@"+host =>target
         HostData.Lhas.call (host, "Auto.reboot", "yes") =>allowReboot
         
-		process = SpawnProcess(SymDict(host,target,allowReboot),{
+	process = SpawnProcess(SymDict(host,target,allowReboot),{
 	        SSH:HostOkSSH (target) =>hostOk
 	        if (!hostOk) {
 	            println(host + ": -offline-")
@@ -329,7 +332,7 @@ s*.s   [no]
 		sshUser=HostData.Lget.call (host,"SSHUser")
 		assert(sshUser != null)
 
-		mon.Lwait.call(8)
+		mon.Lwait.call(8,true)
 		println("Spawning process for host="+host)
 		
 		ctx=SymDict(host,sshUser)
@@ -338,7 +341,12 @@ s*.s   [no]
 		mon.Ladd.call(process)
 		
 		out(process)
-	| _->process
+	| => processes
+
+	mon.Lwait.call(0,true)
+	
+
+	processes _->process
 		Lib:Header("Waiting for " + process.data.host)
 		process.wait
 		Inner {process.output->line println(line)}
