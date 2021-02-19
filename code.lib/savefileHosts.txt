@@ -263,14 +263,16 @@ s*.s   [no]
 # Display reboot info for all hosts
 # --
 	HostData = Hosts:Parse
+   	Util:ProcessMonitor =>mon
+
 	HostData.LallHosts.call.sort->host
         assert(HostData.Lhas.call (host,"OSFamily","debian"))
         HostData.Lget.call (host, "SSHUser") =>sshUser
 
         sshUser+"@"+host =>target
         HostData.Lhas.call (host, "Auto.reboot", "yes") =>allowReboot
-        
-	process = SpawnProcess(SymDict(host,target,allowReboot),{
+
+		process = SpawnProcess(SymDict(host,target,allowReboot),{
 	        SSH:HostOkSSH (target) =>hostOk
 	        if (!hostOk) {
 	            println(host + ": -offline-")
@@ -285,8 +287,14 @@ s*.s   [no]
 			    }
 	    	}
     	})
+    	mon.Ladd.call(process)
     	out(process)
-    | _->process
+    | _=>processes
+
+	println("Waiting for " + processes.length + " processes")
+	mon.Lwait.call(0,true)
+	
+    processes->process
     	process.wait
     	process.output->line println(line)
     	    

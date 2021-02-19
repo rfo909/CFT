@@ -16,6 +16,7 @@ of following steps.
 >>> EOF
 /Readme
 
+
 # Ask for target
 # --
 	Input("Enter ssh target (user@host)").get
@@ -28,9 +29,14 @@ of following steps.
 /Hosts
 
 
+# SSH user
+	"roar"
+/SSHUser
+
+
 # Targets
 	Hosts->h 
-		out("roar@"+h)
+		out(SSHUser+"@"+h)
 /Targets
 
 
@@ -88,7 +94,7 @@ of following steps.
 # Run all above!!
 #
 # May take a while. Not parallelized, as we want exceptions 
-# from SSH:sudo if something fails.
+# from SSH:sudo to stop the show, if something fails.
 # --
 	P(1,Targets) => targets
 	
