@@ -112,7 +112,7 @@ s*.s   [no]
 			result
 		})
 		.set("Ldump",Lambda{
-			self.data.keys->host
+			self.data.keys.sort->host
 				self.data.get(host).keys->field
 					value=self.data.get(host).get(field)
 					out(List(host,field,value))

@@ -26,6 +26,7 @@ of following steps.
 # Hosts - first us used as master, the others become worker1, worker2 and so on
 	#"k1.v k2.v k3.v k4.v k5.v k6.v k7.v k8.v".split
 	"k1.v k2.v k3.v".split
+	#"k4.v k5.v k6.v".split
 /Hosts
 
 
@@ -64,15 +65,31 @@ of following steps.
 
 
 
+
+# List all kubernetes versions ....
+# --
+	P(1,GetTarget) => target
+
+        SSH:sudo(target,"curl -s https://packages.cloud.google.com/apt/dists/kubernetes-xenial/main/binary-amd64/Packages | grep Version | awk '{print $2}'").stdout
+/KubShowVersions
+
+
+
+# Kubernetes version (important for Rancher)
+# --
+	"1.19.8-00"
+/KubVersion
+
+
 # Kubernetes Installation Tools
 # --
 	P(1,GetTarget) => target
 	P(2,false) => debug
 
-	println(""+target+": " + installation tools")
-	SSH:sudo(target,'apt-get install -y kubeadm kubelet kubectl', false, debug)
-	SSH:sudo(target,'apt-mark hold kubeadm kubelet kubectl', false, debug)
-
+	"kubeadm kubelet kubectl".split->app
+		println(""+target+": installating " + app + "=" + KubVersion)
+		SSH:sudo(target,'apt-get install -y --allow-downgrades ' + app + "=" + KubVersion, false, debug)
+	|
 	println("Verifying install getting kubeadm version")
 	SSH:sudo(target,'kubeadm version', false, false).stdout->line
 		println(line)
@@ -117,7 +134,7 @@ of following steps.
 		cmd = if (i==0) {
 			"hostnamectl set-hostname master-node"
 		} else {
-			"hostnamectl set-hostname worker0"+i
+			"hostnamectl set-hostname worker"+i
 		}
 		SSH:sudo(target,cmd,false,debug)
 		i=i+1
