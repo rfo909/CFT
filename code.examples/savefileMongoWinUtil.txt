@@ -1,0 +1,91 @@
+# Utility: Invoke JS code via mongo shell to local mongod on remote host
+#   # Remember to use printjson(...) on elements, to get them back over stdout
+#   # ex.   printjson(db.getReplicationInfo())
+# --
+P(1,Input("Host").get) => host
+P(2,"local") => db
+P(3,List) => jsCode
+P(4, true) => verbose
+P(5,"4.4") => mongoVersion
+P(6,"127.0.0.1:27017") => connectionString 
+
+	temp = Dir("\\"+host+"\c$\temp")
+
+	if (getType(jsCode) != "List") {
+		jsCode=List(jsCode)
+	}
+	mark = "--------" + currentTimeMillis+"-CFT-mark-----------"
+
+	jsCode=List('print("' + mark + '")') + jsCode
+
+	
+	js1 = temp.file("mongoshell"+currentTimeMillis+".js")
+	js1.create(jsCode)
+
+	cmd = '& "$Env:ProgramFiles\MongoDB\Server\' + mongoVersion + '\bin\mongo.exe" '+connectionString+'/' + db + ' c:\temp\' + js1.name
+	if (verbose) {
+		println(cmd)
+	}
+	PS:Call (host, cmd, List, true) => data
+	js1.delete
+
+	# filter stdout to include lines after mark only
+	Inner {
+		foundMark=false
+		data.stdout->line
+			if (line.contains(mark)) {foundMark=true reject(true)}
+			assert(foundMark)
+			out(line)
+	} => modifiedStdout
+	data.set("stdout",modifiedStdout)
+
+	if (verbose) {
+		println("------------" + host)
+		println("exitCode=" + data.exitCode)
+		println
+		Inner { data.stdout->line println(line) }
+		println
+		Inner { data.stderr->line println("ERR  " + line) }
+	}
+
+	data
+/CallMongoShell
+
+
+
+# Create User
+# --
+	P(1) => host
+	P(2) => user
+	P(3) => password
+	P(4) => database
+	P(5,"root") => role
+	P(6,"4.4") => mongoVersion 
+	
+	SymDict(user,password,role,database).mergeCodes => data
+
+<<< EOF
+	db.createUser({
+		user: "${user}",
+		pwd: "${password}",
+		roles: [
+			{role: "${role}", db: "${database}" }
+		]
+
+	})
+>>> EOF
+	-> line
+		out(line.merge(data).trim)
+	| _.concat(" ") => js
+
+	#println("host="+host)
+	#println("js="+js)
+
+	connectionTargetBase="admin"
+	verbose=true
+
+	CallMongoShell(host,connectionTargetBase,js,verbose,mongoVersion)
+/CreateUser
+
+
+
