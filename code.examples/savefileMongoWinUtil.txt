@@ -61,6 +61,7 @@ P(6,"127.0.0.1:27017") => connectionString
 	P(4) => database
 	P(5,"root") => role
 	P(6,"4.4") => mongoVersion 
+	P(7,"admin") => authSource
 	
 	SymDict(user,password,role,database).mergeCodes => data
 
@@ -78,14 +79,29 @@ P(6,"127.0.0.1:27017") => connectionString
 		out(line.merge(data).trim)
 	| _.concat(" ") => js
 
-	#println("host="+host)
-	#println("js="+js)
+	println("host="+host)
+	println("js="+js)
 
-	connectionTargetBase="admin"
 	verbose=true
 
-	CallMongoShell(host,connectionTargetBase,js,verbose,mongoVersion)
+	CallMongoShell(host,authSource,js,verbose,mongoVersion)
 /CreateUser
 
 
+
+
+# Add object to database collection
+# --
+	P(1) => host
+	P(2) => database
+	P(3) => collection
+	P(4,"{test:1}") => obj 
+	P(5,"4.4") => mongoVersion
+
+	js="db."+collection+".insert(" + obj + ")"
+
+	verbose=true
+
+	CallMongoShell(host, database, js, verbose, mongoVersion)
+/AddObject
 
