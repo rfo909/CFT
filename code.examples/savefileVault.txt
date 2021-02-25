@@ -1,0 +1,55 @@
+# Readme
+# --
+<<<<<<< EOF
+Using Db2 to store data encrypted with Sys.secureSessionId, for storing 
+passwords and other secrets for the duration of the session.
+>>>>>>> EOF
+/Readme
+
+
+# Get or ask for session secret. It is stored in database, encrypted with Sys.secureSessionId.
+# --
+	P(1,"Label") => label
+	label.toHexString => key
+	"v"+key => verifyKey
+	
+	Db2:Get("Vault",verifyKey) => value
+	ok=(value != null && Lib.Util.Decrypt(Sys.secureSessionId).processString(value)=="verified")
+	
+	if (ok) {
+		Db2:Get("Vault",key) => value
+		Lib.Util.Decrypt(Sys.secureSessionId).processString(value)
+	} else {
+		readLine(label) => value
+		Lib.Util.Encrypt(Sys.secureSessionId).processString(value) => eValue
+		Db2:Set("Vault", key, eValue)
+		Lib.Util.Encrypt(Sys.secureSessionId).processString("verified") => eVerified
+		Db2:Set("Vault", verifyKey, eVerified)
+		
+		value
+	}
+/SessionSecretGet
+
+# Remove the verification value for a session secret, forcing SessionSecretGet to ask for it
+# --
+	P(1,"Label") => label
+	label.toHexString => key
+	"v"+key => verifyKey
+	Db2:Set("Vault",verifyKey,"")
+/SessionSecretClear
+
+
+# Set session secret, non-interactively
+# --
+	P(1,"Label") => label
+	P(2,"") => value
+	
+	label.toHexString => key
+	"v"+key =>  verifyKey
+	
+	Lib.Util.Encrypt(Sys.secureSessionId).processString(value) => eValue
+	Db2:Set("Vault", key, eValue)
+	Lib.Util.Encrypt(Sys.secureSessionId).processString("verified") => eVerified
+	Db2:Set("Vault", verifyKey, eVerified)
+/SessionSecretSet
+
