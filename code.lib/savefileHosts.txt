@@ -112,7 +112,7 @@ s*.s   [no]
 			result
 		})
 		.set("Ldump",Lambda{
-			self.data.keys->host
+			self.data.keys.sort->host
 				self.data.get(host).keys->field
 					value=self.data.get(host).get(field)
 					out(List(host,field,value))
@@ -208,7 +208,7 @@ s*.s   [no]
 		processData = SymDict(target)
 
 		# Block until less than given number of active processes
-		mon.Lwait.call(8)
+		mon.Lwait.call(8, true)
 		
 		println("*   starting process for " + target)
 		process = SpawnProcess(processData, {
@@ -222,8 +222,11 @@ s*.s   [no]
 		out(process)
 	| => processList
 
-	Lib:Header("Press ENTER to await process results")
+	mon.Lwait.call(0,true)  # verbose
+
+	Lib:Header("Press ENTER to see results")
 	readLine
+
 
 	processList -> process
 		
@@ -260,13 +263,15 @@ s*.s   [no]
 # Display reboot info for all hosts
 # --
 	HostData = Hosts:Parse
+   	Util:ProcessMonitor =>mon
+
 	HostData.LallHosts.call.sort->host
         assert(HostData.Lhas.call (host,"OSFamily","debian"))
         HostData.Lget.call (host, "SSHUser") =>sshUser
 
         sshUser+"@"+host =>target
         HostData.Lhas.call (host, "Auto.reboot", "yes") =>allowReboot
-        
+
 		process = SpawnProcess(SymDict(host,target,allowReboot),{
 	        SSH:HostOkSSH (target) =>hostOk
 	        if (!hostOk) {
@@ -282,8 +287,14 @@ s*.s   [no]
 			    }
 	    	}
     	})
+    	mon.Ladd.call(process)
     	out(process)
-    | _->process
+    | _=>processes
+
+	println("Waiting for " + processes.length + " processes")
+	mon.Lwait.call(0,true)
+	
+    processes->process
     	process.wait
     	process.output->line println(line)
     	    
@@ -329,7 +340,7 @@ s*.s   [no]
 		sshUser=HostData.Lget.call (host,"SSHUser")
 		assert(sshUser != null)
 
-		mon.Lwait.call(8)
+		mon.Lwait.call(8,true)
 		println("Spawning process for host="+host)
 		
 		ctx=SymDict(host,sshUser)
@@ -338,7 +349,12 @@ s*.s   [no]
 		mon.Ladd.call(process)
 		
 		out(process)
-	| _->process
+	| => processes
+
+	mon.Lwait.call(0,true)
+	
+
+	processes _->process
 		Lib:Header("Waiting for " + process.data.host)
 		process.wait
 		Inner {process.output->line println(line)}

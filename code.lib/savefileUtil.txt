@@ -103,20 +103,38 @@ P(2,"*") => globPattern
 #   proc = SpawnProcess(...)
 #   mon.Ladd.call(proc)
 #
+#   ...
+#   # when done
+#   mon.Lwait(0)
 # --
 Dict.set("list",List)
 	.set("LcountRunning",Lambda{
 		self.list->proc assert(proc.isDone) out(proc) | _.length => completed
 		self.list.length-completed
 	})
-	.set("Lwait",Lambda{P(1)=>limit
+	.set("Lwait",Lambda{
+		P(1)=>limit
+		P(2,false)=>verbose
+		if (limit<1) limit=1  ## less-than in test below
 		loop
-			break(self.LcountRunning.call < limit)
-			Sys.sleep(100)
+			self.LcountRunning.call => running
+			if(verbose) {
+				println("Completed: " + (self.list.length-running) + " Running: " + running)
+			}
+			break (running < limit)
+			Sys.sleep(
+				if(verbose,3000,100)
+			)
 	})
-	.set("Ladd",Lambda{P(1)=>proc
+	.set("names",List)
+	.set("Ladd",Lambda{
+		P(1)=>proc
+		P(2,"proc-"+(self.names.length+1)) => name
+
 		self.list.add(proc)
+		self.names.add(name)
 	})
+	
 /ProcessMonitor
 
 

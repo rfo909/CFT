@@ -83,7 +83,7 @@ P(1) => target
 P(2) => commands
 P(3,false) => acceptErrors
 P(4,false) => showDebug
-
+	
     error(target==null || !target.contains("@"), "Invalid target: '" + target + "'")
     error(commands==null, "Invalid commands: can not be null")
 
