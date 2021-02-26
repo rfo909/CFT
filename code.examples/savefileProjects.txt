@@ -39,9 +39,6 @@ Example:
 
 projects.txt
 ---
-### ActiveProjects
-
-CFT
 
 ### CFT
 
@@ -53,10 +50,16 @@ Type: java
 IgnoreDir: build
 IgnoreDir: ebuild 
 IgnoreFile: .git 
+
+# This is a comment
+
+### GNT
+
+...
+
 ---
 
 There can be multiples of every line, including Dir.
-
 >>> EOF
 /Readme
 
@@ -80,7 +83,8 @@ There can be multiples of every line, including Dir.
 
 # List projects and select 
     Db2:Get("Projects","Project") =>result
-    ProjectsFile.get("ActiveProjects")->line out(line.trim) | _ =>names
+	ProjectsFile.keys => names
+
     Lambda { P(1) } =>showName
     loop
         println
@@ -267,13 +271,11 @@ Search(Grep(a).reject(b))
     
     CurrProject =>pr
     println
-    pr.Desc->d
-        println("** " + d)
-    |
+	Lib:Header(pr.Desc.concat(" "))
     pr.Dir->d
-        println("   " + d)
+        println("Dir: " + d)
     |
-    println("   " + pr.Type.concat(" "))
+    println("Types: " + pr.Type.concat(" "))
     println
     true
 /Curr
