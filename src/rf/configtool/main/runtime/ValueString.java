@@ -63,6 +63,8 @@ public class ValueString extends Value {
         add(new FunctionFromHexString());
         add(new FunctionHash());
         add(new FunctionGetBytes());
+        add(new FunctionLast());
+        add(new FunctionFirst());
         
     }
     
@@ -726,4 +728,40 @@ public class ValueString extends Value {
         }
 
     }
+    
+    class FunctionLast extends Function {
+        public String getName() {
+            return "last";
+        }
+        public String getShortDesc() {
+            return "last(count) - returns 'count' last characters if possible";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size()!=1) throw new Exception("Expected parameter count");
+        	int count=(int) getInt("count",params,0);
+        	if (count >= val.length()) {
+        		return new ValueString(val);
+        	} 
+        	return new ValueString(val.substring(val.length()-count));
+        }
+    }
+
+    class FunctionFirst extends Function {
+        public String getName() {
+            return "first";
+        }
+        public String getShortDesc() {
+            return "first(count) - returns 'count' first characters if possible";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size()!=1) throw new Exception("Expected parameter count");
+        	int count=(int) getInt("count",params,0);
+        	if (count >= val.length()) {
+        		return new ValueString(val);
+        	} 
+        	return new ValueString(val.substring(0,count));
+        }
+    }
+
+
 }
