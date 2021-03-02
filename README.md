@@ -11,7 +11,7 @@ For all levels of automation, from searching groups of files to deploying softwa
 Powerful templating functions for generating custom configuration files.
 
 
-[Full Youtube tutorial](https://www.youtube.com/channel/UCT2V2_xjtUVzISdT0YjwZ_Q)
+[Full Youtube tutorial](https://www.youtube.com/playlist?list=PLj58HwpT4Qy80WhDBycFKxIhWFzv5WkwO)
 
 
 # Download and compile
