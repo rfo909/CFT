@@ -1,5 +1,12 @@
+# Readme
+<<< EOF
 # https://www.youtube.com/watch?v=APsZJbnluXg&t=120s 
 
+Runs as it should, but does not end up with
+Rancher responding (on web).
+
+>>> EOF
+/Readme
 
 # SSH target
 # --
@@ -9,6 +16,7 @@
 # Verify
 	SSH:sudo(Target,'kubectl get nodes',false,false).stdout
 /Verify
+
 
 # Select between Rancher stable or latest
 	true
