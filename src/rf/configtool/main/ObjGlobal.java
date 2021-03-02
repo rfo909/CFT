@@ -407,7 +407,7 @@ public class ObjGlobal extends Obj {
             return "Int";
         }
         public String getShortDesc() {
-            return "Int(value,data) - create Int object";
+            return "Int(value,data) - create Int object - for sorting";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size()==2) {
@@ -426,7 +426,7 @@ public class ObjGlobal extends Obj {
             return "Float";
         }
         public String getShortDesc() {
-            return "Float(value,data) - create Float object";
+            return "Float(value,data) - create Float object - for sorting";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size()==2) {
@@ -446,7 +446,7 @@ public class ObjGlobal extends Obj {
             return "Str";
         }
         public String getShortDesc() {
-            return "Str(value,data) - create Str object";
+            return "Str(value,data) - create Str object - for sorting";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size()==2) {
@@ -492,7 +492,7 @@ public class ObjGlobal extends Obj {
             return "Date";
         }
         public String getShortDesc() {
-            return "Date(int?) - create Date object";
+            return "Date(int?) - create Date and time object - uses current time if no parameter";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() == 0) {
