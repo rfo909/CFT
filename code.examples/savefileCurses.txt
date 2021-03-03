@@ -97,7 +97,7 @@ if(ena) {
 } else {
 	nl=if(Sys.isWindows,"^r^n".unEsc, "^n".unEsc)
 	Inner {
-		Lib.Data.yes(Cfg.h,nl) | _.concat
+		Lib.Data.yes(Term.h,nl) | _.concat
 	}
 }
 /Cls

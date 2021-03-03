@@ -54,7 +54,7 @@ P(1,"r---")=>s
 
 P(1,null) => title
 	titleLine=fix("r--") + if(title!=null," ["+title+"] ","")
-	titleLine=Curses:Clear + Pad(titleLine,fix("-"),Cfg.w-2)
+	titleLine=Curses:Clear + Pad(titleLine,fix("-"),Term.w-2)
 	println(titleLine)
 	""
 /DoShowTopLine
@@ -186,7 +186,7 @@ P(2, Lambda{P(1)}) => LambdaLabel
 	
 # Test
 # --
-	Lib:GetTerminalSize  # update Cfg
+	Lib:GetTerminalSize  # update Term
 	
 	
 	DoShowTopLine("Clone VM")
