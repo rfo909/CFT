@@ -2,8 +2,34 @@
 # Show content of dictionary
 # --
 P(1)=>dict
-	dict.keys.sort->key
-		report(key,dict.get(key))
+P(2,false)=>print
+
+	# Inner lambda to convert value to synthesized form, 
+	# if synthesizable, for more relevant information
+	LPresent=Lambda{
+		P(1)=>val
+		# Inner lambda to check if synthesizable via predicate call
+		LSyn=Lambda{syn(P(1))}
+		
+		if (LSyn.?call(val)) {
+			# value is synthesizable
+			syn(val)
+		} else {
+			val
+		}
+	}
+
+	Inner {
+		dict.keys.sort->key
+			val=LPresent.call(dict.get(key))
+			report(key,val)
+	} => reportLines
+	
+	if (print) {
+		reportLines->line println(line)
+	}
+	reportLines
+		
 /ShowDict
 
 
