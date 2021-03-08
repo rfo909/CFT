@@ -14,6 +14,7 @@ If the swarm has more than one manager, it should be an odd number.
 
 
 # Get target
+# --
 	P(1,"Enter target on form user@host")=>label
 	Input(label).get
 /GetTarget
