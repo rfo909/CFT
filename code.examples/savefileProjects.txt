@@ -313,6 +313,9 @@ Search(Grep(a).reject(b))
 /FL
 
 ChangeProject
+/Change
+
+Curr
 /CP
 
 TextFiles

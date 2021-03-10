@@ -182,28 +182,63 @@ P(1,"tmp") => name
 /TmpDir
 
 
-# Copy directory tree. Both fromDir and toDir must exist
+# Copy directory tree. Both fromDir and toDir must exist.
 # --
 P(1) => fromDir
 P(2) => toDir
 P(3,false) => verbose
+P(4,true) => execute  # set false to do "dry run"
+P(5, Lambda{true}) => LInclude
+
 	error(!fromDir.exists, "Invalid fromDir: " + fromDir.path)
-	error(!toDir.exists, "Invalid toDir: " + toDir.path)
+	error(execute && !toDir.exists, "Invalid toDir: " + toDir.path)
 	error(fromDir.path==toDir.path, "fromDir == toDir")
 
 	fromDir.files->f 
+		assert(LInclude.call(f))
 		if(verbose) {
 			println("FROM: " + f.path) 
 			println("TO  : " + toDir.path)
 		}
-		toDir.copy(f) 
+		if (execute) toDir.copy(f) 
 	|
 	fromDir.dirs->d 
 		toDir.sub(d.name) => d2
-		if(!d2.exists) d2.create
-		CopyDirTree(d,d2,verbose)
+		if(!d2.exists && execute) d2.create
+		CopyDirTree(d,d2,verbose,execute,LInclude)
 	|
 /CopyDirTree
+
+
+
+# Compare files from source tree to target tree, prints report to stdout
+# --
+P(1) => fromDir
+P(2) => toDir
+P(3,true) => recurse
+
+	error(!fromDir.exists, "Invalid fromDir: " + fromDir.path)
+	error(!toDir.exists, "Invalid toDir: " + toDir.path)
+
+	fromDir.files->f
+		toDir.file(f.name) => f2
+		if (f2.exists) {
+			if (f2.length != f.length || f2.hash != f.hash) println("DIFFERS: " + f2.path)
+		} else {
+			println("NOT FOUND: " + f2.path)
+		}
+	|
+	if (recurse) {
+		fromDir.dirs->d 
+			toDir.sub(d.name) => d2
+			if(!d2.exists) {
+				println("NO DIR: " + d2.path)
+			} else {
+				CompareFiles(d,d2,true)
+			}
+	}
+/CompareFiles
+
 
 
 # Delete directory tree, asks for interactive confirm
@@ -212,6 +247,7 @@ P(3,false) => verbose
 P(1)=>xdir
 	Sequence(
 		@
+		@ ------------------------------------------
 		@ ------------------------------------------
 		@     Deleting directory tree confirm
 		@ ------------------------------------------
