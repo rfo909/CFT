@@ -442,21 +442,32 @@ P(4,false) => showDebug
 
 
 
-P(1,List) =>options P(2,Lambda { "name"}) =>macroGetElementName P(3) =>title 
-#
-    null =>selectedElement
-    loop
-        println("")
-        if(title != null, Header(title), 0)
+# Select single value from list of options. Using lambda to extract name for each element.
+# --
+	P(1,List)=>options 
+	P(2,Lambda {P(1)}) =>macroGetElementName 
+	P(3,"Select element") =>title 
 
-        ShowOptions(options, macroGetElementName)
-        println("")
-        SelectOptions(options, macroGetElementName) =>result
-        
-        if(result.length==1, Inner{ result.nth =>selectedElement})
-        break(selectedElement != null)
-        println("** No match or not unique")
-    | selectedElement
+	error(getType(options) != "List", "Options must be a list")
+	error(options.length==0,"No elements in options list")
+	
+	if(options.length==1) {
+		options.first
+	} else Inner {
+		selectedElement=null
+		loop
+		    println("")
+		    if(title != null) Header(title)
+
+		    ShowOptions(options, macroGetElementName)
+		    println("")
+		    SelectOptions(options, macroGetElementName) =>result
+		    
+		    if(result.length==1) selectedElement=result.first
+		    break(selectedElement != null)
+		    println("** No match or not unique")
+		| selectedElement
+	}
 /MenuSelect
 
 

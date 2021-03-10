@@ -96,7 +96,11 @@ P(2,"#") => commentStart
 /UncommentFile
 
 
-# Select file from directory
+# Select file from directory (by number). 
+# Alternatively, just use Lib:MenuSelect
+#
+#   files=Dir.files
+#   Lib:MenuSelect(files, Lambda{P(1).name}, "Select file")
 # --
 P(1) => dir
 P(2,"*") => globPattern

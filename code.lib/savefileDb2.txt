@@ -59,44 +59,7 @@ knowing the UUID.
 
 
 
-# Get or save password encrypted with Sys.secureSessionId
-# --
-	P(1,readLine("Password key/name")) => key
-	P(2,"Enter password:") => label
-
-	COLL="Db2.passwords"
-	
-	Db2:Get(COLL, key, null) => val
-	password=null
-	if (val != null) { 
-		Lib.Util.Decrypt(Sys.secureSessionId).processString(val) => decrypted
-		if(decrypted.startsWith("password:")) {
-			password=decrypted.after(":")
-		}
-	}
-	if (password==null) {
-		password=null
-		Inner {
-			loop 
-				Sys.readPassword(label+" ") => password1
-				Sys.readPassword(label+" ") => password2
-				if (password1==password2) {
-					password=password1
-					break
-				} else {
-					println("** Passwords don't match, try again")
-				}
-		}
-		Lib.Util.Encrypt(Sys.secureSessionId).processString("password:" + password) => encrypted
-		Db2:Set(COLL, key, encrypted)
-	}
-	# return password
-	password
-/GetSessionPassword
-
-
-
-# Get keys
+# Get keys in collection
 # --
 	P(1,inputCollection)=>collection
 	Lib.Db.Db2.keys(collection)
@@ -129,9 +92,5 @@ knowing the UUID.
 
 
 
-
-# Shortcut for Collections
-	Collections
-/Coll
 
 
