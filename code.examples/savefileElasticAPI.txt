@@ -19,7 +19,7 @@ To change to different host name, call MyHost(true)
 
 # Known hostnames
 # ---
-	List("hub-test-log3.ad.autopassops.no:9200", "10.115.0.52:9200")
+	Db2:Get("ElasticAPI","KnownHosts")
 /KnownHosts
 
 # Get/set hostname
