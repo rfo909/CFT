@@ -22,7 +22,7 @@ To change to different host name, call MyHost(true)
 	Db2:Get("ElasticAPI","KnownHosts")
 /KnownHosts
 
-# Get/set hostname
+# Get/set target hostname
 # --
 	P(1,false) => change
 
@@ -39,6 +39,22 @@ To change to different host name, call MyHost(true)
 	}
 	name
 /MyHost
+
+
+
+# Change target hostname
+# --
+	MyHost(true)
+/ChangeMyHost
+
+
+
+
+# Create Kibana URL
+# --
+	MyHost.before(":") + ":5601/app/kibana"
+/KibanaURL
+
 
 
 # List indexes
