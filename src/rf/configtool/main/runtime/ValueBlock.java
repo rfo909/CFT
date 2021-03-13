@@ -75,7 +75,7 @@ public class ValueBlock extends Value {
     }
 
     
-    private Value execute (Ctx ctx) throws Exception {
+    private Value executeIsolatedBlock (Ctx ctx) throws Exception {
     	Value retVal=null;
         
         for (ProgramLine progLine:programLines) {
@@ -102,6 +102,13 @@ public class ValueBlock extends Value {
         return retVal;
     }
 
+    
+    private Value executeLocalBlock (Ctx ctx) throws Exception {
+    	if (programLines.size() != 1) throw new Exception("Internal error: local block should contain ONE ProgramLine");
+    	programLines.get(0).execute(ctx);
+    	return ctx.getLocalBlockResult();
+    }
+
     /**
      * Call Inner code block. It runs in sub-context, and inherits
      * lookup of as well parameters and variables. 
@@ -110,7 +117,7 @@ public class ValueBlock extends Value {
         // Execute as Inner code block, which means it has Ctx lookup up the Ctx stack, including
         // parameters to the function, but that the loop flag stops
         Ctx sub=ctx.subContextForInnerBlock(); 
-        return execute(sub);
+        return executeIsolatedBlock(sub);
     }
     
     
@@ -120,7 +127,7 @@ public class ValueBlock extends Value {
      */
     public Value callLocalBlock (Ctx ctx) throws Exception {
     	// Execute code as if it were statements in same context as outside the block. 
-        return execute(ctx);
+        return executeLocalBlock(ctx);
     }
     
     
@@ -140,7 +147,7 @@ public class ValueBlock extends Value {
     	FunctionState fs=new FunctionState(params);
     	fs.set("self", new ValueObj(dict));
         Ctx independentCtx=new Ctx(ctx.getStdio(), ctx.getObjGlobal(), fs);
-        return execute(independentCtx);
+        return executeIsolatedBlock(independentCtx);
     }
     
     // -----------------------------------------------------------

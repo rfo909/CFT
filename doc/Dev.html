@@ -13,6 +13,31 @@
 
 <h1>CFT Change log</h1>
 
+<h3>v2.3.5 2021-03-13 Bugfix</h3>
+<p>
+	The inner block had a bug, so that
+</p>
+<pre>
+	List(1,2,3)-&gt;x {report(x)}
+</pre>
+<p>
+	Resulted in sequence of 1 12 123. This was due to result processing for local blocks must
+	differ from "isolated blocks" like Inner and Lambda.
+</p>
+<p>
+	Also created first test script, called Tests01. Disovered another bug, which is that
+	if an Inner block contains a single assert() or break, but no loop, the traversal-mechanism
+	looking for nearest block escapes the Inner block, and affects the block outside.
+	(Test09)
+</p>
+
+
+<h3>v2.3.4 2021-03-13 Dir object</h3>
+<p>
+	Added function newestFile(Glob?) to easily fetch latest modified file. Also disovered that the
+	allFiles() and allDirs() first collected all dir/files THEN applied glob if defined, which is
+	inefficient, so improved this.
+</p>
 
 <h3>v2.3.3 2021-02-12 String .first(n) and .last(n)</h3>
 <p>

@@ -84,6 +84,7 @@ public class ObjDir extends Obj {
         add(new FunctionUnprotect());
         add(new FunctionSetAsCurrentDir());
         add(new FunctionVerify());
+        add(new FunctionNewestFile());
     }
     
     
@@ -430,12 +431,11 @@ public class ObjDir extends Obj {
                 throw new Exception("Expected optional Glob parameter only");
             }
             List<File> allFiles=new ArrayList<File>();
-            traverse(ctx.getStdio(), new File(name), null, allFiles);
+            traverse(ctx.getStdio(), new File(name), glob, null, allFiles);
             
             
             List<Value> result=new ArrayList<Value>();
             for (File f:allFiles) {
-                if (glob != null && !glob.matches(f.getName())) continue;
                 result.add(new ValueObj(new ObjFile(f.getCanonicalPath(), protection)));
             }
             return new ValueList(result);
@@ -460,12 +460,11 @@ public class ObjDir extends Obj {
             }
 
             List<File> allDirs=new ArrayList<File>();
-            traverse(ctx.getStdio(), new File(name), allDirs, null);
+            traverse(ctx.getStdio(), new File(name), glob, allDirs, null);
             
             
             List<Value> result=new ArrayList<Value>();
             for (File f:allDirs) {
-                if (glob != null && !glob.matches(f.getName())) continue;
                 result.add(new ValueObj(new ObjDir(f.getCanonicalPath(), protection)));
             }
             return new ValueList(result);
@@ -473,7 +472,7 @@ public class ObjDir extends Obj {
     }
 
     
-    private void traverse (Stdio stdio, File currDir, List<File> dirs, List<File> files) throws Exception {
+    private void traverse (Stdio stdio, File currDir, ObjGlob glob, List<File> dirs, List<File> files) throws Exception {
         File[] list=currDir.listFiles();
         for (File f:list) {
             if (f.getName().equals(".") || f.getName().equals("..")) continue;
@@ -481,13 +480,17 @@ public class ObjDir extends Obj {
                 // search for sub-dirs before adding dir, this makes it safe
                 // to delete dioutTextrectories in the order presented
                 try {
-                    traverse(stdio, f, dirs, files);
+                    traverse(stdio, f, glob, dirs, files);
                 } catch(Exception ex) {
                     stdio.println("Traversing dir " + f + " " + ex.getMessage());
                 }
-                if (dirs != null) dirs.add(f);
+                if (dirs != null) {
+                	if (glob==null || glob.matches(f.getName())) dirs.add(f);
+                }
             } else {
-                if (files != null) files.add(f);
+                if (files != null)  {
+                	if (glob==null || glob.matches(f.getName())) files.add(f);
+                }
             }
         }
         
@@ -795,6 +798,43 @@ public class ObjDir extends Obj {
     }
     
 
+    class FunctionNewestFile extends Function {
+        public String getName() {
+            return "newestFile";
+        }
+        public String getShortDesc() {
+            return "newestFile(Glob?) - return file last modified";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            OutText outText=ctx.getOutText();
+            ObjGlob glob=null;
+            if (params.size()==1) {
+                Obj obj=getObj("Glob",params,0);
+                if (!(obj instanceof ObjGlob)) throw new Exception("Expected optional Glob parameter");
+                glob=(ObjGlob) obj;
+            } else if (params.size() != 0) {
+                throw new Exception("Expected optional Glob parameter only");
+            }
+            
+            File[] list=getDir().listFiles();
+            long newestTime=0L;
+            File newestFile=null;
+            
+            for (File f:list) {
+            	if (!f.isFile()) continue;
+                if (glob != null && !glob.matches(f.getName())) continue;
+                if (f.lastModified() > newestTime) {
+                	newestTime=f.lastModified();
+                	newestFile=f;
+                }
+            }
+            
+            if (newestFile==null) {
+            	throw new SoftErrorException("No such file");
+            }
+            return new ValueObj(new ObjFile(newestFile.getCanonicalPath(), self().protection));
+        }
+    }
   
 
 }

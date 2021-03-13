@@ -167,6 +167,12 @@ public class Ctx {
     }
     
     
+    public Value getLocalBlockResult() throws Exception {
+    	callCtxCloseHooks();
+        if (stack.isEmpty()) return null; else return stack.pop();
+    }
+    
+    
     private void callCtxCloseHooks() throws Exception {
     	for (CtxCloseHook x: ctxCloseHooks) {
     		x.ctxClosing(this);
