@@ -19,19 +19,19 @@
 	HostData.LallHosts.call.sort->host
 		assert(HostData.Lget.call(host, "OS")=="linux")
 		       
-        HostData.Lget.call (host, "SSHUser") =>sshUser
-        assert(sshUser != null)
+	        HostData.Lget.call (host, "SSHUser") =>sshUser
+       		 assert(sshUser != null)
 
-        target=sshUser+"@"+host
+        	target=sshUser+"@"+host
         
-        ctx=SymDict(target)
-        proc=SpawnProcess(ctx,{
+        	ctx=SymDict(target)
+        	proc=SpawnProcess(ctx,{
 			ok = SSH:HostOkSSH(target)
-	        status = if (ok,"OK","-")
-	        println(target + ": " + status)
-	        status
-	    })
-	    out(proc)
+	        	status = if (ok,"OK","-")
+	        	println(target + ": " + status)
+	        	status
+	    	})
+		out(proc)
 	| _->proc
 		status = proc.wait.exitValue
 		report(proc.data.target, status)
@@ -59,15 +59,15 @@
 	
 	data.LallHosts.call->host
 
-		println("* " + host)
+		#println("* " + host)
 
 		pm=data.Lget.call(host,"PackageManager")
 		assert(pm=="apt")
-		println("*   pm==apt ok")
+		#println("*   pm==apt ok")
 
 		sshUser=data.Lget.call(host,"SSHUser")
 		assert(sshUser != null)
-		println("*   sshUser != null ok")
+		#println("*   sshUser != null ok")
 
 		target=sshUser+"@"+host
 		processData = SymDict(target)
@@ -75,14 +75,14 @@
 		# Block until less than given number of active processes
 		mon.Lwait.call(8, true)
 		
-		println("*   starting process for " + target)
+		#println("*   starting process for " + target)
 		process = SpawnProcess(processData, {
 			start=currentTimeMillis
 			AptUpdate(target)
 			end=currentTimeMillis
 			println("### time=" + (end-start) + " ms")
 		})
-		mon.Ladd.call(process)
+		mon.Ladd.call(process,host)
 		
 		out(process)
 	| => processList
@@ -137,7 +137,7 @@
         sshUser+"@"+host =>target
         HostData.Lhas.call (host, "Auto.reboot", "yes") =>allowReboot
 
-		process = SpawnProcess(SymDict(host,target,allowReboot),{
+	process = SpawnProcess(SymDict(host,target,allowReboot),{
 	        SSH:HostOkSSH (target) =>hostOk
 	        if (!hostOk) {
 	            println(host + ": -offline-")
@@ -149,10 +149,10 @@
 		        	SSH:sudo(target,"reboot",true)
 		        } else {
 			        println(host + ": " + if(x,"NEEDS REBOOT","ok"))
-			    }
+			}
 	    	}
     	})
-    	mon.Ladd.call(process)
+    	mon.Ladd.call(process,host)
     	out(process)
     | _=>processes
 
@@ -211,7 +211,7 @@
 		ctx=SymDict(host,sshUser)
 		process=SpawnProcess(ctx, UpdateCFT(host, sshUser))
 
-		mon.Ladd.call(process)
+		mon.Ladd.call(process,host)
 		
 		out(process)
 	| => processes
@@ -247,26 +247,35 @@ P(4)=>lineFilter
 
 
 # View host status
-P(1,"mpstat") => command
-P(2)  => lineFilter
+# --
+	P(1,"mpstat") => command
+	P(2)  => lineFilter
 
 	HostData=Hosts:Parse
+	
+	mon=Util:ProcessMonitor
+
 	HostData.LallHosts.call->host
 
 		HostData.Lget.call(host, "OS") => os
 		assert(os=="linux")
         
-        HostData.Lget.call(host, "SSHUser") =>sshUser
-        assert(sshUser != null)
+	        HostData.Lget.call(host, "SSHUser") =>sshUser
+        	assert(sshUser != null)
         
-        sshUser+"@"+host =>target
+		sshUser+"@"+host =>target
 
-        ctx=SymDict(host,target,command,lineFilter)
-        proc=SpawnProcess(ctx,
-        	SysStat(host,target,command,lineFilter)
-        )
+        	ctx=SymDict(host,target,command,lineFilter)
+        	proc=SpawnProcess(ctx,
+        		SysStat(host,target,command,lineFilter)
+        	)
+		mon.Ladd.call(proc,host)
 		out(proc)
-	| _-> proc
+	| _=>procList
+
+	mon.Lwait.call(0,true)
+
+	procList -> proc
 		proc.wait
 		Inner {
 			#proc.output->line println(line) |
@@ -280,26 +289,6 @@ SysStatAll("mpstat")
 
 SysStatAll("iostat")
 /IOStat
-
-
-
-
-
-# Update database with list of debian hosts
-# ---
-	HostData=Hosts:Parse
-	HostData.LallHosts.call->host
-		assert(HostData.Lget.call(host, "OSFamily")=="debian")
-		       
-        HostData.Lget.call (host, "SSHUser") =>sshUser
-        assert(sshUser != null)
-
-        target=sshUser+"@"+host
-
-        data=SymDict(host,sshUser,target)
-        out(data)
-/GetDebianHostsInfo
-
 
 
 

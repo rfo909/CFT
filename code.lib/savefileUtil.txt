@@ -131,38 +131,50 @@ P(2,"*") => globPattern
 #   # --- when about to start a process
 #   mon.Lwait.call(limit)
 #   proc = SpawnProcess(...)
-#   mon.Ladd.call(proc)
+#   mon.Ladd.call(proc,"desc")
 #
 #   ...
 #   # when done
 #   mon.Lwait(0)
 # --
 Dict.set("list",List)
-	.set("LcountRunning",Lambda{
-		self.list->proc assert(proc.isDone) out(proc) | _.length => completed
-		self.list.length-completed
+	.set("Lrunning",Lambda{
+		self.list->data assert(!data.proc.isDone) out(data)
+	})
+	.set("Ldone",Lambda{
+		self.list->data assert(data.proc.isDone) out(data)
 	})
 	.set("Lwait",Lambda{
 		P(1)=>limit
 		P(2,false)=>verbose
 		if (limit<1) limit=1  ## less-than in test below
 		loop
-			self.LcountRunning.call => running
+			self.Lrunning.call => running
 			if(verbose) {
-				println("Completed: " + (self.list.length-running) + " Running: " + running)
+				descRunning = Inner{
+					running->x out(x.name)
+				}.concat(" ")
+
+				AppUI:DoShowTopLine("ProcessMonitor")
+				AppUI:DoShowHeader("Completed")
+				AppUI:DoShowList(self.Ldone.call.filter(Lambda{P(1).name}))
+				AppUI:DoSpace
+				AppUI:DoShowHeader("Running")
+				AppUI:DoShowList(running.filter(Lambda{P(1).name}))
+				AppUI:DoSpace
+
+				#println("Completed: " 
+				#	+ (self.list.length-running.length) 
+				#	+ " Running: " + running.length + " " + descRunning)
 			}
-			break (running < limit)
-			Sys.sleep(
-				if(verbose,3000,100)
-			)
+			break (running.length < limit)
+			Sys.sleep(500)
 	})
-	.set("names",List)
 	.set("Ladd",Lambda{
 		P(1)=>proc
-		P(2,"proc-"+(self.names.length+1)) => name
+		P(2,"proc-"+(self.list.length+1)) => name
 
-		self.list.add(proc)
-		self.names.add(name)
+		self.list.add(SymDict(proc,name))
 	})
 	
 /ProcessMonitor

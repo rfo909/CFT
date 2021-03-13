@@ -34,6 +34,8 @@ P(3) => len
 /Pad
 
 
+# Helper, converts to box drawing characters
+# --
 P(1,"r---")=>s
 	# https://en.wikipedia.org/wiki/Box-drawing_character
 	Dict
@@ -52,7 +54,9 @@ P(1,"r---")=>s
 		
 
 
-P(1,null) => title
+# Show top line with optional title, starts layout
+# --
+	P(1,null) => title
 	titleLine=fix("r--") + if(title!=null," ["+title+"] ","")
 	titleLine=Curses:Clear + Pad(titleLine,fix("-"),Term.w-2)
 	println(titleLine)
@@ -60,17 +64,21 @@ P(1,null) => title
 /DoShowTopLine
 	
 	
-P(1,null) => header
+# Show header line within layout
+# --
+	P(1,null) => header
 	println(fix("+- ") + header)
 	println(fix("|"))
 /DoShowHeader
 
 
 	
-	
 
-P(1,List) => shortNames
-P(2) => current
+# Show status or stage as defined by a number of short names and a current
+# --	
+	P(1,List) => shortNames
+	P(2) => current
+
 	line1=""
 	line2=""
 	Inner {
@@ -88,13 +96,45 @@ P(2) => current
 	println(fix("| ") + line2)
 /DoShowContext
 	
-	
 
 
+# Present some text
+# --
+	P(1)=>text
+	P(2,true) => wordWrap
+
+	if (!wordWrap) {
+		println(fix("+ ") + text)
+	} else {
+		DoShowList((""+text).split)
+	}
+/DoShowText
+
+
+
+# Present content of list		
+# --
+	P(1,List)=>list
 	
-P(1,"Label") => label
-P(2,null) => currValue
-P(3,true) => supportOptions
+
+	line=fix("| ")
+	list->x
+		if (line.length+1+(""+x).length >= Term.w) {
+			println(line)
+			line=fix("| ")
+		}
+		line=line+" "+x
+	|
+	println(line) 
+/DoShowList
+
+
+# Ask for input
+# --	
+	P(1,"Label") => label
+	P(2,null) => currValue
+	P(3,true) => supportOptions
+
 	labelLine=fix("+- ") + Curses:Bold + label  
 		+ if(currValue != null, " / Enter for ["+currValue+"]","") 
 		+ Curses:Reset
@@ -120,8 +160,10 @@ P(3,true) => supportOptions
 
 
 
-
-Dict
+# Create summary object, which is controlled via two lambdas, for
+# adding data and showing (add to layout)
+# --
+	Dict
 	.set("data",List)
 	.set("Lrow",Lambda{
 		P(1)=>shortName
@@ -151,9 +193,10 @@ Dict
 
 
 
-
-P(1,List) => data
-P(2, Lambda{P(1)}) => LambdaLabel
+# Present menu
+# --
+	P(1,List) => data
+	P(2, Lambda{P(1)}) => LambdaLabel
 	println(fix("|"))
 	pos=1
 	data->row
@@ -179,7 +222,7 @@ P(2, Lambda{P(1)}) => LambdaLabel
 
 # Space
 # --
-	println("|")
+	println(fix("|"))
 /DoSpace
 
 
