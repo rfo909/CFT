@@ -20,7 +20,11 @@ See 'example' function
 # --
 P(1," ")=>char
 P(2,0)=>length
-	Lib.Data.each(1,length)->x out(char) | _.concat
+	if (length==0) {
+		""
+	} else Inner {
+		Lib.Data.each(0,length-1)->x out(char) | _.concat
+	}
 /Chars
 
 
@@ -50,7 +54,7 @@ P(1,"r---")=>s
 		out(map.get(c,c))
 	| _.concat => result
 
-	Curses:TxtGreen+result+Curses:Reset
+	result
 /fix
 		
 
@@ -69,7 +73,6 @@ P(1,"r---")=>s
 # --
 	P(1,null) => header
 	println(fix("+- ") + header)
-	println(fix("|"))
 /DoShowHeader
 
 
@@ -129,6 +132,30 @@ P(1,"r---")=>s
 	println(line) 
 /DoShowList
 
+
+
+# Show progress bar
+# --
+	P(1,0) => doneCount
+	P(2,0) => totalCount
+	P(3,50) => charsWidth
+
+	line=fix("| ")
+	if (line.length+charsWidth+1 >= Term.w) {
+		charsWidth=Term.w-line.length-1
+	}
+	dataChars=charsWidth-2
+	if (totalCount > 0) {
+		doneChars=(dataChars*doneCount/totalCount).i
+		if (doneChars > dataChars) doneChars=dataChars
+	} else {
+		doneChars=0
+	}
+
+	line=line+"[" + Chars("#",doneChars) + Chars("-",dataChars-doneChars) + "]"
+	println(line)
+/DoShowProgressBar
+	
 
 # Ask for input
 # --	

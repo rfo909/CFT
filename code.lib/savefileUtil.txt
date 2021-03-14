@@ -1,5 +1,6 @@
 
 # Show content of dictionary
+# Note: can also use JSON:PP
 # --
 P(1)=>dict
 P(2,false)=>print
@@ -139,6 +140,10 @@ P(2,"*") => globPattern
 # --
 Lib:GetTerminalSize
 Dict.set("list",List)
+	.set("title","ProcessMonitor")
+	.set("LsetTitle", Lambda{
+		self.set("title",""+P(1))
+	})
 	.set("Lrunning",Lambda{
 		self.list->data assert(!data.proc.isDone) out(data)
 	})
@@ -152,17 +157,20 @@ Dict.set("list",List)
 		loop
 			self.Lrunning.call => running
 			if(verbose) {
-				descRunning = Inner{
-					running->x out(x.name)
-				}.concat(" ")
+				self.Ldone.call => completed
+	
+			#descRunning = Inner{
+				#	running->x out(x.name)
+				#}.concat(" ")
 
-				AppUI:DoShowTopLine("ProcessMonitor")
+				AppUI:DoShowTopLine(self.title)
+				AppUI:DoShowProgressBar(completed.length, completed.length+running.length,50)
 				AppUI:DoShowHeader("Completed")
-				AppUI:DoShowText(self.Ldone.call.length)
+				AppUI:DoShowText("#"+self.Ldone.call.length)
 				AppUI:DoShowList(self.Ldone.call.filter(Lambda{P(1).name}))
 				AppUI:DoSpace
 				AppUI:DoShowHeader("Running")
-				AppUI:DoShowText(running.length)
+				AppUI:DoShowText("#"+running.length)
 				AppUI:DoShowList(running.filter(Lambda{P(1).name}))
 				AppUI:DoSpace
 
