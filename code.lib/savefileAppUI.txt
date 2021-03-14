@@ -8,7 +8,8 @@ Remember doing initial call to
 
 	Lib:GetTerminalSize
 
-to get terminal proportions right
+so the Term object gives correct dimensions for the terminal.
+ 
 See 'example' function
 
 >>>> EOF

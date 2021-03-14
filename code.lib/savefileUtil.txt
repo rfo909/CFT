@@ -137,6 +137,7 @@ P(2,"*") => globPattern
 #   # when done
 #   mon.Lwait(0)
 # --
+Lib:GetTerminalSize
 Dict.set("list",List)
 	.set("Lrunning",Lambda{
 		self.list->data assert(!data.proc.isDone) out(data)
@@ -157,9 +158,11 @@ Dict.set("list",List)
 
 				AppUI:DoShowTopLine("ProcessMonitor")
 				AppUI:DoShowHeader("Completed")
+				AppUI:DoShowText(self.Ldone.call.length)
 				AppUI:DoShowList(self.Ldone.call.filter(Lambda{P(1).name}))
 				AppUI:DoSpace
 				AppUI:DoShowHeader("Running")
+				AppUI:DoShowText(running.length)
 				AppUI:DoShowList(running.filter(Lambda{P(1).name}))
 				AppUI:DoSpace
 
