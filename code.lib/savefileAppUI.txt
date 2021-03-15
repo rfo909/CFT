@@ -140,7 +140,7 @@ P(1,"r---")=>s
 	P(2,0) => totalCount
 	P(3,50) => charsWidth
 
-	line=fix("| ")
+	line=fix("|  ")
 	if (line.length+charsWidth+1 >= Term.w) {
 		charsWidth=Term.w-line.length-1
 	}
