@@ -2,7 +2,7 @@
 # Count down seconds
 # --
 	P(1,10) => minutes
-	prefix="    "
+	prefix=""
 
 	seconds=minutes*60
 
@@ -17,7 +17,6 @@
 		println(Curses:Clear)
 
 		remainingTime=seconds-i
-		duration = Date.Duration.seconds(remainingTime)
 		
 		println(prefix+"Total time: " + minutes + " minutes")
 
@@ -25,7 +24,9 @@
 		(50*i/seconds).i => done
 		Lib.Data.yes(done,"#").concat => bar
 		Lib.Data.yes(50-done,"-").concat => remaining
-		println(prefix + "["+bar+remaining+"] " + duration)
+		
+		percent=(100*i/seconds).i
+		println(prefix + "["+bar+remaining+"] " + percent + " %")
 	
 		if (remainingTime < 120) {
 		
