@@ -70,12 +70,6 @@
 		break(i>=seconds)
 		i=i+1
 |
-	# Flash 0
-	Lib.Data.each(0,10)->x
-		{Number("00")->line println(prefix+line)}
-		Sys.sleep(200)
-		println(Curses:Clear)
-		Sys.sleep(200)
 
 /CountDown
 
