@@ -1,0 +1,91 @@
+<<<<<< EOF
+   000     111    222     333   4   4   55555   666    77777    888    999      x
+  0   0   1  1   2   2   3   3  4   4   5      6   6       7   8   8  9   9     x
+  0   0  1   1      2        3  4   4   5      6          7    8   8  9   9     x
+  0   0      1     2       33   44444   5555   6666      7      888    9999     x
+  0   0      1    2          3      4       5  6   6     7     8   8      9     x
+  0   0      1   2       3   3      4   5   5  6   6    7      8   8  9   9     x
+   000       1   22222    333       4    555    666    7        888    999      x
+>>>>>> EOF
+/data
+
+
+# Get digit mask
+# --
+	""+P(1,0)=>digit
+	offset=9999
+	data->line
+		pos=line.indexOf(digit)
+		if (pos < offset) offset=pos
+	|
+	data->line
+		out(line.sub(offset,offset+5).replace(digit,"#"))
+/Digit
+
+
+# Get integer
+# --
+	P(1,"135")=>i
+	Lib.Data.each(0,6)->lineNo
+		s = Inner {
+			(""+i).chars->c
+				lines = Digit(c)
+				out(lines.nth(lineNo))
+			| _.concat("   ")
+		} 
+		out(s)
+/Number
+	
+
+# Count down seconds
+# --
+	P(1,10) => seconds
+	prefix="    "
+
+
+	start=currentTimeMillis
+	i=0
+	loop
+		targetTime=start+(i*1000)
+		waitTime=targetTime-currentTimeMillis
+		if (waitTime > 0) Sys.sleep(waitTime)
+
+		# present current value
+		println(Curses:Clear)
+
+		# progress bar
+		(50*i/seconds).i => done
+		Lib.Data.yes(done,"#").concat => bar
+		Lib.Data.yes(50-done,"-").concat => remaining
+		println(prefix + "["+bar+remaining+"] " + (seconds-i))
+
+		if (seconds-i < 60) {
+			println
+			value=seconds-i
+			value=("00"+value).last(2)
+
+			lines=Number(value)
+			lines->line println(prefix + line)
+		}
+		break(i>=seconds)
+		i=i+1
+|
+	# Flash 0
+	Lib.Data.each(0,10)->x
+		{Number("00")->line println(prefix+line)}
+		Sys.sleep(200)
+		println(Curses:Clear)
+		Sys.sleep(200)
+
+/CountDown
+
+
+
+
+
+
+
+# Pomodoro
+# --
+	CountDown(900)
+/Pomodoro15	
