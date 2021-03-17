@@ -59,10 +59,10 @@
 		Lib.Data.yes(50-done,"-").concat => remaining
 		println(prefix + "["+bar+remaining+"] " + (seconds-i))
 
-		if (seconds-i < 60) {
+		if (seconds-i < 120) {
 			println
 			value=seconds-i
-			value=("00"+value).last(2)
+			value=("000"+value).last(3)
 
 			lines=Number(value)
 			lines->line println(prefix + line)
@@ -74,12 +74,9 @@
 /CountDown
 
 
-
-
-
-
-
-# Pomodoro
+# Pomodoro countdown timer
 # --
-	CountDown(900)
-/Pomodoro15	
+	Input("Minutes").get.parseFloat=>minutes
+	CountDown(minutes*60)
+/Pomodoro
+
