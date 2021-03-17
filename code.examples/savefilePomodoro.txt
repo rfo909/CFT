@@ -1,0 +1,50 @@
+
+# Count down seconds
+# --
+	P(1,10) => minutes
+	prefix="    "
+
+	seconds=minutes*60
+
+	start=currentTimeMillis
+	i=0
+	loop
+		targetTime=start+(i*1000)
+		waitTime=targetTime-currentTimeMillis
+		if (waitTime > 0) Sys.sleep(waitTime)
+
+		# present current value
+		println(Curses:Clear)
+
+		remainingTime=seconds-i
+		duration = Date.Duration.seconds(remainingTime)
+		
+		println(prefix+"Total time: " + minutes + " minutes")
+
+		# progress bar
+		(50*i/seconds).i => done
+		Lib.Data.yes(done,"#").concat => bar
+		Lib.Data.yes(50-done,"-").concat => remaining
+		println(prefix + "["+bar+remaining+"] " + duration)
+	
+		if (remainingTime < 120) {
+		
+			println
+			value=("   "+remainingTime).last(3)
+
+			lines=Letters7x5:GetText(value)
+			lines->line println(prefix + line)
+		}
+		break(i>=seconds)
+		i=i+1
+|
+
+/CountDown
+
+
+# Pomodoro countdown timer
+# --
+	Input("Minutes").get.parseInt=>minutes
+	CountDown(minutes)
+/Pomodoro
+
