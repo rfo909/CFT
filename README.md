@@ -4,11 +4,13 @@
 
 Programmable shell. Terminal based. Written in Java.
 
-Functional object oriented language. 
+Functional object oriented language. All function docs available interactively.
 
 For all levels of automation, from searching groups of files to deploying software with dependencies.
 
 Powerful templating functions for generating custom configuration files.
+
+Assorted code library for automating SSH, KVM, PowerShell, apt-get system maintenance.
 
 
 [Full Youtube tutorial](https://www.youtube.com/playlist?list=PLj58HwpT4Qy80WhDBycFKxIhWFzv5WkwO)
@@ -20,6 +22,7 @@ Written in Java and built using Apache ANT, which results in a single JAR file.
 
 Tested on both Linux and Windows. Has no dependencies outside of the standard Java libraries.
 
+# Running
 
 ```
 ./cft
@@ -28,54 +31,77 @@ $ 2+2
  <int>
  4
 
-
-$ Dir.allFiles(Glob("*.java"))
-  (...)
-$ /JavaFiles
-
-
-$ JavaFiles.length
- <int>
-  144
-$ /NumJavaFiles
-
-
-$ NumJavaFiles
- <int>
-  144
-
-
-$ JavaFiles->f out(f.read.length) | _.sum
- <int>
-  20870
-$ /JavaLineCount
-
-
-$ P(1,0)=>a P(2,0)=>b a*b+1
- <int>
- 1
-$ /calc
-
-
-$ calc(3,5)
- <int>
- 16
-
-
-$ ?
-
-$ help
-$ Dir help
-$ List help
-$ "" help
-
-$ :save Test
-$ :quit
-
+$ 4 help
+  (lists all functions for integer objects)
+  
+$ 23.bin
+  <String>
+  00010111 
 ```
 
-To leave type ":quit" or just CTRL-C.
+# Creating scripts
+```
+$ :new
+$ :save MyScript
+$ @e
+```
 
+This opens the script file in a text editor. Works well with both nano and micro (along with f.ex GNU screen), or
+can use any graphical editor (notepad++ or notepad on windows). 
+
+
+```
+# General search function for source files.
+# --
+# Defining parameters with default expressions
+# Dir is current directory
+# List() is a list
+# Input("...").get asks user for value
+# 
+# a=1   # local variable
+# 1=>a  # local variable alternative notation
+# -> ident  # list iteration
+# --
+	P(1,Dir)=>dir
+	P(2,List("java","txt"))=>types
+	P(3,Input("Search term").get) => st
+		grep=Grep(st)
+		dir.allFiles->f 
+			type = f.name.afterLast(".")
+			assert(types.contains(type))
+			grep.file(f)->line
+				report(line.file.name, line.lineNumber, line)
+/SearchSourceFiles
+```
+
+
+# Loading and using scripts
+```
+$ :load MyScript
+$ ?
++-----------------------------------------------------
+| SearchSourceFiles: # General search function for source files.
++-----------------------------------------------------
+| .                : SearchSourceFiles
++-----------------------------------------------------
+
+$ SearchSourceFiles
+(?) Search term
+...
+```
+
+
+# Interactive help
+
+```
+$ help
+$ Dir help
+$ File("x") help
+$ List help
+$ Dict help
+$ "" help
+$ 1 help
+```
 
 
 # Goals
