@@ -10,8 +10,6 @@ For all levels of automation, from searching groups of files to deploying softwa
 
 Powerful templating functions for generating custom configuration files.
 
-Assorted code library for automating SSH, KVM, PowerShell, apt-get system maintenance.
-
 
 [Full Youtube tutorial](https://www.youtube.com/playlist?list=PLj58HwpT4Qy80WhDBycFKxIhWFzv5WkwO)
 
@@ -37,6 +35,15 @@ $ 4 help
 $ 23.bin
   <String>
   00010111 
+  
+$ 23.hex
+  <String>
+  17
+  
+$ "17".parseInt(16)
+  <int>
+  23
+
 ```
 
 # Creating scripts
@@ -46,9 +53,8 @@ $ :save MyScript
 $ @e
 ```
 
-This opens the script file in a text editor. Works well with both nano and micro (along with f.ex GNU screen), or
-can use any graphical editor (notepad++ or notepad on windows). 
-
+This opens the script file in a text editor. Works well with both nano and micro, for pure terminal use, but
+also supports graphical editors. 
 
 ```
 # General search function for source files.
