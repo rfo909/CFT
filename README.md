@@ -1,10 +1,10 @@
 
 
-# CFT (ConfigTool)
+# CFT - ConfigTool
 
 Programmable shell. Terminal based. Written in Java.
 
-Functional object oriented language. All function docs available interactively.
+Functional object oriented language. All functions have interactively available descriptions.
 
 For all levels of automation, from searching groups of files to deploying software with dependencies.
 
@@ -39,11 +39,11 @@ $ 23.bin
 $ 23.hex
   <String>
   17
+$ /f  # define last line as function 'f'
   
-$ "17".parseInt(16)
+$ f.parseInt(16)
   <int>
   23
-
 ```
 
 # Creating scripts
@@ -60,23 +60,34 @@ also supports graphical editors.
 # General search function for source files.
 # --
 # Defining parameters with default expressions
-# Dir is current directory
-# List() is a list
-# Input("...").get asks user for value
+# - Dir function returns current directory
+# - List(...) returns List object
+# - Input("...").get asks user for value
 # 
-# a=1   # local variable
-# 1=>a  # local variable alternative notation
-# -> ident  # list iteration
+# Local variables: 
+#   a=1
+#   1=>a
+#
+# List iteration
+# List -> ident ...
 # --
 	P(1,Dir)=>dir
 	P(2,List("java","txt"))=>types
 	P(3,Input("Search term").get) => st
-		grep=Grep(st)
-		dir.allFiles->f 
-			type = f.name.afterLast(".")
-			assert(types.contains(type))
-			grep.file(f)->line
-				report(line.file.name, line.lineNumber, line)
+
+	# Create Grep object
+	grep=Grep(st)  
+	
+	# Iterate over all files
+	dir.allFiles->f 
+		type = f.name.afterLast(".")
+		
+		# Filter on file type
+		assert(types.contains(type))
+		
+		# Call file() function in Grep object
+		grep.file(f)->line
+			report(line.file.name, line.lineNumber, line)
 /SearchSourceFiles
 ```
 
