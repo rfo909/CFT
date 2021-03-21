@@ -74,16 +74,18 @@ $ @e
 The '@e' shortcut opens the script file in a text editor. Works well with both nano and micro, for pure terminal use, but
 also supports graphical editors. Shortcuts are defined in the CFT.props file. 
 
-Example function in MyScript script. 
+Below we create an example function in the MyScript file, but first a few notes ...
 
 ## Function names
 
-Note that in CFT the code comes first, then the function is named by a separate line with "/" followed by the name. 
+In CFT the code comes first, then the function is named by a separate line with "/" followed by the name. This is a
+heritage from when most code was entered interactively, where one would first enter some code, see it run ok, then
+assign a name.
 
 ## Function parameters
 
 The P(N [,defaultExpr]) calls get the parameter values to the function by position (1-based), and if missing (or null), and there
-is a defaultExpr, then runs it, to get a value for the parameter.
+is a defaultExpr, then resolves it, to get a value for the parameter.
 
 In the example below, parameter 1 is expected to be the directory where we search for files. If missing, use
 current directory. Then we expect a list of file types, by default "java" and "txt", and finally a search term. 
