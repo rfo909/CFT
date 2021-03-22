@@ -39,8 +39,9 @@ Useful for all levels of automation:
 
 - searching groups of files
 - deploying software with dependencies (ssh / scp)
-- automate PowerShell commands both local and remote - saves a lot of
-- automate running git and all other command-line programs (such as virsh for KVM)
+- automate PowerShell commands both local and remote - saves a lot of typing
+- running git and all other command-line programs (such as virsh for KVM)
+- collect and unzip archived log files, for searching
 
 Communication with remote hosts is done by running external programs, typically SSH, SCP and PowerShell 
 in daughter processes (foreground or background). 
@@ -208,7 +209,7 @@ $ 1 help
 
 # Testbed for language mechanisms
 
-CFT also is a bit of a testbed for new and unusual mechanisms.
+CFT also is a bit of a testbed for new and perhaps unusual mechanisms.
 
 ## Everything is code
 
@@ -219,7 +220,7 @@ This converts values, such as a string, a dictionary, or a list of files,
 to code, which can then be stored on file, to be loaded and eval'ed later, or added as a custom function. When
 the code is run, it produces the original data, but avoids all concurrency issues by returning new objects every time.
 
-## Compact syntax - No custom classes
+## Compact syntax - no custom classes
 
 The initial goal was a system that was programmed interactively, one line at a time, which required a compact
 syntax, to get actual useful work out of a single line of code.
