@@ -91,6 +91,43 @@ knowing the UUID.
 /Show
 
 
+# Edit data in collection
+# --
+	P(1,inputCollection) => collection
 
+	Keys(collection).sort => keys
 
+	Lib:Header("Current values in " + collection)
+
+	Inner{
+		count=0 
+		Inner {
+			keys->key 
+				report(count, key, syn(Get(collection,key))) 
+				count=count+1
+		}->line println(line)
+	}
+	println
+	readLine("Command .a to add new, row number to edit or ENTER to quit") => command
+
+	if (command=="") {
+		println("Quitting")
+	} else if (command==".a") {
+		readLine("Key") => key
+		readLine("Value as code, which means quotes around Strings etc") => newValCode
+		actualValue=eval(newValCode)
+		Set(collection,key,actualValue)
+	} else {
+		# Edit row by number
+		key=keys.nth(command.parseInt)
+		value=syn(Get(collection,key))
+		println("Current value:")
+		println(value)
+		readLine("New value") => newValCode
+		modifiedValue=eval(newValCode)
+		Set(collection,key,modifiedValue)
+	}
+
+	"Done"
+/Edit
 

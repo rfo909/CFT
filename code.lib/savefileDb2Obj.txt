@@ -151,7 +151,7 @@ Objects can be sorted on date of last update, and located using a lambda.
 # --
 	P(1,inputCollection)=>collection
 	SortedObjectsByDate(FixCN(collection))->obj
-		report(obj.id, obj.date, obj.value)
+		report(obj.id, obj.date, "<" + obj.value.keys.sort.concat(" ") + ">")
 /ShowObjects
 
 
