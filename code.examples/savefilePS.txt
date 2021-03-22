@@ -158,53 +158,42 @@ P(2, Input("Enter service").get) =>service
 /GetServiceStartType
 	
 
+
 # Utility function for sh
 # --
 	P(1)=>host
-	SymDict(host).set("check",Lambda{
-		P(1)=>obj
-		obj.value.host==self.host
-	}).check => closure
-	
-	Db2Obj:FindObjects("PS_sh", closure).first => foundIt
-	if (foundIt != null) {
-		# doing update to get date value refreshed
-		Db2Obj:UpdateObject("PS_sh", foundIt.id, foundIt.value)
-	} else {
-		# saving new
-		Db2Obj:AddObject("PS_sh",Dict.set("host",host))
-	}
-	
+	Db2:Set("PS_sh",host,Date)
 /_shPutHost
+
 
 
 # Utility function for sh
 # --
-	list = Db2Obj:SortedObjectsByDate("PS_sh").last(10)
-	
+	count=0
 	Lib:Header("Known hosts")
-	if (list.length != 0) Inner{
-		count=0
-		list->x
-			println("" + count + "   : " + x.date.fmt + " - " + x.value.host)
-			count=count+1
-		|
-		println
-		readLine("Enter number of name") => inp
-		if (inp.?parseInt) {
-			host=list.nth(inp.parseInt).value.host
-			_shPutHost(host)
-			host
-		} else {
-			_shPutHost(inp)
-			inp
-		}
-	} else {
-		readLine("Enter host name") =>host
+
+	Db2:Keys("PS_sh")->key
+		Db2:Get("PS_sh",key,Date) => date
+		out(Int(date.get,key))
+	| _.sort.last(10)->x
+		out(x.data)
+	| => list
+	
+	list->key
+		Db2:Get("PS_sh",key,Date) => date
+		println("" + (""+count + "   ").first(4) + " : " + date.fmt + " - " + key)
+		count=count+1
+	|
+	println
+	readLine("Enter number of name") => inp
+	if (inp.?parseInt) {
+		host=list.nth(inp.parseInt)
 		_shPutHost(host)
 		host
+	} else {
+		_shPutHost(inp)
+		inp
 	}
-			
 /_shGetHost
 
 
@@ -213,8 +202,8 @@ P(2, Input("Enter service").get) =>service
 
 P(1,_shGetHost) => host
 
-getDir=Lambda{P(1)=>host Db2:Get("PS_Shell",host,"c:\temp")}
-setDir=Lambda{P(1)=>host P(2)=>dir Db2:Set("PS_Shell",host,dir)}
+getDir=Lambda{P(1)=>host Db2:Get("PS_sh_cwd",host,"c:\temp")}
+setDir=Lambda{P(1)=>host P(2)=>dir Db2:Set("PS_sh_cwd",host,dir)}
 loop
 	println
 	readLine("[" + host + "] CFT [" + getDir.call(host) + "] '.q' to quit, '?' for help") => mode
@@ -229,6 +218,7 @@ loop
 			@ '.e'  - edit file
 			@ '.p'  - show full path to current directory
 			@ '.u X'- show file minus comments (starting with '#' or X if given)
+			@ '.H'  - show all known hosts
 			@ '.'   - enter or paste multiple lines - end with '.'
 			@ '.q'  - quit
 		)->line println(line)
@@ -260,6 +250,12 @@ loop
 			}
 			println("--------------")
 		}
+	} else if (mode==".H") {
+		Inner{
+			Db2:Keys("PS_sh").sort->key
+				Db2:Get("PS_sh",key,Date) => date
+				report(key,date.fmt)
+		}->line println(line)
 	} else {
 		if (mode==".") {
 			println("Enter code lines, then '.' to send")
