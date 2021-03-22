@@ -302,7 +302,8 @@ There can be multiples of every line, including Dir.
     
     CurrProject =>pr
     println
-	Lib:Header(pr.Desc.concat(" "))
+	Lib:Header("Current project")
+	println(pr.Desc.concat(" "))
     pr.Dir->d
         println("Dir: " + d)
     |
@@ -316,8 +317,9 @@ There can be multiples of every line, including Dir.
 # Interactive call to FileLocator, sorted presentation, newest first
 # --
     CheckProject
-    
-    Input("Enter part of file name").get =>fn
+
+	P(1,Input("Enter part of file name").get) => fn
+
     FileLocator(fn) =>fileList
     fileList->file
         out(Int(file.lastModified, file))
@@ -348,8 +350,21 @@ There can be multiples of every line, including Dir.
 ChangeProject
 /Change
 
-Curr
-/CP
 
 TextFiles
 /TF
+
+
+
+# Goto project directory
+# --
+	CurrProject.Dir => dirs
+	error(dirs.length < 1, "No directories configured for project!")
+	if (dirs.length==1) {
+		Dir(dirs.first).setAsCurrentDir
+	} else {
+		Lib:Header("Goto project directory")
+		Dir(Lib:MenuSelect(dirs)).setAsCurrentDir
+	}
+	Dir.path
+/Goto

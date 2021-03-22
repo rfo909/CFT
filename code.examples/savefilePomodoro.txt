@@ -28,16 +28,21 @@
 		percent=(100*i/seconds).i
 		println(prefix + "["+bar+remaining+"] " + percent + " %")
 	
-		if (remainingTime < 120) {
+		if (remainingTime <= 60) {
 		
 			println
-			value=("   "+remainingTime).last(3)
 
-			lines=Letters7x5:GetText(value)
+			lines=Letters7x5:GetText(""+remainingTime)
 			lines->line println(prefix + line)
 		}
 		break(i>=seconds)
-		i=i+1
+		if (seconds-i > 300) {
+			i=i+10
+		} else if (seconds-i > 120) {
+			i=i+3
+		} else {
+			i=i+1
+		}
 |
 
 /CountDown
@@ -47,5 +52,5 @@
 # --
 	Input("Minutes").get.parseInt=>minutes
 	CountDown(minutes)
-/Pomodoro
+/run
 
