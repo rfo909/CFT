@@ -50,7 +50,8 @@ in daughter processes (foreground or background).
 
 CFT supports powerful templating, for creating custom configuration files. It also has internal access
 to the same tokenizer which tokenizes the CFT language. The JSON parser is written
-in CFT itself.
+in CFT itself, and also includes a JSON generator, which means JSON files (or strings) can be created from
+object structures.
 
 ## Internal (thread-safe) data storage
 
@@ -209,16 +210,22 @@ $ 1 help
 
 # Testbed for language mechanisms
 
-CFT also is a bit of a testbed for new and perhaps unusual mechanisms.
+Having "always" been interested in language construction, CFT has also become a bit of a "testbed" for 
+mechanisms which are perhaps a bit unusual. 
+
+It is the first time I've written an interactively parsed language.
+
+Below are some of the peculiarities of CFT.
 
 ## Everything is code
 
-There is the strong adherence to code over values,
-which resulted in the "synthesis" functionality. 
+There is the strong adherence to code over values, which means there are no global variables, only functions.
 
-This converts values, such as a string, a dictionary, or a list of files, 
-to code, which can then be stored on file, to be loaded and eval'ed later, or added as a custom function. When
-the code is run, it produces the original data, but avoids all concurrency issues by returning new objects every time.
+This resulted in the "synthesis" mechanism, which 
+converts values, such as a string, a dictionary, or a list of files, 
+to code, which can then be stored on file, to be loaded and eval'ed later, or added as a custom function. 
+
+When the code is run, it produces the original data, but avoids all concurrency issues by returning new objects every time.
 
 ## Compact syntax - no custom classes
 
