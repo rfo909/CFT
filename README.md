@@ -5,16 +5,22 @@
 - Programmable shell for Linux and Windows
 - Terminal based
 - Written in Java
-- For automation of all tasks
+- For all things automation
 
 
 CFT is a functional object oriented language, which is primarily used for manipulating files and directories, and running
-external programs in the foreground or background.
+external programs in the foreground or background. 
 
-It lets you create functions that call global functions as well as member functions inside objects. All values
-are objects, and descriptions of all predefined functions are available via the "help" functionality.
+It lets you create custom functions that call global functions as well as member functions inside objects. All values
+are objects, and descriptions of all predefined functions are available via the "help" functionality. 
 
-Useful for all levels of automation, from searching groups of files, to deploying software with dependencies.
+Useful for all levels of automation:
+
+- searching groups of files
+- deploying software with dependencies (ssh / scp)
+- automate PowerShell commands both local and remote
+- automate running git and all other command-line programs (such as virsh for KVM)
+
 Communication with remote hosts is done by running external programs, typically SSH, SCP and PowerShell 
 in daughter processes (foreground or background). 
 
