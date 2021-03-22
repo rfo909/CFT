@@ -158,13 +158,60 @@ P(2, Input("Enter service").get) =>service
 /GetServiceStartType
 	
 
+# Utility function for sh
+# --
+	P(1)=>host
+	SymDict(host).set("check",Lambda{
+		P(1)=>obj
+		obj.value.host==self.host
+	}).check => closure
+	
+	Db2Obj:FindObjects("PS_sh", closure).first => foundIt
+	if (foundIt != null) {
+		# doing update to get date value refreshed
+		Db2Obj:UpdateObject("PS_sh", foundIt.id, foundIt.value)
+	} else {
+		# saving new
+		Db2Obj:AddObject("PS_sh",Dict.set("host",host))
+	}
+	
+/_shPutHost
+
+
+# Utility function for sh
+# --
+	list = Db2Obj:SortedObjectsByDate("PS_sh").last(10)
+	
+	Lib:Header("Known hosts")
+	if (list.length != 0) Inner{
+		count=0
+		list->x
+			println("" + count + "   : " + x.date.fmt + " - " + x.value.host)
+			count=count+1
+		|
+		println
+		readLine("Enter number of name") => inp
+		if (inp.?parseInt) {
+			host=list.nth(inp.parseInt).value.host
+			_shPutHost(host)
+			host
+		} else {
+			_shPutHost(inp)
+			inp
+		}
+	} else {
+		readLine("Enter host name") =>host
+		_shPutHost(host)
+		host
+	}
+			
+/_shGetHost
 
 
 # Simple remote shell to multiple windows hosts via PowerShell.
 # --
 
-knownHosts=Lambda{Db2:Keys("PS_Shell")}
-P(1,Inner{knownHosts.call->host println("   "+host) | Input("Enter shell Host").get}) => host
+P(1,_shGetHost) => host
 
 getDir=Lambda{P(1)=>host Db2:Get("PS_Shell",host,"c:\temp")}
 setDir=Lambda{P(1)=>host P(2)=>dir Db2:Set("PS_Shell",host,dir)}
@@ -186,11 +233,7 @@ loop
 			@ '.q'  - quit
 		)->line println(line)
 	} else if (mode==".h") {
-		Lib:Header("Known hosts")
-		Inner {
-			knownHosts.call->h println("   " + h)
-		}
-		Input("Enter shell Host").get => host
+		host=_shGetHost
 	} else if (mode==".d")  {
 		readLine("New current directory") => dir
 		setDir.call(host,dir)
