@@ -166,15 +166,26 @@ P(2, Input("Enter service").get) =>service
 /_shPutHost
 
 
+# Utility
+# --
+	P(1)=>host
+	Lib:run(List("ping","-n","1",host),List,true).exitCode==0
+/_shVerifyHost
 
 # Utility function for sh
 # --
 
+	println("Checking hosts ...")
 	Db2:Keys("PS_sh")->key
 		Db2:Get("PS_sh",key,Date) => date
+		assert(date != null)
+		if (!_shVerifyHost(key)) {
+			Db2:Set("PS_sh",key,null)
+			assert(false)
+		}
 		out(Int(date.get,key))
 	| _.sort.last(10)->x
-		out(x.data)
+		out(x.data.toLower)
 	| => list
 	
 	list->key
@@ -188,7 +199,7 @@ P(2, Input("Enter service").get) =>service
 	menuEntries.add(
 		Dict
 			.set("date",Date)
-			.set("key","XXX Add new host")
+			.set("key","Add new ...")
 			.set("process",Lambda{ readLine("Enter host") })
 	)
 	Llabel=Lambda{P(1)=>x x.date.fmt + " : " + x.key}
@@ -255,6 +266,7 @@ loop
 		Inner{
 			Db2:Keys("PS_sh").sort->key
 				Db2:Get("PS_sh",key,Date) => date
+				assert(date != null)
 				report(key,date.fmt)
 		}->line println(line)
 	} else {
