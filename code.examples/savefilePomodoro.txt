@@ -22,11 +22,11 @@
 
 		# progress bar
 		(50*i/seconds).i => done
-		Lib.Data.yes(done,"#").concat => bar
-		Lib.Data.yes(50-done,"-").concat => remaining
+		Lib.Data.yes(done,Sys.uchar("2588")).concat => bar
+		Lib.Data.yes(50-done,".").concat => remaining
 		
 		percent=(100*i/seconds).i
-		println(prefix + "["+bar+remaining+"] " + percent + " %")
+		println(prefix + bar+remaining+" " + percent + " %")
 	
 		if (remainingTime <= 60) {
 		

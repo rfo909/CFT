@@ -169,8 +169,6 @@ P(2, Input("Enter service").get) =>service
 
 # Utility function for sh
 # --
-	count=0
-	Lib:Header("Known hosts")
 
 	Db2:Keys("PS_sh")->key
 		Db2:Get("PS_sh",key,Date) => date
@@ -181,19 +179,22 @@ P(2, Input("Enter service").get) =>service
 	
 	list->key
 		Db2:Get("PS_sh",key,Date) => date
-		println("" + (""+count + "   ").first(4) + " : " + date.fmt + " - " + key)
-		count=count+1
-	|
-	println
-	readLine("Enter number of name") => inp
-	if (inp.?parseInt) {
-		host=list.nth(inp.parseInt)
-		_shPutHost(host)
-		host
-	} else {
-		_shPutHost(inp)
-		inp
-	}
+		SymDict(date,key)
+			.set("process",Lambda{	self.key }) 
+		=> obj
+		out(obj)
+	| => menuEntries
+	
+	menuEntries.add(
+		Dict
+			.set("date",Date)
+			.set("key","XXX Add new host")
+			.set("process",Lambda{ readLine("Enter host") })
+	)
+	Llabel=Lambda{P(1)=>x x.date.fmt + " : " + x.key}
+	Lib:MenuSelect(menuEntries, Llabel, "Known hosts").process.call => host
+	_shPutHost(host)
+	host
 /_shGetHost
 
 

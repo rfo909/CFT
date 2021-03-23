@@ -144,7 +144,7 @@ P(1,"r---")=>s
 	if (line.length+charsWidth+1 >= Term.w) {
 		charsWidth=Term.w-line.length-1
 	}
-	dataChars=charsWidth-2
+	dataChars=charsWidth
 	if (totalCount > 0) {
 		doneChars=(dataChars*doneCount/totalCount).i
 		if (doneChars > dataChars) doneChars=dataChars
@@ -152,7 +152,7 @@ P(1,"r---")=>s
 		doneChars=0
 	}
 
-	line=line+"[" + Chars("#",doneChars) + Chars("-",dataChars-doneChars) + "]"
+	line=line+Chars(Sys.uchar("2588"),doneChars) + Chars(".",dataChars-doneChars)
 	println(line)
 /DoShowProgressBar
 	
