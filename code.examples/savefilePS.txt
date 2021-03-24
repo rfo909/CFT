@@ -179,12 +179,13 @@ P(2, Input("Enter service").get) =>service
 	Db2:Keys("PS_sh")->key
 		Db2:Get("PS_sh",key,Date) => date
 		assert(date != null)
+		assert(Date.sub(Date.Duration.days(30)).before(date))
 		if (!_shVerifyHost(key)) {
 			Db2:Set("PS_sh",key,null)
 			assert(false)
 		}
 		out(Int(date.get,key))
-	| _.sort.last(10)->x
+	| _.sort->x
 		out(x.data.toLower)
 	| => list
 	
@@ -202,7 +203,7 @@ P(2, Input("Enter service").get) =>service
 			.set("key","Add new ...")
 			.set("process",Lambda{ readLine("Enter host") })
 	)
-	Llabel=Lambda{P(1)=>x x.date.fmt + " : " + x.key}
+	Llabel=Lambda{P(1)=>x x.date.setFormat("yyyy-MM-dd").fmt + " : " + x.key}
 	Lib:MenuSelect(menuEntries, Llabel, "Known hosts").process.call => host
 	_shPutHost(host)
 	host
