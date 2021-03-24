@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2021-02-14 RFO
-v2.3.2
+Last updated: 2021-03-24 RFO
+v2.3.5
 ```
 # Introduction
 
@@ -532,6 +532,12 @@ Apart from navigating interactively, to set current directory via code:
 
 ```
 Dir.setAsCurrentDir
+```
+## Newest file in directory
+
+```
+Dir.newestFile
+Dir.newestFile(Glob("*.log"))
 ```
 # The shell() function
 

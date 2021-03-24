@@ -52,6 +52,7 @@ Directories
  * Get all directories recursively under a directory:
  * Delete a sub-directory
  * Set current directory
+ * Newest file in directory
 
 The shell() function
 
