@@ -1,0 +1,172 @@
+# Readme
+<<< EOF
+Binary calculator
+-----------------
+Works with integer values and string values on format "b010101" and "0xcafe".
+
+Uses internal functions 
+	<int>.bin
+	<int>.hex
+	<String>.parseInt
+>>> EOF
+/Readme
+
+
+# Set number of bits for binary values
+# --
+	P(1,Input("Number of bits").get.parseInt) =>bits
+	Db2:Set("BinCalc","bits",bits)
+/SetBitCount
+
+# Get bitcount
+# --
+	Db2:Get("BinCalc","bits",8)
+/BitCount
+
+
+# Parse any value to int
+# Parameter value:
+#    - int
+#    - String
+#		"23"  (decimal)
+#		"b1001010"   (binary)
+#		"0xff23"   (hex)
+# --
+	P(1)=>value
+	if (getType(value) == "String") {
+		if (value.startsWith("b")) {
+			value.sub(1).parseInt(2)
+		} else if (value.startsWith("0x")) {
+			value.sub(2).parseInt(16)
+		} else {
+			value.parseInt
+		}
+	} else {
+		value
+	}
+/toInt
+
+
+# to binary
+	P(1) => value
+	P(2,BitCount) => bits
+	
+	"b"+(toInt(value)).bin(bits)
+/bin
+
+# int to hex
+	P(1) => value
+	"0x"+(toInt(value)).hex
+/hex
+
+# Binary AND
+# --
+	toInt(P(1)).bin => a
+	toInt(P(2)).bin => b
+
+	Lib.Data.for(0,a.length,1)->i
+		a.chars.nth(i) =>ac
+		b.chars.nth(i) =>bc
+		out(
+			if (ac=="1" && bc=="1", "1", "0")
+		)
+	| _.concat.parseInt(2) => i
+	bin(i)
+/and
+
+
+# Binary OR
+# --
+	toInt(P(1)).bin => a
+	toInt(P(2)).bin => b
+
+	Lib.Data.for(0,a.length,1)->i
+		a.chars.nth(i) =>ac
+		b.chars.nth(i) =>bc
+		out(
+			if (ac=="0" && bc=="0", "0", "1")
+		)
+	| _.concat.parseInt(2) => i
+	bin(i)
+/or
+
+
+# Binary XOR
+# --
+	toInt(P(1)).bin => a
+	toInt(P(2)).bin => b
+
+	Lib.Data.for(0,a.length,1)->i
+		a.chars.nth(i) =>ac
+		b.chars.nth(i) =>bc
+		out(
+			if (ac==bc, "0", "1")
+		)
+	| _.concat.parseInt(2) => i
+	bin(i)
+/xor
+
+# Binary inverse
+	P(1)=>value
+	P(2,BitCount)=>bits
+	toInt(value).bin(bits).chars->c
+		if (c=="1") {
+			out("0")
+		} else {
+			out("1")
+		}
+	| _.concat.parseInt(2) => i
+	bin(i,bits)
+/neg
+
+
+
+# Shift/rotate left
+# --
+	P(1) => value
+	P(2,1) => count
+	P(3,false) => rotate
+	P(4,BitCount) => bits
+	
+	toInt(value).bin(bits) => s
+	Lib.Data.for(0,count,1)->i
+		s=s.sub(1)+if(rotate,s.sub(0,1),"0")
+	|
+	bin(s.parseInt(2),bits)
+/left
+
+# Shift/rotate right
+# --
+	P(1) => value
+	P(2,1) => count
+	P(3,false) => rotate
+	P(4,BitCount) => bits
+	
+	toInt(value).bin(bits) => s
+	Lib.Data.for(0,count,1)->i
+		s=
+			if(rotate,s.sub(bits-1),"0") 
+			+ s.sub(0,bits-1)
+	|
+	bin(s.parseInt(2),bits)
+/right
+
+
+# Show bits
+# --
+	P(1)=>value
+	toInt(value).bin(BitCount) => str
+	count=0
+	str.chars.reverse -> c
+		if (count > 0) {
+			if (count % 4 == 0) out(" ")
+			if (count % 8 == 0) out(" ")
+		}
+		out(c)
+		count=count+1
+	| _.reverse.concat => str
+	println("binary: " + str)
+	println("hex:    " + hex(value))
+	println("dec:    " + toInt(value))
+	toInt(value)
+/show
