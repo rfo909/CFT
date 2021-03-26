@@ -72,7 +72,7 @@ public class ObjDict extends Obj {
     		keySequence.add(key);
     	}
     	values.put(key, value);
-    	init();
+        if (isIdentifier(key)) init();
     	
     	// quick and easy sanity check
     	if (values.keySet().size() != keySequence.size()) {
@@ -248,9 +248,6 @@ public class ObjDict extends Obj {
             
             set(key, value);
             
-            
-            if (isIdentifier(key)) init();
-            
             return new ValueObj(theDict());
         }
     }
@@ -360,8 +357,6 @@ public class ObjDict extends Obj {
             String value=str.substring(pos+1).trim();
 
             set(key,new ValueString(value));
-            
-            if (isIdentifier(key)) init();
             
             return new ValueObj(theDict());
         }
