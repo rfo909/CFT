@@ -72,6 +72,7 @@ public class ObjDict extends Obj {
     		keySequence.add(key);
     	}
     	values.put(key, value);
+    	init();
     	
     	// quick and easy sanity check
     	if (values.keySet().size() != keySequence.size()) {
