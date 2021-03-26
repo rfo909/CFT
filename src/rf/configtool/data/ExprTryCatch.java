@@ -58,12 +58,12 @@ public class ExprTryCatch extends ExprCommon {
     		stackTrace=getStackTrace(ex);
     		msg=new ValueString(ex.getMessage());
     	}
-    	HashMap<String,Value> data=new HashMap<String,Value>();
-    	if (result != null) data.put("result", result);
-    	data.put("ok", new ValueBoolean(result != null));
-    	if (stackTrace != null) data.put("stack", stackTrace);
-    	if (msg != null) data.put("msg", msg);
-    	return new ValueObj(new ObjDict(data));
+    	ObjDict x=new ObjDict();
+    	x.set("ok", new ValueBoolean(result != null));
+    	if (result != null) x.set("result", result);
+    	if (stackTrace != null) x.set("stack", stackTrace);
+    	if (msg != null) x.set("msg", msg);
+    	return new ValueObj(x);
     }
     
     private ValueList getStackTrace(Exception ex) {

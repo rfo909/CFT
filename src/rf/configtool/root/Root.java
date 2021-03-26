@@ -207,11 +207,11 @@ public class Root {
 					// Run the prompt code line to produce possibly dynamic prompt
 					String promptCode = propsFile.getPromptCode();
 					SourceLocation loc = new SourceLocation("prompt", 0, 0);
-					CodeLines codeLines = new CodeLines(promptCode, loc);
+					CodeLines promptCodeLines = new CodeLines(promptCode, loc);
 	
 					String pre;
 					try {
-						Value ret = objGlobal.getRuntime().processCodeLines(stdio, codeLines, new FunctionState());
+						Value ret = objGlobal.getRuntime().processCodeLines(stdio, promptCodeLines, new FunctionState());
 						pre=ret.getValAsString();
 					} catch (Exception ex) {
 						if (debugMode) {

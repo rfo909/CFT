@@ -50,6 +50,8 @@ public class ExprParamLookupDict extends ExprCommon {
     public Value resolve (Ctx ctx) throws Exception {
         List<Value> params=ctx.getFunctionState().getParams();
         Map<String,Value> map=new HashMap<String,Value>();
+        ObjDict x=new ObjDict();
+        
         for (int i=0; i<names.size(); i++) {
             String name=names.get(i).resolve(ctx).getValAsString();
             Value value;
@@ -58,8 +60,8 @@ public class ExprParamLookupDict extends ExprCommon {
             } else {
                 value=new ValueNull();
             }
-            map.put(name, value);
+            x.set(name, value);
         }
-        return new ValueObj(new ObjDict(map));
+        return new ValueObj(x);
     }
 }

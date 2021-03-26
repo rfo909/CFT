@@ -70,12 +70,12 @@ public class ExprTryCatchSoft extends ExprCommon {
     		if (softEx==null) throw ex;  
     	}
     	
-    	HashMap<String,Value> data=new HashMap<String,Value>();
-    	if (result != null) data.put("result", result);
-    	data.put("ok", new ValueBoolean(result != null));
-    	if (softEx != null) data.put("msg", new ValueString(softEx.getMessage()));
+    	ObjDict x=new ObjDict();
+    	x.set("ok", new ValueBoolean(result != null));
+    	if (result != null) x.set("result", result);
+    	if (softEx != null) x.set("msg", new ValueString(softEx.getMessage()));
   
-    	return new ValueObj(new ObjDict(data));
+    	return new ValueObj(x);
     }
     
 }

@@ -34,13 +34,14 @@ import rf.configtool.parser.Token;
 public class ObjDict extends Obj {
     
     private Map<String,Value> values=new HashMap<String,Value>();
-    
-    public Iterator<String> getKeys() {
-        return values.keySet().iterator();
-    }
+    private List<String> keySequence=new ArrayList<String>();
     
     public Value getValue(String key) {
         return values.get(key);
+    }
+    
+    public Iterator<String> getKeys() {
+    	return keySequence.iterator();
     }
     
     private List<Function> baseFunctions;
@@ -65,11 +66,33 @@ public class ObjDict extends Obj {
         init();
     }
     
-    public ObjDict(Map<String,Value> values) {
-        this();
-        this.values=values;
-        init();
+    
+    public void set (String key, Value value) {
+    	if (values.get(key) == null) {
+    		keySequence.add(key);
+    	}
+    	values.put(key, value);
+    	
+    	// quick and easy sanity check
+    	if (values.keySet().size() != keySequence.size()) {
+    		StringBuffer sb1=new StringBuffer();
+    		StringBuffer sb2=new StringBuffer();
+    		for (String s:keySequence) {
+    			if (values.get(s)==null) {
+    				sb1.append(" "+s);
+    			}
+    		}
+    		for (String s:values.keySet()) {
+    			if (!keySequence.contains(s)) {
+    				sb2.append(" " + s);
+    			}
+    		}
+    		
+    		throw new RuntimeException("Dict: internal error: (s1=" + sb1.toString().trim() + ")  (s2=" + sb2.toString().trim() + ")");
+    	}
     }
+    
+    
     
     private void init() {
         clearFunctions();
@@ -79,9 +102,7 @@ public class ObjDict extends Obj {
             functionNames.add(f.getName());
             add(f);
         }
-        Iterator<String> names = values.keySet().iterator();
-        while (names.hasNext()) {
-            String name=names.next();
+        for (String name:keySequence) {
             if (functionNames.contains(name) || !isIdentifier(name)) continue;
             functionNames.add(name);
             add(new FunctionGetDynamic(name));
@@ -127,9 +148,8 @@ public class ObjDict extends Obj {
     public String synthesize() throws Exception {
         StringBuffer sb=new StringBuffer();
         sb.append("Dict");
-        Iterator<String> names=values.keySet().iterator();
-        while (names.hasNext()) {
-            String name=names.next();
+
+        for (String name:keySequence) {
             Value value=values.get(name);
             
             // NOTE: closures are not synthesizable, but lambdas are, and setting a field in a Dict to 
@@ -153,9 +173,8 @@ public class ObjDict extends Obj {
     @Override
     public ColList getContentDescription() {
         StringBuffer str=new StringBuffer();
-        Iterator<String> x=values.keySet().iterator();
-        while (x.hasNext()) {
-            str.append(" "+x.next());
+        for (String key:keySequence) {
+            str.append(" "+key);
         }
         return ColList.list().regular("Dict: " + str.toString().trim());
     }
@@ -188,8 +207,7 @@ public class ObjDict extends Obj {
             if (defaultValue==null) throw new Exception("No value for key='" + key + "'");
             
             // store defaultValue in dict
-            if (values==null) values=new HashMap<String,Value>();
-            values.put(key, defaultValue);
+            set(key, defaultValue);
             return defaultValue;
         }
     }
@@ -227,7 +245,8 @@ public class ObjDict extends Obj {
             	}
             }
             
-            values.put(key, value);
+            set(key, value);
+            
             
             if (isIdentifier(key)) init();
             
@@ -245,11 +264,8 @@ public class ObjDict extends Obj {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             List<Value> result=new ArrayList<Value>();
-            if (values != null) {
-                Iterator<String> keys=values.keySet().iterator();
-                while (keys.hasNext()) {
-                    result.add(new ValueString(keys.next()));
-                }
+            for (String key:keySequence) {
+            	result.add(new ValueString(key));
             }
             return new ValueList(result);
         }
@@ -268,6 +284,7 @@ public class ObjDict extends Obj {
             
             if (values != null) {
                 values.remove(key);
+                keySequence.remove(key);
             } 
             
             if (isIdentifier(key)) init();
@@ -302,13 +319,9 @@ public class ObjDict extends Obj {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
-            if (values != null) {
-                Iterator<String> keys=values.keySet().iterator();
-                while (keys.hasNext()) {
-                    String key=keys.next();
-                    String line=key + ": " + values.get(key).getValAsString();
-                    ctx.getObjGlobal().addSystemMessage(line);
-                }
+            for (String key:keySequence) {
+                String line=key + ": " + values.get(key).getValAsString();
+                ctx.getObjGlobal().addSystemMessage(line);
             }
             return new ValueObj(theDict());
         }
@@ -344,7 +357,8 @@ public class ObjDict extends Obj {
         
             String key=str.substring(0,pos).trim();
             String value=str.substring(pos+1).trim();
-            values.put(key,new ValueString(value));
+
+            set(key,new ValueString(value));
             
             if (isIdentifier(key)) init();
             
@@ -370,15 +384,13 @@ public class ObjDict extends Obj {
         		throw new Exception("Expected no parameters or two parameters: pre,post");
         	}
         
-            Map<String,Value> map=new HashMap<String,Value>();
-            
-            Iterator<String> keys=values.keySet().iterator();
-            while(keys.hasNext()) {
-                String key=keys.next();
-                map.put(pre + key + post, values.get(key));
+        	ObjDict x=new ObjDict();
+           
+            for (String key:keySequence) {
+                x.set(pre + key + post, values.get(key));
             }
             
-            return new ValueObj(new ObjDict(map));
+            return new ValueObj(x);
         }
     }
 
@@ -418,9 +430,7 @@ public class ObjDict extends Obj {
             if (params.size() != 0) throw new Exception("Expected no parameters");
             
             boolean found=false;
-            Iterator<String> keys=values.keySet().iterator();
-            while(keys.hasNext()) {
-                String key=keys.next();
+            for (String key:keySequence) {
                 if (values.get(key) instanceof ValueNull) {
                 	found=true;
                 	break;
@@ -483,11 +493,9 @@ public class ObjDict extends Obj {
         	 Obj obj=getObj("Dict",params,0);
         	 if (obj instanceof ObjDict) {
         		 ObjDict d=(ObjDict) obj;
-        		 Iterator<String> keys = d.getKeys();
-        		 while (keys.hasNext()) {
-        			 String key=keys.next();
+        		 for (String key:d.keySequence) { 
         			 Value value=d.getValue(key);
-        			 self().values.put(key, value);
+        			 set(key, value);
         		 }
         	 } else {
         		 throw new Exception("Expected Dict parameter");
@@ -509,17 +517,19 @@ public class ObjDict extends Obj {
         	 List<Value> list=getList("keyList",params,0);
         	 Value defaultValue=params.get(1);
         	 
+        	 ObjDict x=new ObjDict();
+
         	 Map<String,Value> data=new HashMap<String,Value>();
         	 for (Value v:list) {
         		 if (!(v instanceof ValueString)) throw new Exception("Expected keyList parameter to contain strings");
         		 String key=((ValueString)v).getVal();
         		 if (self().values.containsKey(key)) {
-        			 data.put(key, self().values.get(key));
+        			 x.set(key, self().values.get(key));
         		 } else {
-        			 data.put(key, defaultValue);
+        			 x.set(key, defaultValue);
         		 }
         	 }
-        	 return new ValueObj(new ObjDict(data));
+        	 return new ValueObj(x);
          }
      }
 

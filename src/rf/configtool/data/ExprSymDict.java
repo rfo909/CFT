@@ -46,10 +46,10 @@ public class ExprSymDict extends ExprCommon {
     }
     
     public Value resolve (Ctx ctx) throws Exception {
-    	Map<String,Value> data=new HashMap<String,Value>();
+    	ObjDict x=new ObjDict();
     	for (String name:identifiers) {
-    		data.put(name,ctx.resolveExpr(name));
+    		x.set(name,ctx.resolveExpr(name));
     	}
-    	return new ValueObj(new ObjDict(data));
+    	return new ValueObj(x);
     }
 }

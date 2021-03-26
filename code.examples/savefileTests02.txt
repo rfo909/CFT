@@ -1,0 +1,95 @@
+# Testing Dictonaries after adding code to maintain key
+# sequence.
+
+
+Dict.set("a",1).set("c",3).set("a",2).keys.concat(" ")=="a c"
+/Test01_set
+
+
+
+Dict.set("a",1).set("b",2) => a
+Dict.set("x",5).set("b",4) => b
+b.copyFrom(a).keys.concat == "xba"
+/Test02_copyFrom
+
+
+
+Dict.set("a",1) => a
+a.get("b",2)
+a.set("c",3)
+a.keys.concat=="abc"
+/Test03_getWithDefault
+
+
+
+Dict.set("a",1).set("23",2).set("x",3).keys.concat=="a23x"
+/Test04_nonIdentifierKey
+
+
+
+Lambda{
+	PDict("a","b","2")
+}.call(1,2).keys.concat=="ab2"
+/Test05_PDict
+
+
+
+a=1 b=2 c=3
+SymDict(a,b,c).keys.concat=="abc"
+/Test05b_SymDict
+
+
+
+Dict.set("a",1).set("b",2).set("c",3).set("a",4).mergeCodes.keys.concat=="${a}${b}${c}"
+/Test06_mergeCodes
+
+
+
+Dict.set("a",1).set("b",2).set("c",3) => d
+d.remove("b")
+d.set("b",4)
+d.keys.concat=="acb"
+/Test07_remove
+
+
+
+
+dict=Dict
+<<< EOF
+a : 5
+b = roar
+c: test
+>>> EOF
+	->line
+		dict.setStr(line)
+|
+	dict.keys.concat=="abc" && dict.a=="5" && dict.b=="roar" && dict.c=="test"
+/Test08_setStr
+
+
+
+	
+	
+Dict.set("a",1).set("b",2).set("c",3).subset("b a x".split, "default").keys.concat=="bax"
+/Test09_subset
+
+
+
+
+JSON:Parse("{b:1, a:2, c:3, x:{y:1, z:2}, d:4}").keys.concat=="bacxd" 
+/Test10_JSON
+
+
+
+
+
+# Run all TestX
+# --
+	Sys.functions.sort->f
+		assert(f.startsWith("Test"))
+		report(f,eval(f))
+/RunAll
+
+
+Dict help
+/dh
