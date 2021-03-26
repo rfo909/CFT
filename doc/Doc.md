@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2021-03-24 RFO
-v2.3.5
+Last updated: 2021-03-26 RFO
+v2.3.6
 ```
 # Introduction
 
@@ -2064,6 +2064,46 @@ conversely, takes a Dict/List structure to JSON format again.
 Worth noting that the JSON library is a CFT script, not built-in functionality.
 The parser is written in CFT, using the Lib.Text.Lexer to tokenize the input,
 and a plain recursive-descent parser as functions inside the JSON script.
+
+
+Parse example:
+
+```
+$ JSON:Parse("{a:1,b:[2,3,4]}")
+Dict: a b
+$ /x
+$ x.b
+0: 2
+1: 3
+2: 4
+```
+
+Generate JSON example
+
+```
+$ Dict.set("a",1).set("b",2).set("c","xyz".chars)
+Dict: a b c
+$ /y
+$ JSON:PP(y)
+0: {
+1:   "a": 1,
+2:   "b": 2,
+3:   "c": [
+4:     "x",
+5:     "y",
+6:     "z"
+7:   ]
+8: }
+$ JSON:Export(y)
+{ "a": 1, "b": 2, "c": [ "x", "y", "z" ] }
+```
+
+As of version 2.3.6 dictionaries keep track of the order values are stored, which ensures
+that the order of fields added to dictionary, is the order of fields when generating JSON.
+
+
+Vice versa, the order of fields inside objects in a JSON string, when parsed, becomes the order of
+fields in the corresponding dictionaries.
 
 # Use as a calculator
 
