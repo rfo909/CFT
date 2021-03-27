@@ -1,35 +1,44 @@
 
 # CFT - ConfigTool
 
-CFT started life as a way to configuring, deploying, starting and stopping services on remote Windows hosts via PowerShell,
-but it is really about automation of all kinds.
+CFT started life as a way to create config files, copy files to remote hosts and starting and stopping remote services,
+all via PowerShell. Soon followed log collection and searching.
 
-- Programmable shell for Linux and Windows
-- Terminal based
+- Terminal based, interactive language, for automation
 - Written in Java
-- Automation
+- Runs on Windows and Linux
 
 
 ## Features
 
 
 - Compact syntax
-- Supports threading for parallel operations
-- Runs external programs in foreground or background
-- No global variables, means less unexpected side effects
-- Shortcuts for running code, such as @e to open current script in editor
-- Good error reporting
+- Processing files and directories
+- Rich data structures with lists and dictionaries
+- Powerful filtering of data
+- Running external programs in foreground or background
+- User input
+- Templating functions for merging data into text
+- No global variables - fewer side effects
+- Shortcuts for calling code in any script
 - Two-tiered error handling system (hard and soft)
-- Integrated help system for info on all functions, global and inside objects
-- Various library and example scripts
-- Up to date documentation with examples (doc/Doc.html)
+- Integrated help system for interactive info on all functions
+- All values are objects, with member functions
+- Organize sets of functions into scripts (save-files)
+- Call functions across scripts
+- Lambdas and closures for advanced library functionality
+- Supports multithreading for time consuming operations
+- Many library and example scripts
+- Up to date documentation with examples
 - Youtube tutorial playlist
 
 
 # Introduction
 
-CFT is a functional object oriented language, which is primarily used for manipulating files and directories, and running
-external programs in the foreground or background. 
+CFT is a functional object oriented language. It is primarily used for:
+ 
+- manipulating files and directories
+- running external programs in the foreground or background. 
 
 It lets you create custom functions that call global functions, as well as member functions inside objects. All values
 are objects, and descriptions of all predefined functions are available via the "help" functionality. 
@@ -39,9 +48,10 @@ Useful for all levels of automation:
 
 - searching groups of files
 - deploying software with dependencies (ssh / scp)
-- automate PowerShell commands both local and remote - saves a lot of typing
-- running git and all other command-line programs (such as virsh for KVM)
-- collect and unzip archived log files, for searching
+- start/stop services on sets of servers (PowerShell or SSH)
+- collect logfiles, unzipping zipped files, for searching
+- automate PowerShell commands - saves a lot of typing
+- automate git checkin, checkout, ... or virsh to manage KVM
 
 Communication with remote hosts is done by running external programs, typically SSH, SCP and PowerShell 
 in daughter processes (foreground or background). 
@@ -49,11 +59,13 @@ in daughter processes (foreground or background).
 ## Templating
 
 CFT supports powerful templating, for creating custom configuration files. It also has internal access
-to the same tokenizer which tokenizes the CFT language. The JSON parser is written
-in CFT itself, and also includes a JSON generator, which means JSON files (or strings) can be created from
-object structures.
+to the same tokenizer which tokenizes the CFT language, and the JSON parser is written
+in CFT itself, returning a CFT data structure
+
 
 ## Internal (thread-safe) data storage
+
+CFT has no global variables, only functions.
 
 For situations where state is required, either in session or between sessions, or when sharing data with
 parallel worker threads, a primitive database is included in CFT. It is thread-safe, and provides a
@@ -208,24 +220,28 @@ $ 1 help
 
 [Full Youtube tutorial](https://www.youtube.com/playlist?list=PLj58HwpT4Qy80WhDBycFKxIhWFzv5WkwO)
 
-# Testbed for language mechanisms
+# Some oddities
 
-Having "always" been interested in language construction, CFT has also become a bit of a "testbed" for 
-mechanisms which are perhaps a bit unusual. 
+CFT is kind of a Domain Specific Language, and the initial concept was that of entering code interactively,
+one line at a time. This means the syntax needed to be compact. 
 
-It is the first time I've written an interactively parsed language.
+Over time, editing script files in editors became the norm. The shortcut '@e' is frequently used, as it
+opens current script in your favourite editor. The interactive terminal window is useful not just for
+running your functions, but also for looking up functions inside all types of objects, and inspecting
+library scripts.
 
 Below are some of the peculiarities of CFT.
 
 ## Everything is code
 
-There is the strong adherence to code over values, which means there are no global variables, only functions.
+There is a strong adherence to code over values, which means there are no global variables, only functions.
 
 This resulted in the "synthesis" mechanism, which 
 converts values, such as a string, a dictionary, or a list of files, 
 to code, which can then be stored on file, to be loaded and eval'ed later, or added as a custom function. 
 
-When the code is run, it produces the original data, but avoids all concurrency issues by returning new objects every time.
+When synthesized code is run, it produces the original data, but avoids all concurrency issues 
+by returning new objects every time.
 
 ## Compact syntax - no custom classes
 
@@ -233,25 +249,75 @@ The initial goal was a system that was programmed interactively, one line at a t
 syntax, to get actual useful work out of a single line of code.
 
 From this also followed the initial decision not to allow custom classes. Classes open a whole can of worms
-regarding scope rules, inheritance etc, as well as state management.
+regarding scope rules, inheritance etc, as well as state management, as "stateless classes" is almost a
+contradiction. 
 
-CFT has instead been focused on creating useful system objects. 
+CFT development has focused on creating useful system objects, which the user manipulates via the strictly
+functional interface. 
 
 ## List iteration / filtering
 
-Also, iteration over lists is perhaps a bit "strange", using the "-> loopVariable ..." notation, and with the focus
-on filtering data, by suppressing values, passing on values or create new values based on old values, or any combination.
+Iteration over lists has perhaps a bit "strange" notation, using the "-> loopVariable" notation. The integrated
+support for filtering, as well as conversions, via the out() statement, was an early requirement, since these
+are very common operations, and the implicit result list made syntax compact.
 
-## Inner blocks
+## Function parameters 
 
-In addition to normal blocks in curly braces, CFT has a second type of code block prefixed by the word Inner. The
-need follows from how list iteration usually means filtering, and how we want to do sub-filtering-jobs inline in
-the code of a function, without having to create a helper function.
+Functions identify parameters with the P(N) expression, where N is the 1-based position of the parameter. But
+the P() expression also allows a second part, which is an expression that is a default value. 
+
+The key here is that this second expression is only resolved (run) when it is needed, so it can interactively
+ask the user for input.
+
+This means such functions can be called from other functions, with parameters, or they can be called
+interactively without parameters, and then become interactive. 
+
+
+## Loop spaces
+
+With the goal of simple syntax, block notation was considered but rejected at an early stage, when programming
+was "one-line-at-a-time". Instead, loop bodies started at the "-> loopVariable" and ended at the end of the
+function.
+
+This, however, resulted in many extra functions, and the "PIPE" symbol was born, where the function code is
+(at top-level only) split into multiple blocks, so that the output from one, becomes a value on the top of 
+the stack for the next, which it can use or ignore, but importantly, the PIPE symbol is an end-marker for all
+loops. 
+
+Later, when shifting to using editors instead of entering code interactively, the PIPE could have been
+retired, but it remains, as there already was a bit of library code depending on it, and it's kind
+of neat, when you know what you're doing.
+
+
+## Two types of code blocks in curly braces
+
+At the introduction of blocks, what is now called the Lambda, was the first. Then followed the local
+block. It's description and implementation varied a bit for a while, until it became clear that we needed
+a distinction between what we now call local and Inner blocks.
+
+The concept of having loops populate an implicit result list, meant we needed to differ between the two
+types of inline code blocks.
+ 
+The local block inherites the "loop space" from the environment. It can contain inner loops, which are
+limited in scope by the block. Calling out() sends data to the the inherited implicit output list.
+
+Inner blocks are isolated
+in terms of loop control. Inner blocks can iterate over lists and calculate results, which become result
+values in the calling code, without messing with any iteration loop output there.
+
 
 ## Lambdas and Closures
 
 These concepts are well known, and came about as a consequence of being easy to implement, 
-but have proven useful for different tasks, particularly creating powerful library code.
+but have proven useful for different tasks, particularly creating powerful library code. For example
+the Lib:MenuSelect, given a Lambda to extract a label from the list of elements to select from,
+lets us directly select any type of object, not just strings. 
+
+If you want to select one from a list of files, create a Lambda that outputs the name of the file.
+
+```
+	Lib:MenuSelect(list-of-files, Lambda{P(1).name} )
+```
 
 
 [Full documentation](doc/Doc.md).
