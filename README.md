@@ -4,9 +4,8 @@
 CFT started life as a way to create config files, copy files to remote hosts and starting and stopping remote services,
 all via PowerShell. Soon followed log collection and searching.
 
-- Terminal based, interactive language, for automation
-- Written in Java
-- Runs on Windows and Linux
+CFT is a terminal based, interactive programming language, for automation of all kinds. It is written in Java, and
+is in active use on Windows and Linux.
 
 
 ## Features
@@ -26,8 +25,10 @@ all via PowerShell. Soon followed log collection and searching.
 - All values are objects, with member functions
 - Organize sets of functions into scripts (save-files)
 - Call functions across scripts
+- Use as a desktop calculator (script BCalc for binary operations)
+- Has script for binary calculations
 - Lambdas and closures for advanced library functionality
-- Supports multithreading for time consuming operations
+- Supports multithreading for time consuming operations, such as software installs or updates
 - Many library and example scripts
 - Up to date documentation with examples
 - Youtube tutorial playlist
@@ -41,14 +42,14 @@ CFT is a functional object oriented language. It is primarily used for:
 - running external programs in the foreground or background. 
 
 It lets you create custom functions that call global functions, as well as member functions inside objects. All values
-are objects, and descriptions of all predefined functions are available via the "help" functionality. 
+are objects, and descriptions of all predefined functions are available via the interactive "help" command. 
 
 ## Automation
 Useful for all levels of automation:
 
 - searching groups of files
-- deploying software with dependencies (ssh / scp)
-- start/stop services on sets of servers (PowerShell or SSH)
+- deploying software with dependencies (ssh / scp or PowerShell)
+- start/stop services on sets of servers (ssh or PowerShell)
 - collect logfiles, unzipping zipped files, for searching
 - automate PowerShell commands - saves a lot of typing
 - automate git checkin, checkout, ... or virsh to manage KVM
@@ -58,9 +59,11 @@ in daughter processes (foreground or background).
 
 ## Templating
 
-CFT supports powerful templating, for creating custom configuration files. It also has internal access
-to the same tokenizer which tokenizes the CFT language, and the JSON parser is written
-in CFT itself, returning a CFT data structure
+CFT supports powerful templating, for creating custom configuration files. 
+
+It also has internal access
+to the same tokenizer which tokenizes the CFT language, and has a JSON parser which is written
+in CFT itself, returning a CFT data structure, as well as creating JSON text from a CFT data structure.
 
 
 ## Internal (thread-safe) data storage
@@ -236,12 +239,24 @@ Below are some of the peculiarities of CFT.
 
 There is a strong adherence to code over values, which means there are no global variables, only functions.
 
-This resulted in the "synthesis" mechanism, which 
-converts values, such as a string, a dictionary, or a list of files, 
-to code, which can then be stored on file, to be loaded and eval'ed later, or added as a custom function. 
+To represent a value, such as a path, we create a function that returns that path, as a string literal
+is an expression, which produces a value.
 
-When synthesized code is run, it produces the original data, but avoids all concurrency issues 
-by returning new objects every time.
+A common need was that of creating Dir objects representing some directory in the file system. The
+"synthesis" mechanism was invented, which meant one could navigate to a directory, then type "pwd" or "Dir"
+to get the Dir object for that directory, then ":syn" to syntesize it into code, which could then be
+assigned a function name. 
+
+Later came the eval() function, which meant that synthesis was not only a way of creating functions, but
+also a way of storing data as text, to file, to be eval'ed later, to recreate the original data.
+
+This in turn led to the integrated database, accessed via the Db2 script, where one can store complex
+data structures of lists, dictionaries, File and Dir objects, and so on, and have them load as objects, via
+eval(). 
+
+The synthesis + eval pair also made possible safe transfer of state, when initializing a thread (called process in
+CFT), securely avoiding race conditions, as synthesis + eval always produces an independent copy.
+
 
 ## Compact syntax - no custom classes
 
@@ -255,11 +270,20 @@ contradiction.
 CFT development has focused on creating useful system objects, which the user manipulates via the strictly
 functional interface. 
 
+## Function names follow code
+
+This follows from the initial desire to create functions interactively, which meant entering some code,
+deciding underway how much logic would fit the single line, then watch it fail or run, and if it ran, 
+decide a name for it.
+
+
 ## List iteration / filtering
 
-Iteration over lists has perhaps a bit "strange" notation, using the "-> loopVariable" notation. The integrated
+Iteration over lists has perhaps a bit "strange" syntax, using the "-> loopVariable" notation. The integrated
 support for filtering, as well as conversions, via the out() statement, was an early requirement, since these
 are very common operations, and the implicit result list made syntax compact.
+
+It would however have a few consequences later ...
 
 ## Function parameters 
 
@@ -319,6 +343,9 @@ If you want to select one from a list of files, create a Lambda that outputs the
 	Lib:MenuSelect(list-of-files, Lambda{P(1).name} )
 ```
 
+That call will return one of the files after the user has identified which, by file name.
+
+# References
 
 [Full documentation](doc/Doc.md).
 
