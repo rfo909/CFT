@@ -323,7 +323,7 @@ public class ObjFile extends Obj {
             return "create";
         }
         public String getShortDesc() {
-            return "create(expr) - create file if it doesn't exist, with content as given";
+            return "create(expr) - create file if it doesn't exist, with content as given, returns self";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 1) throw new Exception("Expected one parameter any type (file data)");
@@ -349,7 +349,7 @@ public class ObjFile extends Obj {
             } finally {
                 if (ps != null) try {ps.close();} catch (Exception ex) {};
             }
-            return new ValueBoolean(true);
+            return new ValueObj(self());
         }
     }
 
