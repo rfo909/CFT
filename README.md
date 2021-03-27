@@ -26,7 +26,6 @@ is in active use on Windows and Linux.
 - Organize sets of functions into scripts (save-files)
 - Call functions across scripts
 - Use as a desktop calculator (script BCalc for binary operations)
-- Has script for binary calculations
 - Lambdas and closures for advanced library functionality
 - Supports multithreading for time consuming operations, such as software installs or updates
 - Many library and example scripts
