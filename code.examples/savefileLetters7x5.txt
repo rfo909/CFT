@@ -343,10 +343,21 @@ Z #####   .
 /GetChar
 
 
+# Get character mask doubled in size
+# --
+	P(1)=>char
+	GetChar(char)->line
+		Inner {
+			line.chars->c out(c) out(c)
+		} _.concat => modLine
+		out(modLine)
+		out(modLine)
+/GetCharX2
+
 
 # Get text
 # --
-	P(1,"135")=>i
+	P(1,"TEST")=>i
 	Lib.Data.each(0,6)->lineNo
 		s = Inner {
 			(""+i).chars->c
@@ -359,4 +370,13 @@ Z #####   .
 /GetText
 	
 
-
+# Get text x2
+# --
+	P(1,"TEST")=>s
+	GetText(s)->line
+		Inner {
+			line.chars->c out(c) out(c)
+		} _.concat => modLine
+		out(modLine)
+		out(modLine)
+/GetTextX2

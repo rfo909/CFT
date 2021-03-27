@@ -32,7 +32,7 @@
 		
 			println
 
-			lines=Letters7x5:GetText(""+remainingTime)
+			lines=Letters7x5:GetTextX2(""+remainingTime)
 			lines->line println(prefix + line)
 		}
 		break(i>=seconds)
