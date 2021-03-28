@@ -163,13 +163,13 @@ public class Ctx {
             return stack.pop();
         }
         // no return value
-        return null;
+        return new ValueNull();
     }
     
     
     public Value getLocalBlockResult() throws Exception {
     	callCtxCloseHooks();
-        if (stack.isEmpty()) return null; else return stack.pop();
+        if (stack.isEmpty()) return new ValueNull(); else return stack.pop();
     }
     
     

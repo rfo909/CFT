@@ -1255,8 +1255,7 @@ codeDirs = . ; code.examples ; code.lib
 
 <h1>Block expressions</h1>
 <p>
-  The traditional blocks inside curly braces are present in CFT as well, and are used for different
-  things.
+  The traditional blocks inside curly braces are present in CFT as well.
 </p>
 
 
@@ -1364,81 +1363,19 @@ List("aaa","bbb")-&gt;line
 
 
 
-<h2>Common confusion</h2>
-<p>
-  The following example is a common mistake, based in how local blocks are not
-  separate loop spaces.
-</p>
-<pre>
-  a={List(1,2,3)-&gt;x out("a"+x)} a
-  &lt;List&gt;
-  a1
-  a2
-  a3
-</pre>
-<p>
-  Okay, so we want to assign local variable 'a' to the result from an iteration, then 
-  put it on the stack as return value.
-</p>
-<p>
-  However, that is not quite what happens here. Had the block been an Inner block, the
-  above description would be correct. Instead, this happens:
-</p>
-<ol>
-  <li>The loop runs inside the local block</li>
-  <li>Since the code contains loops, it returns the list populated via out()</li>
-  <li>This is assigned to variable 'a'</li>
-  <li>Value of 'a' is put on the stack</li>
-  <li><b>but</b> since the function contains loops, the result value becomes the list generated via calls
-    to out, which is the list of (1,2,3). 
-  </li>
-</ol>
-<p>
-  The local block, being an expression, has a return value, and it follows the normal
-  rule, which means that as it contains a loop, it returns a list.
-</p>
-<p>
-  So even though the code returned the expected result, it is for the wrong reason.
-</p>
-
-<h3>Extended example</h3>
-<p>
-  The list that is the return value from the local block expression, is the <em>same list</em> 
-  that is also the return value of the entire code line. This can be demonstrated as follows:
-</p>
-<pre>
-  out("hello") a={List(1,2,3)-&gt;x out("a"+x)} println("a="+a) a
-  a=[hello, a1, a2, a3]
-  &lt;List&gt;
-  hello
-  a1
-  a2
-  a3
-</pre>
-<p>
-  Here we see that 'a' refers to the exact same list that is the return value from
-  the complete line, since the list iteration runs inside a <em>local</em> block.
-</p>
-<p>
-  Putting 'a' on the stack at the end of the code line has no effect, since
-  there is a loop in the line, and then the result is always a list generated
-  via calls to out()
-</p>
 
 
-<h3>Using Inner block</h3>
-<pre>
-  out("hello") a=Inner {List(1,2,3)-&gt;x out("a"+x)} println("a="+a) a
-  a=[a1, a2, a3]
-  &lt;List&gt;
-  a1
-  a2
-  a3
-</pre>
+<h2>Local variables scope</h2>
 <p>
-  Using an Inner block, the situation changes. Now the out("hello") has no effect, as
-  there is no loops, since the loop now is isolated inside the Inner block.
+  Local variables inside functions (and lambdas) all share the same scope. This
+  means that there are no sub-scopes inside local or inner blocks inside a 
+  function body. 
 </p>
+<pre>
+  $ {x=3} x
+    3
+</pre>
+
 
 
 
@@ -1595,9 +1532,9 @@ List("aaa","bbb")-&gt;line
   be used without the condition, which means it always throws an exception.
 </p>
 <pre>
-  error(1+1==2,"this should not happen")
+  error(1+1 != 2,"this should not happen")
 
-  if (1+1==2) {
+  if (1+1 != 2) {
     error("oops again")
   }
 </pre>

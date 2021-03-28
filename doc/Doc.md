@@ -1089,8 +1089,7 @@ P(1,Input("Enter value").get) =>value ...
 # Block expressions
 
 
-The traditional blocks inside curly braces are present in CFT as well, and are used for different
-things.
+The traditional blocks inside curly braces are present in CFT as well.
 
 ## Local blocks
 
@@ -1181,91 +1180,17 @@ line.chars->c out(c)
 out("X")
 /t
 ```
-## Common confusion
+## Local variables scope
 
 
-The following example is a common mistake, based in how local blocks are not
-separate loop spaces.
-
-```
-a={List(1,2,3)->x out("a"+x)} a
-<List>
-a1
-a2
-a3
-```
-
-Okay, so we want to assign local variable 'a' to the result from an iteration, then
-put it on the stack as return value.
-
-
-However, that is not quite what happens here. Had the block been an Inner block, the
-above description would be correct. Instead, this happens:
-
-
-
-- The loop runs inside the local block
-
-
-- Since the code contains loops, it returns the list populated via out()
-
-
-- This is assigned to variable 'a'
-
-
-- Value of 'a' is put on the stack
-
-
-- **but** since the function contains loops, the result value becomes the list generated via calls
-to out, which is the list of (1,2,3).
-
-
-
-The local block, being an expression, has a return value, and it follows the normal
-rule, which means that as it contains a loop, it returns a list.
-
-
-So even though the code returned the expected result, it is for the wrong reason.
-
-### Extended example
-
-
-The list that is the return value from the local block expression, is the 
-**same list**that is also the return value of the entire code line. This can be demonstrated as follows:
+Local variables inside functions (and lambdas) all share the same scope. This
+means that there are no sub-scopes inside local or inner blocks inside a
+function body.
 
 ```
-out("hello") a={List(1,2,3)->x out("a"+x)} println("a="+a) a
-a=[hello, a1, a2, a3]
-<List>
-hello
-a1
-a2
-a3
+$ {x=3} x
+3
 ```
-
-Here we see that 'a' refers to the exact same list that is the return value from
-the complete line, since the list iteration runs inside a 
-**local** block.
-
-
-Putting 'a' on the stack at the end of the code line has no effect, since
-there is a loop in the line, and then the result is always a list generated
-via calls to out()
-
-### Using Inner block
-
-```
-out("hello") a=Inner {List(1,2,3)->x out("a"+x)} println("a="+a) a
-a=[a1, a2, a3]
-<List>
-a1
-a2
-a3
-```
-
-Using an Inner block, the situation changes. Now the out("hello") has no effect, as
-there is no loops, since the loop now is isolated inside the Inner block.
-
 # List filtering with Lambda
 
 
@@ -1405,8 +1330,8 @@ an exception with the string part, terminating current execution. Alternatively 
 be used without the condition, which means it always throws an exception.
 
 ```
-error(1+1==2,"this should not happen")
-if (1+1==2) {
+error(1+1 != 2,"this should not happen")
+if (1+1 != 2) {
 error("oops again")
 }
 ```

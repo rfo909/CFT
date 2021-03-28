@@ -108,9 +108,7 @@ Block expressions
  * Inner blocks
  * Block expressions summary
  * Examples: Local vs Inner
- * Common confusion
- |   Extended example
- |   Using Inner block
+ * Local variables scope
 
 List filtering with Lambda
  * Removing items
