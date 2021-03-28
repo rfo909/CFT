@@ -118,9 +118,13 @@ List filtering with Lambda
 Conditionals - if expression
  |   Inline form
  |   Traditional form
- |   Functionally identical
+ |   Example 1
+ |   Example 2
+ |   Expressions are statements ...
+ |   Blocks are expressions ...
  * if-ladders
- * Lazy evaluation
+
+Lazy evaluation
  |     Lazy if
  |     Lazy AND, OR - &amp;&amp; ||
  |     Lazy P(N,defaultExpr)
@@ -273,6 +277,9 @@ Passwords, encryption, binary data
  |   Encrypt / decrypt
  |   Binary data
  |   Session data
+
+Reference: Expressions vs statements
+ * Statements
 
 Reference: Colon commands
 

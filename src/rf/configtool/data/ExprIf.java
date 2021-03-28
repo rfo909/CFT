@@ -35,9 +35,7 @@ public class ExprIf extends ExprCommon {
     public ExprIf (TokenStream ts) throws Exception {
         super(ts);
         
-    	if (!ts.matchStr("if")) {
-    		ts.matchStr("when","expected 'if' or 'when'");
-    	}
+    	ts.matchStr("if","expected 'if' keyword'");
 
         ts.matchStr("(", "expected '(' following 'if");
         bool=new Expr(ts);

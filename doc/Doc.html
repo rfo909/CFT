@@ -15,7 +15,7 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2021-03-26 RFO
+Last updated: 2021-03-28 RFO
 v2.3.6
 
 
@@ -1443,6 +1443,9 @@ List("aaa","bbb")-&gt;line
 
 
 
+
+
+
 <h1>List filtering with Lambda</h1>
 <p>
   Instead of using processing loops, filtering lists can also be done
@@ -1493,30 +1496,49 @@ List("aaa","bbb")-&gt;line
 
 <h3>Traditional form</h3>
 <pre>
-  if (condition) expr1 else expr2
-  if (condition) expr1
+  if (condition) stmt1 else stmt2
+  if (condition) stmt1
 </pre>
 
-<h3>Functionally identical</h3>
+<h3>Example 1</h3>
 <p>
-  The two forms are functionally the same. To select between two simple expressions, the inline
-  form is probably most readable, while when using block expressions, the traditional form
-  usually feels more natural. Also note that block expressions allow us to call statements, 
-  such as out() and break() as well as assignments.
+  Inline form. Check if some value is null, and if it is, provide a default value
 </p>
 <pre>
-  # Example: produce a default value if null
-  if (value != null, value, "x") =&gt;value
+  if (value != null, value, "defaultValue") =&gt;value
+</pre>
 
-  # Example: call statements inside blocks
+<h3>Example 2</h3>
+<p>
+  Using traditional form to call statement "break".
+</p>
+<pre>
   i=1
   loop
-    if (i>10) {
-       break
-    } else {
-      i=i+1
-    }
+    out(i)
+    if (i&gt;=10) break else i=i+1
 </pre>
+
+<h3>Expressions are statements ...</h3>
+<p>
+  Note that all expressions are also statements, which means the first example can be
+  written on traditional form:
+</p>
+<pre>
+  if (value != null) value else "defaultValue" => value
+</pre>
+
+<h3>Blocks are expressions ...</h3>
+<p>
+  Also note, that (local) blocks are expressions, which can contain statements, so we can even do:
+</p>
+<pre>
+  i=1
+  loop
+    out(i)
+    if (i&gt;=10,{break},i=i+1)
+</pre>
+
 
 
 <h2>if-ladders</h2>
@@ -1544,7 +1566,7 @@ List("aaa","bbb")-&gt;line
 
 
 
-<h2>Lazy evaluation</h2>
+<h1>Lazy evaluation</h1>
 <h4>Lazy if</h4>
 <p>
   The if-expression uses lazy evaluation, which means that only the selected
@@ -1561,6 +1583,8 @@ List("aaa","bbb")-&gt;line
   The P() expression to access function parameters only evaluates the default
   expression if parameter N is null.
 </p>
+
+
 
 
 
@@ -3833,6 +3857,43 @@ Dict
 
 
 
+<h1>Reference: Expressions vs statements</h1>
+<p>
+  Almost all code in CFT are expressions. Function calls are of course expressions, and so are assignments.
+</p>
+
+<p>
+  Even blocks, both local and Inner, are expressions.
+</p>
+
+<p>
+  Instead of describing all expressions, it is easier to list the statements.
+</p>
+
+<h2>Statements</h2>
+<p>
+  These are the statements in CFT:
+</p>
+<ul>
+  <li>Looping and iteration over lists</li>
+  <li>assert/reject/break</li>
+  <li>out(), condOut() and report()</li>
+  <li>the debug() command</li>
+  <li>the help command</li>
+  <li>interactive commands "cat", "edit", "ls", "cd"</li>
+  <li>the "shell" command</li>
+  <li>the "showCode" command</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
 
 
 <h1>Reference: Colon commands</h1>
@@ -3978,10 +4039,6 @@ Colon commands
 
 
 <h2>2020-11-13 Script and code size</h2>
-<p>
-  As a followup to yesterdays musings about size of code libraries, I had to check
-  the numbers. 
-</p>
 <pre>
   Script code:      ~5k lines
   Java code:        ~20k lines

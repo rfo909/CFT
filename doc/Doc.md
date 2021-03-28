@@ -7,7 +7,7 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2021-03-26 RFO
+Last updated: 2021-03-28 RFO
 v2.3.6
 ```
 # Introduction
@@ -1313,29 +1313,48 @@ the condition is false, returns null.
 ### Traditional form
 
 ```
-if (condition) expr1 else expr2
-if (condition) expr1
+if (condition) stmt1 else stmt2
+if (condition) stmt1
 ```
-### Functionally identical
+### Example 1
 
 
-The two forms are functionally the same. To select between two simple expressions, the inline
-form is probably most readable, while when using block expressions, the traditional form
-usually feels more natural. Also note that block expressions allow us to call statements,
-such as out() and break() as well as assignments.
+Inline form. Check if some value is null, and if it is, provide a default value
 
 ```
-# Example: produce a default value if null
-if (value != null, value, "x") =>value
-# Example: call statements inside blocks
+if (value != null, value, "defaultValue") =>value
+```
+### Example 2
+
+
+Using traditional form to call statement "break".
+
+```
 i=1
 loop
-if (i>
-10) {
-break
-} else {
-i=i+1
-}
+out(i)
+if (i>=10) break else i=i+1
+```
+### Expressions are statements ...
+
+
+Note that all expressions are also statements, which means the first example can be
+written on traditional form:
+
+```
+if (value != null) value else "defaultValue" =>
+ value
+```
+### Blocks are expressions ...
+
+
+Also note, that (local) blocks are expressions, which can contain statements, so we can even do:
+
+```
+i=1
+loop
+out(i)
+if (i>=10,{break},i=i+1)
 ```
 ## if-ladders
 
@@ -1357,7 +1376,7 @@ Decoding some value x into a numeric code, we can enter the following
 ```
 code = if (x=="a") 1 else if (x=="b") 2 else if (x=="c") 3 else 4
 ```
-## Lazy evaluation
+# Lazy evaluation
 
 #### Lazy if
 
@@ -3404,6 +3423,48 @@ functions, and can only be passed as parameter to system functions, like encrypt
 
 See Db2:GetSessionPassword() function for example.
 
+# Reference: Expressions vs statements
+
+
+Almost all code in CFT are expressions. Function calls are of course expressions, and so are assignments.
+
+
+Even blocks, both local and Inner, are expressions.
+
+
+Instead of describing all expressions, it is easier to list the statements.
+
+## Statements
+
+
+These are the statements in CFT:
+
+
+
+- Looping and iteration over lists
+
+
+- assert/reject/break
+
+
+- out(), condOut() and report()
+
+
+- the debug() command
+
+
+- the help command
+
+
+- interactive commands "cat", "edit", "ls", "cd"
+
+
+- the "shell" command
+
+
+- the "showCode" command
+
+
 # Reference: Colon commands
 
 
@@ -3560,10 +3621,6 @@ and efficient notation, and frequently used, loop spaces and the "pipe" symbol w
 remain in the language.
 
 ## 2020-11-13 Script and code size
-
-
-As a followup to yesterdays musings about size of code libraries, I had to check
-the numbers.
 
 ```
 Script code:      ~5k lines
