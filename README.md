@@ -269,10 +269,12 @@ Below are some of the peculiarities of CFT.
 
 ## Everything is code
 
-There is a strong adherence to code over values, which means there are no global variables, only functions.
+```
+"I am a value"
+/NoYouAreNot
+```
 
-To represent a value, such as a path, we create a function that returns that path, as a string literal
-is an expression, which produces a value.
+There is a strong adherence to code over values, which means there are no global variables, only functions.
 
 A common need was that of creating Dir objects representing some directory in the file system. The
 "synthesis" mechanism was invented, which meant one could navigate to a directory, then type "pwd" or "Dir"
