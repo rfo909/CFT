@@ -78,6 +78,19 @@ in daughter processes (foreground or background).
 
 ## Templating
 
+```
+# Hello something
+# --
+	P(1,"world") => something
+	Dict.set("something",something).mergeCodes => data
+<<< EOF
+Hello ${something}.
+>>> EOF
+	->line
+		out(line.merge(data)
+/PolitenessCostsNothing
+```
+
 CFT supports powerful templating, for creating custom configuration files. 
 
 It also has internal access
