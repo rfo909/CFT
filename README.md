@@ -1,6 +1,18 @@
 
 # CFT - ConfigTool
 
+```
+# Everybody loves Fibonacci series ...
+# --
+	a=P(1,0)
+	b=P(2,1)
+	c=a+b
+	println(""+c)
+	if (c<1000) fib(b,c)
+/fib
+```
+
+
 CFT started life as a way to create config files, copy files to remote hosts and starting and stopping remote services,
 all via PowerShell. Soon followed log collection and searching.
 
@@ -34,6 +46,14 @@ is in active use on Windows and Linux.
 
 
 # Introduction
+
+```
+# Greet users
+# --
+	List("Tom","Dick","Harry") -> name
+		println("Hello " + name)
+/Greet
+```
 
 CFT is a functional object oriented language. It is primarily used for:
  
