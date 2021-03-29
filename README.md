@@ -6,14 +6,14 @@
 # --
 	P(1,List(0,1)) => list
 	P(2,20) => iter
-	Lib.Data.for(0,20,1)->i
+	Lib.Data.for(0,iter,1)->i
 		list.add(list.last(2).sum)
 	|
 	list
 /fib
 ```
 
-An interpreted and dynamically typed programming language for automation of daily tasks.
+- An interpreted and dynamically typed programming language for automation of daily tasks.
 
 CFT started life as a way to create config files, copy files to remote hosts and starting and stopping remote services,
 all via PowerShell. Soon followed log collection and searching.
