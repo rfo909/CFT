@@ -12,11 +12,15 @@
 /fib
 ```
 
+An interpreted and dynamically typed programming language for automation of daily tasks.
 
 CFT started life as a way to create config files, copy files to remote hosts and starting and stopping remote services,
 all via PowerShell. Soon followed log collection and searching.
 
-CFT is a terminal based, interactive programming language, for automation of all kinds:
+CFT runs as a terminal based REPL, with some shell-like functionality. 
+
+It is backed by a functional programming language. Functions are composed interactively,
+or more commonly, by editing script files, and is intended for automation at all levels:
 
 - copying files
 - running programs on remote hosts
@@ -25,8 +29,8 @@ CFT is a terminal based, interactive programming language, for automation of all
 - collecting log files
 - manage services
 
-It is written in Java, and is in active use on Windows and Linux.
-
+CFT is written from scratch in Java, implementing a tokenizer and a custom recursive-descent parser,
+that creates a tree structure, which is then executed.
 
 ## Features
 
@@ -273,22 +277,30 @@ Below are some of the peculiarities of CFT.
 /NoYouAreNot
 ```
 
-There is a strong adherence to code over values, which means there are no global variables, only functions.
+There is a strong adherence to code over values, which means there are no global variables, only functions and
+scripts, which are collections of functions.
 
-A common need was that of creating Dir objects representing some directory in the file system. The
-"synthesis" mechanism was invented, which meant one could navigate to a directory, then type "pwd" or "Dir"
-to get the Dir object for that directory, then ":syn" to syntesize it into code, which could then be
-assigned a function name. 
+The above example is meant to underline that the string is an expression. It is code. 
 
-Later came the eval() function, which meant that synthesis was not only a way of creating functions, but
-also a way of storing data as text, to file, to be eval'ed later, to recreate the original data.
+## Creating code from values
 
-This in turn led to the integrated database, accessed via the Db2 script, where one can store complex
-data structures of lists, dictionaries, File and Dir objects, and so on, and have them load as objects, via
-eval(). 
+The synthesis mechanism is a way of automatically convert a value into code that produces that value, and
+was initially created so one could navigate to some directory via cd, then create a function that returned 
+that directory, independent of future changes to current directory. This was available via the ":syn" command,
+which creates a function from the last value.
 
-The synthesis + eval pair also made possible safe transfer of state, when initializing a thread (called process in
-CFT), securely avoiding race conditions, as synthesis + eval always produces an independent copy.
+Later came the eval() function, and including syntesis into the language, as syn(value), which returns code as 
+a string, and which became a means for storing
+data structures as strings to file, for later restore (load) when needed. 
+
+This in turn led to the integrated database, accessed via the Db2 script, where one can store data by key in
+collections, for all sorts of configuration data, as well as complex results such as lists of files, directories,
+result dictionaries from running external processes, etc.
+
+The eval(syn(value)) construct also made possible safe transfer of state, for doing multiprocessing in
+CFT, securely avoiding race conditions (parallel updates to shared structures), as this
+always produces an independent copy.
+
 
 
 ## Compact syntax - no custom classes
