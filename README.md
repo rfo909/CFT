@@ -4,8 +4,8 @@
 ```
 # Everybody loves Fibonacci series ...
 # --
-	a=P(1,0)
-	b=P(2,1)
+	a=P(1,0)   # parameter 1 defaults to 0
+	b=P(2,1)   # parameter 2 defaults to 1
 	c=a+b
 	println(""+c)
 	if (c<1000) fib(b,c)
@@ -95,7 +95,7 @@ in daughter processes (foreground or background).
 Hello ${something}.
 >>> EOF
 	->line
-		out(line.merge(data)
+		out(line.merge(data))
 /PolitenessCostsNothing
 ```
 
@@ -106,20 +106,11 @@ to the same tokenizer which tokenizes the CFT language, and has a JSON parser wh
 in CFT itself, returning a CFT data structure, as well as creating JSON text from a CFT data structure.
 
 
-## Internal (thread-safe) data storage
-
-CFT has no global variables, only functions.
-
-For situations where state is required, either in session or between sessions, or when sharing data with
-parallel worker threads, a primitive database is included in CFT. It is thread-safe, and provides a
-means for sharing values in a thread safe way, via the "synthesis" functionality, which converts
-values to code strings, then using eval() to run the code and recreate (a copy of) the original value.
-
 ## Youtube tutorial
 
 [Full Youtube tutorial](https://www.youtube.com/playlist?list=PLj58HwpT4Qy80WhDBycFKxIhWFzv5WkwO)
 
-Developed since spring 2018. On Github since June 2020. In daily use at work and at home.
+CFT has been developed since the spring of 2018, and been on Github since June 2020. 
 
 
 # Download and compile
@@ -133,9 +124,9 @@ Tested on both Linux and Windows. Has no dependencies outside of the standard Ja
 ```
 ./cft
 
-$ 2+2
+$ 2+2*3
  <int>
- 4
+ 8
 
 $ 4 help
   (lists all functions for integer objects)
