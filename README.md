@@ -16,8 +16,16 @@
 CFT started life as a way to create config files, copy files to remote hosts and starting and stopping remote services,
 all via PowerShell. Soon followed log collection and searching.
 
-CFT is a terminal based, interactive programming language, for automation of all kinds. It is written in Java, and
-is in active use on Windows and Linux.
+CFT is a terminal based, interactive programming language, for automation of all kinds:
+
+- copying files
+- running programs on remote hosts
+- doing stuff with PowerShell without typing all that text over and over
+- setting up software
+- collecting log files
+- manage services
+
+It is written in Java, and is in active use on Windows and Linux.
 
 
 ## Features
