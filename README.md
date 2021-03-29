@@ -2,13 +2,14 @@
 # CFT - ConfigTool
 
 ```
-# Everybody loves Fibonacci series ...
+# Everybody loves Fibonacci ...
 # --
-	a=P(1,0)   # parameter 1 defaults to 0
-	b=P(2,1)   # parameter 2 defaults to 1
-	c=a+b
-	println(""+c)
-	if (c<1000) fib(b,c)
+	P(1,List(0,1)) => list
+	P(2,20) => iter
+	Lib.Data.for(0,20,1)->i
+		list.add(list.last(2).sum)
+	|
+	list
 /fib
 ```
 
