@@ -86,6 +86,7 @@ public class ObjInput extends ObjPersistent {
     }
     
     private synchronized void addUnique (String s) {
+    	if (s=="") return; // ignore empty string, as this is handled via :E
         // add last used value to end of list
         uniqueValues.remove(s);
         uniqueValues.add(s);
@@ -130,8 +131,8 @@ public class ObjInput extends ObjPersistent {
             // ':xxx' - identify option
             LOOP: for(;;) {
             	stdio.println("(?) " + label);
-                if (currValue.trim().length()>0) stdio.println("    enter for '" + currValue + "'");
-                if (uniqueValues.size() > 0) stdio.println("    ':' for history");
+                if (currValue.trim().length()>0) stdio.println("    Enter for '" + currValue + "'");
+                if (uniqueValues.size() > 0) stdio.println("    ':' for options");
                 String line=ctx.getStdio().getInputLine();
                 if (line.trim().length()==0) {
                     if (currValue==null) currValue="";
@@ -142,12 +143,17 @@ public class ObjInput extends ObjPersistent {
                     currValue=line.substring(1); 
                     break;
                 } else if (line.trim().equals(":")) {
-                	stdio.println("-------------------------");
+                	stdio.println("--------------------------------------------------------------");
+                    stdio.println("Enter ':N' for numbered value, :E for empty string,");
+                    stdio.println("or enter text, using '::' for input text starting with colon.");
+                    stdio.println();
                     showOptions(ctx);
-                	stdio.println("-------------------------");
-                    stdio.println("Enter ':N' for numbered value, or '::' for input text starting with colonl");
-                    stdio.println("--");
+                	stdio.println("--------------------------------------------------------------");
                 } else if (line.startsWith(":")) {
+                	if (line.equals(":e") || line.equals(":E")) {
+                		currValue="";
+                		break LOOP;
+                	}
                     String pos=line.substring(1);
                     String x=getOption(pos);
                     if (x==null) {
