@@ -44,6 +44,14 @@ public class ObjInput extends ObjPersistent {
         this.currValue="";
         
         add(new FunctionGet());
+        add(new FunctionSetCurr());
+        add(new FunctionClear());
+        add(new FunctionGetHistory());
+        add(new FunctionSetHistory());
+    }
+    
+    public ObjInput self() {
+    	return this;
     }
     
 
@@ -73,7 +81,7 @@ public class ObjInput extends ObjPersistent {
     	Stdio stdio=ctx.getStdio();
     	
         for (int i=0; i<uniqueValues.size(); i++) {
-        	stdio.println("" + (i<10?" ":"") + i + "  : " + uniqueValues.get(i));
+        	stdio.println("  :" + i + (i<10?" ":"") + "  ---> " + uniqueValues.get(i));
         }
     }
     
@@ -123,7 +131,7 @@ public class ObjInput extends ObjPersistent {
             LOOP: for(;;) {
             	stdio.println("(?) " + label);
                 if (currValue.trim().length()>0) stdio.println("    enter for '" + currValue + "'");
-                if (uniqueValues.size() > 0) stdio.println("    ':' for options");
+                if (uniqueValues.size() > 0) stdio.println("    ':' for history");
                 String line=ctx.getStdio().getInputLine();
                 if (line.trim().length()==0) {
                     if (currValue==null) currValue="";
@@ -134,9 +142,10 @@ public class ObjInput extends ObjPersistent {
                     currValue=line.substring(1); 
                     break;
                 } else if (line.trim().equals(":")) {
+                	stdio.println("-------------------------");
                     showOptions(ctx);
-                    stdio.println("--");
-                    stdio.println("Use ':N' for numbered value. Use '::' for input text starting with colonl");
+                	stdio.println("-------------------------");
+                    stdio.println("Enter ':N' for numbered value, or '::' for input text starting with colonl");
                     stdio.println("--");
                 } else if (line.startsWith(":")) {
                     String pos=line.substring(1);
@@ -159,5 +168,70 @@ public class ObjInput extends ObjPersistent {
         }
     }
 
+    
+    class FunctionSetCurr extends Function {
+        public String getName() {
+            return "setCurr";
+        }
+        public String getShortDesc() {
+            return "setCurr(str) - set current value (which is default when pressing ENTER in get) - returns self";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size()!=1) throw new Exception("Expected String value");
+            currValue=getString("str", params, 0);
+            return new ValueObj(self());
+        }
+    }
+
+    class FunctionClear extends Function {
+        public String getName() {
+            return "clear";
+        }
+        public String getShortDesc() {
+            return "clear() - clear history and curr - returns self";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size()!=0) throw new Exception("Expected no params");
+            uniqueValues.clear();
+            currValue=null;
+            return new ValueObj(self());
+        }
+    }
+    
+    
+    class FunctionGetHistory extends Function {
+        public String getName() {
+            return "getHistory";
+        }
+        public String getShortDesc() {
+            return "getHistory() - returns list of string in history";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size()!=0) throw new Exception("Expected no params");
+            List<Value> list=new ArrayList<Value>();
+            for (String s:uniqueValues) {
+            	list.add(new ValueString(s));
+            }
+            return new ValueList(list);
+        }
+    }
+
+    class FunctionSetHistory extends Function {
+        public String getName() {
+            return "setHistory";
+        }
+        public String getShortDesc() {
+            return "setHistory(list) - set history - does not affect current value - returns self";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size()!=1) throw new Exception("Expected list parameter");
+            List<Value> list=getList("list", params, 0);
+            uniqueValues.clear();
+            for (Value v:list) {
+            	uniqueValues.add(v.getValAsString());
+            }
+            return new ValueObj(self());
+        }
+    }
 
 }

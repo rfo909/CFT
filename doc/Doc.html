@@ -15,8 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2021-03-28 RFO
-v2.3.6
+Last updated: 2021-04-01 RFO
+v2.3.7
 
 
 </pre>
@@ -1232,10 +1232,13 @@ codeDirs = . ; code.examples ; code.lib
   value = readLine("Enter value")
 </pre>
 <p>
-  The difference is that Input remembers the last input values, and lets the user
-  press enter to use the last value, or may enter colon to select between previous
-  values. The readLine() is much simpler, and allows for empty input, as enter
-  doesn't mean "last value" as for Input.
+  The difference is that Input remembers unique input values, and lets the user
+  press enter to use the last (current) value, or may enter colon to select between previous
+  (history) values. It also has functions to manipulate the history and the "current" value.
+</p>
+<p>
+  The readLine() is much simpler, and allows for empty input, as Enter
+  doesn't mean "last value" as it does for Input.
 </p>
 <p>
   The optional default value parameter to the P() expression for grabbing parameters to
@@ -3899,29 +3902,6 @@ Colon commands
 
 
 <h1>Comments and digressions</h1>
-
-
-
-<h2>Why Input("label").get?</h2>
-<p>
-  Why can't the Input() function just ask the user for input? Why the .get()?
-</p>
-<p>
-  This is because it was envisioned more functions on the Input object, such as 
-  programming it to reset its remembered values, or get values from other sources.
-</p>
-<p>
-  This never came to fruition, and with Input() being a pretty old function, Input("xxx") remains 
-  creating an object, with a single .get() function inside. As a side note, it also has to be an 
-  object in order to persist data in the session, though surely that's not a hard limitation.
-</p>
-<p>
-  At least it leaves us with the option of adding clever stuff later.
-</p>
-<p>
-  Another weakness or strength is that Input objects are mapped to persistent instances by
-  the input label. This can be confusing, but often also what we want. 
-</p>
 
 
 <h2>Function name AFTER code?</h2>

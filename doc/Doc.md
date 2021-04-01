@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2021-03-28 RFO
-v2.3.6
+Last updated: 2021-04-01 RFO
+v2.3.7
 ```
 # Introduction
 
@@ -1074,10 +1074,13 @@ value = Input("Enter value").get
 value = readLine("Enter value")
 ```
 
-The difference is that Input remembers the last input values, and lets the user
-press enter to use the last value, or may enter colon to select between previous
-values. The readLine() is much simpler, and allows for empty input, as enter
-doesn't mean "last value" as for Input.
+The difference is that Input remembers unique input values, and lets the user
+press enter to use the last (current) value, or may enter colon to select between previous
+(history) values. It also has functions to manipulate the history and the "current" value.
+
+
+The readLine() is much simpler, and allows for empty input, as Enter
+doesn't mean "last value" as it does for Input.
 
 
 The optional default value parameter to the P() expression for grabbing parameters to
@@ -3480,27 +3483,6 @@ The "problem" is that CFT code (and so shortcuts) can run colon commands via "ab
 
 
 # Comments and digressions
-
-## Why Input("label").get?
-
-
-Why can't the Input() function just ask the user for input? Why the .get()?
-
-
-This is because it was envisioned more functions on the Input object, such as
-programming it to reset its remembered values, or get values from other sources.
-
-
-This never came to fruition, and with Input() being a pretty old function, Input("xxx") remains
-creating an object, with a single .get() function inside. As a side note, it also has to be an
-object in order to persist data in the session, though surely that's not a hard limitation.
-
-
-At least it leaves us with the option of adding clever stuff later.
-
-
-Another weakness or strength is that Input objects are mapped to persistent instances by
-the input label. This can be confusing, but often also what we want.
 
 ## Function name AFTER code?
 

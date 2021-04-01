@@ -284,7 +284,6 @@ Reference: Colon commands
 Reference: Synthesizable types
 
 Comments and digressions
- * Why Input("label").get?
  * Function name AFTER code?
  * Using Sys.stdin to run colon commands etc
  * Loop spaces / the "pipe"
