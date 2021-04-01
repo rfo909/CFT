@@ -3351,6 +3351,86 @@ functions, and can only be passed as parameter to system functions, like encrypt
 
 See Db2:GetSessionPassword() function for example.
 
+# Reference: object types
+
+```
+Grep("extends Obj") =>
+ g
+Sys.homeDir.allFiles(Glob("*.java"))->
+f
+g.file(f)->
+line
+out(line.after("class").before("extends"))
+| _.sort->
+x
+println(x)
+/objects
+ObjClosure
+ObjConvert
+ObjData
+ObjDataFile
+ObjDate
+ObjDateSort
+ObjDb
+ObjDb2
+ObjDict
+ObjDir
+ObjDuration
+ObjEncrypt
+ObjExtProcess
+ObjFile
+ObjFiles
+ObjFilter
+ObjFilterReader
+ObjGlob
+ObjGlobal
+ObjGrep
+ObjInput
+ObjLexer
+ObjLexerNode
+ObjLexerToken
+ObjLexerTokenStream
+ObjLib
+ObjLineReader
+ObjMath
+ObjPersistent
+ObjPlot
+ObjProcess
+ObjRegex
+ObjSys
+ObjTerm
+ObjText
+ObjUtil
+Value
+```
+# Reference: Value types
+
+```
+Grep("extends Value") =>
+ g
+Sys.homeDir.allFiles(Glob("*.java"))->
+f
+g.file(f)->
+line
+out(line.after("class").before("extends"))
+| _.sort->
+x
+println(x)
+/values
+ValueBinary
+ValueBlock
+ValueBoolean
+ValueFloat
+ValueInt
+ValueList
+ValueNull
+ValueObj
+ValueObjFileLine
+ValueObjFloat
+ValueObjInt
+ValueObjStr
+ValueString
+```
 # Reference: Expressions vs statements
 
 
@@ -3527,70 +3607,24 @@ the command line, at a time long before introducing block expressions. Being a f
 and efficient notation, and frequently used, loop spaces and the "pipe" symbol will
 remain in the language.
 
-## 2020-11-13 Script and code size
+## Script and code size
+
+### 2020-11-13
 
 ```
 Script code:      ~5k lines
 Java code:        ~20k lines
-Doc.html:         ~3800 lines
-Dev.html:         ~3300 lines    # change history 2018-08
 Functions:        ~290
 Object types:     ~45
 ```
-
-Functions means member functions of all object types (including values)
-
-The object types are:
+### 2021-04-01
 
 ```
-0: public class ObjRegex extends Obj {
-1: public class ObjDataFile extends Obj {
-2: public class ObjExtProcess extends Obj {
-3: public class ObjDb2 extends Obj {
-4: public class ObjData extends Obj {
-5: public class ObjFile extends Obj {
-6: public class ObjDir extends Obj {
-7: public class ObjDateSort extends Obj {
-8: public class ObjGlob extends Obj {
-9: public class ObjDict extends Obj {
-10: public abstract class ObjPersistent extends Obj {
-11: public class ObjMath extends Obj {
-12: public class ObjProcess extends Obj {
-13: public class ObjFilterReader extends Obj {
-14: public class ObjDuration extends Obj {
-15: public class ObjConvert extends Obj {
-16: public class ObjGrep extends Obj {
-17: public class ObjClosure extends Obj {
-18: public class ObjFilter extends Obj {
-19: public class ObjSys extends Obj {
-20: public class ObjPlot extends Obj {
-21: public class ObjDate extends Obj {
-22: public class ObjExp extends Obj {
-23: public class ObjDb extends Obj {
-24: public class ObjLib extends Obj {
-25: public class ObjLineReader extends ObjPersistent implements CtxCloseHook {
-26: public class ObjInput extends ObjPersistent {
-27: public class ObjLexer extends Obj {
-28: public class ObjLexerNode extends Obj {
-29: public class ObjLexerTokenStream extends Obj {
-30: public class ObjLexerToken extends Obj {
-31: public class ObjText extends Obj {
-32: public class ObjFiles extends Obj {
-33: public abstract class Value extends Obj {
-34: public class ObjGlobal extends Obj {
-35: public class ObjCfg extends Obj {
-0: public class ValueList extends Value {
-1: public class ValueString extends Value {
-2: public class ValueBlock extends Value {
-3: public class ValueObjInt extends ValueInt {
-4: public class ValueObjFloat extends ValueFloat {
-5: public class ValueObjFileLine extends ValueString {
-6: public class ValueObjStr extends ValueString {
-7: public class ValueFloat extends Value {
-8: public class ValueInt extends Value {
-9: public class ValueNull extends Value {
-10: public class ValueBoolean extends Value {
-11: public class ValueObj extends Value {
+Script code:      ~8k lines
+Java code:        ~21k lines
+Functions:        317
+Object types:     36
+Value types:      12
 ```
 ## Poor man's EXIF date parser
 

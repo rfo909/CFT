@@ -276,6 +276,10 @@ Passwords, encryption, binary data
  |   Binary data
  |   Session data
 
+Reference: object types
+
+Reference: Value types
+
 Reference: Expressions vs statements
  * Statements
 
@@ -287,5 +291,7 @@ Comments and digressions
  * Function name AFTER code?
  * Using Sys.stdin to run colon commands etc
  * Loop spaces / the "pipe"
- * 2020-11-13 Script and code size
+ * Script and code size
+ |   2020-11-13
+ |   2021-04-01
  * Poor man's EXIF date parser
