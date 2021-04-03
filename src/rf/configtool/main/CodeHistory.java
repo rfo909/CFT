@@ -34,6 +34,7 @@ public class CodeHistory {
      
     private PropsFile props;
     private Map<String, CodeLines> namedLines=new HashMap<String,CodeLines>();
+    private Set<String> privateFunctions=new HashSet<String>();
     private List<String> namesInSequence=new ArrayList<String>();
     private ObjTerm term;
     
@@ -53,7 +54,16 @@ public class CodeHistory {
         return currLine;
     }
     
-    public boolean assignName(String name, boolean force) throws Exception {
+    public boolean assignPublicName(String name, boolean force) throws Exception {
+    	return assignName(name, false, force);
+    }
+    
+    public boolean assignPrivateName (String name, boolean force) throws Exception {
+    	return assignName(name, true, force);
+    }
+    
+    
+    private boolean assignName(String name, boolean isPrivate, boolean force) throws Exception {
         if (currLine==null) throw new Exception("No current code line");
         if (namedLines.get(name) != null && !force) return false;
         
@@ -66,6 +76,11 @@ public class CodeHistory {
         } else {
             c.update(currLine, loc);
         }
+        if (isPrivate) {
+        	privateFunctions.add(name);
+        } else {
+        	if (privateFunctions.contains(name)) privateFunctions.remove(name);
+        }
         return true;
     }
 
@@ -74,8 +89,8 @@ public class CodeHistory {
     }
     
 
-    public void reportAll(Stdio stdio) {
-        report(stdio, null);
+    public void reportAll(Stdio stdio, boolean publicOnly) {
+        report(stdio, null, publicOnly);
     }
     
     public List<String> getNames() {
@@ -84,7 +99,7 @@ public class CodeHistory {
         return list;
     }
     
-    public void report(Stdio stdio, String symbolSubStr) {
+    public void report(Stdio stdio, String symbolSubStr, boolean publicOnly) {
         final int available=term.getScreenWidth();
         
         String hr = "+-----------------------------------------------------";
@@ -120,12 +135,14 @@ public class CodeHistory {
             } else {
             	// include all
             	for (int i=0; i<namesInSequence.size(); i++) {
+                    String name=namesInSequence.get(i);
             		matchingNames.add(namesInSequence.get(i));
             	}
             }
 	            
             boolean showFull = (matchingNames.size()==1 && symbolSubStr != null);
             for (String name:matchingNames) {
+            	if ( (privateFunctions.contains(name) && publicOnly && !showFull) ) continue;
                 
                 String label=name;
                 while(label.length()<nameMaxLength) label=label+" ";
@@ -145,7 +162,9 @@ public class CodeHistory {
                 } else {
 	                String namedLine=getNamedCodeLines(name).getFirstNonBlankLine();
 	                
-	                String s="| " + label + ": " + TabUtil.substituteTabs(namedLine,1);
+	                String pre=" ";
+	                if (privateFunctions.contains(name)) pre="/";
+	                String s="| " + pre + label + ": " + TabUtil.substituteTabs(namedLine,1);
 	
 	                if (s.length() > available) s=s.substring(0,available-1)+"+";
 	
@@ -191,7 +210,9 @@ public class CodeHistory {
             for (String x:saveLines) {
                 ps.println(x);
             }
-            ps.println("/" + s);
+            String pre="/";
+            if (privateFunctions.contains(s)) pre="//";
+            ps.println(pre + s);
         }
         ps.close();
         return;
@@ -255,11 +276,23 @@ public class CodeHistory {
 
 
             if (trimmed.startsWith("/")) {
-                String name=s.trim().substring(1);
+            	boolean isPrivate=false;
+            	String name;
+            	if (trimmed.startsWith("//")) {
+            		isPrivate=true;
+            		name=trimmed.substring(2);
+            	} else {
+            		name=trimmed.substring(1);
+            	}
+
                 if (namesInSequence.contains(name)) namesInSequence.remove(name);
                 namesInSequence.add(name);
                 CodeLines c=new CodeLines(lines);
                 namedLines.put(name, c);
+                
+                if (privateFunctions.contains(name)) privateFunctions.remove(name);
+                if (isPrivate) privateFunctions.add(name);
+                
                 lines=new ArrayList<CodeLine>();
                 continue;
             } 
@@ -275,12 +308,15 @@ public class CodeHistory {
     public void clear (String name) throws Exception {
         if (namedLines.containsKey(name)) namedLines.remove(name);
         if (namesInSequence.contains(name)) namesInSequence.remove(name);
+        if (privateFunctions.contains(name)) privateFunctions.remove(name);
     }
+    
     public void copy (String fromName, String toName) throws Exception {
         if (!namedLines.containsKey(fromName)) throw new Exception("No such named line: " + fromName);
         if (namedLines.containsKey(toName)) throw new Exception("Target name '" + toName + "'exists - clear it first");
         
         namedLines.put(toName, namedLines.get(fromName));
         namesInSequence.add(toName);
+        if (privateFunctions.contains(fromName)) privateFunctions.add(toName);
     }
 }

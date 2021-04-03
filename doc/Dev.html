@@ -13,6 +13,40 @@
 
 <h1>CFT Change log</h1>
 
+<h3>v2.3.8 2021-04-03 private functions</h3>
+<p>
+	Allowing scripts to contain private (helper) functions, by naming them with
+</p>
+
+<p>
+	Assuming the following is stored in script file Example:
+<pre>
+	23
+	//a1
+
+	22
+	/a2
+</pre>
+<ul>
+	<lI>
+		With current script being the Example, typing '?' lists all functions, prefixing
+		the local functions by '/'</lI>
+	<li>
+		Examining from outside via "?Example:", we don't see the local functions, and so
+		only see function a2
+	</li>
+	<li>
+		Examining from the outside with search term (or absolute name), we again work
+		with the full set of functions. "?Example:a" shows both functions, again
+		prefixing a1 with slash '/' to indicate it is local.
+	</li>
+	<li>
+		And of course we can list a private function via "?Example:a1"
+	</li>
+</ul>
+
+
+
 <h3>v2.3.7 2021-04-01 Input</h3>
 <p>
 	Added functions to Input

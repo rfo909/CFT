@@ -322,11 +322,20 @@ public class Root {
 			// execute input
 
 			if (ts.matchStr("/")) {
+				boolean isPrivate=false;
+				if (ts.matchStr("/")) {
+					isPrivate=true;
+				}
 				String ident = ts.matchIdentifier("expected name following '/' - for naming current program line");
 				boolean force = ts.matchStr("!");
 				if (!ts.atEOF())
 					throw new Exception("Expected '/ident' to save previous program line");
-				boolean success = codeHistory.assignName(ident, force);
+				boolean success;
+				if (isPrivate) {
+					success = codeHistory.assignPrivateName(ident, force);
+				} else {
+					success = codeHistory.assignPublicName(ident, force);
+				}
 				if (!success) {
 					stdio.println("ERROR: Symbol exists. Use /" + ident + "! to override");
 				}
@@ -364,16 +373,16 @@ public class Root {
 						// complete match, as before
 						String ident2=ts.matchIdentifier();
 						if (ident2 != null) {
-							hist.report(stdio, ident2);
+							hist.report(stdio, ident2, false);
 						} else {
-							hist.reportAll(stdio);
+							hist.reportAll(stdio, true);
 						}
 					} else {
 						// no colon
-						codeHistory.report(stdio, ident);
+						codeHistory.report(stdio, ident, false);
 					}
 				} else {
-					codeHistory.reportAll(stdio);
+					codeHistory.reportAll(stdio,false);
 				}
 				String scriptName = objGlobal.getScriptName();
 				if (scriptName != null) {

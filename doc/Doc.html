@@ -141,6 +141,34 @@ v2.3.7
 </pre>
 
 
+<h2>Helper / local functions</h2>
+<p><i>v2.3.8</i></p>
+<p>
+  In many cases, one needs to create helper functions, which should not be visible as part
+  of the script interface, as seen from other scripts. This is done by defining the function
+  as follows:
+</p>
+<pre>
+  $ 23
+  $ //SomeConstant
+</pre>
+<p>
+  When typing '?' (with the script as current) the function is displayed along with
+  normal functions, but the name is prefixed by a single slash '/'. 
+</p>
+<p>
+  When inspecting
+  script from outside via the "?ScriptName:" functionality, the local functions are
+  not displayed. 
+</p>
+<p>
+  However, inspecting functions from the outside, including a (partial) name, the
+  private functions are included, again prefixed by '/', to indicate their status.
+</p>
+<p>
+  There is nothing blocking calls to local functions from the outside, it is purely
+  a means of managing how the '?Script:' functionality works.
+</p>
 
 
 
