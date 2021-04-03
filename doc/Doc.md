@@ -2390,6 +2390,38 @@ The Db2 persists data to file, and handles all values that can be synthesized to
 Also there is a Db2Obj script, which saves data objects identified by UUID's, which are
 made by calling the Lib.Db.UUID function.
 
+### Lib.Db.Db2 vs Db2 script?
+
+
+The Db2 script uses the Lib.Db.Db2 object. The difference is that an object is implemented
+in Java, while the script is code that runs in the interpreter.
+
+# Objects vs Scripts
+
+
+As for the case of two Db2 entites above, with a script and an object of the same name,
+this is also the situation for "Lib", where the (global) funciton Lib produces a Lib object,
+while there also exists a Lib script.
+
+
+The Lib object, like all CFT objects, has its functions implemented in Java, while the
+Lib script is a text file with functions written in the CFT programming language, which are
+interpreted by Java when called.
+
+
+Getting information about functions inside objects and scripts differ as follows:
+
+```
+$ Lib help    # display functions inside object "Lib"
+$ ?Lib:       # display functions inside script
+```
+
+Calling functions inside objects and libraries differ as well.
+
+```
+$ Lib.Text               # call function Text inside object
+$ Lib:Header("Hello")    # call function Header in script
+```
 # onLoad functions
 
 

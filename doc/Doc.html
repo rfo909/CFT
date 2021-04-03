@@ -2724,7 +2724,41 @@ List("aaa","bbb")-&gt;line
   made by calling the Lib.Db.UUID function.
 </p>
 
+<h3>Lib.Db.Db2 vs Db2 script?</h3>
+<p>
+  The Db2 script uses the Lib.Db.Db2 object. The difference is that an object is implemented
+  in Java, while the script is code that runs in the interpreter.
+</p>
 
+
+
+
+
+<h1>Objects vs Scripts</h1>
+<p>
+  As for the case of two Db2 entites above, with a script and an object of the same name,
+  this is also the situation for "Lib", where the (global) funciton Lib produces a Lib object, 
+  while there also exists a Lib script.
+</p>
+<p>
+  The Lib object, like all CFT objects, has its functions implemented in Java, while the
+  Lib script is a text file with functions written in the CFT programming language, which are
+  interpreted by Java when called.
+</p>
+<p>
+  Getting information about functions inside objects and scripts differ as follows:
+</p>
+<pre>
+  $ Lib help    # display functions inside object "Lib"
+  $ ?Lib:       # display functions inside script
+</pre>
+<p>
+  Calling functions inside objects and libraries differ as well.
+</p>
+<pre>
+  $ Lib.Text               # call function Text inside object
+  $ Lib:Header("Hello")    # call function Header in script
+</pre>
 
 
 
