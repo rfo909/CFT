@@ -15,8 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2021-04-01 RFO
-v2.3.7
+Last updated: 2021-04-03 RFO
+v2.3.8
 
 
 </pre>
@@ -139,39 +139,6 @@ v2.3.7
   &lt;int&gt;
   12
 </pre>
-
-
-<h2>Helper / local functions</h2>
-<p><i>v2.3.8</i></p>
-<p>
-  In many cases, one needs to create helper functions, which should not be visible as part
-  of the script interface, as seen from other scripts. This is done by defining the function
-  as follows:
-</p>
-<pre>
-  $ 23
-  $ //SomeConstant
-</pre>
-<p>
-  When typing '?' (with the script as current) the function is displayed along with
-  normal functions, but the name is prefixed by a single slash '/'. 
-</p>
-<p>
-  When inspecting
-  script from outside via the "?ScriptName:" functionality, the local functions are
-  not displayed. 
-</p>
-<p>
-  However, inspecting functions from the outside, including a (partial) name, the
-  private functions are included, again prefixed by '/', to indicate their status.
-</p>
-<p>
-  There is nothing blocking calls to local functions from the outside, it is purely
-  a means of managing how the '?Script:' functionality works.
-</p>
-
-
-
 <h1>Show your functions</h1>
 <p>
   List all functions in current script
@@ -189,6 +156,12 @@ v2.3.7
   If the name doesn't match one function, it is used as a prefix to list a subset
   of all functions.
 </p>
+
+
+
+
+
+
 
 
 
@@ -1084,6 +1057,38 @@ codeDirs = . ; code.examples ; code.lib
 </pre>
 
 
+
+
+
+
+<h1>Helper / local functions</h1>
+<p><i>v2.3.8</i></p>
+<p>
+  In many cases, one needs to create helper functions, which should not be visible as part
+  of the script interface, as seen from other scripts. This is done by defining the function
+  as follows:
+</p>
+<pre>
+  $ 23
+  $ //SomeConstant
+</pre>
+<p>
+  When typing '?' (with the script as current) the function is displayed along with
+  normal functions, but the name is prefixed by a single slash '/'. 
+</p>
+<p>
+  When inspecting
+  script from outside via the "?ScriptName:" functionality, the local functions are
+  not displayed. 
+</p>
+<p>
+  However, inspecting functions from the outside, including a (partial) name, the
+  private functions are included, again prefixed by '/', to indicate their status.
+</p>
+<p>
+  There is nothing blocking calls to local functions from the outside, it is purely
+  a means of managing how the '?Script:' functionality works.
+</p>
 
 
 

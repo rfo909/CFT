@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2021-04-01 RFO
-v2.3.7
+Last updated: 2021-04-03 RFO
+v2.3.8
 ```
 # Introduction
 
@@ -130,36 +130,6 @@ $ filesInDir
 <int>
 12
 ```
-## Helper / local functions
-
-
-**v2.3.8**
-
-In many cases, one needs to create helper functions, which should not be visible as part
-of the script interface, as seen from other scripts. This is done by defining the function
-as follows:
-
-```
-$ 23
-$ //SomeConstant
-```
-
-When typing '?' (with the script as current) the function is displayed along with
-normal functions, but the name is prefixed by a single slash '/'.
-
-
-When inspecting
-script from outside via the "?ScriptName:" functionality, the local functions are
-not displayed.
-
-
-However, inspecting functions from the outside, including a (partial) name, the
-private functions are included, again prefixed by '/', to indicate their status.
-
-
-There is nothing blocking calls to local functions from the outside, it is purely
-a means of managing how the '?Script:' functionality works.
-
 # Show your functions
 
 
@@ -954,6 +924,36 @@ another script, as well as listing the code of particular function.
 $ ?Lib:                  # lists functions inside Lib
 $ ?Lib:m                 # displays code of function 'm'
 ```
+# Helper / local functions
+
+
+**v2.3.8**
+
+In many cases, one needs to create helper functions, which should not be visible as part
+of the script interface, as seen from other scripts. This is done by defining the function
+as follows:
+
+```
+$ 23
+$ //SomeConstant
+```
+
+When typing '?' (with the script as current) the function is displayed along with
+normal functions, but the name is prefixed by a single slash '/'.
+
+
+When inspecting
+script from outside via the "?ScriptName:" functionality, the local functions are
+not displayed.
+
+
+However, inspecting functions from the outside, including a (partial) name, the
+private functions are included, again prefixed by '/', to indicate their status.
+
+
+There is nothing blocking calls to local functions from the outside, it is purely
+a means of managing how the '?Script:' functionality works.
+
 # Displaying all known scripts
 
 
