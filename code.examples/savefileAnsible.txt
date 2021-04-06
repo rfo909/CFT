@@ -73,7 +73,7 @@
 		processData = SymDict(target)
 
 		# Block until less than given number of active processes
-		mon.Lwait.call(8, true)
+		mon.Lwait.call(10, true)
 		
 		#println("*   starting process for " + target)
 		process = SpawnProcess(processData, {
@@ -87,7 +87,7 @@
 		out(process)
 	| => processList
 
-	mon.Lwait.call(0,true)  # verbose
+	mon.Lwait.call(0,true)  # true=verbose
 
 	Lib:Header("Press ENTER to see results")
 	readLine
@@ -110,6 +110,9 @@
 		obj=SymDict(target,exitValue,output,type)
 		
 		Db2Obj:AddObject("Ansible.APTUpdateUpgrade",obj)
+
+		readLine("Press ENTER for next")
+	
 /AptUpdateAll
 
 
@@ -217,12 +220,15 @@
 	| => processes
 
 	mon.Lwait.call(0,true)
+
+	
 	
 
 	processes _->process
-		Lib:Header("Waiting for " + process.data.host)
+		Lib:Header(""+process.data.host)
 		process.wait
 		Inner {process.output->line println(line)}
+		readLine("ENTER to continue")
 /UpdateCFTAll
 
 
