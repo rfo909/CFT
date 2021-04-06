@@ -11,7 +11,8 @@ Functionality
 
 Getting help
  * Show all global functions
- * Show functions inside objects
+
+Show functions inside value objects
 
 Create functions
 

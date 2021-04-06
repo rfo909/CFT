@@ -15,16 +15,16 @@ v2.3.8
 
 **CFT is an interactive programmable environment for automation.**
 
-Automating tasks is done by creating functions, which are named sequences
-of code. Functions call each other, as well as a library of global functions, and functions
-inside system objects, such as:
+Automation is done by creating custom functions, which call each other, as well
+as a set of global functions, and member functions inside objects returned from
+global functions, as well as member functions inside other objects.
 
 
 
-- directories
+- directory objects
 
 
-- files
+- file objects
 
 
 - lists
@@ -33,8 +33,14 @@ inside system objects, such as:
 - dictionaries
 
 
+- strings
 
-CFT is tested on Linux and Windows, and easily integrates with external commands
+
+- ...
+
+
+
+CFT is tested on Linux and Windows, and easily integrates with external programs
 on both, such as PowerShell, git, ssh. It should run anywhere that supports Java.
 
 
@@ -49,11 +55,12 @@ and Windows.
 # Functionality
 
 
-The CFT programming language is a glue between library functions and -objects, user input, and
+The CFT programming language is a glue between library functions and object functions, user input, and
 running external programs.
 
 
-It is command line based, and programmable interactively, but complex functions are usually created using editors.
+It is command line based, and can be programmed interactively, creating one-line functions, but
+mostly we use editors for creating function code.
 
 The language is object oriented, with all values being objects. Here we call a
 function "bin()" inside an integer object.
@@ -91,7 +98,7 @@ $ Dir.files.length
 ```
 $ help
 ```
-## Show functions inside objects
+# Show functions inside value objects
 
 
 To show all functions inside an object, create an instance of that object followed by the word help.
