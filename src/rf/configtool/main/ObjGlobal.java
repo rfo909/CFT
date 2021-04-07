@@ -52,7 +52,7 @@ import rf.configtool.root.Root;
 public class ObjGlobal extends Obj {
     
 	private Root root;
-    private StdioReal stdioReal;
+    private Stdio stdio;
 
     private String currDir;
     private CodeHistory codeHistory;
@@ -69,17 +69,18 @@ public class ObjGlobal extends Obj {
     	return root;
     }
     
-    public StdioReal getStdioActual() {
-        return stdioReal;
+    public Stdio getStdio() {
+        return stdio;
     }
     
     public boolean isDebugMode() {
     	return root.isDebugMode();
     }
     
-    public ObjGlobal(Root root, StdioReal stdioReal) throws Exception {
+    public ObjGlobal(Root root, String currDir, Stdio stdio) throws Exception {
     	this.root=root;
-        this.stdioReal=stdioReal;
+    	this.currDir=currDir;
+        this.stdio=stdio;
         //props.report(stdio);
         
         
@@ -281,9 +282,9 @@ public class ObjGlobal extends Obj {
         CodeLines onLoad = codeHistory.getNamedCodeLines("onLoad");
         if (onLoad != null) {
         	try {
-        		this.runtime.processCodeLines(stdioReal, onLoad, new FunctionState());
+        		this.runtime.processCodeLines(stdio, onLoad, new FunctionState());
         	} catch (Exception ex) {
-        		stdioReal.println("onLoad function failed with exception");
+        		stdio.println("onLoad function failed with exception");
         	}
         }
         

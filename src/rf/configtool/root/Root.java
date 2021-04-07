@@ -122,6 +122,13 @@ public class Root {
 			}
 		}
 	}
+	
+	
+	private String getCurrDirOrNull() {
+		if (currScript != null) return currScript.getObjGlobal().getCurrDir();
+		return null;
+	}
+	
 
 	private void processSave(String newName) throws Exception {
 		// user has typed :save name
@@ -147,14 +154,14 @@ public class Root {
 				otherScript.getObjGlobal().loadCode(otherScript.getScriptName());
 			return otherScript;
 		}
-		ScriptState newScript = new ScriptState(name, new ObjGlobal(this, stdio)); // throws exception if there is
+		ScriptState newScript = new ScriptState(name, new ObjGlobal(this, getCurrDirOrNull(), stdio)); // throws exception if there is
 																					// trouble
 		scriptStates.put(newScript.getScriptName(), newScript);
 		return newScript;
 	}
 
 	public void createNewScript() throws Exception {
-		currScript = new ScriptState(new ObjGlobal(this, stdio));
+		currScript = new ScriptState(new ObjGlobal(this, getCurrDirOrNull(), stdio));
 		scriptStates.put(currScript.getScriptName(), currScript);
 	}
 
@@ -444,7 +451,7 @@ public class Root {
 		List<String> lines = report.displayValueLines(result);
 		int width = objTerm.getScreenWidth();
 
-		Stdio stdio = objGlobal.getStdioActual();
+		Stdio stdio = objGlobal.getStdio();
 
 		// Display lines cut off at screenWidth, for readability
 		for (String s : lines) {
