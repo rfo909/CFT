@@ -241,9 +241,18 @@ loop
 		readLine("New current directory") => dir
 		setDir.call(host,dir)
 	} else if (mode==".e") {
+		LSortFiles=Lambda{
+			Inner {
+				P(1)->f 
+					out(Int(f.lastModified,f)) 
+				| _.sort
+			} ->x 
+				out(x.data)
+			
+		}
 		dir = Dir("\\" + host + "\" + convertPath(getDir.call(host)))
 		println("dir=" + dir.path)
-		file = Util:SelectFile(dir)
+		file = Util:SelectFile(dir,"*",LSortFiles)
 		if (file != null) {
 			Lib:e (file)
 		}

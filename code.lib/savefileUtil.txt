@@ -105,8 +105,11 @@ P(2,"#") => commentStart
 # --
 P(1) => dir
 P(2,"*") => globPattern
+P(3,Lambda{P(1)}) => processList 
 	i=0
 	files = dir.files(Glob(globPattern))
+	files=processList.call(files)
+
 	files->f 
 		println(""+i + ": " + f.name)
 		i=i+1
