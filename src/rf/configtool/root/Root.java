@@ -165,15 +165,6 @@ public class Root {
 		scriptStates.put(currScript.getScriptName(), currScript);
 	}
 
-	private String getScriptStateNames() {
-		StringBuffer sb = new StringBuffer();
-		Iterator<String> keys = scriptStates.keySet().iterator();
-		while (keys.hasNext()) {
-			sb.append(" '" + keys.next() + "'");
-		}
-		return sb.toString().trim();
-	}
-
 	private void cleanupOnExit() throws Exception {
 		Iterator<String> keys = scriptStates.keySet().iterator();
 		while (keys.hasNext()) {
@@ -569,7 +560,6 @@ public class Root {
 			} else {
 				stdio.println("DEBUG MODE OFF");
 			}
-			//objGlobal.outln("Loaded scripts: " + getScriptStateNames());
 			return;
 		} else if (ts.matchStr("wrap")) {
 			boolean wrap = objTerm.changeWrap();
