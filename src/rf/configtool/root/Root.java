@@ -3,7 +3,7 @@ package rf.configtool.root;
 import java.io.*;
 import java.util.*;
 
-import rf.configtool.main.CodeHistory;
+import rf.configtool.main.ScriptCode;
 import rf.configtool.main.CodeLine;
 import rf.configtool.main.CodeLines;
 import rf.configtool.main.Ctx;
@@ -232,7 +232,7 @@ public class Root {
 		line = line.trim();
 		TokenStream ts = null;
 		ObjGlobal objGlobal = currScript.getObjGlobal();
-		CodeHistory codeHistory = objGlobal.getCodeHistory();
+		ScriptCode codeHistory = objGlobal.getCodeHistory();
 
 		try {
 			// Shortcuts
@@ -353,7 +353,7 @@ public class Root {
 							throw new Exception("No such script: " + ident);
 						}
 						
-						CodeHistory hist = sstate.getObjGlobal().getCodeHistory();
+						ScriptCode hist = sstate.getObjGlobal().getCodeHistory();
 
 						// script: may in turn be followed by another identifier for partial or
 						// complete match, as before
@@ -460,7 +460,7 @@ public class Root {
 
 	private void processColonCommand(TokenStream ts) throws Exception {
 		ObjGlobal objGlobal = currScript.getObjGlobal();
-		CodeHistory codeHistory = objGlobal.getCodeHistory();
+		ScriptCode codeHistory = objGlobal.getCodeHistory();
 
 		if (ts.matchStr("quit")) {
 			terminationFlag = true;

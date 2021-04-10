@@ -210,17 +210,15 @@ public class PropsFile {
 		}
 	}
 	
-	public File getCodeSaveFile (String name) throws Exception {
-		createDir(getSaveDir());
-		return new File(getSaveDir() + File.separator + name);
-	}
-
-	public File getCodeLoadFile (String name) throws Exception {
+	public File getScriptSavefile (String name, File currDir) throws Exception {
 		for (String s:getCodeDirs()) {
 			createDir(s);
 			File f = new File(s + File.separator + name);
 			if (f.exists()) return f;
 		}
+		File f=new File(currDir.getCanonicalPath() + File.separator + name);
+		if (f.exists()) return f;
+		
 		throw new Exception("No such file: " + name);
 	}
 	

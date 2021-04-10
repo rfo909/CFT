@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2021-04-03 RFO
-v2.3.8
+Last updated: 2021-04-10 RFO
+v2.3.9
 ```
 # Introduction
 
@@ -889,18 +889,15 @@ The CFT.props file contains the following line by default
 codeDirs = . ; code.examples ; code.lib
 ```
 
-The codeDirs field defines a search order when loading scripts.
-The first directory is 
-**always** used when you type ":save".
+The codeDirs field defines a search order when loading scripts (followed by current dir)
 
 
 The code.examples contains some example code for various use, while code.lib contains
 library code, used by most other scripts.
 
 
-This means you are free to save a script using the name "Lib", and it will be written to
-the code.work directory. Doing this means it will hide the version in the code.lib directory.
-Which may be perfectly fine, as long as it is what you intended.
+Each script remembers where it was loaded from, so when saving it, it is written back
+to that location.
 
 # Comments
 

@@ -15,8 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2021-04-03 RFO
-v2.3.8
+Last updated: 2021-04-10 RFO
+v2.3.9
 
 
 </pre>
@@ -997,19 +997,16 @@ v2.3.8
 codeDirs = . ; code.examples ; code.lib
 </pre>
 <p>
-  The codeDirs field defines a search order when loading scripts. 
-  The first directory is <b>always</b> used when you type ":save".
+  The codeDirs field defines a search order when loading scripts (followed by current dir)
 </p>
 <p>
   The code.examples contains some example code for various use, while code.lib contains
   library code, used by most other scripts.
 </p>
 <p>
-  This means you are free to save a script using the name "Lib", and it will be written to
-  the code.work directory. Doing this means it will hide the version in the code.lib directory.
-  Which may be perfectly fine, as long as it is what you intended.
+  Each script remembers where it was loaded from, so when saving it, it is written back
+  to that location.
 </p>
-
 
 
 

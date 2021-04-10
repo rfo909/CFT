@@ -54,8 +54,8 @@ public class ObjGlobal extends Obj {
 	private Root root;
     private Stdio stdio;
 
-    private String currDir;
-    private CodeHistory codeHistory;
+    private String currentDir;
+    private ScriptCode currScriptCode;
     
     private String scriptName;
     
@@ -77,14 +77,15 @@ public class ObjGlobal extends Obj {
     	return root.isDebugMode();
     }
     
-    public ObjGlobal(Root root, String currDir, Stdio stdio) throws Exception {
+    public ObjGlobal(Root root, String currentDir, Stdio stdio) throws Exception {
     	this.root=root;
-    	this.currDir=currDir;
+    	this.currentDir=currentDir;
         this.stdio=stdio;
         //props.report(stdio);
         
         
-        codeHistory=new CodeHistory(root.getPropsFile(), root.getObjTerm());
+        // initialize with empty script
+        currScriptCode=new ScriptCode(root.getPropsFile(), root.getObjTerm());
         this.runtime=new Runtime(this);
         
         
@@ -146,7 +147,7 @@ public class ObjGlobal extends Obj {
     }
  
     public String getCurrDir() {
-        if (currDir==null) {
+        if (currentDir==null) {
             File f=new File(".");
             try {
                 return f.getCanonicalPath();
@@ -154,7 +155,7 @@ public class ObjGlobal extends Obj {
                 return ".";
             }
         }
-        return currDir;
+        return currentDir;
     }
     
     public boolean runningOnWindows() {
@@ -171,7 +172,7 @@ public class ObjGlobal extends Obj {
             }
             
         }
-        this.currDir=currDir;
+        this.currentDir=currDir;
     }
     
     @Override
@@ -258,15 +259,15 @@ public class ObjGlobal extends Obj {
         }
     }
 
-    public CodeHistory getCodeHistory() {
-        return codeHistory;
+    public ScriptCode getCodeHistory() {
+        return currScriptCode;
     }
     
     public void saveCode (String name) throws Exception {
         if (name==null) name=scriptName;
         if (name==null) throw new Exception("No save name defined");
         scriptName=name;
-        codeHistory.save(scriptName);
+        currScriptCode.save(scriptName, new File(currentDir));
 
         updateSavefileState();
     }
@@ -275,11 +276,11 @@ public class ObjGlobal extends Obj {
         if (name==null) name=scriptName;
         if (name==null) throw new Exception("No save name defined");
         scriptName=name;
-        codeHistory.load(scriptName);
+        currScriptCode.load(scriptName, new File(currentDir));
 
         updateSavefileState();
  
-        CodeLines onLoad = codeHistory.getNamedCodeLines("onLoad");
+        CodeLines onLoad = currScriptCode.getNamedCodeLines("onLoad");
         if (onLoad != null) {
         	try {
         		this.runtime.processCodeLines(stdio, onLoad, new FunctionState());
@@ -296,7 +297,7 @@ public class ObjGlobal extends Obj {
     
      public File getSavefile() throws Exception {
         if (scriptName==null) throw new Exception("No save name defined");
-        return codeHistory.getSaveFile(scriptName);
+        return currScriptCode.getSaveFile(scriptName, new File(currentDir));
     }
     
     

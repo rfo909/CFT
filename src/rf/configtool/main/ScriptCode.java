@@ -29,10 +29,16 @@ import rf.configtool.parser.SourceLocation;
 import rf.configtool.parser.Token;
 import rf.configtool.util.TabUtil;
 
-public class CodeHistory {
+/**
+ * Originally named CodeHistory
+ *
+ */
+
+public class ScriptCode {
     
      
     private PropsFile props;
+    private File savefile;
     private Map<String, CodeLines> namedLines=new HashMap<String,CodeLines>();
     private Set<String> privateFunctions=new HashSet<String>();
     private List<String> namesInSequence=new ArrayList<String>();
@@ -40,7 +46,7 @@ public class CodeHistory {
     
     private String currLine;
     
-    public CodeHistory (PropsFile props, ObjTerm cfg) {
+    public ScriptCode (PropsFile props, ObjTerm cfg) {
         this.props=props;
         this.term=cfg;
     }
@@ -187,22 +193,33 @@ public class CodeHistory {
         
     }
     
-    private String createSavefileName (String name) {
-        return "savefile" + name + ".txt";
+    private String createSavefileName (String scriptName) {
+        return "savefile" + scriptName + ".txt";
     }
     
     /**
      * Return File for existing file as looked up along the Props path. Used 
      * by global function savefile()
      */
-    public File getSaveFile (String saveName) throws Exception {
-    	return props.getCodeLoadFile(createSavefileName(saveName));
+    public File getSaveFile (String saveName, File currentDir) throws Exception {
+    	return props.getScriptSavefile(createSavefileName(saveName),currentDir);
     }
     
     
-    public void save(String saveName) throws Exception {
-    	File file=props.getCodeSaveFile(createSavefileName(saveName));
-        PrintStream ps=new PrintStream(new FileOutputStream(file));
+    public void save(String scriptName, File currentDir) throws Exception {
+    	String sfn=createSavefileName(scriptName);
+    	
+    	if (this.savefile != null) {
+    		if (!this.savefile.getName().equals(sfn)) {
+    			// saving with new name, using current dir
+    			this.savefile=null;
+    		}
+    	}
+    	if (this.savefile==null) {
+    		this.savefile=new File(currentDir.getCanonicalPath()+File.separator+sfn);
+    	} 
+    	
+        PrintStream ps=new PrintStream(new FileOutputStream(this.savefile));
         
         for (String s:namesInSequence) {
             CodeLines c=namedLines.get(s);
@@ -224,11 +241,13 @@ public class CodeHistory {
     	return s.substring(pos).trim();
     }
     
-    public void load(String saveName) throws Exception {
+    public void load(String scriptName, File currentDir) throws Exception {
         namedLines.clear();
         namesInSequence.clear();
         
-    	File file=props.getCodeLoadFile(createSavefileName(saveName));
+    	String sfn=createSavefileName(scriptName);
+        
+    	File file=props.getScriptSavefile(sfn, currentDir);
         BufferedReader reader=new BufferedReader(new FileReader(file));
         
         List<CodeLine> lines=new ArrayList<CodeLine>();
@@ -238,7 +257,7 @@ public class CodeHistory {
             String s=reader.readLine();
             if (s==null) break;
             
-            SourceLocation loc=new SourceLocation("<script> " + saveName, lineNumber, 0);
+            SourceLocation loc=new SourceLocation("<script> " + scriptName, lineNumber, 0);
 
             // Process inline document format, but add lines as-is to the
             // lines list, as this the external representation. It gets parsed
@@ -301,6 +320,8 @@ public class CodeHistory {
         }
         
         reader.close();
+        
+        this.savefile=file;
         
     }
     

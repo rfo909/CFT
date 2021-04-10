@@ -13,6 +13,19 @@
 
 <h1>CFT Change log</h1>
 
+<h3>v2.3.9 2021-04-10 :save :load currentDir</h3>
+<p>
+	Changed :load to look up scripts in the codeDirs sequence as defined in CFT.props,
+	then if not found, check current directory.
+</p>
+<p>
+	Also renamed CodeHistory to ScriptCode, and extended it to rememvber its full
+	savefile location (if defined) and modified :save so that the location gets 
+	updated on save.
+</p>
+
+
+
 <h3>v2.3.8 2021-04-03 private functions</h3>
 <p> 
 	Allowing scripts to contain private (helper) functions, by naming them with two slashes

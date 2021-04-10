@@ -19,7 +19,7 @@ package rf.configtool.data;
 
 import java.util.*;
 
-import rf.configtool.main.CodeHistory;
+import rf.configtool.main.ScriptCode;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.ObjTerm;
 import rf.configtool.main.Stdio;
@@ -70,7 +70,7 @@ public class StmtShowCode extends Stmt {
         if (v==null || !(v instanceof ValueString)) throw new Exception("showCode() - expected string parameter");
         String s=((ValueString) v).getVal();
         
-        CodeHistory code = ctx.getObjGlobal().getCodeHistory();
+        ScriptCode code = ctx.getObjGlobal().getCodeHistory();
         List<String> names=code.getNames();
         ObjTerm term=ctx.getObjGlobal().getRoot().getObjTerm();
         
