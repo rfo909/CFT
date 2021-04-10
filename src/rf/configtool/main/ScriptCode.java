@@ -29,10 +29,7 @@ import rf.configtool.parser.SourceLocation;
 import rf.configtool.parser.Token;
 import rf.configtool.util.TabUtil;
 
-/**
- * Originally named CodeHistory
- *
- */
+
 
 public class ScriptCode {
     

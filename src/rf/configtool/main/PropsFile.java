@@ -211,13 +211,16 @@ public class PropsFile {
 	}
 	
 	public File getScriptSavefile (String name, File currDir) throws Exception {
+		{
+			File f=new File(currDir.getCanonicalPath() + File.separator + name);
+			if (f.exists()) return f;
+		}
+		
 		for (String s:getCodeDirs()) {
 			createDir(s);
 			File f = new File(s + File.separator + name);
 			if (f.exists()) return f;
 		}
-		File f=new File(currDir.getCanonicalPath() + File.separator + name);
-		if (f.exists()) return f;
 		
 		throw new Exception("No such file: " + name);
 	}

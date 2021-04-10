@@ -471,8 +471,9 @@ public class Root {
 
 		if (ts.matchStr("save")) {
 			String ident = ts.matchIdentifier(); // may be null
-			if (ident == null)
+			if (ident == null) {
 				ident = currScript.getScriptName();
+			}
 			if (ident == null) {
 				throw new SourceException(ts.getSourceLocation(), "No save name");
 			}
