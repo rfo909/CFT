@@ -162,6 +162,39 @@ t10.concat("-")=="1-2-3"
 /Test10_OuterLoopUnaffectedByLambdaAssert
 
 
+# ------------------------------------------
+# Test 11 - 2021-04-07 lambda file sort bug
+# ------------------------------------------
+
+# Sort files via lambda
+# --
+	P(1,Dir.files)=>files 
+	LSortFiles=Lambda{
+		P(1)->f
+			out(Int(f.lastModified,f))
+		| _.sort.reverse->x
+		out(x.data.name)
+	}
+	LSortFiles.call(files)
+/t11ViaLambda
+
+
+# Sort files via lambda
+# --
+	P(1,Dir.files)=>files
+	files->f
+		out(Int(f.lastModified,f))
+	| _.sort.reverse->x
+		out(x.data.name)
+/t11Directly
+
+
+# Test
+	t11Directly.concat==t11ViaLambda.concat
+/Test11_lambda_pipe_2021_04_07
+
+
+
 
 
 

@@ -15,7 +15,7 @@
 
 <h3>v2.3.9 2021-04-10 :save :load currentDir</h3>
 <p>
-	Changed :load to look up scripts in the codeDirs sequence as defined in CFT.props,
+	Changed :load to first look up scripts in the codeDirs sequence as defined in CFT.props,
 	then if not found, check current directory.
 </p>
 <p>
@@ -23,7 +23,10 @@
 	savefile location (if defined) and modified :save so that the location gets 
 	updated on save.
 </p>
-
+<p>
+	Saving a script that has no current savefile location, or entering a different
+	name, the current directory is always used.
+</p>
 
 
 <h3>v2.3.8 2021-04-03 private functions</h3>
