@@ -130,18 +130,6 @@ public class Root {
 	}
 	
 
-	private void processSave(String newName) throws Exception {
-		// user has typed :save name
-		currScript.getObjGlobal().saveCode(newName);
-
-		String currName = currScript.getScriptName();
-		if (!currName.equals(newName)) {
-			scriptStates.remove(currName);
-			currScript.updateName(newName);
-			scriptStates.put(newName, currScript);
-		}
-	}
-
 	public ScriptState getScriptState(String name, boolean isLoad) throws Exception {
 		if (name == null || name.equals(currScript.getScriptName())) {
 			if (isLoad)
@@ -488,7 +476,17 @@ public class Root {
 			if (ident == null) {
 				throw new SourceException(ts.getSourceLocation(), "No save name");
 			}
-			processSave(ident); // maintain map
+			
+			currScript.getObjGlobal().saveCode(ident);
+
+			String currName = currScript.getScriptName();
+			if (!currName.equals(ident)) {
+				// saving current script with new name
+				scriptStates.remove(currName);
+					// remove currScript reference for old name 
+				currScript.updateName(ident);
+				scriptStates.put(ident, currScript);
+			}
 			return;
 		} else if (ts.matchStr("load")) {
 			String ident = ts.matchIdentifier(); // may be null
