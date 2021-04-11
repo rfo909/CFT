@@ -15,6 +15,7 @@ public class PropsFile {
 	
 	private String codeDirs;
 	private String prompt;   // line of code
+	private String bangCommand; // line of code
 	
 	private String shell;
 	private String winShell;
@@ -59,13 +60,17 @@ public class PropsFile {
 		
 		// Set defaults
 		codeDirs=".";
-		prompt="$";
+		prompt="'$ '";  // code
+		bangCommand="println('bangCommand not defined')"; // code
+		
 		shell = "/usr/bin/bash";
 		winShell = "powershell";
 		
+		// code
 		mCat  = "Lambda {error('mCat macro undefined in " + PROPS_FILE + "') }";
 		mEdit = "Lambda {error('mEdit macro undefined in " + PROPS_FILE + "') }";
 		mMore = "Lambda{error('mMore macro undefined in " + PROPS_FILE + "') }";
+		
 		
 		shortcutPrefix = "@";
 		shortcuts=new HashMap<String,String>();
@@ -93,6 +98,9 @@ public class PropsFile {
 					if (name.equals("prompt")) {
 						prompt=value;
 					} else
+					if (name.equals("bangCommand")) {
+						bangCommand=value;
+					} else 
 					if (name.equals("shell")) {
 						shell=value;
 					} else
@@ -153,6 +161,10 @@ public class PropsFile {
 	
 	public String getPromptCode() {
 		return prompt;
+	}
+	
+	public String getBangCommand() {
+		return bangCommand;
 	}
 	
 	public String getShell() {

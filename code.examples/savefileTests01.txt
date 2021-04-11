@@ -162,35 +162,40 @@ t10.concat("-")=="1-2-3"
 /Test10_OuterLoopUnaffectedByLambdaAssert
 
 
-# ------------------------------------------
-# Test 11 - 2021-04-07 lambda file sort bug
-# ------------------------------------------
 
-# Sort files via lambda
-# --
+
+
+# Test11 description
+<<< EOF
+# ------------------------------------------
+# Test 11 - 2021-04-07 lambda file sort bug. 
+#   Does not handle pipe correctly in Lambda code - the two should to the same!
+# ------------------------------------------
+>>> EOF
+//t11_description
+
+
+# Lambda version
 	P(1,Dir.files)=>files 
-	LSortFiles=Lambda{
-		P(1)->f
-			out(Int(f.lastModified,f))
-		| _.sort.reverse->x
-		out(x.data.name)
+	L=Lambda{
+		List(1,2,3)->x out(x)
+		|
+		"abc".chars->x out(x)
 	}
-	LSortFiles.call(files)
-/t11ViaLambda
+	L.call()
+/t11_lambda
 
 
-# Sort files via lambda
-# --
-	P(1,Dir.files)=>files
-	files->f
-		out(Int(f.lastModified,f))
-	| _.sort.reverse->x
-		out(x.data.name)
-/t11Directly
+# function version
+	List(1,2,3)->x out(x)
+	|
+	"abc".chars->x out(x)
+/t11_function
 
 
-# Test
-	t11Directly.concat==t11ViaLambda.concat
+
+# Lambda output should match function output
+	t11_lambda.concat==t11_function.concat
 /Test11_lambda_pipe_2021_04_07
 
 

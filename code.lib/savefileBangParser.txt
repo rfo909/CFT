@@ -1,0 +1,154 @@
+# Readme
+<<< EOF
+-----------------------------------
+v2.4.0 introduces configurable bang commands. This script is an implementation of
+a parser, for running external commands. 
+
+Parser for bang commands, which start with '!'. The rest of the line is
+sent to the Run() function below, which parses the command into a list of parts
+which is ready to be passed to Dir.run(). 
+
+Also supports running CFT code spaces, to generate argument values via expressions. The string
+inside is eval'ed and returns a value.
+
+If the return value is a list, we iterate over it, processing each value.
+
+The values to be added to the command must be either a Dir or File or a string.
+
+For Dir and File values, the .path() is called to produce a string. 
+
+Also understands quotes, both single and double, grouping strings with spaces in them.
+
+Does not handle script pipes. Parser will give error if trying to use the pipe outside
+of the code spaces [...]
+
+See also CFT.props, where the bangCommand code property invokes the Run function below.
+
+Example
+
+	$ !ls -la
+	$ !du [Dir.sub("..")] 
+	$ !git status
+	$ !top
+
+-----------------------------------
+>>> EOF
+/Readme
+
+
+
+# Build root lexer Node for all known tokens
+# --
+	Lib.Text.Lexer.Node => root
+	
+	specials = "{}:;,.()/\*?=-_@!#%&+"  # not including pipes or code space start character
+	digits = "0123456789"
+	ident = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"
+	
+	chars=specials+digits+ident
+	
+	root.sub(chars) => nonspace
+	nonspace.sub(chars,nonspace)
+	nonspace.setIsToken(1)
+	
+	List('"',"'")->c 
+		root.sub(c) => insideString
+		insideString.setDefault(insideString)
+		insideString.sub("\").setDefault(insideString)
+		insideString.sub(c).setIsToken(2)
+	|
+	
+	root.addToken("[") => codeSpace
+	codeSpace.setDefault(codeSpace)
+	codeSpace.addToken("]").setIsToken(3)
+	
+	root.sub(" ^n^r^t".unEsc) => spc
+	spc.setIsToken(-1) # whitespace
+
+
+	# return value is the root node
+	root
+//RootNode
+
+
+
+
+
+# Execute command line with Dir.run, unquoting strings and evaluating content inside []'s.
+# Does not handle pipes 
+# --
+	P(1,readLine) => line
+
+	RootNode => root
+	Lib.Text.Lexer => lexer
+	lexer.processLine(root,line) 
+	tokens=lexer.getTokens
+	
+	Dict
+		.set("cmd",List)
+		.set("LAdd",Lambda{P(1)=>value
+			if (getType(value)=="File" || getType(value)=="Dir") {
+				self.cmd.add(value.path)
+			} else {
+				error(!value.?toUpper,"Invalid value: " + getType(value))
+				self.cmd.add(value)
+			}
+		})
+		=> obj
+	
+	cmd=List
+	tokens->token
+		if (token.tokenType==2) { # string
+			value=token.str
+			value=value.sub(1,value.length-1) # strip quotes
+			obj.LAdd.call(value)
+		} else if (token.tokenType==3) { # codeSpace
+			value=token.str
+			value=value.sub(1,value.length-1) # strip "[" and "]"
+			value=eval(value)
+			if (getType(value)=="List") {
+				value->v
+					obj.LAdd.call(v)
+			} else {
+				obj.LAdd.call(value)
+			}
+		} else {
+			obj.LAdd.call(token.str)
+		}
+	|
+
+	obj.cmd	
+/Parse
+
+
+# Parse and run shell command 
+# --
+	P(1,readLine) => cmd
+	
+	list=Parse(cmd)
+	if (Sys.isWindows) list=List("cmd","/c")+list
+	
+	Dir.run(list)
+/Run
+
+
+# Mainloop for testing
+# --
+	loop
+		readLine => cmd
+		break(cmd=="")
+		tryCatch(Parse(cmd)) => x
+		if (!x.ok) {
+			println("** " + x.msg)
+		} else {
+			tryCatch(Dir.run(x.result)) => y
+			if (!y.ok) {
+				println("** " + y.msg)
+			}
+		}
+//test
+
+
+
+
+

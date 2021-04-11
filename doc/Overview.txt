@@ -26,6 +26,7 @@ Shortcuts vs colon commands
 
 CFT as a shell
  * The "protect" mechanism
+ * Bang commands
  * The "shell" command
  * Show content of file
  * Open a file in editor
@@ -239,9 +240,6 @@ Automating interactive functions / Sys.stdin()
  * Running colon commands from script code
 
 Clone any value
-
-Simple line editing
- |   Develop complex code in steps
 
 CFT.props - mCat, mEdit and mMore lambdas
 

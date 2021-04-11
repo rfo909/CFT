@@ -13,6 +13,18 @@
 
 <h1>CFT Change log</h1>
 
+<h3>v2.4.0 2021-04-11 Bang command</h3>
+<p>
+	Added the "bang command" configurable parser, and created a default parser, with 
+	the net result being that starting a command with a bang ("!"), the rest of the 
+	line is processed by the CFT code defined for the bangCommand configuration property.
+</p>
+<p>
+	In CFT.props it is in turn defined as calling BangParser:Run with the string. It
+	parses and executes the command via Dir.run(). 
+</p>
+
+
 <h3>v2.3.9 2021-04-10 :save :load currentDir</h3>
 <p>
 	Changed :load to first look up scripts in the codeDirs sequence as defined in CFT.props,

@@ -95,6 +95,15 @@ prompt = x=Sys.scriptName h=Lib:Hostname u=Lib:LoggedInUser("<",">")  u + if(h==
 
 
 #
+# The "bang command" is a configurable parser that is invoked when typing
+# '!' as first character. The rest of the line (String) becomes P(1) 
+# ---
+#
+
+bangCommand = BangParser:Run(P(1))
+
+
+#
 # Lib.Db2
 #
 

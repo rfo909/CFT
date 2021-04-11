@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2021-04-10 RFO
-v2.3.9
+Last updated: 2021-04-11 RFO
+v2.4.0
 ```
 # Introduction
 
@@ -223,6 +223,13 @@ $ cd ..
 $ ls *.txt
 ```
 
+The "ls" command comes in two additional versions:
+
+```
+$ lsf   # lists files
+$ lsd   # lists directories
+```
+
 The shell 
 **does not** include commands that move, delete or copy files and directories. This
 is by choice.
@@ -262,6 +269,24 @@ from it, for example like this:
 ```
 $ LogDir.file("log01.txt").delete
 ERROR: [input:18] INVALID-OP delete : /someNfsDir/logs/log01.txt (PROTECTED: -) (java.lang.Exception)
+```
+## Bang commands
+
+
+CFT supports a special syntax, where by starting a command line with "!", the following can
+directly run external commands, such as
+
+```
+$ !ps
+$ !git status
+$ !rm xxx.txt
+$ !top
+```
+
+For details of the default bang command parser:
+
+```
+$ BangParser:Readme
 ```
 ## The "shell" command
 
@@ -2826,35 +2851,6 @@ in question is synthesizable. If not, an error is returned.
 a=List(1,2,3)
 b=a.clone.add(4)  # b contains 1,2,3,4 while a remains unchanged
 ```
-# Simple line editing
-
-
-When using CFT mainly in interactive mode, a primitive line editor can be used to modify
-the code of an existing function, by optionally cutting off text following a pattern, as well
-as optionally adding text.
-
-
-The syntax is as follows
-
-```
-$ !x!       # inserts code from function x as text, then executes it
-$ !x! txt   # inserts code from function x, followed by " txt", then executes it
-$ !x:p!     # inserts code from function x up to but not including pattern 'p'
-$ !x:p! txt
-```
-### Develop complex code in steps
-
-```
-$ Dir.files
-$ /x
-$ !x!->f out(f)
-$ /x!
-$ !x:out!assert(f.name.endsWith(".txt")) out(f)
-$ /x!
-```
-
-Note: this only applies to single-line functions.
-
 # CFT.props - mCat, mEdit and mMore lambdas
 
 

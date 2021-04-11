@@ -15,8 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2021-04-10 RFO
-v2.3.9
+Last updated: 2021-04-11 RFO
+v2.4.0
 
 
 </pre>
@@ -247,9 +247,23 @@ v2.3.9
 </pre>
 
 <p>
+  The "ls" command comes in two additional versions:
+</p>
+<pre>
+  $ lsf   # lists files
+  $ lsd   # lists directories
+</pre>
+
+<p>
   The shell <i>does not</i> include commands that move, delete or copy files and directories. This
   is by choice.
 </p>
+
+
+
+
+
+
 
 
 
@@ -290,6 +304,27 @@ v2.3.9
 
  
 
+<h2>Bang commands</h2>
+<p>
+  CFT supports a special syntax, where by starting a command line with "!", the following can
+  directly run external commands, such as
+</p>
+<pre>
+  $ !ps
+  $ !git status
+  $ !rm xxx.txt
+  $ !top
+</pre>
+
+<p>
+  For details of the default bang command parser:
+</p>
+<pre>
+  $ BangParser:Readme
+</pre>
+
+
+
 <h2>The "shell" command</h2>
 <p>
   One can also run the global "shell" command, perform changes, and then return via "exit":
@@ -301,6 +336,10 @@ v2.3.9
     # Running bash completed
   $
 </pre>
+
+
+
+
 
 
 
@@ -3187,38 +3226,6 @@ $ Db2Obj:FindObjects("stats",Lambda{P(1).value.host=="s04.s"}).first.value.outpu
 
 
 
-
-
-
-<h1>Simple line editing</h1>
-<p>
-  When using CFT mainly in interactive mode, a primitive line editor can be used to modify
-  the code of an existing function, by optionally cutting off text following a pattern, as well
-  as optionally adding text. 
-</p>
-<p>
-  The syntax is as follows
-</p>
-<pre>
-  $ !x!       # inserts code from function x as text, then executes it
-  $ !x! txt   # inserts code from function x, followed by " txt", then executes it
-  $ !x:p!     # inserts code from function x up to but not including pattern 'p'
-  $ !x:p! txt
-</pre>
-
-<h3>Develop complex code in steps</h3>
-<pre>
-  $ Dir.files
-  $ /x
-  $ !x!-&gt;f out(f)
-  $ /x!
-  $ !x:out!assert(f.name.endsWith(".txt")) out(f)
-  $ /x!
-</pre>
-
-<p>
-  Note: this only applies to single-line functions.
-</p>
 
 
 

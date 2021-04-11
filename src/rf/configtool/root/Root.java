@@ -20,6 +20,7 @@ import rf.configtool.main.runtime.ValueList;
 import rf.configtool.main.runtime.ValueBlock;
 import rf.configtool.main.runtime.ValueNull;
 import rf.configtool.main.runtime.ValueObj;
+import rf.configtool.main.runtime.ValueString;
 import rf.configtool.main.runtime.reporttool.Report;
 import rf.configtool.parser.Parser;
 import rf.configtool.parser.SourceLocation;
@@ -264,40 +265,19 @@ public class Root {
 				line = currLine + line.substring(1);
 				stdio.println("$ " + line);
 			} else if (line.startsWith("!")) {
-				int pos = line.indexOf("!", 1);
-				if (pos > 0) {
-					String str = line.substring(1, pos);
+				// bang command (configured in props file)
+				String str=line.substring(1).trim();
 
-					// Look for inner pattern
-					String pattern = null;
-					int colon = str.indexOf(':');
-					if (colon > 0) {
-						pattern = str.substring(colon + 1);
-						str = str.substring(0, colon);
-					}
+				// Run the shell command parser
+				String code = propsFile.getBangCommand();
+				SourceLocation loc = new SourceLocation("bangCommand", 0, 0);
+				CodeLines codeLines = new CodeLines(code, loc);
 
-					CodeLines codeLines = codeHistory.getNamedCodeLines(str);
-					if (codeLines != null) {
-						if (codeLines.hasMultipleCodeLines()) {
-							stdio.println("Function '" + str + "' is not a single line of code");
-							return;
-						}
-						String codeLine = codeLines.getFirstNonBlankLine();
-						if (pattern != null) {
-							int cutoffPos = codeLine.indexOf(pattern);
-							if (cutoffPos > 0) {
-								codeLine = codeLine.substring(0, cutoffPos);
-							}
-						}
-						line = codeLine + line.substring(pos + 1);
-						stdio.println("----> " + line);
-					} else {
-						stdio.println("No function '" + str + "' - Usage: !ident! or !ident:pattern!...");
-						return;
-					}
-
-				}
-			}
+				List<Value> params=new ArrayList<Value>();
+				params.add(new ValueString(str));
+				objGlobal.getRuntime().processCodeLines(stdio, codeLines, new FunctionState(params));
+				return;
+			} 
 
 			// identify input tokens
 			Parser p = new Parser();
