@@ -126,7 +126,7 @@ Example
 	P(1,readLine) => cmd
 	
 	list=Parse(cmd)
-	if (Sys.isWindows) list=List("cmd","/c")+list
+	if (Sys.isWindows) list=List("powershell")+list
 	
 	Dir.run(list)
 /Run
