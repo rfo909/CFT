@@ -13,7 +13,7 @@ inside is eval'ed and returns a value.
 
 If the return value is a list, we iterate over it, processing each value.
 
-The values to be added to the command must be either a Dir or File or a string.
+The values to be added to the command must be either a Dir or File, string or number.
 
 For Dir and File values, the .path() is called to produce a string. 
 
@@ -78,7 +78,7 @@ Example
 # Does not handle pipes 
 # --
 	P(1,readLine) => line
-
+	
 	RootNode => root
 	Lib.Text.Lexer => lexer
 	lexer.processLine(root,line) 
@@ -89,6 +89,8 @@ Example
 		.set("LAdd",Lambda{P(1)=>value
 			if (getType(value)=="File" || getType(value)=="Dir") {
 				self.cmd.add(value.path)
+			} else if (getType(value)=="int" || getType(value)=="float") {
+				self.cmd.add(""+value)
 			} else {
 				error(!value.?toUpper,"Invalid value: " + getType(value))
 				self.cmd.add(value)
@@ -125,10 +127,21 @@ Example
 # --
 	P(1,readLine) => cmd
 	
+	show=false
+	if (cmd.startsWith("!")) {
+		show=true
+		cmd=cmd.sub(1)
+	}
+	
 	list=Parse(cmd)
 	if (Sys.isWindows) list=List("powershell")+list
-	
-	Dir.run(list)
+
+	if (show) {
+		list->x 
+			println("  " + getType(x) + " : " + x)
+	} else {
+		Dir.run(list)
+	}		
 /Run
 
 
