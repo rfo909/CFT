@@ -41,11 +41,11 @@ Example
 # --
 	Lib.Text.Lexer.Node => root
 	
-	specials = "{}:;,.()/\*?=-_@!#%&+"  # not including pipes or code space start character
+	specials = "{}:;,.()/\*?=-_@!#$%&+"  # not including |<> or code space start character
 	digits = "0123456789"
-	ident = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"
+	letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	
-	chars=specials+digits+ident
+	chars=specials+digits+letters
 	
 	root.sub(chars) => nonspace
 	nonspace.sub(chars,nonspace)
