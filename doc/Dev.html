@@ -13,6 +13,13 @@
 
 <h1>CFT Change log</h1>
 
+<h3>v2.4.1 2021-04-14 Bang command bug</h3>
+<p>
+	Sneaky bug with regards to current directory. Finally remembered that BangParser is
+	a CFT script with its own "current dir". Passing current Dir in as parameter to its
+	Run() function did the trick.
+</p>
+
 <h3>v2.4.0 2021-04-11 Bang command</h3>
 <p>
 	Added the "bang command" configurable parser, and created a default parser, with 
@@ -85,7 +92,7 @@
 	.clear()             - clear history and curr
 	.getHistory()        - show history values
 	.setHistory(list)    - set history values
-</p>
+</pre>
 
 
 

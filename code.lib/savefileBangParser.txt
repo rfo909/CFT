@@ -125,7 +125,8 @@ Example
 
 # Parse and run shell command 
 # --
-	P(1,readLine) => cmd
+	P(1,Dir) => currDir   # needs to know which directory, as current dir is stored per script
+	P(2,readLine) => cmd
 	
 	show=false
 	if (cmd.startsWith("!")) {
@@ -140,7 +141,7 @@ Example
 		list->x 
 			println("  " + getType(x) + " : " + x)
 	} else {
-		Dir.run(list)
+		currDir.run(list)
 	}		
 /Run
 

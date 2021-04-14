@@ -137,12 +137,14 @@ public class Root {
 				currScript.getObjGlobal().loadCode(null); // reloads code - overwrite any local changes
 			return currScript;
 		}
+		// script already loaded (but not current)?
 		ScriptState otherScript = scriptStates.get(name);
 		if (otherScript != null) {
 			if (isLoad)
 				otherScript.getObjGlobal().loadCode(otherScript.getScriptName());
 			return otherScript;
 		}
+		// script not loaded, create new ScriptState
 		ScriptState newScript = new ScriptState(name, new ObjGlobal(this, getCurrDirOrNull(), stdio)); // throws exception if there is
 																					// trouble
 		scriptStates.put(newScript.getScriptName(), newScript);
@@ -233,7 +235,7 @@ public class Root {
 		line = line.trim();
 		TokenStream ts = null;
 		ObjGlobal objGlobal = currScript.getObjGlobal();
-		ScriptCode codeHistory = objGlobal.getCodeHistory();
+		ScriptCode currScriptCode = objGlobal.getCodeHistory();
 
 		try {
 			// Shortcuts
@@ -252,20 +254,10 @@ public class Root {
 
 				return;
 			}
-
-			// pre-processing input
-
-			if (line.startsWith(".")) {
-				// repeat previous command
-				String currLine = codeHistory.getCurrLine();
-				if (currLine == null) {
-					stdio.println("ERROR: no current line");
-					return;
-				}
-				line = currLine + line.substring(1);
-				stdio.println("$ " + line);
-			} else if (line.startsWith("!")) {
-				// bang command (configured in props file)
+			
+			// Bang command
+			
+			if (line.startsWith("!")) {
 				String str=line.substring(1).trim();
 
 				// Run the shell command parser
@@ -279,6 +271,19 @@ public class Root {
 				return;
 			} 
 
+
+			// pre-processing input
+
+			if (line.startsWith(".")) {
+				// repeat previous command
+				String currLine = currScriptCode.getCurrLine();
+				if (currLine == null) {
+					stdio.println("ERROR: no current line");
+					return;
+				}
+				line = currLine + line.substring(1);
+				stdio.println("$ " + line);
+			} 
 			// identify input tokens
 			Parser p = new Parser();
 			SourceLocation loc = new SourceLocation("input", 0, 0);
@@ -298,9 +303,9 @@ public class Root {
 					throw new Exception("Expected '/ident' to save previous program line");
 				boolean success;
 				if (isPrivate) {
-					success = codeHistory.assignPrivateName(ident, force);
+					success = currScriptCode.assignPrivateName(ident, force);
 				} else {
-					success = codeHistory.assignPublicName(ident, force);
+					success = currScriptCode.assignPublicName(ident, force);
 				}
 				if (!success) {
 					stdio.println("ERROR: Symbol exists. Use /" + ident + "! to override");
@@ -345,10 +350,10 @@ public class Root {
 						}
 					} else {
 						// no colon
-						codeHistory.report(stdio, ident, false);
+						currScriptCode.report(stdio, ident, false);
 					}
 				} else {
-					codeHistory.reportAll(stdio,false);
+					currScriptCode.reportAll(stdio,false);
 				}
 				String scriptName = objGlobal.getScriptName();
 				if (scriptName != null) {
@@ -364,7 +369,7 @@ public class Root {
 			// actually execute code line
 			if (line.trim().length() > 0) {
 				// program line
-				codeHistory.setCurrLine(line);
+				currScriptCode.setCurrLine(line);
 				Value result = objGlobal.getRuntime().processCodeLines(stdio, new CodeLines(line, loc), null);
 
 				postProcessResult(result);
