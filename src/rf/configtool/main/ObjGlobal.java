@@ -83,6 +83,8 @@ public class ObjGlobal extends Obj {
         this.stdio=stdio;
         //props.report(stdio);
         
+        if (currentDir==null) throw new Exception("No currentDir");
+        
         
         // initialize with empty script
         currScriptCode=new ScriptCode(root.getPropsFile(), root.getObjTerm());

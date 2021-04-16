@@ -125,9 +125,9 @@ public class Root {
 	}
 	
 	
-	private String getCurrDirOrNull() {
+	private String getCurrDirOrDot() throws Exception {
 		if (currScript != null) return currScript.getObjGlobal().getCurrDir();
-		return null;
+		return (new File(".")).getCanonicalPath();
 	}
 	
 
@@ -145,14 +145,14 @@ public class Root {
 			return otherScript;
 		}
 		// script not loaded, create new ScriptState
-		ScriptState newScript = new ScriptState(name, new ObjGlobal(this, getCurrDirOrNull(), stdio)); // throws exception if there is
+		ScriptState newScript = new ScriptState(name, new ObjGlobal(this, getCurrDirOrDot(), stdio)); // throws exception if there is
 																					// trouble
 		scriptStates.put(newScript.getScriptName(), newScript);
 		return newScript;
 	}
 
 	public void createNewScript() throws Exception {
-		currScript = new ScriptState(new ObjGlobal(this, getCurrDirOrNull(), stdio));
+		currScript = new ScriptState(new ObjGlobal(this, getCurrDirOrDot(), stdio));
 		scriptStates.put(currScript.getScriptName(), currScript);
 	}
 
