@@ -199,7 +199,10 @@ public class ScriptCode {
      * by global function savefile()
      */
     public File getSaveFile (String saveName, File currentDir) throws Exception {
-    	return props.getScriptSavefile(createSavefileName(saveName),currentDir);
+    	if (savefile==null) {
+    		savefile=props.getScriptSavefile(createSavefileName(saveName),currentDir);
+    	}
+    	return savefile;
     }
     
     
@@ -242,10 +245,12 @@ public class ScriptCode {
         namedLines.clear();
         namesInSequence.clear();
         
-    	String sfn=createSavefileName(scriptName);
-        
-    	File file=props.getScriptSavefile(sfn, currentDir);
-        BufferedReader reader=new BufferedReader(new FileReader(file));
+    	
+    	if (savefile==null) {
+        	String sfn=createSavefileName(scriptName);
+	    	savefile=props.getScriptSavefile(sfn, currentDir);
+    	}
+        BufferedReader reader=new BufferedReader(new FileReader(savefile));
         
         List<CodeLine> lines=new ArrayList<CodeLine>();
         CodeInlineDocument inlineDoc=null;
@@ -317,8 +322,6 @@ public class ScriptCode {
         }
         
         reader.close();
-        
-        this.savefile=file;
         
     }
     
