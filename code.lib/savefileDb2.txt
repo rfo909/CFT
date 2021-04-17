@@ -25,7 +25,7 @@ knowing the UUID.
 	Collections->c println("   " +c) |
 
 	Input("collection").get
-/inputCollection
+//inputCollection
 
 
 		
