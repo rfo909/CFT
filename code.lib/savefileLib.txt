@@ -571,3 +571,20 @@ P(2) =>value
 		""
 	}
 /LoggedInUser
+
+
+
+# Search text files under current directory
+# --
+	P(1,Input("Search files of type").setCurrCond("txt").get) => type
+	P(2,Input("Search term").get) => st
+
+	if (!type.startsWith(".")) type="."+type
+	grep=Grep(st)
+
+	Dir.allFiles(Glob("*"+type)) -> f
+		grep.file(f)->line
+			report(line.file.name, line.lineNumber, line)
+/SearchTextFiles
+
+	
