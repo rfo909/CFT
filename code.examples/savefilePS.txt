@@ -309,10 +309,6 @@ loop
 						newDir=line.after(":").trim
 						if (newDir != currDir) {
 							setDir.call(host, newDir)
-							Inner {
-								PS:RunScriptRemote(host,List("cd " + newDir, "Get-ChildItem")) => xx
-								xx.stdout->line println(line)
-							}
 						}
 					}
 				}
