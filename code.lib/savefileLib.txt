@@ -513,6 +513,18 @@ P(1,"label") =>label P(2) =>currVal P(3,"yes") =>trueVal P(4,"no") =>falseVal
 
 
 
+# Get confirmation (true or false)
+# --
+P(1,"Please confirm")=>label
+P(2,"yes")=>confirmString
+	readLine(label + " ("+confirmString+")") => inp
+	
+	inp.toLower == confirmString.toLower
+/Confirm
+
+
+
+
 # If value is Dict, for each key found, return corresponding value (as list). Otherwise true if value found, false if not found
 P(1,List) =>lines
 P(2) =>value
@@ -547,107 +559,6 @@ P(2) =>value
 		}
 /Scripts
 
-
-# Save lastResult to database
-# --
-	value=Sys.lastResult
-	
-	P(1,Input("Enter identifier").get) =>name
-	Db2:Get("Lib.lastResults", Sys.sessionUUID, Dict) => dict
-	dict.set(name, value)
-	Db2:Set("Lib.lastResults", Sys.sessionUUID, dict)
-/SaveLastResult
-
-
-# Get saved lastResult
-# --
-	P(1)=>name
-	if (name==null) {
-		Inner {
-			Db2:Get("Lib.lastResults", Sys.sessionUUID, Dict).keys ->x 
-				println(" -> " + x)
-		}
-		Input("Enter identifier").get =>name
-	}
-	Db2:Get("Lib.lastResults",Sys.sessionUUID,Dict).get(name,null)
-/GetLastResult
-
-
-
-# Create/edit text document in database
-# --
-	P(1)=>name
-	if (name==null) {
-		Inner {
-			Db2:Keys("Lib.docs") ->x 
-				println(" -> " + x)
-		}
-		Input("Enter identifier").get =>name
-	}
-	Db2:Get("Lib.docs",name,List) => data
-	Lib:TmpFile("docs","txt") =>f
-	f.create(data)
-	Lib:e(f,false)
-	Db2:Set("Lib.docs",name,f.read)
-	r.delete
-/DocEdit
-
-
-# Get text document from database
-# --
-	P(1)=>name
-	if (name==null) {
-		Inner {
-			Db2:Keys("Lib.docs") ->x 
-				println(" -> " + x)
-		}
-		Input("Enter identifier").get =>name
-	}
-	Db2:Get("Lib.docs",name,List)
-/DocGet
-
-	
-# Get text document names from database
-# --
-	Db2:Keys("Lib.docs")
-/DocNames
-
-	
-# Create properties file in database 
-# --
-	P(1,Input("Properties file name").get)=>name
-	Db2:Get("Lib.propsDocs",name,List) => data
-	Lib:TmpFile("props","txt") => f
-	f.create(data)
-	Lib:e(f,false)
-	list = Inner { f.read->x out(""+x) } # Convert from FileLine to String
-	Db2:Set("Lib.propsDocs",name,list)
-	f.delete
-/PropsEdit
-
-
-# Create properties file in database 
-# --
-	P(1,Input("Properties file name").get)=>name
-	P(2,true)=>verbose
-	dict=Dict
-	Db2:Get("Lib.propsDocs",name,List)->line
-		assert(line.contains(":") || line.contains("="))
-		reject(line.trim.startsWith("#"))
-		dict.setStr(""+line)
-	|
-	if(verbose) Inner {
-		Util:ShowDict(dict)->line println(line)
-	}
-	dict
-	
-/PropsGet
-
-
-# Get properties file names in database 
-# --
-	Db2:Keys("Lib.propsDocs")
-/PropsNames
 
 
 # Current user (linux)
