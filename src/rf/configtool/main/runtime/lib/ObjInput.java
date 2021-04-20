@@ -48,6 +48,8 @@ public class ObjInput extends ObjPersistent {
         add(new FunctionClear());
         add(new FunctionGetHistory());
         add(new FunctionSetHistory());
+        add(new FunctionGetCurr());
+        add(new FunctionSetCurrCond());
     }
     
     public ObjInput self() {
@@ -239,5 +241,36 @@ public class ObjInput extends ObjPersistent {
             return new ValueObj(self());
         }
     }
+    
+    class FunctionGetCurr extends Function {
+        public String getName() {
+            return "getCurr";
+        }
+        public String getShortDesc() {
+            return "getCurr() - get current value or null if not set";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+        	if (currValue.equals("")) return new ValueNull();
+        	return new ValueString(currValue);
+        }
+    }
+    
+    class FunctionSetCurrCond extends Function {
+        public String getName() {
+            return "setCurrCond";
+        }
+        public String getShortDesc() {
+            return "setCurrCond(str) - set current value if no value exists - returns self";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size()!=1) throw new Exception("Expected String value");
+            if (currValue.equals("")) {
+            	currValue=getString("str", params, 0);
+            }
+            return new ValueObj(self());
+        }
+    }
+    
 
 }
