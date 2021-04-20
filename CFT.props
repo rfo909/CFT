@@ -49,7 +49,7 @@ shortcut:term = "---- Update terminal size ----"          Lib:GetTerminalSize
 shortcut:top  = "---- Run top command ----"               Dir.run("top")
 shortcut:rsh  = "---- Remote shell via ssh ----"          SSH:remoteShell
 shortcut:s    = "---- Show all scripts ----"              Lib:Scripts
-shortcut:S    = "---- Search text files curr Dir ----"    Lib:SearchTextFiles
+shortcut:S    = "---- Search text files curr Dir ----"    Lib:SearchTextFiles(Dir)
 
 # Save and get lastResult
 shortcut:slr  = "---- Save lastResult ----"               Lib:SaveLastResult
