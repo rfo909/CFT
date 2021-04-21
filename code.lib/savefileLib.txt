@@ -517,7 +517,8 @@ P(1,"label") =>label P(2) =>currVal P(3,"yes") =>trueVal P(4,"no") =>falseVal
 # --
 P(1,"Please confirm")=>label
 P(2,"yes")=>confirmString
-	readLine(label + " ("+confirmString+")") => inp
+P(3,"no")=>defaultValue
+	readLine(label + " ("+defaultValue+")") => inp
 	
 	inp.toLower == confirmString.toLower
 /Confirm
