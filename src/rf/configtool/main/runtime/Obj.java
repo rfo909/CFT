@@ -27,7 +27,6 @@ import rf.configtool.main.Ctx;
 import rf.configtool.main.ObjGlobal;
 import rf.configtool.main.OutText;
 import rf.configtool.main.Version;
-import rf.configtool.main.runtime.Obj.FunctionClone;
 import rf.configtool.parser.Parser;
 import rf.configtool.parser.SourceLocation;
 import rf.configtool.parser.TokenStream;
@@ -45,17 +44,12 @@ public abstract class Obj {
         this.functions.put(name, function);
     }
     
-    public Obj() {
-        add (new FunctionClone());
-    }
-    
     /**
      * Dict needs to clear and re-add functions when content changes, to enable
      * field values as functions, for direct dotted lookup
      */
     protected void clearFunctions() {
     	functions=new HashMap<String,Function>();
-        add (new FunctionClone());
     }
     
     
@@ -172,26 +166,6 @@ public abstract class Obj {
 			throw new Exception("Value could not be run through eval(syn()) - must be synthesizable");
 		}
 	}
-
-	
-	
-    
-    
-	   class FunctionClone extends Function {
-	        public String getName() {
-	            return "clone";
-	        }
-	        public String getShortDesc() {
-	            return "clone() - creates clone via eval(syn()) - error if value not synthesizable";
-	        }
-	        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-	            if (params.size() != 0) throw new Exception("Expected no parameters");
-	            return createClone(ctx);
-	        }
-
-	    }
-	    
-
    
     
     

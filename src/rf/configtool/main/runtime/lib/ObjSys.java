@@ -65,6 +65,7 @@ public class ObjSys extends Obj {
         add(new FunctionSessionUUID());
         add(new FunctionReadPassword());
         add(new FunctionSecureSessionID());
+        add(new FunctionClone());
         
 	}
 
@@ -433,6 +434,24 @@ public class ObjSys extends Obj {
 			return new ValueBinary(ctx.getObjGlobal().getRoot().getSecureSessionID(), true);
 		}
 	}
+	
+	class FunctionClone extends Function {
+		public String getName() {
+			return "clone";
+		}
+
+		public String getShortDesc() {
+			return "clone(value) - creates clone via eval(syn()) - error if value not synthesizable";
+		}
+
+		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+			if (params.size() != 1)
+				throw new Exception("Expected value parameter");
+			Value v = params.get(0);
+			return v.createClone(ctx);
+		}
+
+	}		    	
 	
 
 }
