@@ -15,8 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2021-04-11 RFO
-v2.4.0
+Last updated: 2021-04-22 RFO
+v2.4.4
 
 
 </pre>
@@ -3215,12 +3215,12 @@ $ Db2Obj:FindObjects("stats",Lambda{P(1).value.host=="s04.s"}).first.value.outpu
 
 <h1>Clone any value</h1>
 <p>
-  The common function clone() of all values returns a copy of the value, as long as the value
-  in question is synthesizable. If not, an error is returned. 
+  The function Sys.clone() returns a copy of any value, as long as it is 
+  synthesizable. If not, an error is returned. 
 </p>
 <pre>
   a=List(1,2,3)
-  b=a.clone.add(4)  # b contains 1,2,3,4 while a remains unchanged
+  b=Sys.clone(a).add(4)  # b contains 1,2,3,4 while a remains unchanged
 </pre>
 
 

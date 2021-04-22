@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2021-04-11 RFO
-v2.4.0
+Last updated: 2021-04-22 RFO
+v2.4.4
 ```
 # Introduction
 
@@ -2844,12 +2844,12 @@ stdin(":load SomeScript","?")
 # Clone any value
 
 
-The common function clone() of all values returns a copy of the value, as long as the value
-in question is synthesizable. If not, an error is returned.
+The function Sys.clone() returns a copy of any value, as long as it is
+synthesizable. If not, an error is returned.
 
 ```
 a=List(1,2,3)
-b=a.clone.add(4)  # b contains 1,2,3,4 while a remains unchanged
+b=Sys.clone(a).add(4)  # b contains 1,2,3,4 while a remains unchanged
 ```
 # CFT.props - mCat, mEdit and mMore lambdas
 
