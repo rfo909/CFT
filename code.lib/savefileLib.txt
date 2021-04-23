@@ -578,11 +578,19 @@ P(2) =>value
 # Search text files under current directory
 # --
 	P(1,Dir) => dir
-	P(2,Input("Search files of type").setCurrCond("txt").get) => type
-	P(3,Input("Search term").get) => st
-
+	P(2,Input("Search term").get) => st
+	P(3,Input("Search files of type").setCurrCond("txt").get) => type
+	P(4,Lib:MenuSelect(List("first","last","all"))) => mode
+	
 	if (!type.startsWith(".")) type="."+type
 	grep=Grep(st)
+	if (mode=="first") {
+		grep.limitFirst(50)
+	} else if (mode=="last") {
+		grep.limitLast(50)
+	} else {
+		grep.limitLast(10000)
+	}
 
 	dir.allFiles(Glob("*"+type)) -> f
 		grep.file(f)->line
