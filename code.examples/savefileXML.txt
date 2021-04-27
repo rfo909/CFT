@@ -1,0 +1,230 @@
+# Readme
+<<<< EOF
+XML parser writtein in CFT.
+
+EXPERIMENTAL / 2021-04-27 RFO
+
+Status: parses correct XML with name spaces. 
+
+Does not properly handle strings (unquoting), and does not know how to  
+generate output.
+
+>>>> EOF
+/Readme
+
+
+
+# Build root lexer Node for tokens in XML
+# --
+	Lib.Text.Lexer.Node => root
+	
+	# WS = 1
+	root.sub(" ^n^r^t".unEsc).setIsToken(1) # whitespace
+	
+	# Specials = 2
+	List("<",">","</","/>","=",":")->t root.addToken(t).setIsToken(2) |
+	
+	# Numbers = 3
+	digits = "0123456789"
+	root.sub(digits+"-"+"+").setIsToken(3) => integer
+	integer.sub(digits,integer) # loop back
+	integer.sub(".").sub(digits).setIsToken(3) => float 
+	float.sub(digits,float) # loop back
+	
+
+	# Identifiers = 4
+	identFirstChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"
+	identInnerChars = identFirstChars + "0123456789"
+	
+	root.sub(identFirstChars).setIsToken(4) => ident
+	ident.sub(identInnerChars, ident) # loop back
+
+	# Strings = 5
+	List('"',"'")->c 
+		root.sub(c) => insideString
+		insideString.setDefault(insideString)
+		insideString.sub("\").setDefault(insideString)
+		insideString.sub(c).setIsToken(5)
+	|
+
+
+	# Everything else = 99	
+	root.setDefault.setIsToken(99)
+
+
+	# return value is the root node
+	root
+/RootNode
+
+
+# Example XML code
+# ---
+	Sequence(
+		@    <a:parent a="test" b=42 >
+		@       <element a=5 b="test" c=ident d=23.5 e=+18 f=-9>inside text 123:456</element>
+		@       <element>another line of text</element>
+		@    </a:parent>
+	)
+/exampleXML
+
+
+
+
+# Tokenize XML, then parse 
+# --
+	P(1)=>xml
+
+	if (xml==null) {
+		println("Paste or enter XML, then terminate by '.' on single line")
+		readLines(".") => xml
+	}
+	
+	start=currentTimeMillis
+
+	RootNode => root
+	Lib.Text.Lexer => lexer
+	
+	xml->line 
+		lexer.processLine(root,line) 
+	|
+
+	#lexer.getTokens->t
+	#	report(t.tokenType, t.str)
+
+	ts=lexer.getTokenStream
+	ws(ts)
+	error(!ts.peek=="<","expected '<'")
+	
+	Obj(ts)
+/Parse
+
+
+
+
+# Eat whitespace
+# --
+	P(1)=>ts
+	loop break(ts.peekType != 1) ts.next
+//ws
+	
+
+
+
+# Match object <a ...> ... </a> 
+# or <a ... />
+#
+# --
+	P(1)=>ts
+
+	dict=Dict
+	
+	ts.match("<","expected '<'")
+	ws(ts)
+
+	elementName=ts.peek	
+	ts.next
+	ws(ts)
+	
+	if (ts.peek==":") {
+		elementName=elementName+":"   # name space
+		ts.next
+		ws(ts)
+		elementName=elementName+ts.peek
+		ts.next
+		ws(ts)
+	}
+	
+	dict.set("name",elementName)
+	dict.set("attr", Dict)
+	
+	Inner {
+		loop
+			ws(ts)
+			if (ts.peek==">") {
+				ts.next
+				dict.set("content",Content(ts, dict.name))  # list of strings and Dict's, until closing my name
+				break
+			} else if (ts.peek=="/>") {
+				ts.next
+				break
+			} else {
+				attrName=ts.peek
+				ts.next
+				ws(ts)
+				ts.match("=","expected '=' following attribute name " + attrName)
+				ws(ts)
+				value=ts.peek
+				ts.next
+				ws(ts)
+				dict.attr.set(""+attrName,value)
+			}
+	}
+	dict
+/Obj
+
+
+
+
+# Returns list of content inside <x>...</x> - includes text and objects
+# --
+	P(1)=>ts
+	P(2)=>currObjectName
+	
+	list=List
+	
+	Inner {
+		text=""
+		loop
+			ws(ts)
+			if (ts.peek=="</") {
+				ts.next
+				ws(ts)
+				name=ts.peek
+				ts.next
+				ws(ts)
+				if (ts.peek==":") {
+					name=name+":"
+					ts.next
+					ws(ts)
+					name=name+ts.peek
+					ts.next
+					ws(ts)
+				}
+				ts.match(">","expected '>' following '</"+name)
+				error(name != currObjectName,"Invalid </"+name+"> - expected " + currObjectName)
+
+				list.add(text)
+				text=""
+				
+				break
+			} else if (ts.peek=="<") {
+				list.add(text)
+				text=""
+				list.add(Obj(ts))
+			} else {
+				text=text+ts.peek
+				ts.next
+			}
+	}
+	list	
+/Content
+	
+	
+	
+JSON:PP(Parse(exampleXML))
+/t
+
+exampleXML
+/e
+
+
+Lib.Text.Lexer help
+/H0
+
+
+Lib.Text.Lexer.Node help
+/H1
+
+Lib.Text.Lexer.getTokenStream help
+/H2
+
