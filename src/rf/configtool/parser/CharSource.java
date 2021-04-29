@@ -24,6 +24,7 @@ import java.util.*;
  */
 public class CharSource  {
 	private List<String> lines=new ArrayList<String>();
+	private List<Integer> lineLengths=new ArrayList<Integer>();
 	private List<SourceLocation> sourceLocations=new ArrayList<SourceLocation>();
 	
 	// Current position = next character
@@ -45,6 +46,7 @@ public class CharSource  {
 			// startpos (0,0) is always valid
 		
 		this.lines.add(line);
+		this.lineLengths.add(line.length());
 		this.sourceLocations.add(loc);
 	}
 	
@@ -86,7 +88,7 @@ public class CharSource  {
         String currLine=lines.get(lineNo);
         char c=currLine.charAt(pos);
         pos=pos+1;
-        if (pos>=currLine.length()) {
+        if (pos>=lineLengths.get(lineNo)) {
         	lineNo++;
         	pos=0;
         }
@@ -101,7 +103,7 @@ public class CharSource  {
         	if (lineNo < 0) {
         		throw new RuntimeException("ungetChar underflow");
         	}
-        	pos=lines.get(lineNo).length()-1;
+        	pos=lineLengths.get(lineNo)-1; // lines.get(lineNo).length()-1;
         }
     }
     
@@ -128,7 +130,7 @@ public class CharSource  {
     		
     		sb.append(lines.get(fromLine).charAt(fromPos));
     		fromPos++;
-    		if (fromPos >= lines.get(fromLine).length()) {
+    		if (fromPos >= lineLengths.get(fromLine)) {
     			fromLine++;
     			fromPos=0;
     		}
@@ -155,7 +157,7 @@ public class CharSource  {
     	}
     	CharSourcePos end=cs.getPos();
     	for (;;) {
-    		cs.ungetChar();
+    	//	cs.ungetChar();
     		CharSourcePos start=cs.getPos();
     		cs.getChars(start,end);
     	}

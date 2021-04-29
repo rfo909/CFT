@@ -1,0 +1,57 @@
+﻿<!-- 
+
+	Common import task for all import files 
+	
+	
+	a/b/c
+	
+-->
+
+
+<Task>
+    <TaskName>ACFCImports_${DB_NAME}</TaskName>
+    <Property>${IMPEX_ROOT}\Config\xcfc\a.properties</Property>
+    <TaskClass>st.systor.impex.DefaultTask</TaskClass>
+    <ClassPath>${IMPEX_ROOT}\Classes\xcfc\xcfc.jar</ClassPath>
+    <Schedule>
+        <Interval>30</Interval>
+    </Schedule>
+    <Process>
+        <ClassName>st.systor.xcfc.imp.Imp</ClassName>
+        <JavaArgument>
+
+		<ArgumentName>dbProperties</ArgumentName>
+		<ClassName>java.util.Properties</ClassName>
+
+		<Value>HOME=${HOME}</Value>
+		<Value>ACFC_ID=000000</Value>
+		<Value>HUB_ID=200000</Value>
+		<Value>GLOBAL_TEMP_DIR=${GLOBAL_TEMPDIR}</Value>
+  
+  		<Value>dir.statuslist.out.backup=${HOME}\\StatusBackup</Value>
+  		<Value>dir.blacklist.out.backup=${HOME}\\BlacklistBackup</Value>
+          
+		<Value>USERID=imp_${DB_NAME}</Value>
+		<Value>HOST=${DB_HOST}</Value>
+		<Value>PORT=${DB_PORT}</Value>
+		<Value>DATABASE=${DB_NAME}</Value>
+		<Value>USERNAME=${DB_USERNAME}</Value>
+		<Value>PASSWORD=${DB_PASSWORD}</Value>
+		<Value>VERSION=6</Value>
+		<Value>log.dir=${IMPEX_ROOT}\\Log</Value>
+		<Value>log.sql=${DEBUG}</Value>
+
+		<Value>bcp.server=${DB_LOCAL_NAME}</Value>
+		<Value>bcp.username=${DB_USERNAME}</Value>
+		<Value>bcp.password=${DB_PASSWORD}</Value>
+
+		<Value>ftp.server=${FTP_HOST}</Value>
+		<Value>ftp.username=${FTP_USER}</Value>
+		<Value>ftp.password=${FTP_PASSWORD}</Value>
+
+        </JavaArgument>
+        <JavaMethod>
+            <MethodName>execute</MethodName>
+        </JavaMethod>
+    </Process>
+</Task>

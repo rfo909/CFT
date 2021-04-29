@@ -393,6 +393,7 @@ PP(Parse(exampleXML,false))
 //t
 
 
+
 # Using JSON:PP to show resulting structure
 JSON:PP(Parse(exampleXML,false))
 //t2
@@ -401,6 +402,14 @@ JSON:PP(Parse(exampleXML,false))
 # Parse output from function 't' and present
 PP(Parse(t))
 //t3
+
+
+# Time t3
+a=currentTimeMillis
+t3
+b=currentTimeMillis
+b-a
+//tt
 
 
 exampleXML
