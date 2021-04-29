@@ -14,6 +14,35 @@
 <h1>CFT Change log</h1>
 
 
+<h3>v2.5.0 2021-04-29 Major Parser update</h3>
+<p>
+	In order to support tokens spanning multiple lines, as needed by the XML parser,
+	the parser code was modified. It is the same that parses CFT code.
+</p>
+<p>
+	Also updated code using the parser: JSON, XML, BangParser and Util:ComplexPatternLineSearch
+</p>
+<p>
+	Updated doc as well
+</p>
+<pre>
+	modified:   code.examples/savefileXML.txt
+	modified:   code.lib/savefileBangParser.txt
+	modified:   code.lib/savefileJSON.txt
+	modified:   code.lib/savefileUtil.txt
+	modified:   doc/Dev.html
+	modified:   doc/Doc.html
+	modified:   src/rf/configtool/main/Version.java
+	modified:   src/rf/configtool/main/runtime/lib/text/ObjLexer.java
+	modified:   src/rf/configtool/main/runtime/lib/text/ObjLexerNode.java
+	modified:   src/rf/configtool/parser/CharSource.java
+	modified:   src/rf/configtool/parser/CharTable.java
+	modified:   src/rf/configtool/parser/Parser.java
+	modified:   src/rf/configtool/parser/SourceLocation.java
+</pre>
+
+
+
 <h3>v2.4.4 2021-04-27 XML parser v0.1</h3>
 <p>
 	Written rudimentary XML parser in CFT. :-)

@@ -34,7 +34,9 @@ import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
 import rf.configtool.main.runtime.lib.ValueObjFileLine;
 import rf.configtool.parser.CharSource;
+import rf.configtool.parser.CharSourcePos;
 import rf.configtool.parser.CharTable;
+import rf.configtool.parser.SourceLocation;
 
 import java.awt.Color;
 
@@ -42,7 +44,7 @@ public class ObjLexer extends Obj {
     
     public ObjLexer() {
     	this.add(new FunctionNode());
-    	this.add(new FunctionProcessLine());
+    	this.add(new FunctionAddLine());
     	this.add(new FunctionGetTokens());
     	this.add(new FunctionGetTokenStream());
     }
@@ -93,83 +95,85 @@ public class ObjLexer extends Obj {
     
     
    
-    private List<ObjLexerToken> tokenList=new ArrayList<ObjLexerToken>();
-    
+    private CharSource cs=new CharSource();
     private int lineNo=0;
     
-    
-    class FunctionProcessLine extends Function {
+    class FunctionAddLine extends Function {
         public String getName() {
-            return "processLine";
+            return "addLine";
         }
         public String getShortDesc() {
-            return "processLine(rootNode,line,eolTokenType?) - processes line, adds to internal token list - returns self";
+            return "addLine(line) - processes line, adds to internal token list - returns self";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() < 2 || params.size() > 3) throw new Exception("Expected parameters rootNode, line, eolTokenType?");
+            if (params.size() != 1) throw new Exception("Expected parameter: line");
             
             lineNo++;
             
-            Obj obj=getObj("rootNode",params,0);
-            if (!(obj instanceof ObjLexerNode)) throw new Exception("Expected parameters rootNode and line");
-             
-            CharTable charTable=((ObjLexerNode) obj).getCharTable();
-            
             // if the line was read from a file, then it is a ValueObjFileLine (which subclasses ValueString)
-            String filePlusLineNo="";
-            if (params.get(1) instanceof ValueObjFileLine) {
+            String file;
+            
+            if (params.get(0) instanceof ValueObjFileLine) {
             	ValueObjFileLine x = (ValueObjFileLine) params.get(1);
-            	filePlusLineNo=x.getFile().getPath() + " line=" + x.getLineNo() + " ";
+            	file=x.getFile().getPath();
             } else {
-            	filePlusLineNo="(nofile) line="+lineNo+" ";
+            	file="(nofile)";
             }
             // get line string
-        	String line = getString("line",params, 1);
-        	CharSource cs=new CharSource(line);
+        	String line = getString("line",params, 0);
+        	cs.addLine(line, new SourceLocation(file,lineNo));
         	
-        	// get optional token type to add at end of line, useful when parsing files
-        	Integer eolTokType=null;
-        	if (params.size()==3) {
-        		eolTokType=(int) getInt("eolTokenType", params, 2);
-        	}
-        	
-        	while (!cs.eol()) {
-        		String sourceLocation=filePlusLineNo+"pos=" + (cs.getPos()+1);
-        		
-        		int startPos=cs.getPos();
-	        	Integer tokenType = charTable.parse(cs);
-	        	if (tokenType == null) {
-	        		if (!cs.eol()) throw new Exception(sourceLocation + ": lexer failed, current char = '" + cs.getChar() + "'");
-	        	}
-	        	
-	        	if (tokenType < 0) continue; // ignoring these: whitespace and comments
-	        	
-	        	int nextPos=cs.getPos();
-	        	ObjLexerToken token=new ObjLexerToken(sourceLocation, tokenType, line.substring(startPos, nextPos));
-	        	tokenList.add(token);
-        	}
-        	
-        	if (eolTokType != null) {
-        		String sourceLocation=filePlusLineNo + "(end-of-line)";
-        		tokenList.add(new ObjLexerToken(sourceLocation, eolTokType, "(end-of-line)"));
-        	}
         	
         	return new ValueObj(theObj());
         }
         	
     }
+
+     
+
     
+    private List<ObjLexerToken> identifyTokens(CharTable charTable) throws Exception {
+    	List<ObjLexerToken> tokenList=new ArrayList<ObjLexerToken>();
+    	
+    	cs.reset();
+
+    	while (!cs.eof()) {
+    		CharSourcePos startPos=cs.getPos();
+    		SourceLocation loc=cs.getSourceLocation(startPos);
+    		
+        	Integer tokenType = charTable.parse(cs);
+        	if (tokenType == null) {
+        		if (!cs.eof()) throw new Exception(loc + ": lexer failed, current char = '" + cs.getChar() + "'");
+        	}
+        	
+        	if (tokenType < 0) continue; // ignoring these: whitespace and comments
+        	
+        	ObjLexerToken token=new ObjLexerToken(loc.toString(), tokenType, cs.getChars(startPos));
+        	tokenList.add(token);
+    	}
+    	
+    	return tokenList;
+    }
    
+    
     class FunctionGetTokens extends Function {
         public String getName() {
             return "getTokens";
         }
         public String getShortDesc() {
-            return "getTokens() - get list of tokens identified via calls to processLine";
+            return "getTokens(rootNode) - get list of tokens";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 1) throw new Exception("Expected rootNode");
+
+        	cs.reset();
+
+        	Obj obj=getObj("rootNode",params,0);
+            if (!(obj instanceof ObjLexerNode)) throw new Exception("Expected parameters rootNode and line");
+        	CharTable charTable=((ObjLexerNode) obj).getCharTable();
+    
         	List<Value> valueList=new ArrayList<Value>();
-        	for (ObjLexerToken t:tokenList) {
+        	for (ObjLexerToken t:identifyTokens(charTable)) {
         		valueList.add(new ValueObj(t));
         	}
         	return new ValueList(valueList);
@@ -182,12 +186,17 @@ public class ObjLexer extends Obj {
             return "getTokenStream";
         }
         public String getShortDesc() {
-            return "getTokenStream() - get list of tokens identified via processLine as TokenStream object";
+            return "getTokenStream(rootNode) - get TokenStream object";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	return new ValueObj(new ObjLexerTokenStream(tokenList));
+        	if (params.size() != 1) throw new Exception("Expected rootNode");
+
+        	Obj obj=getObj("rootNode",params,0);
+            if (!(obj instanceof ObjLexerNode)) throw new Exception("Expected parameters rootNode and line");
+        	CharTable charTable=((ObjLexerNode) obj).getCharTable();
+    
+        	return new ValueObj(new ObjLexerTokenStream(identifyTokens(charTable)));
         }
     }
-    
 
 }

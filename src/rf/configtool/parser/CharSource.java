@@ -16,29 +16,156 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 */
 
 package rf.configtool.parser;
+import java.util.*;
 
+/**
+ * Outputs newline chars at end of lines regardless of whether the 
+ * lines added have CRLF, LF or none of those at the end.
+ */
 public class CharSource  {
-    private String s;
-    private int pos=0;
-
-    public CharSource (String s) { this.s=s; }
-    public int getPos() {
-        return pos;
+	private List<String> lines=new ArrayList<String>();
+	private List<SourceLocation> sourceLocations=new ArrayList<SourceLocation>();
+	
+	private int lineNo=0;
+	private int pos=0;
+	
+	
+	public CharSource() {
+	}
+	
+	
+	public void addLine (String line, SourceLocation loc) {
+		//System.out.println("addLine: " + line + " " + loc.toString());
+		if (line.endsWith("\n")) line=line.substring(0,line.length()-1);
+		if (line.endsWith("\r")) line=line.substring(0,line.length()-1);
+		
+		line=line+"\n";  
+			// ensures all lines at least one character, which in turn means that
+			// startpos (0,0) is always valid
+		
+		this.lines.add(line);
+		this.sourceLocations.add(loc);
+	}
+	
+    public CharSourcePos getPos() {
+    	return new CharSourcePos(lineNo,pos);
     }
-    public void setPos (int pos) {
-    	this.pos=pos;
+    
+    public void setPos (CharSourcePos csp) {
+    	this.lineNo=csp.getLineNo();
+    	this.pos=csp.getPos();
     }
+    
+    public SourceLocation getSourceLocation(CharSourcePos pos) {
+    	int ln=pos.getLineNo();
+    	int po=pos.getPos();
+    	return this.sourceLocations.get(ln).pos(po);
+    }
+    
+    public boolean eof() {
+    	return (lineNo >= lines.size())
+    			||
+    			(lineNo==lines.size()-1) && (pos >= lines.get(lineNo).length());
+    }
+    
+    
+    
+    /**
+     * Move to start of character stream
+     */
+    public void reset() {
+    	this.lineNo=0;
+    	this.pos=0;
+    }
+    
+    
     public char getChar() {
-        if (eol()) throw new RuntimeException("end of line");
-        return s.charAt(pos++);
+        if (eof()) throw new RuntimeException("end of data");
+        
+        String currLine=lines.get(lineNo);
+        char c=currLine.charAt(pos);
+        pos=pos+1;
+        if (pos>=currLine.length()) {
+        	lineNo++;
+        	pos=0;
+        }
+        return c;
     }
+    
+    
     public void ungetChar() {
         pos--;
+        if (pos < 0) {
+        	lineNo=lineNo-1;
+        	if (lineNo < 0) {
+        		throw new RuntimeException("ungetChar underflow");
+        	}
+        	pos=lines.get(lineNo).length()-1;
+        }
     }
+    
     public void ungetChar(int count) {
-        pos-=count;
+    	for (int i=0; i<count; i++) ungetChar();
     }
-    public boolean eol () {
-        return (pos >= s.length());
+    
+    
+    /**
+     * Get sequence of chars between two positions
+     */
+    public String getChars(CharSourcePos from, CharSourcePos to) {
+    	int fromLine=from.getLineNo();
+    	int fromPos=from.getPos();
+    	
+    	int toLine=to.getLineNo();
+    	int toPos=to.getPos();
+    	
+    	if (toLine<fromLine || (toLine==fromLine && toPos <= fromPos)) throw new RuntimeException("Invalid interval: " + from + " to " + to);
+
+    	StringBuffer sb=new StringBuffer();
+    	for(;;) {
+    		if (fromLine==toLine && fromPos==toPos) break;
+   
+    		sb.append(lines.get(fromLine).charAt(fromPos));
+    		fromPos++;
+    		if (fromLine==toLine && fromPos==toPos) break;
+    		
+    		if (fromPos >= lines.get(fromLine).length()) {
+    			fromLine++;
+    			fromPos=0;
+    		}
+    	}
+    	return sb.toString();
     }
+    
+    public String getChars (CharSourcePos from) {
+    	return getChars(from, getPos());
+    }
+    
+    public static void main (String... args) {
+    	CharSource cs=new CharSource();
+    	System.out.println("pos=" + cs.getPos());
+    	
+    	cs.addLine("test", new SourceLocation("input-line", 1, 1));
+    	cs.addLine("aaaa",  new SourceLocation("input-line", 1, 1));
+    	
+    	System.out.println("SourceLoc=" + cs.getSourceLocation(cs.getPos()));
+
+    	for (;;) {
+    		if (cs.eof()) break;
+    		System.out.println("getChar: " + cs.getChar());
+    	}
+    	CharSourcePos end=cs.getPos();
+    	for (;;) {
+    		cs.ungetChar();
+    		CharSourcePos start=cs.getPos();
+    		cs.getChars(start,end);
+    	}
+//    	
+//    	cs.ungetChar();
+//    	cs.ungetChar();
+//    	for (int i=0; i<7; i++) {
+//    		System.out.println("getChar: " + cs.getChar());
+//    	}
+    }
+    
 }

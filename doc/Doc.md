@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2021-04-22 RFO
-v2.4.4
+Last updated: 2021-04-29 RFO
+v2.5.0
 ```
 # Introduction
 
@@ -2982,9 +2982,9 @@ Lib.Text.Lexer.Node function.
 ```
 $ Lib.Text.Lexer help
 # Node(firstChars?) - create empty node, possibly identifying firstChars list
-# getTokenStream() - get list of tokens identified via processLine as TokenStream object
-# getTokens() - get list of tokens identified via calls to processLine
-# processLine(rootNode,line,eolTokenType?) - processes line, adds to internal token list - returns self
+# addLine(line) - processes line, adds to internal token list - returns self
+# getTokenStream(rootNode) - get TokenStream object
+# getTokens(rootNode) - get list of tokens
 ```
 
 The nodes in turn contain the following:
@@ -2992,9 +2992,9 @@ The nodes in turn contain the following:
 ```
 $ Lib.Text.Lexer.Node help
 # addToken(token) - create mappings for token string, returns resulting Node
-# match(Str) - returns number of characters matched
+# addTokenComplex(token, charMapDict) - create mappings for complex string, returns resulting Node
 # setDefault(targetNode?) - map all non-specified characters to node, returns target node
-# setIsToken(tokenType) - tokenType is an int - returns self
+# setIsToken(tokenType?) - tokenType is an int, which defaults to 0 - returns self
 # sub(chars, targetNode) or sub(chars) or sub(targetNode) - add mapping, returns target Node
 ```
 
@@ -3112,7 +3112,7 @@ ignoring space.
 
 ```
 # Test
-Lib.Text.Lexer.processLine(Root,"this is a test").getTokens->
+Lib.Text.Lexer.addLine("this is a test").getTokens(Root)->
 token
 report(token.sourceLocation, token.str, token.tokenType)
 /test
@@ -3128,30 +3128,6 @@ $ test
 2: pos=9  | a    | 1
 3: pos=11 | test | 1
 ```
-## Processing files
-
-
-Processing files is easy, using File.read and iterating over those, calling .processLine
-on the same Lexer object. If we want, we can let the lexer add "newline"-tokens at the end
-of each line, by just defining a token type, here we use 100.
-
-```
-# Process file
-Root =>root
-Lib.Text.Lexer =>lexer
-File("...").read->line
-lexer.processLine(root,lexer,100)
-|
-lexer.getTokens->token
-report(token.sourceLocation, token.str, token.tokenType)
-/ProcessFile
-```
-
-The Lexer.processLine is smart enough to detect when lines are read from a file, as
-lines read from file are not regular strings, but a subtype of String, which contain
-filename and line number. This info is included in the sourceLocation available
-for each token.
-
 ## Limitations
 
 

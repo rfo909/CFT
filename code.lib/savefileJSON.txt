@@ -2,10 +2,13 @@
 <<<< EOF
 JSON parser written i CFT, using Lexer and TokenStream.
 
-To get help
+To get help, run functions
 
-$ Lib.Text.Lexer help
-$ Lib.Text.Lexer.getTokenStream help
+LexerHelp
+NodeHelp
+TSHelp
+
+These are private, but can be called from the outside.
 
 Parse() takes as parameter a list of text lines, or if missing
 asks you to paste them, followed by "." on single line.
@@ -200,10 +203,10 @@ nicely formatted JSON.
 	RootNode => root
 	Lib.Text.Lexer => lexer
 	json->line 
-		lexer.processLine(root,line) 
+		lexer.addLine(line) 
 	|
 
-	ts=lexer.getTokenStream
+	ts=lexer.getTokenStream(root)
 
 	MatchValue(ts)
 /Parse
@@ -306,4 +309,19 @@ nicely formatted JSON.
 
 
 
+# test
+PP(Parse(exampleJSON))
+//t
 
+
+
+Lib.Text.Lexer help
+//LexerHelp
+
+
+Lib.Text.Lexer.Node help
+//NodeHelp
+
+
+Lib.Text.Lexer.getTokenStream(Lib.Text.Lexer.Node) help
+//TSHelp

@@ -260,8 +260,8 @@ Dict.set("list",List)
 
         tryCatch({
                 Lib.Text.Lexer => lexer
-                lexer.processLine(root,line)
-                lexer.getTokens->token
+                lexer.addLine(line)
+                lexer.getTokens(root)->token
                         out(LPostProcess.call(token.str))
         }) => x
         if (x.ok, x.result, List)

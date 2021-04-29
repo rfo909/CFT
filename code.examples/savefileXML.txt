@@ -17,11 +17,7 @@ Handles comments and processing rules
 	
 PrettyPrint (PP) implemented, see test function 't'
 
-Problems
---------
-	- does not handle multi-line tokens (comments / processing rules)
-		Problem is in Lexer.processLine (Java) - should possibly have separate function 
-		for processLines() for tokens spanning multiple lines.
+2021-04-29 as of v2.4.5 we also support multi-line tokens (comments and processing rules)
 
 >>>> EOF
 /Readme
@@ -86,7 +82,10 @@ Problems
 # Example XML code
 # ---
 	Sequence(
-		@    <!-- this is a comment a/b/c --><a:parent a="test" b=42 >
+		@    <!-- this is 
+		@         a comment 
+		@           2021/01/01 12:00:55 
+		@    --><a:parent a="test" b=42 >
 		@	 
 		@       <element a=5 b="test" c=ident d=23.5 e=+18 f=-9>2 + 3 &gt; 5</element>
 		@		<? this is a test ?>
@@ -111,29 +110,23 @@ Problems
 		readLines(".") => xml
 	}
 	
-	### Until we fix lexer.processLine so tokens can span line breaks:
-	#println("---")
-	#println("TEMPORARY FIX for Lexer.processLine multiline token problem")
-	#println("---")
-	#if (getType(xml)=="List") xml=xml.concat(" ")
-		
 	start=currentTimeMillis
 
 	RootNode => root
 	Lib.Text.Lexer => lexer
 	
 	xml->line 
-		lexer.processLine(root,line) 
+		lexer.addLine(line) 
 	|
 
 
 	if (debug) Inner {
-		lexer.getTokens->t
+		lexer.getTokens(root)->t
 			println("(" + t.tokenType + ") : " + t.str)
 		|
 	}
 
-	ts=lexer.getTokenStream
+	ts=lexer.getTokenStream(root)
 	ws(ts)
 	
 	list=List
@@ -151,7 +144,6 @@ Problems
 			break(ts.EOF)
 			list.add(ts.peek)
 			ts.next
-			#error(ts.sourceLocation + ": unexpected content " + ts.peekType + " " + ts.peek)
 		}
 	|
 
@@ -167,7 +159,7 @@ Problems
 # Eat whitespace
 # --
 	P(1)=>ts
-	loop break(ts.peekType != 1) ts.next
+	loop break(ts.EOF || ts.peekType != 1) ts.next
 //ws
 
 
@@ -397,12 +389,12 @@ Problems
 	
 	
 # Using local PP to show output
-PP(Parse(exampleXML))
+PP(Parse(exampleXML,false))
 //t
 
 
 # Using JSON:PP to show resulting structure
-JSON:PP(Parse(exampleXML,true))
+JSON:PP(Parse(exampleXML,false))
 //t2
 
 
@@ -422,6 +414,7 @@ Lib.Text.Lexer help
 Lib.Text.Lexer.Node help
 //NodeHelp
 
-Lib.Text.Lexer.getTokenStream help
+
+Lib.Text.Lexer.getTokenStream(Lib.Text.Lexer.Node) help
 //TSHelp
 

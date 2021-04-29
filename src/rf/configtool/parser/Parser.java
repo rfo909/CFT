@@ -52,22 +52,24 @@ public class Parser {
 
     public void processLine (CodeLine cl) throws Exception {
         String line=cl.getLine();
-        CharSource source=new CharSource(line);
-        
+        CharSource source=new CharSource();
         SourceLocation loc=cl.getLoc();
-        while (!source.eol()) {
-            int startPos=source.getPos();
+
+        source.addLine(line, loc);
+        
+        while (!source.eof()) {
+        	CharSourcePos startPos=source.getPos();
             Integer tokenType=root.parse(source);
             if (tokenType==null) {
-                throw new SourceException(cl.getLoc(), "Parse failed at position " + startPos + " (char=" + source.getChar());
+                throw new SourceException(cl.getLoc(), "Parse failed at position " + startPos);
             }
             if (tokenType < 0) {
                 // ignore whitespace and comments
                 continue;
             }
-            int nextPos=source.getPos();
-            String tokenString=line.substring(startPos,nextPos);
-            SourceLocation loc2=loc.pos(startPos+1);
+            //int nextPos=source.getPos();
+            String tokenString=source.getChars(startPos); // line.substring(startPos,nextPos);
+            SourceLocation loc2=source.getSourceLocation(startPos);
             tokens.add(new Token(loc2, tokenType, tokenString));
         }
 

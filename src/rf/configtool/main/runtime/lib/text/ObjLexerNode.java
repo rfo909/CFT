@@ -56,7 +56,7 @@ public class ObjLexerNode extends Obj {
 		this.add(new FunctionAddToken());
 		this.add(new FunctionSetDefault());
 		this.add(new FunctionSetIsToken());
-		this.add(new FunctionMatch());
+//		this.add(new FunctionMatch());
 		this.add(new FunctionAddTokenComplex());
 	}
 
@@ -266,29 +266,30 @@ public class ObjLexerNode extends Obj {
 		}
 	}
 
-	class FunctionMatch extends Function {
-		public String getName() {
-			return "match";
-		}
-
-		public String getShortDesc() {
-			return "match(Str) - returns number of characters matched";
-		}
-
-		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-			if (params.size() != 1)
-				throw new Exception("Expected Str parameter");
-			String str = getString("Str", params, 0);
-			CharSource cs = new CharSource(str);
-
-			Integer tokenType = charTable.parse(cs);
-			if (tokenType == null) {
-				return new ValueInt(0);
-			} else {
-				return new ValueInt(cs.getPos());
-			}
-		}
-	}
+//	class FunctionMatch extends Function {
+//		public String getName() {
+//			return "match";
+//		}
+//
+//		public String getShortDesc() {
+//			return "match(Str) - returns number of characters matched";
+//		}
+//
+//		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+//			if (params.size() != 1)
+//				throw new Exception("Expected Str parameter");
+//			String str = getString("Str", params, 0);
+//			CharSource cs = new CharSource();
+//			cs.add(str, "single-line");
+//
+//			Integer tokenType = charTable.parse(cs);
+//			if (tokenType == null) {
+//				return new ValueInt(0);
+//			} else {
+//				return new ValueInt(cs.getPos());
+//			}
+//		}
+//	}
 	
 	class FunctionAddTokenComplex extends Function {
 		public String getName() {

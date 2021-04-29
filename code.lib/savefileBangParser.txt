@@ -81,8 +81,8 @@ Example
 	
 	RootNode => root
 	Lib.Text.Lexer => lexer
-	lexer.processLine(root,line) 
-	tokens=lexer.getTokens
+	lexer.addLine(line) 
+	tokens=lexer.getTokens(root)
 	
 	Dict
 		.set("cmd",List)

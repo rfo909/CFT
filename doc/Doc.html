@@ -15,8 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2021-04-22 RFO
-v2.4.4
+Last updated: 2021-04-29 RFO
+v2.5.0
 
 
 </pre>
@@ -3365,6 +3365,7 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
   <lI>Or ,if no map in our parse tree has the "this is a token" mark set, then parsing fails</li>
 </ol>
 
+
 <h2>Implementation</h2>
 <p>
   In the CFT functions, such maps are called nodes. They are created via the
@@ -3374,9 +3375,9 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
   $ Lib.Text.Lexer help
   
   # Node(firstChars?) - create empty node, possibly identifying firstChars list
-  # getTokenStream() - get list of tokens identified via processLine as TokenStream object
-  # getTokens() - get list of tokens identified via calls to processLine
-  # processLine(rootNode,line,eolTokenType?) - processes line, adds to internal token list - returns self
+  # addLine(line) - processes line, adds to internal token list - returns self
+  # getTokenStream(rootNode) - get TokenStream object
+  # getTokens(rootNode) - get list of tokens
 </pre>
 <p>
   The nodes in turn contain the following:
@@ -3385,9 +3386,9 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
   $ Lib.Text.Lexer.Node help
 
   # addToken(token) - create mappings for token string, returns resulting Node
-  # match(Str) - returns number of characters matched
+  # addTokenComplex(token, charMapDict) - create mappings for complex string, returns resulting Node
   # setDefault(targetNode?) - map all non-specified characters to node, returns target node
-  # setIsToken(tokenType) - tokenType is an int - returns self
+  # setIsToken(tokenType?) - tokenType is an int, which defaults to 0 - returns self
   # sub(chars, targetNode) or sub(chars) or sub(targetNode) - add mapping, returns target Node
 </pre>
 <p>
@@ -3523,7 +3524,7 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
 </p>
 <pre>
 # Test
-  Lib.Text.Lexer.processLine(Root,"this is a test").getTokens->token
+  Lib.Text.Lexer.addLine("this is a test").getTokens(Root)->token
     report(token.sourceLocation, token.str, token.tokenType)
 /test
 </pre>
@@ -3539,32 +3540,6 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
    3: pos=11 | test | 1
 </pre>
 
-
-<h2>Processing files</h2>
-<p>
-  Processing files is easy, using File.read and iterating over those, calling .processLine
-  on the same Lexer object. If we want, we can let the lexer add "newline"-tokens at the end
-  of each line, by just defining a token type, here we use 100.
-</p>
-<pre>
-# Process file
-  Root =&gt;root
-  Lib.Text.Lexer =&gt;lexer
-
-  File("...").read-&gt;line 
-    lexer.processLine(root,lexer,100) 
-  |
-  
-  lexer.getTokens-&gt;token
-    report(token.sourceLocation, token.str, token.tokenType)
-/ProcessFile
-</pre>
-<p>
-  The Lexer.processLine is smart enough to detect when lines are read from a file, as
-  lines read from file are not regular strings, but a subtype of String, which contain
-  filename and line number. This info is included in the sourceLocation available
-  for each token.
-</p>
 
 
 <h2>Limitations</h2>

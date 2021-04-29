@@ -97,7 +97,7 @@ public class CharTable {
     public Integer parse (CharSource source) {
         int charCount=0;
         for(;;) {
-            if (source.eol()) {
+            if (source.eof()) {
                 if (tokenType==null) {
                     source.ungetChar(charCount);
                 }

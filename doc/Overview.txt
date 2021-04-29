@@ -257,7 +257,6 @@ Lib.Text.Lexer
  |   .sub()
  * Reusable nodes - integer sequence
  * Processing single lines
- * Processing files
  * Limitations
  * Different uses
  * Complex tokens
