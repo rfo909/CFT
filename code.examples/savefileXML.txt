@@ -412,6 +412,14 @@ b-a
 //tt
 
 
+
+File("example.xml")=>f
+a=currentTimeMillis
+PP(Parse(f.read,false))
+b=currentTimeMillis
+b-a
+/ttt
+
 exampleXML
 //e
 
