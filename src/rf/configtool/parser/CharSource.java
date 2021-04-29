@@ -26,6 +26,7 @@ public class CharSource  {
 	private List<String> lines=new ArrayList<String>();
 	private List<SourceLocation> sourceLocations=new ArrayList<SourceLocation>();
 	
+	// Current position = next character
 	private int lineNo=0;
 	private int pos=0;
 	
@@ -124,11 +125,9 @@ public class CharSource  {
     	StringBuffer sb=new StringBuffer();
     	for(;;) {
     		if (fromLine==toLine && fromPos==toPos) break;
-   
+    		
     		sb.append(lines.get(fromLine).charAt(fromPos));
     		fromPos++;
-    		if (fromLine==toLine && fromPos==toPos) break;
-    		
     		if (fromPos >= lines.get(fromLine).length()) {
     			fromLine++;
     			fromPos=0;
