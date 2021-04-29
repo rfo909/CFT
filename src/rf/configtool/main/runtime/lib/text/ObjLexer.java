@@ -114,12 +114,12 @@ public class ObjLexer extends Obj {
             String file;
             
             if (params.get(0) instanceof ValueObjFileLine) {
-            	ValueObjFileLine x = (ValueObjFileLine) params.get(1);
+            	ValueObjFileLine x = (ValueObjFileLine) params.get(0);
             	file=x.getFile().getPath();
             } else {
             	file="(nofile)";
             }
-            // get line string
+            // get line (as string) string
         	String line = getString("line",params, 0);
         	cs.addLine(line, new SourceLocation(file,lineNo));
         	
