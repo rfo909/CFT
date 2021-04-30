@@ -261,7 +261,7 @@ PrettyPrint (PP) implemented, see test function 't'
 			}
 	}
 	dict
-/Obj
+//Obj
 
 
 
@@ -334,7 +334,55 @@ PrettyPrint (PP) implemented, see test function 't'
 			}
 	}
 	list	
-/Content
+//Content
+
+
+
+
+# Present content in compact fashion
+# Alternatively use PP() to create valid (and nicely formatted) XML.
+# --
+	P(1)=>data
+	P(2,"")=>pre
+	P(3,List)=>output
+
+	if (getType(data) != List, List(data), data) => list
+	
+	list->element
+		if (getType(element)=="List") {
+			element->x
+				ShowData(x,pre+"[]",output)
+		}
+		
+		assert(getType(element)=="Dict")
+		
+		assert(element.has("name"))
+		
+		println("name=" + element.name)
+		pre2=pre+"|"+element.name
+		
+		{element.attr.keys->key
+			output.add(pre2 + " "+key+"="+element.attr.get(key))
+		}
+		
+		assert(element.has("content"))
+		{element.content->c 
+			if (getType(c)=="Dict") ShowData(c,pre+"|"+element.name,output)
+			else {
+				s=(""+c).trim
+				if (s.length>0) output.add(pre2 + "[]" + s)
+			}
+		}
+	|
+	output
+/ShowData
+
+
+
+
+		
+		
+	
 
 
 
@@ -358,7 +406,7 @@ PrettyPrint (PP) implemented, see test function 't'
 	P(1)=>data
 	P(2)=>path
 	
-	list=List(data)
+	if (getType(data) != List, List(data), data) => list
 	
 	path.split->part
 		Inner {
@@ -403,33 +451,7 @@ PrettyPrint (PP) implemented, see test function 't'
 /GetContent
 
 
-# Test lookups
-# --
-	Parse(exampleXML) => obj
-	XML:Get(obj,"a:parent") -> parent
-		XML:Get(parent,"element") -> element
-			XML:GetAttrNames(element)->attr
-				println("-> " + attr + "=" + XML:GetAttr(element,attr))
-//L1
 
-
-# Test lookups
-# --
-	Parse(exampleXML) => obj
-	XML:Get(obj,"a:parent") -> parent
-		XML:Get(parent,"item") -> item
-			XML:Get(item,"title")->title
-				println("title=" + GetContent(title))
-//L2
-
-# Test lookups with space separated path of names
-# --
-	Parse(exampleXML) => obj
-	XML:GetPath(obj,"a:parent item title") -> title
-				println("title=" + GetContent(title))
-//L3
-	
-	
 
 
 # Generate output
@@ -516,7 +538,48 @@ a=currentTimeMillis
 t3
 b=currentTimeMillis
 b-a
-//tt
+//tt3
+
+
+
+
+# Test lookups
+# --
+	Parse(exampleXML) => obj
+	XML:Get(obj,"a:parent") -> parent
+		XML:Get(parent,"element") -> element
+			XML:GetAttrNames(element)->attr
+				println("-> " + attr + "=" + XML:GetAttr(element,attr))
+//L1
+
+
+
+# Test lookups
+# --
+	Parse(exampleXML) => obj
+	XML:Get(obj,"a:parent") -> parent
+		XML:Get(parent,"item") -> item
+			XML:Get(item,"title")->title
+				println("title=" + GetContent(title))
+//L2
+
+
+
+# Test lookups with space separated path of names
+# --
+	Parse(exampleXML) => obj
+	XML:GetPath(obj,"a:parent item title") -> title
+				println("title=" + GetContent(title))
+//L3
+	
+	
+	
+	
+
+# Run ShowData
+# --
+	ShowData(Parse(exampleXML))
+//sd
 
 
 
