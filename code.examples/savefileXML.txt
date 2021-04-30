@@ -89,9 +89,12 @@ PrettyPrint (PP) implemented, see test function 't'
 		@	 
 		@       <element a=5 b="test" c=ident d=23.5 e=+18 f=-9>2 + 3 &gt; 5</element>
 		@		<? this is a test ?>
-		@       <element>another line of text
+		@       <item>another line of text
 		@			<title>Donald Duck &amp; Co</title>
-		@		</element>
+		@ 			<status>
+		@				<count>2</count>
+		@			</status>
+		@		</item>
 		@       <emptyTag a="a"/>
 		@    </a:parent>
 	)
@@ -275,13 +278,22 @@ PrettyPrint (PP) implemented, see test function 't'
 		text=""
 		loop
 			if (ts.peekType==10) {  # processing rule
-				list.add(UnescapeXMLString(text))
+				
+				text=text.trim
+				if (text.length>0) {
+					list.add(UnescapeXMLString(text))
+				}
 				text=""
+				
 				list.add(Dict.set("Special",ts.peek))
 				ts.next
 			} else
 			if (ts.peek=="</") {
-				list.add(UnescapeXMLString(text))
+				
+				text=text.trim
+				if (text.length>0) {
+					list.add(UnescapeXMLString(text))
+				}
 				text=""
 				
 				ts.next
@@ -306,13 +318,15 @@ PrettyPrint (PP) implemented, see test function 't'
 				error(name != currObjectName, ts.sourceLocation + ": Invalid </"+name+"> - expected " + currObjectName)
 				ts.match(">","expected '>' following '</"+name)
 
-				list.add(UnescapeXMLString(text))
-				text=""
-				
 				break
 			} else if (ts.peek=="<") {
-				list.add(text)
+			
+				text=text.trim
+				if (text.length>0) {
+					list.add(UnescapeXMLString(text))
+				}
 				text=""
+				
 				list.add(Obj(ts))
 			} else {
 				text=text+ts.peek
@@ -323,6 +337,99 @@ PrettyPrint (PP) implemented, see test function 't'
 /Content
 
 
+
+
+# Look up content element by name
+# --
+	P(1) => data
+	P(2) => name
+	
+	if (getType(data)=="Dict") data=data.content
+	data->x
+		assert(getType(x)=="Dict" && x.has("name"))
+		assert(x.name==name)
+		out(x)
+/Get
+
+
+
+# Look up content elements by names in path (separated by space). See test L3.
+# --
+	P(1)=>data
+	P(2)=>path
+	
+	list=List(data)
+	
+	path.split->part
+		Inner {
+			output=List
+			
+			list->element
+				result=output+Get(element,part)
+				output=output+result
+			|
+			#println("Looking up " + part + " resulted in " + output.length + " items")
+			
+		}
+		list=output
+	|
+	list
+/GetPath
+
+
+# Look up attribute names of node
+# --
+	P(1) => data
+	error(getType(data) != "Dict", "Must be dictionary")
+	data.attr.keys
+/GetAttrNames
+
+
+# Look up attribute of node
+# --
+	P(1) => data
+	P(2) => attr
+	error(getType(data) != "Dict", "Must be dictionary")
+	data.attr.get(attr,null)
+/GetAttr
+
+
+
+# Get content of node
+# --
+	P(1) => data
+	error(getType(data) != "Dict", "Must be dictionary")
+	data.content
+/GetContent
+
+
+# Test lookups
+# --
+	Parse(exampleXML) => obj
+	XML:Get(obj,"a:parent") -> parent
+		XML:Get(parent,"element") -> element
+			XML:GetAttrNames(element)->attr
+				println("-> " + attr + "=" + XML:GetAttr(element,attr))
+//L1
+
+
+# Test lookups
+# --
+	Parse(exampleXML) => obj
+	XML:Get(obj,"a:parent") -> parent
+		XML:Get(parent,"item") -> item
+			XML:Get(item,"title")->title
+				println("title=" + GetContent(title))
+//L2
+
+# Test lookups with space separated path of names
+# --
+	Parse(exampleXML) => obj
+	XML:GetPath(obj,"a:parent item title") -> title
+				println("title=" + GetContent(title))
+//L3
+	
+	
 
 
 # Generate output
@@ -412,13 +519,6 @@ b-a
 //tt
 
 
-
-File("example.xml")=>f
-a=currentTimeMillis
-PP(Parse(f.read,false))
-b=currentTimeMillis
-b-a
-/ttt
 
 exampleXML
 //e
