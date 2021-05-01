@@ -24,12 +24,20 @@ import rf.configtool.main.CodeLine;
 import rf.configtool.main.SourceException;
 
 public class Parser {
+
+	private static CharTable cachedRoot;
+	private static synchronized CharTable getCachedRoot() {
+		if (cachedRoot==null) cachedRoot=createGraph();
+		return cachedRoot;
+	}
     
     private CharTable root;
     private ArrayList<Token> tokens=new ArrayList<Token>();
+    
+    
 
     public Parser() throws Exception {
-        this.root=createGraph();
+        this.root=getCachedRoot();
     }
 
     public TokenStream getTokenStream() {
@@ -75,7 +83,7 @@ public class Parser {
 
     }
 
-    private CharTable createGraph () {
+    private static CharTable createGraph () {
         CharTable root=new CharTable();
 
         // --- whitespace ---
