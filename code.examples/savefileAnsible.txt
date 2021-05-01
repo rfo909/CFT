@@ -39,11 +39,11 @@
 		
 
 
-# Run APT Update + upgrade on one host
+# Run APT Update + upgrade + dist upgrade on one host
 # --
 	P(1,Input("target").get)=>target
 	println("Calling APTUpdate:run for target="+target)
-	APTUpdate:run(target,3)
+	APTUpdate:run(target,3,true)
 /AptUpdate
 
 
