@@ -66,9 +66,7 @@ public class CharSource  {
     }
     
     public boolean eof() {
-    	return (lineNo >= lines.size())
-    			||
-    			(lineNo==lines.size()-1) && (pos >= lines.get(lineNo).length());
+    	return (lineNo >= lines.size());
     }
     
     
@@ -121,6 +119,8 @@ public class CharSource  {
     	
     	int toLine=to.getLineNo();
     	int toPos=to.getPos();
+
+    	if (toLine==fromLine) return lines.get(fromLine).substring(fromPos,toPos);
     	
     	if (toLine<fromLine || (toLine==fromLine && toPos <= fromPos)) throw new RuntimeException("Invalid interval: " + from + " to " + to);
 
@@ -142,31 +142,6 @@ public class CharSource  {
     	return getChars(from, getPos());
     }
     
-    public static void main (String... args) {
-    	CharSource cs=new CharSource();
-    	System.out.println("pos=" + cs.getPos());
-    	
-    	cs.addLine("test", new SourceLocation("input-line", 1, 1));
-    	cs.addLine("aaaa",  new SourceLocation("input-line", 1, 1));
-    	
-    	System.out.println("SourceLoc=" + cs.getSourceLocation(cs.getPos()));
 
-    	for (;;) {
-    		if (cs.eof()) break;
-    		System.out.println("getChar: " + cs.getChar());
-    	}
-    	CharSourcePos end=cs.getPos();
-    	for (;;) {
-    	//	cs.ungetChar();
-    		CharSourcePos start=cs.getPos();
-    		cs.getChars(start,end);
-    	}
-//    	
-//    	cs.ungetChar();
-//    	cs.ungetChar();
-//    	for (int i=0; i<7; i++) {
-//    		System.out.println("getChar: " + cs.getChar());
-//    	}
-    }
     
 }

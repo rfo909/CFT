@@ -542,6 +542,17 @@ b-a
 
 
 
+# Timing parsing
+# --
+	a=currentTimeMillis
+	Lib.Data.each(0,999)->x
+		t3
+	|
+	b=currentTimeMillis
+	""+(b-a)+"ms (1000 x t3)"
+//timing
+
+
 
 # Test lookups
 # --
