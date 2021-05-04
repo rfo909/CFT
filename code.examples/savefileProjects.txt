@@ -217,6 +217,16 @@ There can be multiples of every line, including Dir.
 /Search
 
 
+
+
+# Test
+# --
+	a=currentTimeMillis
+	Search(Grep("Expr"))
+	currentTimeMillis-a
+//t
+
+
 # Limit search to file names containing a certain string
 # --
     readLine("Enter file filter string").trim =>str

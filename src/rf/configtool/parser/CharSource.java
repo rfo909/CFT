@@ -101,7 +101,7 @@ public class CharSource  {
         	if (lineNo < 0) {
         		throw new RuntimeException("ungetChar underflow");
         	}
-        	pos=lineLengths.get(lineNo)-1; // lines.get(lineNo).length()-1;
+        	pos=lineLengths.get(lineNo)-1;
         }
     }
     

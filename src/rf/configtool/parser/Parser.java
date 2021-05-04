@@ -90,7 +90,6 @@ public class Parser {
         CharTable space=new CharTable();
         space.setTokenType(-1);
         root.setMapping(" \t\r\n", space);
-        space.setMapping(" \t\r\n", space);  // group together lumps of ws
 
         // --- comments ---
         CharTable comment=new CharTable();
