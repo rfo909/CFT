@@ -151,40 +151,37 @@ There can be multiples of every line, including Dir.
 # --
     CheckProject
     CurrProject =>pr
-
-    Lambda { P(1) =>d 
-        true =>keep 
-        CurrProject.IgnoreDir->x 
-            if(d.name==x,Inner{false =>keep}) 
-            break(!keep)
-        |
-        keep
-    } =>checkDir
-    
-    # Generate initial list of all directories in project
-        pr.Dir->dirName 
-            Dir(dirName) =>startDir
-            out(startDir)
-            error(!startDir.exists, "Project dir " + dirName + " not found")
-            startDir.allDirs->d out(d)
-        | =>allDirs
-    
-    # Filter out directories that don't pass checkDir macro call
-        allDirs->d 
-            assert(checkDir.call(d))
-            out(d)
-        | =>allDirs
-
-    # Identify files that have desired type
-        allDirs->d
-            d.files->f
-                f.name.afterLast(".") =>type
-                assert(pr.Type.contains(type))
-                out(f)
-        | =>allFiles
-
-    # return value
-    allFiles
+	
+	pr.Type->t 
+		out(Glob("*."+t) )
+	| => globs
+	
+	pr.IgnoreDir->d
+		sep=if(Sys.isWindows,"\","/")
+		out(sep+d+sep)
+	| => ignores
+	
+	pathOk = Lambda{
+		P(1)=>s 
+		P(2)=>patternList
+		
+		ok=true
+		patternList->pattern
+			if (s.contains(pattern)) ok=false
+		|
+		ok
+	}
+	
+	# 
+	pr.Dir->dirName
+		globs->glob
+			Dir(dirName).allFiles(glob)->f 
+				# Lambda call is FASTER than Inner block ...
+				assert(pathOk.call(f.path, ignores))
+				out(f)
+	| => files
+		
+	files
 /TextFiles
 
 
@@ -201,8 +198,10 @@ There can be multiples of every line, including Dir.
         if(filter != null, file.name.contains(filter), true)
     } =>filter
 
+	TextFiles => textFiles
+	
     # Count matches first
-    TextFiles->tf 
+    textFiles->tf 
         assert(filter.call(tf))
         out(grep.fileCount(tf)) 
     | _.sum =>count
@@ -210,7 +209,7 @@ There can be multiples of every line, including Dir.
     # If too many hits, just cancel
     error(count>10000, "Search matches " + count + " lines - not shown")
 
-    TextFiles->tf
+    textFiles->tf
         assert(filter.call(tf))
         grep.file(tf)->line 
             report(line.file.name, line.lineNumber, line)
@@ -220,6 +219,8 @@ There can be multiples of every line, including Dir.
 
 
 # Test
+# Was very slow in Windows around 8500 ms (Linux around 500ms)
+# Rewrote TextFiles function -> 5-600 ms
 # --
 	a=currentTimeMillis
 	Search(Grep("Expr"))
