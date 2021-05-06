@@ -777,8 +777,16 @@ public class ValueString extends Value {
 			for (int i=0; i<val.length(); i++) {
 				char c=val.charAt(i);
 				int x=(int) c;
-				// TAB, CR, LF, or above 32
-				if (x==9 || x==13 || x==10 || x>=32) {
+				boolean keep=
+						// TAB=9, CR=13, LF=10
+						(x>31 || x==9 || x==13 || x==10)
+						&&
+						(x != 127)
+						&&
+						(x<128 || x>159)
+						;
+
+				if (keep) {
 					sb.append(c);
 				}
 			}
