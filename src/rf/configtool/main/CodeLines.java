@@ -27,28 +27,31 @@ import rf.configtool.main.runtime.reporttool.Report;
 import rf.configtool.parser.Parser;
 import rf.configtool.parser.SourceLocation;
 import rf.configtool.parser.TokenStream;
+import rf.configtool.util.Hash;
 
 /**
- * Function body consists of code lines. Can also represent
- * function override values
+ * Function body consists of code lines. 
  *
  */
 public class CodeLines {
 	
     public static final String PIPE_SYMBOL="|"; // separates multiple ProgramLines on same line
     
+    private static CodeLinesParseCache clpCache=new CodeLinesParseCache();
 
-    private List<CodeLine> saveFormat;
+    private List<CodeLine> codeLines;
+    private String hashString;
+    
     
     public CodeLines (String singleLine, SourceLocation loc) {
         //SourceLocation loc=new SourceLocation("<>", 0, 0);
-        saveFormat=new ArrayList<CodeLine>();
-        saveFormat.add(new CodeLine(loc,"")); // blank line between previous function and this one
-        saveFormat.add(new CodeLine(loc,singleLine));
+        codeLines=new ArrayList<CodeLine>();
+        codeLines.add(new CodeLine(loc,"")); // blank line between previous function and this one
+        codeLines.add(new CodeLine(loc,singleLine));
     }
 
     public CodeLines (List<CodeLine> saveFormat) {
-        this.saveFormat=saveFormat;
+        this.codeLines=saveFormat;
     }
     
     public void update (String singleLine, SourceLocation loc) {
@@ -56,7 +59,7 @@ public class CodeLines {
         
         // keep initial non-code lines, if present
         List<CodeLine> x=new ArrayList<CodeLine>();
-        for (CodeLine s:saveFormat) {
+        for (CodeLine s:codeLines) {
             if (s.isWhitespace()) {
                 x.add(s);
             } else {
@@ -67,12 +70,13 @@ public class CodeLines {
         
         // then add the new single line, without any attempts at breaking it up
         x.add(new CodeLine(loc,singleLine));
-        this.saveFormat=x;
+        this.codeLines=x;
+        this.hashString=null;
     }
         
     public List<String> getSaveFormat() {
         List<String> list=new ArrayList<String>();
-        for (CodeLine c:saveFormat) {
+        for (CodeLine c:codeLines) {
         	if (c.getType()==CodeLine.TYPE_LINE_GENERATED) continue; // write NORMAL and ORIGINAL
         	list.add(c.getLine());
         }
@@ -80,7 +84,7 @@ public class CodeLines {
     }
   
     public String getFirstNonBlankLine () {
-        for (CodeLine s:saveFormat) {
+        for (CodeLine s:codeLines) {
             if (s.isWhitespace()) continue;
             return s.getLine();
         }
@@ -89,7 +93,7 @@ public class CodeLines {
     
     public boolean hasMultipleCodeLines() {
         int count=0;
-          for (CodeLine s:saveFormat) {
+          for (CodeLine s:codeLines) {
             if (s.isWhitespace()) continue;
             count++;
             if (count > 1) return true;
@@ -98,9 +102,9 @@ public class CodeLines {
         
     }
     
-     public TokenStream getTokenStream () throws Exception {
+     private TokenStream getTokenStream () throws Exception {
         Parser p=new Parser();
-        for (CodeLine cl:saveFormat) {
+        for (CodeLine cl:codeLines) {
         	if (cl.getType()==CodeLine.TYPE_LINE_ORIGINAL) continue; // only execute NORMAL and GENERATED
         	p.processLine(cl);
         }
@@ -108,15 +112,33 @@ public class CodeLines {
      }
     
      
+     private synchronized String getHash() throws Exception {
+    	if (this.hashString==null) {
+			Hash hash=new Hash();
+	        for (CodeLine cl:codeLines) {
+	        	if (cl.getType()==CodeLine.TYPE_LINE_ORIGINAL) continue;
+	        	hash.add(cl.getLine().getBytes("UTF-8"));
+	        }
+	        this.hashString=hash.getHashString();
+    	}
+    	return this.hashString;
+     }
      
      public List<ProgramLine> getProgramLines () throws Exception {
-     	TokenStream ts=getTokenStream();
- 	    List<ProgramLine> progLines=new ArrayList<ProgramLine>();
- 	    for(;;) {
- 	        progLines.add(new ProgramLine(ts));
- 	        if (ts.matchStr(PIPE_SYMBOL)) continue;
- 	        break;
- 	    }
+    	String key=getHash();
+    	List<ProgramLine> progLines=clpCache.get(key);
+    	
+    	if (progLines==null) {
+	     	TokenStream ts=getTokenStream();
+	 	    progLines=new ArrayList<ProgramLine>();
+	 	    for(;;) {
+	 	        progLines.add(new ProgramLine(ts));
+	 	        if (ts.matchStr(PIPE_SYMBOL)) continue;
+	 	        break;
+	 	    }
+	    	clpCache.put(key, progLines);
+    	}
+	 	   
  	    return progLines;
      }
      
