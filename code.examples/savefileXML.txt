@@ -360,7 +360,7 @@ PrettyPrint (PP) implemented, see test function 't'
 		
 		assert(element.has("name"))
 		
-		println("name=" + element.name)
+		#println("name=" + element.name)
 		pre2=pre+"|"+element.name
 		
 		{element.attr.keys->key
