@@ -65,6 +65,8 @@ public class ObjGlobal extends Obj {
     private HashMap<String,Value> sessionValues=new HashMap<String,Value>();
     private final Runtime runtime;
     private List<String> systemMessages=new ArrayList<String>();
+    
+    private long exprCount=0L;
 
 
     public Root getRoot() {
@@ -118,6 +120,7 @@ public class ObjGlobal extends Obj {
         add(new FunctionError());
         add(new FunctionShell());
         add(new FunctionGetType());
+        add(new FunctionGetExprCount());
         
         // name spaces
         add(new FunctionSys());
@@ -126,6 +129,14 @@ public class ObjGlobal extends Obj {
     
     public ObjGlobal objGlobal() {
         return this;
+    }
+    
+    public void addExprCount() {
+    	exprCount++;
+    }
+    
+    public long getExprCount() {
+    	return exprCount;
     }
     
     
@@ -812,6 +823,24 @@ public class ObjGlobal extends Obj {
             	s=v.getTypeName();
             }
             return new ValueString(s);
+        }
+    }
+    
+
+
+
+	
+    class FunctionGetExprCount extends Function {
+        public String getName() {
+            return "getExprCount";
+        }
+        public String getShortDesc() {
+            return "getExprCount() - get number of expressions resolved";
+        }
+        @Override
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueInt(exprCount);
         }
     }
     

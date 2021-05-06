@@ -57,6 +57,7 @@ public class Expr extends ExprCommon {
     
     public Value resolve (Ctx ctx) throws Exception {
     	ctx.debug(this);
+    	ctx.getObjGlobal().addExprCount();
     	try {
 	        if (parts.size() == 1) {
 	            return parts.get(0).resolve(ctx);
