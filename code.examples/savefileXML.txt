@@ -459,6 +459,11 @@ PrettyPrint (PP) implemented, see test function 't'
 	P(1)=>data   # Dict or List of (Dict | String)
 	P(2,"")=>indent
 	P(3,Lambda { println(""+P(1)) } )=>LOut
+	P(4,true)=>contentStrict
+	
+	hasElement=false
+	data->element if(getType(element)=="Dict") hasElement=true
+	|
 	
 	data->element
 		type=getType(element)
@@ -466,9 +471,9 @@ PrettyPrint (PP) implemented, see test function 't'
 			if (element.has("Special")) {
 				LOut.call(indent+element.get("Special").trim)
 			} else {
-				OutObject(element,indent,LOut)
+				OutObject(element,indent,LOut,contentStrict)
 			}	
-		} else if (type=="String") {
+		} else if (type=="String" && !(contentStrict && hasElement)) {
 			val=element.trim
 			if (val != "") LOut.call(indent+EscapeXMLString(val))
 		}
@@ -481,6 +486,8 @@ PrettyPrint (PP) implemented, see test function 't'
 	P(1)=>obj
 	P(2)=>indent
 	P(3,Lambda { println(""+P(1)) } )=>LOut
+	P(4,true)=>contentStrict
+	
 	
 	firstTag="<"+obj.name
 	obj.attr.keys->attrName
@@ -504,7 +511,7 @@ PrettyPrint (PP) implemented, see test function 't'
 			LOut.call(indent+firstTag+obj.content.first.trim+lastTag)
 		} else {
 			LOut.call(indent+firstTag)
-			OutContent(obj.content,indent+"   ",LOut)
+			OutContent(obj.content,indent+"   ",LOut,contentStrict)
 			LOut.call(indent+lastTag)
 		}
 	}
@@ -515,9 +522,10 @@ PrettyPrint (PP) implemented, see test function 't'
 # Pretty-print XML
 # --
 	P(1)=>data   # list of Dict
+	P(2,true)=>contentStrict  # if content has XML elements, then ignore strings in same list
 	
 	Dict.set("list",List).set( "LAdd",Lambda{self.list.add(P(1))} ) => obj
-	OutContent(data,"",obj.LAdd)
+	OutContent(data,"",obj.LAdd,contentStrict)
 	
 	obj.list
 /PP
