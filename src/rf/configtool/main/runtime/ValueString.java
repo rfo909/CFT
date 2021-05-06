@@ -65,6 +65,7 @@ public class ValueString extends Value {
         add(new FunctionGetBytes());
         add(new FunctionLast());
         add(new FunctionFirst());
+        add(new FunctionPrintable());
         
     }
     
@@ -763,5 +764,26 @@ public class ValueString extends Value {
         }
     }
 
+
+    class FunctionPrintable extends Function {
+        public String getName() {
+            return "printable";
+        }
+        public String getShortDesc() {
+            return "printable() - returns string with printable characters";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+			StringBuffer sb=new StringBuffer();
+			for (int i=0; i<val.length(); i++) {
+				char c=val.charAt(i);
+				int x=(int) c;
+				// TAB, CR, LF, or above 32
+				if (x==9 || x==13 || x==10 || x>=32) {
+					sb.append(c);
+				}
+			}
+        	return new ValueString(sb.toString());
+        }
+    }
 
 }
