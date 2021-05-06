@@ -342,7 +342,7 @@ PrettyPrint (PP) implemented, see test function 't'
 # Present content in compact fashion
 # Alternatively use PP() to create valid (and nicely formatted) XML.
 # --
-	P(1)=>data
+	P(1,Parse(exampleXML))=>data
 	P(2,"")=>pre
 	P(3,List)=>output
 
@@ -494,13 +494,19 @@ PrettyPrint (PP) implemented, see test function 't'
 	if (!obj.has("content") || obj.content.length==0) {
 		firstTag=firstTag+"/>"
 		hasContent=false
+		LOut.call(indent+firstTag)
 	} else {
 		firstTag=firstTag + ">"
 	}
-	LOut.call(indent+firstTag)
 	if (hasContent) {
-		OutContent(obj.content,indent+"   ",LOut)
-		LOut.call(indent+"</"+obj.name+">")
+		lastTag="</"+obj.name+">"
+		if (obj.content.length==1 && getType(obj.content.first)=="String") {
+			LOut.call(indent+firstTag+obj.content.first.trim+lastTag)
+		} else {
+			LOut.call(indent+firstTag)
+			OutContent(obj.content,indent+"   ",LOut)
+			LOut.call(indent+lastTag)
+		}
 	}
 //OutObject
 	
@@ -533,26 +539,6 @@ PP(Parse(t))
 //t3
 
 
-# Time t3
-a=currentTimeMillis
-t3
-b=currentTimeMillis
-b-a
-//tt3
-
-
-
-# Timing parsing
-# --
-	a=currentTimeMillis
-	Lib.Data.each(0,999)->x
-		t3
-	|
-	b=currentTimeMillis
-	""+(b-a)+"ms (1000 x t3)"
-//timing
-
-
 
 # Test lookups
 # --
@@ -583,14 +569,6 @@ b-a
 				println("title=" + GetContent(title))
 //L3
 	
-	
-	
-	
-
-# Run ShowData
-# --
-	ShowData(Parse(exampleXML))
-//sd
 
 
 
