@@ -92,6 +92,7 @@ PrettyPrint (PP) implemented, see test function 't'
 		@       <item>another line of text
 		@			<title>Donald Duck &amp; Co</title>
 		@ 			<status>
+		@               non-strict text, since there is inner XML element
 		@				<count>2</count>
 		@			</status>
 		@		</item>
@@ -107,6 +108,7 @@ PrettyPrint (PP) implemented, see test function 't'
 # --
 	P(1)=>xml
 	P(2,false)=>debug
+	P(3,true)=>contentStrict
 
 	if (xml==null) {
 		println("Paste or enter XML, then terminate by '.' on single line")
@@ -150,7 +152,7 @@ PrettyPrint (PP) implemented, see test function 't'
 		}
 	|
 
-	list
+	if(contentStrict,Strictify(list),list)
 /Parse
 
 
@@ -459,7 +461,6 @@ PrettyPrint (PP) implemented, see test function 't'
 	P(1)=>data   # Dict or List of (Dict | String)
 	P(2,"")=>indent
 	P(3,Lambda { println(""+P(1)) } )=>LOut
-	P(4,true)=>contentStrict
 	
 	hasElement=false
 	data->element if(getType(element)=="Dict") hasElement=true
@@ -471,9 +472,9 @@ PrettyPrint (PP) implemented, see test function 't'
 			if (element.has("Special")) {
 				LOut.call(indent+element.get("Special").trim)
 			} else {
-				OutObject(element,indent,LOut,contentStrict)
+				OutObject(element,indent,LOut)
 			}	
-		} else if (type=="String" && !(contentStrict && hasElement)) {
+		} else if (type=="String") {
 			val=element.trim
 			if (val != "") LOut.call(indent+EscapeXMLString(val))
 		}
@@ -486,7 +487,6 @@ PrettyPrint (PP) implemented, see test function 't'
 	P(1)=>obj
 	P(2)=>indent
 	P(3,Lambda { println(""+P(1)) } )=>LOut
-	P(4,true)=>contentStrict
 	
 	
 	firstTag="<"+obj.name
@@ -511,29 +511,66 @@ PrettyPrint (PP) implemented, see test function 't'
 			LOut.call(indent+firstTag+obj.content.first.trim+lastTag)
 		} else {
 			LOut.call(indent+firstTag)
-			OutContent(obj.content,indent+"   ",LOut,contentStrict)
+			OutContent(obj.content,indent+"   ",LOut)
 			LOut.call(indent+lastTag)
 		}
 	}
 //OutObject
+
+
+# "Strictify" list of XML elements
+# --
+	P(1) => list
 	
+	list->e 
+		assert(getType(e)=="Dict") 
+		out(StrictifyDict(e))
+	| => dicts
+	
+	if (dicts.length>0, dicts, list)
+//StrictifyList
+
+
+# "Strictify dict"
+# --
+	P(1)=>dict
+	if (dict.has("content")) {
+		dict.set("content",StrictifyList(dict.content))
+	}
+	dict
+//StrictifyDict
+	
+
+
+# Strictify data, eliminating strings if there are Dict's present in a content list
+# --
+	P(1,Parse(exampleXML,false)) => data
+	if (getType(data)=="List") {
+		StrictifyList(data)
+	} else {
+		StricityDict(data)
+	}
+/Strictify
 
 
 # Pretty-print XML
 # --
 	P(1)=>data   # list of Dict
-	P(2,true)=>contentStrict  # if content has XML elements, then ignore strings in same list
 	
 	Dict.set("list",List).set( "LAdd",Lambda{self.list.add(P(1))} ) => obj
-	OutContent(data,"",obj.LAdd,contentStrict)
+	OutContent(data,"",obj.LAdd)
 	
 	obj.list
 /PP
 	
 	
-# Using local PP to show output
-PP(Parse(exampleXML,false))
-//t
+# Using local PP to show output - non-strict mode, including text in scopes with other elements
+PP(Parse(exampleXML,false,false))
+//t1a
+
+# Using local PP to show output - strict mode, discarding text in scopes with other elements
+PP(Parse(exampleXML))
+//t1b
 
 
 
@@ -542,8 +579,8 @@ JSON:PP(Parse(exampleXML,false))
 //t2
 
 
-# Parse output from function 't' and present
-PP(Parse(t))
+# Parse output from function 't1a' and present
+PP(Parse(t1a,false,false))
 //t3
 
 
