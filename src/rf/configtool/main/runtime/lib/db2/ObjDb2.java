@@ -43,20 +43,20 @@ import rf.configtool.main.runtime.ValueString;
 
 public class ObjDb2 extends Obj {
 
-	private Db2 db2;
-	
+    private Db2 db2;
+    
     public ObjDb2 () {
-    	this.db2=Db2.getInstance();
-    	
-    	this.add(new FunctionSet());
-    	this.add(new FunctionGet());
-    	this.add(new FunctionKeys());
-    	this.add(new FunctionCollections());
-    	this.add(new FunctionDeleteCollection());
+        this.db2=Db2.getInstance();
+        
+        this.add(new FunctionSet());
+        this.add(new FunctionGet());
+        this.add(new FunctionKeys());
+        this.add(new FunctionCollections());
+        this.add(new FunctionDeleteCollection());
     }
     
     private ObjDb2 self() {
-    	return this;
+        return this;
     }
     
     @Override
@@ -106,9 +106,9 @@ public class ObjDb2 extends Obj {
             String key=getString("key",params,1);
             String value = db2.get(collection,key);
             if (value==null) {
-            	return new ValueNull();
+                return new ValueNull();
             } else {
-            	return new ValueString(value);
+                return new ValueString(value);
             }
         }
     }
@@ -126,7 +126,7 @@ public class ObjDb2 extends Obj {
             List<String> keys=db2.getKeys(collection);
             List<Value> list=new ArrayList<Value>();
             for (String key:keys) {
-            	list.add(new ValueString(key));
+                list.add(new ValueString(key));
             }
             return new ValueList(list);
         }
@@ -144,7 +144,7 @@ public class ObjDb2 extends Obj {
             List<String> collections=db2.getCollections();
             List<Value> list=new ArrayList<Value>();
             for (String c:collections) {
-            	list.add(new ValueString(c));
+                list.add(new ValueString(c));
             }
             return new ValueList(list);
         }

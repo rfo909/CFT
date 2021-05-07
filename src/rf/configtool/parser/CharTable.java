@@ -50,7 +50,7 @@ public class CharTable {
     }
     
     public CharTable getMapping (char c) {
-    	return map.get(c);
+        return map.get(c);
     }
 
     public void addToken (String token, int tokenType) {

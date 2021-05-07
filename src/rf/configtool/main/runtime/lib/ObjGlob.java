@@ -45,7 +45,7 @@ public class ObjGlob extends Obj {
     }
     
     public ObjGlob (String pattern) {
-    	this(pattern, true);
+        this(pattern, true);
     }
 
     public ObjGlob (String pattern, boolean ignoreCase) {

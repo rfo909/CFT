@@ -144,8 +144,8 @@ public class ObjLib extends Obj {
             if (params.size() != 0) throw new Exception("Expected no parameters");
             List<Value> list=new ArrayList<Value>();
             for (String s:ctx.getObjGlobal().getRoot().getPropsFile().getCodeDirs()) {
-            	ObjDir dir=new ObjDir(s, Protection.NoProtection);
-            	list.add(new ValueObj(dir));
+                ObjDir dir=new ObjDir(s, Protection.NoProtection);
+                list.add(new ValueObj(dir));
             }
             return new ValueList(list);
         }

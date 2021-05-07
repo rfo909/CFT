@@ -37,9 +37,9 @@ public class StmtDebug extends Stmt {
     }
 
     public void execute (Ctx ctx) throws Exception {
-    	Stdio stdio=ctx.getStdio();
-    	
-    	stdio.println("%DEBUG% " + value.resolve(ctx).getValAsString());
+        Stdio stdio=ctx.getStdio();
+        
+        stdio.println("%DEBUG% " + value.resolve(ctx).getValAsString());
     }
 
 }

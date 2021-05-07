@@ -44,9 +44,9 @@ import rf.configtool.parser.TokenStream;
  * 
  */
 public class ExprSequence extends ExprCommon {
-	
-	private boolean guarded;
-	private List<Expr> expr = new ArrayList<Expr>();
+    
+    private boolean guarded;
+    private List<Expr> expr = new ArrayList<Expr>();
 
     public ExprSequence (boolean guarded, TokenStream ts) throws Exception {
         super(ts);
@@ -57,31 +57,31 @@ public class ExprSequence extends ExprCommon {
         ts.matchStr("(", "expected '(' following " + name);
         boolean allowComma=false;
         while (!ts.matchStr(")")) {
-        	if (allowComma) ts.matchStr(",");
-        	expr.add(new Expr(ts));
-        	allowComma=true;
+            if (allowComma) ts.matchStr(",");
+            expr.add(new Expr(ts));
+            allowComma=true;
         }
     }
     
     public Value resolve (Ctx ctx) throws Exception {
-    	if (expr.size()==0) return new ValueList(new ArrayList<Value>());
-    	if (guarded) {
-    		Value v=expr.get(0).resolve(ctx);
-    		if (!(v instanceof ValueBoolean)) throw new Exception("CondSequence: first parameter not a boolean");
-    		boolean ok = v.getValAsBoolean();
-    		if (!ok) return new ValueList(new ArrayList<Value>()); // empty list
-    	}
-    	boolean isFirst=true;
-    	
-    	List<Value> result=new ArrayList<Value>();
-    	for (Expr e:expr) {
-    		if (guarded && isFirst) {
-    			isFirst = false;
-    			continue;
-    		}
-    		result.add(e.resolve(ctx));
-    	}
-    	return new ValueList(result);
+        if (expr.size()==0) return new ValueList(new ArrayList<Value>());
+        if (guarded) {
+            Value v=expr.get(0).resolve(ctx);
+            if (!(v instanceof ValueBoolean)) throw new Exception("CondSequence: first parameter not a boolean");
+            boolean ok = v.getValAsBoolean();
+            if (!ok) return new ValueList(new ArrayList<Value>()); // empty list
+        }
+        boolean isFirst=true;
+        
+        List<Value> result=new ArrayList<Value>();
+        for (Expr e:expr) {
+            if (guarded && isFirst) {
+                isFirst = false;
+                continue;
+            }
+            result.add(e.resolve(ctx));
+        }
+        return new ValueList(result);
      }
     
 }

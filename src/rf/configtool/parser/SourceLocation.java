@@ -35,8 +35,8 @@ public class SourceLocation {
     }
     
     public SourceLocation (String file, int line) {
-    	this.file=file;
-    	this.line=line;
+        this.file=file;
+        this.line=line;
     }
     
 

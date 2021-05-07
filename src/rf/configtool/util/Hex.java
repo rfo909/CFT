@@ -22,7 +22,7 @@ public class Hex {
     static final String HEX_DIGITS = "0123456789ABCDEF";
 
     public static String toHex (byte[] buf) {
-    	return toHex(buf, buf.length);
+        return toHex(buf, buf.length);
     }
 
     public static String toHex (byte[] buf, int count) {

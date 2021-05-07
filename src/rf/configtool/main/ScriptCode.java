@@ -58,11 +58,11 @@ public class ScriptCode {
     }
     
     public boolean assignPublicName(String name, boolean force) throws Exception {
-    	return assignName(name, false, force);
+        return assignName(name, false, force);
     }
     
     public boolean assignPrivateName (String name, boolean force) throws Exception {
-    	return assignName(name, true, force);
+        return assignName(name, true, force);
     }
     
     
@@ -80,9 +80,9 @@ public class ScriptCode {
             c.update(currLine, loc);
         }
         if (isPrivate) {
-        	privateFunctions.add(name);
+            privateFunctions.add(name);
         } else {
-        	if (privateFunctions.contains(name)) privateFunctions.remove(name);
+            if (privateFunctions.contains(name)) privateFunctions.remove(name);
         }
         return true;
     }
@@ -119,59 +119,59 @@ public class ScriptCode {
             List<String> matchingNames=new ArrayList<String>();
             
             if (symbolSubStr != null) {
-	            
-	            // Check for exact match first
-	            for (int i=0; i<namesInSequence.size(); i++) {
-	                String name=namesInSequence.get(i);
-	                if (name.equals(symbolSubStr)) {
-	                	matchingNames.add(name);
-	                }
-	            }
-	            if (matchingNames.isEmpty()) {
-	                for (int i=0; i<namesInSequence.size(); i++) {
-	                    String name=namesInSequence.get(i);
-	                    if (name.startsWith(symbolSubStr)) {
-	                    	matchingNames.add(name);
-	                    }
-	                }
-	            } 
-            } else {
-            	// include all
-            	for (int i=0; i<namesInSequence.size(); i++) {
+                
+                // Check for exact match first
+                for (int i=0; i<namesInSequence.size(); i++) {
                     String name=namesInSequence.get(i);
-            		matchingNames.add(namesInSequence.get(i));
-            	}
+                    if (name.equals(symbolSubStr)) {
+                        matchingNames.add(name);
+                    }
+                }
+                if (matchingNames.isEmpty()) {
+                    for (int i=0; i<namesInSequence.size(); i++) {
+                        String name=namesInSequence.get(i);
+                        if (name.startsWith(symbolSubStr)) {
+                            matchingNames.add(name);
+                        }
+                    }
+                } 
+            } else {
+                // include all
+                for (int i=0; i<namesInSequence.size(); i++) {
+                    String name=namesInSequence.get(i);
+                    matchingNames.add(namesInSequence.get(i));
+                }
             }
-	            
+                
             boolean showFull = (matchingNames.size()==1 && symbolSubStr != null);
             for (String name:matchingNames) {
-            	if ( (privateFunctions.contains(name) && publicOnly && !showFull) ) continue;
+                if ( (privateFunctions.contains(name) && publicOnly && !showFull) ) continue;
                 
                 String label=name;
                 while(label.length()<nameMaxLength) label=label+" ";
                 if (showFull) {
-                	CodeLines codeLines = getNamedCodeLines(name);
-                	List<String> text = codeLines.getSaveFormat();
-                	boolean foundContent=false;
-                	stdio.println();
-                	for (String line:text) {
-                		if (!foundContent && line.trim().length()==0) continue;
-                		foundContent=true;
-                		if (line.length() > available) line=line.substring(0,available-1)+"+";
-                		stdio.println(line);
-                	}
-                	stdio.println("/" + name);
-                	stdio.println();
+                    CodeLines codeLines = getNamedCodeLines(name);
+                    List<String> text = codeLines.getSaveFormat();
+                    boolean foundContent=false;
+                    stdio.println();
+                    for (String line:text) {
+                        if (!foundContent && line.trim().length()==0) continue;
+                        foundContent=true;
+                        if (line.length() > available) line=line.substring(0,available-1)+"+";
+                        stdio.println(line);
+                    }
+                    stdio.println("/" + name);
+                    stdio.println();
                 } else {
-	                String namedLine=getNamedCodeLines(name).getFirstNonBlankLine();
-	                
-	                String pre=" ";
-	                if (privateFunctions.contains(name)) pre="/";
-	                String s="| " + pre + label + ": " + TabUtil.substituteTabs(namedLine,1);
-	
-	                if (s.length() > available) s=s.substring(0,available-1)+"+";
-	
-	                stdio.println(s);
+                    String namedLine=getNamedCodeLines(name).getFirstNonBlankLine();
+                    
+                    String pre=" ";
+                    if (privateFunctions.contains(name)) pre="/";
+                    String s="| " + pre + label + ": " + TabUtil.substituteTabs(namedLine,1);
+    
+                    if (s.length() > available) s=s.substring(0,available-1)+"+";
+    
+                    stdio.println(s);
                 } 
             }
 
@@ -199,26 +199,26 @@ public class ScriptCode {
      * by global function savefile()
      */
     public File getSaveFile (String saveName, File currentDir) throws Exception {
-    	if (savefile==null) {
-    		savefile=props.getScriptSavefile(createSavefileName(saveName),currentDir);
-    	}
-    	return savefile;
+        if (savefile==null) {
+            savefile=props.getScriptSavefile(createSavefileName(saveName),currentDir);
+        }
+        return savefile;
     }
     
     
     public void save(String scriptName, File currentDir) throws Exception {
-    	String sfn=createSavefileName(scriptName);
-    	
-    	if (this.savefile != null) {
-    		if (!this.savefile.getName().equals(sfn)) {
-    			// saving with new name, using current dir
-    			this.savefile=null;
-    		}
-    	}
-    	if (this.savefile==null) {
-    		this.savefile=new File(currentDir.getCanonicalPath()+File.separator+sfn);
-    	} 
-    	
+        String sfn=createSavefileName(scriptName);
+        
+        if (this.savefile != null) {
+            if (!this.savefile.getName().equals(sfn)) {
+                // saving with new name, using current dir
+                this.savefile=null;
+            }
+        }
+        if (this.savefile==null) {
+            this.savefile=new File(currentDir.getCanonicalPath()+File.separator+sfn);
+        } 
+        
         PrintStream ps=new PrintStream(new FileOutputStream(this.savefile));
         
         for (String s:namesInSequence) {
@@ -236,20 +236,20 @@ public class ScriptCode {
     }
     
     private String getInlineIdentifier(String s, SourceLocation loc, String err) throws Exception {
-    	int pos=s.indexOf(" ");
-    	if (pos < 0) throw new SourceException(loc, err);
-    	return s.substring(pos).trim();
+        int pos=s.indexOf(" ");
+        if (pos < 0) throw new SourceException(loc, err);
+        return s.substring(pos).trim();
     }
     
     public void load(String scriptName, File currentDir) throws Exception {
         namedLines.clear();
         namesInSequence.clear();
         
-    	
-    	if (savefile==null) {
-        	String sfn=createSavefileName(scriptName);
-	    	savefile=props.getScriptSavefile(sfn, currentDir);
-    	}
+        
+        if (savefile==null) {
+            String sfn=createSavefileName(scriptName);
+            savefile=props.getScriptSavefile(sfn, currentDir);
+        }
         BufferedReader reader=new BufferedReader(new FileReader(savefile));
         
         List<CodeLine> lines=new ArrayList<CodeLine>();
@@ -277,7 +277,7 @@ public class ScriptCode {
             if (inlineDoc != null) {
                 // check for end marker
                 if (trimmed.startsWith(">>>") && inlineDoc.matchesEofMark(getInlineIdentifier(trimmed, loc, "expected identifier following sequence of >>> and space"))) {
-                	lines.add(new CodeLine(loc,s,CodeLine.TYPE_LINE_ORIGINAL));
+                    lines.add(new CodeLine(loc,s,CodeLine.TYPE_LINE_ORIGINAL));
                     // add generated code line
                     lines.add(new CodeLine(loc,inlineDoc.createCodeLine(),CodeLine.TYPE_LINE_GENERATED));
                     inlineDoc=null;
@@ -297,14 +297,14 @@ public class ScriptCode {
 
 
             if (trimmed.startsWith("/")) {
-            	boolean isPrivate=false;
-            	String name;
-            	if (trimmed.startsWith("//")) {
-            		isPrivate=true;
-            		name=trimmed.substring(2);
-            	} else {
-            		name=trimmed.substring(1);
-            	}
+                boolean isPrivate=false;
+                String name;
+                if (trimmed.startsWith("//")) {
+                    isPrivate=true;
+                    name=trimmed.substring(2);
+                } else {
+                    name=trimmed.substring(1);
+                }
 
                 if (namesInSequence.contains(name)) namesInSequence.remove(name);
                 namesInSequence.add(name);

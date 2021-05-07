@@ -42,8 +42,8 @@ public class ExprParamLookup extends ExprCommon {
     }
     
     private Value getDefaultValue(Ctx ctx) throws Exception {
-    	if (defaultValue != null) return defaultValue.resolve(ctx);
-    	return new ValueNull();
+        if (defaultValue != null) return defaultValue.resolve(ctx);
+        return new ValueNull();
     }
     
     public Value resolve (Ctx ctx) throws Exception {

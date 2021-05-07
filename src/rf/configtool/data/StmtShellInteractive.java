@@ -43,8 +43,8 @@ import java.util.*;
  */
 public abstract class StmtShellInteractive extends Stmt {
 
-	private final String name;
-	
+    private final String name;
+    
     private Expr expr;
     private List<String> elements;
 
@@ -65,33 +65,33 @@ public abstract class StmtShellInteractive extends Stmt {
     }
     
     public String getName() {
-    	return name;
+        return name;
     }
     
     private String getElementsString() {
-    	StringBuffer sb=new StringBuffer();
-    	for (String s:elements) {
-    		sb.append(s);
-    	}
-    	return sb.toString();
+        StringBuffer sb=new StringBuffer();
+        for (String s:elements) {
+            sb.append(s);
+        }
+        return sb.toString();
     }
     
     private boolean isWindows() {
-    	return File.separator.equals("\\");
+        return File.separator.equals("\\");
     }
     
     private boolean isDriveLetter (Character c) {
-    	return "abcdefghijklmnopqrstuvwxyz".indexOf(Character.toLowerCase(c)) >= 0;
+        return "abcdefghijklmnopqrstuvwxyz".indexOf(Character.toLowerCase(c)) >= 0;
     }
     
     private boolean isAbsolutePath (String s) {
-    	if (isWindows()) {
-    		if (s.startsWith("\\")) return true;
-    		if (s.length() >= 3 && isDriveLetter(s.charAt(0)) && s.charAt(1)==':' && s.charAt(2)=='\\') return true;
-    	} else {
-    		if (s.startsWith("/")) return true;
-    	}
-    	return false;
+        if (isWindows()) {
+            if (s.startsWith("\\")) return true;
+            if (s.length() >= 3 && isDriveLetter(s.charAt(0)) && s.charAt(1)==':' && s.charAt(2)=='\\') return true;
+        } else {
+            if (s.startsWith("/")) return true;
+        }
+        return false;
     }
  
     /**
@@ -110,38 +110,38 @@ public abstract class StmtShellInteractive extends Stmt {
     protected abstract void processSet (Ctx ctx, List<File> files) throws Exception;
     
     public void execute (Ctx ctx) throws Exception {
-    	
+        
         if (expr != null) {
             Value v=expr.resolve(ctx);
             if (!(v instanceof ValueObj)) throw new Exception("Expected File or Dir expression");
             Obj obj=((ValueObj) v).getVal();
             if (obj instanceof ObjFile) {
-            	processOne( ctx, ((ObjFile) obj).getFile() );
-            	return;
+                processOne( ctx, ((ObjFile) obj).getFile() );
+                return;
             }
             if (obj instanceof ObjDir) {
-            	processOne( ctx, ((ObjDir) obj).getDir() );
-            	return;
+                processOne( ctx, ((ObjDir) obj).getDir() );
+                return;
             }
             throw new Exception("Expected File or Dir expression");
         }
         
         if (elements.size()==0) {
-        	processDefault(ctx);
-        	return;
+            processDefault(ctx);
+            return;
         }
         
-    	String str=getElementsString();
-    	
-    	if (isAbsolutePath(str)) {
-    		processPathExpression(ctx, str);
-    		return;
-    	}
-    	
-    	// relative path
-		processPathExpression(ctx, ctx.getObjGlobal().getCurrDir() + File.separator + str);
+        String str=getElementsString();
+        
+        if (isAbsolutePath(str)) {
+            processPathExpression(ctx, str);
+            return;
+        }
+        
+        // relative path
+        processPathExpression(ctx, ctx.getObjGlobal().getCurrDir() + File.separator + str);
 
-    	
+        
     }
     
     
@@ -158,67 +158,67 @@ public abstract class StmtShellInteractive extends Stmt {
     
 
     private void processPathExpression (Ctx ctx, String expr) throws Exception {
-    	// single file or directory - as-is 
-		File f=new File(expr);
-		if (f.exists()) {
-			processOne(ctx, f);
-			return;
-		}
+        // single file or directory - as-is 
+        File f=new File(expr);
+        if (f.exists()) {
+            processOne(ctx, f);
+            return;
+        }
 
-		int pos=expr.lastIndexOf(File.separator);
-		String path = expr.substring(0,pos);
-		String name = expr.substring(pos+1);
-		
-		if (!path.contains(File.separator)) path += File.separator; 
-			// as the split above leaves path for root on windows becomes "c:" or "", and for linux ""
-		
-		
-		if (path.contains("*")) {
-			throw new Exception("Invalid path: " + path);
-		}
-		
-		File dir=new File(path);
-		if (!dir.isDirectory()) {
-			throw new Exception("No such directory: " + path);
-		}
-		
-		if (name.contains("*")) { // globbing
-			processSet(ctx, getGlobbedElementList(path, name));
-			return;
-		}
-		
-		throw new Exception("No match: " + expr);
-//		
-//		// attempts substring(s)
-//		processSet(ctx, getElementListBySubstrings(path, elements));
-	}
+        int pos=expr.lastIndexOf(File.separator);
+        String path = expr.substring(0,pos);
+        String name = expr.substring(pos+1);
+        
+        if (!path.contains(File.separator)) path += File.separator; 
+            // as the split above leaves path for root on windows becomes "c:" or "", and for linux ""
+        
+        
+        if (path.contains("*")) {
+            throw new Exception("Invalid path: " + path);
+        }
+        
+        File dir=new File(path);
+        if (!dir.isDirectory()) {
+            throw new Exception("No such directory: " + path);
+        }
+        
+        if (name.contains("*")) { // globbing
+            processSet(ctx, getGlobbedElementList(path, name));
+            return;
+        }
+        
+        throw new Exception("No match: " + expr);
+//      
+//      // attempts substring(s)
+//      processSet(ctx, getElementListBySubstrings(path, elements));
+    }
 
   
     private List<File> getGlobbedElementList (String dir, String globExpr) throws Exception {
-    	File f=new File(dir);
-    	ObjGlob glob=new ObjGlob(globExpr);
-    	
-    	if (!f.isDirectory()) throw new Exception("Not a directory: " + dir);
-    	List<File> result=new ArrayList<File>();
-    	for (File content: f.listFiles()) {
-    		boolean ok=glob.matches(content.getName());
-    		if (ok) result.add(content);
-    	}
-    	return result;
+        File f=new File(dir);
+        ObjGlob glob=new ObjGlob(globExpr);
+        
+        if (!f.isDirectory()) throw new Exception("Not a directory: " + dir);
+        List<File> result=new ArrayList<File>();
+        for (File content: f.listFiles()) {
+            boolean ok=glob.matches(content.getName());
+            if (ok) result.add(content);
+        }
+        return result;
     }
     
     private List<File> getElementListBySubstrings(String dir, List<String> parts) throws Exception {
-    	File f=new File(dir);
-    	if (!f.isDirectory()) throw new Exception("Not a directory: " + dir);
-    	List<File> result=new ArrayList<File>();
-    	for (File content: f.listFiles()) {
-    		boolean ok=true;
-    		for (String p:parts) {
-    			if (!content.getName().contains(p)) ok=false;
-    		}
-    		if (ok) result.add(content);
-    	}
-    	return result;
+        File f=new File(dir);
+        if (!f.isDirectory()) throw new Exception("Not a directory: " + dir);
+        List<File> result=new ArrayList<File>();
+        for (File content: f.listFiles()) {
+            boolean ok=true;
+            for (String p:parts) {
+                if (!content.getName().contains(p)) ok=false;
+            }
+            if (ok) result.add(content);
+        }
+        return result;
     }
 
 }

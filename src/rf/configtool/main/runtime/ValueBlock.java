@@ -76,7 +76,7 @@ public class ValueBlock extends Value {
 
     
     private Value executeIsolatedBlock (Ctx ctx) throws Exception {
-    	Value retVal=null;
+        Value retVal=null;
         
         for (ProgramLine progLine:programLines) {
             Ctx sub=ctx.sub();
@@ -104,9 +104,9 @@ public class ValueBlock extends Value {
 
     
     private Value executeLocalBlock (Ctx ctx) throws Exception {
-    	if (programLines.size() != 1) throw new Exception("Internal error: local block should contain ONE ProgramLine");
-    	programLines.get(0).execute(ctx);
-    	return ctx.getLocalBlockResult();
+        if (programLines.size() != 1) throw new Exception("Internal error: local block should contain ONE ProgramLine");
+        programLines.get(0).execute(ctx);
+        return ctx.getLocalBlockResult();
     }
 
     /**
@@ -126,7 +126,7 @@ public class ValueBlock extends Value {
      * Call Local code block.
      */
     public Value callLocalBlock (Ctx ctx) throws Exception {
-    	// Execute code as if it were statements in same context as outside the block. 
+        // Execute code as if it were statements in same context as outside the block. 
         return executeLocalBlock(ctx);
     }
     
@@ -135,7 +135,7 @@ public class ValueBlock extends Value {
      * Call lambda, running in an isolated Ctx
      */
     public Value callLambda (Ctx ctx, List<Value> params) throws Exception {
-    	return callLambda(ctx, new ObjDict(), params);
+        return callLambda(ctx, new ObjDict(), params);
     }
     
     /**
@@ -143,9 +143,9 @@ public class ValueBlock extends Value {
      * dictionary is stored in the "self" variable inside the lambda.
      */
     public Value callLambda (Ctx ctx, ObjDict dict, List<Value> params) throws Exception {
-    	if (params==null) params=new ArrayList<Value>();
-    	FunctionState fs=new FunctionState(params);
-    	fs.set("self", new ValueObj(dict));
+        if (params==null) params=new ArrayList<Value>();
+        FunctionState fs=new FunctionState(params);
+        fs.set("self", new ValueObj(dict));
         Ctx independentCtx=new Ctx(ctx.getStdio(), ctx.getObjGlobal(), fs);
         return executeIsolatedBlock(independentCtx);
     }

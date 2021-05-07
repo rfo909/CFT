@@ -36,18 +36,18 @@ import rf.configtool.main.runtime.ValueString;
 import java.awt.Color;
 
 public class ObjClosure extends Obj {
-	
-	private ObjDict dict;
-	private ValueBlock lambda;
+    
+    private ObjDict dict;
+    private ValueBlock lambda;
     
     public ObjClosure(ObjDict dict, ValueBlock lambda) {
-    	this.dict=dict;
-    	this.lambda=lambda;
+        this.dict=dict;
+        this.lambda=lambda;
         this.add(new FunctionCall());
     }
     
     public ValueBlock getLambda() {
-    	return lambda;
+        return lambda;
     }
     
     @Override
@@ -83,12 +83,12 @@ public class ObjClosure extends Obj {
             return "call(...) - call closure with parameters";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	return callClosure(ctx,params);
+            return callClosure(ctx,params);
         }
     }
     
     public Value callClosure (Ctx ctx, List<Value> params) throws Exception {
-    	return lambda.callLambda(ctx, dict, params);
+        return lambda.callLambda(ctx, dict, params);
     }
 
 }

@@ -30,28 +30,28 @@ import java.util.List;
  * 
  */
 public class StdioVirtual extends Stdio {
-	
-	private List<String> outputBuffer = new ArrayList<String>();
-	
-//	public StdioVirtual (InputStream in) {
-//    	super(new BufferedReader(new InputStreamReader(in)));
+    
+    private List<String> outputBuffer = new ArrayList<String>();
+    
+//  public StdioVirtual (InputStream in) {
+//      super(new BufferedReader(new InputStreamReader(in)));
 //    }
    
-	public StdioVirtual (BufferedReader stdin) {
-		super(stdin);
+    public StdioVirtual (BufferedReader stdin) {
+        super(stdin);
     }
    
-	@Override
+    @Override
     public synchronized void println (String s) {
-		//System.out.println("StdioVirtual.println -> " + s);
-    	outputBuffer.add(s);
+        //System.out.println("StdioVirtual.println -> " + s);
+        outputBuffer.add(s);
     }
-	
-	
-	public synchronized List<String> getAndClearOutputBuffer() {
-		List<String> x=outputBuffer;
-		outputBuffer=new ArrayList<String>();
-		return x;
-	}
+    
+    
+    public synchronized List<String> getAndClearOutputBuffer() {
+        List<String> x=outputBuffer;
+        outputBuffer=new ArrayList<String>();
+        return x;
+    }
     
 }

@@ -29,7 +29,7 @@ public class StdioReal extends Stdio {
     private PrintStream stdout;
     
     public StdioReal(BufferedReader stdin, PrintStream stdout) {
-    	super(stdin);
+        super(stdin);
         this.stdout=stdout;
     }
    
@@ -39,12 +39,12 @@ public class StdioReal extends Stdio {
     }
 
     public synchronized void print (String s) {
-    	stdout.print(s);
+        stdout.print(s);
     }
     
     public String readPassword() {
-    	Console console=System.console();
-    	return new String(console.readPassword());
+        Console console=System.console();
+        return new String(console.readPassword());
     }
 
 }

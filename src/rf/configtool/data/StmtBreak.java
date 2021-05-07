@@ -31,24 +31,24 @@ public class StmtBreak extends Stmt {
         
         ts.matchStr("break","expected 'break'");
         if (ts.matchStr("(")) {
-	        expr=new Expr(ts);
-	        ts.matchStr(")", "expected ')' closing break statement");
+            expr=new Expr(ts);
+            ts.matchStr(")", "expected ')' closing break statement");
         }
     }
     
     public void execute (Ctx ctx) throws Exception {
-    	if (expr == null) {
-    		// unconditional break
-    		ctx.setBreakLoopFlag();
-    	} else {
-    		// conditional break
-	        Value v=expr.resolve(ctx);
-	        boolean breakLoop=v.getValAsBoolean();
-	        
-	        if (breakLoop) {
-	            ctx.setBreakLoopFlag();
-	        }
-    	} 
+        if (expr == null) {
+            // unconditional break
+            ctx.setBreakLoopFlag();
+        } else {
+            // conditional break
+            Value v=expr.resolve(ctx);
+            boolean breakLoop=v.getValAsBoolean();
+            
+            if (breakLoop) {
+                ctx.setBreakLoopFlag();
+            }
+        } 
     }
 
 

@@ -38,9 +38,9 @@ public class StmtCondOut extends Stmt {
     }
 
     public void execute (Ctx ctx) throws Exception {
-    	if (exprCond.resolve(ctx).getValAsBoolean()) {
-    		ctx.getOutData().out(expr.resolve(ctx));
-    	}
+        if (exprCond.resolve(ctx).getValAsBoolean()) {
+            ctx.getOutData().out(expr.resolve(ctx));
+        }
     }
 
 }

@@ -19,19 +19,19 @@ import rf.configtool.main.runtime.ValueObj;
  */
 public class ObjFilterReader extends Obj {
     
-	private ObjLineReader lineReader;
-	private ObjGrep grep;
-	
+    private ObjLineReader lineReader;
+    private ObjGrep grep;
+    
     public ObjFilterReader(ObjLineReader lineReader, ObjGrep grep) {
-    	this.lineReader=lineReader;
-    	this.grep=grep;
-    	
-    	add(new FunctionRead());
+        this.lineReader=lineReader;
+        this.grep=grep;
+        
+        add(new FunctionRead());
     }
 
     
     public Obj self() {
-    	return this;
+        return this;
     }
     
         

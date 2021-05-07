@@ -31,61 +31,61 @@ import rf.configtool.parser.TokenStream;
  * The Root class manages a set of parallel script contexts.
  */
 public class Root {
-	
-	private final String sessionUUID;
+    
+    private final String sessionUUID;
     private final byte[] secureSessionID; 
 
 
-	private static final Version VERSION = new Version();
+    private static final Version VERSION = new Version();
 
-	private StdioReal stdio;
-	private PropsFile propsFile;
+    private StdioReal stdio;
+    private PropsFile propsFile;
     private ObjTerm objTerm;
 
-	private Map<String, ScriptState> scriptStates = new HashMap<String, ScriptState>();
-	private ScriptState currScript;
-	private boolean debugMode;
-	private Value lastResult;
-	private final long startTime;
-	private boolean terminationFlag = false;
-	
+    private Map<String, ScriptState> scriptStates = new HashMap<String, ScriptState>();
+    private ScriptState currScript;
+    private boolean debugMode;
+    private Value lastResult;
+    private final long startTime;
+    private boolean terminationFlag = false;
+    
     /**
      * Unique value per CFT session, available via Sys.sessionUUID CFT function
      */
     public String getSessionUUID() {
-    	return sessionUUID;
+        return sessionUUID;
     } 
 
     public byte[] getSecureSessionID() {
-    	return secureSessionID;
+        return secureSessionID;
     } 
 
-	public Root(StdioReal stdio, String customScriptDir) throws Exception {
-    	this.sessionUUID = UUID.randomUUID().toString();
-    	this.secureSessionID = (UUID.randomUUID().toString()+":"+System.currentTimeMillis()).getBytes("UTF-8");
-		this.startTime=System.currentTimeMillis();
-		this.stdio = stdio;
-    	propsFile=new PropsFile(customScriptDir);
+    public Root(StdioReal stdio, String customScriptDir) throws Exception {
+        this.sessionUUID = UUID.randomUUID().toString();
+        this.secureSessionID = (UUID.randomUUID().toString()+":"+System.currentTimeMillis()).getBytes("UTF-8");
+        this.startTime=System.currentTimeMillis();
+        this.stdio = stdio;
+        propsFile=new PropsFile(customScriptDir);
         objTerm=new ObjTerm();
         
 
         String globalOnLoad = propsFile.getGlobalOnLoad();
         if (globalOnLoad != null) {
-        	addInitialCommand(globalOnLoad);
+            addInitialCommand(globalOnLoad);
         }
         
 
 
         createNewScript();
-	}
-	
-	public long getStartTime() {
-		return startTime;
-	}
-	
-	public PropsFile getPropsFile() {
-		return propsFile;
-	}
+    }
+    
+    public long getStartTime() {
+        return startTime;
+    }
+    
+    public PropsFile getPropsFile() {
+        return propsFile;
+    }
 
     
     public ObjTerm getObjTerm() {
@@ -93,545 +93,545 @@ public class Root {
     }
     
     public boolean isDebugMode() {
-    	return debugMode;
+        return debugMode;
     }
 
-	public void loadScript(String scriptName) throws Exception {
-		currScript = getScriptState(scriptName, true);
-	}
+    public void loadScript(String scriptName) throws Exception {
+        currScript = getScriptState(scriptName, true);
+    }
 
-	public void addInitialCommand(String line) {
-			stdio.addBufferedInputLine(line);
-	}
+    public void addInitialCommand(String line) {
+            stdio.addBufferedInputLine(line);
+    }
 
-	private void refreshIfSavefileUpdated() throws Exception {
-		Iterator<String> keys = scriptStates.keySet().iterator();
-		List<String> keysToDelete = new ArrayList<String>();
-		while (keys.hasNext()) {
-			String key = keys.next();
-			ScriptState x = scriptStates.get(key);
-			try {
-				x.getObjGlobal().refreshIfSavefileUpdated();
-			} catch (Exception ex) {
-				stdio.println("ERROR: could not reload script " + key + " - removing from cache");
-				keysToDelete.add(key);
-			}
-		}
-		for (String key : keysToDelete) {
-			if (!currScript.getObjGlobal().equals(key)) {
-				scriptStates.remove(key);
-			}
-		}
-	}
-	
-	
-	private String getCurrDirOrDot() throws Exception {
-		if (currScript != null) return currScript.getObjGlobal().getCurrDir();
-		return (new File(".")).getCanonicalPath();
-	}
-	
+    private void refreshIfSavefileUpdated() throws Exception {
+        Iterator<String> keys = scriptStates.keySet().iterator();
+        List<String> keysToDelete = new ArrayList<String>();
+        while (keys.hasNext()) {
+            String key = keys.next();
+            ScriptState x = scriptStates.get(key);
+            try {
+                x.getObjGlobal().refreshIfSavefileUpdated();
+            } catch (Exception ex) {
+                stdio.println("ERROR: could not reload script " + key + " - removing from cache");
+                keysToDelete.add(key);
+            }
+        }
+        for (String key : keysToDelete) {
+            if (!currScript.getObjGlobal().equals(key)) {
+                scriptStates.remove(key);
+            }
+        }
+    }
+    
+    
+    private String getCurrDirOrDot() throws Exception {
+        if (currScript != null) return currScript.getObjGlobal().getCurrDir();
+        return (new File(".")).getCanonicalPath();
+    }
+    
 
-	public ScriptState getScriptState(String name, boolean isLoad) throws Exception {
-		if (name == null || name.equals(currScript.getScriptName())) {
-			if (isLoad)
-				currScript.getObjGlobal().loadCode(null); // reloads code - overwrite any local changes
-			return currScript;
-		}
-		// script already loaded (but not current)?
-		ScriptState otherScript = scriptStates.get(name);
-		if (otherScript != null) {
-			if (isLoad)
-				otherScript.getObjGlobal().loadCode(otherScript.getScriptName());
-			return otherScript;
-		}
-		// script not loaded, create new ScriptState
-		ScriptState newScript = new ScriptState(name, new ObjGlobal(this, getCurrDirOrDot(), stdio)); // throws exception if there is
-																					// trouble
-		scriptStates.put(newScript.getScriptName(), newScript);
-		return newScript;
-	}
+    public ScriptState getScriptState(String name, boolean isLoad) throws Exception {
+        if (name == null || name.equals(currScript.getScriptName())) {
+            if (isLoad)
+                currScript.getObjGlobal().loadCode(null); // reloads code - overwrite any local changes
+            return currScript;
+        }
+        // script already loaded (but not current)?
+        ScriptState otherScript = scriptStates.get(name);
+        if (otherScript != null) {
+            if (isLoad)
+                otherScript.getObjGlobal().loadCode(otherScript.getScriptName());
+            return otherScript;
+        }
+        // script not loaded, create new ScriptState
+        ScriptState newScript = new ScriptState(name, new ObjGlobal(this, getCurrDirOrDot(), stdio)); // throws exception if there is
+                                                                                    // trouble
+        scriptStates.put(newScript.getScriptName(), newScript);
+        return newScript;
+    }
 
-	public void createNewScript() throws Exception {
-		currScript = new ScriptState(new ObjGlobal(this, getCurrDirOrDot(), stdio));
-		scriptStates.put(currScript.getScriptName(), currScript);
-	}
+    public void createNewScript() throws Exception {
+        currScript = new ScriptState(new ObjGlobal(this, getCurrDirOrDot(), stdio));
+        scriptStates.put(currScript.getScriptName(), currScript);
+    }
 
-	private void cleanupOnExit() throws Exception {
-		Iterator<String> keys = scriptStates.keySet().iterator();
-		while (keys.hasNext()) {
-			String key = keys.next();
-			ScriptState x = scriptStates.get(key);
-			x.getObjGlobal().cleanupOnExit();
-		}
-	}
+    private void cleanupOnExit() throws Exception {
+        Iterator<String> keys = scriptStates.keySet().iterator();
+        while (keys.hasNext()) {
+            String key = keys.next();
+            ScriptState x = scriptStates.get(key);
+            x.getObjGlobal().cleanupOnExit();
+        }
+    }
 
-	public Value getLastResult() {
-		if (lastResult == null)
-			return new ValueNull();
-		return lastResult;
-	}
+    public Value getLastResult() {
+        if (lastResult == null)
+            return new ValueNull();
+        return lastResult;
+    }
 
-	// Moved here from Main
-	public void inputLoop() {
-		copyrightNotice();
-		stdio.println(VERSION.getVersion());
-
-
-		try {
-			for (;;) {
+    // Moved here from Main
+    public void inputLoop() {
+        copyrightNotice();
+        stdio.println(VERSION.getVersion());
 
 
-				if (terminationFlag) {
-					stdio.println("Runtime exit, cleaning up");
-					cleanupOnExit();
-					return;
-				}
-				
-				ObjGlobal objGlobal = currScript.getObjGlobal();
+        try {
+            for (;;) {
 
 
-				if (!stdio.hasBufferedInputLines()) {
-					// Only produce prompt when non-buffered lines
-					
-					// Run the prompt code line to produce possibly dynamic prompt
-					String promptCode = propsFile.getPromptCode();
-					SourceLocation loc = new SourceLocation("prompt", 0, 0);
-					CodeLines promptCodeLines = new CodeLines(promptCode, loc);
-	
-					String pre;
-					try {
-						Value ret = objGlobal.getRuntime().processCodeLines(stdio, promptCodeLines, new FunctionState());
-						pre=ret.getValAsString();
-					} catch (Exception ex) {
-						if (debugMode) {
-							pre="ERROR";
-							ex.printStackTrace();
-						} else {
-							pre="$";
-						}
-					}
-	
-					// Stdio can only do line output, so using System.out directly
-					stdio.print(pre);
-				}
-				String line = stdio.getInputLine().trim();
-
-				refreshIfSavefileUpdated();
-				propsFile.refreshFromFile();
-
-				
-				processInteractiveInput(line);
-
-			}
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-	}
-
-	/**
-	 * Moved here from Runtime
-	 */
-	public void processInteractiveInput(String line) throws Exception {
-		line = line.trim();
-		TokenStream ts = null;
-		ObjGlobal objGlobal = currScript.getObjGlobal();
-		ScriptCode currScriptCode = objGlobal.getCodeHistory();
-
-		try {
-			// Shortcuts
-
-			String shortcutPrefix = propsFile.getShortcutPrefix();
-			if (line.startsWith(shortcutPrefix)) {
-				String shortcutName = line.substring(shortcutPrefix.length()).trim();
-				String shortcutCode = propsFile.getShortcutCode(shortcutName);
-				SourceLocation loc = new SourceLocation("shortcut:" + shortcutName, 0, 0);
-
-				CodeLines codeLines = new CodeLines(shortcutCode, loc);
-
-				Value ret = objGlobal.getRuntime().processCodeLines(stdio, codeLines, new FunctionState());
-				postProcessResult(ret);
-				showSystemLog();
-
-				return;
-			}
-			
-			// Bang command
-			
-			if (line.startsWith("!")) {
-				String str=line.substring(1).trim();
-
-				// Run the shell command parser
-				String code = propsFile.getBangCommand();
-				SourceLocation loc = new SourceLocation("bangCommand", 0, 0);
-				CodeLines codeLines = new CodeLines(code, loc);
-
-				List<Value> params=new ArrayList<Value>();
-				params.add(new ValueString(str));
-				objGlobal.getRuntime().processCodeLines(stdio, codeLines, new FunctionState(params));
-				return;
-			} 
+                if (terminationFlag) {
+                    stdio.println("Runtime exit, cleaning up");
+                    cleanupOnExit();
+                    return;
+                }
+                
+                ObjGlobal objGlobal = currScript.getObjGlobal();
 
 
-			// pre-processing input
+                if (!stdio.hasBufferedInputLines()) {
+                    // Only produce prompt when non-buffered lines
+                    
+                    // Run the prompt code line to produce possibly dynamic prompt
+                    String promptCode = propsFile.getPromptCode();
+                    SourceLocation loc = new SourceLocation("prompt", 0, 0);
+                    CodeLines promptCodeLines = new CodeLines(promptCode, loc);
+    
+                    String pre;
+                    try {
+                        Value ret = objGlobal.getRuntime().processCodeLines(stdio, promptCodeLines, new FunctionState());
+                        pre=ret.getValAsString();
+                    } catch (Exception ex) {
+                        if (debugMode) {
+                            pre="ERROR";
+                            ex.printStackTrace();
+                        } else {
+                            pre="$";
+                        }
+                    }
+    
+                    // Stdio can only do line output, so using System.out directly
+                    stdio.print(pre);
+                }
+                String line = stdio.getInputLine().trim();
 
-			if (line.startsWith(".")) {
-				// repeat previous command
-				String currLine = currScriptCode.getCurrLine();
-				if (currLine == null) {
-					stdio.println("ERROR: no current line");
-					return;
-				}
-				line = currLine + line.substring(1);
-				stdio.println("$ " + line);
-			} 
-			// identify input tokens
-			Parser p = new Parser();
-			SourceLocation loc = new SourceLocation("input", 0, 0);
-			p.processLine(new CodeLine(loc, line));
-			ts = p.getTokenStream();
+                refreshIfSavefileUpdated();
+                propsFile.refreshFromFile();
 
-			// execute input
+                
+                processInteractiveInput(line);
 
-			if (ts.matchStr("/")) {
-				boolean isPrivate=false;
-				if (ts.matchStr("/")) {
-					isPrivate=true;
-				}
-				String ident = ts.matchIdentifier("expected name following '/' - for naming current program line");
-				boolean force = ts.matchStr("!");
-				if (!ts.atEOF())
-					throw new Exception("Expected '/ident' to save previous program line");
-				boolean success;
-				if (isPrivate) {
-					success = currScriptCode.assignPrivateName(ident, force);
-				} else {
-					success = currScriptCode.assignPublicName(ident, force);
-				}
-				if (!success) {
-					stdio.println("ERROR: Symbol exists. Use /" + ident + "! to override");
-				}
-				return;
-			}
-			if (ts.matchStr("?")) {
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
 
-				String ident = ts.matchIdentifier();
-				
-				if (ident != null) {
-					boolean colon = ts.matchStr(":");
-					if (colon) {
-						// colon means ident is a script name
-						ScriptState sstate=null;
-						try {
-							// try the "switch" functionality first
-							sstate = getScriptState(ident, false);
-						} catch (Exception ex) {
-							sstate=null;
-						}
-						
-						if (sstate==null) try {
-							// use "load"
-							sstate = getScriptState(ident, true);
-						} catch (Exception ex) {
-							sstate=null;
-						}
-						if (sstate==null) {
-							throw new Exception("No such script: " + ident);
-						}
-						
-						ScriptCode hist = sstate.getObjGlobal().getCodeHistory();
+    /**
+     * Moved here from Runtime
+     */
+    public void processInteractiveInput(String line) throws Exception {
+        line = line.trim();
+        TokenStream ts = null;
+        ObjGlobal objGlobal = currScript.getObjGlobal();
+        ScriptCode currScriptCode = objGlobal.getCodeHistory();
 
-						// script: may in turn be followed by another identifier for partial or
-						// complete match, as before
-						String ident2=ts.matchIdentifier();
-						if (ident2 != null) {
-							hist.report(stdio, ident2, false);
-						} else {
-							hist.reportAll(stdio, true);
-						}
-					} else {
-						// no colon
-						currScriptCode.report(stdio, ident, false);
-					}
-				} else {
-					currScriptCode.reportAll(stdio,false);
-				}
-				String scriptName = objGlobal.getScriptName();
-				if (scriptName != null) {
-					stdio.println("Current script name: " + scriptName);
-				}
-				return; // abort further processing
-			}
-			if (ts.matchStr(":")) {
-				processColonCommand(ts);
-				return;
-			}
+        try {
+            // Shortcuts
 
-			// actually execute code line
-			if (line.trim().length() > 0) {
-				// program line
-				currScriptCode.setCurrLine(line);
-				Value result = objGlobal.getRuntime().processCodeLines(stdio, new CodeLines(line, loc), null);
+            String shortcutPrefix = propsFile.getShortcutPrefix();
+            if (line.startsWith(shortcutPrefix)) {
+                String shortcutName = line.substring(shortcutPrefix.length()).trim();
+                String shortcutCode = propsFile.getShortcutCode(shortcutName);
+                SourceLocation loc = new SourceLocation("shortcut:" + shortcutName, 0, 0);
 
-				postProcessResult(result);
-				showSystemLog();
-			}
+                CodeLines codeLines = new CodeLines(shortcutCode, loc);
 
-		} catch (Throwable t) {
-			try {
-				showSystemLog(); 
-			} catch (Exception ex) {
-				// ignore
-			}
-			stdio.println("ERROR: " + t.getMessage());
-			if (debugMode) {
-				if (t instanceof SourceException) {
-					SourceException se=(SourceException) t;
-					if (se.getOriginalException() != null) {
-						// show original exception stack trace!
-						t=se.getOriginalException();
-					}
-				}
-				t.printStackTrace();
-//				try {
-//					objGlobal.outln("INPUT: " + ts.showNextTokens(10));
-//				} catch (Exception ex) {
-//					// ignore
-//				}
-			}
-		}
-	}
+                Value ret = objGlobal.getRuntime().processCodeLines(stdio, codeLines, new FunctionState());
+                postProcessResult(ret);
+                showSystemLog();
 
-	private void postProcessResult(Value result) throws Exception {
-		if (result == null) {
-			result = new ValueNull();
-		}
-		ObjGlobal objGlobal = currScript.getObjGlobal();
+                return;
+            }
+            
+            // Bang command
+            
+            if (line.startsWith("!")) {
+                String str=line.substring(1).trim();
 
-		// update lastResult
-		lastResult = result;
+                // Run the shell command parser
+                String code = propsFile.getBangCommand();
+                SourceLocation loc = new SourceLocation("bangCommand", 0, 0);
+                CodeLines codeLines = new CodeLines(code, loc);
 
-		// present result
-		Report report = new Report();
-		List<String> lines = report.displayValueLines(result);
-		int width = objTerm.getScreenWidth();
+                List<Value> params=new ArrayList<Value>();
+                params.add(new ValueString(str));
+                objGlobal.getRuntime().processCodeLines(stdio, codeLines, new FunctionState(params));
+                return;
+            } 
 
-		Stdio stdio = objGlobal.getStdio();
 
-		// Display lines cut off at screenWidth, for readability
-		for (String s : lines) {
-			if (s.length() > width - 1) {
-				s = s.substring(0, width - 2) + "+";
-			}
-			stdio.println(s);
-		}
+            // pre-processing input
 
-	}
+            if (line.startsWith(".")) {
+                // repeat previous command
+                String currLine = currScriptCode.getCurrLine();
+                if (currLine == null) {
+                    stdio.println("ERROR: no current line");
+                    return;
+                }
+                line = currLine + line.substring(1);
+                stdio.println("$ " + line);
+            } 
+            // identify input tokens
+            Parser p = new Parser();
+            SourceLocation loc = new SourceLocation("input", 0, 0);
+            p.processLine(new CodeLine(loc, line));
+            ts = p.getTokenStream();
 
-	public void showSystemLog() {
-		ObjGlobal objGlobal = currScript.getObjGlobal();
-		// System messages are written to screen - this applies to help texts etc
-		List<String> messages = objGlobal.getSystemMessages();
-		int limit = objTerm.getScreenWidth()-1;
-		for (String s : messages) {
-			String x="  # " + s;
-			if (x.length() > limit) {
-				x=x.substring(0,limit-1) + "+";
-			}
-			stdio.println(x);
-		}
+            // execute input
 
-		objGlobal.clearSystemMessages();
-	}
+            if (ts.matchStr("/")) {
+                boolean isPrivate=false;
+                if (ts.matchStr("/")) {
+                    isPrivate=true;
+                }
+                String ident = ts.matchIdentifier("expected name following '/' - for naming current program line");
+                boolean force = ts.matchStr("!");
+                if (!ts.atEOF())
+                    throw new Exception("Expected '/ident' to save previous program line");
+                boolean success;
+                if (isPrivate) {
+                    success = currScriptCode.assignPrivateName(ident, force);
+                } else {
+                    success = currScriptCode.assignPublicName(ident, force);
+                }
+                if (!success) {
+                    stdio.println("ERROR: Symbol exists. Use /" + ident + "! to override");
+                }
+                return;
+            }
+            if (ts.matchStr("?")) {
 
-	private void processColonCommand(TokenStream ts) throws Exception {
-		ObjGlobal objGlobal = currScript.getObjGlobal();
-		ScriptCode codeHistory = objGlobal.getCodeHistory();
+                String ident = ts.matchIdentifier();
+                
+                if (ident != null) {
+                    boolean colon = ts.matchStr(":");
+                    if (colon) {
+                        // colon means ident is a script name
+                        ScriptState sstate=null;
+                        try {
+                            // try the "switch" functionality first
+                            sstate = getScriptState(ident, false);
+                        } catch (Exception ex) {
+                            sstate=null;
+                        }
+                        
+                        if (sstate==null) try {
+                            // use "load"
+                            sstate = getScriptState(ident, true);
+                        } catch (Exception ex) {
+                            sstate=null;
+                        }
+                        if (sstate==null) {
+                            throw new Exception("No such script: " + ident);
+                        }
+                        
+                        ScriptCode hist = sstate.getObjGlobal().getCodeHistory();
 
-		if (ts.matchStr("quit")) {
-			terminationFlag = true;
-			return;
-		}
+                        // script: may in turn be followed by another identifier for partial or
+                        // complete match, as before
+                        String ident2=ts.matchIdentifier();
+                        if (ident2 != null) {
+                            hist.report(stdio, ident2, false);
+                        } else {
+                            hist.reportAll(stdio, true);
+                        }
+                    } else {
+                        // no colon
+                        currScriptCode.report(stdio, ident, false);
+                    }
+                } else {
+                    currScriptCode.reportAll(stdio,false);
+                }
+                String scriptName = objGlobal.getScriptName();
+                if (scriptName != null) {
+                    stdio.println("Current script name: " + scriptName);
+                }
+                return; // abort further processing
+            }
+            if (ts.matchStr(":")) {
+                processColonCommand(ts);
+                return;
+            }
 
-		final int screenWidth = objTerm.getScreenWidth();
+            // actually execute code line
+            if (line.trim().length() > 0) {
+                // program line
+                currScriptCode.setCurrLine(line);
+                Value result = objGlobal.getRuntime().processCodeLines(stdio, new CodeLines(line, loc), null);
 
-		if (ts.matchStr("save")) {
-			String ident = ts.matchIdentifier(); // may be null
-			if (ident == null) {
-				ident = currScript.getScriptName();
-			}
-			if (ident == null) {
-				throw new SourceException(ts.getSourceLocation(), "No save name");
-			}
-			
-			currScript.getObjGlobal().saveCode(ident);
+                postProcessResult(result);
+                showSystemLog();
+            }
 
-			String currName = currScript.getScriptName();
-			if (!currName.equals(ident)) {
-				// saving current script with new name
-				scriptStates.remove(currName);
-					// remove currScript reference for old name 
-				currScript.updateName(ident);
-				scriptStates.put(ident, currScript);
-			}
-			return;
-		} else if (ts.matchStr("load")) {
-			String ident = ts.matchIdentifier(); // may be null
-			currScript = getScriptState(ident, true);
-			return;
-		} else if (ts.matchStr("sw")) {
-			String ident=null;
-			if (ts.peekType(Token.TOK_IDENTIFIER)) {
-				ident=ts.matchIdentifier("internal error");
-			}
-		
-			Iterator<String> keys = scriptStates.keySet().iterator();
-			boolean foundAny=false;
+        } catch (Throwable t) {
+            try {
+                showSystemLog(); 
+            } catch (Exception ex) {
+                // ignore
+            }
+            stdio.println("ERROR: " + t.getMessage());
+            if (debugMode) {
+                if (t instanceof SourceException) {
+                    SourceException se=(SourceException) t;
+                    if (se.getOriginalException() != null) {
+                        // show original exception stack trace!
+                        t=se.getOriginalException();
+                    }
+                }
+                t.printStackTrace();
+//              try {
+//                  objGlobal.outln("INPUT: " + ts.showNextTokens(10));
+//              } catch (Exception ex) {
+//                  // ignore
+//              }
+            }
+        }
+    }
 
-			String partialMatch=null;
-			
-			while (keys.hasNext()) {
-				String scriptName=keys.next();
-				if (scriptName.trim().length()==0) {
-					// the empty script
-					continue;
-				}
-				if (ident != null) {
-					if (scriptName.equals(ident)) {
-						// got an exact match, switching to it
-						currScript=getScriptState(scriptName, false);
-						return;
-					} else if (scriptName.contains(ident)) {
-						// got a match, switch to it
-						partialMatch=scriptName;
-					}
-				} else {
-					stdio.println("- " + scriptName);
-					foundAny=true;
-				}
-			}
-			if (partialMatch != null) {
-				currScript=getScriptState(partialMatch, false);
-				return;
+    private void postProcessResult(Value result) throws Exception {
+        if (result == null) {
+            result = new ValueNull();
+        }
+        ObjGlobal objGlobal = currScript.getObjGlobal();
 
-			}
-			if (!foundAny) {
-				stdio.println("(no scripts loaded)");
-			}
-			return;
+        // update lastResult
+        lastResult = result;
 
-		} else if (ts.matchStr("delete")) {
-			for (;;) {
-				String ident = ts.matchIdentifier("expected identifier to be cleared");
-				codeHistory.clear(ident);
+        // present result
+        Report report = new Report();
+        List<String> lines = report.displayValueLines(result);
+        int width = objTerm.getScreenWidth();
 
-				if (!ts.matchStr(",")) {
-					break;
-				}
-			}
-			return;
-		} else if (ts.matchStr("new")) {
-			createNewScript();
-			return;
-		} else if (ts.matchStr("copy")) {
-			String ident1 = ts.matchIdentifier("expected name of codeline to be copied");
-			String ident2 = ts.matchIdentifier("expected target name");
-			codeHistory.copy(ident1, ident2);
-			return;
-		} else if (ts.matchStr("debug")) {
-			debugMode = !debugMode;
-			if (debugMode) {
-				stdio.println("DEBUG MODE ON. Repeat :debug command to turn off again.");
-			} else {
-				stdio.println("DEBUG MODE OFF");
-			}
-			return;
-		} else if (ts.matchStr("wrap")) {
-			boolean wrap = objTerm.changeWrap();
-			if (wrap) {
-				stdio.println("WRAP MODE ON. Repeat :wrap command to turn off again.");
-			} else {
-				stdio.println("WRAP MODE OFF (default)");
-			}
-			return;
-		} else if (ts.matchStr("syn")) {
-			if (lastResult == null) {
-				stdio.println("No current value, can not synthesize");
-				return;
-			}
-			String s = lastResult.synthesize();
-			codeHistory.setCurrLine(s);
-			stdio.println("synthesize ok");
-			stdio.println("+-----------------------------------------------------");
-			String line = "| .  : " + s;
-			if (line.length() > screenWidth) {
-				line = line.substring(0, screenWidth - 1) + "+";
-			}
-			stdio.println(line);
-			stdio.println("+-----------------------------------------------------");
-			stdio.println("Assign to name by /xxx as usual");
-			return; // do not modify codeHistory
-		} else if (ts.peekType(Token.TOK_INT)) {
-			int pos = Integer.parseInt(ts.matchType(Token.TOK_INT).getStr());
-			if (lastResult == null) {
-				stdio.println("No current value");
-				return;
-			}
-			if (!(lastResult instanceof ValueList)) {
-				stdio.println("Current value not a list");
-				return;
-			}
+        Stdio stdio = objGlobal.getStdio();
 
-			List<Value> values = ((ValueList) lastResult).getVal();
+        // Display lines cut off at screenWidth, for readability
+        for (String s : lines) {
+            if (s.length() > width - 1) {
+                s = s.substring(0, width - 2) + "+";
+            }
+            stdio.println(s);
+        }
 
-			if (pos < 0 || pos >= values.size()) {
-				stdio.println("Invalid index: " + pos);
-				return;
-			}
+    }
 
-			String s = values.get(pos).synthesize();
-			codeHistory.setCurrLine(s);
-			stdio.println("synthesize ok");
-			stdio.println("+-----------------------------------------------------");
-			String line = "| .  : " + s;
-			if (line.length() > screenWidth) {
-				line = line.substring(0, screenWidth - 1) + "+";
-			}
-			stdio.println(line);
-			stdio.println("+-----------------------------------------------------");
-			stdio.println("Assign to name by /xxx as usual");
-			return;
-		} else {
-			stdio.println();
-			stdio.println("Colon commands");
-			stdio.println("--------------");
-			stdio.println(":save [ident]?           - save script");
-			stdio.println(":load [ident]?           - load script");
-			stdio.println(":new                     - create new empty script");
-			stdio.println(":sw [ident]?             - switch between loaded scripts");
-			stdio.println(":delete ident [, ident]* - delete function(s)");
-			stdio.println(":copy ident ident        - copy function");
-			stdio.println(":wrap                    - line wrap on/off");
-			stdio.println(":debug                   - enter or leave debug mode");
-			stdio.println(":syn                     - synthesize last result");
-			stdio.println(":<int>                   - synthesize a row from last result (must be list)");
-			stdio.println(":quit                    - terminate CFT");
-			stdio.println();
-			return;
-		}
-	}
+    public void showSystemLog() {
+        ObjGlobal objGlobal = currScript.getObjGlobal();
+        // System messages are written to screen - this applies to help texts etc
+        List<String> messages = objGlobal.getSystemMessages();
+        int limit = objTerm.getScreenWidth()-1;
+        for (String s : messages) {
+            String x="  # " + s;
+            if (x.length() > limit) {
+                x=x.substring(0,limit-1) + "+";
+            }
+            stdio.println(x);
+        }
 
-	private void copyrightNotice() {
-		stdio.println("");
-		stdio.println("CFT (\"ConfigTool\") Copyright (c) 2020 Roar Foshaug");
-		stdio.println("This program comes with ABSOLUTELY NO WARRANTY. See GNU GPL3.");
-		stdio.println("This is free software, and you are welcome to redistribute it");
-		stdio.println("under certain conditions. See GNU GPL3.");
-		stdio.println("");
-		stdio.println("You should have received a copy of the GNU General Public License");
-		stdio.println("along with this program.  If not, see <https://www.gnu.org/licenses/>");
-		stdio.println("");
-		stdio.println("https://github.com/rfo909/CFT.git");
-		stdio.println("");
-	}
+        objGlobal.clearSystemMessages();
+    }
+
+    private void processColonCommand(TokenStream ts) throws Exception {
+        ObjGlobal objGlobal = currScript.getObjGlobal();
+        ScriptCode codeHistory = objGlobal.getCodeHistory();
+
+        if (ts.matchStr("quit")) {
+            terminationFlag = true;
+            return;
+        }
+
+        final int screenWidth = objTerm.getScreenWidth();
+
+        if (ts.matchStr("save")) {
+            String ident = ts.matchIdentifier(); // may be null
+            if (ident == null) {
+                ident = currScript.getScriptName();
+            }
+            if (ident == null) {
+                throw new SourceException(ts.getSourceLocation(), "No save name");
+            }
+            
+            currScript.getObjGlobal().saveCode(ident);
+
+            String currName = currScript.getScriptName();
+            if (!currName.equals(ident)) {
+                // saving current script with new name
+                scriptStates.remove(currName);
+                    // remove currScript reference for old name 
+                currScript.updateName(ident);
+                scriptStates.put(ident, currScript);
+            }
+            return;
+        } else if (ts.matchStr("load")) {
+            String ident = ts.matchIdentifier(); // may be null
+            currScript = getScriptState(ident, true);
+            return;
+        } else if (ts.matchStr("sw")) {
+            String ident=null;
+            if (ts.peekType(Token.TOK_IDENTIFIER)) {
+                ident=ts.matchIdentifier("internal error");
+            }
+        
+            Iterator<String> keys = scriptStates.keySet().iterator();
+            boolean foundAny=false;
+
+            String partialMatch=null;
+            
+            while (keys.hasNext()) {
+                String scriptName=keys.next();
+                if (scriptName.trim().length()==0) {
+                    // the empty script
+                    continue;
+                }
+                if (ident != null) {
+                    if (scriptName.equals(ident)) {
+                        // got an exact match, switching to it
+                        currScript=getScriptState(scriptName, false);
+                        return;
+                    } else if (scriptName.contains(ident)) {
+                        // got a match, switch to it
+                        partialMatch=scriptName;
+                    }
+                } else {
+                    stdio.println("- " + scriptName);
+                    foundAny=true;
+                }
+            }
+            if (partialMatch != null) {
+                currScript=getScriptState(partialMatch, false);
+                return;
+
+            }
+            if (!foundAny) {
+                stdio.println("(no scripts loaded)");
+            }
+            return;
+
+        } else if (ts.matchStr("delete")) {
+            for (;;) {
+                String ident = ts.matchIdentifier("expected identifier to be cleared");
+                codeHistory.clear(ident);
+
+                if (!ts.matchStr(",")) {
+                    break;
+                }
+            }
+            return;
+        } else if (ts.matchStr("new")) {
+            createNewScript();
+            return;
+        } else if (ts.matchStr("copy")) {
+            String ident1 = ts.matchIdentifier("expected name of codeline to be copied");
+            String ident2 = ts.matchIdentifier("expected target name");
+            codeHistory.copy(ident1, ident2);
+            return;
+        } else if (ts.matchStr("debug")) {
+            debugMode = !debugMode;
+            if (debugMode) {
+                stdio.println("DEBUG MODE ON. Repeat :debug command to turn off again.");
+            } else {
+                stdio.println("DEBUG MODE OFF");
+            }
+            return;
+        } else if (ts.matchStr("wrap")) {
+            boolean wrap = objTerm.changeWrap();
+            if (wrap) {
+                stdio.println("WRAP MODE ON. Repeat :wrap command to turn off again.");
+            } else {
+                stdio.println("WRAP MODE OFF (default)");
+            }
+            return;
+        } else if (ts.matchStr("syn")) {
+            if (lastResult == null) {
+                stdio.println("No current value, can not synthesize");
+                return;
+            }
+            String s = lastResult.synthesize();
+            codeHistory.setCurrLine(s);
+            stdio.println("synthesize ok");
+            stdio.println("+-----------------------------------------------------");
+            String line = "| .  : " + s;
+            if (line.length() > screenWidth) {
+                line = line.substring(0, screenWidth - 1) + "+";
+            }
+            stdio.println(line);
+            stdio.println("+-----------------------------------------------------");
+            stdio.println("Assign to name by /xxx as usual");
+            return; // do not modify codeHistory
+        } else if (ts.peekType(Token.TOK_INT)) {
+            int pos = Integer.parseInt(ts.matchType(Token.TOK_INT).getStr());
+            if (lastResult == null) {
+                stdio.println("No current value");
+                return;
+            }
+            if (!(lastResult instanceof ValueList)) {
+                stdio.println("Current value not a list");
+                return;
+            }
+
+            List<Value> values = ((ValueList) lastResult).getVal();
+
+            if (pos < 0 || pos >= values.size()) {
+                stdio.println("Invalid index: " + pos);
+                return;
+            }
+
+            String s = values.get(pos).synthesize();
+            codeHistory.setCurrLine(s);
+            stdio.println("synthesize ok");
+            stdio.println("+-----------------------------------------------------");
+            String line = "| .  : " + s;
+            if (line.length() > screenWidth) {
+                line = line.substring(0, screenWidth - 1) + "+";
+            }
+            stdio.println(line);
+            stdio.println("+-----------------------------------------------------");
+            stdio.println("Assign to name by /xxx as usual");
+            return;
+        } else {
+            stdio.println();
+            stdio.println("Colon commands");
+            stdio.println("--------------");
+            stdio.println(":save [ident]?           - save script");
+            stdio.println(":load [ident]?           - load script");
+            stdio.println(":new                     - create new empty script");
+            stdio.println(":sw [ident]?             - switch between loaded scripts");
+            stdio.println(":delete ident [, ident]* - delete function(s)");
+            stdio.println(":copy ident ident        - copy function");
+            stdio.println(":wrap                    - line wrap on/off");
+            stdio.println(":debug                   - enter or leave debug mode");
+            stdio.println(":syn                     - synthesize last result");
+            stdio.println(":<int>                   - synthesize a row from last result (must be list)");
+            stdio.println(":quit                    - terminate CFT");
+            stdio.println();
+            return;
+        }
+    }
+
+    private void copyrightNotice() {
+        stdio.println("");
+        stdio.println("CFT (\"ConfigTool\") Copyright (c) 2020 Roar Foshaug");
+        stdio.println("This program comes with ABSOLUTELY NO WARRANTY. See GNU GPL3.");
+        stdio.println("This is free software, and you are welcome to redistribute it");
+        stdio.println("under certain conditions. See GNU GPL3.");
+        stdio.println("");
+        stdio.println("You should have received a copy of the GNU General Public License");
+        stdio.println("along with this program.  If not, see <https://www.gnu.org/licenses/>");
+        stdio.println("");
+        stdio.println("https://github.com/rfo909/CFT.git");
+        stdio.println("");
+    }
 
 }

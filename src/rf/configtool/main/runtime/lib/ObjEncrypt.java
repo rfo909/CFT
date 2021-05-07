@@ -46,20 +46,20 @@ import rf.configtool.util.Encrypt;
 import rf.configtool.util.Hex;
 
 public class ObjEncrypt extends Obj {
-	
-	private Encrypt encrypt;
-	private boolean modeEncrypt;
+    
+    private Encrypt encrypt;
+    private boolean modeEncrypt;
 
     public ObjEncrypt (byte[] password, byte[] salt, boolean modeEncrypt) throws Exception {
-    	encrypt=new Encrypt(password, salt);
-    	this.modeEncrypt=modeEncrypt;
-    	
-    	this.add(new FunctionProcess());
-    	this.add(new FunctionProcessString());
+        encrypt=new Encrypt(password, salt);
+        this.modeEncrypt=modeEncrypt;
+        
+        this.add(new FunctionProcess());
+        this.add(new FunctionProcessString());
     }
     
     private ObjEncrypt self() {
-    	return this;
+        return this;
     }
     
     @Override
@@ -111,7 +111,7 @@ public class ObjEncrypt extends Obj {
             byte[] result=new byte[data.length];
             for (int i=0; i<data.length; i++) result[i]=encrypt.process(modeEncrypt, data[i]);
             return new ValueString(
-            		modeEncrypt ? Hex.toHex(result) : new String(result,"UTF-8")
+                    modeEncrypt ? Hex.toHex(result) : new String(result,"UTF-8")
             );
         }
     } 

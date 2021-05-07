@@ -39,11 +39,11 @@ import java.awt.Color;
  * Created when running external programs via Dir.runProcess
  */
 public class ObjExtProcess extends Obj {
-	
-	private Process process;
-	
+    
+    private Process process;
+    
     public ObjExtProcess(Process process) {
-    	this.process=process;
+        this.process=process;
         this.add(new FunctionIsAlive());
         this.add(new FunctionExitCode());
         this.add(new FunctionDestroy());
@@ -78,7 +78,7 @@ public class ObjExtProcess extends Obj {
             return "isAlive() - true if running";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	return new ValueBoolean(process.isAlive());
+            return new ValueBoolean(process.isAlive());
         }
     }
     
@@ -90,7 +90,7 @@ public class ObjExtProcess extends Obj {
             return "exitCode() - get exit code, unless running, which generates error";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	return new ValueInt(process.exitValue());
+            return new ValueInt(process.exitValue());
         }
     }
 
@@ -102,8 +102,8 @@ public class ObjExtProcess extends Obj {
             return "destroy() - terminate process";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	process.destroy();
-        	return new ValueBoolean(true);
+            process.destroy();
+            return new ValueBoolean(true);
         }
     }
 

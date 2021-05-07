@@ -12,12 +12,12 @@ public class TCPServer {
     private List<TCPServerConnection> connections=new ArrayList<TCPServerConnection>();
     
     public synchronized void addConnection (TCPServerConnection x) {
-    	connections.add(x);
+        connections.add(x);
     }
     
     public synchronized TCPServerConnection getConnection () {
-    	if (connections.isEmpty()) return null;
-    	return connections.remove(0);
+        if (connections.isEmpty()) return null;
+        return connections.remove(0);
     }
     
     public TCPServer (int port) throws Exception {

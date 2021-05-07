@@ -17,7 +17,7 @@ public class TCPServerConnection {
     }
     
     public IO getIO() {
-    	return io;
+        return io;
     }
   
 }

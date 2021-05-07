@@ -38,8 +38,8 @@ import rf.configtool.parser.TokenStream;
  * Try-catch for soft errors (created by error()) 
  */
 public class ExprTryCatchSoft extends ExprCommon {
-	
-	private Expr expr;
+    
+    private Expr expr;
 
     public ExprTryCatchSoft (TokenStream ts) throws Exception {
         super(ts);
@@ -50,32 +50,32 @@ public class ExprTryCatchSoft extends ExprCommon {
     }
     
     public Value resolve (Ctx ctx) throws Exception {
-    	SoftErrorException softEx=null;
-    	
-    	Value result=null;
+        SoftErrorException softEx=null;
+        
+        Value result=null;
 
-    	try {
-    		result = expr.resolve(ctx);
-    	} catch (Exception ex) {
-    		// examine if SoftException
-    		//
-    		if (ex instanceof SoftErrorException) {
-    			softEx=(SoftErrorException) ex;
-    		} else if (ex instanceof SourceException) {
-    			Exception inner=((SourceException) ex).getOriginalException();
-    			if (inner != null && (inner instanceof SoftErrorException)) {
-    				softEx=(SoftErrorException) inner;
-    			}
-    		}
-    		if (softEx==null) throw ex;  
-    	}
-    	
-    	ObjDict x=new ObjDict();
-    	x.set("ok", new ValueBoolean(result != null));
-    	if (result != null) x.set("result", result);
-    	if (softEx != null) x.set("msg", new ValueString(softEx.getMessage()));
+        try {
+            result = expr.resolve(ctx);
+        } catch (Exception ex) {
+            // examine if SoftException
+            //
+            if (ex instanceof SoftErrorException) {
+                softEx=(SoftErrorException) ex;
+            } else if (ex instanceof SourceException) {
+                Exception inner=((SourceException) ex).getOriginalException();
+                if (inner != null && (inner instanceof SoftErrorException)) {
+                    softEx=(SoftErrorException) inner;
+                }
+            }
+            if (softEx==null) throw ex;  
+        }
+        
+        ObjDict x=new ObjDict();
+        x.set("ok", new ValueBoolean(result != null));
+        if (result != null) x.set("result", result);
+        if (softEx != null) x.set("msg", new ValueString(softEx.getMessage()));
   
-    	return new ValueObj(x);
+        return new ValueObj(x);
     }
     
 }

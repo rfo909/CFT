@@ -63,7 +63,7 @@ public class TokenStream {
     }
 
     public Token getTokenAtPos (int pos) {
-    	return tokens.get(pos);
+        return tokens.get(pos);
     }
     /** 
      * peekStr checks the string representation of the following token, 

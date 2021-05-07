@@ -49,31 +49,31 @@ public class StmtCd extends StmtShellInteractive {
 
     @Override
     protected void processDefault(Ctx ctx) throws Exception {
-    	ctx.getObjGlobal().setCurrDir(null);
-    	ctx.getObjGlobal().addSystemMessage(ctx.getObjGlobal().getCurrDir());
-    	ctx.push(new ValueObj(new ObjDir(ctx.getObjGlobal().getCurrDir(), Protection.NoProtection)));
+        ctx.getObjGlobal().setCurrDir(null);
+        ctx.getObjGlobal().addSystemMessage(ctx.getObjGlobal().getCurrDir());
+        ctx.push(new ValueObj(new ObjDir(ctx.getObjGlobal().getCurrDir(), Protection.NoProtection)));
     }
     
     
     @Override
     protected void processOne (Ctx ctx, File file) throws Exception {
-    	if (file.exists() && file.isDirectory()) {
-    		ctx.getObjGlobal().setCurrDir(file.getCanonicalPath());
-        	ctx.getObjGlobal().addSystemMessage(ctx.getObjGlobal().getCurrDir());
-        	ctx.push(new ValueObj(new ObjDir(ctx.getObjGlobal().getCurrDir(), Protection.NoProtection)));
-    	} else {
-    		throw new Exception("cd: Invalid directory");
-    	}
-  	
+        if (file.exists() && file.isDirectory()) {
+            ctx.getObjGlobal().setCurrDir(file.getCanonicalPath());
+            ctx.getObjGlobal().addSystemMessage(ctx.getObjGlobal().getCurrDir());
+            ctx.push(new ValueObj(new ObjDir(ctx.getObjGlobal().getCurrDir(), Protection.NoProtection)));
+        } else {
+            throw new Exception("cd: Invalid directory");
+        }
+    
     }
     
     
     
     @Override
     protected void processSet (Ctx ctx, List<File> elements) throws Exception {
-    	if (elements.size() == 0) throw new Exception("cd: expected one directory");
-    	if (elements.size() != 1) throw new Exception("cd: can only process one directory");
-    	processOne(ctx, elements.get(0));
+        if (elements.size() == 0) throw new Exception("cd: expected one directory");
+        if (elements.size() != 1) throw new Exception("cd: can only process one directory");
+        processOne(ctx, elements.get(0));
    }
     
    

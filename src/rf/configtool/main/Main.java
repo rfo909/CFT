@@ -25,50 +25,50 @@ import rf.configtool.root.Root;
 import rf.configtool.main.Version;
 
 public class Main {
-	
-	static class Args {
-		private String[] args;
-		private int pos;
-		
-		public Args (String[] args) { this.args=args; }
-		
-		public boolean hasNext() {
-			return args.length > pos;
-		}
-		public String peek() {
-			return args[pos];
-		}
-		public String get(String msg) throws Exception {
-			if (!hasNext()) throw new Exception(msg);
-			return args[pos++];
-		}
-	}
+    
+    static class Args {
+        private String[] args;
+        private int pos;
+        
+        public Args (String[] args) { this.args=args; }
+        
+        public boolean hasNext() {
+            return args.length > pos;
+        }
+        public String peek() {
+            return args[pos];
+        }
+        public String get(String msg) throws Exception {
+            if (!hasNext()) throw new Exception(msg);
+            return args[pos++];
+        }
+    }
     
     public static void main (String[] argsArray) throws Exception {
-    	Args args=new Args(argsArray);
-    	String scriptDir=null;
-    	
-    	if (args.hasNext()) {
-    		if (args.peek().startsWith("-")) {
-    			if (args.peek().equals("-version")) {
-    	    		System.out.println(Version.getVersion());
-    	    		System.exit(0);
-    			} else if (args.peek().equals("-d")) {
-    				args.get("advance past known -d");
-    				scriptDir=args.get("scriptDir following -d");
-    			} else if (args.peek().equals("-help")) {
-    				System.out.println("Valid options:");
-    				System.out.println("  -version");
-    				System.out.println("  -help");
-    				System.out.println("  -d scriptDir [scriptName [command-lines]]");
-    				System.out.println("or just");
-    				System.out.println("  [scriptName [command-lines]]");
-    				System.exit(0);
-    			}
-    		}
-    	
-    	}
-	    	
+        Args args=new Args(argsArray);
+        String scriptDir=null;
+        
+        if (args.hasNext()) {
+            if (args.peek().startsWith("-")) {
+                if (args.peek().equals("-version")) {
+                    System.out.println(Version.getVersion());
+                    System.exit(0);
+                } else if (args.peek().equals("-d")) {
+                    args.get("advance past known -d");
+                    scriptDir=args.get("scriptDir following -d");
+                } else if (args.peek().equals("-help")) {
+                    System.out.println("Valid options:");
+                    System.out.println("  -version");
+                    System.out.println("  -help");
+                    System.out.println("  -d scriptDir [scriptName [command-lines]]");
+                    System.out.println("or just");
+                    System.out.println("  [scriptName [command-lines]]");
+                    System.exit(0);
+                }
+            }
+        
+        }
+            
         BufferedReader stdin=new BufferedReader(new InputStreamReader(System.in));
         PrintStream stdout=System.out;
         
@@ -82,7 +82,7 @@ public class Main {
         
         List<String> commands=new ArrayList<String>();
         while (args.hasNext()) {
-        	commands.add(args.get("command-string"));
+            commands.add(args.get("command-string"));
         }
         for (String line:commands) root.addInitialCommand(line);
         

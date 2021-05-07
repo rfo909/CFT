@@ -188,8 +188,8 @@ public class ObjGrep extends Obj {
             
             List<Value> result=new ArrayList<Value>();
             BufferedReader br = new BufferedReader(
-      			   new InputStreamReader(
-      	                      new FileInputStream(f.getPath()), f.getEncoding()));
+                   new InputStreamReader(
+                              new FileInputStream(f.getPath()), f.getEncoding()));
 
             boolean reachedLimit = false;
             final String limitType=(limitKeepFirst ? "first" : "last");
@@ -208,18 +208,18 @@ public class ObjGrep extends Obj {
                         result.add(new ValueObjFileLine(deTabbed, lineNo, f));
                         
                         if (limit > 0) {
-                        	if (limitKeepFirst) {
-                        		if (result.size()==limit) {
-                        			ctx.getObjGlobal().addSystemMessage("WARNING: grep limit " + limitType + " " + limit + " reached " + f.getPath());
-                        			return new ValueList(result);
-                        		}
-                        	} else {
-                        		// keep tail
-                        		if (result.size() > limit) {
-                        			reachedLimit=true;
-                        			result.remove(0);
-                        		}
-                        	}
+                            if (limitKeepFirst) {
+                                if (result.size()==limit) {
+                                    ctx.getObjGlobal().addSystemMessage("WARNING: grep limit " + limitType + " " + limit + " reached " + f.getPath());
+                                    return new ValueList(result);
+                                }
+                            } else {
+                                // keep tail
+                                if (result.size() > limit) {
+                                    reachedLimit=true;
+                                    result.remove(0);
+                                }
+                            }
                         }
                     }
                         
@@ -228,7 +228,7 @@ public class ObjGrep extends Obj {
                 br.close();
             }
             if (reachedLimit) {
-    			ctx.getObjGlobal().addSystemMessage("WARNING: grep limit " + limitType + " " + limit + " reached " + f.getPath());
+                ctx.getObjGlobal().addSystemMessage("WARNING: grep limit " + limitType + " " + limit + " reached " + f.getPath());
             }
             return new ValueList(result);
         }
@@ -253,8 +253,8 @@ public class ObjGrep extends Obj {
             
             List<Value> result=new ArrayList<Value>();
             BufferedReader br = new BufferedReader(
-      			   new InputStreamReader(
-      	                      new FileInputStream(f.getPath()), f.getEncoding()));
+                   new InputStreamReader(
+                              new FileInputStream(f.getPath()), f.getEncoding()));
 
             int count=0;
             
@@ -272,14 +272,14 @@ public class ObjGrep extends Obj {
                     }
                     
                     if (keep) {
-                    	count++;
+                        count++;
                     }
                         
                 }
             } finally {
                 br.close();
             }
-        	return new ValueInt(count);
+            return new ValueInt(count);
         }
     }
     

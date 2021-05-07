@@ -29,27 +29,27 @@ import rf.configtool.parser.TokenStream;
  * the result into a Dict object.
  */
 public class ExprSymDict extends ExprCommon {
-	
-	private List<String> identifiers = new ArrayList<String>();
-	
+    
+    private List<String> identifiers = new ArrayList<String>();
+    
     public ExprSymDict (TokenStream ts) throws Exception {
         super(ts);
         ts.matchStr("SymDict", "expected 'SymDict'");
         ts.matchStr("(", "expected '(' following 'SymDict'");
         boolean comma=false;
         while (!ts.matchStr(")")) {
-        	if (comma) ts.matchStr(",","expected comma or ')'");
-        	String ident=ts.matchIdentifier("expected identifier");
-        	identifiers.add(ident);
-        	comma=true;
+            if (comma) ts.matchStr(",","expected comma or ')'");
+            String ident=ts.matchIdentifier("expected identifier");
+            identifiers.add(ident);
+            comma=true;
         }
     }
     
     public Value resolve (Ctx ctx) throws Exception {
-    	ObjDict x=new ObjDict();
-    	for (String name:identifiers) {
-    		x.set(name,ctx.resolveExpr(name));
-    	}
-    	return new ValueObj(x);
+        ObjDict x=new ObjDict();
+        for (String name:identifiers) {
+            x.set(name,ctx.resolveExpr(name));
+        }
+        return new ValueObj(x);
     }
 }

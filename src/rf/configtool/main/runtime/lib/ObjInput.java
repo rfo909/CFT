@@ -53,7 +53,7 @@ public class ObjInput extends ObjPersistent {
     }
     
     public ObjInput self() {
-    	return this;
+        return this;
     }
     
 
@@ -80,15 +80,15 @@ public class ObjInput extends ObjPersistent {
     }
         
     private synchronized void showOptions(Ctx ctx) {
-    	Stdio stdio=ctx.getStdio();
-    	
+        Stdio stdio=ctx.getStdio();
+        
         for (int i=0; i<uniqueValues.size(); i++) {
-        	stdio.println("  :" + i + (i<10?" ":"") + "  ---> " + uniqueValues.get(i));
+            stdio.println("  :" + i + (i<10?" ":"") + "  ---> " + uniqueValues.get(i));
         }
     }
     
     private synchronized void addUnique (String s) {
-    	if (s=="") return; // ignore empty string, as this is handled via :E
+        if (s=="") return; // ignore empty string, as this is handled via :E
         // add last used value to end of list
         uniqueValues.remove(s);
         uniqueValues.add(s);
@@ -114,8 +114,8 @@ public class ObjInput extends ObjPersistent {
             return "get() - get value for question as given when creating Input object";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	Stdio stdio=ctx.getStdio();
-        	
+            Stdio stdio=ctx.getStdio();
+            
             if (params.size()!=0) throw new Exception("Expected no parameters");
 
             boolean silent=ctx.getStdio().hasBufferedInputLines();
@@ -132,7 +132,7 @@ public class ObjInput extends ObjPersistent {
             // '::sdfsdf' - match text that starts with colon
             // ':xxx' - identify option
             LOOP: for(;;) {
-            	stdio.println("(?) " + label);
+                stdio.println("(?) " + label);
                 if (currValue.trim().length()>0) stdio.println("    Enter for '" + currValue + "'");
                 if (uniqueValues.size() > 0) stdio.println("    ':' for options");
                 String line=ctx.getStdio().getInputLine();
@@ -145,21 +145,21 @@ public class ObjInput extends ObjPersistent {
                     currValue=line.substring(1); 
                     break;
                 } else if (line.trim().equals(":")) {
-                	stdio.println("--------------------------------------------------------------");
+                    stdio.println("--------------------------------------------------------------");
                     stdio.println("Enter ':N' for numbered value, :E for empty string,");
                     stdio.println("or enter text, using '::' for input text starting with colon.");
                     stdio.println();
                     showOptions(ctx);
-                	stdio.println("--------------------------------------------------------------");
+                    stdio.println("--------------------------------------------------------------");
                 } else if (line.startsWith(":")) {
-                	if (line.equals(":e") || line.equals(":E")) {
-                		currValue="";
-                		break LOOP;
-                	}
+                    if (line.equals(":e") || line.equals(":E")) {
+                        currValue="";
+                        break LOOP;
+                    }
                     String pos=line.substring(1);
                     String x=getOption(pos);
                     if (x==null) {
-                    	stdio.println("** Invalid reference");
+                        stdio.println("** Invalid reference");
                         continue;
                     }
                     stdio.println(x);  // show selected value
@@ -218,7 +218,7 @@ public class ObjInput extends ObjPersistent {
             if (params.size()!=0) throw new Exception("Expected no params");
             List<Value> list=new ArrayList<Value>();
             for (String s:uniqueValues) {
-            	list.add(new ValueString(s));
+                list.add(new ValueString(s));
             }
             return new ValueList(list);
         }
@@ -236,7 +236,7 @@ public class ObjInput extends ObjPersistent {
             List<Value> list=getList("list", params, 0);
             uniqueValues.clear();
             for (Value v:list) {
-            	uniqueValues.add(v.getValAsString());
+                uniqueValues.add(v.getValAsString());
             }
             return new ValueObj(self());
         }
@@ -251,8 +251,8 @@ public class ObjInput extends ObjPersistent {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
-        	if (currValue.equals("")) return new ValueNull();
-        	return new ValueString(currValue);
+            if (currValue.equals("")) return new ValueNull();
+            return new ValueString(currValue);
         }
     }
     
@@ -266,7 +266,7 @@ public class ObjInput extends ObjPersistent {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size()!=1) throw new Exception("Expected String value");
             if (currValue.equals("")) {
-            	currValue=getString("str", params, 0);
+                currValue=getString("str", params, 0);
             }
             return new ValueObj(self());
         }

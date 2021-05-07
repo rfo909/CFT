@@ -81,15 +81,15 @@ public class ExprLookupOrCall extends ExprCommon {
     }
     
     private Value callFunction(Function f, Ctx ctx, List<Value> values) throws Exception {
-    	try {
-    		return f.callFunction(ctx, values);
-    	} catch (Exception ex) {
-        	if (!(ex instanceof SourceException)) {
-        		throw new SourceException(getSourceLocation(), ex);
-        	} else {
-        		throw ex;
-        	}
+        try {
+            return f.callFunction(ctx, values);
+        } catch (Exception ex) {
+            if (!(ex instanceof SourceException)) {
+                throw new SourceException(getSourceLocation(), ex);
+            } else {
+                throw ex;
+            }
 
-    	}
+        }
     }
 }

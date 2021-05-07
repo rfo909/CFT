@@ -25,11 +25,11 @@ import rf.configtool.main.SourceException;
 
 public class Parser {
 
-	private static CharTable cachedRoot;
-	private static synchronized CharTable getCachedRoot() {
-		if (cachedRoot==null) cachedRoot=createGraph();
-		return cachedRoot;
-	}
+    private static CharTable cachedRoot;
+    private static synchronized CharTable getCachedRoot() {
+        if (cachedRoot==null) cachedRoot=createGraph();
+        return cachedRoot;
+    }
     
     private CharTable root;
     private ArrayList<Token> tokens=new ArrayList<Token>();
@@ -66,7 +66,7 @@ public class Parser {
         source.addLine(line, loc);
         
         while (!source.eof()) {
-        	CharSourcePos startPos=source.getPos();
+            CharSourcePos startPos=source.getPos();
             Integer tokenType=root.parse(source);
             if (tokenType==null) {
                 throw new SourceException(cl.getLoc(), "Parse failed at position " + startPos);

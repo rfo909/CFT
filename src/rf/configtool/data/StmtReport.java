@@ -46,7 +46,7 @@ public class StmtReport extends Stmt {
             result.add(expr.resolve(ctx));
         }
         if (result.size()==1 && (result.get(0) instanceof ValueList)) {
-        	result=((ValueList) result.get(0)).getVal();
+            result=((ValueList) result.get(0)).getVal();
         }
 
         ctx.getOutText().addReportData(result);

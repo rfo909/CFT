@@ -47,11 +47,11 @@ public class ValueObjFileLine extends ValueString {
     }
 
     public ObjFile getFile() {
-    	return file;
+        return file;
     }
     
     public Long getLineNo() {
-    	return lineNo;
+        return lineNo;
     }
     
 

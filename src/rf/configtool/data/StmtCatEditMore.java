@@ -53,8 +53,8 @@ import java.util.*;
  */
 public class StmtCatEditMore extends StmtShellInteractive {
 
-	private String name;
-	
+    private String name;
+    
     public StmtCatEditMore (TokenStream ts) throws Exception {
         super(ts);
         this.name = getName();
@@ -63,70 +63,70 @@ public class StmtCatEditMore extends StmtShellInteractive {
 
     @Override
     protected void processDefault(Ctx ctx) throws Exception {
-    	// Run edit macro without args
-    	callMacro(ctx, null);
+        // Run edit macro without args
+        callMacro(ctx, null);
     }
     
     
     @Override
     protected void processOne (Ctx ctx, File file) throws Exception {
-    	if (file.exists() && file.isFile()) {
-    		ObjFile objFile = new ObjFile(file.getCanonicalPath(), Protection.NoProtection);
-    		// Call the macro corresponding to the name 
-    		callMacro(ctx,objFile);
-     	} else {
-    		throw new Exception("Invalid file");
-    	}
-  	
+        if (file.exists() && file.isFile()) {
+            ObjFile objFile = new ObjFile(file.getCanonicalPath(), Protection.NoProtection);
+            // Call the macro corresponding to the name 
+            callMacro(ctx,objFile);
+      } else {
+            throw new Exception("Invalid file");
+        }
+    
     }
     
     
     
     @Override
     protected void processSet (Ctx ctx, List<File> elements) throws Exception {
-    	if (elements.size() == 0) throw new Exception("Expected one file");
-    	if (elements.size() != 1) throw new Exception("Can only process one file");
-    	processOne(ctx, elements.get(0));
+        if (elements.size() == 0) throw new Exception("Expected one file");
+        if (elements.size() != 1) throw new Exception("Can only process one file");
+        processOne(ctx, elements.get(0));
    }
     
  
     
     private void callMacro (Ctx ctx, ObjFile file) throws Exception {
-    	PropsFile propsFile=ctx.getObjGlobal().getRoot().getPropsFile();
-    	SourceLocation loc=propsFile.getSourceLocation(name);
-    	
-    	String macro;
-    	String fieldName;
+        PropsFile propsFile=ctx.getObjGlobal().getRoot().getPropsFile();
+        SourceLocation loc=propsFile.getSourceLocation(name);
+        
+        String macro;
+        String fieldName;
 
-    	if (name.equals("cat")) {
-    		macro=propsFile.getMCat();
-    		fieldName="mCat";
-    	} else if (name.equals("edit")) {
-    		macro=propsFile.getMEdit(); 
-    		fieldName="mEdit";
-    	} else if (name.equals("more")) {
-    		macro=propsFile.getMMore();
-    		fieldName="mMore";
-    	} else {
-    		throw new Exception("Invalid statement name, expected edit or more: " + name);
-    	}
+        if (name.equals("cat")) {
+            macro=propsFile.getMCat();
+            fieldName="mCat";
+        } else if (name.equals("edit")) {
+            macro=propsFile.getMEdit(); 
+            fieldName="mEdit";
+        } else if (name.equals("more")) {
+            macro=propsFile.getMMore();
+            fieldName="mMore";
+        } else {
+            throw new Exception("Invalid statement name, expected edit or more: " + name);
+        }
 
-    	//OutText out = ctx.getOutText();
-    	//out.addSystemMessage("Running " + PropsFile.PROPS_FILE + "." + fieldName + " macro: " + macro);
-    	
-    	CodeLines codeLines=new CodeLines(macro, loc);
-    	
-    	Value ret = ctx.getObjGlobal().getRuntime().processCodeLines(ctx.getStdio(), codeLines, new FunctionState());
-    	if (!(ret instanceof ValueBlock)) throw new Exception("Not a macro: " + macro + " ---> " + ret.synthesize());
-    	
-    	ValueBlock macroObj=(ValueBlock) ret;
-    	
-    	List<Value> params=new ArrayList<Value>();
-    	if (file != null) {
-    		params.add(new ValueObj(file));
-    	}
-    	
-    	Value result = macroObj.callLambda(ctx.sub(), params);
-    	ctx.push(result);
+        //OutText out = ctx.getOutText();
+        //out.addSystemMessage("Running " + PropsFile.PROPS_FILE + "." + fieldName + " macro: " + macro);
+        
+        CodeLines codeLines=new CodeLines(macro, loc);
+        
+        Value ret = ctx.getObjGlobal().getRuntime().processCodeLines(ctx.getStdio(), codeLines, new FunctionState());
+        if (!(ret instanceof ValueBlock)) throw new Exception("Not a macro: " + macro + " ---> " + ret.synthesize());
+        
+        ValueBlock macroObj=(ValueBlock) ret;
+        
+        List<Value> params=new ArrayList<Value>();
+        if (file != null) {
+            params.add(new ValueObj(file));
+        }
+        
+        Value result = macroObj.callLambda(ctx.sub(), params);
+        ctx.push(result);
     }
 }

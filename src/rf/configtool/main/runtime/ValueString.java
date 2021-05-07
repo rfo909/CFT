@@ -85,20 +85,20 @@ public class ValueString extends Value {
     
     @Override
     public String synthesize() throws Exception {
-    	
+        
         if (val==null) return "''";
         
         // if string contains non-printable characters, use hex encoding
         boolean useHex=false;
         for (int i=0; i<val.length(); i++) {
-        	char ch=val.charAt(i);
-        	if (ch < 32 || ch >= 127) {
-        		useHex=true;
-        		break;
-        	}
+            char ch=val.charAt(i);
+            if (ch < 32 || ch >= 127) {
+                useHex=true;
+                break;
+            }
         }
         if (useHex) {
-        	return '"' + toHexString(val) + '"' + ".fromHexString";
+            return '"' + toHexString(val) + '"' + ".fromHexString";
         }
         
         // decide if using .esc / .unEsc
@@ -588,13 +588,13 @@ public class ValueString extends Value {
     }
 
     public static String toHexString (String s) throws Exception {
-    	byte[] bytes=s.getBytes("UTF-8");
-    	return Hex.toHex(bytes);
+        byte[] bytes=s.getBytes("UTF-8");
+        return Hex.toHex(bytes);
     }
     
     public static String fromHexString (String s) throws Exception {
-    	byte[] bytes=Hex.fromHex(s);
-    	return new String(bytes,"UTF-8");
+        byte[] bytes=Hex.fromHex(s);
+        return new String(bytes,"UTF-8");
     }
     
 
@@ -706,7 +706,7 @@ public class ValueString extends Value {
             if (params.size()!=0) throw new Exception("Expected no parameters");
             List<Value> parts=new ArrayList<Value>();
             for (int i=0; i<val.length(); i++) {
-            	parts.add(new ValueString(""+val.charAt(i)));
+                parts.add(new ValueString(""+val.charAt(i)));
             }
             return new ValueList(parts);
         }
@@ -722,10 +722,10 @@ public class ValueString extends Value {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size()!=1) throw new Exception("Expected parameter charset");
-        	String charSet=getString("charset",params,0);
-        	
-        	byte[] bytes = val.getBytes(charSet);
-        	return new ValueBinary(bytes);
+            String charSet=getString("charset",params,0);
+            
+            byte[] bytes = val.getBytes(charSet);
+            return new ValueBinary(bytes);
         }
 
     }
@@ -739,11 +739,11 @@ public class ValueString extends Value {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size()!=1) throw new Exception("Expected parameter count");
-        	int count=(int) getInt("count",params,0);
-        	if (count >= val.length()) {
-        		return new ValueString(val);
-        	} 
-        	return new ValueString(val.substring(val.length()-count));
+            int count=(int) getInt("count",params,0);
+            if (count >= val.length()) {
+                return new ValueString(val);
+            } 
+            return new ValueString(val.substring(val.length()-count));
         }
     }
 
@@ -756,11 +756,11 @@ public class ValueString extends Value {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size()!=1) throw new Exception("Expected parameter count");
-        	int count=(int) getInt("count",params,0);
-        	if (count >= val.length()) {
-        		return new ValueString(val);
-        	} 
-        	return new ValueString(val.substring(0,count));
+            int count=(int) getInt("count",params,0);
+            if (count >= val.length()) {
+                return new ValueString(val);
+            } 
+            return new ValueString(val.substring(0,count));
         }
     }
 
@@ -773,24 +773,24 @@ public class ValueString extends Value {
             return "printable() - returns string with printable characters";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-			StringBuffer sb=new StringBuffer();
-			for (int i=0; i<val.length(); i++) {
-				char c=val.charAt(i);
-				int x=(int) c;
-				boolean keep=
-						// TAB=9, CR=13, LF=10
-						(x>31 || x==9 || x==13 || x==10)
-						&&
-						(x != 127)
-						&&
-						(x<128 || x>159)
-						;
+            StringBuffer sb=new StringBuffer();
+            for (int i=0; i<val.length(); i++) {
+                char c=val.charAt(i);
+                int x=(int) c;
+                boolean keep=
+                        // TAB=9, CR=13, LF=10
+                        (x>31 || x==9 || x==13 || x==10)
+                        &&
+                        (x != 127)
+                        &&
+                        (x<128 || x>159)
+                        ;
 
-				if (keep) {
-					sb.append(c);
-				}
-			}
-        	return new ValueString(sb.toString());
+                if (keep) {
+                    sb.append(c);
+                }
+            }
+            return new ValueString(sb.toString());
         }
     }
 

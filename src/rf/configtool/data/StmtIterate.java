@@ -54,7 +54,7 @@ public class StmtIterate extends Stmt {
             // iterate over all values in list
             data=((ValueList) v).getVal();
         } else {
-        	if (!v.getValAsBoolean()) {
+            if (!v.getValAsBoolean()) {
                 // no iteration 
                 return;
             }
@@ -68,8 +68,8 @@ public class StmtIterate extends Stmt {
             Ctx sub=ctx.sub();
             sub.setLoopVariable(loopVariable, currVal);
             for (Stmt stmt:body) {
-            	ctx.debug(stmt);
-            	
+                ctx.debug(stmt);
+                
                 stmt.execute(sub);
                 if (sub.hasBreakLoopFlag()) {
                     break OUTER;

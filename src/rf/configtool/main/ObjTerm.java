@@ -88,7 +88,7 @@ public class ObjTerm extends Obj {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() == 0) {
-            	// do nothing
+                // do nothing
             } else if (params.size()==1) {
                 w=(int) getInt("val",params,0);
             } else {
@@ -107,7 +107,7 @@ public class ObjTerm extends Obj {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size()==0) {
-            	// do nothing
+                // do nothing
             } else if (params.size()==1) {
                 h=(int) getInt("val",params,0);
             } else {

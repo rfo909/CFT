@@ -27,33 +27,33 @@ import rf.configtool.parser.TokenStream;
 
 public class ExprSpawnProcess extends ExprCommon {
 
-	private Expr expr;
-	private Expr exprDict;
+    private Expr expr;
+    private Expr exprDict;
 
-	public ExprSpawnProcess(TokenStream ts) throws Exception {
-		super(ts);
+    public ExprSpawnProcess(TokenStream ts) throws Exception {
+        super(ts);
 
-		ts.matchStr("SpawnProcess", "expected 'spawn'");
-		
-		ts.matchStr("(", "expected '('");
-		exprDict = new Expr(ts);
-		ts.matchStr(",","Expected ','");
-		expr = new Expr(ts);
-		ts.matchStr(")", "expected ')' closing spawn statement");
-	}
+        ts.matchStr("SpawnProcess", "expected 'spawn'");
+        
+        ts.matchStr("(", "expected '('");
+        exprDict = new Expr(ts);
+        ts.matchStr(",","Expected ','");
+        expr = new Expr(ts);
+        ts.matchStr(")", "expected ')' closing spawn statement");
+    }
 
     public Value resolve (Ctx ctx) throws Exception {
-		Value d = exprDict.resolve(ctx);
-		if (d instanceof ValueObj) {
-			Obj obj=((ValueObj) d).getVal();
-			if (obj instanceof ObjDict) {
-				ObjDict dict=(ObjDict) obj;
-				
-				ObjProcess process = new ObjProcess(dict, expr);
-				process.start(ctx);
-				return (new ValueObj(process));
-			}
-		}
-		throw new Exception("Expected parameters Dict : Expr");
-	}
+        Value d = exprDict.resolve(ctx);
+        if (d instanceof ValueObj) {
+            Obj obj=((ValueObj) d).getVal();
+            if (obj instanceof ObjDict) {
+                ObjDict dict=(ObjDict) obj;
+                
+                ObjProcess process = new ObjProcess(dict, expr);
+                process.start(ctx);
+                return (new ValueObj(process));
+            }
+        }
+        throw new Exception("Expected parameters Dict : Expr");
+    }
 }

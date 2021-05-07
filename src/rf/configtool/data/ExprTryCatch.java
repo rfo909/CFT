@@ -37,8 +37,8 @@ import rf.configtool.parser.TokenStream;
  * Try-catch for all errors (hard and soft). For soft only, use tryCatchSoft()
  */
 public class ExprTryCatch extends ExprCommon {
-	
-	private Expr expr;
+    
+    private Expr expr;
 
     public ExprTryCatch (TokenStream ts) throws Exception {
         super(ts);
@@ -49,33 +49,33 @@ public class ExprTryCatch extends ExprCommon {
     }
     
     public Value resolve (Ctx ctx) throws Exception {
-    	Value result=null;
-    	ValueList stackTrace=null;
-    	Value msg=null;
-    	try {
-    		result = expr.resolve(ctx);
-    	} catch (Exception ex) {
-    		stackTrace=getStackTrace(ex);
-    		msg=new ValueString(ex.getMessage());
-    	}
-    	ObjDict x=new ObjDict();
-    	x.set("ok", new ValueBoolean(result != null));
-    	if (result != null) x.set("result", result);
-    	if (stackTrace != null) x.set("stack", stackTrace);
-    	if (msg != null) x.set("msg", msg);
-    	return new ValueObj(x);
+        Value result=null;
+        ValueList stackTrace=null;
+        Value msg=null;
+        try {
+            result = expr.resolve(ctx);
+        } catch (Exception ex) {
+            stackTrace=getStackTrace(ex);
+            msg=new ValueString(ex.getMessage());
+        }
+        ObjDict x=new ObjDict();
+        x.set("ok", new ValueBoolean(result != null));
+        if (result != null) x.set("result", result);
+        if (stackTrace != null) x.set("stack", stackTrace);
+        if (msg != null) x.set("msg", msg);
+        return new ValueObj(x);
     }
     
     private ValueList getStackTrace(Exception ex) {
-    	List<Value> data=new ArrayList<Value>();
-    	if (ex instanceof SourceException) {
-    		Exception x=((SourceException) ex).getOriginalException();
-    		if (x != null) ex=x;
-    	}
-    	StackTraceElement[] st = ex.getStackTrace();
-    	for (StackTraceElement e:st) {
-    		data.add(new ValueString(e.toString()));
-    	}
-    	return new ValueList(data);
+        List<Value> data=new ArrayList<Value>();
+        if (ex instanceof SourceException) {
+            Exception x=((SourceException) ex).getOriginalException();
+            if (x != null) ex=x;
+        }
+        StackTraceElement[] st = ex.getStackTrace();
+        for (StackTraceElement e:st) {
+            data.add(new ValueString(e.toString()));
+        }
+        return new ValueList(data);
     }
 }

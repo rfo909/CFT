@@ -30,16 +30,16 @@ public abstract class Stmt extends LexicalElement {
     }
     
     public static Stmt parse (TokenStream ts) throws Exception {
-    	
-    	// Shell interactive functionality
+        
+        // Shell interactive functionality
         if (ts.peekStr("cd")) {
             return new StmtCd(ts);
         }
         if (ts.peekStr("ls") || ts.peekStr("lsd") || ts.peekStr("lsf")) {
-        	return new StmtLs(ts);
+            return new StmtLs(ts);
         }
         if (ts.peekStr("cat") || ts.peekStr("edit") || ts.peekStr("more")) {
-        	return new StmtCatEditMore(ts);
+            return new StmtCatEditMore(ts);
         }
         
         // --------
@@ -60,7 +60,7 @@ public abstract class Stmt extends LexicalElement {
             return new StmtOut(ts);
         }
         if (ts.peekStr("condOut")) {
-        	return new StmtCondOut(ts);
+            return new StmtCondOut(ts);
         }
         if (ts.peekStr("report")) {
             return new StmtReport(ts);
@@ -78,7 +78,7 @@ public abstract class Stmt extends LexicalElement {
             return new StmtDebug(ts);
         }
         if (ts.peekStr("timeExpr")) {
-        	return new StmtTimeExpr(ts);
+            return new StmtTimeExpr(ts);
         }
     
         // otherwise it must be an expression

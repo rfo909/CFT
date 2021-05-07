@@ -44,13 +44,13 @@ import rf.configtool.main.runtime.lib.db2.ObjDb2;
 
 public class ObjDb extends Obj {
 
-    public ObjDb () {    	
+    public ObjDb () {     
         this.add(new FunctionDb2());
         this.add(new FunctionUUID());
     }
     
     private ObjDb self() {
-    	return this;
+        return this;
     }
     
     @Override

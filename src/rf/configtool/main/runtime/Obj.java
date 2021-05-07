@@ -54,7 +54,7 @@ public abstract class Obj {
      * field values as functions, for direct dotted lookup
      */
     protected void clearFunctions() {
-    	functionArr=null;
+        functionArr=null;
         functions=new HashMap<String,Function>();
     }
     
@@ -131,10 +131,10 @@ public abstract class Obj {
     }
     
     public Function getFunction (String name) {
-    	if (functionArr != null) {
-    		for (Function f:functionArr) functions.put(f.getName(), f);
-    		functionArr=null;
-    	}
+        if (functionArr != null) {
+            for (Function f:functionArr) functions.put(f.getName(), f);
+            functionArr=null;
+        }
         return functions.get(name);
     }
     
@@ -196,8 +196,8 @@ public abstract class Obj {
         
         // populate functions map completely for help
         if (functionArr != null) {
-        	for (Function f:functionArr) functions.put(f.getName(), f);
-        	functionArr=null;
+            for (Function f:functionArr) functions.put(f.getName(), f);
+            functionArr=null;
         }
         
         List<String> fNames=new ArrayList<String>();        

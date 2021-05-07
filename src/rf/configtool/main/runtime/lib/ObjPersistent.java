@@ -36,7 +36,7 @@ public abstract class ObjPersistent extends Obj {
      * Called every time an expression resolves to an existing persistent object
      */
     public void refreshPersistentObj() {
-    	// empty
+        // empty
     }
     public void cleanupOnExit() {
         // empty

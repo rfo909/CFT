@@ -293,18 +293,18 @@ public class ValueList extends Value {
             return "keep(from,to?) - returns sub-list";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 1 && params.size() != 2) throw new Exception("Expected in parameter(s) from, to?");
-        	
-        	int from=(int) getInt("from", params, 0);
-        	if (from < 0) from=0;
-        	
-        	int to;
-        	if (params.size() == 2) {
-        		to=(int) getInt("to", params, 1);
-        		if (to >= val.size()) to=val.size()-1;
-        	} else {
-        		to=val.size()-1;
-        	}
+            if (params.size() != 1 && params.size() != 2) throw new Exception("Expected in parameter(s) from, to?");
+            
+            int from=(int) getInt("from", params, 0);
+            if (from < 0) from=0;
+            
+            int to;
+            if (params.size() == 2) {
+                to=(int) getInt("to", params, 1);
+                if (to >= val.size()) to=val.size()-1;
+            } else {
+                to=val.size()-1;
+            }
        
 
             List<Value> newVal=new ArrayList<Value>();
@@ -338,7 +338,7 @@ public class ValueList extends Value {
                     intSort=false;
                 } 
                 if (!(v instanceof ValueFloat)) {
-                	floatSort=false;
+                    floatSort=false;
                 }
                 if (!intSort && !floatSort) break;
             }
@@ -511,25 +511,25 @@ public class ValueList extends Value {
             return "last(count?) - returns last element or null if empty, or if count given: list of N last elements";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	
+            
             if (params.size() == 0) {
-            	if(val.size()==0) return new ValueNull();
-            	return val.get(val.size()-1);
+                if(val.size()==0) return new ValueNull();
+                return val.get(val.size()-1);
             } else if (params.size() == 1) {
-            	int count=(int) getInt("count", params, 0);
-            	if (val.size()==0) return new ValueList(new ArrayList<Value>());
-            	
-            	List<Value> result=new ArrayList<Value>();
-            	int from=val.size()-count;
-            	if (from < 0) from=0;
-            	
-            	for (int i=from; i<val.size(); i++) {
-            		result.add(val.get(i));
-            	}
-            	return new ValueList(result);
-            	
+                int count=(int) getInt("count", params, 0);
+                if (val.size()==0) return new ValueList(new ArrayList<Value>());
+                
+                List<Value> result=new ArrayList<Value>();
+                int from=val.size()-count;
+                if (from < 0) from=0;
+                
+                for (int i=from; i<val.size(); i++) {
+                    result.add(val.get(i));
+                }
+                return new ValueList(result);
+                
             } else {
-            	throw new Exception("Expected optional count parameter");
+                throw new Exception("Expected optional count parameter");
             }
         }
     }
@@ -546,25 +546,25 @@ public class ValueList extends Value {
             return "first(count?) - returns first element or null if empty, or if count given: list of N first elements";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	
+            
             if (params.size() == 0) {
-            	if(val.size()==0) return new ValueNull();
-            	return val.get(0);
+                if(val.size()==0) return new ValueNull();
+                return val.get(0);
             } else if (params.size() == 1) {
-            	int count=(int) getInt("count", params, 0);
-            	if (val.size()==0) return new ValueList(new ArrayList<Value>());
-            	
-            	List<Value> result=new ArrayList<Value>();
-            	int to=count;
-            	if (to>val.size()) to=val.size();
-            	
-            	for (int i=0; i<to; i++) {
-            		result.add(val.get(i));
-            	}
-            	return new ValueList(result);
-            	
+                int count=(int) getInt("count", params, 0);
+                if (val.size()==0) return new ValueList(new ArrayList<Value>());
+                
+                List<Value> result=new ArrayList<Value>();
+                int to=count;
+                if (to>val.size()) to=val.size();
+                
+                for (int i=0; i<to; i++) {
+                    result.add(val.get(i));
+                }
+                return new ValueList(result);
+                
             } else {
-            	throw new Exception("Expected optional count parameter");
+                throw new Exception("Expected optional count parameter");
             }
         }
     }
@@ -578,36 +578,36 @@ public class ValueList extends Value {
             return "filter(lambda) - invokes lambda/closure on each element, returns list of non-null results";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 1) throw new Exception("Expected single Lambda/Closure parameter");
+            if (params.size() != 1) throw new Exception("Expected single Lambda/Closure parameter");
 
-    		if (params.get(0) instanceof ValueBlock) {
-        		// lambda
-        		ValueBlock lambda=(ValueBlock) params.get(0);
-        		List<Value> result=new ArrayList<Value>();
-        		for (Value v:val) {
-        			List<Value> args=new ArrayList<Value>();
-        			args.add(v);
-        			Value x=lambda.callLambda(ctx, args);
-        			if (!(x instanceof ValueNull)) result.add(x);
-        		}
-        		return new ValueList(result);
-    		}
-    		
-    		Obj obj=getObj("closure",params,0);
-    		if (obj instanceof ObjClosure) {
-        		// closure
-        		ObjClosure closure=(ObjClosure) obj;
-        		List<Value> result=new ArrayList<Value>();
-        		for (Value v:val) {
-        			List<Value> args=new ArrayList<Value>();
-        			args.add(v);
-        			Value x=closure.callClosure(ctx, args);
-        			if (!(x instanceof ValueNull)) result.add(x);
-        		}
-        		return new ValueList(result);
-        	}
-    		throw new Exception("Expected single Lambda/Closure parameter");
-        	
+            if (params.get(0) instanceof ValueBlock) {
+                // lambda
+                ValueBlock lambda=(ValueBlock) params.get(0);
+                List<Value> result=new ArrayList<Value>();
+                for (Value v:val) {
+                    List<Value> args=new ArrayList<Value>();
+                    args.add(v);
+                    Value x=lambda.callLambda(ctx, args);
+                    if (!(x instanceof ValueNull)) result.add(x);
+                }
+                return new ValueList(result);
+            }
+            
+            Obj obj=getObj("closure",params,0);
+            if (obj instanceof ObjClosure) {
+                // closure
+                ObjClosure closure=(ObjClosure) obj;
+                List<Value> result=new ArrayList<Value>();
+                for (Value v:val) {
+                    List<Value> args=new ArrayList<Value>();
+                    args.add(v);
+                    Value x=closure.callClosure(ctx, args);
+                    if (!(x instanceof ValueNull)) result.add(x);
+                }
+                return new ValueList(result);
+            }
+            throw new Exception("Expected single Lambda/Closure parameter");
+            
         }
     }
 

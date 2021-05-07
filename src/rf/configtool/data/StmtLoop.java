@@ -45,7 +45,7 @@ public class StmtLoop extends Stmt {
         OUTER: for (;;) {
             Ctx sub=ctx.sub();
             for (Stmt stmt:body) {
-            	ctx.debug(stmt);
+                ctx.debug(stmt);
 
                 stmt.execute(sub);
                 if (sub.hasBreakLoopFlag()) {

@@ -37,27 +37,27 @@ import java.awt.Color;
 
 public class ObjLexerTokenStream extends Obj {
     
-	private List<ObjLexerToken> tokens;
-	private int pos=0;
-	
+    private List<ObjLexerToken> tokens;
+    private int pos=0;
+    
     public ObjLexerTokenStream (List<ObjLexerToken> tokens) {
-    	this.tokens=tokens;
-    	
-    	this.add(new FunctionSourceLocation());
-    	this.add(new FunctionEOF());
-    	this.add(new FunctionPeek());
-    	this.add(new FunctionMatch());
-    	this.add(new FunctionPeekType());
-    	this.add(new FunctionNext());
+        this.tokens=tokens;
+        
+        this.add(new FunctionSourceLocation());
+        this.add(new FunctionEOF());
+        this.add(new FunctionPeek());
+        this.add(new FunctionMatch());
+        this.add(new FunctionPeekType());
+        this.add(new FunctionNext());
     }
     
     private ObjLexerToken curr() throws Exception {
-    	if (pos >= tokens.size()) throw new Exception("At EOF");
-    	return tokens.get(pos);
+        if (pos >= tokens.size()) throw new Exception("At EOF");
+        return tokens.get(pos);
     }
     
     private Obj self() {
-    	return this;
+        return this;
     }
     
     @Override
@@ -96,11 +96,11 @@ public class ObjLexerTokenStream extends Obj {
             return "sourceLocation() - return source location for next token";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 0) throw new Exception("Expected no parameters");
-        	if (pos >= tokens.size()) {
-        		return new ValueString("<EOF>");
-        	}
-        	return new ValueString(tokens.get(pos).getSourceLocation());
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            if (pos >= tokens.size()) {
+                return new ValueString("<EOF>");
+            }
+            return new ValueString(tokens.get(pos).getSourceLocation());
         }
     }
     
@@ -113,8 +113,8 @@ public class ObjLexerTokenStream extends Obj {
             return "EOF() - true when end of data";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 0) throw new Exception("Expected no parameters");
-        	return new ValueBoolean(pos >= tokens.size());
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueBoolean(pos >= tokens.size());
         }
     }
     
@@ -126,8 +126,8 @@ public class ObjLexerTokenStream extends Obj {
             return "peek() - string represenation of next token";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 0) throw new Exception("Expected no parameters");
-        	return new ValueString(curr().getStr());
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueString(curr().getStr());
         }
     }
     
@@ -139,26 +139,26 @@ public class ObjLexerTokenStream extends Obj {
             return "match(str, errMsg?) - if match, advance curr pos and return true, otherwise, if errMsg, throw soft error, otherwise just return false";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	String str;
-        	String errMsg;
-        	if (params.size() == 1 || params.size() == 2) {
-               	str=getString("str", params, 0);
-               	if (params.size()==2) {
-               		errMsg=getString("errMsg", params, 1);
-               	} else {
-               		errMsg=null;
-               	}
-        	} else {
-        		throw new Exception("Expected parameters str, errMsg?");
-        	}
-        	
-        	if (curr().getStr().equals(str)) {
-        		pos++;
-        		return new ValueBoolean(true);
-        	} else {
-        		if (errMsg != null) throw new SoftErrorException(curr().getSourceLocation() + " " + errMsg);
-        		return new ValueBoolean(false);
-        	}
+            String str;
+            String errMsg;
+            if (params.size() == 1 || params.size() == 2) {
+                  str=getString("str", params, 0);
+                  if (params.size()==2) {
+                    errMsg=getString("errMsg", params, 1);
+                  } else {
+                    errMsg=null;
+                  }
+            } else {
+                throw new Exception("Expected parameters str, errMsg?");
+            }
+            
+            if (curr().getStr().equals(str)) {
+                pos++;
+                return new ValueBoolean(true);
+            } else {
+                if (errMsg != null) throw new SoftErrorException(curr().getSourceLocation() + " " + errMsg);
+                return new ValueBoolean(false);
+            }
         }
     }
     
@@ -170,11 +170,11 @@ public class ObjLexerTokenStream extends Obj {
             return "peekType() - type (int) of next token";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 0) throw new Exception("Expected no parameters");
-        	return new ValueInt(curr().getTokenType());
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueInt(curr().getTokenType());
         }
     }
-    	
+        
     class FunctionNext extends Function {
         public String getName() {
             return "next";
@@ -183,9 +183,9 @@ public class ObjLexerTokenStream extends Obj {
             return "next() - move to next token";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 0) throw new Exception("Expected no parameters");
-        	pos++;
-        	return new ValueObj(self());
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            pos++;
+            return new ValueObj(self());
         }
     }
 

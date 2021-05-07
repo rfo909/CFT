@@ -34,7 +34,7 @@ public class ProgramLine extends LexicalElement {
     public ProgramLine (TokenStream ts) throws Exception {
         super(ts);
         while (!ts.atEOF() && !ts.peekStr(CodeLines.PIPE_SYMBOL) && !ts.peekStr("}")) {
-        	Stmt stmt=Stmt.parse(ts);
+            Stmt stmt=Stmt.parse(ts);
             statements.add(stmt);
         }
     }
@@ -42,8 +42,8 @@ public class ProgramLine extends LexicalElement {
     
     public void execute (Ctx ctx) throws Exception {
         for (Stmt stmt:statements) {
-        	ctx.debug(stmt);
-        	
+            ctx.debug(stmt);
+            
             stmt.execute(ctx);
         }
     }

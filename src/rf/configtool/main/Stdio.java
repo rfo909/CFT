@@ -37,13 +37,13 @@ import java.util.List;
  * lines) formatting should be good.
  */
 public abstract class Stdio {
-	
+    
 
     private List<String> bufferedInputLines=new ArrayList<String>();
     private BufferedReader stdin;
     
      public Stdio (BufferedReader stdin) {
-    	this.stdin=stdin;
+        this.stdin=stdin;
      }
      
      
@@ -59,11 +59,11 @@ public abstract class Stdio {
      */
     
     public String getInputLine() throws Exception {
-    	synchronized(bufferedInputLines) {
-	        if (!bufferedInputLines.isEmpty()) {
-	            return bufferedInputLines.remove(0);
-	        }
-    	}
+        synchronized(bufferedInputLines) {
+            if (!bufferedInputLines.isEmpty()) {
+                return bufferedInputLines.remove(0);
+            }
+        }
         return readLine();
     }
     
@@ -74,30 +74,30 @@ public abstract class Stdio {
     
     
     public boolean hasBufferedInputLines() {
-    	synchronized(bufferedInputLines) {
-    		return bufferedInputLines.size()>0;
-    	}
+        synchronized(bufferedInputLines) {
+            return bufferedInputLines.size()>0;
+        }
     }
 
     /**
      * Used by the stdin() statement
      */
     public void addBufferedInputLine (String s) {
-    	synchronized (bufferedInputLines) {
-    		bufferedInputLines.add(s);
-    	}
+        synchronized (bufferedInputLines) {
+            bufferedInputLines.add(s);
+        }
     }
     
     public void clearBufferedInputLines() {
-    	synchronized (bufferedInputLines) {
-    		bufferedInputLines.clear();
-    	}
+        synchronized (bufferedInputLines) {
+            bufferedInputLines.clear();
+        }
     }
     
     public int getCachedInputLineCount() {
-    	synchronized (bufferedInputLines) {
-    		return bufferedInputLines.size();
-    	}
+        synchronized (bufferedInputLines) {
+            return bufferedInputLines.size();
+        }
     }
    
     /**

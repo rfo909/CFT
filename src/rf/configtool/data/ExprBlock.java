@@ -31,10 +31,10 @@ import java.util.*;
 
 public class ExprBlock extends ExprCommon {
 
-	public static final int MODE_INNER = 0;
-	public static final int MODE_LAMBDA = 1;
-	public static final int MODE_LOCAL = 2;
-	
+    public static final int MODE_INNER = 0;
+    public static final int MODE_LAMBDA = 1;
+    public static final int MODE_LOCAL = 2;
+    
     private int mode;
     
     private List<ProgramLine> programLines=new ArrayList<ProgramLine>();
@@ -48,33 +48,33 @@ public class ExprBlock extends ExprCommon {
         int tsStart=ts.getCurrPos();
         
         if (ts.matchStr("Inner")) {
-        	mode=MODE_INNER;
-        	ts.matchStr("{","expected '{'");
+            mode=MODE_INNER;
+            ts.matchStr("{","expected '{'");
         } else if (ts.matchStr("Lambda")) {
-        	mode=MODE_LAMBDA;
-        	ts.matchStr("{","expected '{'");
+            mode=MODE_LAMBDA;
+            ts.matchStr("{","expected '{'");
         } else if (ts.matchStr("{")) {
-        	mode=MODE_LOCAL;
+            mode=MODE_LOCAL;
         }
         
         List<ProgramLine> progLines=new ArrayList<ProgramLine>();
         if (mode==MODE_LOCAL) {
-        	// only one program line as "PIPE" not allowed
+            // only one program line as "PIPE" not allowed
             progLines.add(new ProgramLine(ts));
             
             if (ts.matchStr(CodeLines.PIPE_SYMBOL)) {
-            	// specific exception for this case
-            	throw new SourceException(getSourceLocation(),"Local block can not contain the PIPE '" + CodeLines.PIPE_SYMBOL + "' character");
+                // specific exception for this case
+                throw new SourceException(getSourceLocation(),"Local block can not contain the PIPE '" + CodeLines.PIPE_SYMBOL + "' character");
             }
-        	ts.matchStr("}","expected '}' closing " + getBlockModeName() + " starting at " + this.getSourceLocation());
+            ts.matchStr("}","expected '}' closing " + getBlockModeName() + " starting at " + this.getSourceLocation());
         } else {
-        	// INNER and LAMBDA
-	        for(;;) {
-	            progLines.add(new ProgramLine(ts));
-	            if (ts.matchStr(CodeLines.PIPE_SYMBOL)) continue;
-	            break;
-	        }
-	    	ts.matchStr("}","expected '}' closing " + getBlockModeName() + " starting at " + this.getSourceLocation());
+            // INNER and LAMBDA
+            for(;;) {
+                progLines.add(new ProgramLine(ts));
+                if (ts.matchStr(CodeLines.PIPE_SYMBOL)) continue;
+                break;
+            }
+            ts.matchStr("}","expected '}' closing " + getBlockModeName() + " starting at " + this.getSourceLocation());
         }
         this.programLines=progLines;
         
@@ -82,24 +82,24 @@ public class ExprBlock extends ExprCommon {
         
         StringBuffer sb=new StringBuffer();
         for (int i=tsStart; i<tsEnd; i++) {
-        	sb.append(" ");
-        	sb.append(ts.getTokenAtPos(i).getOriginalStringRep());
+            sb.append(" ");
+            sb.append(ts.getTokenAtPos(i).getOriginalStringRep());
         }
         this.synString=sb.toString();
     }
     
     private String getBlockModeName() {
-    	if (mode==MODE_INNER) return "inner block";
-    	if (mode==MODE_LAMBDA) return "lambda block";
-    	if (mode==MODE_LOCAL) return "local block";
-    	throw new RuntimeException("Unknown mode: " + mode);
+        if (mode==MODE_INNER) return "inner block";
+        if (mode==MODE_LAMBDA) return "lambda block";
+        if (mode==MODE_LOCAL) return "local block";
+        throw new RuntimeException("Unknown mode: " + mode);
     }
     
     
     public Value resolve (Ctx ctx) throws Exception {
         ValueBlock b=new ValueBlock(programLines, synString);
         if (mode==MODE_LAMBDA) {
-        	return b;  // ValueBlock
+            return b;  // ValueBlock
         }
         
         // directly executing alternatives
@@ -107,9 +107,9 @@ public class ExprBlock extends ExprCommon {
         if (mode==MODE_INNER) {
             return b.callInnerBlock(ctx);
         } else if (mode==MODE_LOCAL) {
-        	return b.callLocalBlock(ctx);
+            return b.callLocalBlock(ctx);
         } else {
-        	throw new Exception("Invalid mode: " + mode);
+            throw new Exception("Invalid mode: " + mode);
         }
     }
 

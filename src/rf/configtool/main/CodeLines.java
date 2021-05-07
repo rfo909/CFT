@@ -34,7 +34,7 @@ import rf.configtool.util.Hash;
  *
  */
 public class CodeLines {
-	
+    
     public static final String PIPE_SYMBOL="|"; // separates multiple ProgramLines on same line
     
     private static CodeLinesParseCache clpCache=new CodeLinesParseCache();
@@ -77,8 +77,8 @@ public class CodeLines {
     public List<String> getSaveFormat() {
         List<String> list=new ArrayList<String>();
         for (CodeLine c:codeLines) {
-        	if (c.getType()==CodeLine.TYPE_LINE_GENERATED) continue; // write NORMAL and ORIGINAL
-        	list.add(c.getLine());
+            if (c.getType()==CodeLine.TYPE_LINE_GENERATED) continue; // write NORMAL and ORIGINAL
+            list.add(c.getLine());
         }
         return list;
     }
@@ -105,41 +105,41 @@ public class CodeLines {
      private TokenStream getTokenStream () throws Exception {
         Parser p=new Parser();
         for (CodeLine cl:codeLines) {
-        	if (cl.getType()==CodeLine.TYPE_LINE_ORIGINAL) continue; // only execute NORMAL and GENERATED
-        	p.processLine(cl);
+            if (cl.getType()==CodeLine.TYPE_LINE_ORIGINAL) continue; // only execute NORMAL and GENERATED
+            p.processLine(cl);
         }
         return p.getTokenStream();
      }
     
      
      private synchronized String getHash() throws Exception {
-    	if (this.hashString==null) {
-			Hash hash=new Hash();
-	        for (CodeLine cl:codeLines) {
-	        	if (cl.getType()==CodeLine.TYPE_LINE_ORIGINAL) continue;
-	        	hash.add(cl.getLine().getBytes("UTF-8"));
-	        }
-	        this.hashString=hash.getHashString();
-    	}
-    	return this.hashString;
+        if (this.hashString==null) {
+            Hash hash=new Hash();
+            for (CodeLine cl:codeLines) {
+                if (cl.getType()==CodeLine.TYPE_LINE_ORIGINAL) continue;
+                hash.add(cl.getLine().getBytes("UTF-8"));
+            }
+            this.hashString=hash.getHashString();
+        }
+        return this.hashString;
      }
      
      public List<ProgramLine> getProgramLines () throws Exception {
-    	String key=getHash();
-    	List<ProgramLine> progLines=clpCache.get(key);
-    	
-    	if (progLines==null) {
-	     	TokenStream ts=getTokenStream();
-	 	    progLines=new ArrayList<ProgramLine>();
-	 	    for(;;) {
-	 	        progLines.add(new ProgramLine(ts));
-	 	        if (ts.matchStr(PIPE_SYMBOL)) continue;
-	 	        break;
-	 	    }
-	    	clpCache.put(key, progLines);
-    	}
-	 	   
- 	    return progLines;
+        String key=getHash();
+        List<ProgramLine> progLines=clpCache.get(key);
+        
+        if (progLines==null) {
+          TokenStream ts=getTokenStream();
+          progLines=new ArrayList<ProgramLine>();
+          for(;;) {
+              progLines.add(new ProgramLine(ts));
+              if (ts.matchStr(PIPE_SYMBOL)) continue;
+              break;
+          }
+            clpCache.put(key, progLines);
+        }
+         
+      return progLines;
      }
      
      

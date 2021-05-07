@@ -36,30 +36,30 @@ import java.awt.Color;
 
 public class ObjLexerToken extends Obj {
     
-	private String sourceLocation;
-	private int tokenType;
-	private String str;
-	
+    private String sourceLocation;
+    private int tokenType;
+    private String str;
+    
     public ObjLexerToken(String sourceLocation, int tokenType, String str) {
-    	this.sourceLocation=sourceLocation;
-    	this.tokenType=tokenType;
-    	this.str=str;
-    	
-    	this.add(new FunctionSourceLocation());
-    	this.add(new FunctionTokenType());
-    	this.add(new FunctionStr());
+        this.sourceLocation=sourceLocation;
+        this.tokenType=tokenType;
+        this.str=str;
+        
+        this.add(new FunctionSourceLocation());
+        this.add(new FunctionTokenType());
+        this.add(new FunctionStr());
     }
     
     public String getSourceLocation() {
-    	return sourceLocation;
+        return sourceLocation;
     }
     
     public int getTokenType() {
-    	return tokenType;
+        return tokenType;
     }
     
     public String getStr() {
-    	return str;
+        return str;
     }
     
     @Override
@@ -98,8 +98,8 @@ public class ObjLexerToken extends Obj {
             return "sourceLocation() - return source location string";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 0) throw new Exception("Expected no parameters");
-        	return new ValueString(sourceLocation);
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueString(sourceLocation);
         }
     }
     
@@ -112,8 +112,8 @@ public class ObjLexerToken extends Obj {
             return "tokenType() - return token type (int)";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 0) throw new Exception("Expected no parameters");
-        	return new ValueInt(tokenType);
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueInt(tokenType);
         }
     }
     
@@ -126,8 +126,8 @@ public class ObjLexerToken extends Obj {
             return "str() - return token string representation string";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 0) throw new Exception("Expected no parameters");
-        	return new ValueString(str);
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueString(str);
         }
     }
     

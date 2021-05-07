@@ -40,25 +40,25 @@ public class ObjDir extends Obj {
     private Protection protection;
 
     public ObjDir(String name, Protection protection) throws Exception {
-    	this.name=name;
-    	this.protection=protection;
+        this.name=name;
+        this.protection=protection;
         
         if (protection==null) {
-        	throw new Exception("protection==null is invalid, use Protection.NONE");
+            throw new Exception("protection==null is invalid, use Protection.NONE");
         }
         
         
         if (isSymlink()) {
-        	this.protection=new Protection("isSymlink");
+            this.protection=new Protection("isSymlink");
         } else {
-	        try {
-	            File f=new File(name);
-	            if (f.exists()) {
-	                this.name=f.getCanonicalPath();
-	            }
-	        } catch (Exception ex) {
-	            this.name=name;
-	        }
+            try {
+                File f=new File(name);
+                if (f.exists()) {
+                    this.name=f.getCanonicalPath();
+                }
+            } catch (Exception ex) {
+                this.name=name;
+            }
         }
 
 
@@ -89,17 +89,17 @@ public class ObjDir extends Obj {
     
     
     public boolean isSymlink() {
-    	Path path=Paths.get(name);
-    	return Files.isSymbolicLink(path);
+        Path path=Paths.get(name);
+        return Files.isSymbolicLink(path);
     }
 
 
     public Protection getProtection() {
-    	return protection;
+        return protection;
     }
     
     public void validateDestructiveOperation (String op) throws Exception {
-    	protection.validateDestructiveOperation(op, name);
+        protection.validateDestructiveOperation(op, name);
    }
     
     public boolean dirExists() {
@@ -136,11 +136,11 @@ public class ObjDir extends Obj {
 
     @Override
     public String synthesize() throws Exception {
-    	String prot="";
-    	if (protection != null && protection.isActive()) {
-    		prot=".protect(" + (new ValueString(protection.getCode()).synthesize() + ")");
-    	}
-    	
+        String prot="";
+        if (protection != null && protection.isActive()) {
+            prot=".protect(" + (new ValueString(protection.getCode()).synthesize() + ")");
+        }
+        
         return "Dir(" + (new ValueString(name)).synthesize() + ")" + prot;
     }
 
@@ -328,14 +328,14 @@ public class ObjDir extends Obj {
             
             validateDestructiveOperation("create");
 
-        	OutText outText=ctx.getOutText();
+            OutText outText=ctx.getOutText();
             File f=new File(name);
             if (!f.exists()) {
                 boolean ok = f.mkdirs();
                 if (!ok) throw new Exception("Could not create dir " + f.getCanonicalPath());
                 return new ValueObj(self());
             } else if (!f.isDirectory()) {
-            	throw new Exception ("Exists, but not a dir " + f.getCanonicalPath());
+                throw new Exception ("Exists, but not a dir " + f.getCanonicalPath());
             }
             return new ValueObj(self());
         }
@@ -360,11 +360,11 @@ public class ObjDir extends Obj {
                     boolean result=f.delete();
                     return new ValueBoolean(result);
                 } else {
-                	ctx.getObjGlobal().addSystemMessage("Not a dir   " + f.getCanonicalPath());
+                    ctx.getObjGlobal().addSystemMessage("Not a dir   " + f.getCanonicalPath());
                     return new ValueBoolean(false);
                 }
             } else {
-            	ctx.getObjGlobal().addSystemMessage("Not found   " + f.getCanonicalPath());
+                ctx.getObjGlobal().addSystemMessage("Not found   " + f.getCanonicalPath());
                 return new ValueBoolean(false);
             }
         }
@@ -382,7 +382,7 @@ public class ObjDir extends Obj {
 
             validateDestructiveOperation("copy target dir");
 
-        	Value p1=params.get(0);
+            Value p1=params.get(0);
             if (!(p1 instanceof ValueObj)) throw new Exception("Expected File parameter");
             
             Obj obj=((ValueObj) p1).getVal();
@@ -485,11 +485,11 @@ public class ObjDir extends Obj {
                     stdio.println("Traversing dir " + f + " " + ex.getMessage());
                 }
                 if (dirs != null) {
-                	if (glob==null || glob.matches(f.getName())) dirs.add(f);
+                    if (glob==null || glob.matches(f.getName())) dirs.add(f);
                 }
             } else {
                 if (files != null)  {
-                	if (glob==null || glob.matches(f.getName())) files.add(f);
+                    if (glob==null || glob.matches(f.getName())) files.add(f);
                 }
             }
         }
@@ -546,8 +546,8 @@ public class ObjDir extends Obj {
         }
         
         if (foreground) {
-        	String desc=program;
-        	int returnCode=process.waitFor();
+            String desc=program;
+            int returnCode=process.waitFor();
             long endTime=System.currentTimeMillis();
             long duration=endTime-startTime; 
         }
@@ -600,9 +600,9 @@ public class ObjDir extends Obj {
 
     private Process startProcess (Ctx ctx, File input, File output, File stderr, List<Value> params) throws Exception {
 
-    	int exitCode=-999;
-    	
-	    List<Value> args;
+        int exitCode=-999;
+        
+        List<Value> args;
         if (params.size()==1) {
             if (params.get(0) instanceof ValueString) {
                 args=new ArrayList<Value>();
@@ -733,12 +733,12 @@ public class ObjDir extends Obj {
             return "protect(desc?) - set protection status, returns self";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	String desc="-";
-        	if (params.size() > 1) throw new Exception("Expected optional string parameter");
-        	if (params.size()==1) {
-        		desc=getString("desc", params, 0);
-        	}
-        	protection = new Protection(desc);
+            String desc="-";
+            if (params.size() > 1) throw new Exception("Expected optional string parameter");
+            if (params.size()==1) {
+                desc=getString("desc", params, 0);
+            }
+            protection = new Protection(desc);
             return new ValueObj(self());
         }
     }
@@ -750,13 +750,13 @@ public class ObjDir extends Obj {
         }
         public String getShortDesc() {
             return "unprotect() - unprotect protected directory - error if not protected - returns self";
-            	// Because if we unprotect something and it isn't protected, we don't have
-            	// control of what we are doing, and the protection mechanism is all 
-            	// about ensuring control
+                // Because if we unprotect something and it isn't protected, we don't have
+                // control of what we are doing, and the protection mechanism is all 
+                // about ensuring control
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	if (!protection.isActive()) throw new Exception("unprotect: " + name + " - not protected.");
-        	protection=Protection.NoProtection;
+            if (!protection.isActive()) throw new Exception("unprotect: " + name + " - not protected.");
+            protection=Protection.NoProtection;
             return new ValueObj(self());
         }
     }
@@ -771,8 +771,8 @@ public class ObjDir extends Obj {
             return "setAsCurrentDir() - use this Dir as current work dir - returns self";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 0) throw new Exception("Expected no parameters");
-        	ctx.getObjGlobal().setCurrDir(name);
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            ctx.getObjGlobal().setCurrDir(name);
             return new ValueObj(self());
         }
     }
@@ -786,9 +786,9 @@ public class ObjDir extends Obj {
             return "verify(str) - verify exists, and return self, or throw soft error with str";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 1) throw new Exception("Expected str parameter");
-        	String str=getString("str", params, 0);
-        	
+            if (params.size() != 1) throw new Exception("Expected str parameter");
+            String str=getString("str", params, 0);
+            
             File f=new File(name);
             boolean ok=f.exists() && f.isDirectory();
             if (!ok) throw new SoftErrorException(str + ": " + name); 
@@ -821,16 +821,16 @@ public class ObjDir extends Obj {
             File newestFile=null;
             
             for (File f:list) {
-            	if (!f.isFile()) continue;
+                if (!f.isFile()) continue;
                 if (glob != null && !glob.matches(f.getName())) continue;
                 if (f.lastModified() > newestTime) {
-                	newestTime=f.lastModified();
-                	newestFile=f;
+                    newestTime=f.lastModified();
+                    newestFile=f;
                 }
             }
             
             if (newestFile==null) {
-            	throw new SoftErrorException("No such file");
+                throw new SoftErrorException("No such file");
             }
             return new ValueObj(new ObjFile(newestFile.getCanonicalPath(), self().protection));
         }

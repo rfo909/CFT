@@ -47,15 +47,15 @@ import java.awt.Color;
 
 public class ObjSys extends Obj {
 
-	public ObjSys() {
-		add(new FunctionVersion());
-		add(new FunctionFunctions());
-		add(new FunctionLog());
-		add(new FunctionCodeDirs());
-		add(new FunctionOutCount());
-		add(new FunctionLastResult());
-		add(new FunctionSleep());
-		add(new FunctionStdin());
+    public ObjSys() {
+        add(new FunctionVersion());
+        add(new FunctionFunctions());
+        add(new FunctionLog());
+        add(new FunctionCodeDirs());
+        add(new FunctionOutCount());
+        add(new FunctionLastResult());
+        add(new FunctionSleep());
+        add(new FunctionStdin());
         add(new FunctionIsWindows());
         add(new FunctionSavefile());
         add(new FunctionScriptName());
@@ -67,213 +67,213 @@ public class ObjSys extends Obj {
         add(new FunctionSecureSessionID());
         add(new FunctionClone());
         
-	}
+    }
 
-	@Override
-	public boolean eq(Obj x) {
-		return x == this;
-	}
+    @Override
+    public boolean eq(Obj x) {
+        return x == this;
+    }
 
-	public String getTypeName() {
-		return "Sys";
-	}
+    public String getTypeName() {
+        return "Sys";
+    }
 
-	public ColList getContentDescription() {
-		return ColList.list().regular(getDesc());
-	}
+    public ColList getContentDescription() {
+        return ColList.list().regular(getDesc());
+    }
 
-	private String getDesc() {
-		return "Sys";
-	}
+    private String getDesc() {
+        return "Sys";
+    }
 
-	private Obj theObj() {
-		return this;
-	}
+    private Obj theObj() {
+        return this;
+    }
 
-	class FunctionVersion extends Function {
-		public String getName() {
-			return "version";
-		}
+    class FunctionVersion extends Function {
+        public String getName() {
+            return "version";
+        }
 
-		public String getShortDesc() {
-			return "version() - returns CFT version string";
-		}
+        public String getShortDesc() {
+            return "version() - returns CFT version string";
+        }
 
-		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-			if (params.size() != 0)
-				throw new Exception("Expected no parameters");
-			return new ValueString(new Version().getVersion());
-		}
-	}
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0)
+                throw new Exception("Expected no parameters");
+            return new ValueString(new Version().getVersion());
+        }
+    }
 
-	class FunctionFunctions extends Function {
-		public String getName() {
-			return "functions";
-		}
+    class FunctionFunctions extends Function {
+        public String getName() {
+            return "functions";
+        }
 
-		public String getShortDesc() {
-			return "functions() - returns list of custom functions";
-		}
+        public String getShortDesc() {
+            return "functions() - returns list of custom functions";
+        }
 
-		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-			if (params.size() != 0)
-				throw new Exception("Expected no parameters");
-			List<Value> values = new ArrayList<Value>();
-			List<String> names = ctx.getObjGlobal().getCodeHistory().getNames();
-			for (String name : names)
-				values.add(new ValueString(name));
-			return new ValueList(values);
-		}
-	}
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0)
+                throw new Exception("Expected no parameters");
+            List<Value> values = new ArrayList<Value>();
+            List<String> names = ctx.getObjGlobal().getCodeHistory().getNames();
+            for (String name : names)
+                values.add(new ValueString(name));
+            return new ValueList(values);
+        }
+    }
 
-	class FunctionLog extends Function {
-		public String getName() {
-			return "log";
-		}
+    class FunctionLog extends Function {
+        public String getName() {
+            return "log";
+        }
 
-		public String getShortDesc() {
-			return "log(msg) - add message to system messages, which are presented after run";
-		}
+        public String getShortDesc() {
+            return "log(msg) - add message to system messages, which are presented after run";
+        }
 
-		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-			if (params.size() != 1)
-				throw new Exception("Expected string parameter msg");
-			String line = getString("msg", params, 0);
-			ctx.getObjGlobal().addSystemMessage(line);
-			return new ValueBoolean(true);
-		}
-	}
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1)
+                throw new Exception("Expected string parameter msg");
+            String line = getString("msg", params, 0);
+            ctx.getObjGlobal().addSystemMessage(line);
+            return new ValueBoolean(true);
+        }
+    }
 
-	class FunctionCodeDirs extends Function {
-		public String getName() {
-			return "codeDirs";
-		}
+    class FunctionCodeDirs extends Function {
+        public String getName() {
+            return "codeDirs";
+        }
 
-		public String getShortDesc() {
-			return "codeDirs() - returns list of code dirs (see " + PropsFile.PROPS_FILE + ")";
-		}
+        public String getShortDesc() {
+            return "codeDirs() - returns list of code dirs (see " + PropsFile.PROPS_FILE + ")";
+        }
 
-		@Override
-		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-			if (params.size() != 0)
-				throw new Exception("Expected no parameters");
-			List<Value> list = new ArrayList<Value>();
-			for (String s : ctx.getObjGlobal().getRoot().getPropsFile().getCodeDirs()) {
-				ObjDir dir = new ObjDir(s, Protection.NoProtection);
-				list.add(new ValueObj(dir));
-			}
-			return new ValueList(list);
-		}
-	}
+        @Override
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0)
+                throw new Exception("Expected no parameters");
+            List<Value> list = new ArrayList<Value>();
+            for (String s : ctx.getObjGlobal().getRoot().getPropsFile().getCodeDirs()) {
+                ObjDir dir = new ObjDir(s, Protection.NoProtection);
+                list.add(new ValueObj(dir));
+            }
+            return new ValueList(list);
+        }
+    }
 
-	class FunctionOutCount extends Function {
-		public String getName() {
-			return "outCount";
-		}
+    class FunctionOutCount extends Function {
+        public String getName() {
+            return "outCount";
+        }
 
-		public String getShortDesc() {
-			return "outCount() - returns number of values emitted via out() / report()";
-		}
+        public String getShortDesc() {
+            return "outCount() - returns number of values emitted via out() / report()";
+        }
 
-		@Override
-		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-			if (params.size() != 0)
-				throw new Exception("Expected no parameters");
-			int out = ctx.getOutData().getOutDataLength();
-			int report = ctx.getOutText().getData().size();
-			return new ValueInt(out + report);
-		}
-	}
+        @Override
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0)
+                throw new Exception("Expected no parameters");
+            int out = ctx.getOutData().getOutDataLength();
+            int report = ctx.getOutText().getData().size();
+            return new ValueInt(out + report);
+        }
+    }
 
-	class FunctionLastResult extends Function {
-		public String getName() {
-			return "lastResult";
-		}
+    class FunctionLastResult extends Function {
+        public String getName() {
+            return "lastResult";
+        }
 
-		public String getShortDesc() {
-			return "lastResult() - returns last interactive result";
-		}
+        public String getShortDesc() {
+            return "lastResult() - returns last interactive result";
+        }
 
-		@Override
-		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-			if (params.size() != 0)
-				throw new Exception("Expected no parameters");
-			return ctx.getObjGlobal().getRoot().getLastResult();
-		}
-	}
+        @Override
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0)
+                throw new Exception("Expected no parameters");
+            return ctx.getObjGlobal().getRoot().getLastResult();
+        }
+    }
 
-	class FunctionSleep extends Function {
-		public String getName() {
-			return "sleep";
-		}
+    class FunctionSleep extends Function {
+        public String getName() {
+            return "sleep";
+        }
 
-		public String getShortDesc() {
-			return "sleep(millis) - returns current time in ms";
-		}
+        public String getShortDesc() {
+            return "sleep(millis) - returns current time in ms";
+        }
 
-		@Override
-		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-			if (params.size() != 1)
-				throw new Exception("Expected millis parameter");
-			int millis = (int) getInt("millis", params, 0);
-			try {
-				Thread.sleep(millis);
-			} catch (Exception ex) {
-				// ignore
-			}
-			return new ValueInt(System.currentTimeMillis());
-		}
-	}
+        @Override
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1)
+                throw new Exception("Expected millis parameter");
+            int millis = (int) getInt("millis", params, 0);
+            try {
+                Thread.sleep(millis);
+            } catch (Exception ex) {
+                // ignore
+            }
+            return new ValueInt(System.currentTimeMillis());
+        }
+    }
 
-	class FunctionStdin extends Function {
-		public String getName() {
-			return "stdin";
-		}
+    class FunctionStdin extends Function {
+        public String getName() {
+            return "stdin";
+        }
 
-		public String getShortDesc() {
-			return "stdin(list|...) - buffer stdin lines - no params to clear - returns number of lines cached";
-		}
+        public String getShortDesc() {
+            return "stdin(list|...) - buffer stdin lines - no params to clear - returns number of lines cached";
+        }
 
-		@Override
-		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-			if (params.size() == 0) {
-				// clear buffered input
-				ctx.getStdio().clearBufferedInputLines();
-			} else {
+        @Override
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() == 0) {
+                // clear buffered input
+                ctx.getStdio().clearBufferedInputLines();
+            } else {
 
-				List<Value> values;
-				if (params.size() == 1 && (params.get(0) instanceof ValueList)) {
-					values = ((ValueList) params.get(0)).getVal();
-				} else {
-					values = params;
-				}
+                List<Value> values;
+                if (params.size() == 1 && (params.get(0) instanceof ValueList)) {
+                    values = ((ValueList) params.get(0)).getVal();
+                } else {
+                    values = params;
+                }
 
-				for (Value v : values) {
-					String s = v.getValAsString();
-					ctx.getStdio().addBufferedInputLine(s);
-				}
-			}
-			return new ValueInt(ctx.getStdio().getCachedInputLineCount());
-		}
-	}
+                for (Value v : values) {
+                    String s = v.getValAsString();
+                    ctx.getStdio().addBufferedInputLine(s);
+                }
+            }
+            return new ValueInt(ctx.getStdio().getCachedInputLineCount());
+        }
+    }
 
-	class FunctionIsWindows extends Function {
-		public String getName() {
-			return "isWindows";
-		}
+    class FunctionIsWindows extends Function {
+        public String getName() {
+            return "isWindows";
+        }
 
-		public String getShortDesc() {
-			return "isWindows() - returns boolean";
-		}
+        public String getShortDesc() {
+            return "isWindows() - returns boolean";
+        }
 
-		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-			if (params.size() != 0)
-				throw new Exception("Expected no parameters");
-			return new ValueBoolean(ctx.getObjGlobal().runningOnWindows());
-		}
-	}
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0)
+                throw new Exception("Expected no parameters");
+            return new ValueBoolean(ctx.getObjGlobal().runningOnWindows());
+        }
+    }
 
-	class FunctionSavefile extends Function {
+    class FunctionSavefile extends Function {
         public String getName() {
             return "savefile";
         }
@@ -283,175 +283,175 @@ public class ObjSys extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
             try {
-	            File f=ctx.getObjGlobal().getSavefile();
-	            return new ValueObj(new ObjFile(f.getCanonicalPath(), Protection.NoProtection));
+                File f=ctx.getObjGlobal().getSavefile();
+                return new ValueObj(new ObjFile(f.getCanonicalPath(), Protection.NoProtection));
             } catch (Exception ex) {
-            	return new ValueNull();
+                return new ValueNull();
             }
         }
     } 
 
 
-	class FunctionScriptName extends Function {
-		public String getName() {
-			return "scriptName";
-		}
+    class FunctionScriptName extends Function {
+        public String getName() {
+            return "scriptName";
+        }
 
-		public String getShortDesc() {
-			return "scriptName() - returns script name or null if not saved yet";
-		}
+        public String getShortDesc() {
+            return "scriptName() - returns script name or null if not saved yet";
+        }
 
-		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-			if (params.size() != 0)
-				throw new Exception("Expected no parameters");
-			String scriptName=ctx.getObjGlobal().getScriptName();
-			if (scriptName==null) return new ValueNull();
-			return new ValueString(scriptName);
-		}
-	}
-	
-	
-	class FunctionUptime extends Function {
-		public String getName() {
-			return "uptime";
-		}
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0)
+                throw new Exception("Expected no parameters");
+            String scriptName=ctx.getObjGlobal().getScriptName();
+            if (scriptName==null) return new ValueNull();
+            return new ValueString(scriptName);
+        }
+    }
+    
+    
+    class FunctionUptime extends Function {
+        public String getName() {
+            return "uptime";
+        }
 
-		public String getShortDesc() {
-			return "uptime() - returns a Date.Duration object";
-		}
+        public String getShortDesc() {
+            return "uptime() - returns a Date.Duration object";
+        }
 
-		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-			if (params.size() != 0)
-				throw new Exception("Expected no parameters");
-			long uptime=System.currentTimeMillis() - ctx.getObjGlobal().getRoot().getStartTime();
-			ObjDuration d=new ObjDuration(uptime);
-			return new ValueObj(d);
-		}
-	}
-	
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0)
+                throw new Exception("Expected no parameters");
+            long uptime=System.currentTimeMillis() - ctx.getObjGlobal().getRoot().getStartTime();
+            ObjDuration d=new ObjDuration(uptime);
+            return new ValueObj(d);
+        }
+    }
+    
 
 
-	class FunctionHomeDir extends Function {
-		public String getName() {
-			return "homeDir";
-		}
+    class FunctionHomeDir extends Function {
+        public String getName() {
+            return "homeDir";
+        }
 
-		public String getShortDesc() {
-			return "homeDir() - returns Dir object for CFT start dir";
-		}
+        public String getShortDesc() {
+            return "homeDir() - returns Dir object for CFT start dir";
+        }
 
-		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-			if (params.size() != 0)
-				throw new Exception("Expected no parameters");
-			File f=new File(".");
-			String path=f.getCanonicalPath();
-			ObjDir x=new ObjDir(path, Protection.NoProtection);
-			return new ValueObj(x);
-		}
-	}
-	
-	
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0)
+                throw new Exception("Expected no parameters");
+            File f=new File(".");
+            String path=f.getCanonicalPath();
+            ObjDir x=new ObjDir(path, Protection.NoProtection);
+            return new ValueObj(x);
+        }
+    }
+    
+    
 
-	class FunctionUchar extends Function {
-		public String getName() {
-			return "uchar";
-		}
+    class FunctionUchar extends Function {
+        public String getName() {
+            return "uchar";
+        }
 
-		public String getShortDesc() {
-			return "uchar(str|int) - create unicode char from \\uXXXX string notation (the \\u part is optional) - or int value";
-		}
-		
-		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-			if (params.size() != 1)
-				throw new Exception("Expected str|int parameter");
-			if (params.get(0) instanceof ValueInt) {
-				char c=(char) getInt("int",params,0);
-				return new ValueString(""+c);
-			}
-			// String parameter
-			String str=getString("str",params,0);
-			if (str.toLowerCase().startsWith("\\u")) str=str.substring(2);
-			char c=(char) (Integer.parseInt(str,16));
-			return new ValueString(""+c);
-		}
-	}
+        public String getShortDesc() {
+            return "uchar(str|int) - create unicode char from \\uXXXX string notation (the \\u part is optional) - or int value";
+        }
+        
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1)
+                throw new Exception("Expected str|int parameter");
+            if (params.get(0) instanceof ValueInt) {
+                char c=(char) getInt("int",params,0);
+                return new ValueString(""+c);
+            }
+            // String parameter
+            String str=getString("str",params,0);
+            if (str.toLowerCase().startsWith("\\u")) str=str.substring(2);
+            char c=(char) (Integer.parseInt(str,16));
+            return new ValueString(""+c);
+        }
+    }
 
-	class FunctionSessionUUID extends Function {
-		public String getName() {
-			return "sessionUUID";
-		}
+    class FunctionSessionUUID extends Function {
+        public String getName() {
+            return "sessionUUID";
+        }
 
-		public String getShortDesc() {
-			return "sessionUUID() - return per CFT-session UUID - for storing session values in Db etc";
-		}
-		
-		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-			if (params.size() != 0) throw new Exception("Expected no parameters");
-			return new ValueString(ctx.getObjGlobal().getRoot().getSessionUUID());
-		}
-	}
-	
-	
-	class FunctionReadPassword extends Function {
-		public String getName() {
-			return "readPassword";
-		}
+        public String getShortDesc() {
+            return "sessionUUID() - return per CFT-session UUID - for storing session values in Db etc";
+        }
+        
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueString(ctx.getObjGlobal().getRoot().getSessionUUID());
+        }
+    }
+    
+    
+    class FunctionReadPassword extends Function {
+        public String getName() {
+            return "readPassword";
+        }
 
-		public String getShortDesc() {
-			return "readPassword(prompt?) - returns password or error if stdio != StdioReal";
-		}
-		
-		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-			String prompt="";
-			if (params.size() == 1) {
-				prompt=getString("prompt",params,0);
-			} else if (params.size() != 0) {
-				throw new Exception("Expected optional parameter prompt");
-			}
-			Stdio stdio = ctx.getStdio();
-			if (stdio instanceof StdioReal) {
-				StdioReal real=(StdioReal) stdio;
-				real.print(prompt);
-				return new ValueString(real.readPassword());
-			} else {
-				throw new Exception("readPassword() requires StdioReal"); 
-			}
-		}
-	}
-	
-	
-	class FunctionSecureSessionID extends Function {
-		public String getName() {
-			return "secureSessionId";
-		}
+        public String getShortDesc() {
+            return "readPassword(prompt?) - returns password or error if stdio != StdioReal";
+        }
+        
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+            String prompt="";
+            if (params.size() == 1) {
+                prompt=getString("prompt",params,0);
+            } else if (params.size() != 0) {
+                throw new Exception("Expected optional parameter prompt");
+            }
+            Stdio stdio = ctx.getStdio();
+            if (stdio instanceof StdioReal) {
+                StdioReal real=(StdioReal) stdio;
+                real.print(prompt);
+                return new ValueString(real.readPassword());
+            } else {
+                throw new Exception("readPassword() requires StdioReal"); 
+            }
+        }
+    }
+    
+    
+    class FunctionSecureSessionID extends Function {
+        public String getName() {
+            return "secureSessionId";
+        }
 
-		public String getShortDesc() {
-			return "secureSessionId() - return secure session id as secure Binary object";
-		}
-		
-		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-			if (params.size() != 0) throw new Exception("Expected no parameters");
-			return new ValueBinary(ctx.getObjGlobal().getRoot().getSecureSessionID(), true);
-		}
-	}
-	
-	class FunctionClone extends Function {
-		public String getName() {
-			return "clone";
-		}
+        public String getShortDesc() {
+            return "secureSessionId() - return secure session id as secure Binary object";
+        }
+        
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueBinary(ctx.getObjGlobal().getRoot().getSecureSessionID(), true);
+        }
+    }
+    
+    class FunctionClone extends Function {
+        public String getName() {
+            return "clone";
+        }
 
-		public String getShortDesc() {
-			return "clone(value) - creates clone via eval(syn()) - error if value not synthesizable";
-		}
+        public String getShortDesc() {
+            return "clone(value) - creates clone via eval(syn()) - error if value not synthesizable";
+        }
 
-		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-			if (params.size() != 1)
-				throw new Exception("Expected value parameter");
-			Value v = params.get(0);
-			return v.createClone(ctx);
-		}
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1)
+                throw new Exception("Expected value parameter");
+            Value v = params.get(0);
+            return v.createClone(ctx);
+        }
 
-	}		    	
-	
+    }           
+    
 
 }

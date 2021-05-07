@@ -106,27 +106,27 @@ public class Ctx {
     
     
     public boolean isDebugMode() {
-    	return objGlobal.isDebugMode();
+        return objGlobal.isDebugMode();
     }
     
     public void debug (Stmt stmt) {
-    	if (isDebugMode()) {
-    		objGlobal.debug("stmt " + stmt.getSourceLocation().toString());
-    	}
+        if (isDebugMode()) {
+            objGlobal.debug("stmt " + stmt.getSourceLocation().toString());
+        }
     }
     
     public void debug (Expr expr) {
-    	if (isDebugMode()) {
-    		objGlobal.debug("expr " + expr.getSourceLocation().toString());
-    	}
+        if (isDebugMode()) {
+            objGlobal.debug("expr " + expr.getSourceLocation().toString());
+        }
     }
     
     public void addSystemMessage (String s) {
-    	objGlobal.addSystemMessage(s);
+        objGlobal.addSystemMessage(s);
     }
     
     public void addCtxCloseHook (CtxCloseHook callback) {
-    	ctxCloseHooks.add(callback);
+        ctxCloseHooks.add(callback);
     }
     
       
@@ -150,8 +150,8 @@ public class Ctx {
 
        
     public Value getResult() throws Exception {
-    	callCtxCloseHooks();
-    	
+        callCtxCloseHooks();
+        
         // if program contains looping, then always return data from out(), even
         // if empty
         if (programContainsLooping) {
@@ -168,16 +168,16 @@ public class Ctx {
     
     
     public Value getLocalBlockResult() throws Exception {
-    	callCtxCloseHooks();
+        callCtxCloseHooks();
         if (stack.isEmpty()) return new ValueNull(); else return stack.pop();
     }
     
     
     private void callCtxCloseHooks() throws Exception {
-    	for (CtxCloseHook x: ctxCloseHooks) {
-    		x.ctxClosing(this);
-    	}
-    	ctxCloseHooks.clear();
+        for (CtxCloseHook x: ctxCloseHooks) {
+            x.ctxClosing(this);
+        }
+        ctxCloseHooks.clear();
     }
 
     
@@ -208,7 +208,7 @@ public class Ctx {
     }
     
     public boolean isLoopVariable (String name) {
-    	return getLoopVariable(name) != null;
+        return getLoopVariable(name) != null;
     }
     
     public Value getVariable (String name) {
@@ -263,18 +263,18 @@ public class Ctx {
     /**
      * Resolve expression on string format
      */
-	public Value resolveExpr (String s) throws Exception {
-		Parser p=new Parser();
-		p.processLine(new CodeLine(new SourceLocation(), s));
-		TokenStream ts = p.getTokenStream();
-		ProgramLine progLine=new ProgramLine(ts);
-		
-		Ctx ctx=this.sub();
-		progLine.execute(ctx);
-		Value retVal=ctx.pop();
-		if (retVal==null) retVal=new ValueNull();
-		return retVal;
-	}
+    public Value resolveExpr (String s) throws Exception {
+        Parser p=new Parser();
+        p.processLine(new CodeLine(new SourceLocation(), s));
+        TokenStream ts = p.getTokenStream();
+        ProgramLine progLine=new ProgramLine(ts);
+        
+        Ctx ctx=this.sub();
+        progLine.execute(ctx);
+        Value retVal=ctx.pop();
+        if (retVal==null) retVal=new ValueNull();
+        return retVal;
+    }
 
-	
+    
 }

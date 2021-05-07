@@ -53,7 +53,7 @@ import rf.configtool.root.Root;
  */
 public class ObjGlobal extends Obj {
     
-	private Root root;
+    private Root root;
     private Stdio stdio;
 
     private String currentDir;
@@ -70,7 +70,7 @@ public class ObjGlobal extends Obj {
 
 
     public Root getRoot() {
-    	return root;
+        return root;
     }
     
     public Stdio getStdio() {
@@ -78,12 +78,12 @@ public class ObjGlobal extends Obj {
     }
     
     public boolean isDebugMode() {
-    	return root.isDebugMode();
+        return root.isDebugMode();
     }
     
     public ObjGlobal(Root root, String currentDir, Stdio stdio) throws Exception {
-    	this.root=root;
-    	this.currentDir=currentDir;
+        this.root=root;
+        this.currentDir=currentDir;
         this.stdio=stdio;
         //props.report(stdio);
         
@@ -132,11 +132,11 @@ public class ObjGlobal extends Obj {
     }
     
     public void addExprCount() {
-    	exprCount++;
+        exprCount++;
     }
     
     public long getExprCount() {
-    	return exprCount;
+        return exprCount;
     }
     
     
@@ -149,7 +149,7 @@ public class ObjGlobal extends Obj {
     }
     
     public void debug (String line) {
-    	systemMessages.add("[debug] " + line);
+        systemMessages.add("[debug] " + line);
     }
     
     public List<String> getSystemMessages() {
@@ -157,7 +157,7 @@ public class ObjGlobal extends Obj {
     }
     
     public void clearSystemMessages() {
-    	systemMessages.clear();
+        systemMessages.clear();
     }
  
     public String getCurrDir() {
@@ -204,7 +204,7 @@ public class ObjGlobal extends Obj {
             x=obj;
             x.initPersistentObj();
         } else {
-        	x.refreshPersistentObj();
+            x.refreshPersistentObj();
         }
         return new ValueObj(x);
     }
@@ -296,11 +296,11 @@ public class ObjGlobal extends Obj {
  
         CodeLines onLoad = currScriptCode.getNamedCodeLines("onLoad");
         if (onLoad != null) {
-        	try {
-        		this.runtime.processCodeLines(stdio, onLoad, new FunctionState());
-        	} catch (Exception ex) {
-        		stdio.println("onLoad function failed with exception");
-        	}
+            try {
+                this.runtime.processCodeLines(stdio, onLoad, new FunctionState());
+            } catch (Exception ex) {
+                stdio.println("onLoad function failed with exception");
+            }
         }
         
     }
@@ -546,15 +546,15 @@ public class ObjGlobal extends Obj {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() == 1) {
-	            String pattern=getString("pattern", params, 0);
-	            boolean ignoreCase=true;
-	            return new ValueObj(new ObjGlob(pattern,ignoreCase));
+                String pattern=getString("pattern", params, 0);
+                boolean ignoreCase=true;
+                return new ValueObj(new ObjGlob(pattern,ignoreCase));
             } else if (params.size() == 2) {
-	            String pattern=getString("pattern", params, 0);
-	            boolean ignoreCase=getBoolean("ignoreCase", params, 1);
-	            return new ValueObj(new ObjGlob(pattern,ignoreCase));
+                String pattern=getString("pattern", params, 0);
+                boolean ignoreCase=getBoolean("ignoreCase", params, 1);
+                return new ValueObj(new ObjGlob(pattern,ignoreCase));
             } else {
-            	throw new Exception("Expected parameters pattern, ignoreCase?");
+                throw new Exception("Expected parameters pattern, ignoreCase?");
             }
         }
     }
@@ -633,9 +633,9 @@ public class ObjGlobal extends Obj {
             return "readLines(endmarker) - read input until label on separate line, returns list of strings";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	Stdio stdio=ctx.getStdio();
+            Stdio stdio=ctx.getStdio();
 
-        	if (params.size() == 1 && params.get(0) instanceof ValueString) {
+            if (params.size() == 1 && params.get(0) instanceof ValueString) {
                 String endMarker=getString("endmarker", params, 0);
                 
                 List<Value> list=new ArrayList<Value>();
@@ -662,9 +662,9 @@ public class ObjGlobal extends Obj {
             return "readLine(prompt?) - read single input line";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	Stdio stdio=ctx.getStdio();
+            Stdio stdio=ctx.getStdio();
 
-        	if (params.size() == 1) {
+            if (params.size() == 1) {
                 String prompt=getString("prompt", params, 0);
                 
                 boolean silent=ctx.getStdio().hasBufferedInputLines();
@@ -673,8 +673,8 @@ public class ObjGlobal extends Obj {
                 }
                 return new ValueString(stdio.getInputLine());
             } else if (params.size() == 0) {
-            	// no prompt
-            	return new ValueString(stdio.getInputLine());
+                // no prompt
+                return new ValueString(stdio.getInputLine());
             }
 
             throw new Exception("Expected optional prompt string parameter");
@@ -705,15 +705,15 @@ public class ObjGlobal extends Obj {
             return "println(str) - print string";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	Stdio stdio=ctx.getStdio();
+            Stdio stdio=ctx.getStdio();
 
-        	if (params.size() == 1) {
+            if (params.size() == 1) {
                 String s=params.get(0).getValAsString();
                 stdio.println(s);
                 return new ValueString(s);
             } else if (params.size() == 0) {
                 stdio.println();
-		return new ValueString("");
+        return new ValueString("");
             }
 
             throw new Exception("Expected no parameter or string parameter");
@@ -754,15 +754,15 @@ public class ObjGlobal extends Obj {
         @Override
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() == 2) {
-	            boolean cond=params.get(0).getValAsBoolean();
-	            String s=params.get(1).getValAsString();
-	            if (cond) throw new SoftErrorException(s);
-	            return new ValueNull(); 
+                boolean cond=params.get(0).getValAsBoolean();
+                String s=params.get(1).getValAsString();
+                if (cond) throw new SoftErrorException(s);
+                return new ValueNull(); 
             } else if (params.size() ==1) {
-	            String s=params.get(0).getValAsString();
-	            throw new SoftErrorException(s);
+                String s=params.get(0).getValAsString();
+                throw new SoftErrorException(s);
             } else {
-            	throw new Exception("Expected parameters [cond,] message");
+                throw new Exception("Expected parameters [cond,] message");
             }
         }
     }
@@ -795,9 +795,9 @@ public class ObjGlobal extends Obj {
             if (params.size() != 0) throw new Exception("Expected no parameters");
             String shellCommand;
             if (File.separator.equals("\\")) {
-            	shellCommand=ctx.getObjGlobal().getRoot().getPropsFile().getWinShell();
+                shellCommand=ctx.getObjGlobal().getRoot().getPropsFile().getWinShell();
             } else {
-            	shellCommand=ctx.getObjGlobal().getRoot().getPropsFile().getShell();
+                shellCommand=ctx.getObjGlobal().getRoot().getPropsFile().getShell();
             }
             callExternalProgram(shellCommand, ctx);
             return new ValueBoolean(true);
@@ -818,9 +818,9 @@ public class ObjGlobal extends Obj {
             Value v=params.get(0);
             String s;
             if (v instanceof ValueObj) {
-            	s=((ValueObj) v).getVal().getTypeName();
+                s=((ValueObj) v).getVal().getTypeName();
             } else {
-            	s=v.getTypeName();
+                s=v.getTypeName();
             }
             return new ValueString(s);
         }
@@ -829,7 +829,7 @@ public class ObjGlobal extends Obj {
 
 
 
-	
+    
     class FunctionGetExprCount extends Function {
         public String getName() {
             return "getExprCount";
@@ -847,9 +847,9 @@ public class ObjGlobal extends Obj {
 
 
 
-	
-	
-	
+    
+    
+    
     
     private void callExternalProgram (String cmd, Ctx ctx) throws Exception {
         List<String> strArgs=new ArrayList<String>();

@@ -98,13 +98,13 @@ public class ObjFiles extends Obj {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() == 1) {
-            	Obj obj=getObj("file",params,0);
-            	if (!(obj instanceof ObjFile)) throw new Exception("Expected file parameter");
-            	ObjFile f=(ObjFile) obj;
-            	if (!f.getFile().exists() || !f.getFile().isFile()) {
-            		throw new Exception("File " + f.getPath() + " not found");
-            	}
-            	
+                Obj obj=getObj("file",params,0);
+                if (!(obj instanceof ObjFile)) throw new Exception("Expected file parameter");
+                ObjFile f=(ObjFile) obj;
+                if (!f.getFile().exists() || !f.getFile().isFile()) {
+                    throw new Exception("File " + f.getPath() + " not found");
+                }
+                
                 ObjLineReader x=new ObjLineReader(f);
                 return ctx.getObjGlobal().getOrAddPersistentObject(x);
             } 
@@ -122,16 +122,16 @@ public class ObjFiles extends Obj {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() == 2) {
-            	Obj obj=getObj("LineReader",params,0);
-            	if (!(obj instanceof ObjLineReader)) throw new Exception("Expected LineReader, Grep parameters");
-            	ObjLineReader reader=(ObjLineReader) obj;
-            	
-            	obj=getObj("Grep",params,1);
-            	if (!(obj instanceof ObjGrep)) throw new Exception("Expected LineReader, Grep parameters");
-            	ObjGrep grep=(ObjGrep) obj;
-            	
-            	ObjFilterReader x=new ObjFilterReader(reader, grep);
-            	return new ValueObj(x);
+                Obj obj=getObj("LineReader",params,0);
+                if (!(obj instanceof ObjLineReader)) throw new Exception("Expected LineReader, Grep parameters");
+                ObjLineReader reader=(ObjLineReader) obj;
+                
+                obj=getObj("Grep",params,1);
+                if (!(obj instanceof ObjGrep)) throw new Exception("Expected LineReader, Grep parameters");
+                ObjGrep grep=(ObjGrep) obj;
+                
+                ObjFilterReader x=new ObjFilterReader(reader, grep);
+                return new ValueObj(x);
             } 
 
             throw new Exception("Expected LineReader, Grep parameters");

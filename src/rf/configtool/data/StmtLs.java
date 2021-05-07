@@ -36,28 +36,28 @@ import java.util.*;
 
 public class StmtLs extends StmtShellInteractive {
 
-	private boolean showFiles;
-	private boolean showDirs;
-	
+    private boolean showFiles;
+    private boolean showDirs;
+    
     public StmtLs (TokenStream ts) throws Exception {
         super(ts);
         if (getName().equals("ls")) {
-        	showFiles=true;
-        	showDirs=true;
+            showFiles=true;
+            showDirs=true;
         } else if (getName().equals("lsd")) {
-        	showFiles=false;
-        	showDirs=true;
+            showFiles=false;
+            showDirs=true;
         } else if (getName().equals("lsf")) {
-        	showFiles=true;
-        	showDirs=false;
+            showFiles=true;
+            showDirs=false;
         } else {
-        	throw new Exception("Expected ls, lsf or lsd");
+            throw new Exception("Expected ls, lsf or lsd");
         }
     }
 
     @Override
     protected void processDefault(Ctx ctx) throws Exception {
-    	// list files and dirs in currDir
+        // list files and dirs in currDir
         String currDir=ctx.getObjGlobal().getCurrDir();
 
         File f=new File(currDir);
@@ -74,7 +74,7 @@ public class StmtLs extends StmtShellInteractive {
         File f=new File(dir);
 
         for (String s:f.list()) {
-        	String path=dir + File.separator + s;
+            String path=dir + File.separator + s;
             File x=new File(path);
             if (x.isFile()) {
                 files.add(path);
@@ -83,42 +83,42 @@ public class StmtLs extends StmtShellInteractive {
             }
             
         }
-    	
+        
     }
     
     
     @Override
     protected void processOne (Ctx ctx, File file) throws Exception {
-    	if (!file.exists()) throw new Exception("No such file or directory");
-    	if (file.isFile()) {
-    		ctx.push(new ValueObj(new ObjFile(file.getCanonicalPath(), Protection.NoProtection)));
-    		return;
-    	}
-    	if (file.isDirectory()) {
-    		List<String> directories=new ArrayList<String>();
-    		List<String> files=new ArrayList<String>();
-    		getDirContent(file.getCanonicalPath(), directories, files);
-			show (ctx, directories, files);
-			return;
-       	}
-    	throw new Exception("No such file or directory");
-    	
+        if (!file.exists()) throw new Exception("No such file or directory");
+        if (file.isFile()) {
+            ctx.push(new ValueObj(new ObjFile(file.getCanonicalPath(), Protection.NoProtection)));
+            return;
+        }
+        if (file.isDirectory()) {
+            List<String> directories=new ArrayList<String>();
+            List<String> files=new ArrayList<String>();
+            getDirContent(file.getCanonicalPath(), directories, files);
+            show (ctx, directories, files);
+            return;
+          }
+        throw new Exception("No such file or directory");
+        
     }
     
     
     
     @Override
     protected void processSet (Ctx ctx, List<File> elements) throws Exception {
-		List<String> directories=new ArrayList<String>();
-		List<String> files=new ArrayList<String>();
-		for (File f:elements) {
-			if (f.isDirectory()) {
-				directories.add(f.getCanonicalPath());
-			} else if (f.isFile()) {
-				files.add(f.getCanonicalPath());
-			}
-		}
-		show (ctx, directories, files);
+        List<String> directories=new ArrayList<String>();
+        List<String> files=new ArrayList<String>();
+        for (File f:elements) {
+            if (f.isDirectory()) {
+                directories.add(f.getCanonicalPath());
+            } else if (f.isFile()) {
+                files.add(f.getCanonicalPath());
+            }
+        }
+        show (ctx, directories, files);
     }
     
     
@@ -128,7 +128,7 @@ public class StmtLs extends StmtShellInteractive {
 
     private void show (Ctx ctx, List<String> directories, List<String> files) throws Exception {
         if (showDirs) {
-        	sort(directories);
+            sort(directories);
         } else {
             directories.clear();
         }
@@ -142,8 +142,8 @@ public class StmtLs extends StmtShellInteractive {
         for (String x:directories) result.add(new ValueObj(new ObjDir(x, Protection.NoProtection)));
         for (String x:files) result.add(new ValueObj(new ObjFile(x, Protection.NoProtection)));
                 
-        ctx.push(new ValueList(result));   	
-    	
+        ctx.push(new ValueList(result));      
+        
 
     }
 

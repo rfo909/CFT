@@ -27,9 +27,9 @@ import rf.configtool.parser.TokenStream;
 
 public class ExprTerminal extends ExprCommon {
     
-	private ExprCommon expr;
+    private ExprCommon expr;
     private Value literalValue;
-	private ExprE notExpr;
+    private ExprE notExpr;
     private Expr negExpr;
 
     public ExprTerminal (TokenStream ts) throws Exception {
@@ -37,12 +37,12 @@ public class ExprTerminal extends ExprCommon {
         
         
         if (ts.peekStr("=>")) {
-        	expr=new ExprAssign(ts);
-        	return;
+            expr=new ExprAssign(ts);
+            return;
         }
         if (ts.peekType(Token.TOK_IDENTIFIER) && ts.peekStr(1,"=")) {
-        	expr = new ExprAssign2(ts);
-        	return;
+            expr = new ExprAssign2(ts);
+            return;
         }
         
         
@@ -74,36 +74,36 @@ public class ExprTerminal extends ExprCommon {
         }
         
         if (ts.matchStr("null")) {
-        	literalValue=new ValueNull();
+            literalValue=new ValueNull();
             return;
         }
         if (ts.peekStr(1,":")) {
-        	expr=new ExprCall(ts);
-        	return;
+            expr=new ExprCall(ts);
+            return;
         }
         if (ts.peekStr("tryCatch")) {
-        	expr=new ExprTryCatch(ts);
+            expr=new ExprTryCatch(ts);
             return;
         }
         if (ts.peekStr("tryCatchSoft")) {
-        	expr=new ExprTryCatchSoft(ts);
+            expr=new ExprTryCatchSoft(ts);
             return;
         }
         if (ts.peekStr("Sequence")) {
-        	expr = new ExprSequence(false,ts);
-        	return;
+            expr = new ExprSequence(false,ts);
+            return;
         }
         if (ts.peekStr("CondSequence")) {
-        	expr = new ExprSequence(true,ts);
-        	return;
+            expr = new ExprSequence(true,ts);
+            return;
         }
         if (ts.peekStr("SpawnProcess")) {
-        	expr = new ExprSpawnProcess(ts);
-        	return;
+            expr = new ExprSpawnProcess(ts);
+            return;
         }
         if (ts.peekStr("SymDict")) {
-        	expr=new ExprSymDict(ts);
-        	return;
+            expr=new ExprSymDict(ts);
+            return;
         }
         
         
@@ -144,38 +144,38 @@ public class ExprTerminal extends ExprCommon {
     }
     
     public Value resolve (Ctx ctx) throws Exception {
-    	try {
-    		if (expr != null) return expr.resolve(ctx);
+        try {
+            if (expr != null) return expr.resolve(ctx);
 
-    		if (literalValue != null) return literalValue;
-	        
+            if (literalValue != null) return literalValue;
+            
 
-	        if (notExpr != null) {
-	            Value v=notExpr.resolve(ctx);
-	            return new ValueBoolean(!v.getValAsBoolean());
-	        }
-	        if (negExpr != null) {
-	            Value v=negExpr.resolve(ctx);
-	            if (v instanceof ValueInt) {
-	                long result=-((ValueInt)v).getVal();
-	                return new ValueInt(result);
-	            } else if (v instanceof ValueFloat) {
-	                double result=-((ValueFloat)v).getVal();
-	                return new ValueFloat(result);
-	            } else {
-	                throw new SourceException(negExpr.getSourceLocation(), "expected numeric value (int/float)");
-	            }
-	        }
+            if (notExpr != null) {
+                Value v=notExpr.resolve(ctx);
+                return new ValueBoolean(!v.getValAsBoolean());
+            }
+            if (negExpr != null) {
+                Value v=negExpr.resolve(ctx);
+                if (v instanceof ValueInt) {
+                    long result=-((ValueInt)v).getVal();
+                    return new ValueInt(result);
+                } else if (v instanceof ValueFloat) {
+                    double result=-((ValueFloat)v).getVal();
+                    return new ValueFloat(result);
+                } else {
+                    throw new SourceException(negExpr.getSourceLocation(), "expected numeric value (int/float)");
+                }
+            }
 
-	        throw new RuntimeException("Internal error");
-    	} catch (Exception ex) {
-    		if (ex instanceof SourceException) {
-    			throw ex;
-    		} else {
-    			throw new SourceException(getSourceLocation(), ex);
-    		}
+            throw new RuntimeException("Internal error");
+        } catch (Exception ex) {
+            if (ex instanceof SourceException) {
+                throw ex;
+            } else {
+                throw new SourceException(getSourceLocation(), ex);
+            }
 
-    	}
+        }
     }
 
 }

@@ -41,8 +41,8 @@ import java.nio.file.Files;
 
 public class ObjFile extends Obj {
 
-	static final String DefaultEncoding = "ISO_8859_1";
-	
+    static final String DefaultEncoding = "ISO_8859_1";
+    
     private String name;
     private Protection protection;
     private String encoding=DefaultEncoding;
@@ -53,22 +53,22 @@ public class ObjFile extends Obj {
         this.protection=protection;
         
         if (protection==null) {
-        	throw new Exception("protection==null is invalid, use Protection.NoProtection");
+            throw new Exception("protection==null is invalid, use Protection.NoProtection");
         }
 
         if (!isSymlink()) {
-	        try {
-	            File f=new File(name);
-	            if (f.exists()) {
-	                this.name=f.getCanonicalPath();
-	            }
-	        } catch (Exception ex) {
-	            this.name=name;
-	        }
+            try {
+                File f=new File(name);
+                if (f.exists()) {
+                    this.name=f.getCanonicalPath();
+                }
+            } catch (Exception ex) {
+                this.name=name;
+            }
         }
         
         if (isSymlink()) {
-        	this.protection=new Protection("isSymlink");
+            this.protection=new Protection("isSymlink");
         }
         
         add(new FunctionExists());
@@ -103,17 +103,17 @@ public class ObjFile extends Obj {
     }
     
     public Protection getProtection() {
-    	return protection;
+        return protection;
     }
     
     public void validateDestructiveOperation (String op) throws Exception {
-    	protection.validateDestructiveOperation(op, name);
+        protection.validateDestructiveOperation(op, name);
    }
     
       
     public boolean isSymlink() {
-    	Path path=Paths.get(name);
-    	return Files.isSymbolicLink(path);
+        Path path=Paths.get(name);
+        return Files.isSymbolicLink(path);
     }
 
     protected ObjFile self() {
@@ -130,7 +130,7 @@ public class ObjFile extends Obj {
     }
     
     public String getEncoding() {
-    	return encoding;
+        return encoding;
     }
     
     @Override
@@ -144,15 +144,15 @@ public class ObjFile extends Obj {
 
     @Override
     public String synthesize() throws Exception {
-    	String enc="";
-    	String prot="";
-    	if (!encoding.equals(DefaultEncoding)) {
-    		// setEncoding returns self!
-    		enc=".encoding(" + (new ValueString(encoding)).synthesize() + ")";
-    	}
-    	if (protection != null && protection.isActive()) {
-    		prot=".protect(" + (new ValueString(protection.getCode()).synthesize() + ")");
-    	}
+        String enc="";
+        String prot="";
+        if (!encoding.equals(DefaultEncoding)) {
+            // setEncoding returns self!
+            enc=".encoding(" + (new ValueString(encoding)).synthesize() + ")";
+        }
+        if (protection != null && protection.isActive()) {
+            prot=".protect(" + (new ValueString(protection.getCode()).synthesize() + ")");
+        }
         return "File(" + (new ValueString(name)).synthesize() + ")" + enc + prot;
     }
 
@@ -223,12 +223,12 @@ public class ObjFile extends Obj {
     // Implenting customEOL override
     
     private void outln(PrintStream ps, String line) throws Exception {
-    	if (customEOL==null) {
-    		ps.println(line);
-    	} else {
-    		ps.print(line);
-    		ps.print(customEOL);
-    	}
+        if (customEOL==null) {
+            ps.println(line);
+        } else {
+            ps.print(line);
+            ps.print(customEOL);
+        }
     }
 
     class FunctionExists extends Function {
@@ -303,11 +303,11 @@ public class ObjFile extends Obj {
                 if (f.isFile()) {
                     boolean ok=f.delete();
                     if (!ok) {
-                    	ctx.getObjGlobal().addSystemMessage("Delete failed : " + f.getCanonicalPath());
+                        ctx.getObjGlobal().addSystemMessage("Delete failed : " + f.getCanonicalPath());
                     }
                     return new ValueBoolean(ok);
                 } else {
-                	ctx.getObjGlobal().addSystemMessage("Not a file    : " + f.getCanonicalPath());
+                    ctx.getObjGlobal().addSystemMessage("Not a file    : " + f.getCanonicalPath());
                     return new ValueBoolean(false);
                 }
             } 
@@ -341,10 +341,10 @@ public class ObjFile extends Obj {
                     List<Value> lines=((ValueList)content).getVal();
                     for (Value line:lines) {
                         // process as lines
-                    	outln(ps,line.getValAsString());
+                        outln(ps,line.getValAsString());
                     }
                 } else {
-                	outln(ps,content.getValAsString());
+                    outln(ps,content.getValAsString());
                 }
             } finally {
                 if (ps != null) try {ps.close();} catch (Exception ex) {};
@@ -405,9 +405,9 @@ public class ObjFile extends Obj {
             long lineNo=0;
             try {
                 //br=new BufferedReader(new FileReader(f));
-            	br = new BufferedReader(
-         			   new InputStreamReader(
-         	                      new FileInputStream(f), encoding));
+                br = new BufferedReader(
+                   new InputStreamReader(
+                                new FileInputStream(f), encoding));
 
                 for (;;) {
                     String line=br.readLine();
@@ -506,7 +506,7 @@ public class ObjFile extends Obj {
 
 
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	Stdio stdio=ctx.getStdio();
+            Stdio stdio=ctx.getStdio();
 
             final int lines=ctx.getObjGlobal().getRoot().getObjTerm().getScreenHeight()-2; // room for info line + input line
             final int width=ctx.getObjGlobal().getRoot().getObjTerm().getScreenWidth()-2; // a little space to the right
@@ -517,11 +517,11 @@ public class ObjFile extends Obj {
             BufferedReader br=null;
             try {
                 //br=new BufferedReader(new InputStreamReader(new FileInputStream(f)));
-            	br = new BufferedReader(
-          			   new InputStreamReader(
-          	                      new FileInputStream(f), encoding));
+                br = new BufferedReader(
+                       new InputStreamReader(
+                                  new FileInputStream(f), encoding));
 
-            	int lineNo=0;
+                int lineNo=0;
                 int linesDisplayed=0;
                 for (;;) {
                     String line=br.readLine();
@@ -544,7 +544,7 @@ public class ObjFile extends Obj {
                     
                     
                     if (linesDisplayed >= lines) {
-                    	stdio.println("[" + f.getName() + " | line:" + lineNo + "] ENTER to continue, 'q' to quit");
+                        stdio.println("[" + f.getName() + " | line:" + lineNo + "] ENTER to continue, 'q' to quit");
                         String s=ctx.getStdio().getInputLine();
                         if (s.trim().equals("q")) break;
                         linesDisplayed=0;
@@ -633,7 +633,7 @@ public class ObjFile extends Obj {
             if (params.size() != 1) throw new Exception("Expected File parameter");
 
 
-        	OutText outText=ctx.getOutText();
+            OutText outText=ctx.getOutText();
 
             Obj obj=getObj("File", params, 0);
             if (!(obj instanceof ObjFile)) throw new Exception("Expected File parameter");
@@ -654,17 +654,17 @@ public class ObjFile extends Obj {
             InputStream in=null;
             OutputStream out=null;
             try {
-            	in=new FileInputStream(src);
-            	out=new FileOutputStream(target);
-	            byte[] buf=new byte[64*1024];
-	            for (;;) {
-	                int count=in.read(buf);
-	                if (count <= 0) break;
-	                out.write(buf, 0, count);
-	            }
+                in=new FileInputStream(src);
+                out=new FileOutputStream(target);
+                byte[] buf=new byte[64*1024];
+                for (;;) {
+                    int count=in.read(buf);
+                    if (count <= 0) break;
+                    out.write(buf, 0, count);
+                }
             } finally {
-	            if (in != null) try {in.close();} catch (Exception ex) {};
-	            if (out != null) try {out.close();} catch (Exception ex) {};
+                if (in != null) try {in.close();} catch (Exception ex) {};
+                if (out != null) try {out.close();} catch (Exception ex) {};
             }
             return new ValueObj(self());
         }
@@ -826,14 +826,14 @@ public class ObjFile extends Obj {
                     sb2.append(" " + toHex(b));
                     countInLine++;
                     if (countInLine >= ValuesPerLine) {
-                    	stdio.println(createLine(lineNumber++, sb1,sb2));
+                        stdio.println(createLine(lineNumber++, sb1,sb2));
                         sb1=new StringBuffer();
                         sb2=new StringBuffer();
                         countInLine=0;
 
                         linesDisplayed++;
                         if (linesDisplayed >= lines) {
-                        	stdio.println("[" + f.getName() + "] ENTER to continue, 'q' to quit");
+                            stdio.println("[" + f.getName() + "] ENTER to continue, 'q' to quit");
                             String s=ctx.getStdio().getInputLine();
                             if (s.trim().equals("q")) break;
                             linesDisplayed=0;
@@ -841,7 +841,7 @@ public class ObjFile extends Obj {
                     }
                 }
                 if (countInLine>0) {
-                	stdio.println(createLine(lineNumber,sb1,sb2));
+                    stdio.println(createLine(lineNumber,sb1,sb2));
                 }
             } finally {
                 if (fis != null) try {fis.close();} catch (Exception ex) {}
@@ -891,14 +891,14 @@ public class ObjFile extends Obj {
             return "encoding(encoding?) - get or set encoding (returns self)";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() == 1) {
+            if (params.size() == 1) {
                 String targetEncoding=getString("encoding", params, 0);
                 if (!Charset.isSupported(targetEncoding)) throw new Exception("Charset '" + targetEncoding + "' not supported");
                 encoding=targetEncoding;
                 return new ValueObj(self()); // important for synthesis
-        	} else if (params.size() != 0) {
-            	throw new Exception("Expected single optional parameter encoding");
-        	}
+            } else if (params.size() != 0) {
+                throw new Exception("Expected single optional parameter encoding");
+            }
             return new ValueString(encoding);
         }
     }
@@ -912,12 +912,12 @@ public class ObjFile extends Obj {
             return "protect(desc?) - set protection status, returns self";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	String desc="-";
-        	if (params.size() > 1) throw new Exception("Expected optional string parameter");
-        	if (params.size()==1) {
-        		desc=getString("desc", params, 0);
-        	}
-        	protection = new Protection(desc);
+            String desc="-";
+            if (params.size() > 1) throw new Exception("Expected optional string parameter");
+            if (params.size()==1) {
+                desc=getString("desc", params, 0);
+            }
+            protection = new Protection(desc);
             return new ValueObj(self());
         }
     }
@@ -928,13 +928,13 @@ public class ObjFile extends Obj {
         }
         public String getShortDesc() {
             return "unprotect() - unprotect protected file - error if not protected - returns self";
-            	// Because if we unprotect something and it isn't protected, we don't have
-            	// control of what we are doing, and the protection mechanism is all 
-            	// about ensuring control
+                // Because if we unprotect something and it isn't protected, we don't have
+                // control of what we are doing, and the protection mechanism is all 
+                // about ensuring control
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	if (!protection.isActive()) throw new Exception("unprotect: " + name + " - not protected.");
-        	protection=Protection.NoProtection;
+            if (!protection.isActive()) throw new Exception("unprotect: " + name + " - not protected.");
+            protection=Protection.NoProtection;
             return new ValueObj(self());
         }
     }
@@ -950,18 +950,18 @@ public class ObjFile extends Obj {
             return "tail(count) - returns list of lines from the tail end of file";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	// Using random access for big files
-        	final int BYTES_PER_LINE = 256;
-        	
-        	if (params.size() != 1) throw new Exception("Expected count parameter");
-        	final int count=(int) getInt("count", params, 0);
-        	String[] lines=new String[count];
-        	
+            // Using random access for big files
+            final int BYTES_PER_LINE = 256;
+            
+            if (params.size() != 1) throw new Exception("Expected count parameter");
+            final int count=(int) getInt("count", params, 0);
+            String[] lines=new String[count];
+            
             File f=new File(name);
             if (!f.exists()) {
-            	// return empty list 
-            	List<Value> list=new ArrayList<Value>();
-            	return new ValueList(list);
+                // return empty list 
+                List<Value> list=new ArrayList<Value>();
+                return new ValueList(list);
             }
             long seekPos=f.length()-(count*BYTES_PER_LINE);
             if (seekPos < 0) seekPos=0;
@@ -972,9 +972,9 @@ public class ObjFile extends Obj {
             try {
                 //System.out.println("Seeking to " + seekPos);
                 raf.seek(seekPos);
-            	br = new BufferedReader(
-         			   new InputStreamReader(
-         	                      new FileInputStream(raf.getFD()), encoding));
+                br = new BufferedReader(
+                   new InputStreamReader(
+                                new FileInputStream(raf.getFD()), encoding));
 
                 for (;;) {
                     String line=br.readLine();
@@ -986,12 +986,12 @@ public class ObjFile extends Obj {
                 
                 List<Value> result=new ArrayList<Value>();
                 for (int i=0; i<count; i++) {
-                	int pos=(readLines+i)%count;
-                	long lineNo = readLines-count+i;
-                	if (lineNo < 0) continue;
-                	String s=lines[pos];
-                	String deTabbed=TabUtil.substituteTabs(s, 4);
-                	result.add(new ValueObjFileLine(deTabbed, seekPos==0 ? lineNo : -1, self()));
+                    int pos=(readLines+i)%count;
+                    long lineNo = readLines-count+i;
+                    if (lineNo < 0) continue;
+                    String s=lines[pos];
+                    String deTabbed=TabUtil.substituteTabs(s, 4);
+                    result.add(new ValueObjFileLine(deTabbed, seekPos==0 ? lineNo : -1, self()));
                 }
                 
                 return new ValueList(result);
@@ -999,7 +999,7 @@ public class ObjFile extends Obj {
                 if (raf != null) try {raf.close();} catch (Exception ex) {};
                 if (br != null) try {br.close();} catch (Exception ex) {};
             }
-        	
+            
         }
     }
     
@@ -1013,31 +1013,31 @@ public class ObjFile extends Obj {
             return "head(count) - returns list of lines from start of file (empty list if file doesn't exist)";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 1) throw new Exception("Expected count parameter");
-        	final int count=(int) getInt("count", params, 0);
-        	
+            if (params.size() != 1) throw new Exception("Expected count parameter");
+            final int count=(int) getInt("count", params, 0);
+            
             File f=new File(name);
             if (!f.exists()) {
-            	// return empty list 
-            	List<Value> list=new ArrayList<Value>();
-            	return new ValueList(list);
+                // return empty list 
+                List<Value> list=new ArrayList<Value>();
+                return new ValueList(list);
             }
 
             List<Value> list=new ArrayList<Value>();
             
             BufferedReader br=null;
             try {
-            	br = new BufferedReader(
-         			   new InputStreamReader(
-         	                      new FileInputStream(f), encoding));
+                br = new BufferedReader(
+                   new InputStreamReader(
+                                new FileInputStream(f), encoding));
 
-            	long lineNo=0;
+                long lineNo=0;
                 for (;;) {
                     String line=br.readLine();
                     lineNo++;
                     if (line==null) break;
                     
-                	String deTabbed=TabUtil.substituteTabs(line, 4);
+                    String deTabbed=TabUtil.substituteTabs(line, 4);
                     list.add(new ValueObjFileLine(deTabbed, lineNo, self()));
                     if (list.size() >= count) break;
                 }
@@ -1046,7 +1046,7 @@ public class ObjFile extends Obj {
             } finally {
                 if (br != null) try {br.close();} catch (Exception ex) {};
             }
-        	
+            
         }
     }
 
@@ -1060,8 +1060,8 @@ public class ObjFile extends Obj {
             return "setWriteLF() - override default newline / CRLF";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 0) throw new Exception("Expected no parameters");
-        	customEOL="\n";
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            customEOL="\n";
             return new ValueObj(self());
         }
     }
@@ -1075,8 +1075,8 @@ public class ObjFile extends Obj {
             return "setWriteCRLF() - override default newline / CRLF";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 0) throw new Exception("Expected no parameters");
-        	customEOL="\r\n";
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            customEOL="\r\n";
             return new ValueObj(self());
         }
     }
@@ -1090,42 +1090,42 @@ public class ObjFile extends Obj {
             return "readBinary([offset,count]?) - returns binary value for whole file, or as specified";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() == 0) {
-	        	File f=new File(name);
-	        	byte[] buf=new byte[(int) f.length()];
-	        	InputStream in=null;
-	        	try {
-	        		in=new FileInputStream(f);
-	        		int count = in.read(buf);
-	        		if (count != buf.length) throw new Exception("Invalid read, got " + count + " bytes of " + buf.length); 
-	        	} finally  {
-	        		if (in != null) try {in.close();} catch (Exception ex) {};
-	        	}
-	        	return new ValueBinary(buf);
-	        } else if (params.size()==2) {
-	        	int offset=(int) getInt("offset", params, 0);
-	        	int count=(int) getInt("count", params, 1);
-	        	File f=new File(name);
-	        	byte[] buf=new byte[count];
-	        	FileInputStream fis=null;
-	        	try {
-	        		RandomAccessFile raf=new RandomAccessFile(f,"r");
-	        		raf.seek(offset);
-	        		fis=new FileInputStream(raf.getFD());
-	        		int bytesRead = fis.read(buf);
-	        		if (bytesRead != buf.length) {
-	        			// repackage buf to shorter array
-	        			byte[] newBuf=new byte[bytesRead];
-	        			for (int i=0; i<bytesRead; i++) newBuf[i]=buf[i];
-	        			buf=newBuf;
-	        		}
-	        		return new ValueBinary(buf);
-	        	} finally {
-	        		if (fis != null) try {fis.close();} catch (Exception ex) {};
-	        	}
-	        } else {
-	        	throw new Exception("Expected either no parameters, or two parameters (offset+count)");
-	        }
+            if (params.size() == 0) {
+                File f=new File(name);
+                byte[] buf=new byte[(int) f.length()];
+                InputStream in=null;
+                try {
+                    in=new FileInputStream(f);
+                    int count = in.read(buf);
+                    if (count != buf.length) throw new Exception("Invalid read, got " + count + " bytes of " + buf.length); 
+                } finally  {
+                    if (in != null) try {in.close();} catch (Exception ex) {};
+                }
+                return new ValueBinary(buf);
+            } else if (params.size()==2) {
+                int offset=(int) getInt("offset", params, 0);
+                int count=(int) getInt("count", params, 1);
+                File f=new File(name);
+                byte[] buf=new byte[count];
+                FileInputStream fis=null;
+                try {
+                    RandomAccessFile raf=new RandomAccessFile(f,"r");
+                    raf.seek(offset);
+                    fis=new FileInputStream(raf.getFD());
+                    int bytesRead = fis.read(buf);
+                    if (bytesRead != buf.length) {
+                        // repackage buf to shorter array
+                        byte[] newBuf=new byte[bytesRead];
+                        for (int i=0; i<bytesRead; i++) newBuf[i]=buf[i];
+                        buf=newBuf;
+                    }
+                    return new ValueBinary(buf);
+                } finally {
+                    if (fis != null) try {fis.close();} catch (Exception ex) {};
+                }
+            } else {
+                throw new Exception("Expected either no parameters, or two parameters (offset+count)");
+            }
         }
     }
     
@@ -1138,22 +1138,22 @@ public class ObjFile extends Obj {
             return "binaryCreate(data) - create file from binary data - returns self";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 1) throw new Exception("Expected binary data parameter");
-        	ValueBinary data=getBinary("data",params,0);
-        	
+            if (params.size() != 1) throw new Exception("Expected binary data parameter");
+            ValueBinary data=getBinary("data",params,0);
+            
             validateDestructiveOperation("File.binaryCreate");
             data.validateNonSecure("File.binaryCreate");
 
             
-        	OutputStream out=null;
-        	File f=new File(name);
-        	try {
-        		out=new FileOutputStream(f);
-        		out.write(data.getVal());
-        	} finally  {
-        		if (out != null) try {out.close();} catch (Exception ex) {};
-        	}
-        	return new ValueObj(self());
+            OutputStream out=null;
+            File f=new File(name);
+            try {
+                out=new FileOutputStream(f);
+                out.write(data.getVal());
+            } finally  {
+                if (out != null) try {out.close();} catch (Exception ex) {};
+            }
+            return new ValueObj(self());
         }
     }
     
@@ -1165,9 +1165,9 @@ public class ObjFile extends Obj {
             return "verify(str) - verify exists, and return self, or throw soft error with str";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 1) throw new Exception("Expected str parameter");
-        	String str=getString("str", params, 0);
-        	
+            if (params.size() != 1) throw new Exception("Expected str parameter");
+            String str=getString("str", params, 0);
+            
             File f=new File(name);
             boolean ok=f.exists() && f.isFile();
             if (!ok) throw new SoftErrorException(str + ": " + name); 

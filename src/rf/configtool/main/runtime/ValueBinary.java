@@ -11,22 +11,22 @@ public class ValueBinary extends Value {
     private boolean secure;
 
     public ValueBinary (byte[] val) {
-    	this(val,false);
+        this(val,false);
     }
 
     public ValueBinary (byte[] val, boolean secure) {
         this.val=val;
         this.secure=secure;
         if (!secure) {
-	        add (new FunctionHex());
-	        add (new FunctionLength());
-	        add (new FunctionToString());
-	        add (new FunctionPrintableChars());
+            add (new FunctionHex());
+            add (new FunctionLength());
+            add (new FunctionToString());
+            add (new FunctionPrintableChars());
         }
     }
     
     public void validateNonSecure (String msg) throws Exception {
-    	if (secure) throw new Exception("ValueBinary is flagged as secure, no access: " + msg);
+        if (secure) throw new Exception("ValueBinary is flagged as secure, no access: " + msg);
     }
     
     public byte[] getVal() {
@@ -40,11 +40,11 @@ public class ValueBinary extends Value {
 
     @Override
     public String getValAsString() {
-    	if (secure) {
-    		return "0x???";
-    	} else {
-    		return "0x...";
-    	}
+        if (secure) {
+            return "0x???";
+        } else {
+            return "0x...";
+        }
     }
     
 
@@ -56,12 +56,12 @@ public class ValueBinary extends Value {
     public boolean eq(Obj v) {
         if (v==this) return true;
         if (v instanceof ValueBinary) {
-        	byte[] data=((ValueBinary)v).val;
-        	if (data.length != val.length) return false;
-        	for (int i=0; i<val.length; i++) {
-        		if (data[i] != val[i]) return false;
-        	}
-        	return true;
+            byte[] data=((ValueBinary)v).val;
+            if (data.length != val.length) return false;
+            for (int i=0; i<val.length; i++) {
+                if (data[i] != val[i]) return false;
+            }
+            return true;
         }
         return false;
     }
@@ -127,9 +127,9 @@ public class ValueBinary extends Value {
             if (params.size() != 0) throw new Exception("Expected no parameters");
             StringBuffer sb=new StringBuffer();
             for (int i=0; i<val.length; i++) {
-            	int x=(int) val[i];
-            	String ch=getChar(x);
-            	if (ch != null) sb.append(ch);
+                int x=(int) val[i];
+                String ch=getChar(x);
+                if (ch != null) sb.append(ch);
             }
             return new ValueString(sb.toString());
         }

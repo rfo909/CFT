@@ -31,10 +31,10 @@ import rf.configtool.parser.SourceLocation;
  *
  */
 public class CodeLine {
-	public static final int TYPE_LINE_NORMAL = 0;
-	public static final int TYPE_LINE_ORIGINAL = 1;
-	public static final int TYPE_LINE_GENERATED = 2;
-	
+    public static final int TYPE_LINE_NORMAL = 0;
+    public static final int TYPE_LINE_ORIGINAL = 1;
+    public static final int TYPE_LINE_GENERATED = 2;
+    
     private SourceLocation loc;
     private String line;
     private int type;
@@ -44,7 +44,7 @@ public class CodeLine {
     }
     
     public CodeLine(SourceLocation loc, String line) {
-    	this(loc,line,TYPE_LINE_NORMAL);
+        this(loc,line,TYPE_LINE_NORMAL);
     }
     
     public CodeLine(SourceLocation loc, String line, int type) {
@@ -60,7 +60,7 @@ public class CodeLine {
         return line;
     }
     public int getType() {
-    	return type;
+        return type;
     }
 
 

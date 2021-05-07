@@ -46,14 +46,14 @@ import rf.configtool.main.runtime.lib.db2.ObjDb2;
 
 public class ObjUtil extends Obj {
 
-    public ObjUtil () {    	
+    public ObjUtil () {       
         this.add(new FunctionEncrypt());
         this.add(new FunctionDecrypt());
         this.add(new FunctionRandomBinary());
     }
     
     private ObjUtil self() {
-    	return this;
+        return this;
     }
     
     @Override
@@ -84,9 +84,9 @@ public class ObjUtil extends Obj {
             byte[] password=getBinary("password",params,0).getVal();
             byte[] salt;
             if (params.size() == 2) {
-            	salt=getString("salt",params,1).getBytes("UTF-8");
+                salt=getString("salt",params,1).getBytes("UTF-8");
             } else {
-            	salt=new byte[0];
+                salt=new byte[0];
             }
             return new ValueObj(new ObjEncrypt(password,salt, true));
         }
@@ -105,9 +105,9 @@ public class ObjUtil extends Obj {
             byte[] password=getBinary("password",params,0).getVal();
             byte[] salt;
             if (params.size() == 2) {
-            	salt=getString("salt",params,1).getBytes("UTF-8");
+                salt=getString("salt",params,1).getBytes("UTF-8");
             } else {
-            	salt=new byte[0];
+                salt=new byte[0];
             }
             return new ValueObj(new ObjEncrypt(password,salt, false));
         }
@@ -123,11 +123,11 @@ public class ObjUtil extends Obj {
             return "randomBinary(seed) - returns Binary value with 20 random bytes";
         }
         private byte[] create (String pre, Ctx ctx) throws Exception {
-    		MessageDigest md1 = MessageDigest.getInstance("SHA1"); // 160 bits = 20 bytes
-    		String s = pre+System.currentTimeMillis();
-        	md1.update(s.getBytes("UTF-8"));
-        	md1.update(ctx.getObjGlobal().getRoot().getSecureSessionID());
-        	return md1.digest();
+            MessageDigest md1 = MessageDigest.getInstance("SHA1"); // 160 bits = 20 bytes
+            String s = pre+System.currentTimeMillis();
+            md1.update(s.getBytes("UTF-8"));
+            md1.update(ctx.getObjGlobal().getRoot().getSecureSessionID());
+            return md1.digest();
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 1) throw new Exception("Expected seed string parameter");

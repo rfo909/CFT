@@ -42,7 +42,7 @@ public class OutData {
     }
     
     public int getOutDataLength() {
-    	return outData.size();
+        return outData.size();
     }
 
 }

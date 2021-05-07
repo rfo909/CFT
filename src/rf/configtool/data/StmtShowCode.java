@@ -64,8 +64,8 @@ public class StmtShowCode extends Stmt {
     // 2019-03-13 Also supports names on format "a*:Title", and 
     
     public void execute (Ctx ctx) throws Exception {
-    	Stdio stdio=ctx.getStdio();
-    	
+        Stdio stdio=ctx.getStdio();
+        
         Value v=expr.resolve(ctx);
         if (v==null || !(v instanceof ValueString)) throw new Exception("showCode() - expected string parameter");
         String s=((ValueString) v).getVal();

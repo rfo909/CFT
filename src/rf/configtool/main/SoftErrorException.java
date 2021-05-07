@@ -5,11 +5,11 @@ package rf.configtool.main;
  * which catches soft and hard errors.
  */
 public class SoftErrorException extends Exception{
-	
-	public SoftErrorException (String msg) {
-		super(msg);
-	}
-	
-	
+    
+    public SoftErrorException (String msg) {
+        super(msg);
+    }
+    
+    
 
 }

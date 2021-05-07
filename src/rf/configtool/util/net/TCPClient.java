@@ -25,10 +25,10 @@ public class TCPClient  {
         socket = new Socket(address, port);
         //System.out.println("TCPClient socket ok");
         io=new IO(socket);
-	}
+    }
     
     public IO getIO() {
-    	return io;
+        return io;
     }
 
 

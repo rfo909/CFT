@@ -36,18 +36,18 @@ public class StmtTimeExpr extends Stmt {
     }
 
     public void execute (Ctx ctx) throws Exception {
-    	final long exprInit=ctx.getObjGlobal().getExprCount();
-    	final long a=System.currentTimeMillis();
-    	expr.resolve(ctx);  // ## Not pushing result on stack, to avoid cluttering up the output
-    	long duration=System.currentTimeMillis()-a;
-    	long exprCount = ctx.getObjGlobal().getExprCount() - exprInit;
-    	String ePerSec="";
-    	if (duration>0) {
-    		ePerSec=" / per sec: "+(1000*exprCount/duration);
-    	}
-    	
-    	ctx.getStdio().println("Time: " + (duration) + " ms");
-    	ctx.getStdio().println("Expr: " + exprCount + ePerSec);
+        final long exprInit=ctx.getObjGlobal().getExprCount();
+        final long a=System.currentTimeMillis();
+        expr.resolve(ctx);  // ## Not pushing result on stack, to avoid cluttering up the output
+        long duration=System.currentTimeMillis()-a;
+        long exprCount = ctx.getObjGlobal().getExprCount() - exprInit;
+        String ePerSec="";
+        if (duration>0) {
+            ePerSec=" / per sec: "+(1000*exprCount/duration);
+        }
+        
+        ctx.getStdio().println("Time: " + (duration) + " ms");
+        ctx.getStdio().println("Expr: " + exprCount + ePerSec);
     }
 
 }

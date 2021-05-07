@@ -244,14 +244,14 @@ public class FileInfo {
     * short-circuited, and the file is copied raw, not decompressed and recompressed.
     */
     public void copyFrom (FileInfo f) throws Exception {
-    	boolean isBinary=false;
-    	if (f.getCharSet().equals(CHARSET_BINARY) || this.getCharSet().equals(CHARSET_BINARY)) {
-    		// error if not both binary
-    		if (!f.getCharSet().equals(this.getCharSet())) { 
-    			throw new Exception("Can not copy from charset " + f.getCharSet() + " to " + this.getCharSet());
-    		}
-    		isBinary=true;
-    	}
+        boolean isBinary=false;
+        if (f.getCharSet().equals(CHARSET_BINARY) || this.getCharSet().equals(CHARSET_BINARY)) {
+            // error if not both binary
+            if (!f.getCharSet().equals(this.getCharSet())) { 
+                throw new Exception("Can not copy from charset " + f.getCharSet() + " to " + this.getCharSet());
+            }
+            isBinary=true;
+        }
         if (!isBinary && (f.getCharSet() != this.getCharSet())) {
             BufferedReader reader=null;
             PrintWriter pw=null;
@@ -270,7 +270,7 @@ public class FileInfo {
                 if (reader != null) try {reader.close();} catch (Exception ex) {}
             }
         } else {
-        	// mode isBinary, or charsets are the same, copy is performed at stream level
+            // mode isBinary, or charsets are the same, copy is performed at stream level
             boolean rawCopyOk=false;
             if (f.getCompression() == this.getCompression()) {
                 if (this.getCompression() != ZIP) {

@@ -43,10 +43,10 @@ import java.awt.Color;
 public class ObjLexer extends Obj {
     
     public ObjLexer() {
-    	this.add(new FunctionNode());
-    	this.add(new FunctionAddLine());
-    	this.add(new FunctionGetTokens());
-    	this.add(new FunctionGetTokenStream());
+        this.add(new FunctionNode());
+        this.add(new FunctionAddLine());
+        this.add(new FunctionGetTokens());
+        this.add(new FunctionGetTokenStream());
     }
     
     @Override
@@ -85,9 +85,9 @@ public class ObjLexer extends Obj {
             return "Node(firstChars?) - create empty node, possibly identifying firstChars list";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	String firstChars=ObjLexerNode.NO_CHARS;
+            String firstChars=ObjLexerNode.NO_CHARS;
             if (params.size() == 1) {
-            	firstChars=getString("firstChars",params,0);
+                firstChars=getString("firstChars",params,0);
             }
             return new ValueObj(new ObjLexerNode(firstChars));
         }
@@ -114,45 +114,45 @@ public class ObjLexer extends Obj {
             String file;
             
             if (params.get(0) instanceof ValueObjFileLine) {
-            	ValueObjFileLine x = (ValueObjFileLine) params.get(0);
-            	file=x.getFile().getPath();
+                ValueObjFileLine x = (ValueObjFileLine) params.get(0);
+                file=x.getFile().getPath();
             } else {
-            	file="(nofile)";
+                file="(nofile)";
             }
             // get line (as string) string
-        	String line = getString("line",params, 0);
-        	cs.addLine(line, new SourceLocation(file,lineNo));
-        	
-        	
-        	return new ValueObj(theObj());
+            String line = getString("line",params, 0);
+            cs.addLine(line, new SourceLocation(file,lineNo));
+            
+            
+            return new ValueObj(theObj());
         }
-        	
+            
     }
 
      
 
     
     private List<ObjLexerToken> identifyTokens(CharTable charTable) throws Exception {
-    	List<ObjLexerToken> tokenList=new ArrayList<ObjLexerToken>();
-    	
-    	cs.reset();
+        List<ObjLexerToken> tokenList=new ArrayList<ObjLexerToken>();
+        
+        cs.reset();
 
-    	while (!cs.eof()) {
-    		CharSourcePos startPos=cs.getPos();
-    		SourceLocation loc=cs.getSourceLocation(startPos);
-    		
-        	Integer tokenType = charTable.parse(cs);
-        	if (tokenType == null) {
-        		if (!cs.eof()) throw new Exception(loc + ": lexer failed, current char = '" + cs.getChar() + "'");
-        	}
-        	
-        	if (tokenType < 0) continue; // ignoring these: whitespace and comments
-        	
-        	ObjLexerToken token=new ObjLexerToken(loc.toString(), tokenType, cs.getChars(startPos));
-        	tokenList.add(token);
-    	}
-    	
-    	return tokenList;
+        while (!cs.eof()) {
+            CharSourcePos startPos=cs.getPos();
+            SourceLocation loc=cs.getSourceLocation(startPos);
+            
+            Integer tokenType = charTable.parse(cs);
+            if (tokenType == null) {
+                if (!cs.eof()) throw new Exception(loc + ": lexer failed, current char = '" + cs.getChar() + "'");
+            }
+            
+            if (tokenType < 0) continue; // ignoring these: whitespace and comments
+            
+            ObjLexerToken token=new ObjLexerToken(loc.toString(), tokenType, cs.getChars(startPos));
+            tokenList.add(token);
+        }
+        
+        return tokenList;
     }
    
     
@@ -164,19 +164,19 @@ public class ObjLexer extends Obj {
             return "getTokens(rootNode) - get list of tokens";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 1) throw new Exception("Expected rootNode");
+            if (params.size() != 1) throw new Exception("Expected rootNode");
 
-        	cs.reset();
+            cs.reset();
 
-        	Obj obj=getObj("rootNode",params,0);
+            Obj obj=getObj("rootNode",params,0);
             if (!(obj instanceof ObjLexerNode)) throw new Exception("Expected parameters rootNode and line");
-        	CharTable charTable=((ObjLexerNode) obj).getCharTable();
+            CharTable charTable=((ObjLexerNode) obj).getCharTable();
     
-        	List<Value> valueList=new ArrayList<Value>();
-        	for (ObjLexerToken t:identifyTokens(charTable)) {
-        		valueList.add(new ValueObj(t));
-        	}
-        	return new ValueList(valueList);
+            List<Value> valueList=new ArrayList<Value>();
+            for (ObjLexerToken t:identifyTokens(charTable)) {
+                valueList.add(new ValueObj(t));
+            }
+            return new ValueList(valueList);
         }
     }
     
@@ -189,13 +189,13 @@ public class ObjLexer extends Obj {
             return "getTokenStream(rootNode) - get TokenStream object";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 1) throw new Exception("Expected rootNode");
+            if (params.size() != 1) throw new Exception("Expected rootNode");
 
-        	Obj obj=getObj("rootNode",params,0);
+            Obj obj=getObj("rootNode",params,0);
             if (!(obj instanceof ObjLexerNode)) throw new Exception("Expected parameters rootNode and line");
-        	CharTable charTable=((ObjLexerNode) obj).getCharTable();
+            CharTable charTable=((ObjLexerNode) obj).getCharTable();
     
-        	return new ValueObj(new ObjLexerTokenStream(identifyTokens(charTable)));
+            return new ValueObj(new ObjLexerTokenStream(identifyTokens(charTable)));
         }
     }
 

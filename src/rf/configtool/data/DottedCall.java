@@ -87,11 +87,11 @@ public class DottedCall extends LexicalElement {
             if (checkMode) {
                 return new ValueBoolean(false);
             } else {
-            	if (!(ex instanceof SourceException)) {
-            		throw new SourceException(getSourceLocation(), ex);
-            	} else {
-            		throw ex;
-            	}
+                if (!(ex instanceof SourceException)) {
+                    throw new SourceException(getSourceLocation(), ex);
+                } else {
+                    throw ex;
+                }
             }
         }
     }
