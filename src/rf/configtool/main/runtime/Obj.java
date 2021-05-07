@@ -36,7 +36,12 @@ import rf.configtool.parser.TokenStream;
  */
 public abstract class Obj {
     
+	private Function[] functionArr=new Function[0];
     private HashMap<String,Function> functions=new HashMap<String,Function>();
+    
+    protected void setFunctions (Function[] functionArr) {
+    	this.functionArr=functionArr;
+    }
     
     protected void add (Function function) {
         String name=function.getName();
@@ -49,6 +54,7 @@ public abstract class Obj {
      * field values as functions, for direct dotted lookup
      */
     protected void clearFunctions() {
+    	functionArr=new Function[0];
     	functions=new HashMap<String,Function>();
     }
     
@@ -125,7 +131,17 @@ public abstract class Obj {
     }
     
     public Function getFunction (String name) {
-        return functions.get(name);
+    	Function f=functions.get(name);
+    	if (f != null) return f;
+
+		for (Function x:functionArr) {
+			if (x.getName().equals(name)) {
+				add(x); // to hashmap
+				return x;
+			}
+		}
+		return null;
+        //return functions.get(name);
     }
     
     public abstract String getTypeName();
@@ -183,6 +199,11 @@ public abstract class Obj {
             objGlobal.addSystemMessage("");
         } 
         
+        
+        // populate functions map completely for help
+        for (Function f:functionArr) {
+        	if (!functions.containsKey(f.getName())) add(f);
+        }
         
         List<String> fNames=new ArrayList<String>();        
         Iterator<String> names=functions.keySet().iterator();
