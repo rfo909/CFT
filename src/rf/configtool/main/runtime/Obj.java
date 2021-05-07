@@ -36,11 +36,11 @@ import rf.configtool.parser.TokenStream;
  */
 public abstract class Obj {
     
-	private Function[] functionArr=new Function[0];
+    private Function[] functionArr=null;
     private HashMap<String,Function> functions=new HashMap<String,Function>();
     
     protected void setFunctions (Function[] functionArr) {
-    	this.functionArr=functionArr;
+        this.functionArr=functionArr;
     }
     
     protected void add (Function function) {
@@ -54,8 +54,8 @@ public abstract class Obj {
      * field values as functions, for direct dotted lookup
      */
     protected void clearFunctions() {
-    	functionArr=new Function[0];
-    	functions=new HashMap<String,Function>();
+    	functionArr=null;
+        functions=new HashMap<String,Function>();
     }
     
     
@@ -131,17 +131,11 @@ public abstract class Obj {
     }
     
     public Function getFunction (String name) {
-    	Function f=functions.get(name);
-    	if (f != null) return f;
-
-		for (Function x:functionArr) {
-			if (x.getName().equals(name)) {
-				add(x); // to hashmap
-				return x;
-			}
-		}
-		return null;
-        //return functions.get(name);
+    	if (functionArr != null) {
+    		for (Function f:functionArr) functions.put(f.getName(), f);
+    		functionArr=null;
+    	}
+        return functions.get(name);
     }
     
     public abstract String getTypeName();
@@ -163,46 +157,47 @@ public abstract class Obj {
      * Create a safe copy of this value, by means of running it through an eval(syn()) pipeline,
      * which ensures the new value is completely independent. Throws exception if value not synthesizable.
      */
-	public Value createClone (Ctx callCtx) throws Exception {
-    	Obj obj=this;
-		try {
-			String s=obj.synthesize();
+    public Value createClone (Ctx callCtx) throws Exception {
+        Obj obj=this;
+        try {
+            String s=obj.synthesize();
 
-			Parser p=new Parser();
-			p.processLine(new CodeLine(new SourceLocation(), s));
-			TokenStream ts = p.getTokenStream();
-			ProgramLine progLine=new ProgramLine(ts);
-			
-			Ctx ctx=callCtx.sub();
-			progLine.execute(ctx);
-			Value retVal=ctx.pop();
-			if (retVal==null) retVal=new ValueNull();
-			return retVal;
-		} catch (Exception ex) {
-			throw new Exception("Value could not be run through eval(syn()) - must be synthesizable");
-		}
-	}
+            Parser p=new Parser();
+            p.processLine(new CodeLine(new SourceLocation(), s));
+            TokenStream ts = p.getTokenStream();
+            ProgramLine progLine=new ProgramLine(ts);
+            
+            Ctx ctx=callCtx.sub();
+            progLine.execute(ctx);
+            Value retVal=ctx.pop();
+            if (retVal==null) retVal=new ValueNull();
+            return retVal;
+        } catch (Exception ex) {
+            throw new Exception("Value could not be run through eval(syn()) - must be synthesizable");
+        }
+    }
    
     
     
     
     public void generateHelp(Ctx ctx) {
-    	ObjGlobal objGlobal=ctx.getObjGlobal();
+        ObjGlobal objGlobal=ctx.getObjGlobal();
         OutText outText=ctx.getOutText();
         if (this instanceof ObjGlobal) {
-        	objGlobal.addSystemMessage("-------------------------------------------------");
-        	objGlobal.addSystemMessage("Please read the full documentation: doc/Doc.html");
-        	objGlobal.addSystemMessage("-------------------------------------------------");
+            objGlobal.addSystemMessage("-------------------------------------------------");
+            objGlobal.addSystemMessage("Please read the full documentation: doc/Doc.html");
+            objGlobal.addSystemMessage("-------------------------------------------------");
             objGlobal.addSystemMessage(new Version().getVersion());
-        	objGlobal.addSystemMessage("");
+            objGlobal.addSystemMessage("");
             objGlobal.addSystemMessage("Global functions");
             objGlobal.addSystemMessage("");
         } 
         
         
         // populate functions map completely for help
-        for (Function f:functionArr) {
-        	if (!functions.containsKey(f.getName())) add(f);
+        if (functionArr != null) {
+        	for (Function f:functionArr) functions.put(f.getName(), f);
+        	functionArr=null;
         }
         
         List<String> fNames=new ArrayList<String>();        
@@ -218,7 +213,7 @@ public abstract class Obj {
         });
 
         for (String name:fNames) {
-        	objGlobal.addSystemMessage(functions.get(name).getShortDesc());
+            objGlobal.addSystemMessage(functions.get(name).getShortDesc());
         }
     }
 
