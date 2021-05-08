@@ -1,0 +1,76 @@
+# Readme
+<<<<< EOF
+The functions below were written to investigate how a sequence of digits could be
+made symmetric, by adding two digits together. Order was not important, only that we
+ended up with for ex 22441 which can be rearranged into 24142. 
+
+However, the code spun quickly out of control when presented with certain number
+sequences 5 or more long.
+
+So it became a standardized test for performance.
+
+>>>>> EOF
+/Readme
+
+
+P(1,"12233")=>str
+	dict=Dict
+	str.chars->c
+		dict.set(c,dict.get(c,0)+1)
+	|
+	oddCount=0
+	dict.keys->key
+		if (dict.get(key)%2==1) oddCount=oddCount+1
+	|
+	(oddCount<=1)
+
+/isSymmetric
+
+
+
+# Identify max number of digits the input string can be modified into
+# by adding two digits at a time, testing all permutations.
+# --
+P(1,Input("Digits").get)=>str
+P(2,str) => history
+P(3,false) => verbose
+P(4) => aDict
+	len=str.length
+	max=0
+	Lib.Data.for(0,len-1,1)->x
+		Lib.Data.for(x+1,len,1)->y
+			str.chars => chars
+			xc=chars.nth(x).parseInt
+			yc=chars.nth(y).parseInt
+			Inner {
+				Lib.Data.for(0,len,1)->i 
+					assert(i != x && i != y)
+					out(chars.nth(i))
+				| _.concat
+			} + "" + (xc+yc) => newCode
+			if (newCode.length>1) {
+				symmetry=isSymmetric(newCode)
+				newHistory=history + "->" + newCode
+				if (symmetry) {
+					if (newCode.length>max) {
+						max=newCode.length
+						if (verbose) println(newHistory)
+					}
+				} else {
+					if (newCode.length>=max) {
+						xxx = maxSym(newCode,newHistory,verbose)
+						if (xxx > max) max=xxx
+					}
+				}
+			}
+	|
+	max
+	
+/maxSym
+
+# Run test and report time. 
+# Also counts number of expressions resolved, and currently (2020-05) manages about 4.3 million per second,
+# on my laptop: AMD Ryzen 5 3500U 2.1 GHz / 16 GB RAM
+# -- 
+timeExpr(maxSym("293049"))
+/t
