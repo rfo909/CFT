@@ -28,11 +28,14 @@ public class ValueInt extends Value {
     
     public ValueInt (long val) {
         this.val=val;
-        add(new FunctionBin());
-        add(new FunctionF());
-        add(new FunctionI());
-        add(new FunctionPow());
-        add(new FunctionHex());
+		Function[] arr={
+				new FunctionBin(),
+				new FunctionF(),
+				new FunctionI(),
+				new FunctionPow(),
+				new FunctionHex(),
+			};
+		setFunctions(arr);
     }
     
     protected ValueInt theObj() {

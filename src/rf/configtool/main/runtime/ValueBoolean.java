@@ -29,7 +29,6 @@ public class ValueBoolean extends Value {
     
     public ValueBoolean (boolean val) {
         this.val=val;
-        add (new FunctionNot());
     }
     
     public boolean getVal() {
@@ -61,22 +60,6 @@ public class ValueBoolean extends Value {
     @Override
     public boolean getValAsBoolean() {
         return val;
-    }
-
-
-    
-    class FunctionNot extends Function {
-        public String getName() {
-            return "not";
-        }
-        public String getShortDesc() {
-            return "not() - Inverts boolean value";
-        }
-        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 0) throw new Exception("Expected no parameters");
-            return new ValueBoolean(!val);
-        }
-
     }
     
     

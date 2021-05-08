@@ -35,37 +35,40 @@ public class ValueString extends Value {
     
     public ValueString (String val) {
         this.val=val;
-        add(new FunctionSub());
-        add(new FunctionLength());
-        add(new FunctionTrim());
-        add(new FunctionAdd());
-        add(new FunctionSplit());
-        add(new FunctionEndsWith());
-        add(new FunctionStartsWith());
-        add(new FunctionContains());
-        add(new FunctionToUpper());
-        add(new FunctionToLower());
-        add(new FunctionParseInt());
-        add(new FunctionParseFloat());
-        add(new FunctionReplaceChars());
-        add(new FunctionReplace());
-        add(new FunctionMerge());
-        add(new FunctionIndexOf());
-        add(new FunctionBetween());
-        add(new FunctionBefore());
-        add(new FunctionAfter());
-        add(new FunctionBeforeLast());
-        add(new FunctionAfterLast());
-        add(new FunctionChars());
-        add(new FunctionEsc());
-        add(new FunctionUnEsc());
-        add(new FunctionToHexString());
-        add(new FunctionFromHexString());
-        add(new FunctionHash());
-        add(new FunctionGetBytes());
-        add(new FunctionLast());
-        add(new FunctionFirst());
-        add(new FunctionPrintable());
+		Function[] arr={
+				new FunctionSub(),
+				new FunctionLength(),
+				new FunctionTrim(),
+				new FunctionAdd(),
+				new FunctionSplit(),
+				new FunctionEndsWith(),
+				new FunctionStartsWith(),
+				new FunctionContains(),
+				new FunctionToUpper(),
+				new FunctionToLower(),
+				new FunctionParseInt(),
+				new FunctionParseFloat(),
+				new FunctionReplaceChars(),
+				new FunctionReplace(),
+				new FunctionMerge(),
+				new FunctionIndexOf(),
+				new FunctionBetween(),
+				new FunctionBefore(),
+				new FunctionAfter(),
+				new FunctionBeforeLast(),
+				new FunctionAfterLast(),
+				new FunctionChars(),
+				new FunctionEsc(),
+				new FunctionUnEsc(),
+				new FunctionToHexString(),
+				new FunctionFromHexString(),
+				new FunctionHash(),
+				new FunctionGetBytes(),
+				new FunctionLast(),
+				new FunctionFirst(),
+				new FunctionPrintable(),
+			};
+			setFunctions(arr);
         
     }
     

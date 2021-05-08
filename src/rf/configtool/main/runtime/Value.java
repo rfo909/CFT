@@ -23,7 +23,6 @@ import java.util.List;
 import rf.configtool.data.ProgramLine;
 import rf.configtool.main.CodeLine;
 import rf.configtool.main.Ctx;
-import rf.configtool.main.runtime.ValueBoolean.FunctionNot;
 import rf.configtool.parser.Parser;
 import rf.configtool.parser.SourceLocation;
 import rf.configtool.parser.TokenStream;
