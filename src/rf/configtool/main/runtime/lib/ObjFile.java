@@ -71,35 +71,39 @@ public class ObjFile extends Obj {
             this.protection=new Protection("isSymlink");
         }
         
-        add(new FunctionExists());
-        add(new FunctionName());
-        add(new FunctionPath());
-        add(new FunctionDir());
-        add(new FunctionLength());
-        add(new FunctionDelete());
-        add(new FunctionCreate());
-        add(new FunctionAppend());
-        add(new FunctionRead());
-        add(new FunctionLastModified());
-        add(new FunctionHash());
-        add(new FunctionMore());
-        add(new FunctionUncompress());
-        add(new FunctionCopyFrom());
-        add(new FunctionCopyTo());
-        add(new FunctionMove());
-        add(new FunctionHex());
-        add(new FunctionReadBytes());
-        add(new FunctionEncoding());
-        add(new FunctionProtect());
-        add(new FunctionUnprotect());
-        add(new FunctionTail());
-        add(new FunctionHead());
-        add(new FunctionSetWriteLF());
-        add(new FunctionSetWriteCRLF());
-        add(new FunctionConvertCompressed());
-        add(new FunctionReadBinary());
-        add(new FunctionBinaryCreate());
-        add(new FunctionVerify());
+		Function[] arr={
+				new FunctionExists(),
+				new FunctionName(),
+				new FunctionPath(),
+				new FunctionDir(),
+				new FunctionLength(),
+				new FunctionDelete(),
+				new FunctionCreate(),
+				new FunctionAppend(),
+				new FunctionRead(),
+				new FunctionLastModified(),
+				new FunctionHash(),
+				new FunctionMore(),
+				new FunctionUncompress(),
+				new FunctionCopyFrom(),
+				new FunctionCopyTo(),
+				new FunctionMove(),
+				new FunctionHex(),
+				new FunctionReadBytes(),
+				new FunctionEncoding(),
+				new FunctionProtect(),
+				new FunctionUnprotect(),
+				new FunctionTail(),
+				new FunctionHead(),
+				new FunctionSetWriteLF(),
+				new FunctionSetWriteCRLF(),
+				new FunctionConvertCompressed(),
+				new FunctionReadBinary(),
+				new FunctionBinaryCreate(),
+				new FunctionVerify(),
+		};
+		setFunctions(arr);
+
     }
     
     public Protection getProtection() {

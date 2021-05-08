@@ -48,24 +48,27 @@ import java.awt.Color;
 public class ObjSys extends Obj {
 
     public ObjSys() {
-        add(new FunctionVersion());
-        add(new FunctionFunctions());
-        add(new FunctionLog());
-        add(new FunctionCodeDirs());
-        add(new FunctionOutCount());
-        add(new FunctionLastResult());
-        add(new FunctionSleep());
-        add(new FunctionStdin());
-        add(new FunctionIsWindows());
-        add(new FunctionSavefile());
-        add(new FunctionScriptName());
-        add(new FunctionUptime());
-        add(new FunctionHomeDir());
-        add(new FunctionUchar());
-        add(new FunctionSessionUUID());
-        add(new FunctionReadPassword());
-        add(new FunctionSecureSessionID());
-        add(new FunctionClone());
+		Function[] arr={
+				new FunctionVersion(),
+				new FunctionFunctions(),
+				new FunctionLog(),
+				new FunctionCodeDirs(),
+				new FunctionOutCount(),
+				new FunctionLastResult(),
+				new FunctionSleep(),
+				new FunctionStdin(),
+				new FunctionIsWindows(),
+				new FunctionSavefile(),
+				new FunctionScriptName(),
+				new FunctionUptime(),
+				new FunctionHomeDir(),
+				new FunctionUchar(),
+				new FunctionSessionUUID(),
+				new FunctionReadPassword(),
+				new FunctionSecureSessionID(),
+				new FunctionClone(),
+		};
+		setFunctions(arr);
         
     }
 

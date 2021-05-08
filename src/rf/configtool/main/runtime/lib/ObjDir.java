@@ -62,29 +62,32 @@ public class ObjDir extends Obj {
         }
 
 
-        
-        add(new FunctionName());
-        add(new FunctionPath());
-        add(new FunctionExists());
-        add(new FunctionSub());
-        add(new FunctionFiles());
-        add(new FunctionDirs());
-        add(new FunctionCreate());
-        add(new FunctionDelete());
-        add(new FunctionAllFiles());
-        add(new FunctionAllDirs());
-        add(new FunctionFile());
-        add(new FunctionCopy());
-        add(new FunctionRun());
-        add(new FunctionRunDetach());
-        add(new FunctionRunProcess());
-        add(new FunctionRunCapture());
-        add(new FunctionShowTree());
-        add(new FunctionProtect());
-        add(new FunctionUnprotect());
-        add(new FunctionSetAsCurrentDir());
-        add(new FunctionVerify());
-        add(new FunctionNewestFile());
+		Function[] arr={
+				new FunctionName(),
+				new FunctionPath(),
+				new FunctionExists(),
+				new FunctionSub(),
+				new FunctionFiles(),
+				new FunctionDirs(),
+				new FunctionCreate(),
+				new FunctionDelete(),
+				new FunctionAllFiles(),
+				new FunctionAllDirs(),
+				new FunctionFile(),
+				new FunctionCopy(),
+				new FunctionRun(),
+				new FunctionRunDetach(),
+				new FunctionRunProcess(),
+				new FunctionRunCapture(),
+				new FunctionShowTree(),
+				new FunctionProtect(),
+				new FunctionUnprotect(),
+				new FunctionSetAsCurrentDir(),
+				new FunctionVerify(),
+				new FunctionNewestFile(),
+		};
+		setFunctions(arr);
+
     }
     
     

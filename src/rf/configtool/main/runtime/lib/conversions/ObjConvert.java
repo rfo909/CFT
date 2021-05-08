@@ -101,9 +101,15 @@ public class ObjConvert extends Obj {
     
     
     public ObjConvert() {
-        for (Conv conv:conversions) {
-            this.add(new FunctionCommon(conv));
-        }
+    	Function[] arr=new Function[conversions.length];
+    	for (int i=0; i<conversions.length; i++) {
+    		arr[i]=new FunctionCommon(conversions[i]);
+    	}
+    	setFunctions(arr);
+
+//        for (Conv conv:conversions) {
+//            this.add(new FunctionCommon(conv));
+//        }
     }
     
     @Override

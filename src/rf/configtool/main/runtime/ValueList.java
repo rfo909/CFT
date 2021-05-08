@@ -30,24 +30,27 @@ public class ValueList extends Value {
     
     public ValueList (List<Value> val) {
         this.val=val;
-        add(new FunctionLength());
-        add(new FunctionNth());
-        add(new FunctionSum());
-        add(new FunctionConcat());
-        add(new FunctionAdd());
-        add(new FunctionContains());
-        add(new FunctionUnique());
-        add(new FunctionKeep());
-        add(new FunctionSort());
-        add(new FunctionReverse());
-        add(new FunctionReplace());
-        add(new FunctionRemove());
-        add(new FunctionSet());
-        add(new FunctionInsert());
-        add(new FunctionEmpty());
-        add(new FunctionLast());
-        add(new FunctionFirst());
-        add(new FunctionFilter());
+		Function[] arr={
+				new FunctionLength(),
+				new FunctionNth(),
+				new FunctionSum(),
+				new FunctionConcat(),
+				new FunctionAdd(),
+				new FunctionContains(),
+				new FunctionUnique(),
+				new FunctionKeep(),
+				new FunctionSort(),
+				new FunctionReverse(),
+				new FunctionReplace(),
+				new FunctionRemove(),
+				new FunctionSet(),
+				new FunctionInsert(),
+				new FunctionEmpty(),
+				new FunctionLast(),
+				new FunctionFirst(),
+				new FunctionFilter(),
+		};
+		setFunctions(arr);
     }
     
     protected ValueList self() {

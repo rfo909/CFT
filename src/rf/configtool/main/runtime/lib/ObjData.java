@@ -37,9 +37,12 @@ import java.awt.Color;
 public class ObjData extends Obj {
     
     public ObjData() {
-        this.add(new FunctionFor());
-        this.add(new FunctionYes());
-        this.add(new FunctionEach());
+		Function[] arr={
+				new FunctionFor(),
+				new FunctionYes(),
+				new FunctionEach(),
+		};
+		setFunctions(arr);
     }
     
     @Override

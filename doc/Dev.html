@@ -13,6 +13,21 @@
 
 <h1>CFT Change log</h1>
 
+<h3>v2.5.3 2021-05-08 Obj.add(Function)</h3>
+<p>
+	Profiling revealed that this function consumes 65% of the time. 
+</p>
+<p>
+	Considering that int and string objects are often just used for comparison,
+	without calling internal functions, an additional Obj.setFunctions() taking an array,
+	which at the first call to getFunction() or needing to produce help text, is 
+	copied into the functions map.
+</p>
+<p>
+	This reduced runtime from 8 to 6.3 seconds for a CPU-intensive test.
+</p>
+
+
 
 <h3>v2.5.3 2021-05-06 CodeLinesParseCache</h3>
 <p>

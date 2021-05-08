@@ -44,7 +44,11 @@ public class ObjDict extends Obj {
     	return keySequence.iterator();
     }
     
-    private List<Function> baseFunctions;
+    private final List<Function> baseFunctions;
+    private boolean refreshInnerFunctions = false;
+    private Set<String> allFunctionNames = new HashSet<String>();
+    
+
     
     public ObjDict () {
     	super();
@@ -63,16 +67,28 @@ public class ObjDict extends Obj {
         baseFunctions.add(new FunctionCopyFrom());
         baseFunctions.add(new FunctionSubset());
         
-        init();
+        refreshInnerFunctions=true;
     }
     
+    @Override
+    public Function getFunction (String name) {
+    	verifyInnerFunctions();
+    	return super.getFunction(name);
+    }
+    
+    
+    @Override
+    public void generateHelp(Ctx ctx) {
+    	verifyInnerFunctions();
+    	super.generateHelp(ctx);
+    } 
     
     public void set (String key, Value value) {
     	if (values.get(key) == null) {
     		keySequence.add(key);
     	}
     	values.put(key, value);
-        if (isIdentifier(key)) init();
+        if (isIdentifier(key) && !allFunctionNames.contains(key)) refreshInnerFunctions=true;
     	
     	// quick and easy sanity check
     	if (values.keySet().size() != keySequence.size()) {
@@ -95,19 +111,29 @@ public class ObjDict extends Obj {
     
     
     
-    private void init() {
+    private synchronized void verifyInnerFunctions() {
+    	if (!refreshInnerFunctions) return;
+    	refreshInnerFunctions=false;
+    	
         clearFunctions();
+        allFunctionNames.clear();
         
-        Set<String> functionNames=new HashSet<String>();
+        Set<String> allFunctionNames=new HashSet<String>();
+        List<Function> allFunctions=new ArrayList<Function>();
+        
         for (Function f:baseFunctions) {
-            functionNames.add(f.getName());
-            add(f);
+        	allFunctionNames.add(f.getName());
+            allFunctions.add(f);
         }
         for (String name:keySequence) {
-            if (functionNames.contains(name) || !isIdentifier(name)) continue;
-            functionNames.add(name);
-            add(new FunctionGetDynamic(name));
+            if (allFunctionNames.contains(name) || !isIdentifier(name)) continue;
+            allFunctionNames.add(name);
+            allFunctions.add(new FunctionGetDynamic(name));
         }
+        Function[] arr=new Function[allFunctions.size()];
+        for (int i=0; i<allFunctions.size(); i++) arr[i]=allFunctions.get(i);
+        
+        setFunctions(arr);
     }
     
     private ObjDict self() {
@@ -285,7 +311,7 @@ public class ObjDict extends Obj {
                 keySequence.remove(key);
             } 
             
-            if (isIdentifier(key)) init();
+            if (isIdentifier(key)) refreshInnerFunctions=true;
             
             return new ValueObj(theDict());
         }

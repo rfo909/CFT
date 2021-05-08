@@ -560,6 +560,7 @@ public class ObjGlobal extends Obj {
     }
     
 
+    private static ValueObj staticLib = new ValueObj(new ObjLib());
 
     class FunctionLib extends Function {
         public String getName() {
@@ -570,7 +571,8 @@ public class ObjGlobal extends Obj {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
-            return new ValueObj(new ObjLib());
+            return staticLib;
+            //return new ValueObj(new ObjLib());
         }
     }
     
@@ -767,8 +769,11 @@ public class ObjGlobal extends Obj {
         }
     }
 
+    
+	private static ValueObj staticSys=new ValueObj(new ObjSys());
    
     class FunctionSys extends Function {
+    	
         public String getName() {
             return "Sys";
         }
@@ -777,7 +782,8 @@ public class ObjGlobal extends Obj {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
-            return new ValueObj(new ObjSys());
+            return staticSys;
+            //return new ValueObj(new ObjSys());
         }
     } 
 

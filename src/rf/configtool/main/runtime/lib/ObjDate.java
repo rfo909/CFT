@@ -39,29 +39,29 @@ public class ObjDate extends Obj {
     public ObjDate (long timeValue) {
         this.timeValue=timeValue;
         
-        add(new FunctionSetFormat());
-        add(new FunctionGet());
-        add(new FunctionSet());
-        add(new FunctionParse());
-        add(new FunctionFmt());
-
-        add(new FunctionYear());
-        add(new FunctionMonth());
-        add(new FunctionDayOfMonth());
-        add(new FunctionDayOfYear());
-        add(new FunctionHour());
-        add(new FunctionMinute());
-        add(new FunctionSecond());
-        add(new FunctionMillisecond());
-        
-        add(new FunctionDuration());
-        add(new FunctionAdd());
-        add(new FunctionSub());
-        add(new FunctionDiff());
-        add(new FunctionAfter());
-        add(new FunctionBefore());
-        
-        add(new FunctionGetFormat());
+		Function[] arr={
+				new FunctionSetFormat(),
+				new FunctionGet(),
+				new FunctionSet(),
+				new FunctionParse(),
+				new FunctionFmt(),
+				new FunctionYear(),
+				new FunctionMonth(),
+				new FunctionDayOfMonth(),
+				new FunctionDayOfYear(),
+				new FunctionHour(),
+				new FunctionMinute(),
+				new FunctionSecond(),
+				new FunctionMillisecond(),
+				new FunctionDuration(),
+				new FunctionAdd(),
+				new FunctionSub(),
+				new FunctionDiff(),
+				new FunctionAfter(),
+				new FunctionBefore(),
+				new FunctionGetFormat(),
+		};
+		setFunctions(arr);
         
     }
     

@@ -99,17 +99,18 @@ public class ObjGrep extends Obj {
         if (matchParts.size() > 0) {
             matchList.add(new StrMatch(matchParts));
         }
-        add(new FunctionMatch());
-        add(new FunctionReject());
-        add(new FunctionMatchRegex());
-        add(new FunctionRejectRegex());
-  
-        add(new FunctionFile());
-        add(new FunctionFileCount());
-        
-        add(new FunctionLimitFirst());
-        add(new FunctionLimitLast());
-        add(new FunctionLine());
+		Function[] arr={
+				new FunctionMatch(),
+				new FunctionReject(),
+				new FunctionMatchRegex(),
+				new FunctionRejectRegex(),
+				new FunctionFile(),
+				new FunctionFileCount(),
+				new FunctionLimitFirst(),
+				new FunctionLimitLast(),
+				new FunctionLine(),
+		};
+		setFunctions(arr);
         
     }
     

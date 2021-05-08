@@ -41,9 +41,12 @@ public abstract class Obj {
     
     /**
      * Letting ValueString and ValueInt call this instead of adding member functions
-     * via add() saves us up to 25% run time, since Obj.add() consumes 65% of the time,
+     * via add() saves us up to 25% run time, since Obj.add() consumed 65% of the time,
      * according to profiling, and strings and ints are often just compared, which
-     * are expressions, not involving member functions.
+     * are expressions, not involving member functions. 
+     * 
+     * After optimizing getFunction(), we've started using setFunctions() instead of add() for
+     * many Value and Obj classes.
      * 
      * 2021-05-08 RFO v2.5.4
      */
@@ -53,7 +56,8 @@ public abstract class Obj {
     
     protected void add (Function function) {
         String name=function.getName();
-        if (functions.containsKey(name)) throw new RuntimeException("Duplicate function " + name);
+        // Uncommenting the single following line saves up to 10% of run time ...
+        //if (functions.containsKey(name)) throw new RuntimeException("Duplicate function " + name);
         this.functions.put(name, function);
     }
     
@@ -138,12 +142,32 @@ public abstract class Obj {
         return ((ValueObj) v).getVal();
     }
     
+    
+    /**
+     * Lookup member function by name. 
+     */
     public Function getFunction (String name) {
+//    	// first implementation : 5600ms
+//    	if (functionArr != null) {
+//    		for (Function f:functionArr) functions.put(f.getName(),f);
+//    		functionArr=null;
+//    	}
+//    	return functions.get(name);
+    	
+    	// 4200ms
+    	Function x=functions.get(name);
+    	if (x != null) return x;
+    	
         if (functionArr != null) {
-            for (Function f:functionArr) functions.put(f.getName(), f);
-            functionArr=null;
+    		for (Function f:functionArr) {
+    			if (f.getName().equals(name)) {
+    				functions.put(name, f);
+    				return f;
+    			}
+    		}
+    		return null;
         }
-        return functions.get(name);
+        return null;
     }
     
     public abstract String getTypeName();

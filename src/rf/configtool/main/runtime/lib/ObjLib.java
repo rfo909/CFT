@@ -91,6 +91,7 @@ public class ObjLib extends Obj {
     }
     
 
+    private static final ValueObj staticData = new ValueObj(new ObjData());
 
     class FunctionData extends Function {
         public String getName() {
@@ -101,7 +102,8 @@ public class ObjLib extends Obj {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
-            return new ValueObj(new ObjData());
+            return staticData;
+            //return new ValueObj(new ObjData());
         }
     }
     

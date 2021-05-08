@@ -27,13 +27,16 @@ public class ValueFloat extends Value {
     
     public ValueFloat (double val) {
         this.val=val;
-        add(new FunctionRound());
-        add(new FunctionF());
-        add(new FunctionI());
-        add(new FunctionFloor());
-        add(new FunctionLog());
-        add(new FunctionLog10());
-        add(new FunctionAbs());
+		Function[] arr={
+				new FunctionRound(),
+				new FunctionF(),
+				new FunctionI(),
+				new FunctionFloor(),
+				new FunctionLog(),
+				new FunctionLog10(),
+				new FunctionAbs(),
+		};
+		setFunctions(arr);
     }
     
     protected ValueFloat theObj() {
