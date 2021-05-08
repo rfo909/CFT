@@ -41,9 +41,10 @@ public abstract class Obj {
     
     /**
      * Letting ValueString and ValueInt call this instead of adding member functions
-     * via add() saves us 25% run time, since Obj.add() consumes 65% of the time,
+     * via add() saves us up to 25% run time, since Obj.add() consumes 65% of the time,
      * according to profiling, and strings and ints are often just compared, which
-     * is an expression, not involving member functions.
+     * are expressions, not involving member functions.
+     * 
      * 2021-05-08 RFO v2.5.4
      */
     protected void setFunctions (Function[] functionArr) {
