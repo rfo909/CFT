@@ -79,6 +79,37 @@ choice.
 /m
 
 
+
+# Linux helper
+# --
+	P(1,"ls")=>program
+	Dir.runCapture("which", program) => lines
+	if (lines.length >= 1 && lines.first.contains("/"+program)) {
+		true
+	} else {
+		false
+	}
+//LinuxHasProgram
+
+
+# Show graphical file manager
+# --
+	P(1,Dir) => dir
+	if (Sys.isWindows) {
+		dir.run("explorer",dir.path)
+	} else {
+		if (LinuxHasProgram("nautilus")) {
+			dir.runDetach("nautilus",dir.path)
+		} else if (LinuxHasProgram("xfe")) { 	
+			dir.runDetach("xfe",dir.path)
+		} else {
+			error("Found no file manager")
+		}
+	}
+/fileManager
+
+
+
 # Update Cfg with terminal size (if possible)
     false =>updated
     if(!Sys.isWindows) {
@@ -123,7 +154,7 @@ choice.
 
 	ed = Db2:Get("Lib","linuxEditor")
     actions.get(ed).call(file)
-/ShowLinuxEditor
+//ShowLinuxEditor
 
 
 
