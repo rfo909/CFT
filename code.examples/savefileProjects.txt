@@ -331,11 +331,13 @@ There can be multiples of every line, including Dir.
 
 	P(1,Input("Enter part of file name").get) => fn
 
-    FileLocator(fn) =>fileList
-    fileList->file
+    FileLocator(fn)->file
         out(Int(file.lastModified, file))
     | _.sort->x 
-        x.data =>file 
+		out(x.data)
+	| => fileList
+	
+    fileList->file 
         report(file.path, file.length, Date(file.lastModified).fmt)
     | =>lines  # the report(...) outputs
     
@@ -352,7 +354,9 @@ There can be multiples of every line, including Dir.
     println
     readLine("Enter number to edit, or blank to skip") =>inp
     if(inp != "", Inner{
-        Lib:e (fileList.nth(inp.parseInt))
+		num=inp.parseInt
+		println("Editing file " + fileList.nth(num).path)
+        Lib:e (fileList.nth(num))
     })
     true
 /FL

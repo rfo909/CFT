@@ -31,6 +31,9 @@ Example
 	$ !git status
 	$ !top
 
+
+Note that the [...] (codeSpace) can not refer local functions in the caller script, as 
+BangParser is a separate script. 
 -----------------------------------
 >>> EOF
 /Readme
