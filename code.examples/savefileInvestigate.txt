@@ -44,7 +44,7 @@ in an editor.
     Sys.homeDir.sub("investigate.d") =>dir
     if(!dir.exists, dir.create)
 	dir
-/InvDir
+//InvDir
 
 # Current topic
 	if(Db2:Get("Investigate","topic")==null) {
@@ -61,7 +61,7 @@ in an editor.
 		GetCurrentTopic  # asks for current
 	} else {
 		ShowTopics
-		readLine("[" + GetCurrentTopic + "] Change topic, ENTER to keep current").trim => newTopic
+		readLine("[" + GetCurrentTopic + "] Change topic (full name) or ENTER to keep current").trim => newTopic
 
 		if (newTopic != "") {
 			Db2:Set("Investigate","topic",newTopic)
@@ -71,9 +71,7 @@ in an editor.
 /SetTopic
 
 # List topics
-	println
-	println("Known topics")
-	println("------------")
+	Lib:Header("Known topics")
 	
 	latest=Dict
 	InvDir.files(Glob("*.txt"))->f
@@ -92,6 +90,8 @@ in an editor.
 	| println
 /ShowTopics
 
+
+
 # Get file for current topic
 	GetCurrentTopic => topic
 	Date.setFormat("yyyy-MM-dd").fmt =>dateString
@@ -99,6 +99,9 @@ in an editor.
 	if (!topicFile.exists) topicFile.create(Header(topic + " " + dateString))
 	topicFile
 /LogFile
+
+
+	
 
 
 # Get all files for current topic, sorted 
@@ -109,74 +112,160 @@ in an editor.
 	| _.sort->x out(x.data)
 /GetTopicLogFiles
 
+
+
+# Db2Obj collection
+# --
+	GetCurrentTopic => topic
+	"Investigate_TODO_"+topic
+//todoCollection
+
+
+
+# Get TODO list for current topic
+# --
+	Db2Obj:FindObjects(todoCollection, Lambda{true})
+/GetTodoList
+
+
+
+# Add or overwrite TODO entry for current topic
+# --
+	P(1,readLine("Enter text"))=>text
+	P(2) => uuid
+	
+	value=Dict.set("text",text)
+	
+	if (uuid != null) {
+		Db2Obj:UpdateObject(todoCollection, uuid, value)
+	} else {
+		Db2Obj:AddObject(todoCollection, value)
+	}
+/AddTodoEntry
+
+
+
+
+# Show todo list
+# --
+	count=0
+	GetTodoList => data
+	
+	Lib:Header("TODO entries for " + GetCurrentTopic)
+	
+	if (data.length==0) {
+		println("No entries")
+		println
+	} else  Inner {
+		data->x
+			report(count,x.date,x.value.text)
+			count=count+1
+		| -> line 
+			println(line)
+	}
+//todoShow
+
+
+
+
+
+# Work with todo list
+# --
+	loop
+		todoShow
+
+		println
+		readLine("'a' to add, 'e N' to edit, 'd N' to delete, Enter to return.").trim => cmd
+		break(cmd=="")
+		
+		if (cmd=="a") {
+			AddTodoEntry
+		} else if (cmd.startsWith("e")) {
+			pos=cmd.after(" ").parseInt
+			data=GetTodoList.nth(pos)
+			Lib:Header("Edit entry")
+			println(data.value.text)
+			println
+			uuid = GetTodoList.nth(pos).id
+			AddTodoEntry(null, uuid)
+		} else if (cmd.startsWith("d")) {
+			pos=cmd.after(" ").parseInt
+			data=GetTodoList.nth(pos)
+			Lib:Header("Confirm delete")
+			println(data.value.text)
+			println
+			readLine("'y' to confirm")=>conf
+			if (conf.toLower=="y") {
+				uuid = data.id
+				Db2Obj:DeleteObject(todoCollection, uuid)
+			}
+		}
+		
+/TodosLoop
+
+
 # Input mode
 loop
-    readLine("[" + GetCurrentTopic + "] Enter text, '.' to paste text, '.q' to quit or '.?' for help").trim =>line
+    readLine("[" + GetCurrentTopic + "] Enter text, '.' to paste text, 'q' to quit or '?' for help").trim =>cmd
 
-    if(line=="",Inner{LogFile.append("")})
-    reject(line=="")
-
-    if(line.startsWith(".")) {
-    	if (line=="." || line.startsWith("..")) {
-			# paste
-	   		marker="."
-			if (line.startsWith("..")) {
-				marker=line.sub(2)
-			}
-			println("End-marker: '" + marker + "'")
-			println("---")
-			readLines(marker) =>lines
-			LogFile.append("")
-			LogFile.append("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< xxxxx")
-			Inner {
-				lines->line LogFile.append(line) 
-			}
-			LogFile.append(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> xxxxx")
-			LogFile.append("")
-		} else { 
-			# parse commands
-		    cmd = line.sub(1)
-		    if(cmd=='?') Inner { ## help
-			Sequence(
-				@
-				@
-				@ ---
-				@ .                 - read pasted input lines, with end-marker '.'
-		        	@ ..xxx             - read pasted input lines, with end-marker 'xxx'
-		        	@ .?                - help, this page
-		        	@ .h                - create header
-				@ .d                - insert date/time stamp
-		        	@ .t                - change topic
-		        	@ .T                - show recent topics (7 days)
-		        	@ .c                - show 3 latest topic log files (cat)
-		        	@ .m                - show log file (more)
-		        	@ .e                - edit log file
-		        	@ .q                - quit
-		        	@ ---
-				@
-			)->line println(line)
-		        true =>done
-		    } else if(cmd=='h') { ## Header
-		    	LogHeader
-			} else if (cmd=='d') { ## date/time stamp
-				LogFile.append(List("",Date.fmt))
-			} else if (cmd=='t') { ## change topic
-				SetTopic
-			} else if (cmd=='T') { ## show topics
-				ShowTopics
-		 	} else if(cmd=='c') { ## cat
-				Show
-		    } else if(cmd=='m') { ## more
-		        Lib:m (LogFile)
-		    } else if(cmd=='e') { ## edit
-		        Edit
-		    } else if (cmd=='q') { ## quit
-		        break(true)
-		    } 
-		}        
+	if (cmd=="." || cmd.startsWith("..")) {
+		# paste
+		marker="."
+		if (cmd.startsWith("..")) {
+			marker=cmd.sub(2)
+		}
+		println("End-marker: '" + marker + "'")
+		println("---")
+		readLines(marker) =>lines
+		LogFile.append("")
+		LogFile.append("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< xxxxx")
+		Inner {
+			lines->line LogFile.append(line) 
+		}
+		LogFile.append(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> xxxxx")
+		LogFile.append("")
+		
+	} else if (cmd=="?" || cmd=="?") { 
+		Sequence(
+			@
+			@
+			@ ---
+			@ .                 - read pasted input lines, with end-marker '.'
+			@ ..xxx             - read pasted input lines, with end-marker 'xxx'
+			@ ?                 - get help (this page9
+			@ h/header          - insert header
+			@ d/date            - insert date/time
+			@ t/topic           - change topic
+			@ T/topics          - list all topics
+			@ todo              - manage todo list
+			@ c/c/cat           - display recent entries
+			@ m/m/more          
+			@ e/e/edit          - edit current file
+			@ q/q/quit          - quit
+			@ ---
+			@
+		)->line 
+			println(line.trim)
+	} else if(cmd==".h" || cmd=="h" || cmd=="header") { ## Header
+		LogHeader
+	} else if (cmd==".d" || cmd=='d' || cmd=="date") { ## date/time stamp
+		LogFile.append(List("",Date.fmt))
+	} else if (cmd==".t" || cmd=='t' || cmd=="topic") { ## change topic
+		SetTopic
+	} else if (cmd==".T" || cmd=='T' || cmd=="topics") { ## show topics
+		ShowTopics
+	} else if (cmd=="todo") {
+		TodosLoop
+	} else if(cmd==".c" || cmd=='c' || cmd=="cat") { ## cat
+		Show
+	} else if(cmd==".m" || cmd=='m' || cmd=="more") { ## more
+		Lib:m (LogFile)
+	} else if(cmd==".e" || cmd=='e' || cmd=="edit") { ## edit
+		Edit
+	} else if (cmd==".q" || cmd=='q' || cmd=="quit") { ## quit
+		break(true)
 	} else {
-		#Date.setFormat("HH:mm:ss").fmt =>time
-		LogFile.append(line)
+		LogFile.append(cmd)
 	}
 	
 /InputMode
