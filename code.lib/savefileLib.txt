@@ -479,8 +479,8 @@ P(4,false) => showDebug
 	P(2,Lambda {P(1)}) =>macroGetElementName 
 	P(3,"Select element") =>title 
 
-	error(getType(options) != "List", "Options must be a list")
-	error(options.length==0,"No elements in options list")
+	error(getType(options) != "List", "Options must be a list (" + title + ")")
+	error(options.length==0,"No elements in options list (" + title + ")")
 	
 	if(options.length==1) {
 		options.first
