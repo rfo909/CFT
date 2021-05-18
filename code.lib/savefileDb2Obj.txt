@@ -56,6 +56,14 @@ Objects can be sorted on date of last update, and located using a lambda.
 
 
 
+# Get keys (UUID)
+# --
+	P(1,inputCollection) => collection
+	Db2:Keys(FixCN(collection))
+/Keys
+
+
+
 # Get object by UUID
 # --
 	P(1)=>collection
