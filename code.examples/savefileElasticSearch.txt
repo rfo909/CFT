@@ -1,20 +1,205 @@
+# Readme!
 <<< EOF
-ElasticSearch related installs
+ElasticSearch installs
+----------------------
+
+Verify functions 
+
+- hosts
+- user
+- masterHosts
+- logstashHosts
+- kibanaHosts
+
+Then run
+
+- ElasticSearchComplete 
+- InstallLogstashAll
+- StartLogstash
+- InstallKibanaAll
+- ConfigureKibanaAll
+
+All can be run multiple times.
+
 >>> EOF
 /Readme
 
 Input("ssh target user@host").get
-/GetTarget
+//GetTarget
 
-Dir("/tmp").file("tmp."+currentTimeMillis)
-/tmpFile
+"elasticsearch-7.7.1-amd64.deb"
+//ESImage
 
-# Install Logstash - enables service, but does not start
+"kibana-7.7.1-amd64.deb"
+//KibanaImage
+
+
+# Ensure /mnt/storage ok
+# --
+	P(1,GetTarget)=>target
+	P(2,"")=>prefix
+
+	println(prefix+"Checking /mnt/storage/ISO ok")
+	SSH:sudo(target,"mount -a")
+	SSH:sudo(target,"ls /mnt/storage/ISO", true).get("exitCode") != 0 => notFound
+	if (notFound) {
+		println(prefix+"Creating /mnt/storage")
+		SSH:sudo(target,"mkdir /mnt/storage", true) # ignore errors
+		println(prefix+"Updating /etc/fstab")
+		SSH:sudo(target,'echo "storage.s:/mnt/storage  /mnt/storage    nfs   rw    0 0" >> /etc/fstab')
+		println(prefix,"mount -a")
+		SSH:sudo(target,"mount -a")
+	}
+	SSH:sudo(target,"ls /mnt/storage/ISO", true).get("exitCode") != 0 => notFound
+	error(notFound,"Failed to fix /mnt/storage mount on " + target)
+//CheckOrFixMntStorage
+
+
+
+# Install ElasticSearch
+# --
     P(1,GetTarget) =>target
     P(2,"") =>prefix
 
+	println(prefix+"INSTALLING " + target)
+
+	CheckOrFixMntStorage(target,prefix+"   ")
+	println(prefix+"Installing " + ESImage)
+	SSH:sudo(target,"apt-get install -y /mnt/storage/ISO/" + ESImage)
+
+//InstallElasticSearch	
+
+
+# Set up ElasticSearch configuration file
+# --
+	P(1,GetTarget) => target
+	P(2,List(target)) => masterHosts
+	P(3,"")=>prefix
+
+	target.after("@") => nodeHost
+	nodeHost.before(".") => nodeName
+
+	masterHosts->h 
+		out('"' + if(h.contains("@"),h.after("@"),h) + '"')
+	| _.concat(", ") => masterNodes
+
+	SymDict(nodeHost,nodeName,masterNodes).mergeCodes=>data
+
+	Sequence(
+		@ cluster.name: mycluster
+		@ node.name: ${nodeName}
+ 		@ network.host: ${nodeHost}
+		@ path.data: /var/lib/elasticsearch
+		@ path.logs: /var/log/elasticsearch
+		@ cluster.initial_master_nodes: [ ${masterNodes} ]
+	)->line
+		out(line.merge(data))
+	| => config
+
+	Lib:TmpFile("elasticsearch","yml") => f 
+	f.create(config)
+
+	println(prefix+"Configuration for " + target)
+	println("---")
+	f.read->line println(line) 
+	|
+	println("---")
+
+	SSH:copy(f,target,"./elasticsearch.yml")
+	SSH:sudo(target,"cp ./elasticsearch.yml /etc/elasticsearch")
+
+	f.delete
+//InstallElasticSearchConfig
+
+
+
+
+# Stop ElasticSearch node
+# --
+	P(1,GetTarget)=>target
+	P(2,"")=>prefix
+
+	println(prefix+"STOPPING elasticsearch on " + target)
+	SSH:sudo(target,"/etc/init.d/elasticsearch stop")
+/StopElasticSearch
+
+
+
+
+# Start ElasticSearch node
+# --
+	P(1,GetTarget)=>target
+	P(2,"")=>prefix
+
+	println(prefix+"STARTING elasticsearch on " + target)
+	SSH:sudo(target,"/etc/init.d/elasticsearch start")
+/StartElasticSearch
+
+
+
+
+# Hosts in cluster
+# --
+"elk01.v elk02.v elk03.v elk04.v elk05.v".split
+/hosts
+
+
+# Master hosts
+# --
+"elk03.v elk04.v elk05.v".split
+/masterHosts
+
+
+
+# Logstash hosts
+# --
+	masterHosts
+/logstashHosts
+
+
+# Kibana hosts
+	masterHosts
+/kibanaHosts
+
+
+
+# SSH user
+# --
+"roar"
+/user
+
+
+
+
+# Complete install ElasticSearch 
+# --
+
+	hosts->host
+		target=user+"@"+host
+		InstallElasticSearch(target)
+		InstallElasticSearchConfig(target,masterHosts)
+	|
+	hosts->host
+		target=user+"@"+host
+		StopElasticSearch(target)
+	|
+	hosts->host
+		target=user+"@"+host
+		StartElasticSearch(target)
+	|
+/ElasticSearchComplete
+
+
+
+
+# Install Logstash - enables service, but does not start
+# --
+    P(1,GetTarget) =>target
+    P(2,"") =>prefix
+
+	println(prefix+"INSTALLING logstash " + target)
     # Check if logstash already installed
-    SSH:sudo (target, "systemctl status logstash.service", true).get("exitCode")==4 _.not =>found
+    SSH:sudo (target, "systemctl status logstash.service", true).get("exitCode")!=4 =>found
     if (found) {
         println(prefix+"Logstash already installed")
     } else {
@@ -32,118 +217,115 @@ Dir("/tmp").file("tmp."+currentTimeMillis)
 
         println(prefix+"Installing logstash")
         SSH:sudo (target, cmd)
-    }
+	}
+	println(prefix+"Enabling logstash")
+	SSH:sudo (target,"systemctl enable logstash")
 /InstallLogstash
 
 
-
-# Configure / update logstash
-    P(1,Input("Host")) =>host
-    P(2,"") =>prefix
-    
-    Hosts:GetValue (host, "SSHUser") =>sshUser
-    sshUser +"@" + host =>target
-
-    println(prefix+"Verifying logstash install")
-    InstallLogstash(target,prefix+"   ")
-
-    println(prefix+"Loading parameters for config file for host " + host)
-    Hosts:GetValue (host, "ElasticSearch.Logstash.listenPort") =>listenPort
-    Hosts:GetValue (host, "ElasticSearch.Logstash.esIndex") =>esIndex
-    Hosts:GetValue (host, "ElasticSearch.Logstash.esHosts") =>esHosts
-
-    println(prefix+"Creating config file")
-    tmpFile =>f
-    f.create(LogstashConfigTest(listenPort, esIndex, esHosts))
-    println("--------------------------------")
-    f.read->line println("    -> " + line) |
-    println("--------------------------------")
-
-    println(prefix+"Copying config file to " + target)
-    SSH:copy (f, target, "./main.conf"))
-    Dir.run("rm",f.path)
-
-    println(prefix+"Stopping service if exists")
-    SSH:sudo (target, "systemctl stop logstash.service", true)
-    
-    println(prefix+"Deploying config file on server, starting service")
-    List(
-        "cp ./main.conf /etc/logstash/conf.d/main.conf"
-        , "systemctl start logstash.service"
-    ) =>cmd
-    SSH:sudo (target, cmd)
-    
-/ConfigureLogstash
-    
-
-# Update or install logstash + config on all targets
-    P(1,"") =>prefix
-    Hosts:GetHosts -> host
-        assert(Hosts:HasField (host, "ElasticSearch.Logstash.esIndex"))
-        println(prefix+"*** Checking host " + host)
-        ConfigureLogstash(host,prefix+"   ")
-/VerifyLogstash
+# Install logstash for all logstashHosts
+# --
+	logstashHosts->host
+		target=user+"@"+host
+		InstallLogstash(target)
+/InstallLogstashAll
 
 
+# Stop logstash
+# --
+	logstashHosts->host
+		println("STOPPING logstash " + host)
+		target=user+"@"+host
+		SSH:sudo(target,"systemctl stop logstash")
+/StopLogstash
 
 
-# Create dynamic configuration file, to be stored under /etc/logstash/conf.d on remote host
-#
-PDict("((listenPort))","((esIndex))","((esHosts))") =>data
-#
-# "5044" is default port
-# "logs01" is current esIndex
-# "elastic01.v:9200", "elastic02.v:9200" is esHosts
-#
-error(data.hasNullValue, "Missing parameters: expected listenPort esIndex, esHosts")
-#
-<<<<<<<<<<<<<<<<<<<<<<<<< EOF
-input {
-        beats {
-                port => ((listenPort))
-        }
-}
+	
+# Start logstash
+# --
+	logstashHosts->host
+		println("STARTING logstash " + host)
+		target=user+"@"+host
+		SSH:sudo(target,"systemctl start logstash")
+/StartLogstash
 
-filter {
-  dissect {
-        mapping => {
-          "message" => "%{ts} %{+ts} %{logLevel} [%{javaClass}] {{%{threadId}}} %{logMessage}"
-        }
-  }
-  date {
-        match => [ "ts", "yyyy-MM-dd HH:mm:ss,SSS" ]
-  }
-  mutate {
-        remove_field => [ "message", "ts" ]
-  }
-}
+	
+# Install kibana
+# --
+	kibanaHosts->host
+		target=user+"@"+host
+		println("INSTALLING kibana " + host)
+		CheckOrFixMntStorage(target)
+
+		println("Installing " + KibanaImage)
+		SSH:sudo(target,"apt-get install -y /mnt/storage/ISO/" + KibanaImage)
+
+		println("Enabling service")
+		SSH:sudo(target,"systemctl enable kibana")
+/InstallKibanaAll
 
 
-output {
-        #stdout { codec => rubydebug }
-        elasticsearch {
-               index => ((esIndex))
-               hosts => [ ((esHosts)) ]
-        }
-}
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>> EOF
-->line
-    out(line.merge(data))
-/LogstashConfigTest
+# Configure Kibana all
+# --
+	kibanaHosts->host
+		target=user+"@"+host
+		
+		# Create config
+		Inner {
+			masterHosts->host 
+				out('"' + host + ':9200"')
+			| _.concat(", ")
+		} => masterNodes
+
+		SymDict(masterNodes).mergeCodes => data
+
+		Inner {
+			Sequence(
+				@ server.host: "0.0.0.0"
+		        @ elasticsearch.hosts: [ ${masterNodes} ]
+			)->line
+				out(line.merge(data))
+		} => config
+
+		Lib:TmpFile("kibana","yml") => f
+		f.create(config)
+
+		println("Creating kibana.yml")
+		println("---")
+		{ f.read->line println(line) }
+		println("---")
+
+		SSH:copy(f,target,"./kibana.yml")
+		SSH:sudo(target,"cp ./kibana.yml /etc/kibana.yml")
+
+		f.delete
+	|
+	println("Restarting kibana")
+	StopKibana
+	println
+	StartKibana
+/ConfigureKibanaAll
 
 
+# Stop kibana
+# --
+	kibanaHosts->host
+		target=user+"@"+host
+		println("STOPPING kibana " + host)
+		SSH:sudo(target,"systemctl stop kibana")
+/StopKibana
+
+		
+	
+# Start kibana
+# --
+	kibanaHosts->host
+		target=user+"@"+host
+		println("STARTING kibana " + host)
+		SSH:sudo(target,"systemctl start kibana")
+/StartKibana
+
+		
+	
 
 
-
-
-<<< EOF
-
-wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
-apt-get install apt-transport-https
-echo "deb https://artifacts.elastic.co/packages/7.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-7.x.list
-sudo apt-get update && sudo apt-get install logstash
-
-Run as service: systemd (systemctl ...)
-
->>> EOF
-/notes
