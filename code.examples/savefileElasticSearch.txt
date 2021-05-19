@@ -35,6 +35,53 @@ Input("ssh target user@host").get
 
 
 
+
+
+# Hosts in cluster
+# --
+"elk01.v elk02.v elk03.v elk04.v elk05.v".split
+/hosts
+
+
+# Master hosts
+# --
+"elk03.v elk04.v elk05.v".split
+/masterHosts
+
+
+
+# Logstash hosts
+# --
+	masterHosts
+/logstashHosts
+
+
+# Kibana hosts
+	masterHosts
+/kibanaHosts
+
+
+# Initial master node
+# --
+	"elk03.v"
+/masterHostInitial
+
+
+# SSH user
+# --
+"roar"
+/user
+
+
+
+
+
+
+
+
+
+
+
 # Lookup ip address
 # --
 	P(1,"elk03.v")=>host
@@ -83,13 +130,20 @@ Input("ssh target user@host").get
     P(2,"") =>prefix
 
 	println(prefix+"INSTALLING " + target)
+	APTUpdate:run(target,null,true)
+
+	println(prefix+"Checking Java")
+    Java:VerifyJava (target, prefix+"   ")
+
+	println("Installing apt-transport-https")
+	SSH:sudo(target,"apt-get install -y apt-transport-https")
 
 	CheckOrFixMntStorage(target,prefix+"   ")
 	println(prefix+"Installing " + ESImage)
 	SSH:sudo(target,"apt-get install -y /mnt/storage/ISO/" + ESImage)
 
-	println("Enabling service")
-	SSH:sudo(target,"systemctl enable elasticsearch")
+	##println("Enabling service")
+	##SSH:sudo(target,"systemctl enable elasticsearch")
 
 //InstallElasticSearch	
 
@@ -112,11 +166,30 @@ Input("ssh target user@host").get
 		out('"' + host + '"')
 	| _.concat(", ") => masterNodes
 
+	masterHosts->host
+		out('"' + GetIp(host) + '"')
+	| _.concat(", ") => masterNodesIp
+
 	hosts->host
 		out('"' + host + '"')
 	| _.concat(", ") => allNodes
 
-	SymDict(nodeHost,nodeHostIp,nodeName,isMasterHost,isDataHost,masterNodes,allNodes).mergeCodes=>data
+	hosts->host
+		out('"' + GetIp(host) + '"')
+	| _.concat(", ") => allNodesIp
+
+	SymDict(nodeHost,nodeHostIp,
+		nodeName,isMasterHost,isDataHost,
+		masterNodes,masterNodesIp,masterHostInitial,allNodes,allNodesIp
+	).mergeCodes=>data
+
+	# So the clue here is that by using IP addresses for network.host as well as
+	# in the initial_master_nodes and the unicast.hosts, it works, as the
+	# check on network.host is LITERAL. With this config, we can NOT do
+	# curl to localhost, only to the IP-address. From the outside, we can not
+	# use names like elk03.v, but have to use IP-addresses. Because the network.host
+	# field is about ACCESS CONTROL and it is literal.
+
 
 	Sequence(
 		@ cluster.name: mycluster
@@ -124,12 +197,12 @@ Input("ssh target user@host").get
 		@ node.data: ${isDataHost}
 		@ node.ingest: ${isDataHost}
 		@ node.master: ${isMasterHost}
- 		@ network.host: ${nodeHostIp}
+ 		@ network.host: "${nodeHostIp}"
+		@ http.port: 9200
 		@ path.data: /var/lib/elasticsearch
 		@ path.logs: /var/log/elasticsearch
-		#@ cluster.initial_master_nodes: [ ${masterNodes} ]
-		@ discovery.zen.ping.unicast.hosts: [ ${allNodes} ]
-		#@ discovery.zen.minimum_master_nodes: 2
+		@ cluster.initial_master_nodes: [ ${masterNodesIp} ]
+		@ discovery.zen.ping.unicast.hosts: [ ${allNodesIp} ]
 	)->line
 		out(line.merge(data))
 	| => config
@@ -162,21 +235,40 @@ Input("ssh target user@host").get
 
 
 
-# Stop ElasticSearch node
+# Stop ElasticSearch nodes
 # --
 	hosts->host
 		target=user+"@"+host
 		println("STOPPING elasticsearch on " + target)
-		SSH:sudo(target,"systemctl stop elasticsearch")
+		##SSH:sudo(target,"systemctl stop elasticsearch")
+		SSH:sudo(target,"service elasticsearch stop")
 /StopElasticSearch
 
 
 
 
-# Start ElasticSearch node
+# Start ElasticSearch nodes
 # --
+	<<<<<< XXX
+	# First start masterNodes separately, before starting the rest
+	masterHosts->host
+		target=user+"@"+host
+		println("STARTING " + target)
+		SpawnProcess(SymDict(target), 
+			##SSH:sudo(target,"systemctl start elasticsearch")
+			SSH:sudo(target,"service elasticsearch start")
+		) =>proc
+		out(proc)
+	| _->proc
+		proc.wait
+		println("Started " + proc.data.target)
+	|
+	>>>>>>>> XXX
+
+	# Starting data hosts
 	hosts->host
-		println("STARTING elasticsearch on " + target)
+		#reject(masterHosts.contains(host))
+		println("STARTING elasticsearch on " + host)
 		target=user+"@"+host
 		SpawnProcess(SymDict(target),{
 			SSH:sudo(target,"systemctl start elasticsearch")
@@ -185,44 +277,10 @@ Input("ssh target user@host").get
 
 	processes->proc
 		proc.wait
-		println("STARTED " + proc.data.target)
+		println("Started " + proc.data.target)
  	|
 	println("All done!")
 /StartElasticSearch
-
-
-
-
-# Hosts in cluster
-# --
-"elk01.v elk02.v elk03.v elk04.v elk05.v".split
-/hosts
-
-
-# Master hosts
-# --
-"elk03.v elk04.v elk05.v".split
-/masterHosts
-
-
-
-# Logstash hosts
-# --
-	masterHosts
-/logstashHosts
-
-
-# Kibana hosts
-	masterHosts
-/kibanaHosts
-
-
-
-# SSH user
-# --
-"roar"
-/user
-
 
 
 
@@ -239,6 +297,24 @@ Input("ssh target user@host").get
 	StartElasticSearch
 /ElasticSearchComplete
 
+
+
+# Check install
+# --
+	P(1,GetTarget) => target
+	target.after("@") => host
+	GetIp(host) => ip
+	SSH:run(target,"curl -XGET 'http://"+ip+":9200/_cluster/state?pretty'").stdout
+/CheckInstall
+
+
+# Check install remote
+# --
+	P(1,GetTarget) => target
+	target.after("@") => host
+	GetIp(host) => ip
+	SSH:run(target,"curl -XGET 'http://"+ip+":9200/_cluster/state?pretty'").stdout
+/CheckInstallRemote
 
 
 
@@ -321,6 +397,7 @@ Input("ssh target user@host").get
 		target=user+"@"+host
 		
 		# Create config
+		
 		Inner {
 			masterHosts->host 
 				out('"' + host + ':9200"')
@@ -377,5 +454,29 @@ Input("ssh target user@host").get
 
 		
 	
+
+ElasticSearchComplete 
+/Run1
+
+
+InstallLogstashAll
+/Run2
+
+
+StartLogstash
+/Run3
+
+
+
+InstallKibanaAll
+/Run4
+
+
+
+ConfigureKibanaAll
+/Run5
+
+
+
 
 
