@@ -34,6 +34,26 @@ Input("ssh target user@host").get
 //KibanaImage
 
 
+
+# Lookup ip address
+# --
+	P(1,"elk03.v")=>host
+	foundName=false
+	result=null
+	Lib:run("nslookup",host).stdout->line
+		if(line.startsWith("Name:") && line.contains(host)) {
+			foundName=true
+			assert(false)
+		}
+		if (foundName && line.startsWith("Address:")) {
+			result=line.after(":").trim
+		}
+	|
+	error(result==null,"Could not resolve " + host)
+	result
+//GetIp
+
+
 # Ensure /mnt/storage ok
 # --
 	P(1,GetTarget)=>target
@@ -56,6 +76,7 @@ Input("ssh target user@host").get
 
 
 
+
 # Install ElasticSearch
 # --
     P(1,GetTarget) =>target
@@ -67,6 +88,9 @@ Input("ssh target user@host").get
 	println(prefix+"Installing " + ESImage)
 	SSH:sudo(target,"apt-get install -y /mnt/storage/ISO/" + ESImage)
 
+	println("Enabling service")
+	SSH:sudo(target,"systemctl enable elasticsearch")
+
 //InstallElasticSearch	
 
 
@@ -77,21 +101,35 @@ Input("ssh target user@host").get
 	P(3,"")=>prefix
 
 	target.after("@") => nodeHost
+	GetIp(nodeHost) => nodeHostIp
+
 	nodeHost.before(".") => nodeName
 
-	masterHosts->h 
-		out('"' + if(h.contains("@"),h.after("@"),h) + '"')
+	isMasterHost=""+masterHosts.contains(nodeHost)
+	isDataHost=""+(!masterHosts.contains(nodeHost))
+
+	masterHosts->host
+		out('"' + host + '"')
 	| _.concat(", ") => masterNodes
 
-	SymDict(nodeHost,nodeName,masterNodes).mergeCodes=>data
+	hosts->host
+		out('"' + host + '"')
+	| _.concat(", ") => allNodes
+
+	SymDict(nodeHost,nodeHostIp,nodeName,isMasterHost,isDataHost,masterNodes,allNodes).mergeCodes=>data
 
 	Sequence(
 		@ cluster.name: mycluster
 		@ node.name: ${nodeName}
- 		@ network.host: ${nodeHost}
+		@ node.data: ${isDataHost}
+		@ node.ingest: ${isDataHost}
+		@ node.master: ${isMasterHost}
+ 		@ network.host: ${nodeHostIp}
 		@ path.data: /var/lib/elasticsearch
 		@ path.logs: /var/log/elasticsearch
-		@ cluster.initial_master_nodes: [ ${masterNodes} ]
+		#@ cluster.initial_master_nodes: [ ${masterNodes} ]
+		@ discovery.zen.ping.unicast.hosts: [ ${allNodes} ]
+		#@ discovery.zen.minimum_master_nodes: 2
 	)->line
 		out(line.merge(data))
 	| => config
@@ -107,8 +145,18 @@ Input("ssh target user@host").get
 
 	SSH:copy(f,target,"./elasticsearch.yml")
 	SSH:sudo(target,"cp ./elasticsearch.yml /etc/elasticsearch")
-
 	f.delete
+
+	println("Creating directories for data and log")
+	SSH:sudo(target,"mkdir -p /var/lib/elasticsearch")
+	SSH:sudo(target,"mkdir -p /var/log/elasticsearch")
+
+	SSH:sudo(target,"chmod 755 /var/lib/elasticsearch")
+	SSH:sudo(target,"chmod 755 /var/log/elasticsearch")
+
+	SSH:sudo(target,"chown elasticsearch /var/lib/elasticsearch")
+	SSH:sudo(target,"chown elasticsearch /var/log/elasticsearch")
+
 //InstallElasticSearchConfig
 
 
@@ -116,11 +164,10 @@ Input("ssh target user@host").get
 
 # Stop ElasticSearch node
 # --
-	P(1,GetTarget)=>target
-	P(2,"")=>prefix
-
-	println(prefix+"STOPPING elasticsearch on " + target)
-	SSH:sudo(target,"/etc/init.d/elasticsearch stop")
+	hosts->host
+		target=user+"@"+host
+		println("STOPPING elasticsearch on " + target)
+		SSH:sudo(target,"systemctl stop elasticsearch")
 /StopElasticSearch
 
 
@@ -128,11 +175,19 @@ Input("ssh target user@host").get
 
 # Start ElasticSearch node
 # --
-	P(1,GetTarget)=>target
-	P(2,"")=>prefix
+	hosts->host
+		println("STARTING elasticsearch on " + target)
+		target=user+"@"+host
+		SpawnProcess(SymDict(target),{
+			SSH:sudo(target,"systemctl start elasticsearch")
+		}) => proc out(proc)
+	| => processes
 
-	println(prefix+"STARTING elasticsearch on " + target)
-	SSH:sudo(target,"/etc/init.d/elasticsearch start")
+	processes->proc
+		proc.wait
+		println("STARTED " + proc.data.target)
+ 	|
+	println("All done!")
 /StartElasticSearch
 
 
@@ -179,14 +234,9 @@ Input("ssh target user@host").get
 		InstallElasticSearch(target)
 		InstallElasticSearchConfig(target,masterHosts)
 	|
-	hosts->host
-		target=user+"@"+host
-		StopElasticSearch(target)
-	|
-	hosts->host
-		target=user+"@"+host
-		StartElasticSearch(target)
-	|
+	StopElasticSearch
+	println
+	StartElasticSearch
 /ElasticSearchComplete
 
 

@@ -48,11 +48,9 @@ P(1,ReadSSHTarget) =>sshTarget
 # Check if server responds on ping
 P(1) =>target
     if(target.contains("@"), target.after("@"), target) =>host
-    Dir.runCapture("ping","-c","1",host)->line 
-        assert(line.contains("0 received")) out(line) 
-    | _.length>0 =>failure
+	Lib:run(List("ping","-c","1",host),List,true).exitCode => ex
 
-    !failure
+	ex == 0
 /HostOk
 
 
@@ -165,9 +163,19 @@ P(5, false) => showDebug
 
 # Shell
 # --
+	# Purge non-pingable hosts
+	Inner {
+		Db2:Get("SSH","Hosts",List).unique->t
+			assert(SSH:HostOk(t))
+			out(t)
+		| => targets
+		Db2:Set("SSH","Hosts",targets)
+	}
+
 	Lib:Header("Known targets")
-	Db2:Get("SSH","Hosts",List).unique => targets
-	targets->t println("-> " + t) |
+				
+	targets->t println("-> " + t) 
+	|
 	println
 	Input("Enter target: user@host").get => target
 
