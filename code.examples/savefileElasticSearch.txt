@@ -3,7 +3,7 @@
 ElasticSearch installs
 ----------------------
 
-Verify functions 
+Verify functions defining lists of hosts and SSH user
 
 - hosts
 - user
@@ -13,11 +13,13 @@ Verify functions
 
 Then run
 
-- ElasticSearchComplete 
-- InstallLogstashAll
-- StartLogstash
-- InstallKibanaAll
-- ConfigureKibanaAll
+- ES1 / ElasticSearchComplete       Works!
+
+- KIB1 / InstallKibanaAll           Works!
+- KIB2 / ConfigureKibanaAll
+
+- LS1 /InstallLogstashAll			Not tested / must create config
+- LS2 / StartLogstash
 
 All can be run multiple times.
 
@@ -302,6 +304,10 @@ Input("ssh target user@host").get
 # Check install
 # --
 	P(1,GetTarget) => target
+
+	# Only works using IP-address, not "localhost", see text in
+	# the InstallElasticSearchConfig function
+
 	target.after("@") => host
 	GetIp(host) => ip
 	SSH:run(target,"curl -XGET 'http://"+ip+":9200/_cluster/state?pretty'").stdout
@@ -311,6 +317,10 @@ Input("ssh target user@host").get
 # Check install remote
 # --
 	P(1,GetTarget) => target
+
+	# Only works using IP-address, not "localhost", see text in
+	# the InstallElasticSearchConfig function
+
 	target.after("@") => host
 	GetIp(host) => ip
 	SSH:run(target,"curl -XGET 'http://"+ip+":9200/_cluster/state?pretty'").stdout
@@ -350,6 +360,9 @@ Input("ssh target user@host").get
 
 
 # Install logstash for all logstashHosts
+#
+# Note: configuration not included, just remember to use IP addresses of
+# the ElasticSearch cluster nodes!!
 # --
 	logstashHosts->host
 		target=user+"@"+host
@@ -392,24 +405,41 @@ Input("ssh target user@host").get
 
 
 # Configure Kibana all
+# 
+# Using IP-addresses to connect to the master nodes!
+# Port 5601
 # --
 	kibanaHosts->host
 		target=user+"@"+host
 		
+		println("Configure Kibana " + host)
+
+
 		# Create config
 		
 		Inner {
 			masterHosts->host 
-				out('"' + host + ':9200"')
+				out('"http://' + GetIp(host) + ':9200"')
 			| _.concat(", ")
-		} => masterNodes
+		} => masterNodesIp
 
-		SymDict(masterNodes).mergeCodes => data
+		myIp=GetIp(host)
 
+		SymDict(host,myIp,masterNodesIp).mergeCodes => data
+
+		println("Creating log dir /var/log/kibana")
+		SSH:sudo(target,"mkdir -p /var/log/kibana")
+		SSH:sudo(target,"chown kibana /var/log/kibana")
+
+		
 		Inner {
 			Sequence(
 				@ server.host: "0.0.0.0"
-		        @ elasticsearch.hosts: [ ${masterNodes} ]
+				###@ server.host: "${host}"
+				@ server.port: 5601
+				@ logging.dest: /var/log/kibana/kibana.log
+				@ logging.verbose: true
+		        @ elasticsearch.hosts: [ ${masterNodesIp} ]
 			)->line
 				out(line.merge(data))
 		} => config
@@ -423,7 +453,7 @@ Input("ssh target user@host").get
 		println("---")
 
 		SSH:copy(f,target,"./kibana.yml")
-		SSH:sudo(target,"cp ./kibana.yml /etc/kibana.yml")
+		SSH:sudo(target,"cp ./kibana.yml /etc/kibana/kibana.yml")
 
 		f.delete
 	|
@@ -456,25 +486,27 @@ Input("ssh target user@host").get
 	
 
 ElasticSearchComplete 
-/Run1
-
-
-InstallLogstashAll
-/Run2
-
-
-StartLogstash
-/Run3
+/ES1
 
 
 
 InstallKibanaAll
-/Run4
+/KIB1
 
 
 
 ConfigureKibanaAll
-/Run5
+/KIB2
+
+
+
+InstallLogstashAll
+/LS1
+
+
+StartLogstash
+/LS2
+
 
 
 
