@@ -16,9 +16,9 @@ Then run
 - ES1 / ElasticSearchComplete       Works!
 
 - KIB1 / InstallKibanaAll           Works!
-- KIB2 / ConfigureKibanaAll
+- KIB2 / ConfigureKibanaAll			Works!
 
-- LS1 /InstallLogstashAll			Not tested / must create config
+- LS1 / InstallLogstashAll			Works! (but no pipelines configured, only software install)
 - LS2 / StartLogstash
 
 All can be run multiple times.
@@ -328,6 +328,108 @@ Input("ssh target user@host").get
 
 
 
+	
+# Install kibana
+# --
+	kibanaHosts->host
+		target=user+"@"+host
+		println("INSTALLING kibana " + host)
+		CheckOrFixMntStorage(target)
+
+		println("Installing " + KibanaImage)
+		SSH:sudo(target,"apt-get install -y /mnt/storage/ISO/" + KibanaImage)
+
+		println("Enabling service")
+		SSH:sudo(target,"systemctl enable kibana")
+/InstallKibanaAll
+
+
+# Configure Kibana all
+# 
+# Using IP-addresses to connect to the master nodes!
+#
+# Port 5601
+# Note: Kibana uses a bit of time after restart, to become available!
+# --
+	kibanaHosts->host
+		target=user+"@"+host
+		
+		println("Configure Kibana " + host)
+
+
+		# Create config
+		
+		Inner {
+			masterHosts->host 
+				out('"http://' + GetIp(host) + ':9200"')
+			| _.concat(", ")
+		} => masterNodesIp
+
+		myIp=GetIp(host)
+
+		SymDict(host,myIp,masterNodesIp).mergeCodes => data
+
+		println("Creating log dir /var/log/kibana")
+		SSH:sudo(target,"mkdir -p /var/log/kibana")
+		SSH:sudo(target,"chown kibana /var/log/kibana")
+
+		
+		Inner {
+			Sequence(
+				@ server.host: "0.0.0.0"
+				###@ server.host: "${host}"
+				@ server.port: 5601
+				@ logging.dest: /var/log/kibana/kibana.log
+				#@ logging.verbose: true
+		        @ elasticsearch.hosts: [ ${masterNodesIp} ]
+			)->line
+				out(line.merge(data))
+		} => config
+
+		Lib:TmpFile("kibana","yml") => f
+		f.create(config)
+
+		println("Creating kibana.yml")
+		println("---")
+		{ f.read->line println(line) }
+		println("---")
+
+		SSH:copy(f,target,"./kibana.yml")
+		SSH:sudo(target,"cp ./kibana.yml /etc/kibana/kibana.yml")
+
+		f.delete
+	|
+	println("Restarting kibana")
+	StopKibana
+	println
+	StartKibana
+/ConfigureKibanaAll
+
+
+# Stop kibana
+# --
+	kibanaHosts->host
+		target=user+"@"+host
+		println("STOPPING kibana " + host)
+		SSH:sudo(target,"systemctl stop kibana")
+/StopKibana
+
+		
+	
+# Start kibana
+# --
+	kibanaHosts->host
+		target=user+"@"+host
+		println("STARTING kibana " + host)
+		SSH:sudo(target,"systemctl start kibana")
+/StartKibana
+
+
+
+
+
+
+
 # Install Logstash - enables service, but does not start
 # --
     P(1,GetTarget) =>target
@@ -387,100 +489,6 @@ Input("ssh target user@host").get
 		target=user+"@"+host
 		SSH:sudo(target,"systemctl start logstash")
 /StartLogstash
-
-	
-# Install kibana
-# --
-	kibanaHosts->host
-		target=user+"@"+host
-		println("INSTALLING kibana " + host)
-		CheckOrFixMntStorage(target)
-
-		println("Installing " + KibanaImage)
-		SSH:sudo(target,"apt-get install -y /mnt/storage/ISO/" + KibanaImage)
-
-		println("Enabling service")
-		SSH:sudo(target,"systemctl enable kibana")
-/InstallKibanaAll
-
-
-# Configure Kibana all
-# 
-# Using IP-addresses to connect to the master nodes!
-# Port 5601
-# --
-	kibanaHosts->host
-		target=user+"@"+host
-		
-		println("Configure Kibana " + host)
-
-
-		# Create config
-		
-		Inner {
-			masterHosts->host 
-				out('"http://' + GetIp(host) + ':9200"')
-			| _.concat(", ")
-		} => masterNodesIp
-
-		myIp=GetIp(host)
-
-		SymDict(host,myIp,masterNodesIp).mergeCodes => data
-
-		println("Creating log dir /var/log/kibana")
-		SSH:sudo(target,"mkdir -p /var/log/kibana")
-		SSH:sudo(target,"chown kibana /var/log/kibana")
-
-		
-		Inner {
-			Sequence(
-				@ server.host: "0.0.0.0"
-				###@ server.host: "${host}"
-				@ server.port: 5601
-				@ logging.dest: /var/log/kibana/kibana.log
-				@ logging.verbose: true
-		        @ elasticsearch.hosts: [ ${masterNodesIp} ]
-			)->line
-				out(line.merge(data))
-		} => config
-
-		Lib:TmpFile("kibana","yml") => f
-		f.create(config)
-
-		println("Creating kibana.yml")
-		println("---")
-		{ f.read->line println(line) }
-		println("---")
-
-		SSH:copy(f,target,"./kibana.yml")
-		SSH:sudo(target,"cp ./kibana.yml /etc/kibana/kibana.yml")
-
-		f.delete
-	|
-	println("Restarting kibana")
-	StopKibana
-	println
-	StartKibana
-/ConfigureKibanaAll
-
-
-# Stop kibana
-# --
-	kibanaHosts->host
-		target=user+"@"+host
-		println("STOPPING kibana " + host)
-		SSH:sudo(target,"systemctl stop kibana")
-/StopKibana
-
-		
-	
-# Start kibana
-# --
-	kibanaHosts->host
-		target=user+"@"+host
-		println("STARTING kibana " + host)
-		SSH:sudo(target,"systemctl start kibana")
-/StartKibana
 
 		
 	
