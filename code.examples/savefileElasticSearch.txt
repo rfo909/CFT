@@ -1,25 +1,44 @@
 # Readme!
 <<< EOF
-ElasticSearch installs
-----------------------
+ElasticSearch / Kibana / Logstash install and configure
+########################################################
 
-Verify functions defining lists of hosts and SSH user
+Set up a number of VM's and ensure password-less access
+via SSH, and that the SSH user is added to 
+/etc/sudoers.
 
-- hosts
-- user
-- masterHosts
-- logstashHosts
-- kibanaHosts
+The first time running, you will have to enter your host
+names and then the SSH user name.
+
+This is remembered in the internal database. A four hour
+timeout since last access will ask you to confirm the data.
 
 Then run
+--------
 
 - ES1 / ElasticSearchComplete       Works!
 
 - KIB1 / InstallKibanaAll           Works!
 - KIB2 / ConfigureKibanaAll			Works!
 
-- LS1 / InstallLogstashAll			Works! (but no pipelines configured, only software install)
-- LS2 / StartLogstash
+- LS1 / InstallLogstashAll			Works!
+
+- TestLogstashPipeline			    Works!
+
+Logstash pipelines must be configured outside this script,
+using the code from TestLogstashPipeline as template, for
+getting multiple pipelines correctly configured.
+
+To configure Logstash
+----------------------
+
+- ClearLogstashPipelines
+- AddLogstashPipeline ("xyz",List)   // list of lines
+- ...
+- PushLogstashConfigAll
+- StopLogstash
+- StartLogstash
+
 
 All can be run multiple times.
 
@@ -37,41 +56,94 @@ Input("ssh target user@host").get
 
 
 
+# Get, set or confirm config data
+# --
+	P(1,false) => forceUpdate
+
+	Db2:Get("ElasticSearch","Config") => dict
+
+	save=false
+	
+	if (dict==null) {
+		forceUpdate=true
+		dict=Dict
+	}
+
+	if (forceUpdate || Util:HasTimedOut("ElasticSearch.ConfigCheck", 4*3600)) {
+		Input("All host names - space-separated") => inp
+		inp.clear.setCurr(dict.get("hosts",List).concat(" "))
+		dict.set("hosts", inp.get.split)
+	
+		Input("Master host names - space-separated") => inp
+		inp.clear.setCurr(dict.get("masterHosts",List).concat(" "))
+		dict.set("masterHosts", inp.get.split)
+	
+		Input("Logstash host names - space-separated") => inp
+		inp.clear.setCurr(dict.get("logstashHosts",List).concat(" "))
+		dict.set("logstashHosts", inp.get.split)
+	
+		Input("Kibana host names - space-separated") => inp
+		inp.clear.setCurr(dict.get("kibanaHosts",List).concat(" "))
+		dict.set("kibanaHosts", inp.get.split)
+	
+		Input("SSH user name") => inp
+		inp.clear.setCurr(dict.get("user",""))
+		dict.set("user", inp.get)
+
+		Lib:Header("Current config")
+		Util:ShowDict(dict,true)
+
+		error(!Lib:Confirm,"Aborting")
+
+		Db2:Set("ElasticSearch","Config",dict)
+
+		save=true
+	}
+
+	Util:SetTimeMark("ElasticSearch.ConfigCheck")
+
+	dict
+//GetConfigData
+
+
+
+# Show config data
+# --
+	Util:ShowDict(GetConfigData,true)
+/ShowConfigData
+
 
 
 # Hosts in cluster
 # --
-"elk01.v elk02.v elk03.v elk04.v elk05.v".split
+	GetConfigData.hosts
 /hosts
 
 
 # Master hosts
 # --
-"elk03.v elk04.v elk05.v".split
+	GetConfigData.masterHosts
 /masterHosts
 
 
 
 # Logstash hosts
 # --
-	masterHosts
+	GetConfigData.logstashHosts
 /logstashHosts
 
 
+
 # Kibana hosts
-	masterHosts
+	GetConfigData.kibanaHosts
 /kibanaHosts
 
 
-# Initial master node
-# --
-	"elk03.v"
-/masterHostInitial
 
 
 # SSH user
 # --
-"roar"
+	GetConfigData.user
 /user
 
 
@@ -144,9 +216,6 @@ Input("ssh target user@host").get
 	println(prefix+"Installing " + ESImage)
 	SSH:sudo(target,"apt-get install -y /mnt/storage/ISO/" + ESImage)
 
-	##println("Enabling service")
-	##SSH:sudo(target,"systemctl enable elasticsearch")
-
 //InstallElasticSearch	
 
 
@@ -182,16 +251,17 @@ Input("ssh target user@host").get
 
 	SymDict(nodeHost,nodeHostIp,
 		nodeName,isMasterHost,isDataHost,
-		masterNodes,masterNodesIp,masterHostInitial,allNodes,allNodesIp
+		masterNodes,masterNodesIp,allNodes,allNodesIp
 	).mergeCodes=>data
 
-	# So the clue here is that by using IP addresses for network.host as well as
-	# in the initial_master_nodes and the unicast.hosts, it works, as the
+	# IP-numbers vs host names
+	# ------------------------
+	# The clue here is that by using IP addresses for network.host as well as
+	# in the initial_master_nodes and the unicast.hosts, everything works, as the
 	# check on network.host is LITERAL. With this config, we can NOT do
-	# curl to localhost, only to the IP-address. From the outside, we can not
-	# use names like elk03.v, but have to use IP-addresses. Because the network.host
-	# field is about ACCESS CONTROL and it is literal.
-
+	# curl to localhost, only to the IP-address. Doing CURL from outside, we can also
+	# not use host names, but have to use IP-addresses. Because the network.host
+	# field for Elastic is about ACCESS CONTROL and it is taken literally.
 
 	Sequence(
 		@ cluster.name: mycluster
@@ -365,19 +435,19 @@ Input("ssh target user@host").get
 			| _.concat(", ")
 		} => masterNodesIp
 
-		myIp=GetIp(host)
-
-		SymDict(host,myIp,masterNodesIp).mergeCodes => data
+		SymDict(masterNodesIp).mergeCodes => data
 
 		println("Creating log dir /var/log/kibana")
 		SSH:sudo(target,"mkdir -p /var/log/kibana")
 		SSH:sudo(target,"chown kibana /var/log/kibana")
 
+
+		# For Kibana, server.host 0.0.0.0 means all, also
+		# when using host name instead of IP address
 		
 		Inner {
 			Sequence(
 				@ server.host: "0.0.0.0"
-				###@ server.host: "${host}"
 				@ server.port: 5601
 				@ logging.dest: /var/log/kibana/kibana.log
 				#@ logging.verbose: true
@@ -490,6 +560,109 @@ Input("ssh target user@host").get
 		SSH:sudo(target,"systemctl start logstash")
 /StartLogstash
 
+
+
+# Clear logstash pipelines
+# --
+	Db2Obj:DeleteCollection("LogstashPipeline")
+/ClearLogstashPipelines
+
+
+
+
+# Add logstash pipeline
+# --
+	P(1) => pipelineName
+	P(2) => pipelineJSON
+	P(3) => esHostsMergeCode
+
+	# Create esHosts merge value
+	masterHosts->h out('"' + GetIp(h) + ':9200"') | _.concat(", ") => esHosts
+	Dict.set(esHostsMergeCode, esHosts).mergeCodes => data
+
+	# Merge esHosts into JSON
+	pipelineJSON->line out(line.merge(data)) | _=> pipelineJSON
+
+	# Store in database
+	Db2Obj:AddObject("LogstashPipeline", SymDict(pipelineName, pipelineJSON))
+/AddLogstashPipeline
+
+
+
+# Update logstash config
+# --
+	P(1,GetTarget) => target
+
+	println("PushLogstashConfig " + target)
+
+	list = Db2Obj:FindObjects("LogstashPipeline")
+	error(list.empty,"No Logstash pipelines have been added")
+
+	pipelinesYml = List
+	list->x
+		p=x.value
+		#Util:ShowDict(p,true) error("x")
+		p.mergeCodes => data
+		{
+			Sequence(
+				@@- pipeline.id: ${pipelineName}
+				@@  pipeline.workers: 1
+				@@  path.config: "/etc/logstash/conf.d/${pipelineName}.conf"
+			) -> line 
+				pipelinesYml.add(line.merge(data))
+		}
+		Lib:TmpFile(p.get("pipelineName"),"conf") => f
+		f.create(p.get("pipelineJSON"))
+	
+		fname=p.get("pipelineName")+".conf"
+		
+		println("Deploying " + fname)
+		println("---")
+		f.read->line println(line) |
+		println("---")
+		SSH:copy(f,target,"./"+fname)
+		SSH:sudo(target,"cp ./"+fname+" /etc/logstash/conf.d")
+		f.delete
+
+
+	# The pipelines.yml default points to conf.d/*.conf
+	#
+	# Still, this is cleaner, as it avoid problems with old
+	# conf-files.
+
+	Lib:TmpFile("pipelines","yml") => f
+
+	f.create(pipelinesYml)
+	println("Deploying pipelines.yml")
+	println("---")
+	f.read->line println(line) |
+	println("---")
+	SSH:copy(f,target,"./pipelines.yml")
+	SSH:sudo(target,"cp ./pipelines.yml /etc/logstash")
+	f.delete
+
+	"ok"
+/PushLogstashConfig
+
+
+
+
+
+# Update logstash config all 
+# --
+	logstashHosts->host
+		Lib:Header("Update logstash " + host)
+		target=user+"@"+host
+		PushLogstashConfig(target)
+	|
+	StopLogstash
+	println
+	StartLogstash
+/PushLogstashConfigAll
+
+	
+	
+
 		
 	
 
@@ -511,11 +684,29 @@ ConfigureKibanaAll
 InstallLogstashAll
 /LS1
 
+# Add example logstash pipeline that receives beats data and
+# insert them unmodified into Elastic in day into index beatstest-*
+# --
+	ClearLogstashPipelines
 
-StartLogstash
-/LS2
+<<<<<<<<<<<<<<<<< EOF
+input {
+	beats {
+		port => "5044"
+	}
+}
+output {
+	elasticsearch {
+		index => "beatstest-%{+YYYY.MM.dd}"
+		hosts => [ ${esHosts} ]
+	}
+}
+>>>>>>>>>>>>>>>>> EOF
+	=> json
 
-
+	AddLogstashPipeline("test", json, "esHosts")
+	PushLogstashConfigAll
+/TestLogstashPipeline
 
 
 
