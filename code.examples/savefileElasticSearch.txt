@@ -443,7 +443,7 @@ Input("ssh target user@host").get
 
 
 		# For Kibana, server.host 0.0.0.0 means all, also
-		# when using host name instead of IP address
+		# when called using host name instead of IP address
 		
 		Inner {
 			Sequence(
@@ -671,6 +671,12 @@ ElasticSearchComplete
 
 
 
+
+CheckInstallRemote(user + "@" + masterHosts.first)
+/ES2
+
+
+
 InstallKibanaAll
 /KIB1
 
@@ -684,11 +690,13 @@ ConfigureKibanaAll
 InstallLogstashAll
 /LS1
 
-# Add example logstash pipeline that receives beats data and
-# insert them unmodified into Elastic in day into index beatstest-*
+
+
+
+# Add example logstash pipeline
+# It receives beats data and insert them unmodified into Elastic in index beatstest-*
 # --
 	ClearLogstashPipelines
-
 <<<<<<<<<<<<<<<<< EOF
 input {
 	beats {
