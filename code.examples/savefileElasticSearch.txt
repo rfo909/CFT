@@ -204,7 +204,8 @@ Input("ssh target user@host").get
     P(2,"") =>prefix
 
 	println(prefix+"INSTALLING " + target)
-	APTUpdate:run(target,null,true)
+
+	#APTUpdate:run(target,null,true)
 
 	println(prefix+"Checking Java")
     Java:VerifyJava (target, prefix+"   ")
@@ -215,6 +216,9 @@ Input("ssh target user@host").get
 	CheckOrFixMntStorage(target,prefix+"   ")
 	println(prefix+"Installing " + ESImage)
 	SSH:sudo(target,"apt-get install -y /mnt/storage/ISO/" + ESImage)
+
+	println("Enabling service")
+	SSH:sudo(target,"systemctl enable elasticsearch")
 
 //InstallElasticSearch	
 
