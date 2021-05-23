@@ -1,0 +1,116 @@
+# Readme
+<<<< EOF
+Simulate SFTP-like log
+
+Writing lines at random intervals, of two types, of which only one will
+be processed. The log file exists at a shared location, which is scanned
+by a logstash instance. 
+
+The Pipeline() function contains the latest working pipeline. Wrote to
+output text file for testing.
+
+Issues specific to SFTP log parsing:
+
+	- processing only lines starting with "FILE"
+	- extracting file name from path
+	- extracting file type from file name
+	  Needed Onigurama syntax for custom RegExp to do this!
+
+Simulates log entries, for advanced parsing of SFTP style logs, where
+we need to process certain lines only, and also the file name and type
+needs to be extracted from a path expression.
+>>>> EOF
+/Readme
+
+
+
+# File types
+# --
+"rfo lif mif bif cif atv fuk".split
+/fileTypes
+
+
+# Pseudo random generator
+# --
+	P(1,1000) => limit
+	P(2,0) => seed
+	a = 93499499499 % (currentTimeMillis % (seed+3949931)) % limit
+/Rnd
+
+
+# LogFile
+# --
+	File("/mnt/storage/simulatedLog.txt")
+/LogFile
+
+
+# Generate log lines
+# --
+P(1,Input("Iterations").get.parseInt) => count
+ftypes=fileTypes
+loop
+	sleep=Rnd(1000,3301)
+	if (Rnd(10,93949) > 7) sleep=sleep+Rnd(3000,2992)
+
+	ftype=ftypes.nth(Rnd(ftypes.length,4431))
+	if (Rnd(10,341)>=4) {
+		logLine="FILE:"+Date.fmt+"|START* RUN /xxx/yyy/"+ftype+"_"+Rnd(1000000,348421)+"|EXTRA"
+	} else {
+		logLine="INFO:"+Date.fmt+"|SAVE* FIX /the/file: bla bla|EXTRA"
+	}
+	LogFile.append(logLine)
+	println("#" + count + "  " + logLine)
+	Sys.sleep((sleep/3).i)
+	
+	count=count-1
+	break(count <= 0)
+/run
+
+
+	
+
+# WORKS
+# --
+<<<<<<<<<<<<<<<<<<< EOF
+input {
+	file {
+		path => [ "/mnt/storage/simulatedLog.txt" ]
+	}
+}
+filter {
+        dissect {
+                mapping => {
+                        "message" => "%{op}:%{ts} %{+ts}|%{rest}"
+                }
+        }
+        if [op] != "FILE" {
+                drop {}
+        }
+        grok {
+                match => {
+                        "rest" => "%{UNIXPATH:filepath}|{GREEDYDATA:}"
+                }
+        }
+        mutate {
+                # changes filepath into list, losing the original string version!
+                # 
+                split => [ "filepath","/" ]
+                add_field => [ "fname","%{[filepath][-1]}" ]
+        }
+        grok {
+                match => {
+                        "fname" => "(?<ftype>[a-zA-Z]{3})%{GREEDYDATA:}"
+                }
+        }
+}
+output {
+   file {
+   	  path => "/mnt/storage/simulatedOut.txt"
+   }
+#	elasticsearch {
+#		index => "sim02-%{+YYYY.MM.dd}"
+#		hosts => [ "10.0.5.62:9200", "10.0.5.63:9200", "10.0.5.64:9200" ]
+#	}
+}
+>>>>>>>>>>>>>>>>>>>>> EOF
+/Pipeline
