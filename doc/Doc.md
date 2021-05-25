@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2021-04-29 RFO
-v2.5.0
+Last updated: 2021-05-25 RFO
+v2.5.3
 ```
 # Introduction
 
@@ -2110,6 +2110,12 @@ that the order of fields added to dictionary, is the order of fields when genera
 
 Vice versa, the order of fields inside objects in a JSON string, when parsed, becomes the order of
 fields in the corresponding dictionaries.
+
+# Processing XML
+
+
+The "XML" script handles parsing and pretty-printing XML. It uses only List and Dict
+objects, and has not (per v2.5.3) probably not found its final form.
 
 # Use as a calculator
 

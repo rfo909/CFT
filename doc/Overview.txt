@@ -180,6 +180,8 @@ Processing text
 
 Processing JSON
 
+Processing XML
+
 Use as a calculator
  * Expressions and "variables"
  * Lib.Math
