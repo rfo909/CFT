@@ -1,41 +1,36 @@
 # Readme
 <<<< EOF
-Simulate SFTP-like log
+Parsing SFTP log lines
 
-Writing lines at random intervals, of two types, of which only one will
-be processed. The log file exists at a shared location, which is scanned
-by a logstash instance. 
-
-The Pipeline() function contains the latest working pipeline. Wrote to
-output text file for testing.
-
-Issues specific to SFTP log parsing:
-
-	- processing only lines starting with "FILE"
-	- extracting file name from path
-	- extracting file type from file name
-	  Needed Onigurama syntax for custom RegExp to do this!
-
-Simulates log entries, for advanced parsing of SFTP style logs, where
-we need to process certain lines only, and also the file name and type
-needs to be extracted from a path expression.
 >>>> EOF
 /Readme
 
 
-
-# File types
+# Get logline
 # --
-"rfo lif mif bif cif atv fuk".split
-/fileTypes
+	Db2:Get("ElasticSFTP","lines",null) => list
+	if (list==null) {
+		Input("enter file path and name").get => path
+		list=File(path).read
+
+		Db2:Set("ElasticSFTP","lines",list)
+		Db2:Set("ElasticSFTP","pos",0)
+	}
+	Db2:Get("ElasticSFTP","pos",0) => pos
+	Db2:Get("ElasticSFTP","lines") => lines
+	if (pos >= lines.length) pos=0
+	lines.nth(pos) => line
+	Db2:Set("ElasticSFTP","pos",pos+1)
+
+	line.split("|") => parts
+	Date.setFormat("dd/MM/yyyy HH:mm:ss.000").fmt => now
+	parts.first+"|"+now+"|"+now +"|"+parts.keep(3).concat("|") 
+/GetLogLine
 
 
-# Pseudo random generator
+# Reprocess loglines
 # --
-	P(1,1000) => limit
-	P(2,0) => seed
-	a = 93499499499 % (currentTimeMillis % (seed+3949931)) % limit
-/Rnd
+	
 
 
 # LogFile
@@ -44,32 +39,72 @@ needs to be extracted from a path expression.
 /LogFile
 
 
-# Generate log lines
+
+# Outfile
 # --
-P(1,Input("Iterations").get.parseInt) => count
-ftypes=fileTypes
-loop
-	sleep=Rnd(1000,3301)
-	if (Rnd(10,93949) > 7) sleep=sleep+Rnd(3000,2992)
+	File("/mnt/storage/simulatedOut.txt")
+/OutFile
 
-	ftype=ftypes.nth(Rnd(ftypes.length,4431))
-	if (Rnd(10,341)>=4) {
-		logLine="FILE:"+Date.fmt+"|START* RUN /xxx/yyy/"+ftype+"_"+Rnd(1000000,348421)+"|EXTRA"
-	} else {
-		logLine="INFO:"+Date.fmt+"|SAVE* FIX /the/file: bla bla|EXTRA"
-	}
-	LogFile.append(logLine)
-	println("#" + count + "  " + logLine)
-	Sys.sleep((sleep/3).i)
+
+
+# Push pipeline config to server
+# --
+	target="roar@elk04.v"
+
+	Lib:TmpFile("test","conf") => f
+	f.create(Pipeline)
+	SSH:sudo(target,"systemctl stop logstash")
+	SSH:copy(f,target,"./test.conf")
+	SSH:sudo(target,"cp ./test.conf /etc/logstash/conf.d")
+	SSH:sudo(target,"systemctl start logstash")
+/Push
 	
-	count=count-1
-	break(count <= 0)
-/run
-
-
 	
+# Random number
+# --
+	P(1,100) => range
+	P(2,1) => seed
+	99398348992329 % currentTimeMillis % range
+/Rnd
 
-# WORKS
+
+# Generate single log line
+# --
+	s=GetLogLine
+	println(s)
+	LogFile.append(s)
+/Run
+
+
+
+# Generate N log lines with random delays between them
+# --
+	Input("How many lines").get.parseInt => lines
+	loop
+		lines=lines-1
+		break(lines <= 0)
+		println("lines=" + lines)
+
+		Sys.sleep(100+Rnd(2000))
+		Run
+/Generate
+
+
+# Show latest input 
+# --
+	LogFile.read.last(10)
+/ShowInput
+
+# Get results
+# --
+	OutFile.read.last(10) -> json
+		JSON:Parse(json) => obj
+		JSON:PP(obj)->line out(line)
+/Show
+
+
+
+# SFTP parsing lines 
 # --
 <<<<<<<<<<<<<<<<<<< EOF
 input {
@@ -78,39 +113,57 @@ input {
 	}
 }
 filter {
+
+		# oniguruma
+		# https://github.com/kkos/oniguruma/blob/master/doc/RE
+
         dissect {
                 mapping => {
-                        "message" => "%{op}:%{ts} %{+ts}|%{rest}"
+                        "message" => "STOR|%{ts} %{+ts}|%{}|[%{info}] %{tRead}: %{tStor} %{tStart} %{fPath}.jpg%{rest}"
                 }
         }
-        if [op] != "FILE" {
+		if [tRead] != "READ" {
+			drop {}
+		}
+		if [tStart] != "START" {
+			drop {}
+		}
+        if "_dissectfailure" in [tags] {
                 drop {}
-        }
-        grok {
-                match => {
-                        "rest" => "%{UNIXPATH:filepath}|{GREEDYDATA:}"
-                }
         }
         mutate {
                 # changes filepath into list, losing the original string version!
-                # 
-                split => [ "filepath","/" ]
-                add_field => [ "fname","%{[filepath][-1]}" ]
+                # --
+                split => [ "fPath","/" ]
+                add_field => [ "fname","%{[fPath][-1]}",
+								"binCode","%{[fPath][1]}"
+							]
         }
+		# Identify file type from file name
         grok {
                 match => {
                         "fname" => "(?<ftype>[a-zA-Z]{3})%{GREEDYDATA:}"
                 }
         }
+		# Parse 'ts' timestamp to @timestamp
+		# --
+		date {
+			match => [ "ts", "dd/MM/yyyy HH:mm:ss.SSS" ]
+		}
+		# Delete some fields
+		# --
+		mutate {
+			remove_field => [ "ts", "tRead", "tStor", "tStart", "fPath", "rest" ]
+		}
 }
 output {
    file {
    	  path => "/mnt/storage/simulatedOut.txt"
    }
-#	elasticsearch {
-#		index => "sim02-%{+YYYY.MM.dd}"
-#		hosts => [ "10.0.5.62:9200", "10.0.5.63:9200", "10.0.5.64:9200" ]
-#	}
+	elasticsearch {
+		index => "sim001-%{+YYYY.MM.dd}"
+		hosts => [ "10.0.5.62:9200", "10.0.5.63:9200", "10.0.5.64:9200" ]
+	}
 }
 >>>>>>>>>>>>>>>>>>>>> EOF
 /Pipeline
