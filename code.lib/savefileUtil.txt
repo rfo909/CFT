@@ -21,7 +21,7 @@ P(2,false)=>print
 	}
 
 	Inner {
-		dict.keys.sort->key
+		dict.keys->key
 			val=LPresent.call(dict.get(key))
 			report(key,val)
 	} => reportLines
