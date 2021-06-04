@@ -201,6 +201,32 @@ t10.concat("-")=="1-2-3"
 
 
 
+# ------------------------------------------
+# Possibly the same problem as in Test11
+# 
+# Except here we get a java exception (ConcurrentModificationException)
+# ------------------------------------------
+
+# If an Inner is like a function, the below should return true, but it fails with exception
+	Inner {
+		List(4,1,3,2)->i out(Int(i,i)) | _.sort->x out(x.data)
+	}.concat
+/t12_asInner
+
+
+# Function implementation
+	List(4,1,3,2)->i out(Int(i,i)) | _.sort->x out(x.data) | _.concat
+/t12_asFunction
+
+
+# Inner with loop PIPE loop
+	tryCatch(t12_asInner) => res
+	if (res.ok, res.result==t12_asFunction, "Exception")
+/Test12_Inner_With_loop_pipe_loop
+
+
+
+
 
 
 # Run all TestX
