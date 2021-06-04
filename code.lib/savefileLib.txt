@@ -550,6 +550,7 @@ P(1,"Please confirm")=>label
 P(2,"yes")=>confirmString
 P(3,"no")=>defaultValue
 	readLine(label + " ("+defaultValue+")") => inp
+	if (inp.trim=="") inp=defaultValue
 	
 	inp.toLower == confirmString.toLower
 /Confirm
