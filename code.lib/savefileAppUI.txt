@@ -129,7 +129,7 @@ P(1,"r---")=>s
 		}
 		line=line+" "+x
 	|
-	println(line) 
+	println(line.trim) 
 /DoShowList
 
 
@@ -162,9 +162,9 @@ P(1,"r---")=>s
 	P(1,"Label") => label
 	P(2,null) => currValue
 
-	println(fix("| [?] ") + Curses:Bold + label + Curses:Reset)
+	DoShowText(" [?] " + Curses:Bold + label + Curses:Reset)
 	if(currValue != null) {
-		println( fix("|") + "    Enter for ["+currValue+"]")
+		DoShowText("    Enter for ["+currValue+"]")
 	}
 	
 	readLine => val
