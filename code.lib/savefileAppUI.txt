@@ -121,7 +121,7 @@ P(1,"r---")=>s
 	P(1,List)=>list
 	
 
-	line=fix("| ")
+	line=fix("|")
 	list->x
 		if (line.length+1+(""+x).length >= Term.w) {
 			println(line)
@@ -161,27 +161,13 @@ P(1,"r---")=>s
 # --	
 	P(1,"Label") => label
 	P(2,null) => currValue
-	P(3,true) => supportOptions
 
-	labelLine=fix("+- ") + Curses:Bold + label  
-		+ if(currValue != null, " / Enter for ["+currValue+"]","") 
-		+ Curses:Reset
-		+ if(supportOptions, " ('.' for options)", "")
-	
-	println(labelLine)
-	println("?")
-	readLine => val
-	println()
-	if (val==".") {
-		DoShowHeader("Dot-commands")
-		println(fix("|")+" .xxx   - jump to other page")
-		println(fix("|")+" .q     - to abort")
-		println(fix("|"))
-		println(labelLine)
-		println("?")
-		readLine=>currValue
+	println(fix("| [?] ") + Curses:Bold + label + Curses:Reset)
+	if(currValue != null) {
+		println( fix("|") + "    Enter for ["+currValue+"]")
 	}
 	
+	readLine => val
 	if (val=="") val=currValue
 	val
 /DoInput
@@ -209,13 +195,13 @@ P(1,"r---")=>s
 			vLen=if(x.value.length>vLen, x.value.length, vLen)
 		|
 		self.data->x
-			line=fix("| ") + 
-				Pad(x.shortName + " ","-",sLen+4)
-				+ " " + Pad(x.longName+" ","-",lLen+4)
+			line=AppUI:fix("| ") + 
+				AppUI:Pad(x.shortName + " ","-",sLen+4)
+				+ if(lLen>0, " " + AppUI:Pad(x.longName+" ","-",lLen+4), "")
 				+ " [" + x.value + "]"
 			println(line)
 		|
-		println(fix("|"))
+		println(AppUI:fix("|"))
 	})
 /DoSummaryObj
 
@@ -252,6 +238,26 @@ P(1,"r---")=>s
 # --
 	println(fix("|"))
 /DoSpace
+
+
+# Get confirmation (true or false)
+# --
+P(1,"Please confirm")=>label
+P(2,"yes")=>confirmString
+P(3,"no")=>defaultValue
+	DoShowText("[?] " + label + " ("+defaultValue+")")
+	readLine => inp
+	if (inp.trim=="") inp=defaultValue
+	
+	inp.toLower == confirmString.toLower
+/DoConfirm
+
+
+
+# Clear screen
+# --
+	println(Curses:Clear)
+/DoCls
 
 
 	
