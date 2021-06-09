@@ -35,18 +35,23 @@ via PowerShell. Soon followed collecting log files from multiple sources, and se
 
 CFT runs as a terminal based REPL, with some shell-like functionality. 
 
-It is backed by a custom functional programming language. Functions are composed interactively,
-or more commonly, by editing script files, and is intended for automation at all levels:
+## Automation at all levels
+
+Being backed by a custom functional programming language, we easily create functions, either interactively,
+or more commonly, by editing script files. This is suitable for:
 
 - copying files
 - running programs on remote hosts
-- doing stuff with PowerShell without typing all that text over and over
+- doing stuff with PowerShell without remembering or typing long and verbose commands
 - setting up software
 - collecting log files
 - manage services
 
 CFT is written from scratch in Java, implementing a tokenizer and a custom recursive-descent parser,
 that creates a tree structure, which is then executed.
+
+Communication with remote hosts is done by running external programs: SSH, SCP and PowerShell. These
+run in daughter processes, in foreground or background.
 
 ## Features
 
@@ -82,7 +87,7 @@ Below, the line /Greet creates function Greet from above lines.
 ```
 # Greet users
 # --
-	List("Tom","Dick","Harry") -> name
+	List("Tom","Dick","Harry") -> name   # the arrow is the "for each" loop
 		println("Hello " + name)
 /Greet
 ```
@@ -95,19 +100,6 @@ CFT is a functional object oriented language. It is primarily used for:
 It lets you create custom functions that call global functions, as well as member functions inside objects. All values
 are objects, and descriptions of all predefined functions are available via the interactive "help" command. 
 
-## Automation
-
-Useful for all levels of automation:
-
-- searching groups of files
-- deploying software with dependencies (ssh / scp or PowerShell)
-- start/stop services on sets of servers (ssh or PowerShell)
-- collect logfiles, unzipping zipped files, for searching
-- automate PowerShell commands - saves a lot of typing
-- automate git checkin, checkout, ... or virsh to manage KVM
-
-Communication with remote hosts is done by running external programs, typically SSH, SCP and PowerShell 
-in daughter processes (foreground or background). 
 
 ## Templating
 
@@ -128,9 +120,9 @@ Hello ${something}.
 
 CFT supports powerful templating, for creating custom configuration files. 
 
-It also has internal access
-to the same tokenizer which tokenizes the CFT language, and has a JSON parser which is written
-in CFT itself, returning a CFT data structure, as well as creating JSON text from a CFT data structure.
+It also has internal access to the same tokenizer which is used to process the CFT language.
+
+A JSON parser as well as an XML parser, both written as CFT scripts, have been created using this functionality.
 
 
 ## Youtube tutorial
@@ -145,6 +137,13 @@ CFT has been developed since the spring of 2018, and been on Github since June 2
 Written in Java and built with Maven, which results in a single JAR file. 
 
 Tested on both Linux and Windows. Has no dependencies outside of the standard Java libraries.
+
+```
+git clone https://github.com/rfo909/CFT.git
+cd CFT
+mvn package
+./cft
+```
 
 # Running
 
