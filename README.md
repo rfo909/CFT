@@ -1,8 +1,21 @@
 
 # CFT - ConfigTool
 
+## Converted to Maven
+
+*2020-06-09 v2.5.5: Now using Maven instead of ANT*
+
 ```
-# Everybody loves Fibonacci ...
+git clone https://github.com/rfo909/CFT.git
+cd CFT
+mvn package
+./cft
+```
+
+## Everybody loves Fibonacci ...
+
+```
+# Fibonacci
 # --
 	P(1,List(0,1)) => list
 	P(2,20) => iter
