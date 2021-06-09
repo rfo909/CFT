@@ -120,7 +120,7 @@ CFT has been developed since the spring of 2018, and been on Github since June 2
 
 # Download and compile
 
-Written in Java and built using Apache ANT, which results in a single JAR file. 
+Written in Java and built with Maven, which results in a single JAR file. 
 
 Tested on both Linux and Windows. Has no dependencies outside of the standard Java libraries.
 
