@@ -12,6 +12,13 @@ mvn package
 ./cft
 ```
 
+## Motto
+
+*Unless you script something, it isn't real*
+
+Manual operations are boring, introduce risk of errors, usually undocumented, and should be minimized.
+
+
 ## Everybody loves Fibonacci ...
 
 ```
