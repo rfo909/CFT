@@ -3,7 +3,7 @@
       ConnLang
   </description>
   
-  <property name="src" location="src" />
+  <property name="src" location="src/main/java" />
   <property name="build" location="build" />
   
   <target name="init" depends="clean">

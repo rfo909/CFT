@@ -1,6 +1,7 @@
 TODO/
 private/
 build/
+target/
 src/ebuild/
 src/.classpath
 src/.project
@@ -30,5 +31,7 @@ log.txt
 *.tar.gz
 *.rar
 
+
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+/target/
