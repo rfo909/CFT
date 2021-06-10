@@ -52,6 +52,9 @@ shortcut:rsh  = "---- Remote shell via ssh ----"          SSH:remoteShell
 shortcut:s    = "---- Show all scripts ----"              Lib:Scripts
 shortcut:S    = "---- Search text files curr Dir ----"    Lib:SearchTextFiles(Dir)
 
+shortcut:home = "---- move to script dir ----"			  Sys.savefile.dir.setAsCurrentDir
+
+
 # Save and get lastResult
 shortcut:slr  = "---- Save lastResult ----"               Lib:SaveLastResult
 shortcut:lr   = "---- Get lastResult ----"                Lib:GetLastResult
@@ -82,9 +85,6 @@ shortcut:ic   = "---- Investigate cat log ----"           Investigate:Show
 # ---
 shortcut:     = "---- Show all shortcuts ----"            File("CFT.props").read->line assert(line.startsWith("shortcut:")) out(line)
 
-# ANSI escape sequences - requires Linux terminal or Windows Terminal
-# ---
-shortcut:tcol = "---- Change text color ----"             Curses:SelectTextColor
 
 
 
