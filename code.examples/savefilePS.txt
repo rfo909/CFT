@@ -333,11 +333,16 @@ P(1)=>path
 # --
 	P(1,Input("Host1").get) => host1
 	P(2,Input("Host2").get) => host2
-	P(3,27017) => port
+	P(3,Input("Port").get) => port
+	P(4,true) => verbose
 
 	cmd = "Test-NetConnection -ComputerName " + host2 + " -InformationLevel Detailed -Port " + port
 	PS:RunScriptRemote(host1, List(cmd)) => x
 	connectOk = false
+	if (verbose) Inner {
+		x.stdout->line println("[OUT] " + line) |
+		x.stderr->line println("[ERR] " + line) |
+	}
 	Inner {
 		x.stdout->line
 			assert(line.contains("TcpTestSucceeded"))
@@ -345,6 +350,7 @@ P(1)=>path
 	}
 	connectOk
 /VerifyTCPConnect
+
 
 
 
