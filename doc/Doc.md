@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2021-05-25 RFO
-v2.5.3
+Last updated: 2021-06-16 RFO
+v2.5.6
 ```
 # Introduction
 
@@ -140,7 +140,7 @@ $ filesInDir
 # Show your functions
 
 
-List all functions in current script
+List functions in current script
 
 ```
 $ ?
@@ -956,8 +956,6 @@ $ ?Lib:m                 # displays code of function 'm'
 # Helper / local functions
 
 
-**v2.3.8**
-
 In many cases, one needs to create helper functions, which should not be visible as part
 of the script interface, as seen from other scripts. This is done by defining the function
 as follows:
@@ -967,21 +965,28 @@ $ 23
 $ //SomeConstant
 ```
 
-When typing '?' (with the script as current) the function is displayed along with
-normal functions, but the name is prefixed by a single slash '/'.
+The '?' command now omits local functions, for a cleaner summary of the main functions
+of a script. To see all functions, type '??' and press Enter. The local functions are
+prefixed by a single '/' slash.
 
 
 When inspecting
 script from outside via the "?ScriptName:" functionality, the local functions are
-not displayed.
+also not displayed.
 
 
-However, inspecting functions from the outside, including a (partial) name, the
+However, inspecting functions from the outside, or with the script as current, by
+including a (partial) name, the
 private functions are included, again prefixed by '/', to indicate their status.
 
+```
+# Examples
+$ ?X
+$ ?SomeScript:X
+```
 
 There is nothing blocking calls to local functions from the outside, it is purely
-a means of managing how the '?Script:' functionality works.
+a means of filtering what to show, for clarity.
 
 # Displaying all known scripts
 
@@ -990,7 +995,7 @@ The function Lib:Scripts displays all available scripts, sorted by the directori
 in the CFT.props file.
 
 
-The shortcut @S calls this function.
+The shortcut @s calls this function.
 
 # Nested loops
 

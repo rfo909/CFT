@@ -15,8 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2021-05-25 RFO
-v2.5.3
+Last updated: 2021-06-16 RFO
+v2.5.6
 
 
 </pre>
@@ -144,7 +144,7 @@ v2.5.3
 </pre>
 <h1>Show your functions</h1>
 <p>
-  List all functions in current script
+  List functions in current script
 </p>
 <pre>
   $ ?
@@ -1101,7 +1101,6 @@ codeDirs = . ; code.examples ; code.lib
 
 
 <h1>Helper / local functions</h1>
-<p><i>v2.3.8</i></p>
 <p>
   In many cases, one needs to create helper functions, which should not be visible as part
   of the script interface, as seen from other scripts. This is done by defining the function
@@ -1112,21 +1111,28 @@ codeDirs = . ; code.examples ; code.lib
   $ //SomeConstant
 </pre>
 <p>
-  When typing '?' (with the script as current) the function is displayed along with
-  normal functions, but the name is prefixed by a single slash '/'. 
+  The '?' command now omits local functions, for a cleaner summary of the main functions
+  of a script. To see all functions, type '??' and press Enter. The local functions are
+  prefixed by a single '/' slash. 
 </p>
 <p>
   When inspecting
   script from outside via the "?ScriptName:" functionality, the local functions are
-  not displayed. 
+  also not displayed. 
 </p>
 <p>
-  However, inspecting functions from the outside, including a (partial) name, the
+  However, inspecting functions from the outside, or with the script as current, by 
+  including a (partial) name, the
   private functions are included, again prefixed by '/', to indicate their status.
 </p>
+<pre>
+# Examples
+$ ?X
+$ ?SomeScript:X
+</pre>
 <p>
   There is nothing blocking calls to local functions from the outside, it is purely
-  a means of managing how the '?Script:' functionality works.
+  a means of filtering what to show, for clarity.
 </p>
 
 
@@ -1139,7 +1145,7 @@ codeDirs = . ; code.examples ; code.lib
   in the CFT.props file.
 </p>
 <p>
-  The shortcut @S calls this function.
+  The shortcut @s calls this function.
 </p>
 
 

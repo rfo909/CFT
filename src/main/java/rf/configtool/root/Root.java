@@ -353,7 +353,11 @@ public class Root {
                         currScriptCode.report(stdio, ident, false);
                     }
                 } else {
-                    currScriptCode.reportAll(stdio,false);
+                	boolean publicOnly=true;
+                	if (ts.matchStr("?")) {
+                		publicOnly=false;
+                	}
+                    currScriptCode.reportAll(stdio,publicOnly);
                 }
                 String scriptName = objGlobal.getScriptName();
                 if (scriptName != null) {
