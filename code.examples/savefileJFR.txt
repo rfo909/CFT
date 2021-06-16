@@ -1,3 +1,10 @@
+# Readme
+<<<<<<<<<<<< EOF
+Processing flight file after running JDK Flight Recorder (profiling tool)
+>>>>>>>>>>>> EOF
+/Readme
+
+
 # Processes flight.txt file
 #
 # After doing a JDK Flight Recorder run, we get flight.jfr (see cft script). 
