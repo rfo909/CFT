@@ -139,6 +139,7 @@ P(3,false) =>showDebug
 
 
 # Install ANT if missing - calls VerifyJava
+# --
 P(1,GetSSHTarget) =>target
 P(2,"") =>prefix
     println(prefix+"Preparing to install ANT")
@@ -153,11 +154,28 @@ P(2,"") =>prefix
 /VerifyAnt
 
 
-# Install or upgrade CFT - calls VerifyAnt
+# Install Maven if missing - calls VerifyJava
+# --
+P(1,GetSSHTarget) => target
+P(2,"") => prefix
+	println(prefix+"Preparing to install Maven")
+	VerifyJava(target,prefix+"   ")
+
+	SSH:run(target,"which mvn",true) => result
+	if (result.get("exitCode") != 0) {
+		println(prefix+"Installing Maven")
+		SSH:sudo(target,"apt-get -y install maven")
+	}
+	println(prefix+"Maven ok")
+/VerifyMaven
+
+
+
+# Install or upgrade CFT - calls VerifyMaven
 P(1,GetSSHTarget) =>target
 P(2,"") =>prefix
-    println(prefix+"Verifying ANT (and Java) ok")
-    VerifyAnt(target, prefix+"   ")
+    println(prefix+"Verifying Maven (and Java) ok")
+    VerifyMaven(target, prefix+"   ")
 
     # Check if CFT already installed
     {
@@ -176,7 +194,7 @@ P(2,"") =>prefix
         List(
             "cd CFT",
             "git pull origin master",
-            "ant"
+            "mvn package"
         )
     }
     =>cmd
