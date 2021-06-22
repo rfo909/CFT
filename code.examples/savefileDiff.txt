@@ -1,0 +1,109 @@
+# Simple Diff function for comparing text files
+
+
+
+
+# Identify file A
+# --
+	P(1,Sys.lastResult)=>f
+	Db2:Set("Diff","FileA",f)
+/f1
+
+# Identify file B
+# --
+	P(1,Sys.lastResult)=>f
+	Db2:Set("Diff","FileB",f)
+/f2
+
+# Search for next match
+# --
+	P(1) => str
+	P(2) => pos
+	P(3) => list
+	
+	loop
+		break(pos >= list.length)
+		break(list.nth(pos)==str)
+		pos=pos+1
+	|
+	pos
+//Search	
+
+
+# Fix integer
+# --
+	P(1,1)=>i
+	s=""+i
+	if (s.length<4) {
+		s=("    "+s)
+		s=s.sub(s.length-4)
+	}
+	s
+//fix
+
+
+
+# Get color A
+# --
+	Db2:Get("Diff","ColorA",Curses:TxtGreen)
+//ColA
+
+# Get color B
+# --
+	Db2:Get("Diff","ColorB",Curses:TxtRed)
+//ColB
+
+
+# Reset color
+# --
+	Curses:Reset
+//ColReset
+
+	
+# Diff
+# --
+	P(1, Db2:Get("Diff","FileA")).read => a
+	P(2, Db2:Get("Diff","FileB")).read => b
+	
+	ca=cb=0 # line counters
+	loop
+		if (ca >= a.length) {
+			break
+		} 
+		if (cb >= b.length) {
+			break
+		}
+		sa=a.nth(ca).trim
+		sb=b.nth(cb).trim
+		
+		if (sa==sb) {
+			println(fix(ca+1) + " " + fix(cb+1) + " : " + sa)
+			ca=ca+1
+			cb=cb+1
+		} else {
+			ma=Search(sb,ca,a)
+			mb=Search(sa,cb,b)
+			
+			if (ma>mb) {
+				println(fix("") + " " + fix(cb+1) + " > " + ColB + sb + ColReset)
+				cb=cb+1
+			} else {
+				println(fix(ca+1) + " " + fix("") + " < " + ColA + sa + ColReset)
+				ca=ca+1
+			}
+		}
+	|
+	loop
+		break (ca >= a.length)
+		println(fix(ca+1) + " " + fix("") + " < " + ColA + a.nth(ca) + ColReset)
+		ca=ca+1
+	|
+	loop
+		break (cb >= b.length)
+		println(fix("") + " " + fix(cb+1) + " > " + ColB + b.nth(cb) + ColReset)
+		cb=cb+1
+	|
+		
+
+/Diff		
+			
