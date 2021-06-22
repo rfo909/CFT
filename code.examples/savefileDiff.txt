@@ -109,8 +109,8 @@
 			cb=cb+1
 		} else {
 			
-			ma=Search(sb,ca,a)
-			mb=Search(sa,cb,b)
+			ma=Search(sb,ca,a)-ca
+			mb=Search(sa,cb,b)-cb
 			
 			if (mb<ma) {
 				println(fix("") + " " + fix(cb+1) + " > " + ColB + sb + ColReset)
