@@ -23,6 +23,8 @@
 	
 	loop
 		break(pos >= list.length)
+		#println("Search: " + list.nth(pos))
+		#println("        " + str)
 		break(list.nth(pos)==str)
 		pos=pos+1
 	|
@@ -86,8 +88,8 @@
 	
 # Diff
 # --
-	P(1, Db2:Get("Diff","FileA")).read => a
-	P(2, Db2:Get("Diff","FileB")).read => b
+	P(1, Db2:Get("Diff","FileA")).read->line out(line.trim) | _ => a
+	P(2, Db2:Get("Diff","FileB")).read->line out(line.trim) | _ => b
 	
 	ca=cb=0 # line counters
 	loop
@@ -97,18 +99,20 @@
 		if (cb >= b.length) {
 			break
 		}
-		sa=a.nth(ca).trim
-		sb=b.nth(cb).trim
+		# string a and string b (lines from a and b)
+		sa=a.nth(ca)
+		sb=b.nth(cb)
 		
 		if (sa==sb) {
-			println(fix(ca+1) + " " + fix(cb+1) + " : " + sa)
+			#println(fix(ca+1) + " " + fix(cb+1) + " : " + sa)
 			ca=ca+1
 			cb=cb+1
 		} else {
+			
 			ma=Search(sb,ca,a)
 			mb=Search(sa,cb,b)
 			
-			if (ma>mb) {
+			if (mb<ma) {
 				println(fix("") + " " + fix(cb+1) + " > " + ColB + sb + ColReset)
 				cb=cb+1
 			} else {
