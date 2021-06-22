@@ -30,6 +30,30 @@
 //Search	
 
 
+# Status
+# --
+	println("f1 = " + Db2:Get("Diff","FileA").path)
+	println("f2 = " + Db2:Get("Diff","FileB").path)
+	""
+/status
+
+
+# Swap files
+# --
+	a=Db2:Get("Diff","FileA")
+	b=Db2:Get("Diff","FileB")
+	Db2:Set("Diff","FileA",b)
+	Db2:Set("Diff","FileB",a)
+/swap
+
+
+# Short cut
+# --
+	status
+/s
+
+
+
 # Fix integer
 # --
 	P(1,1)=>i
