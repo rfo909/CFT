@@ -630,3 +630,37 @@ P(2) =>value
 /SearchTextFiles
 
 	
+	
+# Select file
+# --
+	P(1,Dir.files) => files
+	Lib:MenuSelect(files, Lambda{P(1).name})
+/SelectFile
+
+
+
+
+# Copy file into "clipboard"
+# --
+	P(1,SelectFile)=>f
+	error(f==null || getType(f) != "File", "Expected file parameter")
+	Db2:Set("Lib","ClipboardFile",f)
+/ClipboardCopy
+
+
+
+# Paste file from "clipboard"
+	Db2:Get("Lib","ClipboardFile", null) => f
+	error(f==null || getType(f) != "File", "No file found")
+	println("Copy")
+	println("    " + f.path)
+	println("to")
+	println("    " + Dir.path)
+	println
+	if (Lib:Confirm("Please confirm typing 'yes'")) Dir.copy(f) else println("Aborting")
+/ClipboardPaste
+
+
+
+
+	
