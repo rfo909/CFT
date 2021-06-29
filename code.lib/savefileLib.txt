@@ -441,6 +441,7 @@ P(4,false) => showDebug
     P(1,List) =>options
     P(2,Lambda { "name"}) =>macroGetElementName
     P(3,false) =>emptyMeansNone
+	
         sel=readLine("Enter exact or part of value?").trim
         if(emptyMeansNone && sel=="") {
             # empty list
@@ -478,6 +479,7 @@ P(4,false) => showDebug
 	P(1,List)=>options 
 	P(2,Lambda {P(1)}) =>macroGetElementName 
 	P(3,"Select element") =>title 
+	P(4,false) => emptyMeansNone
 
 	error(getType(options) != "List", "Options must be a list (" + title + ")")
 	error(options.length==0,"No elements in options list (" + title + ")")
@@ -489,13 +491,19 @@ P(4,false) => showDebug
 		loop
 		    println("")
 		    if(title != null) Header(title)
+			if (emptyMeansNone) println("(Enter blank for none)")
 
 		    ShowOptions(options, macroGetElementName)
 		    println("")
-		    SelectOptions(options, macroGetElementName) =>result
+		    SelectOptions(options, macroGetElementName, emptyMeansNone) =>result
 		    
-		    if(result.length==1) selectedElement=result.first
-		    break(selectedElement != null)
+		    if(result.length==1) {
+				selectedElement=result.first
+			} else {
+				selectedElement=null
+			}
+			#println("SelectedElement = " + selectedElement)
+		    break(selectedElement != null || emptyMeansNone)
 		    println("** No match or not unique")
 		| selectedElement
 	}
@@ -631,19 +639,11 @@ P(2) =>value
 
 	
 	
-# Select file
-# --
-	P(1,Dir.files) => files
-	Lib:MenuSelect(files, Lambda{P(1).name})
-/SelectFile
-
-
-
 
 # Copy file into "clipboard"
 # --
-	P(1,SelectFile)=>f
-	error(f==null || getType(f) != "File", "Expected file parameter")
+	P(1)=>f
+	error(f != null && getType(f) != "File", "Expected file parameter or null")
 	Db2:Set("Lib","ClipboardFile",f)
 /ClipboardCopy
 
@@ -652,10 +652,7 @@ P(2) =>value
 # Paste file from "clipboard"
 	Db2:Get("Lib","ClipboardFile", null) => f
 	error(f==null || getType(f) != "File", "No file found")
-	println("Copy")
-	println("    " + f.path)
-	println("to")
-	println("    " + Dir.path)
+	println("Copy [" + f.path + "] to [" + Dir.path + "]")
 	println
 	if (Lib:Confirm("Please confirm typing 'yes'")) Dir.copy(f) else println("Aborting")
 /ClipboardPaste

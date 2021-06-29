@@ -55,7 +55,7 @@ shortcut:S    = "---- Search text files curr Dir ----"    Lib:SearchTextFiles(Di
 shortcut:home = "---- move to script dir ----"			  Sys.savefile.dir.setAsCurrentDir
 
 # copy / paste file
-shortcut:c    = "---- copy file to clipboard ----"        Lib:ClipboardCopy
+shortcut:c    = "---- copy file to clipboard ----"        Lib:ClipboardCopy(Lib:MenuSelect(Dir.files, Lambda{P(1).name}, "Select file / blank for none", true))
 shortcut:v    = "---- paste file from clipboard ----"     Lib:ClipboardPaste
 
 
