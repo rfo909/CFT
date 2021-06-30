@@ -58,7 +58,7 @@ choice.
 		if(Sys.isWindows) {
 			npp = Dir("C:\Program Files (x86)\Notepad++")
 			if (npp.exists) {
-				Dir.runDetach("cmd","/c", npp.path + "\notepad++.exe", file.path)
+				Dir.runDetach(npp.path + "\notepad++.exe", file.path)
 			} else {
 				Dir.runDetach("cmd","/c","notepad",file.path)
 			}
