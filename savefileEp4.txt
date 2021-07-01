@@ -1,0 +1,35 @@
+<<<<<<<<<<<<<<<<<<<<<< EOF
+
+Dictionaries
+------------
+
+Dictionaries are maps from names (Strings) to values of
+any type. They are typically used for representing 
+configuration values.
+
+
+Dict
+----
+
+The global Dict() function generates an empty Dict object.
+It has function .set("key",value) and .get("key").
+
+Examples:
+
+Dict.set("a",1).get("a")
+
+- Returns 1
+
+
+Example
+-------
+
+Using dictionaries to switch between different projects
+for our Search function created earlier.
+
+>>>>>>>>>>>>>>>>>>>>>> EOF
+	=>lines
+	Intro:Logo
+	Sys.sleep(3000)
+	Intro:Present(lines)
+/intro

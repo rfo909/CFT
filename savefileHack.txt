@@ -1,0 +1,37 @@
+
+
+P(1)=>f
+	
+	first=true
+	post=false
+	f.read -> line
+		a="add (new Function"
+		b="add(new Function"
+		c="this.add(new Function"
+		d="this.add (new Function"
+		
+		t=line.trim
+		if (t.startsWith(a) || t.startsWith(b) || t.startsWith(c) || t.startsWith(d)) {
+			if (first) out("		Function[] arr={")
+			first=false
+			out("			"+line.after("(").before(");")+",")
+		} else
+		if (line.trim.startsWith("//") || line.trim=="") {
+			#out(line)
+		} else {
+			if (!first && !post) {
+				out("		};")
+				out("		setFunctions(arr);")
+				post=true
+			}
+			#out(line)
+		}
+/processFile
+
+File("/home/roar/CFT/src/rf/configtool/main/runtime/lib/ObjSys.java")
+/TestFile
+
+processFile(TestFile)->line println(line)
+/t
+
+

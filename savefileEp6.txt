@@ -1,0 +1,49 @@
+<<<<<<<<<<<<<<<<<<<<<< EOF
+
+Safety and protection against errors
+------------------------------------
+
+CFT is shell-like with cd, ls, pwd, cat, more
+
+However, CFT does not implement rm, cp, mv, mkdir etc.
+
+The reason is to "force" the use of full CFT syntax, such as:
+
+Dir.sub("xxx").create   # mkdir
+Dir.file("x.txt").delete  
+
+
+Besides, there is the shell command, which opens a shell, or
+the "bang commands", which run shell commands, by prefixing
+them with a "!" (bang).
+
+These will be demonstrated later.
+
+
+
+The protect mechanism
+---------------------
+When working in live environments, there will be files
+and directories that MUST NOT be deleted or modified.
+
+Ex: server logs, config files, database directories
+
+To help with this, CFT contains the option to protect
+directories and files against destructive operations.
+
+
+Demonstration
+--------------
+To illustrate, I've created a local "logs" directory.
+
+We will pretend it contains files that must not be deleted,
+but that we do need to process them.
+
+Now we will create a script for "working" with these files.
+
+>>>>>>>>>>>>>>>>>>>>>> EOF
+	=> lines
+	Intro:Logo
+	Sys.sleep(2000)
+	Intro:Present(lines)
+/intro

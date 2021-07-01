@@ -1,0 +1,13 @@
+# The logdir
+# --
+	Dir("/home/roar/CFT/logs").protect("Logs")
+/LogDir
+
+# Some other dir
+# --
+	Dir("/home/roar/xxx")
+/WorkDir
+
+# Some valid function may then be created to
+# work with the files in WorkDir
+

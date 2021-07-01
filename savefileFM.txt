@@ -1,0 +1,130 @@
+# File Manager command line style
+# --
+<<<<<< EOF
+
+[#N] [Path ...           ]
+     [Cond ...]
+     [Glob ....]
+----------------------------+----------------------------------------------
+                            | *(19) .txt(1) .java(18)
+----------------------------+----------------------------------------------
+d(0) src/     d=1   f=0     | f(0) README.txt   210       0k     3d 04:23    
+d(1) doc/           f=3     | f(1) Test.java   2500       3k    85d
+                            | f(2) Tust.java
+
+
+Enter command
+	# #N = change context
+	# Path .... = set path
+	# cd ... = set path
+	# Cond [(Expr)] = set/clear cond
+	# Name [GlobStr] = set/clear name filtering
+	# f(pos)  = select file (return value)
+	# d(pos) = select dir
+>>>>>> EOF
+/Readme
+
+# Context number
+# --
+	""+Db2:Get("FM","ContextNo",0)
+//GetContextNumber
+
+# Change context number
+# --
+	P(1,0) => contextNumber
+	Db2:Set("FM","ContextNo",contextNumber)
+//SetContextNumber
+
+# Get context
+# --
+	Dict.set("Path",Dir.path)
+		.set("Cond",null)
+		.set("Glob",null)
+		=>defaultContext
+	Db2:Get("FM","Context_"+GetContextNumber, defaultContext)
+//GetContext
+
+# Save context
+# --
+	P(1) => context
+	Db2:Set("FM","Context_"+GetContextNumber, context)
+//SaveContext
+ 
+# Change path
+# --
+	P(1)=>path
+	GetContext.set("Path",path) => data
+	SaveContext(data)
+//Path
+
+
+# cd
+# --
+	P(1,null)=>path
+	if (path==null) {
+		Path(Dir.path)
+	} else {
+		if (path.startsWith(Sys.fileSeparator),
+			path,
+			Dir(GetContext.Path).sub(path).path
+		) => newPath
+		if (Dir(newPath).exists) {
+			Path(newPath)
+		} else {
+			println("INVALID: " + newPath)
+		}
+	 }
+//Cd
+
+
+# Change Glob
+# --
+	P(1,null) => glob
+	GetContext.set("Glob",glob) => data
+	SaveContext(data)
+/SetGlob
+
+# Main loop
+# --
+	done=false
+	loop
+		break(done)
+		GetContextNumber => n
+		GetContext => ctx
+		println
+		println("#" + n)
+		println("    Path " + ctx.Path)
+		println("    Cond " + ctx.Cond)
+		println("    Glob " + ctx.Glob)
+		println("-------------------------------------------")
+		dir=Dir(ctx.Path)
+		if (ctx.Glob != null) {
+			files=dir.files(Glob(ctx.Glob))
+		}
+	
+		
+		readLine("Enter command") => cmd
+		
+		if (cmd.startsWith("#")) {
+			num=cmd.sub(1)
+			if (num.?parseInt) {
+				num=num.parseInt
+				if (num >=0 && num <= 9) {
+					SetContextNumber(num)
+				}
+			}
+		} else			
+		if (cmd.startsWith("Path ")) {
+			Path(cmd.sub(5))
+		} else if (cmd.startsWith("cd "))
+			Cd(cmd.sub(3))
+		} else if (cmd=="cd") {
+			Cd
+		} else if (cmd.startsWith("Q")) {
+			done=true
+		} else if (cmd.startsWith("Glob ")) {
+			SetGlob(cmd.sub(5))
+		} else if (cmd.startsWith("Glob")) {
+			SetGlob
+		}
+/MainLoop

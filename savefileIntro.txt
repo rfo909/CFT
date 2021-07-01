@@ -1,0 +1,134 @@
+# Readme
+# --
+<<<<<< EOF
+
+            ConfigTool
+
+       CCCC     FFFFFFF  TTTTTTTT
+     CC  CC    FF          TT
+    CC        FF          TT
+    CC        FFFFF       TT
+     CC        FF          TT
+      CC  CC    FF          TT
+       CCCC     FF          TT
+
+
+     https://github.com/rfo909/CFT
+
+      Interactive, Programmable
+            Automation
+     
+:-)
+        
+>>>>>> EOF
+	->line println(line)
+/Logo 
+
+
+# Slow presentation
+# --
+	P(1)=>lines
+	lines->line
+		println(line)
+		if ((line.trim != "") && !line.startsWith("--")) {
+			delay=1200+line.trim.length*60
+			if (delay < 1000) delay=1000
+			Sys.sleep(delay)
+		}
+/Present
+
+
+
+
+# Intro
+# --
+<<<<<< EOF
+
+
+Introduction
+-------------
+
+CFT is a terminal based app, which is also a programming
+language, where we define custom functions, which call other
+functions, both predefined and our own.
+
+The reason for creating this tool, is the constant stream
+of tedious tasks, of an ad-hoc nature, such as:
+
+- push a jar-file to N target servers
+- create and distribute configuration files
+- collect and search log files from multiple servers
+- start and stop services on remote hosts
+- search code and config files 
+
+
+Philosophy
+-----------
+Built from the bottom-up to run on Windows and Linux alike. It
+is a functional language with emphasis on reduced side effects, 
+
+It differs from traditional (*ux) shells in that it processes
+objects, not just strings, and there also are no strange
+rules for value expansions via different types of quotes.
+
+:-)
+
+CFT is a glue between coding, user interaction and running 
+external programs.
+
+
+
+
+
+Objects and functions
+----------------------
+
+$ "test".length
+   4
+
+String is an object, that contains function length
+
+
+
+$ 3.bin
+  00000011
+
+Integer is an object, containing function bin
+
+
+
+$ Dir.files.length
+  12
+
+Dir is a global function, and returns current directory.
+It has a function .files() that returns a list of files, and
+we then call the .length() function of the list.
+
+
+
+
+Scripts
+--------
+
+Collections of custom functions are stored into script files,
+which are text files which we can open in an editor, using
+a shortcut, @e
+
+
+>>>>>> EOF
+	=> lines
+	Present(lines)
+/Intro 
+
+
+
+
+
+
+# Run
+# --
+	println(Curses:Clear)
+	Logo
+	Sys.sleep(5000)
+	Intro
+/run
