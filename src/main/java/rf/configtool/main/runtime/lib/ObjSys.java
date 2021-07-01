@@ -67,6 +67,7 @@ public class ObjSys extends Obj {
 				new FunctionReadPassword(),
 				new FunctionSecureSessionID(),
 				new FunctionClone(),
+				new FunctionFileSeparator()
 		};
 		setFunctions(arr);
         
@@ -452,6 +453,24 @@ public class ObjSys extends Obj {
                 throw new Exception("Expected value parameter");
             Value v = params.get(0);
             return v.createClone(ctx);
+        }
+
+    }           
+    
+    class FunctionFileSeparator extends Function {
+        public String getName() {
+            return "fileSeparator";
+        }
+
+        public String getShortDesc() {
+            return "fileSeparator() - returns file separator string";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0)
+                throw new Exception("Expected no parameters");
+           
+            return new ValueString(File.separator);
         }
 
     }           
