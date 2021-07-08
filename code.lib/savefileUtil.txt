@@ -106,19 +106,42 @@ P(2,"#") => commentStart
 P(1) => dir
 P(2,"*") => globPattern
 P(3,Lambda{P(1)}) => processList 
-	i=0
-	files = dir.files(Glob(globPattern))
-	files=processList.call(files)
-
-	files->f 
-		println(""+i + ": " + f.name)
-		i=i+1
+	filterString=null
+	loop
+		i=0
+		files = dir.files(Glob(globPattern))
+		files=processList.call(files)
+		
+		# Apply filterString if it exists
+		if (filterString != null) {
+			Inner {
+				files->f if (f.name.contains(filterString)) out(f)
+			} => files
+		}
+		
+		if (files.length==0) {
+			break(true)
+		}
+		if (files.length==1) {
+			result=files.first
+			break(true)
+		}
+		
+		# Show files
+		Inner {files->f 
+			println(""+i + ": " + f.name)
+			i=i+1
+		}
+		result=null
+		readLine("Enter index / part of name / blank for none") => input
+		if (input=="") break(true)
+		if (input.?parseInt) {
+			result=files.nth(i)
+			break(true)
+		} else {
+			filterString=input
+		}
 	|
-	result=null
-	tryCatch({
-		readLine("Enter index / blank for none").parseInt => i
-		result=files.nth(i)
-	})
 	result
 /SelectFile
 

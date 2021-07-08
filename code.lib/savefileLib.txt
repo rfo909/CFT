@@ -650,11 +650,13 @@ P(2) =>value
 
 
 # Paste file from "clipboard"
+	P(1,Dir) => dir
+	
 	Db2:Get("Lib","ClipboardFile", null) => f
 	error(f==null || getType(f) != "File", "No file found")
-	println("Copy [" + f.path + "] to [" + Dir.path + "]")
+	println("Copy [" + f.path + "] to [" + dir.path + "]")
 	println
-	if (Lib:Confirm("Please confirm typing 'yes'")) Dir.copy(f) else println("Aborting")
+	if (Lib:Confirm("Please confirm typing 'yes'")) dir.copy(f) else println("Aborting")
 /ClipboardPaste
 
 

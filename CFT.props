@@ -56,7 +56,7 @@ shortcut:home = "---- move to script dir ----"			  Sys.savefile.dir.setAsCurrent
 
 # copy / paste file
 shortcut:c    = "---- copy file to clipboard ----"        Lib:ClipboardCopy(Lib:MenuSelect(Dir.files, Lambda{P(1).name}, "Select file / blank for none", true))
-shortcut:v    = "---- paste file from clipboard ----"     Lib:ClipboardPaste
+shortcut:v    = "---- paste file from clipboard ----"     Lib:ClipboardPaste(Dir)
 
 
 # Save and get lastResult
