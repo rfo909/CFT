@@ -187,7 +187,7 @@ P(2,"") =>prefix
         List(
             "git clone https://github.com/rfo909/CFT.git",
             "cd CFT",
-            "ant"
+            "mvn package"
         ) 
     } else {
         println(prefix+"Pull latest CFT then compile")
