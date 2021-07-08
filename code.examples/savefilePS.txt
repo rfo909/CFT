@@ -215,8 +215,8 @@ P(2, Input("Enter service").get) =>service
 
 P(1,_shGetHost) => host
 
-getDir=Lambda{P(1)=>host Db2:Get("PS_sh_cwd",host,"c:\temp")}
-setDir=Lambda{P(1)=>host P(2)=>dir Db2:Set("PS_sh_cwd",host,dir)}
+getDir=Lambda{P(1)=>host Db2:Get("PS_sh_cwd",host+"_"+Sys.sessionUUID,"c:\temp")}
+setDir=Lambda{P(1)=>host P(2)=>dir Db2:Set("PS_sh_cwd",host+"_"+Sys.sessionUUID, dir)}
 loop
 	println
 	readLine("[" + host + "] CFT [" + getDir.call(host) + "] '.q' to quit, '?' for help") => mode
@@ -224,22 +224,64 @@ loop
 
 	if (mode=="?") Inner {
 		Sequence(
-			@ Enter multiple commands separated by semicolon or type
+			@ Enter regular command or type
 			@
-			@ '.h'  - change host
-			@ '.d'  - set directory manually
-			@ '.e'  - edit file
+			@ '.d'  - show stored remote paths
+			@ '.d<n>' - goto stored path
+			@ '.ds<n>' - store current path under 'n'
+			@ '.dx<n>' - remove stored path 'n'
+			@ '.D'  - set directory manually
+			@
+			@ '.e'  - edit file in current directory
 			@ '.p'  - show full path to current directory
 			@ '.u X'- show file minus comments (starting with '#' or X if given)
+			@
+			@ '.h'  - change host
 			@ '.H'  - show all known hosts
 			@ '.'   - enter or paste multiple lines - end with '.'
+			@
 			@ '.q'  - quit
 		)->line println(line)
 	} else if (mode==".h") {
 		host=_shGetHost
-	} else if (mode==".d")  {
+	} else if (mode==".D")  {
 		readLine("New current directory") => dir
 		setDir.call(host,dir)
+	} else if (mode==".d") {
+		println
+		Lib:Header("Stored paths")
+		Inner {Lib.Data.each(0,9)->i
+			str = Db2:Get("PS_sh_paths", host+"_"+i, null)
+			if (str==null) str=""
+			println(""+i + ": " + str)
+		}
+	} else if (mode.startsWith(".ds")) {
+		if (mode.sub(3).trim.?parseInt) {
+			x=mode.sub(3).trim.parseInt
+			Db2:Set("PS_sh_paths", host + "_" + x, getDir.call(host))
+		} else {
+			println("expected integer")
+		}
+	} else if (mode.startsWith(".dx")) {
+		if (mode.sub(3).trim.?parseInt) {
+			x=mode.sub(3).trim.parseInt
+			Db2:Set("PS_sh_paths", host + "_" + x, null)
+		} else {
+			println("expected integer")
+		}
+	} else if (mode.startsWith(".d")) {
+		if (mode.sub(2).trim.?parseInt) {
+			x=mode.sub(2).trim.parseInt
+			path=Db2:Get("PS_sh_paths",host+"_"+x,null)
+			if (path != null) {
+				setDir.call(host,path)
+			} else {
+				println("Path " + x + " undefined")
+			}
+		} else {
+			println("Expected integer")
+		}
+		
 	} else if (mode==".e") {
 		LSortFiles=Lambda{
 			Inner {

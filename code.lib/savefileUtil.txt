@@ -142,6 +142,10 @@ P(3,Lambda{P(1)}) => processList
 			filterString=input
 		}
 	|
+	if (result != null) {
+		println
+		println("* Selected file " + result.name)
+	}
 	result
 /SelectFile
 
