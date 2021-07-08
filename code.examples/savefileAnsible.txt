@@ -123,7 +123,7 @@
 # --
 	P(1)=>target
 	SSH:run(target,"ls /var/run/reboot-required",true).exitCode == 0
-/DebianHostNeedsReboot
+//DebianHostNeedsReboot
 
 
 
@@ -195,7 +195,7 @@
 	} else {
 		println("Last checked at " + Util:GetTimeMark(tMark).fmt)
 	}
-/UpdateCFT
+//UpdateCFT
 
 
 # Update CFT all
@@ -249,7 +249,7 @@ P(4)=>lineFilter
 	    	assert(lineFilter == null || line.contains(lineFilter))
 	        report(List(host,line))
 	} 
-/SysStat
+//SysStat
 
 
 # View host status
