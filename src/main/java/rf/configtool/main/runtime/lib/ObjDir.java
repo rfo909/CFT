@@ -162,20 +162,24 @@ public class ObjDir extends Obj {
             if (!f.isDirectory()) {
                 return ColList.list().regular(fix(f.getAbsolutePath())).status("NOT-A-DIRECTORY");
             }
-            try { 
-                File[] content=f.listFiles();
-                int fCount=0;
-                int dCount=0;
-                for (File c:content) {
-                    if (c.isDirectory()) dCount++;
-                    else if (c.isFile()) fCount++;
-                }
-                return ColList.list().regular(fix(f.getAbsolutePath())).status("d:"+dCount).status("f:" + fCount);
-            } catch (Exception ex) {
-                return ColList.list().regular(fix(f.getAbsolutePath())).status("d:?").status("f:?").status("NO-ACCESS");
-            }
+            return ColList.list().regular(fix(f.getAbsolutePath()));
+            // Stopped including file and dir-count, since it may take a lot of time
+            // for remote directories
+            
+//            try { 
+//                File[] content=f.listFiles();
+//                int fCount=0;
+//                int dCount=0;
+//                for (File c:content) {
+//                    if (c.isDirectory()) dCount++;
+//                    else if (c.isFile()) fCount++;
+//                }
+//                return ColList.list().regular(fix(f.getAbsolutePath())).status("d:"+dCount).status("f:" + fCount);
+//            } catch (Exception ex) {
+//                return ColList.list().regular(fix(f.getAbsolutePath())).status("d:?").status("f:?").status("NO-ACCESS");
+//            }
         }
-        return ColList.list().regular(fix(f.getAbsolutePath())).status("").status("").status("DOES-NOT-EXIST");
+        return ColList.list().regular(fix(f.getAbsolutePath())).status("DOES-NOT-EXIST");
     }
 
     private String fix (String name) {
