@@ -88,14 +88,27 @@ There can be multiples of every line, including Dir.
 /onLoad
 
 
+# The projects.txt file 
+# --
+    (Lib:DirPrivate).file("projects.txt")
+/ConfigFile
+
+
 
 
 # projects.txt file contains all data
 # --
-    (Lib:DirPrivate).file("projects.txt") =>f
+    ConfigFile =>f
     error(!f.exists,"File " + f.path + " missing - run Readme() for details")
     DataFile(f,"###").comment("#")
-/ProjectsFile
+//ProjectsFile
+
+
+# edit config file
+# --
+	Lib:e(ConfigFile)
+/EditConfig
+
 
 
 # List projects and select 
