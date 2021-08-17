@@ -473,6 +473,18 @@ P(4,false) => showDebug
 
 
 
+# Display info message
+# --
+	P(1,"Warning") => title
+	
+	s = Lib.Data.yes(title.length,'#').concat + "##"
+	println(s)
+	println(title)
+	println(s)
+/ShowInfo
+
+
+
 
 # Select single value from list of options. Using lambda to extract name for each element.
 # --
