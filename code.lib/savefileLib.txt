@@ -124,8 +124,15 @@ choice.
         })
     } else {
         # Windows (a bit slow)
-        Dir.runCapture("powershell","(Get-Host).UI.RawUI.WindowSize.Width").nth.parseInt =>w
-        Dir.runCapture("powershell","(Get-Host).UI.RawUI.WindowSize.Height").nth.parseInt =>h
+		# 2021-08-18 RFO: some windows environments fail running powershell
+		tryCatch ({
+			Dir.runCapture("powershell","(Get-Host).UI.RawUI.WindowSize.Width").nth.parseInt =>w
+			Dir.runCapture("powershell","(Get-Host).UI.RawUI.WindowSize.Height").nth.parseInt =>h
+		}) => result
+		if (!result.ok) {
+			w=80
+			h=24
+		}
         Term.w(w)
         Term.h(h)
         true =>updated
