@@ -238,10 +238,10 @@ loop
 			@ t/topic           - change topic
 			@ T/topics          - list all topics
 			@ todo              - manage todo list
-			@ c/c/cat           - display recent entries
-			@ m/m/more          
-			@ e/e/edit          - edit current file
-			@ q/q/quit          - quit
+			@ c/cat             - display recent entries
+			@ m/more          
+			@ e/edit            - edit current file
+			@ q/quit            - quit
 			@ ---
 			@
 		)->line 
@@ -322,10 +322,13 @@ loop
 
 
 # Show lines for 3 newest files for current topic
+	println
 	files = GetTopicLogFiles.last(3)
 	files->f
 		f.read->line
-			println(line)
+			println("| " + line)
+	|
+	println
 /Show
 
 Lib:e (LogFile)
