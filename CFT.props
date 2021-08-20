@@ -47,9 +47,8 @@ shortcut:e    = "---- open script in editor ----"         if(Sys.savefile != nul
 shortcut:ee   = "---- clear editor selection ----"        Lib:ClearEditor "Editor cleared"
 shortcut:fm   = "---- open file manager (curr dir) ---"   Lib:fileManager(Dir)
 shortcut:term = "---- Update terminal size ----"          Lib:GetTerminalSize
-shortcut:top  = "---- Run top command ----"               Dir.run("top")
 shortcut:rsh  = "---- Remote shell via ssh ----"          SSH:remoteShell
-shortcut:s    = "---- Show all scripts ----"              Lib:Scripts
+shortcut:scr  = "---- Show all scripts ----"              Lib:Scripts
 shortcut:S    = "---- Search text files curr Dir ----"    Lib:SearchTextFiles(Dir)
 
 shortcut:home = "---- move to script dir ----"			  Sys.savefile.dir.setAsCurrentDir
@@ -57,17 +56,6 @@ shortcut:home = "---- move to script dir ----"			  Sys.savefile.dir.setAsCurrent
 # copy / paste file
 shortcut:c    = "---- copy file to clipboard ----"        Lib:ClipboardCopy(Lib:MenuSelect(Dir.files, Lambda{P(1).name}, "Select file / blank for none", true))
 shortcut:v    = "---- paste file from clipboard ----"     Lib:ClipboardPaste(Dir)
-
-
-# Save and get lastResult
-shortcut:slr  = "---- Save lastResult ----"               Lib:SaveLastResult
-shortcut:lr   = "---- Get lastResult ----"                Lib:GetLastResult
-
-# Edit text documents stored in database
-shortcut:DD   = "---- Edit document in database ----"     Lib:DocEdit
-
-# Edit props document stored in database
-shortcut:DP   = "---- Edit props doc in database ----"    Lib:PropsEdit
 
 # Release script
 shortcut:rel  = "---- Release ----"                       Sys.stdin(":load Release","?")
@@ -81,8 +69,6 @@ shortcut:PP   = "---- Projects change project ----"       Projects:ChangeProject
 shortcut:i    = "---- Investigate log text ----"          Investigate:LogText
 shortcut:ii   = "---- Investigate log loop ----"          Investigate:InputMode
 shortcut:id   = "---- Investigate log with data ----"     Investigate:LogData
-shortcut:ip   = "---- Investigate log pasted text ----"   Investigate:LogPastedText
-shortcut:ic   = "---- Investigate cat log ----"           Investigate:Show
 
 
 # List available shortcuts when typing '@' only
