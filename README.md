@@ -58,19 +58,15 @@ or prompting the user for input.
 Contrary to bash and PowerShell, a script file is a collection of functions, not like a "main" program on its own.
 In CFT we don't call a script, we *call a function inside a script*. Scripts in CFT are really name spaces.
 
-Single functions can of course take parameters, and be made so that if (some of) those are missing, the function becomes
-interactive, asking the user for missing values. 
+Single functions can of course take parameters. They can also be made so that if (some of) the parameters
+are missing, the function becomes interactive, asking the user for missing values. 
 
-CFT has a built-in help system that lists member functions of all objects and inside any script.
+CFT has a built-in help system that lists member functions of all objects and inside any script. 
 
-Scripts, which are saved text files with CFT functions inside, contain support for public and hidden functions, 
-which regulates visibility, but not actual access. 
+The complex string handling in unix shells, with three different types of quotes, and the verbosity and 
+awkward syntax of PowerShell is eliminated in CFT. 
 
-The "modem noise" syntax of regular *ux shells, and the verbosity and awkward syntax of PowerShell is eliminated
-in CFT. Its ease in calling external programs makes it perfect for automating PowerShell sequences, as
-PowerShell is truly powerful on the windows platform.
-
-So, CFT is another shell, but it represents a rethink, not just another almost-but-not-quite bash remake. 
+CFT represents a rethink, not just another almost-but-not-quite bash remake. 
 
 
 
