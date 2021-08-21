@@ -1,6 +1,8 @@
 
 # Quasi FP
 
+*2021-08-21 RFO*
+
 CFT is not a functional programming language, but it is inspired 
 by such languages.
 
@@ -41,7 +43,7 @@ CFT, as all non-FP programming languages, depends on what pure
 FP calls "side effects", to produce results. 
 
 The design of CFT still tries to minimize the *undesired* side effects, by
-letting users create functions only, banning user-space hidden state
+letting users create functions only, banning user space hidden-state
 objects. This also means prohibiting script files from acting
 as objects, as is done with PowerShell and unix shells.
 
@@ -50,6 +52,6 @@ functions depend mostly on other functions. This gives a degree of
 predictability.
 
 Still, there will be complicated bugs, relating to Db2 saved
-data, as well state of services, content in files, and so on. 
-But the aim is to reduce the risk.
+data, as well state of services, content in files, files in directories,
+and so on. But the aim is to reduce the risk.
 
