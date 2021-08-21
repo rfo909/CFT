@@ -1,5 +1,10 @@
 # Readme
 <<<< EOF
+---------------------------------
+WARNING: highly unstable
+         experimental
+---------------------------------
+
 Run backup and restore backup. Uses full encryption.
 >>>> EOF
 /Readme
