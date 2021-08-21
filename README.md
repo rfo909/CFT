@@ -1,7 +1,7 @@
 
 # CFT - ConfigTool
 
-*README last updated 2021-08-20*
+*README last updated 2021-08-21*
 
 ## Motto
 
@@ -44,7 +44,9 @@ is fairly "tiny", and easily learned.
 The language is also inspired by functional programming, in that there is no global state, which reduces
 risk of errors. Tested functions tend to "just work", since they usually have no dependencies
 apart from other functions. The language supports recursion, but does not depend on it, opposed to how 
-this somehow has become the hallmark of "real" functional programming. 
+this somehow has become the hallmark of "real" functional programming.
+
+[CFT vs FP](FP.md) 
 
 All values in the language are objects, which contain member functions, implemented in Java. These in 
 turn return other objects, such as lists of files, strings, integers. 
