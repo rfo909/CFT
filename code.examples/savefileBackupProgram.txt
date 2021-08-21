@@ -130,14 +130,18 @@ Run backup and restore backup. Uses full encryption.
 	Lib.Util.Encrypt(password,"p1"+salt) => enc1
 	Lib.Util.Encrypt(password,"p2"+salt) => enc2
 	logLine=salt + ":" + enc1.processString(file.path) + ":" + enc2.processString(backupFile.name)
-	
+		
 	# write to tmp file in given directory, to avoid partially written files, if errors occur
 	backupFileTmp=File(backupFile.path+".tmp")
 	
 	if (!backupFile.exists) {
 		println("Saving " + file.path)
 		
+		# write salt to separate file 
+		File(backupFile.path+".salt").create(salt)
+
 		file.encrypt(password, salt, backupFileTmp)
+		
 		backupFileTmp.move(backupFile)
 	}
 
@@ -179,8 +183,12 @@ Run backup and restore backup. Uses full encryption.
 			# --- Restore file if matching pathPrefix ---
 			if (path.startsWith(pathPrefix)) {
 				backupFile=BackupFile(backupFileName)
+				
+				File(backupFile.path+".salt").read.first => fileSalt
+
 				a=targetDir.path
 				b=path.sub(pathPrefix.length)
+				
 				if (a.endsWith(Sys.fileSeparator)) a=a.sub(0,a.length-1)
 				if (b.startsWith(Sys.fileSeparator)) b=b.sub(1)
 				targetPath=a+Sys.fileSeparator+b
@@ -191,12 +199,7 @@ Run backup and restore backup. Uses full encryption.
 				resultDir=resultFile.dir
 				if (!resultDir.exists) resultDir.create
 				
-				tryCatch(
-					backupFile.decrypt(password,salt,resultFile)
-				) => result
-				if (!result.ok) {
-					println("** Failed decrypting backup file for " + path)
-				}
+				backupFile.decrypt(password,fileSalt,resultFile)
 			}
 		}
 /Restore		
