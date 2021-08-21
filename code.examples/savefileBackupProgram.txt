@@ -1,0 +1,227 @@
+# Readme
+<<<< EOF
+Run backup and restore backup. Uses full encryption.
+>>>> EOF
+/Readme
+
+
+# Set target directory
+# --
+	P(1) => targetDir
+	error(targetDir==null,"Parameter 1 must be target dir")
+	Db2:Set("Backup","targetDir",targetDir)
+/SetTargetDir
+
+
+
+# Get target directory
+# --
+	Db2:Get("Backup","targetDir", null) => d
+	error(d==null,"No target dir defined")
+	d
+/TargetDir
+
+
+
+# Verify password by checking for signal file, then convert to Binary object
+# --
+	P(1)=>password
+	Lib.Util.Encrypt(password.getBytes("UTF-8")).processString("this is a test") => hexString
+	pwdFile=TargetDir.file("pwd"+hexString)
+	if (!pwdFile.exists) {
+		readLine("Unknown / new password. Confirm use by typing 'yes'") => conf
+		error(conf != "yes","Aborting")
+		pwdFile.create(Date.fmt)
+	}
+	password.getBytes("UTF-8")
+//verifyAndConvertPassword
+
+
+# Status file
+# --
+	P(1) => backupName
+	TargetDir.file(backupName)
+//StatusFile
+
+
+# Create salt string
+# --
+	P(1,currentTimeMillis) => x
+	Lib.Util.randomBinary(""+x).hex.first(8)
+//Salt
+
+
+
+# Run full backup
+# --
+	P(1,Dir) => rootDir
+	P(2,"Backup"+"_"+rootDir.name) => backupName
+	
+	backupName=Date.setFormat("yyyy-MM-dd").fmt+"_"+backupName
+	println("Backup name: " + backupName)
+	
+	password=Vault:SessionSecretGet("Backup encryption password")
+	
+	password=verifyAndConvertPassword(password)  # Now a Binary
+ 	
+	Dict.set("count",0) => countDict
+
+	StatusFile(backupName) => sf
+	if (sf.exists) sf.delete
+	
+	processDir(password,rootDir,countDict,backupName)
+/Backup
+
+
+
+# Process directory doing backup
+# --
+	P(1)=>password
+	P(2)=>dir
+	P(3)=>countDict
+	P(4)=>backupName
+	
+	#println("Dir: " + dir.path)
+	
+	statusLines=List
+	dir.files->f
+		saltString=""+countDict.count
+		 #tryCatch(
+		 	
+			 processFile(password,f,statusLines,saltString)
+		 #)
+		 countDict.set("count",countDict.count+1)
+	|
+	StatusFile(backupName).append(statusLines)
+	
+	dir.dirs->d
+		#tryCatch(
+			processDir(password,d,countDict,backupName)
+		#)
+	|
+/processDir
+
+
+
+# Create BackupFile for a given hash string
+# --
+	P(1) => x  # hash hexstring
+	TargetDir.sub("repo").sub(x.sub(0,2)).sub(x.sub(2,4)).sub(x.sub(4,6)).create.file(x)
+//BackupFile
+
+
+
+# Process file (backing it up)
+# --
+	P(1) => password
+	P(2) => file
+	P(3) => statusLines
+	P(4) => saltBase
+	
+	key=file.path + ";" + file.length + ";" + file.lastModified + ";" + password.hex
+	backupFile=BackupFile(key.hash)
+	
+	salt=Salt("logLine:"+saltBase)
+	Lib.Util.Encrypt(password,"p1"+salt) => enc1
+	Lib.Util.Encrypt(password,"p2"+salt) => enc2
+	logLine=salt + ":" + enc1.processString(file.path) + ":" + enc2.processString(backupFile.name)
+	
+	# write to tmp file in given directory, to avoid partially written files, if errors occur
+	backupFileTmp=File(backupFile.path+".tmp")
+	
+	if (!backupFile.exists) {
+		println("Saving " + file.path)
+		
+		file.encrypt(password, salt, backupFileTmp)
+		backupFileTmp.move(backupFile)
+	}
+
+	statusLines.add(logLine)
+/processFile
+
+		
+# Restore or show content of backup
+# --
+	P(1,Dir) => targetDir
+	P(2,false) => showContentOnly
+	
+	Input("Backup log file path").get => fPath
+	
+	file=File(fPath)
+	error(!file.exists,"No such file: " + fPath)
+	
+	pathPrefix=null
+	if (!showContentOnly) {
+		Input("Path prefix - should end with file separator").get => pathPrefix
+	}
+	
+	password=Vault:SessionSecretGet("Backup encryption password")
+	password=verifyAndConvertPassword(password)  # Now a Binary
+	
+	file.read->line
+		salt=line.before(":")
+		rest=line.after(":")
+		
+		Lib.Util.Decrypt(password,"p1"+salt) => dec1
+		Lib.Util.Decrypt(password,"p2"+salt) => dec2
+
+		path=dec1.processString(rest.before(":"))
+		backupFileName=dec2.processString(rest.after(":"))
+		#
+		if (showContentOnly) {
+			println(path)
+		} else {
+			# --- Restore file if matching pathPrefix ---
+			if (path.startsWith(pathPrefix)) {
+				backupFile=BackupFile(backupFileName)
+				a=targetDir.path
+				b=path.sub(pathPrefix.length)
+				if (a.endsWith(Sys.fileSeparator)) a=a.sub(0,a.length-1)
+				if (b.startsWith(Sys.fileSeparator)) b=b.sub(1)
+				targetPath=a+Sys.fileSeparator+b
+				#
+				println(targetPath)
+				
+				resultFile=File(targetPath)
+				resultDir=resultFile.dir
+				if (!resultDir.exists) resultDir.create
+				
+				tryCatch(
+					backupFile.decrypt(password,salt,resultFile)
+				) => result
+				if (!result.ok) {
+					println("** Failed decrypting backup file for " + path)
+				}
+			}
+		}
+/Restore		
+
+
+# Show content of backup
+# --
+	Restore(null,true)
+/ShowContent
+		
+
+# Test encrypting file
+# --
+	Lib.Util.randomBinary("1") => password
+	salt="salt"
+	
+	File("x.txt") => f1
+	f1.create("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+			+"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+	
+	File("y.txt") => f2
+	f2.delete
+	File("z.txt") => f3
+	f3.delete
+		
+	f1.encrypt(password,salt,f2)
+	f2.decrypt(password,salt,f3)
+	
+	# result
+	(f1.hash==f3.hash)
+//test
+	
+

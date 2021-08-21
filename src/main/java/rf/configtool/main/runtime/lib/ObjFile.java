@@ -30,6 +30,7 @@ import rf.configtool.main.OutText;
 import rf.configtool.main.SoftErrorException;
 import rf.configtool.main.Stdio;
 import rf.configtool.main.runtime.*;
+import rf.configtool.util.Encrypt;
 import rf.configtool.util.FileInfo;
 import rf.configtool.util.TabUtil;
 
@@ -101,6 +102,8 @@ public class ObjFile extends Obj {
 				new FunctionReadBinary(),
 				new FunctionBinaryCreate(),
 				new FunctionVerify(),
+				new FunctionEncrypt(),
+				new FunctionDecrypt(),
 		};
 		setFunctions(arr);
 
@@ -1180,7 +1183,74 @@ public class ObjFile extends Obj {
         }
     }
     
+    
+    private void encryptDecrypt (Ctx ctx, List<Value> params, boolean modeEncrypt) throws Exception {
+        if (params.size() != 3) throw new Exception("Expected parameters passwordBinary, saltString, targetFile");
+        
+        ValueBinary password=getBinary("passwordBinary",params,0);
+        String salt=getString("saltString", params, 1);
+        Obj fileObj=getObj("targetFile", params, 2);
+        
+        if (!(fileObj instanceof ObjFile)) throw new Exception("Expected parameters passwordBinary, saltString, targetFile");
+        
+        ObjFile targetFile=(ObjFile) fileObj;
+        
+        Encrypt enc=new Encrypt(password.getVal(), ("ObjFile:"+salt).getBytes("UTF-8"));
+        
+        File src=getFile();
+        File target=targetFile.getFile();
+        if (target.exists()) throw new Exception("Target file exists: " + targetFile.getName());
+        
+        FileInputStream in=null;
+        FileOutputStream out=null;
+        
+        try {
+        	in=new FileInputStream(src);
+            out=new FileOutputStream(target);
+            
+            byte[] buf=new byte[1024*64];
+            for (;;) {
+            	int count=in.read(buf);
+            	if (count <= 0) break;
+            	for (int i=0; i<count; i++) {
+            		buf[i]=enc.process(modeEncrypt, buf[i]);
+            	}
+            	out.write(buf,0,count);
+            }
+        	
+        } finally {
+        	if (in != null) try {in.close();} catch (Exception ex) {};
+        	if (out != null) try {out.close();} catch (Exception ex) {};
+        }
+    }
+    
+    
+    class FunctionEncrypt extends Function {
+        public String getName() {
+            return "encrypt";
+        }
+        public String getShortDesc() {
+            return "encrypt(passwordBinary,saltString,targetFile) - returns self";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            encryptDecrypt(ctx, params, true);
+            return new ValueObj(self());
+        }
+    }
+    
 
+    class FunctionDecrypt extends Function {
+        public String getName() {
+            return "decrypt";
+        }
+        public String getShortDesc() {
+            return "decrypt(passwordBinary,saltString,targetFile) - returns self";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            encryptDecrypt(ctx, params, false);
+            return new ValueObj(self());
+        }
+    }
     
 
 
