@@ -56,7 +56,7 @@ same or other scripts, or member functions inside returned object values, such a
 or prompting the user for input.
 
 Contrary to bash and PowerShell, a script file is a collection of functions, not like a "main" program on its own.
-In CFT we don't call a script, we call a function inside a script.
+In CFT we don't call a script, we *call a function inside a script*. Scripts in CFT are really name spaces.
 
 Single functions can of course take parameters, and be made so that if (some of) those are missing, the function becomes
 interactive, asking the user for missing values. 
