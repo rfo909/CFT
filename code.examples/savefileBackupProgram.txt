@@ -5,14 +5,22 @@ WARNING: highly unstable
          experimental
 ---------------------------------
 
-Run backup and restore backup. Uses full encryption.
+Run incremental backup to some (shared) dir.
+Writes encrypted log file.
+Restore according to log file.
+
+Mostly works, but needs hardening, so it doesn't
+crash when hitting soft links, directories or 
+files with no access, etc.
+
+2021-08-21 RFO
 >>>> EOF
 /Readme
 
 
 # Set target directory
 # --
-	P(1) => targetDir
+	P(1,Dir) => targetDir
 	error(targetDir==null,"Parameter 1 must be target dir")
 	Db2:Set("Backup","targetDir",targetDir)
 /SetTargetDir
@@ -104,7 +112,7 @@ Run backup and restore backup. Uses full encryption.
 			processDir(password,d,countDict,backupName)
 		#)
 	|
-/processDir
+//processDir
 
 
 
@@ -113,7 +121,6 @@ Run backup and restore backup. Uses full encryption.
 	P(1) => x  # hash hexstring
 	TargetDir.sub("repo").sub(x.sub(0,2)).sub(x.sub(2,4)).sub(x.sub(4,6)).create.file(x)
 //BackupFile
-
 
 
 # Process file (backing it up)
@@ -146,7 +153,7 @@ Run backup and restore backup. Uses full encryption.
 	}
 
 	statusLines.add(logLine)
-/processFile
+//processFile
 
 		
 # Restore or show content of backup

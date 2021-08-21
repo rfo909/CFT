@@ -1199,7 +1199,6 @@ public class ObjFile extends Obj {
         
         File src=getFile();
         File target=targetFile.getFile();
-        if (target.exists()) throw new Exception("Target file exists: " + targetFile.getName());
         
         FileInputStream in=null;
         FileOutputStream out=null;
