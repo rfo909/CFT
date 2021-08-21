@@ -77,14 +77,14 @@ public class ObjUtil extends Obj {
             return "Encrypt";
         }
         public String getShortDesc() {
-            return "Encrypt(password, salt?) - create Encrypt object in encryption mode";
+            return "Encrypt(passwordBinary, saltString?) - create Encrypt object in encryption mode";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 1 && params.size() != 2) throw new Exception("Expected binary parameter password and optional string parameter salt");
-            byte[] password=getBinary("password",params,0).getVal();
+            if (params.size() != 1 && params.size() != 2) throw new Exception("Expected parameter passwordBinary and optional parameter saltString");
+            byte[] password=getBinary("passwordBinary",params,0).getVal();
             byte[] salt;
             if (params.size() == 2) {
-                salt=getString("salt",params,1).getBytes("UTF-8");
+                salt=getString("saltString",params,1).getBytes("UTF-8");
             } else {
                 salt=new byte[0];
             }
@@ -98,14 +98,14 @@ public class ObjUtil extends Obj {
             return "Decrypt";
         }
         public String getShortDesc() {
-            return "Decrypt(password, salt?) - create Encrypt object in decrypt mode";
+            return "Decrypt(passwordBinary, saltString?) - create Encrypt object in decrypt mode";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 1 && params.size() != 2) throw new Exception("Expected binary parameter password and optional string parameter salt");
-            byte[] password=getBinary("password",params,0).getVal();
+            if (params.size() != 1 && params.size() != 2) throw new Exception("Expected parameter passwordBinary and optional parameter saltString");
+            byte[] password=getBinary("passwordBinary",params,0).getVal();
             byte[] salt;
             if (params.size() == 2) {
-                salt=getString("salt",params,1).getBytes("UTF-8");
+                salt=getString("saltString",params,1).getBytes("UTF-8");
             } else {
                 salt=new byte[0];
             }
@@ -120,7 +120,7 @@ public class ObjUtil extends Obj {
             return "randomBinary";
         }
         public String getShortDesc() {
-            return "randomBinary(seed) - returns Binary value with 20 random bytes";
+            return "randomBinary(seedString) - returns Binary value with 20 random bytes";
         }
         private byte[] create (String pre, Ctx ctx) throws Exception {
             MessageDigest md1 = MessageDigest.getInstance("SHA1"); // 160 bits = 20 bytes
@@ -131,12 +131,12 @@ public class ObjUtil extends Obj {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 1) throw new Exception("Expected seed string parameter");
-            String seed=getString("seed",params,0);
+            String seed=getString("seedString",params,0);
             return new ValueBinary(create(seed, ctx));
         }
         
     } 
        
    
- 
+
 }

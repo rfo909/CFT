@@ -121,7 +121,8 @@ public class ObjGlobal extends Obj {
         add(new FunctionShell());
         add(new FunctionGetType());
         add(new FunctionGetExprCount());
-        
+        add(new FunctionBinary());
+
         // name spaces
         add(new FunctionSys());
         add(new FunctionLib());
@@ -880,7 +881,27 @@ public class ObjGlobal extends Obj {
     
     
     
-
+    class FunctionBinary extends Function {
+        public String getName() {
+            return "Binary";
+        }
+        public String getShortDesc() {
+            return "Binary(hexString) - convert hex string to Binary value";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected hexString parameter");
+            String hex=getString("hexString",params,0);
+            int len=hex.length();
+            byte[] data=new byte[len/2];
+            for (int i=0; i<data.length; i++) {
+            	char c1=hex.charAt(i*2);
+            	char c2=hex.charAt(i*2+1);
+            	data[i]=(byte) Integer.parseInt(""+c1+c2,16);
+            }
+            return new ValueBinary(data);
+        }
+        
+    } 
 
 
 }

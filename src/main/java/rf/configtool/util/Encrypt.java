@@ -21,7 +21,7 @@ public class Encrypt {
 
     /*
     To break this algorithm, given access to the code, and without guessing the
-    passoword + salt, AND assuming that the code breaker has knows or guesses
+    passoword + salt, AND assuming that the code breaker knows or guesses
     some plain-text for encrypted data, one then has to guess a combination 
     of N start points.
     

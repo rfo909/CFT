@@ -1,5 +1,6 @@
 package rf.configtool.main.runtime;
 
+import java.security.MessageDigest;
 import java.util.List;
 
 import rf.configtool.main.Ctx;
@@ -22,6 +23,7 @@ public class ValueBinary extends Value {
             add (new FunctionLength());
             add (new FunctionToString());
             add (new FunctionPrintableChars());
+            add (new FunctionHash());
         }
     }
     
@@ -159,5 +161,34 @@ public class ValueBinary extends Value {
 
     }
 
+    
+    class FunctionHash extends Function {
+        public String getName() {
+            return "hash";
+        }
+        public String getShortDesc() {
+            return "hash() - create hash string";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) {
+                throw new Exception("Expected no parameters");
+            }
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");  // 32 bytes hash
+            digest.update(val);
+            byte[] hash=digest.digest();
+    
+            String digits="0123456789abcdef";
+            StringBuffer sb=new StringBuffer();
+            for (int i=0; i<hash.length; i++) {
+                byte b=hash[i];
+                sb.append(digits.charAt( (b>>4) & 0x0F ));
+                sb.append(digits.charAt( b & 0x0F ));
+            }
+            
+        
+            return new ValueString(sb.toString());
+        }
+    }
+    
     
 }
