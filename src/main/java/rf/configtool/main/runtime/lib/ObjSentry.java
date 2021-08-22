@@ -44,7 +44,8 @@ import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
 import rf.configtool.main.runtime.lib.db2.ObjDb2;
 
-import io.sentry.Sentry;
+import io.sentry.*;
+import io.sentry.protocol.*;
 
 public class ObjSentry extends Obj {
 
@@ -55,6 +56,7 @@ public class ObjSentry extends Obj {
         this.add(new FunctionInit());
         this.add(new FunctionSetSessionKey());
         this.add(new FunctionException());
+        this.add(new FunctionEvent());
     }
     
     private ObjSentry self() {
@@ -121,10 +123,67 @@ public class ObjSentry extends Obj {
         	try {
         		throw new Exception(msg);
         	} catch (Exception ex) {
-        		Sentry.setTag("sessionKey", sessionKey);
-        		Sentry.captureException(ex);
+        		
+        		// Using Event
+        		SentryEvent e=new SentryEvent();
+        		e.setLevel(SentryLevel.ERROR);
+       
+        		Message m=new Message();
+        		m.setMessage(ex.getMessage());
+        		
+        		SentryException sex=new SentryException();
+        		List<SentryStackFrame> frames=new ArrayList<SentryStackFrame>();
+        		for (StackTraceElement line : ex.getStackTrace()) {
+        			
+        			SentryStackFrame xx = new SentryStackFrame();
+        			xx.setContextLine(line.toString());
+        			frames.add(xx);
+        		}
+        		SentryStackTrace sst=new SentryStackTrace(frames);
+        		sex.setStacktrace(sst);
+        		
+        		e.setMessage(m);
+
+        		e.setTag("sessionKey", sessionKey);
+           		e.addBreadcrumb("bc:"+sessionKey);
+        		
+        		Sentry.captureEvent(e);
         	}
         	return new ValueObj(self());
+        }
+    } 
+
+    class FunctionEvent extends Function {
+        public String getName() {
+            return "event";
+        }
+        public String getShortDesc() {
+            return "event(dataDict) - log multiple field event with Sentry - returns self";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	if (!initOk) throw new Exception("Must call init() first");
+        	Obj obj=getObj("msg", params, 0);
+        	if (!(obj instanceof ObjDict)) throw new Exception("Expected dataDict parameter");
+        	
+        	ObjDict data=(ObjDict) obj;
+
+        	// Create proper map
+        	HashMap<String,Object> map=new HashMap<String,Object>();
+        	Iterator<String> keys = data.getKeys();
+        	while (keys.hasNext()) {
+        		String key=keys.next();
+        		map.put(key, data.getValue(key).getValAsString());
+        	}
+        	
+    		SentryEvent e=new SentryEvent();
+    		e.setTag("sessionKey", sessionKey);
+       		e.addBreadcrumb("bc:"+sessionKey);
+       	 	e.setLevel(SentryLevel.DEBUG);
+    		e.acceptUnknownProperties(map);
+    		
+    		Sentry.captureEvent(e);
+
+    		return new ValueObj(self());
         }
     } 
 
