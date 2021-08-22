@@ -1,7 +1,7 @@
 
 # CFT - ConfigTool
 
-*README last updated 2021-08-21*
+*README last updated 2021-08-22*
 
 ## Motto
 
@@ -76,7 +76,6 @@ Written in Java and built with Maven, which results in a single JAR file.
 
 Tested on both Linux and Windows. 
 
-Currently has no dependencies outside of the standard Java libraries.
 
 ```
 git clone https://github.com/rfo909/CFT.git
