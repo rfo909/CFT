@@ -95,7 +95,6 @@ public class ObjSentry extends Obj {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
         	String dsn=getString("DSNString", params, 0);
-        	
         	Sentry.init(dsn);
         	initOk=true;
         	return new ValueObj(self());
