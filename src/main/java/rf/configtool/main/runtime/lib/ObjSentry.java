@@ -50,13 +50,19 @@ import io.sentry.protocol.*;
 public class ObjSentry extends Obj {
 
 	private boolean initOk=false;
-	private String sessionKey="sessionKey";
+	
+	private SentryLevel sentryLevel=SentryLevel.DEBUG;
+	
 	
     public ObjSentry () {       
         this.add(new FunctionInit());
-        this.add(new FunctionSetSessionKey());
-        this.add(new FunctionException());
-        this.add(new FunctionEvent());
+        
+        this.add(new FunctionLevelInfo());
+        this.add(new FunctionLevelDebug());
+        this.add(new FunctionLevelError());
+                
+        this.add(new FunctionSend());
+        
     }
     
     private ObjSentry self() {
@@ -95,97 +101,165 @@ public class ObjSentry extends Obj {
         }
     } 
        
-    
-    class FunctionSetSessionKey extends Function {
+    class FunctionLevelInfo extends Function {
         public String getName() {
-            return "setSessionKey";
+            return "levelInfo";
         }
         public String getShortDesc() {
-            return "setSessionKey(sessionKey) - sets internal state used when logging - returns self";
+            return "levelInfo() - set SentryLevel - returns self";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	sessionKey=getString("sessionKey", params, 0);
+        	sentryLevel=SentryLevel.INFO;
         	return new ValueObj(self());
         }
     } 
-  
-   
-    class FunctionException extends Function {
-        public String getName() {
-            return "exception";
-        }
-        public String getShortDesc() {
-            return "exception(msg) - log exception with Sentry - returns self";
-        }
-        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	if (!initOk) throw new Exception("Must call init() first");
-        	String msg=getString("msg", params, 0);
-        	try {
-        		throw new Exception(msg);
-        	} catch (Exception ex) {
-        		
-        		// Using Event
-        		SentryEvent e=new SentryEvent();
-        		e.setLevel(SentryLevel.ERROR);
        
-        		Message m=new Message();
-        		m.setMessage(ex.getMessage());
-        		
-        		SentryException sex=new SentryException();
-        		List<SentryStackFrame> frames=new ArrayList<SentryStackFrame>();
-        		for (StackTraceElement line : ex.getStackTrace()) {
-        			
-        			SentryStackFrame xx = new SentryStackFrame();
-        			xx.setContextLine(line.toString());
-        			frames.add(xx);
-        		}
-        		SentryStackTrace sst=new SentryStackTrace(frames);
-        		sex.setStacktrace(sst);
-        		
-        		e.setMessage(m);
+    class FunctionLevelDebug extends Function {
+        public String getName() {
+            return "levelDebug";
+        }
+        public String getShortDesc() {
+            return "levelDebug() - set SentryLevel - returns self";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	sentryLevel=SentryLevel.DEBUG;
+        	return new ValueObj(self());
+        }
+    } 
+       
+    
+    class FunctionLevelError extends Function {
+        public String getName() {
+            return "levelError";
+        }
+        public String getShortDesc() {
+            return "levelError() - set SentryLevel - returns self";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	sentryLevel=SentryLevel.ERROR;
+        	return new ValueObj(self());
+        }
+    } 
+       
+  
+    
+    private Map<String,Object> createMap (ObjDict data) {
+    	// Create proper map
+    	HashMap<String,Object> map=new HashMap<String,Object>();
+    	Iterator<String> keys = data.getKeys();
+    	while (keys.hasNext()) {
+    		String key=keys.next();
+    		map.put(key, data.getValue(key).getValAsString());
+    	}
+    	return map;
+    }
 
-        		e.setTag("sessionKey", sessionKey);
-           		e.addBreadcrumb("bc:"+sessionKey);
-        		
-        		Sentry.captureEvent(e);
+    
+    private Map<String,String> createStringMap (ObjDict data) {
+    	// Create proper map
+    	HashMap<String,String> map=new HashMap<String,String>();
+
+    	Iterator<String> keys = data.getKeys();
+    	while (keys.hasNext()) {
+    		String key=keys.next();
+    		map.put(key, data.getValue(key).getValAsString());
+    	}
+    	return map;
+    }
+
+    
+    class FunctionSend extends Function {
+        public String getName() {
+            return "send";
+        }
+        public String getShortDesc() {
+            return "send(message?, breadCrumb?, dataDict?, extraDict?, tagsDict, exceptionMsg?) - optional params must be null - returns self";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	if (!initOk) throw new Exception("Must call init() first");
+        	
+        	if (params.size() != 6) {
+        		throw new Exception("Expected params: message?, breadCrumb?, dataDict?, extraDict?, tagsDict, exceptionMsg?");
         	}
+        	
+        	String message=null;
+        	String breadCrumb=null;
+        	ObjDict dataDict=null;
+        	ObjDict extraDict=null;
+        	ObjDict tagsDict=null;
+        	String exceptionMsg=null;
+        	
+        	
+        	if (!(params.get(0) instanceof ValueNull)) message=getString("message", params, 0);
+        	if (!(params.get(1) instanceof ValueNull)) breadCrumb=getString("breadCrumb", params, 1);
+        	if (!(params.get(2) instanceof ValueNull)) dataDict=(ObjDict) getObj("dataDict", params, 2);
+        	if (!(params.get(3) instanceof ValueNull)) extraDict=(ObjDict) getObj("extraDict", params, 3);
+        	if (!(params.get(4) instanceof ValueNull)) tagsDict=(ObjDict) getObj("tagsDict", params, 4);
+        	if (!(params.get(5) instanceof ValueNull)) exceptionMsg=getString("exceptionMsg", params, 5);
+  
+        	SentryEvent event=new SentryEvent();
+        	
+        	event.setLevel(sentryLevel);
+        	
+	        if (message != null) {		
+        		Message m=new Message();
+        		m.setMessage("Got exception: " + message);
+        		event.setMessage(m);
+        	}
+
+        	if (breadCrumb != null) {
+        		event.addBreadcrumb(breadCrumb);
+        	}
+        	
+        	if (dataDict != null) {
+	        	Map<String,Object> map=createMap(dataDict);
+	        	event.acceptUnknownProperties(map);
+	        }
+        	
+	        if (extraDict != null) {
+	        	Map<String,Object> map=createMap(extraDict);
+	        	event.setExtras(map);
+	        }
+	        
+	        if (tagsDict != null) {
+	        	Map<String,String> map=createStringMap(tagsDict);
+	        	event.setTags(map);
+	        }
+	        
+	        
+        	
+        	if (exceptionMsg != null) {
+            	try {
+            		throw new Exception(exceptionMsg);
+            	} catch (Exception ex) {
+	        		event.setLevel(SentryLevel.ERROR);
+	       
+	        		SentryException sex=new SentryException();
+	        		sex.setValue(ex.getMessage());
+	        		
+	        		List<SentryStackFrame> frames=new ArrayList<SentryStackFrame>();
+	        		for (StackTraceElement line : ex.getStackTrace()) {
+	        			
+	        			SentryStackFrame xx = new SentryStackFrame();
+	        			xx.setContextLine(line.toString());
+	        			frames.add(xx);
+	        		}
+	        		SentryStackTrace sst=new SentryStackTrace(frames);
+	        		sex.setStacktrace(sst);
+	        		
+	        		List<SentryException> list=new ArrayList<SentryException>();
+	        		list.add(sex);
+	        		event.setExceptions(list);
+            	}
+        	}
+        	
+        	Sentry.captureEvent(event);
+        	
         	return new ValueObj(self());
         }
     } 
 
-    class FunctionEvent extends Function {
-        public String getName() {
-            return "event";
-        }
-        public String getShortDesc() {
-            return "event(dataDict) - log multiple field event with Sentry - returns self";
-        }
-        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	if (!initOk) throw new Exception("Must call init() first");
-        	Obj obj=getObj("msg", params, 0);
-        	if (!(obj instanceof ObjDict)) throw new Exception("Expected dataDict parameter");
-        	
-        	ObjDict data=(ObjDict) obj;
-
-        	// Create proper map
-        	HashMap<String,Object> map=new HashMap<String,Object>();
-        	Iterator<String> keys = data.getKeys();
-        	while (keys.hasNext()) {
-        		String key=keys.next();
-        		map.put(key, data.getValue(key).getValAsString());
-        	}
-        	
-    		SentryEvent e=new SentryEvent();
-    		e.setTag("sessionKey", sessionKey);
-       		e.addBreadcrumb("bc:"+sessionKey);
-       	 	e.setLevel(SentryLevel.DEBUG);
-    		e.acceptUnknownProperties(map);
-    		
-    		Sentry.captureEvent(e);
-
-    		return new ValueObj(self());
-        }
-    } 
-
-
+    
+    
+    
 }
