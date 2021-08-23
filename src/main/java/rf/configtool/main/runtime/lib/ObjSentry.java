@@ -61,7 +61,8 @@ public class ObjSentry extends Obj {
         this.add(new FunctionLevelDebug());
         this.add(new FunctionLevelError());
                 
-        this.add(new FunctionSend());
+        this.add(new FunctionSendEvent());
+        this.add(new FunctionSendBreadCrumb());
         
     }
     
@@ -168,18 +169,18 @@ public class ObjSentry extends Obj {
     }
 
     
-    class FunctionSend extends Function {
+    class FunctionSendEvent extends Function {
         public String getName() {
-            return "send";
+            return "sendEvent";
         }
         public String getShortDesc() {
-            return "send(message?, breadCrumb?, dataDict?, extraDict?, tagsDict, exceptionMsg?) - optional params must be null - returns self";
+            return "sendEvent(message?, breadCrumbStr?, dataDict?, extraDict?, tagsDict?, exceptionMsg?) - optional params must be null - returns self";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
         	if (!initOk) throw new Exception("Must call init() first");
         	
         	if (params.size() != 6) {
-        		throw new Exception("Expected params: message?, breadCrumb?, dataDict?, extraDict?, tagsDict, exceptionMsg?");
+        		throw new Exception("Expected params: message?, breadCrumbStr?, dataDict?, extraDict?, tagsDict?, exceptionMsg?");
         	}
         	
         	String message=null;
@@ -191,7 +192,7 @@ public class ObjSentry extends Obj {
         	
         	
         	if (!(params.get(0) instanceof ValueNull)) message=getString("message", params, 0);
-        	if (!(params.get(1) instanceof ValueNull)) breadCrumb=getString("breadCrumb", params, 1);
+        	if (!(params.get(1) instanceof ValueNull)) breadCrumb=getString("breadCrumbStr", params, 1);
         	if (!(params.get(2) instanceof ValueNull)) dataDict=(ObjDict) getObj("dataDict", params, 2);
         	if (!(params.get(3) instanceof ValueNull)) extraDict=(ObjDict) getObj("extraDict", params, 3);
         	if (!(params.get(4) instanceof ValueNull)) tagsDict=(ObjDict) getObj("tagsDict", params, 4);
@@ -208,7 +209,12 @@ public class ObjSentry extends Obj {
         	}
 
         	if (breadCrumb != null) {
-        		event.addBreadcrumb(breadCrumb);
+        		// https://develop.sentry.dev/sdk/event-payloads/breadcrumbs/
+        		Breadcrumb bc=new Breadcrumb();
+        		// bc.setType("default");  
+        		//bc.setCategory("some-breadcrumb-category");
+        		bc.setMessage(breadCrumb);
+        		event.addBreadcrumb(bc);
         	}
         	
         	if (dataDict != null) {
@@ -260,6 +266,36 @@ public class ObjSentry extends Obj {
     } 
 
     
+    class FunctionSendBreadCrumb extends Function {
+        public String getName() {
+            return "sendBreadCrumb";
+        }
+        public String getShortDesc() {
+            return "sendBreadCrumb (breadCrumbStr) - send breadcrumb to Sentry - returns self";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	if (!initOk) throw new Exception("Must call init() first");
+        	
+        	if (params.size() != 1) {
+        		throw new Exception("Expected params: breadCrumbStr");
+        	}
+        	
+        	String breadCrumb=null;
+        	
+        	breadCrumb=getString("breadCrumbStr", params, 0);
+  
+    		// https://develop.sentry.dev/sdk/event-payloads/breadcrumbs/
+    		Breadcrumb bc=new Breadcrumb();
+    		bc.setType("default");  
+    		bc.setCategory("logging");
+    		bc.setMessage(breadCrumb);
+
+    		Sentry.addBreadcrumb(breadCrumb);
+        	
+        	return new ValueObj(self());
+        }
+    } 
+
     
     
 }
