@@ -673,24 +673,28 @@ P(2) =>value
 	dirCount=dirs.keys.length
 	
 	if (totalCount<30 || dirCount==1) {
+		# Show details
 		Inner{
 			files->f
 					grep.file(f)->line
 						report(line.file.name, line.lineNumber, line)
 		}
-	} else Inner {
-		Inner {
-			pos=0
-			files->f
-				report(pos,f.path, Date(f.lastModified).fmt, Date.diff(Date(f.lastModified)).fmt)
-				pos=pos+1
-		} -> line 
-			println(line)
-		|
-		println
-		readLine("Drill down to directory of file (pos), ENTER to cancel").trim=>drillDown
-		if (drillDown != "") {
-			files.nth(drillDown.parseInt).dir.setAsCurrentDir
+	} else {
+		# Show drilldown
+		if (files.length > 0) Inner {
+			Inner {
+				pos=0
+				files -> f
+					report(pos, f.path, Date.diff(Date(f.lastModified)).fmt)
+					pos=pos+1
+			} -> line
+				println(line)
+			|
+			println
+			readLine("Drill down to directory of file (pos), ENTER to cancel").trim=>drillDown
+			if (drillDown != "") {
+				Sys.stdin("cd " + files.nth(drillDown.parseInt).dir.path)
+			}
 		}
 		
 	}
@@ -711,21 +715,22 @@ P(2) =>value
 	| _.sort->x
 		out(x.data)
 	| => files
-	
-	Inner {
-		pos=0
-		files -> f
-			report(pos, f.path, Date.diff(Date(f.lastModified)).fmt)
-			pos=pos+1
-	} -> line
-		println(line)
-	|
-	println
-	readLine("Drill down to directory of file (pos), ENTER to cancel").trim=>drillDown
-	if (drillDown != "") {
-		files.nth(drillDown.parseInt).dir.setAsCurrentDir
-	}
 
+	if (files.length > 0) Inner {
+		Inner {
+			pos=0
+			files -> f
+				report(pos, f.path, Date.diff(Date(f.lastModified)).fmt)
+				pos=pos+1
+		} -> line
+			println(line)
+		|
+		println
+		readLine("Drill down to directory of file (pos), ENTER to cancel").trim=>drillDown
+		if (drillDown != "") {
+			Sys.stdin("cd " + files.nth(drillDown.parseInt).dir.path)
+		}
+	}
 /LocateFiles
 
 	

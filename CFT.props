@@ -67,8 +67,8 @@ shortcut:PS   = "---- Projects perform search ----"       Projects:Curr Projects
 
 # Investigate script
 shortcut:i    = "---- Investigate log text ----"          Investigate:LogText
-shortcut:ii   = "---- Investigate log input loop ----"    Investigate:InputMode
 shortcut:id   = "---- Investigate log with data ----"     Investigate:LogData
+shortcut:ii   = "---- Investigate log input loop ----"    Investigate:InputMode
 
 
 # List available shortcuts when typing '@' only
