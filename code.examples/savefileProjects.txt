@@ -298,6 +298,7 @@ There can be multiples of every line, including Dir.
 	Input("Search3a ... ").get =>a
 	Input("... AND Search3b").get =>b
 	Input("... AND Search3c").get =>c
+	Search(Grep.match(a).match(b).match(c))
 /S3
 
 # Search with one positive and one negative parameter
