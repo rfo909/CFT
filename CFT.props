@@ -49,13 +49,13 @@ shortcut:fm   = "---- open file manager (curr dir) ---"   Lib:fileManager(Dir)
 shortcut:term = "---- Update terminal size ----"          Lib:GetTerminalSize
 shortcut:rsh  = "---- Remote shell via ssh ----"          SSH:remoteShell
 shortcut:scr  = "---- Show all scripts ----"              Lib:Scripts
-shortcut:S    = "---- Search text files curr Dir ----"    Lib:SearchTextFiles(Dir)
+#shortcut:S    = "---- Search text files curr Dir ----"    Lib:SearchTextFiles(Dir)
 
 shortcut:home = "---- move to script dir ----"			  Sys.savefile.dir.setAsCurrentDir
 
 # copy / paste file
-shortcut:c    = "---- copy file to clipboard ----"        Lib:ClipboardCopy(Lib:MenuSelect(Dir.files, Lambda{P(1).name}, "Select file / blank for none", true))
-shortcut:v    = "---- paste file from clipboard ----"     Lib:ClipboardPaste(Dir)
+#shortcut:c    = "---- copy file to clipboard ----"        Lib:ClipboardCopy(Lib:MenuSelect(Dir.files, Lambda{P(1).name}, "Select file / blank for none", true))
+#shortcut:v    = "---- paste file from clipboard ----"     Lib:ClipboardPaste(Dir)
 
 # Release script
 shortcut:rel  = "---- Release ----"                       Sys.stdin(":load Release","?")
@@ -63,11 +63,10 @@ shortcut:rel  = "---- Release ----"                       Sys.stdin(":load Relea
 # Projects script 
 shortcut:P    = "---- Projects ----"                      Sys.stdin(":load Projects","?")
 shortcut:PS   = "---- Projects perform search ----"       Projects:Curr Projects:S
-shortcut:PP   = "---- Projects change project ----"       Projects:ChangeProject
 
-# Investigate script (experimental)
+# Investigate script
 shortcut:i    = "---- Investigate log text ----"          Investigate:LogText
-shortcut:ii   = "---- Investigate log loop ----"          Investigate:InputMode
+shortcut:ii   = "---- Investigate log input loop ----"    Investigate:InputMode
 shortcut:id   = "---- Investigate log with data ----"     Investigate:LogData
 
 

@@ -85,13 +85,13 @@ There can be multiples of every line, including Dir.
 		Db2:Set("Projects","Project",null)
 		Db2:Set("Projects","session", Sys.sessionUUID)
 	}
-/onLoad
+//onLoad
 
 
 # The projects.txt file 
 # --
     (Lib:DirPrivate).file("projects.txt")
-/ConfigFile
+//ConfigFile
 
 
 
@@ -104,7 +104,7 @@ There can be multiples of every line, including Dir.
 //ProjectsFile
 
 
-# edit config file
+# Edit config file (see Readme)
 # --
 	Lib:e(ConfigFile)
 /EditConfig
@@ -127,19 +127,21 @@ There can be multiples of every line, including Dir.
         break(result != null)
     |
     Db2:Set("Projects","Project", result)
-/ChangeProject
+//ChangeProject
 
 
 # Check there is a selected project
 # --
 	if(Db2:Get("Projects","Project")==null, ChangeProject)
-/CheckProject
+//CheckProject
 
 
 # Read current project data into a Dict
 # --
     CheckProject
+    Db2:Get("Projects","Project") =>pName
     Dict
+		.set("Name",pName)
         .set("Desc",List)
         .set("Dir",List)
         .set("Type",List)
@@ -147,7 +149,6 @@ There can be multiples of every line, including Dir.
         .set("IgnoreFile",List)
         =>dict
 
-    Db2:Get("Projects","Project") =>pName
     ProjectsFile.get(pName) =>dataLines
     error(dataLines.length==0, "No data for project " + pName)
 
@@ -157,7 +158,7 @@ There can be multiples of every line, including Dir.
         dict.get(field,List).add(val)
     |
     dict
-/CurrProject
+//CurrProject
 
 
 # Produce list of files to search
@@ -169,9 +170,11 @@ There can be multiples of every line, including Dir.
 		out(Glob("*."+t) )
 	| => globs
 	
+	# prepare the ignore patterns
 	pr.IgnoreDir->d
-		sep=if(Sys.isWindows,"\","/")
-		out(sep+d+sep)
+		sep=Sys.fileSeparator
+		s=(sep+d+sep)
+		out(s.replace(sep+sep,sep))
 	| => ignores
 	
 	pathOk = Lambda{
@@ -195,7 +198,7 @@ There can be multiples of every line, including Dir.
 	| => files
 		
 	files
-/TextFiles
+//TextFiles
 
 
 
@@ -206,16 +209,13 @@ There can be multiples of every line, including Dir.
     P(1,Grep) =>grep
     CheckProject
     
-    Lambda { P(1) =>file 
-        Db2:Get("Projects","FileFilter") =>filter
-        if(filter != null, file.name.contains(filter), true)
-    } =>filter
+	filter=Db2:Get("Projects","FileFilter",null)
 
 	TextFiles => textFiles
 	
     # Count matches first
     textFiles->tf 
-        assert(filter.call(tf))
+        assert(filter==null || file.name.contains(filter))
         out(grep.fileCount(tf)) 
     | _.sum =>count
     
@@ -223,22 +223,13 @@ There can be multiples of every line, including Dir.
     error(count>10000, "Search matches " + count + " lines - not shown")
 
     textFiles->tf
-        assert(filter.call(tf))
+        assert(filter==null || file.name.contains(filter))
         grep.file(tf)->line 
             report(line.file.name, line.lineNumber, line)
-/Search
+//Search
 
 
 
-
-# Test
-# Was very slow in Windows around 8500 ms (Linux around 500ms)
-# Rewrote TextFiles function -> 5-600 ms
-# --
-	a=currentTimeMillis
-	Search(Grep("Expr"))
-	currentTimeMillis-a
-//t
 
 
 # Limit search to file names containing a certain string
@@ -318,28 +309,11 @@ There can be multiples of every line, including Dir.
     TextFiles->tf
         assert(tf.name.contains(fn))
         out(tf)
-/FileLocator
-
-
-# Display current project
-# --
-    CheckProject
-    
-    CurrProject =>pr
-    println
-	Lib:Header("Current project")
-	println(pr.Desc.concat(" "))
-    pr.Dir->d
-        println("Dir: " + d)
-    |
-    println("Types: " + pr.Type.concat(" "))
-    println
-    true
-/Curr
+//FileLocator
 
 
 
-# Interactive call to FileLocator, sorted presentation, newest first
+# FileLocator, interactive, sorted presentation, newest first
 # --
     CheckProject
 
@@ -376,24 +350,34 @@ There can be multiples of every line, including Dir.
 /FL
 
 
-ChangeProject
-/Change
-
-
-TextFiles
+# Show text files (that are being searched)
+# --
+	TextFiles
 /TF
 
 
-
-# Goto project directory
+# Display current project
 # --
-	CurrProject.Dir => dirs
-	error(dirs.length < 1, "No directories configured for project!")
-	if (dirs.length==1) {
-		Dir(dirs.first).setAsCurrentDir
-	} else {
-		Lib:Header("Goto project directory")
-		Dir(Lib:MenuSelect(dirs)).setAsCurrentDir
-	}
-	Dir.path
-/Goto
+    CheckProject
+    
+    CurrProject =>pr
+    println
+	Lib:Header("Current project")
+	println(pr.Desc.concat(" "))
+    pr.Dir->d
+        println("Dir: " + d)
+    |
+    println("Types: " + pr.Type.concat(" "))
+    println
+    true
+/Curr
+
+
+# Change project
+# --
+	ChangeProject
+/Change
+
+
+
+
