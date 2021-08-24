@@ -54,8 +54,8 @@ shortcut:scr  = "---- Show all scripts ----"              Lib:Scripts
 shortcut:home = "---- move to script dir ----"			  Sys.savefile.dir.setAsCurrentDir
 
 # copy / paste file
-#shortcut:c    = "---- copy file to clipboard ----"        Lib:ClipboardCopy(Lib:MenuSelect(Dir.files, Lambda{P(1).name}, "Select file / blank for none", true))
-#shortcut:v    = "---- paste file from clipboard ----"     Lib:ClipboardPaste(Dir)
+shortcut:c    = "---- copy files to clipboard ----"       Lib:ClipboardCopy(Dir)
+shortcut:v    = "---- paste files from clipboard ----"    Lib:ClipboardPaste(Dir)
 
 # Release script
 shortcut:rel  = "---- Release ----"                       Sys.stdin(":load Release","?")
