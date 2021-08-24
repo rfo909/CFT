@@ -49,7 +49,8 @@ shortcut:fm   = "---- open file manager (curr dir) ---"   Lib:fileManager(Dir)
 shortcut:term = "---- Update terminal size ----"          Lib:GetTerminalSize
 shortcut:rsh  = "---- Remote shell via ssh ----"          SSH:remoteShell
 shortcut:scr  = "---- Show all scripts ----"              Lib:Scripts
-#shortcut:S    = "---- Search text files curr Dir ----"    Lib:SearchTextFiles(Dir)
+shortcut:FS   = "---- File Search under curr Dir ----"    Lib:SearchTextFiles(Dir)
+shortcut:FL   = "---- File Locate under curr Dir ----"    Lib:LocateFiles(Dir)
 
 shortcut:home = "---- move to script dir ----"			  Sys.savefile.dir.setAsCurrentDir
 

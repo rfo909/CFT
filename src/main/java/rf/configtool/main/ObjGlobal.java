@@ -543,12 +543,12 @@ public class ObjGlobal extends Obj {
             return "Glob";
         }
         public String getShortDesc() {
-            return "Glob(pattern,ignoreCase?) - creates Glob object for file name matching, such as '*.txt' - ignoreCase defaults to true";
+            return "Glob(pattern,ignoreCase?) - creates Glob object for file name matching, such as '*.txt' - ignoreCase defaults to true on windows, otherwise false";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() == 1) {
                 String pattern=getString("pattern", params, 0);
-                boolean ignoreCase=true;
+                boolean ignoreCase=(File.separator.equals("\\"));  // ignore case on Windows, otherwise not
                 return new ValueObj(new ObjGlob(pattern,ignoreCase));
             } else if (params.size() == 2) {
                 String pattern=getString("pattern", params, 0);

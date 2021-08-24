@@ -47,7 +47,12 @@ public class ObjDuration extends Obj {
         }
         
         public String fmt() {
-            return days + " d " + f(hours,2) + ":" + f(minutes,2) + ":" + f(seconds,2) + "." + f(millis,3);
+        	if (days > 185) return (days/30) + "mo"; 
+        	if (days > 2) return days+"d";
+        	if (days > 0) return days+"d " + hours + "h";
+        	if (hours > 0) return f(hours,2) + ":" + f(minutes,2);
+        	if (minutes > 0) return f(hours,2)+":" + f(minutes,2)+":"+f(seconds,2);
+        	return seconds+"."+f(millis,3) + "s";
         }
     }
     
@@ -204,6 +209,7 @@ public class ObjDuration extends Obj {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
+            
             return new ValueString(""+(new Details(timeValue)).fmt());
         }
     }
