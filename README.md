@@ -23,8 +23,9 @@ is more regular, more like traditional programming languages.
 Also wanted to avoid the complex string quote rules, 
 which while compact and efficient, also is hard to read and maintain. Again, going for easier syntax. 
 
-The syntax of CFT is fairly "tiny", and easily learned. It has a few specialties, but mostly it is 
-about calling functions. 
+The syntax of CFT is fairly "tiny", and easily learned. It has a few specialties, such as list iteration
+and filtering, which is also used all the time, but otherwise, using dotted notation to call functions inside
+objects returned by functions, and assigning local variables, is mostly like any other language.
 
 There are no classes, only functions, which reduces complexity both for the interpreter and for the code.
 Older tested functions tend to "just work", since they usually have no dependencies apart from other functions. 
