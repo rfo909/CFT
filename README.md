@@ -1,7 +1,7 @@
 
 # CFT - ConfigTool
 
-*README last updated 2021-08-22*
+*README last updated 2021-08-24*
 
 ## Motto
 
@@ -43,8 +43,8 @@ is fairly "tiny", and easily learned.
 
 The language is also inspired by functional programming, in that there is no global state, which reduces
 risk of errors. Tested functions tend to "just work", since they usually have no dependencies
-apart from other functions. The language supports recursion, but does not depend on it, opposed to how 
-this somehow has become the hallmark of "real" functional programming.
+apart from other functions. The language supports recursion, but does not depend on it, as
+has seems to have become the hallmark of "real" functional programming. CFT has Lambdas and closures, though.
 
 [CFT vs FP](FP.md) 
 
@@ -61,12 +61,14 @@ In CFT we don't call a script, we *call a function inside a script*. Scripts in 
 Single functions can of course take parameters. They can also be made so that if (some of) the parameters
 are missing, the function becomes interactive, asking the user for missing values. 
 
-CFT has a built-in help system that lists member functions of all objects and inside any script. 
+CFT has a built-in help system that lists member functions of all objects, as well as inside any script. There
+is also an integrated mechanism for running script functionality as parallel threads, for speed, for example
+when doing updates or checking connectivity against multiple remote hosts.
 
-The complex string handling in unix shells, with three different types of quotes, and the verbosity and 
-awkward syntax of PowerShell is eliminated in CFT. 
+The complex string handling in unix shells, and the verbosity and 
+awkward syntax of PowerShell, are both eliminated in CFT. 
 
-CFT represents a rethink, not just another almost-but-not-quite bash remake. 
+CFT represents a *rethink*, not just another "almost-but-not-quite" bash remake. 
 
 
 
