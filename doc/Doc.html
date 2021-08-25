@@ -15,8 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2021-06-16 RFO
-v2.5.6
+Last updated: 2021-08-21 RFO
+v2.5.8
 
 
 </pre>
@@ -52,7 +52,7 @@ v2.5.6
 
 <h1>Platform</h1>
 <p>
-  CFT is written in Java and uses no external libraries. It has been tested on both Linux
+  CFT is written in Java. It has been tested on both Linux
   and Windows.
 </p>
 
@@ -254,9 +254,18 @@ v2.5.6
   $ lsd   # lists directories
 </pre>
 
+<h2>Destructive commands</h2>
 <p>
-  The shell <i>does not</i> include commands that move, delete or copy files and directories. This
-  is by choice.
+  CFT <i>does not</i> include direct "shell-like" destructive commands ("rm", "cp", "mv", "mkdir" etc).
+</p>
+<p>
+	This is by choice.
+</p>
+<p>
+	Such functionality is of course available in CFT, but only as functions inside Dir and File objects.
+</p>
+<p>
+	Alternatively one can use "bang commands" or the shell function.
 </p>
 
 
@@ -267,10 +276,11 @@ v2.5.6
 
 
 
-<h2>The "protect" mechanism</h2>
+<h1>The "protect" mechanism</h1>
 <p>
   Performing changes, such as copying, deleting and creating files, is supposed to be scripted
-  with code, so no "command line" style functionality exists for this.
+  with code, so no "command line" style functionality exists for this. Alternatively  one can use
+  the "shell" command, or "bang" commands, which are sent to the shell.
 </p>
 <p>
   This of course doesn't exclude these actions from the command line, but the syntax changes 
@@ -304,7 +314,7 @@ v2.5.6
 
  
 
-<h2>Bang commands</h2>
+<h1>Bang commands</h1>
 <p>
   CFT supports a special syntax, where by starting a command line with "!", the following can
   directly run external commands, such as
@@ -325,7 +335,7 @@ v2.5.6
 
 
 
-<h2>The "shell" command</h2>
+<h1>The "shell" command</h1>
 <p>
   One can also run the global "shell" command, perform changes, and then return via "exit":
 </p>
@@ -343,7 +353,7 @@ v2.5.6
 
 
 
-<h2>Show content of file</h2>
+<h1>Show content of file</h1>
 <p>
   Now if we want to list content of file "TODO.txt", we can enter
 </p>
@@ -357,6 +367,7 @@ v2.5.6
 <pre>
   $ edit TODO.txt
 </pre>
+
 
 
 
@@ -696,6 +707,7 @@ v2.5.6
   <li>boolean</li>
   <li>List</li>
   <li>Dict</li>
+  <li>Binary</li>
 </ul>
 <p>
   All values in CFT are objects, which may contain functions. Strings can be written using double
@@ -766,6 +778,19 @@ v2.5.6
   dict=SymDict(a,b)
 </pre>
 
+
+<h2>Binary type</h2>
+<p>
+  Used in connection with encryption etc. Can be created from strings.
+</p>
+<pre>
+   "password".getBytes("UTF-8")
+   &lt;Binary&gt;
+   0x..
+</pre>
+<p>
+	Check the Lib.Util object, which contains functions that create objects Encrypt and Decrypt.
+</p>
 
 
 <h1>List processing</h1>
@@ -1145,7 +1170,7 @@ $ ?SomeScript:X
   in the CFT.props file.
 </p>
 <p>
-  The shortcut @s calls this function.
+  The shortcut @scr calls this function.
 </p>
 
 
@@ -1183,16 +1208,16 @@ $ ?SomeScript:X
 
 
 
-<h1>Loop spaces - "pipes"</h1>
+<h1>Code spaces - "pipes"</h1>
 <p>
   The body of any loop is the rest of the code of the function, or until a "pipe" symbol
-  is found. The pipe symbol ("|") more accurately partitions the code into a sequence of
-  <em>loop spaces</em>, which means acting as an end-point for 
+  is found. The pipe symbol ("|") more accurately partitions code into a sequence of
+  <em>code spaces</em>, which means acting as an end-point for 
   running loops.
 </p>
 <p>
-  The way a "pipe" works, is to wait for all current loops to terminate, then take the
-  return value from that loop space and putting it onto the stack for the next loop
+  The way a "pipe" works, is to wait for any current loops to terminate, then take the
+  return value from that code space and putting it onto the stack for the next loop
   space to work with (or do something else). Example:
 </p>
 <pre>
@@ -1201,7 +1226,7 @@ $ ?SomeScript:X
 <p>
   This single line of code first contains a loop, which outputs a list of integers for
   the sizes of all files in the current directory. Then the "pipe" symbol terminates that
-  loop space, and creates a new one, where we pick the result from the previous loop
+  code space, and creates a new one, where we pick the result from the previous loop
   space off the stack and assigns it to a local variable. We then apply the sum() function to it.
 </p>
 <p>
@@ -1213,7 +1238,7 @@ $ ?SomeScript:X
 </pre>
 
 <p>
-  As we see from the above code, a loop spaces don't <em>need</em> containing loops. The 
+  As we see from the above code, a code spaces don't <em>need</em> containing loops. The 
   following is perfectly legal, although a little silly.
 </p>
 <pre>
@@ -1226,15 +1251,15 @@ $ ?SomeScript:X
 
 
 
-<h2>Result value from a loop space</h2>
+<h2>Result value from a code space</h2>
 <p>
-  All bodies of code in CFT consist of one or more <em>loop spaces</em>. The result value
-  from any such body is the return value from the last loop space.
+  All bodies of code in CFT consist of one or more <em>code spaces</em>. The result value
+  from any such body is the return value from the last code space.
 </p>
 
-<h3>If the loop space contains looping ...</h3>
+<h3>If the code space contains looping ...</h3>
 <p>
-  If a loop space contains loop statements, the result value is a list of data generated
+  If a code space contains loop statements, the result value is a list of data generated
   via calls to out() or report() statements. If no actual iteraions take place, or
   filtering with assert(), reject() or break() means no data is generated via out() or report(), 
   then the result is an empty list.
@@ -1242,7 +1267,7 @@ $ ?SomeScript:X
 
 <h3>Otherwise ...</h3>
 <p>
-  A loop space that doesn't contain loop statements, has as its return value the topmost
+  A code space that doesn't contain loop statements, has as its return value the topmost
   element on the stack after all code has executed. If there is no value on the stack,
   the return value is <em>null</em>.
 </p>
@@ -1352,7 +1377,7 @@ $ ?SomeScript:X
 </pre>
 
 <p>
-  Local blocks can contain loops, but can not be split into multiple loop spaces using the PIPE ("|")
+  Local blocks can contain loops, but can not be split into multiple code spaces using the PIPE ("|")
   symbol. Since they execute in the same run-context as the code around them, any calls to out() or report()
   add to the result list of the environment.
 </p>
@@ -1382,7 +1407,7 @@ $ ?SomeScript:X
   blocks. 
 </p>
 <p>
-  In other words: Inner blocks define their own loop space.
+  In other words: Inner blocks define their own code space.
 </p>
 <pre>
   Inner {
@@ -1402,7 +1427,7 @@ $ ?SomeScript:X
 <h2>Block expressions summary</h2>
 <p>
   Local (plain) blocks for non-PIPE-separated blocks of code, typically used with "if". Running in
-  the same loop space as outside the block, means it can call break() and out() as well as
+  the same code space as outside the block, means it can call break() and out() as well as
   assert() and reject() and affect the (innermost) loop of those outside the block. 
 </p>
 <p>
@@ -3817,7 +3842,7 @@ Dict
   the encryption engine with the same (secret) password.
 </p>
 <pre>
-  "password".getBytes("UTF-8")
+  "password".getBytes("UTF-8")  # returns Binary object
   /password
 
   Lib.Util.Encrypt(password).processString("this is a message")
@@ -4089,11 +4114,11 @@ Colon commands
 
 
 
-<h2>Loop spaces / the "pipe"</h2>
+<h2>Code spaces / the "pipe"</h2>
 <p>
   This all stems from the "one-line-at-a-time" period, where scripts were entered from
   the command line, at a time long before introducing block expressions. Being a fairly compact
-  and efficient notation, and frequently used, loop spaces and the "pipe" symbol will
+  and efficient notation, and frequently used, code spaces and the "pipe" symbol will
   remain in the language.
 </p>
 

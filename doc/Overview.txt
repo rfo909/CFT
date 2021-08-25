@@ -25,10 +25,15 @@ Edit script file - shortcuts
 Shortcuts vs colon commands
 
 CFT as a shell
- * The "protect" mechanism
- * Bang commands
- * The "shell" command
- * Show content of file
+ * Destructive commands
+
+The "protect" mechanism
+
+Bang commands
+
+The "shell" command
+
+Show content of file
  * Open a file in editor
 
 List basics
@@ -63,6 +68,7 @@ Core types
  * Dictionaries
  |   Properties as functions
  |   SymDict
+ * Binary type
 
 List processing
  * Iterating over list content
@@ -97,9 +103,9 @@ Displaying all known scripts
 
 Nested loops
 
-Loop spaces - "pipes"
- * Result value from a loop space
- |   If the loop space contains looping ...
+Code spaces - "pipes"
+ * Result value from a code space
+ |   If the code space contains looping ...
  |   Otherwise ...
 
 Function parameters
@@ -295,7 +301,7 @@ Reference: Synthesizable types
 Comments and digressions
  * Function name AFTER code?
  * Using Sys.stdin to run colon commands etc
- * Loop spaces / the "pipe"
+ * Code spaces / the "pipe"
  * Script and code size
  |   2020-11-13
  |   2021-04-01

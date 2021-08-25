@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2021-06-16 RFO
-v2.5.6
+Last updated: 2021-08-21 RFO
+v2.5.8
 ```
 # Introduction
 
@@ -49,7 +49,7 @@ Development has been going on since May 2018, and on github since July 2020.
 # Platform
 
 
-CFT is written in Java and uses no external libraries. It has been tested on both Linux
+CFT is written in Java. It has been tested on both Linux
 and Windows.
 
 # Functionality
@@ -229,16 +229,27 @@ The "ls" command comes in two additional versions:
 $ lsf   # lists files
 $ lsd   # lists directories
 ```
+## Destructive commands
 
-The shell 
-**does not** include commands that move, delete or copy files and directories. This
-is by choice.
 
-## The "protect" mechanism
+CFT 
+**does not** include direct "shell-like" destructive commands ("rm", "cp", "mv", "mkdir" etc).
+
+
+This is by choice.
+
+
+Such functionality is of course available in CFT, but only as functions inside Dir and File objects.
+
+
+Alternatively one can use "bang commands" or the shell function.
+
+# The "protect" mechanism
 
 
 Performing changes, such as copying, deleting and creating files, is supposed to be scripted
-with code, so no "command line" style functionality exists for this.
+with code, so no "command line" style functionality exists for this. Alternatively  one can use
+the "shell" command, or "bang" commands, which are sent to the shell.
 
 
 This of course doesn't exclude these actions from the command line, but the syntax changes
@@ -270,7 +281,7 @@ from it, for example like this:
 $ LogDir.file("log01.txt").delete
 ERROR: [input:18] INVALID-OP delete : /someNfsDir/logs/log01.txt (PROTECTED: -) (java.lang.Exception)
 ```
-## Bang commands
+# Bang commands
 
 
 CFT supports a special syntax, where by starting a command line with "!", the following can
@@ -288,7 +299,7 @@ For details of the default bang command parser:
 ```
 $ BangParser:Readme
 ```
-## The "shell" command
+# The "shell" command
 
 
 One can also run the global "shell" command, perform changes, and then return via "exit":
@@ -300,7 +311,7 @@ roar@pc01$ exit
 # Running bash completed
 $
 ```
-## Show content of file
+# Show content of file
 
 
 Now if we want to list content of file "TODO.txt", we can enter
@@ -614,6 +625,9 @@ winShell = powershell
 - Dict
 
 
+- Binary
+
+
 
 All values in CFT are objects, which may contain functions. Strings can be written using double
 or single quotes.
@@ -678,6 +692,19 @@ a=1
 b=2
 dict=SymDict(a,b)
 ```
+## Binary type
+
+
+Used in connection with encryption etc. Can be created from strings.
+
+```
+"password".getBytes("UTF-8")
+<Binary>
+0x..
+```
+
+Check the Lib.Util object, which contains functions that create objects Encrypt and Decrypt.
+
 # List processing
 
 
@@ -995,7 +1022,7 @@ The function Lib:Scripts displays all available scripts, sorted by the directori
 in the CFT.props file.
 
 
-The shortcut @s calls this function.
+The shortcut @scr calls this function.
 
 # Nested loops
 
@@ -1019,17 +1046,17 @@ $ List(1,2,3)->x List(1,2,3)->y  out(x*y)
 In this case, the body of each loop is all code following the "-> var"
 construct. But this can be changed using the "pipe" symbol, which "closes" all loops.
 
-# Loop spaces - "pipes"
+# Code spaces - "pipes"
 
 
 The body of any loop is the rest of the code of the function, or until a "pipe" symbol
-is found. The pipe symbol ("|") more accurately partitions the code into a sequence of
-**loop spaces**, which means acting as an end-point for
+is found. The pipe symbol ("|") more accurately partitions code into a sequence of
+**code spaces**, which means acting as an end-point for
 running loops.
 
 
-The way a "pipe" works, is to wait for all current loops to terminate, then take the
-return value from that loop space and putting it onto the stack for the next loop
+The way a "pipe" works, is to wait for any current loops to terminate, then take the
+return value from that code space and putting it onto the stack for the next loop
 space to work with (or do something else). Example:
 
 ```
@@ -1038,7 +1065,7 @@ $ Dir.files->f out(f.length) | =>sizes sizes.sum
 
 This single line of code first contains a loop, which outputs a list of integers for
 the sizes of all files in the current directory. Then the "pipe" symbol terminates that
-loop space, and creates a new one, where we pick the result from the previous loop
+code space, and creates a new one, where we pick the result from the previous loop
 space off the stack and assigns it to a local variable. We then apply the sum() function to it.
 
 
@@ -1049,7 +1076,7 @@ the stack.
 $ Dir.files->f out(f.length) | _.sum
 ```
 
-As we see from the above code, a loop spaces don't 
+As we see from the above code, a code spaces don't 
 **need** containing loops. The
 following is perfectly legal, although a little silly.
 
@@ -1059,17 +1086,17 @@ $ 2+3 | | | | =>x x | =>y y | _ _ _ |
 
 Yes, it returns 5.
 
-## Result value from a loop space
+## Result value from a code space
 
 
 All bodies of code in CFT consist of one or more 
-**loop spaces**. The result value
-from any such body is the return value from the last loop space.
+**code spaces**. The result value
+from any such body is the return value from the last code space.
 
-### If the loop space contains looping ...
+### If the code space contains looping ...
 
 
-If a loop space contains loop statements, the result value is a list of data generated
+If a code space contains loop statements, the result value is a list of data generated
 via calls to out() or report() statements. If no actual iteraions take place, or
 filtering with assert(), reject() or break() means no data is generated via out() or report(),
 then the result is an empty list.
@@ -1077,7 +1104,7 @@ then the result is an empty list.
 ### Otherwise ...
 
 
-A loop space that doesn't contain loop statements, has as its return value the topmost
+A code space that doesn't contain loop statements, has as its return value the topmost
 element on the stack after all code has executed. If there is no value on the stack,
 the return value is 
 **null**.
@@ -1170,7 +1197,7 @@ if (a>b) {
 }
 ```
 
-Local blocks can contain loops, but can not be split into multiple loop spaces using the PIPE ("|")
+Local blocks can contain loops, but can not be split into multiple code spaces using the PIPE ("|")
 symbol. Since they execute in the same run-context as the code around them, any calls to out() or report()
 add to the result list of the environment.
 
@@ -1196,7 +1223,7 @@ context for loops and loop output. Technically, inner blocks are expressions, ju
 blocks.
 
 
-In other words: Inner blocks define their own loop space.
+In other words: Inner blocks define their own code space.
 
 ```
 Inner {
@@ -1214,7 +1241,7 @@ terminates loops are hitting the end of the current block.
 
 
 Local (plain) blocks for non-PIPE-separated blocks of code, typically used with "if". Running in
-the same loop space as outside the block, means it can call break() and out() as well as
+the same code space as outside the block, means it can call break() and out() as well as
 assert() and reject() and affect the (innermost) loop of those outside the block.
 
 
@@ -3366,7 +3393,7 @@ password, but the salt is not necessarily secret, just a way of differently init
 the encryption engine with the same (secret) password.
 
 ```
-"password".getBytes("UTF-8")
+"password".getBytes("UTF-8")  # returns Binary object
 /password
 Lib.Util.Encrypt(password).processString("this is a message")
 /x
@@ -3648,12 +3675,12 @@ functions that used
 Input and readLine(). There was a moment of confusion when discovering what happened to input lines not consumed
 by those interactive functions.
 
-## Loop spaces / the "pipe"
+## Code spaces / the "pipe"
 
 
 This all stems from the "one-line-at-a-time" period, where scripts were entered from
 the command line, at a time long before introducing block expressions. Being a fairly compact
-and efficient notation, and frequently used, loop spaces and the "pipe" symbol will
+and efficient notation, and frequently used, code spaces and the "pipe" symbol will
 remain in the language.
 
 ## Script and code size
