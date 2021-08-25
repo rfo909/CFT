@@ -1,14 +1,14 @@
 
 # Quasi FP
 
-*2021-08-21 RFO*
+*2021-08-25 RFO*
 
 CFT is not a functional programming language, but it is inspired 
-by such languages.
+by such.
 
 ## No classes
 
-Most user functions depend solely on other functions, either defined
+Most CFT user functions depend solely on other functions, either defined
 in a script file, or existing inside a system object. This make them
 more predictable than if they in addition were to depend on a 
 hidden object state, as in OO languages, which "enable" complicated
@@ -39,7 +39,7 @@ CFT is created for powerful scripting, which means we can not
 afford neither complex abstractions, nor costly memory management
 schemes.  
 
-CFT, as all non-FP programming languages, depends on what pure 
+CFT, as with all non-FP programming languages, to some degree depends on what pure 
 FP calls "side effects", to produce results. 
 
 The design of CFT still tries to minimize the *undesired* side effects, by

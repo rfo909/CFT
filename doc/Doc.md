@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2021-08-21 RFO
-v2.5.8
+Last updated: 2021-08-25 RFO
+v2.5.10
 ```
 # Introduction
 
