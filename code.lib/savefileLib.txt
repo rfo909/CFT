@@ -706,8 +706,9 @@ P(2) =>value
 # Locate files under current directory
 # --
 	P(1,Dir) => dir
-	P(2,Input("Enter partial file name, or glob pattern with '*'").get) => fname
-	
+	P(2,readLine("Enter partial file name, or glob pattern with '*'")) => fname
+
+	if (fname=="") fname="*"
 	glob=if(fname.contains("*"),Glob(fname),Glob("*"+fname+"*"))
 	
 	dir.allFiles(glob)->f
@@ -726,9 +727,9 @@ P(2) =>value
 			println(line)
 		|
 		println
-		readLine("Drill down to directory of file (pos), ENTER to cancel").trim=>drillDown
-		if (drillDown != "") {
-			Sys.stdin("cd " + files.nth(drillDown.parseInt).dir.path)
+		readLine("Edit file (pos), ENTER to cancel").trim=>pos
+		if (pos != "") {
+			Lib:e(files.nth(pos.parseInt))
 		}
 	}
 /LocateFiles
