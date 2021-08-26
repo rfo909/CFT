@@ -108,8 +108,9 @@ Nested loops
 
 Code spaces - "pipes"
  * Result value from a code space
- |   If the code space contains looping ...
+ |   Code space result value
  |   Otherwise ...
+ * Code blocks: an alternative to code spaces
 
 Function parameters
 

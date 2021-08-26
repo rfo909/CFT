@@ -1303,10 +1303,13 @@ $ ?SomeScript:X
 
 <h1>Code spaces - "pipes"</h1>
 <p>
+<i>Code spaces have also been called Loop spaces in earlier versions of the doc.</i>
+</p>
+
+<p>
   The body of any loop is the rest of the code of the function, or until a "pipe" symbol
   is found. The pipe symbol ("|") more accurately partitions code into a sequence of
-  <em>code spaces</em>, which means acting as an end-point for 
-  running loops.
+  <em>code spaces</em>. It marks termination of all current loops.
 </p>
 <p>
   The way a "pipe" works, is to wait for any current loops to terminate, then take the
@@ -1346,27 +1349,53 @@ $ ?SomeScript:X
 
 <h2>Result value from a code space</h2>
 <p>
-  All bodies of code in CFT consist of one or more <em>code spaces</em>. The result value
+  All function bodies in CFT consist of one or more <em>code spaces</em>. The result value
   from any such body is the return value from the last code space.
 </p>
 
-<h3>If the code space contains looping ...</h3>
+<h3>Code space result value</h3>
 <p>
   If a code space contains loop statements, the result value is a list of data generated
-  via calls to out() or report() statements. If no actual iteraions take place, or
+  via calls to out() or report() statements. If no actual iterations take place, or
   filtering with assert(), reject() or break() means no data is generated via out() or report(), 
-  then the result is an empty list.
+  then the result list is empty.
 </p>
 
 <h3>Otherwise ...</h3>
 <p>
-  A code space that doesn't contain loop statements, has as its return value the topmost
+  A code space that doesn't contain loop statements, has as its result value the topmost
   element on the stack after all code has executed. If there is no value on the stack,
   the return value is <em>null</em>.
 </p>
 
 
 
+<h2>Code blocks: an alternative to code spaces</h2>
+<p>
+	Code spaces are a top-level construct in functions. They can not (easily) be nested,
+	and can become confusing when function code grows. An alternative is to use
+	code blocks. These are described later, under the header <em>Block expressions</em>, and
+	consist of three types: local, Inner and Lambda. 
+</p>
+<p>
+	To replace code spaces, we normally use the "Inner" type of blocks. Example, summing
+	the sizes of the files in current directory:
+</p>
+<pre>
+	Inner{ Dir.files-&gt;f out(f.length) }.sum
+</pre>
+<p>
+	Here we see that the Inner block really is an expression, with a return value,
+	which is the list of individual file sizes. We then call the sum() function
+	on that list.
+</p>
+<pre>
+	numLines={Dir.files-&gt;f out(f.read.length)}
+	numFiles=Dir.files.length
+	avg=numLines/numFiles
+	println("Average number of lines per file: " + avg)
+</pre>
+	
 
 
 
@@ -1436,6 +1465,7 @@ $ ?SomeScript:X
   The readLine() is much simpler, and allows for empty input, as Enter
   doesn't mean "last value" as it does for Input.
 </p>
+
 <p>
   The optional default value parameter to the P() expression for grabbing parameters to
   functions, can be used to produce functions that ask for missing values.
@@ -1483,7 +1513,10 @@ $ ?SomeScript:X
   inside runs detached from the caller, and behaves exactly like a function.
 </p>
 <pre>
-  myLambda=Lambda{P(1)+P(2)} myLambda.call(1,2)
+  Lambda{P(1)+P(2)}
+  /MyLambda
+
+  $ MyLambda.call(1,2)
 </pre>
 <p>
   Can be used to create local functions inside regular functions, but mostly used to create
@@ -1551,7 +1584,7 @@ List("aaa","bbb")-&gt;line
   # The Inner block below works in a separate context, so the calls
   # to out() don't affect the resulting output list of the function.
   # The Inner block returns a list, but it isn't used in this example.
-  # So function returns list with two X only.
+  # So function returns list with XX only.
   Inner {
     line.chars-&gt;c out(c)
   } 

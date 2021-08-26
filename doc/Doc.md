@@ -1154,10 +1154,11 @@ construct. But this can be changed using the "pipe" symbol, which "closes" all l
 # Code spaces - "pipes"
 
 
+**Code spaces have also been called Loop spaces in earlier versions of the doc.**
+
 The body of any loop is the rest of the code of the function, or until a "pipe" symbol
 is found. The pipe symbol ("|") more accurately partitions code into a sequence of
-**code spaces**, which means acting as an end-point for
-running loops.
+**code spaces**. It marks termination of all current loops.
 
 
 The way a "pipe" works, is to wait for any current loops to terminate, then take the
@@ -1194,26 +1195,53 @@ Yes, it returns 5.
 ## Result value from a code space
 
 
-All bodies of code in CFT consist of one or more 
+All function bodies in CFT consist of one or more 
 **code spaces**. The result value
 from any such body is the return value from the last code space.
 
-### If the code space contains looping ...
+### Code space result value
 
 
 If a code space contains loop statements, the result value is a list of data generated
-via calls to out() or report() statements. If no actual iteraions take place, or
+via calls to out() or report() statements. If no actual iterations take place, or
 filtering with assert(), reject() or break() means no data is generated via out() or report(),
-then the result is an empty list.
+then the result list is empty.
 
 ### Otherwise ...
 
 
-A code space that doesn't contain loop statements, has as its return value the topmost
+A code space that doesn't contain loop statements, has as its result value the topmost
 element on the stack after all code has executed. If there is no value on the stack,
 the return value is 
 **null**.
 
+## Code blocks: an alternative to code spaces
+
+
+Code spaces are a top-level construct in functions. They can not (easily) be nested,
+and can become confusing when function code grows. An alternative is to use
+code blocks. These are described later, under the header 
+**Block expressions**, and
+consist of three types: local, Inner and Lambda.
+
+
+To replace code spaces, we normally use the "Inner" type of blocks. Example, summing
+the sizes of the files in current directory:
+
+```
+Inner{ Dir.files->f out(f.length) }.sum
+```
+
+Here we see that the Inner block really is an expression, with a return value,
+which is the list of individual file sizes. We then call the sum() function
+on that list.
+
+```
+numLines={Dir.files->f out(f.read.length)}
+numFiles=Dir.files.length
+avg=numLines/numFiles
+println("Average number of lines per file: " + avg)
+```
 # Function parameters
 
 
@@ -1313,7 +1341,9 @@ A Lambda is an object (a value) that contains code, so it can be called, with pa
 inside runs detached from the caller, and behaves exactly like a function.
 
 ```
-myLambda=Lambda{P(1)+P(2)} myLambda.call(1,2)
+Lambda{P(1)+P(2)}
+/MyLambda
+$ MyLambda.call(1,2)
 ```
 
 Can be used to create local functions inside regular functions, but mostly used to create
@@ -1372,7 +1402,7 @@ List("aaa","bbb")->line
 # The Inner block below works in a separate context, so the calls
 # to out() don't affect the resulting output list of the function.
 # The Inner block returns a list, but it isn't used in this example.
-# So function returns list with two X only.
+# So function returns list with XX only.
 Inner {
 line.chars->c out(c)
 }
