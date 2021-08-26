@@ -237,8 +237,20 @@ v2.5.10
 
 <h1>CFT as a shell</h1>
 <p>
-  Commands like "ls" and "cd" exist, with globbing, as well as "more" and "edit" (which opens a file
-  in an editor), and they are meant for moving around the directory tree.
+  CFT contains a number of "shell like commands", with different syntax from the regular function calls.
+</p>
+<ul>
+<li>ls</li>
+<li>cd</li>
+<li>cat</li>
+<li>more</li>
+<li>edit</li>
+</ul>
+
+<p>
+	The syntax for these commands correspond to how they are used in Linux/Unix, with support for
+ 	globbing ("*.txt" etc). They are meant for easy navigation around the directory trees, and for
+	inspecting files, with "cat", "more" and "edit".
 </p>
 <pre>
   $ pwd
@@ -253,6 +265,54 @@ v2.5.10
   $ lsf   # lists files
   $ lsd   # lists directories
 </pre>
+
+
+<h2>Paths with space</h2>
+<p>
+	To access directories of files with space in them, we use quotes, single or double.
+</p>
+<pre>
+	cd "c:\program files"
+</pre>
+
+
+<h2>Windows backslash</h2>
+<p>
+	Note that backslash is NOT an escape character in CFT, so no need to escape it.
+</p>
+<pre>
+	Dir("c:\program files\")
+	/ProgramFilesDir
+</pre>
+<p>
+	This of course goes interactively as well:
+</p>
+<pre>
+	$ cd d:\logs
+</pre>
+
+
+<h2>Combine with CFT functions</h2>
+<p>
+	In addition to the above syntax, such as "cd /someDir/xyz" etc, these commands
+	also support using output from any CFT function. Say we have some functions:
+</p>
+<pre>
+	Dir("/SomePath/logs")
+	/LogDir
+
+	Dir("/SomewhereElse/xyz").file("data.txt")
+	/DataFile
+</pre>
+<p>
+	... then we can do this:
+</p>
+<pre>
+	$ cd (LogDir)
+	$ edit (DataFile)
+</pre>
+
+
 
 <h2>Destructive commands</h2>
 <p>
@@ -273,18 +333,15 @@ v2.5.10
 
 
 
-
-
-
 <h1>The "protect" mechanism</h1>
 <p>
   Performing changes, such as copying, deleting and creating files, is supposed to be scripted
-  with code, so no "command line" style functionality exists for this. Alternatively  one can use
+  with code, so no "command line" style functionality exists for this. Alternatively one can use
   the "shell" command, or "bang" commands, which are sent to the shell.
 </p>
 <p>
-  This of course doesn't exclude these actions from the command line, but the syntax changes 
-  from regular "cp" and "rm" commands typical of unix shells.
+  CFT has all the functionality needed to perform these operations, but the syntax becomes "program code" instead
+  of just "cp" and "rm". Example of deleting all files in a directory.
 </p>
 <pre>
   $ &lt;DirExpression&gt;.file("xxx.txt").delete
@@ -295,8 +352,8 @@ v2.5.10
   files or directories: <i>the "protect" mechanism</i>.
 </p>
 <p>
-  Usually, when working with multiple files and directories, we create functions that return
-  these. The "protect" mechanism means we can do the following:
+  Usually, when working with multiple files and directories, we will create functions that return
+  Dir objects and File objects. The "protect" mechanism allows us to do the following:
 </p>
 <pre>
   $ Dir("/someNFSDir/logs").protect
@@ -304,15 +361,47 @@ v2.5.10
 </pre>
 <p>
   What this does is set an internal flag in the Dir object that the function creates, that prevents
-  operations like deleting or modifying the directory, as well as all Dir and File objects derived
-  from it, for example like this:
+  operations like deleting or modifying the directory.
+</p>
+<p>
+  As we call LogDir.files, each File object created, also get the <em>protect</em> flag set. 
 </p>
 <pre>
   $ LogDir.file("log01.txt").delete
   ERROR: [input:18] INVALID-OP delete : /someNfsDir/logs/log01.txt (PROTECTED: -) (java.lang.Exception)
 </pre>
 
- 
+<p>
+	This both protect our script code from doing bad things, but also interactively. Say we
+	also have another directory defined as a function:
+</p>
+<pre>
+	Dir("/tmp/myTmp")
+	/TmpDir
+</pre>
+<p>
+	Testing the code, we may decide to delete the files in TmpDir.
+</p>
+<pre>
+	TmpDir.files->f f.delete
+</pre>
+<p>
+  	But what if, in a hurry, we entered LogDir instead of TmpDir. That's where the protect saves us.
+</p>
+<p>
+	Had "rm" been implemented as shell-style command in CFT, we would instead have done the following:
+</p>
+<pre>
+	$ cd (LogDir)
+	$ rm *
+	# Oh no!!
+</pre>
+<p>
+	The "cp", "mv" and "rm" commands with globbing ("*") are not only powerful, but
+	their usage pattern excludes CFT from knowing when trying to delete something
+	that should not be deleted, etc.
+</p>
+	
 
 <h1>Bang commands</h1>
 <p>
@@ -708,6 +797,7 @@ v2.5.10
   <li>List</li>
   <li>Dict</li>
   <li>Binary</li>
+  <li>Lambda</li>
 </ul>
 <p>
   All values in CFT are objects, which may contain functions. Strings can be written using double
@@ -716,7 +806,7 @@ v2.5.10
 
 <h2>String literals</h2>
 <p>
-  Strings are written in single or double quotes, and can be summed with '+', which allows
+  Strings are written in <em>single or double quotes</em>, and can be concatenated with '+', which allows
   for all kinds of combinations.
 </p>
 <pre>
@@ -724,11 +814,9 @@ v2.5.10
   $ 'single quotes'
 
   $ "'a'"
-  &lt;String&gt;
   'a'
 
   $ '"' + "'a'" + '"'
-  &lt;String&gt;
   "'a'"
 </pre>
 <p>
@@ -743,7 +831,6 @@ v2.5.10
 </p>
 <pre>
   $ x=Dict x.set("a",1) x.get("a")
-  &lt;int&gt;
   1
 </pre>
 
@@ -753,10 +840,9 @@ v2.5.10
   member functions of Dict, can be referenced via dotted notation
 </p>
 <pre>
-  Dict.set("a","b")
-  /d
-  d.a
-  &lt;String&gt;
+  $ Dict.set("a","b")
+  $ /d
+  $ d.a
   b
 </pre>  
 
@@ -764,7 +850,7 @@ v2.5.10
 <p>
   A special global expression, SymDict is used to create a dictionary from a list of
   symbols, which must be present as local variables, or parameterless functions. This
-  saves some typing. Example:
+  saves some typing. Example code:
 </p>
 <pre>
   # Without SymDict()
@@ -777,9 +863,16 @@ v2.5.10
   b=2
   dict=SymDict(a,b)
 </pre>
+<p>
+Testing interactively all needs to be on the same line:
+</p>
+<pre>
+	$ a=1 b=2 SymDict(a,b)
+</pre>
 
 
 <h2>Binary type</h2>
+<p><i>v2.5.5</i></p>
 <p>
   Used in connection with encryption etc. Can be created from strings.
 </p>

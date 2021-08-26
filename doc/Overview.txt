@@ -25,6 +25,9 @@ Edit script file - shortcuts
 Shortcuts vs colon commands
 
 CFT as a shell
+ * Paths with space
+ * Windows backslash
+ * Combine with CFT functions
  * Destructive commands
 
 The "protect" mechanism
