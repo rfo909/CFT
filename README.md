@@ -1,6 +1,8 @@
 
 # CFT - ConfigTool
 
+An interpreted and interactive language. 
+
 *README last updated 2021-08-25*
 
 ## Motto
@@ -11,7 +13,7 @@ Manual operations are boring, risk errors, poorly documented, and should be avoi
 
 ## Terminal based
 
-CFT is an interpreted script language engine, which runs in the terminal, and lets you define 
+CFT is an interpreted script language, which runs in the terminal, and lets you define 
 functions interactively, or using editors. It has been in daily use since 2019, and is now considered
 quite stable. 
 
