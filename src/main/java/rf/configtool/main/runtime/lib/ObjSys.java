@@ -67,7 +67,8 @@ public class ObjSys extends Obj {
 				new FunctionReadPassword(),
 				new FunctionSecureSessionID(),
 				new FunctionClone(),
-				new FunctionFileSeparator()
+				new FunctionFileSeparator(),
+				new FunctionEnvironment(),
 		};
 		setFunctions(arr);
         
@@ -471,6 +472,31 @@ public class ObjSys extends Obj {
                 throw new Exception("Expected no parameters");
            
             return new ValueString(File.separator);
+        }
+
+    }           
+    
+    class FunctionEnvironment extends Function {
+        public String getName() {
+            return "environment";
+        }
+
+        public String getShortDesc() {
+            return "environment() - returns Dict with environment variables";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 0) throw new Exception("Expected no parameters");
+        	
+        	Map<String,Value> data=new HashMap<String,Value>();
+            ObjDict x=new ObjDict();
+        	
+        	Map<String, String> env = System.getenv();
+            for (String envName : env.keySet()) {
+            	x.set(envName, new ValueString(env.get(envName)));
+            }
+           
+            return new ValueObj(x);
         }
 
     }           

@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2021-08-25 RFO
-v2.5.10
+Last updated: 2021-08-27 RFO
+v2.6.1
 ```
 # Introduction
 
@@ -940,7 +940,7 @@ List(1,2,3,2,1)-List(2,3)
 1
 1
 ```
-# List sorting
+# Sorting
 
 
 The List object has a single .sort() member function, which does the following:
@@ -2367,6 +2367,13 @@ This loads script Projects, then calls the Curr function inside.
 ./cft -help
 ./cft -d scriptDir [scriptName [commandLines]*]?
 ```
+# Environment variables
+
+
+**v2.6.1**
+
+Available via Sys.environment() function.
+
 # Working with pasted text lines from stdin
 
 

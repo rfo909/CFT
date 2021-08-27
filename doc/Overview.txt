@@ -83,7 +83,7 @@ List processing
  |   Removing a single value from a list
  |   Removing multiple values from a list
 
-List sorting
+Sorting
  * Int(), Str() and Float()
  * Converting between int and float
 
@@ -199,6 +199,8 @@ Use as a calculator
  * Lib.Plot
 
 Command line args
+
+Environment variables
 
 Working with pasted text lines from stdin
 
