@@ -74,13 +74,28 @@ public class ValueBlock extends Value {
         return synString;
     }
 
-    
-    private Value executeIsolatedBlock (Ctx ctx) throws Exception {
+   
+    private Value executeLocalBlock (Ctx ctx) throws Exception {
+        if (programLines.size() != 1) throw new Exception("Internal error: local block should contain ONE ProgramLine");
+        programLines.get(0).execute(ctx);
+        return ctx.getLocalBlockResult();
+    }
+
+    /**
+     * Call Inner code block. It runs in sub-context, and inherits
+     * lookup of as well parameters and variables. 
+     */
+    public Value callInnerBlock (Ctx callerCtx) throws Exception {
+        // Execute as Inner code block, which means it has Ctx lookup up the Ctx stack, including
+        // parameters to the function, but using the isInnerBlock flag for the contexts for each
+    	// progLine, to block loop trigger-propagation from interfering with the callerCtx.
+        
         Value retVal=null;
         
         for (ProgramLine progLine:programLines) {
-            Ctx sub=ctx.sub();
-            
+        	
+            Ctx sub=callerCtx.subNewData(true);  
+
             if (retVal != null) sub.push(retVal);
             
             progLine.execute(sub);
@@ -100,24 +115,6 @@ public class ValueBlock extends Value {
             retVal=sub.getResult();
         }
         return retVal;
-    }
-
-    
-    private Value executeLocalBlock (Ctx ctx) throws Exception {
-        if (programLines.size() != 1) throw new Exception("Internal error: local block should contain ONE ProgramLine");
-        programLines.get(0).execute(ctx);
-        return ctx.getLocalBlockResult();
-    }
-
-    /**
-     * Call Inner code block. It runs in sub-context, and inherits
-     * lookup of as well parameters and variables. 
-     */
-    public Value callInnerBlock (Ctx ctx) throws Exception {
-        // Execute as Inner code block, which means it has Ctx lookup up the Ctx stack, including
-        // parameters to the function, but that the loop flag stops
-        Ctx sub=ctx.subContextForInnerBlock(); 
-        return executeIsolatedBlock(sub);
     }
     
     
@@ -146,8 +143,35 @@ public class ValueBlock extends Value {
         if (params==null) params=new ArrayList<Value>();
         FunctionState fs=new FunctionState(params);
         fs.set("self", new ValueObj(dict));
+        
         Ctx independentCtx=new Ctx(ctx.getStdio(), ctx.getObjGlobal(), fs);
-        return executeIsolatedBlock(independentCtx);
+        
+        Value retVal=null;
+        
+        for (ProgramLine progLine:programLines) {
+        	// CodeLines.execute() creates new independent Ctx for each Code Line. We
+        	// can not do that here, because we want variable lookup, BUT that is the
+        	// reason loop output from separate programLines gets lumped together
+        	
+            Ctx sub=independentCtx.subNewData(false);
+            
+            if (retVal != null) sub.push(retVal);
+            
+            progLine.execute(sub);
+            
+            OutText outText=sub.getOutText();
+
+            // Column data is formatted to text and added to outData as String objects
+            List<List<Value>> outData=outText.getData();
+            Report report=new Report();
+            List<String> formattedText=report.formatDataValues(outData);
+            for (String s:formattedText) {
+                sub.getOutData().out(new ValueString(s));
+            }
+            retVal=sub.getResult();
+        }
+
+        return retVal;
     }
     
     // -----------------------------------------------------------

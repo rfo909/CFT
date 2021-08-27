@@ -139,6 +139,9 @@ t8.concat("-")=="1-2-3"
 
 
 
+# 2021-08-27 Fixed
+
+
 List(1,2,3)->x
 	if (x%2==0) Inner {
 		assert(false)
@@ -165,14 +168,11 @@ t10.concat("-")=="1-2-3"
 
 
 
-# Test11 description
-<<< EOF
 # ------------------------------------------
 # Test 11 - 2021-04-07 lambda file sort bug. 
 #   Does not handle pipe correctly in Lambda code - the two should to the same!
+#   2021-08-27 Fixed
 # ------------------------------------------
->>> EOF
-//t11_description
 
 
 # Lambda version
@@ -203,8 +203,8 @@ t10.concat("-")=="1-2-3"
 
 # ------------------------------------------
 # Possibly the same problem as in Test11
-# 
 # Except here we get a java exception (ConcurrentModificationException)
+#   2021-08-27 Fixed
 # ------------------------------------------
 
 # If an Inner is like a function, the below should return true, but it fails with exception
@@ -223,7 +223,6 @@ t10.concat("-")=="1-2-3"
 	tryCatch(t12_asInner) => res
 	if (res.ok, res.result==t12_asFunction, "Exception")
 /Test12_Inner_With_loop_pipe_loop
-
 
 
 
