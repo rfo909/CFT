@@ -3,7 +3,7 @@
 
 An interpreted and interactive language. 
 
-*README last updated 2021-08-25*
+*README last updated 2021-08-27*
 
 ## Motto
 
@@ -17,10 +17,24 @@ CFT is an interpreted script language, which runs in the terminal, and lets you 
 functions interactively, or using editors. It has been in daily use since 2019, and is now considered
 quite stable. 
 
+```
+# Ex: List all java files (recursively) under current dir, that were modified in the last day
+
+Dir.allFiles(Glob("*.java"))->f assert(currentTimeMillis-f.lastModified < 86400*1000) out(f.path)
+
+# Ex: check if hosts respond to ping
+
+"host1 host2 host3".split
+/hosts
+
+hosts->host report(host,SSH:HostOk("user@"+host"))
+/checkPing 
+```
+
 # Why yet another script language??
 
 The idea behind CFT is to be *object oriented*, like PowerShell, but with a syntax that
-is more regular, more like traditional programming languages. 
+is more regular, a bit more like traditional programming languages. 
 
 Also wanted to avoid the complex string quote rules, 
 which while compact and efficient, also is hard to read and maintain. Again, going for easier syntax. 
