@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2021-08-27 RFO
-v2.6.1
+Last updated: 2021-08-28 RFO
+v2.6.3
 ```
 # Introduction
 
@@ -1568,8 +1568,12 @@ error("oops again")
 
 ```
 println("a")
-debug("b")
+printDebug("b")
 ```
+
+The printDebug() includes location in the source, and appends the log lines to
+a "system messages" list, which is displayed after processing has completed.
+
 # Protecting files and directories
 
 
@@ -2374,6 +2378,15 @@ This loads script Projects, then calls the Curr function inside.
 
 Available via Sys.environment() function.
 
+# Debugging
+
+
+In addition to the printDebug("something") statement, there is also implemented a simple
+"lint" function, which operates on current script, checking that all functions parse ok.
+
+```
+Sys.lint
+```
 # Working with pasted text lines from stdin
 
 
@@ -3676,7 +3689,7 @@ These are the statements in CFT:
 - out(), condOut() and report()
 
 
-- the debug() command
+- the printDebug() command
 
 
 - the help command

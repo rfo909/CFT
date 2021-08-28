@@ -74,8 +74,8 @@ public abstract class Stmt extends LexicalElement {
         if (ts.peekStr("showCode")) {
             return new StmtShowCode(ts);
         }
-        if (ts.peekStr("debug")) {
-            return new StmtDebug(ts);
+        if (ts.peekStr("printDebug")) {
+            return new StmtPrintDebug(ts);
         }
         if (ts.peekStr("timeExpr")) {
             return new StmtTimeExpr(ts);

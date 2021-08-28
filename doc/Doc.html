@@ -15,8 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2021-08-27 RFO
-v2.6.1
+Last updated: 2021-08-28 RFO
+v2.6.3
 
 
 </pre>
@@ -1781,9 +1781,12 @@ List("aaa","bbb")-&gt;line
 <h1>Output to screen</h1>
 <pre>
   println("a")
-  debug("b")
+  printDebug("b")
 </pre>
-
+<p>
+  The printDebug() includes location in the source, and appends the log lines to
+  a "system messages" list, which is displayed after processing has completed.
+</p>
 
 
 
@@ -2660,6 +2663,17 @@ List("aaa","bbb")-&gt;line
   Available via Sys.environment() function.
 </p>
 
+
+
+
+<h1>Debugging</h1>
+<p>
+  In addition to the printDebug("something") statement, there is also implemented a simple
+  "lint" function, which operates on current script, checking that all functions parse ok.
+</p>
+<pre>
+  Sys.lint
+</pre>
 
 
 
@@ -4128,7 +4142,7 @@ ValueString
   <li>Looping and iteration over lists</li>
   <li>assert/reject/break</li>
   <li>out(), condOut() and report()</li>
-  <li>the debug() command</li>
+  <li>the printDebug() command</li>
   <li>the help command</li>
   <li>interactive commands "cat", "edit", "ls", "cd"</li>
   <li>the "shell" command</li>

@@ -24,22 +24,22 @@ import rf.configtool.main.Stdio;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.parser.TokenStream;
 
-public class StmtDebug extends Stmt {
+public class StmtPrintDebug extends Stmt {
 
     private Expr value;
     
-    public StmtDebug (TokenStream ts) throws Exception {
+    public StmtPrintDebug (TokenStream ts) throws Exception {
         super(ts);
-        ts.matchStr("debug","expected 'debug'");
-        ts.matchStr("(", "expected '(' following debug");
+        ts.matchStr("printDebug","expected 'printDebug'");
+        ts.matchStr("(", "expected '(' following printDebug");
         value=new Expr(ts);
-        ts.matchStr(")", "expected ')' closing debug stmt");
+        ts.matchStr(")", "expected ')' closing printDebug stmt");
     }
 
     public void execute (Ctx ctx) throws Exception {
         Stdio stdio=ctx.getStdio();
-        
-        stdio.println("%DEBUG% " + value.resolve(ctx).getValAsString());
+        String loc = this.getSourceLocation().toString();
+        ctx.addSystemMessage(loc + " " + value.resolve(ctx).getValAsString());
     }
 
 }

@@ -45,6 +45,7 @@ shortcutPrefix = @
 
 shortcut:e    = "---- open script in editor ----"         if(Sys.savefile != null, Lib:e(Sys.savefile),"No savefile")
 shortcut:ee   = "---- clear editor selection ----"        Lib:ClearEditor "Editor cleared"
+shortcut:lint = "---- check curr script ----"             Sys.lint
 shortcut:fm   = "---- open file manager (curr dir) ---"   Lib:fileManager(Dir)
 shortcut:term = "---- Update terminal size ----"          Lib:GetTerminalSize
 shortcut:rsh  = "---- Remote shell via ssh ----"          SSH:remoteShell
@@ -62,7 +63,7 @@ shortcut:v    = "---- paste files from clipboard ----"    Lib:ClipboardPaste(Dir
 shortcut:rel  = "---- Release ----"                       Sys.stdin(":load Release","?")
 
 # Projects script 
-shortcut:P    = "---- Projects ----"                      Sys.stdin(":load Projects","?")
+shortcut:P    = "---- Projects ----"                      Sys.stdin(":load Projects","Curr")
 shortcut:PS   = "---- Projects perform search ----"       Projects:Curr Projects:S
 
 # Investigate script

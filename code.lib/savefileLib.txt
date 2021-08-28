@@ -117,7 +117,7 @@ choice.
         Dir.runCapture("which","stty").nth.contains("/stty") =>hasStty
         if(hasStty, Inner{
             Dir.runCapture("stty","size").nth.split =>list
-            #debug("list=" + list)
+
             Term.h(list.nth(0).parseInt)
             Term.w(list.nth(1).parseInt)
             true =>updated

@@ -312,7 +312,7 @@ P(1,"someTarget") =>target
         cmd
     ) =>cmd
 
-    debug(cmd.concat(" "))
+    println(cmd.concat(" "))
     Dir.runDetach(cmd)
 
     <<< EOF
