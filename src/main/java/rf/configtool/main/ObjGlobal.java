@@ -47,6 +47,7 @@ import rf.configtool.parser.Parser;
 import rf.configtool.parser.SourceLocation;
 import rf.configtool.parser.TokenStream;
 import rf.configtool.root.Root;
+import rf.configtool.util.TabUtil;
 
 /**
  * Note that actions without a return value, are statements, and must be parsed
@@ -712,11 +713,16 @@ public class ObjGlobal extends Obj {
 
             if (params.size() == 1) {
                 String s=params.get(0).getValAsString();
+                s=TabUtil.substituteTabs(s, 4);
+                int w=ctx.getObjGlobal().getRoot().getObjTerm().getScreenWidth();
+                if (s.length() >= w-1) {
+                	s=s.substring(0, w-2)+"+";
+                }
                 stdio.println(s);
                 return new ValueString(s);
             } else if (params.size() == 0) {
                 stdio.println();
-        return new ValueString("");
+                return new ValueString("");
             }
 
             throw new Exception("Expected no parameter or string parameter");
