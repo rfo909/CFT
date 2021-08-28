@@ -49,8 +49,8 @@ public class Collection {
     
     private void checkForUpdate() throws Exception {
         if (data==null || fileInfo.isChanged()) {
-            readFromFile();
             fileInfo.sync();
+            readFromFile();
         }
     }
     

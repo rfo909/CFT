@@ -22,6 +22,7 @@ import java.lang.ProcessBuilder.Redirect;
 import java.util.*;
 
 import rf.configtool.data.Expr;
+import rf.configtool.main.CodeLines;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.CtxCloseHook;
 import rf.configtool.main.SoftErrorException;
@@ -69,6 +70,7 @@ public class ObjSys extends Obj {
 				new FunctionClone(),
 				new FunctionFileSeparator(),
 				new FunctionEnvironment(),
+				new FunctionLint(),
 		};
 		setFunctions(arr);
         
@@ -501,5 +503,34 @@ public class ObjSys extends Obj {
 
     }           
     
+    
+    class FunctionLint extends Function {
+        public String getName() {
+            return "lint";
+        }
+
+        public String getShortDesc() {
+            return "lint() - verify syntax of all functions in current script";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0)
+                throw new Exception("Expected no parameters");
+            
+            List<Value> result=new ArrayList<Value>();
+            
+            List<String> names = ctx.getObjGlobal().getCodeHistory().getNames();
+            for (String name : names) {
+            	CodeLines code = ctx.getObjGlobal().getCodeHistory().getNamedCodeLines(name);
+            	try {
+            		code.getProgramLines(); // parses text
+            	} catch (Exception ex) {
+            		result.add(new ValueString(name + " : " + ex.getMessage()));
+            	}
+            }
+            return new ValueList(result);
+        }
+    }
+
 
 }
