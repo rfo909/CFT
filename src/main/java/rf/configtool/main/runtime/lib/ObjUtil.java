@@ -50,6 +50,7 @@ public class ObjUtil extends Obj {
         this.add(new FunctionEncrypt());
         this.add(new FunctionDecrypt());
         this.add(new FunctionRandomBinary());
+        this.add(new FunctionRandom());
     }
     
     private ObjUtil self() {
@@ -137,6 +138,21 @@ public class ObjUtil extends Obj {
         
     } 
        
+    class FunctionRandom extends Function {
+        public String getName() {
+            return "random";
+        }
+        public String getShortDesc() {
+            return "random() - returns random float x so that 0 <= x < 1";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueFloat(Math.random());
+        }
+        
+    } 
+       
    
+
 
 }

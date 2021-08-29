@@ -81,11 +81,11 @@ There can be multiples of every line, including Dir.
 
 # Reset selected projects if new session
 # --
-	if (Db2:Get("Projects","session") != Sys.sessionUUID) {
-		Db2:Set("Projects","Project",null)
-		Db2:Set("Projects","session", Sys.sessionUUID)
-	}
-//onLoad
+#	if (Db2:Get("Projects","session") != Sys.sessionUUID) {
+#		Db2:Set("Projects","Project",null)
+#		Db2:Set("Projects","session", Sys.sessionUUID)
+#	}
+#//onLoad
 
 
 # The projects.txt file 
