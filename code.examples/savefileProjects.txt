@@ -346,7 +346,8 @@ There can be multiples of every line, including Dir.
 		println("Editing file " + fileList.nth(num).path)
         Lib:e (fileList.nth(num))
     })
-    true
+
+    fileList->f out(f.path)
 /FL
 
 
