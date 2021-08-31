@@ -35,7 +35,7 @@ public class ObjDate extends Obj {
     public ObjDate() {
         this(System.currentTimeMillis());
     }
-
+    
     public ObjDate (long timeValue) {
         this.timeValue=timeValue;
         

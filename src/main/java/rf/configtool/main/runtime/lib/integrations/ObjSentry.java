@@ -15,7 +15,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>
 */
 
-package rf.configtool.main.runtime.lib;
+package rf.configtool.main.runtime.lib.integrations;
 
 import java.io.*;
 import java.lang.ProcessBuilder.Redirect;
@@ -42,6 +42,7 @@ import rf.configtool.main.runtime.ValueBlock;
 import rf.configtool.main.runtime.ValueNull;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
+import rf.configtool.main.runtime.lib.ObjDict;
 import rf.configtool.main.runtime.lib.db2.ObjDb2;
 
 import io.sentry.*;

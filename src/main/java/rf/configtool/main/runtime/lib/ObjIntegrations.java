@@ -43,13 +43,15 @@ import rf.configtool.main.runtime.ValueNull;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
 import rf.configtool.main.runtime.lib.db2.ObjDb2;
-
+import rf.configtool.main.runtime.lib.integrations.ObjMSSql;
+import rf.configtool.main.runtime.lib.integrations.ObjSentry;
 import io.sentry.Sentry;
 
 public class ObjIntegrations extends Obj {
 
     public ObjIntegrations () {       
         this.add(new FunctionSentry());
+        this.add(new FunctionMSSql());
     }
     
     private ObjIntegrations self() {
@@ -82,6 +84,19 @@ public class ObjIntegrations extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
             return new ValueObj(new ObjSentry());
+        }
+    } 
+    
+    class FunctionMSSql extends Function {
+        public String getName() {
+            return "MSSql";
+        }
+        public String getShortDesc() {
+            return "MSSql() - create MSSql object for interfacing MS SQL Server database";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueObj(new ObjMSSql());
         }
     } 
     
