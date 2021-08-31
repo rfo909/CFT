@@ -131,40 +131,49 @@
 # Display reboot info for all hosts
 # --
 	HostData = Hosts:Parse
-   	Util:ProcessMonitor =>mon
+	Util:ProcessMonitor =>mon
+
+	# only one host from each reboot group can boot at a time
+	rebootGroups=List
 
 	HostData.LallHosts.call.sort->host
         assert(HostData.Lhas.call (host,"OSFamily","debian"))
         HostData.Lget.call (host, "SSHUser") =>sshUser
 
         sshUser+"@"+host =>target
-        HostData.Lhas.call (host, "Auto.reboot", "yes") =>allowReboot
+	HostData.Lget.call (host, "RebootGroup", null) => rebootGroup
 
-	process = SpawnProcess(SymDict(host,target,allowReboot),{
-	        SSH:HostOkSSH (target) =>hostOk
-	        if (!hostOk) {
-	            println(host + ": -offline-")
-	        } else {
-		        DebianHostNeedsReboot(target) =>x
-		        
-		        if (x && allowReboot) {
-		        	println(host + ": rebooting now")
+	HostData.Lhas.call (host, "Auto.reboot", "yes") => allowReboot
+	
+	Inner {
+        SSH:HostOkSSH (target) =>hostOk
+        if (!hostOk) {
+            println(host + ": -offline-")
+        } else {
+	        DebianHostNeedsReboot(target) =>needsReboot
+		
+	        if (needsReboot) {
+	        	if (!allowReboot) {
+	        		if (rebootGroup != null) {
+	        			if (!rebootGroups.contains(rebootGroup)) {
+	        				allowReboot=true
+	        				rebootGroups.add(rebootGroup)
+	        			}
+	        		}
+	        	}
+		        if (allowReboot) {
+		        	println(host + ": rebooting now" + if(rebootGroup != null, " RebootGroup="+rebootGroup,""))
 		        	SSH:sudo(target,"reboot",true)
 		        } else {
-			        println(host + ": " + if(x,"NEEDS REBOOT","ok"))
+		        	println(host + ": " + if(needsReboot,"NEEDS REBOOT","ok"))
+		        }
+		     
+			} else {
+				println(host + ": ok")
 			}
-	    	}
-    	})
-    	mon.Ladd.call(process,host)
-    	out(process)
-    | _=>processes
+		}
+   	}
 
-	println("Waiting for " + processes.length + " processes")
-	mon.Lwait.call(0,true)
-	
-    processes->process
-    	process.wait
-    	process.output->line println(line)
     	    
 /Reboot
 
