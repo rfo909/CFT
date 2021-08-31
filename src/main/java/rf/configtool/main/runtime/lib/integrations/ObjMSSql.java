@@ -215,7 +215,7 @@ public class ObjMSSql extends Obj {
         	else {
         		throw new Exception("Unsupported type value " + value.getTypeName());
         	}
-        	return new ValueObj(new MSSqlParam(sqlType, obj));
+        	return new ValueObj(new ObjMSSqlParam(sqlType, obj));
         }
     } 
        
@@ -232,7 +232,7 @@ public class ObjMSSql extends Obj {
         	if (params.size() != 1) throw new Exception("Expected param SQLType (int)");
         	int sqlType=(int) getInt("SQLType", params, 0);
         	
-        	return new ValueObj(new MSSqlParam(sqlType));
+        	return new ValueObj(new ObjMSSqlParam(sqlType));
         }
     } 
        

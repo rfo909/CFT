@@ -7,19 +7,19 @@ import rf.configtool.main.Ctx;
 import rf.configtool.main.runtime.*;
 
 
-public class MSSqlResultSet extends Obj {
+public class ObjMSSqlResultSet extends Obj {
 
 	private ResultSet resultSet; 
 	private int rowNumber=0;
 	
-    public MSSqlResultSet (ResultSet resultSet) {
+    public ObjMSSqlResultSet (ResultSet resultSet) {
     	this.resultSet=resultSet;
     	
     	add(new FunctionNext());
     	add(new FunctionGet());
     }
     
-    private MSSqlResultSet self() {
+    private ObjMSSqlResultSet self() {
         return this;
     }
     

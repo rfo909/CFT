@@ -6,7 +6,7 @@ import java.util.List;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.runtime.*;
 
-public class MSSqlParam extends Obj {
+public class ObjMSSqlParam extends Obj {
 
 	private int sqlType;
 	private boolean output;
@@ -17,7 +17,7 @@ public class MSSqlParam extends Obj {
 		this.add(new FunctionGetValue());
 	}
 	
-    public MSSqlParam(int sqlType, Object value) {
+    public ObjMSSqlParam(int sqlType, Object value) {
 		super();
 		this.sqlType = sqlType;
 		this.output = false;
@@ -27,7 +27,7 @@ public class MSSqlParam extends Obj {
 	}
 
     
-    public MSSqlParam(int sqlType) {
+    public ObjMSSqlParam(int sqlType) {
 		super();
 		this.sqlType = sqlType;
 		this.output = true;
@@ -36,16 +36,16 @@ public class MSSqlParam extends Obj {
 		init();
 	}
     
-    public void addParameterToStmt (CallableStatement stmt, String pName) throws Exception {
+    public void addParameterToStmt (CallableStatement stmt, int pos) throws Exception {
 		if (output) {
-			stmt.registerOutParameter(pName, sqlType);
+			stmt.registerOutParameter(pos, sqlType);
 		} else {
-			stmt.setObject(pName, value, sqlType);
+			stmt.setObject(pos, value, sqlType);
 		}
 
     }
 
-    private MSSqlParam self() {
+    private ObjMSSqlParam self() {
         return this;
     }
     

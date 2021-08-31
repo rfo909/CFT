@@ -57,7 +57,10 @@ public class ObjMSSqlConnection extends Obj {
             return "callStoredProcedure";
         }
         public String getShortDesc() {
-            return "callStoredProcedure(name, DictParams) - call stored procedure, returns resultset - nullvalued values are assumed outputs";
+            return "callStoredProcedure(name, DictParams) - call stored procedure, returns resultset";
+        }
+        private void TELL (String s) {
+        	System.out.println("TELL: " + s);
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
         	if (params.size() != 2) throw new Exception("Expected parameters name, DictParams");
@@ -70,46 +73,62 @@ public class ObjMSSqlConnection extends Obj {
         	boolean comma=false;
         	
         	while (keys.hasNext()) {
-        		keys.next();
-        		if (comma) SQL=SQL+",";
-        		SQL=SQL+name;
+        		String pName=keys.next(); 
+        		if (comma) SQL=SQL+", ";
+        		//SQL=SQL+"@"+pName+"=?";
+        		//SQL=SQL+pName;
+        		SQL=SQL+"?";
+        		comma=true;
         	}
         	SQL=SQL+")}";
         	
+        	TELL("callStoredProcedure: SQL=" + SQL);
         	
         	CallableStatement stmt=connection.prepareCall(SQL);
         	
+        	TELL("callStoredProcedure: CallableStatement ok");
+        	
         	// iterate over parameters, adding them to the stmt
         	keys=data.getKeys();
+        	int pos=1;  // 1-based!
         	while (keys.hasNext()) {
         		String pName=keys.next();
-        		MSSqlParam p=getMSSqlParam(pName, data.getValue(pName));
-        		p.addParameterToStmt(stmt,pName);
+        		ObjMSSqlParam p=getMSSqlParam(pName, data.getValue(pName));
+        		p.addParameterToStmt(stmt, pos);
+        		pos++;
         	}
         	
+        	TELL("Parameter values added ok");
+        	
            	ResultSet resultSet=stmt.executeQuery();
+           	
+           	TELL("After executeQuery");
 
         	// iterate over parameters, processing output values
         	keys=data.getKeys();
+        	pos=1;
         	while (keys.hasNext()) {
         		String pName=keys.next();
-        		MSSqlParam p=getMSSqlParam(pName, data.getValue(pName));
+        		ObjMSSqlParam p=getMSSqlParam(pName, data.getValue(pName)); 
         		if (p.isOutput()) {
-        			p.setValue(stmt.getObject(pName));
+        			p.setValue(stmt.getObject(pos));
         		}
+        		pos++;
         	}
+        	
+        	TELL("After processing output values");
 
-        	return new ValueObj(new MSSqlResultSet(resultSet));
+        	return new ValueObj(new ObjMSSqlResultSet(resultSet));
         }
     } 
     
-    private MSSqlParam getMSSqlParam(String name, Value v) throws Exception {
+    private ObjMSSqlParam getMSSqlParam(String name, Value v) throws Exception {
     	String msg="Invalid parameter '" + name + "': " + v.getTypeName() + " - expected MSSqlParam";
     	if (!(v instanceof ValueObj)) throw new Exception(msg);
     	
 		Obj obj=((ValueObj) v).getVal();
-		if (!(obj instanceof MSSqlParam)) throw new Exception(msg);
-		return (MSSqlParam) obj;
+		if (!(obj instanceof ObjMSSqlParam)) throw new Exception(msg);
+		return (ObjMSSqlParam) obj;
     }
     
     	
