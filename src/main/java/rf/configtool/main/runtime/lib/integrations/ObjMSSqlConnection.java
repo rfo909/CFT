@@ -57,15 +57,17 @@ public class ObjMSSqlConnection extends Obj {
             return "callStoredProcedure";
         }
         public String getShortDesc() {
-            return "callStoredProcedure(name, DictParams) - call stored procedure, returns resultset";
+            return "callStoredProcedure(name, DictParams, hasResultSet?) - call stored procedure, returns resultset or null";
         }
         private void TELL (String s) {
         	System.out.println("TELL: " + s);
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 2) throw new Exception("Expected parameters name, DictParams");
+        	if (params.size() != 2 && params.size() != 3) throw new Exception("Expected parameters name, DictParams, hasResultSet?");
         	String name=getString("name", params, 0);
         	ObjDict data=(ObjDict) getObj("DictParams", params, 1);
+        	boolean hasResultSet=false;
+        	if (params.size()==3) hasResultSet=getBoolean("hasResultSet", params, 2);
         	
         	// iterate over parameters, to create SQL statement
         	String SQL="{call " + name + "(";
@@ -100,7 +102,12 @@ public class ObjMSSqlConnection extends Obj {
         	
         	TELL("Parameter values added ok");
         	
-           	ResultSet resultSet=stmt.executeQuery();
+        	ResultSet resultSet=null;
+        	if (hasResultSet) {
+        		resultSet=stmt.executeQuery();
+        	} else {
+        		stmt.execute();
+        	}
            	
            	TELL("After executeQuery");
 
@@ -117,7 +124,9 @@ public class ObjMSSqlConnection extends Obj {
         	}
         	
         	TELL("After processing output values");
-
+        	
+        	if (resultSet==null) return new ValueNull();
+        	
         	return new ValueObj(new ObjMSSqlResultSet(resultSet));
         }
     } 
