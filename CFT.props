@@ -57,6 +57,7 @@ shortcut:home = "---- move to script dir ----"			  Sys.savefile.dir.setAsCurrent
 
 # copy / paste file
 shortcut:c    = "---- copy files to clipboard ----"       Lib:ClipboardCopy(Dir)
+shortcut:x    = "---- move files to clipboard ----"       Lib:ClipboardCopy(Dir,true)
 shortcut:v    = "---- paste files from clipboard ----"    Lib:ClipboardPaste(Dir)
 
 # Release script
