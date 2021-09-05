@@ -441,9 +441,9 @@ P(4,false) => showDebug
 
 # Show a list of options
     P(1,List) =>options
-    P(2,Lambda { "name"}) =>macroGetElementName
+    P(2,Lambda { "name"}) =>LLabel
         options->x
-            println("- " + macroGetElementName.call(x))
+            println("- " + LLabel.call(x))
 /ShowOptions
 
 
@@ -451,8 +451,9 @@ P(4,false) => showDebug
 # Select zero or more from list of options
 # --
     P(1,List) =>options
-    P(2,Lambda { "name"}) =>macroGetElementName
+    P(2,Lambda { "name"}) =>LLabel
     P(3,false) =>emptyMeansNone
+	P(4,LLabel) => LValue
 	
         sel=readLine("Enter exact or part of value?").trim
         if(emptyMeansNone && sel=="") {
@@ -461,12 +462,12 @@ P(4,false) => showDebug
         } else Inner{
             # Look for exact match first, then if no hits, partial
             options->opt
-                assert(macroGetElementName.call(opt)==sel)
+                assert(LValue.call(opt)==sel)
                 out(opt)
             | =>result
             if(result.empty) Inner{
                 options->opt
-                    assert(macroGetElementName.call(opt).contains(sel))
+                    assert(LValue.call(opt).contains(sel))
                     out(opt)
                 | =>result
             }
@@ -508,9 +509,10 @@ P(4,false) => showDebug
 # Select single value from list of options. Using lambda to extract name for each element.
 # --
 	P(1,List)=>options 
-	P(2,Lambda {P(1)}) =>macroGetElementName 
+	P(2,Lambda {P(1)}) =>LLabel   ## display value
 	P(3,"Select element") =>title 
 	P(4,false) => emptyMeansNone
+	P(5,LLabel) =>LValue          ## separate (narrower) value for matching input?
 
 	error(getType(options) != "List", "Options must be a list (" + title + ")")
 	error(options.length==0,"No elements in options list (" + title + ")")
@@ -524,9 +526,9 @@ P(4,false) => showDebug
 		    if(title != null) Header(title)
 			if (emptyMeansNone) println("(Enter blank for none)")
 
-		    ShowOptions(options, macroGetElementName)
+		    ShowOptions(options, LLabel)
 		    println("")
-		    SelectOptions(options, macroGetElementName, emptyMeansNone) =>result
+		    SelectOptions(options, LLabel, emptyMeansNone, LValue) =>result
 		    
 		    if(result.length==1) {
 				selectedElement=result.first

@@ -203,8 +203,9 @@ P(2, Input("Enter service").get) =>service
 			.set("key","Add new ...")
 			.set("process",Lambda{ readLine("Enter host") })
 	)
-	Llabel=Lambda{P(1)=>x x.date.setFormat("yyyy-MM-dd").fmt + " : " + x.key}
-	Lib:MenuSelect(menuEntries, Llabel, "Known hosts").process.call => host
+	LLabel=Lambda{P(1)=>x x.date.setFormat("yyyy-MM-dd").fmt + " : " + x.key}
+	LValue=Lambda{P(1)=>x x.key}
+	Lib:MenuSelect(menuEntries, LLabel, "Known hosts", false, LValue).process.call => host
 	_shPutHost(host)
 	host
 //_shGetHost
