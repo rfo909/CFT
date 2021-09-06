@@ -742,6 +742,7 @@ P(2) =>value
 # Copy file into "clipboard"
 # --
 	P(1,Dir)=>currentDir
+	P(2,false)=>deleteOnPaste
 
 	data=Sys.lastResult
 	files=List
@@ -761,9 +762,13 @@ P(2) =>value
 	}
 
 	Db2:Set("Lib","ClipboardFiles",files)
+	Db2:Set("Lib","ClipboardFilesDeleteOnPaste", deleteOnPaste)
 	Inner {
 		Lib:Header("Files stored to clipboard")
 		files->f println(f.path)
+		if (deleteOnPaste) {
+			println println("** NOTE: originals are deleted on paste")
+		}
 	}
 	"Copied " + files.length + " " + if(files.length==1,"file","files")
 /ClipboardCopy
@@ -782,17 +787,22 @@ P(2) =>value
 		files->file println(file.path)
 	}
 
+	deleteOnPaste=Db2:Get("Lib","ClipboardFilesDeleteOnPaste",false)
+
 	yesToAll=false
 	files->file
 		if (!yesToAll) {
-			readLine("Copy " + file.path + " to " + currentDir.path + "? (yes/no/all/none)").toLower => confirm
+			readLine(if(deleteOnPaste,"Move ","Copy ") + file.path + " to " + currentDir.path + "? (yes/no/y/n/all/none)").toLower => confirm
 
 			error(confirm=="none", "Aborting paste!")
-			assert(confirm=="yes" || confirm=="all")
+			assert(confirm=="yes" || confirm=="y" || confirm=="all")
 			if (confirm=="all") yesToAll=true
 		}
-		println("Copying " + file.path)
+		println(if(deleteOnPaste,"Moving ","Copying ") + file.path)
 		currentDir.copy(file)
+		if (deleteOnPaste) file.delete
+	|
+	
 /ClipboardPaste
 
 
