@@ -85,8 +85,15 @@ Being backed by a powerful programming language, we easily create functions. Thi
 
 Favourite functionality is stored as library scripts, for reuse later. 
 
-CFT is written from scratch in Java, implementing a tokenizer and a custom recursive-descent parser,
-that creates a tree structure, which is then executed.
+Works on both Windows and Linux.
+
+## Proper recursive-descent parser
+
+CFT is written from scratch in Java, implementing a fast tokenizer and a custom recursive-descent parser,
+that creates a tree structure, which is then executed. 
+
+It of course implements normal precedence rules for expressions,
+so that 2+3*5 correctly becomes 17, not not 25!
 
 
 
