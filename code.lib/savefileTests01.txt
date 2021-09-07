@@ -266,12 +266,7 @@ t10.concat("-")=="1-2-3"
 
 
 
-# -----------------------
-# 2021-09-07
-#
-# Local block return value null gets ignored if non-empty data stack
-# These two functions should return the same, but they don't. 
-# -----------------------
+
 
 
 # Function1
@@ -289,7 +284,12 @@ t10.concat("-")=="1-2-3"
 
 # Local block return value confusion
 # --
-	t14_f1 == t14_f2
+# Initially thought that t14_f1 and t14_f2 should return the same, 
+# as if an empty local block is an expression, but of course it is
+# not. Instead an empty local block means EXACTLY the same 
+# as NO CODE, and so ... :-)
+# --
+	t14_f1 == null && t14_f2 == 1
 /Test14_local_block_return_value
 
 
