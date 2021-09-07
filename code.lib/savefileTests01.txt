@@ -240,8 +240,7 @@ t10.concat("-")=="1-2-3"
 # -----------------------
 # 2021-09-07
 # Inner loop report output list 
-# spilling over as return value
-# from function?
+# spilling over to outer scope
 #
 # Not a problem when replacing report() with out()
 # -----------------------
@@ -250,14 +249,86 @@ t10.concat("-")=="1-2-3"
 # --
 	List(1,2,3) => data
 	Inner {
-		data->x report(x)
+		data->x report("i"+x)
 	} -> line
-		#a = 1+1  # not out()'ing anything
-		# And not terminating loop - would expect empty list here
+		out("x"+line)
+		# --
+		# Should return list of "x"+line
+		# Verify test returns true by replacing report() with out() above
 /t13
 
 # Inner loop report output problem
 # --
 	t13 => result
-	getType(result)=="List" && result.length==0
+	getType(result)=="List" && result.concat=="xi1xi2xi3"
 /Test13_Inner_report_output_propagation
+
+
+
+
+# -----------------------
+# 2021-09-07
+#
+# Local block return value null gets ignored if non-empty data stack
+# These two functions should return the same, but they don't. 
+# -----------------------
+
+
+# Function1
+# --
+	{}
+/t14_f1
+
+
+# Function2
+# --
+	1
+	{}
+/t14_f2
+
+
+# Local block return value confusion
+# --
+	t14_f1 == t14_f2
+/Test14_local_block_return_value
+
+
+
+
+
+
+
+# Inner block return values
+# --
+	2
+	{3}
+/t15
+
+
+# Local block return value
+# --
+	t15==3
+/Test15_local_block_return_value
+
+
+
+
+
+
+
+# Inner block return values
+# --
+	2
+	{null}
+/t16
+
+
+# Local block return value
+# --
+	t16==null
+/Test16_local_block_return_value
+
+
+
+
+
