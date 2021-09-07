@@ -235,3 +235,29 @@ t10.concat("-")=="1-2-3"
 		report(f,eval(f))
 /RunAll
 
+
+
+# -----------------------
+# 2021-09-07
+# Inner loop report output list 
+# spilling over as return value
+# from function?
+#
+# Not a problem when replacing report() with out()
+# -----------------------
+
+# Function
+# --
+	List(1,2,3) => data
+	Inner {
+		data->x report(x)
+	} -> line
+		#a = 1+1  # not out()'ing anything
+		# And not terminating loop - would expect empty list here
+/t13
+
+# Inner loop report output problem
+# --
+	t13 => result
+	getType(result)=="List" && result.length==0
+/Test13_Inner_report_output_propagation

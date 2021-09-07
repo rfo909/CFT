@@ -204,7 +204,7 @@ There can be multiples of every line, including Dir.
 
 
 
-# Search through TextFiles for pattern
+# Search through TextFiles for pattern - delivers lines
 # --
     P(1,Grep) =>grep
     CheckProject
@@ -225,6 +225,16 @@ There can be multiples of every line, including Dir.
     textFiles->tf
         assert(filter==null || file.name.contains(filter))
         grep.file(tf)->line 
+			out(line)
+//DoSearch
+
+
+
+# Search through TextFiles for pattern
+# Returns formatted report
+# -- 
+    P(1,Grep) =>grep
+	DoSearch(grep)->line
             report(line.file.name, line.lineNumber, line)
 //Search
 
@@ -312,6 +322,44 @@ There can be multiples of every line, including Dir.
 //FileLocator
 
 
+# Get file content around a given line number as List of lines
+# --
+	P(1,Input("File name or glob pattern").get) => globPattern
+	P(2,Input("File line number").get.parseInt) => lineNo
+	P(3,Input("Number of lines").get.parseInt) => numLines
+
+	glob=Glob(globPattern)
+
+	TextFiles->tf
+		assert(glob.match(tf))
+		out(tf)
+	| => files
+
+	error(files.length==0, "No matching files found")
+	if (files.length == 1) {
+		file=files.first
+	} else {
+		Lib:MenuSelect(files,Lambda{P(1).path},"Select file", true) => file
+		error(file==null,"Aborting: no file selected")
+	}
+	file.read => lines
+
+	delta=(numLines/2).i  # division always returns float!!
+	lines.keep(lineNo-delta, lineNo+delta)
+	
+/gfc
+
+
+# Show file content around a given line number, report style
+# --
+	Inner {
+		gfc->line
+			report(line.lineNumber, line)
+	}->line 
+		println(line)
+	|
+	true
+/sfc
 
 # FileLocator, interactive, sorted presentation, newest first
 # --
@@ -364,21 +412,24 @@ There can be multiples of every line, including Dir.
     CurrProject =>pr
     println
 	Lib:Header("Current project")
-	println(pr.Desc.concat(" "))
+	println(pr.Name)
+	pr.Desc.concat(" ").trim => desc
+	if (desc.length > 0) {
+		println
+		println("Desc: " + pr.Desc.concat(" "))
+		println
+	}
     pr.Dir->d
         println("Dir: " + d)
     |
     println("Types: " + pr.Type.concat(" "))
     println
     true
-/Curr
+/curr
 
 
 # Change project
 # --
 	ChangeProject
-/Change
-
-
-
-
+	curr
+/ch
