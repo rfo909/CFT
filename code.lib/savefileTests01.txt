@@ -331,4 +331,19 @@ t10.concat("-")=="1-2-3"
 
 
 
+# Lib.Java
+# 2021-09-08
+# This code exercises key functionality: class lookup, constructor lookup and call with params, 
+# method lookup and call with params, and conversion of values as parameters and return value from function
+#
+Lib.Java.forName("java.lang.String") => String
+String.getConstructor(String).call(Lib.Java.String("test")) => obj
+String.getConstructor(String).call(Lib.Java.String("123")) => obj2
+Lib.Java.Object(obj2) => paramObj
+String.getMethod("concat",String).call(obj,paramObj).value
+/t17
 
+
+
+t17=="test123"
+/Test17_Lib_Java_interface

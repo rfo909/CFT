@@ -13,6 +13,25 @@
 
 <h1>CFT Change log</h1>
 
+<h3>v2.7.0 2021-09-08 Lib.Java</h3>
+<p>
+	Created Lib.Java object and functionality for locating classes, constructors and methods,
+	and call those. Example:
+</p>
+<pre>
+Lib.Java.forName("java.lang.String") =&gt; String
+String.getConstructor(String).call(Lib.Java.String("test")) =&gt; obj
+String.getConstructor(String).call(Lib.Java.String("123")) =&gt; obj2
+Lib.Java.Object(obj2) =&gt; paramObj
+String.getMethod("concat",String).call(obj,paramObj).value
+/test
+</pre>
+<p>
+	It returns "test123". Added this code to Tests01 script, as it
+	verifies most of the functionality.
+</p>
+
+
 
 <h3>2021-09-07 bug</h3>
 <p>
