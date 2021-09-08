@@ -233,7 +233,7 @@ public class ObjLib extends Obj {
             return "Java";
         }
         public String getShortDesc() {
-            return "Java() - create Java object";
+            return "Java() - object for interacting with Java classes and objects";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");

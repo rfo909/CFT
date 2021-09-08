@@ -17,10 +17,6 @@ public class ObjJavaClass extends Obj {
     	this.add(new FunctionGetMethod());
     	this.add(new FunctionGetConstructor());
 
-    	//        this.add(new FunctionCos());
-//        this.add(new FunctionSin());
-//        this.add(new FunctionPI());
-//        this.add(new FunctionSqrt());
     }
     
     public Class getTheClass() {
