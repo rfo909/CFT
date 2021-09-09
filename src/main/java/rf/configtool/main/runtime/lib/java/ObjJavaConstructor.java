@@ -66,7 +66,7 @@ public class ObjJavaConstructor extends Obj {
         	}
         	
         	Object obj = constructor.newInstance(args);
-        	return new ValueObj(new ObjJavaObject(obj, theClass));
+        	return new ValueObj(new ObjJavaObject(obj));
         }
     }
 

@@ -63,29 +63,7 @@ public class ObjJavaClass extends Obj {
     }
     
     
-    class FunctionNew extends Function {
-        public String getName() {
-            return "new";
-        }
-        public String getShortDesc() {
-            return "new() - create Java object using default constructor";
-        }
-        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 0) throw new Exception("Expected no parameters");
-            // Locate constructor with no parameters
-            Constructor[] constructors = theClass.getConstructors();
-            Constructor x=null;
-            for (Constructor c:constructors) {
-            	if (c.getParameterCount()==0) x=c;
-            }
-            if (x==null) throw new Exception("Class " + theClass.getName() + " has no parameterless constructor");
-            
-            Object obj = theClass.getDeclaredConstructor().newInstance();
-            return new ValueObj(new ObjJavaObject(obj,theClass));
-        }
-    }
-    
-    
+ 
     class FunctionGetMethod extends Function {
         public String getName() {
             return "getMethod";
@@ -103,7 +81,7 @@ public class ObjJavaClass extends Obj {
         	}
         	
         	Method m = theClass.getMethod(name, paramTypes);
-        	return new ValueObj(new ObjJavaMethod(theClass,m));
+        	return new ValueObj(new ObjJavaMethod(m));
         }
     }
 

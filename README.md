@@ -3,68 +3,56 @@
 
 An interpreted and interactive language. 
 
-*README last updated 2021-08-27*
+*README last updated 2021-09-09*
 
-## Motto
+## Terminal based 
 
-*Unless you script it, it isn't real*
+Interpreted script language, runs in the terminal, acts somewhat like a shell. Lets you define 
+functions interactively, or using editors. 
 
-Manual operations are boring, risk errors, poorly documented, and should be avoided.
-
-## Terminal based
-
-CFT is an interpreted script language, which runs in the terminal, and lets you define 
-functions interactively, or using editors. It has been in daily use since 2019, and is now considered
+It has been in daily use since 2019, and is now considered
 quite stable. 
 
 ```
-# Ex: List all java files (recursively) under current dir, that were modified in the last day
-
-Dir.allFiles(Glob("*.java"))->f assert(currentTimeMillis-f.lastModified < 86400*1000) out(f.path)
-
 # Ex: check if hosts respond to ping
+#    (The arrow plus identifier is a foreach)
 
-"host1 host2 host3".split
+List("host1","host2","host3")
 /hosts
 
-hosts->host report(host,SSH:HostOk("user@"+host"))
+hosts->host 
+   report(host,SSH:HostOk(host))
 /checkPing 
 ```
 
-# Why yet another script language??
+# Yet another script language??
 
 The idea behind CFT is to be *object oriented*, like PowerShell, but with a syntax that
-is more regular, a bit more like traditional programming languages. 
+is more regular than both PowerShell and unix shells. 
 
-Also wanted to avoid the complex string quote rules, 
-which while compact and efficient, also is hard to read and maintain. Again, going for easier syntax. 
+The syntax of CFT is fairly "tiny", and easily learned. Apart from a few oddities, it is quite
+regular, using dotted notation to call functions inside objects, as well as using local variables
+inside functions. There are no fancy string substitution rules, which, though powerful, are also hard 
+to learn and hard to read.
 
-The syntax of CFT is fairly "tiny", and easily learned. It has a few specialties, such as list iteration
-and filtering, which is also used all the time, but otherwise, using dotted notation to call functions inside
-objects returned by functions, and assigning local variables, is mostly like any other language.
+To keep it small and simple, there are no classes, just functions. A rich set of system objects, with functions
+inside, provide rich functionality, that is in turn stitched together to do what we want, when we
+create our own functions.
 
-There are no classes, only functions, which reduces complexity both for the interpreter and for the code.
-Older tested functions tend to "just work", since they usually have no dependencies apart from other functions. 
+In some meanings of the term, CFT is almost functional, as there are no global variables, and no user defined
+classes, only functions.
 
 [CFT vs FP](FP.md) 
 
-Values in CFT are objects, such as files, directories, lists, dictionaries and a few others. These contain
-member functions, which are written in Java. There also is a set of global functions written in Java.
+The typical use case for CFT is running it in a terminal, loading some script file, and then running
+different functions from the command line. Since functions can be made to both accept normal parameters,
+and ask the user for values when parameters are missing, one usually just types the name of a function, 
+and presses enter. Parantheses are optional when no function parameters. 
 
-The user creates collections of functions in *scripts* (text files) to interact with other 
-functions in same or other scripts, member functions inside value objects, or with global
-functions, for example prompting the user for input.
+Script files are, contrary to PowerShell and Unix script, not objects themselves. Scripts in CFT
+are just namespaces for functions. We never run a script, we always run a function inside a script.
 
-Contrary to bash and PowerShell, a script file is only a collection of functions, and does not act
-like a "main" program on its own. In CFT we don't call a script, we *call a function inside a script*. 
-
-Scripts in CFT are effectively just name spaces.
-
-CFT has a built-in help system that lets you list built-in functions of all objects, as well as functions coded 
-inside any script. There is also an integrated mechanism for running script functionality as parallel 
-threads, for speed, for example when doing updates or checking connectivity against multiple remote hosts.
-
-The goal is to *make scripting simpler*, by working with objects, and avoiding 
+The goal of CFT is to *make scripting simpler*, by working with objects, and avoiding 
 complex string substitution rules, and finally a more regular syntax than both PowerShell and traditional
 Unix shells. 
 
@@ -73,12 +61,11 @@ CFT represents a *rethink*, not just another bash remake.
 
 ## Automation at all levels
 
-Being backed by a powerful programming language, we easily create functions. This is suitable for:
+Being backed by a powerful programming language, we easily create our own collections of functions.
 
 - copying files
 - collecting and searching logs
-- running programs on remote hosts
-- employing PowerShell without remembering those long complex commands
+- running programs on remote hosts via SSH or PowerShell
 - setting up software
 - creating configuration files
 - managing services locally or remotely
@@ -93,8 +80,14 @@ CFT is written from scratch in Java, implementing a fast tokenizer and a custom 
 that creates a tree structure, which is then executed. 
 
 It of course implements normal precedence rules for expressions,
-so that 2+3*5 correctly becomes 17, not not 25!
+so that 2+3*5 correctly becomes 17, not 25!
 
+
+## Motto
+
+*Unless you script it, it isn't real*
+
+Manual operations are boring, risk errors, poorly documented, and should be avoided. 
 
 
 
@@ -123,4 +116,4 @@ $ 2+3
 
 [Full Youtube tutorial](https://www.youtube.com/playlist?list=PLj58HwpT4Qy80WhDBycFKxIhWFzv5WkwO).
 
-[Youtube HOWTO-videos](https://www.youtube.com/playlist?list=PLj58HwpT4Qy-12WjM16ALnLGEyy3kxX9r). *NEW*
+[Youtube HOWTO-videos](https://www.youtube.com/playlist?list=PLj58HwpT4Qy-12WjM16ALnLGEyy3kxX9r).

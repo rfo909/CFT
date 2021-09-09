@@ -12,11 +12,9 @@ import java.util.List;
 
 public class ObjJavaMethod extends Obj {
 	
-	private Class theClass;
 	private Method method;
     
-    public ObjJavaMethod(Class theClass, Method method) {
-    	this.theClass=theClass;
+    public ObjJavaMethod(Method method) {
     	this.method=method;
     	
     	this.add(new FunctionCall());
