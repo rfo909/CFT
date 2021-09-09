@@ -46,9 +46,12 @@ Add, Commit and Push.
 # Lib and example files are stored in code.lib and code.examples
 # ---
 
-    # Update the Overview.txt file
-    Overview:CreateOverview
-    MD:Run
+    # Update the Overview.txt file and create md-version of doc
+	# Except when on windows.
+	if (!Sys.isWindows) {
+		Overview:CreateOverview
+		MD:Run
+	}
 
     # Identify files to move temporarily out of the way, so as not to be included in git add .
     HomeDir.files(Glob("*.txt"))  
