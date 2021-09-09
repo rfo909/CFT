@@ -22,6 +22,9 @@ import java.util.*;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.runtime.*;
 
+/**
+ * Interface Java objects, constructors and methods, with parameters and return values.
+ */
 
 public class ObjJava extends Obj {
     

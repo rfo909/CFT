@@ -7,17 +7,23 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2021-08-28 RFO
-v2.6.3
+Last updated: 2021-09-08 RFO
+v2.7.0
 ```
 # Introduction
 
 
 **CFT is an interactive programmable environment for automation.**
 
-Automation is done by creating custom functions, which call each other, as well
-as a set of global functions, and member functions inside objects returned from
-global functions, as well as member functions inside other objects.
+Automation is done by creating functions, which call each other, as well
+as a set of global functions, and member functions inside objects. All values
+are objects, with functions inside.
+
+
+A rich set of predefined objects exists, along with global functions to
+create them. An example is the global "Dir" function, which returns a
+"Dir" object, with functions inside, such as .files, which returns list
+of files in the directory. Both the list and the files are objects.
 
 
 
@@ -2935,6 +2941,45 @@ before returning.
 
 
 See separate sections on closures and objects.
+
+# Calling Java
+
+
+**v2.7.0**
+
+CFT lets us interface Java code via the Lib.Java object. It contains functions
+for identifying classes. We then look up a constructor and call it, getting a
+JavaObject in return. We can also look up methods from the class object, and call
+them with parameters.
+
+
+Currently, for this to work, the Java code must exist in the classpath.
+
+
+Example (also available in script Tests01 as function Test17):
+
+```
+Lib.Java.forName("java.lang.String") => String
+String.getConstructor(String).call(Lib.Java.String("test")) => obj
+String.getConstructor(String).call(Lib.Java.String("123")) => obj2
+Lib.Java.Object(obj2) => paramObj
+String.getMethod("concat",String).call(obj,paramObj).value
+/t17
+```
+
+This function looks up the String class, then creates two instances via
+the constructor that takes a String parameter. CFT strings values are converted to Java values
+via the Lib.Java.String() function.
+
+
+Then we wrap obj2, which is a CFT value (of type JavaObject), as a Java value,
+via Lib.Java.Object(), and locate the concat() method of the String class.
+
+
+It is invoked on
+obj, with obj2 as parameter. The method call returns a JavaValue object,
+which has a function value() that returns a CFT value, in this case the
+concatenated string "test123".
 
 # String .esc() and .unEsc()
 

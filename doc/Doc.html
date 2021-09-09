@@ -15,8 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2021-08-28 RFO
-v2.6.3
+Last updated: 2021-09-08 RFO
+v2.7.0
 
 
 </pre>
@@ -27,9 +27,15 @@ v2.6.3
   <i>CFT is an interactive programmable environment for automation.</i>
 </p>
 <p>
-  Automation is done by creating custom functions, which call each other, as well
-  as a set of global functions, and member functions inside objects returned from
-  global functions, as well as member functions inside other objects.
+  Automation is done by creating functions, which call each other, as well
+  as a set of global functions, and member functions inside objects. All values
+  are objects, with functions inside.
+</p>
+<p>
+  A rich set of predefined objects exists, along with global functions to
+  create them. An example is the global "Dir" function, which returns a 
+  "Dir" object, with functions inside, such as .files, which returns list
+  of files in the directory. Both the list and the files are objects.
 </p>
 <ul>
   <li>directory objects</li>
@@ -3308,6 +3314,44 @@ $ Db2Obj:FindObjects("stats",Lambda{P(1).value.host=="s04.s"}).first.value.outpu
 
 
 
+
+<h1>Calling Java</h1>
+<p><i>v2.7.0</i></p>
+<p>
+  CFT lets us interface Java code via the Lib.Java object. It contains functions
+  for identifying classes. We then look up a constructor and call it, getting a
+  JavaObject in return. We can also look up methods from the class object, and call
+  them with parameters. 
+</p>
+<p>
+  Currently, for this to work, the Java code must exist in the classpath.
+</p>
+<p>
+  Example (also available in script Tests01 as function Test17):
+</p>
+<pre>
+Lib.Java.forName("java.lang.String") =&gt; String
+String.getConstructor(String).call(Lib.Java.String("test")) =&gt; obj
+String.getConstructor(String).call(Lib.Java.String("123")) =&gt; obj2
+Lib.Java.Object(obj2) =&gt; paramObj
+String.getMethod("concat",String).call(obj,paramObj).value
+/t17
+</pre>
+<p>
+  This function looks up the String class, then creates two instances via
+  the constructor that takes a String parameter. CFT strings values are converted to Java values
+  via the Lib.Java.String() function. 
+</p>
+<p>
+  Then we wrap obj2, which is a CFT value (of type JavaObject), as a Java value, 
+  via Lib.Java.Object(), and locate the concat() method of the String class.
+</p>
+<p>
+  It is invoked on
+  obj, with obj2 as parameter. The method call returns a JavaValue object,
+  which has a function value() that returns a CFT value, in this case the 
+  concatenated string "test123".
+</p>
 
 
 

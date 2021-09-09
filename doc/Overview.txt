@@ -248,6 +248,8 @@ Multitasking in CFT
  * Advantages
  * Flow control
 
+Calling Java
+
 String .esc() and .unEsc()
  * Escape codes
  |   Note: CRLF / LF with text files ...
