@@ -38,7 +38,7 @@ knowing the UUID.
 	error(collection.startsWith("."), "Invalid collection, '.' indicates system collections")
 	
 	x = Lambda {syn(P(1))}
-	error (x.?call(value)==false, "Value not synthesizable")
+	error (x.?call(value)==false, "Value " + getType(value) + " not synthesizable")
 	value = syn(value)
 	
 	Lib.Db.Db2.set(collection,key,value)

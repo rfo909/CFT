@@ -87,6 +87,27 @@ public class ObjDict extends Obj {
     	if (values.get(key) == null) {
     		keySequence.add(key);
     	}
+
+        // 2020-10: special processing for Lambda's and Closures - the point is that storing a
+        // Lambda in a Dict, we wrap the Lambda in a Closure, so that the Lambda becomes a
+        // "member function" of the Dict, referring back to it via its "self" variable. When
+        // storing a Closure, we unwrap the Lambda and create a new Closure, as described above.
+        //
+        // This means doing Dict.get("somefunc").call(...) invokes a closure instead of a lambda.
+        if (value instanceof ValueBlock) {
+        	ValueBlock lambda=(ValueBlock) value;
+        	//System.out.println("Wrapping lambda in closure for key " + key);
+        	value=new ValueObj(new ObjClosure(self(), lambda));
+        } else if (value instanceof ValueObj) {
+        	Obj obj=((ValueObj) value).getVal();
+        	if (obj instanceof ObjClosure) {
+        		ValueBlock lambda=((ObjClosure) obj).getLambda();
+        		//System.out.println("Recoding closure for key " + key);
+        		value=new ValueObj(new ObjClosure(self(), lambda));
+        	}
+        }
+
+    	
     	values.put(key, value);
         if (isIdentifier(key) && !allFunctionNames.contains(key)) refreshInnerFunctions=true;
     	
@@ -253,24 +274,6 @@ public class ObjDict extends Obj {
             if (params.size() != 2) throw new Exception("Expected name and value parameters");
             String key=getString("name", params, 0);
             Value value=params.get(1);
-            // 2020-10: special processing for Lambda's and Closures - the point is that storing a
-            // Lambda in a Dict, we wrap the Lambda in a Closure, so that the Lambda becomes a
-            // "member function" of the Dict, referring back to it via its "self" variable. When
-            // storing a Closure, we unwrap the Lambda and create a new Closure, as described above.
-            //
-            // This means doing Dict.get("somefunc").call(...) invokes a closure instead of a lambda.
-            if (value instanceof ValueBlock) {
-            	ValueBlock lambda=(ValueBlock) value;
-            	//System.out.println("Wrapping lambda in closure for key " + key);
-            	value=new ValueObj(new ObjClosure(self(), lambda));
-            } else if (value instanceof ValueObj) {
-            	Obj obj=((ValueObj) value).getVal();
-            	if (obj instanceof ObjClosure) {
-            		ValueBlock lambda=((ObjClosure) obj).getLambda();
-            		//System.out.println("Recoding closure for key " + key);
-            		value=new ValueObj(new ObjClosure(self(), lambda));
-            	}
-            }
             
             set(key, value);
             
