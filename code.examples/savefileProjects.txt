@@ -28,47 +28,30 @@
 
 Projects script
 ---------------
-To use this script, create a file projects.txt
-in the directory "private" under the CFT home directory,
-as returned by Lib:DirPrivate
+To use this script, we define projects in a text file, projects.txt under "private"
+dir, as defined by Lib:DirPrivate.
 
-The point of this directory is that it is mentioned
-in .gitignore, and its content will never get checked
-in or overwritten on pull.
-
-The ### marker is followed by a project name,
-and identifies the settings for each project.
+The ### marker is followed by a project name, and then follows settings.
 
 Single "#" at start of lines are comments.
 
 Example:
-
-projects.txt
 ---
-
 ### CFTJava
-
-Desc: CFT project source code
 
 Dir: /home/xyz/CFT
 Type: java
-IgnoreDir: build
-IgnoreDir: ebuild 
-IgnoreFile: .git 
-
-# This is a comment
-
-### CFTScripts
-
-Desc: CFT project scripts
-
-Dir: /home/xyz/CFT/code.lib
-Dir: /home/xyz/CFT/code.examples
-
-Type: txt
-IgnoreFile: .git 
-
+IgnoreDir: .git
 ---
+
+The following settings are allowed, each can be repeated:
+
+Dir: /home/xyz/CFT      ### string
+Type: txt               ### converted to glob-expression *.(type)
+Files: *.java           ### glob-expression
+Ignore: *test*          ### glob-expression to ignore certain files
+IgnoreDir: /.git        ### substring matching against path
+
 
 There can be multiples of every line, including Dir.
 >>> EOF
@@ -79,24 +62,17 @@ There can be multiples of every line, including Dir.
 
 
 
-# Reset selected projects if new session
-# --
-#	if (Db2:Get("Projects","session") != Sys.sessionUUID) {
-#		Db2:Set("Projects","Project",null)
-#		Db2:Set("Projects","session", Sys.sessionUUID)
-#	}
-#//onLoad
-
-
 # The projects.txt file 
 # --
-    (Lib:DirPrivate).file("projects.txt")
-//ConfigFile
+    (Lib:DirPrivate).file("projects.txt") => f
+    if (!f.exists) f.create("")
+    f
+/ConfigFile
 
 
 
 
-# projects.txt file contains all data
+# Projects config as DataFile
 # --
     ConfigFile =>f
     error(!f.exists,"File " + f.path + " missing - run Readme() for details")
@@ -113,13 +89,14 @@ There can be multiples of every line, including Dir.
 
 # List projects and select 
 # --
-    Db2:Get("Projects","Project") =>result
+    Db2:Get("Projects","Project") => result
+    
 	ProjectsFile.keys => names
 
     Lambda { P(1) } =>showName
     loop
         println
-        Lib:Header ("Select project, curr=" + result)
+        Lib:Header ("Select project (" + result + ")")
         Lib:ShowOptions (names, showName)
         Lib:SelectOptions (names, showName, true) =>resultList
         if(resultList.length>1, Inner{println("** not unique **") null =>result} )
@@ -127,31 +104,26 @@ There can be multiples of every line, including Dir.
         break(result != null)
     |
     Db2:Set("Projects","Project", result)
-//ChangeProject
+	result
+//SelectProjectName
 
 
-# Check there is a selected project
+# Current project name
 # --
-	if(Db2:Get("Projects","Project")==null, ChangeProject)
-//CheckProject
+	pName=Db2:Get("Projects","Project")
+	if (pName==null) pName=SelectProjectName
+	pName
+//CurrProjectName
 
 
-# Read current project data into a Dict
-# --
-    CheckProject
-    Db2:Get("Projects","Project") =>pName
-    Dict
-		.set("Name",pName)
-        .set("Desc",List)
-        .set("Dir",List)
-        .set("Type",List)
-        .set("IgnoreDir",List)
-        .set("IgnoreFile",List)
-        =>dict
-
+# Get current project as Dict
+# --	    
+	pName=CurrProjectName
+	
     ProjectsFile.get(pName) =>dataLines
     error(dataLines.length==0, "No data for project " + pName)
 
+	dict=Dict
     dataLines->line
         line.before(":").trim =>field
         line.after(":").trim =>val
@@ -161,43 +133,69 @@ There can be multiples of every line, including Dir.
 //CurrProject
 
 
+
+
+
 # Produce list of files to search
 # --
-    CheckProject
     CurrProject =>pr
+    
+    # Directories
+    # --
+    dirs = pr.get("Dir",List)
+    	
 	
-	pr.Type->t 
+	# File matching by type
+	# --
+	pr.get("Type",List)->t 
 		out(Glob("*."+t) )
-	| => globs
+	| => fileGlobs
 	
-	# prepare the ignore patterns
-	pr.IgnoreDir->d
-		sep=Sys.fileSeparator
-		s=(sep+d+sep)
-		out(s.replace(sep+sep,sep))
-	| => ignores
+	pr.get("Files",List)->f  ## glob strings
+		fileGlobs.add(Glob(f))
+	|
 	
-	pathOk = Lambda{
-		P(1)=>s 
-		P(2)=>patternList
+	# File ignores
+	# --
+	pr.get("Ignore",List)->i  ## Glob
+		out(Glob(i))
+	| => fileIgnores
+	
+	# Dir ignores
+	# --
+	dirIgnores = pr.get("IgnoreDir",List) ## substrings
+
+
+	fileOk = Lambda {
+		P(1)=>file
+		P(2)=>ignoreGlobList
 		
 		ok=true
-		patternList->pattern
+		ignoreGlobList->glob
+			if (glob.match(file)) ok=false
+		|
+		ok
+	}
+
+	pathOk = Lambda{
+		P(1)=>s 
+		P(2)=>ignoreDirList
+		
+		ok=true
+		ignoreDirList->pattern
 			if (s.contains(pattern)) ok=false
 		|
 		ok
 	}
 	
 	# 
-	pr.Dir->dirName
-		globs->glob
+	dirs->dirName
+		fileGlobs->glob
 			Dir(dirName).allFiles(glob)->f 
-				# Lambda call is FASTER than Inner block ...
-				assert(pathOk.call(f.path, ignores))
+				assert(pathOk.call(f.path, dirIgnores))
+				assert(fileOk.call(f,fileIgnores))
 				out(f)
-	| => files
-		
-	files
+	| _.unique 
 //TextFiles
 
 
@@ -207,7 +205,6 @@ There can be multiples of every line, including Dir.
 # Search through TextFiles for pattern - delivers lines
 # --
     P(1,Grep) =>grep
-    CheckProject
     
 	filter=Db2:Get("Projects","FileFilter",null)
 
@@ -275,7 +272,6 @@ There can be multiples of every line, including Dir.
 
 # Search with one parameter
 # --
-	CheckProject
 	ShowFileFilter
 	Input("Search1").get =>a
 	Search(Grep(a))
@@ -284,7 +280,6 @@ There can be multiples of every line, including Dir.
 
 # Search with two parameters
 # --
-	CheckProject
 	ShowFileFilter
 	Input("Search2a ... ").get =>a
 	Input("... AND Search2b").get =>b
@@ -294,7 +289,6 @@ There can be multiples of every line, including Dir.
 
 # Search with three parameters
 # --
-	CheckProject
 	ShowFileFilter
 	Input("Search3a ... ").get =>a
 	Input("... AND Search3b").get =>b
@@ -304,7 +298,6 @@ There can be multiples of every line, including Dir.
 
 # Search with one positive and one negative parameter
 # --
-	CheckProject
 	ShowFileFilter
 	Input("Search1").get =>a
 	Input("Search1n (reject)").get =>b
@@ -314,7 +307,6 @@ There can be multiples of every line, including Dir.
 # Locate file by partial name
 # --
     P(1,"java") =>fn
-    CheckProject
 
     TextFiles->tf
         assert(tf.name.contains(fn))
@@ -363,9 +355,7 @@ There can be multiples of every line, including Dir.
 
 # FileLocator, interactive, sorted presentation, newest first
 # --
-    CheckProject
-
-	P(1,Input("Enter part of file name").get) => fn
+    P(1,Input("Enter part of file name").get) => fn
 
     FileLocator(fn)->file
         out(Int(file.lastModified, file))
@@ -407,22 +397,15 @@ There can be multiples of every line, including Dir.
 
 # Display current project
 # --
-    CheckProject
-    
     CurrProject =>pr
     println
 	Lib:Header("Current project")
-	println(pr.Name)
-	pr.Desc.concat(" ").trim => desc
-	if (desc.length > 0) {
-		println
-		println("Desc: " + pr.Desc.concat(" "))
-		println
-	}
-    pr.Dir->d
-        println("Dir: " + d)
-    |
-    println("Types: " + pr.Type.concat(" "))
+	println(CurrProjectName)
+	println
+	pr.keys->key
+		str=Inner{pr.get(key,List).concat(" ")}
+		println(key+": " + str)
+	|
     println
     true
 /curr
@@ -430,6 +413,6 @@ There can be multiples of every line, including Dir.
 
 # Change project
 # --
-	ChangeProject
+	SelectProjectName
 	curr
 /ch
