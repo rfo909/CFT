@@ -67,7 +67,6 @@ shortcut:rel  = "---- Release ----"                       Sys.stdin(":load Relea
 
 # Projects script 
 shortcut:P    = "---- Projects ----"                      Sys.stdin(":load Projects","curr")
-shortcut:PS   = "---- Projects perform search ----"       Projects:Curr Projects:S
 
 # Investigate script
 shortcut:i    = "---- Investigate log text ----"          Investigate:LogText
