@@ -660,12 +660,13 @@ P(2) =>value
 	grep=Grep(st)
 
 	totalCount=0
-	if(subDirs,dir.allFiles(glob), dir.files(glob)) -> f
-		match=grep.fileCount(f)
+	if(subDirs,dir.allFiles(glob), dir.files(glob))->file 
+		out(Int(file.lastModified,file)) 
+	| _.sort-> x
+		f=x.data
+		match=grep.file(f).length
 		totalCount=totalCount+match
-		if (match>0) out(Int(f.lastModified,f))
-	| _.sort->x 
-		out(x.data)
+		if (match>0) out(f)
 	| => files
 	
 	dirs=Dict
@@ -674,7 +675,7 @@ P(2) =>value
 	|
 	dirCount=dirs.keys.length
 	
-	if (totalCount<30 || dirCount==1) {
+	if (totalCount<2000 || dirCount==1) {
 		# Show details
 		Inner{
 			files->f
@@ -692,6 +693,8 @@ P(2) =>value
 			} -> line
 				println(line)
 			|
+			println
+			println("---> GOT " + totalCount + " HITS ...")
 			println
 			readLine("Drill down to directory of file (pos), ENTER to cancel").trim=>drillDown
 			if (drillDown != "") {

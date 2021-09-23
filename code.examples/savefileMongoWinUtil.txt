@@ -21,13 +21,23 @@ P(6,"127.0.0.1:27017") => connectionString
 	
 	js1 = temp.file("mongoshell"+currentTimeMillis+".js")
 	js1.create(jsCode)
+	
+	if (verbose) {
+		println
+		Inner {jsCode->line println(line)}
+		println
+	}
 
 	cmd = '& "$Env:ProgramFiles\MongoDB\Server\' + mongoVersion + '\bin\mongo.exe" '+connectionString+'/' + db + ' c:\temp\' + js1.name
 	if (verbose) {
 		println(cmd)
 	}
 	PS:Call (host, cmd, List, true) => data
-	js1.delete
+	if (verbose) {
+		println("KEEPING " + js1.path)
+	} else {
+		js1.delete
+	}
 
 	# filter stdout to include lines after mark only
 	Inner {
