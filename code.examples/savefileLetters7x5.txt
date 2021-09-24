@@ -256,13 +256,13 @@ V #   #   .
 V  # #    .
 V   #     .
 
-V #   #   .
-V #   #   .
-V #   #   .
-V #   #   .
-V # # #   .
-V ## ##   .
-V #   #   .
+W #   #   .
+W #   #   .
+W #   #   .
+W #   #   .
+W # # #   .
+W ## ##   .
+W #   #   .
 
 X #   #   .
 X  # #    .
@@ -328,6 +328,22 @@ Z #####   .
 ;   ##    .
 ;  #      .
 
+_         .
+_         .
+_         .
+_         .
+_         .
+_         .
+_ #####   .
+
+
+?  ###    .
+? #   #   .
+?    #    .
+?   #     .
+?   #     .
+?         .
+?   #     .
 
 >>>>>> EOF
 /Letters
@@ -362,7 +378,8 @@ Z #####   .
 		s = Inner {
 			(""+i).chars->c
 				lines = GetChar(c)
-				break(lines.length<7)
+				if (lines.length<7) lines=GetChar("?")
+				#break(lines.length<7)
 				out(lines.nth(lineNo))
 			| _.concat("   ")
 		} 
