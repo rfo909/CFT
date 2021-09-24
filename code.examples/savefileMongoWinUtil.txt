@@ -32,9 +32,9 @@ P(6,"127.0.0.1:27017") => connectionString
 	if (verbose) {
 		println(cmd)
 	}
-	PS:Call (host, cmd, List, true) => data
+	PS:Call (host, cmd, List, true, verbose) => data
 	if (verbose) {
-		println("KEEPING " + js1.path)
+		println("* KEEPING " + js1.path)
 	} else {
 		js1.delete
 	}
