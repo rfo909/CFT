@@ -96,7 +96,7 @@ public class ObjVec2D extends Obj {
 			return "sub";
         }
         public String getShortDesc() {
-            return "sub(Vec2d) - subtract vector";
+            return "sub(Vec2d) - return vector that points from THIS to given vector";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 1) throw new Exception("Expected Vec2d parameter");

@@ -15,8 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2021-09-08 RFO
-v2.7.0
+Last updated: 2021-09-26 RFO
+v2.7.2
 
 
 </pre>
@@ -2585,7 +2585,10 @@ List("aaa","bbb")-&gt;line
   The global function Lib() creates a Lib object, which in turn contains functions that
   create other objects, such as the Math object, which contains trigonometric functions.
 </p>
-
+<p>
+  <i>v2.7.2</i> Added DD function, which contains Vec(x,y) for creating 2D vectors,
+  and doing 2D vector math.
+</p>
 
 
 <h2>Lib.Convert</h2>
@@ -4096,9 +4099,9 @@ Sys.homeDir.allFiles(Glob("*.java"))->f
 /objects
 
 
-
 ObjClosure 
 ObjConvert 
+ObjDD 
 ObjData 
 ObjDataFile 
 ObjDate 
@@ -4118,21 +4121,40 @@ ObjGlob
 ObjGlobal 
 ObjGrep 
 ObjInput 
+ObjIntegrations 
+ObjJava 
+ObjJavaClass 
+ObjJavaConstructor 
+ObjJavaMethod 
+ObjJavaObject 
+ObjJavaValue 
+ObjJavaValueBoolean 
+ObjJavaValueInt 
+ObjJavaValueLong 
+ObjJavaValueNull 
+ObjJavaValueObject 
+ObjJavaValueString 
 ObjLexer 
 ObjLexerNode 
 ObjLexerToken 
 ObjLexerTokenStream 
 ObjLib 
 ObjLineReader 
+ObjMSSql 
+ObjMSSqlConnection 
+ObjMSSqlParam 
+ObjMSSqlResultSet 
 ObjMath 
 ObjPersistent 
 ObjPlot 
 ObjProcess 
 ObjRegex 
+ObjSentry 
 ObjSys 
 ObjTerm 
 ObjText 
-ObjUtil
+ObjUtil 
+ObjVec2D 
 Value 
 </pre>
 
@@ -4146,7 +4168,6 @@ Sys.homeDir.allFiles(Glob("*.java"))->f
 | _.sort->x
   println(x)
 /values
-
 
 
 ValueBinary 
@@ -4324,13 +4345,15 @@ Colon commands
 
 
 <h2>Script and code size</h2>
+
 <h3>2020-11-13</h3>
 <pre>
   Script code:      ~5k lines
   Java code:        ~20k lines
   Functions:        ~290
-  Object types:     ~45
+  Object types:     ~45 (including Value types)
 </pre>
+
 <h3>2021-04-01</h3>
 <pre>
   Script code:      ~8k lines
@@ -4339,6 +4362,16 @@ Colon commands
   Object types:     36
   Value types:      12
 </pre>
+
+<h3>2021-09-26</h3>
+<pre>
+  Script code:      10922 lines
+  Java code:        23907 lines
+  Functions:        377
+  Object types:     57
+  Value types:      13
+</pre>  
+
 
 
 
@@ -4383,7 +4416,6 @@ Colon commands
     }
   /GetJpgExifDate
 </pre>
-
 
 
 </body></html>

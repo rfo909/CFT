@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2021-09-08 RFO
-v2.7.0
+Last updated: 2021-09-26 RFO
+v2.7.2
 ```
 # Introduction
 
@@ -2320,6 +2320,10 @@ generates the value.
 The global function Lib() creates a Lib object, which in turn contains functions that
 create other objects, such as the Math object, which contains trigonometric functions.
 
+
+**v2.7.2** Added DD function, which contains Vec(x,y) for creating 2D vectors,
+and doing 2D vector math.
+
 ## Lib.Convert
 
 
@@ -3643,6 +3647,7 @@ println(x)
 /objects
 ObjClosure
 ObjConvert
+ObjDD
 ObjData
 ObjDataFile
 ObjDate
@@ -3662,21 +3667,40 @@ ObjGlob
 ObjGlobal
 ObjGrep
 ObjInput
+ObjIntegrations
+ObjJava
+ObjJavaClass
+ObjJavaConstructor
+ObjJavaMethod
+ObjJavaObject
+ObjJavaValue
+ObjJavaValueBoolean
+ObjJavaValueInt
+ObjJavaValueLong
+ObjJavaValueNull
+ObjJavaValueObject
+ObjJavaValueString
 ObjLexer
 ObjLexerNode
 ObjLexerToken
 ObjLexerTokenStream
 ObjLib
 ObjLineReader
+ObjMSSql
+ObjMSSqlConnection
+ObjMSSqlParam
+ObjMSSqlResultSet
 ObjMath
 ObjPersistent
 ObjPlot
 ObjProcess
 ObjRegex
+ObjSentry
 ObjSys
 ObjTerm
 ObjText
 ObjUtil
+ObjVec2D
 Value
 ```
 # Reference: Value types
@@ -3891,7 +3915,7 @@ remain in the language.
 Script code:      ~5k lines
 Java code:        ~20k lines
 Functions:        ~290
-Object types:     ~45
+Object types:     ~45 (including Value types)
 ```
 ### 2021-04-01
 
@@ -3901,6 +3925,15 @@ Java code:        ~21k lines
 Functions:        317
 Object types:     36
 Value types:      12
+```
+### 2021-09-26
+
+```
+Script code:      10922 lines
+Java code:        23907 lines
+Functions:        377
+Object types:     57
+Value types:      13
 ```
 ## Poor man's EXIF date parser
 

@@ -315,4 +315,5 @@ Comments and digressions
  * Script and code size
  |   2020-11-13
  |   2021-04-01
+ |   2021-09-26
  * Poor man's EXIF date parser
