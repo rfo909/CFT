@@ -15,7 +15,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>
 */
 
-package rf.configtool.main.runtime.lib;
+package rf.configtool.main.runtime.lib.math;
 
 import java.io.*;
 import java.util.*;
@@ -41,6 +41,7 @@ public class ObjMath extends Obj {
         this.add(new FunctionSin());
         this.add(new FunctionPI());
         this.add(new FunctionSqrt());
+        this.add(new FunctionDD());
     }
     
     @Override
@@ -122,7 +123,7 @@ public class ObjMath extends Obj {
             return "sqrt(value) - return square root";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 1) throw new Exception("Expected no parameters");
+            if (params.size() != 1) throw new Exception("Expected value parameters");
             double value=getFloat("value", params, 0);
             return new ValueFloat(Math.sqrt(value));
         }
@@ -132,5 +133,18 @@ public class ObjMath extends Obj {
     
     private double toRadians (double deg) {
         return 2*Math.PI * deg / 360.0;
+    }
+    
+    class FunctionDD extends Function {
+        public String getName() {
+            return "DD";
+        }
+        public String getShortDesc() {
+            return "DD() - create object for 2D (vector) calculations";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueObj(new ObjDD());
+        }
     }
 }

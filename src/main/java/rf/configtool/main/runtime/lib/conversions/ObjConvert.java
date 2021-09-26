@@ -34,8 +34,8 @@ import rf.configtool.main.runtime.ValueList;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
 import rf.configtool.main.runtime.lib.ObjData;
-import rf.configtool.main.runtime.lib.ObjMath;
 import rf.configtool.main.runtime.lib.ObjPlot;
+import rf.configtool.main.runtime.lib.math.ObjMath;
 
 import java.awt.Color;
 

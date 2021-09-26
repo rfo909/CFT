@@ -13,6 +13,26 @@
 
 <h1>CFT Change log</h1>
 
+<h3>v2.7.2 2021-09-26 2D-vector math</h3>
+<p>
+	Added ancient code for 2D vector math, back from 2001. Needed this to do 
+	material and angle calculations, building a garden shed :-)
+</p>
+<p>
+	The Lib.Math.DD object contains a single function, Vec(x,y), but considering
+	adding simple renderer in here.
+</p>
+<pre>
+# Utility
+# --
+	Lib.Math.DD.Vec(P(1),P(2))
+/vec
+
+vec(10,0).rotate(45).x
+</pre>
+
+
+
 <h3>v2.7.1 2021-09-09 Dead code removal</h3>
 <p>
 	Removed unused code from Java package rf.configtool.util.net. 
