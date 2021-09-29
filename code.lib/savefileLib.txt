@@ -41,6 +41,7 @@ choice.
 
 
 # Edit file
+# --
     P(1,Sys.savefile) => file
 	P(2,true) => detach
 	
@@ -71,6 +72,7 @@ choice.
 
 
 # Page through file
+# --
     P(1,Sys.savefile) =>file
     if(Sys.isWindows)
         Dir.run("cmd", "/c", "more", file.path)
@@ -110,7 +112,8 @@ choice.
 
 
 
-# Update Cfg with terminal size (if possible)
+# Update terminal size (if possible)
+# --
     false =>updated
     if(!Sys.isWindows) {
         # Linux
@@ -171,6 +174,7 @@ choice.
 
 
 # Clear selected Linux editor
+# --
     Db2:Set("Lib","linuxEditor",null)
     "Linux editor selection cleared"
 /ClearEditor
@@ -179,30 +183,33 @@ choice.
 
 # Get the private dir
 # --
-Sys.homeDir.sub("private") =>d
-if(!d.exists) d.create
-d
+	Sys.homeDir.sub("private") =>d
+	if(!d.exists) d.create
+	d
 /DirPrivate
 
 
 
-# Get hostname if defined
+# Get hostname string if defined (used in prompt)
 # --
 	Db2:Get("Lib","hostname")
 /Hostname
 
 
 
-# Set hostname
-	Db2:Set("Lib","hostname", readLine("Hostname"))
+# Set hostname string (used in prompt)
+# --
+	P(1,readLine("Hostname"))=>hostName
+	Db2:Set("Lib","hostname", hostName)
 /SetHostname
 
 
 
 
 # Create name of temp file under /tmp or under c:\temp if windows
-P(1,"tmp") =>name 
-P(2,"txt") => type
+# --
+	P(1,"tmp") =>name 
+	P(2,"txt") => type
 	Util:Counter("Lib.TmpFile.id") => x
 	s=name+Lib.Db.UUID+"-"+x+"."+type
     if (Sys.isWindows,
@@ -213,7 +220,8 @@ P(2,"txt") => type
 
 
 # Create temporary directory - remember to delete it when done
-P(1,"tmp") => name
+# --
+	P(1,"tmp") => name
 	if (Sys.isWindows,
 		Dir("c:\temp\"+name+currentTimeMillis),
 		Dir("/tmp/"+name+currentTimeMillis)
@@ -227,11 +235,11 @@ P(1,"tmp") => name
 
 # Copy directory tree. Both fromDir and toDir must exist.
 # --
-P(1) => fromDir
-P(2) => toDir
-P(3,false) => verbose
-P(4,true) => execute  # set false to do "dry run"
-P(5, Lambda{true}) => LInclude
+	P(1) => fromDir
+	P(2) => toDir
+	P(3,false) => verbose
+	P(4,true) => execute  # set false to do "dry run"
+	P(5, Lambda{true}) => LInclude
 
 	error(!fromDir.exists, "Invalid fromDir: " + fromDir.path)
 	error(execute && !toDir.exists, "Invalid toDir: " + toDir.path)
@@ -256,9 +264,9 @@ P(5, Lambda{true}) => LInclude
 
 # Compare files from source tree to target tree, prints report to stdout
 # --
-P(1) => fromDir
-P(2) => toDir
-P(3,true) => recurse
+	P(1) => fromDir
+	P(2) => toDir
+	P(3,true) => recurse
 
 	error(!fromDir.exists, "Invalid fromDir: " + fromDir.path)
 	error(!toDir.exists, "Invalid toDir: " + toDir.path)
@@ -287,7 +295,7 @@ P(3,true) => recurse
 # Delete directory tree, asks for interactive confirm
 # Leaves root directory
 # --
-P(1)=>xdir
+	P(1)=>xdir
 	Sequence(
 		@
 		@ ------------------------------------------
@@ -322,10 +330,10 @@ P(1)=>xdir
 #     a.wait.call => aResult
 #     b.wait.call => bResult
 # --
-P(1,List("ls","-l")) => cmd
-P(2,List) => stdinLines
-P(3,false) => acceptErrors
-P(4,false) => showDebug
+	P(1,List("ls","-l")) => cmd
+	P(2,List) => stdinLines
+	P(3,false) => acceptErrors
+	P(4,false) => showDebug
 
     if (getType(cmd) != "List") {
         cmd=List(cmd) # wrap as list
@@ -422,10 +430,10 @@ P(4,false) => showDebug
 # Run external program and collect stdout, stderr and exitCode - returns Dict
 # with fields cmd, stdin, stdout, stderr, exitCode
 # --
-P(1,List("ls","-l")) => cmd
-P(2,List) => stdinLines
-P(3,false) => acceptErrors
-P(4,false) => showDebug
+	P(1,List("ls","-l")) => cmd
+	P(2,List) => stdinLines
+	P(3,false) => acceptErrors
+	P(4,false) => showDebug
 
 	runProcess (cmd,stdinLines,acceptErrors,showDebug) => processDict
 	
@@ -440,6 +448,7 @@ P(4,false) => showDebug
 
 
 # Show a list of options
+# --
     P(1,List) =>options
     P(2,Lambda { "name"}) =>LLabel
         options->x
@@ -478,6 +487,7 @@ P(4,false) => showDebug
 
 
 # Display text with line under
+# --
     P(1,"Title") =>title
     println
     println(title)
@@ -587,9 +597,9 @@ P(1,"label") =>label P(2) =>currVal P(3,"yes") =>trueVal P(4,"no") =>falseVal
 
 # Get confirmation (true or false)
 # --
-P(1,"Please confirm")=>label
-P(2,"yes")=>confirmString
-P(3,"no")=>defaultValue
+	P(1,"Please confirm")=>label
+	P(2,"yes")=>confirmString
+	P(3,"no")=>defaultValue
 	readLine(label + " ("+defaultValue+")") => inp
 	if (inp.trim=="") inp=defaultValue
 	
@@ -600,8 +610,8 @@ P(3,"no")=>defaultValue
 
 
 # If value is Dict, for each key found, return corresponding value (as list). Otherwise true if value found, false if not found
-P(1,List) =>lines
-P(2) =>value
+	P(1,List) =>lines
+	P(2) =>value
     if(getType(value)=="Dict") Inner{
         # match keys and result corresponding values as list
         dict=value
@@ -809,6 +819,3 @@ P(2) =>value
 /ClipboardPaste
 
 
-
-
-	
