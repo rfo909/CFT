@@ -216,12 +216,7 @@ public abstract class Obj {
         ObjGlobal objGlobal=ctx.getObjGlobal();
         OutText outText=ctx.getOutText();
         if (this instanceof ObjGlobal) {
-            objGlobal.addSystemMessage("-------------------------------------------------");
-            objGlobal.addSystemMessage("Please read the full documentation: doc/Doc.html");
-            objGlobal.addSystemMessage("-------------------------------------------------");
             objGlobal.addSystemMessage(new Version().getVersion());
-            objGlobal.addSystemMessage("");
-            objGlobal.addSystemMessage("Global functions");
             objGlobal.addSystemMessage("");
         } 
         
@@ -234,6 +229,7 @@ public abstract class Obj {
         
         List<String> fNames=new ArrayList<String>();        
         Iterator<String> names=functions.keySet().iterator();
+        
         while(names.hasNext()) {
             String name=names.next();
             fNames.add(name);
@@ -243,9 +239,20 @@ public abstract class Obj {
                 return a.compareTo(b);
             }
         });
-
+        
+        
+        boolean foundSpecial=false;
         for (String name:fNames) {
-            objGlobal.addSystemMessage(functions.get(name).getShortDesc());
+        	if (name.startsWith("_")) {
+        		objGlobal.addSystemMessage(functions.get(name).getShortDesc());
+        		foundSpecial=true;
+        	}
+        }
+        if (foundSpecial) {
+        	objGlobal.addSystemMessage("");
+        }
+        for (String name:fNames) {
+        	if (!name.startsWith("_")) objGlobal.addSystemMessage(functions.get(name).getShortDesc());
         }
     }
 

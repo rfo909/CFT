@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2021-09-26 RFO
-v2.7.2
+Last updated: 2021-09-29 RFO
+v2.7.3
 ```
 # Introduction
 
@@ -3767,11 +3767,12 @@ These are the statements in CFT:
 - interactive commands "cat", "edit", "ls", "cd"
 
 
-- the "shell" command
-
-
 - the "showCode" command
 
+
+
+**v2.7.3** Added global function _Stmt that displays
+info about statements in CFT.
 
 # Reference: Colon commands
 

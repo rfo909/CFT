@@ -123,6 +123,7 @@ public class ObjGlobal extends Obj {
         add(new FunctionGetType());
         add(new FunctionGetExprCount());
         add(new FunctionBinary());
+        add(new FunctionStmtList());
 
         // name spaces
         add(new FunctionSys());
@@ -906,6 +907,74 @@ public class ObjGlobal extends Obj {
             }
             return new ValueBinary(data);
         }
+        
+    } 
+
+    
+    class FunctionStmtList extends Function {
+        public String getName() {
+            return "_Stmt";
+        }
+        public String getShortDesc() {
+            return "_Stmt() - display information about Statements in CFT";
+        }
+        private String[] data= {
+        	"",
+        	"Statements in CFT",
+        	"-----------------",
+        	"",
+        	"Looping and iteration over lists:", 
+        	"   loop ... break(cond)",
+        	"   list -> variable ...",
+        	"",
+        	"Loop control:",
+        	"   assert(boolExpr)",
+        	"   reject(boolExpr)",
+        	"   break(boolExpr)",
+        	"   break",
+        	"",
+        	"Loop output:",
+        	"   out(expr)",
+        	"   condOut(boolExpr,expr)",
+        	"   report(expr,expr,...)",
+        	"   reporttList(listExpr)",
+        	"",
+        	"The help command shows available functions in objects, and takes two forms:", 
+        	"   help           : show global functions",
+        	"   <value> help   : help about top value on stack",
+        	"",
+        	"Interactive commands:",
+        	"   ls",
+        	"   ls a*.txt",
+        	"   ls /some/path",
+        	"   ls (dirExpr)",
+        	"   cd",
+        	"   cd ../path",
+        	"   cd (dirExpr)",
+        	"   cat file.txt",
+        	"   cat (fileExpr)",
+        	"   edit file.txt",
+        	"   edit (fileExpr)",
+        	"",
+        	"   (note) the ls command comes in two additional variants:",
+        	"       lsd ...   : list directories only",
+        	"       lsf ...   : list files only",
+        	"",
+        	"The printDebug(expr) command", 
+        	"The showCode(strExpr) command (see docs)",
+        	"Profiling with timeExpr(expr)",
+        	"",
+        	"More system commands are implemented as functions in the Sys object:",
+        	"",
+        	"Sys help",
+        };
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	for (String line:data) {
+                ctx.getObjGlobal().addSystemMessage(line);
+        	}
+        	return new ValueBoolean(true);
+        }
+        
         
     } 
 
