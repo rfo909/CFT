@@ -86,6 +86,10 @@
 
 	edit, cat, more
 
+	ls
+	:N
+	edit/cat/more
+
 	@fm
 
 	@S
@@ -105,7 +109,7 @@
 	Unzip/Zip files
 	Convert between CRLF and LF - File.hex
 	Start/stop services (PS)
-	"PS sh"
+	PS:sh
 	...
 
 
