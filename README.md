@@ -99,6 +99,8 @@ Written in Java and built with Maven, which results in a single JAR file.
 
 Tested on both Linux and Windows. 
 
+[Install on Windows](INSTALL_WINDOWS.md)
+
 
 ```
 git clone https://github.com/rfo909/CFT.git

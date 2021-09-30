@@ -1,7 +1,7 @@
 
 # CFT Install on Windows
 
-## Open JDK
+## OpenJDK Java
 
 ### Download 
 
@@ -24,7 +24,7 @@ Start new CMD to get environment variables updated.
 java -version
 ```
 
-## Maven on windows
+## Maven
 
 ### Download
 
@@ -41,3 +41,39 @@ Requires Path to point to java bin-directory, as well as JAVA_HOME as defined ab
 mvn -version
 ```
 
+## GIT
+
+### Check if installed
+
+```
+git --version
+```
+
+### Install 
+
+https://git-scm.com/download/win
+
+This should initiate a download, which when run installs git on your computer. 
+
+
+## CFT
+
+### Clone from Github
+
+```
+git clone https://github.com/rfo909/CFT.git
+```
+
+### Build with maven
+
+```
+cd CFT
+mvn clean package
+```
+
+
+### Run
+
+```
+.\cft
+```
