@@ -25,11 +25,11 @@ winShell = powershell
 # may be null or point to a file.
 # ----
 
-mCat = Lambda { P(1)=>file error(file==null, 'cat: no file') file.read->line println(line) }
+mCat = Lambda { P(1)=>file if(file==null, Lib:GetLastResultFile, file) => file file.read->line println(line) }
 
-mEdit = Lambda { P(1)=>file if(file==null, Sys.savefile, file) => file Lib:e(file) }
+mEdit = Lambda { P(1)=>file if(file==null, Lib:GetLastResultFile, file) => file Lib:e(file) }
 
-mMore = Lambda { P(1)=>file error(file==null, 'more: no file') Lib:m(file) }
+mMore = Lambda { P(1)=>file if(file==null, Lib:GetLastResultFile, file) => file Lib:m(file) }
 
 
 # Shortcuts

@@ -82,6 +82,20 @@ choice.
 
 
 
+# Get file from lastResult if possible, otherwise error
+# --
+	x = Sys.lastResult
+	if (getType(x)=="List") {
+		files=Inner{x->e assert(getType(e)=="File") out(e)}
+		error(files.empty,"No files in lastResult")
+		Lib:MenuSelect(files,Lambda{P(1).name},null,true) => x
+	}
+	error(getType(x)!="File","Not a file")
+	x
+/GetLastResultFile
+
+
+
 # Linux helper
 # --
 	P(1,"ls")=>program

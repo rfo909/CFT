@@ -592,7 +592,10 @@ public class Root {
                 return;
             }
 
-            String s = values.get(pos).synthesize();
+            Value theValue=values.get(pos);
+            lastResult=theValue;
+            
+            String s = theValue.synthesize();
             codeHistory.setCurrLine(s);
             stdio.println("synthesize ok");
             stdio.println("+-----------------------------------------------------");

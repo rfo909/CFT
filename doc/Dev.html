@@ -13,6 +13,22 @@
 
 <h1>CFT Change log</h1>
 
+<h3>v2.7.4 2021-09-30 minor fix :NN</h3>
+<p>
+	Changed the colon command for synthesizing an element in list, so that it also modifies
+	the lastResult value. Have also created a function in Lib script, GetLastResultFile, which
+	is used in CFT.props, as default for cat, edit and more when no file given!
+</p>
+<p>
+	The result is that we can now do this:</p>
+</p>
+<p>
+	ls
+	:3    # synthesizes but also updates lastResult
+	edit  # edit 3'rd file (now lastResult)
+</p>
+
+
 <h3>v2.7.3 2021-09-29 _Stmt() function</h3>
 <p>
 	Added function _Stmt() to GlobalObject, which when run displays info
