@@ -14,7 +14,7 @@ for example under c:\software
 
 Add path to the bin-directory inside the JDK directory to Path environment variable.
 
-Set JAVA_HOME to point to the JDK directory (not the bin-dir).
+Set environment variable JAVA_HOME to point to the JDK directory (which contains the bin directory).
 
 Start new CMD to get environment variables updated.
 
