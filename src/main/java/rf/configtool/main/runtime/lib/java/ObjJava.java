@@ -36,6 +36,7 @@ public class ObjJava extends Obj {
     	this.add(new FunctionString());
     	this.add(new FunctionBoolean());
     	this.add(new FunctionObject());
+    	this.add(new Function_Example());
     }
     
     @Override
@@ -171,7 +172,34 @@ public class ObjJava extends Obj {
         }
     }
    
-
+    class Function_Example extends Function {
+        public String getName() {
+            return "_example";
+        }
+        public String getShortDesc() {
+            return "_example() - display example";
+        }
+        private String[] data= {
+        	"",
+        	"Example",
+        	"-------",
+        	"",
+			"Lib.Java.forName(\"java.lang.String\") => String",
+			"String.getConstructor(String).call(Lib.Java.String(\"test\")) => obj",
+			"String.getConstructor(String).call(Lib.Java.String(\"123\")) => obj2",
+			"Lib.Java.Object(obj2) => paramObj",
+			"String.getMethod(\"concat\",String).call(obj,paramObj).value",
+			"",
+			"Returns string \"test123\"",
+			"",
+        };
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	for (String line:data) {
+                ctx.getObjGlobal().getStdio().println(line);
+        	}
+        	return new ValueBoolean(true);
+        }
+    }
 
 
 }

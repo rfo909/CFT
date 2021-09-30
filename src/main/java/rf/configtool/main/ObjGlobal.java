@@ -970,7 +970,7 @@ public class ObjGlobal extends Obj {
         };
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
         	for (String line:data) {
-                ctx.getObjGlobal().addSystemMessage(line);
+                ctx.getObjGlobal().getStdio().println(line);
         	}
         	return new ValueBoolean(true);
         }
