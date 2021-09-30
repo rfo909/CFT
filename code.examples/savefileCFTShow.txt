@@ -1,0 +1,162 @@
+<<<<< EOF
+.h CFT Intro
+
+	** "CFT" = "ConfigTool"
+
+	** Interpreted language
+	** Functions only, no global variables
+	** Interactive help system
+
+	$ 2+3
+	$ help
+	$ Dir
+	$ Dir help
+	$ File("x") help
+
+	$ "" help
+	$ _Stmt
+
+	$ Dir.files
+	$ Dir.dirs
+
+	$ Dir.allFiles(Glob("*.java"))
+	$ /JavaFiles
+
+	$ JavaFiles
+	$ ?
+
+	$ JavaFiles.length
+
+.h Iteration
+
+	** Iteration over lists
+
+	$ List(1,2,3)->x out("test"+x)
+	$ Dir.files->f out(f.length)
+	$ /sizes
+
+	$ sizes help
+	$ sizes.sum
+	$ JavaFiles->f out(f.read.length) | _.sum
+
+	$ :save Demo
+
+	** Shortcuts
+
+	$ @
+
+	$ @e
+
+	----
+	# Search
+	# --
+		term=Input("Enter search term").get
+		grep=Grep(term)
+		JavaFiles->f
+			grep.file(f)->line
+				report(line.file.name, line.lineNumber, line)
+	/S
+	----
+
+	$ ?
+	$ S
+
+	$ @term
+
+
+.h Projects
+
+	** Script for searching
+
+	$ @scr
+
+	$ @P
+
+	$ curr
+	$ ch
+
+	$ S
+	$ FL
+	
+	$ EditConfig
+
+.h Shell
+
+	ls, lsd, lsf
+
+	edit, cat, more
+
+	@fm
+
+	@S
+	@FL
+
+	$ !dir
+	$ shell
+
+.h Customize
+
+	CFT.props
+	
+
+.h Other 
+	
+	Collect logs from remote hosts
+	Unzip/Zip files
+	Convert between CRLF and LF - File.hex
+	Start/stop services (PS)
+	"PS sh"
+	...
+
+
+	doc/Doc.html
+
+	https://www.youtube.com/playlist?list=PLj58HwpT4Qy80WhDBycFKxIhWFzv5WkwO
+
+	https://www.youtube.com/playlist?list=PLj58HwpT4Qy-12WjM16ALnLGEyy3kxX9r
+
+>>>>> EOF
+//text
+
+
+
+# Process line
+# --
+	P(1) => line
+	P(2) => first
+	if (line.startsWith(".h")) {
+		if (!first) {
+			readLine("Enter")
+		}
+		println(Curses:Clear)
+		Inner {
+			Letters7x5:GetText(line.sub(2).trim.toUpper)->line println(line)
+			|
+			println
+		}
+	} else {
+		println(line)
+	}
+//ProcessLine
+
+
+# Show text
+# --
+	P(1,List) => lines
+	first=true
+	lines->line 
+		ProcessLine(line, first)
+		first=false
+	|
+	"Done"
+//Show
+
+
+
+# Show text
+# --
+	Show(text)
+/t
+
+
+
