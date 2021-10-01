@@ -20,13 +20,13 @@ package rf.configtool.main;
 import java.io.*;
 import java.util.*;
 
-import rf.configtool.data.Stmt;
+import rf.configtool.lexer.Lexer;
+import rf.configtool.lexer.SourceLocation;
+import rf.configtool.lexer.Token;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueString;
 import rf.configtool.main.runtime.lib.ObjDict;
-import rf.configtool.parser.Parser;
-import rf.configtool.parser.SourceLocation;
-import rf.configtool.parser.Token;
+import rf.configtool.parsetree.Stmt;
 import rf.configtool.util.TabUtil;
 
 

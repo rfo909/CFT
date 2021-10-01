@@ -21,7 +21,9 @@ import java.io.*;
 import java.lang.ProcessBuilder.Redirect;
 import java.util.*;
 
-import rf.configtool.data.ProgramLine;
+import rf.configtool.lexer.Lexer;
+import rf.configtool.lexer.SourceLocation;
+import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.runtime.*;
 import rf.configtool.main.runtime.lib.ObjDataFile;
 import rf.configtool.main.runtime.lib.ObjDate;
@@ -43,9 +45,7 @@ import rf.configtool.main.runtime.lib.ValueObjFileLine;
 import rf.configtool.main.runtime.lib.ValueObjInt;
 import rf.configtool.main.runtime.lib.ValueObjFloat;
 import rf.configtool.main.runtime.lib.ValueObjStr;
-import rf.configtool.parser.Parser;
-import rf.configtool.parser.SourceLocation;
-import rf.configtool.parser.TokenStream;
+import rf.configtool.parsetree.ProgramLine;
 import rf.configtool.root.Root;
 import rf.configtool.util.TabUtil;
 

@@ -22,7 +22,10 @@ import java.io.PrintStream;
 import java.lang.ProcessBuilder.Redirect;
 import java.util.*;
 
-import rf.configtool.data.ProgramLine;
+import rf.configtool.lexer.Lexer;
+import rf.configtool.lexer.SourceLocation;
+import rf.configtool.lexer.Token;
+import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueList;
@@ -30,10 +33,7 @@ import rf.configtool.main.runtime.ValueNull;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
 import rf.configtool.main.runtime.reporttool.Report;
-import rf.configtool.parser.Parser;
-import rf.configtool.parser.SourceLocation;
-import rf.configtool.parser.Token;
-import rf.configtool.parser.TokenStream;
+import rf.configtool.parsetree.ProgramLine;
 
 /**
  * Executing one statement at a time, possibly saving last statement in symbol table.

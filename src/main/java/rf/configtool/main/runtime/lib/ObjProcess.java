@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import rf.configtool.data.Expr;
-import rf.configtool.data.ProgramLine;
+import rf.configtool.lexer.CharSource;
+import rf.configtool.lexer.Lexer;
+import rf.configtool.lexer.SourceLocation;
+import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.CodeLine;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.FunctionState;
@@ -15,10 +17,8 @@ import rf.configtool.main.runtime.*;
 import rf.configtool.main.runtime.lib.ObjExtProcess.FunctionDestroy;
 import rf.configtool.main.runtime.lib.ObjExtProcess.FunctionExitCode;
 import rf.configtool.main.runtime.lib.ObjExtProcess.FunctionIsAlive;
-import rf.configtool.parser.CharSource;
-import rf.configtool.parser.Parser;
-import rf.configtool.parser.SourceLocation;
-import rf.configtool.parser.TokenStream;
+import rf.configtool.parsetree.Expr;
+import rf.configtool.parsetree.ProgramLine;
 
 import java.io.BufferedReader;
 import java.io.InputStream;

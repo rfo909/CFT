@@ -19,14 +19,14 @@ package rf.configtool.main.runtime.lib;
 
 import java.util.*;
 
+import rf.configtool.lexer.Lexer;
+import rf.configtool.lexer.SourceLocation;
+import rf.configtool.lexer.Token;
+import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.CodeLine;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.OutText;
 import rf.configtool.main.runtime.*;
-import rf.configtool.parser.Parser;
-import rf.configtool.parser.SourceLocation;
-import rf.configtool.parser.TokenStream;
-import rf.configtool.parser.Token;
 
 /**
  * Non-persistent object to be populated with key-value pairs.
@@ -163,7 +163,7 @@ public class ObjDict extends Obj {
     
     private boolean isIdentifier(String name) {
         try {
-            Parser p=new Parser();
+            Lexer p=new Lexer();
             CodeLine cl=new CodeLine(new SourceLocation("xxx",0,0), name);
             p.processLine (cl);
             TokenStream ts=p.getTokenStream();

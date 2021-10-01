@@ -19,8 +19,8 @@ package rf.configtool.main;
 
 import java.util.*;
 
+import rf.configtool.lexer.SourceLocation;
 import rf.configtool.main.runtime.ValueString;
-import rf.configtool.parser.SourceLocation;
 
 public class CodeInlineDocument {
     private String eofMark;

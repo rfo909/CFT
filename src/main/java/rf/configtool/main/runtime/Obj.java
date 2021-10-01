@@ -21,15 +21,15 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.*;
 
-import rf.configtool.data.ProgramLine;
+import rf.configtool.lexer.Lexer;
+import rf.configtool.lexer.SourceLocation;
+import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.CodeLine;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.ObjGlobal;
 import rf.configtool.main.OutText;
 import rf.configtool.main.Version;
-import rf.configtool.parser.Parser;
-import rf.configtool.parser.SourceLocation;
-import rf.configtool.parser.TokenStream;
+import rf.configtool.parsetree.ProgramLine;
 
 /**
  * Super class of all object types.
@@ -194,7 +194,7 @@ public abstract class Obj {
         try {
             String s=obj.synthesize();
 
-            Parser p=new Parser();
+            Lexer p=new Lexer();
             p.processLine(new CodeLine(new SourceLocation(), s));
             TokenStream ts = p.getTokenStream();
             ProgramLine progLine=new ProgramLine(ts);

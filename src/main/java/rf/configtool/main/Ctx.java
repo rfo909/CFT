@@ -19,16 +19,16 @@ package rf.configtool.main;
 
 import java.util.*;
 
-import rf.configtool.data.Expr;
-import rf.configtool.data.ProgramLine;
-import rf.configtool.data.Stmt;
+import rf.configtool.lexer.Lexer;
+import rf.configtool.lexer.SourceLocation;
+import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueList;
 import rf.configtool.main.runtime.ValueNull;
-import rf.configtool.parser.Parser;
-import rf.configtool.parser.SourceLocation;
-import rf.configtool.parser.TokenStream;
+import rf.configtool.parsetree.Expr;
+import rf.configtool.parsetree.ProgramLine;
+import rf.configtool.parsetree.Stmt;
 
 /**
  * Ctx means context and is a collection of objects required to execute CFT code.
@@ -256,7 +256,7 @@ public class Ctx {
      * Resolve expression on string format
      */
     public Value resolveExpr (String s) throws Exception {
-        Parser p=new Parser();
+        Lexer p=new Lexer();
         p.processLine(new CodeLine(new SourceLocation(), s));
         TokenStream ts = p.getTokenStream();
         ProgramLine progLine=new ProgramLine(ts);

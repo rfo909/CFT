@@ -4,6 +4,10 @@ import java.io.*;
 import java.util.*;
 
 import rf.configtool.main.ScriptCode;
+import rf.configtool.lexer.Lexer;
+import rf.configtool.lexer.SourceLocation;
+import rf.configtool.lexer.Token;
+import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.CodeLine;
 import rf.configtool.main.CodeLines;
 import rf.configtool.main.Ctx;
@@ -22,10 +26,6 @@ import rf.configtool.main.runtime.ValueNull;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
 import rf.configtool.main.runtime.reporttool.Report;
-import rf.configtool.parser.Parser;
-import rf.configtool.parser.SourceLocation;
-import rf.configtool.parser.Token;
-import rf.configtool.parser.TokenStream;
 
 /**
  * The Root class manages a set of parallel script contexts.
@@ -285,7 +285,7 @@ public class Root {
                 stdio.println("$ " + line);
             } 
             // identify input tokens
-            Parser p = new Parser();
+            Lexer p = new Lexer();
             SourceLocation loc = new SourceLocation("input", 0, 0);
             p.processLine(new CodeLine(loc, line));
             ts = p.getTokenStream();

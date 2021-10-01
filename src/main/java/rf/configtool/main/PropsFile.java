@@ -3,7 +3,7 @@ package rf.configtool.main;
 import java.io.*;
 import java.util.*;
 
-import rf.configtool.parser.SourceLocation;
+import rf.configtool.lexer.SourceLocation;
 
 public class PropsFile {
     

@@ -20,6 +20,9 @@ package rf.configtool.main.runtime.lib.text;
 import java.io.*;
 import java.util.*;
 
+import rf.configtool.lexer.CharSource;
+import rf.configtool.lexer.CharTable;
+import rf.configtool.lexer.Lexer;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.OutText;
 import rf.configtool.main.runtime.ColList;
@@ -34,9 +37,6 @@ import rf.configtool.main.runtime.ValueList;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
 import rf.configtool.main.runtime.lib.ObjDict;
-import rf.configtool.parser.CharSource;
-import rf.configtool.parser.CharTable;
-import rf.configtool.parser.Parser;
 
 import java.awt.Color;
 

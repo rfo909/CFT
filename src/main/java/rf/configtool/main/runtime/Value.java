@@ -20,12 +20,12 @@ package rf.configtool.main.runtime;
 import java.util.ArrayList;
 import java.util.List;
 
-import rf.configtool.data.ProgramLine;
+import rf.configtool.lexer.Lexer;
+import rf.configtool.lexer.SourceLocation;
+import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.CodeLine;
 import rf.configtool.main.Ctx;
-import rf.configtool.parser.Parser;
-import rf.configtool.parser.SourceLocation;
-import rf.configtool.parser.TokenStream;
+import rf.configtool.parsetree.ProgramLine;
 
 public abstract class Value extends Obj {
     

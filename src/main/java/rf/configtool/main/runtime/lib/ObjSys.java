@@ -21,7 +21,6 @@ import java.io.*;
 import java.lang.ProcessBuilder.Redirect;
 import java.util.*;
 
-import rf.configtool.data.Expr;
 import rf.configtool.main.CodeLines;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.CtxCloseHook;
@@ -44,6 +43,8 @@ import rf.configtool.main.runtime.ValueBlock;
 import rf.configtool.main.runtime.ValueNull;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
+import rf.configtool.parsetree.Expr;
+
 import java.awt.Color;
 
 public class ObjSys extends Obj {

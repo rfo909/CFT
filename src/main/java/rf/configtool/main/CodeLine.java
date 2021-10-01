@@ -17,7 +17,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.main;
 
-import rf.configtool.parser.SourceLocation;
+import rf.configtool.lexer.SourceLocation;
 
 /**
  * Code lines initially are just the combination of a source location plus a line, but as

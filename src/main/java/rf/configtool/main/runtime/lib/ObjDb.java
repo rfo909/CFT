@@ -21,7 +21,6 @@ import java.io.*;
 import java.lang.ProcessBuilder.Redirect;
 import java.util.*;
 
-import rf.configtool.data.Expr;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.CtxCloseHook;
 import rf.configtool.main.SoftErrorException;
@@ -41,6 +40,7 @@ import rf.configtool.main.runtime.ValueNull;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
 import rf.configtool.main.runtime.lib.db2.ObjDb2;
+import rf.configtool.parsetree.Expr;
 
 public class ObjDb extends Obj {
 

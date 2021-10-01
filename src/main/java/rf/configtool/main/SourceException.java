@@ -1,6 +1,6 @@
 package rf.configtool.main;
 
-import rf.configtool.parser.SourceLocation;
+import rf.configtool.lexer.SourceLocation;
 
 /**
  * Exceptions arising in own code, which can relate to a source location, should throw this. In addition, 

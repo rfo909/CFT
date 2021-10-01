@@ -19,8 +19,6 @@ package rf.configtool.main.runtime;
 
 import java.util.*;
 
-import rf.configtool.data.ProgramLine;
-import rf.configtool.data.Stmt;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.FunctionState;
 import rf.configtool.main.ObjGlobal;
@@ -29,6 +27,8 @@ import rf.configtool.main.OutText;
 import rf.configtool.main.runtime.lib.ObjDict;
 import rf.configtool.main.runtime.lib.ObjGrep;
 import rf.configtool.main.runtime.reporttool.Report;
+import rf.configtool.parsetree.ProgramLine;
+import rf.configtool.parsetree.Stmt;
 
 /**
  * Block of code - takes three different forms, but only one is available as

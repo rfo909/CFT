@@ -22,7 +22,6 @@ import java.lang.ProcessBuilder.Redirect;
 import java.security.MessageDigest;
 import java.util.*;
 
-import rf.configtool.data.Expr;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.CtxCloseHook;
 import rf.configtool.main.SoftErrorException;
@@ -33,6 +32,7 @@ import rf.configtool.main.runtime.*;
 import rf.configtool.main.runtime.lib.ObjDate;
 import rf.configtool.main.runtime.lib.ObjDict;
 import rf.configtool.main.runtime.lib.db2.ObjDb2;
+import rf.configtool.parsetree.Expr;
 
 import com.microsoft.sqlserver.jdbc.ISQLServerBulkData;
 import com.microsoft.sqlserver.jdbc.ISQLServerBulkRecord;

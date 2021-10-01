@@ -2,7 +2,7 @@ package rf.configtool.main;
 
 import java.util.*;
 
-import rf.configtool.data.ProgramLine;
+import rf.configtool.parsetree.ProgramLine;
 
 /**
  * Caching parsed function bodies, with periodic purge, as command line inputs are
