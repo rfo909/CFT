@@ -50,7 +50,13 @@ import rf.configtool.root.Root;
 import rf.configtool.util.TabUtil;
 
 /**
- * Note that actions without a return value, are statements, and must be parsed
+ * ObjGlobal is a global store of state ... per script in memory. The global object managing
+ * these is the Root class.
+ * 
+ * ObjGlobal contains all the global functions.
+ * 
+ * Note that actions without a return value, are implemented as statements, which are parsed
+ * individually according to syntax.
  */
 public class ObjGlobal extends Obj {
     

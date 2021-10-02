@@ -32,7 +32,7 @@ import rf.configtool.main.Version;
 import rf.configtool.parsetree.ProgramLine;
 
 /**
- * Super class of all object types.
+ * Superclass of all object types, including Value hierarchy
  */
 public abstract class Obj {
     

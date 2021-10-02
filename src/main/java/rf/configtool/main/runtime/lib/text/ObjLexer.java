@@ -40,6 +40,10 @@ import rf.configtool.main.runtime.lib.ValueObjFileLine;
 
 import java.awt.Color;
 
+/**
+ * CFT object for doing lexical analysis in script code.
+ *
+ */
 public class ObjLexer extends Obj {
     
     public ObjLexer() {
@@ -47,6 +51,7 @@ public class ObjLexer extends Obj {
         this.add(new FunctionAddLine());
         this.add(new FunctionGetTokens());
         this.add(new FunctionGetTokenStream());
+        this.add(new Function_Example());
     }
     
     @Override
@@ -198,5 +203,73 @@ public class ObjLexer extends Obj {
             return new ValueObj(new ObjLexerTokenStream(identifyTokens(charTable)));
         }
     }
+    
+    
+    class Function_Example extends Function {
+        public String getName() {
+            return "_example";
+        }
+        public String getShortDesc() {
+            return "_example() - display example";
+        }
+        private String[] data= {
+        		"",
+        		"# Example (based on JSON script)",
+        		"# ------------------------------",
+        		"",
+        		"",
+        		"# Build root lexer Node for all known tokens in JSON",
+        		"# --",
+        		"    Lib.Text.Lexer.Node => root",
+        		"    ",
+        		"    root.sub(\"{}:,[]()\").setIsToken(1)  # specials",
+        		"    root.sub(\" ^n^r^t\".unEsc).setIsToken(-1) # whitespace",
+        		"",
+        		"    digits = \"0123456789\"",
+        		"    root.sub(digits+\"-\").setIsToken(2) => integer",
+        		"    integer.sub(digits,integer) # loop back",
+        		"    integer.sub(\".\").sub(digits).setIsToken(3) => float ",
+        		"    float.sub(digits,float) # loop back",
+        		"    ",
+        		"    identFirstChars = \"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_\"",
+        		"    identInnerChars = identFirstChars + digits",
+        		"    ",
+        		"    root.sub(identFirstChars).setIsToken(4) => ident",
+        		"    ident.sub(identInnerChars, ident) # loop back",
+        		"    ",
+        		"    List('\"',\"'\")->c ",
+        		"        root.sub(c) => insideString",
+        		"        insideString.setDefault(insideString)",
+        		"        insideString.sub(\"\\\").setDefault(insideString)",
+        		"        insideString.sub(c).setIsToken(5)",
+        		"    |",
+        		"    ",
+        		"    # return value is the root node",
+        		"    root",
+        		"/RootNode",
+        		"",
+        		"# Takes json string as parameter",
+        		"# --",
+        		"    P(1)=>json",
+        		"",
+        		"    Lib.Text.Lexer => lexer",
+        		"    json->line ",
+        		"        lexer.addLine(line) ",
+        		"    |",
+        		"",
+        		"    RootNode => root",
+        		"    ts=lexer.getTokenStream(root)",
+        		"",
+        		"    MatchValue(ts)",
+        		"/Parse",
+        };
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	for (String line:data) {
+                ctx.getObjGlobal().getStdio().println(line);
+        	}
+        	return new ValueBoolean(true);
+        }
+    }
+
 
 }

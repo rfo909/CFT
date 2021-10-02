@@ -19,6 +19,10 @@ package rf.configtool.main.runtime;
 
 import java.util.*;
 
+/**
+ * For formatting output as columns
+ *
+ */
 public class ColList {
     
     public static final ColList list() {

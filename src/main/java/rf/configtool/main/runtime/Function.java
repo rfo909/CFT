@@ -17,6 +17,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.main.runtime;
 
+/**
+ * Superclass of all functions inside Obj (java objects of the language)
+ * 
+ */
 import java.util.*;
 
 import rf.configtool.main.Ctx;
