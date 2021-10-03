@@ -5,13 +5,13 @@ CFT is an interpreted and interactive language for automation.
 
 *README last updated 2021-10-03*
 
-## Terminal based 
+## Terminal based - shell-like
 
 The REPL makes it act like a shell, with cd, ls, pwd, cat, more and edit, for navigating the 
 directory tree, and inspecting files, but it's really about 
 creating and running functions. 
 
-One-line functions can be created directly from the REPL, but most functions
+One-line functions can be created directly from the command line interface, but most functions
 are created using an editor.
 
 
@@ -73,11 +73,30 @@ hosts->host report(host,SSH:HostOk(host))
 ```
 
 
+# Interactive help
+
+Typing "help" lists all global functions. 
+
+To list functions inside an object, such as string, we type:
+
+```
+$ "" help
+  # add(str) - returns sum of strings
+  # after(str) - return string following given string
+  # afterLast(str) - return string following last position of given string
+  # before(str) - return string up to given string
+  # beforeLast(str) - return string up to last position of given string
+  # between(pre,post) - return string between two given strings
+     :
+     :
+```
+
+
 # Motto
 
 *Unless you script it, (and check it in) it isn't real*
 
-Manual operations are boring, risk errors, poorly documented, and should be avoided. 
+Manual operations are boring, risk errors, hard to keep documented, and should be avoided. 
 
 
 
@@ -97,6 +116,7 @@ mvn package
 $ 2+3
 5
 ```
+
 
 [Detailed walkthrough for Windows](INSTALL_WINDOWS.md).
 
