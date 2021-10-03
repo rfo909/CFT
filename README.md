@@ -1,31 +1,67 @@
 
-# CFT - ConfigTool
+# Automation at all levels
 
-An interpreted and interactive language. 
+CFT is an interpreted and interactive language for automation.
 
 *README last updated 2021-09-09*
 
 ## Terminal based 
 
-Interpreted script language, runs in the terminal, acts somewhat like a shell. Lets you define 
-functions interactively, or using editors. 
+Acts like a shell for navigating the directory tree, etc, but is really about creating and
+running functions. Small functions can be created directly from the REPL, but most functions
+are created using an editor.
 
-It has been in daily use since 2019, and is now considered
-quite stable. 
+## Object oriented
+
+CFT consists of a set of global functions, which return values, such as the current
+directory, an empty dictionary, or a Date object for current time, and so on. These
+in turn have inner functions that we can call:
+
+```
+"test".length
+4
+```
+
+The key concept was to create an interactive and interpreted language inspired by
+PowerShell, working with objects instead of strings, as in bash, but with a more regular syntax.
+
+Still, CFT *does not support* user defined classes, only user defined functions.
+
+Functions are stored in script files, which are really just name spaces. Functions call each
+other, both inside a script and in other scripts. 
+
+## No global state
+
+CFT has no global variables, no script state. This minimizes unwanted side effects. 
+
+
+# Frequent uses
+
+- check out + run build + distribute files + cleanup
+- search project trees
+- collect and search log files 
+- various install and deployment tasks
+
+It's been in daily use since 2019 in my work as a software developer, and is very stable. 
+
+
+
+# Example
 
 ```
 # Ex: check if hosts respond to ping
 #    (The arrow plus identifier is a foreach)
+#    (The  /name lines define functions from the preceding code lines)
 
 List("host1","host2","host3")
 /hosts
 
-hosts->host 
-   report(host,SSH:HostOk(host))
+hosts->host report(host,SSH:HostOk(host))
 /checkPing 
 ```
 
-# Yet another script language??
+
+# Why yet another script language?
 
 The idea behind CFT is to be *object oriented*, like PowerShell, but with a syntax that
 is more regular than both PowerShell and unix shells. 
@@ -33,14 +69,12 @@ is more regular than both PowerShell and unix shells.
 The syntax of CFT is fairly "tiny", and easily learned. Apart from a few oddities, it is quite
 regular, using dotted notation to call functions inside objects, as well as using local variables
 inside functions. There are no fancy string substitution rules, which, though powerful, are also hard 
-to learn and hard to read.
+to learn and harder to read.
 
 To keep it small and simple, there are no classes, just functions. A rich set of system objects, with functions
-inside, provide rich functionality, that is in turn stitched together to do what we want, when we
-create our own functions.
+inside, provide rich functionality, that our functions use.
 
-In some meanings of the term, CFT is almost functional, as there are no global variables, and no user defined
-classes, only functions.
+In some meanings of the term, CFT is almost functional ...
 
 [CFT vs FP](FP.md) 
 
@@ -85,11 +119,9 @@ so that 2+3*5 correctly becomes 17, not 25!
 
 ## Motto
 
-*Unless you script it, it isn't real*
+*Unless you script it, (and check it in) it isn't real*
 
 Manual operations are boring, risk errors, poorly documented, and should be avoided. 
-
-
 
 
 
@@ -99,7 +131,6 @@ Written in Java and built with Maven, which results in a single JAR file.
 
 Tested on both Linux and Windows. 
 
-[Install on Windows](INSTALL_WINDOWS.md)
 
 
 ```
@@ -110,6 +141,8 @@ mvn package
 $ 2+3
 5
 ```
+
+[Detailed walkthrough for Windows](INSTALL_WINDOWS.md).
 
 
 # References
