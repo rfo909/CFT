@@ -207,16 +207,15 @@ public class ObjLexer extends Obj {
     
     class Function_Example extends Function {
         public String getName() {
-            return "_example";
+            return "_Example";
         }
         public String getShortDesc() {
-            return "_example() - display example";
+            return "_Example() - display example";
         }
         private String[] data= {
         		"",
-        		"# Example (based on JSON script)",
-        		"# ------------------------------",
-        		"",
+        		"Example (based on JSON script)",
+        		"------------------------------",
         		"",
         		"# Build root lexer Node for all known tokens in JSON",
         		"# --",
@@ -262,10 +261,15 @@ public class ObjLexer extends Obj {
         		"",
         		"    MatchValue(ts)",
         		"/Parse",
+        		"",
+        		"For details on how to build a recursive-descent parser,",
+        		"see the JSON parser script.",
+        		"",
+        		":load JSON"
         };
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
         	for (String line:data) {
-                ctx.getObjGlobal().getStdio().println(line);
+                ctx.getObjGlobal().addSystemMessage(line);
         	}
         	return new ValueBoolean(true);
         }

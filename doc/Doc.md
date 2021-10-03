@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2021-09-29 RFO
-v2.7.3
+Last updated: 2021-10-03 RFO
+v2.8.2
 ```
 # Introduction
 
@@ -103,6 +103,13 @@ $ Dir.files.length
 
 ```
 $ help
+```
+
+Note also the two global functions, _Stmt and _Expr, which produce summaries
+of statements and expressions.
+```
+$ _Stmt
+$ _Expr
 ```
 # Show functions inside value objects
 
@@ -3769,10 +3776,6 @@ These are the statements in CFT:
 
 - the "showCode" command
 
-
-
-**v2.7.3** Added global function _Stmt that displays
-info about statements in CFT.
 
 # Reference: Colon commands
 

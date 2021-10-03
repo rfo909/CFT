@@ -23,6 +23,7 @@ import java.util.*;
 
 import rf.configtool.lexer.Lexer;
 import rf.configtool.lexer.SourceLocation;
+import rf.configtool.lexer.Token;
 import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.runtime.*;
 import rf.configtool.main.runtime.lib.ObjDataFile;
@@ -45,6 +46,21 @@ import rf.configtool.main.runtime.lib.ValueObjFileLine;
 import rf.configtool.main.runtime.lib.ValueObjInt;
 import rf.configtool.main.runtime.lib.ValueObjFloat;
 import rf.configtool.main.runtime.lib.ValueObjStr;
+import rf.configtool.parsetree.Expr;
+import rf.configtool.parsetree.ExprBlock;
+import rf.configtool.parsetree.ExprCall;
+import rf.configtool.parsetree.ExprE;
+import rf.configtool.parsetree.ExprIf;
+import rf.configtool.parsetree.ExprLookupOrCall;
+import rf.configtool.parsetree.ExprParamLookup;
+import rf.configtool.parsetree.ExprParamLookupDict;
+import rf.configtool.parsetree.ExprPop;
+import rf.configtool.parsetree.ExprPwd;
+import rf.configtool.parsetree.ExprSequence;
+import rf.configtool.parsetree.ExprSpawnProcess;
+import rf.configtool.parsetree.ExprSymDict;
+import rf.configtool.parsetree.ExprTryCatch;
+import rf.configtool.parsetree.ExprTryCatchSoft;
 import rf.configtool.parsetree.ProgramLine;
 import rf.configtool.root.Root;
 import rf.configtool.util.TabUtil;
@@ -129,7 +145,8 @@ public class ObjGlobal extends Obj {
         add(new FunctionGetType());
         add(new FunctionGetExprCount());
         add(new FunctionBinary());
-        add(new FunctionStmtList());
+        add(new Function_Stmt());
+        add(new Function_Expr());
 
         // name spaces
         add(new FunctionSys());
@@ -917,7 +934,7 @@ public class ObjGlobal extends Obj {
     } 
 
     
-    class FunctionStmtList extends Function {
+    class Function_Stmt extends Function {
         public String getName() {
             return "_Stmt";
         }
@@ -970,19 +987,87 @@ public class ObjGlobal extends Obj {
         	"The showCode(strExpr) command (see docs)",
         	"Profiling with timeExpr(expr)",
         	"",
+        	"Expressions are also statements",
+        	"",
         	"More system commands are implemented as functions in the Sys object:",
         	"",
         	"Sys help",
         };
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
         	for (String line:data) {
-                ctx.getObjGlobal().getStdio().println(line);
+                ctx.getObjGlobal().addSystemMessage(line);
+        	}
+        	return new ValueBoolean(true);
+        }        
+    } 
+    
+    class Function_Expr extends Function {
+        public String getName() {
+            return "_Expr";
+        }
+        public String getShortDesc() {
+            return "_Expr() - display information about expressions in CFT";
+        }
+        private String[] data= {
+        	"",
+        	"Expressions in CFT",
+        	"------------------",
+        	"",
+        	"Logical",
+        	"   bool || bool",
+        	"   bool && bool",
+        	"",
+        	"Compare",
+        	"   >  <  >=  <= == !=",
+        	"",
+        	"Calculate",
+        	"",
+        	"   + - * / % div",
+        	"",
+        	"Various",
+        	"   ( expr )",
+        	"   !expr",
+        	"   -expr",
+        	"   _",
+        	"   if(expr,expr,expr)",
+        	"   if(expr) Stmt [else Stmt]",
+        	"       (note that Expr is a valid Stmt)",
+        	"   pwd",
+        	"   null",
+        	"   ScriptName:func(...)",
+        	"   tryCatch(Expr)",
+        	"   tryCatchSoft(Expr)",
+        	"   Sequence(Expr ...)    - may omit commas",
+        	"   CondSequence(BoolExpr Expr ...)",
+        	"   SymDict(ident,...)",
+        	"   Inner{...}",
+        	"   Lambda{...}",
+        	"   P(N[,expr])",
+        	"   PDict(Str,...)",
+        	"",
+        	"Value tokens",
+        	"   int, string, float",
+        	"   true",
+        	"   false",
+        	"",
+        	"Function calls",
+        	"   func",
+        	"   func(...)",
+        	"",
+        	"Dotted lookup",
+        	"   a.b.c(...).d.e",
+        	""
+        };
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	for (String line:data) {
+                ctx.getObjGlobal().addSystemMessage(line);
         	}
         	return new ValueBoolean(true);
         }
         
         
     } 
+
 
 
 }

@@ -174,10 +174,10 @@ public class ObjJava extends Obj {
    
     class Function_Example extends Function {
         public String getName() {
-            return "_example";
+            return "_Example";
         }
         public String getShortDesc() {
-            return "_example() - display example";
+            return "_Example() - display example";
         }
         private String[] data= {
         	"",
@@ -195,7 +195,7 @@ public class ObjJava extends Obj {
         };
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
         	for (String line:data) {
-                ctx.getObjGlobal().getStdio().println(line);
+                ctx.getObjGlobal().addSystemMessage(line);
         	}
         	return new ValueBoolean(true);
         }
