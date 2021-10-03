@@ -81,7 +81,6 @@ To list functions inside an object, such as string, we type:
 
 ```
 $ "" help
-  # add(str) - returns sum of strings
   # after(str) - return string following given string
   # afterLast(str) - return string following last position of given string
   # before(str) - return string up to given string

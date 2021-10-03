@@ -39,7 +39,6 @@ public class ValueString extends Value {
 				new FunctionSub(),
 				new FunctionLength(),
 				new FunctionTrim(),
-				new FunctionAdd(),
 				new FunctionSplit(),
 				new FunctionEndsWith(),
 				new FunctionStartsWith(),
@@ -179,23 +178,6 @@ public class ValueString extends Value {
         }
 
     }
-    
-    class FunctionAdd extends Function {
-        public String getName() {
-            return "add";
-        }
-        public String getShortDesc() {
-            return "add(str) - returns sum of strings";
-        }
-        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size()==1) {
-                return new ValueString(val + params.get(0).getValAsString());
-            } else {
-                throw new Exception("Expected one string parameter");
-            }
-        }
-    }
-    
     
     class FunctionSplit extends Function {
         public String getName() {
