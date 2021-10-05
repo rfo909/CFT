@@ -7,12 +7,23 @@ CFT is an interpreted and interactive language for automation.
 
 ## Terminal based - shell-like
 
-The REPL makes it act like a shell, with cd, ls, pwd, cat, more and edit, for navigating the 
-directory tree, and inspecting files, but it's really about 
-creating and running functions. 
+The REPL makes it act like a shell, for navigating the directory tree, and inspecting files:
 
-One-line functions can be created directly from the command line interface, but most functions
-are created using an editor.
+- cd
+- ls
+- pwd
+- cat 
+- more
+- edit
+
+However, CFT is really about creating and running functions.
+
+Originally, the idea was to build code from the bottom up, one line at a time, interactively,
+but nowadays we usually edit script code in some editor. 
+
+The shortcut @e opens current script file to be edited in notepad or notepad++ on windows, and 
+whatever preferred editor is selected on Linux.
+
 
 ### Shortcuts
 
@@ -23,12 +34,18 @@ the CFT.props file, and by default include:
 @e       - open current script in editor
 @fm      - open file manager for current dir
 @home    - move to script directory
-@c       - copy selection of files to clipboard
+@c       - copy selection of files to clipboard, to be copied on @v
+@x       - copy selection of files to clipboard, to be moved on @v
 @v       - paste selection of files to current dir
 ```
 
 The shortcut character '@' can be changed, also in CFT.props.
 
+### Use protection
+
+CFT has a built-in protection mechanism that may help us avoid modifying critical data on live
+systems, such as database files, persistens logs etc. Read more about it in the docs, or view
+the Youtube tutorial video [episode six](https://www.youtube.com/watch?v=7e-f1gudxpE&list=PLj58HwpT4Qy80WhDBycFKxIhWFzv5WkwO&index=7).
 
 ## Object oriented - functional
 
