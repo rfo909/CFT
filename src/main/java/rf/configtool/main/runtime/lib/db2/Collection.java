@@ -6,13 +6,22 @@ import java.io.*;
 public class Collection {
     
     private FileInfo fileInfo;
+    private File lockFile;
     
     private Map<String,String> data;
+
+    private void getLock() throws Exception {
+    	CollectionLock.obtainLock(lockFile);
+    }
     
+    private void freeLock () throws Exception {
+    	CollectionLock.freeLock(lockFile);
+    }
 
     public Collection (FileInfo fileInfo) {
         this.fileInfo=fileInfo;
         if (fileInfo==null) throw new RuntimeException("fileInfo==null");
+        lockFile=new File(fileInfo.getFile().getPath()+".lock");
     }
     
     public synchronized void addData (String key, String value) throws Exception {
@@ -20,13 +29,18 @@ public class Collection {
         if (value.contains("\r") || value.contains("\n")) throw new Exception("Invalid value: \\r\\n forbidden");
 
         // Can NOT do checkForUpdate here, since it will severely degrade write performance
-        File f=fileInfo.getFile();
-        PrintStream ps = new PrintStream (new FileOutputStream(f, true));
-        try {
-            ps.println(key + " " + value);
-        } finally {
-            if (ps != null) try {ps.close();} catch (Exception ex) {};
-        }
+    	getLock();
+    	try {
+	        File f=fileInfo.getFile();
+	        PrintStream ps = new PrintStream (new FileOutputStream(f, true));
+	        try {
+	            ps.println(key + " " + value);
+	        } finally {
+	            if (ps != null) try {ps.close();} catch (Exception ex) {};
+	        }
+    	} finally {
+    		freeLock();
+    	}
     }
     
     public synchronized String getData (String key) throws Exception {
@@ -55,22 +69,52 @@ public class Collection {
     }
     
     private void readFromFile () throws Exception {
-        data=new HashMap<String,String>();
-        File f=fileInfo.getFile();
-        if (!f.exists()) return;
+    	getLock();
+    	try {
+	        data=new HashMap<String,String>();
+	        File f=fileInfo.getFile();
+	        if (!f.exists()) return;
+	        
+	        int dataLinesRead=0;
+	
+	        BufferedReader br=new BufferedReader(new FileReader(f));
+	        try {
+	            for (;;) {
+	                String line=br.readLine();
+	                if (line==null) break;
+	                if (line.length()==0) continue;
+	                
+	                dataLinesRead++;
+	                int pos=line.indexOf(' ');
+	                data.put(line.substring(0,pos), line.substring(pos+1));
+	            }
+	        } finally {
+	            if (br != null) try {br.close();} catch (Exception ex) {};
+	        }
+	        
+	        int diff=dataLinesRead - data.keySet().size();
+	        //System.out.println("#### Collection " + f.getName() + " diff=" + diff);
+	        if (dataLinesRead > data.keySet().size()*2 && diff > 5) {
+	        	//System.out.println("Compacting collection " + f.getName() + " " + dataLinesRead + " -> " + data.keySet().size());
+	        	
+	        	// Note: can NOT call addData() as it uses the lock too, and nested calls
+	        	// obtaining the lock WILL fail
 
-        BufferedReader br=new BufferedReader(new FileReader(f));
-        try {
-            for (;;) {
-                String line=br.readLine();
-                if (line==null) break;
-                if (line.length()==0) continue;
-                int pos=line.indexOf(' ');
-                data.put(line.substring(0,pos), line.substring(pos+1));
-            }
-        } finally {
-            if (br != null) try {br.close();} catch (Exception ex) {};
-        }
+		        PrintStream ps = null;
+		        try {
+			        ps = new PrintStream (new FileOutputStream(f, false));  // no append
+			        for (String key:data.keySet()) {
+			        	String value=data.get(key);
+			            ps.println(key + " " + value);
+			        }
+		        } finally {
+		            if (ps != null) try {ps.close();} catch (Exception ex) {};
+		        }
+		        
+	        }
+    	} finally {
+    		freeLock();
+    	}
     }
 
 
