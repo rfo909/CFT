@@ -156,11 +156,9 @@ It's been in daily use since 2019 in my work as a software developer, and is sta
 
 # Create report
 # --
-	processes=List
-	hosts->host 
-		processes.add(SpawnProcess(SymDict(host), SSH:HostOk(host)))
-	|
-	processes->proc
+	hosts -> host 
+		out(SpawnProcess(SymDict(host), SSH:HostOk(host)))
+	| -> proc
 		println("Waiting for " + proc.data.host)
 		proc.wait
 		report(proc.data.host, proc.exitValue)
