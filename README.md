@@ -156,9 +156,9 @@ It's been in daily use since 2019 in my work as a software developer, and is sta
 
 # Create report
 # --
-	hosts -> host 
+	hosts->host 
 		out(SpawnProcess(SymDict(host), SSH:HostOk(host)))
-	| -> proc
+	| ->proc
 		println("Waiting for " + proc.data.host)
 		proc.wait
 		report(proc.data.host, proc.exitValue)
