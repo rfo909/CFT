@@ -23,11 +23,9 @@ However, CFT is really about creating and running *functions*.
 ## Functions
 
 Functions are collected in script files, and can call each other, as well as functions in
-other scripts. 
+other scripts, as well as inside system objects. 
 
-The system library consists of some 
-
-- 70+ object types
+- 70+ system object types
 - 370+ library functions
 
 About 30 of the library functions are global, the rest exist inside different object types.
@@ -39,13 +37,15 @@ About 30 of the library functions are global, the rest exist inside different ob
 - integrated help system
 - lists and dictionaries
 - run external programs
-- text templating with merge code processing
+- (inline) text templating with merge code processing
 - spawn CFT expressions as background threads
 - lambdas and closures
 - tryCatch with two-tiered exception hierarchy ("soft" and "hard")
-- integrated data store (Db2) for complex data structures (lists, dictionaries etc)
+- integrated data store (Db2) 
 - integrated encryption 
-- integrated lexer; JSON parser implemented as CFT script
+- integrated lexer; full JSON parser is implemented as CFT script
+
+### Editing script code
 
 Originally, the idea was to build code from the bottom up, one line at a time, interactively,
 but nowadays we usually edit script code in some editor. 
@@ -60,7 +60,7 @@ The documentation is extensive, and kept up-to-date. There also is a Youtube tut
 another playlist with shorter "howto"-videos.
 
 
-## Shortcuts
+### Shortcuts
 
 Frequently used commands or command sequences can be stored as shortcuts. These are defined in
 the CFT.props file, and by default include:
@@ -74,7 +74,7 @@ the CFT.props file, and by default include:
 @v       - paste selection of files to current dir
 ```
 
-## Protection mechanism
+### Protection mechanism
 
 CFT has a built-in protection mechanism that may help us avoid modifying critical data on live
 systems, such as database files, persistens logs etc. Read more about it in the docs, or view
@@ -126,17 +126,44 @@ It's been in daily use since 2019 in my work as a software developer, and is sta
 
 
 
-## Example
+## Example: ping hosts
 
 ```
 # Ex: check if hosts respond to ping
 #    (The arrow plus identifier is a foreach)
 #    (The  /name lines define functions from the preceding code lines)
 
-List("host1","host2","host3")
+# Define hosts
+# --
+	List("host1","host2","host3")
 /hosts
 
-hosts->host report(host,SSH:HostOk(host))
+
+# Create report
+# --
+	hosts->host report(host,SSH:HostOk(host))
+/checkPing 
+```
+
+### Rewritten to do parallel pings
+
+```
+# Define hosts
+# --
+	List("host1","host2","host3")
+/hosts
+
+
+# Create report
+# --
+	processes=List
+	hosts->host 
+		processes.add(SpawnProcess(SymDict(host), SSH:HostOk(host)))
+	|
+	processes->proc
+		println("Waiting for " + proc.data.host)
+		proc.wait
+		report(proc.data.host, proc.exitValue)
 /checkPing 
 ```
 
