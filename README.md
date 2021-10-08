@@ -39,21 +39,26 @@ About 30 of the library functions are global, the rest exist inside different ob
 - integrated help system
 - lists and dictionaries
 - run external programs
+- text templating with merge code processing
 - spawn CFT expressions as background threads
 - lambdas and closures
-- text templating with merge code processing
 - tryCatch with two-tiered exception hierarchy ("soft" and "hard")
-- integrated database storing complex data structures (lists, dictionaries etc)
+- integrated data store (Db2) for complex data structures (lists, dictionaries etc)
 - integrated encryption 
 - integrated lexer; JSON parser implemented as CFT script
-- protection mechanism for files and directories
-- extensive and up-to-date documentation + Youtube videos
 
 Originally, the idea was to build code from the bottom up, one line at a time, interactively,
 but nowadays we usually edit script code in some editor. 
 
 The shortcut @e opens current script file to be edited in notepad or notepad++ on windows, and 
 whatever preferred editor is selected on Linux.
+
+
+### Documentation
+
+The documentation is extensive, and kept up-to-date. There also is a Youtube tutorial, plus
+another playlist with shorter "howto"-videos.
+
 
 ## Shortcuts
 
@@ -104,7 +109,9 @@ call each other, both inside a script and in other scripts.
 
 ## No global state
 
-CFT has no global variables, no script state. This minimizes unwanted side effects. 
+CFT has no global variables, no script state, unless using files or the integrated Db2 data store. 
+
+This minimizes unwanted side effects. 
 
 
 ## Frequent uses
