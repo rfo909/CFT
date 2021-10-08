@@ -1,11 +1,13 @@
 
 # Automation at all levels
 
-CFT is an interpreted and interactive language for automation.
+CFT is an interpreted and interactive shell and programming language. It was initiated
+because of a need for a do-all tool in my job as a developer, and from my long lasting
+interest in parsers and interpreters.
 
-*README last updated 2021-10-03*
+*README last updated 2021-10-08*
 
-## Terminal based - shell-like
+## Terminal based - shell-like - programmable
 
 The REPL makes it act like a shell, for navigating the directory tree, and inspecting files:
 
@@ -16,7 +18,30 @@ The REPL makes it act like a shell, for navigating the directory tree, and inspe
 - more
 - edit
 
-However, CFT is really about creating and running functions.
+However, CFT is really about creating and running *functions*.
+
+## Functions
+
+Functions are collected in script files, and can call each other, as well as functions in
+other scripts. The system library consists of some 70+ object types, each
+with member functions, for a total of some 370+ library functions (about 30 of them are global).
+
+## Functionality
+
+- shell-like command line interface / REPL
+- create functions, do interactive testing
+- integrated help system
+- lists and dictionaries
+- run external programs
+- spawn CFT expressions as background threads
+- lambdas and closures
+- text templating with merge code processing
+- tryCatch with two-tiered exception hierarchy ("soft" and "hard")
+- integrated database storing complex data structures (lists, dictionaries etc)
+- integrated encryption 
+- integrated lexer; JSON parser implemented as CFT script
+- protection mechanism for files and directories
+- extensive and up-to-date documentation + Youtube videos
 
 Originally, the idea was to build code from the bottom up, one line at a time, interactively,
 but nowadays we usually edit script code in some editor. 
@@ -24,8 +49,7 @@ but nowadays we usually edit script code in some editor.
 The shortcut @e opens current script file to be edited in notepad or notepad++ on windows, and 
 whatever preferred editor is selected on Linux.
 
-
-### Shortcuts
+## Shortcuts
 
 Frequently used commands or command sequences can be stored as shortcuts. These are defined in
 the CFT.props file, and by default include:
@@ -39,9 +63,7 @@ the CFT.props file, and by default include:
 @v       - paste selection of files to current dir
 ```
 
-The shortcut character '@' can be changed, also in CFT.props.
-
-### Use protection
+## Protection mechanism
 
 CFT has a built-in protection mechanism that may help us avoid modifying critical data on live
 systems, such as database files, persistens logs etc. Read more about it in the docs, or view
@@ -79,7 +101,7 @@ call each other, both inside a script and in other scripts.
 CFT has no global variables, no script state. This minimizes unwanted side effects. 
 
 
-# Frequent uses
+## Frequent uses
 
 - check out + run build + distribute files + cleanup
 - search project trees
@@ -91,7 +113,7 @@ It's been in daily use since 2019 in my work as a software developer, and is sta
 
 
 
-# Example
+## Example
 
 ```
 # Ex: check if hosts respond to ping
@@ -106,7 +128,7 @@ hosts->host report(host,SSH:HostOk(host))
 ```
 
 
-# Interactive help
+## Interactive help
 
 Typing "help" lists all global functions. 
 
@@ -124,7 +146,7 @@ $ "" help
 ```
 
 
-# Motto
+## Motto
 
 *Unless you script it, (and check it in) it isn't real*
 
