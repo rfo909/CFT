@@ -984,7 +984,6 @@ public class ObjGlobal extends Obj {
         	"       lsf ...   : list files only",
         	"",
         	"printDebug (expr)", 
-        	"showCode (strExpr)",
         	"timeExpr (expr)",
         	"",
         	"Expressions are also statements",
@@ -1048,7 +1047,7 @@ public class ObjGlobal extends Obj {
         	"   pwd",
         	"   null",
         	"   ScriptName:func(...)",
-        	"   Sequence(Expr ...)    - may omit commas",
+        	"   Sequence(Expr ...)",
         	"   CondSequence(BoolExpr Expr ...)",
         	"   SymDict(ident,...)",
         	"   P(N[,expr])",
@@ -1066,7 +1065,10 @@ public class ObjGlobal extends Obj {
         	"",
         	"Dotted lookup",
         	"   a.b.c(...).d.e",
-        	""
+        	"",
+        	"Raw string",
+        	"   @ ...",
+        	"",
         };
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
         	for (String line:data) {
