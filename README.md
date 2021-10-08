@@ -23,9 +23,9 @@ However, CFT is really about creating and running *functions*.
 ## Functions
 
 Functions are collected in script files, and can call each other, as well as functions in
-other scripts, as well as inside system objects. 
+other scripts, and functions inside library objects. 
 
-- 70+ system object types
+- 70+ library object types
 - 370+ library functions
 
 About 30 of the library functions are global, the rest exist inside different object types.
