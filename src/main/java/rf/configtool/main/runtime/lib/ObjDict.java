@@ -49,7 +49,6 @@ public class ObjDict extends Obj {
     private Set<String> allFunctionNames = new HashSet<String>();
     
 
-    
     public ObjDict () {
     	super();
         baseFunctions=new ArrayList<Function>();

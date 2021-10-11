@@ -39,6 +39,7 @@ import rf.configtool.main.runtime.lib.integrations.ObjIntegrations;
 import rf.configtool.main.runtime.lib.java.ObjJava;
 import rf.configtool.main.runtime.lib.math.ObjMath;
 import rf.configtool.main.runtime.lib.text.ObjText;
+import rf.configtool.main.runtime.lib.web.ObjWeb;
 
 import java.awt.Color;
 
@@ -55,6 +56,7 @@ public class ObjLib extends Obj {
         this.add(new FunctionUtil());
         this.add(new FunctionIntegrations());
         this.add(new FunctionJava());
+        this.add(new FunctionWeb());
         
     }
     
@@ -240,6 +242,20 @@ public class ObjLib extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
             return new ValueObj(new ObjJava());
+        }
+    } 
+    
+   
+    class FunctionWeb extends Function {
+        public String getName() {
+            return "Web";
+        }
+        public String getShortDesc() {
+            return "Web() - object for setting up Web Server";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueObj(new ObjWeb());
         }
     } 
     
