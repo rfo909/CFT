@@ -13,16 +13,19 @@ public class ObjRequest extends Obj {
 	private Map<String,String> headers;
 	private String method;
 	private String url;
+	private byte[] body;
 
 	
-	public ObjRequest(Map<String,String> headers, String method, String url) {
+	public ObjRequest(Map<String,String> headers, String method, String url, byte[] body) {
 		this.headers = headers;
 		this.method = method;
 		this.url = url;
+		this.body=body;
 
 		this.add(new FunctionHeaders());
 		this.add(new FunctionMethod());
 		this.add(new FunctionUrl());
+		this.add(new FunctionBody());
     }
 
 	public Map<String,String> getHeaders() {
@@ -87,6 +90,7 @@ public class ObjRequest extends Obj {
     }
     
     
+ 
     class FunctionUrl extends Function {
         public String getName() {
             return "url";
@@ -97,6 +101,20 @@ public class ObjRequest extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
             return new ValueString(url);
+        }
+    }
+    
+    class FunctionBody extends Function {
+        public String getName() {
+            return "body";
+        }
+        public String getShortDesc() {
+            return "body() - returns binary or null";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            if (body==null) return new ValueNull();
+            return new ValueBinary(body);
         }
     }
     

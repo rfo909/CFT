@@ -121,7 +121,39 @@ public class ObjServer extends ObjPersistent {
     public synchronized byte[] processGETRequest(ObjRequest request) throws Exception {
     	ObjContext context = bindings.get(request.getUrl());
     	if (context != null) {
-    		ObjClosure closure = context.getClosureHTML();
+    		ObjClosure closure = context.getClosureGET();
+    		
+    		if (closure != null) {
+    			List<Value> params=new ArrayList<Value>();
+    			params.add(new ValueObj(request));
+
+    			Value output = closure.callClosure(asyncCtx.sub(), params);
+    			
+    			if (output instanceof ValueList) {
+    				StringBuffer sb=new StringBuffer();
+    				List<Value> lines = ((ValueList) output).getVal();
+    				for (Value v:lines) {
+    					sb.append(v.getValAsString());
+    					sb.append("\n");
+    				}
+    				return sb.toString().getBytes("UTF-8");	
+    			} else {
+    				return output.getValAsString().getBytes("UTF-8");
+    			}
+    		}
+    	}
+    	//System.out.println("ObjServer.processRequest(url=" + url + ")");
+    	return ("<html><body><p>" + (new Date()) + " method="+ request.getMethod() + " url=" + request.getUrl() + "</p>").getBytes();
+    }
+    
+
+    /**
+     * Callback method via ServerMainLoop -> ClientMain
+     */
+    public synchronized byte[] processPOSTRequest(ObjRequest request) throws Exception {
+    	ObjContext context = bindings.get(request.getUrl());
+    	if (context != null) {
+    		ObjClosure closure = context.getClosurePOST();
     		
     		if (closure != null) {
     			List<Value> params=new ArrayList<Value>();

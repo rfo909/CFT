@@ -1,0 +1,83 @@
+# Initialize web server - for testing
+# --
+
+	Lib.Web.Server(2500).RootContext => Root
+		
+	Root.GET(Lambda{
+		Sequence(
+			@ <html><body>
+			@ <h3>Menu</h3>
+			@ <p>
+			@ <a href="/test">/test</a><br/>
+			@ </p>
+			@ <p>
+			@ <a href="/status">/status</a><br/>
+			@ </p>
+			@ <p>
+			@ <a href="/formtest">/formtest</a><br/>
+			@ </p>
+			@ </body>
+			@ </html>
+		)
+	})
+		
+	Root.Context("test")
+			.GET(Lambda{
+				List("<html><body><h1>File list</h1>") 
+				+ 
+				Inner {
+					Dir.files->file out(file.path + "</br>")
+				}
+				+ List("</body></html>")
+			})
+	Root.Context("status")
+		.GET(Lambda{P(1)=>requestObj
+			List("<html><body><h1>Headers</h1>") 
+			+ 
+			Inner {Util:ShowDict(requestObj.headers)->line out(line+"<br/>")}
+				+ List("</body></html>")
+			})
+
+	Root.Context("formtest")
+		.GET(Lambda{P(1)=>requestObj
+			Sequence(
+				@ <html>
+				@ <head>
+				@ 	<meta charset="utf-8"/>
+				@ </head>
+				@ <body><h1>Formtest</h1>
+				@ <form action="/formtest" method="POST">
+				@ <input name="a"/>
+				@ <input name="b"/>
+				@ <input type="submit" value="Submit">
+				@ </form>
+				@ </body></html>
+			)
+		})
+		.POST(Lambda{P(1)=>requestObj
+			body=requestObj.body
+			if (body != null) {
+				# binary
+				body=body.toString("UTF-8")
+			}
+			Sequence(
+				@ <html><body><h1>Form POST</h1>
+			)
+			+
+			Inner {
+				requestObj.headers.keys->header
+					value=requestObj.headers.get(header)
+					out(""+header + ": " + value+"<br/>")
+			}
+			+
+			List("<br/>",body,"</br/>")
+			+
+			Sequence(
+				@ </body></html>
+			)
+		})
+/init
+
+
+
+

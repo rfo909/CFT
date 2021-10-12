@@ -1,9 +1,6 @@
 package rf.configtool.main.runtime.lib.web;
 
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.util.*;
 
@@ -41,28 +38,61 @@ public 	class ClientMain implements Runnable {
 		outBinary.flush();
 	}
 	
+	private List<String> getRequestPlusHeaders (InputStream in) throws Exception {
+		byte[] buf=new byte[64*1024];
+		int pos=0;
+		int count=0;
+		for (;;) {
+			int b=in.read();
+			buf[pos++]=(byte) b;
+			if (b=='\n') {
+				count++;
+				if (count==2) break;
+			} else if (b=='\r') {
+				// no change to count
+			} else {
+				count=0;
+			}
+		}
+		List<String> result=new ArrayList<String>();
+		BufferedReader br=new BufferedReader(new InputStreamReader(new ByteArrayInputStream(buf, 0, pos)));
+		for (;;) {
+			String line=br.readLine();
+			if (line==null) break;
+			result.add(line);
+		}
+		return result;
+	}
+	
+	
+	
+	
 	public void run () {
-		BufferedReader in = null; 
+		InputStream in = null;
 		PrintWriter out = null; 
 		BufferedOutputStream outBinary = null;
 		
 		try {
-			in = new BufferedReader(new InputStreamReader(sock.getInputStream()));
+			sock.setSoTimeout(10000);
+			in = sock.getInputStream();
 			out = new PrintWriter(sock.getOutputStream()); 
 				// remember to flush out before using outBinary
 			outBinary = new BufferedOutputStream(sock.getOutputStream());
 			
-			String input = in.readLine();
+			List<String> lines=getRequestPlusHeaders(in);
 
-			StringTokenizer st = new StringTokenizer(input," ",false);
+			StringTokenizer st = new StringTokenizer(lines.get(0)," ",false);
 			String method = st.nextToken().toUpperCase(); // we get the HTTP method of the client
 			String url = st.nextToken().toLowerCase();
 			
+			
+			
 			Map<String,String> headers = new HashMap<String,String>();
-			for (;;) {
-				String line=in.readLine();
+			for (int i=1; i<lines.size(); i++) {
+				String line=lines.get(i);
 				if (line==null) break;
-				if (line.trim().length()==0) break;
+				
+				if (line.trim().length()==0) break; // end of headers
 				int colonPos=line.indexOf(':');
 				if (colonPos <= 0) continue;
 				
@@ -73,10 +103,30 @@ public 	class ClientMain implements Runnable {
 				//System.out.println("HDR> " + line);
 			}
 			
+			
+			byte[] body=null;
+			if (headers.containsKey("Content-Length")) {
+				int contentLength=Integer.parseInt(headers.get("Content-Length"));
+				
+				body=new byte[contentLength];
+				int bytesRead=in.read(body);
+				if (bytesRead < 0) throw new Exception("Got eof from inBinary");
+				if (bytesRead != contentLength) throw new Exception("Should do repeat reads on content? (" + bytesRead + " of " + contentLength + ")");
+			}
+			
+			ObjRequest request=new ObjRequest(headers, method, url, body);
+			
 			if (method.equals("GET")) {
 				try {
-					ObjRequest request=new ObjRequest(headers, method, url);
 					byte[] data=objServer.processGETRequest(request);
+					//System.out.println("Sending data=" + data.length+" bytes");
+					sendData(out, outBinary, "text/html", data);
+				} finally {
+					sock.close();
+				}
+			} else if (method.equals("POST")) {
+				try {
+					byte[] data=objServer.processPOSTRequest(request);
 					//System.out.println("Sending data=" + data.length+" bytes");
 					sendData(out, outBinary, "text/html", data);
 				} finally {
@@ -84,6 +134,7 @@ public 	class ClientMain implements Runnable {
 				}
 			} else {
 				byte[] data=("<html><body><p>"+(new Date())+" invalid method " + method).getBytes("UTF-8");
+				
 				System.out.println("Sending invalid method message (" + method + ")");
 				sendData(out, outBinary, "text/html", data);
 			}

@@ -33,7 +33,9 @@ public class ObjContext extends Obj {
 	private ObjServer server;
 	private String path;
 	
-	private ObjClosure closureHTML;
+	private ObjClosure closureGET;
+	private ObjClosure closurePOST;
+	
 	
     public ObjContext(ObjServer server, String path) {
     	
@@ -43,11 +45,17 @@ public class ObjContext extends Obj {
     	server.bind(path,this);
 
     	this.add(new FunctionContext());
-    	this.add(new FunctionHTML());
+    	this.add(new FunctionGET());
+    	this.add(new FunctionPOST());
     }
     
-    public ObjClosure getClosureHTML() {
-    	return closureHTML;
+    public ObjClosure getClosureGET() {
+    	return closureGET;
+    }
+    
+    
+    public ObjClosure getClosurePOST() {
+    	return closurePOST;
     }
     
     
@@ -97,12 +105,12 @@ public class ObjContext extends Obj {
     }
     
     
-    class FunctionHTML extends Function {
+    class FunctionGET extends Function {
         public String getName() {
-            return "HTML";
+            return "GET";
         }
         public String getShortDesc() {
-            return "HTML(LambdaOrClosure) - set HTML lambda, return self";
+            return "GET(LambdaOrClosure) - set GET lambda, return self";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 1) throw new Exception("Expected lambda or closure parameter");
@@ -111,11 +119,38 @@ public class ObjContext extends Obj {
             if (obj instanceof ValueBlock) {
             	ValueBlock lambda=(ValueBlock) obj;
             	ObjClosure closure=new ObjClosure(new ObjDict(), lambda);
-            	closureHTML=closure;
+            	closureGET=closure;
             } else if (obj instanceof ValueObj) {
             	Obj x = ((ValueObj) obj).getVal(); 
             	if (!(x instanceof ObjClosure)) throw new Exception("Expected lambda or closure parameter");
-            	closureHTML=(ObjClosure) x;
+            	closureGET=(ObjClosure) x;
+            } else {
+            	throw new Exception("Expected lambda or closure parameter");
+            }
+            return new ValueObj(theContext());
+        }
+    }
+    
+    
+    class FunctionPOST extends Function {
+        public String getName() {
+            return "POST";
+        }
+        public String getShortDesc() {
+            return "POST(LambdaOrClosure) - set POST lambda, return self";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected lambda or closure parameter");
+            
+            Obj obj=params.get(0);
+            if (obj instanceof ValueBlock) {
+            	ValueBlock lambda=(ValueBlock) obj;
+            	ObjClosure closure=new ObjClosure(new ObjDict(), lambda);
+            	closurePOST=closure;
+            } else if (obj instanceof ValueObj) {
+            	Obj x = ((ValueObj) obj).getVal(); 
+            	if (!(x instanceof ObjClosure)) throw new Exception("Expected lambda or closure parameter");
+            	closurePOST=(ObjClosure) x;
             } else {
             	throw new Exception("Expected lambda or closure parameter");
             }
