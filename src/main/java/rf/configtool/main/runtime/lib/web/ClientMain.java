@@ -114,6 +114,21 @@ public 	class ClientMain implements Runnable {
 				if (bytesRead != contentLength) throw new Exception("Should do repeat reads on content? (" + bytesRead + " of " + contentLength + ")");
 			}
 			
+			Map<String,String> bodyParams=new HashMap<String,String>();
+			if (headers.containsKey("Content-Type")) {
+				if (headers.get("Content-Type").toLowerCase().equals("application/x-www-form-urlencoded")) {
+					String a=new String(body);
+//					StringTokenizer st2=new StringTokenizer(a,"&",false);
+//					while (st2.hasMoreTokens()) {
+//						
+//					}
+					String b=java.net.URLDecoder.decode(a, "UTF-8");
+					System.out.println("body=" + b);
+					body=b.getBytes("UTF-8"); // Request object expectes byte[]
+				}
+				
+			}
+			
 			ObjRequest request=new ObjRequest(headers, method, url, body);
 			
 			if (method.equals("GET")) {

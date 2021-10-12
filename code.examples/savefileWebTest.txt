@@ -61,7 +61,11 @@
 				body=body.toString("UTF-8")
 			}
 			Sequence(
-				@ <html><body><h1>Form POST</h1>
+				@ <html>
+				@ <head>
+				@ 	<meta charset="utf-8"/>
+				@ </head>
+				@ <body><h1>Form POST</h1>
 			)
 			+
 			Inner {
