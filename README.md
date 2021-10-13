@@ -43,7 +43,7 @@ About 30 of the library functions are global, the rest exist inside different ob
 - tryCatch with two-tiered exception hierarchy ("soft" and "hard")
 - integrated data store (Db2) 
 - integrated encryption 
-- integrated lexer; full JSON parser is implemented as CFT script
+- integrated lexer; full JSON recursive-descent parser written in CFT
 
 ### Editing script code
 
@@ -183,12 +183,6 @@ $ "" help
      :
 ```
 
-
-## Motto
-
-*Unless you script it, (and check it in) it isn't real*
-
-Manual operations are boring, risk errors, hard to keep documented, and should be avoided. 
 
 
 

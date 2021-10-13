@@ -198,6 +198,8 @@ Use as a calculator
  * Lib.Convert
  * Lib.Plot
 
+Internal web-server
+
 Command line args
 
 Environment variables

@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2021-10-03 RFO
-v2.8.2
+Last updated: 2021-10-13 RFO
+v2.9.0
 ```
 # Introduction
 
@@ -2363,6 +2363,18 @@ f.delete
 ```
 
 The above code generates an example plot as a png file in the current directory.
+
+# Internal web-server
+
+
+**v2.9.0**
+
+There is a small embedded web-server in CFT, available in the Lib.Web object. It
+supports GET and POST, does parameter and form input parsing, and works with html
+only.
+
+
+Status: experimental. See WebTest script.
 
 # Command line args
 
