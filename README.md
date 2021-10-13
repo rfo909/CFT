@@ -11,16 +11,21 @@ interest in parsers and interpreters.
 
 The REPL makes it act like a shell, for navigating the directory tree, and inspecting files:
 
-- cd
-- ls
-- pwd
-- cat 
-- more
-- edit
+- cd, ls, pwd, cat, more, edit
 
 However, CFT is really about creating and running *functions*.
 
 ## Functions
+
+```
+# Example
+# --
+	file1=P(1)
+	file2=P(2)
+	file.hash==file2.hash # boolean return value
+/FilesMatch
+```
+
 
 Functions are collected in script files, and can call each other, as well as functions in
 other scripts, and functions inside library objects. 
@@ -34,15 +39,14 @@ About 30 of the library functions are global, the rest exist inside different ob
 
 - shell-like command line interface / REPL
 - create functions, do interactive testing
-- integrated help system
+- interactive help system
 - lists and dictionaries
-- run external programs
+- run external programs in foreground or background
 - (inline) text templating with merge code processing
 - spawn CFT expressions as background threads
 - lambdas and closures
 - tryCatch with two-tiered exception hierarchy ("soft" and "hard")
 - integrated data store (Db2) 
-- integrated encryption 
 - integrated lexer; full JSON recursive-descent parser written in CFT
 
 ### Editing script code
@@ -147,13 +151,11 @@ It's been in daily use since 2019 in my work as a software developer, and is sta
 
 ### Rewritten to do parallel pings
 
+Since pinging hosts that don't respond takes a while, we may want to run
+all pings in parallel, then collect information. Total time is then the
+time of the single slowest ping, not the sum.
+
 ```
-# Define hosts
-# --
-	List("host1","host2","host3")
-/hosts
-
-
 # Create report
 # --
 	hosts->host 
@@ -168,7 +170,40 @@ It's been in daily use since 2019 in my work as a software developer, and is sta
 
 ## Interactive help
 
-Typing "help" lists all global functions. 
+Type "help" lists all global functions. Note two special functions starting with underscore, which
+provide info in built-in statements and expressions.
+
+```
+$ _Stmt
+  # 
+  # Statements in CFT
+  # -----------------
+  # 
+  # Looping and iteration over lists:
+  #    loop ... break(cond)
+  #    list -> variable ...
+  # 
+  # Loop control:
+  #    assert (boolExpr)
+  #    reject (boolExpr)
+     :
+     :
+
+$ _Expr
+  # 
+  # Expressions in CFT
+  # ------------------
+  # 
+  # Logical
+  #    bool || bool
+  #    bool && bool
+  # 
+  # Compare
+  #    >  <  >=  <= == !=
+     :
+     :
+```
+
 
 To list functions inside an object, such as string, we type:
 
