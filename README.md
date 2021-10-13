@@ -5,11 +5,11 @@ CFT is an interpreted and interactive shell and programming language. It was ini
 because of a need for a do-all tool in my job as a developer, and from my long lasting
 interest in parsers and interpreters.
 
-*README last updated 2021-10-08*
+*README last updated 2021-10-13*
 
 ## Terminal based - shell-like - programmable
 
-The REPL makes it act like a shell, for navigating the directory tree, and inspecting files:
+The REPL makes it CFT work like a shell, for navigating the directory tree, and inspecting files:
 
 - cd, ls, pwd, cat, more, edit
 
@@ -17,12 +17,14 @@ However, CFT is really about creating and running *functions*.
 
 ## Functions
 
+In CFT the code comes before the function name.
+
 ```
 # Example
 # --
 	file1=P(1)
 	file2=P(2)
-	file.hash==file2.hash # boolean return value
+	file1.hash==file2.hash # boolean return value
 /FilesMatch
 ```
 
@@ -31,7 +33,7 @@ Functions are collected in script files, and can call each other, as well as fun
 other scripts, and functions inside library objects. 
 
 - 70+ library object types
-- 370+ library functions
+- 390+ library functions
 
 About 30 of the library functions are global, the rest exist inside different object types.
 
@@ -87,7 +89,7 @@ the Youtube tutorial video [episode six](https://www.youtube.com/watch?v=7e-f1gu
 ## Object oriented - functional
 
 CFT consists of a set of global functions, which return values, such as the current
-directory, an empty dictionary, or the current date, and so on. All values are objects,
+directory, an empty dictionary, some list, the current date, and so on. All values are objects,
 and so in turn have inner functions that we can call. 
 
 There are no primitive types, all are objects:
@@ -100,6 +102,10 @@ $ "test".length
 $ 23.bin
   <String>
   00010111
+
+$ "abc".chars.reverse.concat
+  <String>
+  "cba"
 ```
 
 The key concept was to create an *interactive and interpreted* language inspired by
@@ -153,7 +159,7 @@ It's been in daily use since 2019 in my work as a software developer, and is sta
 
 Since pinging hosts that don't respond takes a while, we may want to run
 all pings in parallel, then collect information. Total time is then the
-time of the single slowest ping, not the sum.
+time of the single slowest ping, not the sum of times for all pings.
 
 ```
 # Create report
@@ -170,8 +176,27 @@ time of the single slowest ping, not the sum.
 
 ## Interactive help
 
-Type "help" lists all global functions. Note two special functions starting with underscore, which
-provide info in built-in statements and expressions.
+Type "help" lists all global functions. 
+
+```
+$ help
+  # v2.9.0
+  # 
+  # _Expr() - display information about expressions in CFT
+  # _Stmt() - display information about Statements in CFT
+  # 
+  # Binary(hexString) - convert hex string to Binary value
+  # DataFile(file,prefix) - create DataFile object
+  # Date(int?) - create Date and time object - uses current time if no parameter
+  # Dict() - create Dict object
+  # Dir(str?) - creates Dir object
+  # File(str) - creates File object
+     :
+     :
+```
+
+Note two special functions starting with underscore, which
+provide info in built-in statements and expressions when run, like this:
 
 ```
 $ _Stmt
