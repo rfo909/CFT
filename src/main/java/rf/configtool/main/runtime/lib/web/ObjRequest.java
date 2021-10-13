@@ -13,19 +13,24 @@ public class ObjRequest extends Obj {
 	private Map<String,String> headers;
 	private String method;
 	private String url;
+	private Map<String,String> urlParams;
 	private byte[] body;
+	private Map<String,String> bodyParams;
 
-	
-	public ObjRequest(Map<String,String> headers, String method, String url, byte[] body) {
+	public ObjRequest(Map<String,String> headers, String method, String url, Map<String,String> urlParams, byte[] body, Map<String,String> bodyParams) {
 		this.headers = headers;
 		this.method = method;
 		this.url = url;
+		this.urlParams=urlParams;
 		this.body=body;
+		this.bodyParams=bodyParams;
 
 		this.add(new FunctionHeaders());
 		this.add(new FunctionMethod());
 		this.add(new FunctionUrl());
+		this.add(new FunctionURLParams());
 		this.add(new FunctionBody());
+		this.add(new FunctionBodyParams());
     }
 
 	public Map<String,String> getHeaders() {
@@ -104,6 +109,21 @@ public class ObjRequest extends Obj {
         }
     }
     
+    class FunctionURLParams extends Function {
+        public String getName() {
+            return "urlParams";
+        }
+        public String getShortDesc() {
+            return "urlParams() - returns Dict (may be empty)";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return createStringDict(urlParams);
+        }
+    }
+    
+
+    
     class FunctionBody extends Function {
         public String getName() {
             return "body";
@@ -117,7 +137,22 @@ public class ObjRequest extends Obj {
             return new ValueBinary(body);
         }
     }
+
+    class FunctionBodyParams extends Function {
+        public String getName() {
+            return "bodyParams";
+        }
+        public String getShortDesc() {
+            return "bodyParams() - returns Dict of encoded form data from body (may be empty)";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return createStringDict(bodyParams);
+        }
+    }
     
+
+
     
     
     
@@ -125,6 +160,8 @@ public class ObjRequest extends Obj {
     
     private Value createStringDict (Map<String, String> data) {
 		ObjDict dict = new ObjDict();
+		if (data==null) return new ValueObj(dict);
+		
 		for (String name:data.keySet()) {
 			Value v=new ValueString(data.get(name));
 			dict.set(name, v);

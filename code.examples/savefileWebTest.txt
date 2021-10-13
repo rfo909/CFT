@@ -1,11 +1,12 @@
-# Initialize web server - for testing
+# Initialize web server on port 2500 - for testing
 # --
 
 	Lib.Web.Server(2500).RootContext => Root
 		
 	Root.GET(Lambda{
+		BodyStart
+		+
 		Sequence(
-			@ <html><body>
 			@ <h3>Menu</h3>
 			@ <p>
 			@ <a href="/test">/test</a><br/>
@@ -16,19 +17,22 @@
 			@ <p>
 			@ <a href="/formtest">/formtest</a><br/>
 			@ </p>
-			@ </body>
-			@ </html>
 		)
+		+
+		BodyEnd
 	})
 		
 	Root.Context("test")
 			.GET(Lambda{
-				List("<html><body><h1>File list</h1>") 
+				BodyStart
+				+
+				List("<h1>File list</h1>") 
 				+ 
 				Inner {
 					Dir.files->file out(file.path + "</br>")
 				}
-				+ List("</body></html>")
+				+ 
+				BodyEnd
 			})
 	Root.Context("status")
 		.GET(Lambda{P(1)=>requestObj
@@ -40,19 +44,18 @@
 
 	Root.Context("formtest")
 		.GET(Lambda{P(1)=>requestObj
+			BodyStart
+			+
 			Sequence(
-				@ <html>
-				@ <head>
-				@ 	<meta charset="utf-8"/>
-				@ </head>
-				@ <body><h1>Formtest</h1>
+				@ <h1>Formtest</h1>
 				@ <form action="/formtest" method="POST">
 				@ <input name="a"/>
 				@ <input name="b"/>
 				@ <input type="submit" value="Submit">
 				@ </form>
-				@ </body></html>
 			)
+			+
+			BodyEnd
 		})
 		.POST(Lambda{P(1)=>requestObj
 			body=requestObj.body
@@ -60,28 +63,70 @@
 				# binary
 				body=body.toString("UTF-8")
 			}
-			Sequence(
-				@ <html>
-				@ <head>
-				@ 	<meta charset="utf-8"/>
-				@ </head>
-				@ <body><h1>Form POST</h1>
-			)
-			+
-			Inner {
-				requestObj.headers.keys->header
-					value=requestObj.headers.get(header)
-					out(""+header + ": " + value+"<br/>")
-			}
-			+
-			List("<br/>",body,"</br/>")
+			BodyStart
 			+
 			Sequence(
-				@ </body></html>
+				@ <h1>Form POST</h1>
 			)
+			+ ShowRequest(requestObj)
+			#+
+			#List("<br/>",body,"</br/>")
+			+
+			BodyEnd
 		})
-/init
+/Init
 
 
+# Open Body 
+# --
+	Sequence(
+			@ <html>
+			@ <head>
+			@ 	<meta charset="utf-8"/>
+			@ </head>
+			@ <body>
+	)
+//BodyStart
 
+
+# Close Body 
+# --
+	Sequence(
+		@ </body>
+		@ </html>
+	)
+//BodyEnd
+
+
+# Show all data from Request object
+# --
+	P(1) => req
+	
+	body=req.body
+	if (body==null) {
+		body="null"
+	} else {
+		# Binary value
+		body=body.hex
+		if (body.length > 50) body=body.sub(0,40) + "..."
+	}
+	
+	List("<h2>.headers</h2>")
+	+ ShowDict(req.headers)
+	+ List("<h2>.method</h2>",req.method+"<br/>")
+	+ List("<h2>.url</h2>",req.url+"<br/>")
+	+ List("<h2>.urlParams</h2>")
+	+ ShowDict(req.urlParams)
+	+ List("<h2>.body</h2>", body, "<br/>")
+	+ List("<h2>.bodyParams</h2>")
+	+ ShowDict(req.bodyParams)
+//ShowRequest
+
+
+# Show dictionary
+# --
+	P(1)=>dict
+	dict.keys->key
+		out(""+key + ": " + dict.get(key) + "<br/>")
+//ShowDict
 

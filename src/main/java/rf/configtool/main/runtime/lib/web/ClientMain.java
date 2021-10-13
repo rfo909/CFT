@@ -85,7 +85,12 @@ public 	class ClientMain implements Runnable {
 			String method = st.nextToken().toUpperCase(); // we get the HTTP method of the client
 			String url = st.nextToken().toLowerCase();
 			
-			
+			Map<String,String> urlParams = null;
+			if (url.contains("?")) {
+				int pos=url.indexOf('?');
+				urlParams=splitAndDecodeUrlFields(url.substring(pos+1),"UTF-8");
+				url=url.substring(0,pos);
+			}
 			
 			Map<String,String> headers = new HashMap<String,String>();
 			for (int i=1; i<lines.size(); i++) {
@@ -114,22 +119,16 @@ public 	class ClientMain implements Runnable {
 				if (bytesRead != contentLength) throw new Exception("Should do repeat reads on content? (" + bytesRead + " of " + contentLength + ")");
 			}
 			
-			Map<String,String> bodyParams=new HashMap<String,String>();
-			if (headers.containsKey("Content-Type")) {
+			Map<String,String> bodyParams=null;
+			if (headers.containsKey("Content-Type") && body != null) {
 				if (headers.get("Content-Type").toLowerCase().equals("application/x-www-form-urlencoded")) {
-					String a=new String(body);
-//					StringTokenizer st2=new StringTokenizer(a,"&",false);
-//					while (st2.hasMoreTokens()) {
-//						
-//					}
-					String b=java.net.URLDecoder.decode(a, "UTF-8");
-					System.out.println("body=" + b);
-					body=b.getBytes("UTF-8"); // Request object expectes byte[]
+					String a=new String(body,"ISO-8859-1");
+					bodyParams=splitAndDecodeUrlFields(a, "UTF-8");
 				}
 				
 			}
 			
-			ObjRequest request=new ObjRequest(headers, method, url, body);
+			ObjRequest request=new ObjRequest(headers, method, url, urlParams, body, bodyParams);
 			
 			if (method.equals("GET")) {
 				try {
@@ -158,5 +157,21 @@ public 	class ClientMain implements Runnable {
 		}
 		
 		setCompleted();
+	}
+	
+	private Map<String,String> splitAndDecodeUrlFields (String s, String charset) throws Exception {
+		Map<String,String> result=new HashMap<String,String>();
+		StringTokenizer st=new StringTokenizer(s,"&",false);
+		while (st.hasMoreTokens()) {
+			String assignment=st.nextToken();
+			assignment=java.net.URLDecoder.decode(assignment, charset);
+			int pos=assignment.indexOf('=');
+			if (pos > 0) {
+				String name=assignment.substring(0,pos);
+				String value=assignment.substring(pos+1);
+				result.put(name, value);
+			}
+		}
+		return result;
 	}
 }
