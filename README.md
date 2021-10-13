@@ -173,6 +173,24 @@ time of the single slowest ping, not the sum of times for all pings.
 /checkPing 
 ```
 
+### The SSH:HostOk function
+
+Above we are calling the HostOk function inside the SSH script. It is implemented as follows.
+
+```
+# Check if server responds on ping
+P(1) =>target
+    if(target.contains("@"), target.after("@"), target) =>host
+	Lib:run(List("ping","-c","1",host),List,true).exitCode => ex
+
+	ex == 0
+/HostOk
+```
+
+It in turn calls function "run()" inside Lib script, which eventually ends up doing a call 
+to Dir.runProcess() which actually runs the external program. The details don't matter so much
+as the concept of creating a hierarchy of functions with none (or very few) side effects, providing
+high level reliability, such as the HostOk function.
 
 ## Interactive help
 
