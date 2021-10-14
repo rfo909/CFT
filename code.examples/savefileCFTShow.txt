@@ -1,4 +1,4 @@
-<<<<< EOF
+<<<<< TEXT
 .h Intro
 
 	# CFT: "ConfigTool"
@@ -132,10 +132,10 @@
 	@S
 	@FL
 
-	$ !dir
-	$ shell
+	!dir
+	shell
 
-.h Advanced
+.h Pipes
 
 	## Loop control with PIPE
 
@@ -154,6 +154,7 @@
 	:save Demo
 	@e
 
+
 .h Example
 
 	Dir.allFiles(Glob("*.java"))
@@ -164,40 +165,43 @@
 	# --
 		pattern=readLine("Pattern")
 		JavaFiles->f
-			containsPattern=Inner{
-				f.read->line 
-					if(line.contains(pattern)) out(line) 
-				| _=>list
-
-				# return value
-				!list.empty
+			lines=Inner{
+				f.read->line
+					assert(line.contains(pattern))
+					out(line) 
 			}
-			assert(containsPattern)
+			assert(lines.length>0)
 			out(f)
 	/Contains
 
 	## Without "Inner", the out(line) would add to the result from Contains()
 
-	## Inefficient ...
 
-.h Improved
 
-	# List files containing pattern
+.h Templates
+
+	:save Demo
+	@e
+	
+	# Create notification
 	# --
-		pattern=readLine("Pattern")
-		grep=Grep(pattern).limitFirst(1)
+		P(1,readLine("name"))=>name
+		Dict
+			.set("name",name)
+			.mergeCodes
+			=> data
 
-		JavaFiles->f
-			containsPattern=grep.fileCount(f)>0
-			assert(containsPattern)
-			out(f)
-	/Contains
+		Sequence(
+			@ Dear ${name}
+			@
+			@ Your visa has expired
+		)->line
+			out(line.merge(data))
+	/test2
 
+	
 
-
-
-
->>>>> EOF
+>>>>> TEXT
 //text
 
 
