@@ -1,92 +1,121 @@
 <<<<< EOF
-.h Specials
+.h Intro
 
-	- Function names follow function body
+	# CFT: "ConfigTool"
+	# Dev since May 2018, on git since 2020
+	# --
+
+
+	## Function names follow function body
 
 	1+1
 	/two
 	
-	- Assignment takes two forms
+	## Assignment takes two forms
 
 	a = expr
 	expr => a
 
-	- Foreach loop is a single arrow plus loop variable
+	## Foreach loop is a single arrow plus loop variable
 
 	List(1,2,3)->x out("a"+x)
 
 	Dir.files->f out(f.path)
 
+	## Filtering
 
-.h CFT Intro
+	List(1,2,3,4)->x assert(x%2==0) out(x)
 
-	** "CFT" = "ConfigTool"
+	Dir.files->f reject(f.name.startsWith("savefile")) out(f)
 
-	** Functions only, no global variables
-	** Interactive help system
 
-	$ 2+3
-	$ help
 
-	$ Dir help
-	$ File("x") help
+.h help
 
-	$ "" help
-	$ _Stmt
-	$ _Expr
 
-	$ Dir.files
-	$ Dir.dirs
+	# Interactive help
+	# --
 
-	$ Dir.allFiles(Glob("*.java"))
-	$ /JavaFiles
+	help
+	_Stmt
+	_Expr
 
-	$ JavaFiles
-	$ ?
+	Dir help
+	File("x") help
 
-	$ JavaFiles.length
+	"" help
+	2 help
+	List help
+	Dict help
+
+
+.h Scripts
+
+	# Functions only, no global variables
+	# No custom classes
+	# --
+
+	Dir.allFiles(Glob("*.java"))
+	/JavaFiles
+
+	JavaFiles.length
+	
+	:save Demo
+
+	## Shortcuts
+
+	@
+	@e
+
+
 
 .h Iteration
 
-	** Iteration over lists
+	# Iteration over lists 
+	# PIPE
+	# --
 
 	JavaFiles->f out(f.length) | =>x x.sum
 	JavaFiles->f out(f.read.length) | _.sum
 
+	x=1 loop out(x) x=x+1 break(x>10)	
+	/Numbers
+
 	:save Demo
 
-	** Shortcuts
+	## Shortcuts
 
 	$ @
 	$ @e
 
-	----
-	# Search
+	# Generate numbers from 1
 	# --
-		term=Input("Enter search term").get
-		grep=Grep(term)
-		JavaFiles->f
-			grep.file(f)->line
-				report(line.file.name, line.lineNumber, line)
-	/S
-	----
+		P(1,10)=>limit
+		x=1 loop out(x) x=x+1 break(x>limit)	
+	/Numbers
 
-	$ ?
-	$ S
+	# Alt.
+	
+	Lib.Data.each(1,10)
 
 
 .h Projects
 
-	** Script for searching
+	# Script for searching
+	# Multiple projects, fast switching
+	# --
 
-	$ @P
+	@
+	@P
 
-	$ ch
+	?
+	ch
 
-	$ S
-	$ FL
-	
-	$ EditConfig
+	S
+	FL
+
+	EditConfig
+
 
 .h Shell
 
@@ -108,18 +137,16 @@
 
 .h Advanced
 
-	** Made for interactive use
+	## Loop control with PIPE
 
 	Dir.files->f out(f.length) | _.sum
 
 	- Whenever there are loops: collect values from out() as result
-	- The PIPE limits loop body
+	- The PIPE terminates all current loops
 
 	- Splits code into "code spaces"
 
 	- Result from one code space is put on stack in next code space
-
-	3 | =>x x+1
 
 	- Inner blocks
 		- separate code space
@@ -149,9 +176,9 @@
 			out(f)
 	/Contains
 
-	** Without "Inner", the out(line) would add to the result from Contains()
+	## Without "Inner", the out(line) would add to the result from Contains()
 
-	** Inefficient ...
+	## Inefficient ...
 
 .h Improved
 
@@ -165,6 +192,10 @@
 			assert(containsPattern)
 			out(f)
 	/Contains
+
+
+
+
 
 >>>>> EOF
 //text
