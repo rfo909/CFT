@@ -1,20 +1,39 @@
 <<<<< EOF
+.h Specials
+
+	- Function names follow function body
+
+	1+1
+	/two
+	
+	- Assignment takes two forms
+
+	a = expr
+	expr => a
+
+	- Foreach loop is a single arrow plus loop variable
+
+	List(1,2,3)->x out("a"+x)
+
+	Dir.files->f out(f.path)
+
+
 .h CFT Intro
 
 	** "CFT" = "ConfigTool"
 
-	** Interpreted language
 	** Functions only, no global variables
 	** Interactive help system
 
 	$ 2+3
 	$ help
-	$ Dir
+
 	$ Dir help
 	$ File("x") help
 
 	$ "" help
 	$ _Stmt
+	$ _Expr
 
 	$ Dir.files
 	$ Dir.dirs
@@ -31,20 +50,14 @@
 
 	** Iteration over lists
 
-	$ List(1,2,3)->x out("test"+x)
-	$ Dir.files->f out(f.length)
-	$ /sizes
+	JavaFiles->f out(f.length) | =>x x.sum
+	JavaFiles->f out(f.read.length) | _.sum
 
-	$ sizes help
-	$ sizes.sum
-	$ JavaFiles->f out(f.read.length) | _.sum
-
-	$ :save Demo
+	:save Demo
 
 	** Shortcuts
 
 	$ @
-
 	$ @e
 
 	----
@@ -61,18 +74,13 @@
 	$ ?
 	$ S
 
-	$ @term
-
 
 .h Projects
 
 	** Script for searching
 
-	$ @scr
-
 	$ @P
 
-	$ curr
 	$ ch
 
 	$ S
@@ -84,7 +92,7 @@
 
 	ls, lsd, lsf
 
-	edit, cat, more
+	cat, more, edit
 
 	ls
 	:N
@@ -98,26 +106,65 @@
 	$ !dir
 	$ shell
 
-.h Customize
+.h Advanced
 
-	CFT.props
-	
+	** Made for interactive use
 
-.h Other 
-	
-	Collect logs from remote hosts
-	Unzip/Zip files
-	Convert between CRLF and LF - File.hex
-	Start/stop services (PS)
-	PS:sh
-	...
+	Dir.files->f out(f.length) | _.sum
+
+	- Whenever there are loops: collect values from out() as result
+	- The PIPE limits loop body
+
+	- Splits code into "code spaces"
+
+	- Result from one code space is put on stack in next code space
+
+	3 | =>x x+1
+
+	- Inner blocks
+		- separate code space
+
+	:save Demo
+	@e
+
+.h Example
+
+	Dir.allFiles(Glob("*.java"))
+	/JavaFiles
 
 
-	doc/Doc.html
+	# List files containing pattern
+	# --
+		pattern=readLine("Pattern")
+		JavaFiles->f
+			containsPattern=Inner{
+				f.read->line 
+					if(line.contains(pattern)) out(line) 
+				| _=>list
 
-	https://www.youtube.com/playlist?list=PLj58HwpT4Qy80WhDBycFKxIhWFzv5WkwO
+				# return value
+				!list.empty
+			}
+			assert(containsPattern)
+			out(f)
+	/Contains
 
-	https://www.youtube.com/playlist?list=PLj58HwpT4Qy-12WjM16ALnLGEyy3kxX9r
+	** Without "Inner", the out(line) would add to the result from Contains()
+
+	** Inefficient ...
+
+.h Improved
+
+	# List files containing pattern
+	# --
+		pattern=readLine("Pattern")
+		grep=Grep(pattern).limitFirst(1)
+
+		JavaFiles->f
+			containsPattern=grep.fileCount(f)>0
+			assert(containsPattern)
+			out(f)
+	/Contains
 
 >>>>> EOF
 //text
