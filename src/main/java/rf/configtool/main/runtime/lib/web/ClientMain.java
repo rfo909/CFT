@@ -24,16 +24,16 @@ public 	class ClientMain implements Runnable {
 		this.objServer=objServer;
 	}
 
-	private void sendData (PrintWriter out, BufferedOutputStream outBinary, String contentType, byte[] data) throws Exception {
+	private void sendData (PrintWriter out, BufferedOutputStream outBinary, ResponseData resp) throws Exception {
 		out.println("HTTP/1.1 200 OK");
 		out.println("Server: CFT " + Version.getVersion());
 		out.println("Date: " + new Date());
-		out.println("Content-type: " + contentType);
-		out.println("Content-length: " + data.length);
+		out.println("Content-type: " + resp.getContentType());
+		out.println("Content-length: " + resp.getData().length);
 		out.println(); 
 		out.flush();
 		
-		outBinary.write(data);
+		outBinary.write(resp.getData());
 		outBinary.flush();
 		outBinary.flush();
 	}
@@ -132,25 +132,26 @@ public 	class ClientMain implements Runnable {
 			
 			if (method.equals("GET")) {
 				try {
-					byte[] data=objServer.processGETRequest(request);
+					ResponseData resp=objServer.processGETRequest(request);
 					//System.out.println("Sending data=" + data.length+" bytes");
-					sendData(out, outBinary, "text/html", data);
+					sendData(out, outBinary, resp);
 				} finally {
 					sock.close();
 				}
 			} else if (method.equals("POST")) {
 				try {
-					byte[] data=objServer.processPOSTRequest(request);
+					ResponseData resp=objServer.processPOSTRequest(request);
 					//System.out.println("Sending data=" + data.length+" bytes");
-					sendData(out, outBinary, "text/html", data);
+					sendData(out, outBinary, resp);
 				} finally {
 					sock.close();
 				}
 			} else {
 				byte[] data=("<html><body><p>"+(new Date())+" invalid method " + method).getBytes("UTF-8");
+				ResponseData resp=new ResponseData("text/html", data);
 				
 				System.out.println("Sending invalid method message (" + method + ")");
-				sendData(out, outBinary, "text/html", data);
+				sendData(out, outBinary, resp);
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();

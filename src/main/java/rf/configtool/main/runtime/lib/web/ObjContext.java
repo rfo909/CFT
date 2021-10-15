@@ -25,20 +25,28 @@ import rf.configtool.main.runtime.lib.ObjClosure;
 import rf.configtool.main.runtime.lib.ObjDict;
 
 /**
- * Web server stuff
+ * A context is a URL path with closures for GET and POST.
+ * 
+ * In this primitive web server, different content types are
+ * tied in with different context objects. 
  */
 
 public class ObjContext extends Obj {
     
 	private ObjServer server;
 	private String path;
+	private String contentType;
 	
 	private ObjClosure closureGET;
 	private ObjClosure closurePOST;
 	
-	
     public ObjContext(ObjServer server, String path) {
+    	this(server, path, "text/html");
+    }
+	
+    public ObjContext(ObjServer server, String path, String contentType) {
     	
+    	this.contentType=contentType;
     	this.server=server;
     	this.path=path;
     	
@@ -58,6 +66,10 @@ public class ObjContext extends Obj {
     	return closurePOST;
     }
     
+    
+    public String getContentType() {
+    	return contentType;
+    }
     
     
     @Override
@@ -95,12 +107,14 @@ public class ObjContext extends Obj {
             return "Context";
         }
         public String getShortDesc() {
-            return "Context(subPath) - returns sub-context object";
+            return "Context(subPath, contentType?) - returns sub-context object";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 1) throw new Exception("Expected path string parameter");
+            if (params.size() != 1 && params.size() != 2) throw new Exception("Expected path, contentType(optional) string parameters");
             String subPath=getString("subPath", params, 0);
-            return new ValueObj(new ObjContext(server, (path+subPath).replace("//", "/")));
+            String contentType="text/html";
+            if (params.size()==2) contentType=getString("contentType", params, 1);
+            return new ValueObj(new ObjContext(server, (path+subPath).replace("//", "/"), contentType));
         }
     }
     

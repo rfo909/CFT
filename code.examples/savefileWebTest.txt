@@ -9,7 +9,7 @@
 		Sequence(
 			@ <h3>Menu</h3>
 			@ <p>
-			@ <a href="/test">/test</a><br/>
+			@ <a href="/text">/text (text/plain test)</a><br/>
 			@ </p>
 			@ <p>
 			@ <a href="/status">/status</a><br/>
@@ -22,11 +22,11 @@
 		BodyEnd
 	})
 		
-	Root.Context("test")
+	Root.Context("text","text/plain")
 			.GET(Lambda{
 				BodyStart
 				+
-				List("<h1>File list</h1>") 
+				List("<h1>Plain text test</h1>") 
 				+ 
 				Inner {
 					Dir.files->file out(file.path + "</br>")

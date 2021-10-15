@@ -34,7 +34,7 @@ import rf.configtool.main.runtime.lib.ObjClosure;
 import rf.configtool.main.runtime.lib.ObjPersistent;
 
 /**
- * Web server stuff
+ * Web server
  */
 
 public class ObjServer extends ObjPersistent {
@@ -114,69 +114,75 @@ public class ObjServer extends ObjPersistent {
         }
     }
     
+
+    
+    
     
     /**
      * Callback method via ServerMainLoop -> ClientMain
      */
-    public synchronized byte[] processGETRequest(ObjRequest request) throws Exception {
+    public synchronized ResponseData processGETRequest(ObjRequest request) throws Exception {
     	ObjContext context = bindings.get(request.getUrl());
     	if (context != null) {
     		ObjClosure closure = context.getClosureGET();
+        	String contentType=context.getContentType();
     		
     		if (closure != null) {
     			List<Value> params=new ArrayList<Value>();
     			params.add(new ValueObj(request));
 
     			Value output = closure.callClosure(asyncCtx.sub(), params);
-    			
-    			if (output instanceof ValueList) {
-    				StringBuffer sb=new StringBuffer();
-    				List<Value> lines = ((ValueList) output).getVal();
-    				for (Value v:lines) {
-    					sb.append(v.getValAsString());
-    					sb.append("\n");
-    				}
-    				return sb.toString().getBytes("UTF-8");	
-    			} else {
-    				return output.getValAsString().getBytes("UTF-8");
-    			}
+    			byte[] data = createBytesFromValue(output);
+    			return new ResponseData(contentType, data);
     		}
     	}
     	//System.out.println("ObjServer.processRequest(url=" + url + ")");
-    	return ("<html><body><p>" + (new Date()) + " method="+ request.getMethod() + " url=" + request.getUrl() + "</p>").getBytes();
+    	return new ResponseData(("<html><body><p>" + (new Date()) + " method="+ request.getMethod() + " url=" + request.getUrl() + "</p>").getBytes());
     }
     
 
     /**
      * Callback method via ServerMainLoop -> ClientMain
      */
-    public synchronized byte[] processPOSTRequest(ObjRequest request) throws Exception {
+    public synchronized ResponseData processPOSTRequest(ObjRequest request) throws Exception {
     	ObjContext context = bindings.get(request.getUrl());
     	if (context != null) {
     		ObjClosure closure = context.getClosurePOST();
+        	String contentType=context.getContentType();
     		
     		if (closure != null) {
     			List<Value> params=new ArrayList<Value>();
     			params.add(new ValueObj(request));
 
     			Value output = closure.callClosure(asyncCtx.sub(), params);
-    			
-    			if (output instanceof ValueList) {
-    				StringBuffer sb=new StringBuffer();
-    				List<Value> lines = ((ValueList) output).getVal();
-    				for (Value v:lines) {
-    					sb.append(v.getValAsString());
-    					sb.append("\n");
-    				}
-    				return sb.toString().getBytes("UTF-8");	
-    			} else {
-    				return output.getValAsString().getBytes("UTF-8");
-    			}
+    			byte[] data = createBytesFromValue(output);
+    			return new ResponseData(contentType, data);
     		}
     	}
     	//System.out.println("ObjServer.processRequest(url=" + url + ")");
-    	return ("<html><body><p>" + (new Date()) + " method="+ request.getMethod() + " url=" + request.getUrl() + "</p>").getBytes();
+    	return new ResponseData(("<html><body><p>" + (new Date()) + " method="+ request.getMethod() + " url=" + request.getUrl() + "</p>").getBytes());
     }
     
+    
+    private byte[] createBytesFromValue (Value output) throws Exception {
+		if (output instanceof ValueList) {
+			StringBuffer sb=new StringBuffer();
+			List<Value> lines = ((ValueList) output).getVal();
+			for (Value v:lines) {
+				sb.append(v.getValAsString());
+				sb.append("\n");
+			}
+			return sb.toString().getBytes("UTF-8");
+		}
+		if (output instanceof ValueString) {
+			return ((ValueString) output).getVal().getBytes("UTF-8");
+		}
+		if (output instanceof ValueBinary) {
+			return ((ValueBinary) output).getVal();
+		}
+		// all else
+		return output.getValAsString().getBytes("UTF-8");
+    }
+
 
 }
