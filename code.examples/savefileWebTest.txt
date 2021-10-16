@@ -1,7 +1,15 @@
 # Initialize web server on port 2500 - for testing
 # --
 
-	Lib.Web.Server(2500).RootContext => Root
+	Lib.Web.Server(2500).RootContext => Root   # The "/" path
+	
+	Root.Context("my.css","text/css")
+		.GET(Lambda{
+			Sequence(
+				@ * {font-family: courier}
+				@ body {background-color:#AAFF99}
+			)
+	})
 		
 	Root.GET(Lambda{
 		Sequence(
@@ -83,12 +91,15 @@
 /Init
 
 
+
+
 # Open Body 
 # --
 	Sequence(
 			@ <html>
 			@ <head>
 			@ 	<meta charset="utf-8"/>
+			@ 	<link rel="stylesheet" href="/my.css">
 			@ </head>
 			@ <body>
 	)

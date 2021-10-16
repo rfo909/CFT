@@ -242,7 +242,7 @@ t10.concat("-")=="1-2-3"
 # Inner loop report output list 
 # spilling over to outer scope
 #
-# Not a problem when replacing report() with out()
+# Not a problem when replacing report() with out() - (See Test13b)
 # -----------------------
 
 # Function
@@ -262,6 +262,34 @@ t10.concat("-")=="1-2-3"
 	t13 => result
 	getType(result)=="List" && result.concat=="xi1xi2xi3"
 /Test13_Inner_report_output_propagation
+
+
+
+
+# Same as Test13 but with "out" instead of "report".
+# report() should work like out(), but it doesn't
+# ---
+
+# Function
+# --
+	List(1,2,3) => data
+	Inner {
+		data->x out("i"+x)
+	} -> line
+		out("x"+line)
+		# --
+		# Should return list of "x"+line
+		# Verify test returns true by replacing report() with out() above
+/t13b
+
+# Inner loop report output problem
+# --
+	t13b => result
+	getType(result)=="List" && result.concat=="xi1xi2xi3"
+/Test13b_Inner_out_output_propagation
+
+
+
 
 
 
