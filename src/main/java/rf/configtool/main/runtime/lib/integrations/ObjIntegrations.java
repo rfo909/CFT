@@ -49,7 +49,6 @@ public class ObjIntegrations extends Obj {
 
     public ObjIntegrations () {       
         this.add(new FunctionSentry());
-        this.add(new FunctionMSSql());
     }
     
     private ObjIntegrations self() {
@@ -85,18 +84,5 @@ public class ObjIntegrations extends Obj {
         }
     } 
     
-    class FunctionMSSql extends Function {
-        public String getName() {
-            return "MSSql";
-        }
-        public String getShortDesc() {
-            return "MSSql() - create MSSql object for interfacing MS SQL Server database";
-        }
-        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 0) throw new Exception("Expected no parameters");
-            return new ValueObj(new ObjMSSql());
-        }
-    } 
-    
-
+   
 }
