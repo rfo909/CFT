@@ -55,26 +55,37 @@ IgnoreDir: /.git        ### substring matching against path
 
 There can be multiples of every line, including Dir.
 >>> EOF
-->line 
-	# avoid line numbering, for copy/paste of text
-	println(line)
+//ReadmeLines
+
+
+# Readme
+# --
+	ReadmeLines->line println(line)
 /Readme
-
-
 
 # The projects.txt file 
 # --
     (Lib:DirPrivate).file("projects.txt") => f
-    if (!f.exists) f.create(Sequence(
-    	@ ### CFT
-    	@
-    	@ # Example project
-    	@ Dir: .
-    	@ Type: java
-    	@
-    ))
-    f
-/ConfigFile
+	if (!f.exists || DataFile(f,"###").keys.length==0) {
+		readme=Lambda{ReadmeLines->line out("# "+line)}
+		Inner{
+			Sequence(
+				@
+				@ ${readme.call}
+				@
+				@ # Example project (auto-generated ${Date.fmt})
+				@
+				@ ### CFT
+				@ 
+				@ Dir: ${Sys.homeDir.path}
+				@ Type: java
+			)->line
+				line.mergeExpr->s out(s)
+		} => lines
+		f.append(lines)
+	}
+	f
+/ConfigFile	
 
 
 
@@ -82,7 +93,6 @@ There can be multiples of every line, including Dir.
 # Projects config as DataFile
 # --
     ConfigFile =>f
-    error(!f.exists,"File " + f.path + " missing - run Readme() for details")
     DataFile(f,"###").comment("#")
 //ProjectsFile
 
@@ -99,17 +109,6 @@ There can be multiples of every line, including Dir.
     Db2:Get("Projects","Project") => result
     
 	ProjectsFile.keys => names
-	
-	if (names.length==0) {
-		ConfigFile.append(Sequence(
-			@ 
-			@ ### CFT
-			@ # Example project
-			@ Dir: .
-			@ Type: java
-			@
-		))
-	}
 
     Lambda { P(1) } =>showName
     loop

@@ -253,20 +253,18 @@ public class Ctx {
     
     // Utility method
     /**
-     * Resolve expression on string format
+     * Resolve ProgramLine (sequence of statements) on string format - does not support PIPE
      */
-    public Value resolveExpr (String s) throws Exception {
+    public Value resolveProgramLine (String s) throws Exception {
         Lexer p=new Lexer();
         p.processLine(new CodeLine(new SourceLocation(), s));
+        
         TokenStream ts = p.getTokenStream();
         ProgramLine progLine=new ProgramLine(ts);
+        if (!ts.atEOF()) throw new Exception(ts.error("Invalid token - expected EOF"));
         
         Ctx ctx=this.sub();
         progLine.execute(ctx);
-        Value retVal=ctx.pop();
-        if (retVal==null) retVal=new ValueNull();
-        return retVal;
+        return ctx.getResult();
     }
-
-    
 }

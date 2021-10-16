@@ -820,7 +820,7 @@ public class ValueString extends Value {
             	sb.append(val.substring(currPos,pos));
             	currPos=pos2+after.length();
             	String expr=val.substring(pos+before.length(),pos2);
-            	Value val=ctx.resolveExpr(expr);
+            	Value val=ctx.subNewData(true).resolveProgramLine(expr);
             	
             	if (val instanceof ValueList) {
             		List<String> renderResult=new ArrayList<String>();

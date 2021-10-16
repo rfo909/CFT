@@ -441,3 +441,27 @@ f="X" "a${f}b".mergeExpr.concat("|")=="aXb"
 "abc(5+5)def".mergeExpr("(",")").concat("|")=="abc10def"
 /Test26_mergeExpr_alternative_markup
 
+
+
+
+"a${List(1,2,3)->x out(x+1)}b".mergeExpr.concat("|")=="a2|3|4b"
+/Test27_mergeExpr_iteration_ok
+
+
+
+# PIPE not allowed - use a lambda :-)
+#
+tryCatch("a${List(1,2,3)->x out(x+1) | _.concat}b".mergeExpr).ok==false
+/Test28_mergeExpr_iteration_pipe_invalid
+
+
+# SymDict
+
+a=5 SymDict(a).get("a")==5
+/Test29_Symdict_basic
+
+a=List(1,2,3) SymDict(a).get("a").concat("|")=="1|2|3"
+/Test30_Symdict_list
+
+
+
