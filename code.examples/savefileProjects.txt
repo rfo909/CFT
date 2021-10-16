@@ -65,7 +65,14 @@ There can be multiples of every line, including Dir.
 # The projects.txt file 
 # --
     (Lib:DirPrivate).file("projects.txt") => f
-    if (!f.exists) f.create("")
+    if (!f.exists) f.create(Sequence(
+    	@ ### CFT
+    	@
+    	@ # Example project
+    	@ Dir: .
+    	@ Type: java
+    	@
+    ))
     f
 /ConfigFile
 
@@ -92,6 +99,17 @@ There can be multiples of every line, including Dir.
     Db2:Get("Projects","Project") => result
     
 	ProjectsFile.keys => names
+	
+	if (names.length==0) {
+		ConfigFile.append(Sequence(
+			@ 
+			@ ### CFT
+			@ # Example project
+			@ Dir: .
+			@ Type: java
+			@
+		))
+	}
 
     Lambda { P(1) } =>showName
     loop
@@ -121,7 +139,11 @@ There can be multiples of every line, including Dir.
 	pName=CurrProjectName
 	
     ProjectsFile.get(pName) =>dataLines
-    error(dataLines.length==0, "No data for project " + pName)
+    if(dataLines.length==0) {
+    	SelectProjectName
+    	pName=CurrProjectName
+    	ProjectsFile.get(pName) =>dataLines
+    }
 
 	dict=Dict
     dataLines->line
