@@ -8,7 +8,7 @@
 			@ ${BodyStart}
 			@ <h3>Menu</h3>
 			@ <p>
-			@ <a href="/text">/text (text/plain test)</a><br/>
+			@ <a href="/text">/text</a> (text/plain test)<br/>
 			@ </p>
 			@ <p>
 			@ <a href="/status">/status</a><br/>
@@ -21,57 +21,64 @@
 			line.mergeExpr->s out(s)
 	})
 		
-	Root.Context("text","text/plain")
-			.GET(Lambda{
-				BodyStart
-				+
-				List("<h1>Plain text test</h1>") 
-				+ 
-				Inner {
-					Dir.files->file out(file.path + "</br>")
-				}
-				+ 
-				BodyEnd
-			})
+	Root.Context("text","text/plain").GET(Lambda{
+		files=Lambda{
+			Dir.files->f report(f.name, f.length)
+		}
+		Sequence(
+			#@ ${BodyStart}
+			#@ <h1>Plain text test</h1>
+			@ ${files.call}
+			#@ ${BodyEnd}
+		) -> line
+			line.mergeExpr->s out(s)
+	})
 	Root.Context("status")
-		.GET(Lambda{P(1)=>requestObj
-			List("<html><body><h1>Headers</h1>") 
-			+ 
-			Inner {Util:ShowDict(requestObj.headers)->line out(line+"<br/>")}
-				+ List("</body></html>")
-			})
+		.GET(Lambda{
+			P(1)=>requestObj
+			headers=Lambda{
+				P(1)=>requestObj
+				Util:ShowDict(requestObj.headers)->line out(line+"<br/>")
+			}
+			Sequence(
+				@ ${BodyStart}
+				@ <h1>Headers</h1>
+				@ ${headers.call(requestObj)}
+				@ ${BodyEnd}
+			) -> line
+				line.mergeExpr->s out(s)
+		})
 
 	Root.Context("formtest")
-		.GET(Lambda{P(1)=>requestObj
-			BodyStart
-			+
+		.GET(Lambda{
+			P(1)=>requestObj
 			Sequence(
+				@ ${BodyStart}
 				@ <h1>Formtest</h1>
 				@ <form action="/formtest" method="POST">
 				@ <input name="a"/>
 				@ <input name="b"/>
 				@ <input type="submit" value="Submit">
 				@ </form>
-			)
-			+
-			BodyEnd
+				@ ${BodyEnd}
+			) -> line
+				line.mergeExpr->s out(s)
 		})
-		.POST(Lambda{P(1)=>requestObj
+		.POST(Lambda{
+			P(1)=>requestObj
+			
 			body=requestObj.body
 			if (body != null) {
 				# binary
 				body=body.toString("UTF-8")
 			}
-			BodyStart
-			+
 			Sequence(
+				@ ${BodyStart}
 				@ <h1>Form POST</h1>
-			)
-			+ ShowRequest(requestObj)
-			#+
-			#List("<br/>",body,"</br/>")
-			+
-			BodyEnd
+				@ ${ShowRequest(requestObj)}
+				@ ${BodyEnd}
+			)->line
+				line.mergeExpr->s out(s)
 		})
 /Init
 
@@ -109,16 +116,21 @@
 		body=body.hex
 		if (body.length > 50) body=body.sub(0,40) + "..."
 	}
-	
-	List("<h2>.headers</h2>")
-	+ ShowDict(req.headers)
-	+ List("<h2>.method</h2>",req.method+"<br/>")
-	+ List("<h2>.url</h2>",req.url+"<br/>")
-	+ List("<h2>.urlParams</h2>")
-	+ ShowDict(req.urlParams)
-	+ List("<h2>.body</h2>", body, "<br/>")
-	+ List("<h2>.bodyParams</h2>")
-	+ ShowDict(req.bodyParams)
+	Sequence(
+		@ <h2>.headers</h2>
+		@ ${ShowDict(req.headers)}
+		@ <h2>.method</h2>
+		@ ${req.method}<br>
+		@ <h2>.url</h2>
+		@ ${req.url}<br/>
+		@ <h2>.urlParams</h2>
+		@ ${ShowDict(req.urlParams)}
+		@ <h2>.body</h2>
+		@ ${body}<br/>
+		@ <h2>.bodyParams</h2>
+		@ ${ShowDict(req.bodyParams)}
+	) -> line
+		line.mergeExpr->s out(s)
 //ShowRequest
 
 
