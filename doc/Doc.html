@@ -67,14 +67,16 @@ v2.9.1
 
 <h1>Functionality</h1>
 <p>
-  The CFT programming language is a glue between library functions and object functions, user input, and 
-  running external programs.
+  The CFT programming language is a glue between library functions, user input, and 
+  running external programs. It is designed for data filtering, and file processing, 
+  as well as being interactive.
 </p>
 <p>
   It is command line based, and can be programmed interactively, creating one-line functions, but 
   mostly we use editors for creating function code.
 <p>
-  The language is object oriented, with all values being objects. Here we call a
+  The language is object oriented, with all values being objects, but for simplicity
+  does not allow user-defined classes. Here we call a
   function "bin()" inside an integer object. 
 </p>
 <pre>
@@ -83,7 +85,7 @@ v2.9.1
   00000001
 </pre>
 <p>
-  Parantheses are optional when no parameters.
+  Parantheses are optional when no parameters to a function.
 </p>
 
 <h2>Another example</h2>
@@ -106,7 +108,7 @@ v2.9.1
 </pre>
 
 <p>
-  Note also the two global functions, _Stmt and _Expr, which produce summaries
+  Note the two global functions, _Stmt and _Expr, which produce summaries
   of statements and expressions.
 <pre>
   $ _Stmt
@@ -172,7 +174,7 @@ v2.9.1
 </pre>
 <p>
   If the name doesn't match one function, it is used as a prefix to list a subset
-  of all functions.
+  of the functions.
 </p>
 
 
@@ -197,6 +199,7 @@ v2.9.1
 
 
 
+
 <h1>Edit script file - shortcuts</h1>
 <p>
   Instead of entering code via the command line, the script file can easily be opened in
@@ -206,8 +209,8 @@ v2.9.1
   $ @e
 </pre>
 <p>
-  This opens the script in an editor. On linux you will be asked which editor you prefer.
-  This is remembered within the session. To use a different editor, type @ee instead.
+  This opens the script in an editor. On linux you will be asked which editor you prefer, and
+  the selection is persisted for future invocations. To reset the editor selection, type @ee instead.
 </p>
 <p>
   After changing a script in the editor, and saving, CFT automatically detects the change, and
@@ -291,6 +294,7 @@ v2.9.1
 </pre>
 
 
+
 <h2>Windows backslash</h2>
 <p>
 	Note that backslash is NOT an escape character in CFT, so no need to escape it.
@@ -307,7 +311,7 @@ v2.9.1
 </pre>
 
 
-<h2>Combine with CFT functions</h2>
+<h2>Combine shell commands with CFT functions</h2>
 <p>
 	In addition to the above syntax, such as "cd /someDir/xyz" etc, these commands
 	also support using output from any CFT function. Say we have some functions:
@@ -329,7 +333,7 @@ v2.9.1
 
 
 
-<h2>Destructive commands</h2>
+<h2>No shell-like destructive commands</h2>
 <p>
   CFT <i>does not</i> include direct "shell-like" destructive commands ("rm", "cp", "mv", "mkdir" etc).
 </p>
@@ -337,10 +341,12 @@ v2.9.1
 	This is by choice.
 </p>
 <p>
-	Such functionality is of course available in CFT, but only as functions inside Dir and File objects.
+  The reason is to force the user to use regular CFT syntax, that is, create script code, for 
+  better security. 
 </p>
 <p>
-	Alternatively one can use "bang commands" or the shell function.
+	Alternatively one can use "bang commands" or the shell function. Can also use the
+  shortcut @fm, which opens a graphical file manager for the current directory.
 </p>
 
 
@@ -417,6 +423,10 @@ v2.9.1
 	that should not be deleted, etc.
 </p>
 	
+
+
+
+
 
 <h1>Bang commands</h1>
 <p>
@@ -564,7 +574,7 @@ v2.9.1
 
 <h2>Filtering</h2>
 <p>
-  Filtering list data is essential in CFT. Here is a simple example:
+  Filtering list data is an essential function in CFT. Here is a simple example:
 </p>
 <pre>
   $ List(1,2,3,4,3,2,1)->x assert(x>2) out(x)
@@ -595,7 +605,7 @@ v2.9.1
 </pre>
 
 <p>
-  Can also use "stack based" notation, where the assignment picks the current value
+  Assignment can also be done "stack based", where the assignment picks the current value
   off the stack and stores it into a variable:
 </p>
 <pre>
@@ -642,7 +652,7 @@ v2.9.1
   some Dir object:
 </p>
 <pre>
-  $ Dir.sub("src").file("x.txt")
+  $ Dir("...").file("x.txt")
 </pre>
 
 
@@ -659,13 +669,14 @@ v2.9.1
 
 
 
-<h2>Show bytes of file</h2>
+<h2>Show binary file</h2>
 <p>
   To page through hex listing of file
 </p>
 <pre>
   File("x.txt").hex
 </pre>
+
 
 
 
@@ -694,6 +705,7 @@ v2.9.1
 <pre>
   f=File("x.txt") lines=f.read f.setWriteLF.create(lines)
 </pre>
+
 
 
 
@@ -831,7 +843,7 @@ v2.9.1
   $ "double quotes"
   $ 'single quotes'
 
-  $ "'a'"
+  $ "'a'"
   'a'
 
   $ '"' + "'a'" + '"'
@@ -839,7 +851,7 @@ v2.9.1
 </pre>
 <p>
   Also, backslash is not used as escape character, which means backslash is just another character,
-  simplifying those Windows paths.
+  simplifying Windows paths.
 </p>
 
 
@@ -882,7 +894,7 @@ v2.9.1
   dict=SymDict(a,b)
 </pre>
 <p>
-Testing interactively all needs to be on the same line:
+If testing interactively, all needs to be on the same line:
 </p>
 <pre>
 	$ a=1 b=2 SymDict(a,b)
@@ -892,7 +904,8 @@ Testing interactively all needs to be on the same line:
 <h2>Binary type</h2>
 <p><i>v2.5.5</i></p>
 <p>
-  Used in connection with encryption etc. Can be created from strings.
+  Used in connection with encryption etc. Can be created from strings, or represent
+  the content of a file.
 </p>
 <pre>
    "password".getBytes("UTF-8")
@@ -904,11 +917,10 @@ Testing interactively all needs to be on the same line:
 </p>
 
 
+
+
 <h1>List processing</h1>
 
-<p>
-  Lists are essential for all processing with CFT.
-</p>
 <p>
   Lists can be created manually using the global List() function. 
 </p>
@@ -994,6 +1006,19 @@ Testing interactively all needs to be on the same line:
   &lt;String&gt;
   (b)bbb(b)
 </pre>
+<p>
+  Alternatively one can use "if". Using a multi-line example here:
+</p>
+<pre>
+  List(1,2,3,2,1)-&gt;x 
+    if (x&lt;2) out("(")
+    out("b")
+    if (x&lt;2) out(")")
+  | _.concat
+  /f
+</pre>
+
+
 
 
 
@@ -1323,13 +1348,14 @@ $ ?SomeScript:X
 
 <h1>Code spaces - "pipes"</h1>
 <p>
-<i>Code spaces have also been called Loop spaces in earlier versions of the doc.</i>
+<i>Code spaces have also been called "loop spaces" in earlier versions of the doc.</i>
 </p>
 
 <p>
   The body of any loop is the rest of the code of the function, or until a "pipe" symbol
-  is found. The pipe symbol ("|") more accurately partitions code into a sequence of
-  <em>code spaces</em>. It marks termination of all current loops.
+  is found. The pipe symbol ("|") partitions code into a sequence of
+  <em>code spaces</em>. Loops are limited within single code spaces, so the "pipe"
+  effectively is an end marker for all current loops.
 </p>
 <p>
   The way a "pipe" works, is to wait for any current loops to terminate, then take the
@@ -1354,14 +1380,14 @@ $ ?SomeScript:X
 </pre>
 
 <p>
-  As we see from the above code, a code spaces don't <em>need</em> containing loops. The 
+  As we see from the above code, code spaces don't <em>need</em> containing loops. The 
   following is perfectly legal, although a little silly.
 </p>
 <pre>
   $ 2+3 | | | | =&gt;x x | =&gt;y y | _ _ _ |
 </pre>
 <p>
-  Yes, it returns 5.
+  It returns 5.
 </p>
 
 
@@ -1369,8 +1395,8 @@ $ ?SomeScript:X
 
 <h2>Result value from a code space</h2>
 <p>
-  All function bodies in CFT consist of one or more <em>code spaces</em>. The result value
-  from any such body is the return value from the last code space.
+  All function bodies in CFT consist of one or more <em>code spaces</em>. The return value
+  from the function is the result from the last code space.
 </p>
 
 <h3>Code space result value</h3>
@@ -1405,12 +1431,10 @@ $ ?SomeScript:X
 	Inner{ Dir.files-&gt;f out(f.length) }.sum
 </pre>
 <p>
-	Here we see that the Inner block really is an expression, with a return value,
-	which is the list of individual file sizes. We then call the sum() function
-	on that list.
+	Another example
 </p>
 <pre>
-	numLines={Dir.files-&gt;f out(f.read.length)}
+	numLines=Inner{Dir.files-&gt;f out(f.read.length)}
 	numFiles=Dir.files.length
 	avg=numLines/numFiles
 	println("Average number of lines per file: " + avg)
@@ -1427,7 +1451,7 @@ $ ?SomeScript:X
 
 <h1>Function parameters</h1>
 <p>
-  Custom functions can also take parameters. This is done using the P() expression, which
+  Custom functions can take parameters. This is done using the P() expression, which
   identifies the parameter by position. Note that <em>parameter position is 1-based</em>.  
 </p>
 <pre>
@@ -1478,7 +1502,7 @@ $ ?SomeScript:X
 </pre>
 <p>
   The difference is that Input remembers unique input values, and lets the user
-  press enter to use the last (current) value, or may enter colon to select between previous
+  press enter to use the last (current) value, or enter colon to select between previous
   (history) values. It also has functions to manipulate the history and the "current" value.
 </p>
 <p>
@@ -1504,7 +1528,7 @@ $ ?SomeScript:X
 
 <h1>Block expressions</h1>
 <p>
-  The traditional blocks inside curly braces are present in CFT as well.
+  The traditional blocks inside curly braces come in three variants in CFT.
 </p>
 
 
@@ -1521,7 +1545,7 @@ $ ?SomeScript:X
 
 <p>
   Local blocks can contain loops, but can not be split into multiple code spaces using the PIPE ("|")
-  symbol. Since they execute in the same run-context as the code around them, any calls to out() or report()
+  symbol, as they execute in the same run-context as the code around them. Any calls to out() or report()
   add to the result list of the environment.
 </p>
 
@@ -1548,7 +1572,7 @@ $ ?SomeScript:X
 <h2>Inner blocks</h2>
 <p>
   An inner block is a cross between local blocks and the Lambda. An Inner block is executed
-  immediately, and has access to the local variables inside the function, but maintain a separate
+  immediately, and has access to the local variables inside the function, but maintains a separate
   context for loops and loop output. Technically, inner blocks are expressions, just as with local
   blocks. 
 </p>
@@ -1592,7 +1616,7 @@ $ ?SomeScript:X
 List("aaa","bbb")-&gt;line
   # Using a local block to limit scope of loop, so that we
   # can follow it by code that runs after the inner loop
-  # has completed. Results in list of characters: aaaXbbbX
+  # has completed. Result is list of characters: aaaXbbbX
   {
     line.chars-&gt;c out(c)
   } 
@@ -1669,8 +1693,8 @@ List("aaa","bbb")-&gt;line
   control processing loops with assert, reject and break.
 </p>
 <p>
-  Then there is the if-exression. It takes two forms, but is always considered an expression, not a statement. The
-  difference is that expressions always return a value, which statements need not.
+  Then there is the if-exression. It takes two forms, but is always considered an expression, not a statement.
+  The difference is that expressions always return a value, which statements need not.
 </p>
 <h3>Inline form</h3>
 <pre>
@@ -1735,7 +1759,7 @@ List("aaa","bbb")-&gt;line
   The implementation in CFT supports chaining multiple if after each other.
 </p>
 <pre>
-  if (cond) {
+  if (condA) {
     ...
   } else if (condB) {
     ...
@@ -1779,9 +1803,9 @@ List("aaa","bbb")-&gt;line
 
 <h1>The error() function</h1>
 <p>
-  The error() expression is another that contains a conditional part, and if true, throws
-  an exception with the string part, terminating current execution. Alternatively it can
-  be used without the condition, which means it always throws an exception.
+  The error() global function contains a conditional part, and if true, throws
+  a soft error with the string part, terminating current execution. Alternatively it can
+  be used without the condition, which means it always throws a soft error.
 </p>
 <pre>
   error(1+1 != 2,"this should not happen")
@@ -1806,10 +1830,6 @@ List("aaa","bbb")-&gt;line
 
 
 <h1>Protecting files and directories</h1>
-<p>
-  To save typing, one often create functions that just return some directory, or 
-  some files.  The JavaFiles example above illustrates this.
-</p>
 <p>
   The protect mechanism in CFT lets us attach a protect state to any Dir and File object,
   which guarantees that:
@@ -4111,6 +4131,9 @@ Dict
 
 
 <h1>Reference: object types</h1>
+<p>
+  <i>v2.9.1</i>
+</p>
 <pre>
 Grep("extends Obj") => g
 Sys.homeDir.allFiles(Glob("*.java"))->f
@@ -4122,6 +4145,7 @@ Sys.homeDir.allFiles(Glob("*.java"))->f
 
 
 ObjClosure 
+ObjContext 
 ObjConvert 
 ObjDD 
 ObjData 
@@ -4162,26 +4186,28 @@ ObjLexerToken
 ObjLexerTokenStream 
 ObjLib 
 ObjLineReader 
-ObjMSSql 
-ObjMSSqlConnection 
-ObjMSSqlParam 
-ObjMSSqlResultSet 
 ObjMath 
 ObjPersistent 
 ObjPlot 
 ObjProcess 
 ObjRegex 
+ObjRequest 
 ObjSentry 
+ObjServer 
 ObjSys 
 ObjTerm 
 ObjText 
 ObjUtil 
 ObjVec2D 
-Value 
+ObjWeb 
+Value
 </pre>
 
 
 <h1>Reference: Value types</h1>
+<p>
+  <i>v2.9.1</i>
+</p>
 <pre>
 Grep("extends Value") => g
 Sys.homeDir.allFiles(Glob("*.java"))->f
@@ -4236,6 +4262,17 @@ ValueString
 </ul>
 
 
+<p>
+  As of version 2.8.2 there are two global functions that list out
+  details about built-in syntax for expressions and statements:
+</p>
+<pre>
+  _Stmt
+  _Expr
+</pre>
+<p>
+  These are listed at the top when typing help to show global functions.
+</p>
 
 
 
@@ -4395,14 +4432,14 @@ Colon commands
 </pre>
 
 <h3>2021-10-16</h3>
+<p>Running CodeStats:main</p>
 <pre>
   Script code:      11488 lines
-  Java code:        25288 lines
-  Functions:        393
-  Object types:     61
+  Java code:        24644 lines
+  Functions:        378
+  Object types:     57
   Value types:      13
 </pre>  
-
 
 
 

@@ -61,14 +61,16 @@ and Windows.
 # Functionality
 
 
-The CFT programming language is a glue between library functions and object functions, user input, and
-running external programs.
+The CFT programming language is a glue between library functions, user input, and
+running external programs. It is designed for data filtering, and file processing,
+as well as being interactive.
 
 
 It is command line based, and can be programmed interactively, creating one-line functions, but
 mostly we use editors for creating function code.
 
-The language is object oriented, with all values being objects. Here we call a
+The language is object oriented, with all values being objects, but for simplicity
+does not allow user-defined classes. Here we call a
 function "bin()" inside an integer object.
 
 ```
@@ -77,7 +79,7 @@ $ 1.bin
 00000001
 ```
 
-Parantheses are optional when no parameters.
+Parantheses are optional when no parameters to a function.
 
 ## Another example
 
@@ -105,7 +107,7 @@ $ Dir.files.length
 $ help
 ```
 
-Note also the two global functions, _Stmt and _Expr, which produce summaries
+Note the two global functions, _Stmt and _Expr, which produce summaries
 of statements and expressions.
 ```
 $ _Stmt
@@ -166,7 +168,7 @@ $ ? name
 ```
 
 If the name doesn't match one function, it is used as a prefix to list a subset
-of all functions.
+of the functions.
 
 # Save and load
 
@@ -188,8 +190,8 @@ an editor. To do this, the current script must be saved, then enter the followin
 $ @e
 ```
 
-This opens the script in an editor. On linux you will be asked which editor you prefer.
-This is remembered within the session. To use a different editor, type @ee instead.
+This opens the script in an editor. On linux you will be asked which editor you prefer, and
+the selection is persisted for future invocations. To reset the editor selection, type @ee instead.
 
 
 After changing a script in the editor, and saving, CFT automatically detects the change, and
@@ -286,7 +288,7 @@ This of course goes interactively as well:
 ```
 $ cd d:\logs
 ```
-## Combine with CFT functions
+## Combine shell commands with CFT functions
 
 
 In addition to the above syntax, such as "cd /someDir/xyz" etc, these commands
@@ -305,7 +307,7 @@ Dir("/SomewhereElse/xyz").file("data.txt")
 $ cd (LogDir)
 $ edit (DataFile)
 ```
-## Destructive commands
+## No shell-like destructive commands
 
 
 CFT 
@@ -315,10 +317,12 @@ CFT
 This is by choice.
 
 
-Such functionality is of course available in CFT, but only as functions inside Dir and File objects.
+The reason is to force the user to use regular CFT syntax, that is, create script code, for
+better security.
 
 
-Alternatively one can use "bang commands" or the shell function.
+Alternatively one can use "bang commands" or the shell function. Can also use the
+shortcut @fm, which opens a graphical file manager for the current directory.
 
 # The "protect" mechanism
 
@@ -508,7 +512,7 @@ returning a single int value.
 ## Filtering
 
 
-Filtering list data is essential in CFT. Here is a simple example:
+Filtering list data is an essential function in CFT. Here is a simple example:
 
 ```
 $ List(1,2,3,4,3,2,1)->
@@ -533,7 +537,7 @@ $ a=3 b=2 a+b
 5
 ```
 
-Can also use "stack based" notation, where the assignment picks the current value
+Assignment can also be done "stack based", where the assignment picks the current value
 off the stack and stores it into a variable:
 
 ```
@@ -573,7 +577,7 @@ path in the parameter to File(), or use the file() function inside
 some Dir object:
 
 ```
-$ Dir.sub("src").file("x.txt")
+$ Dir("...").file("x.txt")
 ```
 ## Page through a file
 
@@ -583,7 +587,7 @@ To page through text file
 ```
 more x.txt
 ```
-## Show bytes of file
+## Show binary file
 
 
 To page through hex listing of file
@@ -755,14 +759,14 @@ for all kinds of combinations.
 ```
 $ "double quotes"
 $ 'single quotes'
-$ "'a'"
+$ "'a'"
 'a'
 $ '"' + "'a'" + '"'
 "'a'"
 ```
 
 Also, backslash is not used as escape character, which means backslash is just another character,
-simplifying those Windows paths.
+simplifying Windows paths.
 
 ## Dictionaries
 
@@ -803,7 +807,7 @@ b=2
 dict=SymDict(a,b)
 ```
 
-Testing interactively all needs to be on the same line:
+If testing interactively, all needs to be on the same line:
 
 ```
 $ a=1 b=2 SymDict(a,b)
@@ -813,7 +817,8 @@ $ a=1 b=2 SymDict(a,b)
 
 **v2.5.5**
 
-Used in connection with encryption etc. Can be created from strings.
+Used in connection with encryption etc. Can be created from strings, or represent
+the content of a file.
 
 ```
 "password".getBytes("UTF-8")
@@ -824,9 +829,6 @@ Used in connection with encryption etc. Can be created from strings.
 Check the Lib.Util object, which contains functions that create objects Encrypt and Decrypt.
 
 # List processing
-
-
-Lists are essential for all processing with CFT.
 
 
 Lists can be created manually using the global List() function.
@@ -899,6 +901,17 @@ be sent out as second parameter. Can be useful some times.
 $ List(1,2,3,2,1)->x condOut(x<2,"(") out("b") condOut(x<2,")") | _.concat
 <String>
 (b)bbb(b)
+```
+
+Alternatively one can use "if". Using a multi-line example here:
+
+```
+List(1,2,3,2,1)->x
+if (x<2) out("(")
+out("b")
+if (x<2) out(")")
+| _.concat
+/f
 ```
 ## Produce columns
 
@@ -1167,11 +1180,12 @@ construct. But this can be changed using the "pipe" symbol, which "closes" all l
 # Code spaces - "pipes"
 
 
-**Code spaces have also been called Loop spaces in earlier versions of the doc.**
+**Code spaces have also been called "loop spaces" in earlier versions of the doc.**
 
 The body of any loop is the rest of the code of the function, or until a "pipe" symbol
-is found. The pipe symbol ("|") more accurately partitions code into a sequence of
-**code spaces**. It marks termination of all current loops.
+is found. The pipe symbol ("|") partitions code into a sequence of
+**code spaces**. Loops are limited within single code spaces, so the "pipe"
+effectively is an end marker for all current loops.
 
 
 The way a "pipe" works, is to wait for any current loops to terminate, then take the
@@ -1195,7 +1209,7 @@ the stack.
 $ Dir.files->f out(f.length) | _.sum
 ```
 
-As we see from the above code, a code spaces don't 
+As we see from the above code, code spaces don't 
 **need** containing loops. The
 following is perfectly legal, although a little silly.
 
@@ -1203,14 +1217,14 @@ following is perfectly legal, although a little silly.
 $ 2+3 | | | | =>x x | =>y y | _ _ _ |
 ```
 
-Yes, it returns 5.
+It returns 5.
 
 ## Result value from a code space
 
 
 All function bodies in CFT consist of one or more 
-**code spaces**. The result value
-from any such body is the return value from the last code space.
+**code spaces**. The return value
+from the function is the result from the last code space.
 
 ### Code space result value
 
@@ -1245,12 +1259,10 @@ the sizes of the files in current directory:
 Inner{ Dir.files->f out(f.length) }.sum
 ```
 
-Here we see that the Inner block really is an expression, with a return value,
-which is the list of individual file sizes. We then call the sum() function
-on that list.
+Another example
 
 ```
-numLines={Dir.files->f out(f.read.length)}
+numLines=Inner{Dir.files->f out(f.read.length)}
 numFiles=Dir.files.length
 avg=numLines/numFiles
 println("Average number of lines per file: " + avg)
@@ -1258,7 +1270,7 @@ println("Average number of lines per file: " + avg)
 # Function parameters
 
 
-Custom functions can also take parameters. This is done using the P() expression, which
+Custom functions can take parameters. This is done using the P() expression, which
 identifies the parameter by position. Note that 
 **parameter position is 1-based**.
 
@@ -1312,7 +1324,7 @@ value = readLine("Enter value")
 ```
 
 The difference is that Input remembers unique input values, and lets the user
-press enter to use the last (current) value, or may enter colon to select between previous
+press enter to use the last (current) value, or enter colon to select between previous
 (history) values. It also has functions to manipulate the history and the "current" value.
 
 
@@ -1329,7 +1341,7 @@ P(1,Input("Enter value").get) =>value ...
 # Block expressions
 
 
-The traditional blocks inside curly braces are present in CFT as well.
+The traditional blocks inside curly braces come in three variants in CFT.
 
 ## Local blocks
 
@@ -1344,7 +1356,7 @@ if (a>b) {
 ```
 
 Local blocks can contain loops, but can not be split into multiple code spaces using the PIPE ("|")
-symbol. Since they execute in the same run-context as the code around them, any calls to out() or report()
+symbol, as they execute in the same run-context as the code around them. Any calls to out() or report()
 add to the result list of the environment.
 
 ## Lambdas
@@ -1366,7 +1378,7 @@ closures and/or Dict objects.
 
 
 An inner block is a cross between local blocks and the Lambda. An Inner block is executed
-immediately, and has access to the local variables inside the function, but maintain a separate
+immediately, and has access to the local variables inside the function, but maintains a separate
 context for loops and loop output. Technically, inner blocks are expressions, just as with local
 blocks.
 
@@ -1405,7 +1417,7 @@ Lambdas are "functions" as values.
 List("aaa","bbb")->line
 # Using a local block to limit scope of loop, so that we
 # can follow it by code that runs after the inner loop
-# has completed. Results in list of characters: aaaXbbbX
+# has completed. Result is list of characters: aaaXbbbX
 {
 line.chars->c out(c)
 }
@@ -1463,8 +1475,8 @@ Conditional execution of code is done in two ways in CFT, with the first being h
 control processing loops with assert, reject and break.
 
 
-Then there is the if-exression. It takes two forms, but is always considered an expression, not a statement. The
-difference is that expressions always return a value, which statements need not.
+Then there is the if-exression. It takes two forms, but is always considered an expression, not a statement.
+The difference is that expressions always return a value, which statements need not.
 
 ### Inline form
 
@@ -1529,7 +1541,7 @@ if (i>=10,{break},i=i+1)
 The implementation in CFT supports chaining multiple if after each other.
 
 ```
-if (cond) {
+if (condA) {
 ...
 } else if (condB) {
 ...
@@ -1567,9 +1579,9 @@ expression if parameter N is null.
 # The error() function
 
 
-The error() expression is another that contains a conditional part, and if true, throws
-an exception with the string part, terminating current execution. Alternatively it can
-be used without the condition, which means it always throws an exception.
+The error() global function contains a conditional part, and if true, throws
+a soft error with the string part, terminating current execution. Alternatively it can
+be used without the condition, which means it always throws a soft error.
 
 ```
 error(1+1 != 2,"this should not happen")
@@ -1588,10 +1600,6 @@ The printDebug() includes location in the source, and appends the log lines to
 a "system messages" list, which is displayed after processing has completed.
 
 # Protecting files and directories
-
-
-To save typing, one often create functions that just return some directory, or
-some files.  The JavaFiles example above illustrates this.
 
 
 The protect mechanism in CFT lets us attach a protect state to any Dir and File object,
@@ -3654,6 +3662,8 @@ See Db2:GetSessionPassword() function for example.
 
 # Reference: object types
 
+
+**v2.9.1**
 ```
 Grep("extends Obj") =>
  g
@@ -3667,6 +3677,7 @@ x
 println(x)
 /objects
 ObjClosure
+ObjContext
 ObjConvert
 ObjDD
 ObjData
@@ -3707,25 +3718,26 @@ ObjLexerToken
 ObjLexerTokenStream
 ObjLib
 ObjLineReader
-ObjMSSql
-ObjMSSqlConnection
-ObjMSSqlParam
-ObjMSSqlResultSet
 ObjMath
 ObjPersistent
 ObjPlot
 ObjProcess
 ObjRegex
+ObjRequest
 ObjSentry
+ObjServer
 ObjSys
 ObjTerm
 ObjText
 ObjUtil
 ObjVec2D
+ObjWeb
 Value
 ```
 # Reference: Value types
 
+
+**v2.9.1**
 ```
 Grep("extends Value") =>
  g
@@ -3790,6 +3802,17 @@ These are the statements in CFT:
 
 - the "showCode" command
 
+
+
+As of version 2.8.2 there are two global functions that list out
+details about built-in syntax for expressions and statements:
+
+```
+_Stmt
+_Expr
+```
+
+These are listed at the top when typing help to show global functions.
 
 # Reference: Colon commands
 
@@ -3958,11 +3981,14 @@ Value types:      13
 ```
 ### 2021-10-16
 
+
+Running CodeStats:main
+
 ```
 Script code:      11488 lines
-Java code:        25288 lines
-Functions:        393
-Object types:     61
+Java code:        24644 lines
+Functions:        378
+Object types:     57
 Value types:      13
 ```
 ## Poor man's EXIF date parser

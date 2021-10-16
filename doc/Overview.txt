@@ -27,8 +27,8 @@ Shortcuts vs colon commands
 CFT as a shell
  * Paths with space
  * Windows backslash
- * Combine with CFT functions
- * Destructive commands
+ * Combine shell commands with CFT functions
+ * No shell-like destructive commands
 
 The "protect" mechanism
 
@@ -48,7 +48,7 @@ Local variables
 
 Files
  * Page through a file
- * Show bytes of file
+ * Show binary file
  * Encoding
  * end-of-line
 
