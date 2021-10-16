@@ -4,9 +4,8 @@
 	Lib.Web.Server(2500).RootContext => Root
 		
 	Root.GET(Lambda{
-		BodyStart
-		+
 		Sequence(
+			@ ${BodyStart}
 			@ <h3>Menu</h3>
 			@ <p>
 			@ <a href="/text">/text (text/plain test)</a><br/>
@@ -17,9 +16,9 @@
 			@ <p>
 			@ <a href="/formtest">/formtest</a><br/>
 			@ </p>
-		)
-		+
-		BodyEnd
+			@ ${BodyEnd}
+		) -> line 
+			line.mergeExpr->s out(s)
 	})
 		
 	Root.Context("text","text/plain")

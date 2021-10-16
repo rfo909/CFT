@@ -13,13 +13,24 @@
 
 <h1>CFT Change log</h1>
 
+<h3>v2.9.1 2021-10-16 String.mergeExpr</h3>
+<p>
+	Created mergeExpr() function on String. It evaluates expressions inside ${...} or
+	custom start/end-markers as parameters to the mergeEval() function.
+</p>
+<pre>
+	a=5 b=6 "a=${a} b=${b}".mergeExpr
+</pre>
+
+
+
 <h3>v2.9.0 2021-10-11 Lib.Web.Server</h3>
 <p>
 	Created experimental web-server inside CFT. See script WebTest for details. 
 </p>
 
 
-<h3>v2.8.3 2021-10-03 Db2 implementation</h3>
+<h3>v2.8.3 2021-10-03 Db2 improvements</h3>
 <p>
 	Created lock files for reading and writing collection data, and compacting
 	collections where there are many redefines of values. 
