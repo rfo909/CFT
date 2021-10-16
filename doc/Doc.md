@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2021-10-13 RFO
-v2.9.0
+Last updated: 2021-10-16 RFO
+v2.9.1
 ```
 # Introduction
 
@@ -2370,11 +2370,13 @@ The above code generates an example plot as a png file in the current directory.
 **v2.9.0**
 
 There is a small embedded web-server in CFT, available in the Lib.Web object. It
-supports GET and POST, does parameter and form input parsing, and works with html
-only.
+supports GET and POST, does parameter and form input parsing.
 
 
-Status: experimental. See WebTest script.
+See WebTest script, which was modified in v2.9.1 with the addition of
+String method .mergeExpr where expressions inside ${...} are evaluated and
+inserted, creating a list of strings (as the sub-expression may result in
+many lines of output).
 
 # Command line args
 
@@ -3952,6 +3954,15 @@ Script code:      10922 lines
 Java code:        23907 lines
 Functions:        377
 Object types:     57
+Value types:      13
+```
+### 2021-10-16
+
+```
+Script code:      11488 lines
+Java code:        25288 lines
+Functions:        393
+Object types:     61
 Value types:      13
 ```
 ## Poor man's EXIF date parser
