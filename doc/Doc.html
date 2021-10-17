@@ -15,7 +15,7 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2021-10-16 RFO
+Last updated: 2021-10-17 RFO
 v2.9.1
 
 
@@ -2373,6 +2373,39 @@ List("aaa","bbb")-&gt;line
   /CreateMongodCfg
 </pre>
 
+
+
+<h2>mergeExpr</h2>
+<p>
+  <b>v2.9.1</b>
+</p>
+<p>
+  The String.mergeExpr is another option. Instead of merging data from a dictionary
+  into the template, the template contains CFT expressions inside &lt;&lt; and &gt;&gt;.
+</p>
+<pre>
+  # Create template
+  # --
+    P(1,"John Doe")=>name
+    P(2,List)=>hobbies
+
+    Sequence(
+      @ p>Dear &lt;&lt;name&gt;&gt;
+      @ We see that you have &lt;&lt;hobbies.length&gt;&gt; hobbies:
+      @ &lt;&lt; hobbies-&gt;h out("   - " + h) &gt;&gt;
+    )-&gt;a
+      a.mergeExpr-&gt;b
+        out(b)
+  /GetTemplate
+</pre>
+<p>
+  Note that String.mergeExpr returns a list, hence looping over that, outputting
+  each result line.
+</p>
+<p>
+  Expressions can include iterating over a list, as seen, and creating Inner
+  blocks, if using PIPE inside. Usually we will probably refer variables, or call functions().
+</p>
 
 <h1>Processing text</h1>
 <p>
