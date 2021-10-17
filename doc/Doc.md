@@ -2382,7 +2382,11 @@ supports GET and POST, does parameter and form input parsing.
 
 
 See WebTest script, which was modified in v2.9.1 with the addition of
-String method .mergeExpr where expressions inside ${...} are evaluated and
+String method .mergeExpr where expressions inside 
+<
+<...>
+>
+ are evaluated and
 inserted, creating a list of strings (as the sub-expression may result in
 many lines of output).
 

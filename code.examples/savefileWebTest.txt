@@ -13,7 +13,7 @@
 		
 	Root.GET(Lambda{
 		Sequence(
-			@ ${BodyStart}
+			@ <<BodyStart>>
 			@ <h3>Menu</h3>
 			@ <p>
 			@ <a href="/text">/text</a> (text/plain test)<br/>
@@ -24,7 +24,7 @@
 			@ <p>
 			@ <a href="/formtest">/formtest</a><br/>
 			@ </p>
-			@ ${BodyEnd}
+			@ <<BodyEnd>>
 		) -> line 
 			line.mergeExpr->s out(s)
 	})
@@ -34,10 +34,10 @@
 			Dir.files->f report(f.name, f.length)
 		}
 		Sequence(
-			#@ ${BodyStart}
+			#@ <<BodyStart>>
 			#@ <h1>Plain text test</h1>
-			@ ${files.call}
-			#@ ${BodyEnd}
+			@ <<files.call>>
+			#@ <<BodyEnd>>
 		) -> line
 			line.mergeExpr->s out(s)
 	})
@@ -49,10 +49,10 @@
 				Util:ShowDict(requestObj.headers)->line out(line+"<br/>")
 			}
 			Sequence(
-				@ ${BodyStart}
+				@ <<BodyStart>>
 				@ <h1>Headers</h1>
-				@ ${headers.call(requestObj)}
-				@ ${BodyEnd}
+				@ <<headers.call(requestObj)>>
+				@ <<BodyEnd>>
 			) -> line
 				line.mergeExpr->s out(s)
 		})
@@ -61,14 +61,14 @@
 		.GET(Lambda{
 			P(1)=>requestObj
 			Sequence(
-				@ ${BodyStart}
+				@ <<BodyStart>>
 				@ <h1>Formtest</h1>
 				@ <form action="/formtest" method="POST">
 				@ <input name="a"/>
 				@ <input name="b"/>
 				@ <input type="submit" value="Submit">
 				@ </form>
-				@ ${BodyEnd}
+				@ <<BodyEnd>>
 			) -> line
 				line.mergeExpr->s out(s)
 		})
@@ -81,10 +81,10 @@
 				body=body.toString("UTF-8")
 			}
 			Sequence(
-				@ ${BodyStart}
+				@ <<BodyStart>>
 				@ <h1>Form POST</h1>
-				@ ${ShowRequest(requestObj)}
-				@ ${BodyEnd}
+				@ <<ShowRequest(requestObj)>>
+				@ <<BodyEnd>>
 			)->line
 				line.mergeExpr->s out(s)
 		})
@@ -129,17 +129,17 @@
 	}
 	Sequence(
 		@ <h2>.headers</h2>
-		@ ${ShowDict(req.headers)}
+		@ <<ShowDict(req.headers)>>
 		@ <h2>.method</h2>
-		@ ${req.method}<br>
+		@ <<req.method>><br>
 		@ <h2>.url</h2>
-		@ ${req.url}<br/>
+		@ <<req.url>><br/>
 		@ <h2>.urlParams</h2>
-		@ ${ShowDict(req.urlParams)}
+		@ <<ShowDict(req.urlParams)>>
 		@ <h2>.body</h2>
-		@ ${body}<br/>
+		@ <<body>><br/>
 		@ <h2>.bodyParams</h2>
-		@ ${ShowDict(req.bodyParams)}
+		@ <<ShowDict(req.bodyParams)>>
 	) -> line
 		line.mergeExpr->s out(s)
 //ShowRequest

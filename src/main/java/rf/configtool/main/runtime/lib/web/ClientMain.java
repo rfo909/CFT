@@ -154,7 +154,7 @@ public 	class ClientMain implements Runnable {
 				sendData(out, outBinary, resp);
 			}
 		} catch (Exception ex) {
-			//ex.printStackTrace();
+			ex.printStackTrace();
 		}
 		
 		setCompleted();

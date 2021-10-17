@@ -71,13 +71,13 @@ There can be multiples of every line, including Dir.
 		Inner{
 			Sequence(
 				@
-				@ ${readme.call}
+				@ << readme.call >>
 				@
-				@ # Example project (auto-generated ${Date.fmt})
+				@ # Example project (auto-generated << Date.fmt >>)
 				@
-				@ ### CFT
+				@ ### CFTJava
 				@ 
-				@ Dir: ${Sys.homeDir.path}
+				@ Dir: << Sys.homeDir.path >>
 				@ Type: java
 			)->line
 				line.mergeExpr->s out(s)

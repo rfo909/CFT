@@ -21,11 +21,11 @@
 
 <h3>v2.9.1 2021-10-16 String.mergeExpr</h3>
 <p>
-	Created mergeExpr() function on String. It evaluates expressions inside ${...} or
+	Created mergeExpr() function on String. It evaluates expressions inside <<...>> or
 	custom start/end-markers as parameters to the mergeEval() function.
 </p>
 <pre>
-	a=5 b=6 "a=${a} b=${b}".mergeExpr
+	a=5 b=6 "a=<<a>> b=<<b>>".mergeExpr
 </pre>
 
 

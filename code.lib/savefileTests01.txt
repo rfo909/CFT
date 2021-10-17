@@ -387,7 +387,7 @@ t17=="test123"
 List(List(List(1)))
 /t18
 
-"a${t18}b".mergeExpr.concat("|")=="a1b"
+"a<<t18>>b".mergeExpr.concat("|")=="a1b"
 /Test18_mergeExpr_list1_nested
 
 
@@ -396,7 +396,7 @@ List(List(List(1)))
 List(1,2)
 /t19
 
-"a${t19}b".mergeExpr.concat("|")=="a1|2b"
+"a<<t19>>b".mergeExpr.concat("|")=="a1|2b"
 /Test19_mergeExpr_list2
 
 
@@ -406,23 +406,23 @@ List(1,2)
 List(1,2,3)
 /t20
 
-"a${t20}b".mergeExpr.concat("|")=="a1|2|3b"
+"a<<t20>>b".mergeExpr.concat("|")=="a1|2|3b"
 /Test20_mergeExpr_list3
 
 
 
-"a${null}b".mergeExpr.concat("|")=="ab"
+"a<<null>>b".mergeExpr.concat("|")=="ab"
 /Test21_mergeExpr_null
 
 
 
 
-"a${List(List(null))}b".mergeExpr.concat("|")=="ab"
+"a<<List(List(null))>>b".mergeExpr.concat("|")=="ab"
 /Test22_mergeExpr_null_nested
 
 
 
-f="X" "a${f}b".mergeExpr.concat("|")=="aXb"
+f="X" "a<<f>>b".mergeExpr.concat("|")=="aXb"
 /Test23_mergeExpr_localVariable
 
 
@@ -433,7 +433,7 @@ f="X" "a${f}b".mergeExpr.concat("|")=="aXb"
 
 
 
-"abc${d".mergeExpr.concat("|")=="abc${d"
+"abc<<d".mergeExpr.concat("|")=="abc<<d"
 /Test25_mergeExpr_incomplete_expr
 
 
@@ -444,25 +444,24 @@ f="X" "a${f}b".mergeExpr.concat("|")=="aXb"
 
 
 
-"a${List(1,2,3)->x out(x+1)}b".mergeExpr.concat("|")=="a2|3|4b"
+"a<<List(1,2,3)->x out(x+1)>>b".mergeExpr.concat("|")=="a2|3|4b"
 /Test27_mergeExpr_iteration_ok
 
 
 # PIPE not allowed - use a lambda :-)
 #
-tryCatch("a${List(1,2,3)->x out(x+1) | _.concat}b".mergeExpr).ok==false
+tryCatch("a<<List(1,2,3)->x out(x+1) | _.concat>>b".mergeExpr).ok==false
 /Test28_mergeExpr_iteration_pipe_invalid
 
 
 
 # But Inner blocks are allowed, and they can contain PIPE.
-# Require using other before/after-marks, here square brackets!
 #
 
 List(1,2,3)
 /t28b
 
-'A[ Inner{t28b->x out(x+1) | _.sum}+1 ]B'.mergeExpr("[","]").concat("|")=="A10B"
+'A<< Inner{t28b->x out(x+1) | _.sum}+1 >>B'.mergeExpr.concat("|")=="A10B"
 /Test28b_MergeExpr_iteration_pipe_inside_inner
 
 

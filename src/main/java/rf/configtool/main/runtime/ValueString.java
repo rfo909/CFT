@@ -787,11 +787,11 @@ public class ValueString extends Value {
             return "mergeExpr";
         }
         public String getShortDesc() {
-            return "mergeExpr([before,after]) - replace ${x} with result from eval(x)";
+            return "mergeExpr([before,after]) - replace <<x>> with result from eval(x)";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	String before="${";
-        	String after="}";
+        	String before="<<";
+        	String after=">>";
             if (params.size() == 0) {
             	// ok
             } else if (params.size() == 2) {
