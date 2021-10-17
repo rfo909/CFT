@@ -787,7 +787,7 @@ public class ValueString extends Value {
             return "mergeExpr";
         }
         public String getShortDesc() {
-            return "mergeExpr([before,after]) - replace <<x>> with result from eval(x)";
+            return "mergeExpr([before,after]) - replace <<x>> with result from eval(x) - returns list of strings";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
         	String before="<<";
@@ -801,75 +801,84 @@ public class ValueString extends Value {
                 throw new Exception("Expected either 0 or 2 parameters (before- and after-markers for code segments inside string)");
             }
             
-            List<String> resultList=new ArrayList<String>();
             
-            StringBuffer sb=new StringBuffer();
-            int currPos=0;
-            while (currPos < val.length()) {
-            	int pos=val.indexOf(before, currPos);
-            	if (pos < 0) {
-            		sb.append(val.substring(currPos));
-            		break;
-            	}
-            	int pos2=val.indexOf(after, currPos+before.length());
-            	if (pos2 < 0) {
-            		sb.append(val.substring(currPos));
-            		break;
-            	}
-            	// found something
-            	sb.append(val.substring(currPos,pos));
-            	currPos=pos2+after.length();
-            	String expr=val.substring(pos+before.length(),pos2);
-            	Value val=ctx.subNewData(true).resolveProgramLine(expr);
-            	
-            	if (val instanceof ValueList) {
-            		List<String> renderResult=new ArrayList<String>();
-            		render(renderResult, (ValueList) val);
-            		
-            		if (renderResult.size()==0) {
-            			// ignore
-            		} else if (renderResult.size()==1) { 
-            			// special treatment, to insert value into string, without newlines
-            			sb.append(renderResult.get(0));
-            		} else {
-            			sb.append(renderResult.get(0));
-            			for (int i=1; i<renderResult.size(); i++) {
-            				String line=renderResult.get(i);
-            				resultList.add(sb.toString());
-            				sb=new StringBuffer();
-            				sb.append(line);
-            			}
-            		}
-            	} else if (val instanceof ValueNull) {
-            		// ignore
-            	} else {
-            		// all others
-            		sb.append(val.getValAsString());
-            	}
-            }
-            resultList.add(sb.toString());
+            List<String> resultList = ValueString.mergeExpr(val, before, after, ctx);
+            
             List<Value> x=new ArrayList<Value>();
             for (String s:resultList) x.add(new ValueString(s));
             return new ValueList(x);
             
         }
-        /**
-         * Process list, possibly containing inner lists, into single
-         * list of values (recursive)
-         */
-        private void render (List<String> result, ValueList list) throws Exception {
-        	for (Value v:list.getVal()) {
-        		if (v instanceof ValueList) {
-        			render(result,(ValueList) v);
-        		} else if (v instanceof ValueNull) {
-        			// ignore
-        		} else {
-        			result.add(v.getValAsString());
-        		}
-        	}	
-        }
+        
     }
     
+    public static List<String> mergeExpr (String val, String before, String after, Ctx ctx) throws Exception {
+        List<String> resultList=new ArrayList<String>();
+        
+        StringBuffer sb=new StringBuffer();
+        int currPos=0;
+        while (currPos < val.length()) {
+        	int pos=val.indexOf(before, currPos);
+        	if (pos < 0) {
+        		sb.append(val.substring(currPos));
+        		break;
+        	}
+        	int pos2=val.indexOf(after, currPos+before.length());
+        	if (pos2 < 0) {
+        		sb.append(val.substring(currPos));
+        		break;
+        	}
+        	// found something
+        	sb.append(val.substring(currPos,pos));
+        	currPos=pos2+after.length();
+        	String expr=val.substring(pos+before.length(),pos2);
+        	Value v=ctx.subNewData(true).resolveProgramLine(expr);
+        	
+        	if (v instanceof ValueList) {
+        		List<String> renderResult=new ArrayList<String>();
+        		render(renderResult, (ValueList) v);
+        		
+        		if (renderResult.size()==0) {
+        			// ignore
+        		} else if (renderResult.size()==1) { 
+        			// special treatment, to insert value into string, without newlines
+        			sb.append(renderResult.get(0));
+        		} else {
+        			sb.append(renderResult.get(0));
+        			for (int i=1; i<renderResult.size(); i++) {
+        				String line=renderResult.get(i);
+        				resultList.add(sb.toString());
+        				sb=new StringBuffer();
+        				sb.append(line);
+        			}
+        		}
+        	} else if (v instanceof ValueNull) {
+        		// ignore
+        	} else {
+        		// all others
+        		sb.append(v.getValAsString());
+        	}
+        }
+        resultList.add(sb.toString());
+        return resultList;
+
+    }
+    
+    /**
+     * Process list, possibly containing inner lists, into single
+     * list of values (recursive)
+     */
+    private static void render (List<String> result, ValueList list) throws Exception {
+    	for (Value v:list.getVal()) {
+    		if (v instanceof ValueList) {
+    			render(result,(ValueList) v);
+    		} else if (v instanceof ValueNull) {
+    			// ignore
+    		} else {
+    			result.add(v.getValAsString());
+    		}
+    	}	
+    }
 
 
 }

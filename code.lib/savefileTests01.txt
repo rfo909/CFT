@@ -476,3 +476,30 @@ a=List(1,2,3) SymDict(a).get("a").concat("|")=="1|2|3"
 
 
 
+
+
+# mergeExpr for lists
+
+a=5 b=6 List("a=<< a >>","b=<<b>>").mergeExpr.concat("|")=="a=5|b=6"
+/Test31_list_mergeExpr
+
+
+
+
+a=5 b=6 Sequence(
+	@ a=<< a>>
+	@ b=<<b>>
+).mergeExpr.concat("|")=="a=5|b=6"
+/Test32_sequence_mergeExpr
+
+
+
+
+a=5 b=6 
+<<<<<<<<< EOF
+a=<< a >>
+b=<<b>>
+>>>>>>>>> EOF
+.mergeExpr.concat("|")=="a=5|b=6"
+/Test33_heredoc_mergeExpr
+

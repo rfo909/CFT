@@ -2109,12 +2109,12 @@ Sequence(
 line out(line.merge(data))
 /CreateMongodCfg
 ```
-## mergeExpr
+## List.mergeExpr
 
 
-**v2.9.1**
+**v2.9.2**
 
-The String.mergeExpr is another option. Instead of merging data from a dictionary
+The List.mergeExpr is another option. Instead of merging data from a dictionary
 into the template, the template contains CFT expressions inside << and >>.
 
 ```
@@ -2129,18 +2129,16 @@ Sequence(
 Dear <<name>>
 @ We see that you have <<hobbies.length>> hobbies:
 @ << hobbies->h out("   - " + h) >>
-)->a
-a.mergeExpr->b
-out(b)
+).mergeExpr
 /GetTemplate
 ```
 
-Note that String.mergeExpr returns a list, hence looping over that, outputting
-each result line.
+Note that Sequence() is just another way of creating a List.
 
 
 Expressions can include iterating over a list, as seen, and creating Inner
-blocks, if using PIPE inside. Usually we will probably refer variables, or call functions().
+blocks, if using PIPE inside. Usually we will probably refer variables,
+or call functions().
 
 # Processing text
 

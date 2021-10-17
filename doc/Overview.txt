@@ -179,7 +179,7 @@ Templating
  |   Custom merge codes
  * PDict()
  * Example using raw strings and Sequence()
- * mergeExpr
+ * List.mergeExpr
 
 Processing text
  * Reading text files

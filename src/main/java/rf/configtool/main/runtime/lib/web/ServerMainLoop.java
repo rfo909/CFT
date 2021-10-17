@@ -14,6 +14,8 @@ public 	class ServerMainLoop implements Runnable {
 	private boolean completed=false;
 	private List<ClientMain> pendingClients=new ArrayList<ClientMain>();
 	
+	private int clientCounter=0;
+	
 	public ServerMainLoop (int serverPort, ObjServer objServer) {
 		this.serverPort=serverPort;
 		this.objServer=objServer;
@@ -45,7 +47,7 @@ public 	class ServerMainLoop implements Runnable {
 					clientSocket=null;
 				}
 				if (clientSocket != null) {
-					ClientMain client = new ClientMain(clientSocket, objServer);
+					ClientMain client = new ClientMain(clientSocket, objServer, clientCounter++);
 					pendingClients.add(client);
 					//System.out.println("pendingClient=" + pendingClients.size());
 					Thread thread = new Thread(client);

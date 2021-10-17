@@ -7,10 +7,12 @@ import java.util.*;
 import rf.configtool.main.Version;
 
 public 	class ClientMain implements Runnable {
-	private ObjServer objServer;
+
+	private final Socket sock;
+	private final ObjServer objServer;
+	private final int id;
 	
 	private boolean completed=false;
-	private Socket sock;
 	
 	public synchronized boolean isCompleted() {
 		return completed;
@@ -19,9 +21,10 @@ public 	class ClientMain implements Runnable {
 		this.completed=true;
 	}
 	
-	public ClientMain (Socket sock, ObjServer objServer) {
+	public ClientMain (Socket sock, ObjServer objServer, int id) {
 		this.sock=sock;
 		this.objServer=objServer;
+		this.id=id;
 	}
 
 	private void sendData (PrintWriter out, BufferedOutputStream outBinary, ResponseData resp) throws Exception {
@@ -42,26 +45,32 @@ public 	class ClientMain implements Runnable {
 		byte[] buf=new byte[64*1024];
 		int pos=0;
 		int count=0;
-		for (;;) {
-			int b=in.read();
-			buf[pos++]=(byte) b;
-			if (b=='\n') {
-				count++;
-				if (count==2) break;
-			} else if (b=='\r') {
-				// no change to count
-			} else {
-				count=0;
+		
+		try {
+			for (;;) {
+				int b=in.read();
+				buf[pos++]=(byte) b;
+				if (b=='\n') {
+					count++;
+					if (count==2) break;
+				} else if (b=='\r') {
+					// no change to count
+				} else {
+					count=0;
+				}
 			}
+			List<String> result=new ArrayList<String>();
+			BufferedReader br=new BufferedReader(new InputStreamReader(new ByteArrayInputStream(buf, 0, pos)));
+			for (;;) {
+				String line=br.readLine();
+				if (line==null) break;
+				result.add(line);
+			}
+			return result;
+		} catch (Exception ex) {
+			objServer.appendToServerLog("ClientMain:" + id, "getRequestPlusHeaders exception: pos=" + pos + " (number of bytes read)");
+			throw ex;
 		}
-		List<String> result=new ArrayList<String>();
-		BufferedReader br=new BufferedReader(new InputStreamReader(new ByteArrayInputStream(buf, 0, pos)));
-		for (;;) {
-			String line=br.readLine();
-			if (line==null) break;
-			result.add(line);
-		}
-		return result;
 	}
 	
 	
@@ -80,6 +89,8 @@ public 	class ClientMain implements Runnable {
 			outBinary = new BufferedOutputStream(sock.getOutputStream());
 			
 			List<String> lines=getRequestPlusHeaders(in);
+			
+			objServer.appendToServerLog("ClientMain:"+id, lines);
 
 			StringTokenizer st = new StringTokenizer(lines.get(0)," ",false);
 			String method = st.nextToken().toUpperCase(); // we get the HTTP method of the client
@@ -128,6 +139,7 @@ public 	class ClientMain implements Runnable {
 				
 			}
 			
+			
 			ObjRequest request=new ObjRequest(headers, method, url, urlParams, body, bodyParams);
 			
 			if (method.equals("GET")) {
@@ -150,11 +162,14 @@ public 	class ClientMain implements Runnable {
 				byte[] data=("<html><body><p>"+(new Date())+" invalid method " + method).getBytes("UTF-8");
 				ResponseData resp=new ResponseData("text/html", data);
 				
-				System.out.println("Sending invalid method message (" + method + ")");
+				objServer.appendToServerLog("ClientMain:"+id,"Sending invalid method message (" + method + ")");
 				sendData(out, outBinary, resp);
 			}
+		} catch (java.net.SocketTimeoutException socketTimeout) {
+			// ignore
+			objServer.appendToServerLog("ClientMain:"+id,"Exception", socketTimeout);
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			objServer.appendToServerLog("ClientMain:"+id,"Exception", ex);
 		}
 		
 		setCompleted();

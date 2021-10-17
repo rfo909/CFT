@@ -49,6 +49,7 @@ public class ValueList extends Value {
 				new FunctionLast(),
 				new FunctionFirst(),
 				new FunctionFilter(),
+				new FunctionMergeExpr(),
 		};
 		setFunctions(arr);
     }
@@ -615,6 +616,37 @@ public class ValueList extends Value {
     }
 
     
-
+    class FunctionMergeExpr extends Function {
+        public String getName() {
+            return "mergeExpr";
+        }
+        public String getShortDesc() {
+            return "mergeExpr([before,after]) - replace <<x>> with result from eval(x) - returns list of strings";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	String before="<<";
+        	String after=">>";
+            if (params.size() == 0) {
+            	// ok
+            } else if (params.size() == 2) {
+            	before=getString("before", params, 0);
+            	after=getString("after", params, 1);
+            } else {
+                throw new Exception("Expected either 0 or 2 parameters (before- and after-markers for code segments inside string)");
+            }
+            
+            List<String> resultList=new ArrayList<String>();
+            for (Value v:val) {
+            	List<String> x=ValueString.mergeExpr(v.getValAsString(), before, after, ctx);
+            	for (String s:x) resultList.add(s);
+            }
+            
+            List<Value> x=new ArrayList<Value>();
+            for (String s:resultList) x.add(new ValueString(s));
+            return new ValueList(x);
+            
+        }
+        
+    }
 
 }

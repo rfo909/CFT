@@ -2375,12 +2375,13 @@ List("aaa","bbb")-&gt;line
 
 
 
-<h2>mergeExpr</h2>
+
+<h2>List.mergeExpr</h2>
 <p>
-  <b>v2.9.1</b>
+  <b>v2.9.2</b>
 </p>
 <p>
-  The String.mergeExpr is another option. Instead of merging data from a dictionary
+  The List.mergeExpr is another option. Instead of merging data from a dictionary
   into the template, the template contains CFT expressions inside &lt;&lt; and &gt;&gt;.
 </p>
 <pre>
@@ -2393,18 +2394,16 @@ List("aaa","bbb")-&gt;line
       @ p>Dear &lt;&lt;name&gt;&gt;
       @ We see that you have &lt;&lt;hobbies.length&gt;&gt; hobbies:
       @ &lt;&lt; hobbies-&gt;h out("   - " + h) &gt;&gt;
-    )-&gt;a
-      a.mergeExpr-&gt;b
-        out(b)
+    ).mergeExpr
   /GetTemplate
 </pre>
 <p>
-  Note that String.mergeExpr returns a list, hence looping over that, outputting
-  each result line.
+  Note that Sequence() is just another way of creating a List.
 </p>
 <p>
   Expressions can include iterating over a list, as seen, and creating Inner
-  blocks, if using PIPE inside. Usually we will probably refer variables, or call functions().
+  blocks, if using PIPE inside. Usually we will probably refer variables, 
+  or call functions().
 </p>
 
 <h1>Processing text</h1>

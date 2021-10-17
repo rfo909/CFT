@@ -1,10 +1,6 @@
 package rf.configtool.main.runtime.lib.web;
 
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -31,6 +27,7 @@ import rf.configtool.main.Ctx;
 import rf.configtool.main.Version;
 import rf.configtool.main.runtime.*;
 import rf.configtool.main.runtime.lib.ObjClosure;
+import rf.configtool.main.runtime.lib.ObjFile;
 import rf.configtool.main.runtime.lib.ObjPersistent;
 
 /**
@@ -41,6 +38,7 @@ public class ObjServer extends ObjPersistent {
     
 	private int serverPort;
 	private Ctx asyncCtx;
+	private File serverLogFile;
 	
 	private HashMap<String,ObjContext> bindings=new HashMap<String,ObjContext>();
 	private ServerMainLoop serverMainLoop;
@@ -48,6 +46,9 @@ public class ObjServer extends ObjPersistent {
     public ObjServer(int serverPort, Ctx asyncCtx) {
     	this.serverPort=serverPort;
     	this.asyncCtx=asyncCtx;
+
+    	this.add(new FunctionRootContext());
+    	this.add(new FunctionSetServerLogFile());;
     }
     
     @Override
@@ -57,7 +58,7 @@ public class ObjServer extends ObjPersistent {
    
     @Override
     public void initPersistentObj() {
-    	this.add(new FunctionRootContext());
+    	
     	this.serverMainLoop=new ServerMainLoop(serverPort, theServer());
     	(new Thread(serverMainLoop)).start();
     }
@@ -70,10 +71,60 @@ public class ObjServer extends ObjPersistent {
         	try {Thread.sleep(20);} catch (Exception ex) {}
         }
     }
-    
+
+    /**
+     * Service function 
+     */
     public void bind (String path, ObjContext context) {
     	bindings.put(path,context);
     }
+
+    /**
+     * Service function
+     */
+    public synchronized void appendToServerLog (String context, List<String> lines) {
+    	if (serverLogFile==null) return;
+    	
+    	
+    	try {
+        	PrintStream ps=null;
+	    	try {
+	    		ps=new PrintStream(new FileOutputStream(serverLogFile,true), false, "UTF-8");
+	    		ps.println();
+	    		ps.println(""+(new Date()));
+	    		for (String line: lines) ps.println("[" + context + "] " + line);
+	    	} finally {
+	    		if (ps != null) try {ps.close();} catch (Exception ex) {};
+	    	}
+    	} catch (Exception ex) {
+    		// ignore
+    	}
+    }
+
+    /**
+     * Service function
+     */
+    public synchronized void appendToServerLog (String context, String line) {
+    	List<String> lines=new ArrayList<String>();
+    	lines.add(line);
+    	appendToServerLog(context, lines);
+    }
+
+
+    /**
+     * Service function
+     */
+    public synchronized void appendToServerLog (String context, String line, Throwable t)  {
+    	List<String> lines=new ArrayList<String>();
+    	lines.add(line);
+    	lines.add(t.getMessage());
+    	for (StackTraceElement e : t.getStackTrace()) {
+    		lines.add(e.toString());
+    	}
+    	appendToServerLog(context, lines);
+    }
+
+
     
     @Override
     public boolean eq(Obj x) {
@@ -111,6 +162,23 @@ public class ObjServer extends ObjPersistent {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
             return new ValueObj(new ObjContext(theServer(), "/"));
+        }
+    }
+    
+    class FunctionSetServerLogFile extends Function {
+        public String getName() {
+            return "setServerLogFile";
+        }
+        public String getShortDesc() {
+            return "setServerLogFile(file) - returns self";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected file parameter");
+            Obj obj=getObj("file",params,0);
+            if (!(obj instanceof ObjFile)) throw new Exception("Expected file parameter");
+            serverLogFile=((ObjFile) obj).getFile();
+
+            return new ValueObj(theServer());
         }
     }
     

@@ -1,7 +1,17 @@
+# Log file
+# --
+	File("WebTest_log.txt")
+/LogFile
+
+
 # Initialize web server on port 2500 - for testing
 # --
 
-	Lib.Web.Server(2500).RootContext => Root   # The "/" path
+	Lib.Web.Server(2500) => server
+	if (LogFile.exists) LogFile.delete
+	server.setServerLogFile(LogFile)
+	
+	server.RootContext => Root   # The "/" path
 	
 	Root.Context("my.css","text/css")
 		.GET(Lambda{
@@ -25,8 +35,7 @@
 			@ <a href="/formtest">/formtest</a><br/>
 			@ </p>
 			@ <<BodyEnd>>
-		) -> line 
-			line.mergeExpr->s out(s)
+		).mergeExpr
 	})
 		
 	Root.Context("text","text/plain").GET(Lambda{
@@ -38,8 +47,7 @@
 			#@ <h1>Plain text test</h1>
 			@ <<files.call>>
 			#@ <<BodyEnd>>
-		) -> line
-			line.mergeExpr->s out(s)
+		).mergeExpr
 	})
 	Root.Context("status")
 		.GET(Lambda{
@@ -53,8 +61,7 @@
 				@ <h1>Headers</h1>
 				@ <<headers.call(requestObj)>>
 				@ <<BodyEnd>>
-			) -> line
-				line.mergeExpr->s out(s)
+			).mergeExpr
 		})
 
 	Root.Context("formtest")
@@ -69,8 +76,7 @@
 				@ <input type="submit" value="Submit">
 				@ </form>
 				@ <<BodyEnd>>
-			) -> line
-				line.mergeExpr->s out(s)
+			).mergeExpr
 		})
 		.POST(Lambda{
 			P(1)=>requestObj
@@ -85,8 +91,7 @@
 				@ <h1>Form POST</h1>
 				@ <<ShowRequest(requestObj)>>
 				@ <<BodyEnd>>
-			)->line
-				line.mergeExpr->s out(s)
+			).mergeExpr
 		})
 /Init
 
@@ -151,4 +156,11 @@
 	dict.keys->key
 		out(""+key + ": " + dict.get(key) + "<br/>")
 //ShowDict
+
+
+
+# Show logfile
+# --
+	LogFile.read
+/show
 
