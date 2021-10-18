@@ -1052,7 +1052,7 @@ public class ObjGlobal extends Obj {
         	"   SymDict(ident,...)",
         	"   P(N[,expr])",
         	"   PDict(Str,...)",
-        	"   SpawnProcess(Dict,expr)",
+        	"   SpawnProcess(Dict,expr[,lambda])",
         	"",
         	"Value tokens",
         	"   int, string, float",
