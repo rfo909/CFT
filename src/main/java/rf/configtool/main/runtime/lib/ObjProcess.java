@@ -39,15 +39,17 @@ public class ObjProcess extends Obj {
     
     private ObjDict dict;
     private Expr expr;
+    private ObjClosure onChange;
     
     private StdioVirtual stdioVirtual;
     private PrintStream processInput;
     
     private Value exitValue;
 
-    public ObjProcess(ObjDict dict, Expr expr) {
+    public ObjProcess(ObjDict dict, Expr expr, ObjClosure onChange) {
         this.dict=dict;
         this.expr = expr;
+        this.onChange=onChange; 
         
         this.add(new FunctionOutput());
         this.add(new FunctionSendLine());
@@ -97,6 +99,11 @@ public class ObjProcess extends Obj {
 
         Runner runner = new Runner(processCtx, expr, this);
         (new Thread(runner)).start();
+        
+        if (onChange != null) {
+        	OnChangeRunner runner2=new OnChangeRunner(ctx, onChange, this);
+            (new Thread(runner2)).start();
+        }
 
     }
 
@@ -154,21 +161,61 @@ public class ObjProcess extends Obj {
                 Throwable t=ex;
                 Stdio stdio = ctx.getStdio();
                 stdio.println("Process fails with Exception: " + t.getMessage());
-//              while (t != null) {
-//                  stdio.println("Process fails with Exception: " + t.getMessage());
-//                  for (StackTraceElement line : t.getStackTrace()) {
-//                      stdio.println("   " + line.toString());
-//                  }
-//                  t=t.getCause();
-//                  if (t != null ) {
-//                      stdio.println("Caused by:");
-//                  }
-//              }
+				for (StackTraceElement line : t.getStackTrace()) {
+					stdio.println("   " + line.toString());
+				}
                 process.setExitValue(new ValueNull());
             }
         }
     }
+    
+    
+    /**
+     * Monitoring thread, regularly examining status of the process, and calling the
+     * given closure, with the ObjProcess as parameter
+     *
+     */
+    class OnChangeRunner implements Runnable {
+        private Ctx ctx;
+        private ObjClosure closure;
+        private ObjProcess process;
 
+        public OnChangeRunner(Ctx ctx, ObjClosure closure, ObjProcess process) {
+            this.ctx = ctx;
+            this.closure = closure;
+            this.process = process;
+        }
+
+        public void run() {
+            try {
+            	for(;;) {
+	            	Thread.sleep(31);
+	            	
+	            	boolean isCompleted;
+	            	
+	                synchronized (EXIT_LOCK) {
+	                    isCompleted = (exitValue != null);
+	                }
+	                
+	                if (isCompleted || stdioVirtual.hasBufferedOutput()) {
+	                	// call closure
+	                	List<Value> params=new ArrayList<Value>();
+	                	params.add(new ValueObj(process));
+	                	closure.callClosure(ctx, params);
+	                }
+	                if (isCompleted) break; // no more calls
+            	}
+            } catch (Exception ex) {
+                // Generating full exception log to virtual stdout if process fails
+                Throwable t=ex;
+                Stdio stdio = ctx.getStdio();
+                stdio.println("OnChangeRunner fails with Exception: " + t.getMessage());
+				for (StackTraceElement line : t.getStackTrace()) {
+					stdio.println("   " + line.toString());
+				}
+            }
+        }
+    }
     
     class FunctionOutput extends Function {
         public String getName() {

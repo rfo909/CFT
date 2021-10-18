@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2021-10-17 RFO
-v2.9.1
+Last updated: 2021-10-18 RFO
+v2.9.3
 ```
 # Introduction
 
@@ -2774,12 +2774,15 @@ Db2:Set("Projects","session", Sys.sessionUUID)
 # Multitasking in CFT
 
 
-**v1.9.8**
-
 CFT offers the ability to run multiple processes of CFT code, via the SpawnProcess() expression.
 
 
-It takes two parameters, a context dictionary and an expression. The named values from the
+It takes two or three parameters, a context dictionary and an expression, with
+an optional lambda or closure, which if defined gets called with the Process object as parameter
+whenever there is new output or the process has terminated.
+
+
+The named values from the
 context dictionary become local variables when the expression is executed, which takes
 place in a separate process.
 
@@ -2797,9 +2800,9 @@ local variables.
 
 
 The only way a CFT thread can maintain persistent (global) state, is using external storage,
-usually via synthesis and eval, such as implemented by the Db2 internal database. What this means
-is of course that data written to Db2 is converted to code. Reading the data back from the database
-means running (eval) that code, and get a newly created data structure.
+usually via synthesis and eval, such as implemented by the Db2 internal data storage. What this means
+is that data written to Db2 is converted to code. Reading the data back from the database
+means running that code (with eval), and get a newly created data structure.
 
 
 Logically, this corresponds to 
@@ -2817,6 +2820,11 @@ It should be added that the intended use of spawning processes in CFT is for par
 multiple possibly time consuming jobs, each operating invididually, then collecting the
 results. Typical examples are mass updating tens of virtual machines, as well as getting
 various stats from sets of hosts.
+
+
+The optional third parameter (lambdaOrClosure) is a way of processing both output via
+the process stdio object (which is virtual), and capturing the result value when
+the process has terminated.
 
 ## The Process
 

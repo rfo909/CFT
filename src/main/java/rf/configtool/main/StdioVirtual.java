@@ -54,4 +54,8 @@ public class StdioVirtual extends Stdio {
         return x;
     }
     
+    public synchronized boolean hasBufferedOutput() {
+    	return outputBuffer.size() > 0;
+    }
+    
 }

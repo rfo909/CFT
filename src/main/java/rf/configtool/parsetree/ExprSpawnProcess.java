@@ -22,6 +22,7 @@ import java.util.List;
 import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.runtime.*;
+import rf.configtool.main.runtime.lib.ObjClosure;
 import rf.configtool.main.runtime.lib.ObjDict;
 import rf.configtool.main.runtime.lib.ObjProcess;
 
@@ -29,6 +30,7 @@ public class ExprSpawnProcess extends ExprCommon {
 
     private Expr expr;
     private Expr exprDict;
+    private Expr onChangeLambdaOrClosure;
 
     public ExprSpawnProcess(TokenStream ts) throws Exception {
         super(ts);
@@ -39,21 +41,51 @@ public class ExprSpawnProcess extends ExprCommon {
         exprDict = new Expr(ts);
         ts.matchStr(",","Expected ','");
         expr = new Expr(ts);
+        if (ts.matchStr(",")) {
+        	onChangeLambdaOrClosure = new Expr(ts);
+        }
         ts.matchStr(")", "expected ')' closing spawn statement");
     }
 
     public Value resolve (Ctx ctx) throws Exception {
         Value d = exprDict.resolve(ctx);
+        Value oc = null;
+        if (onChangeLambdaOrClosure != null) oc=onChangeLambdaOrClosure.resolve(ctx);
+             
+        ObjDict dict=null;
+        ObjClosure closure=null;
+
+        boolean dictOk=false;
+        boolean closOk=false;
+        
         if (d instanceof ValueObj) {
             Obj obj=((ValueObj) d).getVal();
             if (obj instanceof ObjDict) {
-                ObjDict dict=(ObjDict) obj;
-                
-                ObjProcess process = new ObjProcess(dict, expr);
-                process.start(ctx);
-                return (new ValueObj(process));
+                dict=(ObjDict) obj;
+                dictOk=true;
             }
         }
-        throw new Exception("Expected parameters Dict : Expr");
+               
+        if (oc==null) {
+        	closOk=true;
+        } else {
+        	if (oc instanceof ValueBlock) {
+    			closure=new ObjClosure(new ObjDict(), (ValueBlock) oc);
+    			closOk=true;
+        	} else if (oc instanceof ValueObj) {
+        		Obj x=((ValueObj) oc).getVal();
+        		if (x instanceof ObjClosure) {
+        			closure=(ObjClosure) x;
+        			closOk=true;
+        		}
+        	}
+        }
+ 
+        if (!dictOk || !closOk) throw new Exception("Expected parameters Dict, Expr [,lambdaOrClosure]");
+        
+        ObjProcess process = new ObjProcess(dict, expr, closure);
+        process.start(ctx);
+        return (new ValueObj(process));
+        
     }
 }

@@ -13,6 +13,25 @@
 
 <h1>CFT Change log</h1>
 
+<h3>v2.9.3 2021-10-18 Extended SpawnProcess</h3>
+<p>
+	Added third parameter to SpawnProcess,
+	supplying a Lambda or Closure to be called from a monitor thread inside ObjProcess
+	whenever there is output, or the process has terminated (with an exitValue). 
+</p>
+<p>
+	Allows async data collection from running background processes, which may be aggregated
+	in Db2, to file, or printed to screen. 
+</p>
+<pre>
+SpawnProcess(Dict,expr,Lambda{P(1)=&gt;process process.output-&gt;line println(line)})
+</pre>
+<p>
+	Being a Lambda, and as there is no global state, and the ObjProcess object being thread
+	safe, it can at least not do any harm.
+</p>
+
+
 <h3>v2.9.2 2021-10-17 Added List.mergeExpr</h3>
 <p>
 	Templating with List, Sequence or "here" documents, we can just add

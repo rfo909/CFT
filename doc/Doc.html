@@ -15,8 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2021-10-17 RFO
-v2.9.1
+Last updated: 2021-10-18 RFO
+v2.9.3
 
 
 </pre>
@@ -3141,12 +3141,16 @@ List("aaa","bbb")-&gt;line
 
 
 <h1>Multitasking in CFT</h1>
-<p><b>v1.9.8</b></p>
 <p>
   CFT offers the ability to run multiple processes of CFT code, via the SpawnProcess() expression.
 </p>
 <p>
-  It takes two parameters, a context dictionary and an expression. The named values from the 
+  It takes two or three parameters, a context dictionary and an expression, with
+  an optional lambda or closure, which if defined gets called with the Process object as parameter
+  whenever there is new output or the process has terminated.
+</p>
+<p> 
+  The named values from the 
   context dictionary become local variables when the expression is executed, which takes
   place in a separate process.
 </p>
@@ -3156,6 +3160,7 @@ List("aaa","bbb")-&gt;line
   object.
 </p>
 
+
 <h2>Key concepts</h2>
 <p>
   CFT objects (as implemented in Java) are generally not thread-safe, but it turns out that they don't
@@ -3164,9 +3169,9 @@ List("aaa","bbb")-&gt;line
 </p>
 <p>
   The only way a CFT thread can maintain persistent (global) state, is using external storage,
-  usually via synthesis and eval, such as implemented by the Db2 internal database. What this means
-  is of course that data written to Db2 is converted to code. Reading the data back from the database
-  means running (eval) that code, and get a newly created data structure. 
+  usually via synthesis and eval, such as implemented by the Db2 internal data storage. What this means
+  is that data written to Db2 is converted to code. Reading the data back from the database
+  means running that code (with eval), and get a newly created data structure. 
 </p>
 <p>
   Logically, this corresponds to <em>message passing</em>, in that the writer (sender) and reader (receiver)
@@ -3183,6 +3188,11 @@ List("aaa","bbb")-&gt;line
   multiple possibly time consuming jobs, each operating invididually, then collecting the
   results. Typical examples are mass updating tens of virtual machines, as well as getting
   various stats from sets of hosts.
+</p>
+<p>
+  The optional third parameter (lambdaOrClosure) is a way of processing both output via 
+  the process stdio object (which is virtual), and capturing the result value when
+  the process has terminated.
 </p>
 
 
