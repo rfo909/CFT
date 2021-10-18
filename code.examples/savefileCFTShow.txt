@@ -3,30 +3,31 @@
 
 	# CFT: "ConfigTool"
 	# Dev since May 2018, on git since 2020
+	# GNU GPL 3.0 ("open source")
 	# --
-
 
 	## Function names follow function body
 
 	1+1
 	/two
-	
-	## Assignment takes two forms
 
-	a = expr
-	expr => a
+	?
+	
+	## Local variables
+
+	a=two+two  a
+	two+two =>a  a
 
 	## Foreach loop is a single arrow plus loop variable
 
 	List(1,2,3)->x out("a"+x)
-
 	Dir.files->f out(f.path)
+	Dir.files->f report(f.name, f.length)
 
 	## Filtering
 
-	List(1,2,3,4)->x assert(x%2==0) out(x)
-
-	Dir.files->f reject(f.name.startsWith("savefile")) out(f)
+	Dir.files->f assert(f.name.endsWith(".md")) out(f)
+	Dir.files->f reject(f.name.endsWith(".txt")) out(f)
 
 
 
@@ -49,9 +50,9 @@
 	Dict help
 
 
-.h Scripts
+.h Functions
 
-	# Functions only, no global variables
+	# No global variables
 	# No custom classes
 	# --
 
@@ -59,49 +60,23 @@
 	/JavaFiles
 
 	JavaFiles.length
+	/CountJavaFiles
 	
 	:save Demo
-
-	## Shortcuts
 
 	@
 	@e
 
-
-
-.h Iteration
-
-	# Iteration over lists 
-	# PIPE
-	# --
-
-	JavaFiles->f out(f.length) | =>x x.sum
 	JavaFiles->f out(f.read.length) | _.sum
-
-	x=1 loop out(x) x=x+1 break(x>10)	
-	/Numbers
-
-	:save Demo
-
-	## Shortcuts
-
-	$ @
-	$ @e
-
-	# Generate numbers from 1
-	# --
-		P(1,10)=>limit
-		x=1 loop out(x) x=x+1 break(x>limit)	
-	/Numbers
-
-	# Alt.
-	
-	Lib.Data.each(1,10)
+	/JavaLines
 
 
-.h Projects
 
-	# Script for searching
+
+
+.h Search
+
+	# Projects = Script for searching
 	# Multiple projects, fast switching
 	# --
 
@@ -115,6 +90,7 @@
 	FL
 
 	EditConfig
+
 
 
 .h Shell
@@ -135,47 +111,6 @@
 	!dir
 	shell
 
-.h Pipes
-
-	## Loop control with PIPE
-
-	Dir.files->f out(f.length) | _.sum
-
-	- Whenever there are loops: collect values from out() as result
-	- The PIPE terminates all current loops
-
-	- Splits code into "code spaces"
-
-	- Result from one code space is put on stack in next code space
-
-	- Inner blocks
-		- separate code space
-
-	:save Demo
-	@e
-
-
-.h Example
-
-	Dir.allFiles(Glob("*.java"))
-	/JavaFiles
-
-
-	# List files containing pattern
-	# --
-		pattern=readLine("Pattern")
-		JavaFiles->f
-			lines=Inner{
-				f.read->line
-					assert(line.contains(pattern))
-					out(line) 
-			}
-			assert(lines.length>0)
-			out(f)
-	/Contains
-
-	## Without "Inner", the out(line) would add to the result from Contains()
-
 
 
 .h Templates
@@ -186,20 +121,15 @@
 	# Create notification
 	# --
 		P(1,readLine("name"))=>name
-		Dict
-			.set("name",name)
-			.mergeCodes
-			=> data
 
 		Sequence(
-			@ Dear ${name}
+			@ Dear <<name>>
 			@
 			@ Your visa has expired
-		)->line
-			out(line.merge(data))
+		).mergeExpr
 	/test2
 
-	
+
 
 >>>>> TEXT
 //text
@@ -222,6 +152,7 @@
 		}
 	} else {
 		println(line)
+		Sys.sleep(10)
 	}
 //ProcessLine
 
