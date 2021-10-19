@@ -11,11 +11,11 @@ public class Collection {
     private Map<String,String> data;
 
     private void getLock() throws Exception {
-    	CollectionLock.obtainLock(lockFile);
+    	LockFile.obtainLock(lockFile);
     }
     
     private void freeLock () throws Exception {
-    	CollectionLock.freeLock(lockFile);
+    	LockFile.freeLock(lockFile);
     }
 
     public Collection (FileInfo fileInfo) {

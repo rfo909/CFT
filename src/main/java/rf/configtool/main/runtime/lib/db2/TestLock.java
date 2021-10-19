@@ -11,24 +11,28 @@ public class TestLock {
 		public Runner (int id) {this.id=id;}
 		
 		public void run() {
-			for (int i=0; i<10000; i++) {
-				boolean gotIt=CollectionLock.getLock(lockFile);
-				if (gotIt) System.out.println("" + id);
-			
-				try {
-					Thread.sleep(gotIt ? 100 : (int) (Math.random()*13));
-				} catch (Exception ex) {
-					// ignore
-				}
+			try {
+				for (int i=0; i<10000; i++) {
+					boolean gotIt=LockFile.getLock(lockFile);
+					if (gotIt) System.out.println("" + id);
 				
-				if (gotIt) CollectionLock.freeLock(lockFile);
-
-				try {
-					Thread.sleep((int) (Math.random()*13));
-				} catch (Exception ex) {
-					// ignore
+					try {
+						Thread.sleep(gotIt ? 100 : (int) (Math.random()*13));
+					} catch (Exception ex) {
+						// ignore
+					}
+					
+					if (gotIt) LockFile.freeLock(lockFile);
+	
+					try {
+						Thread.sleep((int) (Math.random()*13));
+					} catch (Exception ex) {
+						// ignore
+					}
+					
 				}
-				
+			} catch (Exception ex) {
+				ex.printStackTrace();
 			}
 		}
 	}

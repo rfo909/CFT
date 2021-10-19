@@ -9,7 +9,7 @@ import java.io.*;
  * Also remember that obtaining lock for a certain file MUST NEVER BE NESTED, as these WILL FAIL.
  *
  */
-public class CollectionLock {
+public class LockFile {
 	
 	public static final int OBTAIN_LOCK_TIMEOUT_MS = 10000;
 	
@@ -17,14 +17,13 @@ public class CollectionLock {
 	 * Tested with the TestLock class 2021-10-06 RFO
 	 */
 	
-	private CollectionLock() {}
+	private LockFile() {}
 		
 	private static String getLockId () {
 		return ""+Runtime.getRuntime().hashCode() + "_" + Thread.currentThread().getId();
 	}
 	
 	private static boolean doGetLock (File theFile) throws Exception {
-		if (theFile.exists()) return false;
 	
 		String lockId=getLockId();
 		
@@ -59,11 +58,15 @@ public class CollectionLock {
 	}
 
 	public static void obtainLock (File theFile) throws Exception {
+		obtainLock(theFile, OBTAIN_LOCK_TIMEOUT_MS);
+	}
+	
+	public static void obtainLock (File theFile, long timeoutMillis) throws Exception {
 		long startTime=System.currentTimeMillis();
 		for (;;) {
 			if (getLock(theFile)) return;
 			
-			if (System.currentTimeMillis()-startTime > OBTAIN_LOCK_TIMEOUT_MS) break;
+			if (System.currentTimeMillis()-startTime > timeoutMillis) break;
 			
 			try {
 				Thread.sleep((int) (Math.random()*4) + 1);
@@ -76,23 +79,15 @@ public class CollectionLock {
 
 	
 	
-	public static void freeLock (File theFile) {
+	public static void freeLock (File theFile) throws Exception {
 		// verify we still have the lock
 		BufferedReader br=null;
 		String lockId=getLockId();
-		try {
-			br=new BufferedReader(new FileReader(theFile));
-			String line=br.readLine(); // single line
-			if (!line.equals(lockId)) System.out.println("PANIC: freeLock: not owner of lock");
-		} catch (Exception ex) {
-			// ignore
-		} finally {
-			try {
-				br.close();
-			} catch (Exception ex) {
-				// Ignore
-			}
-		}
+		
+		br=new BufferedReader(new FileReader(theFile));
+		String line=br.readLine(); // single line
+		br.close();
+		if (!line.equals(lockId)) throw new Exception("PANIC: freeLock: not owner of lock");
 		theFile.delete();
 	}
 
