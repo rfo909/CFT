@@ -361,16 +361,9 @@ choice.
     
     inFile.create(stdinLines)
 
-#    tryCatch({
-    	process = Dir.runProcess(inFile,outFile,errFile,cmd)
-#    }) => xxx
+	# The Dir.runProcess call
+	process = Dir.runProcess(inFile,outFile,errFile,cmd)
 
-#    if (!xxx.ok) {
-#    	process=null
-#    	errFile.append("Dir.runProcess failed with exception")
-#    	errFile.append(xxx.get("msg","<No message>"))
-#    	errFile.append(xxx.get("stack",List))
-#    }
     Dict
         .set("cmd", cmd)
         .set("acceptErrors", acceptErrors)
@@ -383,10 +376,13 @@ choice.
         	self.process==null || !self.process.isAlive
         })
         .set("wait", Lambda{
+        	# Delay until process terminated
         	loop 
         		break(self.process==null || !self.process.isAlive) 
         		Sys.sleep(5) 
         	|
+        	
+        	# Read temp files
         	result = Dict
         		.set("cmd", self.cmd)
         		.set("stdin", self.stdin.read)
@@ -394,10 +390,17 @@ choice.
         		.set("stderr", if(self.stderr.exists, self.stderr.read, List))
         		.set("exitCode", if(self.process==null, -1, self.process.exitCode))
 
-        	Del = Lambda  {P(1)=>f if(f.exists) f.delete}
+			# Delete temp-files
+        	Del = Lambda  {
+        		P(1)=>f 
+        		if(f.exists) f.delete
+        		error(f.exists,"Failed to delete file " + f.path)
+        	}
         	Del.call(self.stdin)
         	Del.call(self.stdout)
         	Del.call(self.stderr)
+        	
+        	# Show debug
         	
     	    FAIL = false
 		    if (result.exitCode != 0 && !self.acceptErrors) {
@@ -429,14 +432,14 @@ choice.
 		    result
 
         })  # Lambda "wait"
-    =>result
+    =>obj
 
 	if (showDebug) Inner{
 		println("--- runProcess result ---")
-    	Util:ShowDict(result)->line println(line)
+    	Util:ShowDict(obj,true)
     }
     
-    result
+    obj
 
 /runProcess
 
@@ -458,6 +461,10 @@ choice.
 
 
 
+
+
+run(null,null,null,true)
+/testRun
 
 
 
