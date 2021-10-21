@@ -394,7 +394,9 @@ choice.
         	Del = Lambda  {
         		P(1)=>f 
         		if(f.exists) f.delete
-        		error(f.exists,"Failed to delete file " + f.path)
+				## Note: Windows external processes do not allow files to be deleted
+				## even after returning isAlive() == false.
+        		#error(f.exists,"Failed to delete file " + f.path)
         	}
         	Del.call(self.stdin)
         	Del.call(self.stdout)
