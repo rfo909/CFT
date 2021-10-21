@@ -391,12 +391,21 @@ choice.
         		.set("exitCode", if(self.process==null, -1, self.process.exitCode))
 
 			# Delete temp-files
-        	Del = Lambda  {
+			# --
+			# Note: Windows external processes do not allow files to be deleted
+			# immediately even after returning isAlive() == false.
+			Del = Lambda {
         		P(1)=>f 
-        		if(f.exists) f.delete
-				## Note: Windows external processes do not allow files to be deleted
-				## even after returning isAlive() == false.
-        		#error(f.exists,"Failed to delete file " + f.path)
+				count=0
+				loop
+					if(f.exists && count <= 20) {
+						count=count+1
+						if (count>15) println("File delete failed, trying again: " + f.path)
+						Sys.sleep(5)
+						f.delete
+					} else {
+						break
+					}
         	}
         	Del.call(self.stdin)
         	Del.call(self.stdout)
