@@ -1,17 +1,21 @@
 
 # Automation at all levels
 
-CFT is short for *ConfigTool*. 
+CFT is short for *ConfigTool*, and is an interpreted and interactive shell and
+programming language. 
 
-It is an interpreted and interactive shell and programming language. It was initiated
-because of a need for a scripting tool in my job as a developer, and from my 
-interest in parsers and interpreters.
+It was initiated because of a need for a descent (!) scripting and automation tool in my job as a 
+software developer, combined with my interest in parsers and interpreters. 
+
+It's been in continous use since creation in 2018, and is quite reliable.
+
+Written in Java, it runs both on Linux (at home) and Windows environment (at work). 
 
 *README last updated 2021-10-27*
 
 ## Terminal based - shell-like
 
-The command line makes CFT feel like a shell, for navigating the directory tree, and inspecting files,
+The command line interface makes CFT feel like a shell, for navigating the directory tree, and inspecting files,
 using the following commands.
 
 - cd
@@ -25,7 +29,7 @@ However, CFT is really about creating and running functions.
 
 ## Creating functions
 
-In CFT the code comes before the function name. The P(N) global function returns parameters by position.
+In CFT, code comes before the function name. The P(N) expression returns parameters by position.
 
 ```
 # Example
