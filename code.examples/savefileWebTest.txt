@@ -71,8 +71,8 @@
 				@ <<BodyStart>>
 				@ <h1>Formtest</h1>
 				@ <form action="/formtest" method="POST">
-				@ <input name="a"/>
-				@ <input name="b"/>
+				@ <br/>
+				@ <textarea name="c" cols=80 rows=5></textarea>
 				@ <input type="submit" value="Submit">
 				@ </form>
 				@ <<BodyEnd>>
@@ -81,14 +81,16 @@
 		.POST(Lambda{
 			P(1)=>requestObj
 			
-			body=requestObj.body
-			if (body != null) {
-				# binary
-				body=body.toString("UTF-8")
-			}
 			Sequence(
 				@ <<BodyStart>>
 				@ <h1>Form POST</h1>
+				@ <form action="/formtest" method="POST">
+				@ <textarea name="c" cols=80 rows=5><<requestObj.bodyParams.c>></textarea>
+				@ <br/>
+				@ <input type="submit" value="Submit">
+				@ <br/>
+				@ <pre><<eval(requestObj.bodyParams.c)>></pre>
+				@ </form>
 				@ <<ShowRequest(requestObj)>>
 				@ <<BodyEnd>>
 			).mergeExpr

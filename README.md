@@ -1,15 +1,18 @@
 
 # Automation at all levels
 
-CFT is an interpreted and interactive shell and programming language. It was initiated
-because of a need for a do-all tool in my job as a developer, and from my long lasting
+CFT is short for *ConfigTool*. 
+
+It is an interpreted and interactive shell and programming language. It was initiated
+because of a need for a scripting tool in my job as a developer, and from my 
 interest in parsers and interpreters.
 
-*README last updated 2021-10-13*
+*README last updated 2021-10-27*
 
 ## Terminal based - shell-like - programmable
 
-The REPL makes it CFT work like a shell, for navigating the directory tree, and inspecting files:
+The command line makes CFT feel like a shell, for navigating the directory tree, and inspecting files,
+using the following commands.
 
 - cd, ls, pwd, cat, more, edit
 
@@ -17,7 +20,7 @@ However, CFT is really about creating and running *functions*.
 
 ## Functions
 
-In CFT the code comes before the function name.
+In CFT the code comes before the function name. The P(N) global function returns parameters by position.
 
 ```
 # Example
@@ -28,9 +31,12 @@ In CFT the code comes before the function name.
 /FilesMatch
 ```
 
+*Note* that the two ".hash" are function calls on the File objects received as parameters. 
+Parantheses are optional when no arguments. 
 
-Functions are collected in script files, and can call each other, as well as functions in
-other scripts, and functions inside library objects. 
+Functions are collected in script files, and can call each other, functions in
+other scripts, and member functions inside library objects. Scripts contain no state, and are just
+a way of organizing code. Each script essentially is a name space. 
 
 - 70+ library object types
 - 390+ library functions
@@ -40,8 +46,7 @@ About 30 of the library functions are global, the rest exist inside different ob
 ## Functionality
 
 - shell-like command line interface / REPL
-- create functions, do interactive testing
-- interactive help system
+- create functions, do interactive testing, use interactive help
 - lists and dictionaries
 - run external programs in foreground or background
 - (inline) text templating with merge code processing
@@ -49,7 +54,7 @@ About 30 of the library functions are global, the rest exist inside different ob
 - lambdas and closures
 - tryCatch with two-tiered exception hierarchy ("soft" and "hard")
 - integrated data store (Db2) 
-- integrated lexer; full JSON recursive-descent parser written in CFT
+- integrated lexer; JSON recursive-descent parser written in CFT
 
 ### Editing script code
 
@@ -82,17 +87,25 @@ the CFT.props file, and by default include:
 
 ### Protection mechanism
 
-CFT has a built-in protection mechanism that may help us avoid modifying critical data on live
-systems, such as database files, persistens logs etc. Read more about it in the docs, or view
-the Youtube tutorial video [episode six](https://www.youtube.com/watch?v=7e-f1gudxpE&list=PLj58HwpT4Qy80WhDBycFKxIhWFzv5WkwO&index=7).
+CFT has a built-in directory and file *protection*, which may help us avoid modifying critical data on live
+systems, such as database files, logs, etc. 
+
+Read more about it in the docs, or view the Youtube tutorial video [episode six](https://www.youtube.com/watch?v=7e-f1gudxpE&list=PLj58HwpT4Qy80WhDBycFKxIhWFzv5WkwO&index=7).
+
 
 ## Object oriented - functional
 
-CFT consists of a set of global functions, which return values, such as the current
-directory, an empty dictionary, some list, the current date, and so on. All values are objects,
-and so in turn have inner functions that we can call. 
+### Values are objects - member functions
 
-There are no primitive types, all are objects:
+All values in CFT are objects. These in turn have member functions, which we call to either
+modify the value, or get information from it, etc.
+
+### Global functions
+
+There also is a set of global functions, which return values, such as the current
+directory, an empty dictionary, a list, the current date, and so on. 
+
+All values are objects, and there are no primitive types in the classic meaning. Example:
 
 ```
 $ "test".length
@@ -108,20 +121,40 @@ $ "abc".chars.reverse.concat
   "cba"
 ```
 
-The key concept was to create an *interactive and interpreted* language inspired by
-PowerShell, working with objects instead of strings, as in bash, but with a more regular syntax.
+### Inspired by PowerShell
 
-To keep the language simple, CFT *does not support* user defined classes, only user defined functions.
+CFT was inspired by PowerShell, working with objects instead of strings, as in bash. 
 
-Functions are stored in script files, which are really just name spaces. Functions can of course
-call each other, both inside a script and in other scripts. 
+Apart from a couple of "peculiarities", CFT strives for a regular and predictable syntax, 
+compared to PowerShell and bash. 
+
+The interactive approach made possible a help system, where one can always run some expression, and list 
+member function of the result.
+
 
 
 ## No global state
 
-CFT has no global variables, no script state, unless using files or the integrated Db2 data store. 
+To keep the language simple, CFT *does not support* user defined classes, only user defined functions.
 
-This minimizes unwanted side effects. 
+This in turn correlated well with making the language as stateless as possible, for multiple reasons, 
+most generally robustness, but also enabling safe multi-threading. 
+
+CFT has no global variables, and there is no script state. A script in CFT is a collection of related
+functions, nothing more. 
+
+There are options for storing data, either to file, or using the integrated Db2 data store.
+
+The goal is to minimize unwanted side effects.
+
+
+## Just code
+
+CFT implements object types for lists and dictionaries, and the Db2 data store is able to save most data
+structures, using a special mechanism called *synthesis*, which produces code from values. This code on
+string format is stored when saving data with Db2, or it can be written to some file.
+
+When loading data from Db2, the code is run through eval() which recreates the original data.
 
 
 ## Frequent uses
@@ -136,12 +169,17 @@ It's been in daily use since 2019 in my work as a software developer, and is sta
 
 
 
-## Example: ping hosts
+## Example: ping some hosts
 
 ```
-# Ex: check if hosts respond to ping
-#    (The arrow plus identifier is a foreach)
-#    (The  /name lines define functions from the preceding code lines)
+# Readme function
+# --
+<<< EOF
+Check if hosts respond to ping
+    (The arrow plus identifier is a foreach)
+    (The  /name lines define functions from the preceding code lines)
+>>> EOF
+/Readme
 
 # Define hosts
 # --
@@ -157,9 +195,17 @@ It's been in daily use since 2019 in my work as a software developer, and is sta
 
 ### Rewritten to do parallel pings
 
-Since pinging hosts that don't respond takes a while, we may want to run
-all pings in parallel, then collect information. Total time is then the
-time of the single slowest ping, not the sum of times for all pings.
+Since pinging hosts that don't respond may take a while, we decide to run
+all pings in parallel, then collect information. 
+
+Total time is then the time of the single slowest ping, not the sum of times for all pings.
+
+Threads are created by calling SpawnProcess() with a dictionary for local
+variables, and an expression. This immediately returns Process objects, which
+are collected in a list via the out() statement.
+
+When all processes have been spawned, we loop through the processes, wait for
+each to terminate, then report its result. 
 
 ```
 # Create report
@@ -175,7 +221,7 @@ time of the single slowest ping, not the sum of times for all pings.
 
 ### The SSH:HostOk function
 
-Above we are calling the HostOk function inside the SSH script. It is implemented as follows.
+Above we're calling the HostOk function inside the SSH script. It is implemented as follows.
 
 ```
 # Check if server responds on ping
@@ -189,7 +235,7 @@ P(1) =>target
 
 It in turn calls function "run()" inside Lib script, which eventually ends up doing a call 
 to Dir.runProcess() which actually runs the external program. The details don't matter so much
-as the concept of creating a hierarchy of functions with none (or very few) side effects, providing
+as the concept of creating a hierarchy of functions with no (or very few) side effects, providing
 high level reliability, such as the HostOk function.
 
 ## Interactive help
