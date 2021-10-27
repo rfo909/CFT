@@ -25,18 +25,21 @@ In CFT the code comes before the function name. The P(N) global function returns
 ```
 # Example
 # --
-	file1=P(1)
+	file1=P(1)  # Expects File objects
 	file2=P(2)
 	file1.hash==file2.hash # boolean return value
 /FilesMatch
 ```
 
-*Note* that the two ".hash" are function calls on the File objects received as parameters. 
+*Note* that the two ".hash" are function calls on the File objects received as parameters.
+ 
 Parantheses are optional when no arguments. 
 
-Functions are collected in script files, and can call each other, functions in
-other scripts, and member functions inside library objects. Scripts contain no state, and are just
-a way of organizing code. Each script essentially is a name space. 
+When we create our own functions, they are organized into script files. They may call each other, both inside the
+same script file, and in other script files, as well as member functions inside library objects, such as
+the calls to File.hash() above. 
+
+Scripts contain no state, and are just a way of organizing code, making each script essentially a name space. 
 
 - 70+ library object types
 - 390+ library functions
