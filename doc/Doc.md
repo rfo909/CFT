@@ -7,7 +7,7 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2021-10-18 RFO
+Last updated: 2021-10-27 RFO
 v2.9.3
 ```
 # Introduction
@@ -17,7 +17,7 @@ v2.9.3
 
 Automation is done by creating functions, which call each other, as well
 as a set of global functions, and member functions inside objects. All values
-are objects, with functions inside.
+are objects, implemented in Java, and with member functions inside.
 
 
 A rich set of predefined objects exists, along with global functions to
@@ -55,7 +55,7 @@ Development has been going on since May 2018, and on github since July 2020.
 # Platform
 
 
-CFT is written in Java. It has been tested on both Linux
+CFT is written in Java. It has been continously tested on both Linux
 and Windows.
 
 # Functionality
@@ -69,7 +69,7 @@ as well as being interactive.
 It is command line based, and can be programmed interactively, creating one-line functions, but
 mostly we use editors for creating function code.
 
-The language is object oriented, with all values being objects, but for simplicity
+The language is object oriented, with all values being objects, but
 does not allow user-defined classes. Here we call a
 function "bin()" inside an integer object.
 
@@ -108,7 +108,8 @@ $ help
 ```
 
 Note the two global functions, _Stmt and _Expr, which produce summaries
-of statements and expressions.
+of statements and expressions. To run them, just type their name and press Enter:
+
 ```
 $ _Stmt
 $ _Expr
@@ -144,7 +145,7 @@ $ Dir.files.length
 $ /filesInDir
 ```
 
-The code line that gives us the number of files in the current directory is now named "filesInDir", and can
+Now "filesInDir" is a function, referring to one line of code. It can
 be run again as follows:
 
 ```
@@ -239,6 +240,9 @@ CFT contains a number of "shell like commands", with different syntax from the r
 - cd
 
 
+- pwd
+
+
 - cat
 
 
@@ -288,11 +292,11 @@ This of course goes interactively as well:
 ```
 $ cd d:\logs
 ```
-## Combine shell commands with CFT functions
+## Combine shell commands with CFT function results
 
 
 In addition to the above syntax, such as "cd /someDir/xyz" etc, these commands
-also support using output from any CFT function. Say we have some functions:
+also support using output from some CFT function. Say we have some functions:
 
 ```
 Dir("/SomePath/logs")
@@ -329,27 +333,19 @@ shortcut @fm, which opens a graphical file manager for the current directory.
 
 Performing changes, such as copying, deleting and creating files, is supposed to be scripted
 with code, so no "command line" style functionality exists for this. Alternatively one can use
-the "shell" command, or "bang" commands, which are sent to the shell.
-
-
-CFT has all the functionality needed to perform these operations, but the syntax becomes "program code" instead
-of just "cp" and "rm". Example of deleting all files in a directory.
+the "shell" command, or "bang" commands, which are sent through to the shell.
 
 ```
 $ <DirExpression>.file("xxx.txt").delete
 ```
 
 The point here is that the "DirExpression" as well as functionality to provide sets of files
-and similar, are CFT code, and CFT has a special provision to avoid deleting or modifying the wrong
+and similar, are CFT code, as CFT has a special provision to avoid deleting or modifying the wrong
 files or directories: 
 **the "protect" mechanism**.
 
-
-Usually, when working with multiple files and directories, we will create functions that return
-Dir objects and File objects. The "protect" mechanism allows us to do the following:
-
 ```
-$ Dir("/someNFSDir/logs").protect
+$ Dir("/someDir/logs").protect
 $ /LogDir
 ```
 
@@ -365,35 +361,7 @@ $ LogDir.file("log01.txt").delete
 ERROR: [input:18] INVALID-OP delete : /someNfsDir/logs/log01.txt (PROTECTED: -) (java.lang.Exception)
 ```
 
-This both protect our script code from doing bad things, but also interactively. Say we
-also have another directory defined as a function:
-
-```
-Dir("/tmp/myTmp")
-/TmpDir
-```
-
-Testing the code, we may decide to delete the files in TmpDir.
-
-```
-TmpDir.files->
-f f.delete
-```
-
-But what if, in a hurry, we entered LogDir instead of TmpDir. That's where the protect saves us.
-
-
-Had "rm" been implemented as shell-style command in CFT, we would instead have done the following:
-
-```
-$ cd (LogDir)
-$ rm *
-# Oh no!!
-```
-
-The "cp", "mv" and "rm" commands with globbing ("*") are not only powerful, but
-their usage pattern excludes CFT from knowing when trying to delete something
-that should not be deleted, etc.
+This both protects our script code from doing bad things, but also interactively.
 
 # Bang commands
 
@@ -498,7 +466,7 @@ $ JavaFiles->f out(f.read.length) | _.sum
 /linecount
 ```
 
-The "arrow" followed by an identifier is the "for each" construct, with the identifier becoming
+The single "arrow" followed by an identifier is the "for each" construct, with the identifier becoming
 the "loop variable".  The out() statement is used to generate output from the loop.
 
 
@@ -587,7 +555,7 @@ To page through text file
 ```
 more x.txt
 ```
-## Show binary file
+## Show file as hex
 
 
 To page through hex listing of file
@@ -614,10 +582,13 @@ someFile.setWriteCRLF
 someFile.setWriteLF
 ```
 
-To ensure a text file has all lines end with for example LF, we can do the following:
+CFT reads both formats, and so to ensure a text file has all lines end with for
+example LF, we can do the following:
 
 ```
 f=File("x.txt") lines=f.read f.setWriteLF.create(lines)
+# or more compact
+f=File("x.txt") f.setWriteLF.create(f.read)
 ```
 # Directories
 
@@ -696,7 +667,7 @@ Dir.setAsCurrentDir
 Dir.newestFile
 Dir.newestFile(Glob("*.log"))
 ```
-# The shell() function
+# shell()
 
 
 The global shell() function starts a shell inside CFT. When you exit from it, you're back
@@ -765,9 +736,21 @@ $ '"' + "'a'" + '"'
 "'a'"
 ```
 
-Also, backslash is not used as escape character, which means backslash is just another character,
-simplifying Windows paths.
+Also, backslash is not used as escape character, simplifying Windows paths.
 
+
+In script code, there is an additional way of creating strings:
+
+```
+@ this is a raw string, extending to the end of the line
+```
+
+Since '@' is the shortcut character, you can not enter a raw string in the
+command line interface. To test interactively, type:
+
+```
+$ "" + @ something
+```
 ## Dictionaries
 
 
@@ -814,8 +797,6 @@ $ a=1 b=2 SymDict(a,b)
 ```
 ## Binary type
 
-
-**v2.5.5**
 
 Used in connection with encryption etc. Can be created from strings, or represent
 the content of a file.
@@ -1114,7 +1095,7 @@ $ ?Lib:m                 # displays code of function 'm'
 # Helper / local functions
 
 
-In many cases, one needs to create helper functions, which should not be visible as part
+In many cases, we need to create helper functions, which should not be visible as part
 of the script interface, as seen from other scripts. This is done by defining the function
 as follows:
 
@@ -1123,28 +1104,19 @@ $ 23
 $ //SomeConstant
 ```
 
-The '?' command now omits local functions, for a cleaner summary of the main functions
-of a script. To see all functions, type '??' and press Enter. The local functions are
+The '?' command omits these local functions, for a cleaner summary of the main functions
+of a script. To see all functions, type '??'. The local functions are
 prefixed by a single '/' slash.
 
 
 When inspecting
 script from outside via the "?ScriptName:" functionality, the local functions are
-also not displayed.
+also not displayed, while using "??ScriptName:" includes them.
 
 
-However, inspecting functions from the outside, or with the script as current, by
-including a (partial) name, the
-private functions are included, again prefixed by '/', to indicate their status.
-
-```
-# Examples
-$ ?X
-$ ?SomeScript:X
-```
-
-There is nothing blocking calls to local functions from the outside, it is purely
-a means of filtering what to show, for clarity.
+Also note, that "local" functions are not private in the Java sense, and so are callable
+from the outside. Marking functions as local is all about filtering what is shown on the
+single "?" command.
 
 # Displaying all known scripts
 
@@ -1242,31 +1214,6 @@ element on the stack after all code has executed. If there is no value on the st
 the return value is 
 **null**.
 
-## Code blocks: an alternative to code spaces
-
-
-Code spaces are a top-level construct in functions. They can not (easily) be nested,
-and can become confusing when function code grows. An alternative is to use
-code blocks. These are described later, under the header 
-**Block expressions**, and
-consist of three types: local, Inner and Lambda.
-
-
-To replace code spaces, we normally use the "Inner" type of blocks. Example, summing
-the sizes of the files in current directory:
-
-```
-Inner{ Dir.files->f out(f.length) }.sum
-```
-
-Another example
-
-```
-numLines=Inner{Dir.files->f out(f.read.length)}
-numFiles=Dir.files.length
-avg=numLines/numFiles
-println("Average number of lines per file: " + avg)
-```
 # Function parameters
 
 
@@ -1346,8 +1293,8 @@ The traditional blocks inside curly braces come in three variants in CFT.
 ## Local blocks
 
 
-Local blocks are just for grouping code that runs in the same context as the code around it. Technically
-they are considered expressions.
+Local blocks are just for grouping code that runs in the same context ("code space")
+as the code around it. Technically they are considered expressions.
 
 ```
 if (a>b) {
@@ -1358,6 +1305,33 @@ if (a>b) {
 Local blocks can contain loops, but can not be split into multiple code spaces using the PIPE ("|")
 symbol, as they execute in the same run-context as the code around them. Any calls to out() or report()
 add to the result list of the environment.
+
+## Inner blocks
+
+
+An inner block is a separate "code space", where we can do loops and call out() without
+affecting the result of the caller.
+
+
+They are like calling a function, as their inner
+workings do not affect the caller, 
+**except** that they have access to, and can
+modify local variables.
+
+```
+# List number of lines containing string in files under current dir
+# --
+P(1,readLine("pattern"))=>
+pattern
+Dir.files->f
+count=Inner{f.read->line
+assert(line.contains(pattern)) out(line)
+}.length
+report(f.name, count)
+/CountMatches
+```
+
+(Note: this could be implemented easier with Grep.fileCount())
 
 ## Lambdas
 
@@ -1374,29 +1348,6 @@ $ MyLambda.call(1,2)
 Can be used to create local functions inside regular functions, but mostly used to create
 closures and/or Dict objects.
 
-## Inner blocks
-
-
-An inner block is a cross between local blocks and the Lambda. An Inner block is executed
-immediately, and has access to the local variables inside the function, but maintains a separate
-context for loops and loop output. Technically, inner blocks are expressions, just as with local
-blocks.
-
-
-In other words: Inner blocks define their own code space.
-
-```
-Inner {
-someList->
-x out(x+1)
-} =>resultList
-...
-```
-
-Inner blocks are a way of running loops isolated from the environment. Remember that loops by
-default extend to the end of the function, or until hitting a "pipe". The third thing that
-terminates loops are hitting the end of the current block.
-
 ## Block expressions summary
 
 
@@ -1405,35 +1356,12 @@ the same code space as outside the block, means it can call break() and out() as
 assert() and reject() and affect the (innermost) loop of those outside the block.
 
 
-Inner blocks for isolated processing loops inside other code. This means calling break() and
-out() and assert() and reject() have no effect on loops outside the block.
+Inner blocks for isolated processing loops inside other code. This means that calling
+out(), assert(), reject() and break() inside, has no effect on loops outside the block.
 
 
 Lambdas are "functions" as values.
 
-## Examples: Local vs Inner
-
-```
-List("aaa","bbb")->line
-# Using a local block to limit scope of loop, so that we
-# can follow it by code that runs after the inner loop
-# has completed. Result is list of characters: aaaXbbbX
-{
-line.chars->c out(c)
-}
-out("X")
-/t
-List("aaa","bbb")->line
-# The Inner block below works in a separate context, so the calls
-# to out() don't affect the resulting output list of the function.
-# The Inner block returns a list, but it isn't used in this example.
-# So function returns list with XX only.
-Inner {
-line.chars->c out(c)
-}
-out("X")
-/t
-```
 ## Local variables scope
 
 
@@ -1863,28 +1791,11 @@ $ ssh-copy-id user@host
 ```
 # Synthesis
 
-## The problem
-
-
-If we use "cd" and "ls" to move
-to a directory, and want to create a function that works on files or subdirectories under
-that location, we have to take care.
-
-
-The issue is that we can not just say
-
-```
-Dir.allFiles->f ...
-```
-
-... because the Dir() function returns the current directory, which may change.
-
 ## Creating code from values
 
 
-This is where the 
-**syntesis** functionality comes in. The most often used variant takes
-the form of two "colon commands".
+The 
+**syntesis** functionality comes in three variants. Two of them are "colon commands".
 
 
 
@@ -1898,31 +1809,33 @@ last result is not a list, an error is reported.
 ## Example using :syn
 
 ```
-$ cd ..
+$ Dir.sub("src")
 # /home/roar
 <obj: Dir>
-roar/ d:61 f:33
-$ cd project1
-# /home/roar/project1
-<obj: Dir>
-project1/ d:0 f:0
+src/
 $ :syn
 synthesize ok
 +-----------------------------------------------------
-| .  : Dir("/home/roar/project1")
+| .  : Dir("/home/roar/CFT/src")
 +-----------------------------------------------------
 Assign to name by /xxx as usual
 $ /DirProject1
 ```
 
-When we use "cd" to change to a directory, it returns a Dir object. The shell remembers the last
-result value, and the ":syn" attempts to create code representing that value in as direct a way as
-possible. If this succeeds, it inserts the generated code line tino the "code history", as the
+Running the code Dir.sub("src") creates a Dir object for the src subdirectory.
+
+
+When we run the ":syn" command, as CFT remembers the last result value, it creates code for it.
+
+
+If this succeeds, it inserts the generated code line tino the "code history", as the
 last command, which means it can now be assigned a name, for example "DirProject"
 
 
 Calling function "DirProject" will now always generate a Dir object pointing to the same
-directory, and is no longer dependening on current directory.
+directory. Having synthesized a value, makes it independent of how it was created, which
+in this case means that DirProject always returns that specific directory, regardless
+of current directory.
 
 ## Example using :NN
 
@@ -1946,23 +1859,16 @@ Assign to name by /xxx as usual
 
 If the last value was not a list, the ":NN" command will fail with an error.
 
-# Output format / Cfg
+# Output format / Term
 
 
-Output to screen is regulated via a Cfg object. It is a session object, that contains default
-settings for number of lines and line width of the current window / terminal. It's default
-mode of operation is to disable wrapping, which means long lines are cut, ending with a simple '+'
-to indicate this.
-
-
-To change the current size of the terminal window, we may use global function Cfg() to obtain
-the Cfg object, and methods to set or view the properties.
+Output to screen is regulated via a Term object. It is a session object, remembering the
+current size of the terminal window.
 
 ## The @term shortcut
 
 
-After the introduction of short cuts, the easiest way to set the terminal window width and
-height, is to enter
+After resizing the terminal, we need to update the Term object.
 
 ```
 $ @term

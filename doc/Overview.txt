@@ -27,7 +27,7 @@ Shortcuts vs colon commands
 CFT as a shell
  * Paths with space
  * Windows backslash
- * Combine shell commands with CFT functions
+ * Combine shell commands with CFT function results
  * No shell-like destructive commands
 
 The "protect" mechanism
@@ -48,7 +48,7 @@ Local variables
 
 Files
  * Page through a file
- * Show binary file
+ * Show file as hex
  * Encoding
  * end-of-line
 
@@ -64,7 +64,7 @@ Directories
  * Set current directory
  * Newest file in directory
 
-The shell() function
+shell()
 
 Core types
  * String literals
@@ -110,7 +110,6 @@ Code spaces - "pipes"
  * Result value from a code space
  |   Code space result value
  |   Otherwise ...
- * Code blocks: an alternative to code spaces
 
 Function parameters
 
@@ -118,10 +117,9 @@ User input
 
 Block expressions
  * Local blocks
- * Lambdas
  * Inner blocks
+ * Lambdas
  * Block expressions summary
- * Examples: Local vs Inner
  * Local variables scope
 
 List filtering with Lambda
@@ -164,12 +162,11 @@ Running external programs
  * Doing ssh
 
 Synthesis
- * The problem
  * Creating code from values
  * Example using :syn
  * Example using :NN
 
-Output format / Cfg
+Output format / Term
  * The @term shortcut
  * Line wrapping
 
