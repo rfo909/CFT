@@ -108,7 +108,42 @@ modify the value, or get information from it, etc.
 There also is a set of global functions, which return values, such as the current
 directory, an empty dictionary, a list, the current date, and so on. 
 
-All values are objects, and there are no primitive types in the classic meaning. Example:
+Note that the '$' is the prompt.
+
+```
+## Create empty List object
+
+$ List
+
+## Create List with members
+
+$ List(1,2,3)
+
+## Create empty dictionary
+
+$ Dict
+
+## Create Date object 
+
+$ Date
+
+## Get directory object for current dir
+
+$ Dir
+
+## ... or for some path
+
+$ Dir("/some/path")
+
+## Get list of files in current directory
+
+$ Dir.files
+```
+  
+### Values are library objects
+
+All values are objects, implemented in Java, with member functions. 
+There are no primitive types in the classic meaning. Example:
 
 ```
 $ "test".length
