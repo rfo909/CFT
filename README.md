@@ -14,9 +14,14 @@ interest in parsers and interpreters.
 The command line makes CFT feel like a shell, for navigating the directory tree, and inspecting files,
 using the following commands.
 
-- cd, ls, pwd, cat, more, edit
+- cd
+- ls
+- pwd
+- cat
+- more
+- edit
 
-However, CFT is really about creating and running *functions*.
+However, CFT is really about creating and running functions.
 
 ## Creating functions
 
@@ -27,11 +32,13 @@ In CFT the code comes before the function name. The P(N) global function returns
 # --
 	file1=P(1)  # Expects File objects
 	file2=P(2)
-	file1.hash==file2.hash # boolean return value
+	
+	# boolean return value
+	file1.hash==file2.hash 
 /FilesMatch
 ```
 
-*Note* that the two ".hash" are function calls on the File objects received as parameters.
+*Note* that the two references ".hash" are function calls on the File objects received as parameters.
  
 Parantheses are optional when no arguments. 
 
@@ -40,11 +47,6 @@ same script file, and in other script files, as well as member functions inside 
 the calls to File.hash() above. 
 
 Scripts contain no state, and are just a way of organizing code, making each script essentially a name space. 
-
-- 70+ library object types
-- 390+ library functions
-
-About 30 of the library functions are global, the rest exist inside different object types.
 
 ## Functionality
 
@@ -96,71 +98,73 @@ systems, such as database files, logs, etc.
 Read more about it in the docs, or view the Youtube tutorial video [episode six](https://www.youtube.com/watch?v=7e-f1gudxpE&list=PLj58HwpT4Qy80WhDBycFKxIhWFzv5WkwO&index=7).
 
 
-## Object oriented - functional
-
-### Values are objects - member functions
-
-All values in CFT are objects. These in turn have member functions, which we call to either
-modify the value, or get information from it, etc.
-
 ### Global functions
 
-There also is a set of global functions, which return values, such as the current
+CFT currently implements 70+ object types, with 390+ library functions. Of these, about 30 are global, the
+rest exist as object member functions, such as the File.hash() invoked in above example.
+
+The global functions return different values, such as the current
 directory, an empty dictionary, and so on. 
 
-Note that the '$' is the prompt.
+In the example below, note that the '$' is the prompt.
 
 ```
-## Create empty List object
+	## Create empty List object
 
-$ List
+	$ List
 
-## Create List with members
+	## Create List with members
 
-$ List(1,2,3)
+	$ List(1,2,3)
 
-## Create empty dictionary
+	## Create empty dictionary
 
-$ Dict
+	$ Dict
 
-## Create Date object 
+	## Create Date object 
 
-$ Date
+	$ Date
 
-## Get directory object for current dir
+	## Get directory object for current dir
 
-$ Dir
+	$ Dir
 
-## ... or for some path
+	## ... or for some path
 
-$ Dir("/some/path")
+	$ Dir("/some/path")
 
-## Get list of files in current directory
+	## Get list of files in current directory
 
-$ Dir.files
+	$ Dir.files
 ```
   
-### Values are library objects
+### Values are objects
 
-All values are objects, implemented in Java, with member functions. 
-There are no primitive types in the classic meaning. Example:
+All values in CFT are objects, written in Java. These in turn have member functions, which we call to either
+modify the value, or get information from it, etc.
+
+There are no primitive types in the classic ("atomic") sense. The "int" type in CFT corresponds to Java long,
+and the "float" to Java double. 
+
+Strings can be written with single and double quotes.
+
 
 ```
-$ "test".length
-  <int>
-  4
+	$ "test".length
+	  <int>
+	  4
 
-$ 23.bin
-  <String>
-  00010111
+	$ 23.bin
+	  <String>
+	  00010111
 
-$ "abc".chars.reverse.concat
-  <String>
-  "cba"
-  
-$ 3.14.i
-  <int>
-  3
+	$ "abc".chars.reverse.concat
+	  <String>
+	  "cba"
+	  
+	$ 3.14.i
+	  <int>
+	  3
 ```
 
 ### Inspired by PowerShell
@@ -173,6 +177,10 @@ compared to PowerShell and bash. CFT easily calls both, on their corresponding p
 The interactive approach made possible a help system, where one can always run some expression, and list 
 member function of the result.
 
+### Variable substitution
+
+Contrary to PowerShell and bash, CFT performs no automatic substitution of "dollar-expressions" inside
+strings, unless told to.
 
 ### "Foreach"
 
@@ -182,46 +190,49 @@ using a single arrow and an identifier.
 In combination with assert(), reject() and break(), this makes it easy to filter and modify list data.
 
 ```
-$ List(1,2,3,4)->x assert(x%2==0) out(x+100)
-  <List>
-   0: 102
-   1: 104
+	$ List(1,2,3,4)->x assert(x%2==0) out(x+100)
+	  <List>
+	   0: 102
+	   1: 104
 ```
  
 ### "Pipe"
 
-In order to avoid having to create multiple helper functions, we may create multiple "code spaces" 
-inside functions, with output from one being piped as input to the next, via the data stack. 
+In order to do multiple stages of processing, rather than just create helper functions, we may 
+split the code of single functions into a sequence of  "code spaces", with the Pipe ("|") character.
 
-The next code space may then either assign the value to a local variable, with "=> ident" syntax,
-or use the "_" (underscore), to include it in an expression. The "_" (underscore) expression really gets the
-top value off the data stack, so it will not persist for long. 
+The output from one code space is the "piped" as input to the next, via the data stack.
+
+The next code space may then either assign the value to a local variable, with "=> ident" syntax, which
+is the stack-based assignment operations, or using the "single underscore" expression, which refers to the 
+top value on the data stack.
 
 ```
-# Calculate total number of lines in text files under current dir and subdirs, for files
-# modified within last hour.
-# --
-	Dir.allFiles(Glob("*.txt"))->f 
-		reject(f.lastModified < currentTimeMillis-60*60*1000)  # last hour
-		out(f.read.length)
-	| _.sum
-/TextCountLastHour
+	# Calculate total number of lines in text files under current dir and subdirs, for files
+	# modified within last hour.
+	# --
+		Dir.allFiles(Glob("*.txt"))->f 
+			reject(f.lastModified < currentTimeMillis-60*60*1000)  # last hour
+			out(f.read.length)
+		| _.sum
+	/TextCountLastHour
 
 
-# Present files sorted by size, biggest first
-# --
-	Dir.files->f
-		out(Int(f.length,f))
-	| _.sort.reverse->x
-		out(x.data)
-/BiggestFirst
+	# Present files sorted by size, biggest first
+	# --
+		Dir.files->f
+			out(Int(f.length,f))
+		| _.sort.reverse->x
+			out(x.data)
+	/BiggestFirst
 ```
 
-The sort example illustrates sorting in CFT, which consists of making a list of something into a list of
-wrappers that represent a sortable attribute, in this case Int(). The result list is then sorted, and 
-another iteration unwraps the original elements.
+The sort example illustrates all sorting in CFT, which consists of converting a list of something, such as files,
+into a list of wrappers that represent a sortable attribute, in this case global function Int(). 
 
-There also exist global functions Str() and Float() following same pattern.
+The result list is then sorted, and another iteration unwraps the original elements.
+
+There also exist global functions Str() and Float() following the same pattern. 
 
 
 ### No global state
@@ -229,25 +240,24 @@ There also exist global functions Str() and Float() following same pattern.
 To keep the language simple, CFT *does not support* user defined classes, only user defined functions.
 
 This in turn correlated well with making the language as stateless as possible, for multiple reasons, 
-most generally robustness, but also enabling safe multi-threading. 
+mostly script robustness, but also enabling safe multi-threading. 
 
 CFT has no global variables, and there is no script state. A script in CFT is a collection of related
 functions, nothing more. 
 
-There are options for storing data, either to file, or using the integrated Db2 data store.
+There are options for storing data, either to file, or using the integrated Db2 data store. This requires
+an explicit effort, not something that just happens, as the goal is to minimize or eliminate unwanted
+side effects.
 
-The goal is to minimize unwanted side effects.
 
+### Values as code
 
-### Just code
+The Db2 data store is able to save most data and values, using a special mechanism called *synthesis*, and
+which is the "serialization" format for values in CFT. This produces code from values, which when run, produces
+the original values. 
 
-CFT implements object types for lists and dictionaries, which enables somewhat complex data structures.
-
-The Db2 data store is able to save most data
-structures and values, using a special mechanism called *synthesis*, which produces code from values. This code on
-string format is stored when saving data with Db2, or it can be written to some file.
-
-When loading data from Db2, the code is run through eval() which recreates the original data.
+So Db2 stores data as code on string format. When loading from Db2, the code string is run through
+eval(), and we get the original data.
 
 
 # Frequent uses
@@ -265,25 +275,25 @@ It's been in daily use since 2019 in my work as a software developer, and is sta
 ## Example: ping some hosts
 
 ```
-# Readme function
-# --
-<<< EOF
-Check if hosts respond to ping
-    (The arrow plus identifier is a foreach)
-    (The  /name lines define functions from the preceding code lines)
->>> EOF
-/Readme
+	# Readme function
+	# --
+	<<< EOF
+	Check if hosts respond to ping
+		(The arrow plus identifier is a foreach)
+		(The  /name lines define functions from the preceding code lines)
+	>>> EOF
+	/Readme
 
-# Define hosts
-# --
-	List("host1","host2","host3")
-/hosts
+	# Define hosts
+	# --
+		List("host1","host2","host3")
+	/hosts
 
 
-# Create report
-# --
-	hosts->host report(host,SSH:HostOk(host))
-/checkPing 
+	# Create report
+	# --
+		hosts->host report(host,SSH:HostOk(host))
+	/checkPing 
 ```
 
 ### Rewritten to do parallel pings
@@ -301,15 +311,15 @@ When all processes have been spawned, we loop through the processes, wait for
 each to terminate, then report its result. 
 
 ```
-# Create report
-# --
-	hosts->host 
-		out(SpawnProcess(SymDict(host), SSH:HostOk(host)))
-	| ->proc
-		println("Waiting for " + proc.data.host)
-		proc.wait
-		report(proc.data.host, proc.exitValue)
-/checkPing 
+	# Create report
+	# --
+		hosts->host 
+			out(SpawnProcess(SymDict(host), SSH:HostOk(host)))
+		| ->proc
+			println("Waiting for " + proc.data.host)
+			proc.wait
+			report(proc.data.host, proc.exitValue)
+	/checkPing 
 ```
 
 ### The SSH:HostOk function
@@ -317,13 +327,13 @@ each to terminate, then report its result.
 Above we're calling the HostOk function inside the SSH script. It is implemented as follows.
 
 ```
-# Check if server responds on ping
-P(1) =>target
-    if(target.contains("@"), target.after("@"), target) =>host
-	Lib:run(List("ping","-c","1",host),List,true).exitCode => ex
+	# Check if server responds on ping
+	P(1) =>target
+		if(target.contains("@"), target.after("@"), target) =>host
+		Lib:run(List("ping","-c","1",host),List,true).exitCode => ex
 
-	ex == 0
-/HostOk
+		ex == 0
+	/HostOk
 ```
 
 It in turn calls function "run()" inside Lib script, which eventually ends up doing a call 
