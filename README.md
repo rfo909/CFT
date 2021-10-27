@@ -7,7 +7,7 @@ programming language.
 It was initiated because of a need for a descent (!) scripting and automation tool in my job as a 
 software developer, combined with my interest in parsers and interpreters. 
 
-It's been in continous use since creation in 2018, and is quite reliable.
+It's been in continous use since creation in 2018.
 
 Written in Java, it runs both on Linux (at home) and Windows environment (at work). 
 
@@ -72,6 +72,14 @@ but nowadays we usually edit script code in some editor.
 
 The shortcut @e opens current script file to be edited in notepad or notepad++ on windows, and 
 whatever preferred editor is selected on Linux.
+
+Script code is managed via "colon commands", which are management functions outside the language:
+
+```
+:save <scriptName>
+:load <scriptName>
+:new
+```
 
 
 ### Documentation
@@ -147,7 +155,7 @@ In the example below, note that the '$' is the prompt.
 All values in CFT are objects, written in Java. These in turn have member functions, which we call to either
 modify the value, or get information from it, etc.
 
-There are no primitive types in the classic ("atomic") sense. The "int" type in CFT corresponds to Java long,
+There are no primitive types in the classic ("atomic") sense. The values of the "int" type in CFT corresponds to Java long,
 and the "float" to Java double. 
 
 Strings can be written with single and double quotes.
@@ -176,22 +184,59 @@ Strings can be written with single and double quotes.
 CFT was inspired by PowerShell, working with objects instead of strings, as in bash. 
 
 Apart from a couple of "peculiarities", CFT strives for a regular, compact and predictable syntax, 
-compared to PowerShell and bash. CFT easily calls both, on their corresponding platforms.  
+compared to PowerShell and bash. CFT easily calls both, on their corresponding platforms.
 
 The interactive approach made possible a help system, where one can always run some expression, and list 
-member function of the result.
+member function of the resulting object.
 
-### Variable substitution
+
+### Variable substitution / templating
 
 Contrary to PowerShell and bash, CFT performs no automatic substitution of "dollar-expressions" inside
 strings, unless told to.
+
+```
+	# Create javascript query for MongoDb, counting objects for given status,
+	# to be invoked via Mongo shell
+	# --
+		P(1)=>table
+		P(2)=>status
+		
+		# remember printjson() to produce output through Mongo Shell
+		Sequence(
+			@ printjson(db.<<table>>.find({
+			@    status: "<<status>>"
+			@ }).count())
+		).mergeExpr
+	/MongoDbCountStatusJS	
+```
+
+The Sequence() expression creates a List, but without the requirement of commas, and the '@ ...' is
+the "raw string" format in CFT. Alternatively we can use inline "here" documents, for easily pasting.
+
+```
+	# Create javascript query ...
+	# --
+		P(1)=>table
+		P(2)=>status
+
+<<< EOF
+printjson(db.<<table>>.find({
+  status: "<<status>>"
+}).count())
+>>> EOF
+		.mergeExpr
+	/MongoDbCountStatusJS	
+```
 
 ### "Foreach"
 
 One of the pecularities of CFT is its extremely compact notation for doing a "foreach" loop over content,
 using a single arrow and an identifier.
 
-In combination with assert(), reject() and break(), this makes it easy to filter and modify list data.
+In combination with assert(), reject() and break(), this makes it easy to filter and modify list data. 
+
+The result from a loop is generated with calls to out(), creating a new list.
 
 ```
 	$ List(1,2,3,4)->x assert(x%2==0) out(x+100)
@@ -208,21 +253,25 @@ split the code of single functions into a sequence of  "code spaces", with the P
 The output from one code space is the "piped" as input to the next, via the data stack.
 
 The next code space may then either assign the value to a local variable, with "=> ident" syntax, which
-is the stack-based assignment operations, or using the "single underscore" expression, which refers to the 
+is the stack-based assignment operation, or using the "single underscore" expression, which refers to the 
 top value on the data stack.
 
 ```
-	# Calculate total number of lines in text files under current dir and subdirs, for files
-	# modified within last hour.
+	# Count number of files modified within the last week,
+	# under current dir and subdirs ("allFiles")
 	# --
-		Dir.allFiles(Glob("*.txt"))->f 
-			reject(f.lastModified < currentTimeMillis-60*60*1000)  # last hour
-			out(f.read.length)
-		| _.sum
-	/TextCountLastHour
+		P(1,"*.txt") => globPattern
+		limit=Date.sub(Date.Duration.days(7)).get  # millis one week ago
+		
+		Dir.allFiles(Glob(globPattern))->f 
+			reject(f.lastModified < limit)
+			out(f)
+		| _.length
+	/ModifiedLastWeek
 
 
-	# Present files sorted by size, biggest first
+	# Present files sorted by size, biggest first,
+	# in current directory
 	# --
 		Dir.files->f
 			out(Int(f.length,f))
@@ -250,7 +299,7 @@ CFT has no global variables, and there is no script state. A script in CFT is a 
 functions, nothing more. 
 
 There are options for storing data, either to file, or using the integrated Db2 data store. This requires
-an explicit effort, not something that just happens, as the goal is to minimize or eliminate unwanted
+an explicit effort, and is not something that "just happens". The goal is to minimize or eliminate unwanted
 side effects.
 
 
@@ -263,6 +312,11 @@ the original values.
 So Db2 stores data as code on string format. When loading from Db2, the code string is run through
 eval(), and we get the original data.
 
+```
+	$ syn("a b c".split)
+	  <String>
+	  List("a","b","c")
+```
 
 # Frequent uses
 
@@ -271,8 +325,6 @@ eval(), and we get the original data.
 - collect and search log files 
 - various install and deployment tasks
 - automate powershell command sequences
-
-It's been in daily use since 2019 in my work as a software developer, and is stable. 
 
 
 
