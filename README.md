@@ -9,7 +9,7 @@ interest in parsers and interpreters.
 
 *README last updated 2021-10-27*
 
-## Terminal based - shell-like - programmable
+## Terminal based - shell-like
 
 The command line makes CFT feel like a shell, for navigating the directory tree, and inspecting files,
 using the following commands.
@@ -18,7 +18,7 @@ using the following commands.
 
 However, CFT is really about creating and running *functions*.
 
-## Functions
+## Creating functions
 
 In CFT the code comes before the function name. The P(N) global function returns parameters by position.
 
@@ -106,7 +106,7 @@ modify the value, or get information from it, etc.
 ### Global functions
 
 There also is a set of global functions, which return values, such as the current
-directory, an empty dictionary, a list, the current date, and so on. 
+directory, an empty dictionary, and so on. 
 
 Note that the '$' is the prompt.
 
@@ -157,21 +157,74 @@ $ 23.bin
 $ "abc".chars.reverse.concat
   <String>
   "cba"
+  
+$ 3.14.i
+  <int>
+  3
 ```
 
 ### Inspired by PowerShell
 
 CFT was inspired by PowerShell, working with objects instead of strings, as in bash. 
 
-Apart from a couple of "peculiarities", CFT strives for a regular and predictable syntax, 
-compared to PowerShell and bash. 
+Apart from a couple of "peculiarities", CFT strives for a regular, compact and predictable syntax, 
+compared to PowerShell and bash. CFT easily calls both, on their corresponding platforms.  
 
 The interactive approach made possible a help system, where one can always run some expression, and list 
 member function of the result.
 
 
+### "Foreach"
 
-## No global state
+One of the pecularities of CFT is its extremely compact notation for doing a "foreach" loop over content,
+using a single arrow and an identifier.
+
+In combination with assert(), reject() and break(), this makes it easy to filter and modify list data.
+
+```
+$ List(1,2,3,4)->x assert(x%2==0) out(x+100)
+  <List>
+   0: 102
+   1: 104
+```
+ 
+### "Pipe"
+
+In order to avoid having to create multiple helper functions, we may create multiple "code spaces" 
+inside functions, with output from one being piped as input to the next, via the data stack. 
+
+The next code space may then either assign the value to a local variable, with "=> ident" syntax,
+or use the "_" (underscore), to include it in an expression. The "_" (underscore) expression really gets the
+top value off the data stack, so it will not persist for long. 
+
+```
+# Calculate total number of lines in text files under current dir and subdirs, for files
+# modified within last hour.
+# --
+	Dir.allFiles(Glob("*.txt"))->f 
+		reject(f.lastModified < currentTimeMillis-60*60*1000)  # last hour
+		out(f.read.length)
+	| _.sum
+/TextCountLastHour
+
+
+# Present files sorted by size, biggest first
+# --
+	Dir.files->f
+		out(Int(f.length,f))
+	| _.sort.reverse->x
+		out(x.data)
+/BiggestFirst
+```
+
+The sort example illustrates sorting in CFT, which consists of making a list of something into a list of
+wrappers that represent a sortable attribute, in this case Int(). The result list is then sorted, and 
+another iteration unwraps the original elements.
+
+There also exist global functions Str() and Float() following same pattern.
+
+
+### No global state
 
 To keep the language simple, CFT *does not support* user defined classes, only user defined functions.
 
@@ -186,16 +239,18 @@ There are options for storing data, either to file, or using the integrated Db2 
 The goal is to minimize unwanted side effects.
 
 
-## Just code
+### Just code
 
-CFT implements object types for lists and dictionaries, and the Db2 data store is able to save most data
-structures, using a special mechanism called *synthesis*, which produces code from values. This code on
+CFT implements object types for lists and dictionaries, which enables somewhat complex data structures.
+
+The Db2 data store is able to save most data
+structures and values, using a special mechanism called *synthesis*, which produces code from values. This code on
 string format is stored when saving data with Db2, or it can be written to some file.
 
 When loading data from Db2, the code is run through eval() which recreates the original data.
 
 
-## Frequent uses
+# Frequent uses
 
 - check out + run build + distribute files + cleanup
 - search project trees
@@ -276,7 +331,7 @@ to Dir.runProcess() which actually runs the external program. The details don't 
 as the concept of creating a hierarchy of functions with no (or very few) side effects, providing
 high level reliability, such as the HostOk function.
 
-## Interactive help
+# Interactive help
 
 Type "help" lists all global functions. 
 
