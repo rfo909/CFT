@@ -4,7 +4,7 @@
 CFT is short for *ConfigTool*, and is an interpreted and interactive shell and
 programming language. 
 
-It was initiated because of a need for a descent (!) scripting and automation tool in my job as a 
+It was initiated because of a need for a decent scripting and automation tool in my job as a 
 software developer, combined with my interest in parsers and interpreters. 
 
 It's been in continous use since creation in 2018.
