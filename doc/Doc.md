@@ -7,7 +7,7 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2021-10-27 RFO
+Last updated: 2021-10-28 RFO
 v2.9.3
 ```
 # Introduction
@@ -1309,7 +1309,7 @@ add to the result list of the environment.
 ## Inner blocks
 
 
-An inner block is a separate "code space", where we can do loops and call out() without
+An Inner block is a separate "code space", where we can do loops and call out() without
 affecting the result of the caller.
 
 
@@ -1319,19 +1319,27 @@ workings do not affect the caller,
 modify local variables.
 
 ```
-# List number of lines containing string in files under current dir
+# List number of lines containing a pattern, in files under current dir
 # --
 P(1,readLine("pattern"))=>
 pattern
 Dir.files->f
-count=Inner{f.read->line
+count=Inner{
+f.read->line
 assert(line.contains(pattern)) out(line)
-}.length
+| _.length
+}
 report(f.name, count)
 /CountMatches
 ```
 
-(Note: this could be implemented easier with Grep.fileCount())
+Apart from how this could have been implemented better with Grep.fileCount(), this
+is an illustration of how Inner blocks are more general and powerful than using
+the PIPE to split function bodies into code spaces.
+
+
+Of course, inner blocs can themselves be partitioned into code spaces, as we see
+in the above example.
 
 ## Lambdas
 
@@ -1352,12 +1360,13 @@ closures and/or Dict objects.
 
 
 Local (plain) blocks for non-PIPE-separated blocks of code, typically used with "if". Running in
-the same code space as outside the block, means it can call break() and out() as well as
+the same code space as outside the block, which means it can contain calls to break() and out() as well as
 assert() and reject() and affect the (innermost) loop of those outside the block.
 
 
 Inner blocks for isolated processing loops inside other code. This means that calling
-out(), assert(), reject() and break() inside, has no effect on loops outside the block.
+out(), assert(), reject() and break() inside, has no effect on loops outside the block. They
+can be split into parts with PIPE, just like functions.
 
 
 Lambdas are "functions" as values.
@@ -3896,6 +3905,20 @@ This all stems from the "one-line-at-a-time" period, where scripts were entered 
 the command line, at a time long before introducing block expressions. Being a fairly compact
 and efficient notation, and frequently used, code spaces and the "pipe" symbol will
 remain in the language.
+
+## Code spaces vs Inner blocks
+
+
+To be clear: code spaces were invented long before any blocks. Code spaces, separated by
+the "pipe" character is enough for most designs.
+
+
+The need for code blocks only really arised after the "if" was added. The first implementation
+shared the "local" block syntax, but functionally worked like an "Inner" block.
+
+
+It took a while back and forth deciding we needed two different non-lambda block expressions,
+and defining them in terms of code spaces.
 
 ## Script and code size
 

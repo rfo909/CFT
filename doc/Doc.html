@@ -15,7 +15,7 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2021-10-27 RFO
+Last updated: 2021-10-28 RFO
 v2.9.3
 
 
@@ -1505,7 +1505,7 @@ codeDirs = . ; code.examples ; code.lib
 
 <h2>Inner blocks</h2>
 <p>
-  An inner block is a separate "code space", where we can do loops and call out() without
+  An Inner block is a separate "code space", where we can do loops and call out() without
   affecting the result of the caller.
 </p>
 <p>
@@ -1514,18 +1514,26 @@ codeDirs = . ; code.examples ; code.lib
   modify local variables.
 </p>
 <pre>
-  # List number of lines containing string in files under current dir
+  # List number of lines containing a pattern, in files under current dir
   # --
     P(1,readLine("pattern"))=>pattern
     Dir.files-&gt;f
-      count=Inner{f.read-&gt;line
-        assert(line.contains(pattern)) out(line)
-      }.length
+      count=Inner{
+        f.read-&gt;line
+          assert(line.contains(pattern)) out(line)
+        | _.length
+      }
       report(f.name, count)
     /CountMatches
 </pre>
 <p>
-  (Note: this could be implemented easier with Grep.fileCount())
+  Apart from how this could have been implemented better with Grep.fileCount(), this
+  is an illustration of how Inner blocks are more general and powerful than using
+  the PIPE to split function bodies into code spaces. 
+</p>
+<p>
+  Of course, inner blocs can themselves be partitioned into code spaces, as we see
+  in the above example.
 </p>
 
 
@@ -1555,12 +1563,13 @@ codeDirs = . ; code.examples ; code.lib
 <h2>Block expressions summary</h2>
 <p>
   Local (plain) blocks for non-PIPE-separated blocks of code, typically used with "if". Running in
-  the same code space as outside the block, means it can call break() and out() as well as
+  the same code space as outside the block, which means it can contain calls to break() and out() as well as
   assert() and reject() and affect the (innermost) loop of those outside the block. 
 </p>
 <p>
   Inner blocks for isolated processing loops inside other code. This means that calling 
-  out(), assert(), reject() and break() inside, has no effect on loops outside the block.
+  out(), assert(), reject() and break() inside, has no effect on loops outside the block. They
+  can be split into parts with PIPE, just like functions.
 </p>
 <p>
   Lambdas are "functions" as values.
@@ -4358,6 +4367,21 @@ Colon commands
   remain in the language.
 </p>
 
+
+
+<h2>Code spaces vs Inner blocks</h2>
+<p>
+  To be clear: code spaces were invented long before any blocks. Code spaces, separated by
+  the "pipe" character is enough for most designs.
+</p>
+<p>
+  The need for code blocks only really arised after the "if" was added. The first implementation
+  shared the "local" block syntax, but functionally worked like an "Inner" block. 
+</p>
+<p>
+  It took a while back and forth deciding we needed two different non-lambda block expressions, 
+  and defining them in terms of code spaces.
+</p>
 
 
 
