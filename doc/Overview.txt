@@ -269,7 +269,6 @@ Some example code
  * Windows CMD
 
 Lib.Text.Lexer
- * Motivation
  * Concept
  * Implementation
  |   .sub()
@@ -281,10 +280,10 @@ Lib.Text.Lexer
  |   Regular Node.addToken() example
  |   Node.addTokenComplex() example
 
-Closures
+Manual closures
  * Another example
 
-Closures v2 - Objects
+Closures / Dict Objects
  * Member lambdas calling each other
  * Copy lambdas between dictionaries
  * Lambdas are synthesizable

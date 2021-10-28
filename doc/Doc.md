@@ -3071,6 +3071,13 @@ synthesizable. If not, an error is returned.
 a=List(1,2,3)
 b=Sys.clone(a).add(4)  # b contains 1,2,3,4 while a remains unchanged
 ```
+
+The same can be done manually:
+
+```
+a=List(1,2,3)
+b=eval(syn(a))
+```
 # CFT.props - mCat, mEdit and mMore lambdas
 
 
@@ -3158,46 +3165,48 @@ DirProject.run("cmd","/c","git","push","origin","master")
 # Lib.Text.Lexer
 
 
-**v1.3.2**
-
 The Lib.Text.Lexer objects adds
-capability to match complex tokens with CFT, using the same Java tokenizer that is used when
+capability to match complex tokens with CFT, using the same Java tokenizer implementation
 parsing CFT script code.
-
-## Motivation
-
-
-Working with log data, it would be nice identifying data in log lines beyond
-doing free text searches. The Lexer is the first step, and will in time be followed by
-some more classes, including a basic recursive-descent parser.
 
 ## Concept
 
 
-The concept is that of a tree of maps, each map maps single characters to other maps, and so on.
-If map A contains mapping of digits 0-9 pointing at map B, and our parse process so far has led
-us to map A, with next input character being 0,1,2,3..., then that character is "consumed", which is
-fancy speak for matched, and the current map becomes B. The process then repeates.
+The concept is that of a graph of nodes, each being a map for single characters to other
+nodes.
 
 
-If the current map has no mapping for the current next character, then one of the following happen:
+If our parse process so far has led us to node A, and it contains mappings for digits 0-9
+pointing at node B, and next input character is a digit, then that character is "consumed" from
+input, and we move to node B as new current node.
+
+
+The process repeats, until end of input, or current node has no mapping for the next character.
+
+
+At this point, one of the following takes place:
 
 
 
-- If the current map is marked with "this is a token", then parsing succeeds
+- If the current map is marked with "this is a token of type X", then parsing succeeds
 
 
-- Otherwise, we backtrack, unconsuming previourly consumed characters, until finding a map that "is a token"
+- Otherwise, we backtrack, unconsuming previourly consumed characters, until finding a
+map that "is a token of type Y", which is processed as the first case
 
 <lI>
-Or ,if no map in our parse tree has the "this is a token" mark set, then parsing fails
+Or, if no map in our parse tree has the "this is a token" mark set, then parsing fails
 
+
+
+Following a successful token match, the matching state is reset to the root node of the
+graph, working with the next input character. This repeats until either all characters
+have been consumed, or we find a character that we can not match, which is usually an error.
 
 ## Implementation
 
 
-In the CFT functions, such maps are called nodes. They are created via the
-Lib.Text.Lexer.Node function.
+In the CFT functions, nodes are created via the Lib.Text.Lexer.Node function.
 
 ```
 $ Lib.Text.Lexer help
@@ -3225,11 +3234,8 @@ top=Lib.Text.Lexer.Node
 x=top.sub("0123456789")   # new node
 x.sub("0123456789",x)  # x points to itself for digits
 x.setIsToken(1) # token type: non-negative numbers for regular tokens
-top.match("300xx")  # returns 3, matching sequence '300'
+top.match("123xx")  # returns 3 (length of token), indicating match on sequence '300'
 ```
-
-The match() function is for testing only.
-
 ### .sub()
 
 
@@ -3241,11 +3247,11 @@ three forms:
 someNode.sub("abc",someOtherNode)
 # when at someNode and one of the characters ("abc") are next character in input
 # string, then consume character, and move to that other node, which may of course
-# be the same node or some other node
+# be "someNode" (back-pointer) or some different node
 (2)
 someNode.sub("abc")
 # When no node parameter, an empty node is created, which "abc" points to from
-# someNode. The new node is returned
+# someNode. The new node is returned.
 (3)
 someNode.sub(someOtherNode)
 # When creating libraries of reusable nodes, they always must define a set of
@@ -3267,6 +3273,7 @@ lets those characters point at it.
 
 ```
 # Create reusable node for integers.
+# --
 "0123456789"=>digits
 Lib.Text.Lexer.Node(digits) =>x
 x.sub(digits,x)
@@ -3274,6 +3281,7 @@ x.setIsToken(1)
 x
 /NodeInt
 # Now we can for example match a IP v4 address
+# --
 Lib.Text.Lexer.Node =top
 a=NodeInt
 b=NodeInt
@@ -3287,9 +3295,9 @@ d.setIsToken(2)
 top
 /MatchIPAddress
 # Test
-"192.168.1.1 255.255.x 10.0.0.1 1.2.3 .4".split->word
-report(word, MatchIPAddress.match(word))
-# should return 11,0,8,0,0
+# --
+word="192.168.1.1 xxx" MatchIPAddress.match(word))
+# should return 11 (character count)
 /t1
 ```
 ## Processing single lines
@@ -3300,12 +3308,13 @@ pointers to sub-nodes for all valid tokens. For simplicity, let us match only
 identifiers.
 
 
-Since identifiers are separated by space, we also need to match
+If identifiers are separated by space, we also need to match
 whitespace. Since we are not interested in whitespace, we assign whitespace
 tokens a negative token type, as those get automatically ignored.
 
 ```
 # Identifiers
+# --
 "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_" =>firstChars
 firstChars+"0123456789" =>innerChars
 ident = Lib.Text.Lexer.Node(firstChars)
@@ -3314,13 +3323,15 @@ ident.setIsToken(1)
 ident
 /Identifiers
 # Whitespace
+# --
 " ^t^n^r".unEsc =>chars
 Lib.Text.Lexer.Node(chars) =>ws
 ws.sub(chars,ws)
 ws.setIsToken(-1)
 ws
-/WhitesSpace
+/WhiteSpace
 # Root node
+# --
 Lib.Text.Lexer.Node =>root
 root.sub(Identifiers)
 root.sub(WhiteSpace)
@@ -3328,10 +3339,14 @@ root.sub(WhiteSpace)
 ```
 
 With the Root node ready, we can now parse strings consisting of identifiers and space,
-ignoring space.
+and since space is assigned a negative token type, it gets automatically ignorined.
 
 ```
 # Test
+#
+# Using getTokens(), with the Root node as parameter, which returns
+# a list of token objects.
+# --
 Lib.Text.Lexer.addLine("this is a test").getTokens(Root)->
 token
 report(token.sourceLocation, token.str, token.tokenType)
@@ -3348,31 +3363,27 @@ $ test
 2: pos=9  | a    | 1
 3: pos=11 | test | 1
 ```
+
+The spaces are nicely consumed and ignored.
+
 ## Limitations
 
 
 As there is at most one pointer per character in each node, we can not both recognize
-identifiers AND certain keywords, such as "begin" and "end", separately. Unless of course
-the keywords start with a different sequence of characters in front, that make them
-unique from identifiers.
+identifiers AND certain keywords, such as "begin" and "end", separately, since "b" can only
+point to one Node, not two.
 
 
-With the "symbols" we can easily recognize both "=" and "==" as symbols, because the second
-is an extension of the first, and the "=" node is not configured to match any stream
-of "=", such as identifiers are for letters and numbers.
+However, we can easily match symbols that extend other symbols, such as "=" and "==", because
+the second is an extension of the first. The matching algorithm described above means
+matching as much input as possible, before possibly backtracking to find a token type.
 
-
-This also means we can not both match integer and dates on numeric format, such as
-
-```
-2020   # integer
-2020-09-12   # date
-```
 ## Different uses
 
 
 Parsing a programming language or JSON structure, requires us to identify every
-token in the string. The lexer tree must house them all.
+token in the string. The lexer tree must know all, and use a top Node that recognizes
+the start of each.
 
 
 Parsing a log line piece by piece does not have this requirement. Different
@@ -3385,11 +3396,8 @@ would also be suited.
 
 For the case where we want to identify parts of a log line, one token at a time,
 individual token definitions may not co-exist under a shared root, but that is
-exactly the point: we have clear expectations for what we look for, at any time.
-
-
-The Node.addTokenComplex() function is not one that lives happily together with
-others.
+exactly the point: we have clear expectations for what we look for, at any time,
+and can employ different Node roots as we progress.
 
 ### Regular Node.addToken() example
 
@@ -3425,10 +3433,8 @@ date.match("2020-009-15xxx") # returns 0 (no match)
 
 Feels like Regex character classes, no?
 
-# Closures
+# Manual closures
 
-
-**v1.3.1**
 
 A closure is created by binding a Lambda to a Dict object. The Closure
 has a .call function just like the Lambda, and invokes the lambda, with
@@ -3472,10 +3478,8 @@ $ Strip(2).call("this is a test")
 <String>
 is is a te
 ```
-# Closures v2 - Objects
+# Closures / Dict Objects
 
-
-**v1.7.5**
 
 Letting the dictionary .set function detect lambdas, they are automatically wrapped inside
 closures, with "self" pointing to the dictionary in question.
@@ -3541,8 +3545,6 @@ This means stateful objects can be "serialized" to the database as well.
 # ANSI escape codes
 
 
-**v2.1.2**
-
 The Curses script contains code for producing ANSI escape sequences to set text color,
 bold and underline, as well as clearing the screen, and moving the cursor, which
 enables drawing boxes, for example.
@@ -3559,8 +3561,6 @@ This changes all the functions inside Curses from returning empty strings, to re
 
 # Passwords, encryption, binary data
 
-
-**v2.2.0**
 ## Passwords
 
 
@@ -3612,7 +3612,7 @@ See Db2:GetSessionPassword() function for example.
 # Reference: object types
 
 
-**v2.9.1**
+**Per v2.9.1**
 ```
 Grep("extends Obj") =>
  g
@@ -3686,7 +3686,7 @@ Value
 # Reference: Value types
 
 
-**v2.9.1**
+**Per v2.9.1**
 ```
 Grep("extends Value") =>
  g
