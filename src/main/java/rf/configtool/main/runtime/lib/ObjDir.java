@@ -260,6 +260,19 @@ public class ObjDir extends Obj {
             return new ValueObj(new ObjFile(fileName, protection));
         }
     }
+    
+    
+    private ObjGlob getObjGlob (List<Value> params, int pos) throws Exception {
+    	Value objOrString = params.get(pos);
+    	if (objOrString instanceof ValueString) {
+            boolean ignoreCase=(File.separator.equals("\\"));  // ignore case on Windows, otherwise not
+    		return new ObjGlob( ((ValueString) objOrString).getVal(), ignoreCase);
+    	}
+    	Obj obj=getObj("Glob", params, pos);
+        if (!(obj instanceof ObjGlob)) throw new Exception("Expected String or Glob parameter");
+        return (ObjGlob) obj;
+    }
+    
 
     class FunctionFiles extends Function {
         public String getName() {
@@ -271,9 +284,7 @@ public class ObjDir extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             ObjGlob glob=null;
             if (params.size()==1) {
-                Obj obj=getObj("Glob",params,0);
-                if (!(obj instanceof ObjGlob)) throw new Exception("Expected optional Glob parameter");
-                glob=(ObjGlob) obj;
+            	glob=getObjGlob(params,0);
             } else if (params.size() != 0) {
                 throw new Exception("Expected optional Glob parameter only");
             }
@@ -302,9 +313,7 @@ public class ObjDir extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             ObjGlob glob=null;
             if (params.size()==1) {
-                Obj obj=getObj("Glob",params,0);
-                if (!(obj instanceof ObjGlob)) throw new Exception("Expected optional Glob parameter");
-                glob=(ObjGlob) obj;
+            	glob=getObjGlob(params,0);
             } else if (params.size() != 0) {
                 throw new Exception("Expected optional Glob parameter only");
             }
@@ -431,9 +440,7 @@ public class ObjDir extends Obj {
             OutText outText=ctx.getOutText();
             ObjGlob glob=null;
             if (params.size()==1) {
-                Obj obj=getObj("Glob",params,0);
-                if (!(obj instanceof ObjGlob)) throw new Exception("Expected optional Glob parameter");
-                glob=(ObjGlob) obj;
+            	glob=getObjGlob(params,0);
             } else if (params.size() != 0) {
                 throw new Exception("Expected optional Glob parameter only");
             }
@@ -459,9 +466,7 @@ public class ObjDir extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             ObjGlob glob=null;
             if (params.size()==1) {
-                Obj obj=getObj("Glob",params,0);
-                if (!(obj instanceof ObjGlob)) throw new Exception("Expected optional Glob parameter");
-                glob=(ObjGlob) obj;
+            	glob=getObjGlob(params,0);
             } else if (params.size() != 0) {
                 throw new Exception("Expected optional Glob parameter only");
             }

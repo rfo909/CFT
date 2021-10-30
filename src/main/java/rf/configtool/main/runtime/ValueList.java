@@ -33,6 +33,7 @@ public class ValueList extends Value {
 		Function[] arr={
 				new FunctionLength(),
 				new FunctionNth(),
+				new FunctionNth(true),   // .get(N) is more intuitive - keeping .nth() for compatibility
 				new FunctionSum(),
 				new FunctionConcat(),
 				new FunctionAdd(),
@@ -239,11 +240,14 @@ public class ValueList extends Value {
 
 
     class FunctionNth extends Function {
+    	private String name="nth";
+    	public FunctionNth() {}
+    	public FunctionNth(boolean nameGet) {this.name="get";}
         public String getName() {
-            return "nth";
+            return name;
         }
         public String getShortDesc() {
-            return "nth() or nth(pos) - returns nth element, defaults to 0, use negative to index from end";
+            return name+"() or "+name+"(pos) - returns nth element, defaults to 0, use negative to index from end";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() == 0) {
