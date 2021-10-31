@@ -10,7 +10,7 @@ public class Hash {
         this("SHA-256");
     }
     public Hash (String alg) throws Exception {
-        digest=MessageDigest.getInstance("SHA-256");  // 32 bytes hash
+        digest=MessageDigest.getInstance(alg);
     }
     public void add (byte[] data) {
         digest.update(data);

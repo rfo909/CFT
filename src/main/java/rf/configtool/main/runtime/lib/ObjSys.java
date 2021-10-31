@@ -18,6 +18,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package rf.configtool.main.runtime.lib;
 
 import java.io.*;
+import rf.configtool.util.Hash;
+
 import java.lang.ProcessBuilder.Redirect;
 import java.util.*;
 
@@ -72,6 +74,7 @@ public class ObjSys extends Obj {
 				new FunctionFileSeparator(),
 				new FunctionEnvironment(),
 				new FunctionLint(),
+				new FunctionScriptId(),
 		};
 		setFunctions(arr);
         
@@ -533,5 +536,35 @@ public class ObjSys extends Obj {
         }
     }
 
+    class FunctionScriptId extends Function {
+        public String getName() {
+            return "scriptId";
+        }
+        public String getShortDesc() {
+            return "scriptId() - returns id unique for script (full path, no space)";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            try {
+                File f=ctx.getObjGlobal().getSavefile();
+                String path=f.getCanonicalPath();
 
+                StringBuffer sb=new StringBuffer();
+                for (int pos=0; pos<path.length(); pos++) {
+                	char c=path.charAt(pos);
+                	if ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ/_\\,.-+".indexOf(c) < 0) {
+                		sb.append("_");
+                	} else {
+                		sb.append(c);
+                	}
+                }
+                
+                return new ValueString(sb.toString());
+            } catch (Exception ex) {
+                return new ValueNull();
+            }
+        }
+    } 
+
+    
 }
