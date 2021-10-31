@@ -28,8 +28,12 @@ P(6,"127.0.0.1:27017") => connectionString
 		Inner {jsCode->line println(line)}
 		println
 	}
+	
+	if (!connectionString.endsWith("/"+db)) {
+		connectionString=connectionString + "/" + db
+	}
 
-	cmd = '& "$Env:ProgramFiles\MongoDB\Server\' + mongoVersion + '\bin\mongo.exe" '+connectionString+'/' + db + ' c:\temp\' + js1.name
+	cmd = '& "$Env:ProgramFiles\MongoDB\Server\' + mongoVersion + '\bin\mongo.exe" '+connectionString + ' c:\temp\' + js1.name
 	if (verbose) {
 		println(cmd)
 	}
