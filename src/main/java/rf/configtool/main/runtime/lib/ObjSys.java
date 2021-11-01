@@ -552,7 +552,7 @@ public class ObjSys extends Obj {
                 StringBuffer sb=new StringBuffer();
                 for (int pos=0; pos<path.length(); pos++) {
                 	char c=path.charAt(pos);
-                	if ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ/_\\,.-+".indexOf(c) < 0) {
+                	if ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_,.-+".indexOf(c) < 0) {
                 		sb.append("_");
                 	} else {
                 		sb.append(c);
