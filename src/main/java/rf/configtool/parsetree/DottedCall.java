@@ -77,7 +77,7 @@ public class DottedCall extends LexicalElement {
             String msg=getSourceLocation() + " " + obj.getDescription() + " no function '" + ident + "'";
             throw new Exception(msg);
         }
-
+        
         try {
             Value result=f.callFunction(ctx, values);
             //System.out.println("DottedCall result=" + result.getClass().getName());

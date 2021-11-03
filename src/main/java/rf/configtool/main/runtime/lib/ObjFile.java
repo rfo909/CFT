@@ -1232,6 +1232,7 @@ public class ObjFile extends Obj {
             return "encrypt(passwordBinary,saltString,targetFile) - returns self";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	validateDestructiveOperation("encrypt file");
             encryptDecrypt(ctx, params, true);
             return new ValueObj(self());
         }
@@ -1246,6 +1247,7 @@ public class ObjFile extends Obj {
             return "decrypt(passwordBinary,saltString,targetFile) - returns self";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	validateDestructiveOperation("decrypt file");
             encryptDecrypt(ctx, params, false);
             return new ValueObj(self());
         }
