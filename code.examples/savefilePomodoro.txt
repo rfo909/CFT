@@ -54,3 +54,16 @@
 	CountDown(minutes)
 /run
 
+
+# Show seconds 
+# --
+	seconds=""
+	loop
+		Date.setFormat("HH:mm:ss").fmt => s2
+		if (s2 != seconds) {
+			seconds=s2
+			println(Curses:Clear)
+			Inner {Letters7x5:GetText(seconds)->line println(line)}
+		}
+		Sys.sleep(50)
+//Clock
