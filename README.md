@@ -1,17 +1,17 @@
 
 # Automation at all levels
 
-CFT is short for *ConfigTool*, and is an interpreted and interactive shell and
-programming language. 
+CFT is short for *ConfigTool*, and is an interpreted and interactive programming language
+and shell.
 
-It was initiated because of a need for a decent scripting and automation tool in my job as a 
+It was initiated because of a need for a decent automation tool in my job as a 
 software developer, combined with my interest in parsers and interpreters. 
 
 It's been in continous use since creation in 2018.
 
 Written in Java, it runs both on Linux (at home) and Windows environment (at work). 
 
-*README last updated 2021-10-27*
+*README last updated 2021-11-09*
 
 ## Terminal based - shell-like
 
@@ -101,13 +101,6 @@ the CFT.props file, and by default include:
 @x       - copy selection of files to clipboard, to be moved on @v
 @v       - paste selection of files to current dir
 ```
-
-### Protection mechanism
-
-CFT has a built-in directory and file *protection*, which may help us avoid modifying critical data on live
-systems, such as database files, logs, etc. 
-
-Read more about it in the docs, or view the Youtube tutorial video [episode six](https://www.youtube.com/watch?v=7e-f1gudxpE&list=PLj58HwpT4Qy80WhDBycFKxIhWFzv5WkwO&index=7).
 
 
 ### Global functions
@@ -303,20 +296,35 @@ an explicit effort, and is not something that "just happens". The goal is to min
 side effects.
 
 
-### Values as code
+# Scripting vs programming?
 
-The Db2 data store is able to save most data and values, using a special mechanism called *synthesis*, and
-which is the "serialization" format for values in CFT. This produces code from values, which when run, produces
-the original values. 
+  If being a scripting language simply means interpreted, then CFT is a scripting language.
 
-So Db2 stores data as code on string format. When loading from Db2, the code string is run through
-eval(), and we get the original data.
+  If "scripting" or script programming instead means running external commands directly 
+  from either the command line, or as stand-alone program lines inside scripts, then CFT 
+  is a programming language, not a scripting language.
+
+  Example:
 
 ```
-	$ syn("a b c".split)
-	  <String>
-	  List("a","b","c")
+  # If CFT were a scripting language, the following might be a valid
+  # line of code in the language.
+
+  git pull origin master
+
+  # This is not valid in CFT, as we require a bit code, such as
+
+  Dir.run("git","pull","origin","master")
 ```
+
+The disadvantage of having to write code instead of just running a program
+is believed to be out-weighed by a richer "vocabulary", as there are 4 different
+functions inside the Dir object for running external programs, with varying functionality,
+return value and complexity. 
+
+
+
+
 
 # Frequent uses
 

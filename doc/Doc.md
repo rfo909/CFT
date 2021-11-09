@@ -61,7 +61,7 @@ and Windows.
 # Functionality
 
 
-The CFT programming language is a glue between library functions, user input, and
+The CFT programming language is a glue between library objects and functions, user input, and
 running external programs. It is designed for data filtering, and file processing,
 as well as being interactive.
 
