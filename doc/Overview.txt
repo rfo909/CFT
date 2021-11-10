@@ -71,6 +71,7 @@ Core types
  * Dictionaries
  |   Properties as functions
  |   SymDict
+ |   Name
  * Binary type
 
 List processing

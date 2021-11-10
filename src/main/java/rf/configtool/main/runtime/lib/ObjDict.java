@@ -33,6 +33,7 @@ import rf.configtool.main.runtime.*;
  */
 public class ObjDict extends Obj {
     
+	private String name;
     private Map<String,Value> values=new HashMap<String,Value>();
     private List<String> keySequence=new ArrayList<String>();
     
@@ -50,7 +51,12 @@ public class ObjDict extends Obj {
     
 
     public ObjDict () {
+    	this(null);
+    }
+
+    public ObjDict (String name) {
     	super();
+    	this.name=name;
         baseFunctions=new ArrayList<Function>();
         baseFunctions.add(new FunctionSet());
         baseFunctions.add(new FunctionGet());
@@ -65,6 +71,8 @@ public class ObjDict extends Obj {
         baseFunctions.add(new FunctionGetMany());
         baseFunctions.add(new FunctionCopyFrom());
         baseFunctions.add(new FunctionSubset());
+        baseFunctions.add(new FunctionGetName());
+        baseFunctions.add(new FunctionSetName());
         
         refreshInnerFunctions=true;
     }
@@ -195,9 +203,12 @@ public class ObjDict extends Obj {
     public String synthesize() throws Exception {
         StringBuffer sb=new StringBuffer();
         sb.append("Dict");
+        if (name != null) {
+        	sb.append("(" + new ValueString(name).synthesize() + ")");
+        }
 
-        for (String name:keySequence) {
-            Value value=values.get(name);
+        for (String propName:keySequence) {
+            Value value=values.get(propName);
             
             // NOTE: closures are not synthesizable, but lambdas are, and setting a field in a Dict to 
             // a lambda, recreates a closure, so that's how this is handled.
@@ -211,7 +222,7 @@ public class ObjDict extends Obj {
             	// simple sanity check
             	throw new Exception("Internal errors: Dict should contain ref to Lambda as it should be auto-wrapped as Closure");
             }
-            sb.append(".set(" + new ValueString(name).synthesize() + "," + value.synthesize() + ")");
+            sb.append(".set(" + new ValueString(propName).synthesize() + "," + value.synthesize() + ")");
         }
         return sb.toString();
     }
@@ -556,5 +567,39 @@ public class ObjDict extends Obj {
         	 return new ValueObj(x);
          }
      }
+     
+     class FunctionGetName extends Function {
+         public String getName() {
+            return "getName";
+        }
+        public String getShortDesc() {
+            return "getName() - return name string or null if not set";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            if (name==null) return new ValueNull();
+            return new ValueString(name);
+         }
+    }
+
+
+     class FunctionSetName extends Function {
+         public String getName() {
+            return "setName";
+        }
+        public String getShortDesc() {
+            return "setName(str|null) - set name, return self";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected name string|null parameter");
+            if (params.get(0) instanceof ValueNull) {
+            	name=null;
+            } else {
+	            String str=getString("name",params,0);
+	            name=str;
+            }
+	        return new ValueObj(self());
+         }
+    }
 
 }

@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2021-10-28 RFO
-v2.9.3
+Last updated: 2021-11-10 RFO
+v2.9.7
 ```
 # Introduction
 
@@ -795,6 +795,18 @@ If testing interactively, all needs to be on the same line:
 ```
 $ a=1 b=2 SymDict(a,b)
 ```
+### Name
+
+
+Dictionary objects support a simple string name, in addition to named properties.
+
+```
+Dict("name")
+```
+
+The name can be accessed via Dict.getName() and modified/set via Dict.setName(). To
+clear, do Dict.setName(null)
+
 ## Binary type
 
 

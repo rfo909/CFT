@@ -15,8 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2021-10-28 RFO
-v2.9.3
+Last updated: 2021-11-10 RFO
+v2.9.7
 
 
 </pre>
@@ -892,6 +892,18 @@ If testing interactively, all needs to be on the same line:
 </pre>
 
 
+
+<h3>Name</h3>
+<p>
+  Dictionary objects support a simple string name, in addition to named properties. 
+</p>
+<pre>
+  Dict("name")
+</pre>
+<p>
+  The name can be accessed via Dict.getName() and modified/set via Dict.setName(). To
+  clear, do Dict.setName(null)
+</p>
 
 
 <h2>Binary type</h2>

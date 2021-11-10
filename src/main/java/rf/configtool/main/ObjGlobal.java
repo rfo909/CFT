@@ -520,12 +520,15 @@ public class ObjGlobal extends Obj {
             return "Dict";
         }
         public String getShortDesc() {
-            return "Dict() - create Dict object";
+            return "Dict(name?) - create Dict object with optional string name";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 0) throw new Exception("No parameters expected");
-            ObjDict x=new ObjDict();
-            return new ValueObj(x);
+            if (params.size() == 0) return new ValueObj(new ObjDict());
+            if (params.size() == 1) {
+            	String name=getString("name", params, 0);
+            	return new ValueObj(new ObjDict(name));
+            }
+            throw new Exception("Expected optional name parameter");
         }
     }
     
