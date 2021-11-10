@@ -14,7 +14,7 @@ public class LockFile {
 	public static final int OBTAIN_LOCK_TIMEOUT_MS = 10000;
 	
 	/*
-	 * Tested with the TestLock class 2021-10-06 RFO
+	 * Tested with the (improved) TestLock class 2021-11-10 RFO
 	 */
 	
 	private LockFile() {}
@@ -28,20 +28,25 @@ public class LockFile {
 		String lockId=getLockId();
 		
 		PrintStream ps=null;
+		if (theFile.exists()) return false;
+		
 		try {
-			// assuming parallel writes to same file will throw exception for all but the first,
-			// or in other words, that we don't mess up the write of the initial process
-			// writing to the file.
 			ps=new PrintStream(new FileOutputStream(theFile,true)); // append
 			ps.println(lockId);
 		} finally {
 			if (ps != null) ps.close();
 		}
+		Thread.sleep(50);
 		BufferedReader br=null;
 		try {
-			br=new BufferedReader(new FileReader(theFile));  
-			String line=br.readLine();		// first line only
-			if (line.equals(lockId)) return true;
+			br=new BufferedReader(new FileReader(theFile));
+			String lastLine="";
+			for (;;) {
+				String line=br.readLine();
+				if (line == null) break;
+				lastLine=line;
+			}
+			if (lastLine.equals(lockId)) return true;
 		} finally {
 			if (br != null) br.close();
 		}
@@ -69,7 +74,7 @@ public class LockFile {
 			if (System.currentTimeMillis()-startTime > timeoutMillis) break;
 			
 			try {
-				Thread.sleep((int) (Math.random()*4) + 1);
+				Thread.sleep((int) (Math.random()*10) + 1);
 			} catch (Exception ex) {
 				// ignore
 			}
@@ -85,9 +90,14 @@ public class LockFile {
 		String lockId=getLockId();
 		
 		br=new BufferedReader(new FileReader(theFile));
-		String line=br.readLine(); // single line
+		String lastLine="";
+		for (;;) {
+			String line=br.readLine();
+			if (line == null) break;
+			lastLine=line;
+		}
 		br.close();
-		if (!line.equals(lockId)) throw new Exception("PANIC: freeLock: not owner of lock");
+		if (!lastLine.equals(lockId)) throw new Exception("PANIC: freeLock: not owner of lock");
 		theFile.delete();
 	}
 
