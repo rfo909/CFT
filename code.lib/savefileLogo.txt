@@ -1,0 +1,26 @@
+# CFT Logo
+# --
+<<<<<< EOF
+
+            ConfigTool
+
+       CCCC     FFFFFFF  TTTTTTTT
+     CC  CC    FF          TT
+    CC        FF          TT
+    CC        FFFFF       TT
+     CC        FF          TT
+      CC  CC    FF          TT
+       CCCC     FF          TT
+
+
+     https://github.com/rfo909/CFT
+
+      Interactive, Programmable
+            Automation
+     
+:-)
+        
+>>>>>> EOF
+/Logo 
+
+
