@@ -1,13 +1,13 @@
-# Return N first files, sorted by name
+# Return files, sorted by name
 # --
 	P(1,Dir)=>dir
-	P(2,"*")=>glob
-	P(3,10)=>N
-	dir.files(glob).first(N)->f 
+	P(2,Lambda{P(1)=>file true})=>LFilterFiles
+	dir.files()->f 
+		assert(LFilterFiles.call(f))
 		out(Str(f.name.toLower,f))
 	| _.sort->x
 		out (x.data)
-/NFiles
+//NFiles
 
 # Return immediate subdirs, sorted by name
 # --
@@ -16,21 +16,45 @@
 		out(Str(d.name.toLower,d))
 	| _.sort->x
 		out(x.data)
-/SubDirs
+//SubDirs
 
+# Lambda for filtering files based on age
+# Example:
+#   ShowTree(NewestFiles(2))
+# --
+	P(1,1)=>hours
+	SymDict(hours).set("x",Lambda{
+		P(1)=>file
+		currentTimeMillis-file.lastModified < self.hours*3600*1000
+	}).x
+/NewestFiles
+
+
+# Lambda for filtering files by glob string
+# Example:
+#   ShowTree(Filename("*.txt"))
+# --
+	P(1,"*") => glob
+	SymDict(glob).set("x",Lambda{
+		P(1)=>file
+		Glob(self.glob).match(file)
+	}).x
+/Filename
+	
+	
 # Show tree with files
 # --
-	P(1,Dir)=>dir
-	P(2,"*")=>glob
+	P(1,Lambda{P(1)=>file true})=>LFilterFiles
+	P(2,Dir)=>dir
 	P(3,"")=>indent
-	P(4,10)=>maxFilesPerDir
+	
 	Inner{
-		NFiles(dir,glob,maxFilesPerDir)->f
+		NFiles(dir,LFilterFiles)->f
 			println(""+indent + f.name)
 	}
 	Inner {
 		SubDirs(dir)->d
 			println(""+indent+d.name+"/")
-			ShowTree(d, glob, indent+"|  ", maxFilesPerDir)
+			ShowTree(LFilterFiles, d, indent+"|  ")
 	}
 /ShowTree
