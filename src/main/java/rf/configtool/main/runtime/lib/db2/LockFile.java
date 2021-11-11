@@ -7,6 +7,15 @@ import java.io.*;
  * obtaining it.
  * 
  * Also remember that obtaining lock for a certain file MUST NEVER BE NESTED, as these WILL FAIL.
+ * 
+ * (1) if lock file exists, return false
+ * (2) otherwise append to file, writing local lockId, which is supposed to be unique per runtime + thread
+ * (3) wait a short while
+ * (4) read last line from file
+ * (5) if it matches lockId, return true, otherwise false
+ * 
+ * The key here is that the file may be created by someone else between steps 1 and 2. The wait in step 3 is for the case
+ * when someone else appends to the file between steps 2 and 4, having found the file not to exist in 1.
  *
  */
 public class LockFile {
