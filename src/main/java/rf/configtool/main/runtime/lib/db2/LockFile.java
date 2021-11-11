@@ -36,7 +36,7 @@ public class LockFile {
 		} finally {
 			if (ps != null) ps.close();
 		}
-		Thread.sleep(50);
+		Thread.sleep(20);
 		BufferedReader br=null;
 		try {
 			br=new BufferedReader(new FileReader(theFile));
