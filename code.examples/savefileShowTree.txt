@@ -1,0 +1,36 @@
+# Return N first files, sorted by name
+# --
+	P(1,Dir)=>dir
+	P(2,"*")=>glob
+	P(3,10)=>N
+	dir.files(glob).first(N)->f 
+		out(Str(f.name.toLower,f))
+	| _.sort->x
+		out (x.data)
+/NFiles
+
+# Return immediate subdirs, sorted by name
+# --
+	P(1,Dir)=>dir
+	dir.dirs->d
+		out(Str(d.name.toLower,d))
+	| _.sort->x
+		out(x.data)
+/SubDirs
+
+# Show tree with files
+# --
+	P(1,Dir)=>dir
+	P(2,"*")=>glob
+	P(3,"")=>indent
+	P(4,10)=>maxFilesPerDir
+	Inner{
+		NFiles(dir,glob,maxFilesPerDir)->f
+			println(""+indent + f.name)
+	}
+	Inner {
+		SubDirs(dir)->d
+			println(""+indent+d.name+"/")
+			ShowTree(d, glob, indent+"|  ", maxFilesPerDir)
+	}
+/ShowTree
