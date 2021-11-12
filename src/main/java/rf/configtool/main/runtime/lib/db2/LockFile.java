@@ -6,21 +6,17 @@ import java.io.*;
  * Attempt getting a file lock, using a separate file. May return true or false. Remember to always free lock after
  * obtaining it.
  * 
- * Also remember that obtaining lock for a certain file MUST NEVER BE NESTED, as these WILL FAIL.
+ * Getting a lock means getting ones lockId as the first line of the lock file. Other contenders may append to the
+ * file, but this doesn't change the first line. 
  * 
- * (1) if lock file exists, return false
- * (2) otherwise append to file, writing local lockId, which is supposed to be unique per runtime + thread
- * (3) wait a short while
- * (4) read last line from file
- * (5) if it matches lockId, return true, otherwise false
+ * This makes it harmless obtaining the same lock twice by the same thread.
  * 
- * The key here is that the file may be created by someone else between steps 1 and 2. The wait in step 3 is for the case
- * when someone else appends to the file between steps 2 and 4, having found the file not to exist in 1.
  *
  */
 public class LockFile {
 	
 	public static final int OBTAIN_LOCK_TIMEOUT_MS = 10000;
+	public static final String lockIdPre=""+System.currentTimeMillis();
 	
 	/*
 	 * Tested with the (improved) TestLock class 2021-11-10 RFO
@@ -29,33 +25,27 @@ public class LockFile {
 	private LockFile() {}
 		
 	private static String getLockId () {
-		return ""+Runtime.getRuntime().hashCode() + "_" + Thread.currentThread().getId();
+		return lockIdPre + "_"+Runtime.getRuntime().hashCode() + "_" + Thread.currentThread().getId();
 	}
-	
+
 	private static boolean doGetLock (File theFile) throws Exception {
 	
 		String lockId=getLockId();
 		
 		PrintStream ps=null;
-		if (theFile.exists()) return false;
-		
+
 		try {
 			ps=new PrintStream(new FileOutputStream(theFile,true)); // append
 			ps.println(lockId);
 		} finally {
 			if (ps != null) ps.close();
 		}
-		Thread.sleep(20);
+		Thread.sleep(10);
 		BufferedReader br=null;
 		try {
 			br=new BufferedReader(new FileReader(theFile));
-			String lastLine="";
-			for (;;) {
-				String line=br.readLine();
-				if (line == null) break;
-				lastLine=line;
-			}
-			if (lastLine.equals(lockId)) return true;
+			String line=br.readLine();
+			if (line.equals(lockId)) return true;
 		} finally {
 			if (br != null) br.close();
 		}
@@ -77,8 +67,16 @@ public class LockFile {
 	
 	public static void obtainLock (File theFile, long timeoutMillis) throws Exception {
 		long startTime=System.currentTimeMillis();
+		int retries=0;
 		for (;;) {
-			if (getLock(theFile)) return;
+			if (getLock(theFile)) {
+				//System.out.println("retries=" + retries);
+				
+				return;
+			}
+			
+			retries++;
+
 			
 			if (System.currentTimeMillis()-startTime > timeoutMillis) break;
 			
@@ -88,26 +86,33 @@ public class LockFile {
 				// ignore
 			}
 		}
-		throw new Exception("Could not obtain lock " + theFile.getAbsolutePath());
+		throw new Exception("Could not obtain lock " + theFile.getAbsolutePath() + " for " + timeoutMillis + " millis");
 	}
 
 	
 	
 	public static void freeLock (File theFile) throws Exception {
-		// verify we still have the lock
-		BufferedReader br=null;
 		String lockId=getLockId();
 		
-		br=new BufferedReader(new FileReader(theFile));
-		String lastLine="";
-		for (;;) {
-			String line=br.readLine();
-			if (line == null) break;
-			lastLine=line;
+		// verify we have the lock
+		boolean verifyOk=false;
+		try {
+			BufferedReader br=null;
+			try {
+				br=new BufferedReader(new FileReader(theFile));
+				String line=br.readLine();
+				if (line != null && line.equals(lockId)) verifyOk=true;
+			} finally {
+				br.close();
+			}
+			// all ok
+			if (verifyOk) {
+				theFile.delete();
+				return;
+			}
+		} catch (Exception ex) {
 		}
-		br.close();
-		if (!lastLine.equals(lockId)) throw new Exception("PANIC: freeLock: not owner of lock");
-		theFile.delete();
+		throw new Exception("Could not free lock " + theFile.getAbsolutePath() + " - not owner");
 	}
 
 }
