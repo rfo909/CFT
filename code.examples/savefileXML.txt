@@ -15,7 +15,7 @@ Handles comments and processing rules
 	<!-- bla bla -->
 	<? do this ?>
 	
-PrettyPrint (PP) implemented, see test function 't'
+PrettyPrint (PP) implemented, 
 
 2021-04-29 as of v2.4.5 we also support multi-line tokens (comments and processing rules)
 
@@ -92,8 +92,12 @@ PrettyPrint (PP) implemented, see test function 't'
 		@       <item>another line of text
 		@			<title>Donald Duck &amp; Co</title>
 		@ 			<status>
-		@               non-strict text, since there is inner XML element
+		@     non-strict line (i)
+        @        - since there is inner XML element
 		@				<count>2</count>
+		@     non-strict line (2)
+		@               <x a=1>xxx</x>
+		@     non-strict line (c)
 		@			</status>
 		@		</item>
 		@       <emptyTag a="a"/>
@@ -562,26 +566,24 @@ PrettyPrint (PP) implemented, see test function 't'
 	
 	obj.list
 /PP
+
+
+
+# JSON:PP(Parse(...)) using defaults
+# --
+JSON:PP(Parse(exampleXML))
+/t
 	
 	
-# Using local PP to show output - non-strict mode, including text in scopes with other elements
-PP(Parse(exampleXML,false,false))
-//t1a
+# JSON:PP - non-strict mode, including text in scopes with other elements
+JSON:PP(Parse(exampleXML,false,false))
+/t2
 
-# Using local PP to show output - strict mode, discarding text in scopes with other elements
-PP(Parse(exampleXML))
-//t1b
-
-
-
-# Using JSON:PP to show resulting structure
-JSON:PP(Parse(exampleXML,false))
-//t2
+# JSON:PP - strict mode, deleting text in scopes with other elements
+JSON:PP(Parse(exampleXML,false,true))
+/t3
 
 
-# Parse output from function 't1a' and present
-PP(Parse(t1a,false,false))
-//t3
 
 
 
