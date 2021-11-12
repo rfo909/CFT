@@ -16,7 +16,7 @@ import java.io.*;
 public class LockFile {
 	
 	public static final int OBTAIN_LOCK_TIMEOUT_MS = 10000;
-	public static final String lockIdPre=""+System.currentTimeMillis();
+	public static final String lockIdPre=""+System.currentTimeMillis() + "_"+Runtime.getRuntime().hashCode();
 	
 	/*
 	 * Tested with the (improved) TestLock class 2021-11-10 RFO
@@ -25,34 +25,57 @@ public class LockFile {
 	private LockFile() {}
 		
 	private static String getLockId () {
-		return lockIdPre + "_"+Runtime.getRuntime().hashCode() + "_" + Thread.currentThread().getId();
+		String s=lockIdPre + "_" + Thread.currentThread().getId();
+		// LEN:str  - to combat parallel writes, see isValidLockId called from ownsLock() method
+		return ""+s.length()+":"+s;
+	}
+	
+	private static boolean isValidLockId (String s) {
+		try {
+			int pos=s.indexOf(':');
+			int len=Integer.parseInt(s.substring(0,pos));
+			return len==(s.substring(pos+1).length());
+		} catch (Exception ex) {
+			return false;
+		}
 	}
 
+	private static boolean ownsLock (File theFile) throws Exception {
+		BufferedReader br=null;
+		try {
+			br=new BufferedReader(new FileReader(theFile));
+			for (;;) {
+				String line=br.readLine();
+				if (line==null) return false;
+				if (isValidLockId(line)) {
+					return line.equals(getLockId());
+					
+				}
+			}
+		} catch (Exception ex) {
+			return false;
+		} finally {
+			if (br != null) br.close();
+		}
+	}
+	
+	
 	private static boolean doGetLock (File theFile) throws Exception {
 	
-		String lockId=getLockId();
-		
 		PrintStream ps=null;
 
 		try {
 			ps=new PrintStream(new FileOutputStream(theFile,true)); // append
-			ps.println(lockId);
+			ps.println(getLockId());
 		} finally {
 			if (ps != null) ps.close();
 		}
-		Thread.sleep(10);
-		BufferedReader br=null;
-		try {
-			br=new BufferedReader(new FileReader(theFile));
-			String line=br.readLine();
-			if (line.equals(lockId)) return true;
-		} finally {
-			if (br != null) br.close();
-		}
-		
-		return false;
+		return ownsLock(theFile);
 	}
 
+	
+	// Utility methods
+	
 	public static boolean getLock (File theFile) {
 		try {
 			return doGetLock(theFile);
@@ -61,58 +84,30 @@ public class LockFile {
 		}
 	}
 
-	public static void obtainLock (File theFile) throws Exception {
-		obtainLock(theFile, OBTAIN_LOCK_TIMEOUT_MS);
+	public static void obtainLock (File theFile, String desc) throws Exception {
+		obtainLock(theFile, desc, OBTAIN_LOCK_TIMEOUT_MS);
 	}
 	
-	public static void obtainLock (File theFile, long timeoutMillis) throws Exception {
+	public static void obtainLock (File theFile, String desc, long timeoutMillis) throws Exception {
 		long startTime=System.currentTimeMillis();
-		int retries=0;
+
 		for (;;) {
 			if (getLock(theFile)) {
-				//System.out.println("retries=" + retries);
-				
 				return;
 			}
-			
-			retries++;
-
-			
+					
 			if (System.currentTimeMillis()-startTime > timeoutMillis) break;
 			
-			try {
-				Thread.sleep((int) (Math.random()*10) + 1);
-			} catch (Exception ex) {
-				// ignore
-			}
+			Thread.sleep((int) (Math.random()*10) + 1);
 		}
-		throw new Exception("Could not obtain lock " + theFile.getAbsolutePath() + " for " + timeoutMillis + " millis");
+		throw new Exception("Could not obtain lock '" + desc + "' for " + timeoutMillis + " millis");
 	}
 
 	
 	
-	public static void freeLock (File theFile) throws Exception {
-		String lockId=getLockId();
-		
-		// verify we have the lock
-		boolean verifyOk=false;
-		try {
-			BufferedReader br=null;
-			try {
-				br=new BufferedReader(new FileReader(theFile));
-				String line=br.readLine();
-				if (line != null && line.equals(lockId)) verifyOk=true;
-			} finally {
-				br.close();
-			}
-			// all ok
-			if (verifyOk) {
-				theFile.delete();
-				return;
-			}
-		} catch (Exception ex) {
-		}
-		throw new Exception("Could not free lock " + theFile.getAbsolutePath() + " - not owner");
+	public static void freeLock (File theFile, String desc) throws Exception {
+		if (!ownsLock(theFile)) throw new Exception("Could not free lock '" + desc + "' - not owner");
+		theFile.delete();
 	}
 
 }

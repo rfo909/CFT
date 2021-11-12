@@ -193,7 +193,7 @@ public class ObjDb2 extends Obj {
             int timeout=(int) getInt("timeoutmillis", params, 1);
             
             File file=getLockFile(name);
-            LockFile.obtainLock(file, timeout);
+            LockFile.obtainLock(file, name, timeout);
             return new ValueBoolean(true);
         }
     }
@@ -211,7 +211,7 @@ public class ObjDb2 extends Obj {
             String name=getString("name",params,0);
             
             File file=getLockFile(name);
-            LockFile.freeLock(file);
+            LockFile.freeLock(file,name);
             
             return new ValueBoolean(true);
         }

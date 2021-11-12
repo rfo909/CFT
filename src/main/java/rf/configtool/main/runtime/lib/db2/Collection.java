@@ -9,13 +9,17 @@ public class Collection {
     private File lockFile;
     
     private Map<String,String> data;
+    
+    private String collectionName() {
+    	return fileInfo.getFile().getName();
+    }
 
     private void getLock() throws Exception {
-    	LockFile.obtainLock(lockFile);
+    	LockFile.obtainLock(lockFile, collectionName());
     }
     
     private void freeLock () throws Exception {
-    	LockFile.freeLock(lockFile);
+    	LockFile.freeLock(lockFile, collectionName());
     }
 
     public Collection (FileInfo fileInfo) {

@@ -34,9 +34,9 @@ public class TestLock {
 		
 		public void run() {
 			try {
-				for (int i=0; i<300; i++) {
+				for (int i=0; i<200; i++) {
 					long start=System.currentTimeMillis();
-					LockFile.obtainLock(lockFile);
+					LockFile.obtainLock(lockFile, "testlock");
 					long delay=System.currentTimeMillis() - start;
 					System.out.println("Job " + id + " delay=" + delay + " i=" + i);
 				
@@ -48,7 +48,7 @@ public class TestLock {
 					}
 					clearHolder(id);
 					
-					LockFile.freeLock(lockFile);
+					LockFile.freeLock(lockFile, "testlock");
 	
 					try {
 						Thread.sleep((int) (Math.random()*100));
