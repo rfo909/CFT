@@ -25,9 +25,9 @@ public class LockFile {
 	private LockFile() {}
 		
 	private static String getLockId () {
-		String s=lockIdPre + "_" + Thread.currentThread().getId();
+		String str=lockIdPre + "_" + Thread.currentThread().getId();
 		// LEN:str  - to combat parallel writes, see isValidLockId called from ownsLock() method
-		return ""+s.length()+":"+s;
+		return ""+str.length()+":"+str;
 	}
 	
 	private static boolean isValidLockId (String s) {
@@ -55,7 +55,7 @@ public class LockFile {
 		} catch (Exception ex) {
 			return false;
 		} finally {
-			if (br != null) br.close();
+			if (br != null) try {br.close();} catch (Exception ex) {};
 		}
 	}
 	
@@ -98,7 +98,7 @@ public class LockFile {
 					
 			if (System.currentTimeMillis()-startTime > timeoutMillis) break;
 			
-			Thread.sleep((int) (Math.random()*10) + 1);
+			Thread.sleep((int) (Math.random()*8) + 3);
 		}
 		throw new Exception("Could not obtain lock '" + desc + "' for " + timeoutMillis + " millis");
 	}

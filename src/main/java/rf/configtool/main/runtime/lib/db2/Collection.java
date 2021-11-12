@@ -10,16 +10,20 @@ public class Collection {
     
     private Map<String,String> data;
     
-    private String collectionName() {
+    private String getCollectionName() {
     	return fileInfo.getFile().getName();
     }
+    
+    //private long getLockTime=0;
 
     private void getLock() throws Exception {
-    	LockFile.obtainLock(lockFile, collectionName());
+    	LockFile.obtainLock(lockFile, getCollectionName());
+    	//getLockTime=System.currentTimeMillis();
     }
     
     private void freeLock () throws Exception {
-    	LockFile.freeLock(lockFile, collectionName());
+    	LockFile.freeLock(lockFile, getCollectionName());
+    	//System.out.println("freeLock '" + getCollectionName() + "' held it for " + (System.currentTimeMillis()-getLockTime) + " ms");
     }
 
     public Collection (FileInfo fileInfo) {

@@ -39,14 +39,20 @@ import rf.configtool.main.runtime.ValueBlock;
 import rf.configtool.main.runtime.ValueNull;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
+import rf.configtool.main.runtime.lib.db2.LockFile;
 import rf.configtool.main.runtime.lib.db2.ObjDb2;
 import rf.configtool.parsetree.Expr;
+import rf.configtool.util.Hash;
 
 public class ObjDb extends Obj {
 
     public ObjDb () {     
         this.add(new FunctionDb2());
         this.add(new FunctionUUID());
+        this.add(new FunctionObtainLock());
+        this.add(new FunctionReleaseLock());
+        this.add(new FunctionGetLockFile());
+
     }
     
     private ObjDb self() {
@@ -96,6 +102,70 @@ public class ObjDb extends Obj {
         }
     } 
  
+    
+    private File getLockFile (String name) throws Exception {
+        String lockFileDir=(File.separator.equals("/") ? "/tmp" : "c:\\temp");
+        Hash hash=new Hash();
+        hash.add(name.getBytes("UTF-8"));
+        return new File(lockFileDir + File.separator + hash.getHashString() + ".lock");
+    }
+    
+    class FunctionObtainLock extends Function {
+        public String getName() {
+            return "obtainLock";
+        }
+        public String getShortDesc() {
+            return "obtainLock(name, timeoutmillis) - obtain named lock - throws error if failing";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 2) throw new Exception("Expected parameters: name, timeoutmillis");
+            
+            // ensure we have a valid file name, hashing the name
+            String name=getString("name", params, 0);
+            int timeout=(int) getInt("timeoutmillis", params, 1);
+            
+            File file=getLockFile(name);
+            LockFile.obtainLock(file, name, timeout);
+            return new ValueBoolean(true);
+        }
+    }
+
+
+    class FunctionReleaseLock extends Function {
+        public String getName() {
+            return "releaseLock";
+        }
+        public String getShortDesc() {
+            return "releaseLock(name) - release named lock obtained previously - throws error if not owner";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected name parameter");
+            String name=getString("name",params,0);
+            
+            File file=getLockFile(name);
+            LockFile.freeLock(file,name);
+            
+            return new ValueBoolean(true);
+        }
+    }
+
+
+    class FunctionGetLockFile extends Function {
+        public String getName() {
+            return "getLockFile";
+        }
+        public String getShortDesc() {
+            return "getLockFile(name) - return corresponding lock file for named lock";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected name parameter");
+            String name=getString("name",params,0);
+            
+            File file=getLockFile(name);
+            return new ValueObj(new ObjFile(file.getAbsolutePath(), Protection.NoProtection));
+        }
+    }
+
     
    
  

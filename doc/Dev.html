@@ -13,6 +13,23 @@
 
 <h1>CFT Change log</h1>
 
+<h3>v2.9.8 2021-11-12</h3>
+<p>
+	Improved the LockFile.java multiple times. Also improved the test class, TestLock, which ensures robustness of
+	locks. 
+</p>
+<p>
+	Moved Lib.Db.Db2 functions for locks to Lib.Db.
+</p>
+<p>
+	Improved the Util:Counter function with an internal transaction lock, and
+	created a test for it in Tests04 / Test01_xxx
+</p>
+<p>
+	This should fix previously identified unstabilities with temporary files, which
+	depend on the Util:Counter for uniqueness.
+</p>
+
 <h3>v2.9.7 2021-11-10 Dict name</h3>
 <p>
 	Added "name" property of Dictionary objects. It can be set at creation Dict("name") or via
@@ -40,7 +57,7 @@
 	the full path of the script, with no special characters, and no space.
 </p>
 
-<h3>v2.9.4 2021-10-19 Added Lib.Db.Db2 object functions</h3>
+<h3>v2.9.4 2021-10-19 Added Lib.Db object functions</h3>
 <pre>
 Lib.Db.Db2.obtainLock(name,timeoutMillis)
 Lib.Db.Db2.releaseLock(name)

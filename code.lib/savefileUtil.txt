@@ -34,17 +34,29 @@ P(2,false)=>print
 /ShowDict
 
 
+
 # Create / access counter
+# (Note: uses named lock for transaction security)
 # --
 P(1) => name
-P(2,9999999999999999) => maxValue
+P(2,999999999999) => maxValue
+	
 	error(name==null,"P(1) name missing")
 	
 	id="counter:"+(name.replace(" ","_"))
-	i = Db2:Get("Util", id, 0)
 	
+	TRANS="Util.Counter.Transaction"
+		# Individual Db2 collection accesses are protected by collection locks, but
+		# below we have a transaction, where we read a value, update it
+		# and write it back.
+			
+	Lib.Db.obtainLock(TRANS,10000)
+	
+	i = Db2:Get("Util", id, 0)
 	next=(i+1) % maxValue
 	Db2:Set("Util",id,next)
+	
+	Lib.Db.releaseLock(TRANS)
 	i
 /Counter
 	
