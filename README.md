@@ -9,9 +9,9 @@ software developer, combined with my interest in parsers and interpreters.
 
 It's been in continous use since creation in 2018.
 
-Written in Java, it runs both on Linux (at home) and Windows environment (at work). 
+Written in Java, it runs both on Linux and Windows environment. 
 
-*README last updated 2021-11-09*
+*README last updated 2021-11-13*
 
 ## Terminal based - shell-like
 
@@ -25,9 +25,10 @@ using the following commands.
 - more
 - edit
 
-However, CFT is really about creating and running functions.
+However, CFT is really about writing code in the form of functions. Functions are called directly from the command line,
+or from other functions.
 
-## Creating functions
+## Functions
 
 In CFT, code comes before the function name. The P(N) expression returns parameters by position.
 
@@ -42,15 +43,21 @@ In CFT, code comes before the function name. The P(N) expression returns paramet
 /FilesMatch
 ```
 
-*Note* that the two references ".hash" are function calls on the File objects received as parameters.
- 
-Parantheses are optional when no arguments. 
+The two references ".hash" are function calls on the File objects received as parameters. Parantheses are optional when no arguments. 
+
+### Scripts 
 
 When we create our own functions, they are organized into script files. They may call each other, both inside the
-same script file, and in other script files, as well as member functions inside library objects, such as
-the calls to File.hash() above. 
+same script file, and in other script files. They will also be working with member functions insid library objects,
+such as the File.hash() above.
 
 Scripts contain no state, and are just a way of organizing code, making each script essentially a name space. 
+
+
+### Types
+
+CFT is dynamically typed, with no way of declaring variables or parameter types. 
+
 
 ## Functionality
 
@@ -58,8 +65,8 @@ Scripts contain no state, and are just a way of organizing code, making each scr
 - create functions, do interactive testing, use interactive help
 - lists and dictionaries
 - run external programs in foreground or background
-- (inline) text templating with merge code processing
-- spawn CFT expressions as background threads
+- text templating with merge code processing
+- spawning CFT expressions as background threads
 - lambdas and closures
 - tryCatch with two-tiered exception hierarchy ("soft" and "hard")
 - integrated data store (Db2) 
@@ -82,13 +89,15 @@ Script code is managed via "colon commands", which are management functions outs
 ```
 
 
-### Documentation
+## Documentation
 
-The documentation is extensive, and kept up-to-date. There also is a Youtube tutorial, plus
+The documentation is extensive, and kept up-to-date. 
+
+There also is a Youtube tutorial, plus
 another playlist with shorter "howto"-videos.
 
 
-### Shortcuts
+## Shortcuts
 
 Frequently used commands or command sequences can be stored as shortcuts. These are defined in
 the CFT.props file, and by default include:
@@ -102,8 +111,10 @@ the CFT.props file, and by default include:
 @v       - paste selection of files to current dir
 ```
 
+List all shortcuts by typing a single '@' and press enter.
 
-### Global functions
+
+## Global functions
 
 CFT currently implements 70+ object types, with 390+ library functions. Of these, about 30 are global, the
 rest exist as object member functions, such as the File.hash() invoked in above example.
@@ -143,7 +154,7 @@ In the example below, note that the '$' is the prompt.
 	$ Dir.files
 ```
   
-### Values are objects
+## Values are objects
 
 All values in CFT are objects, written in Java. These in turn have member functions, which we call to either
 modify the value, or get information from it, etc.
@@ -172,18 +183,20 @@ Strings can be written with single and double quotes.
 	  3
 ```
 
-### Inspired by PowerShell
+# Inspired by PowerShell
 
-CFT was inspired by PowerShell, working with objects instead of strings, as in bash. 
+CFT was inspired by PowerShell, working with objects instead of just strings, as in bash. 
 
 Apart from a couple of "peculiarities", CFT strives for a regular, compact and predictable syntax, 
-compared to PowerShell and bash. CFT easily calls both, on their corresponding platforms.
+compared to PowerShell and bash. Also contrary to PowerShell, there is no guessing as to what the users
+is trying to do, and silent conversions of data. A list in CFT remains a list until explicitly converted
+to something else, etc.
 
 The interactive approach made possible a help system, where one can always run some expression, and list 
 member function of the resulting object.
 
 
-### Variable substitution / templating
+## Variable substitution / templating
 
 Contrary to PowerShell and bash, CFT performs no automatic substitution of "dollar-expressions" inside
 strings, unless told to.
@@ -207,22 +220,13 @@ strings, unless told to.
 The Sequence() expression creates a List, but without the requirement of commas, and the '@ ...' is
 the "raw string" format in CFT. Alternatively we can use inline "here" documents, for easily pasting.
 
-```
-	# Create javascript query ...
-	# --
-		P(1)=>table
-		P(2)=>status
+The .mergeExpr is a member function of List objects, which evaluates expressions inside "<<" and ">>", inserting
+resulting values as text into the template sequence. 
 
-<<< EOF
-printjson(db.<<table>>.find({
-  status: "<<status>>"
-}).count())
->>> EOF
-		.mergeExpr
-	/MongoDbCountStatusJS	
-```
 
-### "Foreach"
+# CFT specialities
+
+## "Foreach"
 
 One of the pecularities of CFT is its extremely compact notation for doing a "foreach" loop over content,
 using a single arrow and an identifier.
@@ -238,16 +242,22 @@ The result from a loop is generated with calls to out(), creating a new list.
 	   1: 104
 ```
  
-### "Pipe"
+## Pipes
 
 In order to do multiple stages of processing, rather than just create helper functions, we may 
 split the code of single functions into a sequence of  "code spaces", with the Pipe ("|") character.
 
 The output from one code space is the "piped" as input to the next, via the data stack.
 
+
 The next code space may then either assign the value to a local variable, with "=> ident" syntax, which
 is the stack-based assignment operation, or using the "single underscore" expression, which refers to the 
 top value on the data stack.
+
+
+Example. The P(N) get parameter value by position (1-based) and P(N,defaultExpr) resolve the defaultExpr if the parameter N
+is null or missing. Supplying defaults for parameters mean we can run functions without parameters for testing
+or common use, with the option of supplying parameters as needed.
 
 ```
 	# Count number of files modified within the last week,
@@ -256,7 +266,7 @@ top value on the data stack.
 		P(1,"*.txt") => globPattern
 		limit=Date.sub(Date.Duration.days(7)).get  # millis one week ago
 		
-		Dir.allFiles(Glob(globPattern))->f 
+		Dir.allFiles(globPattern)->f 
 			reject(f.lastModified < limit)
 			out(f)
 		| _.length
@@ -274,14 +284,15 @@ top value on the data stack.
 ```
 
 The sort example illustrates all sorting in CFT, which consists of converting a list of something, such as files,
-into a list of wrappers that represent a sortable attribute, in this case global function Int(). 
+into a list of wrappers that represent a sortable attribute, in this case global function Int(), representing
+file size. 
 
 The result list is then sorted, and another iteration unwraps the original elements.
 
 There also exist global functions Str() and Float() following the same pattern. 
 
 
-### No global state
+## No global state
 
 To keep the language simple, CFT *does not support* user defined classes, only user defined functions.
 
@@ -294,6 +305,8 @@ functions, nothing more.
 There are options for storing data, either to file, or using the integrated Db2 data store. This requires
 an explicit effort, and is not something that "just happens". The goal is to minimize or eliminate unwanted
 side effects.
+
+ 
 
 
 # Scripting vs programming?
@@ -312,7 +325,7 @@ side effects.
 
   git pull origin master
 
-  # This is not valid in CFT, as we require a bit code, such as
+  # This is not valid in CFT, as we require a bit of code, such as
 
   Dir.run("git","pull","origin","master")
 ```
@@ -333,6 +346,23 @@ return value and complexity.
 - collect and search log files 
 - various install and deployment tasks
 - automate powershell command sequences
+
+## The Projects script
+
+For searching through projects (source code, text files, html, css etc), a script called "Projects" has been written
+and refined over time. It is easily activated via shortcut @P.
+
+Before one can start using it, the config file must be created. First run the Readme function, then call
+EditConfig, to enter details for your projects, such as directories and file types.
+
+```
+$ @P
+[Projects]$ Readme
+ ...
+[Projects]$ EditConfig
+  # (opens configuration file in editor)
+
+```
 
 
 

@@ -37,13 +37,26 @@ Single "#" at start of lines are comments.
 
 Example:
 ---
+
 ### CFTJava
 
 Dir: /home/xyz/CFT
 Type: java
 IgnoreDir: .git
----
 
+
+### OtherProject
+
+Dir: /home/xyz/OtherProject
+Type: html
+Type: css
+Type: js
+
+
+
+
+Configuration
+-------------
 The following settings are allowed, each can be repeated:
 
 Dir: /home/xyz/CFT      ### string
@@ -53,14 +66,16 @@ Ignore: *test*          ### glob-expression to ignore certain files
 IgnoreDir: /.git        ### substring matching against path
 
 
-There can be multiples of every line, including Dir.
+There can be multiples of every line, so if we want to scan different directories in one go,
+just add a second "Dir:" line.
+
 >>> EOF
 //ReadmeLines
 
 
 # Readme
 # --
-	ReadmeLines->line println(line)
+	ReadmeLines->line println("| " + line)
 /Readme
 
 # The projects.txt file 
