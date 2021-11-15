@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2021-11-10 RFO
-v2.9.7
+Last updated: 2021-11-15 RFO
+v2.9.9
 ```
 # Introduction
 
@@ -3871,6 +3871,9 @@ The "problem" is that CFT code (and so shortcuts) can run colon commands via "ab
 
 
 - Lambda
+
+
+- AValue
 
 
 # Comments and digressions

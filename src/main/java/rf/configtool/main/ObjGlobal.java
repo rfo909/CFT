@@ -26,26 +26,7 @@ import rf.configtool.lexer.SourceLocation;
 import rf.configtool.lexer.Token;
 import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.runtime.*;
-import rf.configtool.main.runtime.lib.ObjDataFile;
-import rf.configtool.main.runtime.lib.ObjDate;
-import rf.configtool.main.runtime.lib.ObjDateSort;
-import rf.configtool.main.runtime.lib.ObjDict;
-import rf.configtool.main.runtime.lib.ObjDir;
-import rf.configtool.main.runtime.lib.ObjFile;
-import rf.configtool.main.runtime.lib.ObjFilter;
-import rf.configtool.main.runtime.lib.ObjGlob;
-import rf.configtool.main.runtime.lib.ObjGrep;
-import rf.configtool.main.runtime.lib.ObjInput;
-import rf.configtool.main.runtime.lib.ObjLib;
-import rf.configtool.main.runtime.lib.ObjPersistent;
-import rf.configtool.main.runtime.lib.ObjRegex;
-import rf.configtool.main.runtime.lib.ObjSys;
-import rf.configtool.main.runtime.lib.Protection;
-import rf.configtool.main.runtime.lib.RunCaptureOutput;
-import rf.configtool.main.runtime.lib.ValueObjFileLine;
-import rf.configtool.main.runtime.lib.ValueObjInt;
-import rf.configtool.main.runtime.lib.ValueObjFloat;
-import rf.configtool.main.runtime.lib.ValueObjStr;
+import rf.configtool.main.runtime.lib.*;
 import rf.configtool.parsetree.Expr;
 import rf.configtool.parsetree.ExprBlock;
 import rf.configtool.parsetree.ExprCall;
@@ -145,6 +126,10 @@ public class ObjGlobal extends Obj {
         add(new FunctionGetType());
         add(new FunctionGetExprCount());
         add(new FunctionBinary());
+        add(new FunctionAValue());
+
+
+        // help
         add(new Function_Stmt());
         add(new Function_Expr());
 
@@ -881,6 +866,36 @@ public class ObjGlobal extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
             return new ValueInt(exprCount);
+        }
+    }
+    
+
+
+    class FunctionAValue extends Function {
+        public String getName() {
+            return "AValue";
+        }
+        public String getShortDesc() {
+            return "AValue(str,any,metaDict?) - created AValue (annotated value) object";
+        }
+        @Override
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() == 2 || params.size() == 3) { 
+            	String str=getString("typeStr", params, 0);
+            	Value v=params.get(1);
+            	ObjDict dict=null;
+            	if (params.size()==3) {
+            		Obj obj=getObj("metaDict", params, 2);
+            		if (obj instanceof ObjDict) {
+            			dict=(ObjDict) obj;
+            		} else {
+            	    	throw new Exception("Expected parameters typeStr,value,metaDict?");
+            		}
+            	}
+            	if (dict==null) dict=new ObjDict();
+            	return new ValueObj(new ObjAnnotatedValue(str,v,dict));
+            }
+   	    	throw new Exception("Expected parameters typeStr,value,metaDict?");
         }
     }
     
