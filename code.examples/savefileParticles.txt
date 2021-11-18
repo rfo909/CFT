@@ -16,8 +16,14 @@ Functions
    - "r" - set range
    - "s" - search range, looking for minimum variance
    - "h" - show histogram for current range
+   - "rand" - get lowest variance for random data sets of same length as real data
 
 Currently focused on quarks only.
+
+2021-11-18: For range 0-0.8
+	The random data produces a lowest variance of around 700 (average)
+  	The real data provides lowest variance of 204
+  	The random data provides variance lower than this for about 15-25% of the random data sets
 
 >>>>>> EOF
 ->line
@@ -75,10 +81,11 @@ P(1)*1000000000
 	if (random) {
 		Inner {
 			actualValues->x  # to produce same number
-				v=Lib.Util.random*10000000000000*Lib.Util.random
-				if (Lib.Util.random > 0.5) v=v-(Lib.Util.random*1000000000)
-				if (Lib.Util.random > 0.5) v=v+(Lib.Util.random*10000000)
-				if (Lib.Util.random > 0.5) v=v-(Lib.Util.random*100000)
+				if (Lib.Util.random < 0.5) {
+					G(Lib.Util.random*10)
+				} else {
+					M(Lib.Util.random*10)
+				} => v
 				out(v)
 		}
 	} else {
@@ -151,17 +158,20 @@ P(1)*1000000000
 
 # Find lowest variance for current range
 # --
+	P(1,false)=>random
+	
 	lowestVariance = 999999
 	lowestVarianceFactor = 0
 
 	highestVariance=0
 	highestVarianceVactor=0
 
-	STEPS=10000
+	STEPS=30000
+	theData=Data(random)
 
 	range=GetRange
 	Lib.Data.for(range.start, range.end, (range.end-range.start)/STEPS)->factor
-		data = Normalize(factor)
+		data = Normalize(factor,theData)
 		var = Variance(data)
 		if (var < lowestVariance) {
 			lowestVariance=var
@@ -181,13 +191,6 @@ P(1)*1000000000
 	lowestVarianceFactor
 /Search
 
-
-
-SetRange
-/r
-
-Search
-/s
 
 
 
@@ -231,29 +234,32 @@ Search
 		println(fStr + " " + bar)
 /Histogram
 
-Histogram
-/h
-
 
 
 # Examine random data sets
 # --
+	P(1,204)=>realDataVariance
 	count=0
-	maxCount=100
+	maxCount=10000
+	countUnderRealValue=0
 	loop
 		break(count >= maxCount)
 		count=count+1
 		
-		data=Data(true)
+		theData=Data(true)
 		
-		println("count="+count)
+		STEPS = 1000
+		
 		lowest=99999999
+		range=GetRange
 		Inner {
-			Lib.Data.for(0.05, 0.90, 0.001)->factor
-				#println("factor=" + factor)
-				var=Variance(Normalize(factor, data))
+			Lib.Data.for(range.start, range.end, (range.end-range.start)/STEPS)->factor
+				data=Normalize(factor, theData)
+				var=Variance(data)
 				if (var<lowest) lowest=var
+				if (var<realDataVariance) countUnderRealValue=countUnderRealValue+1
 		} 
+		println("count="+count + " lowestVar=" + fix(lowest,3))
 		out(lowest)
 	| => data
 	
@@ -263,7 +269,24 @@ Histogram
 		if (value<lowest) lowest=value
 		sum=sum+value
 	|
-	println("Lowest variance=" + lowest)
 	println("Average=" + sum/data.length)
-	println("Variance of lowest variance data=" + Variance(data))
+	println("#under real data variance value: " + fix(countUnderRealValue/maxCount*100,2) + "%") 
 /CheckRandomData
+
+
+
+SetRange
+/r
+
+Search
+/s
+
+Search(true)
+/sr
+
+Histogram
+/h
+
+
+CheckRandomData
+/rand
