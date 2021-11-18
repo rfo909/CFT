@@ -260,13 +260,12 @@ P(1)*1000000000
 				data=Normalize(factor, theData)
 				var=Variance(data)
 				if (var<lowest) lowest=var
-				if (var<realDataVariance) {
-					countUnderRealValue=countUnderRealValue+1
-					println("[" + count + "] Under real data variance value: " + fix(countUnderRealValue/count*100,2) + "%")
-				}
-
 		} 
 		#println("count="+count + " lowestVar=" + fix(lowest,3))
+		if (lowest<realDataVariance) {
+			countUnderRealValue=countUnderRealValue+1
+			println("[" + count + "] Under real data variance value: " + fix(countUnderRealValue/count*100,2) + "%")
+		}
 		out(lowest)
 	| => data
 	
