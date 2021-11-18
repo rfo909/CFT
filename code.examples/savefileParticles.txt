@@ -9,7 +9,7 @@ inside a given range, then calculate variance.
 Values near 1 are invalid, as they creep the value down in smaller and smaller
 increments, making all values line up nicely, so mostly run with range 0.05 to 0.8
 
-Found that the smallest variance is for factor 0.6966728 
+Found that the smallest variance is for factor 0.6966728 (variance 204 when normalizing 0-1000)
 
 Functions
 
@@ -44,6 +44,8 @@ P(1)*1000000000
 	Db2:Set(Sys.scriptId,"range",data)
 /SetRange
 
+
+
 # Get range
 # --
 	Db2:Get(Sys.scriptId,"range") => result
@@ -55,8 +57,11 @@ P(1)*1000000000
 /GetRange
 
 
+
 # Data
 # --
+	P(1,false)=>random
+	
 	Sequence(
 		M(2.2)   # up
 		G(1.28)  # charm
@@ -64,7 +69,22 @@ P(1)*1000000000
 		M(4.7)   # down
 		M(96)    # strange
 		G(4.18)  # bottom
-	)
+	) => actualValues
+	
+	
+	if (random) {
+		Inner {
+			actualValues->x  # to produce same number
+				v=Lib.Util.random*10000000000000*Lib.Util.random
+				if (Lib.Util.random > 0.5) v=v-(Lib.Util.random*1000000000)
+				if (Lib.Util.random > 0.5) v=v+(Lib.Util.random*10000000)
+				if (Lib.Util.random > 0.5) v=v-(Lib.Util.random*100000)
+				out(v)
+		}
+	} else {
+		actualValues
+	}
+
 /Data
 
 # Sin(45) = Sqrt(2)/2
@@ -90,7 +110,8 @@ P(1)*1000000000
 # Process data set
 # --
 	P(1,0.5)=>factor
-	Data->value
+	P(2,Data)=>data
+	data->value
 		out(NormalizeValue(value, factor))
 /Normalize
 
@@ -212,3 +233,37 @@ Search
 
 Histogram
 /h
+
+
+
+# Examine random data sets
+# --
+	count=0
+	maxCount=100
+	loop
+		break(count >= maxCount)
+		count=count+1
+		
+		data=Data(true)
+		
+		println("count="+count)
+		lowest=99999999
+		Inner {
+			Lib.Data.for(0.05, 0.90, 0.001)->factor
+				#println("factor=" + factor)
+				var=Variance(Normalize(factor, data))
+				if (var<lowest) lowest=var
+		} 
+		out(lowest)
+	| => data
+	
+	sum=0
+	lowest=9999999999
+	data->value
+		if (value<lowest) lowest=value
+		sum=sum+value
+	|
+	println("Lowest variance=" + lowest)
+	println("Average=" + sum/data.length)
+	println("Variance of lowest variance data=" + Variance(data))
+/CheckRandomData
