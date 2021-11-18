@@ -239,13 +239,16 @@ P(1)*1000000000
 # Examine random data sets
 # --
 	P(1,204)=>realDataVariance
+	P(2,100)=>maxCount
+	
 	count=0
-	maxCount=10000
+	
 	countUnderRealValue=0
 	loop
 		break(count >= maxCount)
 		count=count+1
 		
+		if (count % 100 == 0) println("[" + count + "]")
 		theData=Data(true)
 		
 		STEPS = 1000
@@ -257,9 +260,13 @@ P(1)*1000000000
 				data=Normalize(factor, theData)
 				var=Variance(data)
 				if (var<lowest) lowest=var
-				if (var<realDataVariance) countUnderRealValue=countUnderRealValue+1
+				if (var<realDataVariance) {
+					countUnderRealValue=countUnderRealValue+1
+					println("[" + count + "] Under real data variance value: " + fix(countUnderRealValue/count*100,2) + "%")
+				}
+
 		} 
-		println("count="+count + " lowestVar=" + fix(lowest,3))
+		#println("count="+count + " lowestVar=" + fix(lowest,3))
 		out(lowest)
 	| => data
 	
@@ -270,7 +277,6 @@ P(1)*1000000000
 		sum=sum+value
 	|
 	println("Average=" + sum/data.length)
-	println("#under real data variance value: " + fix(countUnderRealValue/maxCount*100,2) + "%") 
 /CheckRandomData
 
 
