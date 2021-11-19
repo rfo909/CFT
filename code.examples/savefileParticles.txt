@@ -2,17 +2,58 @@
 # --
 <<<<<< EOF
 
-Toying with identifying ways to unify particle energies, by dividing each
-value repeatedly, or actually, multiplying by factor in range 0-1, until value
-inside a given range, then calculate variance.
+Standard model of particle physics 
+----------------------------------
+Toying with identifying ways to unify particle energies, by first doing a normalization
+of the values, through some repeated transformation, then calculate variance of the set,
+looking for normalization parameter(s) or algorithm that give smallest variance.
 
-Values near 1 are invalid, as they creep the value down in smaller and smaller
-increments, making all values line up nicely, so mostly run with range 0.05 to 0.8
+Comparing this with random sets of data of same size as the particle energies, and see for
+what fraction of the data sets we manage finding a variance as low as the lowest
+variance for the real (particle energies) data, to get a sense of whether the particle
+energy values feels random or not.
 
-Found that the smallest variance is for factor 0.6966728 (variance 204 when normalizing 0-1000)
+First attempt
+-------------
+Normalization by multiplying repeatedly with factor in range 0-0.8, we found that the
+smallest variance is 204.33 for factor 0.6866
+
+Factors very close to 1.0 will result in creeping the values slowly down below our limit
+and produce artificial correlations, hence stopping at 0.8 og 0.85
+
+For random data sets undergoing the same transformation, we find that smallest variance
+for each set under 204.33 is found in about 5% of the cases. 
+
+	The random data produces a lowest variance of around 700 (average)
+  	The real data provides lowest variance of 204
+  	The random data provides variance lower than this for about ~4-5% of the random data sets,
+    increasing to 7% by tweaking scale factor.
+
+	Error sources: the scale factor for the random data affects the outcome!
+
+
+Second attempt
+--------------
+Doing repeat square root until value in range
+
+For particle data we get variance of 43300. When checking random data sets, we get that
+around 90% of those have Sqrt variance lower than this value, reduces this to 60% by
+tweaking scale factor.
+	
+	Error sources: result varies by scale factor for random data.
+
+
+Other transformations
+---------------------
+- logarithmic
+- square root
+- rotate complex vector along inwards spiral until absolute length at certain value, then read out
+  real value
+- cos/sin with offsets
+
 
 Functions
-
+---------
    - "r" - set range
    - "s" - search range, looking for minimum variance
    - "h" - show histogram for current range
@@ -20,10 +61,6 @@ Functions
 
 Currently focused on quarks only.
 
-2021-11-18: For range 0-0.8
-	The random data produces a lowest variance of around 700 (average)
-  	The real data provides lowest variance of 204
-  	The random data provides variance lower than this for about 15-25% of the random data sets
 
 >>>>>> EOF
 ->line
@@ -80,12 +117,8 @@ P(1)*1000000000
 	
 	if (random) {
 		Inner {
-			actualValues->x  # to produce same number
-				if (Lib.Util.random < 0.5) {
-					G(Lib.Util.random*10)
-				} else {
-					M(Lib.Util.random*10)
-				} => v
+			actualValues->x  # to produce same number of values
+				v=Lib.Util.random*10000000000000.0
 				out(v)
 		}
 	} else {
@@ -100,7 +133,7 @@ P(1)*1000000000
 /factor
 
 
-# Normalize value
+# Normalize value by multiplying with factor
 # --
 	P(1,100000) => value
 	P(2,0.5)=> factor
@@ -111,16 +144,41 @@ P(1)*1000000000
 		value=value*factor
 	|
 	value
-/NormalizeValue
+/NormalizeValue_Factor
 
 
-# Process data set
+# Normalize value by square root
+# --
+	P(1,100000) => value
+	P(2,1000) => range
+
+	loop
+		break(value<range)
+		value=Lib.Math.sqrt(value)
+	|
+	value
+/NormalizeValue_Sqrt
+
+
+
+# Process data set by multiplying with factor in range 0-1
 # --
 	P(1,0.5)=>factor
 	P(2,Data)=>data
 	data->value
-		out(NormalizeValue(value, factor))
-/Normalize
+		out(NormalizeValue_Factor(value, factor))
+/NormalizeSet_Factor
+
+
+# Process data set by doing square root
+# --
+	P(1,Data)=>data
+	data->value
+		out(NormalizeValue_Sqrt(value))
+/NormalizeSet_Sqrt
+
+
+
 
 
 # Calculate variance of set
@@ -146,10 +204,9 @@ P(1)*1000000000
 	P(2,5) => numDecimals
 	s=""+value
 	pos=s.indexOf(".")
-	if (pos >= 0) {
-		s=s.sub(0,pos+1+numDecimals)
-	}
-	s
+	if (pos < 0) s=s+".000000000000000000000"
+	pos=s.indexOf(".")
+	s=s.sub(0,pos+1+numDecimals)
 /fix
 
 
@@ -171,7 +228,7 @@ P(1)*1000000000
 
 	range=GetRange
 	Lib.Data.for(range.start, range.end, (range.end-range.start)/STEPS)->factor
-		data = Normalize(factor,theData)
+		data = NormalizeSet_Factor(factor,theData)
 		var = Variance(data)
 		if (var < lowestVariance) {
 			lowestVariance=var
@@ -188,6 +245,9 @@ P(1)*1000000000
 	println("LOW  factor="+fix(lowestVarianceFactor,12) + " variance=" + fix(lowestVariance,12))
 	println("HIGH factor="+fix(highestVarianceFactor,12) + " variance=" + fix(highestVariance,12))
 
+	println("--")
+	println("Sqrt: " + Variance(NormalizeSet_Sqrt(theData)))
+
 	lowestVarianceFactor
 /Search
 
@@ -201,7 +261,7 @@ P(1)*1000000000
 	if (factor < 0.05) factor=0.05
 	if (factor > 0.95) factor=0.95
 
-	data = Normalize(factor)
+	data = NormalizeSet_Factor(factor)
 	data->x
 		println(x)
 	|
@@ -218,7 +278,7 @@ P(1)*1000000000
 	range=GetRange
 	LINES=Term.h
 	Lib.Data.for(range.start, range.end, (range.end-range.start)/LINES)->factor
-		data = Normalize(factor)
+		data = NormalizeSet_Factor(factor)
 		var = Variance(data)
 		out(AValue("",var,SymDict(factor)))
 	| => values
@@ -240,16 +300,29 @@ P(1)*1000000000
 # --
 	P(1,204)=>realDataVariance
 	P(2,100)=>maxCount
+	P(3,43342)=>realSqrtVariance
 	
 	count=0
+
 	
 	countUnderRealValue=0
+	countUnderRealSqrtValue=0
+
 	loop
 		break(count >= maxCount)
 		count=count+1
 		
-		if (count % 100 == 0) println("[" + count + "]")
+		if (count % 50 == 0) {
+			println("[" + count + "] <FactorMinVar: " + fix(countUnderRealValue/count*100,4) + "%"
+				+ " <SqrtMinVar: " + fix(countUnderRealSqrtValue/count*100,4) + "%")
+		}
 		theData=Data(true)
+
+		Inner{
+			xx=Variance(NormalizeSet_Sqrt(theData))
+			if (xx < realSqrtVariance) countUnderRealSqrtValue=countUnderRealSqrtValue+1
+		}
+
 		
 		STEPS = 1000
 		
@@ -257,18 +330,19 @@ P(1)*1000000000
 		range=GetRange
 		Inner {
 			Lib.Data.for(range.start, range.end, (range.end-range.start)/STEPS)->factor
-				data=Normalize(factor, theData)
+				data=NormalizeSet_Factor(factor, theData)
 				var=Variance(data)
 				if (var<lowest) lowest=var
 		} 
 		#println("count="+count + " lowestVar=" + fix(lowest,3))
 		if (lowest<realDataVariance) {
 			countUnderRealValue=countUnderRealValue+1
-			println("[" + count + "] Under real data variance value: " + fix(countUnderRealValue/count*100,2) + "%")
 		}
 		out(lowest)
 	| => data
 	
+	println("[" + count + "] Under real data variance value: " + fix(countUnderRealValue/count*100,4) + "%")
+
 	sum=0
 	lowest=9999999999
 	data->value
@@ -276,6 +350,8 @@ P(1)*1000000000
 		sum=sum+value
 	|
 	println("Average=" + sum/data.length)
+
+	println("Under real sqrt lowest variance=" + fix(countUnderRealSqrtValue/count*100,4) + "%")
 /CheckRandomData
 
 
@@ -293,5 +369,11 @@ Histogram
 /h
 
 
-CheckRandomData
+# Interactive front to CheckRandomData
+# --
+	Input("Lowest variance for real data").get.parseFloat => lowestVar
+	Input("Sqrt variance for real data").get.parseFloat => lowestSqrt
+	Input("Number of random data sets").get.parseInt => count
+
+	CheckRandomData(lowestVar,count,lowestSqrt)
 /rand
