@@ -15,8 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2021-11-15 RFO
-v2.9.9
+Last updated: 2021-11-20 RFO
+v2.9.10
 
 
 </pre>
@@ -2987,7 +2987,6 @@ codeDirs = . ; code.examples ; code.lib
 
 
 <h1>The CFT database</h1>
-<p><i>v1.9.6</i></p>
 <p>
   CFT implements its own primitive database, as found in Lib.Db.Db2, and which is usually
   interfaced via the Db2 script.
@@ -3003,11 +3002,44 @@ codeDirs = . ; code.examples ; code.lib
   made by calling the Lib.Db.UUID function.
 </p>
 
-<h3>Lib.Db.Db2 vs Db2 script?</h3>
+<h2>Collections</h2>
+<p>
+  Apart from using static strings as collection names, another common practice is
+  to use the scriptId, which is a function of the Sys object:
+</p>
+<pre>
+  Db2:Set(Sys.scriptId,"name","value")
+</pre>
+<p>
+  Sys.scriptId is better than Sys.scriptName, since there may be multiple scripts with the
+  same name (in different directories).
+</p>
+
+
+<h2>Lib.Db.Db2 vs Db2 script?</h2>
 <p>
   The Db2 script uses the Lib.Db.Db2 object. The difference is that an object is implemented
-  in Java, while the script is code that runs in the interpreter.
+  in Java, while the script is code that runs in the interpreter. See separate section on "Objects vs Scripts".
 </p>
+
+<h2>Synchronization</h2>
+<p>
+  Calls to the Db2 database are thread safe, via a Db2 lock file per collection,
+  to prevent parallel updates, or partial reads etc. 
+</p>
+<p>
+  In order to create transactions consisting of multiple Db2 calls, the Lib.Db object
+  contains support for named locks. Example:
+</p>
+<pre>
+  Lib.Db.obtainLock("Unique Lock Name",5000) ## 5000 = wait max 5 seconds before failing
+  Db2:Get(Sys.scriptId,"someValue") => data
+  # (modify data)
+  Db2:Set(Sys.scriptId,"someValue",data)
+  Lib.Db.releaseLock("Unique lock name")
+</pre>
+
+
 
 
 
@@ -3042,8 +3074,8 @@ codeDirs = . ; code.examples ; code.lib
 
 
 
+
 <h1>onLoad functions</h1>
-<p><i>v2.1.7</i></p>
 <p>
   Calling a function onLoad results in it being called every time the script is loaded
   and (automatically) reloaded in GNT. Nice for clearing defaults, when new session.
@@ -3076,6 +3108,10 @@ codeDirs = . ; code.examples ; code.lib
   It takes two or three parameters, a context dictionary and an expression, with
   an optional lambda or closure, which if defined gets called with the Process object as parameter
   whenever there is new output or the process has terminated.
+</p>
+<p>
+  The lambda/closure executes in the caller's environment. See the Cron example script for 
+  example.
 </p>
 <p> 
   The named values from the 

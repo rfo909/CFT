@@ -13,6 +13,19 @@
 
 <h1>CFT Change log</h1>
 
+<h3>2.9.10 2021-11-20 Cron script</h3>
+<p>
+	Created Cron script as a proof of concept, for running things in the background, and be notified when done. Used the
+	additional third argument to SpawnProcess from v2.9.3 which is a lambda or closure running in the
+	invoking context, handling output and status update from running Process. Also using named locks from
+	2.9.4 (improved and moved to Lib.Db in 2.9.8).
+</p>
+<p>
+	Extended Closure with functions .dict and .lambda to access its constituents, because storing closures in
+	Db2 requires us to store the dict and the lambda separately, and recreate the closure when about to
+	invoke it.
+</p>
+
 <h3>v2.9.9 2021-11-15 AValue</h3>
 <p>
 	Created global function AValue which creates AnnotatedValue object. In preparation for improved XML parser, and all other
@@ -21,8 +34,8 @@
 
 <h3>v2.9.8 2021-11-12</h3>
 <p>
-	Improved the LockFile.java multiple times. Also improved the test class, TestLock, which ensures robustness of
-	locks. 
+	Improved the LockFile.java over multiple iterations. Also improved the test class, TestLock (Java), which 
+	ensures robustness of locks. 
 </p>
 <p>
 	Moved Lib.Db.Db2 functions for locks to Lib.Db.
@@ -43,7 +56,7 @@
 </p>
 
 
-<h3>v2.9.6 2021-11-10 Db2 FileLock</h3>
+<h3>v2.9.6 2021-11-10 Db2 FileLock (Java)</h3>
 <p>
 	The previous version of the FileLock from 2.8.3 was flawed, and has been improved, at the cost of a
 	1/20 second delay when attempting to get a lock.

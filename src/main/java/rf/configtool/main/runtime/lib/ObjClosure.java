@@ -44,6 +44,8 @@ public class ObjClosure extends Obj {
         this.dict=dict;
         this.lambda=lambda;
         this.add(new FunctionCall());
+        this.add(new FunctionDict());
+        this.add(new FunctionLambda());
     }
     
     public ValueBlock getLambda() {
@@ -87,6 +89,30 @@ public class ObjClosure extends Obj {
         }
     }
     
+    class FunctionLambda extends Function {
+        public String getName() {
+            return "lambda";
+        }
+        public String getShortDesc() {
+            return "lambda() - extract the lambda from the closure";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	return lambda;
+        }
+    }
+
+    class FunctionDict extends Function {
+        public String getName() {
+            return "dict";
+        }
+        public String getShortDesc() {
+            return "dict() - extract the dictionary from the closure";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	return new ValueObj(dict);
+        }
+    }
+
     public Value callClosure (Ctx ctx, List<Value> params) throws Exception {
         return lambda.callLambda(ctx, dict, params);
     }

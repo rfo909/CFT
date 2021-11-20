@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2021-11-15 RFO
-v2.9.9
+Last updated: 2021-11-20 RFO
+v2.9.10
 ```
 # Introduction
 
@@ -2628,8 +2628,6 @@ This can be used to save arbitrarily big structures, as long as they are synthes
 # The CFT database
 
 
-**v1.9.6**
-
 CFT implements its own primitive database, as found in Lib.Db.Db2, and which is usually
 interfaced via the Db2 script.
 
@@ -2643,12 +2641,43 @@ The Db2 persists data to file, and handles all values that can be synthesized to
 Also there is a Db2Obj script, which saves data objects identified by UUID's, which are
 made by calling the Lib.Db.UUID function.
 
-### Lib.Db.Db2 vs Db2 script?
+## Collections
+
+
+Apart from using static strings as collection names, another common practice is
+to use the scriptId, which is a function of the Sys object:
+
+```
+Db2:Set(Sys.scriptId,"name","value")
+```
+
+Sys.scriptId is better than Sys.scriptName, since there may be multiple scripts with the
+same name (in different directories).
+
+## Lib.Db.Db2 vs Db2 script?
 
 
 The Db2 script uses the Lib.Db.Db2 object. The difference is that an object is implemented
-in Java, while the script is code that runs in the interpreter.
+in Java, while the script is code that runs in the interpreter. See separate section on "Objects vs Scripts".
 
+## Synchronization
+
+
+Calls to the Db2 database are thread safe, via a Db2 lock file per collection,
+to prevent parallel updates, or partial reads etc.
+
+
+In order to create transactions consisting of multiple Db2 calls, the Lib.Db object
+contains support for named locks. Example:
+
+```
+Lib.Db.obtainLock("Unique Lock Name",5000) ## 5000 = wait max 5 seconds before failing
+Db2:Get(Sys.scriptId,"someValue") =>
+ data
+# (modify data)
+Db2:Set(Sys.scriptId,"someValue",data)
+Lib.Db.releaseLock("Unique lock name")
+```
 # Objects vs Scripts
 
 
@@ -2678,8 +2707,6 @@ $ Lib:Header("Hello")    # call function Header in script
 # onLoad functions
 
 
-**v2.1.7**
-
 Calling a function onLoad results in it being called every time the script is loaded
 and (automatically) reloaded in GNT. Nice for clearing defaults, when new session.
 
@@ -2707,6 +2734,10 @@ CFT offers the ability to run multiple processes of CFT code, via the SpawnProce
 It takes two or three parameters, a context dictionary and an expression, with
 an optional lambda or closure, which if defined gets called with the Process object as parameter
 whenever there is new output or the process has terminated.
+
+
+The lambda/closure executes in the caller's environment. See the Cron example script for
+example.
 
 
 The named values from the

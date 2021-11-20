@@ -232,7 +232,9 @@ The general loop statement
 Storing CFT data structures to file - syn() and eval()
 
 The CFT database
- |   Lib.Db.Db2 vs Db2 script?
+ * Collections
+ * Lib.Db.Db2 vs Db2 script?
+ * Synchronization
 
 Objects vs Scripts
 
