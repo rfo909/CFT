@@ -200,10 +200,11 @@ AddTask(
 # Example of stateful job, delivering a future reminder
 # --
 	P(1,Input("Enter reminder text").get) => text
-	P(2,Input("Enter seconds delay").get.parseInt) => seconds
-	date=Date.add(Date.Duration.seconds(seconds))
+	P(2,DateUtil:SelectDateTime)=>date
+
 	closure=SymDict(text).bind(Lambda{
-		println("Reminder: " + self.text)
+		date=Date.setFormat("HH:mm:ss").fmt
+		println("Reminder: " + date + " " + self.text)
 	})
 	AddTask(date, closure, "[reminder] " + text.first(20))
 /reminder
@@ -214,17 +215,18 @@ AddTask(
 # --
 	P(1)=>file
 	P(2,10)=>intervalSeconds
+	P(3,Date.add(Date.Duration.days(1)))=>expirationDate
 	
 	error(!file.exists,"File not found: " + file.path)
 	
 	lastModified=file.lastModified
 	
 	date=Date.add(Date.Duration.seconds(intervalSeconds))
-	closure=SymDict(file,lastModified,intervalSeconds).bind(Lambda{
+	closure=SymDict(file,lastModified,intervalSeconds,expirationDate).bind(Lambda{
 		if (!self.file.exists || self.file.lastModified != self.lastModified) {
 			println("File " + self.file.path + " has changed")
 		} else {
-			Cron:watchFile(self.file, self.intervalSeconds)
+			if (Date.before(self.expirationDate)) Cron:watchFile(self.file, self.intervalSeconds, self.expirationDate)
 		}
 	})
 	AddTask(date,closure,"[watchFile] " + file.path)

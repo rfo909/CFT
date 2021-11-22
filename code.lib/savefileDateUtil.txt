@@ -1,0 +1,54 @@
+
+# Enter date relative to today
+# (maintains time of day)
+# --
+	Input("Enter date on format yyyy-mm-dd, -D/+D for days in past/future, or . for today").get.trim=>value
+	if (value.startsWith("-") || value.startsWith("+")) {
+		days=value.sub(1).parseInt
+		if (value.startsWith("-")) {
+			Date.sub(Date.Duration.days(days))
+		} else {
+			Date.add(Date.Duration.days(days))
+		}
+	} else if (value==".") {
+		Date
+	} else 
+		Date.setFormat("yyyy-MM-dd").parse(value)
+	}
+/SelectDate
+
+
+# Enter time
+# (returns number of minutes since midnight)
+# --
+	P(1,Date) => day
+
+	Input("Enter time on format hh:mm or -M/+M for minutes back/forward, or . for now").get.trim=>value
+	if (value.startsWith("-") || value.startsWith("+")) {
+		mins=value.sub(1).parseInt
+		if (value.startsWith("-")) {
+			Date.hour*60 + Date.minute - mins
+		} else {
+			Date.hour*60 + Date.minute + mins
+		}
+	} else if (value==".") {
+		Date.hour*60 + Date.minutes
+	} else {
+		list=value.split(":")
+		list.get(0).parseInt*60+list.get(1).parseInt
+	}
+//GetMinutesSinceMidnight
+
+
+
+# Get date + time
+# --
+	date=SelectDate
+	minutes=GetMinutesSinceMidnight
+
+	ymdString = date.setFormat("yyyy-MM-dd").fmt
+	Date.setFormat("yyyy-MM-dd").parse(ymdString).add(Date.Duration.minutes(minutes))
+/SelectDateTime
+
+
+	
