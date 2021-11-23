@@ -170,9 +170,9 @@ GetOutput
 # --
 	date = Db2:Get(Sys.scriptName,"alive")
 	if (date != null && currentTimeMillis-date.get < 3000) {
-		println("Running")
+		Lib:Header("Status: Running")
 	} else {
-		println("Inactive")
+		Lib:Header("Status: Inactive")
 	}
 	GetTasks->task
 		println(""+task.when.fmt + " " + task.get("desc","<no description>"))
@@ -210,35 +210,30 @@ AddTask(
 /reminder
 
 	
-# Example of regular job, waiting for a file to change
-# Schedules itself at given interval in seconds until detecting file deleted or changed.
+# Example of regular job, waiting for files in a directory to change
+# Schedules itself at given interval in seconds until reaching expiration
+# date (defaults to one day ahead). Gives notification of change if one or
+# more files in directory have lastModified updated. 
 # --
-	P(1)=>file
+	P(1,Dir)=>dir
 	P(2,10)=>intervalSeconds
 	P(3,Date.add(Date.Duration.days(1)))=>expirationDate
+	P(4,currentTimeMillis)=>startTime
+	P(5,dir.files.length)=>fileCount
 	
-	error(!file.exists,"File not found: " + file.path)
+	runAt=Date.add(Date.Duration.seconds(intervalSeconds))
 	
-	lastModified=file.lastModified
-	
-	date=Date.add(Date.Duration.seconds(intervalSeconds))
-	closure=SymDict(file,lastModified,intervalSeconds,expirationDate).bind(Lambda{
-		if (!self.file.exists || self.file.lastModified != self.lastModified) {
-			println("File " + self.file.path + " has changed")
-		} else {
-			if (Date.before(self.expirationDate)) Cron:watchFile(self.file, self.intervalSeconds, self.expirationDate)
+	closure=SymDict(dir,startTime,intervalSeconds,expirationDate,fileCount).bind(Lambda{
+		found=false
+		Inner {self.dir.files->f if (f.lastModified > self.startTime) found=true}
+		
+		if (found) {
+			println("CHANGE: Directory " + self.dir.path)
+			self.set("startTime",currentTimeMillis)
+		} 
+		if (Date.before(self.expirationDate)) {
+			Cron:watchDir(self.dir, self.intervalSeconds, self.expirationDate, self.startTime)
 		}
 	})
-	AddTask(date,closure,"[watchFile] " + file.path)
-/watchFile
-
-
-# Watch file demo - modify or delete file to trigger it
-# --
-	File("x.txt") => f
-	f.create("something")
-	watchFile(f)
-/watchFileDemo
-
-
-
+	AddTask(runAt,closure,"[watchDir] " + dir.path)
+/watchDir
