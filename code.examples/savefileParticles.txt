@@ -62,6 +62,40 @@ Functions
 Currently focused on quarks only.
 
 
+Running with up + charm + top:
+------------------------------
+0.6125536
+1411.185577971666816665674559772014617919921875
+1403.604247167774019544594921171665191650390625
+1411.798569881807225101510994136333465576171875
+
+Factor=0.6125536000000000314003045787103474140167236328125
+Variance=13.8888067312968797040184654179029166698455810546875
+
+
+down + strange + bottom
+------------------------
+1703.91137821022493881173431873321533203125
+1701.751895089189247300964780151844024658203125
+1703.711765781133408381720073521137237548828125
+
+Factor=0.68574000000000001620037437533028423786163330078125
+Variance=0.94936728900306188716484712131205014884471893310546875
+
+All six quarks
+--------------
+1740.347943329687268487759865820407867431640625
+1698.79365006376019664457999169826507568359375
+1733.615125626092094535124488174915313720703125
+1753.102904225699376183911226689815521240234375
+1769.967839550760572819854132831096649169921875
+1796.18540301886923771235160529613494873046875
+
+Factor=0.68667000000000000259348098552436567842960357666015625
+Variance=919.0863795945433594170026481151580810546875
+
+
+
 >>>>>> EOF
 ->line
 	println("| " + line)
@@ -106,9 +140,9 @@ P(1)*1000000000
 	P(1,false)=>random
 	
 	Sequence(
-		M(2.2)   # up
-		G(1.28)  # charm
-		G(173.1) # top
+		#M(2.2)   # up
+		#G(1.28)  # charm
+		#G(173.1) # top
 		M(4.7)   # down
 		M(96)    # strange
 		G(4.18)  # bottom
@@ -137,10 +171,10 @@ P(1)*1000000000
 # --
 	P(1,100000) => value
 	P(2,0.5)=> factor
-	P(3,1000) => range
+	P(3,1000) => cutoffValue
 
 	loop
-		break(value<range)
+		break(value<cutoffValue)
 		value=value*factor
 	|
 	value
@@ -165,8 +199,22 @@ P(1)*1000000000
 # --
 	P(1,0.5)=>factor
 	P(2,Data)=>data
+	
+	# Hard cutoff
+	# -----------	
+	# Discovered that aside from changing the scale of the resulting variance values, the 
+	# factor found to have lowest variance is mostly steady when changing 
+	# the value (0.6866 for 10, 100, 1000, but 0.6872 for 389 and 0.6871 for 387) 
+	
+	cutoff=2000
+	
+	#cutoff=387   # 0.687089
+	#cutoff=386.9 # 0.687083
+	#cutoff=387.1 # 0.687093
+	#cutoff=387.5 # 0.687111
+	
 	data->value
-		out(NormalizeValue_Factor(value, factor))
+		out(NormalizeValue_Factor(value, factor,cutoff))
 /NormalizeSet_Factor
 
 

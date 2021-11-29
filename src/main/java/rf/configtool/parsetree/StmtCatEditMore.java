@@ -129,4 +129,17 @@ public class StmtCatEditMore extends StmtShellInteractive {
         Value result = macroObj.callLambda(ctx.sub(), params);
         ctx.push(result);
     }
+    
+    @Override
+    protected boolean processUnknown (Ctx ctx, File file) throws Exception {
+    	if (!this.name.equals("edit")) return false; 
+    	
+		file.createNewFile();
+		ObjFile theFile=new ObjFile(file.getCanonicalPath(), Protection.NoProtection);
+		callMacro(ctx, theFile);
+		ctx.push(new ValueObj(theFile));
+        return true;
+    }
+    
+
 }

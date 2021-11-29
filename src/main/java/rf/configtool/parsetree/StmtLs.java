@@ -34,6 +34,11 @@ import rf.configtool.main.runtime.lib.ObjGlob;
 import rf.configtool.main.runtime.lib.Protection;
 
 import java.util.*;
+import java.nio.channels.WritableByteChannel;
+import java.nio.file.DirectoryStream;
+import java.nio.file.DirectoryIteratorException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class StmtLs extends StmtShellInteractive {
 
@@ -55,35 +60,73 @@ public class StmtLs extends StmtShellInteractive {
             throw new Exception("Expected ls, lsf or lsd");
         }
     }
+    
 
     @Override
     protected void processDefault(Ctx ctx) throws Exception {
-        // list files and dirs in currDir
+    	
         String currDir=ctx.getObjGlobal().getCurrDir();
 
-        File f=new File(currDir);
         List<String> directories=new ArrayList<String>();
         List<String> files=new ArrayList<String>();
 
-        getDirContent(currDir, directories, files);
+        getDirContent(ctx, currDir, directories, files);
         show (ctx, directories, files);
         
     }
     
-    
-    private void getDirContent (String dir, List<String> directories, List<String> files) throws Exception {
-        File f=new File(dir);
+    public static final long LS_DEFAULT_TIMEOUT_MS = 6000;
+    // list files and dirs in currDir - default (no parameters) is guarded by a timeout, since
+	// working with remote directories, and many files, ls can take very long time.
 
-        for (String s:f.list()) {
-            String path=dir + File.separator + s;
-            File x=new File(path);
+    public static final int LS_DEFAULT_MAX_ENTRIES = 2000;
+
+
+    private void getDirContent (Ctx ctx, String dir, List<String> directories, List<String> files) throws Exception {
+        File f=new File(dir);
+        
+        long startTime=System.currentTimeMillis();
+        
+        DirectoryStream<Path> stream = Files.newDirectoryStream(f.toPath());
+        Iterator<Path> iter = stream.iterator();
+        
+        int totalCount=0;
+        while (iter.hasNext()) {
+        	Path p=iter.next();
+        	
+        	File x=p.toFile();
+        	String path=x.getCanonicalPath();
             if (x.isFile()) {
                 files.add(path);
             } else if (x.isDirectory()) {
                 directories.add(path); 
             }
             
+            totalCount++;
+            
+            long duration = System.currentTimeMillis()-startTime;
+
+            if (duration > LS_DEFAULT_TIMEOUT_MS) {
+            	ctx.addSystemMessage("--- directory listing timed out after " + LS_DEFAULT_TIMEOUT_MS + ", use '*' to override");
+            	return;
+            }
+            if (totalCount >= LS_DEFAULT_MAX_ENTRIES) {
+            	ctx.addSystemMessage("--- directory entry count > " + LS_DEFAULT_MAX_ENTRIES + ", use '*' to override");
+            	return;
+            }
         }
+        
+//        
+//        for (String s:f.list()) {
+//            String path=dir + File.separator + s;
+//            File x=new File(path);
+//;            if (x.isFile()) {
+//                files.add(path);
+//            } else if (x.isDirectory()) {
+//                directories.add(path); 
+//            }
+//            
+//        }
         
     }
     
@@ -98,7 +141,7 @@ public class StmtLs extends StmtShellInteractive {
         if (file.isDirectory()) {
             List<String> directories=new ArrayList<String>();
             List<String> files=new ArrayList<String>();
-            getDirContent(file.getCanonicalPath(), directories, files);
+            getDirContent(ctx, file.getCanonicalPath(), directories, files);
             show (ctx, directories, files);
             return;
           }
@@ -123,6 +166,12 @@ public class StmtLs extends StmtShellInteractive {
     }
     
     
+    
+    @Override
+    protected boolean processUnknown (Ctx ctx, File file) throws Exception {
+        return false;
+    }
+
     
     
     

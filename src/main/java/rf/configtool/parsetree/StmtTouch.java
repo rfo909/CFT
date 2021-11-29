@@ -17,10 +17,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.parsetree;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
 
 import rf.configtool.lexer.Token;
 import rf.configtool.lexer.TokenStream;
@@ -35,52 +32,55 @@ import rf.configtool.main.runtime.lib.ObjDir;
 import rf.configtool.main.runtime.lib.ObjFile;
 import rf.configtool.main.runtime.lib.ObjGlob;
 import rf.configtool.main.runtime.lib.Protection;
-import rf.configtool.main.runtime.lib.ValueObjFileLine;
-import rf.configtool.util.TabUtil;
 
 import java.util.*;
+import java.nio.channels.WritableByteChannel;
+import java.nio.file.DirectoryStream;
+import java.nio.file.DirectoryIteratorException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
+import java.time.LocalDateTime;
 
-public class StmtCd extends StmtShellInteractive {
+public class StmtTouch extends StmtShellInteractive {
 
-    public StmtCd (TokenStream ts) throws Exception {
+    public StmtTouch (TokenStream ts) throws Exception {
         super(ts);
-        if (!getName().equals("cd")) throw new Exception("Expected cd");
     }
+    
 
     @Override
     protected void processDefault(Ctx ctx) throws Exception {
-        ctx.getObjGlobal().setCurrDir(null);
-        ctx.getObjGlobal().addSystemMessage(ctx.getObjGlobal().getCurrDir());
-        ctx.push(new ValueObj(new ObjDir(ctx.getObjGlobal().getCurrDir(), Protection.NoProtection)));
+    	throw new Exception("Expected file to create");
     }
-    
     
     @Override
     protected void processOne (Ctx ctx, File file) throws Exception {
-        if (file.exists() && file.isDirectory()) {
-            ctx.getObjGlobal().setCurrDir(file.getCanonicalPath());
-            ctx.getObjGlobal().addSystemMessage(ctx.getObjGlobal().getCurrDir());
-            ctx.push(new ValueObj(new ObjDir(ctx.getObjGlobal().getCurrDir(), Protection.NoProtection)));
-        } else {
-            throw new Exception("cd: Invalid directory");
-        }
-    
+    	if (!file.exists()) {
+            file.createNewFile();
+    	} else {
+			Path path=file.toPath();
+			FileTime ft = FileTime.fromMillis(System.currentTimeMillis());
+			Files.setLastModifiedTime(path, ft);
+    	}
+    	Value result=new ValueObj(new ObjFile(file.getCanonicalPath(), Protection.NoProtection));
+    	ctx.push(result);
     }
-    
     
     
     @Override
     protected void processSet (Ctx ctx, List<File> elements) throws Exception {
-        if (elements.size() == 0) throw new Exception("cd: expected one directory");
-        if (elements.size() != 1) throw new Exception("cd: can only process one directory");
-        processOne(ctx, elements.get(0));
-   }
-    
+    	for (File file:elements) processOne(ctx,file);
+    }
     
     @Override
     protected boolean processUnknown (Ctx ctx, File file) throws Exception {
-        return false;
+        file.createNewFile();
+        Value result=new ValueObj(new ObjFile(file.getCanonicalPath(), Protection.NoProtection));
+        ctx.push(result);;
+        return true;
     }
- 
+    
    
+
 }

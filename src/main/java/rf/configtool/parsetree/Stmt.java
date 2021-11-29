@@ -41,6 +41,9 @@ public abstract class Stmt extends LexicalElement {
         if (ts.peekStr("cat") || ts.peekStr("edit") || ts.peekStr("more")) {
             return new StmtCatEditMore(ts);
         }
+        if (ts.peekStr("touch")) {
+        	return new StmtTouch(ts);
+        }
         
         // --------
         

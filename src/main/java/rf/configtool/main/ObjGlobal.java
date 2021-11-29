@@ -1,5 +1,5 @@
 /*
-CFT - an interactive programmable shell for automation 
+- an interactive programmable shell for automation 
 Copyright (C) 2020 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
@@ -996,6 +996,9 @@ public class ObjGlobal extends Obj {
         	"   cat (fileExpr)",
         	"   edit file.txt",
         	"   edit (fileExpr)",
+        	"   touch file.txt",
+        	"   touch *.txt",
+        	"   touch (fileExpr)",
         	"",
         	"   (note) the ls command comes in two additional variants:",
         	"       lsd ...   : list directories only",

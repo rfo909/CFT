@@ -13,6 +13,38 @@
 
 <h1>CFT Change log</h1>
 
+
+<h3>2.9.11 2021-11-29</h3>
+
+
+<h4>"ls" default behaviour</h4>
+<p>
+	Added safeguards to default "ls" processing (when no parameters such as *.txt etc), so that it times out if
+	operation of traversing directory entries takes too long, or if the number of entries is very large. 
+</p>
+<p>
+	If this happens, the files and directories located so far, are displayed as before, followed by a system
+	message informing of the truncation and why, and to use "*" to override, as the glob parsing for the terminal
+	commands is processed commonly in the StmtShellInteractive class.
+</p>
+
+
+<h4>"touch"</h4>
+<p>
+	Added "touch", to update timestamp of file or create new empty file. Returns File object.
+</p>
+
+<p>
+	Updated global function _Stmt in ObjGlobal with "touch"
+</p>
+
+
+<h4>"edit" improvement</h4>
+<p>
+	When typing 'edit xxx.txt' if file xxx.txt does not exist, it is automatically created.
+</p>
+
+
 <h3>2.9.10 2021-11-20 Cron script</h3>
 <p>
 	Created Cron script as a proof of concept, for running things in the background, and be notified when done. Used the

@@ -36,11 +36,10 @@ import java.util.*;
  * Superclass of all interactive file and directory statements
  * 
  * StmtLs tested ok
- * StmtCat tested ok
+ * StmtCatEditMore tested ok
  * StmtCd tested ok
+ * StmtTouch tested ok
  * 
- * edit, touch, rm
- * mkdir, rmdir
  */
 public abstract class StmtShellInteractive extends Stmt {
 
@@ -109,6 +108,14 @@ public abstract class StmtShellInteractive extends Stmt {
      * Globbing or substrings - all files exist (dirs or files)
      */
     protected abstract void processSet (Ctx ctx, List<File> files) throws Exception;
+    
+    /**
+     * Process unknown path reference that does not match anything, for functions
+     * that create new files etc. Return true if processing ok
+     */
+    protected abstract boolean processUnknown (Ctx ctx, File file) throws Exception;
+    
+    
     
     public void execute (Ctx ctx) throws Exception {
         
@@ -188,10 +195,13 @@ public abstract class StmtShellInteractive extends Stmt {
             return;
         }
         
+        // default: pass the unknown File object f to processOne
+        if (processUnknown(ctx,f)) {
+        	return;
+        }
+        
+        
         throw new Exception("No match: " + expr);
-//      
-//      // attempts substring(s)
-//      processSet(ctx, getElementListBySubstrings(path, elements));
     }
 
   
@@ -208,18 +218,6 @@ public abstract class StmtShellInteractive extends Stmt {
         return result;
     }
     
-    private List<File> getElementListBySubstrings(String dir, List<String> parts) throws Exception {
-        File f=new File(dir);
-        if (!f.isDirectory()) throw new Exception("Not a directory: " + dir);
-        List<File> result=new ArrayList<File>();
-        for (File content: f.listFiles()) {
-            boolean ok=true;
-            for (String p:parts) {
-                if (!content.getName().contains(p)) ok=false;
-            }
-            if (ok) result.add(content);
-        }
-        return result;
-    }
+
 
 }
