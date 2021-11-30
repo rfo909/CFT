@@ -14,7 +14,7 @@ import rf.configtool.main.runtime.lib.ObjDb.FunctionGetLockFile;
 import rf.configtool.main.runtime.lib.ObjDb.FunctionObtainLock;
 import rf.configtool.main.runtime.lib.ObjDb.FunctionReleaseLock;
 import rf.configtool.main.runtime.lib.ObjDb.FunctionUUID;
-import rf.configtool.main.runtime.lib.db2.ObjDb2;
+import rf.configtool.main.runtime.lib.db.ObjDb2;
 
 public class ObjAnnotatedValue extends Obj {
 	

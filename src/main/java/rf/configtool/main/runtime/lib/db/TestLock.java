@@ -1,4 +1,4 @@
-package rf.configtool.main.runtime.lib.db2;
+package rf.configtool.main.runtime.lib.db;
 
 import java.io.File;
 
@@ -37,8 +37,8 @@ public class TestLock {
 				for (int i=0; i<200; i++) {
 					long start=System.currentTimeMillis();
 					LockFile.obtainLock(lockFile, "testlock");
-					long delay=System.currentTimeMillis() - start;
-					System.out.println("Job " + id + " delay=" + delay + " i=" + i);
+					long obtainDelay=System.currentTimeMillis() - start;
+					System.out.println(""+System.currentTimeMillis() + " Job " + id + " obtainDelay=" + obtainDelay + " i=" + i);
 				
 					setHolder(id);
 					try {
@@ -57,9 +57,9 @@ public class TestLock {
 					}
 					
 				}
-				System.out.println("JOB " + id + " Terminating Normally");
+				System.out.println(""+System.currentTimeMillis() + " JOB " + id + " Terminating Normally");
 			} catch (Exception ex) {
-				System.out.println("JOB " + id + " failing");
+				System.out.println(""+System.currentTimeMillis() + " JOB " + id + " failing");
 				ex.printStackTrace();
 			}
 		}

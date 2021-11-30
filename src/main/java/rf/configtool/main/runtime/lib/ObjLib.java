@@ -34,7 +34,7 @@ import rf.configtool.main.runtime.ValueList;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
 import rf.configtool.main.runtime.lib.conversions.ObjConvert;
-import rf.configtool.main.runtime.lib.db2.ObjDb2;
+import rf.configtool.main.runtime.lib.db.ObjDb2;
 import rf.configtool.main.runtime.lib.integrations.ObjIntegrations;
 import rf.configtool.main.runtime.lib.java.ObjJava;
 import rf.configtool.main.runtime.lib.math.ObjMath;

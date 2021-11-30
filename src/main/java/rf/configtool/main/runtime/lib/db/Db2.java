@@ -1,4 +1,4 @@
-package rf.configtool.main.runtime.lib.db2;
+package rf.configtool.main.runtime.lib.db;
 
 import java.util.*;
 

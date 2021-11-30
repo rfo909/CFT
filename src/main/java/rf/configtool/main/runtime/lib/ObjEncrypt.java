@@ -40,7 +40,7 @@ import rf.configtool.main.runtime.ValueBlock;
 import rf.configtool.main.runtime.ValueNull;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
-import rf.configtool.main.runtime.lib.db2.ObjDb2;
+import rf.configtool.main.runtime.lib.db.ObjDb2;
 import rf.configtool.parsetree.Expr;
 import rf.configtool.util.Encrypt;
 import rf.configtool.util.Hex;
