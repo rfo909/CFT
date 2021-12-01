@@ -1,0 +1,45 @@
+
+# Get hostname string if defined / for inclusion in prompt
+# --
+	h=Db2:Get("Lib","hostname")
+	if (h==null) {
+		""
+	} else {
+		"[" + h + "]"
+	}
+/Hostname
+
+
+# Set hostname string (used in prompt)
+# --
+	P(1,readLine("Hostname"))=>hostName
+	Db2:Set("Lib","hostname", hostName)
+/SetHostname
+
+
+
+# Set current path color for prompt
+# --
+	P(1,Curses:SelectColor) => color
+	Db2:Set(Sys.scriptId,"PromptPathColor", color)
+/SetPathColor
+
+
+# Get current path color 
+# --
+	Db2:Get(Sys.scriptId,"PromptPathColor","")
+//GetPathColor
+	
+
+# Format current dir for prompt
+# --
+	P(1,Dir)=>dir
+	s=dir.path
+	maxLen=(Term.w/2).i
+	if (maxLen < 30) maxLen=30
+
+	# return value
+	GetPathColor + if (s.length > maxLen, "+"+s.last(maxLen-1), s) + Curses:Reset
+/Path
+
+

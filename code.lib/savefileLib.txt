@@ -204,22 +204,6 @@ choice.
 
 
 
-# Get hostname string if defined (used in prompt)
-# --
-	Db2:Get("Lib","hostname")
-/Hostname
-
-
-
-# Set hostname string (used in prompt)
-# --
-	P(1,readLine("Hostname"))=>hostName
-	Db2:Set("Lib","hostname", hostName)
-/SetHostname
-
-
-
-
 # Create name of temp file under /tmp or under c:\temp if windows
 # --
 	P(1,"tmp") =>name 

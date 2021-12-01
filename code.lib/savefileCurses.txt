@@ -62,34 +62,18 @@ if(ena,Esc+"[37m","")
 /TxtWhite
 
 
-# Select text color
+# Select color
 # --
-	P(1,false)=>override
-
 	SymDict(TxtBlack, TxtRed, TxtGreen, TxtYellow, TxtBlue, TxtMagenta, TxtCyan, TxtWhite) => colors
-	col = Db2:Get("Curses","TxtColor")
-	if (override) col=null
+	colors.keys->key
+		println(colors.get(key)+key+Curses:Reset)
+	|
+	Lib:MenuSelect(colors.keys) => key
+	println("Selected " + colors.get(key) + key + Curses:Reset)
 
-	if (col==null) Inner {
-		Lib:Header("Enter color by name")
-		colors.keys.sort->key
-			println(key)
-		|
-		println
-		readLine => col
-		
-		println(colors.get(col)+"Changed text color!")
-		println("Okay? (type 'yes')")
-		if(readLine=="yes") {
-			Db2:Set("Curses","TxtColor", col)
-		}
-	} else {
-		println
-		println("- Changing to " + colors.get(col) + "default text color!")
-		println("- To select another color, call Curses:SelectTextColor(true)")
-		println
-	}
-/SelectTextColor
+	# return value
+	colors.get(key)
+/SelectColor
 
 
 if(ena) {
