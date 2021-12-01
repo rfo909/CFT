@@ -1,8 +1,8 @@
 
 # Get hostname string if defined / for inclusion in prompt
 # --
-	h=Db2:Get("Lib","hostname")
-	if (h==null) {
+	h=Db2:Get("Lib","hostname","").trim
+	if (h==null || h.length==0) {
 		""
 	} else {
 		"[" + h + "]"
