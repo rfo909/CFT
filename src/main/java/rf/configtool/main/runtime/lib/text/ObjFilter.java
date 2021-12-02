@@ -15,7 +15,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>
 */
 
-package rf.configtool.main.runtime.lib;
+package rf.configtool.main.runtime.lib.text;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -30,6 +30,7 @@ import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueBoolean;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
+import rf.configtool.main.runtime.lib.Regex;
 
 public class ObjFilter extends Obj {
     

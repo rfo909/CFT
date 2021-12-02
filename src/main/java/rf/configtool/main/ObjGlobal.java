@@ -102,7 +102,6 @@ public class ObjGlobal extends Obj {
         add(new FunctionList());
         add(new FunctionDir());
         add(new FunctionFile());
-        add(new FunctionFilter());
         add(new FunctionGrep());
         add(new FunctionObjInput());
         add(new FunctionInt());
@@ -376,20 +375,7 @@ public class ObjGlobal extends Obj {
     }
     
 
-    class FunctionFilter extends Function {
-        public String getName() {
-            return "Filter";
-        }
-        public String getShortDesc() {
-            return "Filter() - creates Filter object";
-        }
-        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 0) throw new Exception("Expected no parameters");
-            return new ValueObj(new ObjFilter());
-        }
-    }
-    
-
+ 
     class FunctionGrep extends Function {
         public String getName() {
             return "Grep";

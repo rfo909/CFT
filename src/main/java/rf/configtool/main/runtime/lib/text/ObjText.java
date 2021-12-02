@@ -32,12 +32,14 @@ import rf.configtool.main.runtime.ValueInt;
 import rf.configtool.main.runtime.ValueList;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
+
 import java.awt.Color;
 
 public class ObjText extends Obj {
     
     public ObjText() {
         this.add(new FunctionLexer());
+        this.add(new FunctionFilter());
     }
     
     @Override
@@ -80,6 +82,21 @@ public class ObjText extends Obj {
             return new ValueObj(new ObjLexer());
         }
     }
+    
+    class FunctionFilter extends Function {
+        public String getName() {
+            return "Filter";
+        }
+        public String getShortDesc() {
+            return "Filter() - creates Filter object";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueObj(new ObjFilter());
+        }
+    }
+    
+
   
 
 }
