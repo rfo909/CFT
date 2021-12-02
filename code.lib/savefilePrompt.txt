@@ -1,19 +1,17 @@
 
 # Get hostname string if defined / for inclusion in prompt
 # --
-	h=Db2:Get("Lib","hostname","").trim
-	if (h==null || h.length==0) {
-		""
-	} else {
-		"[" + h + "]"
-	}
+	h=Db2:Get(Sys.scriptId,"hostname","").trim
+	if (h==null) h=""
+	if (h.length>0) h="["+h+"]"
+	h
 /Hostname
 
 
 # Set hostname string (used in prompt)
 # --
 	P(1,readLine("Hostname"))=>hostName
-	Db2:Set("Lib","hostname", hostName)
+	Db2:Set(Sys.scriptId,"hostname", hostName)
 /SetHostname
 
 
