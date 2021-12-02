@@ -1,3 +1,18 @@
+# Is root on linux?
+# --
+	if (!Sys.isWindows) {
+		Dir.runCapture("whoami").nth.trim=="root"
+	} else {
+		false
+	}
+//IsRoot
+
+
+# IsRootMark
+# --
+	if(IsRoot,Curses:Reversed + "#root#" + Curses:Reset + " ", "")
+/IsRootMark
+
 
 # Get hostname string if defined / for inclusion in prompt
 # --
