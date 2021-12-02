@@ -1,9 +1,9 @@
 
 # Get hostname string if defined / for inclusion in prompt
 # --
-	h=Db2:Get(Sys.scriptId,"hostname","").trim
+	h=Db2:Get(Sys.scriptId,"hostname",null)
 	if (h==null) h=""
-	if (h.length>0) h="["+h+"]"
+	if (h.length > 0) h="["+h+"]"
 	h
 /Hostname
 
@@ -16,19 +16,6 @@
 
 
 
-# Set current path color for prompt
-# --
-	P(1,Curses:SelectColor) => color
-	Db2:Set(Sys.scriptId,"PromptPathColor", color)
-/SetPathColor
-
-
-# Get current path color 
-# --
-	Db2:Get(Sys.scriptId,"PromptPathColor","")
-//GetPathColor
-	
-
 # Format current dir for prompt
 # --
 	P(1,Dir)=>dir
@@ -37,7 +24,7 @@
 	if (maxLen < 30) maxLen=30
 
 	# return value
-	GetPathColor + if (s.length > maxLen, "+"+s.last(maxLen-1), s) + Curses:Reset
+	Curses:Bold + if (s.length > maxLen, "+"+s.last(maxLen-1), s) + Curses:Reset
 /Path
 
 
