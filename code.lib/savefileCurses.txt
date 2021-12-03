@@ -8,13 +8,18 @@ Color and cursor control with ANSI Escape sequences.
 P(1,true)=>enabled
 	Db2:Set("Curses","Enabled",enabled)
 	if (enabled) Inner {
-		List(TxtRed,TxtGreen,TxtBlue,TxtYellow,TxtMagenta,TxtCyan,TxtWhite,TxtBlack,Reversed)->x
+		List(TxtRed,TxtGreen,TxtBlue,TxtYellow,TxtMagenta,TxtCyan,TxtWhite,TxtBlack,Underline,Reversed)->x
 			println(x+"Curses using ANSI escape sequences" + Bold + " ENABLED" + Reset)
 		|
 	}
 	true 
 /Enable
 
+
+# Disable ANSI escape sequences
+# --
+	Enable(false)
+/Disable
 
 
 # Is curses enabled?
@@ -64,15 +69,26 @@ if(ena,Esc+"[37m","")
 
 # Select color
 # --
-	SymDict(TxtBlack, TxtRed, TxtGreen, TxtYellow, TxtBlue, TxtMagenta, TxtCyan, TxtWhite) => colors
-	colors.keys->key
-		println(colors.get(key)+key+Curses:Reset)
-	|
-	Lib:MenuSelect(colors.keys) => key
-	println("Selected " + colors.get(key) + key + Curses:Reset)
-
-	# return value
-	colors.get(key)
+	if (!ena) {
+		println("Curses disabled, returning empty string (no color)")
+		""
+	} else Inner {
+		SymDict(TxtBlack, TxtRed, TxtGreen, TxtYellow, TxtBlue, TxtMagenta, TxtCyan, TxtWhite, Bold, Underline, Reversed) => colors
+		data=Inner{
+			colors.keys->key 
+				value=colors.get(key) 
+				label=key + " " + value+"example"+Curses:Reset 
+				out(SymDict(label,value))
+		}
+		LLabel=Lambda{P(1).label}
+		Lib:MenuSelect(data, LLabel, "Select text color") => result
+		if (result == null) {
+			#println("Selected none")
+			""
+		} else {
+			result.value
+		}
+	}
 /SelectColor
 
 

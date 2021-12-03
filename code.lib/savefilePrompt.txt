@@ -30,6 +30,19 @@
 /SetHostname
 
 
+# Set text color for current path in prompt
+# --
+	P(1,Curses:SelectColor) => col
+	Db2:Set(Sys.scriptId,"path.color", col)
+/SetPathColor
+
+
+# Get text color for path (in Path function)
+# --
+	if (Curses:Enabled, Db2:Get(Sys.scriptId,"path.color",""), "")
+/GetPathColor
+
+
 
 # Format current dir for prompt
 # --
@@ -39,7 +52,7 @@
 	if (maxLen < 30) maxLen=30
 
 	# return value
-	Curses:Bold + if (s.length > maxLen, "+"+s.last(maxLen-1), s) + Curses:Reset
+	GetPathColor + if (s.length > maxLen, "+"+s.last(maxLen-1), s) + Curses:Reset
 /Path
 
 
