@@ -24,6 +24,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -85,6 +86,7 @@ public class ObjDir extends Obj {
 				new FunctionSetAsCurrentDir(),
 				new FunctionVerify(),
 				new FunctionNewestFile(),
+				new FunctionStats(),
 		};
 		setFunctions(arr);
 
@@ -848,5 +850,36 @@ public class ObjDir extends Obj {
         }
     }
   
+    
+    class FunctionStats extends Function {
+        public String getName() {
+            return "stats";
+        }
+        public String getShortDesc() {
+            return "stats() - return dictionary with stats for directory";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            File f=new File(name);
+            
+            int fileCount=0;
+            int dirCount=0;
+
+            File[] content = f.listFiles();
+            for (File x:content) {
+            	try {
+	            	if (x.isFile()) { fileCount++; } 
+	            	else if (x.isDirectory()) { dirCount++; }
+            	} catch (Exception ex) {
+            		// ignore
+            	}
+            }
+            ObjDict dict=new ObjDict();
+            dict.set("fileCount", new ValueInt(fileCount));
+            dict.set("dirCount", new ValueInt(dirCount));
+            
+            return new ValueObj(dict);
+        }
+    }
 
 }
