@@ -1,7 +1,5 @@
 package rf.configtool.main.runtime.lib.ddd.viewers;
 
-import java.awt.Graphics;
-import java.awt.Color;
 import java.util.Vector;
 
 import rf.configtool.main.runtime.lib.ddd.core.*;
@@ -13,7 +11,7 @@ import rf.configtool.main.runtime.lib.ddd.core.*;
 */
 public class AreaViewer extends Viewer {
 
-	private Color defaultColor;
+	private MyColor defaultColor;
 
 	// simple statistics
 	private long triCount=0;	// all triangles that are attempted drawn
@@ -21,7 +19,7 @@ public class AreaViewer extends Viewer {
 
 	// Calculated results for each pixel
 	private double depth[][];	// x-depth for each point
-	private Color color[][];	// base color: if null, no point exists
+	private MyColor color[][];	// base color: if null, no point exists
 
 	private Vector3d vectors[][];	// rays
 
@@ -32,9 +30,8 @@ public class AreaViewer extends Viewer {
 		// Test av forskjellige m�ter � kalkulere refleksjon p�
 
 	private ViewerNotificationListener listener;
-	private Bounds2d updatedArea;	// null means no pixels set
 
-	private int notificationCount;
+	private final int notificationCount;
 	private int notificationCounter=0;
 	// when it passes notificationCount, a notification is sent and the counter is reset
 
@@ -52,14 +49,14 @@ public class AreaViewer extends Viewer {
 	* (re)drawn into a Graphics object.
 	*/
 	public AreaViewer (double focalLength,
-		double filmWidth, double filmHeight, int sizex, int sizey, Color defaultColor,
+		double filmWidth, double filmHeight, int sizex, int sizey, MyColor defaultColor,
 		ViewerNotificationListener listener, int notificationCount)
 	{
 		super(focalLength, filmWidth, filmHeight, sizex, sizey);
 
 		this.defaultColor=defaultColor;
 		depth=new double[sizex][sizey];
-		color=new Color[sizex][sizey];
+		color=new MyColor[sizex][sizey];
 		// Colors default to null, means infinite distance, no point
 		vectors=new Vector3d[sizex][sizey];
 		for (int y=0; y<sizey; y++) {
@@ -76,7 +73,7 @@ public class AreaViewer extends Viewer {
 	* Clears the viewer of content
 	*/
 	public void clear() {
-		color=new Color[sizex][sizey];  // creates new array of null-values
+		color=new MyColor[sizex][sizey];  // creates new array of null-values
 	}
 
 	/**
@@ -100,7 +97,7 @@ public class AreaViewer extends Viewer {
 	* calculated by finding the distance from current light position to the point
 	* given as arg.
 	*/
-	public void setLightIntensity (Ref somePoint) {
+	public void setLightReach (Ref somePoint) {
 		Vector3d v=somePoint.getPos().sub(lightPos);
 		maxLightDistance=v.length();
 		System.out.println("light influence reaches zero at a distance of " + maxLightDistance);
@@ -115,8 +112,8 @@ public class AreaViewer extends Viewer {
 	}
 
 
-	private Color applyLightSources (Triangle t, Vector3d intersectionPoint) {
-		Color baseColor=t.getAttributes().getColor();
+	private MyColor applyLightSources (Triangle t, Vector3d intersectionPoint) {
+		MyColor baseColor=t.getAttributes().getColor();
 
 		if (t.calcPlaneEquation(lightPos) <= 0) {
 			// light hits surface from the back
@@ -171,7 +168,7 @@ public class AreaViewer extends Viewer {
 				deltaColor--;
 			}
 		}
-		return new Color ((int)r,(int)g,(int)b);
+		return new MyColor ((int)r,(int)g,(int)b);
 	}
 
 
@@ -245,12 +242,6 @@ public class AreaViewer extends Viewer {
 							if (color[x][y]==null || depth[x][y] > depthValue) {
 								depth[x][y]=depthValue;
 								color[x][y]=applyLightSources(t, intersect);
-								// keep track of which parts of the image are being updated
-								if (updatedArea==null) {
-									updatedArea=new Bounds2d(x,y);
-								} else {
-									updatedArea.addPoint(x,y);
-								}
 							}
 						} else {
 							// System.out.println("focal length problem:" + depthValue);
@@ -276,8 +267,7 @@ public class AreaViewer extends Viewer {
 
 		notificationCounter++;
 		if (notificationCounter >= notificationCount) {
-			if (listener != null) listener.viewerNotification();
-			notificationCounter=0;
+			sendViewerNotification();
 		}
 	}
 
@@ -396,55 +386,45 @@ public class AreaViewer extends Viewer {
 		return false;
 	}
 
-
-	/**
-	* Refresh updated area of image.
-	*/
-	public void draw (Graphics g) {
-		if (updatedArea==null) return;	// no changes
-
-		long aa=System.currentTimeMillis();
-
-		int xmin=(int)updatedArea.getXMin();
-		int xmax=(int)updatedArea.getXMax();
-
-		int ymin=(int)updatedArea.getYMin();
-		int ymax=(int)updatedArea.getYMax();
-
-		if (xmin < 0) xmin=0;
-		if (xmin >= sizex) xmin=sizex-1;
-		if (ymin < 0) ymin=0;
-		if (ymin >= sizey) ymin=sizey-1;
-
-		Color c;
-		for (int y=ymin; y<=ymax; y++) {
-			for (int x=xmin; x<=xmax; x++) {
-				if (color[x][y]==null) {
-					c=defaultColor;
-				} else {
-					c=color[x][y];
-				}
-				g.setColor(c);
-				g.fillRect(x,y,1,1);
-			}
-		}
-
-		// ## m� bruke arrays som konverteres til Image - g�r sannsynligvis 1000 x fortere
-		// bruker rundt 500 ms p� min Dell Precision M90 (2 GHz Core 2 Duo - koden er singel-threaded)
-
-		long bb=System.currentTimeMillis();
-		System.out.println("draw: " + (bb-aa) + " ms");
-	}
-
-	/**
-	* Reset the internal data structure that keeps track of which part
-	* of the image has changed. Should only be called after all images
-	* used in double-buffering have been taken off-screen and updated via
-	* the draw() method.
-	*/
-	public void reset() {
-		updatedArea=null;
-	}
+//
+//	/**
+//	* Refresh updated area of image.
+//	*/
+//	public void draw (Graphics g) {
+//		if (updatedArea==null) return;	// no changes
+//
+//		long aa=System.currentTimeMillis();
+//
+//		int xmin=(int)updatedArea.getXMin();
+//		int xmax=(int)updatedArea.getXMax();
+//
+//		int ymin=(int)updatedArea.getYMin();
+//		int ymax=(int)updatedArea.getYMax();
+//
+//		if (xmin < 0) xmin=0;
+//		if (xmin >= sizex) xmin=sizex-1;
+//		if (ymin < 0) ymin=0;
+//		if (ymin >= sizey) ymin=sizey-1;
+//
+//		Color c;
+//		for (int y=ymin; y<=ymax; y++) {
+//			for (int x=xmin; x<=xmax; x++) {
+//				if (color[x][y]==null) {
+//					c=defaultColor;
+//				} else {
+//					c=color[x][y];
+//				}
+//				g.setColor(c);
+//				g.fillRect(x,y,1,1);
+//			}
+//		}
+//
+//		// ## m� bruke arrays som konverteres til Image - g�r sannsynligvis 1000 x fortere
+//		// bruker rundt 500 ms p� min Dell Precision M90 (2 GHz Core 2 Duo - koden er singel-threaded)
+//
+//		long bb=System.currentTimeMillis();
+//		System.out.println("draw: " + (bb-aa) + " ms");
+//	}
 
 
 	/** Return number of rectangles and triangles processed.

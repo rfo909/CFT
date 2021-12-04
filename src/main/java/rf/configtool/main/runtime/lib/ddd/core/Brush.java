@@ -1,7 +1,6 @@
 package rf.configtool.main.runtime.lib.ddd.core;
 
-import java.awt.Color;
-import java.util.Vector;
+import java.util.*;
 
 
 /**
@@ -13,16 +12,16 @@ import java.util.Vector;
 public class Brush {
 	
 	private TriangleReceiver triDest;
-	private VisibleAttributes defaultAttributes;
+	private VisibleAttributes attr;
 	
 	private Vector points=new Vector();			// Vector3d
-	private Vector attributes=new Vector();		// VisibleAttributes or null if not visible
 	private Vector prevPoints=null;
 	
+	private List<Triangle> terminatorTriangles=new ArrayList<Triangle>();
 	
 	private boolean visibleTrianglesOnly=false;
 	// decides whether calling triVisible() or tri() in triDest.
-	private boolean splitBothWays=false;
+	private boolean splitBothWays=true;
 	// if true, generate double set of triangles, splitting both possible ways
 	
 	
@@ -35,27 +34,39 @@ public class Brush {
 	*/
 	public Brush (TriangleReceiver triDest) {
 		this.triDest=triDest;
-		defaultAttributes=new VisibleAttributes(Color.red);
+		attr=new VisibleAttributes(new MyColor(255,0,0));
+	}
+	
+	public void setAttr (VisibleAttributes attr) {
+		this.attr=attr;
+	}
+	
+	
+	public void clearPoints() {
+		points.clear();
 	}
 	
 	/**
 	* Private helper method to add a point and an accompanying attributes object
 	* to the two vectors that are stored internally. 
 	*/
-	private void add (Vector3d point, VisibleAttributes attr) {
+	private void add (Vector3d point) {
 		points.addElement(point);
-		attributes.addElement(attr);
 	}
 	
 	/**
 	* Create the first or a new starting point for a sequence of segments.
 	*/
 	public void addPoint (Vector3d point) {
-		add(point,null);
+		add(point);
 	}
 	
 	public void addPoint (double x, double y, double z) {
 		addPoint(new Vector3d(x,y,z));
+	}
+	
+	public void addTerminatorTriangle (Triangle t) {
+		terminatorTriangles.add(t);
 	}
 
 	/** 
@@ -76,7 +87,7 @@ public class Brush {
 		if (points.size() == 0) {
 			addPoint(0,0,0);
 		}
-		add(point, defaultAttributes);
+		add(point);
 	}
 	
 	public void addSegment (double x, double y, double z) {
@@ -95,8 +106,8 @@ public class Brush {
 	* for the opaqueness parameter is 0.0 for totally transparency and 1.0 for
 	* totally opaque.
 	*/
-	public void setAttributes(Color defaultColor) {
-		defaultAttributes=new VisibleAttributes(defaultColor);
+	public void setAttributes(MyColor defaultColor) {
+		attr=new VisibleAttributes(defaultColor);
 	}
 	
 	
@@ -170,14 +181,11 @@ public class Brush {
 		if (prevPoints != null) {
 			// start at 1 since the first must be a point without attributes
 			for (int i=1; i<prevPoints.size(); i++) {
-				VisibleAttributes attr=(VisibleAttributes) attributes.elementAt(i);
-				if (attr != null) {
-					Vector3d prev_a=(Vector3d) prevPoints.elementAt(i-1);
-					Vector3d prev_b=(Vector3d) prevPoints.elementAt(i);
-					Vector3d new_a=(Vector3d) newPoints.elementAt(i-1);
-					Vector3d new_b=(Vector3d) newPoints.elementAt(i);
-					generateTriangles (prev_a, prev_b, new_a, new_b, attr);
-				}
+				Vector3d prev_a=(Vector3d) prevPoints.elementAt(i-1);
+				Vector3d prev_b=(Vector3d) prevPoints.elementAt(i);
+				Vector3d new_a=(Vector3d) newPoints.elementAt(i-1);
+				Vector3d new_b=(Vector3d) newPoints.elementAt(i);
+				generateTriangles (prev_a, prev_b, new_a, new_b, attr);
 			}
 		}
 		prevPoints=newPoints;

@@ -20,12 +20,12 @@ of following steps.
 # Ask for target
 # --
 	Input("Enter ssh target (user@host)").get
-/GetTarget
+//GetTarget
 
 
 # Hosts - first us used as master, the others become worker1, worker2 and so on
-	#"k1.v k2.v k3.v k4.v k5.v k6.v k7.v k8.v".split
-	"k1.v k2.v k3.v".split
+	"k1.v k2.v k3.v k4.v k5.v k6.v k7.v k8.v".split
+	#"k1.v k2.v k3.v".split
 	#"k4.v k5.v k6.v".split
 /Hosts
 
@@ -38,7 +38,7 @@ of following steps.
 # Targets
 	Hosts->h 
 		out(SSHUser+"@"+h)
-/Targets
+//Targets
 
 
 
@@ -50,7 +50,7 @@ of following steps.
 	DockerSwarm:Install(target)
 	SSH:sudo(target,'systemctl enable docker', false, debug)
 	SSH:sudo(target,'systemctl start docker', true, debug)
-/InstallDocker
+//InstallDocker
 
 
 
@@ -61,7 +61,7 @@ of following steps.
 
 	SSH:sudo(target,'curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add', false, debug)
 	SSH:sudo(target,'apt-add-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main"', false, debug)
-/InstallSoftwareRepos
+//InstallSoftwareRepos
 
 
 
@@ -71,7 +71,7 @@ of following steps.
 	P(1,GetTarget) => target
 
         SSH:sudo(target,"curl -s https://packages.cloud.google.com/apt/dists/kubernetes-xenial/main/binary-amd64/Packages | grep Version | awk '{print $2}'").stdout
-/KubShowVersions
+//KubShowVersions
 
 
 
@@ -94,7 +94,7 @@ of following steps.
 	SSH:sudo(target,'kubeadm version', false, false).stdout->line
 		println(line)
 	|
-/InstallationTools
+//InstallationTools
 
 
 
@@ -105,7 +105,7 @@ of following steps.
 
 	println(""+target+": turning off swap")
 	SSH:sudo(target,'swapoff -a', false, debug)
-/SwappingOff
+//SwappingOff
 
 
 # Run all above!!

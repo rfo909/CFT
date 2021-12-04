@@ -1,8 +1,5 @@
 package rf.configtool.main.runtime.lib.ddd.viewers;
 
-import java.awt.Color;
-import java.awt.Graphics;
-
 import rf.configtool.main.runtime.lib.ddd.core.*;
 
 /**
@@ -124,7 +121,7 @@ public abstract class Viewer implements TriangleReceiver {
 	* internally about what areas of the picture have changed since last draw(),
 	* thus optimizing the draw() method.
 	*/
-	public abstract void draw (Graphics g);
+	//public abstract void draw (Graphics g);
 
 	/**
 	* The generator may ask the viewer to update itself when a new object

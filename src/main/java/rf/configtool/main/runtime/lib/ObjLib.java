@@ -35,6 +35,7 @@ import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
 import rf.configtool.main.runtime.lib.conversions.ObjConvert;
 import rf.configtool.main.runtime.lib.db.ObjDb2;
+import rf.configtool.main.runtime.lib.ddd.DDD;
 import rf.configtool.main.runtime.lib.integrations.ObjIntegrations;
 import rf.configtool.main.runtime.lib.java.ObjJava;
 import rf.configtool.main.runtime.lib.math.ObjMath;
@@ -57,6 +58,8 @@ public class ObjLib extends Obj {
         this.add(new FunctionIntegrations());
         this.add(new FunctionJava());
         this.add(new FunctionWeb());
+        this.add(new FunctionDDD());
+        this.add(new FunctionColor());
         
     }
     
@@ -260,5 +263,36 @@ public class ObjLib extends Obj {
     } 
     
    
+    class FunctionDDD extends Function {
+        public String getName() {
+            return "DDD";
+        }
+        public String getShortDesc() {
+            return "DDD() - object for generating 3D model as image";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueObj(new DDD());
+        }
+    } 
+    
+    class FunctionColor extends Function {
+        public String getName() {
+            return "Color";
+        }
+
+        public String getShortDesc() {
+            return "Color(r,g,b) - create Color object";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 3) throw new RuntimeException("Expected rgb parameters (ints)");
+        	int r=(int) getInt("r", params, 0);
+        	int g=(int) getInt("g", params, 1);
+        	int b=(int) getInt("b", params, 2);
+        	
+        	return new ValueObj(new ObjColor(r,g,b));
+        }
+    }
 
 }

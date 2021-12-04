@@ -1,19 +1,18 @@
 package rf.configtool.main.runtime.lib.ddd.core;
 
-import java.awt.Color;
 
 /** Simple container-class containing common attributes of
 * objects to be visualized: color
 */
 
 public class VisibleAttributes {
-	private Color color;
+	private MyColor color;
 
-	public VisibleAttributes (Color color) {
+	public VisibleAttributes (MyColor color) {
 		this.color=color;
 	}
 
-	public Color getColor() {
+	public MyColor getColor() {
 		return color;
 	}
 
