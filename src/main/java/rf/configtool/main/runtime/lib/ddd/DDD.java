@@ -1,5 +1,6 @@
 package rf.configtool.main.runtime.lib.ddd;
 
+import java.awt.Color;
 import java.util.List;
 
 import rf.configtool.main.Ctx;
@@ -8,7 +9,10 @@ import rf.configtool.main.runtime.Function;
 import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueObj;
+import rf.configtool.main.runtime.lib.ObjColor;
+import rf.configtool.main.runtime.lib.ddd.core.Triangle;
 import rf.configtool.main.runtime.lib.ddd.core.Vector3d;
+import rf.configtool.main.runtime.lib.ddd.core.VisibleAttributes;
 
 /**
  * Publicly known object via Lib
@@ -101,28 +105,26 @@ public class DDD extends Obj {
         }
 
         public String getShortDesc() {
-            return "Triangle(a,b,c,color) - a,b,c are 3D vectors";
+            return "Triangle(a,b,c,color) - a,b,c are Ref objects";
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 4) throw new RuntimeException("Expected 3D vector parameters a,b,c + color");
+        	if (params.size() != 4) throw new RuntimeException("Expected Ref parameters a,b,c + color");
         	Obj a1=getObj("a",params,0);
         	Obj b1=getObj("b",params,1);
         	Obj c1=getObj("c",params,2);
         	Obj col1=getObj("color",params,3);
         	
-        	if (!(a1 instanceof DDDVector) || !(b1 instanceof DDDVector) || !(c1 instanceof DDDVector)) {
-        		throw new RuntimeException("Expected 3D vector parameters a,b,c + color");
+        	if (!(a1 instanceof DDDRef) || !(b1 instanceof DDDRef) || !(c1 instanceof DDDRef) || !(col1 instanceof ObjColor)) {
+        		throw new RuntimeException("Expected Ref parameters a,b,c + color");
         	}
-        	Vector3d a=((DDDVector) a1).getVec();
-        	Vector3d b=((DDDVector) b1).getVec();
-        	Vector3d c=((DDDVector) c1).getVec();
+        	Vector3d a=((DDDRef) a1).getRef().getPos();
+        	Vector3d b=((DDDRef) b1).getRef().getPos();
+        	Vector3d c=((DDDRef) c1).getRef().getPos();
         	
-        	double x=getFloat("x", params, 0);
-        	double y=getFloat("y", params, 1);
-        	double z=getFloat("z", params, 2);
-        	Vector3d vec=new Vector3d(x,y,z);
-        	return new ValueObj(new DDDVector(vec));
+        	Color color=((ObjColor) col1).getAWTColor();
+        	Triangle t=new Triangle(a,b,c,new VisibleAttributes(color));
+        	return new ValueObj(new DDDTriangle(t));
         }
     }
     

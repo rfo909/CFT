@@ -1,5 +1,6 @@
 package rf.configtool.main.runtime.lib.ddd.core;
 
+import java.awt.Color;
 import java.util.*;
 
 
@@ -34,7 +35,7 @@ public class Brush {
 	*/
 	public Brush (TriangleReceiver triDest) {
 		this.triDest=triDest;
-		attr=new VisibleAttributes(new MyColor(255,0,0));
+		attr=new VisibleAttributes(new Color(255,0,0));
 	}
 	
 	public void setAttr (VisibleAttributes attr) {
@@ -106,7 +107,7 @@ public class Brush {
 	* for the opaqueness parameter is 0.0 for totally transparency and 1.0 for
 	* totally opaque.
 	*/
-	public void setAttributes(MyColor defaultColor) {
+	public void setAttributes(Color defaultColor) {
 		attr=new VisibleAttributes(defaultColor);
 	}
 	

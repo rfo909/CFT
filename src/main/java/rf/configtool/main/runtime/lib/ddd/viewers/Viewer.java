@@ -1,5 +1,7 @@
 package rf.configtool.main.runtime.lib.ddd.viewers;
 
+import java.io.File;
+
 import rf.configtool.main.runtime.lib.ddd.core.*;
 
 /**
@@ -111,23 +113,9 @@ public abstract class Viewer implements TriangleReceiver {
 	}
 	
 	/**
-	* This method should basically draw all changes since the last call
-	* to the method. In other words, it is not necessarily a complete redraw,
-	* and should probably be called regularly at least for line viewers, since
-	* these have to cache calculated lines internally. For surface viewers,
-	* there is no way of not keeping a complete representation of the view, so
-	* then this method may simply be a complete redraw. An advanced implementation
-	* might still choose to implement partial update by storing information
-	* internally about what areas of the picture have changed since last draw(),
-	* thus optimizing the draw() method.
-	*/
-	//public abstract void draw (Graphics g);
-
-	/**
-	* The generator may ask the viewer to update itself when a new object
-	* is rendered. This method is dictated by the TriangleReceiver interface.
-	*/
-	public abstract void update();
+	 * Write PNG file
+	 */
+	public abstract void writePNG (File file) throws Exception;
 	
 	/**
 	* Brief statistics report from the viewer: how many rectangles/triangles

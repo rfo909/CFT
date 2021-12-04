@@ -21,12 +21,5 @@ public interface TriangleReceiver {
 	*/
 	public boolean notVisible (rf.configtool.main.runtime.lib.ddd.core.Bounds3d bounds) ;
 	
-	/**
-	* A generator of triangles may call this method whenever it wants the
-	* triangle-receiver to update its output (screen). This could be due to
-	* some level of object being completely rendered.
-	*/
-	public void update();
-	
 
 }

@@ -1,5 +1,7 @@
 package rf.configtool.main.runtime.lib.ddd;
 
+import java.awt.Color;
+import java.io.File;
 import java.util.List;
 
 import rf.configtool.main.Ctx;
@@ -8,7 +10,8 @@ import rf.configtool.main.runtime.Function;
 import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueObj;
-import rf.configtool.main.runtime.lib.ddd.core.MyColor;
+import rf.configtool.main.runtime.lib.ObjFile;
+import rf.configtool.main.runtime.lib.ddd.core.Triangle;
 import rf.configtool.main.runtime.lib.ddd.core.TriangleReceiver;
 import rf.configtool.main.runtime.lib.ddd.viewers.AreaViewer;
 import rf.configtool.main.runtime.lib.ddd.viewers.ViewerNotificationListener;
@@ -21,17 +24,25 @@ public class DDDWorld extends Obj {
 	private final AreaViewer viewer;
 	private final TriangleReceiver triRecv;
 
+	private double mm(double meters) {
+		return meters/1000.0;
+	}
+	
     public DDDWorld() {
     	// Defining viewer in millimetres
     	ViewerNotificationListener listener=null;
     	int viewerNofificationTriCount=1000;
     	
-    	this.viewer=new AreaViewer(50, 36, 24, 800, 600, MyColor.BLACK, listener, viewerNofificationTriCount);
+    	/**
+    	 * Defining camera in meter scale, which becomes scale 1
+    	 */
+    	this.viewer=new AreaViewer(mm(35), mm(36), mm(24), 800, 600, Color.BLACK, listener, viewerNofificationTriCount);
     	this.triRecv=this.viewer; 
     	
     	this.add(new FunctionSetLightPos());
-    	this.add(new FunctionSetLightReach());
+    	this.add(new FunctionSetLightRange());
         this.add(new FunctionBrush());
+        this.add(new FunctionOut());
         this.add(new FunctionRender());
     }
 
@@ -79,13 +90,13 @@ public class DDDWorld extends Obj {
     }
 
 
-    class FunctionSetLightReach extends Function {
+    class FunctionSetLightRange extends Function {
         public String getName() {
-            return "setLightReach";
+            return "setLightRange";
         }
 
         public String getShortDesc() {
-            return "setLightReach(DDD.Ref) - returns self";
+            return "setLightRange(Ref) - returns self";
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
@@ -129,15 +140,41 @@ public class DDDWorld extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	// Create image
-        	// get Graphics-object
-        	// viewer.draw(g);
-        	// save as PNG
-        	throw new Exception("Not implemented");
+        	if (params.size() != 1) throw new RuntimeException("Expected File parameter");
+        	Obj file=getObj("file",params,0);
+        	if (file instanceof ObjFile) {
+        		File f=((ObjFile) file).getFile();
+        		self().viewer.writePNG(f);
+        		return new ValueObj(self());
+        	} else {
+        		throw new RuntimeException("Expected File parameter");
+        	}
         }
     }
 
 
-  
+    class FunctionOut extends Function {
+        public String getName() {
+            return "out";
+        }
+
+        public String getShortDesc() {
+            return "out(Triangle) - add triangle to scene";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 1) throw new RuntimeException("Expected Triangle parameter");
+        	Obj tri=getObj("triangle",params,0);
+        	if (tri instanceof DDDTriangle) {
+        		Triangle t=((DDDTriangle) tri).getTri();
+        		self().viewer.tri(t);
+        		return new ValueObj(self());
+        	} else {
+        		throw new RuntimeException("Expected Triangle parameter");
+        	}
+        }
+    }
+
+
     
 }

@@ -13,7 +13,7 @@ public class Bounds3d {
 	
 	public Bounds3d (Vector3d[] points) {
 		this(points[0]);
-		for (int i=1; i<=points.length; i++) add(points[i]);
+		for (int i=1; i<points.length; i++) add(points[i]);
 	}
 
 	public Bounds3d (Ref ref) {

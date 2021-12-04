@@ -1,5 +1,6 @@
 package rf.configtool.main.runtime.lib;
 
+import java.awt.Color;
 import java.util.List;
 
 import rf.configtool.main.Ctx;
@@ -8,7 +9,6 @@ import rf.configtool.main.runtime.Function;
 import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueInt;
-import rf.configtool.main.runtime.lib.ddd.core.MyColor;
 
 public class ObjColor extends Obj {
     
@@ -40,8 +40,8 @@ public class ObjColor extends Obj {
 	}
 
 
-	public MyColor getMyColor() {
-		return new MyColor(r,g,b);
+	public Color getAWTColor() {
+		return new Color(r,g,b);
 	}
 	
 	

@@ -1,7 +1,10 @@
 package rf.configtool.main.runtime.lib.ddd.viewers;
 
+import java.awt.Color;
+import java.io.File;
+
+import rf.configtool.main.runtime.lib.RasterImage;
 import rf.configtool.main.runtime.lib.ddd.core.Bounds3d;
-import rf.configtool.main.runtime.lib.ddd.core.MyColor;
 import rf.configtool.main.runtime.lib.ddd.core.Plane3d;
 import rf.configtool.main.runtime.lib.ddd.core.Ref;
 import rf.configtool.main.runtime.lib.ddd.core.Triangle;
@@ -14,15 +17,17 @@ import rf.configtool.main.runtime.lib.ddd.core.Vector3d;
 */
 public class AreaViewer extends Viewer {
 
-	private MyColor defaultColor;
+	private Color defaultColor;
 
 	// simple statistics
 	private long triCount=0;	// all triangles that are attempted drawn
 	private long triPaintedCount=0;		// triangles actually painted
+	
+	private final int sizex, sizey;
 
 	// Calculated results for each pixel
 	private double depth[][];	// x-depth for each point
-	private MyColor color[][];	// base color: if null, no point exists
+	private Color color[][];	// base color: if null, no point exists
 
 	private Vector3d vectors[][];	// rays
 
@@ -52,14 +57,16 @@ public class AreaViewer extends Viewer {
 	* (re)drawn into a Graphics object.
 	*/
 	public AreaViewer (double focalLength,
-		double filmWidth, double filmHeight, int sizex, int sizey, MyColor defaultColor,
+		double filmWidth, double filmHeight, int sizex, int sizey, Color defaultColor,
 		ViewerNotificationListener listener, int notificationCount)
 	{
 		super(focalLength, filmWidth, filmHeight, sizex, sizey);
+		this.sizex=sizex;
+		this.sizey=sizey;
 
 		this.defaultColor=defaultColor;
 		depth=new double[sizex][sizey];
-		color=new MyColor[sizex][sizey];
+		color=new Color[sizex][sizey];
 		// Colors default to null, means infinite distance, no point
 		vectors=new Vector3d[sizex][sizey];
 		for (int y=0; y<sizey; y++) {
@@ -76,7 +83,7 @@ public class AreaViewer extends Viewer {
 	* Clears the viewer of content
 	*/
 	public void clear() {
-		color=new MyColor[sizex][sizey];  // creates new array of null-values
+		color=new Color[sizex][sizey];  // creates new array of null-values
 	}
 
 	/**
@@ -86,7 +93,7 @@ public class AreaViewer extends Viewer {
 	*/
 	public void setLightPos (Ref pos) {
 		lightPos=pos.getPos();
-		System.out.println("light source positioned at " + lightPos);
+		//System.out.println("light source positioned at " + lightPos);
 	}
 
 	/**
@@ -103,7 +110,7 @@ public class AreaViewer extends Viewer {
 	public void setLightReach (Ref somePoint) {
 		Vector3d v=somePoint.getPos().sub(lightPos);
 		maxLightDistance=v.length();
-		System.out.println("light influence reaches zero at a distance of " + maxLightDistance);
+		//System.out.println("light influence reaches zero at a distance of " + maxLightDistance);
 	}
 
 	/**
@@ -115,8 +122,8 @@ public class AreaViewer extends Viewer {
 	}
 
 
-	private MyColor applyLightSources (Triangle t, Vector3d intersectionPoint) {
-		MyColor baseColor=t.getAttributes().getColor();
+	private Color applyLightSources (Triangle t, Vector3d intersectionPoint) {
+		Color baseColor=t.getAttributes().getColor();
 
 		if (t.calcPlaneEquation(lightPos) <= 0) {
 			// light hits surface from the back
@@ -171,7 +178,7 @@ public class AreaViewer extends Viewer {
 				deltaColor--;
 			}
 		}
-		return new MyColor ((int)r,(int)g,(int)b);
+		return new Color ((int)r,(int)g,(int)b);
 	}
 
 
@@ -197,7 +204,7 @@ public class AreaViewer extends Viewer {
 		y1-=2;
 		y2+=2;
 		if (x1 > sizex - 1 || x2 < 0 || y1 > sizey - 1 || y2 < 0) {
-			System.out.println("OUTSIDE: Bounds: [" + x1 + "," + y1 + "] - [" + x2 + "," + y2 + "]");
+			//System.out.println("OUTSIDE: Bounds: [" + x1 + "," + y1 + "] - [" + x2 + "," + y2 + "]");
 			return;
 		}
 		if (x1 < 0) x1=0;
@@ -250,7 +257,7 @@ public class AreaViewer extends Viewer {
 							// System.out.println("focal length problem:" + depthValue);
 						}
 					} else {
-						System.out.println("intersect==null");
+						//System.out.println("intersect==null");
 					}
 					pix_inside++;
 				} else {
@@ -282,10 +289,6 @@ public class AreaViewer extends Viewer {
 	private void sendViewerNotification () {
 		if (listener != null) listener.viewerNotification();
 		notificationCounter=0;
-	}
-
-	public void update() {
-		sendViewerNotification();
 	}
 
 	/** Display visible triangles only. Parameters MUST BE GIVEN IN COUNTER-CLOCK ORDER
@@ -389,45 +392,26 @@ public class AreaViewer extends Viewer {
 		return false;
 	}
 
-//
-//	/**
-//	* Refresh updated area of image.
-//	*/
-//	public void draw (Graphics g) {
-//		if (updatedArea==null) return;	// no changes
-//
-//		long aa=System.currentTimeMillis();
-//
-//		int xmin=(int)updatedArea.getXMin();
-//		int xmax=(int)updatedArea.getXMax();
-//
-//		int ymin=(int)updatedArea.getYMin();
-//		int ymax=(int)updatedArea.getYMax();
-//
-//		if (xmin < 0) xmin=0;
-//		if (xmin >= sizex) xmin=sizex-1;
-//		if (ymin < 0) ymin=0;
-//		if (ymin >= sizey) ymin=sizey-1;
-//
-//		Color c;
-//		for (int y=ymin; y<=ymax; y++) {
-//			for (int x=xmin; x<=xmax; x++) {
-//				if (color[x][y]==null) {
-//					c=defaultColor;
-//				} else {
-//					c=color[x][y];
-//				}
-//				g.setColor(c);
-//				g.fillRect(x,y,1,1);
-//			}
-//		}
-//
-//		// ## m� bruke arrays som konverteres til Image - g�r sannsynligvis 1000 x fortere
-//		// bruker rundt 500 ms p� min Dell Precision M90 (2 GHz Core 2 Duo - koden er singel-threaded)
-//
-//		long bb=System.currentTimeMillis();
-//		System.out.println("draw: " + (bb-aa) + " ms");
-//	}
+
+	/**
+	* Save as PNG
+	*/
+	public void writePNG (File file) throws Exception {
+		RasterImage img=new RasterImage(sizex,sizey);
+		for (int y=0; y<sizey; y++) {
+			for (int x=0; x<sizex; x++) {
+				Color c;
+				if (color[x][y]==null) {
+					c=defaultColor;
+				} else {
+					c=color[x][y];
+				}
+				img.setPixel(x,y,c);
+			}
+		}
+		
+		img.savePNG(file.getAbsolutePath());
+	}
 
 
 	/** Return number of rectangles and triangles processed.

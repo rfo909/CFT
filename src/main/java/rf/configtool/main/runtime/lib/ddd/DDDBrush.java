@@ -1,5 +1,6 @@
 package rf.configtool.main.runtime.lib.ddd;
 
+import java.awt.Color;
 import java.util.List;
 
 import rf.configtool.main.Ctx;
@@ -10,7 +11,6 @@ import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.lib.ObjColor;
 import rf.configtool.main.runtime.lib.ddd.core.Brush;
-import rf.configtool.main.runtime.lib.ddd.core.MyColor;
 import rf.configtool.main.runtime.lib.ddd.core.Triangle;
 import rf.configtool.main.runtime.lib.ddd.core.TriangleReceiver;
 import rf.configtool.main.runtime.lib.ddd.core.Vector3d;
@@ -87,7 +87,7 @@ public class DDDBrush extends Obj {
         	if (params.size() != 1) throw new RuntimeException("Expected Color parameter");
         	Obj x=getObj("color",params,0);
         	if (x instanceof ObjColor) {
-        		MyColor color=((ObjColor) x).getMyColor();
+        		Color color=((ObjColor) x).getAWTColor();
             	self().brush.setAttr(new VisibleAttributes(color));
             	return new ValueObj(self());
         	} else {
