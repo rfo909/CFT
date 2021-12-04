@@ -34,7 +34,7 @@ public class AreaViewer extends Viewer {
 	private Vector3d lightPos=new Vector3d(0,0,0);  // light at center of film
 	private double maxLightDistance=1000;	// unit unknown, may be millimetres or metres
 
-	private boolean metallicReflection=false;
+	private boolean metallicReflection=true;
 		// Test av forskjellige m�ter � kalkulere refleksjon p�
 
 	private ViewerNotificationListener listener;
@@ -125,10 +125,10 @@ public class AreaViewer extends Viewer {
 	private Color applyLightSources (Triangle t, Vector3d intersectionPoint) {
 		Color baseColor=t.getAttributes().getColor();
 
-		if (t.calcPlaneEquation(lightPos) <= 0) {
-			// light hits surface from the back
-			return baseColor;
-		}
+//		if (t.calcPlaneEquation(lightPos) <= 0) {
+//			// light hits surface from the back
+//			return baseColor;
+//		}
 
 		Vector3d triNorm=t.getNormalVector();
 
@@ -144,9 +144,9 @@ public class AreaViewer extends Viewer {
 		}
 		if (angle > 1.0) angle=1.0;
 
-		double maxInfluence=0.4;
+		double maxInfluence=1.2;
 		if (metallicReflection) {
-			maxInfluence=0.8;	// metallic reflection: max influence is higher
+			maxInfluence=5;	// metallic reflection: max influence is higher
 		}
 		double influenceFactor=1.0-angle;		// 1.0 when parallell, 0.0 when 90 degreees
 
@@ -163,7 +163,7 @@ public class AreaViewer extends Viewer {
 		int r=baseColor.getRed();
 		int g=baseColor.getGreen();
 		int b=baseColor.getBlue();
-		deltaColor *= 3;  // this is the number of color values to add to the three
+		//deltaColor *= 3;  // this is the number of color values to add to the three
 		while ( (r < 255 || g < 255 || b < 255) && deltaColor > 0) {
 			if (r < 255) {
 				r++;
@@ -232,8 +232,6 @@ public class AreaViewer extends Viewer {
 		}
 		// Now, any point from eye to screen within the 2d-bounding box that is outside
 		// any of the planes (equation > 0) is outside the triangle and will be ignored
-		int pix_inside=0;
-		int pix_outside=0;
 		for (int x=x1; x<=x2; x++) {
 			for (int y=y1; y<=y2; y++) {
 				Vector3d vec=vectors[x][y];	// "ray" from eye through pixel
@@ -259,20 +257,10 @@ public class AreaViewer extends Viewer {
 					} else {
 						//System.out.println("intersect==null");
 					}
-					pix_inside++;
-				} else {
-					pix_outside++;
 				}
 			}
 		}
-		/*
-		if (pix_inside==0 || pix_outside==0) {
-			System.out.print("**");
-		} else {
-			System.out.print("  ");
-		}
-		System.out.println("pix_inside=" + pix_inside + " pix_outside=" + pix_outside);
-		*/
+
 		triPaintedCount++;
 
 		notificationCounter++;
