@@ -76,11 +76,11 @@ public class DDDBrush extends Obj {
     
     class FunctionSetColor extends Function {
         public String getName() {
-            return "SetColor";
+            return "setColor";
         }
 
         public String getShortDesc() {
-            return "SetColor(Color) - set color - returns self";
+            return "setColor(Color) - set color - returns self";
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
@@ -99,11 +99,11 @@ public class DDDBrush extends Obj {
     
     class FunctionClearPoints extends Function {
         public String getName() {
-            return "ClearPoints";
+            return "clearPoints";
         }
 
         public String getShortDesc() {
-            return "ClearPoints() - reset brush - return self";
+            return "clearPoints() - reset brush - return self";
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
@@ -116,11 +116,11 @@ public class DDDBrush extends Obj {
   
     class FunctionAddPoint extends Function {
         public String getName() {
-            return "AddPoint";
+            return "addPoint";
         }
 
         public String getShortDesc() {
-            return "AddPoint(DDD.Vector) - add brush point as (relative) vector - returns self";
+            return "addPoint(DDD.Vector) - add brush point as (relative) vector - returns self";
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
@@ -137,11 +137,11 @@ public class DDDBrush extends Obj {
     
     class FunctionAddTerminationTriangle extends Function {
         public String getName() {
-            return "AddTerminationTriangle";
+            return "addTerminationTriangle";
         }
 
         public String getShortDesc() {
-            return "AddTerminationTriangle(DDD.Triangle) - triangles rendered at first penDown and at penUp";
+            return "addTerminationTriangle(DDD.Triangle) - triangles rendered at first penDown and at penUp";
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
@@ -160,11 +160,11 @@ public class DDDBrush extends Obj {
     
     class FunctionPenDown extends Function {
         public String getName() {
-            return "PenDown";
+            return "penDown";
         }
 
         public String getShortDesc() {
-            return "PenDown(Ref) - brush pen down";
+            return "penDown(Ref) - brush pen down";
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
@@ -181,11 +181,11 @@ public class DDDBrush extends Obj {
     
     class FunctionPenUp extends Function {
         public String getName() {
-            return "PenUp";
+            return "penUp";
         }
 
         public String getShortDesc() {
-            return "PenUp() - brush pen up";
+            return "penUp() - brush pen up";
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {

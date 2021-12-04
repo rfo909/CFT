@@ -51,6 +51,7 @@ public class StmtHelp extends Stmt {
         }
         
         v.generateHelp(ctx);
+        ctx.push(new ValueObj(v));
     }
 
 

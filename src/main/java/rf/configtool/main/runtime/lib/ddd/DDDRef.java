@@ -7,8 +7,10 @@ import rf.configtool.main.runtime.ColList;
 import rf.configtool.main.runtime.Function;
 import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
+import rf.configtool.main.runtime.ValueFloat;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.lib.ddd.core.Ref;
+import rf.configtool.main.runtime.lib.ddd.core.Vector3d;
 
 /**
  * Publicly known object
@@ -40,6 +42,12 @@ public class DDDRef extends Obj {
     	this.add(new FunctionRight());
         this.add(new FunctionUp());
         this.add(new FunctionDown());
+        
+        this.add(new FunctionTranslate());
+        
+        this.add(new FunctionGetPosVector());
+        this.add(new FunctionGetScaleFactor());
+        this.add(new FunctionGetTransformedVector());
 
     }
 
@@ -323,6 +331,88 @@ public class DDDRef extends Obj {
         	return new ValueObj(new DDDRef(ref.down(dist)));
         }
     }
+
+    
+    class FunctionTranslate extends Function {
+        public String getName() {
+            return "Translate";
+        }
+
+        public String getShortDesc() {
+            return "Translate(vec) - create new Ref";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 1) throw new RuntimeException("Expected 3d vector parameter");
+
+        	Obj vec1=getObj("vec",params,0);
+        	if (vec1 instanceof DDDVector) {
+        		Vector3d vec=((DDDVector) vec1).getVec();
+        		Ref newRef=self().ref.translate(vec);
+        		return new ValueObj(new DDDRef(newRef));
+        	} else {
+        		throw new RuntimeException("Expected 3D vector parameter");
+        	}
+        }
+    }
+
+    
+    class FunctionGetPosVector extends Function {
+        public String getName() {
+            return "getPosVector";
+        }
+
+        public String getShortDesc() {
+            return "getPosVector() - get position vector";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 0) throw new RuntimeException("Expected no parameters");
+        	DDDVector pos=new DDDVector( self().ref.getPos() );
+        	return new ValueObj(pos);
+        }
+    }
+
+
+    class FunctionGetScaleFactor extends Function {
+        public String getName() {
+            return "getScaleFactor";
+        }
+
+        public String getShortDesc() {
+            return "getScaleFactor() - get current scale factor";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 0) throw new RuntimeException("Expected no parameters");
+        	double factor=self().ref.getScaleFactor();
+        	return new ValueFloat(factor);
+        }
+    }
+
+
+    class FunctionGetTransformedVector extends Function {
+        public String getName() {
+            return "getTransformedVector";
+        }
+
+        public String getShortDesc() {
+            return "getTransformedVector(vec) - transform local vector inside Ref system, to global vector";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 1) throw new RuntimeException("Expected 3D vector parameter");
+        	Obj vec1=getObj("vec",params,0);
+        	if (vec1 instanceof DDDVector) {
+        		Vector3d vec=((DDDVector) vec1).getVec();
+        		Vector3d result=self().ref.transformLocalToGlobal(vec);
+        		return new ValueObj(new DDDVector(result));
+        	} else {
+        		throw new RuntimeException("Expected 3D vector parameter");
+        	}
+        }
+    }
+
 
 
 }

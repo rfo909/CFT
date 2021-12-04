@@ -1,8 +1,17 @@
 package rf.configtool.main.runtime.lib.ddd;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import rf.configtool.main.Ctx;
 import rf.configtool.main.runtime.ColList;
+import rf.configtool.main.runtime.Function;
 import rf.configtool.main.runtime.Obj;
+import rf.configtool.main.runtime.Value;
+import rf.configtool.main.runtime.ValueList;
+import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.lib.ddd.core.Triangle;
+import rf.configtool.main.runtime.lib.ddd.core.Vector3d;
 
 public class DDDTriangle extends Obj {
 
@@ -14,10 +23,8 @@ public class DDDTriangle extends Obj {
 	
     public DDDTriangle (Triangle tri) {
     	this.tri=tri;
-//    	
-//    	this.add(new FunctionX());
-//    	this.add(new FunctionY());
-//    	this.add(new FunctionZ());
+    	this.add(new FunctionPoints());
+    	this.add(new FunctionNormal());
     }
 
     
@@ -43,22 +50,44 @@ public class DDDTriangle extends Obj {
     }
 
 
-//    class FunctionX extends Function {
-//        public String getName() {
-//            return "x";
-//        }
-//
-//        public String getShortDesc() {
-//            return "x() - get component value";
-//        }
-//
-//        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-//        	if (params.size() != 0) throw new RuntimeException("Expected no parameters");
-//        	return new ValueFloat(vec.getX());
-//        }
-//    }
-//
-//    class FunctionY extends Function {
+    class FunctionPoints extends Function {
+        public String getName() {
+            return "points";
+        }
+
+        public String getShortDesc() {
+            return "points() - returns list of 3D vectors";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 0) throw new RuntimeException("Expected no parameters");
+        	List<Value> list=new ArrayList<Value>();
+        	Vector3d[] points=self().tri.getPoints();
+        	for (Vector3d p:points) {
+        		list.add(new ValueObj(new DDDVector(p)));
+        	}
+        	return new ValueList(list);
+        }
+    }
+
+    class FunctionNormal extends Function {
+        public String getName() {
+            return "normal";
+        }
+
+        public String getShortDesc() {
+            return "normal() - returns normal vector";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 0) throw new RuntimeException("Expected no parameters");
+        	Vector3d normal=self().getTri().getNormalVector();
+        	return new ValueObj(new DDDVector(normal));
+        }
+    }
+
+    
+    //    class FunctionY extends Function {
 //        public String getName() {
 //            return "y";
 //        }

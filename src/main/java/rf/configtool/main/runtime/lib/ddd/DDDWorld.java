@@ -59,11 +59,11 @@ public class DDDWorld extends Obj {
     
     class FunctionSetLightPos extends Function {
         public String getName() {
-            return "SetLightPos";
+            return "setLightPos";
         }
 
         public String getShortDesc() {
-            return "SetLightPos(DDD.Ref) - returns self";
+            return "setLightPos(DDD.Ref) - returns self";
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
@@ -81,11 +81,11 @@ public class DDDWorld extends Obj {
 
     class FunctionSetLightReach extends Function {
         public String getName() {
-            return "SetLightReach";
+            return "setLightReach";
         }
 
         public String getShortDesc() {
-            return "SetLightReach(DDD.Ref) - returns self";
+            return "setLightReach(DDD.Ref) - returns self";
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
@@ -121,7 +121,7 @@ public class DDDWorld extends Obj {
     
     class FunctionRender extends Function {
         public String getName() {
-            return "Render";
+            return "render";
         }
 
         public String getShortDesc() {

@@ -24,6 +24,7 @@ public class DDDVector extends Obj {
     	this.add(new FunctionX());
     	this.add(new FunctionY());
     	this.add(new FunctionZ());
+    	this.add(new FunctionLength());
     }
 
     
@@ -91,6 +92,21 @@ public class DDDVector extends Obj {
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
         	if (params.size() != 0) throw new RuntimeException("Expected no parameters");
         	return new ValueFloat(vec.getZ());
+        }
+    }
+
+    class FunctionLength extends Function {
+        public String getName() {
+            return "length";
+        }
+
+        public String getShortDesc() {
+            return "length() - get vector length";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 0) throw new RuntimeException("Expected no parameters");
+        	return new ValueFloat(self().vec.length());
         }
     }
 
