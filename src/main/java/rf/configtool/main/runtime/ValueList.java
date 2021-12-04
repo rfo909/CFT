@@ -17,12 +17,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.main.runtime;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 import rf.configtool.main.Ctx;
-import rf.configtool.main.OutText;
 import rf.configtool.main.runtime.lib.ObjClosure;
-import rf.configtool.main.runtime.lib.ValueObjInt;
 
 public class ValueList extends Value {
     

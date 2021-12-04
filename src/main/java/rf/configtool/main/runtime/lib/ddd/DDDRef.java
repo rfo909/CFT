@@ -1,30 +1,14 @@
 package rf.configtool.main.runtime.lib.ddd;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
-import rf.configtool.lexer.CharSource;
-import rf.configtool.lexer.Lexer;
-import rf.configtool.lexer.SourceLocation;
-import rf.configtool.lexer.TokenStream;
-import rf.configtool.main.CodeLine;
 import rf.configtool.main.Ctx;
-import rf.configtool.main.FunctionState;
-import rf.configtool.main.Stdio;
-import rf.configtool.main.StdioVirtual;
-import rf.configtool.main.runtime.*;
+import rf.configtool.main.runtime.ColList;
+import rf.configtool.main.runtime.Function;
+import rf.configtool.main.runtime.Obj;
+import rf.configtool.main.runtime.Value;
+import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.lib.ddd.core.Ref;
-import rf.configtool.parsetree.Expr;
-import rf.configtool.parsetree.ProgramLine;
-
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
-import java.io.PrintStream;
 
 /**
  * Publicly known object

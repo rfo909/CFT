@@ -17,12 +17,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.main.runtime;
 
-import java.io.File;
-import java.util.List;
-
-import rf.configtool.main.Ctx;
-import rf.configtool.main.OutText;
-
 public class ValueBoolean extends Value {
     
     private boolean val;

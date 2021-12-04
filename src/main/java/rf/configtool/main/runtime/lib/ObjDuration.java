@@ -17,10 +17,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.main.runtime.lib;
 
-import java.util.*;
+import java.util.List;
 
 import rf.configtool.main.Ctx;
-import rf.configtool.main.runtime.*;
+import rf.configtool.main.runtime.ColList;
+import rf.configtool.main.runtime.Function;
+import rf.configtool.main.runtime.Obj;
+import rf.configtool.main.runtime.Value;
+import rf.configtool.main.runtime.ValueInt;
+import rf.configtool.main.runtime.ValueObj;
+import rf.configtool.main.runtime.ValueString;
 
 /**
  * Duration is an absolute value, no negatives allowed, for addition or subtraction from Date values.

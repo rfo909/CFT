@@ -17,7 +17,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.main.runtime;
 
-import java.io.FileInputStream;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -25,7 +24,6 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import rf.configtool.main.Ctx;
-import rf.configtool.main.OutText;
 import rf.configtool.main.runtime.lib.ObjDict;
 import rf.configtool.util.Hex;
 

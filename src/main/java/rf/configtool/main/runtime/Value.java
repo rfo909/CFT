@@ -17,16 +17,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.main.runtime;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import rf.configtool.lexer.Lexer;
-import rf.configtool.lexer.SourceLocation;
-import rf.configtool.lexer.TokenStream;
-import rf.configtool.main.CodeLine;
-import rf.configtool.main.Ctx;
-import rf.configtool.parsetree.ProgramLine;
-
 public abstract class Value extends Obj {
     
     public abstract String getTypeName();

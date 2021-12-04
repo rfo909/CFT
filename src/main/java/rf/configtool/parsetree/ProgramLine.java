@@ -17,16 +17,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.parsetree;
 
-import rf.configtool.lexer.Token;
+import java.util.ArrayList;
+import java.util.List;
+
 import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.CodeLines;
 import rf.configtool.main.Ctx;
-import rf.configtool.main.ObjGlobal;
-import rf.configtool.main.Runtime;
-import rf.configtool.main.SourceException;
-import rf.configtool.main.runtime.Obj;
-
-import java.util.*;
 
 /**
  * Given a TokenStream, identify a sequence of Stmt objects, until reaching a PIPE_SYMBOL. This

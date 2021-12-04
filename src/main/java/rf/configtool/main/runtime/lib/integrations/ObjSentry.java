@@ -17,36 +17,28 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.main.runtime.lib.integrations;
 
-import java.io.*;
-import java.lang.ProcessBuilder.Redirect;
-import java.security.MessageDigest;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
+import io.sentry.Breadcrumb;
+import io.sentry.Sentry;
+import io.sentry.SentryEvent;
+import io.sentry.SentryLevel;
+import io.sentry.protocol.Message;
+import io.sentry.protocol.SentryException;
+import io.sentry.protocol.SentryStackFrame;
+import io.sentry.protocol.SentryStackTrace;
 import rf.configtool.main.Ctx;
-import rf.configtool.main.CtxCloseHook;
-import rf.configtool.main.SoftErrorException;
-import rf.configtool.main.OutText;
-import rf.configtool.main.PropsFile;
-import rf.configtool.main.Version;
 import rf.configtool.main.runtime.ColList;
 import rf.configtool.main.runtime.Function;
 import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
-import rf.configtool.main.runtime.ValueBinary;
-import rf.configtool.main.runtime.ValueBoolean;
-import rf.configtool.main.runtime.ValueFloat;
-import rf.configtool.main.runtime.ValueInt;
-import rf.configtool.main.runtime.ValueList;
-import rf.configtool.main.runtime.ValueBlock;
 import rf.configtool.main.runtime.ValueNull;
 import rf.configtool.main.runtime.ValueObj;
-import rf.configtool.main.runtime.ValueString;
 import rf.configtool.main.runtime.lib.ObjDict;
-import rf.configtool.main.runtime.lib.db.ObjDb2;
-import rf.configtool.parsetree.Expr;
-import io.sentry.*;
-import io.sentry.Sentry.OptionsConfiguration;
-import io.sentry.protocol.*;
 
 public class ObjSentry extends Obj {
 

@@ -17,12 +17,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.parsetree;
 
-import java.util.*;
-
 import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.Stdio;
-import rf.configtool.main.runtime.Value;
 
 public class StmtPrintDebug extends Stmt {
 

@@ -1,6 +1,9 @@
 package rf.configtool.main.runtime.lib;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.util.List;
 
 import rf.configtool.main.Ctx;
@@ -9,7 +12,6 @@ import rf.configtool.main.runtime.ColList;
 import rf.configtool.main.runtime.Function;
 import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
-import rf.configtool.main.runtime.ValueBoolean;
 import rf.configtool.main.runtime.ValueNull;
 import rf.configtool.main.runtime.ValueObj;
 

@@ -1,6 +1,10 @@
 package rf.configtool.main.runtime.lib.db;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.PrintStream;
 
 /**
  * Attempt getting a file lock, using a separate file. May return true or false. Remember to always free lock after

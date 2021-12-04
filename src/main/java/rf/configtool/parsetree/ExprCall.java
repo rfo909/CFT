@@ -17,23 +17,15 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.parsetree;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
 
-import rf.configtool.lexer.SourceLocation;
 import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.ObjGlobal;
 import rf.configtool.main.Stdio;
-import rf.configtool.main.runtime.*;
-import rf.configtool.main.runtime.lib.ObjDict;
-import rf.configtool.main.runtime.lib.ObjDir;
-import rf.configtool.main.runtime.lib.ObjFile;
-import rf.configtool.main.runtime.lib.ObjGlob;
+import rf.configtool.main.runtime.Value;
 import rf.configtool.root.ScriptState;
-
-import java.util.*;
 
 /**
  * Return directory object for current directory

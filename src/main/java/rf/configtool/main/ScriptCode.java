@@ -17,16 +17,19 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.main;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import rf.configtool.lexer.Lexer;
 import rf.configtool.lexer.SourceLocation;
-import rf.configtool.lexer.Token;
-import rf.configtool.main.runtime.Value;
-import rf.configtool.main.runtime.ValueString;
-import rf.configtool.main.runtime.lib.ObjDict;
-import rf.configtool.parsetree.Stmt;
 import rf.configtool.util.TabUtil;
 
 

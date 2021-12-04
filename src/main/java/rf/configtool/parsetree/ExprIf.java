@@ -17,11 +17,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.parsetree;
 
-import java.util.List;
-
 import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.Ctx;
-import rf.configtool.main.runtime.*;
+import rf.configtool.main.runtime.Value;
+import rf.configtool.main.runtime.ValueNull;
 
 public class ExprIf extends ExprCommon {
 

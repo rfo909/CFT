@@ -17,9 +17,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.main;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.BufferedReader;
+import java.io.Console;
+import java.io.PrintStream;
 
 /**
  * Actual input and output, connected to global stdin and stdout, hence no buffering of output lines.

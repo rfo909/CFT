@@ -17,32 +17,18 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.main.runtime.lib.db;
 
-import java.io.*;
-import java.lang.ProcessBuilder.Redirect;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import rf.configtool.main.Ctx;
-import rf.configtool.main.CtxCloseHook;
-import rf.configtool.main.SoftErrorException;
-import rf.configtool.main.OutText;
-import rf.configtool.main.PropsFile;
-import rf.configtool.main.Version;
 import rf.configtool.main.runtime.ColList;
 import rf.configtool.main.runtime.Function;
 import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
-import rf.configtool.main.runtime.ValueBoolean;
-import rf.configtool.main.runtime.ValueFloat;
-import rf.configtool.main.runtime.ValueInt;
 import rf.configtool.main.runtime.ValueList;
-import rf.configtool.main.runtime.ValueBlock;
 import rf.configtool.main.runtime.ValueNull;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
-import rf.configtool.main.runtime.lib.ObjFile;
-import rf.configtool.main.runtime.lib.Protection;
-import rf.configtool.parsetree.Expr;
-import rf.configtool.util.Hash;
 
 public class ObjDb2 extends Obj {
 

@@ -1,14 +1,14 @@
 package rf.configtool.main.runtime.lib.java;
 
+import java.lang.reflect.Constructor;
+import java.util.List;
+
 import rf.configtool.main.Ctx;
 import rf.configtool.main.runtime.ColList;
 import rf.configtool.main.runtime.Function;
 import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueObj;
-import rf.configtool.main.runtime.lib.java.ObjJava.FunctionForName;
-import java.lang.reflect.*;
-import java.util.List;
 
 public class ObjJavaConstructor extends Obj {
 	

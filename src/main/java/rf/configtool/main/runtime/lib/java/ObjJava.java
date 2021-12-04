@@ -16,11 +16,15 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>
 */
-
-import java.util.*;
+import java.util.List;
 
 import rf.configtool.main.Ctx;
-import rf.configtool.main.runtime.*;
+import rf.configtool.main.runtime.ColList;
+import rf.configtool.main.runtime.Function;
+import rf.configtool.main.runtime.Obj;
+import rf.configtool.main.runtime.Value;
+import rf.configtool.main.runtime.ValueBoolean;
+import rf.configtool.main.runtime.ValueObj;
 
 /**
  * Interface Java objects, constructors and methods, with parameters and return values.

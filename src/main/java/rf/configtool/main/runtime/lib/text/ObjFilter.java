@@ -17,12 +17,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.main.runtime.lib.text;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import rf.configtool.main.Ctx;
-import rf.configtool.main.OutText;
 import rf.configtool.main.runtime.ColList;
 import rf.configtool.main.runtime.Function;
 import rf.configtool.main.runtime.Obj;

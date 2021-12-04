@@ -1,6 +1,8 @@
 package rf.configtool.main.runtime.lib.java;
 
-import rf.configtool.main.runtime.*;
+import rf.configtool.main.runtime.Value;
+import rf.configtool.main.runtime.ValueInt;
+import rf.configtool.main.runtime.ValueNull;
 
 public class ObjJavaValueInt extends ObjJavaValue {
 	

@@ -17,12 +17,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.main;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
 
-import rf.configtool.main.runtime.*;
 import rf.configtool.root.Root;
-import rf.configtool.main.Version;
 
 public class Main {
     

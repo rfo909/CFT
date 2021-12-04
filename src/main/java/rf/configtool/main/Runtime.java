@@ -17,20 +17,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.main;
 
-import java.io.File;
-import java.io.PrintStream;
-import java.lang.ProcessBuilder.Redirect;
-import java.util.*;
+import java.util.List;
 
-import rf.configtool.lexer.Lexer;
-import rf.configtool.lexer.SourceLocation;
-import rf.configtool.lexer.Token;
-import rf.configtool.lexer.TokenStream;
-import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
-import rf.configtool.main.runtime.ValueList;
-import rf.configtool.main.runtime.ValueNull;
-import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
 import rf.configtool.main.runtime.reporttool.Report;
 import rf.configtool.parsetree.ProgramLine;

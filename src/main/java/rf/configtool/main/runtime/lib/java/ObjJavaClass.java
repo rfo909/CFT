@@ -5,7 +5,12 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 import rf.configtool.main.Ctx;
-import rf.configtool.main.runtime.*;
+import rf.configtool.main.runtime.ColList;
+import rf.configtool.main.runtime.Function;
+import rf.configtool.main.runtime.Obj;
+import rf.configtool.main.runtime.Value;
+import rf.configtool.main.runtime.ValueObj;
+import rf.configtool.main.runtime.ValueString;
 
 public class ObjJavaClass extends Obj {
     

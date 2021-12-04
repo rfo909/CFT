@@ -17,9 +17,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.main.runtime.lib;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import rf.configtool.main.runtime.*;
+import rf.configtool.main.runtime.Value;
+import rf.configtool.main.runtime.ValueList;
+import rf.configtool.main.runtime.ValueString;
 
 /**
  * Used by Dir.runCapture() function

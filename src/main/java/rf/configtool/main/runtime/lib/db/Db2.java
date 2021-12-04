@@ -1,10 +1,12 @@
 package rf.configtool.main.runtime.lib.db;
 
-import java.util.*;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import rf.configtool.main.PropsFile;
-
-import java.io.*;
 
 /**
  * A CFT object storage is a map of strings, which represent code, synthesized from data. 

@@ -17,13 +17,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.main;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Stack;
 
 import rf.configtool.lexer.Lexer;
 import rf.configtool.lexer.SourceLocation;
 import rf.configtool.lexer.TokenStream;
-import rf.configtool.main.runtime.Function;
-import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueList;
 import rf.configtool.main.runtime.ValueNull;

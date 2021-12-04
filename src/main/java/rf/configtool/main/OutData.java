@@ -17,10 +17,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.main;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import rf.configtool.main.runtime.Value;
-import rf.configtool.main.runtime.reporttool.Report;
 
 /**
  * Data from StmtOut

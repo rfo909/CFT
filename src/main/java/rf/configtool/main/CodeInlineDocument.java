@@ -17,7 +17,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.main;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import rf.configtool.lexer.SourceLocation;
 import rf.configtool.main.runtime.ValueString;

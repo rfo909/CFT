@@ -17,28 +17,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.parsetree;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
+import java.util.List;
 
-import rf.configtool.lexer.Token;
 import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.Ctx;
-import rf.configtool.main.runtime.Obj;
-import rf.configtool.main.runtime.Value;
-import rf.configtool.main.runtime.ValueInt;
-import rf.configtool.main.runtime.ValueList;
 import rf.configtool.main.runtime.ValueObj;
-import rf.configtool.main.runtime.ValueString;
 import rf.configtool.main.runtime.lib.ObjDir;
-import rf.configtool.main.runtime.lib.ObjFile;
-import rf.configtool.main.runtime.lib.ObjGlob;
 import rf.configtool.main.runtime.lib.Protection;
-import rf.configtool.main.runtime.lib.ValueObjFileLine;
-import rf.configtool.util.TabUtil;
-
-import java.util.*;
 
 public class StmtCd extends StmtShellInteractive {
 

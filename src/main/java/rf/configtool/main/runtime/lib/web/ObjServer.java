@@ -1,8 +1,8 @@
 package rf.configtool.main.runtime.lib.web;
 
-import java.io.*;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 
 /*
 CFT - an interactive programmable shell for automation 
@@ -20,12 +20,20 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>
 */
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 
 import rf.configtool.main.Ctx;
-import rf.configtool.main.Version;
-import rf.configtool.main.runtime.*;
+import rf.configtool.main.runtime.ColList;
+import rf.configtool.main.runtime.Function;
+import rf.configtool.main.runtime.Obj;
+import rf.configtool.main.runtime.Value;
+import rf.configtool.main.runtime.ValueBinary;
+import rf.configtool.main.runtime.ValueList;
+import rf.configtool.main.runtime.ValueObj;
+import rf.configtool.main.runtime.ValueString;
 import rf.configtool.main.runtime.lib.ObjClosure;
 import rf.configtool.main.runtime.lib.ObjFile;
 import rf.configtool.main.runtime.lib.ObjPersistent;

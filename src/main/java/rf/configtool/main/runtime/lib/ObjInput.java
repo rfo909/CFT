@@ -18,13 +18,18 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package rf.configtool.main.runtime.lib;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import rf.configtool.main.Ctx;
 import rf.configtool.main.Stdio;
-import rf.configtool.main.Ctx;
-import rf.configtool.main.runtime.*;
+import rf.configtool.main.runtime.ColList;
+import rf.configtool.main.runtime.Function;
+import rf.configtool.main.runtime.Obj;
+import rf.configtool.main.runtime.Value;
+import rf.configtool.main.runtime.ValueList;
+import rf.configtool.main.runtime.ValueNull;
+import rf.configtool.main.runtime.ValueObj;
+import rf.configtool.main.runtime.ValueString;
 
 /**
  * Persistent object within a session, the persistence part is managed by the global function instantiating

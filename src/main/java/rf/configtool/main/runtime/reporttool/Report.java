@@ -17,10 +17,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.main.runtime.reporttool;
 
-import rf.configtool.main.runtime.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import java.io.PrintStream;
-import java.util.*;
+import rf.configtool.main.runtime.Value;
+import rf.configtool.main.runtime.ValueList;
+import rf.configtool.main.runtime.ValueObj;
 
 public class Report {
     

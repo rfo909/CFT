@@ -9,12 +9,6 @@ import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
-import rf.configtool.main.runtime.lib.ObjDb.FunctionDb2;
-import rf.configtool.main.runtime.lib.ObjDb.FunctionGetLockFile;
-import rf.configtool.main.runtime.lib.ObjDb.FunctionObtainLock;
-import rf.configtool.main.runtime.lib.ObjDb.FunctionReleaseLock;
-import rf.configtool.main.runtime.lib.ObjDb.FunctionUUID;
-import rf.configtool.main.runtime.lib.db.ObjDb2;
 
 public class ObjAnnotatedValue extends Obj {
 	

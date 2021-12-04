@@ -22,13 +22,11 @@ import java.util.List;
 
 import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.Ctx;
-import rf.configtool.main.SourceException;
 import rf.configtool.main.runtime.Value;
-import rf.configtool.main.runtime.ValueString;
-import rf.configtool.main.runtime.ValueBoolean;
 import rf.configtool.main.runtime.ValueFloat;
 import rf.configtool.main.runtime.ValueInt;
 import rf.configtool.main.runtime.ValueList;
+import rf.configtool.main.runtime.ValueString;
 
 public class ExprC extends ExprCommon {
     private String[] sep= {"+","-"};

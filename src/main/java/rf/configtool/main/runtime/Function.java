@@ -21,10 +21,9 @@ package rf.configtool.main.runtime;
  * Superclass of all functions inside Obj (java objects of the language)
  * 
  */
-import java.util.*;
+import java.util.List;
 
 import rf.configtool.main.Ctx;
-import rf.configtool.main.OutText;
 
 public abstract class Function {
 	

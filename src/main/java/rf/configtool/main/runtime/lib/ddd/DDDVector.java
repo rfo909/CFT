@@ -8,22 +8,6 @@ import rf.configtool.main.runtime.Function;
 import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueFloat;
-import rf.configtool.main.runtime.ValueObj;
-import rf.configtool.main.runtime.lib.ddd.DDDRef.FunctionBack;
-import rf.configtool.main.runtime.lib.ddd.DDDRef.FunctionDown;
-import rf.configtool.main.runtime.lib.ddd.DDDRef.FunctionFwd;
-import rf.configtool.main.runtime.lib.ddd.DDDRef.FunctionLeft;
-import rf.configtool.main.runtime.lib.ddd.DDDRef.FunctionRight;
-import rf.configtool.main.runtime.lib.ddd.DDDRef.FunctionRollLeft;
-import rf.configtool.main.runtime.lib.ddd.DDDRef.FunctionRollRight;
-import rf.configtool.main.runtime.lib.ddd.DDDRef.FunctionScaleDown;
-import rf.configtool.main.runtime.lib.ddd.DDDRef.FunctionScaleUp;
-import rf.configtool.main.runtime.lib.ddd.DDDRef.FunctionTurnDown;
-import rf.configtool.main.runtime.lib.ddd.DDDRef.FunctionTurnLeft;
-import rf.configtool.main.runtime.lib.ddd.DDDRef.FunctionTurnRight;
-import rf.configtool.main.runtime.lib.ddd.DDDRef.FunctionTurnUp;
-import rf.configtool.main.runtime.lib.ddd.DDDRef.FunctionUp;
-import rf.configtool.main.runtime.lib.ddd.core.Ref;
 import rf.configtool.main.runtime.lib.ddd.core.Vector3d;
 
 public class DDDVector extends Obj {

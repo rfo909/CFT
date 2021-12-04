@@ -1,8 +1,11 @@
 package rf.configtool.main.runtime.lib.ddd.viewers;
 
-import java.util.Vector;
-
-import rf.configtool.main.runtime.lib.ddd.core.*;
+import rf.configtool.main.runtime.lib.ddd.core.Bounds3d;
+import rf.configtool.main.runtime.lib.ddd.core.MyColor;
+import rf.configtool.main.runtime.lib.ddd.core.Plane3d;
+import rf.configtool.main.runtime.lib.ddd.core.Ref;
+import rf.configtool.main.runtime.lib.ddd.core.Triangle;
+import rf.configtool.main.runtime.lib.ddd.core.Vector3d;
 
 /**
 * This is an extension of abstract class Viewer, that performs

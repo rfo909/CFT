@@ -17,18 +17,15 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.main.runtime;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import rf.configtool.main.Ctx;
 import rf.configtool.main.FunctionState;
-import rf.configtool.main.ObjGlobal;
-import rf.configtool.main.OutData;
 import rf.configtool.main.OutText;
 import rf.configtool.main.runtime.lib.ObjDict;
-import rf.configtool.main.runtime.lib.ObjGrep;
 import rf.configtool.main.runtime.reporttool.Report;
 import rf.configtool.parsetree.ProgramLine;
-import rf.configtool.parsetree.Stmt;
 
 /**
  * Block of code - takes three different forms, but only one is available as

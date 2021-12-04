@@ -17,13 +17,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.parsetree;
 
-import java.util.List;
-
 import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.Ctx;
-import rf.configtool.main.ObjGlobal;
 import rf.configtool.main.SourceException;
-import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 
 public class ExprAssign extends ExprCommon {

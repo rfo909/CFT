@@ -20,7 +20,6 @@ package rf.configtool.main.runtime;
 import java.util.List;
 
 import rf.configtool.main.Ctx;
-import rf.configtool.main.OutText;
 
 public class ValueInt extends Value {
     

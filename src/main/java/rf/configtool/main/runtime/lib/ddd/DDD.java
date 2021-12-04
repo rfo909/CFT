@@ -9,7 +9,6 @@ import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.lib.ddd.core.Vector3d;
-import rf.configtool.main.runtime.lib.ddd.core.VisibleAttributes;
 
 /**
  * Publicly known object via Lib

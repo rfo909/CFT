@@ -17,7 +17,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.main.runtime.lib;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import rf.configtool.lexer.Lexer;
 import rf.configtool.lexer.SourceLocation;
@@ -25,8 +31,16 @@ import rf.configtool.lexer.Token;
 import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.CodeLine;
 import rf.configtool.main.Ctx;
-import rf.configtool.main.OutText;
-import rf.configtool.main.runtime.*;
+import rf.configtool.main.runtime.ColList;
+import rf.configtool.main.runtime.Function;
+import rf.configtool.main.runtime.Obj;
+import rf.configtool.main.runtime.Value;
+import rf.configtool.main.runtime.ValueBlock;
+import rf.configtool.main.runtime.ValueBoolean;
+import rf.configtool.main.runtime.ValueList;
+import rf.configtool.main.runtime.ValueNull;
+import rf.configtool.main.runtime.ValueObj;
+import rf.configtool.main.runtime.ValueString;
 
 /**
  * Non-persistent object to be populated with key-value pairs.
