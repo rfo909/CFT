@@ -117,10 +117,6 @@ public abstract class Viewer implements TriangleReceiver {
 	 */
 	public abstract void writePNG (File file) throws Exception;
 	
-	/**
-	* Brief statistics report from the viewer: how many rectangles/triangles
-	*/
-	public abstract String getStats();
 	
 	/**
 	* This method returns true if the object whose bounds are given as parameter

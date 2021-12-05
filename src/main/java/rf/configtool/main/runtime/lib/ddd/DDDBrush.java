@@ -36,7 +36,7 @@ public class DDDBrush extends Obj {
     	this.add(new FunctionAddTerminationTriangle());
     	
     	this.add(new FunctionBox());
-    	//this.add(new FunctionCircle());
+    	this.add(new FunctionCircle());
     	
     	this.add(new FunctionPenDown());
     	this.add(new FunctionPenUp());
@@ -213,7 +213,44 @@ public class DDDBrush extends Obj {
         		brush.addTerminatorTriangle(t1);
         		brush.addTerminatorTriangle(t2);
         		
-        		brush.setSplitBothWays(false);
+        		return new ValueObj(self());
+        	} else {
+        		throw new RuntimeException("Expected parameters, width, height, color");
+        	}
+        }
+    }
+    
+    
+    
+    
+    class FunctionCircle extends Function {
+        public String getName() {
+            return "circle";
+        }
+
+        public String getShortDesc() {
+            return "circle(radius,color) - creates circle brush, to be dragged along Fwd direction)";
+        }
+        
+        
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 2) throw new RuntimeException("Expected parameters, radius, color");
+        	double radius=getFloat("radius",params,0);
+        	Obj col1=getObj("color",params,1);
+        	if (col1 instanceof ObjColor) {
+        		Color col=((ObjColor) col1).getAWTColor();
+        		VisibleAttributes attr = new VisibleAttributes(col);
+
+        		brush.setAttr(attr);
+        		
+        		Vector3d center=RU(0,0);
+        		
+        		for (int i=0; i<36+1; i++) {
+        			Vector3d a=RU(radius,0).rotateDegX(i*10);
+        			brush.addPoint(a);;
+        			Vector3d b=RU(radius,0).rotateDegX((i+1)*10);
+        			brush.addTerminatorTriangle(new Triangle(center,a,b,attr));
+        		}
         		return new ValueObj(self());
         	} else {
         		throw new RuntimeException("Expected parameters, width, height, color");

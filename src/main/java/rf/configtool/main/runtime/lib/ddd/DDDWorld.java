@@ -9,12 +9,13 @@ import rf.configtool.main.runtime.ColList;
 import rf.configtool.main.runtime.Function;
 import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
+import rf.configtool.main.runtime.ValueInt;
 import rf.configtool.main.runtime.ValueObj;
+import rf.configtool.main.runtime.lib.ObjDict;
 import rf.configtool.main.runtime.lib.ObjFile;
 import rf.configtool.main.runtime.lib.ddd.core.Triangle;
 import rf.configtool.main.runtime.lib.ddd.core.TriangleReceiver;
 import rf.configtool.main.runtime.lib.ddd.viewers.AreaViewer;
-import rf.configtool.main.runtime.lib.ddd.viewers.ViewerNotificationListener;
 
 /**
  *
@@ -29,14 +30,9 @@ public class DDDWorld extends Obj {
 	}
 	
     public DDDWorld() {
-    	// Defining viewer in millimetres
-    	ViewerNotificationListener listener=null;
-    	int viewerNofificationTriCount=1000;
-    	
-    	/**
-    	 * Defining camera in meter scale, which becomes scale 1
-    	 */
-    	this.viewer=new AreaViewer(mm(35), mm(36), mm(24), 800, 600, Color.BLACK, listener, viewerNofificationTriCount);
+
+    	// Defining camera in meter scale, which becomes scale 1
+    	this.viewer=new AreaViewer(mm(35), mm(36), mm(24), 800, 600, Color.BLACK);
     	this.triRecv=this.viewer; 
     	
     	this.add(new FunctionSetLightPos());
@@ -45,6 +41,7 @@ public class DDDWorld extends Obj {
         this.add(new FunctionOut());
         this.add(new FunctionRender());
     	this.add(new FunctionSetMetallicReflection());
+    	this.add(new FunctionGetStats());
 
     }
 
@@ -88,7 +85,8 @@ public class DDDWorld extends Obj {
         	} else {
         		throw new Exception("Expected DDD.Ref parameter");
         	}
-        }
+        }	/** Return number of rectangles and triangles processed.
+    	*/
     }
 
 
@@ -192,6 +190,25 @@ public class DDDWorld extends Obj {
         	boolean bool=getBoolean("bool", params, 0);
         	self().viewer.setMetallicReflection(bool);
         	return new ValueObj(self());
+        }
+    }
+    
+
+    class FunctionGetStats extends Function {
+        public String getName() {
+            return "getStats";
+        }
+
+        public String getShortDesc() {
+            return "getStats() - returns Dict";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 0) throw new RuntimeException("Expected no parameters");
+        	ObjDict dict=new ObjDict();
+        	dict.set("triCount", new ValueInt(viewer.getTriCount()));	
+        	dict.set("triPaintedCount", new ValueInt(viewer.getTriPaintedCount()));	
+        	return new ValueObj(dict);
         }
     }
     

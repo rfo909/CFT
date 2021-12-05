@@ -38,12 +38,6 @@ public class AreaViewer extends Viewer {
 
 	private boolean metallicReflection=false;
 
-	private ViewerNotificationListener listener;
-
-	private final int notificationCount;
-	private int notificationCounter=0;
-	// when it passes notificationCount, a notification is sent and the counter is reset
-
 	/**
 	* Creates an area viewer. The focal length, filmwidth and filmheight may be given in
 	* millimetres, like 50 mm focal length and 35x24 mm film size. The sizex and sizey is
@@ -58,8 +52,7 @@ public class AreaViewer extends Viewer {
 	* (re)drawn into a Graphics object.
 	*/
 	public AreaViewer (double focalLength,
-		double filmWidth, double filmHeight, int sizex, int sizey, Color defaultColor,
-		ViewerNotificationListener listener, int notificationCount)
+		double filmWidth, double filmHeight, int sizex, int sizey, Color defaultColor)
 	{
 		super(focalLength, filmWidth, filmHeight, sizex, sizey);
 		this.sizex=sizex;
@@ -76,8 +69,6 @@ public class AreaViewer extends Viewer {
 				// if (x%100==0) System.out.println("Ray["+x+","+y+"] = " + vectors[x][y]);
 			}
 		}
-		this.listener=listener;
-		this.notificationCount=notificationCount;
 	}
 
 	/**
@@ -263,28 +254,16 @@ public class AreaViewer extends Viewer {
 		}
 
 		triPaintedCount++;
-
-		notificationCounter++;
-		if (notificationCounter >= notificationCount) {
-			sendViewerNotification();
-		}
 	}
 
-	/**
-	* Inform the listener that it is time to update the image on screen. May be called
-	* automatically as a consequence of notificationCounter reaching max value, or it
-	* may be called directly from the generator via the method update()
-	*/
-	private void sendViewerNotification () {
-		if (listener != null) listener.viewerNotification();
-		notificationCounter=0;
-	}
+
 
 	/** Display visible triangles only. Parameters MUST BE GIVEN IN COUNTER-CLOCK ORDER
 	* SEEN FROM OUTSIDE, for the determinant to work.
 	*/
 	public void triVisible (Triangle t) {
 		triCount++;
+
 		if (t.calcPlaneEquation(origoVector) > 0) {
 			renderTriangle(t);
 		}
@@ -295,64 +274,6 @@ public class AreaViewer extends Viewer {
 		triCount++;
 		renderTriangle(t);
 	}
-//
-//	/** Overriding method - still calling super-version: adding checking
-//	* against depth-mask: if all parts of objects will be hidden by previously
-//	* drawn objects, then return true.
-//	*/
-//	public boolean notVisible (Bounds3d bounds) {
-//		if (super.notVisible(bounds)) return true;
-//		//Vector3d points[]=bounds.getPoints();
-//		//double smallestDepth=points[0].getX();
-//		//for (int i=1; i<points.length; i++) {
-//		//	if (points[i].getX() < smallestDepth) smallestDepth=points[i].getX();
-//		//}
-//		double smallestDepth=bounds.getX1();
-//		
-//		Bounds2d bounds2d = new Bounds2d(calcScreenCoordinates(points));
-//
-//		int x1=(int) bounds2d.getXMin();
-//		int x2=(int) bounds2d.getXMax();
-//		int y1=(int) bounds2d.getYMin();
-//		int y2=(int) bounds2d.getYMax();
-//		x1-=1;
-//		x2+=1;
-//		y1-=1;
-//		y2+=1;
-//		if (x1 > sizex - 1 || x2 < 0 || y1 > sizey - 1 || y2 < 0) {
-//			System.out.println("notVisible: OUTSIDE: Bounds: [" + x1 + "," + y1 + "] - [" + x2 + "," + y2 + "]");
-//			return true;
-//		}
-//		if (x1 < 0) x1=0;
-//		if (x2 > sizex-1) x2=sizex-1;
-//		if (y1 < 0) y1=0;
-//		if (y2 > sizey-1) y2=sizey-1;
-//
-//		// Do a fast precheck on the corners and center points of the 2d-bounds. If the
-//		// object is partially visible, hopefully this test will decide.
-//		int preCheckX[]={x1,x1,x2,x2};
-//		int preCheckY[]={y1,y2,y1,y2};
-//		for (int i=0; i<preCheckX.length; i++) {
-//			if (color[preCheckX[i]][preCheckY[i]]==null) return false;
-//			if (depth[preCheckX[i]][preCheckY[i]] > smallestDepth) return false;
-//		}
-//
-//		// Now check distance info in each pixel, if any is bigger than smallestDepth, then
-//		// return false. If loop completes, return true.
-//		for (int x=x1; x<=x2; x++) {
-//			for (int y=y1; y<=y2; y++) {
-//				if (color[x][y]==null) return false;  // no object has been painted in this pixel yet
-//				if (depth[x][y] > smallestDepth) return false;
-//			}
-//		}
-//
-//		// System.out.println("notVisible: HIDDEN");
-//
-//		// Object is definitely hidden by other objects!
-//		return true;
-//	}
-//
-//
 
 
 	/**
@@ -402,13 +323,15 @@ public class AreaViewer extends Viewer {
 		img.savePNG(file.getAbsolutePath());
 	}
 
-
-	/** Return number of rectangles and triangles processed.
-	*/
-	public String getStats() {
-		String s="tri=" + triCount + " triPainted=" + triPaintedCount;
-		return s;
+	
+	public long getTriCount() {
+		return triCount;
 	}
+
+	public long getTriPaintedCount() {
+		return triPaintedCount;
+	}
+
 
 }
 
