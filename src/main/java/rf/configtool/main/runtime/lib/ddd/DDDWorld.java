@@ -25,14 +25,10 @@ public class DDDWorld extends Obj {
 	private final AreaViewer viewer;
 	private final TriangleReceiver triRecv;
 
-	private double mm(double meters) {
-		return meters/1000.0;
-	}
-	
     public DDDWorld() {
 
-    	// Defining camera in meter scale, which becomes scale 1
-    	this.viewer=new AreaViewer(mm(35), mm(36), mm(24), 800, 600, Color.BLACK);
+    	// Defining camera in millimeters
+    	this.viewer=new AreaViewer(34, 36, 24, 1024, 768, Color.BLACK);
     	this.triRecv=this.viewer; 
     	
     	this.add(new FunctionSetLightPos());
@@ -136,7 +132,7 @@ public class DDDWorld extends Obj {
         }
 
         public String getShortDesc() {
-            return "Render(file) - render as PNG to file";
+            return "render(file) - render as PNG to file";
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {

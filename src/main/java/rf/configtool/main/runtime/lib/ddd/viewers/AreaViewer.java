@@ -34,7 +34,7 @@ public class AreaViewer extends Viewer {
 	private Vector3d vectors[][];	// rays
 
 	private Vector3d lightPos=new Vector3d(0,0,0);  // light at center of film
-	private double maxLightDistance=1000;	// unit unknown, may be millimetres or metres
+	private double maxLightDistance=100*1000; // 100 meter in millimeters!
 
 	private boolean metallicReflection=false;
 

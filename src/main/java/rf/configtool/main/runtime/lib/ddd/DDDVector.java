@@ -8,6 +8,7 @@ import rf.configtool.main.runtime.Function;
 import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueFloat;
+import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.lib.ddd.core.Vector3d;
 
 public class DDDVector extends Obj {
@@ -25,6 +26,10 @@ public class DDDVector extends Obj {
     	this.add(new FunctionY());
     	this.add(new FunctionZ());
     	this.add(new FunctionLength());
+    	this.add(new FunctionAdd());
+    	this.add(new FunctionSub());
+    	this.add(new FunctionScale());
+    	this.add(new FunctionScaleTo());
     }
 
     
@@ -107,6 +112,85 @@ public class DDDVector extends Obj {
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
         	if (params.size() != 0) throw new RuntimeException("Expected no parameters");
         	return new ValueFloat(self().vec.length());
+        }
+    }
+
+    class FunctionAdd extends Function {
+        public String getName() {
+            return "add";
+        }
+
+        public String getShortDesc() {
+            return "add(DDD.Vector) - return vector sum";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 1) throw new RuntimeException("Expected 3d Vector parameter");
+        	Obj vec1=getObj("vector",params,0);
+        	if (vec1 instanceof DDDVector) {
+        		Vector3d x=((DDDVector) vec1).getVec();
+        		return new ValueObj(new DDDVector(getVec().add(x)));
+        	} else {
+        		throw new RuntimeException("Expected 3d Vector parameter");
+        	}
+        }
+    }
+
+    class FunctionSub extends Function {
+        public String getName() {
+            return "sub";
+        }
+
+        public String getShortDesc() {
+            return "sub(DDD.Vector) - subtract vector";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 1) throw new RuntimeException("Expected 3d Vector parameter");
+        	Obj vec1=getObj("vector",params,0);
+        	if (vec1 instanceof DDDVector) {
+        		Vector3d x=((DDDVector) vec1).getVec();
+        		return new ValueObj(new DDDVector(getVec().sub(x)));
+        	} else {
+        		throw new RuntimeException("Expected 3d Vector parameter");
+        	}
+        }
+    }
+
+    
+    class FunctionScale extends Function {
+        public String getName() {
+            return "scale";
+        }
+
+        public String getShortDesc() {
+            return "scale(factor) - scale vector length";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 1) throw new RuntimeException("Expected Scale parameter");
+        	double factor = getFloat("factor",params,0);
+        	return new ValueObj(new DDDVector(getVec().mul(factor)));
+        }
+    }
+
+
+    
+    class FunctionScaleTo extends Function {
+        public String getName() {
+            return "scaleTo";
+        }
+
+        public String getShortDesc() {
+            return "scale(length) - scale vector length";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 1) throw new RuntimeException("Expected Length parameter");
+        	double length = getFloat("length",params,0);
+        	double factor=length/vec.length();
+        	
+        	return new ValueObj(new DDDVector(getVec().mul(factor)));
         }
     }
 

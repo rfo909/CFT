@@ -47,6 +47,7 @@ public class DDDRef extends Obj {
         
         this.add(new FunctionGetPosVector());
         this.add(new FunctionGetScaleFactor());
+        this.add(new FunctionSetScaleFactor());
         this.add(new FunctionGetTransformedVector());
 
     }
@@ -98,11 +99,11 @@ public class DDDRef extends Obj {
 
     class FunctionScaleDown extends Function {
         public String getName() {
-            return "ScaleDown";
+            return "scaleDown";
         }
 
         public String getShortDesc() {
-            return "ScaleDown(factor) - create new Ref";
+            return "scaleDown(factor) - create new Ref";
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
@@ -117,11 +118,11 @@ public class DDDRef extends Obj {
     
     class FunctionTurnLeft extends Function {
         public String getName() {
-            return "TurnLeft";
+            return "turnLeft";
         }
 
         public String getShortDesc() {
-            return "TurnLeft(degrees) - create new Ref";
+            return "turnLeft(degrees) - create new Ref";
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
@@ -136,11 +137,11 @@ public class DDDRef extends Obj {
     
     class FunctionTurnRight extends Function {
         public String getName() {
-            return "TurnRight";
+            return "turnRight";
         }
 
         public String getShortDesc() {
-            return "TurnRight(degrees) - create new Ref";
+            return "turnRight(degrees) - create new Ref";
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
@@ -155,11 +156,11 @@ public class DDDRef extends Obj {
     
     class FunctionRollLeft extends Function {
         public String getName() {
-            return "RollLeft";
+            return "rollLeft";
         }
 
         public String getShortDesc() {
-            return "RollLeft(degrees) - create new Ref";
+            return "rollLeft(degrees) - create new Ref";
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
@@ -173,11 +174,11 @@ public class DDDRef extends Obj {
     
     class FunctionRollRight extends Function {
         public String getName() {
-            return "RollRight";
+            return "rollRight";
         }
 
         public String getShortDesc() {
-            return "RollRight(degrees) - create new Ref";
+            return "rollRight(degrees) - create new Ref";
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
@@ -191,11 +192,11 @@ public class DDDRef extends Obj {
     
     class FunctionTurnUp extends Function {
         public String getName() {
-            return "TurnUp";
+            return "turnUp";
         }
 
         public String getShortDesc() {
-            return "TurnUp(degrees) - create new Ref";
+            return "turnUp(degrees) - create new Ref";
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
@@ -209,11 +210,11 @@ public class DDDRef extends Obj {
     
     class FunctionTurnDown extends Function {
         public String getName() {
-            return "TurnDown";
+            return "turnDown";
         }
 
         public String getShortDesc() {
-            return "TurnDown(degrees) - create new Ref";
+            return "turnDown(degrees) - create new Ref";
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
@@ -227,11 +228,11 @@ public class DDDRef extends Obj {
     
     class FunctionFwd extends Function {
         public String getName() {
-            return "Fwd";
+            return "fwd";
         }
 
         public String getShortDesc() {
-            return "Fwd(dist) - create new Ref";
+            return "fwd(dist) - create new Ref";
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
@@ -245,11 +246,11 @@ public class DDDRef extends Obj {
 
     class FunctionBack extends Function {
         public String getName() {
-            return "Back";
+            return "back";
         }
 
         public String getShortDesc() {
-            return "Back(dist) - create new Ref";
+            return "back(dist) - create new Ref";
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
@@ -263,11 +264,11 @@ public class DDDRef extends Obj {
 
     class FunctionLeft extends Function {
         public String getName() {
-            return "Left";
+            return "left";
         }
 
         public String getShortDesc() {
-            return "Left(dist) - create new Ref";
+            return "left(dist) - create new Ref";
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
@@ -281,11 +282,11 @@ public class DDDRef extends Obj {
 
     class FunctionRight extends Function {
         public String getName() {
-            return "Right";
+            return "right";
         }
 
         public String getShortDesc() {
-            return "Right(dist) - create new Ref";
+            return "right(dist) - create new Ref";
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
@@ -299,11 +300,11 @@ public class DDDRef extends Obj {
 
     class FunctionUp extends Function {
         public String getName() {
-            return "Up";
+            return "up";
         }
 
         public String getShortDesc() {
-            return "Up(dist) - create new Ref";
+            return "up(dist) - create new Ref";
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
@@ -317,11 +318,11 @@ public class DDDRef extends Obj {
 
     class FunctionDown extends Function {
         public String getName() {
-            return "Down";
+            return "down";
         }
 
         public String getShortDesc() {
-            return "Down(dist) - create new Ref";
+            return "down(dist) - create new Ref";
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
@@ -335,11 +336,11 @@ public class DDDRef extends Obj {
     
     class FunctionTranslate extends Function {
         public String getName() {
-            return "Translate";
+            return "translate";
         }
 
         public String getShortDesc() {
-            return "Translate(vec) - create new Ref";
+            return "translate(vec) - create new Ref";
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
@@ -412,6 +413,25 @@ public class DDDRef extends Obj {
         	}
         }
     }
+
+
+    
+    class FunctionSetScaleFactor extends Function {
+        public String getName() {
+            return "setScaleFactor";
+        }
+
+        public String getShortDesc() {
+            return "setScaleFactor(double) - set current scale factor - returns self";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 1) throw new RuntimeException("Expected scaleFactor parameter");
+        	double factor=getFloat("factor", params, 0);
+        	return new ValueObj(new DDDRef(ref.setScaleFactor(factor)));
+        }
+    }
+
 
 
 

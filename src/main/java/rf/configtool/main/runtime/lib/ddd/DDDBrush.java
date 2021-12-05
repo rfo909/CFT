@@ -32,7 +32,8 @@ public class DDDBrush extends Obj {
     	
     	this.add(new FunctionSetColor());
 
-    	this.add(new FunctionAddPoint());
+    	this.add(new FunctionAdd());
+    	this.add(new FunctionAddRU());
     	this.add(new FunctionAddTerminationTriangle());
     	
     	this.add(new FunctionBox());
@@ -94,13 +95,13 @@ public class DDDBrush extends Obj {
     }
     
     
-    class FunctionAddPoint extends Function {
+    class FunctionAdd extends Function {
         public String getName() {
-            return "addPoint";
+            return "add";
         }
 
         public String getShortDesc() {
-            return "addPoint(Vector) - add brush point as (relative) vector - returns self";
+            return "add(Vector) - add brush point as (relative) vector - returns self";
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
@@ -110,6 +111,26 @@ public class DDDBrush extends Obj {
         		Vector3d vec=((DDDVector) obj).getVec();
         		self().brush.addPoint(vec);
         	}
+        	return new ValueObj(self());
+        }
+    }
+    
+    
+    class FunctionAddRU extends Function {
+        public String getName() {
+            return "addRU";
+        }
+
+        public String getShortDesc() {
+            return "addRU(right,up) - add brush point as right+up coordinates - returns self";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 2) throw new RuntimeException("Expected parameter right+up");
+        	double r=getFloat("right",params,0);
+        	double u=getFloat("up",params,1);
+        	Vector3d vec=new Vector3d(0,-r,u);
+        	self().brush.addPoint(vec);
         	return new ValueObj(self());
         }
     }

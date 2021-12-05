@@ -127,6 +127,12 @@ public class Ref {
 		return x.length();
 	}
 
+	public Ref setScaleFactor(double factor) {
+		double currScale=getScaleFactor();
+		double divFactor=factor/currScale;
+		return scale(divFactor, divFactor, divFactor);
+	}
+
 	// --------------------------------------------------------------
 	// Core operations: transform from local system to global system
 	// --------------------------------------------------------------
