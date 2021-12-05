@@ -14,6 +14,8 @@ import rf.configtool.main.runtime.lib.ddd.core.Vector3d;
 * This is an extension of abstract class Viewer, that performs
 * area rendering of models. It is not very fast but also not very much optimized,
 * so it could probably be made to work faster.
+* 
+* (c) Roar Foshaug 2001
 */
 public class AreaViewer extends Viewer {
 
