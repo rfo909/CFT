@@ -17,6 +17,7 @@ public class Brush {
 	
 	private Vector points=new Vector();			// Vector3d
 	private Vector prevPoints=null;
+	private Ref prevRef=null;
 	
 	private List<Triangle> terminatorTriangles=new ArrayList<Triangle>();
 	
@@ -35,16 +36,11 @@ public class Brush {
 	*/
 	public Brush (TriangleReceiver triDest) {
 		this.triDest=triDest;
-		attr=new VisibleAttributes(new Color(255,0,0));
+		this.attr=new VisibleAttributes(Color.RED);
 	}
 	
 	public void setAttr (VisibleAttributes attr) {
 		this.attr=attr;
-	}
-	
-	
-	public void clearPoints() {
-		points.clear();
 	}
 	
 	/**
@@ -70,79 +66,6 @@ public class Brush {
 		terminatorTriangles.add(t);
 	}
 
-	/** 
-	* Add a point being the position vector of a reference system. Note that the ref
-	* must be local, that is, created with an initial pos of (0,0,0).
-	*/
-	public void addPoint (Ref ref) {
-		addPoint(ref.getPos());
-	}
-	/**
-	* Defines a drawing segment going from the end of the previous segment or
-	* from a more recently defined starting point. If no points have been added,
-	* [0,0,0] will be used as startingpoint for the segment. Attributes as given
-	* in the constructor or latest call to setAttributes() will be used for
-	* the segment.
-	*/
-	public void addSegment (Vector3d point) {
-		if (points.size() == 0) {
-			addPoint(0,0,0);
-		}
-		add(point);
-	}
-	
-	public void addSegment (double x, double y, double z) {
-		addSegment(new Vector3d(x,y,z));
-	}
-	
-	/** 
-	* Add a segment being the position vector of a reference system. Note that the ref
-	* must be local, that is, created with an initial pos of (0,0,0).
-	*/
-	public void addSegment (Ref ref) {
-		addSegment(ref.getPos());
-	}
-	/**
-	* Set default color and opaqueness - used by the addSegment() methods. The value
-	* for the opaqueness parameter is 0.0 for totally transparency and 1.0 for
-	* totally opaque.
-	*/
-	public void setAttributes(Color defaultColor) {
-		attr=new VisibleAttributes(defaultColor);
-	}
-	
-	
-	/**
-	* Add point giving coordinates as forward, right, up. These left-handed values
-	* are converted to the right values in our right-handed system where forward is
-	* positive along the x-axis, right is negative along the y-axis and up is 
-	* positive along the z-axis.
-	*/
-	public void addFRUPoint (double forward, double right, double up) {
-		addPoint(forward, -right, up);
-	}
-	
-	/**
-	* Add segment giving coordinates as forward, right, up
-	*/
-	public void addFRUSegment (double forward, double right, double up) {
-		addSegment(forward, -right, up);
-	}
-	
-	/**
-	* Add point giving coordinates as right and up only
-	*/
-	public void addRUPoint (double right, double up) {
-		addPoint (0.0, -right, up);
-	}
-	
-	/**
-	* Add segment giving coordinates as right and up only
-	*/
-	public void addRUSegment (double right, double up) {
-		addSegment (0.0, -right, up);
-	}
-	
 	/** Call this method to change what triangles are displayed. If b is true, then
 	* only triangles for which the eye is on the outside, are visible. If b is false,
 	* the all triangles will be displayed. Default is TRUE !!!
@@ -166,7 +89,24 @@ public class Brush {
 	* a penDown somewhere else without generating the in-between "line".
 	*/
 	public void penUp() {
+		if (prevRef != null) {
+			terminator(prevRef);
+			prevRef=null;
+		}
 		prevPoints=null;
+	}
+	
+	/**
+	 * Map terminator triangles to ref position
+	 */
+	private void terminator (Ref ref) {
+		for (Triangle t:terminatorTriangles) {
+			Vector3d[] points = t.getPoints();
+			Vector3d a=ref.translate(points[0]).getPos();
+			Vector3d b=ref.translate(points[1]).getPos();
+			Vector3d c=ref.translate(points[2]).getPos();
+			triDest.tri(new Triangle(a,b,c,t.getAttributes()));
+		}
 	}
 	
 	/**
@@ -174,6 +114,9 @@ public class Brush {
 	* unless penUp() has been called inbetween.
 	*/
 	public void penDown(Ref ref) {
+		if (prevRef==null) {
+			terminator(ref);
+		}
 		Vector newPoints=new Vector();
 		for (int i=0; i<points.size(); i++) {
 			Vector3d transVector=(Vector3d) points.elementAt(i);
@@ -190,6 +133,7 @@ public class Brush {
 			}
 		}
 		prevPoints=newPoints;
+		prevRef=ref;
 	}
 	
 	

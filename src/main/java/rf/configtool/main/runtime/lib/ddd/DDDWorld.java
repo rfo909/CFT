@@ -44,6 +44,8 @@ public class DDDWorld extends Obj {
         this.add(new FunctionBrush());
         this.add(new FunctionOut());
         this.add(new FunctionRender());
+    	this.add(new FunctionSetMetallicReflection());
+
     }
 
     @Override
@@ -175,6 +177,24 @@ public class DDDWorld extends Obj {
         }
     }
 
+
+    class FunctionSetMetallicReflection extends Function {
+        public String getName() {
+            return "setMetallicReflection";
+        }
+
+        public String getShortDesc() {
+            return "setMetallicReflection(bool) - modify influence from light source - returns self";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 1) throw new RuntimeException("Expected boolean parameter");
+        	boolean bool=getBoolean("bool", params, 0);
+        	self().viewer.setMetallicReflection(bool);
+        	return new ValueObj(self());
+        }
+    }
+    
 
     
 }

@@ -32,14 +32,11 @@ public class DDDBrush extends Obj {
     	
     	this.add(new FunctionSetColor());
 
-    	this.add(new FunctionClearPoints());
     	this.add(new FunctionAddPoint());
     	this.add(new FunctionAddTerminationTriangle());
     	
-
-//    	this.add(new FunctionBoxXY());
-//    	this.add(new FunctionBoxXZ()));
-//    	this.add(new FunctionBoxYZ()));
+    	this.add(new FunctionBox());
+    	//this.add(new FunctionCircle());
     	
     	this.add(new FunctionPenDown());
     	this.add(new FunctionPenUp());
@@ -97,30 +94,13 @@ public class DDDBrush extends Obj {
     }
     
     
-    class FunctionClearPoints extends Function {
-        public String getName() {
-            return "clearPoints";
-        }
-
-        public String getShortDesc() {
-            return "clearPoints() - reset brush - return self";
-        }
-
-        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 0) throw new RuntimeException("Expected no parameters");
-        	self().brush.clearPoints();
-        	return new ValueObj(self());
-        }
-    }
-    
-  
     class FunctionAddPoint extends Function {
         public String getName() {
             return "addPoint";
         }
 
         public String getShortDesc() {
-            return "addPoint(DDD.Vector) - add brush point as (relative) vector - returns self";
+            return "addPoint(Vector) - add brush point as (relative) vector - returns self";
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
@@ -194,5 +174,55 @@ public class DDDBrush extends Obj {
         	return new ValueObj(self());
         }
     }
+    
+    private Vector3d RU (double right, double up) {
+    	return new Vector3d(0, -right, up);
+    }
+    
+    class FunctionBox extends Function {
+        public String getName() {
+            return "box";
+        }
+
+        public String getShortDesc() {
+            return "box(width,height,color) - creates box brush, to be dragged along Fwd direction)";
+        }
+        
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 3) throw new RuntimeException("Expected parameters, width, height, color");
+        	double width=getFloat("width",params,0);
+        	double height=getFloat("height",params,1);
+        	Obj col1=getObj("color",params,2);
+        	if (col1 instanceof ObjColor) {
+        		Color col=((ObjColor) col1).getAWTColor();
+        		VisibleAttributes attr = new VisibleAttributes(col);
+
+        		brush.setAttr(attr);
+        		
+        		Vector3d a=RU(-width/2,-height/2);
+        		Vector3d b=RU(+width/2,-height/2);
+        		Vector3d c=RU(+width/2,+height/2);
+        		Vector3d d=RU(-width/2,+height/2);
+        		brush.addPoint(a);
+        		brush.addPoint(b);
+        		brush.addPoint(c);
+        		brush.addPoint(d);
+        		brush.addPoint(a);
+        		Triangle t1=new Triangle(a,b,c,attr);
+        		Triangle t2=new Triangle(a,c,d,attr);
+        		brush.addTerminatorTriangle(t1);
+        		brush.addTerminatorTriangle(t2);
+        		
+        		brush.setSplitBothWays(false);
+        		return new ValueObj(self());
+        	} else {
+        		throw new RuntimeException("Expected parameters, width, height, color");
+        	}
+        }
+    }
+    
+    
+    
+    
     
 }

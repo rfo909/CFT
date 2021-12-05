@@ -34,8 +34,7 @@ public class AreaViewer extends Viewer {
 	private Vector3d lightPos=new Vector3d(0,0,0);  // light at center of film
 	private double maxLightDistance=1000;	// unit unknown, may be millimetres or metres
 
-	private boolean metallicReflection=true;
-		// Test av forskjellige m�ter � kalkulere refleksjon p�
+	private boolean metallicReflection=false;
 
 	private ViewerNotificationListener listener;
 
@@ -146,7 +145,7 @@ public class AreaViewer extends Viewer {
 
 		double maxInfluence=1.2;
 		if (metallicReflection) {
-			maxInfluence=5;	// metallic reflection: max influence is higher
+			maxInfluence=2.0;	// metallic reflection: max influence is higher
 		}
 		double influenceFactor=1.0-angle;		// 1.0 when parallell, 0.0 when 90 degreees
 

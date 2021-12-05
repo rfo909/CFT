@@ -25,7 +25,8 @@ public class DDD extends Obj {
         this.add(new FunctionRef());
         this.add(new FunctionVector());
         this.add(new FunctionWorld());
-        this.add(new FunctionTriangle());
+        this.add(new FunctionRTriangle());
+        this.add(new FunctionVTriangle());
     }
 
     @Override
@@ -99,13 +100,13 @@ public class DDD extends Obj {
         }
     }
     
-    class FunctionTriangle extends Function {
+    class FunctionRTriangle extends Function {
         public String getName() {
-            return "Triangle";
+            return "RTriangle";
         }
 
         public String getShortDesc() {
-            return "Triangle(a,b,c,color) - a,b,c are Ref objects";
+            return "RTriangle(a,b,c,color) - a,b,c are Ref objects";
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
@@ -121,6 +122,37 @@ public class DDD extends Obj {
         	Vector3d a=((DDDRef) a1).getRef().getPos();
         	Vector3d b=((DDDRef) b1).getRef().getPos();
         	Vector3d c=((DDDRef) c1).getRef().getPos();
+        	
+        	Color color=((ObjColor) col1).getAWTColor();
+        	Triangle t=new Triangle(a,b,c,new VisibleAttributes(color));
+        	return new ValueObj(new DDDTriangle(t));
+        }
+    }
+    
+
+ 
+    class FunctionVTriangle extends Function {
+        public String getName() {
+            return "VTriangle";
+        }
+
+        public String getShortDesc() {
+            return "VTriangle(a,b,c,color) - a,b,c are 3d Vectors";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 4) throw new RuntimeException("Expected Vector parameters a,b,c + color");
+        	Obj a1=getObj("a",params,0);
+        	Obj b1=getObj("b",params,1);
+        	Obj c1=getObj("c",params,2);
+        	Obj col1=getObj("color",params,3);
+        	
+        	if (!(a1 instanceof DDDVector) || !(b1 instanceof DDDVector) || !(c1 instanceof DDDVector) || !(col1 instanceof ObjColor)) {
+        		throw new RuntimeException("Expected Ref parameters a,b,c + color");
+        	}
+        	Vector3d a=((DDDVector) a1).getVec();
+        	Vector3d b=((DDDVector) b1).getVec();
+        	Vector3d c=((DDDVector) c1).getVec();
         	
         	Color color=((ObjColor) col1).getAWTColor();
         	Triangle t=new Triangle(a,b,c,new VisibleAttributes(color));
