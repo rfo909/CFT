@@ -30,6 +30,8 @@ public class DDDVector extends Obj {
     	this.add(new FunctionSub());
     	this.add(new FunctionScale());
     	this.add(new FunctionScaleTo());
+    	this.add(new FunctionAngle());
+    	
     }
 
     
@@ -191,6 +193,29 @@ public class DDDVector extends Obj {
         	double factor=length/vec.length();
         	
         	return new ValueObj(new DDDVector(getVec().mul(factor)));
+        }
+    }
+    
+    
+    
+    class FunctionAngle extends Function {
+        public String getName() {
+            return "angle";
+        }
+
+        public String getShortDesc() {
+            return "angle(DDD.Vector) - return absolute angle (0-90)";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 1) throw new RuntimeException("Expected 3d Vector parameter");
+        	Obj vec1=getObj("vector",params,0);
+        	if (vec1 instanceof DDDVector) {
+        		Vector3d x=((DDDVector) vec1).getVec();
+        		return new ValueFloat(getVec().calcAbsoluteAngleNormalized(x)*90);
+        	} else {
+        		throw new RuntimeException("Expected 3d Vector parameter");
+        	}
         }
     }
 

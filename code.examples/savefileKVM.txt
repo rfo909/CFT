@@ -76,30 +76,56 @@ displayed with
 > ip addr
 
 
-Create first VM
----------------
+Create a template VM
+--------------------
+Creating VM's for actual use, we prefer cloning a template VM
+as this is MUCH faster.
+
+Start by allocating an IP-address and decide on a name, possibly
+adding these to local DNS server, if using such setup.
+
 To create the first VM, run the interactive Create function. It
 asks for details, then creates a VM. Often its good to create
 a template VM, then clone this to individual VM's.
 
+*** Connecting to new VM 
+
 If you are running on a server with X windows, select headless no,
 and then after installation has started, just from a terminal:
 
-> sudo bash
-> virt-manager
+> sudo virt-manager
 
 If no X-windows, enter "yes" for headless. You must then use 
-VNC to complete the install. Run the VNCHelp function, to look up
-the port number (usually 5900), then follow the instructions to 
-transport the port number to another PC, where you run VNC. 
+VNC to complete the install. In a different window, run the 
 
---
-AutoClone is the preferred way of creating new VM's, as
-it includes the necessary waits and checks for ping/ssh before
-going on.
+	VNCHelp
 
-Making SSH work without password
---------------------------------
+function, to look up the port number (usually 5900), then follow
+the instructions to transport the port number to another PC, 
+where you run VNC, connecting to 127.0.0.1:5900 or some other port. 
+
+After the initial install, reboot the VM. May need to start it
+explicitly, using the Start() function of this script. Then again
+run the VNCHelp function, to check the port, then reconnect with VNC.
+
+All we now need, is to log in, then enter 
+
+	ip addr
+	
+We then ssh in from some terminal, and go on to prepare the VM.
+
+VM preparations
+---------------
+*** Fix /etc/netplan/xxx.yaml
+
+*** Allow password-less sudo
+
+Add a line to /etc/sudoers
+
+<username>	ALL=(ALL) NOPASSWD:ALL
+
+*** Make SSH work without password
+
 The new template VM must allow access from root on the VM server.
 This is done by:
 
@@ -109,8 +135,31 @@ $ ssh-copy-id user@VM
 Also, if there are other hosts that are used for management,
 then do the same there, for the relevant users.
 
---------------------------------------------------------------
+I typically run a separate VM that has access to every host,
+using the Ansible script to update and maintain all hosts.
+
+To ensure access, run the ssh-copy-id user@VM from that host
+as well.
+
+*** Update
+
+For ubuntu:
+
+sudo apt-get update
+sudo apt-get upgrade -y
+sudo apt-get dist-upgrade -y
+
+Production VM's
+---------------
+Use the Clone() function to create copies of the template VM.
+This function is fully parametrized, and can be run automatically
+from other scripts.
+
+Remember to allocate IP-addresses in DNS before starting.
+
+
 >>> EOF
+->line println("| " + line)
 /Readme
 
 
