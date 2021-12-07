@@ -34,14 +34,20 @@
 				b1.penUp
 			}
 	|
-	ref.fwd(lines.first.length*pixelSize)
+	ref.fwd((lines.first.length+2)*pixelSize)
 /Letters3d
+
 		
 # Target dir
 # --
 	Dir("/home/roar/anim").create
 /TargetDir
 
+
+# Subdir
+# --
+	TargetDir.sub("letters").create
+/SubDir
 
 # Subdir
 # --
@@ -59,8 +65,21 @@
 			.left(2+Lib.Math.sin(rot*3)*0.4)
 			.turnRight(60)
 			.rollLeft(Lib.Math.sin(rot)*30)
-		ref = Letters3d("CFT ",world,ref,0.1)
-		ref = Letters3d("RULES",world,ref,0.1,Lib.Color(255,255,0))
+
+
+		str="CFT RULES"
+		Inner {
+			Lib.Data.for(0,str.length,1)->charPos
+				offset=rot+charPos*2
+				red=(Lib.Math.cos(offset*2)*127+127).i
+				green=(Lib.Math.cos(offset+180)*60+127).i
+				blue=(Lib.Math.sin(offset+90)*127+127).i
+				color=Lib.Color(red,green,blue)
+				ref=DDDLetters:Letters3d(str.chars.nth(charPos),world,ref,0.1,color)
+		}
+
+		#ref = DDDLetters:Letters3d("GNT ",world,ref,0.1,color)
+		#ref = DDDLetters:Letters3d("RULES",world,ref,0.1,Lib.Color(255,255,0))
 		
 		rotStr=("0000"+rot).last(3)
 		
@@ -68,6 +87,7 @@
 		f=SubDir.create.file("letters_" + rotStr +".png")
 		world.render(f)
 /test
+
 
 # Create mp4 movie (requires ffmpeg)
 # --
