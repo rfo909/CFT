@@ -1,0 +1,57 @@
+# Generate pixelated letters using squares
+# --
+	P(1,"TXT")=>str
+	P(2)=>world
+	P(3)=>ref
+	P(4,10)=>pixelSize
+	
+	thickness=pixelSize/3
+	
+	
+	# ref is pointing along direction of text, centered in height
+	
+	bSize=pixelSize*0.8
+	b1=world.Brush.box(bSize,bSize,Lib.Color(255,0,0))
+	#b1=world.Brush.box(bSize,bSize,Lib.Color(200,200,200))
+	
+	
+	lines=Letters7x5:GetText(str)
+	Lib.Data.each(0,6)->lineNo
+		line=lines.nth(lineNo)
+		Lib.Data.each(0,line.length-1)->charNo
+			ch=line.chars.nth(charNo)
+			if (ch != " ") {
+				pos=ref.up(3.5*pixelSize)
+					.down(lineNo*pixelSize)
+					.fwd(charNo*pixelSize)
+					.down(0.5*pixelSize)
+					.fwd(0.5*pixelSize)
+					.turnRight(90)
+					.back(thickness/2)
+				b1.penDown(pos)
+				b1.penDown(pos.fwd(thickness))
+				b1.penUp
+			}
+/Letters3d
+		
+# Target dir
+# --
+	Dir("/home/roar/anim").create
+/TargetDir
+
+
+# Test
+# --
+	
+	Lib.Data.for(0,360,5)->rot
+		Lib.DDD.World => world
+		ref = Lib.DDD.Ref.setScaleFactor(1000)
+		ref=ref.fwd(3).left(1.5).turnRight(45).rollLeft(Lib.Math.sin(rot)*15)
+		Letters3d("CFT RULES",world,ref,0.1)
+		
+		rotStr=("0000"+rot).last(3)
+		
+		println("rot="+rotStr)
+		f=TargetDir.sub("letters").create.file("letters_" + rotStr +".png")
+		world.render(f)
+/test
