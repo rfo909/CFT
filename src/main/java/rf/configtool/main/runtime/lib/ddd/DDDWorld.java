@@ -11,6 +11,7 @@ import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueInt;
 import rf.configtool.main.runtime.ValueObj;
+import rf.configtool.main.runtime.lib.ObjColor;
 import rf.configtool.main.runtime.lib.ObjDict;
 import rf.configtool.main.runtime.lib.ObjFile;
 import rf.configtool.main.runtime.lib.ddd.core.Triangle;
@@ -22,15 +23,18 @@ import rf.configtool.main.runtime.lib.ddd.viewers.AreaViewer;
  */
 public class DDDWorld extends Obj {
 	
-	private final AreaViewer viewer;
-	private final TriangleReceiver triRecv;
+	private AreaViewer viewer;
+	private TriangleReceiver triRecv;
 
-    public DDDWorld() {
-
-    	// Defining camera in millimeters
-    	this.viewer=new AreaViewer(34, 36, 24, 1024, 768, Color.BLACK);
+	private void createViewer(double focalDist, double filmX, double filmY, int pixelsX, int pixelsY, Color defaultColor) {
+    	this.viewer=new AreaViewer(focalDist, filmX, filmY, pixelsX, pixelsY, defaultColor);
     	this.triRecv=this.viewer; 
-    	
+	}
+    public DDDWorld() {
+    	// Defining camera in millimeters
+    	createViewer(35, 36, 24, 800, 600, Color.BLACK);
+    
+    	this.add(new FunctionInit());
     	this.add(new FunctionSetLightPos());
     	this.add(new FunctionSetLightRange());
         this.add(new FunctionBrush());
@@ -62,6 +66,32 @@ public class DDDWorld extends Obj {
         return this;
     }
     
+    class FunctionInit extends Function {
+        public String getName() {
+            return "init";
+        }
+
+        public String getShortDesc() {
+            return "init(focalDist,filmWidth,filmHeight,pixelsX,pixelsY,defaultColor) - returns self";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 6) throw new Exception("Expected six parameters");
+        	double focalDist=getFloat("focalDist",params,0);
+        	double filmWidth=getFloat("filmWidth",params,1);
+        	double filmHeight=getFloat("filmHeight",params,2);
+        	int pixelsX=(int) getInt("pixelsX", params, 3);
+        	int pixelsY=(int) getInt("pixelsY", params, 4);
+        	Obj col1=getObj("defaultColor", params, 5);
+        	if (col1 instanceof ObjColor) {
+        		Color defaultColor=((ObjColor) col1).getAWTColor();
+        		self().createViewer(focalDist, filmWidth, filmHeight, pixelsX, pixelsY, defaultColor);
+        		return new ValueObj(self());
+        	} else {
+        		throw new Exception("Expected six paramters");
+        	}
+        }
+    }
     
     class FunctionSetLightPos extends Function {
         public String getName() {
@@ -81,8 +111,7 @@ public class DDDWorld extends Obj {
         	} else {
         		throw new Exception("Expected DDD.Ref parameter");
         	}
-        }	/** Return number of rectangles and triangles processed.
-    	*/
+        }
     }
 
 

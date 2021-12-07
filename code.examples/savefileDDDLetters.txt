@@ -57,8 +57,8 @@
 # Test
 # --
 	
-	Lib.Data.for(0,360,1)->rot
-		Lib.DDD.World => world
+	Lib.Data.for(0,720,1)->rot
+		Lib.DDD.World.init(35,36,24,800,600,Lib.Color(0,0,0)) => world
 		ref = Lib.DDD.Ref.setScaleFactor(1000)
 		ref = ref
 			.fwd(5-Lib.Math.sin(rot*2)*0.7)
@@ -75,7 +75,8 @@
 				green=(Lib.Math.cos(offset+180)*60+127).i
 				blue=(Lib.Math.sin(offset+90)*127+127).i
 				color=Lib.Color(red,green,blue)
-				ref=DDDLetters:Letters3d(str.chars.nth(charPos),world,ref,0.1,color)
+				
+				ref=DDDLetters:Letters3d(str.chars.nth(charPos),world,ref.rollRight(rot/2),0.1,color)
 		}
 
 		#ref = DDDLetters:Letters3d("GNT ",world,ref,0.1,color)
