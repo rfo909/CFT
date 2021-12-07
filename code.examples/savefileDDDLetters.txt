@@ -1,9 +1,11 @@
 # Generate pixelated letters using squares
+# Returns ref for additional text
 # --
 	P(1,"TXT")=>str
 	P(2)=>world
 	P(3)=>ref
 	P(4,10)=>pixelSize
+	P(5,Lib.Color(255,0,0)) => color
 	
 	thickness=pixelSize/3
 	
@@ -11,9 +13,8 @@
 	# ref is pointing along direction of text, centered in height
 	
 	bSize=pixelSize*0.8
-	b1=world.Brush.box(bSize,bSize,Lib.Color(255,0,0))
-	#b1=world.Brush.box(bSize,bSize,Lib.Color(200,200,200))
-	
+	b1=world.Brush.box(bSize,bSize,color)
+
 	
 	lines=Letters7x5:GetText(str)
 	Lib.Data.each(0,6)->lineNo
@@ -32,6 +33,8 @@
 				b1.penDown(pos.fwd(thickness))
 				b1.penUp
 			}
+	|
+	ref.fwd(lines.first.length*pixelSize)
 /Letters3d
 		
 # Target dir
@@ -40,18 +43,33 @@
 /TargetDir
 
 
+# Subdir
+# --
+	TargetDir.sub("letters").create
+/SubDir
+
 # Test
 # --
 	
-	Lib.Data.for(0,360,5)->rot
+	Lib.Data.for(0,360,1)->rot
 		Lib.DDD.World => world
 		ref = Lib.DDD.Ref.setScaleFactor(1000)
-		ref=ref.fwd(3).left(1.5).turnRight(45).rollLeft(Lib.Math.sin(rot)*15)
-		Letters3d("CFT RULES",world,ref,0.1)
+		ref = ref
+			.fwd(5-Lib.Math.sin(rot*2)*0.7)
+			.left(2+Lib.Math.sin(rot*3)*0.4)
+			.turnRight(60)
+			.rollLeft(Lib.Math.sin(rot)*30)
+		ref = Letters3d("CFT ",world,ref,0.1)
+		ref = Letters3d("RULES",world,ref,0.1,Lib.Color(255,255,0))
 		
 		rotStr=("0000"+rot).last(3)
 		
 		println("rot="+rotStr)
-		f=TargetDir.sub("letters").create.file("letters_" + rotStr +".png")
+		f=SubDir.create.file("letters_" + rotStr +".png")
 		world.render(f)
 /test
+
+# Create mp4 movie (requires ffmpeg)
+# --
+	SubDir.run("ffmpeg -i letters_%3d.png result.mp4".split)
+/makeMovie
