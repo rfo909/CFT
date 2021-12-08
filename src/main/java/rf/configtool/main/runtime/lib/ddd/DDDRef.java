@@ -81,11 +81,11 @@ public class DDDRef extends Obj {
 
     class FunctionScaleUp extends Function {
         public String getName() {
-            return "ScaleUp";
+            return "scaleUp";
         }
 
         public String getShortDesc() {
-            return "ScaleUp(factor) - create new Ref";
+            return "scaleUp(factor) - create new Ref";
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {

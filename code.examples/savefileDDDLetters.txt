@@ -9,6 +9,7 @@
 	
 	thickness=pixelSize/3
 	
+	if (str=="") str=" "
 	
 	# ref is pointing along direction of text, centered in height
 	
@@ -40,14 +41,9 @@
 		
 # Target dir
 # --
-	Dir("/home/roar/anim").create
+	Sys.homeDir.sub("anim").create
 /TargetDir
 
-
-# Subdir
-# --
-	TargetDir.sub("letters").create
-/SubDir
 
 # Subdir
 # --
@@ -61,13 +57,13 @@
 		Lib.DDD.World.init(35,36,24,800,600,Lib.Color(0,0,0)) => world
 		ref = Lib.DDD.Ref.setScaleFactor(1000)
 		ref = ref
-			.fwd(5-Lib.Math.sin(rot*2)*0.7)
+			.fwd(5.3-Lib.Math.sin(rot*2)*0.7)
 			.left(2+Lib.Math.sin(rot*3)*0.4)
 			.turnRight(60)
 			.rollLeft(Lib.Math.sin(rot)*30)
 
 
-		str="CFT RULES"
+		str="CFT POWER"
 		Inner {
 			Lib.Data.for(0,str.length,1)->charPos
 				offset=rot+charPos*2
@@ -93,4 +89,7 @@
 # Create mp4 movie (requires ffmpeg)
 # --
 	SubDir.run("ffmpeg -i letters_%3d.png result.mp4".split)
+	SubDir.run("ffmpeg -i letters_%3d.png result.avi".split)
 /makeMovie
+
+
