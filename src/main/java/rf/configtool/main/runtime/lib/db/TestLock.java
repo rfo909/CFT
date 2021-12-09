@@ -42,7 +42,7 @@ public class TestLock {
 				
 					setHolder(id);
 					try {
-						Thread.sleep((int) (Math.random()*1000+10) );
+						Thread.sleep((int) (Math.random()*100+10) );
 					} catch (Exception ex) {
 						// ignore
 					}
