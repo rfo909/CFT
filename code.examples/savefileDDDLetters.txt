@@ -52,8 +52,7 @@
 
 # Test
 # --
-	
-	Lib.Data.for(0,720,1)->rot
+	P(1)=> rot	
 		Lib.DDD.World.init(35,36,24,800,600,Lib.Color(0,0,0)) => world
 		ref = Lib.DDD.Ref.setScaleFactor(1000)
 		ref = ref
@@ -83,8 +82,14 @@
 		println("rot="+rotStr)
 		f=SubDir.create.file("letters_" + rotStr +".png")
 		world.render(f)
-/test
+/makeFrame
 
+
+# Run all frames
+# --
+	Lib.Data.for(0,720,1)->rot
+		makeFrame(rot)
+/run
 
 # Create mp4 movie (requires ffmpeg)
 # --
