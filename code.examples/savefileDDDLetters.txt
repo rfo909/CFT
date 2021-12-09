@@ -87,16 +87,8 @@
 
 # Run all frames
 # --
-	Util:ProcessMonitor =>mon
-	threads=8
-
-	Lib.Data.for(0,720*4,1)->rot
-		println("rot=" + rot)
-		mon.Lwait.call(threads,false)
-		process=SpawnProcess(SymDict(rot), makeFrame(rot))
-		mon.Ladd.call(process)
-	|
-	mon.Lwait.call(0,false)
+	Lib.Data.for(0,720,1)->rot
+		makeFrame(rot)
 /run
 
 # Create mp4 movie (requires ffmpeg)
