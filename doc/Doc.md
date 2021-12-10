@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2021-11-20 RFO
-v2.9.13
+Last updated: 2021-12-10 RFO
+v2.10.0
 ```
 # Introduction
 
@@ -2348,6 +2348,80 @@ String method .mergeExpr where expressions inside
 inserted, creating a list of strings (as the sub-expression may result in
 many lines of output).
 
+# 3D library
+
+
+**v2.10.0**
+
+Included and adapted an old 3d-library written over 20 years ago, for rendering 3D scenes,
+working purely in Java, without any acceleration. It is slow, but gets the job done.
+
+
+It is non-interactive, code only, and fits well into CFT.
+
+## Ref
+
+
+The key object is the Ref, which
+is a complete coordinate system living in global 3D space. It has functions for moving
+in different directions, as well as rotating around its three axes, and scaling.
+
+## World
+
+
+Then there is the World object, which represents the camera and renderer. By default, the
+"film plane" of the camera lives at position (0,0,0) in the global coordinate system, and is defined using
+millimeters. This means that using a Ref object without setting scale, means it operates
+in millimeters. But we can change the scale on Ref objects, for example setting it to
+1000, which means that the units are now meters.
+
+
+Note that Ref objects are immutable, so all calls to Ref functions create new Ref objects.
+
+```
+world = Lib.DDD.World
+ref = Lib.DDD.Ref  # at 0,0,0 and scale=1, which for default camera defs means millimeters
+ref=ref.scaleUp(1000)  # now working in meters
+ref=ref.fwd(3).turnRight(30).down(0.5)
+# new ref is placed 3 meters forward, turned right 30 degrees, and lowered 0.5 meters
+```
+## Brushes
+
+
+The DDD library uses 3D brushes to generate content. A brush is defined as a sequence of
+line segments, for example a square, which is then "dragged" through 3D-space in a
+sequence of "pen down" operations.
+
+```
+boxBrush = world.Brush.box(1,1,Lib.Color(255,0,0))
+# creates a brush for a box centered on origo, with a certain size and color
+# note the size here is "relative" and determined by the scale of the Ref's used
+# when painting with the brush.
+ref = Lib.DDD.Ref.setScaleFactor(1000).forward(3) # forward 3 meters
+boxBrush.penDown(ref)  # start drawing with brush
+boxBrush.penDown(ref.fwd(2))  # move 2 meter forward and do penDown here
+boxBrush.penUp
+```
+
+The above code generates a red box 1 x 1 meter in cross-section and 2 meters long.
+
+## Rendering
+
+
+After doing some number of brush operations, it is time to create a PNG file
+with the image, as seen by the camera.
+
+```
+file=Dir.file("test.png")
+world.render(file)
+```
+## Drawing a spoked wheel
+
+
+The example script DDDExample contains code for rendering a spoked wooden wheel.
+
+
+**
 # Command line args
 
 

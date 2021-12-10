@@ -199,6 +199,13 @@ Use as a calculator
 
 Internal web-server
 
+3D library
+ * Ref
+ * World
+ * Brushes
+ * Rendering
+ * Drawing a spoked wheel
+
 Command line args
 
 Environment variables
