@@ -22,15 +22,15 @@ import java.io.PrintStream;
  * 
  *
  */
-public class LockFile {
+public class LockManager {
 	
 	private static LockServer lockServer=new LockServer();
 	
-	private LockFile() {}
+	private LockManager() {}
 		
-	public static boolean getLock (File theFile) {
+	public static boolean getLock (String name) {
 		try {
-			return lockServer.getLock(theFile.getCanonicalPath());
+			return lockServer.getLock(name);
 		} catch (Exception ex) {
 			return false;
 		}
@@ -39,24 +39,24 @@ public class LockFile {
 	/**
 	 * desc is for exception if failing to obtain lock, uses default OBTAIN_LOCK_TIMEOUT_MS timeout
 	 */
-	public static void obtainLock (File theFile, String desc) throws Exception {
-		obtainLock(theFile, desc, 10000);
+	public static void obtainLock (String name) throws Exception {
+		obtainLock(name, 10000);
 	}
 	
 	/**
 	 * desc is for exception if failing to obtain lock within timeout
 	 */
-	public static void obtainLock (File theFile, String desc, long timeoutMillis) throws Exception {
-		boolean ok = lockServer.obtainLock(theFile.getCanonicalPath(),timeoutMillis);
-		if (!ok) throw new Exception(desc + " could not get lock");
+	public static void obtainLock (String name, long timeoutMillis) throws Exception {
+		boolean ok = lockServer.obtainLock(name, timeoutMillis);
+		if (!ok) throw new Exception("Could not get lock: " + name);
 	}
 
 	
 	/**
 	 * desc is for exception if failing not owning lock
 	 */
-	public static void freeLock (File theFile, String desc) throws Exception {
-		lockServer.releaseLock(theFile.getCanonicalPath());
+	public static void freeLock (String name) throws Exception {
+		lockServer.releaseLock(name);
 	}
 
 }

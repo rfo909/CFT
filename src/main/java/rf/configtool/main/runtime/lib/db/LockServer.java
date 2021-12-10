@@ -62,7 +62,7 @@ public class LockServer {
 		while (System.currentTimeMillis()-start < timeoutMillis) {
 			if (getLock(lockName)) return true;
 			try {
-				Thread.sleep(( (int) Math.random()*12)+3);
+				Thread.sleep(( (int) Math.random()*50)+3);
 			} catch (Exception ex) {
 				// ignore
 			}
@@ -78,8 +78,9 @@ class ServerLoop implements Runnable {
 	private HashMap<String,String> locks=new HashMap<String,String>();
 	private boolean shuttingDown=false;
 	
-	public ServerLoop (ServerSocket serverSocket) {
+	public ServerLoop (ServerSocket serverSocket) throws Exception {
 		this.serverSocket=serverSocket;
+		serverSocket.setSoTimeout(200);
 	}
 	
 	public synchronized void setShuttingDown() {
@@ -90,7 +91,7 @@ class ServerLoop implements Runnable {
 				Socket clientSocket=null;
 				try {
 					clientSocket=serverSocket.accept();
-					clientSocket.setSoTimeout(1000);
+					clientSocket.setSoTimeout(200);
 					BufferedReader br=new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 					PrintStream ps=new PrintStream(clientSocket.getOutputStream());
 					String[] line=br.readLine().trim().split(" ");

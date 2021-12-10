@@ -57,39 +57,5 @@ Script testing
 	 
 	 
 	 
-	 
-	 
-# Threads test 2
-#   Let different threads try and obtain a lock, then verify that the
-#   lock file contains different keys. Note creative use of obtainLock()
-#   timeout, to ensure single calls to get lock per thread. 
-#
-# The first thread becomes owner of lock, the remaining will fail, but
-# the test is about collecting the lockId's that are written to the
-# lock file, one by each thread, verifying they are unique.   
-# --
-	LOCK="Tests04.Test02"
-	
-	Lib.Db.getLockFile(LOCK) => f
-	if (f.exists) f.delete
-	
-	# Run 10 threads, but wait for each. Using timeout -1 to ensure
-	# only a single attempt at obtaining the lock.
-	
-	Lib.Data.each(1,10)->i
-		SpawnProcess(SymDict(LOCK),Lib.Db.obtainLock(LOCK,-1)).wait
-		
-	|
-	
-	# Read the attempts at obtaining the lock as lines from the lock file
-	f.read => allLines
-	
-	# Delete lock file
-	f.delete
-	
-	# result
-	allLines.length == allLines.unique.length
-/Test02_Verify_Threads_Get_Unique_LockFile_lockIds
 
-		
 

@@ -13,6 +13,14 @@
 
 <h1>CFT Change log</h1>
 
+
+<h3>2.10.1 2021-12-10</h3>
+<p>
+	Got verified it works on Windows. Added timeout for serverSocket, to ensure proper termination, and 
+	ran the LockTest.java program. Renamed LockFile to LockManager, and simplified the interface, to 
+	match that of Lib.Db, using simple strings for lock names, not files.
+</p>
+
 <h3>2.10.1 2021-12-09 rewrote LockFile.java</h3>
 <p>
 	rf.configtool.main.runtime.lib.db.LockFile
@@ -22,6 +30,7 @@
 	on windows. Still needs some cleanup, when terminating, just needs to verify that this works on 
 	all platforms.
 </p>
+
 
 <h3>2.10.0 2021-12-05 Including DDD library</h3>
 <p>

@@ -4,7 +4,7 @@ import java.io.File;
 
 public class TestLock {
 	
-	private final File lockFile=new File("/tmp/myLock.txt"); 
+	private final String lockName="TestLock.java_lock"; 
 	
 	private int currHolder=-1;
 	private synchronized void setHolder (int holder) {
@@ -36,19 +36,19 @@ public class TestLock {
 			try {
 				for (int i=0; i<200; i++) {
 					long start=System.currentTimeMillis();
-					LockFile.obtainLock(lockFile, "testlock");
+					LockManager.obtainLock(lockName);
 					long obtainDelay=System.currentTimeMillis() - start;
 					System.out.println(""+System.currentTimeMillis() + " Job " + id + " obtainDelay=" + obtainDelay + " i=" + i);
 				
 					setHolder(id);
 					try {
-						Thread.sleep((int) (Math.random()*100+10) );
+						Thread.sleep((int) (Math.random()*1000+10) );
 					} catch (Exception ex) {
 						// ignore
 					}
 					clearHolder(id);
 					
-					LockFile.freeLock(lockFile, "testlock");
+					LockManager.freeLock(lockName);
 	
 					try {
 						Thread.sleep((int) (Math.random()*100));
@@ -66,7 +66,6 @@ public class TestLock {
 	}
 
 	public void runTest () {
-		if (lockFile.exists()) lockFile.delete();
 		for (int i=0; i<NUM_THREADS; i++) {
 			new Thread(new Runner(i)).start();
 		}

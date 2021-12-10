@@ -14,30 +14,26 @@ import java.util.Map;
 public class Collection {
     
     private FileInfo fileInfo;
-    private File lockFile;
     
     private Map<String,String> data;
     
-    private String getCollectionName() {
-    	return fileInfo.getFile().getName();
+    public Collection (FileInfo fileInfo) {
+        this.fileInfo=fileInfo;
+        if (fileInfo==null) throw new RuntimeException("fileInfo==null");
+    }
+
+    private String lockName() throws Exception {
+    	return "Collection|" + fileInfo.getFile().getCanonicalPath();
     }
     
-    //private long getLockTime=0;
-
     private void getLock() throws Exception {
-    	LockFile.obtainLock(lockFile, getCollectionName());
+    	LockManager.obtainLock(lockName());
     	//getLockTime=System.currentTimeMillis();
     }
     
     private void freeLock () throws Exception {
-    	LockFile.freeLock(lockFile, getCollectionName());
+    	LockManager.freeLock(lockName());
     	//System.out.println("freeLock '" + getCollectionName() + "' held it for " + (System.currentTimeMillis()-getLockTime) + " ms");
-    }
-
-    public Collection (FileInfo fileInfo) {
-        this.fileInfo=fileInfo;
-        if (fileInfo==null) throw new RuntimeException("fileInfo==null");
-        lockFile=new File(fileInfo.getFile().getPath()+".lock");
     }
     
     public synchronized void addData (String key, String value) throws Exception {
