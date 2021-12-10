@@ -1,0 +1,90 @@
+# Readme
+# --
+<<<<<< EOF
+Demonstration of DDD library. Generates a 3D wooden wheel.
+
+CFT 2.10.0
+>>>>>> EOF
+->line
+	println("| " + line)
+/Readme
+
+		
+# Target dir
+# --
+	Lib:DirPrivate.sub("anim").create
+/TargetDir
+
+
+# Subdir
+# --
+	TargetDir.sub("wheel").create
+/SubDir
+
+# Wooden wheel example
+# --
+	P(1)=>world
+	P(2)=>ref
+		# ref is at the center of the wheel, with wheel extending in forward/backward and up/down plane
+
+	hubWidth=100
+	hubThickness=50
+
+	rimWidth=60
+	rimThickness=30
+
+	spokeRadius=15
+	axleHoleRadius=15
+
+	rimCenterRadius=500
+
+	ref=ref.setScaleFactor(1)  ## millimeters
+	world.Brush.box(hubWidth, hubThickness, Lib.Color(120,80,40)) => hub
+	world.Brush.box(rimWidth, rimThickness, Lib.Color(120,80,40)) => rim
+	world.Brush.circle(spokeRadius, Lib.Color(120,80,50)) => spoke
+
+	# going to 361 to ensure 360 is included, so the circles (hub and rim)
+	# get closed on themselves.
+
+	Lib.Data.for(0,361,3)->angle
+		rotated=ref.turnDown(angle)
+		hubPos=rotated.up(axleHoleRadius + hubThickness/2)
+		rimPos=rotated.up(rimCenterRadius)
+
+		hub.penDown(hubPos)
+		rim.penDown(rimPos)
+		
+		# spokes
+		if (angle % 30 == 0) {
+			spokeStart = ref.turnDown(angle).up(axleHoleRadius + hubThickness/2).turnUp(90)
+			spokeEnd=ref.turnDown(angle).up(rimCenterRadius).turnUp(90)
+
+			spoke.penDown(spokeStart)
+			spoke.penDown(spokeEnd)
+			spoke.penUp
+		}
+	|
+	hub.penUp
+	rim.penUp
+	
+	f=SubDir.file("wheel.png")
+	world.render(f)
+
+	Util:ShowDict(world.getStats,true)
+	println("Wrote file " + f.path)
+/RenderWheel
+
+
+# Main function
+# --
+	world = Lib.DDD.World
+		# by default the world scale is in millimeters
+
+	ref = Lib.DDD.Ref.setScaleFactor(1000)  # going up to meter scale
+	ref=ref.fwd(2).turnRight(30).rollLeft(30)  # create viewable position for center of wheel
+	
+	RenderWheel(world,ref)
+/run
+
+
+
