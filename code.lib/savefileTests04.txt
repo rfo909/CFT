@@ -27,11 +27,13 @@ Script testing
 # --
 	P(1,10)=>numCalls
 	loop
-		break(numCalls<0)
+		break(numCalls<=0)
 		numCalls=numCalls-1
 		println("Got: " + Util:Counter("test"))
 		
 //t01_GetCounters
+
+
 
 # Create separate threads, each calling GetCounters()
 # The idea is that we check that each counter value is obtained
@@ -45,17 +47,26 @@ Script testing
 	loop
 		break(i>=numThreads)
 		i=i+1
-		out(SpawnProcess(SymDict(i),t01_GetCounters))
+		out(SpawnProcess(SymDict(i),t01_GetCounters(10)))
 	| -> proc
 		proc.wait
 		proc.output->line out(line)
 	| => allLines
 	
 	# result
-	allLines.length == allLines.unique.length
+	allLines.length == allLines.unique.length && allLines.length==200
 /Test01_Verifying_Util_Counter_Threaded_test
 	 
 	 
-	 
 
-
+# Basic verify for locks
+# --
+	Lib.Db.obtainLock("Tests04",1000)
+	SpawnProcess(Dict, Lib.Db.obtainLock("Tests04",1000)).wait.output => output
+	ok=Inner{
+		output->line assert(line.contains("Exception")) out(line) | _.length>0
+	}
+	Lib.Db.releaseLock("Tests04")
+	# result
+	ok
+/Test02_Verify_lock
