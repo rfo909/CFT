@@ -41,7 +41,7 @@
 		
 # Target dir
 # --
-	Sys.homeDir.sub("anim").create
+	Lib:DirPrivate.sub("anim").create
 /TargetDir
 
 
