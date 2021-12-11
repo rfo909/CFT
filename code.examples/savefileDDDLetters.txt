@@ -91,7 +91,8 @@
 	processes=List
 	start=currentTimeMillis
 	
-	apm=Util:AutomaticProcessMonitor
+	NUM_THREADS=(Sys.cpuCores*1.5).i
+	apm=Util:AutomaticProcessMonitor(NUM_THREADS)
 	
 		# Testing by calling runX, and reading out the last,
  
@@ -116,7 +117,8 @@
 	apm.LWaitAll.call
 	end=currentTimeMillis
 	
-	println("Processing time for images: " + (end-start) + " ms with " + Sys.cpuCores + " cpu cores")
+	println("Processing time for images: " + (end-start) + " ms with " 
+		+ NUM_THREADS + " threads on " + Sys.cpuCores + " cpu cores")
 /run
 
 # Capacity testing

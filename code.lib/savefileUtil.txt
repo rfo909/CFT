@@ -256,9 +256,8 @@ Dict.set("list",List)
 					}
 				)
 				self.set("list",newList)
-				len=newList.length
-				break(len < self.numThreads)
-				Sys.sleep(10)
+				break(newList.length < self.numThreads)
+				Sys.sleep(5)
 		})
 		.set("LAdd",Lambda{
 			self.list.add(P(1))
