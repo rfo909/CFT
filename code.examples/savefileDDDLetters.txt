@@ -6,6 +6,7 @@
 	P(3)=>ref
 	P(4,10)=>pixelSize
 	P(5,Lib.Color(255,0,0)) => color
+	P(6,0.8) => pixelSizeFactor
 	
 	thickness=pixelSize/3
 	
@@ -13,7 +14,7 @@
 	
 	# ref is pointing along direction of text, centered in height
 	
-	bSize=pixelSize*0.8
+	bSize=pixelSize*pixelSizeFactor
 	b1=world.Brush.box(bSize,bSize,color)
 
 	

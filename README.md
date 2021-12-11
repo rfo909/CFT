@@ -13,6 +13,7 @@ Written in Java, it runs both on Linux and Windows environment.
 
 *README last updated 2021-11-13*
 
+
 ## Terminal based - shell-like
 
 The command line interface makes CFT feel like a shell, for navigating the directory tree, and inspecting files,
@@ -504,7 +505,13 @@ $ "" help
      :
 ```
 
+# v2.10.0 3D-rendering
 
+Added support for primitive 3D rendering by code. Watch video [Introduction to 3D in CFT](https://www.youtube.com/watch?v=cbHFGPkhGec) here.
+
+The following was rendered with the DDDExample script.
+
+![Spoked wooden wheel](doc/wheel.png)
 
 
 # Download and compile
