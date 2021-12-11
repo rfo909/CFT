@@ -91,7 +91,7 @@
 	processes=List
 	start=currentTimeMillis
 	
-	NUM_THREADS=(Sys.cpuCores+4).i
+	NUM_THREADS=(Sys.cpuCores*1.4).i
 	apm=Util:AutomaticProcessMonitor(NUM_THREADS)
 	
 		# Testing by calling runX, and reading out the last,
