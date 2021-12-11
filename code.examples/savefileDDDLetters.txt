@@ -98,13 +98,11 @@
  
 		# on 16 core server, Dual Xeon 8-core E5-2690 0 @ 2.90GHz (no HT)
         # ---
-        # 10 threads: 18 seconds
-        # 20 threads: 16.5 seconds
-        # 30 threads: 16.5 seconds
+        # 12.1 seconds /  with 22 threads on 16 cpu cores
         
         # on 12 core server, Dual Xeon 6-core E5-2643 v2 @ 3.50GHz (no HT)
         # ---
-		# 9 sekunder / with 18 threads on 12 cpu cores
+		# 9.3 seconds / with 18 threads on 12 cpu cores
 
 
 	Lib.Data.for(0,720,1)->rot
