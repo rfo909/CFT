@@ -67,6 +67,7 @@ public class ObjSys extends Obj {
 				new FunctionEnvironment(),
 				new FunctionLint(),
 				new FunctionScriptId(),
+				new FunctionCPUCores(),
 		};
 		setFunctions(arr);
         
@@ -558,5 +559,23 @@ public class ObjSys extends Obj {
         }
     } 
 
+    
+    class FunctionCPUCores extends Function {
+        public String getName() {
+            return "cpuCores";
+        }
+
+        public String getShortDesc() {
+            return "cpuCores() - get CPU core count";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 0) throw new Exception("Expected no parameters");
+        	
+        	int count=Runtime.getRuntime().availableProcessors();
+        	return new ValueInt(count);
+        }
+
+    }         
     
 }

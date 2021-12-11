@@ -91,21 +91,21 @@
 	processes=List
 	start=currentTimeMillis
 	
-	NUMTHREADS=16
+	NUMTHREADS=Sys.cpuCores
+	
+		# Testing by calling runX, and reading out the last,
  
 		# on 16 core server, Dual Xeon 8-core E5-2690 0 @ 2.90GHz (no HT)
         # ---
-        # 10 threads: 22 seconds
-        # 16 threads: 15 seconds
-        # 20 threads: 13 seconds
-        # 30 threads: 13 seconds
-        # 50 threads: 16 seconds
-
+        # 10 threads: 18 seconds
+        # 20 threads: 16.5 seconds
+        # 30 threads: 16.5 seconds
+        
         # on 12 core server, Dual Xeon 6-core E5-2643 v2 @ 3.50GHz (no HT)
         # ---
-        # 10 threads: 12 seconds
-        # 20 threads: 12 seconds
-        # 30 threads: 12 seconds
+        # 10 threads: 14 seconds
+        # 20 threads: 12.5 seconds
+        # 30 threads: 12.5 seconds
 
 
 	Lib.Data.for(0,720,1)->rot
@@ -121,8 +121,15 @@
 	processes->proc proc.wait |
 	end=currentTimeMillis
 	
-	println("Processing time for images: " + (end-start) + " ms with ")
+	println("Processing time for images: " + (end-start) + " ms with " + NUMTHREADS + " threads")
 /run
+
+# Capacity testing
+# --
+	run run run run run
+	run run run run run
+/runX
+
 
 # Create mp4 movie (requires ffmpeg)
 # --
