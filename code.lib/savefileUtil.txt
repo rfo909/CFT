@@ -232,6 +232,43 @@ Dict.set("list",List)
 
 
 
+# Automatic high performance process monitor for large number of threads.
+#
+# Usage:
+#    apm=Util:AutomaticProcessMonitor
+#    loop
+#       apm.LWait.call
+#       apm.LAdd.call(SpawnProcess(...))
+#    |
+#    apm.LWaitAll.call
+#
+# --
+	P(1,Sys.cpuCores+2) => numThreads
+	Dict
+		.set("numThreads",numThreads)
+		.set("list",List)
+		.set("LWait",Lambda{
+			loop
+				newList = self.list.filter(
+					Lambda{
+						P(1)=>proc 
+						if(proc.isAlive,proc,null)
+					}
+				)
+				self.set("list",newList)
+				len=newList.length
+				break(len < self.numThreads)
+				Sys.sleep(10)
+		})
+		.set("LAdd",Lambda{
+			self.list.add(P(1))
+		})
+		.set("LWaitAll",Lambda{
+			self.list->p p.wait | self.set("list",List)
+		})
+/AutomaticProcessMonitor
+
+
 # Invoke curl - does not work for jsonData on Windows (but ok on Linux / WSL)
 # --
 	P(1,"http")=>protocol

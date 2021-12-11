@@ -91,7 +91,7 @@
 	processes=List
 	start=currentTimeMillis
 	
-	NUMTHREADS=Sys.cpuCores
+	apm=Util:AutomaticProcessMonitor
 	
 		# Testing by calling runX, and reading out the last,
  
@@ -110,18 +110,13 @@
 
 	Lib.Data.for(0,720,1)->rot
 		println("rot=" + rot)
-		Inner {
-			loop break(processes.length < NUMTHREADS) 
-			processes.first.wait 
-			processes.remove(0)
-		}
-		processes.add(SpawnProcess(SymDict(rot), makeFrame(rot)))
+		apm.LWait.call
+		apm.LAdd.call(SpawnProcess(SymDict(rot), makeFrame(rot)))
 	|
-	# wait for remaining processes
-	processes->proc proc.wait |
+	apm.LWaitAll.call
 	end=currentTimeMillis
 	
-	println("Processing time for images: " + (end-start) + " ms with " + NUMTHREADS + " threads")
+	println("Processing time for images: " + (end-start) + " ms with " + Sys.cpuCores + " cpu cores")
 /run
 
 # Capacity testing
