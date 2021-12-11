@@ -334,7 +334,7 @@ public class ObjProcess extends Obj {
                 synchronized(EXIT_LOCK) {
                     if (exitValue!=null) break;
                 }
-                Thread.sleep(5);
+                Thread.sleep(10);
             }
             return new ValueObj(self());
         }

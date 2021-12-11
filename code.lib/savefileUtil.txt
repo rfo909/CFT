@@ -164,6 +164,9 @@ P(3,Lambda{P(1)}) => processList
 
 # Process monitor : object to limit number of simultaneously active processes
 #
+# NOTE: stores both active and completed processes in internal list, so do
+# not use for huge sets of processes, as you will run out of memory!!
+#
 # Example of use
 #
 #   # --- create monitor object, set limit of active running processes
@@ -199,10 +202,6 @@ Dict.set("list",List)
 			self.Lrunning.call => running
 			if(verbose) {
 				self.Ldone.call => completed
-	
-			#descRunning = Inner{
-				#	running->x out(x.name)
-				#}.concat(" ")
 
 				AppUI:DoShowTopLine(self.title)
 				AppUI:DoShowProgressBar(completed.length, completed.length+running.length,50)

@@ -88,8 +88,25 @@
 
 # Run all frames
 # --
+	processes=List
+	start=currentTimeMillis
+	
+	NUMTHREADS=8
+	
 	Lib.Data.for(0,720,1)->rot
-		makeFrame(rot)
+		println("rot=" + rot)
+		Inner {
+			loop break(processes.length < NUMTHREADS) 
+			processes.first.wait 
+			processes.remove(0)
+		}
+		processes.add(SpawnProcess(SymDict(rot), makeFrame(rot)))
+	|
+	# wait for remaining processes
+	processes->proc proc.wait |
+	end=currentTimeMillis
+	
+	println("Processing time for images: " + (end-start) + " ms with ")
 /run
 
 # Create mp4 movie (requires ffmpeg)
