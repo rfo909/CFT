@@ -30,6 +30,7 @@ import rf.configtool.main.runtime.ValueList;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.lib.conversions.ObjConvert;
 import rf.configtool.main.runtime.lib.db.ObjDb;
+import rf.configtool.main.runtime.lib.dd.DD;
 import rf.configtool.main.runtime.lib.ddd.DDD;
 import rf.configtool.main.runtime.lib.integrations.ObjIntegrations;
 import rf.configtool.main.runtime.lib.java.ObjJava;
@@ -51,6 +52,7 @@ public class ObjLib extends Obj {
         this.add(new FunctionIntegrations());
         this.add(new FunctionJava());
         this.add(new FunctionWeb());
+        this.add(new FunctionDD());
         this.add(new FunctionDDD());
         this.add(new FunctionColor());
         
@@ -254,6 +256,21 @@ public class ObjLib extends Obj {
             return new ValueObj(new ObjWeb());
         }
     } 
+    
+    
+    class FunctionDD extends Function {
+        public String getName() {
+            return "DD";
+        }
+        public String getShortDesc() {
+            return "DD() - create object for 2D (vector) calculations";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueObj(new DD());
+        }
+    }
+
     
    
     class FunctionDDD extends Function {

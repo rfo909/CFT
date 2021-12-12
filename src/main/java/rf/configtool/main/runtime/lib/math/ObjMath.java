@@ -26,6 +26,7 @@ import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueFloat;
 import rf.configtool.main.runtime.ValueObj;
+import rf.configtool.main.runtime.lib.dd.DD;
 
 public class ObjMath extends Obj {
     
@@ -34,7 +35,6 @@ public class ObjMath extends Obj {
         this.add(new FunctionSin());
         this.add(new FunctionPI());
         this.add(new FunctionSqrt());
-        this.add(new FunctionDD());
     }
     
     @Override
@@ -128,16 +128,4 @@ public class ObjMath extends Obj {
         return 2*Math.PI * deg / 360.0;
     }
     
-    class FunctionDD extends Function {
-        public String getName() {
-            return "DD";
-        }
-        public String getShortDesc() {
-            return "DD() - create object for 2D (vector) calculations";
-        }
-        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 0) throw new Exception("Expected no parameters");
-            return new ValueObj(new ObjDD());
-        }
-    }
-}
+ }
