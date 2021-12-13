@@ -60,7 +60,7 @@ public class DDBrush extends Obj {
 	        }
 
 	        public String getShortDesc() {
-	            return "penDown(Ref) - draw line since last penDown";
+	            return "penDown(Ref|Vector) - draw line since last penDown";
 	        }
 
 	        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
@@ -69,6 +69,14 @@ public class DDBrush extends Obj {
 	        	if (ref1 instanceof DDRef) {
 	        		Ref ref=((DDRef) ref1).getRef();
 	        		Vector2d pos=ref.getPos();
+	        		if (prevPos != null) {
+	        			Line line=new Line(prevPos, pos, color);
+	        			recv.addLine(line);
+	        		}
+	        		prevPos=pos;
+	        		return new ValueObj(self());
+	        	} else if (ref1 instanceof DDVector) {
+	        		Vector2d pos=((DDVector) ref1).getVec();
 	        		if (prevPos != null) {
 	        			Line line=new Line(prevPos, pos, color);
 	        			recv.addLine(line);

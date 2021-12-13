@@ -14,8 +14,8 @@ public class Viewer implements ViewReceiver {
 	
 	private Color backgroundColor;
 	private List<Line> lines=new ArrayList<Line>();
-	private int width = 800;
-	private int height = 600;
+	private int width = 1024;
+	private int height = 768;
 	
 	public Viewer (Color backgroundColor) {
 		this.backgroundColor=backgroundColor;
@@ -79,7 +79,7 @@ public class Viewer implements ViewReceiver {
 		//System.out.println("PPUx=" + pixelsPerUnitX);
 		//System.out.println("PPUy=" + pixelsPerUnitY);
 		
-		double targetPPU = Math.min(pixelsPerUnitX,  pixelsPerUnitY);
+		double targetPPU = Math.min(pixelsPerUnitX,  pixelsPerUnitY)*0.95;  // 0.95 for a bit of space around the edges
 		//System.out.println("targetPPU=" + targetPPU);
 
 		// ## Why does this work? 
@@ -90,7 +90,8 @@ public class Viewer implements ViewReceiver {
 
 			x1-=delta/2;
 			x2+=delta/2;
-		} else if (pixelsPerUnitX > targetPPU) {
+		} 
+		if (pixelsPerUnitX > targetPPU) {
 			double ratio = pixelsPerUnitX / targetPPU;  // what to multiply with current range, to get correct PPU
 			double delta=(y2-y1)*ratio-(y2-y1);
 			//System.out.println("yDelta=" + delta);

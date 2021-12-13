@@ -1,0 +1,61 @@
+
+
+# DDText - writes along the "forward" direction, up is left and down is right.
+# Each letter is 7x5 and space between letters and lines is 2, so next line
+# is .right(7+2) (line height + extra space)
+# --
+	P(1)=>world
+	P(2)=>ref
+	P(3,"test")=>str
+	P(4,Lib.Color(0,0,0))=>color
+	
+	brush=world.Brush.setColor(color)
+	
+	Letters7x5:GetText(str) => lines
+	Lib.Data.each(0,lines.length-1)->lineNo
+		line=lines.nth(lineNo)
+		Lib.Data.each(0,line.length-1)->charNo
+			char=line.chars.nth(charNo)
+			assert(char=="#") 
+			ref.left(3).right(lineNo).fwd(charNo).fwd(0.5)=>dotCenter
+			brush.penDown(dotCenter.left(0.25).back(0.25))
+			brush.penDown(dotCenter.left(0.25).fwd(0.25))
+			brush.penDown(dotCenter.right(0.25).fwd(0.25))
+			brush.penDown(dotCenter.right(0.25).back(0.25))
+			brush.penDown(dotCenter.left(0.25).back(0.25))
+			brush.penUp
+/DDText			
+
+
+
+# Target dir for demo
+# --
+	Lib:DirPrivate.sub("anim").sub("2d").create
+/Target
+
+# Testing 2D graphics
+# --
+	Lib.DD.World => world
+	Lib.DD.Ref => ref
+	
+	
+	world.Brush => b2
+	Lib.DD.Ref => ref
+	b2.penDown(ref)
+	b2.penDown(ref.right(100))
+	b2.penUp
+	b2.penDown(ref)
+	b2.penDown(ref.fwd(300))
+	b2.penUp
+
+	DDText(world, ref.right(100).turnRight(90).fwd(10).scaleUp(2), "right", Lib.Color(255,0,0))
+	DDText(world, ref.fwd(300).fwd(10).scaleUp(2), "fwd", Lib.Color(255,0,0))
+	
+	Lib.DD.Ref.back(40).turnRight(20).setScaleFactor(3) => textRef
+	DDText(world, textRef, "Testing DD library")
+	DDText(world, textRef.right(7+2), "Second line")
+
+	world.render(Target.file("test.png"))
+/demo
+
+
