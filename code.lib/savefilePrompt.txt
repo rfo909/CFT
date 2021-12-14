@@ -18,7 +18,7 @@
 # --
 	h=Db2:Get(Sys.scriptId,"hostname",null)
 	if (h==null) h=""
-	if (h.length > 0) h="["+h+"]"
+	if (h.length > 0) h="|"+h
 	h
 /Hostname
 

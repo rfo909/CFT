@@ -86,7 +86,7 @@ shortcut:     = "---- Show all shortcuts ----"            File("CFT.props").read
 # The prompt setting is a line of code, just as with the shortcuts
 # ---
 
-prompt = x=Sys.scriptName "CFT " + Prompt:IsRootMark + Prompt:Hostname + Prompt:Path(Dir) + if(x==null,">"," <" + x + ">") + " "
+prompt = x=Sys.scriptName "CFT" + Prompt:Hostname + " " + if(x!=null,"<" + x + "> ", "") + Prompt:IsRootMark + Prompt:Path(Dir) + "> "
 
 #
 # The "bang command" is a configurable parser that is invoked when typing
