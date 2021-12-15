@@ -509,9 +509,10 @@ $ "" help
 
 Added support for primitive 3D rendering by code. Watch video [Introduction to 3D in CFT](https://www.youtube.com/watch?v=cbHFGPkhGec) here.
 
-The following was rendered with the [DDDExample script](code.examples/savefileDDDExample.txt).
+The following was rendered with the [DDDExample script](code.examples/savefileDDDGraphs.txt).
 
-![Spoked wooden wheel](doc/wheel.png)
+![Spoked wooden wheel](doc/torus.png)
+
 
 
 # Download and compile

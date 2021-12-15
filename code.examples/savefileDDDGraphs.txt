@@ -5,10 +5,10 @@
 		Lib.Color(120,40,101),
 		Lib.Color(30,120,80),
 		Lib.Color(0,35,88),
-		Lib.Color(110,20,150),
+		Lib.Color(200,200,0),
 		Lib.Color(0,200,0),
 		Lib.Color(120,80,0),
-		Lib.Color(0,0,255),
+		Lib.Color(50,50,255),
 		Lib.Color(100,100,100)
 	)
 //Colors
@@ -50,15 +50,17 @@
 
 # Torus
 # --
-	P(1,List(10,11,30))=>values
-	P(2,List("Alice","Bob","Others"))=>labels
+	P(1,List(10,11,2,1,8,5,40,30,12))=>values
+	P(2,List("Alice","Bob","Carol","Dante","Edward","Fiona","Gabriel","Santa Claus","Others"))=>labels
+	P(3,TargetDir.file("torus.png"))=>targetFile
+	P(4,30)=>torusRotateLeft
 	
 	error(values.length != labels.length, "values and labels must match")
 	error(values.length > Colors.length, "max " + Colors.length + " values supported (dictated by number of colors)")
 	
 	Lib.DDD.World => world
 	world.init(35,36,18,800,400,Lib.Color(0,0,0))
-	Lib.DDD.Ref.fwd(500).left(100).turnUp(30).turnLeft(30) => ref
+	Lib.DDD.Ref.fwd(500).left(100).turnUp(30).turnLeft(torusRotateLeft) => ref
 	
 	angles=Fractions(values,360)
 	colors=Colors
@@ -93,5 +95,5 @@
 		textRef = textRef.down(pixelHeight*7).down(lineSpace)
 	|
 	
-	world.render(TargetDir.file("torus.png"))
+	world.render(targetFile)
 /Torus
