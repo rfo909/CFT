@@ -64,6 +64,9 @@ public class ObjProcess extends Obj {
         }
     }
     
+    /**
+     * Start process, copying the dictionary content as function state (local variables) for the expression. 
+     */
     public void start(Ctx ctx) throws Exception {
         PipedOutputStream out;
         PipedInputStream in;
@@ -90,6 +93,10 @@ public class ObjProcess extends Obj {
             Value transformedValue=value.createClone(ctx);
             functionState.set(key, transformedValue);
         }
+        
+        // WE ALSO replace the entire Dictionary object with a copy
+        
+        dict=(ObjDict) ((ValueObj) dict.createClone(ctx)).getVal();
 
         Ctx processCtx = new Ctx(stdioVirtual, ctx.getObjGlobal(), functionState);
 

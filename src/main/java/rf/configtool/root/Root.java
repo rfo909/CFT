@@ -51,6 +51,8 @@ public class Root {
     private final long startTime;
     private boolean terminationFlag = false;
     
+    private BackgroundProcesses backgroundProcesses=new BackgroundProcesses();
+    
     /**
      * Unique value per CFT session, available via Sys.sessionUUID CFT function
      */
@@ -151,6 +153,10 @@ public class Root {
                                                                                     // trouble
         scriptStates.put(newScript.getScriptName(), newScript);
         return newScript;
+    }
+    
+    public BackgroundProcesses getBackgroundProcesses() {
+    	return backgroundProcesses;
     }
 
     public void createNewScript() throws Exception {

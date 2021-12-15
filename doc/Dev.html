@@ -13,6 +13,17 @@
 
 <h1>CFT Change log</h1>
 
+<h3>2.12.0 2021-12-15 Sys.Jobs</h3>
+<p>
+	Fixed minor bug in ObjProcess, ensuring that supplied Dictionary is completely copied. Then added Java class BackgroundProcesses, which is avaialable
+	via the Root object. Managing it is done by creating the Sys.Jobs object.
+</p>
+<p>
+	CFT needs a mechanism for running stuff in the background and get notice when completed, and
+	a specialized "session store" for ObjProcess objects is required, as ObjProcess instances can
+	not be stored in Db2 (not synthesizable).
+</p>
+
 <h3>2.11.0 2021-12-12 DD package</h3>
 <p>
 	Moved 2D vectors from Lib.Math to Lib.DD, and modeled it after the DDD library, including viewer. 

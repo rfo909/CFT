@@ -68,6 +68,7 @@ public class ObjSys extends Obj {
 				new FunctionLint(),
 				new FunctionScriptId(),
 				new FunctionCPUCores(),
+				new FunctionJobs(),
 		};
 		setFunctions(arr);
         
@@ -577,5 +578,22 @@ public class ObjSys extends Obj {
         }
 
     }         
+
+    class FunctionJobs extends Function {
+        public String getName() {
+            return "Jobs";
+        }
+
+        public String getShortDesc() {
+            return "Jobs() - returns Jobs object";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 0) throw new Exception("Expected no parameters");
+        	return new ValueObj(new ObjJobs());
+        }
+
+    }
+    
     
 }
