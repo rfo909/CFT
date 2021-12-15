@@ -11,7 +11,7 @@ It's been in continous use since creation in 2018.
 
 Written in Java, it runs both on Linux and Windows environment. 
 
-*README last updated 2021-12-11*
+*README last updated 2021-12-15*
 
 
 ## Terminal based - shell-like
@@ -509,9 +509,9 @@ $ "" help
 
 Added support for primitive 3D rendering by code. Watch video [Introduction to 3D in CFT](https://www.youtube.com/watch?v=cbHFGPkhGec) here.
 
-The following was rendered with the [DDDExample script](code.examples/savefileDDDGraphs.txt).
+The following was rendered with [this script](code.examples/savefileDDDGraphs.txt).
 
-![Spoked wooden wheel](doc/torus.png)
+![Donut](doc/torus.png)
 
 
 
