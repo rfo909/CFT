@@ -1,0 +1,97 @@
+# Graph colors
+# --
+	List(
+		Lib.Color(255,0,0),
+		Lib.Color(120,40,101),
+		Lib.Color(30,120,80),
+		Lib.Color(0,35,88),
+		Lib.Color(110,20,150),
+		Lib.Color(0,200,0),
+		Lib.Color(120,80,0),
+		Lib.Color(0,0,255),
+		Lib.Color(100,100,100)
+	)
+//Colors
+
+# Calculate fractions
+# --
+	P(1,List(1,2,3))=>data
+	P(2,1.0)=>radix
+	sum=0.0
+	Inner{data->x sum=sum+x}
+	data->x
+		out(radix * x/sum)
+//Fractions 
+
+# Calculate position in list of fractions
+# --
+	P(1,3)=>value
+	P(2,List(1,1,4))=>data
+	
+	pos=-1
+	Lib.Data.for(0,data.length,1)->i
+		x=data.nth(i)
+		value=value-x
+		if (value <= 0) {
+			pos=i
+			break
+		}
+	|
+	if (pos < 0) pos=data.length-1
+	#
+	pos
+//GetPosInFractionsSequence
+
+
+# Save target
+# --
+	Lib:DirPrivate.sub("anim").sub("Graphs").create
+//TargetDir
+
+# Torus
+# --
+	P(1,List(10,11,30))=>values
+	P(2,List("Alice","Bob","Others"))=>labels
+	
+	error(values.length != labels.length, "values and labels must match")
+	error(values.length > Colors.length, "max " + Colors.length + " values supported (dictated by number of colors)")
+	
+	Lib.DDD.World => world
+	world.init(35,36,18,800,400,Lib.Color(0,0,0))
+	Lib.DDD.Ref.fwd(500).left(100).turnUp(30).turnLeft(30) => ref
+	
+	angles=Fractions(values,360)
+	colors=Colors
+	torusRadius=100
+	brushRadius=20
+	
+	# Draw torus
+	world.Brush.circle(brushRadius,Lib.Color(255,255,255)) => b
+	
+	Lib.Data.for(0,361,1)->angle
+		pos=GetPosInFractionsSequence(angle,angles)
+		b.setColor(colors.nth(pos))
+		b.penDown(ref.turnRight(angle).back(torusRadius).turnLeft(90))
+	|
+	
+	# Legends
+	pixelHeight=2
+	lineSpace=4*pixelHeight
+	
+	numLines=values.length
+	linesHeight=numLines*pixelHeight*7
+	linesDist=(numLines-1)*lineSpace
+	totalHeight=linesHeight+linesDist
+	
+	Lib.DDD.Ref.fwd(500).right(50).up(totalHeight/2).turnRight(90) => textRef
+	
+	Lib.Data.for(0,labels.length,1)->i
+		label=labels.nth(i)
+		color=colors.nth(i)
+		
+		DDDLetters:Letters3d(label,world,textRef,pixelHeight,color,1.0)
+		textRef = textRef.down(pixelHeight*7).down(lineSpace)
+	|
+	
+	world.render(TargetDir.file("torus.png"))
+/Torus
