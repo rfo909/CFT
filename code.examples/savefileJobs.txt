@@ -12,7 +12,14 @@ S:theFunction
 Note that functions you run in the background shouln't
 ask for input, or they will hang.
 
-First version!
+First version! :-)
+
+Note that the Add function is scriptable:
+
+
+"job1 job2".split->job
+	Jobs:Add(Sys.scriptName + ":" + job)
+/StartHeavyTasks
 >>>> EOF
 ->line println("| " + line)
 /Readme
