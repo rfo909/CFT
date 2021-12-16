@@ -1,0 +1,63 @@
+# List jobs
+# --
+	Sys.Jobs.names->name
+		Sys.Jobs.get(name)->proc
+			report(name,if(proc.isAlive,"Running","COMPLETED"))
+/ps
+
+
+# Generate names
+# --
+	"p" + Util:Counter(Sys.scriptId + "_pid")
+//CreateName
+
+
+# Add job
+# --
+	P(1,readLine("Enter code to run"))=>code
+	name="("+CreateName + ") " + code
+	maxLen=(Term.w/2).i
+	if (name.length>maxLen) name=name.sub(0,maxLen-4) + " ..."
+	println(name)
+
+	process=SpawnProcess(SymDict(code),eval(code))
+	Sys.Jobs.add(process,name)
+/Add
+
+
+# Return completed job names (for integration into prompt)
+# --
+	Sys.Jobs.names->name
+		Sys.Jobs.get(name)->proc
+			if (proc.isDone) out(name)
+/Completed
+
+
+# Get single result from first terminated process
+# --
+	result=null
+
+	Sys.Jobs.names->name
+		Sys.Jobs.get(name).first => proc
+		if (proc.isDone) {
+			Lib:Header(name)
+			output=proc.output
+			if (output.length > 0) Inner {
+				output->line println(line)
+			} 
+
+			Sys.Jobs.delete(name)
+			result = proc.exitValue
+			break
+		}
+	|
+	result
+/Get
+
+
+# Clear all completed jobs
+# --
+	Sys.Jobs.names->name
+		Sys.Jobs.get(name)->proc
+			if (proc.isDone) Sys.Jobs.delete(name)
+/Clear

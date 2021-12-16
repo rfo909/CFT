@@ -70,6 +70,12 @@ shortcut:i    = "---- Investigate log text ----"          Investigate:LogText
 shortcut:id   = "---- Investigate log with data ----"     Investigate:LogData
 shortcut:ii   = "---- Investigate log input loop ----"    Investigate:InputMode
 
+# Job control
+shortcut:J    = "---- Add background job ----"            Jobs:Add
+shortcut:JPS  = "---- List background jobs ----"          Jobs:ps
+shortcut:JJ   = "---- Get job result ----"                Jobs:Get
+
+
 # Release script
 shortcut:rel  = "---- Release ----"                       Sys.stdin(":load Release","?")
 
@@ -86,7 +92,7 @@ shortcut:     = "---- Show all shortcuts ----"            File("CFT.props").read
 # The prompt setting is a line of code, just as with the shortcuts
 # ---
 
-prompt = x=Sys.scriptName "CFT" + Prompt:Hostname + " " + if(x!=null,"<" + x + "> ", "") + Prompt:IsRootMark + Prompt:Path(Dir) + "> "
+prompt = Prompt:CompletedJobs x=Sys.scriptName "CFT" + Prompt:Hostname + " " + if(x!=null,"<" + x + "> ", "") + Prompt:IsRootMark + Prompt:Path(Dir) + "> "
 
 #
 # The "bang command" is a configurable parser that is invoked when typing

@@ -56,3 +56,15 @@
 /Path
 
 
+# List completed jobs (when changes)
+# --
+	list=Jobs:Completed
+	str=list.concat("|")
+	if (str != Db2:Get(Sys.scriptId,"CompletedJobs","")) Inner {
+		Db2:Set(Sys.scriptId,"CompletedJobs",str)
+		list -> name
+			println(" " + name)
+	}
+
+/CompletedJobs
+	
