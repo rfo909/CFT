@@ -1,3 +1,23 @@
+# Readme
+# --
+<<<< EOF
+First implementation of background job control.
+
+Since this is a separate CFT script, if working
+inside script S, to run a function there in the background,
+enter
+
+S:theFunction
+
+Note that functions you run in the background shouln't
+ask for input, or they will hang.
+
+First version!
+>>>> EOF
+->line println("| " + line)
+/Readme
+
+
 # List jobs
 # --
 	Sys.Jobs.names->name
