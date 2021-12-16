@@ -79,6 +79,9 @@ public class ObjDuration extends Obj {
         add(new FunctionSeconds());
         add(new FunctionMillis());
         add(new FunctionFmt());
+		add(new FunctionAsDays());
+		add(new FunctionAsHours());
+		add(new FunctionAsMinutes());
         
     }
     
@@ -219,6 +222,50 @@ public class ObjDuration extends Obj {
             return new ValueString(""+(new Details(timeValue)).fmt());
         }
     }
+
+    
+    class FunctionAsDays extends Function {
+        public String getName() {
+            return "asDays";
+        }
+        public String getShortDesc() {
+            return "asDays() - return duration as number of days";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            long days=timeValue/(86400*1000);
+            return new ValueInt(days);
+        }
+    }
+
+    class FunctionAsHours extends Function {
+        public String getName() {
+            return "asHours";
+        }
+        public String getShortDesc() {
+            return "asHours() - return duration as number of hours";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            long hours=timeValue/(3600*1000);
+            return new ValueInt(hours);
+        }
+    }
+
+    class FunctionAsMinutes extends Function {
+        public String getName() {
+            return "asMinutes";
+        }
+        public String getShortDesc() {
+            return "asMinutes() - return duration as number of minutes";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            long minutes=timeValue/(60*1000);
+            return new ValueInt(minutes);
+        }
+    }
+
 
     
 }
