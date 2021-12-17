@@ -81,33 +81,35 @@ completes.
 
 	Lib:Header("Selected job: " + name)
 	println("Below follows an input loop.")
-	println("Output from the process is displayed, and you may enter input to it")
+	println("Output from the job is displayed, and you may enter input to it")
 	println
 	println("To detach from job, type '.quit' and to wait for more output,")
 	println("type '...'")
 	println
-	println("All other inputs are sent to stdin of the process")
+	println("All other inputs are sent to stdin of the job")
 	println
 	println("Text following below the line, is output from the job.")
+	println
+	println("BEWARE: Input() contains state (last value) which may change")
+	println("between presenting the default, and pressing Enter to use it!!")
+	println
 	readLine("ENTER to continue")
 	println("--------------------------------------------------------------------")
-
-	result=null
 
 	proc=Sys.Jobs.getRunning(name)
 	error(proc==null,"No running process " + name)
 	loop
 		Inner { proc.output->line println(line) }
 		if (proc.isDone) {
-			println("(Job has terminated)")
-			result=proc.exitValue
+			println("(Job completed)")
+			#result=proc.exitValue
 			#Sys.Jobs.deleteCompleted(name)
 			break
 		}
 		readLine => line
-		break(line==".q")
+		break(line==".quit")
 		if (line != "...") proc.sendLine(line)
 		Sys.sleep(1000)
 	|
-	result
+	"Done"
 /ToForeground
