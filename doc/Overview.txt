@@ -28,7 +28,8 @@ CFT as a shell
  * Paths with space
  * Windows backslash
  * Combine shell commands with CFT function results
- * No shell-like destructive commands
+ * No shell-like destructive commands!
+ * Background jobs
 
 The "protect" mechanism
 
@@ -63,8 +64,6 @@ Directories
  * Delete a sub-directory
  * Set current directory
  * Newest file in directory
-
-shell()
 
 Core types
  * String literals

@@ -15,7 +15,7 @@
 
 <h3>2.12.1 2021-12-16 Background jobs</h3>
 <p>
-	Created alternative notation for SpawnProcess() expression:
+	Created alternative notation for the SpawnProcess() expression:
 </p>
 <pre>
    & expr
@@ -23,34 +23,74 @@
 </pre>
 <p>
 	The name is either an identifier or an expression, typically a string. This extends the default name,
-	which is "&" plus an integer, for readability.
+	which is "(n)", for readability.
 </p>
 
 <p>
 	Updated the _Expr global documentation function.
 </p>
 
-
 <p>
-	Also rewrote the Sys.Jobs and the Jobs script from yesterday, as well as the shortcuts
-	defined in CFT.props.
+	Also modified the Sys.Jobs and the Jobs script from yesterday, as well as the shortcuts
+	defined in CFT.props. Developed a crude way of bringing a running job to the foreground, 
+	so that jobs stalled on input, can be supplied with input data. 
+</p>
+<h4>Some details</h4>
+<p>
+	As the Input object is unaware of threads, the "last value" functionality becomes unreliable
+	if there are more than one job running the same code, because one may update the "last value" after
+	another has blocked on the same input, telling the user what was the "last value" at that point,
+	causing confusion. 
+</p>
+<p>
+	The rapid development of background jobs was driven by a very specific need at work, with slow servers and tens of
+	thousands of log files that needed to be "massaged" into meaningful subsets, stored in Db2, for
+	further inspection. The problem was that searching the remote directories for the latest file for some 
+	Glob pattern, was way too slow to repeat for every inspection. I wrote some "update"-functions which extracted
+	subsets of files, and stored them in the database, and now these functions can be run in the background. Very nice.
+</p>
+<h4>Inside code</h4>
+<p>
+	Even though the '&' expression (ExprAmp internally) is runnable from general code, it is limited compared
+	to SpawnProcess, as it can not refer variables. On the command line that is not a problem, since we
+	don't have any variables around anyway. Also there is the thing that jobs created with ExprAmp are added
+	to the internal registry, and returns the job name. 
+</p>
+<p>
+	In code we will normally use SpawnProcess, which returns an ObjProcess object.
+</p>
+<p>
+	Still, any code can easily use ExprAmp, when we want to automate generating background jobs for further management
+	via the Jobs script (which in turn uses the Sys.Jobs object).
 </p>
 
 
-<h3>2.12.0 2021-12-15 Sys.Jobs</h3>
+<h3>2.12.0 2021-12-15 Sys.Jobs + Jobs script</h3>
 <p>
-	Fixed minor bug in ObjProcess, ensuring that supplied Dictionary is completely copied. Then added Java class BackgroundProcesses, which is avaialable
-	via the Root object. Managing it is done by creating the Sys.Jobs object.
+	Fixed minor bug in ObjProcess, ensuring that supplied Dictionary is completely copied. Then added Java class BackgroundProcesses, which is available via the Root object. Managing it is done by creating the Sys.Jobs object, which in turn is used by a new
+	"Jobs" script.
 </p>
 <p>
 	CFT needs a mechanism for running stuff in the background and get notice when completed, and
-	a specialized "session store" for ObjProcess objects is required, as ObjProcess instances can
+	a specialized "session store" for ObjProcess objects was required, as ObjProcess instances can
 	not be stored in Db2 (not synthesizable).
 </p>
+<p>
+	This kind of breaks the claim of "no shared state", but it's a specialized store, for background jobs only, and
+	written to be thread-safe both internally (managing running threads) and externally, as called from CFT code,
+	including the command line.
+</p>
+
 
 <h3>2.11.0 2021-12-12 DD package</h3>
 <p>
 	Moved 2D vectors from Lib.Math to Lib.DD, and modeled it after the DDD library, including viewer. 
+</p>
+<p>
+	Status still uncertain, not really mature. The brush object and rendering is mostly a hack. It's fast though.
+</p>
+<p>
+	<b>Not included into the Doc yet</b>
 </p>
 
 

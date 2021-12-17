@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2021-12-10 RFO
-v2.10.0
+Last updated: 2021-12-17 RFO
+v2.12.1
 ```
 # Introduction
 
@@ -311,7 +311,7 @@ Dir("/SomewhereElse/xyz").file("data.txt")
 $ cd (LogDir)
 $ edit (DataFile)
 ```
-## No shell-like destructive commands
+## No shell-like destructive commands!
 
 
 CFT 
@@ -328,6 +328,36 @@ better security.
 Alternatively one can use "bang commands" or the shell function. Can also use the
 shortcut @fm, which opens a graphical file manager for the current directory.
 
+## Background jobs
+
+
+CFT lets us run any 
+**expression** (usually a function call) as a background job, using
+the '&amp;' expression syntax.
+
+```
+$ &amp; 1+1, "addition"
+$ &amp; someFunction(...), "description"
+```
+
+The "2+3" and "someFunction" are the expressions that are run as background jobs, and the value
+after the comma is an optional name, which helps us remember what each of the (numbered)
+background jobs do.
+
+
+To list all jobs, use the @J shortcut. To get the result from the first completed job,
+use the @JJ shortcut. There are a few other shortcuts starting with @J that are related to
+job management.
+
+
+Every time a new prompt is to be generated, a check is done to list out any changes to the set
+of completed jobs, which means we are alerted with jobs terminate. If we do not care about the
+results from any of the terminated jobs, we can use the @JCL shortcut ("jobs clear") which
+clears completed jobs from the jobs registry.
+
+
+And of course, jobs don't survive killing the CFT process.
+
 # The "protect" mechanism
 
 
@@ -340,7 +370,7 @@ $ <DirExpression>.file("xxx.txt").delete
 ```
 
 The point here is that the "DirExpression" as well as functionality to provide sets of files
-and similar, are CFT code, as CFT has a special provision to avoid deleting or modifying the wrong
+and similar, are CFT code, and CFT has a special provision to avoid deleting or modifying the wrong
 files or directories: 
 **the "protect" mechanism**.
 
@@ -353,15 +383,16 @@ What this does is set an internal flag in the Dir object that the function creat
 operations like deleting or modifying the directory.
 
 
-As we call LogDir.files, each File object created, also get the 
-**protect** flag set.
+As we call LogDir.files, each File object created, inherits the 
+**protect** flag.
 
 ```
 $ LogDir.file("log01.txt").delete
 ERROR: [input:18] INVALID-OP delete : /someNfsDir/logs/log01.txt (PROTECTED: -) (java.lang.Exception)
 ```
 
-This both protects our script code from doing bad things, but also interactively.
+This protects our script code from doing bad things, but also interactively, as we tend to call
+functions like LogDir from the command line instead of typing Dir("/somedir/logs").
 
 # Bang commands
 
@@ -384,14 +415,23 @@ $ BangParser:Readme
 # The "shell" command
 
 
-One can also run the global "shell" command, perform changes, and then return via "exit":
+The global shell() function starts a shell inside CFT. When you exit from it, you're back
+in CFT.
 
 ```
 $ shell
-roar@pc01$ rm xxx.txt
-roar@pc01$ exit
-# Running bash completed
+(starts bash or cmd or Powershell or something else)
+exit
+# Running /usr/bin/bash completed: 25529ms
 $
+```
+
+The shell function is configured in the CFT.props file which must exist in the CFT
+home directory.
+
+```
+shell = bash
+winShell = powershell
 ```
 # Show content of file
 
@@ -666,27 +706,6 @@ Dir.setAsCurrentDir
 ```
 Dir.newestFile
 Dir.newestFile(Glob("*.log"))
-```
-# shell()
-
-
-The global shell() function starts a shell inside CFT. When you exit from it, you're back
-in CFT.
-
-```
-$ shell
-(starts bash or cmd or Powershell or something else)
-exit
-# Running /usr/bin/bash completed: 25529ms
-$
-```
-
-The shell function is configured in the CFT.props file which must exist in the CFT
-home directory.
-
-```
-shell = bash
-winShell = powershell
 ```
 # Core types
 

@@ -11,7 +11,7 @@ It's been in continous use since creation in 2018.
 
 Written in Java, it runs both on Linux and Windows environment. 
 
-*README last updated 2021-12-15*
+*README last updated 2021-12-17*
 
 
 ## Terminal based - shell-like
@@ -219,7 +219,7 @@ strings, unless told to.
 ```
 
 The Sequence() expression creates a List, but without the requirement of commas, and the '@ ...' is
-the "raw string" format in CFT. Alternatively we can use inline "here" documents, for easily pasting.
+the "raw string" format in CFT. Alternatively we can use inline "here" documents, for easy copy/paste.
 
 The .mergeExpr is a member function of List objects, which evaluates expressions inside "<<" and ">>", inserting
 resulting values as text into the template sequence. 
@@ -365,6 +365,12 @@ $ @P
 
 ```
 
+Once you have one or more projects defined, you select the project using the "ch" (change) function. The
+selection is stored in the integrated database. 
+
+To search through files, run functions "S" (search), "S2" (search with 2 params) and so on.
+
+List functions in script with "?".
 
 
 ## Example: ping some hosts
@@ -436,6 +442,33 @@ to Dir.runProcess() which actually runs the external program. The details don't 
 as the concept of creating a hierarchy of functions with no (or very few) side effects, providing
 high level reliability, such as the HostOk function.
 
+## Running background jobs from the command line
+
+Added in v2.12.1
+
+Some times we have jobs that take a while, and using the '&' expression, we can delegate those to
+run in the background, to avoid blocking the REPL. 
+
+```
+  & timeConsumingFunction(...), "Some meaningful name"
+```
+
+Strictly speaking, '&' runs an expression, and function calls are expressions.
+
+This spawns off a Process, similar to the SpawnProcess() example above, but in addition registers the job in
+a job register. 
+
+The "Jobs" script contains code to manage both running and completed jobs, and in turn is made
+available through a few shortcuts, defined in CFT.props.
+
+```
+	@J - list background jobs
+	@JJ - get result from first of completed jobs (if any)
+	@JCL - clear set of completed jobs
+	@JFG - bring running job to foreground, for interactivity
+```
+
+
 # Interactive help
 
 Type "help" lists all global functions. 
@@ -505,9 +538,10 @@ $ "" help
      :
 ```
 
-# v2.10.0 3D-rendering
+# 3D-rendering
 
-Added support for primitive 3D rendering by code. Watch video [Introduction to 3D in CFT](https://www.youtube.com/watch?v=cbHFGPkhGec) here.
+In v2.10.0, support for primitive 3D rendering by code was added. 
+Watch video [Introduction to 3D in CFT](https://www.youtube.com/watch?v=cbHFGPkhGec) here.
 
 The following was rendered with [this script](code.examples/savefileDDDGraphs.txt).
 
