@@ -8,7 +8,7 @@ If you have problems, consider viewing the Doc.html file instead.
 
 ```
 Last updated: 2021-12-17 RFO
-v2.12.1
+v3.0.0
 ```
 # Introduction
 
@@ -4059,11 +4059,6 @@ shared the "local" block syntax, but functionally worked like an "Inner" block.
 It took a while back and forth deciding we needed two different non-lambda block expressions,
 and defining them in terms of code spaces.
 
-## Finally - v3.0.0 coming up
-
-
-v2.12.1 - finally got background jobs running from the command line. Starting to feel
-ready for the big version 3.0.0.
 ## Script and code size
 
 ### 2020-11-13 v2.0.0
@@ -4107,7 +4102,7 @@ Functions:        378
 Object types:     57
 Value types:      13
 ```
-### 2021-12-17
+### 2021-12-17 v3.0.0
 
 
 Running CodeStats:main

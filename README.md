@@ -13,6 +13,19 @@ Written in Java, it runs both on Linux and Windows environment.
 
 *README last updated 2021-12-17*
 
+# Version 3.0.0 - 2021-12-17
+
+Just decided that version 2.12.1 represents enough changes since version 2.0.0 in November of 2020, to become
+version 3.0.0. These milestones are of no practical consequence, as the latest version will always be
+the preferred one. Still, it just felt like version 3 as the background jobs came to work as I've wanted
+for a long time.
+
+Also want to mention the 3D library, which was added recently, and allows us to generate images like this, 
+from [this script](code.examples/savefileDDDExample.txt).
+
+![Wheel](doc/wheel.png)
+
+
 
 ## Terminal based - shell-like
 
