@@ -4059,9 +4059,14 @@ shared the "local" block syntax, but functionally worked like an "Inner" block.
 It took a while back and forth deciding we needed two different non-lambda block expressions,
 and defining them in terms of code spaces.
 
+## Finally - v3.0.0 coming up
+
+
+v2.12.1 - finally got background jobs running from the command line. Starting to feel
+ready for the big version 3.0.0.
 ## Script and code size
 
-### 2020-11-13
+### 2020-11-13 v2.0.0
 
 ```
 Script code:      ~5k lines
@@ -4102,41 +4107,16 @@ Functions:        378
 Object types:     57
 Value types:      13
 ```
-## Poor man's EXIF date parser
+### 2021-12-17
 
 
-Need to sort camera photos by date? JPG files created by a camera, or via image processing
-software like Darktable, LightRoom and so on, will contain an initial block of metadata
-called EXIF, which contains numerous fields and values, and which may occupy up to
-64 Kb at the start of the file.
-
-
-Not having written or included any third party implementation for parsing the EXIF data,
-the easy solution was to implement a function printableChars in the Binary value type, and
-search for dates using the Lib.Text.Lexer.
-
-
-The Lib.Text.Lexer.Node has support for "complex tokens", where we define a character
-string like "dddd-dd-dd", and then define what each chacter means, so that "d" may map
-to "0123456789", while letting "-" map only to itself.
-
-
-A utility function Util:ComplexPatternLineSearch was created for managing the details.
+Running CodeStats:main
 
 ```
-# Get EXIF date (as Date object) or return null
-# --
-P(1) =>
- jpegFile
-pattern = "dddd:dd:dd"
-map = Dict.set("d","0123456789").set(":",":")
-str = jpegFile.readBinary(0,64*1024).printableChars
-date = Util:CompledPatternLineSearh(printableChars, pattern, map).first
-if (date != null) {
-Date.setFormat("yyyy:MM:dd").parse(date)
-} else {
-null
-}
-/GetJpgExifDate
+Script code:      12751 lines
+Java code:        30244 lines
+Functions:        483
+Object types:     69
+Value types:      13
 ```
 

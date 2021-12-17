@@ -63,6 +63,9 @@
 	Still, any code can easily use ExprAmp, when we want to automate generating background jobs for further management
 	via the Jobs script (which in turn uses the Sys.Jobs object).
 </p>
+<p>
+	Also deleted the Cron script from 2.9.10, as it adds nothing of value any more.
+</p>
 
 
 <h3>2.12.0 2021-12-15 Sys.Jobs + Jobs script</h3>
@@ -296,7 +299,7 @@ SpawnProcess(Dict,expr,Lambda{P(1)=&gt;process process.output-&gt;line println(l
 	custom start/end-markers as parameters to the mergeEval() function.
 </p>
 <pre>
-	a=5 b=6 "a=<<a>> b=<<b>>".mergeExpr
+	a=5 b=6 "a=&lt;&lt;a&gt;&gt; b=&lt;&lt;b&gt;&gt;".mergeExpr
 </pre>
 
 

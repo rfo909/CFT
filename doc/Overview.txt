@@ -321,9 +321,10 @@ Comments and digressions
  * Using Sys.stdin to run colon commands etc
  * Code spaces / the "pipe"
  * Code spaces vs Inner blocks
+ * Finally - v3.0.0 coming up
  * Script and code size
- |   2020-11-13
+ |   2020-11-13 v2.0.0
  |   2021-04-01
  |   2021-09-26
  |   2021-10-16
- * Poor man's EXIF date parser
+ |   2021-12-17
