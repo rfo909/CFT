@@ -20,6 +20,7 @@ package rf.configtool.main.runtime;
 import java.util.List;
 
 import rf.configtool.main.Ctx;
+import rf.configtool.util.NumberFormat;
 
 public class ValueInt extends Value {
     
@@ -191,29 +192,12 @@ public class ValueInt extends Value {
             return "fmt";
         }
         public String getShortDesc() {
-            return "fmt() - returns String value on format xx,xxx,xxx for readability";
+            return "fmt(thousandSep) - returns String value on format xx,xxx,xxx for readability";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size()!=0) throw new Exception("Expected no parameters");
-            
-            String s;
-            boolean neg=false;
-            if (val < 0) {
-            	s=""+(-val);
-            	neg=true;
-            } else {
-            	s=""+val;
-            }
-            while (s.length() % 3 != 0) {
-            	s=" "+s;
-            }
-            StringBuffer sb=new StringBuffer();
-            for (int i=0; i<s.length(); i++) {
-            	if (i>0 && i%3==0) sb.append(",");
-            	sb.append(s.charAt(i));
-            }
-            String result = (neg?"-":"") + (sb.toString()).trim();
-            return new ValueString(result);
+            if (params.size()!=1) throw new Exception("Expected parameter thousandSep");
+            String thousandSep=getString("thousandSep",params,0);
+            return new ValueString(NumberFormat.formatInt(val, thousandSep));
         }
 
     }

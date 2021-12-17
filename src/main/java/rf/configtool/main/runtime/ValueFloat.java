@@ -20,6 +20,7 @@ package rf.configtool.main.runtime;
 import java.util.List;
 
 import rf.configtool.main.Ctx;
+import rf.configtool.util.NumberFormat;
 
 public class ValueFloat extends Value {
     
@@ -35,6 +36,7 @@ public class ValueFloat extends Value {
 				new FunctionLog(),
 				new FunctionLog10(),
 				new FunctionAbs(),
+				new FunctionFmt(),
 		};
 		setFunctions(arr);
     }
@@ -178,6 +180,24 @@ public class ValueFloat extends Value {
 
     }
     
+    class FunctionFmt extends Function {
+        public String getName() {
+            return "fmt";
+        }
+        public String getShortDesc() {
+            return "fmt(thousandSep,decimalComma,numDecimals) - returns String value on format xx,xxx,xxx.yyy for readability";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size()!=3) throw new Exception("Expected parameters thousandSep, decimalComma, numDecimals");
+            String thousandSep=getString("thousandSep",params,0);
+            String decimalComma=getString("decimalComma",params,1);
+            long numDecimals=getInt("numDecimals",params,2);
+            
+            return new ValueString(NumberFormat.formatFloat(val, thousandSep, decimalComma, (int) numDecimals));
+        }
+
+    }
+
 
 
 }
