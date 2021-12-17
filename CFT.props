@@ -74,6 +74,7 @@ shortcut:ii   = "---- Investigate log input loop ----"    Investigate:InputMode
 shortcut:J    = "---- List background jobs  ----"         Jobs:AllJobs
 shortcut:JJ   = "---- Get first completed job ----"       Jobs:Get
 shortcut:JCL  = "---- Clear completed jobs ----"          Jobs:Clear
+shortcut:JFG  = "---- Interact with job ----"             Jobs:ToForeground
 
 
 # Release script
