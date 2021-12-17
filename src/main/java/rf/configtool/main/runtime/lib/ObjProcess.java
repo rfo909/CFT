@@ -135,6 +135,11 @@ public class ObjProcess extends Obj {
         processInput.println(line);
     }
 
+    public synchronized boolean isAlive() {
+    	return (exitValue==null);
+    }
+    
+    
     public void close() throws Exception {
         processInput.close();
     }

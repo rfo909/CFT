@@ -13,6 +13,30 @@
 
 <h1>CFT Change log</h1>
 
+<h3>2.12.1 2021-12-16 Background jobs</h3>
+<p>
+	Created alternative notation for SpawnProcess() expression:
+</p>
+<pre>
+   & expr
+   & expr, name
+</pre>
+<p>
+	The name is either an identifier or an expression, typically a string. This extends the default name,
+	which is "&" plus an integer, for readability.
+</p>
+
+<p>
+	Updated the _Expr global documentation function.
+</p>
+
+
+<p>
+	Also rewrote the Sys.Jobs and the Jobs script from yesterday, as well as the shortcuts
+	defined in CFT.props.
+</p>
+
+
 <h3>2.12.0 2021-12-15 Sys.Jobs</h3>
 <p>
 	Fixed minor bug in ObjProcess, ensuring that supplied Dictionary is completely copied. Then added Java class BackgroundProcesses, which is avaialable

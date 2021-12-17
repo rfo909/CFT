@@ -1,90 +1,57 @@
 # Readme
 # --
 <<<< EOF
-First implementation of background job control.
+This script is for background jobs control, as started by
+the '&' expression, which has the following syntax
 
-Since this is a separate CFT script, if working
-inside script S, to run a function there in the background,
-enter
+& expr
 
-S:theFunction
+or 
 
-Note that functions you run in the background shouln't
-ask for input, or they will hang.
+& expr, name
 
-First version! :-)
+where name is an identifier or a string, to identify the process.
 
-Note that the Add function is scriptable:
-
-
-"job1 job2".split->job
-	Jobs:Add(Sys.scriptName + ":" + job)
 /StartHeavyTasks
 >>>> EOF
 ->line println("| " + line)
 /Readme
 
 
-# List jobs
+
+# Get running job names
 # --
-	Sys.Jobs.names->name
-		Sys.Jobs.get(name)->proc
-			report(name,if(proc.isAlive,"Running","COMPLETED"))
-/ps
-
-
-# Generate names
-# --
-	"p" + Util:Counter(Sys.scriptId + "_pid")
-//CreateName
-
-
-# Add job
-# --
-	P(1,readLine("Enter code to run"))=>code
-	name="("+CreateName + ") " + code
-	maxLen=(Term.w/2).i
-	if (name.length>maxLen) name=name.sub(0,maxLen-4) + " ..."
-	println(name)
-
-	process=SpawnProcess(SymDict(code),eval(code))
-	Sys.Jobs.add(process,name)
-/Add
+	Sys.Jobs.namesRunning
+/Running
 
 
 # Return completed job names (for integration into prompt)
 # --
-	Sys.Jobs.names->name
-		Sys.Jobs.get(name)->proc
-			if (proc.isDone) out(name)
+	Sys.Jobs.namesCompleted
 /Completed
 
 
 # Get single result from first terminated process
 # --
-	result=null
+	completed = Sys.Jobs.namesCompleted
+	error(completed.length==0, "No completed jobs")
 
-	Sys.Jobs.names->name
-		Sys.Jobs.get(name).first => proc
-		if (proc.isDone) {
-			Lib:Header(name)
-			output=proc.output
-			if (output.length > 0) Inner {
-				output->line println(line)
-			} 
+	name=completed.first
+	proc=Sys.Jobs.getCompleted(name)
 
-			Sys.Jobs.delete(name)
-			result = proc.exitValue
-			break
-		}
-	|
-	result
+	Lib:Header(name)
+	output=proc.output
+	if (output.length > 0) Inner {
+		output->line println(line)
+	} @rel
+
+	Sys.Jobs.deleteCompleted(name)
+	
+	proc.exitValue
 /Get
 
 
 # Clear all completed jobs
 # --
-	Sys.Jobs.names->name
-		Sys.Jobs.get(name)->proc
-			if (proc.isDone) Sys.Jobs.delete(name)
+	Sys.Jobs.namesCompleted->name Sys.Jobs.deleteCompleted(name)
 /Clear

@@ -104,6 +104,10 @@ public class ExprTerminal extends ExprCommon {
             expr = new ExprSpawnProcess(ts);
             return;
         }
+        if (ts.peekStr("&")) {
+        	expr=new ExprAmp(ts);
+        	return;
+        }
         if (ts.peekStr("SymDict")) {
             expr=new ExprSymDict(ts);
             return;
