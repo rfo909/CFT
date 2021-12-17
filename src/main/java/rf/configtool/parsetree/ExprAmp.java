@@ -43,7 +43,7 @@ public class ExprAmp extends ExprCommon {
 	private Expr nameExpr;
 
     private String getName(String text) {
-    	String s="&" + (counter++);
+    	String s="(" + (counter++) + ")";
     	if (text != null) {
     		s=s+" " + text;
     	}
