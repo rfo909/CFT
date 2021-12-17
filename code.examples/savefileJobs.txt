@@ -63,3 +63,30 @@ where name is an identifier or a string, to identify the process.
 # --
 	Sys.Jobs.namesCompleted->name Sys.Jobs.deleteCompleted(name)
 /Clear
+
+
+# Select job to do interactive follow-up on
+# --
+	Lib:MenuSelect(Sys.Jobs.namesRunning,null,"Select job") => name
+	println("Selected job: " + name)
+	println("In the input loop below, enter .q to abort")
+
+	result=null
+
+	proc=Sys.Jobs.getRunning(name)
+	error(proc==null,"No running process " + name)
+	loop
+		println("proc=" + proc)
+		Inner { proc.output->line println(line) }
+		if (proc.isDone) {
+			println("(Job has terminated)")
+			result=proc.exitValue
+			Sys.Jobs.deleteCompleted(name)
+			break
+		}
+		readLine => line
+		break(line==".q")
+		proc.sendLine(line)
+	|
+	result
+/ManageProcess
