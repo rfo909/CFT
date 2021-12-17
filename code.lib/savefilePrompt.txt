@@ -63,7 +63,7 @@
 	if (str != Db2:Get(Sys.scriptId,"CompletedJobs","")) Inner {
 		Db2:Set(Sys.scriptId,"CompletedJobs",str)
 		list -> name
-			println(" " + name)
+			println("COMPLETED " + name)
 	}
 
 /CompletedJobs

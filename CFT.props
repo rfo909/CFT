@@ -71,8 +71,7 @@ shortcut:id   = "---- Investigate log with data ----"     Investigate:LogData
 shortcut:ii   = "---- Investigate log input loop ----"    Investigate:InputMode
 
 # Job control
-shortcut:J    = "---- List completed jobs  ----"          Jobs:Completed
-shortcut:JPS  = "---- List running jobs ----"             Jobs:Running
+shortcut:J    = "---- List background jobs  ----"         Jobs:AllJobs
 shortcut:JJ   = "---- Get first completed job ----"       Jobs:Get
 shortcut:JCL  = "---- Clear completed jobs ----"          Jobs:Clear
 

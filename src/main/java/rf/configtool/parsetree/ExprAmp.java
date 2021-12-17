@@ -24,6 +24,7 @@ import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueBlock;
 import rf.configtool.main.runtime.ValueObj;
+import rf.configtool.main.runtime.ValueString;
 import rf.configtool.main.runtime.lib.ObjClosure;
 import rf.configtool.main.runtime.lib.ObjDict;
 import rf.configtool.main.runtime.lib.ObjProcess;
@@ -84,8 +85,9 @@ public class ExprAmp extends ExprCommon {
         }
         
         // add to Jobs object
-        ctx.getObjGlobal().getRoot().getBackgroundProcesses().add(getName(text), process);
-        return (new ValueObj(process));
+        String pid=getName(text);
+        ctx.getObjGlobal().getRoot().getBackgroundProcesses().add(pid, process);
+        return new ValueString(pid);
         
     }
 }
