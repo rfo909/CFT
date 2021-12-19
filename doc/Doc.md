@@ -3757,7 +3757,7 @@ See Db2:GetSessionPassword() function for example.
 # Reference: object types
 
 
-**Per v2.9.1**
+**Per v3.0.2**
 ```
 Grep("extends Obj") =>
  g
@@ -3770,10 +3770,22 @@ out(line.after("class").before("extends"))
 x
 println(x)
 /objects
+DD
+DDBrush
+DDD
+DDDBrush
+DDDRef
+DDDTriangle
+DDDVector
+DDDWorld
+DDRef
+DDVector
+DDWorld
+ObjAnnotatedValue
 ObjClosure
+ObjColor
 ObjContext
 ObjConvert
-ObjDD
 ObjData
 ObjDataFile
 ObjDate
@@ -3806,6 +3818,7 @@ ObjJavaValueLong
 ObjJavaValueNull
 ObjJavaValueObject
 ObjJavaValueString
+ObjJobs
 ObjLexer
 ObjLexerNode
 ObjLexerToken
@@ -3824,14 +3837,13 @@ ObjSys
 ObjTerm
 ObjText
 ObjUtil
-ObjVec2D
 ObjWeb
 Value
 ```
 # Reference: Value types
 
 
-**Per v2.9.1**
+**Per v3.0.2**
 ```
 Grep("extends Value") =>
  g
@@ -3958,7 +3970,16 @@ The "problem" is that CFT code (and so shortcuts) can run colon commands via "ab
 - null
 
 
-- List
+- AValue
+
+
+- Date
+
+
+- Date.Duration
+
+
+- Dict
 
 
 - Dir
@@ -3970,34 +3991,25 @@ The "problem" is that CFT code (and so shortcuts) can run colon commands via "ab
 - FileLine
 
 
-- Date
-
-
-- Date.Duration
-
-
-- Int
-
-
 - Float
-
-
-- Str
-
-
-- Dict
 
 
 - Glob
 
 
-- Regex
+- Int
 
 
 - Lambda
 
 
-- AValue
+- List
+
+
+- Regex
+
+
+- Str
 
 
 # Comments and digressions
