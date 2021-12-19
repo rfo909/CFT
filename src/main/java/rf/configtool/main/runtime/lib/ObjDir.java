@@ -29,6 +29,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import rf.configtool.main.Ctx;
@@ -96,6 +97,7 @@ public class ObjDir extends Obj {
 				new FunctionSetAsCurrentDir(),
 				new FunctionVerify(),
 				new FunctionNewestFile(),
+				new FunctionNewestFiles(),
 				new FunctionStats(),
 		};
 		setFunctions(arr);
@@ -833,9 +835,7 @@ public class ObjDir extends Obj {
             OutText outText=ctx.getOutText();
             ObjGlob glob=null;
             if (params.size()==1) {
-                Obj obj=getObj("Glob",params,0);
-                if (!(obj instanceof ObjGlob)) throw new Exception("Expected optional Glob parameter");
-                glob=(ObjGlob) obj;
+            	glob = getObjGlob(params,0);
             } else if (params.size() != 0) {
                 throw new Exception("Expected optional Glob parameter only");
             }
@@ -859,7 +859,73 @@ public class ObjDir extends Obj {
             return new ValueObj(new ObjFile(newestFile.getCanonicalPath(), self().protection));
         }
     }
+
+    
+    class FunctionNewestFiles extends Function {
+        public String getName() {
+            return "newestFiles";
+        }
+        public String getShortDesc() {
+            return "newestFiles(Glob,count) - return sorted list (newest first) of newest files";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	if (params.size() != 2) throw new Exception("Expected parameter glob, count");
+        	ObjGlob glob=getObjGlob(params,0);
+        	int count=(int) getInt("count",params,1);
+        	
+        	List<ObjFile> sortedList=new ArrayList<ObjFile>();
+            File f=new File(name);
+            File[] content = f.listFiles();
+
+            List<File> fileList=new ArrayList<File>();
+            for (File x:content) {
+            	try {
+	            	if (x.isFile()) { fileList.add(x); } 
+            	} catch (Exception ex) {
+            		// ignore
+            	}
+            }
+
+        	
+        	Comparator<File> comp=new Comparator<File>() {
+                public int compare(File a, File b) {
+                	long ia;
+                	try {
+                		ia=a.lastModified();
+                	} catch (Exception ex) {
+                		ia=0L;
+                	}
+                    long ib;
+                    try {
+                    	ib=b.lastModified();
+                    } catch (Exception ex) {
+                    	ib=0L;
+                    }
+                    if (ia>ib) return -1;
+                    if (ia==ib) return 0;
+                    return 1;
+                    
+                }
+            };
+          
+            fileList.sort(comp);
+            List<Value> valList=new ArrayList<Value>();
+            if (count > fileList.size()) count=fileList.size();
+            CREATE_RESULT: for (File file:fileList) {
+            	try {
+            		valList.add(new ValueObj(new ObjFile(file.getAbsolutePath(), Protection.NoProtection)));
+            	} catch (Exception ex) {
+            		// ignore
+            	}
+            	if (valList.size()==count) break CREATE_RESULT;
+            }
+        	
+            return new ValueList(valList);
+        }
+    }
   
+    
+
     
     class FunctionStats extends Function {
         public String getName() {

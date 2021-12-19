@@ -13,10 +13,17 @@
 
 <h1>CFT Change log</h1>
 
+<h3>3.0.2 2021-12-19 Dir.newestFile and .newestFiles</h3>
+<p>
+	Dir.newestFile(): fixed so glob can be a string. Then added Dir.newestFiles(glob,count), which returns
+	list of files, sorted newest first. For directories with huge number of files, this should be far more
+	efficient than creating ObjFile objects for all, when doing this operation in CFT code.
+</p>
+
 
 <h3>3.0.1 2021-12-18 BangParser</h3>
 <p>
-	Fixes plain globbing with BangParser, which means current directory only, such as "*.txt", but not "somePath/*.txt".
+	Fixed plain globbing with BangParser, which means current directory only, such as "*.txt", but not "somePath/*.txt".
 	Also tried to fix quotes for Windows, as PowerShell requires quotes even when calling Dir:Run with list of parts.
 	Will test this on windows later. 
 </p> 
