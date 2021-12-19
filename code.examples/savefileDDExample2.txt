@@ -47,24 +47,19 @@
 		# spokes
 		x=ref.turnLeft(angle).fwd(axleHoleRadius+hubThickness/2)
 		y=ref.turnLeft(angle).fwd(rimCenterRadius)
-		Lib.DD.Vector(0, -spokeRadius) => left
-		Lib.DD.Vector(0, spokeRadius) => right
-		world.Brush(left,right).setColor(Lib.Color(250,150,50)) => b
+		world.Brush(-spokeRadius,spokeRadius).setColor(Lib.Color(250,150,50)) => b
 		b.penDown(x)
 		b.penDown(y)
 		b.penUp
 	|
 
 	# Hub
-	left=Lib.DD.Vector(0,-hubThickness/2)
-	right=Lib.DD.Vector(0,hubThickness/2)
-	Circle(ref, world.Brush(left,right).setColor(Lib.Color(200,100,0)), axleHoleRadius + hubThickness/2)
-	#Circle(ref, world.LineBrush.setColor(Lib.Color(200,100,0)), axleHoleRadius+hubThickness)
+	Circle(ref, world.Brush(-hubThickness/2,hubThickness/2).setColor(Lib.Color(200,100,0)), axleHoleRadius + hubThickness/2)
 	
 	# Rim
 	left=Lib.DD.Vector(0,-rimThickness/2)
 	right=Lib.DD.Vector(0,rimThickness/2)
-	Circle(ref, world.Brush(left,right).setColor(Lib.Color(200,100,0)), rimCenterRadius)
+	Circle(ref, world.Brush(-rimThickness/2,rimThickness/2).setColor(Lib.Color(200,100,0)), rimCenterRadius)
 	
 	world.render(file)
 

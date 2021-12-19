@@ -24,10 +24,18 @@ public class DDBrush extends Obj {
 	private Vector2d prevA, prevB;
 
 	
-	public DDBrush (ViewReceiver recv, Vector2d offsetA, Vector2d offsetB) {
+	/**
+	 * As there are problems with right being negative and left being positibe, we mask this by
+	 * not using vectors in the call interface for creating a brush, but instead signed
+	 * offsets, which are positive to the right and negative to the left.
+	 * @param recv
+	 * @param offsetA
+	 * @param offsetB
+	 */
+	public DDBrush (ViewReceiver recv, double offsetA, double offsetB) {
 		this.recv=recv;
-		this.offsetA=offsetA;
-		this.offsetB=offsetB;
+		this.offsetA=new Vector2d(0,-offsetA);
+		this.offsetB=new Vector2d(0,-offsetB);
 		this.color=new Color(0,0,0);
 		
 		this.add(new FunctionPenDown());

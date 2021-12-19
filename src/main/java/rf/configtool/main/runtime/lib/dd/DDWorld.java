@@ -52,19 +52,15 @@ public class DDWorld extends Obj {
 		}
 
 		public String getShortDesc() {
-			return "Brush(vectorA,vectorB) - return Brush object";
+			return "Brush(offsetA,offsetB) - positive offset to right and negative to left - return Brush object";
 		}
 
 		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
 			if (params.size() != 2)
-				throw new Exception("Expected parameter VectorA, VectorB");
-			Obj vecA=getObj("VectorA", params, 0);
-			Obj vecB=getObj("VectorB", params, 1);
-			if (vecA instanceof DDVector && vecB instanceof DDVector) {
-				return new ValueObj(new DDBrush(viewer, ((DDVector) vecA).getVec(), ((DDVector) vecB).getVec() ));
-			} else {
-				throw new Exception("Expected parameter VectorA, VectorB");
-			}
+				throw new Exception("Expected numeric parameters offsetA, offsetB (positive to right, negative to left)");
+			double a=getFloat("offsetA", params, 0);
+			double b=getFloat("offsetB", params, 1);
+			return new ValueObj(new DDBrush(viewer, a, b));
 		}
 	}
 
