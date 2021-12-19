@@ -2058,8 +2058,6 @@ line out(line.merge(data))
 ## List.mergeExpr
 
 
-**v2.9.2**
-
 The List.mergeExpr is another option. Instead of merging data from a dictionary
 into the template, the template contains CFT expressions inside << and >>.
 
@@ -2188,8 +2186,6 @@ Now all lines starting with "//" are automatically stripped from any output.
 
 ## Sequence() and raw strings
 
-
-**v1.7.0**
 
 Raw strings start with '@' and consist of the rest of the line.
 In addition, two expressions have been added, called Sequence() and CondSequence(). These
@@ -2351,8 +2347,6 @@ The above code generates an example plot as a png file in the current directory.
 # Internal web-server
 
 
-**v2.9.0**
-
 There is a small embedded web-server in CFT, available in the Lib.Web object. It
 supports GET and POST, does parameter and form input parsing.
 
@@ -2480,8 +2474,6 @@ This loads script Projects, then calls the Curr function inside.
 ```
 # Environment variables
 
-
-**v2.6.1**
 
 Available via Sys.environment() function.
 
@@ -3084,8 +3076,6 @@ See separate sections on closures and objects.
 
 # Calling Java
 
-
-**v2.7.0**
 
 CFT lets us interface Java code via the Lib.Java object. It contains functions
 for identifying classes. We then look up a constructor and call it, getting a

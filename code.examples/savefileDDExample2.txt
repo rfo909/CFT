@@ -39,6 +39,8 @@
 	rimCenterRadius=500
 	
 	println(getType(world))
+	
+	# Polygon brushes: x is forward, and y is left/right
 
 	# draw spokes first
 	Lib.Data.for(0,361,30) -> angle
@@ -59,7 +61,7 @@
 	Circle(ref, world.Brush(left,right).setColor(Lib.Color(200,100,0)), axleHoleRadius + hubThickness/2)
 	#Circle(ref, world.LineBrush.setColor(Lib.Color(200,100,0)), axleHoleRadius+hubThickness)
 	
-	# Rim: x is forward, so y is left/right
+	# Rim
 	left=Lib.DD.Vector(0,-rimThickness/2)
 	right=Lib.DD.Vector(0,rimThickness/2)
 	Circle(ref, world.Brush(left,right).setColor(Lib.Color(200,100,0)), rimCenterRadius)
