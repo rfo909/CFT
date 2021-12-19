@@ -551,7 +551,7 @@ $ "" help
      :
 ```
 
-# 3D-rendering
+# 3D- and 2D-rendering
 
 In v2.10.0, support for primitive 3D rendering by code was added. 
 Watch video [Introduction to 3D in CFT](https://www.youtube.com/watch?v=cbHFGPkhGec) here.
@@ -560,6 +560,12 @@ The following was rendered with [this script](code.examples/savefileDDDGraphs.tx
 
 ![Donut](doc/torus.png)
 
+## Some more examples
+
+![Helix](doc/helix.png)
+<br/>
+
+![2D Donut](doc/torus2d.png)
 
 
 # Download and compile
