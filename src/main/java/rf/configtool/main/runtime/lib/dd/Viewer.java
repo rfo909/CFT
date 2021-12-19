@@ -39,7 +39,9 @@ public class Viewer implements ViewReceiver {
 	}
 	
 	public void addPolygon (Polygon poly) {
-		polys.add(poly);
+		if (!poly.getLinesOnly()) {
+			polys.add(poly);
+		}
 		for (Line line:poly.getLines()) {
 			addLine(line); // include it in bounding box calculations
 		}

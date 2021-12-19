@@ -9,10 +9,15 @@ import java.awt.Color;
 public class Polygon {
 	private List<Vector2d> points;
 	private Color color;
+	private boolean linesOnly=false;
 	
 	public Polygon (List<Vector2d> points, Color color) {
 		this.points=points;
 		this.color = color;
+	}
+	
+	public void setLinesOnly() {
+		this.linesOnly=true;
 	}
 
 	
@@ -22,6 +27,10 @@ public class Polygon {
 
 	public Color getColor() {
 		return color;
+	}
+	
+	public boolean getLinesOnly() {
+		return linesOnly;
 	}
 
 	public List<Line> getLines() {

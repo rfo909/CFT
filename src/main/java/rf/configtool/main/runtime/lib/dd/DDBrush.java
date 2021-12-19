@@ -19,6 +19,8 @@ public class DDBrush extends Obj {
 
 	private ViewReceiver recv;
 	private Color color;
+	private boolean linesOnly=false;
+
 	private Vector2d offsetA, offsetB;
 	
 	private Vector2d prevA, prevB;
@@ -41,6 +43,7 @@ public class DDBrush extends Obj {
 		this.add(new FunctionPenDown());
 		this.add(new FunctionPenUp());
 		this.add(new FunctionSetColor());
+		this.add(new FunctionSetLinesOnly());
 		
 	}
 	@Override
@@ -93,7 +96,10 @@ public class DDBrush extends Obj {
 	        			points.add(b);
 	        			points.add(a);
 	        			points.add(prevA); // closing polygon
-	        			recv.addPolygon(new Polygon(points,color));
+	        			
+	        			Polygon poly=new Polygon(points,color);
+	        			if (linesOnly) poly.setLinesOnly();
+	        			recv.addPolygon(poly);
 	        			
 //	        			StringBuffer sb=new StringBuffer();
 //	        			for (Vector2d p:points) {
@@ -147,6 +153,23 @@ public class DDBrush extends Obj {
 	        	} else {
 	        		throw new RuntimeException("Expected Color parameter");
 	        	}
+	        }
+	    }
+	   
+	   
+	   class FunctionSetLinesOnly extends Function {
+	        public String getName() {
+	            return "setLinesOnly";
+	        }
+
+	        public String getShortDesc() {
+	            return "setLinesOnly() - render brush polygons as lines only, not filled";
+	        }
+
+	        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+	        	if (params.size() != 0) throw new RuntimeException("Expected no parameters");
+	        	self().linesOnly=true;
+	        	return new ValueObj(self());
 	        }
 	    }
 }
