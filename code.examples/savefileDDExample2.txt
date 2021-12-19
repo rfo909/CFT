@@ -1,0 +1,72 @@
+# Example of 2D graphics, rendering the same wheel as the DDDExample (3D) version
+# --
+
+
+# Circle
+# --
+	P(1)=>ref
+	P(2)=>brush
+	P(3)=>radius
+	
+
+	Lib.Data.for(0,361,3)->angle
+		brush.penDown(ref.turnLeft(angle).left(radius))
+	|
+	brush.penUp
+/Circle
+
+
+
+# Target dir for testing
+# --
+	Sys.homeDir.sub("anim").sub("2d").create
+/TargetDir
+
+
+
+# Wooden wheel example
+# --
+	P(1,Lib.DD.World)=>world
+	P(2,Lib.DD.Ref)=>ref
+	P(3,TargetDir.file("wheel2.png"))=>file
+
+	hubThickness=50
+	rimThickness=30
+
+	spokeRadius=15
+	axleHoleRadius=15
+	
+	rimCenterRadius=500
+	
+	println(getType(world))
+
+	# draw spokes first
+	Lib.Data.for(0,361,30) -> angle
+		# spokes
+		x=ref.turnLeft(angle).fwd(axleHoleRadius+hubThickness/2)
+		y=ref.turnLeft(angle).fwd(rimCenterRadius)
+		Lib.DD.Vector(0, -spokeRadius) => left
+		Lib.DD.Vector(0, spokeRadius) => right
+		world.Brush(left,right).setColor(Lib.Color(250,150,50)) => b
+		b.penDown(x)
+		b.penDown(y)
+		b.penUp
+	|
+
+	# Hub
+	left=Lib.DD.Vector(0,-hubThickness/2)
+	right=Lib.DD.Vector(0,hubThickness/2)
+	Circle(ref, world.Brush(left,right).setColor(Lib.Color(200,100,0)), axleHoleRadius + hubThickness/2)
+	#Circle(ref, world.LineBrush.setColor(Lib.Color(200,100,0)), axleHoleRadius+hubThickness)
+	
+	# Rim: x is forward, so y is left/right
+	left=Lib.DD.Vector(0,-rimThickness/2)
+	right=Lib.DD.Vector(0,rimThickness/2)
+	Circle(ref, world.Brush(left,right).setColor(Lib.Color(200,100,0)), rimCenterRadius)
+	
+	world.render(file)
+
+	println("Wrote file " + file.path)
+/Wheel
+
+

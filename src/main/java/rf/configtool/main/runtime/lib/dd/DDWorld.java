@@ -19,6 +19,7 @@ public class DDWorld extends Obj {
 	public DDWorld() {
 		this.viewer = new Viewer(Color.WHITE);
 		this.add(new FunctionBrush());
+		this.add(new FunctionLineBrush());
 		this.add(new FunctionRender());
 	}
 
@@ -44,20 +45,44 @@ public class DDWorld extends Obj {
 	private DDWorld self() {
 		return this;
 	}
-
+	
 	class FunctionBrush extends Function {
 		public String getName() {
 			return "Brush";
 		}
 
 		public String getShortDesc() {
-			return "Brush() - return Brush object";
+			return "Brush(vectorA,vectorB) - return Brush object";
+		}
+
+		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+			if (params.size() != 2)
+				throw new Exception("Expected parameter VectorA, VectorB");
+			Obj vecA=getObj("VectorA", params, 0);
+			Obj vecB=getObj("VectorB", params, 1);
+			if (vecA instanceof DDVector && vecB instanceof DDVector) {
+				return new ValueObj(new DDBrush(viewer, ((DDVector) vecA).getVec(), ((DDVector) vecB).getVec() ));
+			} else {
+				throw new Exception("Expected parameter VectorA, VectorB");
+			}
+		}
+	}
+
+
+
+	class FunctionLineBrush extends Function {
+		public String getName() {
+			return "LineBrush";
+		}
+
+		public String getShortDesc() {
+			return "LineBrush() - return LineBrush object";
 		}
 
 		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
 			if (params.size() != 0)
 				throw new Exception("Expected no parameters");
-			return new ValueObj(new DDBrush(viewer));
+			return new ValueObj(new DDLineBrush(viewer));
 		}
 	}
 

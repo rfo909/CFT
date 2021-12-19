@@ -8,7 +8,7 @@ If you have problems, consider viewing the Doc.html file instead.
 
 ```
 Last updated: 2021-12-19 RFO
-v3.0.2
+v3.0.3
 ```
 # Introduction
 
@@ -2442,16 +2442,19 @@ The example script DDDExample contains code for rendering a spoked wooden wheel.
 
 
 Similar to the 3D library, the 2D library lets us draw vector graphics using a
-2D Ref object that moves in the plane.
+2D Ref object that moves in the plane, using either lines or filled polygons.
 
 ## Spoked wheel
 
 
-Created DDExample which draws the same wheel as the 3D version.
+Created DDExample which draws the same wheel as the 3D version, using the LineBrush of DD.World
 
 
 **
-# Command line args
+
+Created DDExample2 which uses polygon drawing Brush of DD.World.
+
+**# Command line args
 
 
 If CFT is invoked with command line arguments, the first is the name of the script,

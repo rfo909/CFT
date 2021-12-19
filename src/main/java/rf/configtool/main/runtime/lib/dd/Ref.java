@@ -201,7 +201,8 @@ public class Ref {
 
 	
 	public Vector2d transformLocalToGlobal (Vector2d localVec) {
-		return x.mul(localVec.getX()).add(y.mul(localVec.getY()));
+		Vector2d convertedToLocalSystem = x.mul(localVec.getX()).add(y.mul(localVec.getY()));
+		return pos.add(convertedToLocalSystem);
 	}
 
 }

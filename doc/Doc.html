@@ -16,7 +16,7 @@ CFT / ConfigTool
 <pre style="padding-left:0; margin-left:0">
 
 Last updated: 2021-12-19 RFO
-v3.0.2
+v3.0.3
 
 
 </pre>
@@ -2732,15 +2732,20 @@ codeDirs = . ; code.examples ; code.lib
 <h1>2D library</h1>
 <p>
   Similar to the 3D library, the 2D library lets us draw vector graphics using a
-  2D Ref object that moves in the plane.
+  2D Ref object that moves in the plane, using either lines or filled polygons.
 </p>
 <h2>Spoked wheel</h2>
 <p>
-  Created DDExample which draws the same wheel as the 3D version.
+  Created DDExample which draws the same wheel as the 3D version, using the LineBrush of DD.World
 </p>
 <p>
   <img src="wheel2d.png" alt="2D Wooden wheel rendered with CFT"/>
 </p>
+<p>
+  Created DDExample2 which uses polygon drawing Brush of DD.World.
+</p>
+  <img src="wheel2dpoly.png" alt="2D Wooden wheel rendered with CFT"/>
+
 
 
 <h1>Command line args</h1>
