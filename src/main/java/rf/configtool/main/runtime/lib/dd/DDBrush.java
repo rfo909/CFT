@@ -37,7 +37,7 @@ public class DDBrush extends Obj {
 
 	@Override
 	public String getTypeName() {
-		return "DD.Ref";
+		return "DD.Brush";
 	}
 
 	@Override
@@ -46,7 +46,7 @@ public class DDBrush extends Obj {
 	}
 
 	private String getDesc() {
-		return "DD.Ref";
+		return "DD.Brush";
 	}
 
 	private DDBrush self() {

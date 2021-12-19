@@ -205,6 +205,9 @@ Internal web-server
  * Rendering
  * Drawing a spoked wheel
 
+2D library
+ * Spoked wheel
+
 Command line args
 
 Environment variables

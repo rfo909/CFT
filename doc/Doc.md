@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2021-12-17 RFO
-v3.0.0
+Last updated: 2021-12-19 RFO
+v3.0.2
 ```
 # Introduction
 
@@ -2313,8 +2313,7 @@ The global function Lib() creates a Lib object, which in turn contains functions
 create other objects, such as the Math object, which contains trigonometric functions.
 
 
-**v2.7.2** Added DD function, which contains Vec(x,y) for creating 2D vectors,
-and doing 2D vector math.
+For vector logic and rendering see Lib.DD and Lib.DDD (2D and 3D).
 
 ## Lib.Convert
 
@@ -2369,8 +2368,6 @@ many lines of output).
 
 # 3D library
 
-
-**v2.10.0**
 
 Included and adapted an old 3d-library written over 20 years ago, for rendering 3D scenes,
 working purely in Java, without any acceleration. It is slow, but gets the job done.
@@ -2438,6 +2435,19 @@ world.render(file)
 
 
 The example script DDDExample contains code for rendering a spoked wooden wheel.
+
+
+**
+# 2D library
+
+
+Similar to the 3D library, the 2D library lets us draw vector graphics using a
+2D Ref object that moves in the plane.
+
+## Spoked wheel
+
+
+Created DDExample which draws the same wheel as the 3D version.
 
 
 **
