@@ -45,7 +45,7 @@
 
 # Save target
 # --
-	Lib:DirPrivate.sub("anim").sub("Graphs").create
+	Sys.homeDir.sub("anim").sub("3d").create
 //TargetDir
 
 # Torus
