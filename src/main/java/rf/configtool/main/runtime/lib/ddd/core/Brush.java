@@ -36,7 +36,7 @@ public class Brush {
 	*/
 	public Brush (TriangleReceiver triDest) {
 		this.triDest=triDest;
-		this.attr=new VisibleAttributes(Color.RED);
+		this.attr=new VisibleAttributes(Color.BLACK);
 	}
 	
 	public void setAttr (VisibleAttributes attr) {

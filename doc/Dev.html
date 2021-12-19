@@ -13,7 +13,7 @@
 
 <h1>CFT Change log</h1>
 
-<h3>3.0.3 2021-12-19 DD improvements and verification</h3>
+<h3>3.0.4 2021-12-19 DD improvements and verification</h3>
 <p>
 	The Lib.DD package seems to work. Ref.fwd is along the X-axis, which for 2D is
 	to the right, with Y up.
@@ -22,8 +22,26 @@
 	Created DDExample, which draws the same wooden wheel as in DDDExample (3D).
 </p>
 <p>
-	Created 2D brush that drags a line through 2D space, for filled areas, and created DDExample2 which draws
-	the same wheel with filled polygons.
+	Created 2D brush that drags a line segment through 2D space, for filled areas, and created DDExample2 which draws
+	the same wheel with this brush, which renders as filled 4-point polygons.
+</p>
+<p>
+	Created DDGraphs script, with Torus and an interesting 720 degrees Helix illustration, which presents values
+	sorted, so biggest first. Turned out great!
+</p>
+<p>
+	Deleted rotation operations from Lib.DD.Vector, to avoid confusion, since the DD universe has some inherent
+	issues regarding the meaning of left and right. Now it works, and that's good enough, even though .fwd is along
+	the X axis from left to right. 
+</p>
+<p>
+	Also fixed the DD.Vector.sub() as well as DDD.Vector.sub()
+	to be intuitive (reversing the direction of the arrow), so that x.sub(y) returns vector from point y to point x.
+	Updated doc on both functions to be identical. 
+</p>
+<p>
+	Changed default background color for DDD.Viewer to white, and verified Torus from DDDExample. Also extended
+	number of colors from 9 to 12.
 </p>
 
 

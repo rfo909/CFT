@@ -32,7 +32,7 @@ public class DDDWorld extends Obj {
 	}
     public DDDWorld() {
     	// Defining camera in millimeters
-    	createViewer(35, 36, 24, 800, 600, Color.BLACK);
+    	createViewer(35, 36, 24, 800, 600, Color.WHITE);
     
     	this.add(new FunctionInit());
     	this.add(new FunctionSetLightPos());

@@ -1,16 +1,6 @@
 # Graph colors
 # --
-	List(
-		Lib.Color(255,0,0),
-		Lib.Color(120,40,101),
-		Lib.Color(30,120,80),
-		Lib.Color(0,35,88),
-		Lib.Color(200,200,0),
-		Lib.Color(0,200,0),
-		Lib.Color(120,80,0),
-		Lib.Color(50,50,255),
-		Lib.Color(100,100,100)
-	)
+	DDDGraphs:Colors
 //Colors
 
 

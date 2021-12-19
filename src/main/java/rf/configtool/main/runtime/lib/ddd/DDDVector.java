@@ -144,7 +144,7 @@ public class DDDVector extends Obj {
         }
 
         public String getShortDesc() {
-            return "sub(DDD.Vector) - subtract vector";
+            return "sub(DDD.Vector) - return vector that points from given vector point to THIS vector point";
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
@@ -152,7 +152,7 @@ public class DDDVector extends Obj {
         	Obj vec1=getObj("vector",params,0);
         	if (vec1 instanceof DDDVector) {
         		Vector3d x=((DDDVector) vec1).getVec();
-        		return new ValueObj(new DDDVector(getVec().sub(x)));
+        		return new ValueObj(new DDDVector(getVec().intuitiveSub(x)));
         	} else {
         		throw new RuntimeException("Expected 3d Vector parameter");
         	}

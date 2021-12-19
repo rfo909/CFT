@@ -28,8 +28,6 @@ public class DDVector extends Obj {
 		this.add(new FunctionLength());
 		this.add(new FunctionX());
 		this.add(new FunctionY());
-		this.add(new FunctionRotateLeft());
-		this.add(new FunctionRotateRight());
 		this.add(new FunctionScaleTo());
 		this.add(new FunctionScale());
 	}
@@ -91,12 +89,13 @@ public class DDVector extends Obj {
 			return "sub";
         }
         public String getShortDesc() {
-            return "sub(Vector2d) - return vector that points from THIS to given vector";
+            return "sub(Vector2d) - return vector that points from given vector point to THIS vector point";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 1) throw new Exception("Expected Vec2d parameter");
             Vector2d vec=getVector("Vec2d", params, 0, "Expected Vec2d parameter");
-            return new ValueObj(new DDVector(getVec().sub(vec)));
+            
+            return new ValueObj(new DDVector(getVec().intuitiveSub(vec)));
         }
     }
 
@@ -106,7 +105,7 @@ public class DDVector extends Obj {
 			return "angle";
         }
         public String getShortDesc() {
-            return "angle(Vector2d) - get absolute angle in degrees between vectors";
+            return "angle(Vector2d) - get absolute angle in degrees between vectors (0-90)";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 1) throw new Exception("Expected Vec2d parameter");
@@ -157,39 +156,7 @@ public class DDVector extends Obj {
         }
     }
 
-	class FunctionRotateLeft extends Function {
-		public String getName() {
-			return "rotateLeft";
-        }
-        public String getShortDesc() {
-            return "rotateLeft(angleDeg) - create rotated vector";
-        }
-        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 1) throw new Exception("Expected parameter angle");
-            double angle=getFloat("angleDeg", params, 0);
-            return new ValueObj(new DDVector(getVec().rotateDeg(angle)));
-        }
-    }
-	
-	
-	class FunctionRotateRight extends Function {
-		public String getName() {
-			return "rotateRight";
-        }
-        public String getShortDesc() {
-            return "rotateRight(angleDeg) - create rotated vector, positive is counter clockwise";
-        }
-        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 1) throw new Exception("Expected parameter angle");
-            double angle=getFloat("angleDeg", params, 0);
-            return new ValueObj(new DDVector(getVec().rotateDeg(-angle)));
-        }
-    }
 
-
-
-
-	
 	class FunctionScaleTo extends Function {
 		public String getName() {
 			return "scaleTo";
