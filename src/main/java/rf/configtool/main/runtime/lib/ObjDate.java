@@ -68,6 +68,7 @@ public class ObjDate extends Obj {
 				new FunctionAfter(),
 				new FunctionBefore(),
 				new FunctionGetFormat(),
+				new FunctionTimeSinceMidnight(),
 		};
 		setFunctions(arr);
         
@@ -427,6 +428,24 @@ public class ObjDate extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
             return new ValueString(dateFmt);
+        }
+    }
+
+
+    class FunctionTimeSinceMidnight extends Function {
+        public String getName() {
+            return "timeSinceMidnight";
+        }
+        public String getShortDesc() {
+            return "timeSinceMidnight() - returns Date.Duration object";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            long h = getCalendarValue(Calendar.HOUR_OF_DAY) * 3600 * 1000;
+            long m = getCalendarValue(Calendar.MINUTE) * 60 * 1000;
+            long s = getCalendarValue(Calendar.SECOND) * 1000;
+            long ms = getCalendarValue(Calendar.MILLISECOND);
+            return new ValueObj(new ObjDuration(h+m+s+ms));
         }
     }
 
