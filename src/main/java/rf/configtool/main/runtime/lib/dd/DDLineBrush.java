@@ -1,7 +1,7 @@
 package rf.configtool.main.runtime.lib.dd;
 
 import java.awt.Color;
-import java.util.*;
+import java.util.List;
 
 import rf.configtool.main.Ctx;
 import rf.configtool.main.runtime.ColList;
@@ -15,35 +15,19 @@ import rf.configtool.main.runtime.lib.ObjColor;
 /**
  * The 2D brush is simply for drawing lines, nothing fancy
  */
-public class DDBrush extends Obj {
+public class DDLineBrush extends Obj {
 
 	private ViewReceiver recv;
 	private Color color;
-	private boolean linesOnly=false;
+	private Vector2d prevPos;
 
-	private Vector2d offsetA, offsetB;
-	
-	private Vector2d prevA, prevB;
-
-	
-	/**
-	 * As there are problems with right being negative and left being positibe, we mask this by
-	 * not using vectors in the call interface for creating a brush, but instead signed
-	 * offsets, which are positive to the right and negative to the left.
-	 * @param recv
-	 * @param offsetA
-	 * @param offsetB
-	 */
-	public DDBrush (ViewReceiver recv, double offsetA, double offsetB) {
+	public DDLineBrush (ViewReceiver recv) {
 		this.recv=recv;
-		this.offsetA=new Vector2d(0,-offsetA);
-		this.offsetB=new Vector2d(0,-offsetB);
 		this.color=new Color(0,0,0);
 		
 		this.add(new FunctionPenDown());
 		this.add(new FunctionPenUp());
 		this.add(new FunctionSetColor());
-		this.add(new FunctionSetLinesOnly());
 		
 	}
 	@Override
@@ -65,7 +49,7 @@ public class DDBrush extends Obj {
 		return "DD.Brush";
 	}
 
-	private DDBrush self() {
+	private DDLineBrush self() {
 		return this;
 	}
 
@@ -76,39 +60,28 @@ public class DDBrush extends Obj {
 	        }
 
 	        public String getShortDesc() {
-	            return "penDown(Ref) - draw area from last penDown";
+	            return "penDown(Ref|Vector) - draw line since last penDown";
 	        }
 
 	        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
 	        	if (params.size() != 1) throw new RuntimeException("Expected Ref parameter");
-	        	
 	        	Obj ref1=getObj("Ref",params,0);
 	        	if (ref1 instanceof DDRef) {
 	        		Ref ref=((DDRef) ref1).getRef();
-	        		// calculate new global points a and b
-	        		Vector2d a=ref.transformLocalToGlobal(offsetA);
-	        		Vector2d b=ref.transformLocalToGlobal(offsetB);
-	        		
-	        		if (prevA != null && prevB != null) {
-	        			List<Vector2d> points=new ArrayList<Vector2d>();
-	        			points.add(prevA);
-	        			points.add(prevB);
-	        			points.add(b);
-	        			points.add(a);
-	        			points.add(prevA); // closing polygon
-	        			
-	        			Polygon poly=new Polygon(points,color);
-	        			if (linesOnly) poly.setLinesOnly();
-	        			recv.addPolygon(poly);
-	        			
-//	        			StringBuffer sb=new StringBuffer();
-//	        			for (Vector2d p:points) {
-//	        				sb.append(" " + p.toString());
-//	        			}
-//	        			System.out.println(sb.toString());
+	        		Vector2d pos=ref.getPos();
+	        		if (prevPos != null) {
+	        			Line line=new Line(prevPos, pos, color);
+	        			recv.addLine(line);
 	        		}
-	        		prevA=a;
-	        		prevB=b;
+	        		prevPos=pos;
+	        		return new ValueObj(self());
+	        	} else if (ref1 instanceof DDVector) {
+	        		Vector2d pos=((DDVector) ref1).getVec();
+	        		if (prevPos != null) {
+	        			Line line=new Line(prevPos, pos, color);
+	        			recv.addLine(line);
+	        		}
+	        		prevPos=pos;
 	        		return new ValueObj(self());
 	        	} else {
 	        		throw new RuntimeException("Expected Ref parameter");
@@ -128,7 +101,7 @@ public class DDBrush extends Obj {
 
 	        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
 	        	if (params.size() != 0) throw new RuntimeException("Expected no parameters");
-	        	prevA=prevB=null;
+	        	prevPos=null;
 	        	return new ValueObj(self());
 	        }
 	    }
@@ -153,23 +126,6 @@ public class DDBrush extends Obj {
 	        	} else {
 	        		throw new RuntimeException("Expected Color parameter");
 	        	}
-	        }
-	    }
-	   
-	   
-	   class FunctionSetLinesOnly extends Function {
-	        public String getName() {
-	            return "setLinesOnly";
-	        }
-
-	        public String getShortDesc() {
-	            return "setLinesOnly() - render brush polygons as lines only, not filled";
-	        }
-
-	        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-	        	if (params.size() != 0) throw new RuntimeException("Expected no parameters");
-	        	self().linesOnly=true;
-	        	return new ValueObj(self());
 	        }
 	    }
 }

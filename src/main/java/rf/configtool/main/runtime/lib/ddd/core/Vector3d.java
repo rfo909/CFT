@@ -59,12 +59,17 @@ public class Vector3d {
 	/** Create new vector represents the line from the end of this vector to the end
 	* of the given vector: this is the subtraction operation, "v" minus "this". It is
 	* the opposite of the add() method, in that adding the result of this method to "this"
-	* reproduces the argument "v".
+	* reproduces the argument "v". 
 	*/
 	public Vector3d sub(Vector3d v) {
+		// Used in viewer calculations, so do not change - created intuitiveSub for CFT
 		return new Vector3d(v.x-x, v.y-y, v.z-z);
 	}
 
+	public Vector3d intuitiveSub (Vector3d v) {
+		return new Vector3d(x-v.x, y-v.y, z-v.z);
+	}
+	
 	/**
 	* Calculate angle (in radians) between this vector and the given vector. It is
 	* absolute in that it is in the range 0..pi/2, (0-90 deg).

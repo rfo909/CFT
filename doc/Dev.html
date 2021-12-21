@@ -13,9 +13,105 @@
 
 <h1>CFT Change log</h1>
 
+<h3>3.0.4 2021-12-19 DD improvements and verification</h3>
+<p>
+	Created DDGraphs script, with Torus and an interesting 720 degrees Helix illustration, which presents values
+	sorted, so biggest first. Turned out great!
+</p>
+<p>
+	Deleted rotation operations from Lib.DD.Vector, to avoid confusion, since the DD universe has some inherent
+	issues regarding the meaning of left and right. Now it works, and that's good enough, even though .fwd is along
+	the X axis from left to right. 
+</p>
+<p>
+	Also fixed the DD.Vector.sub() as well as DDD.Vector.sub()
+	to be intuitive (reversing the direction of the arrow), so that x.sub(y) returns vector from point y to point x.
+	Updated doc on both functions to be identical. 
+</p>
+<p>
+	Changed default background color for DDD.Viewer to white, and verified Torus from DDDExample. Also extended
+	number of colors from 9 to 12.
+</p>
+<p>
+	Added Lib.DD.Brush.setLinesOnly to render what is normally a sequence of filled polygons, as lines only, for
+	better control while developing a model.
+</p>
+
+
+<h3>3.0.3 2021-12-19 DD improvements</h3>
+<p>
+	The Lib.DD package seems to work. Ref.fwd is along the X-axis, which for 2D is
+	to the right, with Y up.
+</p>
+<p>
+	Created DDExample, which draws the same wooden wheel as in DDDExample (3D).
+</p>
+<p>
+	Created 2D brush that drags a line segment through 2D space, for filled areas, and created DDExample2 which draws
+	the same wheel with this brush, which renders as filled 4-point polygons.
+</p>
+
+
+
+<h3>3.0.2 2021-12-19 Dir.newestFile and .newestFiles</h3>
+<p>
+	Dir.newestFile(): fixed so glob can be a string. Then added Dir.newestFiles(glob,count), which returns
+	list of files, sorted newest first. For directories with huge number of files, this should be far more
+	efficient than creating ObjFile objects for all, when doing this operation in CFT code.
+</p>
+
+
+<h3>3.0.1 2021-12-18 BangParser</h3>
+<p>
+	Fixed plain globbing with BangParser, which means current directory only, such as "*.txt", but not "somePath/*.txt".
+	Also tried to fix quotes for Windows, as PowerShell requires quotes even when calling Dir:Run with list of parts.
+	Will test this on windows later. 
+</p> 
+
+
+
+<h2 class="tag">2021-12-17 v3.0.0</h2>
+
+<p>
+	As version 2.0.0 was created in November of 2020, I wasn't sure there would be a version 3, since so much
+	had already fallen into place. This file, the change log, is useful for getting an idea of all that has happened
+	over the last year. The java code has increased from 20k to 30k lines, and the script library has
+	more than doubled, from 5k to 12.7k lines.
+</p>
+<p>
+	In addition to all that's described in this file, there have been many minor additions to system objects.
+	Just two days ago, I added .fmt() to int and float values, for better presentation, plus three functions (asDays, asHours, asMinutes)
+	to the Date.Duration object, in order to work meaningfully with the output from Date diffs. 
+</p>
+<p>
+	Also, most of the script development is not documented via separate versions, and then there is the complete video tutorial
+	on Youtube, along with a list of shorter HOWTO videos.
+</p>
+<p>
+	I did not consider moving to version 3.0.0 until I got the background jobs in place. That mechanism has been something
+	I've pondered for a long time, wanting to get it right. As it turned out okay, it suddenly felt like
+	version 3.
+</p>
+<p>
+	So will there be a version 4? I guess so.
+</p>
+<P>
+	My offline TODO list still contains a few big ideas and many improvements, and more will surface under way. The point, or
+	at least my point, is not just to make stuff, but to fit it in with the existing system, in an elegant way, 
+	offering advanced functionality, and doing it in a way that works through the utterly primitive line based text interface.
+</p>
+<p>
+	CFT is still my daily tool for almost everything. 
+</p>
+<p>
+	Now if only the bang commands could do globbing, and have the quotes work in Windows, and ... and .. 
+</p>
+
+
+
 <h3>2.12.1 2021-12-16 Background jobs</h3>
 <p>
-	Created alternative notation for SpawnProcess() expression:
+	Created alternative notation for the SpawnProcess() expression:
 </p>
 <pre>
    & expr
@@ -23,34 +119,77 @@
 </pre>
 <p>
 	The name is either an identifier or an expression, typically a string. This extends the default name,
-	which is "&" plus an integer, for readability.
+	which is "(n)", for readability.
 </p>
 
 <p>
 	Updated the _Expr global documentation function.
 </p>
 
-
 <p>
-	Also rewrote the Sys.Jobs and the Jobs script from yesterday, as well as the shortcuts
-	defined in CFT.props.
+	Also modified the Sys.Jobs and the Jobs script from yesterday, as well as the shortcuts
+	defined in CFT.props. Developed a crude way of bringing a running job to the foreground, 
+	so that jobs stalled on input, can be supplied with input data. 
+</p>
+<h4>Some details</h4>
+<p>
+	As the Input object is unaware of threads, the "last value" functionality becomes unreliable
+	if there are more than one job running the same code, because one may update the "last value" after
+	another has blocked on the same input, telling the user what was the "last value" at that point,
+	causing confusion. 
+</p>
+<p>
+	The rapid development of background jobs was driven by a very specific need at work, with slow servers and tens of
+	thousands of log files that needed to be "massaged" into meaningful subsets, stored in Db2, for
+	further inspection. The problem was that searching the remote directories for the latest file for some 
+	Glob pattern, was way too slow to repeat for every inspection. I wrote some "update"-functions which extracted
+	subsets of files, and stored them in the database, and now these functions can be run in the background. Very nice.
+</p>
+<h4>Inside code</h4>
+<p>
+	Even though the '&' expression (ExprAmp internally) is runnable from general code, it is limited compared
+	to SpawnProcess, as it can not refer variables. On the command line that is not a problem, since we
+	don't have any variables around anyway. Also there is the thing that jobs created with ExprAmp are added
+	to the internal registry, and returns the job name. 
+</p>
+<p>
+	In code we will normally use SpawnProcess, which returns an ObjProcess object.
+</p>
+<p>
+	Still, any code can easily use ExprAmp, when we want to automate generating background jobs for further management
+	via the Jobs script (which in turn uses the Sys.Jobs object).
+</p>
+<p>
+	Also deleted the Cron script from 2.9.10, as it adds nothing of value any more.
 </p>
 
 
-<h3>2.12.0 2021-12-15 Sys.Jobs</h3>
+<h3>2.12.0 2021-12-15 Sys.Jobs + Jobs script</h3>
 <p>
-	Fixed minor bug in ObjProcess, ensuring that supplied Dictionary is completely copied. Then added Java class BackgroundProcesses, which is avaialable
-	via the Root object. Managing it is done by creating the Sys.Jobs object.
+	Fixed minor bug in ObjProcess, ensuring that supplied Dictionary is completely copied. Then added Java class BackgroundProcesses, which is available via the Root object. Managing it is done by creating the Sys.Jobs object, which in turn is used by a new
+	"Jobs" script.
 </p>
 <p>
 	CFT needs a mechanism for running stuff in the background and get notice when completed, and
-	a specialized "session store" for ObjProcess objects is required, as ObjProcess instances can
+	a specialized "session store" for ObjProcess objects was required, as ObjProcess instances can
 	not be stored in Db2 (not synthesizable).
 </p>
+<p>
+	This kind of breaks the claim of "no shared state", but it's a specialized store, for background jobs only, and
+	written to be thread-safe both internally (managing running threads) and externally, as called from CFT code,
+	including the command line.
+</p>
+
 
 <h3>2.11.0 2021-12-12 DD package</h3>
 <p>
 	Moved 2D vectors from Lib.Math to Lib.DD, and modeled it after the DDD library, including viewer. 
+</p>
+<p>
+	Status still uncertain, not really mature. The brush object and rendering is mostly a hack. It's fast though.
+</p>
+<p>
+	<b>Not included into the Doc yet</b>
 </p>
 
 
@@ -256,7 +395,7 @@ SpawnProcess(Dict,expr,Lambda{P(1)=&gt;process process.output-&gt;line println(l
 	custom start/end-markers as parameters to the mergeEval() function.
 </p>
 <pre>
-	a=5 b=6 "a=<<a>> b=<<b>>".mergeExpr
+	a=5 b=6 "a=&lt;&lt;a&gt;&gt; b=&lt;&lt;b&gt;&gt;".mergeExpr
 </pre>
 
 
@@ -1043,7 +1182,7 @@ roar
 </p>
 
 
-<h2 class="tag">2020-11-14 Tagging v2.0.0</h3> 
+<h2 class="tag">2020-11-14 Tagging v2.0.0</h2>
 
 
 

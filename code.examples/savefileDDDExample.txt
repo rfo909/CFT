@@ -12,19 +12,16 @@ CFT 2.10.0
 		
 # Target dir
 # --
-	Lib:DirPrivate.sub("anim").create
+	Sys.homeDir.sub("anim").sub("3d").create
 /TargetDir
 
 
-# Subdir
-# --
-	TargetDir.sub("wheel").create
-/SubDir
 
 # Wooden wheel example
 # --
 	P(1)=>world
 	P(2)=>ref
+	P(3,TargetDir.file("wheel.png"))=>file
 		# ref is at the center of the wheel, with wheel extending in forward/backward and up/down plane
 
 	hubWidth=100
@@ -67,11 +64,10 @@ CFT 2.10.0
 	hub.penUp
 	rim.penUp
 	
-	f=SubDir.file("wheel.png")
-	world.render(f)
+	world.render(file)
 
 	Util:ShowDict(world.getStats,true)
-	println("Wrote file " + f.path)
+	println("Wrote file " + file.path)
 /RenderWheel
 
 

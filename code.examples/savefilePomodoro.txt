@@ -67,3 +67,25 @@
 		}
 		Sys.sleep(50)
 //Clock
+
+
+
+# Minutes since midnight
+# --
+	P(1,Date)=>date
+	date.timeSinceMidnight.asMinutes
+/MinutesSinceMidnight
+
+
+# Count down seconds
+# --
+	loop
+		println(Curses:Clear)
+		lines=Letters7x5:GetTextX2(""+MinutesSinceMidnight)
+		Inner {
+			lines->line println(line)
+		}
+		Sys.sleep(13000)
+|
+
+/CountMinutes

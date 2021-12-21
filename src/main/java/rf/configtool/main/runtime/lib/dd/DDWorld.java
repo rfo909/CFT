@@ -19,6 +19,7 @@ public class DDWorld extends Obj {
 	public DDWorld() {
 		this.viewer = new Viewer(Color.WHITE);
 		this.add(new FunctionBrush());
+		this.add(new FunctionLineBrush());
 		this.add(new FunctionRender());
 	}
 
@@ -44,20 +45,40 @@ public class DDWorld extends Obj {
 	private DDWorld self() {
 		return this;
 	}
-
+	
 	class FunctionBrush extends Function {
 		public String getName() {
 			return "Brush";
 		}
 
 		public String getShortDesc() {
-			return "Brush() - return Brush object";
+			return "Brush(offsetA,offsetB) - positive offset to right and negative to left - return Brush object";
+		}
+
+		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+			if (params.size() != 2)
+				throw new Exception("Expected numeric parameters offsetA, offsetB (positive to right, negative to left)");
+			double a=getFloat("offsetA", params, 0);
+			double b=getFloat("offsetB", params, 1);
+			return new ValueObj(new DDBrush(viewer, a, b));
+		}
+	}
+
+
+
+	class FunctionLineBrush extends Function {
+		public String getName() {
+			return "LineBrush";
+		}
+
+		public String getShortDesc() {
+			return "LineBrush() - return LineBrush object";
 		}
 
 		public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
 			if (params.size() != 0)
 				throw new Exception("Expected no parameters");
-			return new ValueObj(new DDBrush(viewer));
+			return new ValueObj(new DDLineBrush(viewer));
 		}
 	}
 

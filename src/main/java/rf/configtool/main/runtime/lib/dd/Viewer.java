@@ -14,6 +14,7 @@ public class Viewer implements ViewReceiver {
 	
 	private Color backgroundColor;
 	private List<Line> lines=new ArrayList<Line>();
+	private List<Polygon> polys=new ArrayList<Polygon>();
 	private int width = 1024;
 	private int height = 768;
 	
@@ -35,6 +36,15 @@ public class Viewer implements ViewReceiver {
 
 	public void addLine (Line line) {
 		lines.add(line);
+	}
+	
+	public void addPolygon (Polygon poly) {
+		if (!poly.getLinesOnly()) {
+			polys.add(poly);
+		}
+		for (Line line:poly.getLines()) {
+			addLine(line); // include it in bounding box calculations
+		}
 	}
 	
 	
@@ -100,11 +110,12 @@ public class Viewer implements ViewReceiver {
 		}
 		
 		
-		// draw lines
 		BufferedImage img=new BufferedImage(width,height,BufferedImage.TYPE_INT_ARGB);
 		Graphics g = img.getGraphics();
 		g.setColor(backgroundColor);
 		g.fillRect(0, 0, width, height);
+
+		// draw lines
 		for (Line line:lines) {
 			g.setColor(line.getColor());
 			
@@ -114,6 +125,22 @@ public class Viewer implements ViewReceiver {
 			int by=convert(y1,y2,line.getTo().getY(),height, true);
 			
 			g.drawLine(ax, ay, bx, by);
+		}
+		
+		// draw polygons
+		for (Polygon poly:polys) {
+			int xPos[]=new int[5];
+			int yPos[]=new int[5];
+			final int nPoints=5;
+			
+			int i=0;
+			for (Vector2d v:poly.getPoints()) {
+				xPos[i]=convert(x1,x2,v.getX(), width, false);
+				yPos[i]=convert(y1,y2,v.getY(), height, true);
+				i++;
+			}
+			g.setColor(poly.getColor());
+			g.fillPolygon(xPos,yPos,nPoints);
 		}
 
 		ImageIO.write((BufferedImage) img, "png", file);

@@ -82,6 +82,7 @@ public class ObjDuration extends Obj {
 		add(new FunctionAsDays());
 		add(new FunctionAsHours());
 		add(new FunctionAsMinutes());
+		add(new FunctionAsSeconds());
         
     }
     
@@ -263,6 +264,21 @@ public class ObjDuration extends Obj {
             if (params.size() != 0) throw new Exception("Expected no parameters");
             long minutes=timeValue/(60*1000);
             return new ValueInt(minutes);
+        }
+    }
+
+
+    class FunctionAsSeconds extends Function {
+        public String getName() {
+            return "asSeconds";
+        }
+        public String getShortDesc() {
+            return "asSeconds() - return duration as number of seconds";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            long seconds=timeValue/1000;
+            return new ValueInt(seconds);
         }
     }
 

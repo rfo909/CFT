@@ -1,5 +1,6 @@
 package rf.configtool.main.runtime.lib.dd;
 
+
 /**
 * This class represents a 2d-vector.
 *
@@ -26,6 +27,10 @@ public class Vector2d  {
 	*/
 	public Vector2d sub(Vector2d v) {
 		return new Vector2d(v.x-x, v.y-y);
+	}
+
+	public Vector2d intuitiveSub (Vector2d v) {
+		return new Vector2d(x-v.x, y-v.y);
 	}
 
 	/**

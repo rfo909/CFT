@@ -1,0 +1,132 @@
+# Graph colors
+# --
+	DDDGraphs:Colors
+//Colors
+
+
+# Target dir for testing
+# --
+	Sys.homeDir.sub("anim").sub("2d").create
+/TargetDir
+
+
+# 720 degrees helix
+# --
+	P(1,List(10,11,2,1,8,5,40,30,12))=>values
+	P(2,List("Alice","Bob","Carol","Dante","Edward","Fiona","Gabriel","Santa Claus","Others"))=>labels
+	P(3,TargetDir.file("helix.png"))=>targetFile
+	
+	error(values.length != labels.length, "values and labels must match")
+	error(values.length > Colors.length, "max " + Colors.length + " values supported (dictated by number of colors)")
+	
+	
+		
+	Lib.Data.for(0,values.length,1)->i
+		out(Float(values.nth(i).f,labels.nth(i)))
+	| _.sort.reverse => values
+	
+	values->x out(x.data)
+	| => labels
+	
+	
+	Lib.DD.World => world
+	Lib.DD.Ref => ref
+	
+	angles=DDDGraphs:Fractions(values,720)
+	colors=Colors
+	torusRadius=100
+	torusWidth=33
+	
+	# Draw torus
+	b = world.Brush(torusRadius,torusRadius-torusWidth)
+	
+	torusRef=ref
+	Lib.Data.for(0,721,1)->angle
+		pos=DDDGraphs:GetPosInFractionsSequence(angle,angles)
+		b.setColor(colors.nth(pos))
+		b.penDown(torusRef.turnRight(angle).setScaleFactor(900-angle))
+	|
+	
+	# Legends
+	pixelHeight=1.5
+	
+	lineSpace=4
+	
+	numLines=values.length
+	linesHeight=numLines*7
+	linesDist=(numLines-1)*lineSpace
+	totalHeight=linesHeight+linesDist
+	
+	textRef=ref.scaleUp(900).fwd(torusRadius*1).scaleUp(pixelHeight).left(totalHeight*0.5)
+
+	Lib.Data.for(0,labels.length,1)->i
+		label=labels.nth(i)
+		color=colors.nth(i)
+		
+		DDLetters:DDText(world,textRef,label,color)
+		textRef = textRef.right(7).right(lineSpace)
+	|
+	
+	world.render(targetFile)
+/Helix
+
+
+
+
+
+
+
+# Torus diagram
+# --
+	P(1,List(10,11,2,1,8,5,40,30,12))=>values
+	P(2,List("Alice","Bob","Carol","Dante","Edward","Fiona","Gabriel","Santa Claus","Others"))=>labels
+	P(3,TargetDir.file("torus.png"))=>targetFile
+	P(4,0)=>torusRotateLeft
+	
+	error(values.length != labels.length, "values and labels must match")
+	error(values.length > Colors.length, "max " + Colors.length + " values supported (dictated by number of colors)")
+
+		
+	Lib.DD.World => world
+	Lib.DD.Ref => ref
+	
+	angles=DDDGraphs:Fractions(values,360)
+	colors=Colors
+	torusRadius=100
+	torusWidth=33
+	
+	# Draw torus
+	b = world.Brush(torusRadius,torusRadius-torusWidth)
+	
+	torusRef=ref.turnLeft(torusRotateLeft)
+	Lib.Data.for(0,361,1)->angle
+		pos=DDDGraphs:GetPosInFractionsSequence(angle,angles)
+		b.setColor(colors.nth(pos))
+		b.penDown(torusRef.turnRight(angle))
+	|
+	
+	# Legends
+	pixelHeight=1.5
+	
+	lineSpace=4
+	
+	numLines=values.length
+	linesHeight=numLines*7
+	linesDist=(numLines-1)*lineSpace
+	totalHeight=linesHeight+linesDist
+	
+	textRef=ref.fwd(torusRadius*1.2).scaleUp(pixelHeight).left(totalHeight*0.5)
+
+	Lib.Data.for(0,labels.length,1)->i
+		label=labels.nth(i)
+		color=colors.nth(i)
+		
+		DDLetters:DDText(world,textRef,label,color)
+		textRef = textRef.right(7).right(lineSpace)
+	|
+	
+	world.render(targetFile)
+/Torus
+
+
+

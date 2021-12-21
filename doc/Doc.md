@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2021-12-10 RFO
-v2.10.0
+Last updated: 2021-12-19 RFO
+v3.0.3
 ```
 # Introduction
 
@@ -311,7 +311,7 @@ Dir("/SomewhereElse/xyz").file("data.txt")
 $ cd (LogDir)
 $ edit (DataFile)
 ```
-## No shell-like destructive commands
+## No shell-like destructive commands!
 
 
 CFT 
@@ -328,6 +328,36 @@ better security.
 Alternatively one can use "bang commands" or the shell function. Can also use the
 shortcut @fm, which opens a graphical file manager for the current directory.
 
+## Background jobs
+
+
+CFT lets us run any 
+**expression** (usually a function call) as a background job, using
+the '&amp;' expression syntax.
+
+```
+$ &amp; 1+1, "addition"
+$ &amp; someFunction(...), "description"
+```
+
+The "2+3" and "someFunction" are the expressions that are run as background jobs, and the value
+after the comma is an optional name, which helps us remember what each of the (numbered)
+background jobs do.
+
+
+To list all jobs, use the @J shortcut. To get the result from the first completed job,
+use the @JJ shortcut. There are a few other shortcuts starting with @J that are related to
+job management.
+
+
+Every time a new prompt is to be generated, a check is done to list out any changes to the set
+of completed jobs, which means we are alerted with jobs terminate. If we do not care about the
+results from any of the terminated jobs, we can use the @JCL shortcut ("jobs clear") which
+clears completed jobs from the jobs registry.
+
+
+And of course, jobs don't survive killing the CFT process.
+
 # The "protect" mechanism
 
 
@@ -340,7 +370,7 @@ $ <DirExpression>.file("xxx.txt").delete
 ```
 
 The point here is that the "DirExpression" as well as functionality to provide sets of files
-and similar, are CFT code, as CFT has a special provision to avoid deleting or modifying the wrong
+and similar, are CFT code, and CFT has a special provision to avoid deleting or modifying the wrong
 files or directories: 
 **the "protect" mechanism**.
 
@@ -353,15 +383,16 @@ What this does is set an internal flag in the Dir object that the function creat
 operations like deleting or modifying the directory.
 
 
-As we call LogDir.files, each File object created, also get the 
-**protect** flag set.
+As we call LogDir.files, each File object created, inherits the 
+**protect** flag.
 
 ```
 $ LogDir.file("log01.txt").delete
 ERROR: [input:18] INVALID-OP delete : /someNfsDir/logs/log01.txt (PROTECTED: -) (java.lang.Exception)
 ```
 
-This both protects our script code from doing bad things, but also interactively.
+This protects our script code from doing bad things, but also interactively, as we tend to call
+functions like LogDir from the command line instead of typing Dir("/somedir/logs").
 
 # Bang commands
 
@@ -384,14 +415,23 @@ $ BangParser:Readme
 # The "shell" command
 
 
-One can also run the global "shell" command, perform changes, and then return via "exit":
+The global shell() function starts a shell inside CFT. When you exit from it, you're back
+in CFT.
 
 ```
 $ shell
-roar@pc01$ rm xxx.txt
-roar@pc01$ exit
-# Running bash completed
+(starts bash or cmd or Powershell or something else)
+exit
+# Running /usr/bin/bash completed: 25529ms
 $
+```
+
+The shell function is configured in the CFT.props file which must exist in the CFT
+home directory.
+
+```
+shell = bash
+winShell = powershell
 ```
 # Show content of file
 
@@ -666,27 +706,6 @@ Dir.setAsCurrentDir
 ```
 Dir.newestFile
 Dir.newestFile(Glob("*.log"))
-```
-# shell()
-
-
-The global shell() function starts a shell inside CFT. When you exit from it, you're back
-in CFT.
-
-```
-$ shell
-(starts bash or cmd or Powershell or something else)
-exit
-# Running /usr/bin/bash completed: 25529ms
-$
-```
-
-The shell function is configured in the CFT.props file which must exist in the CFT
-home directory.
-
-```
-shell = bash
-winShell = powershell
 ```
 # Core types
 
@@ -2039,8 +2058,6 @@ line out(line.merge(data))
 ## List.mergeExpr
 
 
-**v2.9.2**
-
 The List.mergeExpr is another option. Instead of merging data from a dictionary
 into the template, the template contains CFT expressions inside << and >>.
 
@@ -2170,8 +2187,6 @@ Now all lines starting with "//" are automatically stripped from any output.
 ## Sequence() and raw strings
 
 
-**v1.7.0**
-
 Raw strings start with '@' and consist of the rest of the line.
 In addition, two expressions have been added, called Sequence() and CondSequence(). These
 generate List elements, but with a relaxed syntax, making commas between values optional,
@@ -2294,8 +2309,7 @@ The global function Lib() creates a Lib object, which in turn contains functions
 create other objects, such as the Math object, which contains trigonometric functions.
 
 
-**v2.7.2** Added DD function, which contains Vec(x,y) for creating 2D vectors,
-and doing 2D vector math.
+For vector logic and rendering see Lib.DD and Lib.DDD (2D and 3D).
 
 ## Lib.Convert
 
@@ -2333,8 +2347,6 @@ The above code generates an example plot as a png file in the current directory.
 # Internal web-server
 
 
-**v2.9.0**
-
 There is a small embedded web-server in CFT, available in the Lib.Web object. It
 supports GET and POST, does parameter and form input parsing.
 
@@ -2350,8 +2362,6 @@ many lines of output).
 
 # 3D library
 
-
-**v2.10.0**
 
 Included and adapted an old 3d-library written over 20 years ago, for rendering 3D scenes,
 working purely in Java, without any acceleration. It is slow, but gets the job done.
@@ -2422,7 +2432,23 @@ The example script DDDExample contains code for rendering a spoked wooden wheel.
 
 
 **
-# Command line args
+# 2D library
+
+
+Similar to the 3D library, the 2D library lets us draw vector graphics using a
+2D Ref object that moves in the plane, using either lines or filled polygons.
+
+## Spoked wheel
+
+
+Created DDExample which draws the same wheel as the 3D version, using the LineBrush of DD.World
+
+
+**
+
+Created DDExample2 which uses polygon drawing Brush of DD.World.
+
+**# Command line args
 
 
 If CFT is invoked with command line arguments, the first is the name of the script,
@@ -2448,8 +2474,6 @@ This loads script Projects, then calls the Curr function inside.
 ```
 # Environment variables
 
-
-**v2.6.1**
 
 Available via Sys.environment() function.
 
@@ -3052,8 +3076,6 @@ See separate sections on closures and objects.
 
 # Calling Java
 
-
-**v2.7.0**
 
 CFT lets us interface Java code via the Lib.Java object. It contains functions
 for identifying classes. We then look up a constructor and call it, getting a
@@ -3738,7 +3760,7 @@ See Db2:GetSessionPassword() function for example.
 # Reference: object types
 
 
-**Per v2.9.1**
+**Per v3.0.2**
 ```
 Grep("extends Obj") =>
  g
@@ -3751,10 +3773,22 @@ out(line.after("class").before("extends"))
 x
 println(x)
 /objects
+DD
+DDBrush
+DDD
+DDDBrush
+DDDRef
+DDDTriangle
+DDDVector
+DDDWorld
+DDRef
+DDVector
+DDWorld
+ObjAnnotatedValue
 ObjClosure
+ObjColor
 ObjContext
 ObjConvert
-ObjDD
 ObjData
 ObjDataFile
 ObjDate
@@ -3787,6 +3821,7 @@ ObjJavaValueLong
 ObjJavaValueNull
 ObjJavaValueObject
 ObjJavaValueString
+ObjJobs
 ObjLexer
 ObjLexerNode
 ObjLexerToken
@@ -3805,14 +3840,13 @@ ObjSys
 ObjTerm
 ObjText
 ObjUtil
-ObjVec2D
 ObjWeb
 Value
 ```
 # Reference: Value types
 
 
-**Per v2.9.1**
+**Per v3.0.2**
 ```
 Grep("extends Value") =>
  g
@@ -3939,7 +3973,16 @@ The "problem" is that CFT code (and so shortcuts) can run colon commands via "ab
 - null
 
 
-- List
+- AValue
+
+
+- Date
+
+
+- Date.Duration
+
+
+- Dict
 
 
 - Dir
@@ -3951,34 +3994,25 @@ The "problem" is that CFT code (and so shortcuts) can run colon commands via "ab
 - FileLine
 
 
-- Date
-
-
-- Date.Duration
-
-
-- Int
-
-
 - Float
-
-
-- Str
-
-
-- Dict
 
 
 - Glob
 
 
-- Regex
+- Int
 
 
 - Lambda
 
 
-- AValue
+- List
+
+
+- Regex
+
+
+- Str
 
 
 # Comments and digressions
@@ -4042,7 +4076,7 @@ and defining them in terms of code spaces.
 
 ## Script and code size
 
-### 2020-11-13
+### 2020-11-13 v2.0.0
 
 ```
 Script code:      ~5k lines
@@ -4083,41 +4117,16 @@ Functions:        378
 Object types:     57
 Value types:      13
 ```
-## Poor man's EXIF date parser
+### 2021-12-17 v3.0.0
 
 
-Need to sort camera photos by date? JPG files created by a camera, or via image processing
-software like Darktable, LightRoom and so on, will contain an initial block of metadata
-called EXIF, which contains numerous fields and values, and which may occupy up to
-64 Kb at the start of the file.
-
-
-Not having written or included any third party implementation for parsing the EXIF data,
-the easy solution was to implement a function printableChars in the Binary value type, and
-search for dates using the Lib.Text.Lexer.
-
-
-The Lib.Text.Lexer.Node has support for "complex tokens", where we define a character
-string like "dddd-dd-dd", and then define what each chacter means, so that "d" may map
-to "0123456789", while letting "-" map only to itself.
-
-
-A utility function Util:ComplexPatternLineSearch was created for managing the details.
+Running CodeStats:main
 
 ```
-# Get EXIF date (as Date object) or return null
-# --
-P(1) =>
- jpegFile
-pattern = "dddd:dd:dd"
-map = Dict.set("d","0123456789").set(":",":")
-str = jpegFile.readBinary(0,64*1024).printableChars
-date = Util:CompledPatternLineSearh(printableChars, pattern, map).first
-if (date != null) {
-Date.setFormat("yyyy:MM:dd").parse(date)
-} else {
-null
-}
-/GetJpgExifDate
+Script code:      12751 lines
+Java code:        30244 lines
+Functions:        483
+Object types:     69
+Value types:      13
 ```
 

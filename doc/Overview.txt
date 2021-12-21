@@ -28,7 +28,8 @@ CFT as a shell
  * Paths with space
  * Windows backslash
  * Combine shell commands with CFT function results
- * No shell-like destructive commands
+ * No shell-like destructive commands!
+ * Background jobs
 
 The "protect" mechanism
 
@@ -63,8 +64,6 @@ Directories
  * Delete a sub-directory
  * Set current directory
  * Newest file in directory
-
-shell()
 
 Core types
  * String literals
@@ -206,6 +205,9 @@ Internal web-server
  * Rendering
  * Drawing a spoked wheel
 
+2D library
+ * Spoked wheel
+
 Command line args
 
 Environment variables
@@ -323,8 +325,8 @@ Comments and digressions
  * Code spaces / the "pipe"
  * Code spaces vs Inner blocks
  * Script and code size
- |   2020-11-13
+ |   2020-11-13 v2.0.0
  |   2021-04-01
  |   2021-09-26
  |   2021-10-16
- * Poor man's EXIF date parser
+ |   2021-12-17 v3.0.0

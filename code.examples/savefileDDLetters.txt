@@ -9,7 +9,7 @@
 	P(3,"test")=>str
 	P(4,Lib.Color(0,0,0))=>color
 	
-	brush=world.Brush.setColor(color)
+	brush=world.Brush(-0.5,0.5).setColor(color)
 	
 	Letters7x5:GetText(str) => lines
 	Lib.Data.each(0,lines.length-1)->lineNo
@@ -18,11 +18,8 @@
 			char=line.chars.nth(charNo)
 			assert(char=="#") 
 			ref.left(3).right(lineNo).fwd(charNo).fwd(0.5)=>dotCenter
-			brush.penDown(dotCenter.left(0.25).back(0.25))
-			brush.penDown(dotCenter.left(0.25).fwd(0.25))
-			brush.penDown(dotCenter.right(0.25).fwd(0.25))
-			brush.penDown(dotCenter.right(0.25).back(0.25))
-			brush.penDown(dotCenter.left(0.25).back(0.25))
+			brush.penDown(dotCenter.back(0.5))
+			brush.penDown(dotCenter.fwd(0.5))
 			brush.penUp
 /DDText			
 
@@ -30,7 +27,7 @@
 
 # Target dir for demo
 # --
-	Lib:DirPrivate.sub("anim").sub("2d").create
+	Sys.homeDir.sub("anim").sub("2d").create
 /Target
 
 # Testing 2D graphics
@@ -39,7 +36,7 @@
 	Lib.DD.Ref => ref
 	
 	
-	world.Brush => b2
+	world.LineBrush => b2
 	Lib.DD.Ref => ref
 	b2.penDown(ref)
 	b2.penDown(ref.right(100))
@@ -55,7 +52,7 @@
 	DDText(world, textRef, "Testing DD library")
 	DDText(world, textRef.right(7+2), "Second line")
 
-	world.render(Target.file("test.png"))
+	world.render(Target.file("letters.png"))
 /demo
 
 

@@ -15,8 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2021-12-10 RFO
-v2.10.0
+Last updated: 2021-12-19 RFO
+v3.0.3
 
 
 </pre>
@@ -89,6 +89,8 @@ v2.10.0
 <p>
   Parantheses are optional when no parameters to a function.
 </p>
+
+
 
 <h2>Another example</h2>
 <pre>
@@ -337,7 +339,7 @@ v2.10.0
 
 
 
-<h2>No shell-like destructive commands</h2>
+<h2>No shell-like destructive commands!</h2>
 <p>
   CFT <i>does not</i> include direct "shell-like" destructive commands ("rm", "cp", "mv", "mkdir" etc).
 </p>
@@ -356,6 +358,36 @@ v2.10.0
 
 
 
+<h2>Background jobs</h2>
+<p>
+  CFT lets us run any <em>expression</em> (usually a function call) as a background job, using
+  the '&amp;' expression syntax. 
+</p>
+<pre>
+  $ &amp; 1+1, "addition"
+  $ &amp; someFunction(...), "description"
+</pre>
+<p>
+  The "2+3" and "someFunction" are the expressions that are run as background jobs, and the value
+  after the comma is an optional name, which helps us remember what each of the (numbered)
+  background jobs do.
+</p>
+<p>
+  To list all jobs, use the @J shortcut. To get the result from the first completed job, 
+  use the @JJ shortcut. There are a few other shortcuts starting with @J that are related to
+  job management.
+</p>
+<p>
+  Every time a new prompt is to be generated, a check is done to list out any changes to the set
+  of completed jobs, which means we are alerted with jobs terminate. If we do not care about the
+  results from any of the terminated jobs, we can use the @JCL shortcut ("jobs clear") which
+  clears completed jobs from the jobs registry.
+</p>
+<p>
+  And of course, jobs don't survive killing the CFT process.
+</p>
+
+
 
 
 <h1>The "protect" mechanism</h1>
@@ -369,7 +401,7 @@ v2.10.0
 </pre>
 <p>
   The point here is that the "DirExpression" as well as functionality to provide sets of files
-  and similar, are CFT code, as CFT has a special provision to avoid deleting or modifying the wrong 
+  and similar, are CFT code, and CFT has a special provision to avoid deleting or modifying the wrong 
   files or directories: <i>the "protect" mechanism</i>.
 </p>
 <pre>
@@ -381,7 +413,7 @@ v2.10.0
   operations like deleting or modifying the directory.
 </p>
 <p>
-  As we call LogDir.files, each File object created, also get the <em>protect</em> flag set. 
+  As we call LogDir.files, each File object created, inherits the <em>protect</em> flag. 
 </p>
 <pre>
   $ LogDir.file("log01.txt").delete
@@ -389,7 +421,8 @@ v2.10.0
 </pre>
 
 <p>
-	This both protects our script code from doing bad things, but also interactively.
+	This protects our script code from doing bad things, but also interactively, as we tend to call
+  functions like LogDir from the command line instead of typing Dir("/somedir/logs"). 
 </p>
 
 
@@ -419,17 +452,31 @@ v2.10.0
 
 
 
+
+
 <h1>The "shell" command</h1>
 <p>
-  One can also run the global "shell" command, perform changes, and then return via "exit":
+  The global shell() function starts a shell inside CFT. When you exit from it, you're back
+  in CFT.
 </p>
 <pre>
   $ shell
-  roar@pc01$ rm xxx.txt
-  roar@pc01$ exit
-    # Running bash completed
+  (starts bash or cmd or Powershell or something else)
+  exit
+  # Running /usr/bin/bash completed: 25529ms
   $
 </pre>
+<p>
+  The shell function is configured in the CFT.props file which must exist in the CFT 
+  home directory.
+</p>
+<pre>
+  shell = bash
+  winShell = powershell
+</pre>
+
+
+
 
 
 
@@ -759,31 +806,6 @@ v2.10.0
   Dir.newestFile
   Dir.newestFile(Glob("*.log"))
 </pre>
-
-
-
-
-<h1>shell()</h1>
-<p>
-  The global shell() function starts a shell inside CFT. When you exit from it, you're back
-  in CFT.
-</p>
-<pre>
-  $ shell
-  (starts bash or cmd or Powershell or something else)
-  exit
-  # Running /usr/bin/bash completed: 25529ms
-  $
-</pre>
-<p>
-  The shell function is configured in the CFT.props file which must exist in the CFT 
-  home directory.
-</p>
-<pre>
-  shell = bash
-  winShell = powershell
-</pre>
-
 
 
 
@@ -2306,9 +2328,6 @@ codeDirs = . ; code.examples ; code.lib
 
 <h2>List.mergeExpr</h2>
 <p>
-  <b>v2.9.2</b>
-</p>
-<p>
   The List.mergeExpr is another option. Instead of merging data from a dictionary
   into the template, the template contains CFT expressions inside &lt;&lt; and &gt;&gt;.
 </p>
@@ -2441,9 +2460,6 @@ codeDirs = . ; code.examples ; code.lib
 
 <h2>Sequence() and raw strings</h2>
 <p>
-  <i>v1.7.0</i>
-</p>
-<p>
   Raw strings start with '@' and consist of the rest of the line.
   In addition, two expressions have been added, called Sequence() and CondSequence(). These
   generate List elements, but with a relaxed syntax, making commas between values optional, 
@@ -2575,8 +2591,7 @@ codeDirs = . ; code.examples ; code.lib
   create other objects, such as the Math object, which contains trigonometric functions.
 </p>
 <p>
-  <i>v2.7.2</i> Added DD function, which contains Vec(x,y) for creating 2D vectors,
-  and doing 2D vector math.
+  For vector logic and rendering see Lib.DD and Lib.DDD (2D and 3D).
 </p>
 
 
@@ -2622,7 +2637,6 @@ codeDirs = . ; code.examples ; code.lib
 
 
 <h1>Internal web-server</h1>
-<p><i>v2.9.0</i></p>
 <p>
   There is a small embedded web-server in CFT, available in the Lib.Web object. It
   supports GET and POST, does parameter and form input parsing. 
@@ -2637,7 +2651,6 @@ codeDirs = . ; code.examples ; code.lib
 
 
 <h1>3D library</h1>
-<p><i>v2.10.0</i></p>
 <p>
   Included and adapted an old 3d-library written over 20 years ago, for rendering 3D scenes,
   working purely in Java, without any acceleration. It is slow, but gets the job done.
@@ -2709,6 +2722,24 @@ codeDirs = . ; code.examples ; code.lib
 </p>
 
 
+<h1>2D library</h1>
+<p>
+  Similar to the 3D library, the 2D library lets us draw vector graphics using a
+  2D Ref object that moves in the plane, using either lines or filled polygons.
+</p>
+<h2>Spoked wheel</h2>
+<p>
+  Created DDExample which draws the same wheel as the 3D version, using the LineBrush of DD.World
+</p>
+<p>
+  <img src="wheel2d.png" alt="2D Wooden wheel rendered with CFT"/>
+</p>
+<p>
+  Created DDExample2 which uses polygon drawing Brush of DD.World.
+</p>
+  <img src="wheel2dpoly.png" alt="2D Wooden wheel rendered with CFT"/>
+
+
 
 <h1>Command line args</h1>
 <p>
@@ -2740,7 +2771,6 @@ codeDirs = . ; code.examples ; code.lib
 
 
 <h1>Environment variables</h1>
-<p><i>v2.6.1</i></p>
 <p>
   Available via Sys.environment() function.
 </p>
@@ -3438,7 +3468,6 @@ $ Db2Obj:FindObjects("stats",Lambda{P(1).value.host=="s04.s"}).first.value.outpu
 
 
 <h1>Calling Java</h1>
-<p><i>v2.7.0</i></p>
 <p>
   CFT lets us interface Java code via the Lib.Java object. It contains functions
   for identifying classes. We then look up a constructor and call it, getting a
@@ -4221,7 +4250,7 @@ Dict
 
 <h1>Reference: object types</h1>
 <p>
-  <i>Per v2.9.1</i>
+  <i>Per v3.0.2</i>
 </p>
 <pre>
 Grep("extends Obj") => g
@@ -4233,69 +4262,81 @@ Sys.homeDir.allFiles(Glob("*.java"))->f
 /objects
 
 
-ObjClosure 
-ObjContext 
-ObjConvert 
-ObjDD 
-ObjData 
-ObjDataFile 
-ObjDate 
-ObjDateSort 
-ObjDb 
-ObjDb2 
-ObjDict 
-ObjDir 
-ObjDuration 
-ObjEncrypt 
-ObjExtProcess 
-ObjFile 
-ObjFiles 
-ObjFilter 
-ObjFilterReader 
-ObjGlob 
-ObjGlobal 
-ObjGrep 
-ObjInput 
-ObjIntegrations 
-ObjJava 
-ObjJavaClass 
-ObjJavaConstructor 
-ObjJavaMethod 
-ObjJavaObject 
-ObjJavaValue 
-ObjJavaValueBoolean 
-ObjJavaValueInt 
-ObjJavaValueLong 
-ObjJavaValueNull 
-ObjJavaValueObject 
-ObjJavaValueString 
-ObjLexer 
-ObjLexerNode 
-ObjLexerToken 
-ObjLexerTokenStream 
-ObjLib 
-ObjLineReader 
-ObjMath 
-ObjPersistent 
-ObjPlot 
-ObjProcess 
-ObjRegex 
-ObjRequest 
-ObjSentry 
-ObjServer 
-ObjSys 
-ObjTerm 
-ObjText 
-ObjUtil 
-ObjVec2D 
-ObjWeb 
-Value
+ DD 
+ DDBrush 
+ DDD 
+ DDDBrush 
+ DDDRef 
+ DDDTriangle 
+ DDDVector 
+ DDDWorld 
+ DDRef 
+ DDVector 
+ DDWorld 
+ ObjAnnotatedValue 
+ ObjClosure 
+ ObjColor 
+ ObjContext 
+ ObjConvert 
+ ObjData 
+ ObjDataFile 
+ ObjDate 
+ ObjDateSort 
+ ObjDb 
+ ObjDb2 
+ ObjDict 
+ ObjDir 
+ ObjDuration 
+ ObjEncrypt 
+ ObjExtProcess 
+ ObjFile 
+ ObjFiles 
+ ObjFilter 
+ ObjFilterReader 
+ ObjGlob 
+ ObjGlobal 
+ ObjGrep 
+ ObjInput 
+ ObjIntegrations 
+ ObjJava 
+ ObjJavaClass 
+ ObjJavaConstructor 
+ ObjJavaMethod 
+ ObjJavaObject 
+ ObjJavaValue 
+ ObjJavaValueBoolean 
+ ObjJavaValueInt 
+ ObjJavaValueLong 
+ ObjJavaValueNull 
+ ObjJavaValueObject 
+ ObjJavaValueString 
+ ObjJobs 
+ ObjLexer 
+ ObjLexerNode 
+ ObjLexerToken 
+ ObjLexerTokenStream 
+ ObjLib 
+ ObjLineReader 
+ ObjMath 
+ ObjPersistent 
+ ObjPlot 
+ ObjProcess 
+ ObjRegex 
+ ObjRequest 
+ ObjSentry 
+ ObjServer 
+ ObjSys 
+ ObjTerm 
+ ObjText 
+ ObjUtil 
+ ObjWeb 
+ Value 
 </pre>
 
 
 <h1>Reference: Value types</h1>
 <p>
-  <i>Per v2.9.1</i>
+  <i>Per v3.0.2</i>
 </p>
 <pre>
 Grep("extends Value") => g
@@ -4307,19 +4348,19 @@ Sys.homeDir.allFiles(Glob("*.java"))->f
 /values
 
 
-ValueBinary 
-ValueBlock 
-ValueBoolean 
-ValueFloat 
-ValueInt 
-ValueList 
-ValueNull 
-ValueObj 
-ValueObjFileLine 
-ValueObjFloat 
-ValueObjInt 
-ValueObjStr 
-ValueString 
+ ValueBinary 
+ ValueBlock 
+ ValueBoolean 
+ ValueFloat 
+ ValueInt 
+ ValueList 
+ ValueNull 
+ ValueObj 
+ ValueObjFileLine 
+ ValueObjFloat 
+ ValueObjInt 
+ ValueObjStr 
+ ValueString 
 </pre> 
 
 
@@ -4417,20 +4458,22 @@ Colon commands
   <li>float</li>
   <li>string</li>
   <li>null</li>
-  <li>List</li>
-  <li>Dir</li>
-  <li>File</li>
-  <li>FileLine</li>
-  <li>Date</li>
-  <li>Date.Duration</li>
-  <li>Int</li>
-  <li>Float</li>
-  <li>Str</li>
-  <li>Dict</li>
-  <li>Glob</li>
-  <li>Regex</li>
-  <li>Lambda</li>
-  <li>AValue</li>
+
+    <li>AValue</li>
+    <li>Date</li>
+    <li>Date.Duration</li>
+    <li>Dict</li>
+    <li>Dir</li>
+    <li>File</li>
+    <li>FileLine</li>
+    <li>Float</li>
+    <li>Glob</li>
+    <li>Int</li>
+    <li>Lambda</li>
+    <li>List</li>
+    <li>Regex</li>
+    <li>Str</li>
+
 </ul>
 
 
@@ -4509,7 +4552,7 @@ Colon commands
 
 <h2>Script and code size</h2>
 
-<h3>2020-11-13</h3>
+<h3>2020-11-13 v2.0.0</h3>
 <pre>
   Script code:      ~5k lines
   Java code:        ~20k lines
@@ -4546,49 +4589,16 @@ Colon commands
   Value types:      13
 </pre>  
 
-
-
-
-
-<h2>Poor man's EXIF date parser</h2>
-<p>
-  Need to sort camera photos by date? JPG files created by a camera, or via image processing
-  software like Darktable, LightRoom and so on, will contain an initial block of metadata
-  called EXIF, which contains numerous fields and values, and which may occupy up to 
-  64 Kb at the start of the file.
-</p>
-<p>
-  Not having written or included any third party implementation for parsing the EXIF data,
-  the easy solution was to implement a function printableChars in the Binary value type, and
-  search for dates using the Lib.Text.Lexer.
-</p>
-<p>
-  The Lib.Text.Lexer.Node has support for "complex tokens", where we define a character
-  string like "dddd-dd-dd", and then define what each chacter means, so that "d" may map
-  to "0123456789", while letting "-" map only to itself.
-</p>
-<p>
-  A utility function Util:ComplexPatternLineSearch was created for managing the details.
-</p>
-
+<h3>2021-12-17 v3.0.0</h3>
+<p>Running CodeStats:main</p>
 <pre>
-  # Get EXIF date (as Date object) or return null
-  # --
-    P(1) => jpegFile
-
-    pattern = "dddd:dd:dd"
-    map = Dict.set("d","0123456789").set(":",":")
-
-    str = jpegFile.readBinary(0,64*1024).printableChars
-    date = Util:CompledPatternLineSearh(printableChars, pattern, map).first
-
-    if (date != null) {
-      Date.setFormat("yyyy:MM:dd").parse(date)
-    } else {
-      null
-    }
-  /GetJpgExifDate
+  Script code:      12751 lines
+  Java code:        30244 lines
+  Functions:        483
+  Object types:     69
+  Value types:      13
 </pre>
+
 
 
 
