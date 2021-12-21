@@ -141,38 +141,38 @@
         HostData.Lget.call (host, "SSHUser") =>sshUser
 
         sshUser+"@"+host =>target
-	HostData.Lget.call (host, "RebootGroup", null) => rebootGroup
+		HostData.Lget.call (host, "RebootGroup", null) => rebootGroup
 
-	HostData.Lhas.call (host, "Auto.reboot", "yes") => allowReboot
-	
-	Inner {
-        SSH:HostOkSSH (target) =>hostOk
-        if (!hostOk) {
-            println(host + ": -offline-")
-        } else {
-	        DebianHostNeedsReboot(target) =>needsReboot
+		HostData.Lhas.call (host, "Auto.reboot", "yes") => allowReboot
 		
-	        if (needsReboot) {
-	        	if (!allowReboot) {
-	        		if (rebootGroup != null) {
-	        			if (!rebootGroups.contains(rebootGroup)) {
-	        				allowReboot=true
-	        				rebootGroups.add(rebootGroup)
-	        			}
-	        		}
-	        	}
-		        if (allowReboot) {
-		        	println(host + ": rebooting now" + if(rebootGroup != null, " RebootGroup="+rebootGroup,""))
-		        	SSH:sudo(target,"reboot",true)
-		        } else {
-		        	println(host + ": " + if(needsReboot,"NEEDS REBOOT","ok"))
-		        }
-		     
-			} else {
-				println(host + ": ok")
+		Inner {
+	        SSH:HostOkSSH (target) =>hostOk
+	        if (!hostOk) {
+	            println(host + ": -offline-")
+	        } else {
+		        DebianHostNeedsReboot(target) =>needsReboot
+			
+		        if (needsReboot) {
+		        	if (!allowReboot) {
+		        		if (rebootGroup != null) {
+		        			if (!rebootGroups.contains(rebootGroup)) {
+		        				allowReboot=true
+		        				rebootGroups.add(rebootGroup)
+		        			}
+		        		}
+		        	}
+			        if (allowReboot) {
+			        	println(host + ": rebooting now" + if(rebootGroup != null, " RebootGroup="+rebootGroup,""))
+			        	SSH:sudo(target,"reboot",true)
+			        } else {
+			        	println(host + ": " + if(needsReboot,"NEEDS REBOOT","ok"))
+			        }
+			     
+				} else {
+					println(host + ": ok")
+				}
 			}
-		}
-   	}
+	   	}
 
     	    
 /Reboot
@@ -381,4 +381,71 @@ Hosts:Parse.Ldump.call
 	UpdateCFTAll
 	AptUpdateAll
 	Reboot
-/run
+/runAll
+
+
+# Assign name and correct IP for newly created VM from Ubuntu Server template on Proxmox
+# This assures fixed IP and that the ansible.v host has password-less access via ssh.
+# After cloning a number of VM's, start each, one at a time, followed by running this
+# function, which modifies the /etc/hostname and /etc/netplan/WHATEVER.yaml, then reboots
+# it. It is now safe to start the next newly cloned VM, and avoid IP clash.
+# --
+	"10.0.99.80" =>templateIp
+	
+	P(1,Input("New IP").get) => newIp
+	P(2,Input("Host name").get) => hostname
+	P(3,Input("Username").get) => username
+
+	Lib:TmpFile("hostname") => hostnameFile
+	hostnameFile.create(hostname)
+
+	Lib:TmpFile("netplan") => netplanFile
+	netplanFile.create(NetplanTemplate(newIp))
+
+	target=username + "@" + templateIp
+
+	println("target=" + target)
+
+	readLine("All ok, type 'y'") => confirm
+	error(confirm != "y", "Aborting")
+
+	println("Copying hostname file")
+	SSH:copy(hostnameFile, target, "./hostname")
+
+	println("Copying netplan file")
+	SSH:copy(netplanFile, target, "./00-installer-config.yaml")
+
+	println("Updating target hostname")
+	SSH:sudo(target, "cp ./hostname /etc/hostname")
+
+	println("Updating target netplan config")
+	SSH:sudo(target, "cp ./00-installer-config.yaml /etc/netplan/00-installer-config.yaml")
+
+	println("Rebooting " + target)
+	acceptErrors=true
+	SSH:sudo(target, "reboot", acceptErrors)
+
+	println("Deleting temp files")
+	hostnameFile.delete
+	netplanFile.delete
+	
+/InitUbuntuServerVM
+
+
+# Netplan template (copied from template VM, then modified with <<ip>> merge exprezsion
+# --
+	P(1,readLine("IP address")) => ip
+<<< EOF
+# This is the network config written by 'subiquity'
+network:
+  version: 2
+  ethernets:
+    ens18:
+      dhcp4: no
+      gateway4: 10.0.0.138
+      addresses: [<<ip>>/16]
+      nameservers:
+        addresses: [10.0.0.3, 10.0.0.4]
+>>> EOF
+	.mergeExpr
+//NetplanTemplate
