@@ -13,6 +13,9 @@ output. The join command for workers is stored in a text file
 in step where the master is initialized, as is stdout and stderr
 of following steps.
 
+2021-12 Modified for multiple masters, but missing way of joining
+together multiple masters to form single cluster. 
+
 >>> EOF
 /Readme
 
@@ -23,11 +26,22 @@ of following steps.
 //GetTarget
 
 
-# Hosts - first us used as master, the others become worker1, worker2 and so on
-	"k1.v k2.v k3.v k4.v k5.v k6.v k7.v k8.v".split
-	#"k1.v k2.v k3.v".split
-	#"k4.v k5.v k6.v".split
-/Hosts
+# Master hosts
+# (Should ideally work with more than one)
+# --
+	"k1.v".split
+/MasterHosts
+
+# Worker hosts
+# --
+	"k2.v k3.v".split
+/WorkerHosts
+
+
+# All hosts
+# --
+	MasterHosts + WorkerHosts
+/AllHosts
 
 
 # SSH user
@@ -35,11 +49,18 @@ of following steps.
 /SSHUser
 
 
-# Targets
-	Hosts->h 
-		out(SSHUser+"@"+h)
-//Targets
+# HostTarget
+# --
+	P(1)=>host
+	SSHUser+"@"+host
+/HostTarget
 
+
+# Convert list of hosts to list of targets
+# --
+	P(1)=>hosts
+	hosts->host out(HostTarget(host))
+/TargetList
 
 
 # Install docker
@@ -69,9 +90,8 @@ of following steps.
 # List all kubernetes versions ....
 # --
 	P(1,GetTarget) => target
-
         SSH:sudo(target,"curl -s https://packages.cloud.google.com/apt/dists/kubernetes-xenial/main/binary-amd64/Packages | grep Version | awk '{print $2}'").stdout
-//KubShowVersions
+/KubShowVersions
 
 
 
@@ -94,8 +114,16 @@ of following steps.
 	SSH:sudo(target,'kubeadm version', false, false).stdout->line
 		println(line)
 	|
-//InstallationTools
+/InstallationTools
 
+
+# Verify kubeadm
+# --
+	P(1,GetTarget) => target
+	P(2,false) => debug
+	SSH:sudo(target,'kubeadm version',false,false).stdout->line 
+		println(line)	
+/VerifyKubeadm
 
 
 # Turn off swapping
@@ -113,7 +141,7 @@ of following steps.
 # May take a while. Not parallelized, as we want exceptions 
 # from SSH:sudo to stop the show, if something fails.
 # --
-	P(1,Targets) => targets
+	P(1,TargetList(AllHosts)) => targets
 	
 	targets->target
 		InstallDocker(target)
@@ -126,69 +154,79 @@ of following steps.
 
 # Assign host names with hostnamectl
 # --
-	P(1,Targets.first(3)) => targets
-	P(2,true) => debug
+	debug=true
 	
 	i=0
-	targets->target
-		cmd = if (i==0) {
-			"hostnamectl set-hostname master-node"
-		} else {
-			"hostnamectl set-hostname worker"+i
-		}
-		SSH:sudo(target,cmd,false,debug)
+	TargetList(MasterHosts)->target
+		SSH:sudo(target,"hostnamectl set-hostname master"+i, false, debug)
 		i=i+1
+	|
+	i=0
+	TargetList(WorkerHosts)->target
+		SSH:sudo(target,"hostnamectl set-hostname worker"+i, false, debug)
+		i=i+1
+	|
 /AssignHostnames
 
 
-# Initialize Kubernetes on Master node
+# Initialize Kubernetes on Master nodes
 # --
-	P(1,Targets.first) => masterNode
-	P(2,false) => debug
-	
-	SSH:sudo(masterNode,'sudo kubeadm init --pod-network-cidr=10.244.0.0/16',false,debug).stdout => stdout
-	File("KUB_Master_init.txt") => f
-	f.create(stdout)
-	ShowMainInitOutput
-	println("--- Stdout stored: " + f.path)
-/InitMasterNode
+	debug=false
+	MasterHosts->host
+		Lib:Header(host)
+		HostTarget(host) => masterNode
+		
+		SSH:sudo(masterNode,'sudo kubeadm init --pod-network-cidr=10.244.0.0/16',false,debug).stdout => stdout
+		File("KUB_Master_init_" + host + ".txt") => f
+		f.create(stdout)
+		ShowMainInitOutput
+		println("--- Stdout stored: " + f.path)
+/InitMasterNodes
 
 
 
 # Show KUB_Master_init log
 # --
-	File("KUB_Master_init.txt").read->line println(line)
+	Dir.files("KUB_Master_init*.txt")->file
+		Lib:Header(file.name)
+		file.read->line println(line)
 /ShowMainInitOutput
 
 
 # Make HOME/.kube config
 # --
-	P(1,Targets.first) => masterNode
-	P(2,false) => debug
-
-	SSH:sudo(masterNode,'mkdir -p $HOME/.kube',true, debug)
-	SSH:sudo(masterNode,'cp -i /etc/kubernetes/admin.conf $HOME/.kube/config', false, debug)
-	SSH:sudo(masterNode,'chown $(id -u):$(id -g) $HOME/.kube/config', false, debug)
+	debug=false
+	MasterHosts->host
+		Lib:Header(host)
+		HostTarget(host) => masterNode
+		
+		SSH:sudo(masterNode,'mkdir -p $HOME/.kube',true, debug)
+		SSH:sudo(masterNode,'cp -i /etc/kubernetes/admin.conf $HOME/.kube/config', false, debug)
+		SSH:sudo(masterNode,'chown $(id -u):$(id -g) $HOME/.kube/config', false, debug)
 /CreateHomeKubeConfig
 
 
 # Pod network - flannel
 # --
-	P(1,Targets.first) => masterNode
-	P(2,false) => debug
+	debug=false
+	MasterHosts->host
+		Lib:Header(host)
+		HostTarget(host) => masterNode
 
-	SSH:sudo(masterNode,'kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml', false, debug) => result
-	File("KUB_Flannel_init_out.txt").create(result.stdout)
-	File("KUB_Flannel_init_err.txt").create(result.stderr)
+		SSH:sudo(masterNode,'kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml', false, debug) => result
+		File("KUB_Flannel_init_out.txt").create(result.stdout)
+		File("KUB_Flannel_init_err.txt").create(result.stderr)
 
-	result.stdout->line println(line) |
+		result.stdout->line println(line)
 /DeployPodNetwork		
 
 
 # Verify Pod network
 # --
-	P(1,Targets.first) => masterNode
-	P(2,false) => debug
+	debug=false
+	MasterHosts->host
+		Lib:Header(host)
+		HostTarget(host) => masterNode
 
 	SSH:sudo(masterNode,'kubectl get pods --all-namespaces', false, debug).stdout->line
 		println(line)
@@ -219,9 +257,11 @@ of following steps.
 	println
 	readLine("Enter to continue")
 
-	Targets.keep(1)->worker
+	WorkerHosts->host
+		Lib:Header(host)
+		HostTarget(host) => worker
+
 		SSH:sudo(worker,cmd,false,debug) => result
-		worker.after("@") => host
 		File("KUB_Worker_" + host + ".txt") => f
 		f.create(result.stdout)
 		result.stderr->line f.append("ERR " + line) |
@@ -230,10 +270,13 @@ of following steps.
 
 # Verify workers
 # --
-	P(1,Targets.first) => masterNode
-	P(2,false) => debug
-
-	SSH:sudo(masterNode,'kubectl get nodes', false, debug).stdout->line
-		println(line)
+	debug=false
+	MasterHosts->host
+		Lib:Header(host)
+		HostTarget(host) => masterNode
+		
+		SSH:sudo(masterNode,'kubectl get nodes', false, debug).stdout->line
+			println(line)
 /VerifyWorkers
+
 
