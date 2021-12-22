@@ -133,6 +133,27 @@ together multiple masters to form single cluster.
 
 	println(""+target+": turning off swap")
 	SSH:sudo(target,'swapoff -a', false, debug)
+
+	# Also need to modify /etc/fstab, using CFT on remote host
+	Java:VerifyCFT(target)
+	Date.setFormat("yyyy-MM-dd").fmt => today
+
+	cftScript=Lib:TmpFile("cft")
+	cftScript.create(Sequence(
+		@ File("/etc/fstab")=>f
+		@ File("fstab.txt.backup_<<today>>").copyFrom(f)
+		@ f.read->line
+		@    if (line.split.contains("swap"))
+		@       out("# " + line)
+		@    else
+		@       out(line)
+		@ | => newLines
+		@ f.create(newLines)
+		@ /run
+	).mergeExpr)
+	SSH:copy(cftScript, target, "./CFT/savefileTest.txt")
+	SSH:sudo(target, './RunCFT Test run ":quit"', false, false)
+	cftScript.delete
 //SwappingOff
 
 
