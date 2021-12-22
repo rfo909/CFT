@@ -1,4 +1,4 @@
-package rf.configtool.main.runtime.lib.db;
+package rf.configtool.root;
 
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
@@ -15,6 +15,10 @@ public class LockServer {
 	
 	public LockServer() {
 		init();
+	}
+	
+	public void setShuttingDown() {
+		serverLoop.setShuttingDown();
 	}
 	
 	private void init () {

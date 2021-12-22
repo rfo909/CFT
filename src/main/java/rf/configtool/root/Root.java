@@ -38,8 +38,6 @@ public class Root {
     private final byte[] secureSessionID; 
 
 
-    private static final Version VERSION = new Version();
-
     private StdioReal stdio;
     private PropsFile propsFile;
     private ObjTerm objTerm;
@@ -179,22 +177,16 @@ public class Root {
         return lastResult;
     }
 
-    // Moved here from Main
+    // Interactive input loop
     public void inputLoop() {
         copyrightNotice();
-        stdio.println(VERSION.getVersion());
-
+        stdio.println(Version.getVersion());
 
         try {
-            for (;;) {
+            INPUT_LOOP: for (;;) {
+            	
+            	if (terminationFlag) break INPUT_LOOP;
 
-
-                if (terminationFlag) {
-                    stdio.println("Runtime exit, cleaning up");
-                    cleanupOnExit();
-                    return;
-                }
-                
                 ObjGlobal objGlobal = currScript.getObjGlobal();
 
 
@@ -222,7 +214,13 @@ public class Root {
                     // Stdio can only do line output, so using System.out directly
                     stdio.print(pre);
                 }
-                String line = stdio.getInputLine().trim();
+                String line = null;
+                try {
+                	line = stdio.getInputLine().trim();
+                } catch (Exception ex) {
+                	stdio.println("inputLoop(): read failed");
+                	break INPUT_LOOP;
+                }
 
                 refreshIfSavefileUpdated();
                 propsFile.refreshFromFile();
@@ -233,6 +231,17 @@ public class Root {
             }
         } catch (Exception ex) {
             ex.printStackTrace();
+        }
+        
+        // Clean up and terminate
+        // ----------------------
+    	stdio.println("Shutting down lock manager");
+        LockManager.setShuttingDown();
+        stdio.println("Runtime exit, cleaning up");
+        try {
+        	cleanupOnExit();
+        } catch (Exception ex) {
+        	ex.printStackTrace();
         }
     }
 

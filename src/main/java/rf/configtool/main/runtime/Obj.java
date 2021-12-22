@@ -218,7 +218,7 @@ public abstract class Obj {
         ObjGlobal objGlobal=ctx.getObjGlobal();
         OutText outText=ctx.getOutText();
         if (this instanceof ObjGlobal) {
-            objGlobal.addSystemMessage(new Version().getVersion());
+            objGlobal.addSystemMessage(Version.getVersion());
             objGlobal.addSystemMessage("");
         } 
         

@@ -1,4 +1,4 @@
-package rf.configtool.main.runtime.lib.db;
+package rf.configtool.root;
 
 import java.io.File;
 

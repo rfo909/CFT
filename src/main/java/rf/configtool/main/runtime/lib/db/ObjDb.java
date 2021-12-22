@@ -29,6 +29,7 @@ import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueBoolean;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
+import rf.configtool.root.LockManager;
 import rf.configtool.util.Hash;
 
 public class ObjDb extends Obj {

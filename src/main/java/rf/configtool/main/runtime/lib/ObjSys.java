@@ -107,7 +107,7 @@ public class ObjSys extends Obj {
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0)
                 throw new Exception("Expected no parameters");
-            return new ValueString(new Version().getVersion());
+            return new ValueString(Version.getVersion());
         }
     }
 

@@ -1,4 +1,4 @@
-package rf.configtool.main.runtime.lib.db;
+package rf.configtool.root;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -27,7 +27,11 @@ public class LockManager {
 	private static LockServer lockServer=new LockServer();
 	
 	private LockManager() {}
-		
+	
+	public static void setShuttingDown() {
+		lockServer.setShuttingDown();
+	}
+	
 	public static boolean getLock (String name) {
 		try {
 			return lockServer.getLock(name);

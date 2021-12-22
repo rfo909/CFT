@@ -13,6 +13,17 @@
 
 <h1>CFT Change log</h1>
 
+<h3>3.0.5 2021-12-22 Locks cleanup</h3>
+<p>
+	Added code so that Root.java when input loop fails (CTRL D on linux) or when typing :quit, new method
+	LockManager.setShuttingDown() is called, which ends up setting flag inside LockServer.ServerLoop so that
+	it terminates. Its socket read blocks for only 200 ms at a time, so it terminates quickly.
+</p>
+<p>
+	Did some minor cleanups as well. Moved the Lock-related classes to rf.configtool.root.
+</p>
+
+
 <h3>3.0.4 2021-12-19 DD improvements and verification</h3>
 <p>
 	Created DDGraphs script, with Torus and an interesting 720 degrees Helix illustration, which presents values
