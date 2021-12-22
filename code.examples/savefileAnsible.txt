@@ -311,6 +311,7 @@ SysStatAll("iostat")
 
 
 # Configure /etc/systemd/resolved.conf
+#### Does it do any good on Ubuntu Server 20+ ??
 # ---
 	HostData=Hosts:Parse
 	file=Lib:TmpFile("resolved_conf")
@@ -336,7 +337,7 @@ SysStatAll("iostat")
 	|
 	file.delete
 	
-/FixResolve
+//FixResolve
 
 
 # /etc/systemd/resolved.conf
@@ -365,7 +366,7 @@ DNS=10.0.0.3 10.0.0.4
 #Cache=yes
 #DNSStubListener=yes
 >>>>> EOF
-/resolved_conf
+//resolved_conf
 
 
 
