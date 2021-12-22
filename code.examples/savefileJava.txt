@@ -176,33 +176,44 @@ P(2,"") => prefix
 	P(1,GetSSHTarget) =>target
 	P(2,"") =>prefix
 
-    println(prefix+"Verifying Maven (and Java) ok")
-    VerifyMaven(target, prefix+"   ")
+	# Short timeout to avoid being run multiple times
+	# as part of same script for same host
+	# --
+	mark=Sys.scriptName+"_VerifyCFT_"+target
+	if (Util:HasTimedOut(mark,600)) Inner {
+		
+	    println(prefix+"Verifying Maven (and Java) ok")
+	    VerifyMaven(target, prefix+"   ")
 
-    # Check if CFT already installed
-    {
-        SSH:run (target,"cd CFT",true).get("exitCode")==0 
-    } =>hasCFT
-    
-    if (!hasCFT) {
-        println(prefix+"Installing and compiling CFT")
-        List(
-            "git clone https://github.com/rfo909/CFT.git",
-            "cd CFT",
-            "mvn package"
-        ) 
-    } else {
-        println(prefix+"Pull latest CFT then compile")
-        List(
-            "cd CFT",
-            "git pull origin master",
-            "mvn package"
-        )
-    }
-    =>cmd
-    SSH:run (target, cmd)
-    
-    CreateRunCFT(target,prefix+"   ")
+	    # Check if CFT already installed
+	    {
+	        SSH:run (target,"cd CFT",true).get("exitCode")==0 
+	    } =>hasCFT
+	    
+	    if (!hasCFT) {
+	        println(prefix+"Installing and compiling CFT")
+	        List(
+	            "git clone https://github.com/rfo909/CFT.git",
+	            "cd CFT",
+	            "mvn package"
+	        ) 
+	    } else {
+	        println(prefix+"Pull latest CFT then compile")
+	        List(
+	            "cd CFT",
+	            "git pull origin master",
+	            "mvn package"
+	        )
+	    }
+	    =>cmd
+	    SSH:run (target, cmd)
+	    
+	    CreateRunCFT(target,prefix+"   ")
+
+	    Util:SetTimeMark(mark)
+	} else {
+		println(prefix+"Skipping CFT check, last run at " + Util:GetTimeMark(mark))
+	}
 /VerifyCFT
 
 
