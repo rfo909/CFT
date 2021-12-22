@@ -172,8 +172,10 @@ P(2,"") => prefix
 
 
 # Install or upgrade CFT - calls VerifyMaven
-P(1,GetSSHTarget) =>target
-P(2,"") =>prefix
+# --
+	P(1,GetSSHTarget) =>target
+	P(2,"") =>prefix
+
     println(prefix+"Verifying Maven (and Java) ok")
     VerifyMaven(target, prefix+"   ")
 
@@ -199,7 +201,30 @@ P(2,"") =>prefix
     }
     =>cmd
     SSH:run (target, cmd)
+    
+    CreateRunCFT(target,prefix+"   ")
 /VerifyCFT
 
+
+
+# Create home directory shell script RunCFT to run CFT 
+# Called from VerifyCFT
+# --
+	P(1,GetSSHTarget) =>target
+	P(2,"") =>prefix
+	
+	SSH:run(target,"which bash", false, false).stdout->line
+		assert(line.contains("/bash")) 
+		out(line)
+	| _.first => path
     
+    Lib:TmpFile("script") => f
+    f.create(Sequence(
+    	@@#!<<path>>
+    	@ cd CFT
+    	@ ./cft $*
+    ).mergeExpr)
+	SSH:copy(f,target,"./RunCFT")
+	SSH:run(target,"chmod +x ./RunCFT")
+//CreateRunCFT
 
