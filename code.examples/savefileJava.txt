@@ -180,7 +180,7 @@ P(2,"") => prefix
 	# as part of same script for same host
 	# --
 	mark=Sys.scriptName+"_VerifyCFT_"+target
-	if (Util:HasTimedOut(mark,600)) Inner {
+	if (Util:HasTimedOut(mark,60)) Inner {
 		
 	    println(prefix+"Verifying Maven (and Java) ok")
 	    VerifyMaven(target, prefix+"   ")
