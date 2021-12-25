@@ -129,37 +129,41 @@ choice.
 # Update terminal size (if possible)
 # --
     false =>updated
-    if(!Sys.isWindows) {
-        # Linux
-        Dir.runCapture("which","stty").nth.contains("/stty") =>hasStty
-        if(hasStty, Inner{
-            Dir.runCapture("stty","size").nth.split =>list
 
-            Term.h(list.nth(0).parseInt)
-            Term.w(list.nth(1).parseInt)
-            true =>updated
-        })
-    } else {
-        # Windows (a bit slow)
-		# 2021-08-18 RFO: some windows environments fail running powershell
-		tryCatch ({
-			Dir.runCapture("powershell","(Get-Host).UI.RawUI.WindowSize.Width").nth.parseInt =>w
-			Dir.runCapture("powershell","(Get-Host).UI.RawUI.WindowSize.Height").nth.parseInt =>h
-		}) => result
-		if (!result.ok) {
-			key="GetTerminalSize Windows Fails"
-			if (Util:HasTimedOut(key,3600)) {
-				Lib:ShowWarn("GetTerminalSize() fails (windows) - using 80x24")
-				Util:SetTimeMark(key)
+    if (Term.isTerminal) {
+		if(!Sys.isWindows) {
+		    # Linux
+		    Dir.runCapture("which","stty").nth.contains("/stty") =>hasStty
+		    if(hasStty, Inner{
+		        Dir.runCapture("stty","size").nth.split =>list
+
+		        Term.h(list.nth(0).parseInt)
+		        Term.w(list.nth(1).parseInt)
+		        true =>updated
+		    })
+		} else {
+		    # Windows (a bit slow)
+			# 2021-08-18 RFO: some windows environments fail running powershell
+			tryCatch ({
+				Dir.runCapture("powershell","(Get-Host).UI.RawUI.WindowSize.Width").nth.parseInt =>w
+				Dir.runCapture("powershell","(Get-Host).UI.RawUI.WindowSize.Height").nth.parseInt =>h
+			}) => result
+			if (!result.ok) {
+				key="GetTerminalSize Windows Fails"
+				if (Util:HasTimedOut(key,3600)) {
+					Lib:ShowWarn("GetTerminalSize() fails (windows) - using 80x24")
+					Util:SetTimeMark(key)
+				}
+				w=80
+				h=24
 			}
-			w=80
-			h=24
+		    Term.w(w)
+		    Term.h(h)
+		    true =>updated
 		}
-        Term.w(w)
-        Term.h(h)
-        true =>updated
-    }
-    if(updated, Term, null)
+	}
+	#if(updated, Term, null)
+	Term
 /GetTerminalSize
             
 

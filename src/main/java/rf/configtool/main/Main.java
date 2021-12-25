@@ -47,34 +47,45 @@ public class Main {
     
     public static void main (String[] argsArray) throws Exception {
         Args args=new Args(argsArray);
-        String scriptDir=null;
         
         if (args.hasNext()) {
-            if (args.peek().startsWith("-")) {
-                if (args.peek().equals("-version")) {
-                    System.out.println(Version.getVersion());
-                    System.exit(0);
-                } else if (args.peek().equals("-d")) {
-                    args.get("advance past known -d");
-                    scriptDir=args.get("scriptDir following -d");
-                } else if (args.peek().equals("-help")) {
-                    System.out.println("Valid options:");
-                    System.out.println("  -version");
-                    System.out.println("  -help");
-                    System.out.println("  -d scriptDir [scriptName [command-lines]]");
-                    System.out.println("or just");
-                    System.out.println("  [scriptName [command-lines]]");
-                    System.exit(0);
-                }
+            if (args.peek().equals("-version")) {
+                System.out.println(Version.getVersion());
+                System.exit(0);
+            } else if (args.peek().equals("-help")) {
+                System.out.println("Valid options:");
+                System.out.println("  -version");
+                System.out.println("  -help");
+                System.out.println("  [FLAGS]? [scriptName [command-lines]]");
+                System.out.println("[FLAGS]");
+                System.out.println("  -d scriptDir");
+                System.out.println("  -noterm     ## no proper terminal - when called remotely");
+                System.exit(0);
             }
-        
         }
+        
+        String scriptDir=null;
+        boolean noTerminal = false;
+        
+        while(args.hasNext() && args.peek().startsWith("-")) {
+	        if (args.peek().equals("-d")) {
+	        	args.get("advance past known -d");
+	        	scriptDir=args.get("scriptDir following -d");
+	        } else if (args.peek().equals("-noterm")) {
+	        	args.get("comsume -noterm");
+	        	noTerminal=true;
+	        } else {
+	        	System.out.println("Invalid flag. Run CFT with -help.");
+	        	System.exit(1);
+	        }
+        }
+
             
         BufferedReader stdin=new BufferedReader(new InputStreamReader(System.in));
         PrintStream stdout=System.out;
         
         StdioReal stdio=new StdioReal(stdin, stdout);
-        Root root=new Root(stdio, scriptDir);
+        Root root=new Root(stdio, scriptDir, noTerminal);
         
         if (args.hasNext()) {
             String scriptName=args.get("scriptname");

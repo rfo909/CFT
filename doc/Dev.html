@@ -13,6 +13,17 @@
 
 <h1>CFT Change log</h1>
 
+<h3>3.0.7 2021-12-25 Terminal handling</h3>
+<p>
+	Added -noterm flag to CFT, to disable terminal checking, when running CFT via SSH, as ioctl complains and
+	terminates the process otherwise.
+</p>
+<p>
+	This is the basis for the Term.isTerminal function, which if false, first off sets wrap=true in the
+	default Term object, and second, is used to prevent Lib:GetTerminalSize from examining 
+	terminal size (when flag -noterm which means Term.isTerminal=false)
+</p>
+
 <h3>3.0.6 2021-12-22 Java script</h3>
 <p>
 	Modified Java script so that installing or updating CFT also creates a script in the home directory, 

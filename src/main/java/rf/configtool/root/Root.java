@@ -62,13 +62,13 @@ public class Root {
         return secureSessionID;
     } 
 
-    public Root(StdioReal stdio, String customScriptDir) throws Exception {
+    public Root(StdioReal stdio, String customScriptDir, boolean noTerminal) throws Exception {
         this.sessionUUID = UUID.randomUUID().toString();
         this.secureSessionID = (UUID.randomUUID().toString()+":"+System.currentTimeMillis()).getBytes("UTF-8");
         this.startTime=System.currentTimeMillis();
         this.stdio = stdio;
         propsFile=new PropsFile(customScriptDir);
-        objTerm=new ObjTerm();
+        objTerm=new ObjTerm(noTerminal);
         
 
         String globalOnLoad = propsFile.getGlobalOnLoad();

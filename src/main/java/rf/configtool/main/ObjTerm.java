@@ -29,15 +29,21 @@ import rf.configtool.main.runtime.ValueString;
 
 public class ObjTerm extends Obj {
     
+	private boolean isTerminal;	// an actual terminal
     private int h=24;
     private int w=130;
     private boolean wrap=false;
     
-    public ObjTerm() {
+    public ObjTerm(boolean noTerminal) {
+    	this.isTerminal=!noTerminal;
+    	if (noTerminal) {
+    		wrap=true; // no cutoff for output
+    	}
         this.add(new FunctionW());
         this.add(new FunctionH());
         this.add(new FunctionWrap());
         this.add(new FunctionShow());
+        this.add(new FunctionIsTerminal());
     }
     
     public int getScreenWidth() {
@@ -149,6 +155,19 @@ public class ObjTerm extends Obj {
             }
             
             return new ValueString(h+"x"+w);
+        }
+    }
+
+    class FunctionIsTerminal extends Function {
+        public String getName() {
+            return "isTerminal";
+        }
+        public String getShortDesc() {
+            return "isTerminal() - false if noTerminal flag to CFT, which means not safe to check dimensions";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueBoolean(isTerminal);
         }
     }
 
