@@ -18,7 +18,7 @@ public class LockServer {
 	}
 	
 	public void setShuttingDown() {
-		serverLoop.setShuttingDown();
+		if (serverLoop != null) serverLoop.setShuttingDown();
 	}
 	
 	private void init () {

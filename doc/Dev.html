@@ -23,6 +23,10 @@
 	default Term object, and second, is used to prevent Lib:GetTerminalSize from examining 
 	terminal size (when flag -noterm which means Term.isTerminal=false)
 </p>
+<p>
+	Bugfix LockServer.setShuttingDown(): if there runs a server on local host already, in another instance or
+	thread, the internal variable serverLoop will be null.
+</p>
 
 <h3>3.0.6 2021-12-22 Java script</h3>
 <p>
