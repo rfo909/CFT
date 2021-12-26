@@ -421,6 +421,7 @@ Hosts:Parse.Ldump.call
 /InitUbs08Clone
 
 
+
 # CFT script to run on new VM
 # --
 	P(1)=>hostname
@@ -461,7 +462,7 @@ Hosts:Parse.Ldump.call
 	# Truncate machine-id file to zero bytes
 	Dir.run(List("truncate","-s","0", idFile.path))
 
-	# Generate new content
+	# Generate new machine-id content
 	Dir.run(List("systemd-machine-id-setup"))
 	newId=idFile.read.first
 
@@ -469,7 +470,22 @@ Hosts:Parse.Ldump.call
 	println("- oldId: " + oldId)
 	println("- newId: " + newId)
 
+	# Generate new host ssh keys
+	# https://www.cyberciti.biz/faq/howto-regenerate-openssh-host-keys/
+
+	println("Deleting /etc/ssh_host_* key files")
+	Inner {
+		Dir("/etc/ssh").files("ssh_host_*")->f f.delete
+	}
+	println("Generating new ssh_host_* keys")
+	Dir.run(List("dpkg-reconfigure","openssh-server"))
+	
+	println("Restarting ssh service")
+	Dir.run(List("systemctl","restart","ssh"))
+	
+	println("** REMEMBER: must update or delete ./ssh/known-hosts") 
 /run
+
 
 >>>>>> EOF
 	.mergeExpr
