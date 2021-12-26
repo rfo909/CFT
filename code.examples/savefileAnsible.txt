@@ -130,6 +130,12 @@
 # Reboot hosts that need reboot and allow reboot. 
 # Display reboot info for all hosts
 # --
+	P(1,false)=>forceReboot  
+		# Reboot all that can be rebooted
+		# Note: will reboot the first in each RebootGroup
+		# When run later, with value true, it reboots those first in each RebootGroup again
+		# For TESTING of the RebootGroup mechanism only!
+	
 	HostData = Hosts:Parse
 	Util:ProcessMonitor =>mon
 
@@ -152,7 +158,7 @@
 	        } else {
 		        DebianHostNeedsReboot(target) =>needsReboot
 			
-		        if (needsReboot) {
+		        if (needsReboot || forceReboot) {
 		        	if (!allowReboot) {
 		        		if (rebootGroup != null) {
 		        			if (!rebootGroups.contains(rebootGroup)) {
@@ -490,5 +496,3 @@ Hosts:Parse.Ldump.call
 >>>>>> EOF
 	.mergeExpr
 //RemoteScript
-
-
