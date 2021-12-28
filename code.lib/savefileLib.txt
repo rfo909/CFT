@@ -744,7 +744,7 @@ P(1,"label") =>label P(2) =>currVal P(3,"yes") =>trueVal P(4,"no") =>falseVal
 	P(2,readLine("Enter partial file name, or glob pattern with '*'")) => fname
 
 	if (fname=="") fname="*"
-	glob=if(fname.contains("*"),Glob(fname),Glob("*"+fname+"*"))
+	glob=if(fname.contains("*"),Glob(fname,true),Glob("*"+fname+"*",true))
 	
 	dir.allFiles(glob)->f
 		out(Int(f.lastModified, f))
