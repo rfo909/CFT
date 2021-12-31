@@ -130,3 +130,68 @@
 
 
 
+# Bars diagram
+# --
+	P(1,List(10,11,2,1,8,5,40,30,12,5,6,7))=>values
+	P(2,List("Alice","Bob","Carol","Dante","Edward","Fiona","Gabriel","Harry","Ignoramus","Jorge","Santa Claus","Others"))=>labels
+	P(3,TargetDir.file("bars.png"))=>targetFile
+	
+	error(values.length != labels.length, "values and labels must match")
+	error(values.length > Colors.length, "max " + Colors.length + " values supported (dictated by number of colors)")
+
+	Lib.DD.World => world
+	Lib.DD.Ref => ref
+
+	diagramWidth=200
+	diagramHeight=200
+	
+	colors=Colors
+	
+	colWidth=diagramWidth/values.length
+	max=0
+	Inner{values->v 
+		if (v>max) max=v
+	}
+	vfactor=diagramHeight/max
+	
+	# Render bars
+	base=ref
+	xx=(colWidth/2)*0.9
+	b=world.Brush(-xx,xx)
+	Inner {
+		Lib.Data.for(0,values.length,1)->i
+			colors.nth(i) => color
+			b.setColor(color)
+			base.turnLeft(90) => p1
+			base.turnLeft(90).fwd(values.nth(i)*vfactor) => p2
+			b.penDown(p1)
+			b.penDown(p2)
+			b.penUp
+			base=base.fwd(colWidth)
+	}
+
+	# Legends
+	pixelHeight=1.5
+	
+	lineSpace=4
+	
+	numLines=values.length
+	linesHeight=numLines*7
+	linesDist=(numLines-1)*lineSpace
+	totalHeight=linesHeight+linesDist
+	
+	textRef=ref.fwd(diagramWidth*1.05).left(diagramHeight/2).scaleUp(pixelHeight).left(totalHeight*0.5)
+
+	Lib.Data.for(0,labels.length,1)->i
+		label=labels.nth(i)
+		color=colors.nth(i)
+		
+		DDLetters:DDText(world,textRef,label,color)
+		textRef = textRef.right(7).right(lineSpace)
+	|
+	
+	world.render(targetFile)
+/Bars
+
+
+

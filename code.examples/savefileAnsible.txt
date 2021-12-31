@@ -377,9 +377,15 @@ DNS=10.0.0.3 10.0.0.4
 
 
 
-
-Hosts:Parse.Ldump.call
-/dump
+# Dump content from Hosts file, optionally with
+# filter string, to isolate hosts, property names or values
+# -- 
+	P(1,null)=>filter
+	Hosts:Parse.Ldump.call->line  
+		# each line is a list with three elements: host, setting name and setting value
+		assert(filter==null || line.concat("|").contains(filter))
+		reportList(line)
+/Dump
 
 
 
