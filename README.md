@@ -9,24 +9,9 @@ software developer, combined with my interest in parsers and interpreters.
 
 It's been in continous use since creation in 2018.
 
-Written in Java, it runs both on Linux and Windows environment. 
+Written from scratch in Java; runs both on Linux and Windows environments. 
 
-*README last updated 2021-12-19*
-
-
-# New developments
-
-Integrated two ancient libraries for 2D and 3D graphics, written around year 2000-2005 by myself. The 3D library 
-allows us to generate images like this, from the [DDDExample script](code.examples/savefileDDDExample.txt):
-
-![Wheel](doc/wheel.png)
-
-The 2D library, which matured in 3.0.3 lets us generate "business graphics" like these from the 
-[DDGraphs script](code.examples/savefileDDGraphs.txt):
-
-![Helix](doc/helix.png)
-
-![Torus](doc/torus2d.png)
+*README last updated 2022-01-11*
 
 
 ## Terminal based - shell-like
@@ -41,38 +26,43 @@ using the following commands.
 - more
 - edit
 
-However, CFT is really about writing code in the form of functions. Functions are called directly from the command line,
-or from other functions.
+## Functions and scripts
 
-## Functions
+Automation in CFT is done by creating functions. These are in turn saved in script files. 
+
+Functions are run from the command line, or they call each other, both inside the same script file
+and functions in other script files. Script files have no state, as they are just collections of
+functions.
+
+The base of CFT is its built-in objects and functions.
+
+Functions can be created interactively, by assigning a name to the previously executed line
+of code, but usually we create functions by editing the script file.
 
 In CFT, code comes before the function name. The P(N) expression returns parameters by position.
 
 ```
-# Example
+# Convert IP address to binary format
 # --
-	file1=P(1)  # Expects File objects
-	file2=P(2)
+	ipAddr=P(1) # on format 10.0.0.3
 	
-	# boolean return value
-	file1.hash==file2.hash 
-/FilesMatch
+	parts = ipAddr.split(".")
+	parts->part
+		out(part.parseInt.bin)
+	| _.concat(".")
+/IpToBinary
 ```
 
-The two references ".hash" are function calls on the File objects received as parameters. Parantheses are optional when no arguments. 
+This example uses the built-in function .split() of the String type, which returns a list. We then iterate over the
+list, and for each part, parse the string to int, then convert it to binary. The result is concatenated back to
+dotted format, such as 
 
-### Scripts 
-
-When we create our own functions, they are organized into script files. They may call each other, both inside the
-same script file, and in other script files. They will also be working with member functions insid library objects,
-such as the File.hash() above.
-
-Scripts contain no state, and are just a way of organizing code, making each script essentially a name space. 
-
+00001010.00000000.00000000.00000011
 
 ### Types
 
-CFT is dynamically typed, with no way of declaring variables or parameter types. 
+CFT is dynamically typed. Variables are not declared, just used, such as the "parts" variable above. The
+arrow "->" followed by identifier "part" is the "for-each" of CFT, with "part" as loop variable.
 
 
 ## Functionality
@@ -91,7 +81,7 @@ CFT is dynamically typed, with no way of declaring variables or parameter types.
 ### Editing script code
 
 Originally, the idea was to build code from the bottom up, one line at a time, interactively,
-but nowadays we usually edit script code in some editor. 
+but nowadays we usually edit the script file code in some editor. 
 
 The shortcut @e opens current script file to be edited in notepad or notepad++ on windows, and 
 whatever preferred editor is selected on Linux.
@@ -133,7 +123,7 @@ List all shortcuts by typing a single '@' and press enter.
 ## Global functions
 
 CFT currently implements 70+ object types, with 390+ library functions. Of these, about 30 are global, the
-rest exist as object member functions, such as the File.hash() invoked in above example.
+rest exist as object member functions, such as the String.split() invoked in above example.
 
 The global functions return different values, such as the current
 directory, an empty dictionary, and so on. 
@@ -153,7 +143,7 @@ In the example below, note that the '$' is the prompt.
 
 	$ Dict
 
-	## Create Date object 
+	## Create Date object for "now"
 
 	$ Date
 
@@ -211,6 +201,19 @@ to something else, etc.
 The interactive approach made possible a help system, where one can always run some expression, and list 
 member function of the resulting object.
 
+## Compact code
+
+Creating custom functions inside system objects makes CFT code compact. For example, to create a hash string for
+a file, in order to locate duplicates, or checking if it has changed, we just call the .hash() function of
+any File object.
+
+The idea is to let objects, such as File, contain relevant functions that deliver useful results with the
+least amount of hassle. The implementation of .hash() has to deal with FileInputStream, and a loop that
+reads binary file data into some buffer, to be passed on to the hash function, and finally, code for converting
+the binary hash to hex.
+
+This means the CFT "API" runs at a higher level than Java, and this results in compact code.
+ 
 
 ## Variable substitution / templating
 
