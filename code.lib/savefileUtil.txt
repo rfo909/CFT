@@ -147,7 +147,7 @@ P(3,Lambda{P(1)}) => processList
 		readLine("Enter index / part of name / blank for none") => input
 		if (input=="") break(true)
 		if (input.?parseInt) {
-			result=files.nth(i)
+			result=files.nth(input.parseInt)
 			break(true)
 		} else {
 			filterString=input
