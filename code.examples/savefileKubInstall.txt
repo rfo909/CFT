@@ -29,12 +29,12 @@ together multiple masters to form single cluster.
 # Master hosts
 # (Should ideally work with more than one)
 # --
-	"k1.v".split
+	"kub1.v".split
 /MasterHosts
 
 # Worker hosts
 # --
-	"k2.v k3.v".split
+	"kub2.v kub3.v".split
 /WorkerHosts
 
 
