@@ -397,14 +397,20 @@ DNS=10.0.0.3 10.0.0.4
 /runAll
 
 
-# Assign name and correct IP for newly created VM from Ubuntu Server template on Proxmox
-# This assures fixed IP and that the ansible.v host has password-less access via ssh.
+# Assign name and correct IP for newly created VM from Ubuntu Server template on Proxmox.
+# This assumes fixed IP and that the management host has password-less access via ssh.
+#
 # After cloning a number of VM's, start each, one at a time, followed by running this
-# function, which modifies the /etc/hostname and /etc/netplan/WHATEVER.yaml, then reboots
-# it. It is now safe to start the next newly cloned VM, and avoid IP clash.
+# function, which 
+# - modifies the /etc/hostname
+# - modified /etc/netplan/WHATEVER.yaml
+# - fixes machine-id
+# - generates unique SSH keys
+# - reboots
+#
+# It is now safe to start the next newly cloned VM, and avoid IP clash.
 # --
-	"10.0.99.80" => defaultTemplateIp
-
+	"10.0.99.56" => defaultTemplateIp
 
 	P(1,Input("Template IP").setCurrCond(defaultTemplateIp).get) => templateIp
 	P(2,Input("Clone new IP").get) => newIp
@@ -422,15 +428,13 @@ DNS=10.0.0.3 10.0.0.4
 
 
 	println("Creating CFT Test script")
-	SSH:copy(scriptFile, target, "./CFT/savefileTest.txt")
+	SSH:copy(scriptFile, target, "./CFT/savefileInitClone.txt")
 
-
-	#SSH:sudo(target, './RunCFT -noterm Test "1+1" ":quit"', false, true)
-	SSH:sudo(target, './RunCFT -noterm Test run ":quit"', false, true)
+	SSH:sudo(target, './RunCFT -noterm InitClone run ":quit"', false, true)
 
 	SSH:sudo(target, "reboot", true, false)
 	
-/InitUbs08Clone
+/InitUbsClone
 
 
 
