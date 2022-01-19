@@ -69,6 +69,8 @@ files with no access, etc.
 # --
 	P(1,Dir) => rootDir
 	P(2,"Backup"+"_"+rootDir.name) => backupName
+
+	Input("Enter backup name").setCurr(backupName).get => backupName
 	
 	backupName=Date.setFormat("yyyy-MM-dd").fmt+"_"+backupName
 	println("Backup name: " + backupName)
@@ -94,16 +96,18 @@ files with no access, etc.
 	P(3)=>countDict
 	P(4)=>backupName
 	
-	#println("Dir: " + dir.path)
 	
 	statusLines=List
 	dir.files->f
 		saltString=""+countDict.count
-		 #tryCatch(
-		 	
-			 processFile(password,f,statusLines,saltString)
-		 #)
-		 countDict.set("count",countDict.count+1)
+		tryCatch(	
+			processFile(password,f,statusLines,saltString)
+		) => result
+		if (!result.ok) {
+			println(f.path)
+			println("   " + result.msg)
+		}
+		countDict.set("count",countDict.count+1)
 	|
 	StatusFile(backupName).append(statusLines)
 	
@@ -112,6 +116,8 @@ files with no access, etc.
 			processDir(password,d,countDict,backupName)
 		#)
 	|
+
+	println("" + countDict.count + " " + dir.path)
 //processDir
 
 
@@ -163,7 +169,7 @@ files with no access, etc.
 	
 	Input("Backup log file path").get => fPath
 	
-	file=File(fPath)
+	file=targetDir.file(fPath)
 	error(!file.exists,"No such file: " + fPath)
 	
 	pathPrefix=null
