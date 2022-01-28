@@ -196,12 +196,28 @@ Input("ssh target user@host").get
 //GetIp
 
 
+# Ensure NFS client ok
+# --
+	P(1,GetTarget)=>target
+	P(2,"")=>prefix
+	println(prefix+"Ensuring nfs-common installed")
+	
+	println(prefix+"Running apt-get update")
+	SSH:sudo(target,"apt-get update")
+	println(prefix+"Installing nfs-common")
+	SSH:sudo(target,"apt-get install -y nfs-common")
+//EnsureNFSClient
+
+
 # Ensure /mnt/storage ok
 # --
     P(1,GetTarget)=>target
     P(2,"")=>prefix
 
     println(prefix+"Checking /mnt/storage/ISO ok")
+
+	EnsureNFSClient(target,prefix+"   ")
+
     SSH:sudo(target,"mount -a")
     SSH:sudo(target,"ls /mnt/storage/ISO", true).get("exitCode") != 0 => notFound
     if (notFound) {
@@ -209,7 +225,7 @@ Input("ssh target user@host").get
         SSH:sudo(target,"mkdir /mnt/storage", true) # ignore errors
         println(prefix+"Updating /etc/fstab")
         SSH:sudo(target,'echo "storage.s:/mnt/storage  /mnt/storage    nfs   rw    0 0" >> /etc/fstab')
-        println(prefix,"mount -a")
+        println(prefix+"mount -a")
         SSH:sudo(target,"mount -a")
     }
     SSH:sudo(target,"ls /mnt/storage/ISO", true).get("exitCode") != 0 => notFound
