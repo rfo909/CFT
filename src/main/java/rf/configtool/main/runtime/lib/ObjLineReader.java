@@ -57,11 +57,7 @@ public class ObjLineReader extends ObjPersistent implements CtxCloseHook {
                     // ignore
                 }
             }
-            String encoding=file.getEncoding();
-            File f=file.getFile();
-            br = new BufferedReader(
-                   new InputStreamReader(
-                              new FileInputStream(f), encoding));
+            br=file.getBufferedReader();
             ctx.addCtxCloseHook(this);
         } catch (Exception ex) {
             br=null;

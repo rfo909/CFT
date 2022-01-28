@@ -13,6 +13,23 @@
 
 <h1>CFT Change log</h1>
 
+<h3>3.1.0 2022-01-28 File character sets</h3>
+<p>
+	Added support for File object to detect BOM mark when object is created (if file exists), setting internal encoding property.
+</p>
+<p>
+	Modified create() to write BOM if one is defined for current encoding. Doing the same for append() for the case when
+	the file does not exist, or is empty (length==0).
+</p>
+<p>
+	Created java method ObjFile.getBufferedReader() which handles skipping the BOM mark if defined for current encoding,
+	and applied this to read() and more(). 
+</p>
+<p>
+	Also modified the following, to use ObjFile.getBufferedReader(): 
+	ObjDataFile, ObjGrep, ObjLineReader, ObjPlot
+</p>
+
 <h3>3.0.7 2021-12-25 Terminal handling</h3>
 <p>
 	Added -noterm flag to CFT, to disable terminal checking, when running CFT via SSH, as ioctl complains and

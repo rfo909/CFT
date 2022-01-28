@@ -281,9 +281,7 @@ public class ObjDateSort extends Obj {
                 BufferedReader br=null;
 
                 raf.seek(seekPos);
-                br = new BufferedReader(
-                   new InputStreamReader(
-                                new FileInputStream(raf.getFD()), encoding));
+                br = new BufferedReader(new InputStreamReader(new FileInputStream(raf.getFD()), encoding));
                 
 
                 List<Value> result=new ArrayList<Value>();

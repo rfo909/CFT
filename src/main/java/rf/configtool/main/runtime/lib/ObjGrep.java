@@ -196,10 +196,8 @@ public class ObjGrep extends Obj {
             ObjFile f=(ObjFile) o1;
             
             List<Value> result=new ArrayList<Value>();
-            BufferedReader br = new BufferedReader(
-                   new InputStreamReader(
-                              new FileInputStream(f.getPath()), f.getEncoding()));
-
+            BufferedReader br = f.getBufferedReader();
+            
             boolean reachedLimit = false;
             final String limitType=(limitKeepFirst ? "first" : "last");
             
@@ -260,11 +258,8 @@ public class ObjGrep extends Obj {
             }
             ObjFile f=(ObjFile) o1;
             
-            List<Value> result=new ArrayList<Value>();
-            BufferedReader br = new BufferedReader(
-                   new InputStreamReader(
-                              new FileInputStream(f.getPath()), f.getEncoding()));
-
+            BufferedReader br = f.getBufferedReader();
+            
             int count=0;
             
             try {

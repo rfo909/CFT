@@ -52,6 +52,7 @@ import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
 import rf.configtool.util.Encrypt;
 import rf.configtool.util.FileInfo;
+import rf.configtool.util.Hex;
 import rf.configtool.util.TabUtil;
 
 
@@ -77,6 +78,7 @@ public class ObjFile extends Obj {
                 File f=new File(name);
                 if (f.exists()) {
                     this.name=f.getCanonicalPath();
+                    encoding=getFileEncoding(f, encoding);
                 }
             } catch (Exception ex) {
                 this.name=name;
@@ -121,6 +123,77 @@ public class ObjFile extends Obj {
 				new FunctionDecrypt(),
 		};
 		setFunctions(arr);
+
+    }
+    
+    
+    
+    private String getFileEncoding (File f, String defaultEncoding) {
+    	try {
+    		FileInputStream fis=null;
+    		try {		
+    			fis = new FileInputStream(f);
+    	    	
+    			byte[] bom=new byte[4];
+    	    	int count=fis.read(bom);
+    	    	if (count != 4) return defaultEncoding;
+    	    	
+    	    	String str=Hex.toHex(bom,4);
+    	    	
+    	    	// https://en.wikipedia.org/wiki/Byte_order_mark
+    	    	
+    	    	if (str.equals("0000FEFF")) return "UTF-32BE";
+    	    	if (str.equals("FFFE0000")) return "UTF-32LE";
+
+    	    	if (str.startsWith("FEFF")) return "UTF-16BE";
+    	    	if (str.startsWith("FFFE")) return "UTF-16LE";
+
+    	    	if (str.startsWith("EFBBBF")) return "UTF-8";
+    	    	
+    		} finally {
+    			if (fis != null) try {fis.close();} catch (Exception ex) {};
+    		}
+    	} catch (Exception ex) {
+    		// ignore
+    	}
+    	return defaultEncoding;
+    }
+    
+    /**
+     * Get BOM byte sequence for encoding by (Java) name
+     */
+    private byte[] getBOM (String encoding) {
+    	String s;
+    	
+    	if (encoding.equals("UTF-32BE")) s="0000FEFF";
+    	else if(encoding.equals("UTF-32LE")) s="FFFE0000";
+    	else if(encoding.equals("UTF-16BE")) s="FEFF";
+    	else if(encoding.equals("UTF-16LE")) s="FFFE";
+    	else if(encoding.equals("UTF-8")) s="EFBBBF";
+    	else s=""; // no BOM
+    	
+    	return Hex.fromHex(s);
+    }
+    
+    
+    /**
+     * Get BufferedReader for file, correctly initialized with encoding and advanced past potential byte-order-mark (BOM) for unicode
+     */
+    public BufferedReader getBufferedReader () throws Exception {
+        File f=new File(name);
+        if (!f.exists() || !f.isFile()) {
+            throw new Exception("File does not exist");
+        }
+    	FileInputStream fis=new FileInputStream(f);
+    	
+    	// read past BOM if there is one
+    	int bomBytes = getBOM(encoding).length;
+    	while (bomBytes>0) {
+    		fis.read();
+    		bomBytes--;
+    	}
+
+    	return new BufferedReader(new InputStreamReader(fis, encoding));
 
     }
     
@@ -357,7 +430,10 @@ public class ObjFile extends Obj {
 
             PrintStream ps=null;
             try {
-                ps=new PrintStream(new FileOutputStream(f),false, encoding);
+            	FileOutputStream fos=new FileOutputStream(f);
+        		fos.write(getBOM(encoding));
+            	
+                ps=new PrintStream(fos,false, encoding);
                 Value content=params.get(0);
                 if (content instanceof ValueList) {
                     List<Value> lines=((ValueList)content).getVal();
@@ -391,7 +467,15 @@ public class ObjFile extends Obj {
             
             PrintStream ps=null;
             try {
-                ps=new PrintStream(new FileOutputStream(f,true), false, encoding);
+            	FileOutputStream fos;
+            	if (f.exists() && f.length()>0) {
+            		fos=new FileOutputStream(f, true);
+            	} else {
+            		fos=new FileOutputStream(f);
+            		fos.write(getBOM(encoding));
+            	}
+            	
+                ps=new PrintStream(fos, false, encoding);
                 Value content=params.get(0);
                 if (content instanceof ValueList) {
                     List<Value> lines=((ValueList)content).getVal();
@@ -418,19 +502,12 @@ public class ObjFile extends Obj {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
-            File f=new File(name);
-            if (!f.exists()) {
-                throw new Exception("File does not exist");
-            }
             List<Value> result=new ArrayList<Value>();
             BufferedReader br=null;
             long lineNo=0;
             try {
-                //br=new BufferedReader(new FileReader(f));
-                br = new BufferedReader(
-                   new InputStreamReader(
-                                new FileInputStream(f), encoding));
-
+            	
+        		br = getBufferedReader();
                 for (;;) {
                     String line=br.readLine();
                     lineNo++;
@@ -538,10 +615,8 @@ public class ObjFile extends Obj {
             
             BufferedReader br=null;
             try {
-                //br=new BufferedReader(new InputStreamReader(new FileInputStream(f)));
-                br = new BufferedReader(
-                       new InputStreamReader(
-                                  new FileInputStream(f), encoding));
+
+        		br = getBufferedReader();
 
                 int lineNo=0;
                 int linesDisplayed=0;
@@ -994,9 +1069,7 @@ public class ObjFile extends Obj {
             try {
                 //System.out.println("Seeking to " + seekPos);
                 raf.seek(seekPos);
-                br = new BufferedReader(
-                   new InputStreamReader(
-                                new FileInputStream(raf.getFD()), encoding));
+                br = new BufferedReader(new InputStreamReader(new FileInputStream(raf.getFD()), encoding));
 
                 for (;;) {
                     String line=br.readLine();
@@ -1049,10 +1122,8 @@ public class ObjFile extends Obj {
             
             BufferedReader br=null;
             try {
-                br = new BufferedReader(
-                   new InputStreamReader(
-                                new FileInputStream(f), encoding));
-
+                br = getBufferedReader();
+                
                 long lineNo=0;
                 for (;;) {
                     String line=br.readLine();

@@ -72,7 +72,7 @@ public class ObjDataFile extends Obj {
         
         BufferedReader br=null;
         try {
-            br=new BufferedReader(new FileReader(new File(file.getPath())));
+            br=file.getBufferedReader();
             for (;;) {
                 String s=br.readLine();
                 if (s==null) break;
@@ -97,7 +97,7 @@ public class ObjDataFile extends Obj {
         
         BufferedReader br=null;
         try {
-            br=new BufferedReader(new FileReader(new File(file.getPath())));
+            br=file.getBufferedReader();
             for (;;) {
                 String s=br.readLine();
                 if (s==null) break;

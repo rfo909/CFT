@@ -100,7 +100,7 @@ public class ObjPlot extends Obj {
             data.clear();
             BufferedReader br=null;
             try {
-                br=new BufferedReader(new InputStreamReader(new FileInputStream(objFile.getPath())));
+                br=objFile.getBufferedReader();
                 for(;;) {
                     String line=br.readLine();
                     if (line==null) break;
