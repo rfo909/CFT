@@ -362,23 +362,6 @@ Input("ssh target user@host").get
 
 # Start ElasticSearch nodes
 # --
-    <<<<<< XXX
-    # First start masterNodes separately, before starting the rest
-    masterHosts->host
-        target=user+"@"+host
-        println("STARTING " + target)
-        SpawnProcess(SymDict(target), 
-            ##SSH:sudo(target,"systemctl start elasticsearch")
-            SSH:sudo(target,"service elasticsearch start")
-        ) =>proc
-        out(proc)
-    | _->proc
-        proc.wait
-        println("Started " + proc.data.target)
-    |
-    >>>>>>>> XXX
-
-    # Starting data hosts
     hosts->host
         #reject(masterHosts.contains(host))
         println("STARTING elasticsearch on " + host)
@@ -411,18 +394,6 @@ Input("ssh target user@host").get
 /ElasticSearchComplete
 
 
-
-# Check install
-# --
-    P(1,GetTarget) => target
-
-    # Only works using IP-address, not "localhost", see text in
-    # the InstallElasticSearchConfig function
-
-    target.after("@") => host
-    GetIp(host) => ip
-    SSH:run(target,"curl -XGET 'http://"+ip+":9200/_cluster/state?pretty'").stdout
-/CheckInstall
 
 
 # Check install remote
@@ -514,6 +485,8 @@ Input("ssh target user@host").get
     StopKibana
     println
     StartKibana
+	Lib:Header("http://" + kibanaHosts.first + ":5601")
+	true
 /ConfigureKibanaAll
 
 
