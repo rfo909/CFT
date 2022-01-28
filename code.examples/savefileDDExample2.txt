@@ -1,69 +1,90 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2022 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 # Example of 2D graphics, rendering the same wheel as the DDDExample (3D) version
 # --
 
 
 # Circle
 # --
-	P(1)=>ref
-	P(2)=>brush
-	P(3)=>radius
-	
+    P(1)=>ref
+    P(2)=>brush
+    P(3)=>radius
+    
 
-	Lib.Data.for(0,361,3)->angle
-		brush.penDown(ref.turnLeft(angle).left(radius))
-	|
-	brush.penUp
+    Lib.Data.for(0,361,3)->angle
+        brush.penDown(ref.turnLeft(angle).left(radius))
+    |
+    brush.penUp
 /Circle
 
 
 
 # Target dir for testing
 # --
-	Sys.homeDir.sub("anim").sub("2d").create
+    Sys.homeDir.sub("anim").sub("2d").create
 /TargetDir
 
 
 
 # Wooden wheel example
 # --
-	P(1,Lib.DD.World)=>world
-	P(2,Lib.DD.Ref)=>ref
-	P(3,TargetDir.file("wheel2.png"))=>file
+    P(1,Lib.DD.World)=>world
+    P(2,Lib.DD.Ref)=>ref
+    P(3,TargetDir.file("wheel2.png"))=>file
 
-	hubThickness=50
-	rimThickness=30
+    hubThickness=50
+    rimThickness=30
 
-	spokeRadius=15
-	axleHoleRadius=15
-	
-	rimCenterRadius=500
-	
-	println(getType(world))
-	
-	# Polygon brushes: x is forward, and y is left/right
+    spokeRadius=15
+    axleHoleRadius=15
+    
+    rimCenterRadius=500
+    
+    println(getType(world))
+    
+    # Polygon brushes: x is forward, and y is left/right
 
-	# draw spokes first
-	Lib.Data.for(0,361,30) -> angle
-		# spokes
-		x=ref.turnLeft(angle).fwd(axleHoleRadius+hubThickness/2)
-		y=ref.turnLeft(angle).fwd(rimCenterRadius)
-		world.Brush(-spokeRadius,spokeRadius).setColor(Lib.Color(250,150,50)) => b
-		b.penDown(x)
-		b.penDown(y)
-		b.penUp
-	|
+    # draw spokes first
+    Lib.Data.for(0,361,30) -> angle
+        # spokes
+        x=ref.turnLeft(angle).fwd(axleHoleRadius+hubThickness/2)
+        y=ref.turnLeft(angle).fwd(rimCenterRadius)
+        world.Brush(-spokeRadius,spokeRadius).setColor(Lib.Color(250,150,50)) => b
+        b.penDown(x)
+        b.penDown(y)
+        b.penUp
+    |
 
-	# Hub
-	Circle(ref, world.Brush(-hubThickness/2,hubThickness/2).setColor(Lib.Color(200,100,0)), axleHoleRadius + hubThickness/2)
-	
-	# Rim
-	left=Lib.DD.Vector(0,-rimThickness/2)
-	right=Lib.DD.Vector(0,rimThickness/2)
-	Circle(ref, world.Brush(-rimThickness/2,rimThickness/2).setColor(Lib.Color(200,100,0)), rimCenterRadius)
-	
-	world.render(file)
+    # Hub
+    Circle(ref, world.Brush(-hubThickness/2,hubThickness/2).setColor(Lib.Color(200,100,0)), axleHoleRadius + hubThickness/2)
+    
+    # Rim
+    left=Lib.DD.Vector(0,-rimThickness/2)
+    right=Lib.DD.Vector(0,rimThickness/2)
+    Circle(ref, world.Brush(-rimThickness/2,rimThickness/2).setColor(Lib.Color(200,100,0)), rimCenterRadius)
+    
+    world.render(file)
 
-	println("Wrote file " + file.path)
+    println("Wrote file " + file.path)
 /Wheel
 
 

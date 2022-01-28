@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020 Roar Foshaug
+Copyright (C) 2020-2022 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -47,30 +47,30 @@ public class ObjDate extends Obj {
     public ObjDate (long timeValue) {
         this.timeValue=timeValue;
         
-		Function[] arr={
-				new FunctionSetFormat(),
-				new FunctionGet(),
-				new FunctionSet(),
-				new FunctionParse(),
-				new FunctionFmt(),
-				new FunctionYear(),
-				new FunctionMonth(),
-				new FunctionDayOfMonth(),
-				new FunctionDayOfYear(),
-				new FunctionHour(),
-				new FunctionMinute(),
-				new FunctionSecond(),
-				new FunctionMillisecond(),
-				new FunctionDuration(),
-				new FunctionAdd(),
-				new FunctionSub(),
-				new FunctionDiff(),
-				new FunctionAfter(),
-				new FunctionBefore(),
-				new FunctionGetFormat(),
-				new FunctionTimeSinceMidnight(),
-		};
-		setFunctions(arr);
+        Function[] arr={
+                new FunctionSetFormat(),
+                new FunctionGet(),
+                new FunctionSet(),
+                new FunctionParse(),
+                new FunctionFmt(),
+                new FunctionYear(),
+                new FunctionMonth(),
+                new FunctionDayOfMonth(),
+                new FunctionDayOfYear(),
+                new FunctionHour(),
+                new FunctionMinute(),
+                new FunctionSecond(),
+                new FunctionMillisecond(),
+                new FunctionDuration(),
+                new FunctionAdd(),
+                new FunctionSub(),
+                new FunctionDiff(),
+                new FunctionAfter(),
+                new FunctionBefore(),
+                new FunctionGetFormat(),
+                new FunctionTimeSinceMidnight(),
+        };
+        setFunctions(arr);
         
     }
     

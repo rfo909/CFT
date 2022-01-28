@@ -1,54 +1,75 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2022 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 
 # Enter date relative to today
 # (maintains time of day)
 # --
-	Input("Enter date on format yyyy-mm-dd, -D/+D for days in past/future, or . for today").get.trim=>value
-	if (value.startsWith("-") || value.startsWith("+")) {
-		days=value.sub(1).parseInt
-		if (value.startsWith("-")) {
-			Date.sub(Date.Duration.days(days))
-		} else {
-			Date.add(Date.Duration.days(days))
-		}
-	} else if (value==".") {
-		Date
-	} else 
-		Date.setFormat("yyyy-MM-dd").parse(value)
-	}
+    Input("Enter date on format yyyy-mm-dd, -D/+D for days in past/future, or . for today").get.trim=>value
+    if (value.startsWith("-") || value.startsWith("+")) {
+        days=value.sub(1).parseInt
+        if (value.startsWith("-")) {
+            Date.sub(Date.Duration.days(days))
+        } else {
+            Date.add(Date.Duration.days(days))
+        }
+    } else if (value==".") {
+        Date
+    } else 
+        Date.setFormat("yyyy-MM-dd").parse(value)
+    }
 /SelectDate
 
 
 # Enter time
 # (returns number of minutes since midnight)
 # --
-	P(1,Date) => day
+    P(1,Date) => day
 
-	Input("Enter time on format hh:mm or -M/+M for minutes back/forward, or . for now").get.trim=>value
-	if (value.startsWith("-") || value.startsWith("+")) {
-		mins=value.sub(1).parseInt
-		if (value.startsWith("-")) {
-			Date.hour*60 + Date.minute - mins
-		} else {
-			Date.hour*60 + Date.minute + mins
-		}
-	} else if (value==".") {
-		Date.hour*60 + Date.minutes
-	} else {
-		list=value.split(":")
-		list.get(0).parseInt*60+list.get(1).parseInt
-	}
+    Input("Enter time on format hh:mm or -M/+M for minutes back/forward, or . for now").get.trim=>value
+    if (value.startsWith("-") || value.startsWith("+")) {
+        mins=value.sub(1).parseInt
+        if (value.startsWith("-")) {
+            Date.hour*60 + Date.minute - mins
+        } else {
+            Date.hour*60 + Date.minute + mins
+        }
+    } else if (value==".") {
+        Date.hour*60 + Date.minutes
+    } else {
+        list=value.split(":")
+        list.get(0).parseInt*60+list.get(1).parseInt
+    }
 //GetMinutesSinceMidnight
 
 
 
 # Get date + time
 # --
-	date=SelectDate
-	minutes=GetMinutesSinceMidnight
+    date=SelectDate
+    minutes=GetMinutesSinceMidnight
 
-	ymdString = date.setFormat("yyyy-MM-dd").fmt
-	Date.setFormat("yyyy-MM-dd").parse(ymdString).add(Date.Duration.minutes(minutes))
+    ymdString = date.setFormat("yyyy-MM-dd").fmt
+    Date.setFormat("yyyy-MM-dd").parse(ymdString).add(Date.Duration.minutes(minutes))
 /SelectDateTime
 
 
-	
+    

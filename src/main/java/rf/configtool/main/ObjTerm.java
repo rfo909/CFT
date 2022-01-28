@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020 Roar Foshaug
+Copyright (C) 2020-2022 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -29,16 +29,16 @@ import rf.configtool.main.runtime.ValueString;
 
 public class ObjTerm extends Obj {
     
-	private boolean isTerminal;	// an actual terminal
+    private boolean isTerminal;   // an actual terminal
     private int h=24;
     private int w=130;
     private boolean wrap=false;
     
     public ObjTerm(boolean noTerminal) {
-    	this.isTerminal=!noTerminal;
-    	if (noTerminal) {
-    		wrap=true; // no cutoff for output
-    	}
+        this.isTerminal=!noTerminal;
+        if (noTerminal) {
+            wrap=true; // no cutoff for output
+        }
         this.add(new FunctionW());
         this.add(new FunctionH());
         this.add(new FunctionWrap());

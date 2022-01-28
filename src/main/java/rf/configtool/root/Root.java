@@ -1,3 +1,20 @@
+/*
+CFT - an interactive programmable shell for automation 
+Copyright (C) 2020-2022 Roar Foshaug
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>
+*/
+
 package rf.configtool.root;
 
 import java.io.File;
@@ -154,7 +171,7 @@ public class Root {
     }
     
     public BackgroundProcesses getBackgroundProcesses() {
-    	return backgroundProcesses;
+        return backgroundProcesses;
     }
 
     public void createNewScript() throws Exception {
@@ -184,8 +201,8 @@ public class Root {
 
         try {
             INPUT_LOOP: for (;;) {
-            	
-            	if (terminationFlag) break INPUT_LOOP;
+                
+                if (terminationFlag) break INPUT_LOOP;
 
                 ObjGlobal objGlobal = currScript.getObjGlobal();
 
@@ -216,10 +233,10 @@ public class Root {
                 }
                 String line = null;
                 try {
-                	line = stdio.getInputLine().trim();
+                    line = stdio.getInputLine().trim();
                 } catch (Exception ex) {
-                	stdio.println("inputLoop(): read failed");
-                	break INPUT_LOOP;
+                    stdio.println("inputLoop(): read failed");
+                    break INPUT_LOOP;
                 }
 
                 refreshIfSavefileUpdated();
@@ -235,13 +252,13 @@ public class Root {
         
         // Clean up and terminate
         // ----------------------
-    	stdio.println("Shutting down lock manager");
+        stdio.println("Shutting down lock manager");
         LockManager.setShuttingDown();
         stdio.println("Runtime exit, cleaning up");
         try {
-        	cleanupOnExit();
+            cleanupOnExit();
         } catch (Exception ex) {
-        	ex.printStackTrace();
+            ex.printStackTrace();
         }
     }
 
@@ -370,10 +387,10 @@ public class Root {
                         currScriptCode.report(stdio, ident, false);
                     }
                 } else {
-                	boolean publicOnly=true;
-                	if (ts.matchStr("?")) {
-                		publicOnly=false;
-                	}
+                    boolean publicOnly=true;
+                    if (ts.matchStr("?")) {
+                        publicOnly=false;
+                    }
                     currScriptCode.reportAll(stdio,publicOnly);
                 }
                 String scriptName = objGlobal.getScriptName();
@@ -645,8 +662,13 @@ public class Root {
     }
 
     private void copyrightNotice() {
+        // avoid replacement by Copyright script
+        String cop="Copyright" 
+                    + " (C) 2020-2022"
+                    + " Roar Foshaug";
+        
         stdio.println("");
-        stdio.println("CFT (\"ConfigTool\") Copyright (c) 2020 Roar Foshaug");
+        stdio.println(cop);
         stdio.println("This program comes with ABSOLUTELY NO WARRANTY. See GNU GPL3.");
         stdio.println("This is free software, and you are welcome to redistribute it");
         stdio.println("under certain conditions. See GNU GPL3.");

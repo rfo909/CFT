@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020 Roar Foshaug
+Copyright (C) 2020-2022 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -33,40 +33,40 @@ public class ValueString extends Value {
     
     public ValueString (String val) {
         this.val=val;
-		Function[] arr={
-				new FunctionSub(),
-				new FunctionLength(),
-				new FunctionTrim(),
-				new FunctionSplit(),
-				new FunctionEndsWith(),
-				new FunctionStartsWith(),
-				new FunctionContains(),
-				new FunctionToUpper(),
-				new FunctionToLower(),
-				new FunctionParseInt(),
-				new FunctionParseFloat(),
-				new FunctionReplaceChars(),
-				new FunctionReplace(),
-				new FunctionMerge(),
-				new FunctionIndexOf(),
-				new FunctionBetween(),
-				new FunctionBefore(),
-				new FunctionAfter(),
-				new FunctionBeforeLast(),
-				new FunctionAfterLast(),
-				new FunctionChars(),
-				new FunctionEsc(),
-				new FunctionUnEsc(),
-				new FunctionToHexString(),
-				new FunctionFromHexString(),
-				new FunctionHash(),
-				new FunctionGetBytes(),
-				new FunctionLast(),
-				new FunctionFirst(),
-				new FunctionPrintable(),
-				new FunctionMergeExpr(),
-			};
-			setFunctions(arr);
+        Function[] arr={
+                new FunctionSub(),
+                new FunctionLength(),
+                new FunctionTrim(),
+                new FunctionSplit(),
+                new FunctionEndsWith(),
+                new FunctionStartsWith(),
+                new FunctionContains(),
+                new FunctionToUpper(),
+                new FunctionToLower(),
+                new FunctionParseInt(),
+                new FunctionParseFloat(),
+                new FunctionReplaceChars(),
+                new FunctionReplace(),
+                new FunctionMerge(),
+                new FunctionIndexOf(),
+                new FunctionBetween(),
+                new FunctionBefore(),
+                new FunctionAfter(),
+                new FunctionBeforeLast(),
+                new FunctionAfterLast(),
+                new FunctionChars(),
+                new FunctionEsc(),
+                new FunctionUnEsc(),
+                new FunctionToHexString(),
+                new FunctionFromHexString(),
+                new FunctionHash(),
+                new FunctionGetBytes(),
+                new FunctionLast(),
+                new FunctionFirst(),
+                new FunctionPrintable(),
+                new FunctionMergeExpr(),
+            };
+            setFunctions(arr);
         
     }
     
@@ -788,13 +788,13 @@ public class ValueString extends Value {
             return "mergeExpr([before,after]) - replace <<x>> with result from eval(x) - returns list of strings";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	String before="<<";
-        	String after=">>";
+            String before="<<";
+            String after=">>";
             if (params.size() == 0) {
-            	// ok
+                // ok
             } else if (params.size() == 2) {
-            	before=getString("before", params, 0);
-            	after=getString("after", params, 1);
+                before=getString("before", params, 0);
+                after=getString("after", params, 1);
             } else {
                 throw new Exception("Expected either 0 or 2 parameters (before- and after-markers for code segments inside string)");
             }
@@ -816,46 +816,46 @@ public class ValueString extends Value {
         StringBuffer sb=new StringBuffer();
         int currPos=0;
         while (currPos < val.length()) {
-        	int pos=val.indexOf(before, currPos);
-        	if (pos < 0) {
-        		sb.append(val.substring(currPos));
-        		break;
-        	}
-        	int pos2=val.indexOf(after, currPos+before.length());
-        	if (pos2 < 0) {
-        		sb.append(val.substring(currPos));
-        		break;
-        	}
-        	// found something
-        	sb.append(val.substring(currPos,pos));
-        	currPos=pos2+after.length();
-        	String expr=val.substring(pos+before.length(),pos2);
-        	Value v=ctx.subNewData(true).resolveProgramLine(expr);
-        	
-        	if (v instanceof ValueList) {
-        		List<String> renderResult=new ArrayList<String>();
-        		render(renderResult, (ValueList) v);
-        		
-        		if (renderResult.size()==0) {
-        			// ignore
-        		} else if (renderResult.size()==1) { 
-        			// special treatment, to insert value into string, without newlines
-        			sb.append(renderResult.get(0));
-        		} else {
-        			sb.append(renderResult.get(0));
-        			for (int i=1; i<renderResult.size(); i++) {
-        				String line=renderResult.get(i);
-        				resultList.add(sb.toString());
-        				sb=new StringBuffer();
-        				sb.append(line);
-        			}
-        		}
-        	} else if (v instanceof ValueNull) {
-        		// ignore
-        	} else {
-        		// all others
-        		sb.append(v.getValAsString());
-        	}
+            int pos=val.indexOf(before, currPos);
+            if (pos < 0) {
+                sb.append(val.substring(currPos));
+                break;
+            }
+            int pos2=val.indexOf(after, currPos+before.length());
+            if (pos2 < 0) {
+                sb.append(val.substring(currPos));
+                break;
+            }
+            // found something
+            sb.append(val.substring(currPos,pos));
+            currPos=pos2+after.length();
+            String expr=val.substring(pos+before.length(),pos2);
+            Value v=ctx.subNewData(true).resolveProgramLine(expr);
+            
+            if (v instanceof ValueList) {
+                List<String> renderResult=new ArrayList<String>();
+                render(renderResult, (ValueList) v);
+                
+                if (renderResult.size()==0) {
+                    // ignore
+                } else if (renderResult.size()==1) { 
+                    // special treatment, to insert value into string, without newlines
+                    sb.append(renderResult.get(0));
+                } else {
+                    sb.append(renderResult.get(0));
+                    for (int i=1; i<renderResult.size(); i++) {
+                        String line=renderResult.get(i);
+                        resultList.add(sb.toString());
+                        sb=new StringBuffer();
+                        sb.append(line);
+                    }
+                }
+            } else if (v instanceof ValueNull) {
+                // ignore
+            } else {
+                // all others
+                sb.append(v.getValAsString());
+            }
         }
         resultList.add(sb.toString());
         return resultList;
@@ -867,15 +867,15 @@ public class ValueString extends Value {
      * list of values (recursive)
      */
     private static void render (List<String> result, ValueList list) throws Exception {
-    	for (Value v:list.getVal()) {
-    		if (v instanceof ValueList) {
-    			render(result,(ValueList) v);
-    		} else if (v instanceof ValueNull) {
-    			// ignore
-    		} else {
-    			result.add(v.getValAsString());
-    		}
-    	}	
+        for (Value v:list.getVal()) {
+            if (v instanceof ValueList) {
+                render(result,(ValueList) v);
+            } else if (v instanceof ValueNull) {
+                // ignore
+            } else {
+                result.add(v.getValAsString());
+            }
+        } 
     }
 
 

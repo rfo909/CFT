@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020 Roar Foshaug
+Copyright (C) 2020-2022 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -58,7 +58,7 @@ public class StmtLs extends StmtShellInteractive {
 
     @Override
     protected void processDefault(Ctx ctx) throws Exception {
-    	
+        
         String currDir=ctx.getObjGlobal().getCurrDir();
 
         List<String> directories=new ArrayList<String>();
@@ -71,7 +71,7 @@ public class StmtLs extends StmtShellInteractive {
     
     public static final long LS_DEFAULT_TIMEOUT_MS = 6000;
     // list files and dirs in currDir - default (no parameters) is guarded by a timeout, since
-	// working with remote directories, and many files, ls can take very long time.
+    // working with remote directories, and many files, ls can take very long time.
 
     public static final int LS_DEFAULT_MAX_ENTRIES = 2000;
 
@@ -86,10 +86,10 @@ public class StmtLs extends StmtShellInteractive {
         
         int totalCount=0;
         while (iter.hasNext()) {
-        	Path p=iter.next();
-        	
-        	File x=p.toFile();
-        	String path=x.getCanonicalPath();
+            Path p=iter.next();
+            
+            File x=p.toFile();
+            String path=x.getCanonicalPath();
             if (x.isFile()) {
                 files.add(path);
             } else if (x.isDirectory()) {
@@ -101,12 +101,12 @@ public class StmtLs extends StmtShellInteractive {
             long duration = System.currentTimeMillis()-startTime;
 
             if (duration > LS_DEFAULT_TIMEOUT_MS) {
-            	ctx.addSystemMessage("--- directory listing timed out after " + LS_DEFAULT_TIMEOUT_MS + ", use '*' to override");
-            	return;
+                ctx.addSystemMessage("--- directory listing timed out after " + LS_DEFAULT_TIMEOUT_MS + ", use '*' to override");
+                return;
             }
             if (totalCount >= LS_DEFAULT_MAX_ENTRIES) {
-            	ctx.addSystemMessage("--- directory entry count > " + LS_DEFAULT_MAX_ENTRIES + ", use '*' to override");
-            	return;
+                ctx.addSystemMessage("--- directory entry count > " + LS_DEFAULT_MAX_ENTRIES + ", use '*' to override");
+                return;
             }
         }
         

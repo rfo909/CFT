@@ -1,3 +1,24 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2022 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 # Readme
 <<<<<<<<<<<<<<<< EOF
 Testing that local blocks scope and operation is correct (v2.4.0)
@@ -56,7 +77,7 @@ t4==36
 
 
 if(true) {
-	1
+    1
 } else {2
 }
 /t5
@@ -68,9 +89,9 @@ t5==1
 
 P(1)=>bool
 if(bool) {
-	List(1,2,3)->x out(x)
+    List(1,2,3)->x out(x)
 } else {
-	1
+    1
 }
 /t5b
 
@@ -81,12 +102,12 @@ t5b(true).concat("-")=="1-2-3" && t5b(false)==1
 
 
 List(1,2,3)->x
-	out(x)
-	if (x%2==0) {
-		out("even")
-	} else {
-		out("odd")
-	}
+    out(x)
+    if (x%2==0) {
+        out("even")
+    } else {
+        out("odd")
+    }
 /t6
 
 t6.concat=="1odd2even3odd"
@@ -96,12 +117,12 @@ t6.concat=="1odd2even3odd"
 
 
 List(1,2,3)->x
-	out(x)
-	if (x%2==0) Inner {
-		out("even")
-	} else {
-		out("odd")
-	}
+    out(x)
+    if (x%2==0) Inner {
+        out("even")
+    } else {
+        out("odd")
+    }
 /t6b
 
 t6b.concat=="1odd23odd"
@@ -113,10 +134,10 @@ t6b.concat=="1odd23odd"
 
 
 List(1,2,3)->x 
-	if (x%2==0) {
-		assert(false)
-	}
-	out(x)
+    if (x%2==0) {
+        assert(false)
+    }
+    out(x)
 /t7
 
 t7.concat("-")=="1-3"
@@ -126,10 +147,10 @@ t7.concat("-")=="1-3"
 
 
 List(1,2,3)->x
-	if (x%2==0) Inner {
-		List(4,5,6) -> y assert(false)
-	}
-	out(x)
+    if (x%2==0) Inner {
+        List(4,5,6) -> y assert(false)
+    }
+    out(x)
 /t8
 
 t8.concat("-")=="1-2-3"
@@ -143,10 +164,10 @@ t8.concat("-")=="1-2-3"
 
 
 List(1,2,3)->x
-	if (x%2==0) Inner {
-		assert(false)
-	}
-	out(x)
+    if (x%2==0) Inner {
+        assert(false)
+    }
+    out(x)
 /t9
 
 t9.concat("-")=="1-2-3"
@@ -157,8 +178,8 @@ t9.concat("-")=="1-2-3"
 
 
 List(1,2,3)->x
-	Lambda{assert(false)}.call
-	out(x)
+    Lambda{assert(false)}.call
+    out(x)
 /t10
 
 t10.concat("-")=="1-2-3"
@@ -176,26 +197,26 @@ t10.concat("-")=="1-2-3"
 
 
 # Lambda version
-	P(1,Dir.files)=>files 
-	L=Lambda{
-		List(1,2,3)->x out(x)
-		|
-		"abc".chars->x out(x)
-	}
-	L.call()
+    P(1,Dir.files)=>files 
+    L=Lambda{
+        List(1,2,3)->x out(x)
+        |
+        "abc".chars->x out(x)
+    }
+    L.call()
 /t11_lambda
 
 
 # function version
-	List(1,2,3)->x out(x)
-	|
-	"abc".chars->x out(x)
+    List(1,2,3)->x out(x)
+    |
+    "abc".chars->x out(x)
 /t11_function
 
 
 
 # Lambda output should match function output
-	t11_lambda.concat==t11_function.concat
+    t11_lambda.concat==t11_function.concat
 /Test11_lambda_pipe_2021_04_07
 
 
@@ -208,20 +229,20 @@ t10.concat("-")=="1-2-3"
 # ------------------------------------------
 
 # If an Inner is like a function, the below should return true, but it fails with exception
-	Inner {
-		List(4,1,3,2)->i out(Int(i,i)) | _.sort->x out(x.data)
-	}.concat
+    Inner {
+        List(4,1,3,2)->i out(Int(i,i)) | _.sort->x out(x.data)
+    }.concat
 /t12_asInner
 
 
 # Function implementation
-	List(4,1,3,2)->i out(Int(i,i)) | _.sort->x out(x.data) | _.concat
+    List(4,1,3,2)->i out(Int(i,i)) | _.sort->x out(x.data) | _.concat
 /t12_asFunction
 
 
 # Inner with loop PIPE loop
-	tryCatch(t12_asInner) => res
-	if (res.ok, res.result==t12_asFunction, "Exception")
+    tryCatch(t12_asInner) => res
+    if (res.ok, res.result==t12_asFunction, "Exception")
 /Test12_Inner_With_loop_pipe_loop
 
 
@@ -230,9 +251,9 @@ t10.concat("-")=="1-2-3"
 
 # Run all TestX
 # --
-	Sys.functions.sort->f
-		assert(f.startsWith("Test"))
-		report(f,eval(f))
+    Sys.functions.sort->f
+        assert(f.startsWith("Test"))
+        report(f,eval(f))
 /RunAll
 
 
@@ -247,20 +268,20 @@ t10.concat("-")=="1-2-3"
 
 # Function
 # --
-	List(1,2,3) => data
-	Inner {
-		data->x report("i"+x)
-	} -> line
-		out("x"+line)
-		# --
-		# Should return list of "x"+line
-		# Verify test returns true by replacing report() with out() above
+    List(1,2,3) => data
+    Inner {
+        data->x report("i"+x)
+    } -> line
+        out("x"+line)
+        # --
+        # Should return list of "x"+line
+        # Verify test returns true by replacing report() with out() above
 /t13
 
 # Inner loop report output problem
 # --
-	t13 => result
-	getType(result)=="List" && result.concat=="xi1xi2xi3"
+    t13 => result
+    getType(result)=="List" && result.concat=="xi1xi2xi3"
 /Test13_Inner_report_output_propagation
 
 
@@ -272,20 +293,20 @@ t10.concat("-")=="1-2-3"
 
 # Function
 # --
-	List(1,2,3) => data
-	Inner {
-		data->x out("i"+x)
-	} -> line
-		out("x"+line)
-		# --
-		# Should return list of "x"+line
-		# Verify test returns true by replacing report() with out() above
+    List(1,2,3) => data
+    Inner {
+        data->x out("i"+x)
+    } -> line
+        out("x"+line)
+        # --
+        # Should return list of "x"+line
+        # Verify test returns true by replacing report() with out() above
 /t13b
 
 # Inner loop report output problem
 # --
-	t13b => result
-	getType(result)=="List" && result.concat=="xi1xi2xi3"
+    t13b => result
+    getType(result)=="List" && result.concat=="xi1xi2xi3"
 /Test13b_Inner_out_output_propagation
 
 
@@ -299,14 +320,14 @@ t10.concat("-")=="1-2-3"
 
 # Function1
 # --
-	{}
+    {}
 /t14_f1
 
 
 # Function2
 # --
-	1
-	{}
+    1
+    {}
 /t14_f2
 
 
@@ -317,7 +338,7 @@ t10.concat("-")=="1-2-3"
 # not. Instead an empty local block means EXACTLY the same 
 # as NO CODE, and so ... :-)
 # --
-	t14_f1 == null && t14_f2 == 1
+    t14_f1 == null && t14_f2 == 1
 /Test14_local_block_return_value
 
 
@@ -328,14 +349,14 @@ t10.concat("-")=="1-2-3"
 
 # Inner block return values
 # --
-	2
-	{3}
+    2
+    {3}
 /t15
 
 
 # Local block return value
 # --
-	t15==3
+    t15==3
 /Test15_local_block_return_value
 
 
@@ -346,14 +367,14 @@ t10.concat("-")=="1-2-3"
 
 # Inner block return values
 # --
-	2
-	{null}
+    2
+    {null}
 /t16
 
 
 # Local block return value
 # --
-	t16==null
+    t16==null
 /Test16_local_block_return_value
 
 
@@ -487,8 +508,8 @@ a=5 b=6 List("a=<< a >>","b=<<b>>").mergeExpr.concat("|")=="a=5|b=6"
 
 
 a=5 b=6 Sequence(
-	@ a=<< a>>
-	@ b=<<b>>
+    @ a=<< a>>
+    @ b=<<b>>
 ).mergeExpr.concat("|")=="a=5|b=6"
 /Test32_sequence_mergeExpr
 

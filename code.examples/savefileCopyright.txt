@@ -1,0 +1,124 @@
+# Readme
+# --
+<<<< EOF
+This script is used to update all java files and script files with
+up-to-date copyright information.
+>>>> EOF
+/Readme
+
+	
+
+
+# Check and update copyright notice
+# --
+	P(1)=>f
+	isJava=f.name.endsWith(".java")
+	found=false
+	
+	prefix=if (isJava, "", "# ")
+
+	f.read->line
+		if (line.contains("Copyright") && line.contains("Roar Foshaug")) {
+			println(line)
+			out(prefix + UpdatedCopyrightLine)
+			found=true
+		} else {
+			out(line)
+		}
+	| => lines
+	if (found) {
+		f.create(lines)
+	}
+
+	found
+//HasCopyrightNotice
+
+
+# Copyright updated line
+# --
+	"Copyright (C) 2020-2022 Roar Foshaug"
+/UpdatedCopyrightLine
+
+
+# Update from
+# --
+
+
+Sys.homeDir.allFiles("*.java")->f
+	if (!HasCopyrightNotice(f)) {
+		#println(f.path)
+		AddJavaCopyrightNotice(f)
+	}
+/UpdateJava
+
+
+
+Sys.homeDir.allFiles("savefile*.txt")->f
+	reject(f.path==Sys.savefile.path)
+	if (!HasCopyrightNotice(f)) {
+		AddScriptCopyrightNotice(f)
+	}
+/UpdateScript
+
+
+# Create copyright in script
+# --
+	P(1)=>file
+<<<< XXXXXXXXXXX
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2022 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
+>>>> XXXXXXXXXXX
+	=>lines
+	lines=lines+file.read
+
+	file.create(lines)
+//AddScriptCopyrightNotice
+
+
+
+# Create copyright in java files
+# --
+	P(1)=>file
+<<<< XXXXXXXXXXX
+/*
+CFT - an interactive programmable shell for automation 
+Copyright (C) 2020-2022 Roar Foshaug
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>
+*/
+
+>>>> XXXXXXXXXXX
+	=>lines
+	lines=lines+file.read
+
+	file.create(lines)
+//AddJavaCopyrightNotice

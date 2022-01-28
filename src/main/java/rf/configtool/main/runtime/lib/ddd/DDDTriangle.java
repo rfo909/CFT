@@ -1,3 +1,20 @@
+/*
+CFT - an interactive programmable shell for automation 
+Copyright (C) 2020-2022 Roar Foshaug
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>
+*/
+
 package rf.configtool.main.runtime.lib.ddd;
 
 import java.util.ArrayList;
@@ -15,16 +32,16 @@ import rf.configtool.main.runtime.lib.ddd.core.Vector3d;
 
 public class DDDTriangle extends Obj {
 
-	private Triangle tri;
-	
-	public Triangle getTri() {
-		return tri;
-	}
-	
+    private Triangle tri;
+    
+    public Triangle getTri() {
+        return tri;
+    }
+    
     public DDDTriangle (Triangle tri) {
-    	this.tri=tri;
-    	this.add(new FunctionPoints());
-    	this.add(new FunctionNormal());
+        this.tri=tri;
+        this.add(new FunctionPoints());
+        this.add(new FunctionNormal());
     }
 
     
@@ -60,13 +77,13 @@ public class DDDTriangle extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 0) throw new RuntimeException("Expected no parameters");
-        	List<Value> list=new ArrayList<Value>();
-        	Vector3d[] points=self().tri.getPoints();
-        	for (Vector3d p:points) {
-        		list.add(new ValueObj(new DDDVector(p)));
-        	}
-        	return new ValueList(list);
+            if (params.size() != 0) throw new RuntimeException("Expected no parameters");
+            List<Value> list=new ArrayList<Value>();
+            Vector3d[] points=self().tri.getPoints();
+            for (Vector3d p:points) {
+                list.add(new ValueObj(new DDDVector(p)));
+            }
+            return new ValueList(list);
         }
     }
 
@@ -80,9 +97,9 @@ public class DDDTriangle extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 0) throw new RuntimeException("Expected no parameters");
-        	Vector3d normal=self().getTri().getNormalVector();
-        	return new ValueObj(new DDDVector(normal));
+            if (params.size() != 0) throw new RuntimeException("Expected no parameters");
+            Vector3d normal=self().getTri().getNormalVector();
+            return new ValueObj(new DDDVector(normal));
         }
     }
 
@@ -97,8 +114,8 @@ public class DDDTriangle extends Obj {
 //        }
 //
 //        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-//        	if (params.size() != 0) throw new RuntimeException("Expected no parameters");
-//        	return new ValueFloat(vec.getY());
+//          if (params.size() != 0) throw new RuntimeException("Expected no parameters");
+//          return new ValueFloat(vec.getY());
 //        }
 //    }
 //
@@ -112,8 +129,8 @@ public class DDDTriangle extends Obj {
 //        }
 //
 //        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-//        	if (params.size() != 0) throw new RuntimeException("Expected no parameters");
-//        	return new ValueFloat(vec.getZ());
+//          if (params.size() != 0) throw new RuntimeException("Expected no parameters");
+//          return new ValueFloat(vec.getZ());
 //        }
 //    }
 

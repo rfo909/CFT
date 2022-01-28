@@ -1,3 +1,24 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2022 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 # Readme
 # --
 <<<<<<< EOF
@@ -9,54 +30,54 @@ passwords and other secrets for the duration of the session.
 
 # Get or ask for session secret. It is stored in database, encrypted with Sys.secureSessionId.
 # --
-	P(1,"Label") => label
-	P(2,true) => echo
-	
-	label.toHexString => key
-	"v"+key => verifyKey
-	
-	Db2:Get("Vault",verifyKey) => value
-	ok=(value != null && Lib.Util.Decrypt(Sys.secureSessionId,"verify").processString(value)=="verified")
-	
-	if (ok) {
-		Db2:Get("Vault",key) => value
-		Lib.Util.Decrypt(Sys.secureSessionId,"value").processString(value)
-	} else {
-		if (echo) {
-			readLine(label) => value
-		} else {
-			println(label)
-			Sys.readPassword => value
-		}
-		Lib.Util.Encrypt(Sys.secureSessionId,"value").processString(value) => eValue
-		Db2:Set("Vault", key, eValue)
-		Lib.Util.Encrypt(Sys.secureSessionId,"verify").processString("verified") => eVerified
-		Db2:Set("Vault", verifyKey, eVerified)
-		
-		value
-	}
+    P(1,"Label") => label
+    P(2,true) => echo
+    
+    label.toHexString => key
+    "v"+key => verifyKey
+    
+    Db2:Get("Vault",verifyKey) => value
+    ok=(value != null && Lib.Util.Decrypt(Sys.secureSessionId,"verify").processString(value)=="verified")
+    
+    if (ok) {
+        Db2:Get("Vault",key) => value
+        Lib.Util.Decrypt(Sys.secureSessionId,"value").processString(value)
+    } else {
+        if (echo) {
+            readLine(label) => value
+        } else {
+            println(label)
+            Sys.readPassword => value
+        }
+        Lib.Util.Encrypt(Sys.secureSessionId,"value").processString(value) => eValue
+        Db2:Set("Vault", key, eValue)
+        Lib.Util.Encrypt(Sys.secureSessionId,"verify").processString("verified") => eVerified
+        Db2:Set("Vault", verifyKey, eVerified)
+        
+        value
+    }
 /SessionSecretGet
 
 # Remove the verification value for a session secret, forcing SessionSecretGet to ask for it
 # --
-	P(1,"Label") => label
-	label.toHexString => key
-	"v"+key => verifyKey
-	Db2:Set("Vault",verifyKey,"")
+    P(1,"Label") => label
+    label.toHexString => key
+    "v"+key => verifyKey
+    Db2:Set("Vault",verifyKey,"")
 /SessionSecretClear
 
 
 # Set session secret, non-interactively
 # --
-	P(1,"Label") => label
-	P(2,"") => value
-	
-	label.toHexString => key
-	"v"+key =>  verifyKey
-	
-	Lib.Util.Encrypt(Sys.secureSessionId,"value").processString(value) => eValue
-	Db2:Set("Vault", key, eValue)
-	Lib.Util.Encrypt(Sys.secureSessionId,"verify").processString("verified") => eVerified
-	Db2:Set("Vault", verifyKey, eVerified)
+    P(1,"Label") => label
+    P(2,"") => value
+    
+    label.toHexString => key
+    "v"+key =>  verifyKey
+    
+    Lib.Util.Encrypt(Sys.secureSessionId,"value").processString(value) => eValue
+    Db2:Set("Vault", key, eValue)
+    Lib.Util.Encrypt(Sys.secureSessionId,"verify").processString("verified") => eVerified
+    Db2:Set("Vault", verifyKey, eVerified)
 /SessionSecretSet
 

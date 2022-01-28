@@ -1,13 +1,34 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2022 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 
 # Verify all hosts have copy of SSH key
 # --
-	data=Hosts:Parse
-	data.LallHosts.call->host
-		sshUser=data.Lget.call(host,"SSHUser")
-		assert(sshUser != null)
-		target=sshUser+"@"+host
-		println("------ " + target)
-		Dir.run("ssh-copy-id",target)
+    data=Hosts:Parse
+    data.LallHosts.call->host
+        sshUser=data.Lget.call(host,"SSHUser")
+        assert(sshUser != null)
+        target=sshUser+"@"+host
+        println("------ " + target)
+        Dir.run("ssh-copy-id",target)
 /CheckSSHKeys
 
 
@@ -15,114 +36,114 @@
 
 # Test SSH (and dns)
 # ---
-	HostData=Hosts:Parse
-	HostData.LallHosts.call.sort->host
-		assert(HostData.Lget.call(host, "OS")=="linux")
-		       
-	        HostData.Lget.call (host, "SSHUser") =>sshUser
-       		 assert(sshUser != null)
+    HostData=Hosts:Parse
+    HostData.LallHosts.call.sort->host
+        assert(HostData.Lget.call(host, "OS")=="linux")
+               
+            HostData.Lget.call (host, "SSHUser") =>sshUser
+             assert(sshUser != null)
 
-        	target=sshUser+"@"+host
+            target=sshUser+"@"+host
         
-        	ctx=SymDict(target)
-        	proc=SpawnProcess(ctx,{
-			ok = SSH:HostOkSSH(target)
-	        	status = if (ok,"OK","-")
-	        	println(target + ": " + status)
-	        	status
-	    	})
-		out(proc)
-	| _->proc
-		status = proc.wait.exitValue
-		report(proc.data.target, status)
+            ctx=SymDict(target)
+            proc=SpawnProcess(ctx,{
+            ok = SSH:HostOkSSH(target)
+                status = if (ok,"OK","-")
+                println(target + ": " + status)
+                status
+            })
+        out(proc)
+    | _->proc
+        status = proc.wait.exitValue
+        report(proc.data.target, status)
 /HostsStatus
-		
+        
 
 
 # Run APT Update + upgrade + dist upgrade on one host
 # --
-	P(1,Input("target").get)=>target
-	println("Calling APTUpdate:run for target="+target)
-	APTUpdate:run(target,3,true)
+    P(1,Input("target").get)=>target
+    println("Calling APTUpdate:run for target="+target)
+    APTUpdate:run(target,3,true)
 /AptUpdate
 
 
 # Run APT Update / upgrade on hosts
 # --
-	data=Hosts:Parse
-	
-	allHosts=data.LallHosts
-	lget = data.Lget
+    data=Hosts:Parse
+    
+    allHosts=data.LallHosts
+    lget = data.Lget
 
 
-	mon=Util:ProcessMonitor
-	
-	data.LallHosts.call->host
+    mon=Util:ProcessMonitor
+    
+    data.LallHosts.call->host
 
-		#println("* " + host)
+        #println("* " + host)
 
-		pm=data.Lget.call(host,"PackageManager")
-		assert(pm=="apt")
-		#println("*   pm==apt ok")
+        pm=data.Lget.call(host,"PackageManager")
+        assert(pm=="apt")
+        #println("*   pm==apt ok")
 
-		sshUser=data.Lget.call(host,"SSHUser")
-		assert(sshUser != null)
-		#println("*   sshUser != null ok")
+        sshUser=data.Lget.call(host,"SSHUser")
+        assert(sshUser != null)
+        #println("*   sshUser != null ok")
 
-		target=sshUser+"@"+host
-		processData = SymDict(target)
+        target=sshUser+"@"+host
+        processData = SymDict(target)
 
-		# Block until less than given number of active processes
-		mon.Lwait.call(10, true)
-		
-		#println("*   starting process for " + target)
-		process = SpawnProcess(processData, {
-			start=currentTimeMillis
-			AptUpdate(target)
-			end=currentTimeMillis
-			println("### time=" + (end-start) + " ms")
-		})
-		mon.Ladd.call(process,host)
-		
-		out(process)
-	| => processList
+        # Block until less than given number of active processes
+        mon.Lwait.call(10, true)
+        
+        #println("*   starting process for " + target)
+        process = SpawnProcess(processData, {
+            start=currentTimeMillis
+            AptUpdate(target)
+            end=currentTimeMillis
+            println("### time=" + (end-start) + " ms")
+        })
+        mon.Ladd.call(process,host)
+        
+        out(process)
+    | => processList
 
-	mon.Lwait.call(0,true)  # true=verbose
+    mon.Lwait.call(0,true)  # true=verbose
 
-	Lib:Header("Press ENTER to see results")
-	readLine
+    Lib:Header("Press ENTER to see results")
+    readLine
 
 
-	processList -> process
-		
-		target=process.data.target
-		Lib:Header("Waiting for " + target)
-		
-		exitValue=process.wait.exitValue
-		output=process.output
+    processList -> process
+        
+        target=process.data.target
+        Lib:Header("Waiting for " + target)
+        
+        exitValue=process.wait.exitValue
+        output=process.output
 
-		println("exitValue=" + exitValue)
-		Inner{
-			output->line println("OUT: " + line)
-		}
-		type="APTUpdateUpgrade"
-		
-		obj=SymDict(target,exitValue,output,type)
-		
-		Db2Obj:AddObject("Ansible.APTUpdateUpgrade",obj)
+        println("exitValue=" + exitValue)
+        Inner{
+            output->line println("OUT: " + line)
+        }
+        type="APTUpdateUpgrade"
+        
+        obj=SymDict(target,exitValue,output,type)
+        
+        Db2Obj:AddObject("Ansible.APTUpdateUpgrade",obj)
 
-		readLine("Press ENTER for next")
-	
+        readLine("Press ENTER for next")
+    
 /AptUpdateAll
 
 
-		
-	
+        
+    
 
 # Decide if debian host should be booted
 # --
-	P(1)=>target
-	SSH:run(target,"ls /var/run/reboot-required",true).exitCode == 0
+    P(1)=>target
+    SSH:run(target,"ls /var/run/reboot-required",true).exitCode == 0
 //DebianHostNeedsReboot
 
 
@@ -130,120 +151,120 @@
 # Reboot hosts that need reboot and allow reboot. 
 # Display reboot info for all hosts
 # --
-	P(1,false)=>forceReboot  
-		# Reboot all that can be rebooted
-		# Note: will reboot the first in each RebootGroup
-		# When run later, with value true, it reboots those first in each RebootGroup again
-		# For TESTING of the RebootGroup mechanism only!
-	
-	HostData = Hosts:Parse
-	Util:ProcessMonitor =>mon
+    P(1,false)=>forceReboot  
+        # Reboot all that can be rebooted
+        # Note: will reboot the first in each RebootGroup
+        # When run later, with value true, it reboots those first in each RebootGroup again
+        # For TESTING of the RebootGroup mechanism only!
+    
+    HostData = Hosts:Parse
+    Util:ProcessMonitor =>mon
 
-	# only one host from each reboot group can boot at a time
-	rebootGroups=List
+    # only one host from each reboot group can boot at a time
+    rebootGroups=List
 
-	HostData.LallHosts.call.sort->host
+    HostData.LallHosts.call.sort->host
         assert(HostData.Lhas.call (host,"OSFamily","debian"))
         HostData.Lget.call (host, "SSHUser") =>sshUser
 
         sshUser+"@"+host =>target
-		HostData.Lget.call (host, "RebootGroup", null) => rebootGroup
+        HostData.Lget.call (host, "RebootGroup", null) => rebootGroup
 
-		HostData.Lhas.call (host, "Auto.reboot", "yes") => allowReboot
-		
-		Inner {
-	        SSH:HostOkSSH (target) =>hostOk
-	        if (!hostOk) {
-	            println(host + ": -offline-")
-	        } else {
-		        DebianHostNeedsReboot(target) =>needsReboot
-			
-		        if (needsReboot || forceReboot) {
-		        	if (!allowReboot) {
-		        		if (rebootGroup != null) {
-		        			if (!rebootGroups.contains(rebootGroup)) {
-		        				allowReboot=true
-		        				rebootGroups.add(rebootGroup)
-		        			}
-		        		}
-		        	}
-			        if (allowReboot) {
-			        	println(host + ": rebooting now" + if(rebootGroup != null, " RebootGroup="+rebootGroup,""))
-			        	SSH:sudo(target,"reboot",true)
-			        } else {
-			        	println(host + ": " + if(needsReboot,"NEEDS REBOOT","ok"))
-			        }
-			     
-				} else {
-					println(host + ": ok")
-				}
-			}
-	   	}
+        HostData.Lhas.call (host, "Auto.reboot", "yes") => allowReboot
+        
+        Inner {
+            SSH:HostOkSSH (target) =>hostOk
+            if (!hostOk) {
+                println(host + ": -offline-")
+            } else {
+                DebianHostNeedsReboot(target) =>needsReboot
+            
+                if (needsReboot || forceReboot) {
+                    if (!allowReboot) {
+                        if (rebootGroup != null) {
+                            if (!rebootGroups.contains(rebootGroup)) {
+                                allowReboot=true
+                                rebootGroups.add(rebootGroup)
+                            }
+                        }
+                    }
+                    if (allowReboot) {
+                        println(host + ": rebooting now" + if(rebootGroup != null, " RebootGroup="+rebootGroup,""))
+                        SSH:sudo(target,"reboot",true)
+                    } else {
+                        println(host + ": " + if(needsReboot,"NEEDS REBOOT","ok"))
+                    }
+                 
+                } else {
+                    println(host + ": ok")
+                }
+            }
+          }
 
-    	    
+            
 /Reboot
 
 
 # Update or install CFT
 # --
-	P(1)=>host
-	P(2)=>sshUser
+    P(1)=>host
+    P(2)=>sshUser
 
-	println("host=" + host)
-	println("sshUser=" + sshUser)
+    println("host=" + host)
+    println("sshUser=" + sshUser)
 
-	tMark=Sys.scriptName+".lastrun."+host
-	if (Util:HasTimedOut(tMark)) {
-		println("# host " + host)
+    tMark=Sys.scriptName+".lastrun."+host
+    if (Util:HasTimedOut(tMark)) {
+        println("# host " + host)
 
-	    if (!SSH:HostOk (host)) {
-	    	println("Host unreachable")
-		} else {	    
-		    sshUser+"@"+host =>target
-		    println("Updating " + target)
-		    
-		    assert(SSH:HostOkSSH (target))
+        if (!SSH:HostOk (host)) {
+            println("Host unreachable")
+        } else {        
+            sshUser+"@"+host =>target
+            println("Updating " + target)
+            
+            assert(SSH:HostOkSSH (target))
 
-		    Java:VerifyCFT (target)
-		    Util:SetTimeMark(tMark)
-		}
-	} else {
-		println("Last checked at " + Util:GetTimeMark(tMark).fmt)
-	}
+            Java:VerifyCFT (target)
+            Util:SetTimeMark(tMark)
+        }
+    } else {
+        println("Last checked at " + Util:GetTimeMark(tMark).fmt)
+    }
 //UpdateCFT
 
 
 # Update CFT all
 # --
-	mon=Util:ProcessMonitor
-	
-	HostData=Hosts:Parse
-	HostData.LallHosts.call.sort->host
-		assert(HostData.Lhas.call(host,"Install.CFT","1"))
-		sshUser=HostData.Lget.call (host,"SSHUser")
-		assert(sshUser != null)
+    mon=Util:ProcessMonitor
+    
+    HostData=Hosts:Parse
+    HostData.LallHosts.call.sort->host
+        assert(HostData.Lhas.call(host,"Install.CFT","1"))
+        sshUser=HostData.Lget.call (host,"SSHUser")
+        assert(sshUser != null)
 
-		mon.Lwait.call(8,true)
-		println("Spawning process for host="+host)
-		
-		ctx=SymDict(host,sshUser)
-		process=SpawnProcess(ctx, UpdateCFT(host, sshUser))
+        mon.Lwait.call(8,true)
+        println("Spawning process for host="+host)
+        
+        ctx=SymDict(host,sshUser)
+        process=SpawnProcess(ctx, UpdateCFT(host, sshUser))
 
-		mon.Ladd.call(process,host)
-		
-		out(process)
-	| => processes
+        mon.Ladd.call(process,host)
+        
+        out(process)
+    | => processes
 
-	mon.Lwait.call(0,true)
+    mon.Lwait.call(0,true)
 
-	
-	
+    
+    
 
-	processes _->process
-		Lib:Header(""+process.data.host)
-		process.wait
-		Inner {process.output->line println(line)}
-		readLine("ENTER to continue")
+    processes _->process
+        Lib:Header(""+process.data.host)
+        process.wait
+        Inner {process.output->line println(line)}
+        readLine("ENTER to continue")
 /UpdateCFTAll
 
 
@@ -252,56 +273,56 @@ P(1)=>host
 P(2)=>target
 P(3,"mpstat") => command
 P(4)=>lineFilter
-	if (SSH:HostOk (host)) Inner {
+    if (SSH:HostOk (host)) Inner {
 
-	    println("---- " + host + " ----")
-	    SSH:run (target, "which mpstat", true).get("exitCode") != 0 =>install
-	    if(install) {
-	        println("    (installing sysstat)")
-	        SSH:sudo (target, "apt-get -y install sysstat")
-	    }
-	    SSH:run (target, command).get("stdout")->line
-	    	assert(lineFilter == null || line.contains(lineFilter))
-	        report(List(host,line))
-	} 
+        println("---- " + host + " ----")
+        SSH:run (target, "which mpstat", true).get("exitCode") != 0 =>install
+        if(install) {
+            println("    (installing sysstat)")
+            SSH:sudo (target, "apt-get -y install sysstat")
+        }
+        SSH:run (target, command).get("stdout")->line
+            assert(lineFilter == null || line.contains(lineFilter))
+            report(List(host,line))
+    } 
 //SysStat
 
 
 # View host status
 # --
-	P(1,"mpstat") => command
-	P(2)  => lineFilter
+    P(1,"mpstat") => command
+    P(2)  => lineFilter
 
-	HostData=Hosts:Parse
-	
-	mon=Util:ProcessMonitor
+    HostData=Hosts:Parse
+    
+    mon=Util:ProcessMonitor
 
-	HostData.LallHosts.call->host
+    HostData.LallHosts.call->host
 
-		HostData.Lget.call(host, "OS") => os
-		assert(os=="linux")
+        HostData.Lget.call(host, "OS") => os
+        assert(os=="linux")
         
-	        HostData.Lget.call(host, "SSHUser") =>sshUser
-        	assert(sshUser != null)
+            HostData.Lget.call(host, "SSHUser") =>sshUser
+            assert(sshUser != null)
         
-		sshUser+"@"+host =>target
+        sshUser+"@"+host =>target
 
-        	ctx=SymDict(host,target,command,lineFilter)
-        	proc=SpawnProcess(ctx,
-        		SysStat(host,target,command,lineFilter)
-        	)
-		mon.Ladd.call(proc,host)
-		out(proc)
-	| _=>procList
+            ctx=SymDict(host,target,command,lineFilter)
+            proc=SpawnProcess(ctx,
+                SysStat(host,target,command,lineFilter)
+            )
+        mon.Ladd.call(proc,host)
+        out(proc)
+    | _=>procList
 
-	mon.Lwait.call(0,true)
+    mon.Lwait.call(0,true)
 
-	procList -> proc
-		proc.wait
-		Inner {
-			#proc.output->line println(line) |
-			proc.exitValue->line println(line)
-		}		
+    procList -> proc
+        proc.wait
+        Inner {
+            #proc.output->line println(line) |
+            proc.exitValue->line println(line)
+        }   
 /SysStatAll
 
 
@@ -319,30 +340,30 @@ SysStatAll("iostat")
 # Configure /etc/systemd/resolved.conf
 #### Does it do any good on Ubuntu Server 20+ ??
 # ---
-	HostData=Hosts:Parse
-	file=Lib:TmpFile("resolved_conf")
-	file.create(resolved_conf)
-	
-	HostData.LallHosts.call->host
-		assert(HostData.Lget.call(host, "OSFamily")=="debian")
-		       
+    HostData=Hosts:Parse
+    file=Lib:TmpFile("resolved_conf")
+    file.create(resolved_conf)
+    
+    HostData.LallHosts.call->host
+        assert(HostData.Lget.call(host, "OSFamily")=="debian")
+               
         HostData.Lget.call (host, "SSHUser") =>sshUser
         assert(sshUser != null)
 
-		Lib:Header(host)
+        Lib:Header(host)
 
         target=sshUser+"@"+host
         if (!SSH:HostOkSSH(target)) {
-        	println("- Host unreachable - skipping target " + target)
-        	assert(false)
+            println("- Host unreachable - skipping target " + target)
+            assert(false)
         }
 
-		SSH:copy(file, target, "./resolved_conf")
-		SSH:sudo(target,"cp ./resolved_conf /etc/systemd/resolved.conf")
-		println("- Updated file /etc/systemd/resolv.conf")
-	|
-	file.delete
-	
+        SSH:copy(file, target, "./resolved_conf")
+        SSH:sudo(target,"cp ./resolved_conf /etc/systemd/resolved.conf")
+        println("- Updated file /etc/systemd/resolv.conf")
+    |
+    file.delete
+    
 //FixResolve
 
 
@@ -380,20 +401,20 @@ DNS=10.0.0.3 10.0.0.4
 # Dump content from Hosts file, optionally with
 # filter string, to isolate hosts, property names or values
 # -- 
-	P(1,null)=>filter
-	Hosts:Parse.Ldump.call->line  
-		# each line is a list with three elements: host, setting name and setting value
-		assert(filter==null || line.concat("|").contains(filter))
-		reportList(line)
+    P(1,null)=>filter
+    Hosts:Parse.Ldump.call->line  
+        # each line is a list with three elements: host, setting name and setting value
+        assert(filter==null || line.concat("|").contains(filter))
+        reportList(line)
 /Dump
 
 
 
 # Run all periodic jobs
 # --
-	UpdateCFTAll
-	AptUpdateAll
-	Reboot
+    UpdateCFTAll
+    AptUpdateAll
+    Reboot
 /runAll
 
 
@@ -410,99 +431,99 @@ DNS=10.0.0.3 10.0.0.4
 #
 # It is now safe to start the next newly cloned VM, and avoid IP clash.
 # --
-	"10.0.99.56" => defaultTemplateIp
+    "10.0.99.56" => defaultTemplateIp
 
-	P(1,Input("Template IP").setCurrCond(defaultTemplateIp).get) => templateIp
-	P(2,Input("Clone new IP").get) => newIp
-	P(3,Input("Clone host name").get) => hostname
-	P(4,Input("Management username").get) => username
+    P(1,Input("Template IP").setCurrCond(defaultTemplateIp).get) => templateIp
+    P(2,Input("Clone new IP").get) => newIp
+    P(3,Input("Clone host name").get) => hostname
+    P(4,Input("Management username").get) => username
 
-	target=username + "@" + templateIp
+    target=username + "@" + templateIp
 
-	# Creating CFT script to run on new VM
-	Java:VerifyCFT(target)
-
-
-	Lib:TmpFile("cftTest")=>scriptFile
-	scriptFile.create(RemoteScript(hostname, templateIp, newIp))
+    # Creating CFT script to run on new VM
+    Java:VerifyCFT(target)
 
 
-	println("Creating CFT Test script")
-	SSH:copy(scriptFile, target, "./CFT/savefileInitClone.txt")
+    Lib:TmpFile("cftTest")=>scriptFile
+    scriptFile.create(RemoteScript(hostname, templateIp, newIp))
 
-	SSH:sudo(target, './RunCFT -noterm InitClone run ":quit"', false, true)
 
-	SSH:sudo(target, "reboot", true, false)
-	
+    println("Creating CFT Test script")
+    SSH:copy(scriptFile, target, "./CFT/savefileInitClone.txt")
+
+    SSH:sudo(target, './RunCFT -noterm InitClone run ":quit"', false, true)
+
+    SSH:sudo(target, "reboot", true, false)
+    
 /InitUbsClone
 
 
 
 # CFT script to run on new VM
 # --
-	P(1)=>hostname
-	P(2)=>origIp
-	P(3)=>newIp
+    P(1)=>hostname
+    P(2)=>origIp
+    P(3)=>newIp
 <<<<<< EOF
 # Autogenerated script <<Date.fmt>>
 # --
-	# Check that running as root
-	error(Dir.runCapture("whoami").first.trim != "root", "This scipt must run as root")
-	
-	# Fix hostname
-	File("/etc/hostname").create("<<hostname>>")
-	println("Fixed /etc/hostname: <<hostname>>")
-	
-	# Read current netplan config
-	Dir("/etc/netplan").files("*.yaml")=>files
-	files.first => netplanFile
-	netplanFile.read => netplanLines
+    # Check that running as root
+    error(Dir.runCapture("whoami").first.trim != "root", "This scipt must run as root")
+    
+    # Fix hostname
+    File("/etc/hostname").create("<<hostname>>")
+    println("Fixed /etc/hostname: <<hostname>>")
+    
+    # Read current netplan config
+    Dir("/etc/netplan").files("*.yaml")=>files
+    files.first => netplanFile
+    netplanFile.read => netplanLines
 
-	# Modify netplan config with new IP address
-	netplanLines = Inner{
-		netplanLines->line 
-			out(line.replace("<<origIp>>","<<newIp>>"))
-	}
-	# Delete netplan file(s)	
-	Inner{files->f f.delete}
-	
-	# Create new netplan file
-	netplanFile.create(netplanLines)
+    # Modify netplan config with new IP address
+    netplanLines = Inner{
+        netplanLines->line 
+            out(line.replace("<<origIp>>","<<newIp>>"))
+    }
+    # Delete netplan file(s)    
+    Inner{files->f f.delete}
+    
+    # Create new netplan file
+    netplanFile.create(netplanLines)
 
-	println("Updated /etc/netplan/" + netplanFile.path)
+    println("Updated /etc/netplan/" + netplanFile.path)
 
-	# Set machine-id
-	File("/etc/machine-id") => idFile
-	oldId=idFile.read.first
+    # Set machine-id
+    File("/etc/machine-id") => idFile
+    oldId=idFile.read.first
 
-	# Truncate machine-id file to zero bytes
-	Dir.run(List("truncate","-s","0", idFile.path))
+    # Truncate machine-id file to zero bytes
+    Dir.run(List("truncate","-s","0", idFile.path))
 
-	# Generate new machine-id content
-	Dir.run(List("systemd-machine-id-setup"))
-	newId=idFile.read.first
+    # Generate new machine-id content
+    Dir.run(List("systemd-machine-id-setup"))
+    newId=idFile.read.first
 
-	println("Changed /etc/machine-id")
-	println("- oldId: " + oldId)
-	println("- newId: " + newId)
+    println("Changed /etc/machine-id")
+    println("- oldId: " + oldId)
+    println("- newId: " + newId)
 
-	# Generate new host ssh keys
-	# https://www.cyberciti.biz/faq/howto-regenerate-openssh-host-keys/
+    # Generate new host ssh keys
+    # https://www.cyberciti.biz/faq/howto-regenerate-openssh-host-keys/
 
-	println("Deleting /etc/ssh_host_* key files")
-	Inner {
-		Dir("/etc/ssh").files("ssh_host_*")->f f.delete
-	}
-	println("Generating new ssh_host_* keys")
-	Dir.run(List("dpkg-reconfigure","openssh-server"))
-	
-	println("Restarting ssh service")
-	Dir.run(List("systemctl","restart","ssh"))
-	
-	println("** REMEMBER: must update or delete ./ssh/known-hosts") 
+    println("Deleting /etc/ssh_host_* key files")
+    Inner {
+        Dir("/etc/ssh").files("ssh_host_*")->f f.delete
+    }
+    println("Generating new ssh_host_* keys")
+    Dir.run(List("dpkg-reconfigure","openssh-server"))
+    
+    println("Restarting ssh service")
+    Dir.run(List("systemctl","restart","ssh"))
+    
+    println("** REMEMBER: must update or delete ./ssh/known-hosts") 
 /run
 
 
 >>>>>> EOF
-	.mergeExpr
+    .mergeExpr
 //RemoteScript

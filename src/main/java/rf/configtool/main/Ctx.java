@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020 Roar Foshaug
+Copyright (C) 2020-2022 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -92,7 +92,7 @@ public class Ctx {
 
     
     public boolean isInnerBlock() {
-    	return isInnerBlock;
+        return isInnerBlock;
     }
     
     
@@ -175,7 +175,7 @@ public class Ctx {
     public void setAbortIterationFlag() {
         abortIterationFlag=true;
         if (!isInnerBlock) {
-        	if (!programContainsLooping && parent != null) parent.setAbortIterationFlag();
+            if (!programContainsLooping && parent != null) parent.setAbortIterationFlag();
         }
     }
     
@@ -214,11 +214,11 @@ public class Ctx {
         // all assigned variables ("=x") are stored in shared scope for the
         // function.
 
-    	// This also means one can not redefine loop variables.
-    	
-    	// Lambdas are run on clean Ctx objects, and for local as well as Inner
-    	// blocks, full lookup is a feature all the way up the the function
-    	// or inside of lambda, so no special handling here.
+        // This also means one can not redefine loop variables.
+        
+        // Lambdas are run on clean Ctx objects, and for local as well as Inner
+        // blocks, full lookup is a feature all the way up the the function
+        // or inside of lambda, so no special handling here.
         
         if (loopVariableName != null && name.equals(loopVariableName)) {
             return loopVariableValue;

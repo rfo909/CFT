@@ -1,3 +1,24 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2022 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 # Simple Diff function for comparing text files
 
 
@@ -5,133 +26,133 @@
 
 # Identify file A
 # --
-	P(1,Sys.lastResult)=>f
-	Db2:Set("Diff","FileA",f)
+    P(1,Sys.lastResult)=>f
+    Db2:Set("Diff","FileA",f)
 /f1
 
 # Identify file B
 # --
-	P(1,Sys.lastResult)=>f
-	Db2:Set("Diff","FileB",f)
+    P(1,Sys.lastResult)=>f
+    Db2:Set("Diff","FileB",f)
 /f2
 
 # Search for next match
 # --
-	P(1) => str
-	P(2) => pos
-	P(3) => list
-	
-	loop
-		break(pos >= list.length)
-		#println("Search: " + list.nth(pos))
-		#println("        " + str)
-		break(list.nth(pos)==str)
-		pos=pos+1
-	|
-	pos
-//Search	
+    P(1) => str
+    P(2) => pos
+    P(3) => list
+    
+    loop
+        break(pos >= list.length)
+        #println("Search: " + list.nth(pos))
+        #println("        " + str)
+        break(list.nth(pos)==str)
+        pos=pos+1
+    |
+    pos
+//Search    
 
 
 # Status
 # --
-	println("f1 = " + Db2:Get("Diff","FileA").path)
-	println("f2 = " + Db2:Get("Diff","FileB").path)
-	""
+    println("f1 = " + Db2:Get("Diff","FileA").path)
+    println("f2 = " + Db2:Get("Diff","FileB").path)
+    ""
 /status
 
 
 # Swap files
 # --
-	a=Db2:Get("Diff","FileA")
-	b=Db2:Get("Diff","FileB")
-	Db2:Set("Diff","FileA",b)
-	Db2:Set("Diff","FileB",a)
+    a=Db2:Get("Diff","FileA")
+    b=Db2:Get("Diff","FileB")
+    Db2:Set("Diff","FileA",b)
+    Db2:Set("Diff","FileB",a)
 /swap
 
 
 # Short cut
 # --
-	status
+    status
 /s
 
 
 
 # Fix integer
 # --
-	P(1,1)=>i
-	s=""+i
-	if (s.length<4) {
-		s=("    "+s)
-		s=s.sub(s.length-4)
-	}
-	s
+    P(1,1)=>i
+    s=""+i
+    if (s.length<4) {
+        s=("    "+s)
+        s=s.sub(s.length-4)
+    }
+    s
 //fix
 
 
 
 # Get color A
 # --
-	Db2:Get("Diff","ColorA",Curses:TxtGreen)
+    Db2:Get("Diff","ColorA",Curses:TxtGreen)
 //ColA
 
 # Get color B
 # --
-	Db2:Get("Diff","ColorB",Curses:TxtRed)
+    Db2:Get("Diff","ColorB",Curses:TxtRed)
 //ColB
 
 
 # Reset color
 # --
-	Curses:Reset
+    Curses:Reset
 //ColReset
 
-	
+    
 # Diff
 # --
-	P(1, Db2:Get("Diff","FileA")).read->line out(line.trim) | _ => a
-	P(2, Db2:Get("Diff","FileB")).read->line out(line.trim) | _ => b
-	
-	ca=cb=0 # line counters
-	loop
-		if (ca >= a.length) {
-			break
-		} 
-		if (cb >= b.length) {
-			break
-		}
-		# string a and string b (lines from a and b)
-		sa=a.nth(ca)
-		sb=b.nth(cb)
-		
-		if (sa==sb) {
-			#println(fix(ca+1) + " " + fix(cb+1) + " : " + sa)
-			ca=ca+1
-			cb=cb+1
-		} else {
-			
-			ma=Search(sb,ca,a)-ca
-			mb=Search(sa,cb,b)-cb
-			
-			if (mb<ma) {
-				println(fix("") + " " + fix(cb+1) + " > " + ColB + sb + ColReset)
-				cb=cb+1
-			} else {
-				println(fix(ca+1) + " " + fix("") + " < " + ColA + sa + ColReset)
-				ca=ca+1
-			}
-		}
-	|
-	loop
-		break (ca >= a.length)
-		println(fix(ca+1) + " " + fix("") + " < " + ColA + a.nth(ca) + ColReset)
-		ca=ca+1
-	|
-	loop
-		break (cb >= b.length)
-		println(fix("") + " " + fix(cb+1) + " > " + ColB + b.nth(cb) + ColReset)
-		cb=cb+1
-	|
-		
+    P(1, Db2:Get("Diff","FileA")).read->line out(line.trim) | _ => a
+    P(2, Db2:Get("Diff","FileB")).read->line out(line.trim) | _ => b
+    
+    ca=cb=0 # line counters
+    loop
+        if (ca >= a.length) {
+            break
+        } 
+        if (cb >= b.length) {
+            break
+        }
+        # string a and string b (lines from a and b)
+        sa=a.nth(ca)
+        sb=b.nth(cb)
+        
+        if (sa==sb) {
+            #println(fix(ca+1) + " " + fix(cb+1) + " : " + sa)
+            ca=ca+1
+            cb=cb+1
+        } else {
+            
+            ma=Search(sb,ca,a)-ca
+            mb=Search(sa,cb,b)-cb
+            
+            if (mb<ma) {
+                println(fix("") + " " + fix(cb+1) + " > " + ColB + sb + ColReset)
+                cb=cb+1
+            } else {
+                println(fix(ca+1) + " " + fix("") + " < " + ColA + sa + ColReset)
+                ca=ca+1
+            }
+        }
+    |
+    loop
+        break (ca >= a.length)
+        println(fix(ca+1) + " " + fix("") + " < " + ColA + a.nth(ca) + ColReset)
+        ca=ca+1
+    |
+    loop
+        break (cb >= b.length)
+        println(fix("") + " " + fix(cb+1) + " > " + ColB + b.nth(cb) + ColReset)
+        cb=cb+1
+    |
+        
 
-/Diff		
-			
+/Diff   
+            

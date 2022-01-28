@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020 Roar Foshaug
+Copyright (C) 2020-2022 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -44,33 +44,33 @@ import rf.configtool.main.runtime.ValueString;
 public class ObjSys extends Obj {
 
     public ObjSys() {
-		Function[] arr={
-				new FunctionVersion(),
-				new FunctionFunctions(),
-				new FunctionLog(),
-				new FunctionCodeDirs(),
-				new FunctionOutCount(),
-				new FunctionLastResult(),
-				new FunctionSleep(),
-				new FunctionStdin(),
-				new FunctionIsWindows(),
-				new FunctionSavefile(),
-				new FunctionScriptName(),
-				new FunctionUptime(),
-				new FunctionHomeDir(),
-				new FunctionUchar(),
-				new FunctionSessionUUID(),
-				new FunctionReadPassword(),
-				new FunctionSecureSessionID(),
-				new FunctionClone(),
-				new FunctionFileSeparator(),
-				new FunctionEnvironment(),
-				new FunctionLint(),
-				new FunctionScriptId(),
-				new FunctionCPUCores(),
-				new FunctionJobs(),
-		};
-		setFunctions(arr);
+        Function[] arr={
+                new FunctionVersion(),
+                new FunctionFunctions(),
+                new FunctionLog(),
+                new FunctionCodeDirs(),
+                new FunctionOutCount(),
+                new FunctionLastResult(),
+                new FunctionSleep(),
+                new FunctionStdin(),
+                new FunctionIsWindows(),
+                new FunctionSavefile(),
+                new FunctionScriptName(),
+                new FunctionUptime(),
+                new FunctionHomeDir(),
+                new FunctionUchar(),
+                new FunctionSessionUUID(),
+                new FunctionReadPassword(),
+                new FunctionSecureSessionID(),
+                new FunctionClone(),
+                new FunctionFileSeparator(),
+                new FunctionEnvironment(),
+                new FunctionLint(),
+                new FunctionScriptId(),
+                new FunctionCPUCores(),
+                new FunctionJobs(),
+        };
+        setFunctions(arr);
         
     }
 
@@ -486,14 +486,14 @@ public class ObjSys extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 0) throw new Exception("Expected no parameters");
-        	
-        	Map<String,Value> data=new HashMap<String,Value>();
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            
+            Map<String,Value> data=new HashMap<String,Value>();
             ObjDict x=new ObjDict();
-        	
-        	Map<String, String> env = System.getenv();
+            
+            Map<String, String> env = System.getenv();
             for (String envName : env.keySet()) {
-            	x.set(envName, new ValueString(env.get(envName)));
+                x.set(envName, new ValueString(env.get(envName)));
             }
            
             return new ValueObj(x);
@@ -519,12 +519,12 @@ public class ObjSys extends Obj {
             
             List<String> names = ctx.getObjGlobal().getCodeHistory().getNames();
             for (String name : names) {
-            	CodeLines code = ctx.getObjGlobal().getCodeHistory().getNamedCodeLines(name);
-            	try {
-            		code.getProgramLines(); // parses text
-            	} catch (Exception ex) {
-            		result.add(new ValueString(name + " : " + ex.getMessage()));
-            	}
+                CodeLines code = ctx.getObjGlobal().getCodeHistory().getNamedCodeLines(name);
+                try {
+                    code.getProgramLines(); // parses text
+                } catch (Exception ex) {
+                    result.add(new ValueString(name + " : " + ex.getMessage()));
+                }
             }
             return new ValueList(result);
         }
@@ -545,12 +545,12 @@ public class ObjSys extends Obj {
 
                 StringBuffer sb=new StringBuffer();
                 for (int pos=0; pos<path.length(); pos++) {
-                	char c=path.charAt(pos);
-                	if ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_,.-+".indexOf(c) < 0) {
-                		sb.append("_");
-                	} else {
-                		sb.append(c);
-                	}
+                    char c=path.charAt(pos);
+                    if ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_,.-+".indexOf(c) < 0) {
+                        sb.append("_");
+                    } else {
+                        sb.append(c);
+                    }
                 }
                 
                 return new ValueString(sb.toString());
@@ -571,10 +571,10 @@ public class ObjSys extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 0) throw new Exception("Expected no parameters");
-        	
-        	int count=Runtime.getRuntime().availableProcessors();
-        	return new ValueInt(count);
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            
+            int count=Runtime.getRuntime().availableProcessors();
+            return new ValueInt(count);
         }
 
     }         
@@ -589,8 +589,8 @@ public class ObjSys extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 0) throw new Exception("Expected no parameters");
-        	return new ValueObj(new ObjJobs());
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueObj(new ObjJobs());
         }
 
     }

@@ -1,3 +1,20 @@
+/*
+CFT - an interactive programmable shell for automation 
+Copyright (C) 2020-2022 Roar Foshaug
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>
+*/
+
 package rf.configtool.main.runtime.lib.java;
 
 import java.lang.reflect.Field;
@@ -11,18 +28,18 @@ import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueObj;
 
 public class ObjJavaObject extends Obj {
-	
-	private Object obj;
+    
+    private Object obj;
     
     public ObjJavaObject(Object obj) {
-    	this.obj=obj;
-    	
-    	add(new FunctionGetFieldValue());
-    	
+        this.obj=obj;
+        
+        add(new FunctionGetFieldValue());
+        
     }
     
     public Object getJavaObject() {
-    	return obj;
+        return obj;
     }
         
     @Override
@@ -56,12 +73,12 @@ public class ObjJavaObject extends Obj {
             return "getFieldValue(name) - returns JavaValue object";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	String name=getString("name", params, 0);
-        	
-        	Class theClass=obj.getClass();
-        	Field f = theClass.getDeclaredField(name);
-        	if (!f.canAccess(obj)) throw new Exception("No access to field '" + name + "'");
-        	return new ValueObj(ObjJavaValue.getInstance(f.get(obj)));
+            String name=getString("name", params, 0);
+            
+            Class theClass=obj.getClass();
+            Field f = theClass.getDeclaredField(name);
+            if (!f.canAccess(obj)) throw new Exception("No access to field '" + name + "'");
+            return new ValueObj(ObjJavaValue.getInstance(f.get(obj)));
         }
     }
 

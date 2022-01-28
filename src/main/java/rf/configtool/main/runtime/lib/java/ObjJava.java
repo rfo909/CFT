@@ -2,7 +2,7 @@ package rf.configtool.main.runtime.lib.java;
 
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020 Roar Foshaug
+Copyright (C) 2020-2022 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -33,14 +33,14 @@ import rf.configtool.main.runtime.ValueObj;
 public class ObjJava extends Obj {
     
     public ObjJava() {
-    	this.add(new FunctionForName());
-    	this.add(new FunctionNull());
-    	this.add(new FunctionInt());
-    	this.add(new FunctionLong());
-    	this.add(new FunctionString());
-    	this.add(new FunctionBoolean());
-    	this.add(new FunctionObject());
-    	this.add(new Function_Example());
+        this.add(new FunctionForName());
+        this.add(new FunctionNull());
+        this.add(new FunctionInt());
+        this.add(new FunctionLong());
+        this.add(new FunctionString());
+        this.add(new FunctionBoolean());
+        this.add(new FunctionObject());
+        this.add(new Function_Example());
     }
     
     @Override
@@ -184,24 +184,24 @@ public class ObjJava extends Obj {
             return "_Example() - display example";
         }
         private String[] data= {
-        	"",
-        	"Example",
-        	"-------",
-        	"",
-			"Lib.Java.forName(\"java.lang.String\") => String",
-			"String.getConstructor(String).call(Lib.Java.String(\"test\")) => obj",
-			"String.getConstructor(String).call(Lib.Java.String(\"123\")) => obj2",
-			"Lib.Java.Object(obj2) => paramObj",
-			"String.getMethod(\"concat\",String).call(obj,paramObj).value",
-			"",
-			"Returns string \"test123\"",
-			"",
+            "",
+            "Example",
+            "-------",
+            "",
+            "Lib.Java.forName(\"java.lang.String\") => String",
+            "String.getConstructor(String).call(Lib.Java.String(\"test\")) => obj",
+            "String.getConstructor(String).call(Lib.Java.String(\"123\")) => obj2",
+            "Lib.Java.Object(obj2) => paramObj",
+            "String.getMethod(\"concat\",String).call(obj,paramObj).value",
+            "",
+            "Returns string \"test123\"",
+            "",
         };
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	for (String line:data) {
+            for (String line:data) {
                 ctx.getObjGlobal().addSystemMessage(line);
-        	}
-        	return new ValueBoolean(true);
+            }
+            return new ValueBoolean(true);
         }
     }
 

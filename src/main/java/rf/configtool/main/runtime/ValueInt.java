@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020 Roar Foshaug
+Copyright (C) 2020-2022 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -28,15 +28,15 @@ public class ValueInt extends Value {
     
     public ValueInt (long val) {
         this.val=val;
-		Function[] arr={
-				new FunctionBin(),
-				new FunctionF(),
-				new FunctionI(),
-				new FunctionPow(),
-				new FunctionHex(),
-				new FunctionFmt(),
-			};
-		setFunctions(arr);
+        Function[] arr={
+                new FunctionBin(),
+                new FunctionF(),
+                new FunctionI(),
+                new FunctionPow(),
+                new FunctionHex(),
+                new FunctionFmt(),
+            };
+        setFunctions(arr);
     }
     
     protected ValueInt theObj() {

@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020 Roar Foshaug
+Copyright (C) 2020-2022 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -296,12 +296,12 @@ public class ObjLib extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 3) throw new RuntimeException("Expected rgb parameters (ints)");
-        	int r=(int) getInt("r", params, 0);
-        	int g=(int) getInt("g", params, 1);
-        	int b=(int) getInt("b", params, 2);
-        	
-        	return new ValueObj(new ObjColor(r,g,b));
+            if (params.size() != 3) throw new RuntimeException("Expected rgb parameters (ints)");
+            int r=(int) getInt("r", params, 0);
+            int g=(int) getInt("g", params, 1);
+            int b=(int) getInt("b", params, 2);
+            
+            return new ValueObj(new ObjColor(r,g,b));
         }
     }
 

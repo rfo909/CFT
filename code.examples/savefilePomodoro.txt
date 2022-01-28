@@ -1,48 +1,69 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2022 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 
 # Count down seconds
 # --
-	P(1,10) => minutes
-	prefix=""
+    P(1,10) => minutes
+    prefix=""
 
-	seconds=minutes*60
+    seconds=minutes*60
 
-	start=currentTimeMillis
-	i=0
-	loop
-		targetTime=start+(i*1000)
-		waitTime=targetTime-currentTimeMillis
-		if (waitTime > 0) Sys.sleep(waitTime)
+    start=currentTimeMillis
+    i=0
+    loop
+        targetTime=start+(i*1000)
+        waitTime=targetTime-currentTimeMillis
+        if (waitTime > 0) Sys.sleep(waitTime)
 
-		# present current value
-		println(Curses:Clear)
+        # present current value
+        println(Curses:Clear)
 
-		remainingTime=seconds-i
-		
-		println(prefix+"Total time: " + minutes + " minutes")
+        remainingTime=seconds-i
+        
+        println(prefix+"Total time: " + minutes + " minutes")
 
-		# progress bar
-		(50*i/seconds).i => done
-		Lib.Data.yes(done,Sys.uchar("2588")).concat => bar
-		Lib.Data.yes(50-done,".").concat => remaining
-		
-		percent=(100*i/seconds).i
-		println(prefix + bar+remaining+" " + percent + " %")
-	
-		if (remainingTime <= 60) {
-		
-			println
+        # progress bar
+        (50*i/seconds).i => done
+        Lib.Data.yes(done,Sys.uchar("2588")).concat => bar
+        Lib.Data.yes(50-done,".").concat => remaining
+        
+        percent=(100*i/seconds).i
+        println(prefix + bar+remaining+" " + percent + " %")
+    
+        if (remainingTime <= 60) {
+        
+            println
 
-			lines=Letters7x5:GetTextX2(""+remainingTime)
-			lines->line println(prefix + line)
-		}
-		break(i>=seconds)
-		if (seconds-i > 300) {
-			i=i+10
-		} else if (seconds-i > 120) {
-			i=i+3
-		} else {
-			i=i+1
-		}
+            lines=Letters7x5:GetTextX2(""+remainingTime)
+            lines->line println(prefix + line)
+        }
+        break(i>=seconds)
+        if (seconds-i > 300) {
+            i=i+10
+        } else if (seconds-i > 120) {
+            i=i+3
+        } else {
+            i=i+1
+        }
 |
 
 /CountDown
@@ -50,42 +71,42 @@
 
 # Pomodoro countdown timer
 # --
-	Input("Minutes").get.parseInt=>minutes
-	CountDown(minutes)
+    Input("Minutes").get.parseInt=>minutes
+    CountDown(minutes)
 /run
 
 
 # Show seconds 
 # --
-	seconds=""
-	loop
-		Date.setFormat("HH:mm:ss").fmt => s2
-		if (s2 != seconds) {
-			seconds=s2
-			println(Curses:Clear)
-			Inner {Letters7x5:GetText(seconds)->line println(line)}
-		}
-		Sys.sleep(50)
+    seconds=""
+    loop
+        Date.setFormat("HH:mm:ss").fmt => s2
+        if (s2 != seconds) {
+            seconds=s2
+            println(Curses:Clear)
+            Inner {Letters7x5:GetText(seconds)->line println(line)}
+        }
+        Sys.sleep(50)
 //Clock
 
 
 
 # Minutes since midnight
 # --
-	P(1,Date)=>date
-	date.timeSinceMidnight.asMinutes
+    P(1,Date)=>date
+    date.timeSinceMidnight.asMinutes
 /MinutesSinceMidnight
 
 
 # Count down seconds
 # --
-	loop
-		println(Curses:Clear)
-		lines=Letters7x5:GetTextX2(""+MinutesSinceMidnight)
-		Inner {
-			lines->line println(line)
-		}
-		Sys.sleep(13000)
+    loop
+        println(Curses:Clear)
+        lines=Letters7x5:GetTextX2(""+MinutesSinceMidnight)
+        Inner {
+            lines->line println(line)
+        }
+        Sys.sleep(13000)
 |
 
 /CountMinutes

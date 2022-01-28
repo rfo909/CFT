@@ -1,3 +1,24 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2022 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 # Utility: Invoke JS code via mongo shell to local mongod on remote host
 #
 #   # Remember to use printjson(...) on elements, to get them back over stdout
@@ -10,96 +31,96 @@ P(4, true) => verbose
 P(5,"4.4") => mongoVersion
 P(6,"127.0.0.1:27017") => connectionString 
 
-	temp = Dir("\\"+host+"\c$\temp")
+    temp = Dir("\\"+host+"\c$\temp")
 
-	if (getType(jsCode) != "List") {
-		jsCode=List(jsCode)
-	}
-	mark = "--------" + currentTimeMillis+"-CFT-mark-----------"
+    if (getType(jsCode) != "List") {
+        jsCode=List(jsCode)
+    }
+    mark = "--------" + currentTimeMillis+"-CFT-mark-----------"
 
-	jsCode=List('print("' + mark + '")') + jsCode
+    jsCode=List('print("' + mark + '")') + jsCode
 
-	
-	js1 = temp.file("mongoshell"+currentTimeMillis+".js")
-	js1.create(jsCode)
-	
-	if (verbose) {
-		println
-		Inner {jsCode->line println(line)}
-		println
-	}
-	
-	if (!connectionString.endsWith("/"+db)) {
-		connectionString=connectionString + "/" + db
-	}
+    
+    js1 = temp.file("mongoshell"+currentTimeMillis+".js")
+    js1.create(jsCode)
+    
+    if (verbose) {
+        println
+        Inner {jsCode->line println(line)}
+        println
+    }
+    
+    if (!connectionString.endsWith("/"+db)) {
+        connectionString=connectionString + "/" + db
+    }
 
-	cmd = '& "$Env:ProgramFiles\MongoDB\Server\' + mongoVersion + '\bin\mongo.exe" '+connectionString + ' c:\temp\' + js1.name
-	if (verbose) {
-		println(cmd)
-	}
-	PS:Call (host, cmd, List, true, verbose) => data
-	if (verbose) {
-		println("* KEEPING " + js1.path)
-	} else {
-		js1.delete
-	}
+    cmd = '& "$Env:ProgramFiles\MongoDB\Server\' + mongoVersion + '\bin\mongo.exe" '+connectionString + ' c:\temp\' + js1.name
+    if (verbose) {
+        println(cmd)
+    }
+    PS:Call (host, cmd, List, true, verbose) => data
+    if (verbose) {
+        println("* KEEPING " + js1.path)
+    } else {
+        js1.delete
+    }
 
-	# filter stdout to include lines after mark only
-	Inner {
-		foundMark=false
-		data.stdout->line
-			if (line.contains(mark)) {foundMark=true reject(true)}
-			assert(foundMark)
-			out(line)
-	} => modifiedStdout
-	data.set("stdout",modifiedStdout)
+    # filter stdout to include lines after mark only
+    Inner {
+        foundMark=false
+        data.stdout->line
+            if (line.contains(mark)) {foundMark=true reject(true)}
+            assert(foundMark)
+            out(line)
+    } => modifiedStdout
+    data.set("stdout",modifiedStdout)
 
-	if (verbose) {
-		println("------------" + host)
-		println("exitCode=" + data.exitCode)
-		println
-		Inner { data.stdout->line println(line) }
-		println
-		Inner { data.stderr->line println("ERR  " + line) }
-	}
+    if (verbose) {
+        println("------------" + host)
+        println("exitCode=" + data.exitCode)
+        println
+        Inner { data.stdout->line println(line) }
+        println
+        Inner { data.stderr->line println("ERR  " + line) }
+    }
 
-	data
+    data
 /CallMongoShell
 
 
-	
+    
 # Create User
 # --
-	P(1) => host
-	P(2) => user
-	P(3) => password
-	P(4) => database
-	P(5,"root") => role
-	P(6,"4.4") => mongoVersion 
-	P(7,"admin") => authSource
-	
-	SymDict(user,password,role,database).mergeCodes => data
+    P(1) => host
+    P(2) => user
+    P(3) => password
+    P(4) => database
+    P(5,"root") => role
+    P(6,"4.4") => mongoVersion 
+    P(7,"admin") => authSource
+    
+    SymDict(user,password,role,database).mergeCodes => data
 
 <<< EOF
-	db.createUser({
-		user: "${user}",
-		pwd: "${password}",
-		roles: [
-			{role: "${role}", db: "${database}" }
-		]
+    db.createUser({
+        user: "${user}",
+        pwd: "${password}",
+        roles: [
+            {role: "${role}", db: "${database}" }
+        ]
 
-	})
+    })
 >>> EOF
-	-> line
-		out(line.merge(data).trim)
-	| _.concat(" ") => js
+    -> line
+        out(line.merge(data).trim)
+    | _.concat(" ") => js
 
-	println("host="+host)
-	println("js="+js)
+    println("host="+host)
+    println("js="+js)
 
-	verbose=true
+    verbose=true
 
-	CallMongoShell(host,authSource,js,verbose,mongoVersion)
+    CallMongoShell(host,authSource,js,verbose,mongoVersion)
 /CreateUser
 
 
@@ -107,16 +128,16 @@ P(6,"127.0.0.1:27017") => connectionString
 
 # Add object to database collection
 # --
-	P(1) => host
-	P(2) => database
-	P(3) => collection
-	P(4,"{test:1}") => obj 
-	P(5,"4.4") => mongoVersion
+    P(1) => host
+    P(2) => database
+    P(3) => collection
+    P(4,"{test:1}") => obj 
+    P(5,"4.4") => mongoVersion
 
-	js="db."+collection+".insert(" + obj + ")"
+    js="db."+collection+".insert(" + obj + ")"
 
-	verbose=true
+    verbose=true
 
-	CallMongoShell(host, database, js, verbose, mongoVersion)
+    CallMongoShell(host, database, js, verbose, mongoVersion)
 /AddObject
 

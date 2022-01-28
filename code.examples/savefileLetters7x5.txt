@@ -1,3 +1,24 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2022 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 <<<<<< EOF
 
 0  ###    .
@@ -770,57 +791,57 @@ $  ###    .
 
 # Get character mask
 # --
-	P(1)=>char
-	offset=1000
-	Letters->line
-		assert(line.startsWith(char))
-		out(line.sub(2,7))
+    P(1)=>char
+    offset=1000
+    Letters->line
+        assert(line.startsWith(char))
+        out(line.sub(2,7))
 /GetChar
 
 
 # Get character mask doubled in size
 # --
-	P(1)=>char
-	GetChar(char)->line
-		Inner {
-			line.chars->c out(c) out(c)
-		} _.concat => modLine
-		out(modLine)
-		out(modLine)
+    P(1)=>char
+    GetChar(char)->line
+        Inner {
+            line.chars->c out(c) out(c)
+        } _.concat => modLine
+        out(modLine)
+        out(modLine)
 /GetCharX2
 
 
 # Get text
 # --
-	P(1,"TEST")=>i
-	Lib.Data.each(0,6)->lineNo
-		s = Inner {
-			(""+i).chars->c
-				lines = GetChar(c)
-				if (lines.length<7) lines=GetChar("?")
-				#break(lines.length<7)
-				out(lines.nth(lineNo))
-			| _.concat("   ")
-		} 
-		out(s)
+    P(1,"TEST")=>i
+    Lib.Data.each(0,6)->lineNo
+        s = Inner {
+            (""+i).chars->c
+                lines = GetChar(c)
+                if (lines.length<7) lines=GetChar("?")
+                #break(lines.length<7)
+                out(lines.nth(lineNo))
+            | _.concat("   ")
+        } 
+        out(s)
 /GetText
-	
+    
 
 # Get text x2
 # --
-	P(1,"TEST")=>s
-	GetText(s)->line
-		Inner {
-			line.chars->c out(c) out(c)
-		} _.concat => modLine
-		out(modLine)
-		out(modLine)
+    P(1,"TEST")=>s
+    GetText(s)->line
+        Inner {
+            line.chars->c out(c) out(c)
+        } _.concat => modLine
+        out(modLine)
+        out(modLine)
 /GetTextX2
 
 
 # Test 
 # --
-	P(1,Input("Enter text").get)=>text
-	GetText(text)
+    P(1,Input("Enter text").get)=>text
+    GetText(text)
 //t
 

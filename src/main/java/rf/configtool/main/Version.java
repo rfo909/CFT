@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020 Roar Foshaug
+Copyright (C) 2020-2022 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -19,8 +19,8 @@ package rf.configtool.main;
 
 
 public class Version {
-	
-	private Version() {}
+    
+    private Version() {}
 
     public static String getVersion() {
         return "v3.1.0";

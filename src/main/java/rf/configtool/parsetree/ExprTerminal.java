@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020 Roar Foshaug
+Copyright (C) 2020-2022 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -105,8 +105,8 @@ public class ExprTerminal extends ExprCommon {
             return;
         }
         if (ts.peekStr("&")) {
-        	expr=new ExprAmp(ts);
-        	return;
+            expr=new ExprAmp(ts);
+            return;
         }
         if (ts.peekStr("SymDict")) {
             expr=new ExprSymDict(ts);

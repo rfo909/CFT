@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020 Roar Foshaug
+Copyright (C) 2020-2022 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -53,12 +53,12 @@ public class ObjDuration extends Obj {
         }
         
         public String fmt() {
-        	if (days > 185) return (days/30) + "mo"; 
-        	if (days > 2) return days+"d";
-        	if (days > 0) return days+"d " + hours + "h";
-        	if (hours > 0) return f(hours,2) + ":" + f(minutes,2);
-        	if (minutes > 0) return f(hours,2)+":" + f(minutes,2)+":"+f(seconds,2);
-        	return seconds+"."+f(millis,3) + "s";
+            if (days > 185) return (days/30) + "mo"; 
+            if (days > 2) return days+"d";
+            if (days > 0) return days+"d " + hours + "h";
+            if (hours > 0) return f(hours,2) + ":" + f(minutes,2);
+            if (minutes > 0) return f(hours,2)+":" + f(minutes,2)+":"+f(seconds,2);
+            return seconds+"."+f(millis,3) + "s";
         }
     }
     
@@ -79,10 +79,10 @@ public class ObjDuration extends Obj {
         add(new FunctionSeconds());
         add(new FunctionMillis());
         add(new FunctionFmt());
-		add(new FunctionAsDays());
-		add(new FunctionAsHours());
-		add(new FunctionAsMinutes());
-		add(new FunctionAsSeconds());
+        add(new FunctionAsDays());
+        add(new FunctionAsHours());
+        add(new FunctionAsMinutes());
+        add(new FunctionAsSeconds());
         
     }
     

@@ -1,3 +1,24 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2022 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 # Readme
 <<< EOF
 -----------------------------------
@@ -26,10 +47,10 @@ See also CFT.props, where the bangCommand code property invokes the Run function
 
 Example
 
-	$ !ls -la
-	$ !du [Dir.sub("..")] 
-	$ !git status
-	$ !top
+    $ !ls -la
+    $ !du [Dir.sub("..")] 
+    $ !git status
+    $ !top
 
 
 Note that the [...] (codeSpace) can not refer local functions in the caller script, as 
@@ -42,48 +63,48 @@ BangParser is a separate script.
 
 # Build root lexer Node for all known tokens
 # --
-	Lib.Text.Lexer.Node => root
-	
-	specials = "{}:;,.()/\*?=-_@!#$%&+"  # not including |<> or code space start character
-	digits = "0123456789"
-	letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	
-	# all non-space characters
-	chars=specials+digits+letters
-	
-	root.sub(chars) => nonspace
-	nonspace.sub(chars,nonspace)
-	nonspace.setIsToken(1)
-	
-	List('"',"'")->c 
-		root.sub(c) => insideString
-		insideString.setDefault(insideString)
-		insideString.sub("\").setDefault(insideString)
-		insideString.sub(c).setIsToken(2)
-	|
-	
-	root.addToken("[") => codeSpace
-	codeSpace.setDefault(codeSpace)
-	codeSpace.addToken("]").setIsToken(3)
-	
-	root.sub(" ^n^r^t".unEsc) => spc
-	spc.setIsToken(-1) # whitespace
+    Lib.Text.Lexer.Node => root
+    
+    specials = "{}:;,.()/\*?=-_@!#$%&+"  # not including |<> or code space start character
+    digits = "0123456789"
+    letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    
+    # all non-space characters
+    chars=specials+digits+letters
+    
+    root.sub(chars) => nonspace
+    nonspace.sub(chars,nonspace)
+    nonspace.setIsToken(1)
+    
+    List('"',"'")->c 
+        root.sub(c) => insideString
+        insideString.setDefault(insideString)
+        insideString.sub("\").setDefault(insideString)
+        insideString.sub(c).setIsToken(2)
+    |
+    
+    root.addToken("[") => codeSpace
+    codeSpace.setDefault(codeSpace)
+    codeSpace.addToken("]").setIsToken(3)
+    
+    root.sub(" ^n^r^t".unEsc) => spc
+    spc.setIsToken(-1) # whitespace
 
 
-	# return value is the root node
-	root
+    # return value is the root node
+    root
 //RootNode
 
 
 
 # fix code space values
 # --
-	P(1)=>val
-	if (getType(val)=="File" || getType(val)=="Dir") {
-		val.path
-	} else {
-		val
-	}
+    P(1)=>val
+    if (getType(val)=="File" || getType(val)=="Dir") {
+        val.path
+    } else {
+        val
+    }
 //fixValue
 
 
@@ -91,101 +112,101 @@ BangParser is a separate script.
 # This consists of unquoting strings (for non-windows) and performing 
 # globbing in a limited sense (not subdir/*.x, just *.x)
 # --
-	P(1,Dir) => currentDir
-	P(2,readLine) => line
-	
-	RootNode => root
-	Lib.Text.Lexer => lexer
-	lexer.addLine(line) 
-	tokens=lexer.getTokens(root)
-	
-	Dict
-		.set("cmd",List)
-		.set("LAdd",Lambda{P(1)=>value
-			if (getType(value)=="File" || getType(value)=="Dir") {
-				self.cmd.add(value.path)
-			} else if (getType(value)=="int" || getType(value)=="float") {
-				self.cmd.add(""+value)
-			} else {
-				error(!value.?toUpper,"Invalid value: " + getType(value))
-				self.cmd.add(value)
-			}
-		})
-		=> obj
-	
-	cmd=List
-	tokens->token
-		if (token.tokenType==2) { # string
-			value=token.str
-			# For windows, leave quotes in place
-			if (!Sys.isWindows) {
-				value=value.sub(1,value.length-1) # strip quotes
-			}
-			obj.LAdd.call(value)
-		} else if (token.tokenType==3) { # codeSpace
-			value=token.str
-			value=value.sub(1,value.length-1) # strip "[" and "]"
-			value=eval(value)
-			if (getType(value)=="List") {
-				value->v
-					obj.LAdd.call(fixValue(v))
-			} else {
-				obj.LAdd.call(fixValue(value))
-			}
-		} else {
-			# token type = 1 ("nonspace")
-			if (token.str.contains("*")) {
-				# attempt Glob expansion
-				Inner {
-					currentDir.files(token.str)->f obj.LAdd.call(f.name)
-				} 
-			} else {
-				obj.LAdd.call(token.str)
-			}
-		}
-	|
+    P(1,Dir) => currentDir
+    P(2,readLine) => line
+    
+    RootNode => root
+    Lib.Text.Lexer => lexer
+    lexer.addLine(line) 
+    tokens=lexer.getTokens(root)
+    
+    Dict
+        .set("cmd",List)
+        .set("LAdd",Lambda{P(1)=>value
+            if (getType(value)=="File" || getType(value)=="Dir") {
+                self.cmd.add(value.path)
+            } else if (getType(value)=="int" || getType(value)=="float") {
+                self.cmd.add(""+value)
+            } else {
+                error(!value.?toUpper,"Invalid value: " + getType(value))
+                self.cmd.add(value)
+            }
+        })
+        => obj
+    
+    cmd=List
+    tokens->token
+        if (token.tokenType==2) { # string
+            value=token.str
+            # For windows, leave quotes in place
+            if (!Sys.isWindows) {
+                value=value.sub(1,value.length-1) # strip quotes
+            }
+            obj.LAdd.call(value)
+        } else if (token.tokenType==3) { # codeSpace
+            value=token.str
+            value=value.sub(1,value.length-1) # strip "[" and "]"
+            value=eval(value)
+            if (getType(value)=="List") {
+                value->v
+                    obj.LAdd.call(fixValue(v))
+            } else {
+                obj.LAdd.call(fixValue(value))
+            }
+        } else {
+            # token type = 1 ("nonspace")
+            if (token.str.contains("*")) {
+                # attempt Glob expansion
+                Inner {
+                    currentDir.files(token.str)->f obj.LAdd.call(f.name)
+                } 
+            } else {
+                obj.LAdd.call(token.str)
+            }
+        }
+    |
 
-	obj.cmd	
+    obj.cmd   
 /Parse
 
 
 # Parse and run shell command 
 # --
-	P(1,Dir) => currDir   # needs to know which directory, as current dir is stored per script
-	P(2,readLine) => cmd
-	
-	show=false
-	if (cmd.startsWith("!")) {
-		show=true
-		cmd=cmd.sub(1)
-	}
-	
-	list=Parse(currDir,cmd)
-	if (Sys.isWindows) list=List("powershell")+list
+    P(1,Dir) => currDir   # needs to know which directory, as current dir is stored per script
+    P(2,readLine) => cmd
+    
+    show=false
+    if (cmd.startsWith("!")) {
+        show=true
+        cmd=cmd.sub(1)
+    }
+    
+    list=Parse(currDir,cmd)
+    if (Sys.isWindows) list=List("powershell")+list
 
-	if (show) {
-		list->x 
-			println("  " + getType(x) + " : " + x)
-	} else {
-		currDir.run(list)
-	}		
+    if (show) {
+        list->x 
+            println("  " + getType(x) + " : " + x)
+    } else {
+        currDir.run(list)
+    }   
 /Run
 
 
 # Mainloop for testing
 # --
-	loop
-		readLine => cmd
-		break(cmd=="")
-		tryCatch(Parse(cmd)) => x
-		if (!x.ok) {
-			println("** " + x.msg)
-		} else {
-			tryCatch(Dir.run(x.result)) => y
-			if (!y.ok) {
-				println("** " + y.msg)
-			}
-		}
+    loop
+        readLine => cmd
+        break(cmd=="")
+        tryCatch(Parse(cmd)) => x
+        if (!x.ok) {
+            println("** " + x.msg)
+        } else {
+            tryCatch(Dir.run(x.result)) => y
+            if (!y.ok) {
+                println("** " + y.msg)
+            }
+        }
 //test
 
 

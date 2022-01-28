@@ -2,7 +2,7 @@
 <<< EOF
 #
 # CFT - an interactive programmable shell for automation 
-# Copyright (C) 2020 Roar Foshaug
+# Copyright (C) 2020-2022 Roar Foshaug
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -98,7 +98,7 @@ and then after installation has started, just from a terminal:
 If no X-windows, enter "yes" for headless. You must then use 
 VNC to complete the install. In a different window, run the 
 
-	VNCHelp
+    VNCHelp
 
 function, to look up the port number (usually 5900), then follow
 the instructions to transport the port number to another PC, 
@@ -110,8 +110,8 @@ run the VNCHelp function, to check the port, then reconnect with VNC.
 
 All we now need, is to log in, then enter 
 
-	ip addr
-	
+    ip addr
+    
 We then ssh in from some terminal, and go on to prepare the VM.
 
 VM preparations
@@ -122,7 +122,7 @@ VM preparations
 
 Add a line to /etc/sudoers
 
-<username>	ALL=(ALL) NOPASSWD:ALL
+<username>  ALL=(ALL) NOPASSWD:ALL
 
 *** Make SSH work without password
 
@@ -189,9 +189,9 @@ d
     Dir.runCapture("whoami").nth=="root" =>ok
     error(!ok, "Must be logged in as root")
 
-	println
-	Lib:run(List("virsh","list","--all")).stdout->line println(line) |
-	println
+    println
+    Lib:run(List("virsh","list","--all")).stdout->line println(line) |
+    println
 /status
 
 
@@ -230,33 +230,33 @@ P(1,"someTarget") =>target
 
 # Automatic (and manual) cloning of existing VM (which will be stopped if running)
 # --
-	P(1) => original           # original VM ("kubsXX")
-	P(2) => cloneName          # new VM name
-	P(3) => originalIp         # ip of the VM that got cloned
-	P(4) => newIp			   # ip/NN
-	P(5) => sshUser            # for config
-	P(6) => nic                # VM network card to configure ("ens3" etc) - run "ip addr" on original VM
+    P(1) => original           # original VM ("kubsXX")
+    P(2) => cloneName          # new VM name
+    P(3) => originalIp         # ip of the VM that got cloned
+    P(4) => newIp          # ip/NN
+    P(5) => sshUser            # for config
+    P(6) => nic                # VM network card to configure ("ens3" etc) - run "ip addr" on original VM
 
     Dir.runCapture("whoami").nth=="root" =>ok
     error(!ok, "Must be logged in as root")
 
-	PDict("original","cloneName","originalIp","newIp","sshUser") => pdict
-	if (pdict.hasNullValue) Inner {
-		loop
-			status
-			Lib:ReadValue("Template VM (will be stopped if running)", original) => original
-			Lib:ReadValue("New VM name", cloneName) => cloneName
-			Lib:ReadValue("Template VM IP address", originalIp) => originalIp
-			Lib:ReadValue("New VM IP address (including /NN netmask)", newIp) => newIp
-			Lib:ReadValue("SSH user", sshUser) => sshUser
-			Lib:ReadValue("Network card (nic) to configure, ex. ens3", nic) => nic
-			break(Lib:ReadValueBoolean("Confirm", false))
-	}
-	error(!newIp.contains("/"), "Invalid newIp - must contain /NN netmask")
+    PDict("original","cloneName","originalIp","newIp","sshUser") => pdict
+    if (pdict.hasNullValue) Inner {
+        loop
+            status
+            Lib:ReadValue("Template VM (will be stopped if running)", original) => original
+            Lib:ReadValue("New VM name", cloneName) => cloneName
+            Lib:ReadValue("Template VM IP address", originalIp) => originalIp
+            Lib:ReadValue("New VM IP address (including /NN netmask)", newIp) => newIp
+            Lib:ReadValue("SSH user", sshUser) => sshUser
+            Lib:ReadValue("Network card (nic) to configure, ex. ens3", nic) => nic
+            break(Lib:ReadValueBoolean("Confirm", false))
+    }
+    error(!newIp.contains("/"), "Invalid newIp - must contain /NN netmask")
 
     Lib:Header ("Cloning existing VM")
 
-	println("* Stopping original VM " + original)
+    println("* Stopping original VM " + original)
     Stop(original)
 
     println("* Creating clone " + cloneName)
@@ -278,9 +278,9 @@ P(1,"someTarget") =>target
 
     println("* Wait for SSH ok")
     Inner {
-    	Lib.Data.yes(20,"x") -> dummy
-    		break(SSH:HostOkSSH(target))
-    		Sys.sleep(1000)
+        Lib.Data.yes(20,"x") -> dummy
+            break(SSH:HostOkSSH(target))
+            Sys.sleep(1000)
     }
 
     
@@ -295,11 +295,11 @@ P(1,"someTarget") =>target
 
     println("* Waiting for VM to stop responding to ping")
     Inner {
-    	loop
-    		Lib:run(List("ping","-c",1,originalIp),List,true) => x
-    		break(x.exitCode != 0)
-    		println("   sleeping")
-    		Sys.sleep(3000)
+        loop
+            Lib:run(List("ping","-c",1,originalIp),List,true) => x
+            break(x.exitCode != 0)
+            println("   sleeping")
+            Sys.sleep(3000)
     }
     println("* Clone completed")
 
@@ -379,19 +379,19 @@ P(1,"someTarget") =>target
 
 # Reconfigure a VM by editing its XML config file
 # --
-	status
+    status
 
-	P(1,Input("VM to reconfigure").get) => vm
+    P(1,Input("VM to reconfigure").get) => vm
 
-	println("8GB=" + (8*1024*1024) + " Kb")
-	println("16GB=" + (16*1024*1024) + " Kb")
-	println("32GB=" + (32*1024*1024) + " Kb")
+    println("8GB=" + (8*1024*1024) + " Kb")
+    println("16GB=" + (16*1024*1024) + " Kb")
+    println("32GB=" + (32*1024*1024) + " Kb")
 
-	Stop(vm)
-	Dir.run("virsh","edit",vm)
+    Stop(vm)
+    Dir.run("virsh","edit",vm)
 /ReconfigureVM
-	
-	
+    
+    
 
 # Run virt-manager (required X-windows)
     Dir.run("virt-manager")
@@ -400,7 +400,7 @@ P(1,"someTarget") =>target
 
 
 # Info on using VNC for installation
-	status
+    status
     readLine("VM name") =>vm
 
     Dir.runCapture("hostname").nth.trim =>host

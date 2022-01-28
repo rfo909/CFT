@@ -2,7 +2,7 @@
 <<< EOF
 #
 # CFT - an interactive programmable shell for automation 
-# Copyright (C) 2020 Roar Foshaug
+# Copyright (C) 2020-2022 Roar Foshaug
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -75,32 +75,32 @@ just add a second "Dir:" line.
 
 # Readme
 # --
-	ReadmeLines->line println("| " + line)
+    ReadmeLines->line println("| " + line)
 /Readme
 
 # The projects.txt file 
 # --
     (Lib:DirPrivate).file("projects.txt") => f
-	if (!f.exists || DataFile(f,"###").keys.length==0) {
-		readme=Lambda{ReadmeLines->line out("# "+line)}
-		Inner{
-			Sequence(
-				@
-				@ << readme.call >>
-				@
-				@ # Example project (auto-generated << Date.fmt >>)
-				@
-				@ ### CFTJava
-				@ 
-				@ Dir: << Sys.homeDir.path >>
-				@ Type: java
-			)->line
-				line.mergeExpr->s out(s)
-		} => lines
-		f.append(lines)
-	}
-	f
-/ConfigFile	
+    if (!f.exists || DataFile(f,"###").keys.length==0) {
+        readme=Lambda{ReadmeLines->line out("# "+line)}
+        Inner{
+            Sequence(
+                @
+                @ << readme.call >>
+                @
+                @ # Example project (auto-generated << Date.fmt >>)
+                @
+                @ ### CFTJava
+                @ 
+                @ Dir: << Sys.homeDir.path >>
+                @ Type: java
+            )->line
+                line.mergeExpr->s out(s)
+        } => lines
+        f.append(lines)
+    }
+    f
+/ConfigFile   
 
 
 
@@ -114,7 +114,7 @@ just add a second "Dir:" line.
 
 # Edit config file (see Readme)
 # --
-	Lib:e(ConfigFile)
+    Lib:e(ConfigFile)
 /EditConfig
 
 
@@ -123,7 +123,7 @@ just add a second "Dir:" line.
 # --
     Db2:Get("Projects","Project") => result
     
-	ProjectsFile.keys => names
+    ProjectsFile.keys => names
 
     Lambda { P(1) } =>showName
     loop
@@ -136,30 +136,30 @@ just add a second "Dir:" line.
         break(result != null)
     |
     Db2:Set("Projects","Project", result)
-	result
+    result
 //SelectProjectName
 
 
 # Current project name
 # --
-	pName=Db2:Get("Projects","Project")
-	if (pName==null) pName=SelectProjectName
-	pName
+    pName=Db2:Get("Projects","Project")
+    if (pName==null) pName=SelectProjectName
+    pName
 //CurrProjectName
 
 
 # Get current project as Dict
-# --	    
-	pName=CurrProjectName
-	
+# --        
+    pName=CurrProjectName
+    
     ProjectsFile.get(pName) =>dataLines
     if(dataLines.length==0) {
-    	SelectProjectName
-    	pName=CurrProjectName
-    	ProjectsFile.get(pName) =>dataLines
+        SelectProjectName
+        pName=CurrProjectName
+        ProjectsFile.get(pName) =>dataLines
     }
 
-	dict=Dict
+    dict=Dict
     dataLines->line
         line.before(":").trim =>field
         line.after(":").trim =>val
@@ -179,59 +179,59 @@ just add a second "Dir:" line.
     # Directories
     # --
     dirs = pr.get("Dir",List)
-    	
-	
-	# File matching by type
-	# --
-	pr.get("Type",List)->t 
-		out(Glob("*."+t) )
-	| => fileGlobs
-	
-	pr.get("Files",List)->f  ## glob strings
-		fileGlobs.add(Glob(f))
-	|
-	
-	# File ignores
-	# --
-	pr.get("Ignore",List)->i  ## Glob
-		out(Glob(i))
-	| => fileIgnores
-	
-	# Dir ignores
-	# --
-	dirIgnores = pr.get("IgnoreDir",List) ## substrings
+        
+    
+    # File matching by type
+    # --
+    pr.get("Type",List)->t 
+        out(Glob("*."+t) )
+    | => fileGlobs
+    
+    pr.get("Files",List)->f  ## glob strings
+        fileGlobs.add(Glob(f))
+    |
+    
+    # File ignores
+    # --
+    pr.get("Ignore",List)->i  ## Glob
+        out(Glob(i))
+    | => fileIgnores
+    
+    # Dir ignores
+    # --
+    dirIgnores = pr.get("IgnoreDir",List) ## substrings
 
 
-	fileOk = Lambda {
-		P(1)=>file
-		P(2)=>ignoreGlobList
-		
-		ok=true
-		ignoreGlobList->glob
-			if (glob.match(file)) ok=false
-		|
-		ok
-	}
+    fileOk = Lambda {
+        P(1)=>file
+        P(2)=>ignoreGlobList
+        
+        ok=true
+        ignoreGlobList->glob
+            if (glob.match(file)) ok=false
+        |
+        ok
+    }
 
-	pathOk = Lambda{
-		P(1)=>s 
-		P(2)=>ignoreDirList
-		
-		ok=true
-		ignoreDirList->pattern
-			if (s.contains(pattern)) ok=false
-		|
-		ok
-	}
-	
-	# 
-	dirs->dirName
-		fileGlobs->glob
-			Dir(dirName).allFiles(glob)->f 
-				assert(pathOk.call(f.path, dirIgnores))
-				assert(fileOk.call(f,fileIgnores))
-				out(f)
-	| _.unique 
+    pathOk = Lambda{
+        P(1)=>s 
+        P(2)=>ignoreDirList
+        
+        ok=true
+        ignoreDirList->pattern
+            if (s.contains(pattern)) ok=false
+        |
+        ok
+    }
+    
+    # 
+    dirs->dirName
+        fileGlobs->glob
+            Dir(dirName).allFiles(glob)->f 
+                assert(pathOk.call(f.path, dirIgnores))
+                assert(fileOk.call(f,fileIgnores))
+                out(f)
+    | _.unique 
 //TextFiles
 
 
@@ -242,10 +242,10 @@ just add a second "Dir:" line.
 # --
     P(1,Grep) =>grep
     
-	filter=Db2:Get("Projects","FileFilter",null)
+    filter=Db2:Get("Projects","FileFilter",null)
 
-	TextFiles => textFiles
-	
+    TextFiles => textFiles
+    
     # Count matches first
     textFiles->tf 
         assert(filter==null || file.name.contains(filter))
@@ -258,7 +258,7 @@ just add a second "Dir:" line.
     textFiles->tf
         assert(filter==null || file.name.contains(filter))
         grep.file(tf)->line 
-			out(line)
+            out(line)
 //DoSearch
 
 
@@ -267,7 +267,7 @@ just add a second "Dir:" line.
 # Returns formatted report
 # -- 
     P(1,Grep) =>grep
-	DoSearch(grep)->line
+    DoSearch(grep)->line
             report(line.file.name, line.lineNumber, line)
 //Search
 
@@ -297,7 +297,7 @@ just add a second "Dir:" line.
 
 # Clear file filter
 # --
-	Db2:Set("Projects","FileFilter",null)
+    Db2:Set("Projects","FileFilter",null)
 /ClearFileFilter
 
 
@@ -308,36 +308,36 @@ just add a second "Dir:" line.
 
 # Search with one parameter
 # --
-	ShowFileFilter
-	Input("Search1").get =>a
-	Search(Grep(a))
+    ShowFileFilter
+    Input("Search1").get =>a
+    Search(Grep(a))
 /S
 
 
 # Search with two parameters
 # --
-	ShowFileFilter
-	Input("Search2a ... ").get =>a
-	Input("... AND Search2b").get =>b
-	Search(Grep.match(a).match(b))
+    ShowFileFilter
+    Input("Search2a ... ").get =>a
+    Input("... AND Search2b").get =>b
+    Search(Grep.match(a).match(b))
 /S2
 
 
 # Search with three parameters
 # --
-	ShowFileFilter
-	Input("Search3a ... ").get =>a
-	Input("... AND Search3b").get =>b
-	Input("... AND Search3c").get =>c
-	Search(Grep.match(a).match(b).match(c))
+    ShowFileFilter
+    Input("Search3a ... ").get =>a
+    Input("... AND Search3b").get =>b
+    Input("... AND Search3c").get =>c
+    Search(Grep.match(a).match(b).match(c))
 /S3
 
 # Search with one positive and one negative parameter
 # --
-	ShowFileFilter
-	Input("Search1").get =>a
-	Input("Search1n (reject)").get =>b
-	Search(Grep(a).reject(b))
+    ShowFileFilter
+    Input("Search1").get =>a
+    Input("Search1n (reject)").get =>b
+    Search(Grep(a).reject(b))
 /SN
 
 # Locate file by partial name
@@ -352,41 +352,41 @@ just add a second "Dir:" line.
 
 # Get file content around a given line number as List of lines
 # --
-	P(1,Input("File name or glob pattern").get) => globPattern
-	P(2,Input("File line number").get.parseInt) => lineNo
-	P(3,Input("Number of lines").get.parseInt) => numLines
+    P(1,Input("File name or glob pattern").get) => globPattern
+    P(2,Input("File line number").get.parseInt) => lineNo
+    P(3,Input("Number of lines").get.parseInt) => numLines
 
-	glob=Glob(globPattern)
+    glob=Glob(globPattern)
 
-	TextFiles->tf
-		assert(glob.match(tf))
-		out(tf)
-	| => files
+    TextFiles->tf
+        assert(glob.match(tf))
+        out(tf)
+    | => files
 
-	error(files.length==0, "No matching files found")
-	if (files.length == 1) {
-		file=files.first
-	} else {
-		Lib:MenuSelect(files,Lambda{P(1).path},"Select file", true) => file
-		error(file==null,"Aborting: no file selected")
-	}
-	file.read => lines
+    error(files.length==0, "No matching files found")
+    if (files.length == 1) {
+        file=files.first
+    } else {
+        Lib:MenuSelect(files,Lambda{P(1).path},"Select file", true) => file
+        error(file==null,"Aborting: no file selected")
+    }
+    file.read => lines
 
-	delta=(numLines/2).i  # division always returns float!!
-	lines.keep(lineNo-delta, lineNo+delta)
-	
+    delta=(numLines/2).i  # division always returns float!!
+    lines.keep(lineNo-delta, lineNo+delta)
+    
 /gfc
 
 
 # Show file content around a given line number, report style
 # --
-	Inner {
-		gfc->line
-			report(line.lineNumber, line)
-	}->line 
-		println(line)
-	|
-	true
+    Inner {
+        gfc->line
+            report(line.lineNumber, line)
+    }->line 
+        println(line)
+    |
+    true
 /sfc
 
 # FileLocator, interactive, sorted presentation, newest first
@@ -396,9 +396,9 @@ just add a second "Dir:" line.
     FileLocator(fn)->file
         out(Int(file.lastModified, file))
     | _.sort->x 
-		out(x.data)
-	| => fileList
-	
+        out(x.data)
+    | => fileList
+    
     fileList->file 
         report(file.path, file.length, Date(file.lastModified).fmt)
     | =>lines  # the report(...) outputs
@@ -416,8 +416,8 @@ just add a second "Dir:" line.
     println
     readLine("Enter number to edit, or blank to skip") =>inp
     if(inp != "", Inner{
-		num=inp.parseInt
-		println("Editing file " + fileList.nth(num).path)
+        num=inp.parseInt
+        println("Editing file " + fileList.nth(num).path)
         Lib:e (fileList.nth(num))
     })
 
@@ -427,7 +427,7 @@ just add a second "Dir:" line.
 
 # Show text files (that are being searched)
 # --
-	TextFiles
+    TextFiles
 /TF
 
 
@@ -435,13 +435,13 @@ just add a second "Dir:" line.
 # --
     CurrProject =>pr
     println
-	Lib:Header("Current project")
-	println(CurrProjectName)
-	println
-	pr.keys->key
-		str=Inner{pr.get(key,List).concat(" ")}
-		println(key+": " + str)
-	|
+    Lib:Header("Current project")
+    println(CurrProjectName)
+    println
+    pr.keys->key
+        str=Inner{pr.get(key,List).concat(" ")}
+        println(key+": " + str)
+    |
     println
     true
 /curr
@@ -449,6 +449,6 @@ just add a second "Dir:" line.
 
 # Change project
 # --
-	SelectProjectName
-	curr
+    SelectProjectName
+    curr
 /ch

@@ -1,3 +1,24 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2022 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 
 # Readme
 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< EOF
@@ -158,62 +179,62 @@ P(2,"") =>prefix
 # --
 P(1,GetSSHTarget) => target
 P(2,"") => prefix
-	println(prefix+"Preparing to install Maven")
-	VerifyJava(target,prefix+"   ")
+    println(prefix+"Preparing to install Maven")
+    VerifyJava(target,prefix+"   ")
 
-	SSH:run(target,"which mvn",true) => result
-	if (result.get("exitCode") != 0) {
-		println(prefix+"Installing Maven")
-		SSH:sudo(target,"apt-get -y install maven")
-	}
-	println(prefix+"Maven ok")
+    SSH:run(target,"which mvn",true) => result
+    if (result.get("exitCode") != 0) {
+        println(prefix+"Installing Maven")
+        SSH:sudo(target,"apt-get -y install maven")
+    }
+    println(prefix+"Maven ok")
 /VerifyMaven
 
 
 
 # Install or upgrade CFT - calls VerifyMaven
 # --
-	P(1,GetSSHTarget) =>target
-	P(2,"") =>prefix
+    P(1,GetSSHTarget) =>target
+    P(2,"") =>prefix
 
-	# Short timeout to avoid being run multiple times
-	# as part of same script for same host
-	# --
-	mark=Sys.scriptName+"_VerifyCFT_"+target
-	if (Util:HasTimedOut(mark,60)) Inner {
-		
-	    println(prefix+"Verifying Maven (and Java) ok")
-	    VerifyMaven(target, prefix+"   ")
+    # Short timeout to avoid being run multiple times
+    # as part of same script for same host
+    # --
+    mark=Sys.scriptName+"_VerifyCFT_"+target
+    if (Util:HasTimedOut(mark,60)) Inner {
+        
+        println(prefix+"Verifying Maven (and Java) ok")
+        VerifyMaven(target, prefix+"   ")
 
-	    # Check if CFT already installed
-	    {
-	        SSH:run (target,"cd CFT",true).get("exitCode")==0 
-	    } =>hasCFT
-	    
-	    if (!hasCFT) {
-	        println(prefix+"Installing and compiling CFT")
-	        List(
-	            "git clone https://github.com/rfo909/CFT.git",
-	            "cd CFT",
-	            "mvn package"
-	        ) 
-	    } else {
-	        println(prefix+"Pull latest CFT then compile")
-	        List(
-	            "cd CFT",
-	            "git pull origin master",
-	            "mvn package"
-	        )
-	    }
-	    =>cmd
-	    SSH:run (target, cmd)
-	    
-	    CreateRunCFT(target,prefix+"   ")
+        # Check if CFT already installed
+        {
+            SSH:run (target,"cd CFT",true).get("exitCode")==0 
+        } =>hasCFT
+        
+        if (!hasCFT) {
+            println(prefix+"Installing and compiling CFT")
+            List(
+                "git clone https://github.com/rfo909/CFT.git",
+                "cd CFT",
+                "mvn package"
+            ) 
+        } else {
+            println(prefix+"Pull latest CFT then compile")
+            List(
+                "cd CFT",
+                "git pull origin master",
+                "mvn package"
+            )
+        }
+        =>cmd
+        SSH:run (target, cmd)
+        
+        CreateRunCFT(target,prefix+"   ")
 
-	    Util:SetTimeMark(mark)
-	} else {
-		println(prefix+"Skipping CFT check, last run at " + Util:GetTimeMark(mark))
-	}
+        Util:SetTimeMark(mark)
+    } else {
+        println(prefix+"Skipping CFT check, last run at " + Util:GetTimeMark(mark))
+    }
 /VerifyCFT
 
 
@@ -221,21 +242,21 @@ P(2,"") => prefix
 # Create home directory shell script RunCFT to run CFT 
 # Called from VerifyCFT
 # --
-	P(1,GetSSHTarget) =>target
-	P(2,"") =>prefix
-	
-	SSH:run(target,"which bash", false, false).stdout->line
-		assert(line.contains("/bash")) 
-		out(line)
-	| _.first => path
+    P(1,GetSSHTarget) =>target
+    P(2,"") =>prefix
+    
+    SSH:run(target,"which bash", false, false).stdout->line
+        assert(line.contains("/bash")) 
+        out(line)
+    | _.first => path
     
     Lib:TmpFile("script") => f
     f.create(Sequence(
-    	@@#!<<path>>
-    	@ cd CFT
-    	@ ./cft $*
+        @@#!<<path>>
+        @ cd CFT
+        @ ./cft $*
     ).mergeExpr)
-	SSH:copy(f,target,"./RunCFT")
-	SSH:run(target,"chmod +x ./RunCFT")
+    SSH:copy(f,target,"./RunCFT")
+    SSH:run(target,"chmod +x ./RunCFT")
 //CreateRunCFT
 

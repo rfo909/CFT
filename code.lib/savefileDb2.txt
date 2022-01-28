@@ -1,3 +1,24 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2022 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 # Readme
 # --
 <<<<<<<<< EOF
@@ -21,113 +42,113 @@ knowing the UUID.
 
 # Helper
 # --
-	Lib:Header("Enter collection.")
-	Collections->c println("   " +c) |
+    Lib:Header("Enter collection.")
+    Collections->c println("   " +c) |
 
-	Input("collection").get
+    Input("collection").get
 //inputCollection
 
 
-		
+        
 # Store data
 # --
-	P(1)=>collection
-	P(2)=>key
-	P(3)=>value
+    P(1)=>collection
+    P(2)=>key
+    P(3)=>value
 
-	error(collection.startsWith("."), "Invalid collection, '.' indicates system collections")
-	
-	x = Lambda {syn(P(1))}
-	error (x.?call(value)==false, "Value " + getType(value) + " not synthesizable")
-	value = syn(value)
-	
-	Lib.Db.Db2.set(collection,key,value)
+    error(collection.startsWith("."), "Invalid collection, '.' indicates system collections")
+    
+    x = Lambda {syn(P(1))}
+    error (x.?call(value)==false, "Value " + getType(value) + " not synthesizable")
+    value = syn(value)
+    
+    Lib.Db.Db2.set(collection,key,value)
 
 /Set
 
 
 # Get data
 # --
-	P(1,inputCollection)=>collection
-	P(2,Input("key").get)=>key
-	P(3)=>defaultValue
-	
-	value=Lib.Db.Db2.get(collection,key)
+    P(1,inputCollection)=>collection
+    P(2,Input("key").get)=>key
+    P(3)=>defaultValue
+    
+    value=Lib.Db.Db2.get(collection,key)
 
-	if (value == null, defaultValue, eval(value))
+    if (value == null, defaultValue, eval(value))
 /Get
 
 
 
 # Get keys in collection
 # --
-	P(1,inputCollection)=>collection
-	Lib.Db.Db2.keys(collection)
+    P(1,inputCollection)=>collection
+    Lib.Db.Db2.keys(collection)
 /Keys
 
 
 
 # Get collections
 # --
-	Lib.Db.Db2.collections.sort->name
-		reject(name.startsWith("Obj."))  # prefix for Db2Obj collections
-		out(name)
+    Lib.Db.Db2.collections.sort->name
+        reject(name.startsWith("Obj."))  # prefix for Db2Obj collections
+        out(name)
 /Collections
 
 
 
 # Delete collection
 # --
-	P(1,inputCollection)=>collection
-	Lib.Db.Db2.deleteCollection(collection)
+    P(1,inputCollection)=>collection
+    Lib.Db.Db2.deleteCollection(collection)
 /DeleteCollection
 
 
 # Show content
 # --
-	P(1,inputCollection)=>collection
-	Keys(collection).sort->key
-		report(collection, key, Get(collection,key))
+    P(1,inputCollection)=>collection
+    Keys(collection).sort->key
+        report(collection, key, Get(collection,key))
 /Show
 
 
 # Edit data in collection
 # --
-	P(1,inputCollection) => collection
+    P(1,inputCollection) => collection
 
-	Keys(collection).sort => keys
+    Keys(collection).sort => keys
 
-	Lib:Header("Current values in " + collection)
+    Lib:Header("Current values in " + collection)
 
-	Inner{
-		count=0 
-		Inner {
-			keys->key 
-				report(count, key, syn(Get(collection,key))) 
-				count=count+1
-		}->line println(line)
-	}
-	println
-	readLine("Command .a to add new, row number to edit or ENTER to quit") => command
+    Inner{
+        count=0 
+        Inner {
+            keys->key 
+                report(count, key, syn(Get(collection,key))) 
+                count=count+1
+        }->line println(line)
+    }
+    println
+    readLine("Command .a to add new, row number to edit or ENTER to quit") => command
 
-	if (command=="") {
-		println("Quitting")
-	} else if (command==".a") {
-		readLine("Key") => key
-		readLine("Value as code, which means quotes around Strings etc") => newValCode
-		actualValue=eval(newValCode)
-		Set(collection,key,actualValue)
-	} else {
-		# Edit row by number
-		key=keys.nth(command.parseInt)
-		value=syn(Get(collection,key))
-		println("Current value:")
-		println(value)
-		readLine("New value") => newValCode
-		modifiedValue=eval(newValCode)
-		Set(collection,key,modifiedValue)
-	}
+    if (command=="") {
+        println("Quitting")
+    } else if (command==".a") {
+        readLine("Key") => key
+        readLine("Value as code, which means quotes around Strings etc") => newValCode
+        actualValue=eval(newValCode)
+        Set(collection,key,actualValue)
+    } else {
+        # Edit row by number
+        key=keys.nth(command.parseInt)
+        value=syn(Get(collection,key))
+        println("Current value:")
+        println(value)
+        readLine("New value") => newValCode
+        modifiedValue=eval(newValCode)
+        Set(collection,key,modifiedValue)
+    }
 
-	"Done"
+    "Done"
 /Edit
 

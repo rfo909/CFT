@@ -6,7 +6,7 @@ import java.io.PrintStream;
 
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020 Roar Foshaug
+Copyright (C) 2020-2022 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -44,39 +44,39 @@ import rf.configtool.main.runtime.lib.ObjPersistent;
 
 public class ObjServer extends ObjPersistent {
     
-	private int serverPort;
-	private Ctx asyncCtx;
-	private File serverLogFile;
-	
-	private HashMap<String,ObjContext> bindings=new HashMap<String,ObjContext>();
-	private ServerMainLoop serverMainLoop;
+    private int serverPort;
+    private Ctx asyncCtx;
+    private File serverLogFile;
+    
+    private HashMap<String,ObjContext> bindings=new HashMap<String,ObjContext>();
+    private ServerMainLoop serverMainLoop;
 
     public ObjServer(int serverPort, Ctx asyncCtx) {
-    	this.serverPort=serverPort;
-    	this.asyncCtx=asyncCtx;
+        this.serverPort=serverPort;
+        this.asyncCtx=asyncCtx;
 
-    	this.add(new FunctionRootContext());
-    	this.add(new FunctionSetServerLogFile());;
+        this.add(new FunctionRootContext());
+        this.add(new FunctionSetServerLogFile());;
     }
     
     @Override
     public String getPersistenceId() {
-    	return "ObjServer:" + serverPort;
+        return "ObjServer:" + serverPort;
     }
    
     @Override
     public void initPersistentObj() {
-    	
-    	this.serverMainLoop=new ServerMainLoop(serverPort, theServer());
-    	(new Thread(serverMainLoop)).start();
+        
+        this.serverMainLoop=new ServerMainLoop(serverPort, theServer());
+        (new Thread(serverMainLoop)).start();
     }
     @Override
     public void cleanupOnExit() {
-    	serverMainLoop.setShuttingDown();
+        serverMainLoop.setShuttingDown();
         // wait for main loop to terminate
         for(;;) {
-        	if (serverMainLoop.isCompleted()) break;
-        	try {Thread.sleep(20);} catch (Exception ex) {}
+            if (serverMainLoop.isCompleted()) break;
+            try {Thread.sleep(20);} catch (Exception ex) {}
         }
     }
 
@@ -84,38 +84,38 @@ public class ObjServer extends ObjPersistent {
      * Service function 
      */
     public void bind (String path, ObjContext context) {
-    	bindings.put(path,context);
+        bindings.put(path,context);
     }
 
     /**
      * Service function
      */
     public synchronized void appendToServerLog (String context, List<String> lines) {
-    	if (serverLogFile==null) return;
-    	
-    	
-    	try {
-        	PrintStream ps=null;
-	    	try {
-	    		ps=new PrintStream(new FileOutputStream(serverLogFile,true), false, "UTF-8");
-	    		ps.println();
-	    		ps.println(""+(new Date()));
-	    		for (String line: lines) ps.println("[" + context + "] " + line);
-	    	} finally {
-	    		if (ps != null) try {ps.close();} catch (Exception ex) {};
-	    	}
-    	} catch (Exception ex) {
-    		// ignore
-    	}
+        if (serverLogFile==null) return;
+        
+        
+        try {
+            PrintStream ps=null;
+            try {
+                ps=new PrintStream(new FileOutputStream(serverLogFile,true), false, "UTF-8");
+                ps.println();
+                ps.println(""+(new Date()));
+                for (String line: lines) ps.println("[" + context + "] " + line);
+            } finally {
+                if (ps != null) try {ps.close();} catch (Exception ex) {};
+            }
+        } catch (Exception ex) {
+            // ignore
+        }
     }
 
     /**
      * Service function
      */
     public synchronized void appendToServerLog (String context, String line) {
-    	List<String> lines=new ArrayList<String>();
-    	lines.add(line);
-    	appendToServerLog(context, lines);
+        List<String> lines=new ArrayList<String>();
+        lines.add(line);
+        appendToServerLog(context, lines);
     }
 
 
@@ -123,13 +123,13 @@ public class ObjServer extends ObjPersistent {
      * Service function
      */
     public synchronized void appendToServerLog (String context, String line, Throwable t)  {
-    	List<String> lines=new ArrayList<String>();
-    	lines.add(line);
-    	lines.add(t.getMessage());
-    	for (StackTraceElement e : t.getStackTrace()) {
-    		lines.add(e.toString());
-    	}
-    	appendToServerLog(context, lines);
+        List<String> lines=new ArrayList<String>();
+        lines.add(line);
+        lines.add(t.getMessage());
+        for (StackTraceElement e : t.getStackTrace()) {
+            lines.add(e.toString());
+        }
+        appendToServerLog(context, lines);
     }
 
 
@@ -198,22 +198,22 @@ public class ObjServer extends ObjPersistent {
      * Callback method via ServerMainLoop -> ClientMain
      */
     public synchronized ResponseData processGETRequest(ObjRequest request) throws Exception {
-    	ObjContext context = bindings.get(request.getUrl());
-    	if (context != null) {
-    		ObjClosure closure = context.getClosureGET();
-        	String contentType=context.getContentType();
-    		
-    		if (closure != null) {
-    			List<Value> params=new ArrayList<Value>();
-    			params.add(new ValueObj(request));
+        ObjContext context = bindings.get(request.getUrl());
+        if (context != null) {
+            ObjClosure closure = context.getClosureGET();
+            String contentType=context.getContentType();
+            
+            if (closure != null) {
+                List<Value> params=new ArrayList<Value>();
+                params.add(new ValueObj(request));
 
-    			Value output = closure.callClosure(asyncCtx.sub(), params);
-    			byte[] data = createBytesFromValue(output);
-    			return new ResponseData(contentType, data);
-    		}
-    	}
-    	//System.out.println("ObjServer.processRequest(url=" + url + ")");
-    	return new ResponseData(("<html><body><p>" + (new Date()) + " method="+ request.getMethod() + " url=" + request.getUrl() + "</p>").getBytes());
+                Value output = closure.callClosure(asyncCtx.sub(), params);
+                byte[] data = createBytesFromValue(output);
+                return new ResponseData(contentType, data);
+            }
+        }
+        //System.out.println("ObjServer.processRequest(url=" + url + ")");
+        return new ResponseData(("<html><body><p>" + (new Date()) + " method="+ request.getMethod() + " url=" + request.getUrl() + "</p>").getBytes());
     }
     
 
@@ -221,43 +221,43 @@ public class ObjServer extends ObjPersistent {
      * Callback method via ServerMainLoop -> ClientMain
      */
     public synchronized ResponseData processPOSTRequest(ObjRequest request) throws Exception {
-    	ObjContext context = bindings.get(request.getUrl());
-    	if (context != null) {
-    		ObjClosure closure = context.getClosurePOST();
-        	String contentType=context.getContentType();
-    		
-    		if (closure != null) {
-    			List<Value> params=new ArrayList<Value>();
-    			params.add(new ValueObj(request));
+        ObjContext context = bindings.get(request.getUrl());
+        if (context != null) {
+            ObjClosure closure = context.getClosurePOST();
+            String contentType=context.getContentType();
+            
+            if (closure != null) {
+                List<Value> params=new ArrayList<Value>();
+                params.add(new ValueObj(request));
 
-    			Value output = closure.callClosure(asyncCtx.sub(), params);
-    			byte[] data = createBytesFromValue(output);
-    			return new ResponseData(contentType, data);
-    		}
-    	}
-    	//System.out.println("ObjServer.processRequest(url=" + url + ")");
-    	return new ResponseData(("<html><body><p>" + (new Date()) + " method="+ request.getMethod() + " url=" + request.getUrl() + "</p>").getBytes());
+                Value output = closure.callClosure(asyncCtx.sub(), params);
+                byte[] data = createBytesFromValue(output);
+                return new ResponseData(contentType, data);
+            }
+        }
+        //System.out.println("ObjServer.processRequest(url=" + url + ")");
+        return new ResponseData(("<html><body><p>" + (new Date()) + " method="+ request.getMethod() + " url=" + request.getUrl() + "</p>").getBytes());
     }
     
     
     private byte[] createBytesFromValue (Value output) throws Exception {
-		if (output instanceof ValueList) {
-			StringBuffer sb=new StringBuffer();
-			List<Value> lines = ((ValueList) output).getVal();
-			for (Value v:lines) {
-				sb.append(v.getValAsString());
-				sb.append("\n");
-			}
-			return sb.toString().getBytes("UTF-8");
-		}
-		if (output instanceof ValueString) {
-			return ((ValueString) output).getVal().getBytes("UTF-8");
-		}
-		if (output instanceof ValueBinary) {
-			return ((ValueBinary) output).getVal();
-		}
-		// all else
-		return output.getValAsString().getBytes("UTF-8");
+        if (output instanceof ValueList) {
+            StringBuffer sb=new StringBuffer();
+            List<Value> lines = ((ValueList) output).getVal();
+            for (Value v:lines) {
+                sb.append(v.getValAsString());
+                sb.append("\n");
+            }
+            return sb.toString().getBytes("UTF-8");
+        }
+        if (output instanceof ValueString) {
+            return ((ValueString) output).getVal().getBytes("UTF-8");
+        }
+        if (output instanceof ValueBinary) {
+            return ((ValueBinary) output).getVal();
+        }
+        // all else
+        return output.getValAsString().getBytes("UTF-8");
     }
 
 

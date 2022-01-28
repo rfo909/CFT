@@ -1,3 +1,24 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2022 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 # Readme
 <<< EOF
 Simple object oriented extension of the Db2 script.
@@ -15,90 +36,90 @@ Objects can be sorted on date of last update, and located using a lambda.
 
 # Get collections
 # --
-	Lib.Db.Db2.collections.sort->name
-		assert(name.startsWith(CollectionPrefix))
-		out(name.sub(CollectionPrefix.length))
+    Lib.Db.Db2.collections.sort->name
+        assert(name.startsWith(CollectionPrefix))
+        out(name.sub(CollectionPrefix.length))
 /Collections
 
 
 # Input collection name
 # --
-	println("Known Object collections")
-	Collections->name
-		println("   "+name)
-	|
-	Input("Enter collection").get
+    println("Known Object collections")
+    Collections->name
+        println("   "+name)
+    |
+    Input("Enter collection").get
 /inputCollection
-		
+        
 
 
 # Modify collection names 
 # --
-	P(1) => collection
-	prefix=CollectionPrefix
-	if (!collection.startsWith(prefix)) collection=prefix+collection
-	collection
+    P(1) => collection
+    prefix=CollectionPrefix
+    if (!collection.startsWith(prefix)) collection=prefix+collection
+    collection
 /FixCN
 
 
 
 # Store some value wrapped inside a Dict with id and date + value - returns new Dict
 # --
-	P(1)=>collection
-	P(2)=>value
-	error(value != null && getType(value) != "Dict","Value must be Dict")
-	
-	uuid=Lib.Db.UUID
-	data=Dict.set("id",uuid).set("date",Date).set("value",value)
-	Db2:Set(FixCN(collection), uuid, data)
-	data
+    P(1)=>collection
+    P(2)=>value
+    error(value != null && getType(value) != "Dict","Value must be Dict")
+    
+    uuid=Lib.Db.UUID
+    data=Dict.set("id",uuid).set("date",Date).set("value",value)
+    Db2:Set(FixCN(collection), uuid, data)
+    data
 /AddObject
 
 
 
 # Get keys (UUID)
 # --
-	P(1,inputCollection) => collection
-	Db2:Keys(FixCN(collection))
+    P(1,inputCollection) => collection
+    Db2:Keys(FixCN(collection))
 /Keys
 
 
 
 # Get object by UUID
 # --
-	P(1)=>collection
-	P(2)=>uuid
-	Db2:Get(FixCN(collection),uuid)
+    P(1)=>collection
+    P(2)=>uuid
+    Db2:Get(FixCN(collection),uuid)
 /Get
 
 
 
 # Overwrite object by uuid
 # --
-	P(1)=>collection
-	P(2)=>uuid
-	P(3)=>value
-	error(value != null && getType(value) != "Dict","Value must be Dict")
+    P(1)=>collection
+    P(2)=>uuid
+    P(3)=>value
+    error(value != null && getType(value) != "Dict","Value must be Dict")
 
-	data=Dict.set("id",uuid).set("date",Date).set("value",value)
-	Db2:Set(FixCN(collection),uuid,data)
+    data=Dict.set("id",uuid).set("date",Date).set("value",value)
+    Db2:Set(FixCN(collection),uuid,data)
 /UpdateObject
 
 
 
 # Delete object by uuid
 # --
-	P(1)=>collection
-	P(2)=>uuid
-	UpdateObject(collection, uuid, null)
+    P(1)=>collection
+    P(2)=>uuid
+    UpdateObject(collection, uuid, null)
 /DeleteObject
 
 
 
 # Delete collection
 # --
-	P(1)=>collection
-	Db2:DeleteCollection(FixCN(collection))
+    P(1)=>collection
+    Db2:DeleteCollection(FixCN(collection))
 /DeleteCollection
 
 
@@ -106,71 +127,71 @@ Objects can be sorted on date of last update, and located using a lambda.
 
 # Find objects that satisfy given lambda, sorted by date/time
 # --
-	P(1)=>collection
-	P(2,Lambda{P(1) true})=>lambdaCheck  # (value)->boolean
-	Db2:Keys(FixCN(collection))->key
-		obj=Db2:Get(FixCN(collection),key)
-		assert(obj.value != null)
-		assert(lambdaCheck.call(obj))
-		out(Int(obj.date.get,obj))
-	| _.sort->x
-		out(x.data)
+    P(1)=>collection
+    P(2,Lambda{P(1) true})=>lambdaCheck  # (value)->boolean
+    Db2:Keys(FixCN(collection))->key
+        obj=Db2:Get(FixCN(collection),key)
+        assert(obj.value != null)
+        assert(lambdaCheck.call(obj))
+        out(Int(obj.date.get,obj))
+    | _.sort->x
+        out(x.data)
 /FindObjects
 
 
 
 # Find objects where a given field has a certain (string) value
 # --
-	P(1,inputCollection)=>collection
-	P(2,readLine("field"))=>field
-	P(3,readLine("value (glob)"))=>value
-	
-	Glob(value,false).regex => regex
-	
-	
-	
-	# Creating an object, so the lambda has access to state (field and value via self)
-	Dict
-		.set("field",field)
-		.set("regex",regex)
-		.set("check", Lambda {
-			P(1)=>obj
-			obj.value.has(self.field) && self.regex.match(""+obj.value.get(self.field))
-		})
-		=> obj
-	FindObjects(collection, obj.check)->x
-		report(x.value.getMany(x.value.keys.sort))
+    P(1,inputCollection)=>collection
+    P(2,readLine("field"))=>field
+    P(3,readLine("value (glob)"))=>value
+    
+    Glob(value,false).regex => regex
+    
+    
+    
+    # Creating an object, so the lambda has access to state (field and value via self)
+    Dict
+        .set("field",field)
+        .set("regex",regex)
+        .set("check", Lambda {
+            P(1)=>obj
+            obj.value.has(self.field) && self.regex.match(""+obj.value.get(self.field))
+        })
+        => obj
+    FindObjects(collection, obj.check)->x
+        report(x.value.getMany(x.value.keys.sort))
 /SimpleFind
 
 
 # Get collection objects sorted by date
 # --
-	P(1,inputCollection)=>collection
-	Db2:Keys(FixCN(collection))->key
-		obj=Db2:Get(FixCN(collection),key)
-		assert(obj.value != null)
-		out(Int(obj.date.get,obj))
-	| _.sort->x out(x.data)
+    P(1,inputCollection)=>collection
+    Db2:Keys(FixCN(collection))->key
+        obj=Db2:Get(FixCN(collection),key)
+        assert(obj.value != null)
+        out(Int(obj.date.get,obj))
+    | _.sort->x out(x.data)
 /SortedObjectsByDate
 
-	
-	
+    
+    
 # Show objects sorted by last update
 # --
-	P(1,inputCollection)=>collection
-	SortedObjectsByDate(FixCN(collection))->obj
-		report(obj.id, obj.date, "<" + obj.value.keys.sort.concat(" ") + ">")
+    P(1,inputCollection)=>collection
+    SortedObjectsByDate(FixCN(collection))->obj
+        report(obj.id, obj.date, "<" + obj.value.keys.sort.concat(" ") + ">")
 /ShowObjects
 
 
 # Interactive reporting function: Show object fields, sorted by last update
 # --
-	P(1,inputCollection)=>collection
-	P(2,Input("Fields").get.split)=>fields
-	
-	SortedObjectsByDate(FixCN(collection))->obj
-		data = List(obj.date) + obj.value.getMany(fields) 
-		report(data)
+    P(1,inputCollection)=>collection
+    P(2,Input("Fields").get.split)=>fields
+    
+    SortedObjectsByDate(FixCN(collection))->obj
+        data = List(obj.date) + obj.value.getMany(fields) 
+        report(data)
 /ShowFields
 
 
@@ -178,48 +199,48 @@ Objects can be sorted on date of last update, and located using a lambda.
 # Example use for FindObjects - find values in Object collections that are not objects
 # at all, and delete them (should not happen)
 # --
-	Collections -> collection
-		Lfilter = Lambda {
-			P(1) => obj 
-			getType(obj.value) != "Dict"
-		}
-		FindObjects(FixCN(collection), Lfilter) -> obj
-			println("Deleting value " + getType(obj.value))
-			DeleteObject(collection, obj.id)
+    Collections -> collection
+        Lfilter = Lambda {
+            P(1) => obj 
+            getType(obj.value) != "Dict"
+        }
+        FindObjects(FixCN(collection), Lfilter) -> obj
+            println("Deleting value " + getType(obj.value))
+            DeleteObject(collection, obj.id)
 /DeleteNonObjects
 
 
 # Create some test data
 # --
 Dir.files -> f
-	println(f.name)
-	Dict
-		.set("type","test")   # type of object, see DeleteTestData
-		.set("name",f.name)
-		.set("path",f.path)
-		.set("size",f.length)
-		.set("inner",Dict.set("fileDate",Date(f.lastModified)))
-		=> data
-	AddObject("test", data)
+    println(f.name)
+    Dict
+        .set("type","test")   # type of object, see DeleteTestData
+        .set("name",f.name)
+        .set("path",f.path)
+        .set("size",f.length)
+        .set("inner",Dict.set("fileDate",Date(f.lastModified)))
+        => data
+    AddObject("test", data)
 /CreateTestData
-		
+        
 
 # Delete test data
 # --
-	collection="test"
-	Lfilter=Lambda{P(1).value.type=="test"}
-	FindObjects(collection,Lfilter) -> obj
-		DeleteObject(collection, obj.id)
+    collection="test"
+    Lfilter=Lambda{P(1).value.type=="test"}
+    FindObjects(collection,Lfilter) -> obj
+        DeleteObject(collection, obj.id)
 /DeleteTestData
 
 
 
 # Delete data in collection
 # --
-	P(1,inputCollection)=>collection
-	P(2,Lambda{false}) => Lfilter
-	FindObjects(collection,Lfilter) -> obj
-		DeleteObject(collection, obj.id)
+    P(1,inputCollection)=>collection
+    P(2,Lambda{false}) => Lfilter
+    FindObjects(collection,Lfilter) -> obj
+        DeleteObject(collection, obj.id)
 /DeleteObjects
 
 
@@ -227,8 +248,8 @@ Dir.files -> f
 
 # Delete all data in collection
 # --
-	P(1,inputCollection)=>collection
-	DeleteObjects(collection, Lambda{true})
+    P(1,inputCollection)=>collection
+    DeleteObjects(collection, Lambda{true})
 /DeleteAll
 
 
@@ -236,34 +257,34 @@ Dir.files -> f
 
 # Reporting function: Show object fields, sorted by last update
 # --
-	P(1,inputCollection)=>collection
-	P(2,Lambda{P(1) true})=>filter
-	P(3,Lambda{P(1) List})=>cols
-	
-	SortedObjectsByDate(FixCN(collection))->obj
-		assert(filter.call(obj))
-		report(cols.call(obj))
+    P(1,inputCollection)=>collection
+    P(2,Lambda{P(1) true})=>filter
+    P(3,Lambda{P(1) List})=>cols
+    
+    SortedObjectsByDate(FixCN(collection))->obj
+        assert(filter.call(obj))
+        report(cols.call(obj))
 /CustomView
 
 
 # Example of custom view, using example data
 # --
-	P(1,24) => hours
-	
-	# Creating object to make lambdas configurable
-	# --
-	x = Dict
-		.set("limit",Date.sub(Date.Duration.hours(hours)))
-		.set("Lfilter",Lambda{
-			P(1)=>obj
-			obj.date.after(self.limit) && obj.value.type=="test"
-		})
-		.set("Lcols",Lambda{
-			P(1).value=>obj
-			List(obj.name, obj.size, obj.inner.fileDate)
-		})
-	Lib:Header("Cols: name, size, inner.fileDate")
-	CustomView("test", x.Lfilter, x.Lcols)
+    P(1,24) => hours
+    
+    # Creating object to make lambdas configurable
+    # --
+    x = Dict
+        .set("limit",Date.sub(Date.Duration.hours(hours)))
+        .set("Lfilter",Lambda{
+            P(1)=>obj
+            obj.date.after(self.limit) && obj.value.type=="test"
+        })
+        .set("Lcols",Lambda{
+            P(1).value=>obj
+            List(obj.name, obj.size, obj.inner.fileDate)
+        })
+    Lib:Header("Cols: name, size, inner.fileDate")
+    CustomView("test", x.Lfilter, x.Lcols)
 /CustomViewDemo
 
 

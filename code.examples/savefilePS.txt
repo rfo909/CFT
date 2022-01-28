@@ -2,7 +2,7 @@
 <<< EOF
 #
 # CFT - an interactive programmable shell for automation 
-# Copyright (C) 2020 Roar Foshaug
+# Copyright (C) 2020-2022 Roar Foshaug
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -68,24 +68,24 @@ P(2,"get-service") =>code
 # Run a Powershell script on remote host
 # The script is created locally and run remotely via Invoke-Command.
 # --
-	P(1, Input("Enter remote host").get) =>host 
-	P(2, List("cd c:\temp","dir")) => scriptCode
-	P(2, false) => asAdmin
+    P(1, Input("Enter remote host").get) =>host 
+    P(2, List("cd c:\temp","dir")) => scriptCode
+    P(2, false) => asAdmin
 
-	# The Invoke-Command can run command from local ps1-file on remote server!
+    # The Invoke-Command can run command from local ps1-file on remote server!
 
-	Lib:TmpFile("script","ps1") => ps1file
-		# The script to be invoked must be named *.ps1
-		
-	ps1file.create("")
-	if (asAdmin) {
-		ps1file.append("start-process powershell -verb runas")
-	}
-	ps1file.append(scriptCode)
-	List("powershell","Invoke-Command","-ComputerName",host,"-FilePath",ps1file.path) => cmd
-	Lib:run(cmd,List,true) => result
-	ps1file.delete
-	result
+    Lib:TmpFile("script","ps1") => ps1file
+        # The script to be invoked must be named *.ps1
+        
+    ps1file.create("")
+    if (asAdmin) {
+        ps1file.append("start-process powershell -verb runas")
+    }
+    ps1file.append(scriptCode)
+    List("powershell","Invoke-Command","-ComputerName",host,"-FilePath",ps1file.path) => cmd
+    Lib:run(cmd,List,true) => result
+    ps1file.delete
+    result
 /RunScriptRemote
 
 
@@ -113,21 +113,21 @@ P(2, Input("Enter service").get) =>service
 
 # Set StartupType for Windows Service
 # --
-	P(1,Input("Host").get) => host
-	P(2,Input("Service").get) => service
-	P(3,Input("StartupType") => startupType
+    P(1,Input("Host").get) => host
+    P(2,Input("Service").get) => service
+    P(3,Input("StartupType") => startupType
 
-	SymDict(service,startupType).mergeCodes=>data
-	script = Inner {
-		Sequence(
-			@ start-process powershell -verb runas
-			@ Set-Service -Name ${service} -StartupType ${startupType}
-		)->line 
-			out(line.merge(data))
-	}
+    SymDict(service,startupType).mergeCodes=>data
+    script = Inner {
+        Sequence(
+            @ start-process powershell -verb runas
+            @ Set-Service -Name ${service} -StartupType ${startupType}
+        )->line 
+            out(line.merge(data))
+    }
 
-	PS:RunScriptRemote(host, script) => x
-	x
+    PS:RunScriptRemote(host, script) => x
+    x
 /SetServiceAutostart
 
 
@@ -135,79 +135,79 @@ P(2, Input("Enter service").get) =>service
 
 # Show startup type for Windows Service
 # --
-	P(1,Input("Host").get) => host
-	P(2,Input("Service").get) => service
-	
-	SymDict(service).mergeCodes=>data
-	script=Inner{
-		Sequence(
-			@ get-service ${service} | select -property name, starttype
-		)->line
-			out(line.merge(data))
-	}
+    P(1,Input("Host").get) => host
+    P(2,Input("Service").get) => service
+    
+    SymDict(service).mergeCodes=>data
+    script=Inner{
+        Sequence(
+            @ get-service ${service} | select -property name, starttype
+        )->line
+            out(line.merge(data))
+    }
 
-	PS:RunScriptRemote(host, script) => x
+    PS:RunScriptRemote(host, script) => x
 
-	dict=Dict
-	x.stdout->line 
-		assert(line.contains(":")) 
-		dict.setStr(line) 
-	|
-	dict.get("StartType")
-	
+    dict=Dict
+    x.stdout->line 
+        assert(line.contains(":")) 
+        dict.setStr(line) 
+    |
+    dict.get("StartType")
+    
 /GetServiceStartType
-	
+    
 
 
 # Utility function for sh
 # --
-	P(1)=>host
-	Db2:Set("PS_sh",host,Date)
+    P(1)=>host
+    Db2:Set("PS_sh",host,Date)
 //_shPutHost
 
 
 # Utility
 # --
-	P(1)=>host
-	Lib:run(List("ping","-n","1",host),List,true).exitCode==0
+    P(1)=>host
+    Lib:run(List("ping","-n","1",host),List,true).exitCode==0
 //_shVerifyHost
 
 # Utility function for sh
 # --
 
-	println("Checking hosts ...")
-	Db2:Keys("PS_sh")->key
-		Db2:Get("PS_sh",key,Date) => date
-		assert(date != null)
-		assert(Date.sub(Date.Duration.days(30)).before(date))
-		if (!_shVerifyHost(key)) {
-			Db2:Set("PS_sh",key,null)
-			assert(false)
-		}
-		out(Int(date.get,key))
-	| _.sort->x
-		out(x.data.toLower)
-	| => list
-	
-	list->key
-		Db2:Get("PS_sh",key,Date) => date
-		SymDict(date,key)
-			.set("process",Lambda{	self.key }) 
-		=> obj
-		out(obj)
-	| => menuEntries
-	
-	menuEntries.add(
-		Dict
-			.set("date",Date)
-			.set("key","Add new ...")
-			.set("process",Lambda{ readLine("Enter host") })
-	)
-	LLabel=Lambda{P(1)=>x x.date.setFormat("yyyy-MM-dd").fmt + " : " + x.key}
-	LValue=Lambda{P(1)=>x x.key}
-	Lib:MenuSelect(menuEntries, LLabel, "Known hosts", false, LValue).process.call => host
-	_shPutHost(host)
-	host
+    println("Checking hosts ...")
+    Db2:Keys("PS_sh")->key
+        Db2:Get("PS_sh",key,Date) => date
+        assert(date != null)
+        assert(Date.sub(Date.Duration.days(30)).before(date))
+        if (!_shVerifyHost(key)) {
+            Db2:Set("PS_sh",key,null)
+            assert(false)
+        }
+        out(Int(date.get,key))
+    | _.sort->x
+        out(x.data.toLower)
+    | => list
+    
+    list->key
+        Db2:Get("PS_sh",key,Date) => date
+        SymDict(date,key)
+            .set("process",Lambda{  self.key }) 
+        => obj
+        out(obj)
+    | => menuEntries
+    
+    menuEntries.add(
+        Dict
+            .set("date",Date)
+            .set("key","Add new ...")
+            .set("process",Lambda{ readLine("Enter host") })
+    )
+    LLabel=Lambda{P(1)=>x x.date.setFormat("yyyy-MM-dd").fmt + " : " + x.key}
+    LValue=Lambda{P(1)=>x x.key}
+    Lib:MenuSelect(menuEntries, LLabel, "Known hosts", false, LValue).process.call => host
+    _shPutHost(host)
+    host
 //_shGetHost
 
 
@@ -219,154 +219,154 @@ P(1,_shGetHost) => host
 getDir=Lambda{P(1)=>host Db2:Get("PS_sh_cwd",host+"_"+Sys.sessionUUID,"c:\temp")}
 setDir=Lambda{P(1)=>host P(2)=>dir Db2:Set("PS_sh_cwd",host+"_"+Sys.sessionUUID, dir)}
 loop
-	println
-	readLine("[" + host + "] CFT [" + getDir.call(host) + "] '.q' to quit, '?' for help") => mode
-	break(mode==".q")
+    println
+    readLine("[" + host + "] CFT [" + getDir.call(host) + "] '.q' to quit, '?' for help") => mode
+    break(mode==".q")
 
-	if (mode=="?") Inner {
-		Sequence(
-			@ Enter regular command or type
-			@
-			@ '.d'  - show stored remote paths
-			@ '.d<n>' - goto stored path
-			@ '.ds<n>' - store current path under 'n'
-			@ '.dx<n>' - remove stored path 'n'
-			@ '.D'  - set directory manually
-			@
-			@ '.e'  - edit file in current directory
-			@ '.p'  - show full path to current directory
-			@ '.u X'- show file minus comments (starting with '#' or X if given)
-			@
-			@ '.h'  - change host
-			@ '.H'  - show all known hosts
-			@ '.'   - enter or paste multiple lines - end with '.'
-			@
-			@ '.q'  - quit
-		)->line println(line)
-	} else if (mode==".h") {
-		host=_shGetHost
-	} else if (mode==".D")  {
-		readLine("New current directory") => dir
-		setDir.call(host,dir)
-	} else if (mode==".d") {
-		println
-		Lib:Header("Stored paths")
-		Inner {Lib.Data.each(0,9)->i
-			str = Db2:Get("PS_sh_paths", host+"_"+i, null)
-			if (str==null) str=""
-			println(""+i + ": " + str)
-		}
-	} else if (mode.startsWith(".ds")) {
-		if (mode.sub(3).trim.?parseInt) {
-			x=mode.sub(3).trim.parseInt
-			Db2:Set("PS_sh_paths", host + "_" + x, getDir.call(host))
-		} else {
-			println("expected integer")
-		}
-	} else if (mode.startsWith(".dx")) {
-		if (mode.sub(3).trim.?parseInt) {
-			x=mode.sub(3).trim.parseInt
-			Db2:Set("PS_sh_paths", host + "_" + x, null)
-		} else {
-			println("expected integer")
-		}
-	} else if (mode.startsWith(".d")) {
-		if (mode.sub(2).trim.?parseInt) {
-			x=mode.sub(2).trim.parseInt
-			path=Db2:Get("PS_sh_paths",host+"_"+x,null)
-			if (path != null) {
-				setDir.call(host,path)
-			} else {
-				println("Path " + x + " undefined")
-			}
-		} else {
-			println("Expected integer")
-		}
-		
-	} else if (mode==".e") {
-		LSortFiles=Lambda{
-			Inner {
-				P(1)->f 
-					out(Int(f.lastModified,f)) 
-				| _.sort
-			} ->x 
-				out(x.data)
-			
-		}
-		dir = Dir("\\" + host + "\" + convertPath(getDir.call(host)))
-		println("dir=" + dir.path)
-		file = Util:SelectFile(dir,"*",LSortFiles)
-		if (file != null) {
-			Lib:e (file)
-		}
-	} else if (mode==".p") {
-		dir = Dir("\\" + host + "\" + convertPath(getDir.call(host)))
-		println(dir.path)
-	} else if (mode.startsWith(".u")) {
-		dir = Dir("\\" + host + "\" + convertPath(getDir.call(host)))
-		comment="#"
-		if (mode.split.length==2) comment=mode.split.nth(1)
+    if (mode=="?") Inner {
+        Sequence(
+            @ Enter regular command or type
+            @
+            @ '.d'  - show stored remote paths
+            @ '.d<n>' - goto stored path
+            @ '.ds<n>' - store current path under 'n'
+            @ '.dx<n>' - remove stored path 'n'
+            @ '.D'  - set directory manually
+            @
+            @ '.e'  - edit file in current directory
+            @ '.p'  - show full path to current directory
+            @ '.u X'- show file minus comments (starting with '#' or X if given)
+            @
+            @ '.h'  - change host
+            @ '.H'  - show all known hosts
+            @ '.'   - enter or paste multiple lines - end with '.'
+            @
+            @ '.q'  - quit
+        )->line println(line)
+    } else if (mode==".h") {
+        host=_shGetHost
+    } else if (mode==".D")  {
+        readLine("New current directory") => dir
+        setDir.call(host,dir)
+    } else if (mode==".d") {
+        println
+        Lib:Header("Stored paths")
+        Inner {Lib.Data.each(0,9)->i
+            str = Db2:Get("PS_sh_paths", host+"_"+i, null)
+            if (str==null) str=""
+            println(""+i + ": " + str)
+        }
+    } else if (mode.startsWith(".ds")) {
+        if (mode.sub(3).trim.?parseInt) {
+            x=mode.sub(3).trim.parseInt
+            Db2:Set("PS_sh_paths", host + "_" + x, getDir.call(host))
+        } else {
+            println("expected integer")
+        }
+    } else if (mode.startsWith(".dx")) {
+        if (mode.sub(3).trim.?parseInt) {
+            x=mode.sub(3).trim.parseInt
+            Db2:Set("PS_sh_paths", host + "_" + x, null)
+        } else {
+            println("expected integer")
+        }
+    } else if (mode.startsWith(".d")) {
+        if (mode.sub(2).trim.?parseInt) {
+            x=mode.sub(2).trim.parseInt
+            path=Db2:Get("PS_sh_paths",host+"_"+x,null)
+            if (path != null) {
+                setDir.call(host,path)
+            } else {
+                println("Path " + x + " undefined")
+            }
+        } else {
+            println("Expected integer")
+        }
+        
+    } else if (mode==".e") {
+        LSortFiles=Lambda{
+            Inner {
+                P(1)->f 
+                    out(Int(f.lastModified,f)) 
+                | _.sort
+            } ->x 
+                out(x.data)
+            
+        }
+        dir = Dir("\\" + host + "\" + convertPath(getDir.call(host)))
+        println("dir=" + dir.path)
+        file = Util:SelectFile(dir,"*",LSortFiles)
+        if (file != null) {
+            Lib:e (file)
+        }
+    } else if (mode==".p") {
+        dir = Dir("\\" + host + "\" + convertPath(getDir.call(host)))
+        println(dir.path)
+    } else if (mode.startsWith(".u")) {
+        dir = Dir("\\" + host + "\" + convertPath(getDir.call(host)))
+        comment="#"
+        if (mode.split.length==2) comment=mode.split.nth(1)
 
-		file = Util:SelectFile(dir)
-		if (file != null) {
-			println("--------------")
-			Inner{
-				Util:UncommentFile (file, comment)->line println(line) 
-			}
-			println("--------------")
-		}
-	} else if (mode==".H") {
-		Inner{
-			Db2:Keys("PS_sh").sort->key
-				Db2:Get("PS_sh",key,Date) => date
-				assert(date != null)
-				report(key,date.fmt)
-		}->line println(line)
-	} else {
-		if (mode==".") {
-			println("Enter code lines, then '.' to send")
-			scriptLines = readLines(".")
-		} else {
-			scriptLines=mode.split(";")
-		}
-		currDir = getDir.call(host)
-		scriptLines = List("cd '" + currDir + "'") 
-			+ scriptLines + Sequence(
-				@ Write-Host "----------Output-Stops-Here----------"
-				@ $xxxxxx=Get-Location
-				@ Write-Host "RemotePath: $xxxxxx"
-			)
+        file = Util:SelectFile(dir)
+        if (file != null) {
+            println("--------------")
+            Inner{
+                Util:UncommentFile (file, comment)->line println(line) 
+            }
+            println("--------------")
+        }
+    } else if (mode==".H") {
+        Inner{
+            Db2:Keys("PS_sh").sort->key
+                Db2:Get("PS_sh",key,Date) => date
+                assert(date != null)
+                report(key,date.fmt)
+        }->line println(line)
+    } else {
+        if (mode==".") {
+            println("Enter code lines, then '.' to send")
+            scriptLines = readLines(".")
+        } else {
+            scriptLines=mode.split(";")
+        }
+        currDir = getDir.call(host)
+        scriptLines = List("cd '" + currDir + "'") 
+            + scriptLines + Sequence(
+                @ Write-Host "----------Output-Stops-Here----------"
+                @ $xxxxxx=Get-Location
+                @ Write-Host "RemotePath: $xxxxxx"
+            )
 
 
-		PS:RunScriptRemote(host,scriptLines) => status
+        PS:RunScriptRemote(host,scriptLines) => status
 
-		# Process stdout
-		Inner { 
-			marker=false
-			status.stdout->line 
-				if(line.contains("---------Output-Stops-Here---------")) {marker=true}
-				if (!marker) println(line)
-				if (marker && line.startsWith("RemotePath:")) {
-					d=line.after(":").trim
-					if (d != getDir.call(host)) {
-						newDir=line.after(":").trim
-						if (newDir != currDir) {
-							setDir.call(host, newDir)
-						}
-					}
-				}
-		}
-		# Process stdout				
-		Inner { status.stderr->line println("ERR " + line) }
-	}
+        # Process stdout
+        Inner { 
+            marker=false
+            status.stdout->line 
+                if(line.contains("---------Output-Stops-Here---------")) {marker=true}
+                if (!marker) println(line)
+                if (marker && line.startsWith("RemotePath:")) {
+                    d=line.after(":").trim
+                    if (d != getDir.call(host)) {
+                        newDir=line.after(":").trim
+                        if (newDir != currDir) {
+                            setDir.call(host, newDir)
+                        }
+                    }
+                }
+        }
+        # Process stdout                
+        Inner { status.stderr->line println("ERR " + line) }
+    }
 /sh
 
 
 # Convert path c:\xxx to c$\xxx etc
 # --
 P(1)=>path
-	error(path.chars.nth(1) != ":" || path.chars.nth(2) != "\", "Invalid path, must start with c:\... or similar")
-	path.chars.nth + "$" + path.sub(2)
+    error(path.chars.nth(1) != ":" || path.chars.nth(2) != "\", "Invalid path, must start with c:\... or similar")
+    path.chars.nth + "$" + path.sub(2)
 //convertPath
 
 
@@ -374,24 +374,24 @@ P(1)=>path
 # Check if host1 can access TCP port on host2, true if connect ok, false if not
 # Note: slow
 # --
-	P(1,Input("Host1").get) => host1
-	P(2,Input("Host2").get) => host2
-	P(3,Input("Port").get) => port
-	P(4,true) => verbose
+    P(1,Input("Host1").get) => host1
+    P(2,Input("Host2").get) => host2
+    P(3,Input("Port").get) => port
+    P(4,true) => verbose
 
-	cmd = "Test-NetConnection -ComputerName " + host2 + " -InformationLevel Detailed -Port " + port
-	PS:RunScriptRemote(host1, List(cmd)) => x
-	connectOk = false
-	if (verbose) Inner {
-		x.stdout->line println("[OUT] " + line) |
-		x.stderr->line println("[ERR] " + line) |
-	}
-	Inner {
-		x.stdout->line
-			assert(line.contains("TcpTestSucceeded"))
-			connectOk = line.contains("True")
-	}
-	connectOk
+    cmd = "Test-NetConnection -ComputerName " + host2 + " -InformationLevel Detailed -Port " + port
+    PS:RunScriptRemote(host1, List(cmd)) => x
+    connectOk = false
+    if (verbose) Inner {
+        x.stdout->line println("[OUT] " + line) |
+        x.stderr->line println("[ERR] " + line) |
+    }
+    Inner {
+        x.stdout->line
+            assert(line.contains("TcpTestSucceeded"))
+            connectOk = line.contains("True")
+    }
+    connectOk
 /VerifyTCPConnect
 
 
@@ -399,51 +399,51 @@ P(1)=>path
 
 # Get event-log
 # --
-	P(1,Input("Host").get) => host
-	P(2,null) => logName
-	P(3,null) => minutes
-	P(4,null) => searchTerm
+    P(1,Input("Host").get) => host
+    P(2,null) => logName
+    P(3,null) => minutes
+    P(4,null) => searchTerm
 
-	if(logName==null) {
-		choices = "Application Security System".split
-		Lib:MenuSelect(choices,Lambda{P(1)},"Select log name") => logName
-	}
-	if (minutes==null) {
-		readLine("Enter minutes back, default=60") => m
-		if (m.?parseInt, m.parseInt, 60) => minutes
-	}
-	if (searchTerm==null) {
-		readLine("Enter search term") => searchTerm
-	}
-	searchPart=""
-	if (searchTerm.trim != "") {
-		searchPart=' | where message -like "*' + searchTerm.trim + '*"'
-	}
+    if(logName==null) {
+        choices = "Application Security System".split
+        Lib:MenuSelect(choices,Lambda{P(1)},"Select log name") => logName
+    }
+    if (minutes==null) {
+        readLine("Enter minutes back, default=60") => m
+        if (m.?parseInt, m.parseInt, 60) => minutes
+    }
+    if (searchTerm==null) {
+        readLine("Enter search term") => searchTerm
+    }
+    searchPart=""
+    if (searchTerm.trim != "") {
+        searchPart=' | where message -like "*' + searchTerm.trim + '*"'
+    }
 
-	cmd="get-eventlog "+logName+" -after (get-date).addminutes(-" + minutes + ")"+searchPart
-	#readLine(cmd)
+    cmd="get-eventlog "+logName+" -after (get-date).addminutes(-" + minutes + ")"+searchPart
+    #readLine(cmd)
 
-	i=5
-	Call(host,cmd).stdout.reverse->line
-		println(line) 
-		i=i-1
-		if(i<=0) { 
-			println
-			i=5
-		}
-	|
-	println("["+ logName + ":" + minutes + "min]")
-	println(cmd)
-	readLine("Enter index of event(s) to view separated by space") =>x
-	x.split->part
-		if (part.trim.?parseInt) {
-			index=part.trim.parseInt
-			Inner {
-				Call(host,"get-eventlog "+logName + " | where index -eq " + index + " | format-list *").stdout->line 
-					println(line) 
-			}
-		}
-	}
+    i=5
+    Call(host,cmd).stdout.reverse->line
+        println(line) 
+        i=i-1
+        if(i<=0) { 
+            println
+            i=5
+        }
+    |
+    println("["+ logName + ":" + minutes + "min]")
+    println(cmd)
+    readLine("Enter index of event(s) to view separated by space") =>x
+    x.split->part
+        if (part.trim.?parseInt) {
+            index=part.trim.parseInt
+            Inner {
+                Call(host,"get-eventlog "+logName + " | where index -eq " + index + " | format-list *").stdout->line 
+                    println(line) 
+            }
+        }
+    }
 /GetEventLog
 
 
@@ -452,26 +452,26 @@ P(1)=>path
 
 # Check disk usage numbers for remote drives
 # --
-	P(1,Input("host").get)=>host
-	P(2,Input("drive").get)=>drive
+    P(1,Input("host").get)=>host
+    P(2,Input("drive").get)=>drive
 
-	driveLetter=drive.chars.nth  # ignore colon if included
+    driveLetter=drive.chars.nth  # ignore colon if included
 
-	"get-psdrive " + driveLetter+ " | Select-Object Used,Free" => cmd
+    "get-psdrive " + driveLetter+ " | Select-Object Used,Free" => cmd
 
-	data=Dict
-	PS:Call(host,cmd).stdout->line 
-		assert(line.contains(":"))
-		data.setStr(line)
-	|
-	used=data.Used.parseInt
-	free=data.Free.parseInt
-	total=used+free
-	usagePercent=((used/total)*100).i
+    data=Dict
+    PS:Call(host,cmd).stdout->line 
+        assert(line.contains(":"))
+        data.setStr(line)
+    |
+    used=data.Used.parseInt
+    free=data.Free.parseInt
+    total=used+free
+    usagePercent=((used/total)*100).i
 
-	usedGb=(used/1024/1024/1024).i
-	freeGb=(free/1024/1024/1024).i
+    usedGb=(used/1024/1024/1024).i
+    freeGb=(free/1024/1024/1024).i
 
-	# return dictionary
-	SymDict(host,driveLetter,used,free,usagePercent,usedGb,freeGb)
+    # return dictionary
+    SymDict(host,driveLetter,used,free,usagePercent,usedGb,freeGb)
 /GetRemoteDiskUse

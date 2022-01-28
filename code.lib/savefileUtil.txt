@@ -1,3 +1,24 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2022 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 
 # Show content of dictionary
 # Note: can also use JSON:PP
@@ -5,32 +26,32 @@
 P(1)=>dict
 P(2,false)=>print
 
-	# Inner lambda to convert value to synthesized form, 
-	# if synthesizable, for more relevant information
-	LPresent=Lambda{
-		P(1)=>val
-		# Inner lambda to check if synthesizable via predicate call
-		LSyn=Lambda{syn(P(1))}
-		
-		if (LSyn.?call(val)) {
-			# value is synthesizable
-			syn(val)
-		} else {
-			val
-		}
-	}
+    # Inner lambda to convert value to synthesized form, 
+    # if synthesizable, for more relevant information
+    LPresent=Lambda{
+        P(1)=>val
+        # Inner lambda to check if synthesizable via predicate call
+        LSyn=Lambda{syn(P(1))}
+        
+        if (LSyn.?call(val)) {
+            # value is synthesizable
+            syn(val)
+        } else {
+            val
+        }
+    }
 
-	Inner {
-		dict.keys->key
-			val=LPresent.call(dict.get(key))
-			report(key,val)
-	} => reportLines
-	
-	if (print) {
-		reportLines->line println(line)
-	}
-	reportLines
-		
+    Inner {
+        dict.keys->key
+            val=LPresent.call(dict.get(key))
+            report(key,val)
+    } => reportLines
+    
+    if (print) {
+        reportLines->line println(line)
+    }
+    reportLines
+        
 /ShowDict
 
 
@@ -39,34 +60,34 @@ P(2,false)=>print
 # --
 P(1) => name
 P(2,999999999999) => maxValue
-	
-	error(name==null,"P(1) name missing")
-	
-	id="counter:"+(name.replace(" ","_"))
-	
-	TRANS="Util.Counter.Transaction:" + id
-		# Individual Db2 collection accesses are protected by collection locks, but
-		# below we have a transaction, where we read a value, update it
-		# and write it back.
-			
-	Lib.Db.obtainLock(TRANS,10000)
-	
-	i = Db2:Get("Util", id, 0)
-	next=(i+1) % maxValue
-	Db2:Set("Util",id,next)
-	
-	Lib.Db.releaseLock(TRANS)
-	i
+    
+    error(name==null,"P(1) name missing")
+    
+    id="counter:"+(name.replace(" ","_"))
+    
+    TRANS="Util.Counter.Transaction:" + id
+        # Individual Db2 collection accesses are protected by collection locks, but
+        # below we have a transaction, where we read a value, update it
+        # and write it back.
+            
+    Lib.Db.obtainLock(TRANS,10000)
+    
+    i = Db2:Get("Util", id, 0)
+    next=(i+1) % maxValue
+    Db2:Set("Util",id,next)
+    
+    Lib.Db.releaseLock(TRANS)
+    i
 /Counter
-	
+    
 
 
 
 # Set time mark
 # --
 P(1) => name
-	id="timemark:"+(name.replace(" ","_"))
-	Db2:Set("Util", id, Date)
+    id="timemark:"+(name.replace(" ","_"))
+    Db2:Set("Util", id, Date)
 /SetTimeMark
 
 
@@ -75,23 +96,23 @@ P(1) => name
 # --
 P(1) => name
 P(2,3600) => seconds
-	Date.sub(Date.Duration.seconds(seconds)) => limit
+    Date.sub(Date.Duration.seconds(seconds)) => limit
 
-	id="timemark:"+((""+name).replace(" ","_"))
-	val = Db2:Get("Util", id)
+    id="timemark:"+((""+name).replace(" ","_"))
+    val = Db2:Get("Util", id)
 
-	val==null || val.before(limit)
+    val==null || val.before(limit)
 /HasTimedOut
-	
+    
 
 
 # Get time mark
 # --
 P(1) => name
-	id="timemark:"+((""+name).replace(" ","_"))
-	val = Db2:Get("Util",id)
-	if (val==null) val=Date
-	val
+    id="timemark:"+((""+name).replace(" ","_"))
+    val = Db2:Get("Util",id)
+    if (val==null) val=Date
+    val
 /GetTimeMark
 
 
@@ -101,10 +122,10 @@ P(1) => name
 # --
 P(1) => file
 P(2,"#") => commentStart
-	file.read->line
-		s=line.trim
-		reject(s.startsWith(commentStart) || s=="")
-		out(line)
+    file.read->line
+        s=line.trim
+        reject(s.startsWith(commentStart) || s=="")
+        out(line)
 /UncommentFile
 
 
@@ -117,47 +138,47 @@ P(2,"#") => commentStart
 P(1) => dir
 P(2,"*") => globPattern
 P(3,Lambda{P(1)}) => processList 
-	filterString=null
-	loop
-		i=0
-		files = dir.files(Glob(globPattern))
-		files=processList.call(files)
-		
-		# Apply filterString if it exists
-		if (filterString != null) {
-			Inner {
-				files->f if (f.name.contains(filterString)) out(f)
-			} => files
-		}
-		
-		if (files.length==0) {
-			break(true)
-		}
-		if (files.length==1) {
-			result=files.first
-			break(true)
-		}
-		
-		# Show files
-		Inner {files->f 
-			println(""+i + ": " + f.name)
-			i=i+1
-		}
-		result=null
-		readLine("Enter index / part of name / blank for none") => input
-		if (input=="") break(true)
-		if (input.?parseInt) {
-			result=files.nth(input.parseInt)
-			break(true)
-		} else {
-			filterString=input
-		}
-	|
-	if (result != null) {
-		println
-		println("* Selected file " + result.name)
-	}
-	result
+    filterString=null
+    loop
+        i=0
+        files = dir.files(Glob(globPattern))
+        files=processList.call(files)
+        
+        # Apply filterString if it exists
+        if (filterString != null) {
+            Inner {
+                files->f if (f.name.contains(filterString)) out(f)
+            } => files
+        }
+        
+        if (files.length==0) {
+            break(true)
+        }
+        if (files.length==1) {
+            result=files.first
+            break(true)
+        }
+        
+        # Show files
+        Inner {files->f 
+            println(""+i + ": " + f.name)
+            i=i+1
+        }
+        result=null
+        readLine("Enter index / part of name / blank for none") => input
+        if (input=="") break(true)
+        if (input.?parseInt) {
+            result=files.nth(input.parseInt)
+            break(true)
+        } else {
+            filterString=input
+        }
+    |
+    if (result != null) {
+        println
+        println("* Selected file " + result.name)
+    }
+    result
 /SelectFile
 
 
@@ -184,50 +205,50 @@ P(3,Lambda{P(1)}) => processList
 # --
 Lib:GetTerminalSize
 Dict.set("list",List)
-	.set("title","ProcessMonitor")
-	.set("LsetTitle", Lambda{
-		self.set("title",""+P(1))
-	})
-	.set("Lrunning",Lambda{
-		self.list->data assert(!data.proc.isDone) out(data)
-	})
-	.set("Ldone",Lambda{
-		self.list->data assert(data.proc.isDone) out(data)
-	})
-	.set("Lwait",Lambda{
-		P(1)=>limit
-		P(2,false)=>verbose
-		if (limit<1) limit=1  ## less-than in test below
-		loop
-			self.Lrunning.call => running
-			if(verbose) {
-				self.Ldone.call => completed
+    .set("title","ProcessMonitor")
+    .set("LsetTitle", Lambda{
+        self.set("title",""+P(1))
+    })
+    .set("Lrunning",Lambda{
+        self.list->data assert(!data.proc.isDone) out(data)
+    })
+    .set("Ldone",Lambda{
+        self.list->data assert(data.proc.isDone) out(data)
+    })
+    .set("Lwait",Lambda{
+        P(1)=>limit
+        P(2,false)=>verbose
+        if (limit<1) limit=1  ## less-than in test below
+        loop
+            self.Lrunning.call => running
+            if(verbose) {
+                self.Ldone.call => completed
 
-				AppUI:DoShowTopLine(self.title)
-				AppUI:DoShowProgressBar(completed.length, completed.length+running.length,50)
-				AppUI:DoShowHeader("Completed")
-				AppUI:DoShowText("#"+self.Ldone.call.length)
-				AppUI:DoShowList(self.Ldone.call.filter(Lambda{P(1).name}))
-				AppUI:DoSpace
-				AppUI:DoShowHeader("Running")
-				AppUI:DoShowText("#"+running.length)
-				AppUI:DoShowList(running.filter(Lambda{P(1).name}))
-				AppUI:DoSpace
+                AppUI:DoShowTopLine(self.title)
+                AppUI:DoShowProgressBar(completed.length, completed.length+running.length,50)
+                AppUI:DoShowHeader("Completed")
+                AppUI:DoShowText("#"+self.Ldone.call.length)
+                AppUI:DoShowList(self.Ldone.call.filter(Lambda{P(1).name}))
+                AppUI:DoSpace
+                AppUI:DoShowHeader("Running")
+                AppUI:DoShowText("#"+running.length)
+                AppUI:DoShowList(running.filter(Lambda{P(1).name}))
+                AppUI:DoSpace
 
-				#println("Completed: " 
-				#	+ (self.list.length-running.length) 
-				#	+ " Running: " + running.length + " " + descRunning)
-			}
-			break (running.length < limit)
-			Sys.sleep(500)
-	})
-	.set("Ladd",Lambda{
-		P(1)=>proc
-		P(2,"proc-"+(self.list.length+1)) => name
+                #println("Completed: " 
+                # + (self.list.length-running.length) 
+                # + " Running: " + running.length + " " + descRunning)
+            }
+            break (running.length < limit)
+            Sys.sleep(500)
+    })
+    .set("Ladd",Lambda{
+        P(1)=>proc
+        P(2,"proc-"+(self.list.length+1)) => name
 
-		self.list.add(SymDict(proc,name))
-	})
-	
+        self.list.add(SymDict(proc,name))
+    })
+    
 /ProcessMonitor
 
 
@@ -243,70 +264,70 @@ Dict.set("list",List)
 #    apm.LWaitAll.call
 #
 # --
-	P(1,Sys.cpuCores+2) => numThreads
-	Dict
-		.set("numThreads",numThreads)
-		.set("list",List)
-		.set("LWait",Lambda{
-			loop
-				newList = self.list.filter(
-					Lambda{
-						P(1)=>proc 
-						if(proc.isAlive,proc,null)
-					}
-				)
-				self.set("list",newList)
-				break(newList.length < self.numThreads)
-				Sys.sleep(5)
-		})
-		.set("LAdd",Lambda{
-			self.list.add(P(1))
-		})
-		.set("LWaitAll",Lambda{
-			self.list->p p.wait | self.set("list",List)
-		})
+    P(1,Sys.cpuCores+2) => numThreads
+    Dict
+        .set("numThreads",numThreads)
+        .set("list",List)
+        .set("LWait",Lambda{
+            loop
+                newList = self.list.filter(
+                    Lambda{
+                        P(1)=>proc 
+                        if(proc.isAlive,proc,null)
+                    }
+                )
+                self.set("list",newList)
+                break(newList.length < self.numThreads)
+                Sys.sleep(5)
+        })
+        .set("LAdd",Lambda{
+            self.list.add(P(1))
+        })
+        .set("LWaitAll",Lambda{
+            self.list->p p.wait | self.set("list",List)
+        })
 /AutomaticProcessMonitor
 
 
 # Invoke curl - does not work for jsonData on Windows (but ok on Linux / WSL)
 # --
-	P(1,"http")=>protocol
-	P(2)=>HostPort
-	P(3,"GET") => method
-	P(4,error("path required"))=>path
-	P(5) => jsonData
-	P(6,false)=>verbose
-	
-	
-	cmd=List("curl","-X",method)
-	if (jsonData != null) {
-		cmd.add("--header")
-		cmd.add("Content-Type: application/json")
-	}
+    P(1,"http")=>protocol
+    P(2)=>HostPort
+    P(3,"GET") => method
+    P(4,error("path required"))=>path
+    P(5) => jsonData
+    P(6,false)=>verbose
+    
+    
+    cmd=List("curl","-X",method)
+    if (jsonData != null) {
+        cmd.add("--header")
+        cmd.add("Content-Type: application/json")
+    }
 
-	if (!protocol.endsWith(":")) protocol=protocol+":"
-	if (!protocol.endsWith("//")) protocol=protocol+"//"
-	
-	url=protocol + HostPort + path
-	cmd.add(url)
-	if (jsonData != null) {
-		cmd.add("-d")
-		cmd.add(if (getType(jsonData)=="String", jsonData, JSON:Export(jsonData)) )
-	}
-	if (verbose) {
-		println
-		Inner {
-			cmd->x println("% " + x)
-		}
-		println
-	}
-	result = Lib:run(cmd)
-	if (verbose) {
-		println("exitCode = " + result.exitCode)
-		{result.stdout->line println("(out) " + line)}
-		{result.stderr->line println("(err) " + line)}
-	}
-	result
+    if (!protocol.endsWith(":")) protocol=protocol+":"
+    if (!protocol.endsWith("//")) protocol=protocol+"//"
+    
+    url=protocol + HostPort + path
+    cmd.add(url)
+    if (jsonData != null) {
+        cmd.add("-d")
+        cmd.add(if (getType(jsonData)=="String", jsonData, JSON:Export(jsonData)) )
+    }
+    if (verbose) {
+        println
+        Inner {
+            cmd->x println("% " + x)
+        }
+        println
+    }
+    result = Lib:run(cmd)
+    if (verbose) {
+        println("exitCode = " + result.exitCode)
+        {result.stdout->line println("(out) " + line)}
+        {result.stderr->line println("(err) " + line)}
+    }
+    result
 /CURL
 
 

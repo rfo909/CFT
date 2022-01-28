@@ -1,100 +1,121 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2022 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 # Log file
 # --
-	File("WebTest_log.txt")
+    File("WebTest_log.txt")
 /LogFile
 
 
 # Initialize web server on port 2500 - for testing
 # --
 
-	Lib.Web.Server(2500) => server
-	if (LogFile.exists) LogFile.delete
-	server.setServerLogFile(LogFile)
-	
-	server.RootContext => Root   # The "/" path
-	
-	Root.Context("my.css","text/css")
-		.GET(Lambda{
-			Sequence(
-				@ * {font-family: courier}
-				@ body {background-color:#AAFF99}
-			)
-	})
-		
-	Root.GET(Lambda{
-		Sequence(
-			@ <<BodyStart>>
-			@ <h3>Menu</h3>
-			@ <p>
-			@ <a href="/text">/text</a> (text/plain test)<br/>
-			@ </p>
-			@ <p>
-			@ <a href="/status">/status</a><br/>
-			@ </p>
-			@ <p>
-			@ <a href="/formtest">/formtest</a><br/>
-			@ </p>
-			@ <<BodyEnd>>
-		).mergeExpr
-	})
-		
-	Root.Context("text","text/plain").GET(Lambda{
-		files=Lambda{
-			Dir.files->f report(f.name, f.length)
-		}
-		Sequence(
-			#@ <<BodyStart>>
-			#@ <h1>Plain text test</h1>
-			@ <<files.call>>
-			#@ <<BodyEnd>>
-		).mergeExpr
-	})
-	Root.Context("status")
-		.GET(Lambda{
-			P(1)=>requestObj
-			headers=Lambda{
-				P(1)=>requestObj
-				Util:ShowDict(requestObj.headers)->line out(line+"<br/>")
-			}
-			Sequence(
-				@ <<BodyStart>>
-				@ <h1>Headers</h1>
-				@ <<headers.call(requestObj)>>
-				@ <<BodyEnd>>
-			).mergeExpr
-		})
+    Lib.Web.Server(2500) => server
+    if (LogFile.exists) LogFile.delete
+    server.setServerLogFile(LogFile)
+    
+    server.RootContext => Root   # The "/" path
+    
+    Root.Context("my.css","text/css")
+        .GET(Lambda{
+            Sequence(
+                @ * {font-family: courier}
+                @ body {background-color:#AAFF99}
+            )
+    })
+        
+    Root.GET(Lambda{
+        Sequence(
+            @ <<BodyStart>>
+            @ <h3>Menu</h3>
+            @ <p>
+            @ <a href="/text">/text</a> (text/plain test)<br/>
+            @ </p>
+            @ <p>
+            @ <a href="/status">/status</a><br/>
+            @ </p>
+            @ <p>
+            @ <a href="/formtest">/formtest</a><br/>
+            @ </p>
+            @ <<BodyEnd>>
+        ).mergeExpr
+    })
+        
+    Root.Context("text","text/plain").GET(Lambda{
+        files=Lambda{
+            Dir.files->f report(f.name, f.length)
+        }
+        Sequence(
+            #@ <<BodyStart>>
+            #@ <h1>Plain text test</h1>
+            @ <<files.call>>
+            #@ <<BodyEnd>>
+        ).mergeExpr
+    })
+    Root.Context("status")
+        .GET(Lambda{
+            P(1)=>requestObj
+            headers=Lambda{
+                P(1)=>requestObj
+                Util:ShowDict(requestObj.headers)->line out(line+"<br/>")
+            }
+            Sequence(
+                @ <<BodyStart>>
+                @ <h1>Headers</h1>
+                @ <<headers.call(requestObj)>>
+                @ <<BodyEnd>>
+            ).mergeExpr
+        })
 
-	Root.Context("formtest")
-		.GET(Lambda{
-			P(1)=>requestObj
-			Sequence(
-				@ <<BodyStart>>
-				@ <h1>Formtest</h1>
-				@ <form action="/formtest" method="POST">
-				@ <br/>
-				@ <textarea name="c" cols=80 rows=5></textarea>
-				@ <input type="submit" value="Submit">
-				@ </form>
-				@ <<BodyEnd>>
-			).mergeExpr
-		})
-		.POST(Lambda{
-			P(1)=>requestObj
-			
-			Sequence(
-				@ <<BodyStart>>
-				@ <h1>Form POST</h1>
-				@ <form action="/formtest" method="POST">
-				@ <textarea name="c" cols=80 rows=5><<requestObj.bodyParams.c>></textarea>
-				@ <br/>
-				@ <input type="submit" value="Submit">
-				@ <br/>
-				@ <pre><<eval(requestObj.bodyParams.c)>></pre>
-				@ </form>
-				@ <<ShowRequest(requestObj)>>
-				@ <<BodyEnd>>
-			).mergeExpr
-		})
+    Root.Context("formtest")
+        .GET(Lambda{
+            P(1)=>requestObj
+            Sequence(
+                @ <<BodyStart>>
+                @ <h1>Formtest</h1>
+                @ <form action="/formtest" method="POST">
+                @ <br/>
+                @ <textarea name="c" cols=80 rows=5></textarea>
+                @ <input type="submit" value="Submit">
+                @ </form>
+                @ <<BodyEnd>>
+            ).mergeExpr
+        })
+        .POST(Lambda{
+            P(1)=>requestObj
+            
+            Sequence(
+                @ <<BodyStart>>
+                @ <h1>Form POST</h1>
+                @ <form action="/formtest" method="POST">
+                @ <textarea name="c" cols=80 rows=5><<requestObj.bodyParams.c>></textarea>
+                @ <br/>
+                @ <input type="submit" value="Submit">
+                @ <br/>
+                @ <pre><<eval(requestObj.bodyParams.c)>></pre>
+                @ </form>
+                @ <<ShowRequest(requestObj)>>
+                @ <<BodyEnd>>
+            ).mergeExpr
+        })
 /Init
 
 
@@ -102,67 +123,67 @@
 
 # Open Body 
 # --
-	Sequence(
-			@ <html>
-			@ <head>
-			@ 	<meta charset="utf-8"/>
-			@ 	<link rel="stylesheet" href="/my.css">
-			@ </head>
-			@ <body>
-	)
+    Sequence(
+            @ <html>
+            @ <head>
+            @   <meta charset="utf-8"/>
+            @   <link rel="stylesheet" href="/my.css">
+            @ </head>
+            @ <body>
+    )
 //BodyStart
 
 
 # Close Body 
 # --
-	Sequence(
-		@ </body>
-		@ </html>
-	)
+    Sequence(
+        @ </body>
+        @ </html>
+    )
 //BodyEnd
 
 
 # Show all data from Request object
 # --
-	P(1) => req
-	
-	body=req.body
-	if (body==null) {
-		body="null"
-	} else {
-		# Binary value
-		body=body.hex
-		if (body.length > 50) body=body.sub(0,40) + "..."
-	}
-	Sequence(
-		@ <h2>.headers</h2>
-		@ <<ShowDict(req.headers)>>
-		@ <h2>.method</h2>
-		@ <<req.method>><br>
-		@ <h2>.url</h2>
-		@ <<req.url>><br/>
-		@ <h2>.urlParams</h2>
-		@ <<ShowDict(req.urlParams)>>
-		@ <h2>.body</h2>
-		@ <<body>><br/>
-		@ <h2>.bodyParams</h2>
-		@ <<ShowDict(req.bodyParams)>>
-	) -> line
-		line.mergeExpr->s out(s)
+    P(1) => req
+    
+    body=req.body
+    if (body==null) {
+        body="null"
+    } else {
+        # Binary value
+        body=body.hex
+        if (body.length > 50) body=body.sub(0,40) + "..."
+    }
+    Sequence(
+        @ <h2>.headers</h2>
+        @ <<ShowDict(req.headers)>>
+        @ <h2>.method</h2>
+        @ <<req.method>><br>
+        @ <h2>.url</h2>
+        @ <<req.url>><br/>
+        @ <h2>.urlParams</h2>
+        @ <<ShowDict(req.urlParams)>>
+        @ <h2>.body</h2>
+        @ <<body>><br/>
+        @ <h2>.bodyParams</h2>
+        @ <<ShowDict(req.bodyParams)>>
+    ) -> line
+        line.mergeExpr->s out(s)
 //ShowRequest
 
 
 # Show dictionary
 # --
-	P(1)=>dict
-	dict.keys->key
-		out(""+key + ": " + dict.get(key) + "<br/>")
+    P(1)=>dict
+    dict.keys->key
+        out(""+key + ": " + dict.get(key) + "<br/>")
 //ShowDict
 
 
 
 # Show logfile
 # --
-	LogFile.read
+    LogFile.read
 /show
 

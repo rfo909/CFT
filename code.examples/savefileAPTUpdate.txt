@@ -1,3 +1,24 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2022 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 
 
 Input("Enter ssh target on format user@host").get
@@ -18,46 +39,46 @@ P(3,false) => includeDistUpgrade
     error(!SSH:HostOkSSH(target),"Target " + target + " not responding")
 
     target.after("@") =>host
-	tMark=Sys.scriptName+".lastrun."+host
-	if (Util:HasTimedOut(tMark, hoursSinceLast*3600)) {
+    tMark=Sys.scriptName+".lastrun."+host
+    if (Util:HasTimedOut(tMark, hoursSinceLast*3600)) {
 
-		println("Performing update")
-		result = SSH:sudo(target,"apt-get -y update", true)
+        println("Performing update")
+        result = SSH:sudo(target,"apt-get -y update", true)
 
-		FAIL = result.get("exitCode") != 0 
-		if (FAIL) Inner {
-			Lib:Header("Update failed")
-			result.stdout->line println(line) |
-			result.stdout->line println("##ERR## " + line)
-		} 
+        FAIL = result.get("exitCode") != 0 
+        if (FAIL) Inner {
+            Lib:Header("Update failed")
+            result.stdout->line println(line) |
+            result.stdout->line println("##ERR## " + line)
+        } 
 
-	   	if (!FAIL) {
-	        println("Performing upgrade")
-	        SSH:sudo(target,"apt-get -y upgrade", true) =>result
-	        FAIL = result.get("exitCode") != 0 
-			if (FAIL) Inner {
-				Lib:Header("Upgrade failed")
-				result.stdout->line println(line) |
-				result.stdout->line println("##ERR## " + line)
-			} 
-	   	}
+          if (!FAIL) {
+            println("Performing upgrade")
+            SSH:sudo(target,"apt-get -y upgrade", true) =>result
+            FAIL = result.get("exitCode") != 0 
+            if (FAIL) Inner {
+                Lib:Header("Upgrade failed")
+                result.stdout->line println(line) |
+                result.stdout->line println("##ERR## " + line)
+            } 
+          }
 
-	   	if (includeDistUpgrade && !FAIL) {
-	   		println("Performing dist-upgrade")
-	        SSH:sudo(target,"apt-get -y dist-upgrade", true) =>result
-	        FAIL = result.get("exitCode") != 0 
-			if (FAIL) Inner {
-				Lib:HEader("Dist-upgrade failed")
-				result.stdout->line println(line) |
-				result.stdout->line println("##ERR## " + line)
-			} 
-	   	}
+          if (includeDistUpgrade && !FAIL) {
+            println("Performing dist-upgrade")
+            SSH:sudo(target,"apt-get -y dist-upgrade", true) =>result
+            FAIL = result.get("exitCode") != 0 
+            if (FAIL) Inner {
+                Lib:HEader("Dist-upgrade failed")
+                result.stdout->line println(line) |
+                result.stdout->line println("##ERR## " + line)
+            } 
+          }
 
-	   	if (!FAIL) {
-	   		Util:SetTimeMark(tMark)
-	   	}
-	} else {
-		println("Ignoring: last checked on " + Util:GetTimeMark(tMark).fmt)
-	}
+          if (!FAIL) {
+            Util:SetTimeMark(tMark)
+          }
+    } else {
+        println("Ignoring: last checked on " + Util:GetTimeMark(tMark).fmt)
+    }
 /run
 

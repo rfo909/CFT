@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020 Roar Foshaug
+Copyright (C) 2020-2022 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -89,90 +89,90 @@ public class ObjFile extends Obj {
             this.protection=new Protection("isSymlink");
         }
         
-		Function[] arr={
-				new FunctionExists(),
-				new FunctionName(),
-				new FunctionPath(),
-				new FunctionDir(),
-				new FunctionLength(),
-				new FunctionDelete(),
-				new FunctionCreate(),
-				new FunctionAppend(),
-				new FunctionRead(),
-				new FunctionLastModified(),
-				new FunctionHash(),
-				new FunctionMore(),
-				new FunctionUncompress(),
-				new FunctionCopyFrom(),
-				new FunctionCopyTo(),
-				new FunctionMove(),
-				new FunctionHex(),
-				new FunctionReadBytes(),
-				new FunctionEncoding(),
-				new FunctionProtect(),
-				new FunctionUnprotect(),
-				new FunctionTail(),
-				new FunctionHead(),
-				new FunctionSetWriteLF(),
-				new FunctionSetWriteCRLF(),
-				new FunctionConvertCompressed(),
-				new FunctionReadBinary(),
-				new FunctionBinaryCreate(),
-				new FunctionVerify(),
-				new FunctionEncrypt(),
-				new FunctionDecrypt(),
-		};
-		setFunctions(arr);
+        Function[] arr={
+                new FunctionExists(),
+                new FunctionName(),
+                new FunctionPath(),
+                new FunctionDir(),
+                new FunctionLength(),
+                new FunctionDelete(),
+                new FunctionCreate(),
+                new FunctionAppend(),
+                new FunctionRead(),
+                new FunctionLastModified(),
+                new FunctionHash(),
+                new FunctionMore(),
+                new FunctionUncompress(),
+                new FunctionCopyFrom(),
+                new FunctionCopyTo(),
+                new FunctionMove(),
+                new FunctionHex(),
+                new FunctionReadBytes(),
+                new FunctionEncoding(),
+                new FunctionProtect(),
+                new FunctionUnprotect(),
+                new FunctionTail(),
+                new FunctionHead(),
+                new FunctionSetWriteLF(),
+                new FunctionSetWriteCRLF(),
+                new FunctionConvertCompressed(),
+                new FunctionReadBinary(),
+                new FunctionBinaryCreate(),
+                new FunctionVerify(),
+                new FunctionEncrypt(),
+                new FunctionDecrypt(),
+        };
+        setFunctions(arr);
 
     }
     
     
     
     private String getFileEncoding (File f, String defaultEncoding) {
-    	try {
-    		FileInputStream fis=null;
-    		try {		
-    			fis = new FileInputStream(f);
-    	    	
-    			byte[] bom=new byte[4];
-    	    	int count=fis.read(bom);
-    	    	if (count != 4) return defaultEncoding;
-    	    	
-    	    	String str=Hex.toHex(bom,4);
-    	    	
-    	    	// https://en.wikipedia.org/wiki/Byte_order_mark
-    	    	
-    	    	if (str.equals("0000FEFF")) return "UTF-32BE";
-    	    	if (str.equals("FFFE0000")) return "UTF-32LE";
+        try {
+            FileInputStream fis=null;
+            try {   
+                fis = new FileInputStream(f);
+                
+                byte[] bom=new byte[4];
+                int count=fis.read(bom);
+                if (count != 4) return defaultEncoding;
+                
+                String str=Hex.toHex(bom,4);
+                
+                // https://en.wikipedia.org/wiki/Byte_order_mark
+                
+                if (str.equals("0000FEFF")) return "UTF-32BE";
+                if (str.equals("FFFE0000")) return "UTF-32LE";
 
-    	    	if (str.startsWith("FEFF")) return "UTF-16BE";
-    	    	if (str.startsWith("FFFE")) return "UTF-16LE";
+                if (str.startsWith("FEFF")) return "UTF-16BE";
+                if (str.startsWith("FFFE")) return "UTF-16LE";
 
-    	    	if (str.startsWith("EFBBBF")) return "UTF-8";
-    	    	
-    		} finally {
-    			if (fis != null) try {fis.close();} catch (Exception ex) {};
-    		}
-    	} catch (Exception ex) {
-    		// ignore
-    	}
-    	return defaultEncoding;
+                if (str.startsWith("EFBBBF")) return "UTF-8";
+                
+            } finally {
+                if (fis != null) try {fis.close();} catch (Exception ex) {};
+            }
+        } catch (Exception ex) {
+            // ignore
+        }
+        return defaultEncoding;
     }
     
     /**
      * Get BOM byte sequence for encoding by (Java) name
      */
     private byte[] getBOM (String encoding) {
-    	String s;
-    	
-    	if (encoding.equals("UTF-32BE")) s="0000FEFF";
-    	else if(encoding.equals("UTF-32LE")) s="FFFE0000";
-    	else if(encoding.equals("UTF-16BE")) s="FEFF";
-    	else if(encoding.equals("UTF-16LE")) s="FFFE";
-    	else if(encoding.equals("UTF-8")) s="EFBBBF";
-    	else s=""; // no BOM
-    	
-    	return Hex.fromHex(s);
+        String s;
+        
+        if (encoding.equals("UTF-32BE")) s="0000FEFF";
+        else if(encoding.equals("UTF-32LE")) s="FFFE0000";
+        else if(encoding.equals("UTF-16BE")) s="FEFF";
+        else if(encoding.equals("UTF-16LE")) s="FFFE";
+        else if(encoding.equals("UTF-8")) s="EFBBBF";
+        else s=""; // no BOM
+        
+        return Hex.fromHex(s);
     }
     
     
@@ -184,16 +184,16 @@ public class ObjFile extends Obj {
         if (!f.exists() || !f.isFile()) {
             throw new Exception("File does not exist");
         }
-    	FileInputStream fis=new FileInputStream(f);
-    	
-    	// read past BOM if there is one
-    	int bomBytes = getBOM(encoding).length;
-    	while (bomBytes>0) {
-    		fis.read();
-    		bomBytes--;
-    	}
+        FileInputStream fis=new FileInputStream(f);
+        
+        // read past BOM if there is one
+        int bomBytes = getBOM(encoding).length;
+        while (bomBytes>0) {
+            fis.read();
+            bomBytes--;
+        }
 
-    	return new BufferedReader(new InputStreamReader(fis, encoding));
+        return new BufferedReader(new InputStreamReader(fis, encoding));
 
     }
     
@@ -430,9 +430,9 @@ public class ObjFile extends Obj {
 
             PrintStream ps=null;
             try {
-            	FileOutputStream fos=new FileOutputStream(f);
-        		fos.write(getBOM(encoding));
-            	
+                FileOutputStream fos=new FileOutputStream(f);
+                fos.write(getBOM(encoding));
+                
                 ps=new PrintStream(fos,false, encoding);
                 Value content=params.get(0);
                 if (content instanceof ValueList) {
@@ -467,14 +467,14 @@ public class ObjFile extends Obj {
             
             PrintStream ps=null;
             try {
-            	FileOutputStream fos;
-            	if (f.exists() && f.length()>0) {
-            		fos=new FileOutputStream(f, true);
-            	} else {
-            		fos=new FileOutputStream(f);
-            		fos.write(getBOM(encoding));
-            	}
-            	
+                FileOutputStream fos;
+                if (f.exists() && f.length()>0) {
+                    fos=new FileOutputStream(f, true);
+                } else {
+                    fos=new FileOutputStream(f);
+                    fos.write(getBOM(encoding));
+                }
+                
                 ps=new PrintStream(fos, false, encoding);
                 Value content=params.get(0);
                 if (content instanceof ValueList) {
@@ -506,8 +506,8 @@ public class ObjFile extends Obj {
             BufferedReader br=null;
             long lineNo=0;
             try {
-            	
-        		br = getBufferedReader();
+                
+                br = getBufferedReader();
                 for (;;) {
                     String line=br.readLine();
                     lineNo++;
@@ -616,7 +616,7 @@ public class ObjFile extends Obj {
             BufferedReader br=null;
             try {
 
-        		br = getBufferedReader();
+                br = getBufferedReader();
 
                 int lineNo=0;
                 int linesDisplayed=0;
@@ -1290,22 +1290,22 @@ public class ObjFile extends Obj {
         FileOutputStream out=null;
         
         try {
-        	in=new FileInputStream(src);
+            in=new FileInputStream(src);
             out=new FileOutputStream(target);
             
             byte[] buf=new byte[1024*64];
             for (;;) {
-            	int count=in.read(buf);
-            	if (count <= 0) break;
-            	for (int i=0; i<count; i++) {
-            		buf[i]=enc.process(modeEncrypt, buf[i]);
-            	}
-            	out.write(buf,0,count);
+                int count=in.read(buf);
+                if (count <= 0) break;
+                for (int i=0; i<count; i++) {
+                    buf[i]=enc.process(modeEncrypt, buf[i]);
+                }
+                out.write(buf,0,count);
             }
-        	
+            
         } finally {
-        	if (in != null) try {in.close();} catch (Exception ex) {};
-        	if (out != null) try {out.close();} catch (Exception ex) {};
+            if (in != null) try {in.close();} catch (Exception ex) {};
+            if (out != null) try {out.close();} catch (Exception ex) {};
         }
     }
     
@@ -1318,7 +1318,7 @@ public class ObjFile extends Obj {
             return "encrypt(passwordBinary,saltString,targetFile) - returns self";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	validateDestructiveOperation("encrypt file");
+            validateDestructiveOperation("encrypt file");
             encryptDecrypt(ctx, params, true);
             return new ValueObj(self());
         }
@@ -1333,7 +1333,7 @@ public class ObjFile extends Obj {
             return "decrypt(passwordBinary,saltString,targetFile) - returns self";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	validateDestructiveOperation("decrypt file");
+            validateDestructiveOperation("decrypt file");
             encryptDecrypt(ctx, params, false);
             return new ValueObj(self());
         }

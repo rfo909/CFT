@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020 Roar Foshaug
+Copyright (C) 2020-2022 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -42,11 +42,11 @@ import rf.configtool.main.runtime.lib.ObjDict;
 
 public class ObjSentry extends Obj {
 
-	private boolean initOk=false;
-	
-	private SentryLevel sentryLevel=SentryLevel.DEBUG;
-	
-	
+    private boolean initOk=false;
+    
+    private SentryLevel sentryLevel=SentryLevel.DEBUG;
+    
+    
     public ObjSentry () {       
         this.add(new FunctionInit());
         
@@ -87,11 +87,11 @@ public class ObjSentry extends Obj {
             return "init(DSNString) - initialize Sentry with Data Source Name string - returns self";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	String dsn=getString("DSNString", params, 0);
-        	Sentry.init(dsn);
+            String dsn=getString("DSNString", params, 0);
+            Sentry.init(dsn);
 
-        	initOk=true;
-        	return new ValueObj(self());
+            initOk=true;
+            return new ValueObj(self());
         }
     } 
        
@@ -103,8 +103,8 @@ public class ObjSentry extends Obj {
             return "levelInfo() - set SentryLevel - returns self";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	sentryLevel=SentryLevel.INFO;
-        	return new ValueObj(self());
+            sentryLevel=SentryLevel.INFO;
+            return new ValueObj(self());
         }
     } 
        
@@ -116,8 +116,8 @@ public class ObjSentry extends Obj {
             return "levelDebug() - set SentryLevel - returns self";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	sentryLevel=SentryLevel.DEBUG;
-        	return new ValueObj(self());
+            sentryLevel=SentryLevel.DEBUG;
+            return new ValueObj(self());
         }
     } 
        
@@ -130,35 +130,35 @@ public class ObjSentry extends Obj {
             return "levelError() - set SentryLevel - returns self";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	sentryLevel=SentryLevel.ERROR;
-        	return new ValueObj(self());
+            sentryLevel=SentryLevel.ERROR;
+            return new ValueObj(self());
         }
     } 
        
   
     
     private Map<String,Object> createMap (ObjDict data) {
-    	// Create proper map
-    	HashMap<String,Object> map=new HashMap<String,Object>();
-    	Iterator<String> keys = data.getKeys();
-    	while (keys.hasNext()) {
-    		String key=keys.next();
-    		map.put(key, data.getValue(key).getValAsString());
-    	}
-    	return map;
+        // Create proper map
+        HashMap<String,Object> map=new HashMap<String,Object>();
+        Iterator<String> keys = data.getKeys();
+        while (keys.hasNext()) {
+            String key=keys.next();
+            map.put(key, data.getValue(key).getValAsString());
+        }
+        return map;
     }
 
     
     private Map<String,String> createStringMap (ObjDict data) {
-    	// Create proper map
-    	HashMap<String,String> map=new HashMap<String,String>();
+        // Create proper map
+        HashMap<String,String> map=new HashMap<String,String>();
 
-    	Iterator<String> keys = data.getKeys();
-    	while (keys.hasNext()) {
-    		String key=keys.next();
-    		map.put(key, data.getValue(key).getValAsString());
-    	}
-    	return map;
+        Iterator<String> keys = data.getKeys();
+        while (keys.hasNext()) {
+            String key=keys.next();
+            map.put(key, data.getValue(key).getValAsString());
+        }
+        return map;
     }
 
     
@@ -170,91 +170,91 @@ public class ObjSentry extends Obj {
             return "sendEvent(message?, breadCrumbStr?, dataDict?, extraDict?, tagsDict?, exceptionMsg?) - optional params must be null - returns self";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	if (!initOk) throw new Exception("Must call init() first");
-        	
-        	if (params.size() != 6) {
-        		throw new Exception("Expected params: message?, breadCrumbStr?, dataDict?, extraDict?, tagsDict?, exceptionMsg?");
-        	}
-        	
-        	String message=null;
-        	String breadCrumb=null;
-        	ObjDict dataDict=null;
-        	ObjDict extraDict=null;
-        	ObjDict tagsDict=null;
-        	String exceptionMsg=null;
-        	
-        	
-        	if (!(params.get(0) instanceof ValueNull)) message=getString("message", params, 0);
-        	if (!(params.get(1) instanceof ValueNull)) breadCrumb=getString("breadCrumbStr", params, 1);
-        	if (!(params.get(2) instanceof ValueNull)) dataDict=(ObjDict) getObj("dataDict", params, 2);
-        	if (!(params.get(3) instanceof ValueNull)) extraDict=(ObjDict) getObj("extraDict", params, 3);
-        	if (!(params.get(4) instanceof ValueNull)) tagsDict=(ObjDict) getObj("tagsDict", params, 4);
-        	if (!(params.get(5) instanceof ValueNull)) exceptionMsg=getString("exceptionMsg", params, 5);
+            if (!initOk) throw new Exception("Must call init() first");
+            
+            if (params.size() != 6) {
+                throw new Exception("Expected params: message?, breadCrumbStr?, dataDict?, extraDict?, tagsDict?, exceptionMsg?");
+            }
+            
+            String message=null;
+            String breadCrumb=null;
+            ObjDict dataDict=null;
+            ObjDict extraDict=null;
+            ObjDict tagsDict=null;
+            String exceptionMsg=null;
+            
+            
+            if (!(params.get(0) instanceof ValueNull)) message=getString("message", params, 0);
+            if (!(params.get(1) instanceof ValueNull)) breadCrumb=getString("breadCrumbStr", params, 1);
+            if (!(params.get(2) instanceof ValueNull)) dataDict=(ObjDict) getObj("dataDict", params, 2);
+            if (!(params.get(3) instanceof ValueNull)) extraDict=(ObjDict) getObj("extraDict", params, 3);
+            if (!(params.get(4) instanceof ValueNull)) tagsDict=(ObjDict) getObj("tagsDict", params, 4);
+            if (!(params.get(5) instanceof ValueNull)) exceptionMsg=getString("exceptionMsg", params, 5);
   
-        	SentryEvent event=new SentryEvent();
-        	
-        	event.setLevel(sentryLevel);
-        	
-	        if (message != null) {		
-        		Message m=new Message();
-        		m.setMessage("Got exception: " + message);
-        		event.setMessage(m);
-        	}
+            SentryEvent event=new SentryEvent();
+            
+            event.setLevel(sentryLevel);
+            
+            if (message != null) {      
+                Message m=new Message();
+                m.setMessage("Got exception: " + message);
+                event.setMessage(m);
+            }
 
-        	if (breadCrumb != null) {
-        		// https://develop.sentry.dev/sdk/event-payloads/breadcrumbs/
-        		Breadcrumb bc=new Breadcrumb();
-        		// bc.setType("default");  
-        		//bc.setCategory("some-breadcrumb-category");
-        		bc.setMessage(breadCrumb);
-        		event.addBreadcrumb(bc);
-        	}
-        	
-        	if (dataDict != null) {
-	        	Map<String,Object> map=createMap(dataDict);
-	        	event.acceptUnknownProperties(map);
-	        }
-        	
-	        if (extraDict != null) {
-	        	Map<String,Object> map=createMap(extraDict);
-	        	event.setExtras(map);
-	        }
-	        
-	        if (tagsDict != null) {
-	        	Map<String,String> map=createStringMap(tagsDict);
-	        	event.setTags(map);
-	        }
-	        
-	        
-        	
-        	if (exceptionMsg != null) {
-            	try {
-            		throw new Exception(exceptionMsg);
-            	} catch (Exception ex) {
-	        		event.setLevel(SentryLevel.ERROR);
-	       
-	        		SentryException sex=new SentryException();
-	        		sex.setValue(ex.getMessage());
-	        		
-	        		List<SentryStackFrame> frames=new ArrayList<SentryStackFrame>();
-	        		for (StackTraceElement line : ex.getStackTrace()) {
-	        			
-	        			SentryStackFrame xx = new SentryStackFrame();
-	        			xx.setContextLine(line.toString());
-	        			frames.add(xx);
-	        		}
-	        		SentryStackTrace sst=new SentryStackTrace(frames);
-	        		sex.setStacktrace(sst);
-	        		
-	        		List<SentryException> list=new ArrayList<SentryException>();
-	        		list.add(sex);
-	        		event.setExceptions(list);
-            	}
-        	}
-        	
-        	Sentry.captureEvent(event);
-        	
-        	return new ValueObj(self());
+            if (breadCrumb != null) {
+                // https://develop.sentry.dev/sdk/event-payloads/breadcrumbs/
+                Breadcrumb bc=new Breadcrumb();
+                // bc.setType("default");  
+                //bc.setCategory("some-breadcrumb-category");
+                bc.setMessage(breadCrumb);
+                event.addBreadcrumb(bc);
+            }
+            
+            if (dataDict != null) {
+                Map<String,Object> map=createMap(dataDict);
+                event.acceptUnknownProperties(map);
+            }
+            
+            if (extraDict != null) {
+                Map<String,Object> map=createMap(extraDict);
+                event.setExtras(map);
+            }
+            
+            if (tagsDict != null) {
+                Map<String,String> map=createStringMap(tagsDict);
+                event.setTags(map);
+            }
+            
+            
+            
+            if (exceptionMsg != null) {
+                try {
+                    throw new Exception(exceptionMsg);
+                } catch (Exception ex) {
+                    event.setLevel(SentryLevel.ERROR);
+           
+                    SentryException sex=new SentryException();
+                    sex.setValue(ex.getMessage());
+                    
+                    List<SentryStackFrame> frames=new ArrayList<SentryStackFrame>();
+                    for (StackTraceElement line : ex.getStackTrace()) {
+                        
+                        SentryStackFrame xx = new SentryStackFrame();
+                        xx.setContextLine(line.toString());
+                        frames.add(xx);
+                    }
+                    SentryStackTrace sst=new SentryStackTrace(frames);
+                    sex.setStacktrace(sst);
+                    
+                    List<SentryException> list=new ArrayList<SentryException>();
+                    list.add(sex);
+                    event.setExceptions(list);
+                }
+            }
+            
+            Sentry.captureEvent(event);
+            
+            return new ValueObj(self());
         }
     } 
 
@@ -267,25 +267,25 @@ public class ObjSentry extends Obj {
             return "sendBreadCrumb (breadCrumbStr) - send breadcrumb to Sentry - returns self";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	if (!initOk) throw new Exception("Must call init() first");
-        	
-        	if (params.size() != 1) {
-        		throw new Exception("Expected params: breadCrumbStr");
-        	}
-        	
-        	String breadCrumb=null;
-        	
-        	breadCrumb=getString("breadCrumbStr", params, 0);
+            if (!initOk) throw new Exception("Must call init() first");
+            
+            if (params.size() != 1) {
+                throw new Exception("Expected params: breadCrumbStr");
+            }
+            
+            String breadCrumb=null;
+            
+            breadCrumb=getString("breadCrumbStr", params, 0);
   
-    		// https://develop.sentry.dev/sdk/event-payloads/breadcrumbs/
-    		Breadcrumb bc=new Breadcrumb();
-    		bc.setType("default");  
-    		bc.setCategory("logging");
-    		bc.setMessage(breadCrumb);
+            // https://develop.sentry.dev/sdk/event-payloads/breadcrumbs/
+            Breadcrumb bc=new Breadcrumb();
+            bc.setType("default");  
+            bc.setCategory("logging");
+            bc.setMessage(breadCrumb);
 
-    		Sentry.addBreadcrumb(breadCrumb);
-        	
-        	return new ValueObj(self());
+            Sentry.addBreadcrumb(breadCrumb);
+            
+            return new ValueObj(self());
         }
     } 
 

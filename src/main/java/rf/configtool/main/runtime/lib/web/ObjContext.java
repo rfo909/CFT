@@ -2,7 +2,7 @@ package rf.configtool.main.runtime.lib.web;
 
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020 Roar Foshaug
+Copyright (C) 2020-2022 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -33,42 +33,42 @@ import rf.configtool.main.runtime.lib.ObjDict;
 
 public class ObjContext extends Obj {
     
-	private ObjServer server;
-	private String path;
-	private String contentType;
-	
-	private ObjClosure closureGET;
-	private ObjClosure closurePOST;
-	
+    private ObjServer server;
+    private String path;
+    private String contentType;
+    
+    private ObjClosure closureGET;
+    private ObjClosure closurePOST;
+    
     public ObjContext(ObjServer server, String path) {
-    	this(server, path, "text/html");
+        this(server, path, "text/html");
     }
-	
+    
     public ObjContext(ObjServer server, String path, String contentType) {
-    	
-    	this.contentType=contentType;
-    	this.server=server;
-    	this.path=path;
-    	
-    	server.bind(path,this);
+        
+        this.contentType=contentType;
+        this.server=server;
+        this.path=path;
+        
+        server.bind(path,this);
 
-    	this.add(new FunctionContext());
-    	this.add(new FunctionGET());
-    	this.add(new FunctionPOST());
+        this.add(new FunctionContext());
+        this.add(new FunctionGET());
+        this.add(new FunctionPOST());
     }
     
     public ObjClosure getClosureGET() {
-    	return closureGET;
+        return closureGET;
     }
     
     
     public ObjClosure getClosurePOST() {
-    	return closurePOST;
+        return closurePOST;
     }
     
     
     public String getContentType() {
-    	return contentType;
+        return contentType;
     }
     
     
@@ -95,7 +95,7 @@ public class ObjContext extends Obj {
     }
     
     private ObjServer theServer() {
-    	return server;
+        return server;
     }
     
     private ObjContext theContext () {
@@ -131,15 +131,15 @@ public class ObjContext extends Obj {
             
             Obj obj=params.get(0);
             if (obj instanceof ValueBlock) {
-            	ValueBlock lambda=(ValueBlock) obj;
-            	ObjClosure closure=new ObjClosure(new ObjDict(), lambda);
-            	closureGET=closure;
+                ValueBlock lambda=(ValueBlock) obj;
+                ObjClosure closure=new ObjClosure(new ObjDict(), lambda);
+                closureGET=closure;
             } else if (obj instanceof ValueObj) {
-            	Obj x = ((ValueObj) obj).getVal(); 
-            	if (!(x instanceof ObjClosure)) throw new Exception("Expected lambda or closure parameter");
-            	closureGET=(ObjClosure) x;
+                Obj x = ((ValueObj) obj).getVal(); 
+                if (!(x instanceof ObjClosure)) throw new Exception("Expected lambda or closure parameter");
+                closureGET=(ObjClosure) x;
             } else {
-            	throw new Exception("Expected lambda or closure parameter");
+                throw new Exception("Expected lambda or closure parameter");
             }
             return new ValueObj(theContext());
         }
@@ -158,15 +158,15 @@ public class ObjContext extends Obj {
             
             Obj obj=params.get(0);
             if (obj instanceof ValueBlock) {
-            	ValueBlock lambda=(ValueBlock) obj;
-            	ObjClosure closure=new ObjClosure(new ObjDict(), lambda);
-            	closurePOST=closure;
+                ValueBlock lambda=(ValueBlock) obj;
+                ObjClosure closure=new ObjClosure(new ObjDict(), lambda);
+                closurePOST=closure;
             } else if (obj instanceof ValueObj) {
-            	Obj x = ((ValueObj) obj).getVal(); 
-            	if (!(x instanceof ObjClosure)) throw new Exception("Expected lambda or closure parameter");
-            	closurePOST=(ObjClosure) x;
+                Obj x = ((ValueObj) obj).getVal(); 
+                if (!(x instanceof ObjClosure)) throw new Exception("Expected lambda or closure parameter");
+                closurePOST=(ObjClosure) x;
             } else {
-            	throw new Exception("Expected lambda or closure parameter");
+                throw new Exception("Expected lambda or closure parameter");
             }
             return new ValueObj(theContext());
         }

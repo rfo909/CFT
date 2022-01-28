@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020 Roar Foshaug
+Copyright (C) 2020-2022 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -89,7 +89,7 @@ public class ObjClosure extends Obj {
             return "lambda() - extract the lambda from the closure";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	return lambda;
+            return lambda;
         }
     }
 
@@ -101,7 +101,7 @@ public class ObjClosure extends Obj {
             return "dict() - extract the dictionary from the closure";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	return new ValueObj(dict);
+            return new ValueObj(dict);
         }
     }
 

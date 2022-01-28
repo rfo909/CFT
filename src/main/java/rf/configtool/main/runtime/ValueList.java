@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020 Roar Foshaug
+Copyright (C) 2020-2022 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -30,29 +30,29 @@ public class ValueList extends Value {
     
     public ValueList (List<Value> val) {
         this.val=val;
-		Function[] arr={
-				new FunctionLength(),
-				new FunctionNth(),
-				new FunctionNth(true),   // .get(N) is more intuitive - keeping .nth() for compatibility
-				new FunctionSum(),
-				new FunctionConcat(),
-				new FunctionAdd(),
-				new FunctionContains(),
-				new FunctionUnique(),
-				new FunctionKeep(),
-				new FunctionSort(),
-				new FunctionReverse(),
-				new FunctionReplace(),
-				new FunctionRemove(),
-				new FunctionSet(),
-				new FunctionInsert(),
-				new FunctionEmpty(),
-				new FunctionLast(),
-				new FunctionFirst(),
-				new FunctionFilter(),
-				new FunctionMergeExpr(),
-		};
-		setFunctions(arr);
+        Function[] arr={
+                new FunctionLength(),
+                new FunctionNth(),
+                new FunctionNth(true),   // .get(N) is more intuitive - keeping .nth() for compatibility
+                new FunctionSum(),
+                new FunctionConcat(),
+                new FunctionAdd(),
+                new FunctionContains(),
+                new FunctionUnique(),
+                new FunctionKeep(),
+                new FunctionSort(),
+                new FunctionReverse(),
+                new FunctionReplace(),
+                new FunctionRemove(),
+                new FunctionSet(),
+                new FunctionInsert(),
+                new FunctionEmpty(),
+                new FunctionLast(),
+                new FunctionFirst(),
+                new FunctionFilter(),
+                new FunctionMergeExpr(),
+        };
+        setFunctions(arr);
     }
     
     protected ValueList self() {
@@ -240,9 +240,9 @@ public class ValueList extends Value {
 
 
     class FunctionNth extends Function {
-    	private String name="nth";
-    	public FunctionNth() {}
-    	public FunctionNth(boolean nameGet) {this.name="get";}
+        private String name="nth";
+        public FunctionNth() {}
+        public FunctionNth(boolean nameGet) {this.name="get";}
         public String getName() {
             return name;
         }
@@ -628,21 +628,21 @@ public class ValueList extends Value {
             return "mergeExpr([before,after]) - replace <<x>> with result from eval(x) - returns list of strings";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	String before="<<";
-        	String after=">>";
+            String before="<<";
+            String after=">>";
             if (params.size() == 0) {
-            	// ok
+                // ok
             } else if (params.size() == 2) {
-            	before=getString("before", params, 0);
-            	after=getString("after", params, 1);
+                before=getString("before", params, 0);
+                after=getString("after", params, 1);
             } else {
                 throw new Exception("Expected either 0 or 2 parameters (before- and after-markers for code segments inside string)");
             }
             
             List<String> resultList=new ArrayList<String>();
             for (Value v:val) {
-            	List<String> x=ValueString.mergeExpr(v.getValAsString(), before, after, ctx);
-            	for (String s:x) resultList.add(s);
+                List<String> x=ValueString.mergeExpr(v.getValAsString(), before, after, ctx);
+                for (String s:x) resultList.add(s);
             }
             
             List<Value> x=new ArrayList<Value>();

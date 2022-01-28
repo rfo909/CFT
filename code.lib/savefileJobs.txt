@@ -1,3 +1,24 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2022 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 # Readme
 # --
 <<<< EOF
@@ -30,86 +51,86 @@ completes.
 
 # Get all jobs
 # --
-	Inner {
-		Sys.Jobs.namesCompleted->name out("COMPLETED " + name)
-	} + Sys.Jobs.namesRunning
+    Inner {
+        Sys.Jobs.namesCompleted->name out("COMPLETED " + name)
+    } + Sys.Jobs.namesRunning
 /AllJobs
 
 
 
 # Get running job names
 # --
-	Sys.Jobs.namesRunning
+    Sys.Jobs.namesRunning
 /Running
 
 
 # Return completed job names (for integration into prompt)
 # --
-	Sys.Jobs.namesCompleted
+    Sys.Jobs.namesCompleted
 /Completed
 
 
 # Get single result from first terminated process
 # --
-	completed = Sys.Jobs.namesCompleted
-	error(completed.length==0, "No completed jobs")
+    completed = Sys.Jobs.namesCompleted
+    error(completed.length==0, "No completed jobs")
 
-	name=completed.first
-	proc=Sys.Jobs.getCompleted(name)
+    name=completed.first
+    proc=Sys.Jobs.getCompleted(name)
 
-	Lib:Header(name)
-	output=proc.output
-	if (output.length > 0) Inner {
-		output->line println(line)
-	} @rel
+    Lib:Header(name)
+    output=proc.output
+    if (output.length > 0) Inner {
+        output->line println(line)
+    } @rel
 
-	Sys.Jobs.deleteCompleted(name)
-	
-	proc.exitValue
+    Sys.Jobs.deleteCompleted(name)
+    
+    proc.exitValue
 /Get
 
 
 # Clear all completed jobs
 # --
-	Sys.Jobs.namesCompleted->name Sys.Jobs.deleteCompleted(name)
+    Sys.Jobs.namesCompleted->name Sys.Jobs.deleteCompleted(name)
 /Clear
 
 
 # Bring running job to "foreground", to do interactive follow-up
 # --
-	Lib:MenuSelect(Sys.Jobs.namesRunning,null,"Select job") => name
+    Lib:MenuSelect(Sys.Jobs.namesRunning,null,"Select job") => name
 
-	Lib:Header("Selected job: " + name)
-	println("Below follows an input loop.")
-	println("Output from the job is displayed, and you may enter input to it")
-	println
-	println("To detach from job, type '.quit' and to wait for more output,")
-	println("type '...'")
-	println
-	println("All other inputs are sent to stdin of the job")
-	println
-	println("Text following below the line, is output from the job.")
-	println
-	println("BEWARE: Input() contains state (last value) which may change")
-	println("between presenting the default, and pressing Enter to use it!!")
-	println
-	readLine("ENTER to continue")
-	println("--------------------------------------------------------------------")
+    Lib:Header("Selected job: " + name)
+    println("Below follows an input loop.")
+    println("Output from the job is displayed, and you may enter input to it")
+    println
+    println("To detach from job, type '.quit' and to wait for more output,")
+    println("type '...'")
+    println
+    println("All other inputs are sent to stdin of the job")
+    println
+    println("Text following below the line, is output from the job.")
+    println
+    println("BEWARE: Input() contains state (last value) which may change")
+    println("between presenting the default, and pressing Enter to use it!!")
+    println
+    readLine("ENTER to continue")
+    println("--------------------------------------------------------------------")
 
-	proc=Sys.Jobs.getRunning(name)
-	error(proc==null,"No running process " + name)
-	loop
-		Inner { proc.output->line println(line) }
-		if (proc.isDone) {
-			println("(Job completed)")
-			#result=proc.exitValue
-			#Sys.Jobs.deleteCompleted(name)
-			break
-		}
-		readLine => line
-		break(line==".quit")
-		if (line != "...") proc.sendLine(line)
-		Sys.sleep(1000)
-	|
-	"Done"
+    proc=Sys.Jobs.getRunning(name)
+    error(proc==null,"No running process " + name)
+    loop
+        Inner { proc.output->line println(line) }
+        if (proc.isDone) {
+            println("(Job completed)")
+            #result=proc.exitValue
+            #Sys.Jobs.deleteCompleted(name)
+            break
+        }
+        readLine => line
+        break(line==".quit")
+        if (line != "...") proc.sendLine(line)
+        Sys.sleep(1000)
+    |
+    "Done"
 /ToForeground

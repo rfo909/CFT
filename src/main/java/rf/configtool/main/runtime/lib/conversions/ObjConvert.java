@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020 Roar Foshaug
+Copyright (C) 2020-2022 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -89,11 +89,11 @@ public class ObjConvert extends Obj {
     
     
     public ObjConvert() {
-    	Function[] arr=new Function[conversions.length];
-    	for (int i=0; i<conversions.length; i++) {
-    		arr[i]=new FunctionCommon(conversions[i]);
-    	}
-    	setFunctions(arr);
+        Function[] arr=new Function[conversions.length];
+        for (int i=0; i<conversions.length; i++) {
+            arr[i]=new FunctionCommon(conversions[i]);
+        }
+        setFunctions(arr);
 
 //        for (Conv conv:conversions) {
 //            this.add(new FunctionCommon(conv));

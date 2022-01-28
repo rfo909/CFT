@@ -1,3 +1,24 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2022 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 # Readme
 <<<< EOF
 JSON parser written i CFT, using Lexer and TokenStream.
@@ -33,182 +54,182 @@ nicely formatted JSON.
 
 # Build root lexer Node for all known tokens in JSON
 # --
-	Lib.Text.Lexer.Node => root
-	
-	root.sub("{}:,[]()").setIsToken(1)  # specials
-	root.sub(" ^n^r^t".unEsc).setIsToken(-1) # whitespace
+    Lib.Text.Lexer.Node => root
+    
+    root.sub("{}:,[]()").setIsToken(1)  # specials
+    root.sub(" ^n^r^t".unEsc).setIsToken(-1) # whitespace
 
-	digits = "0123456789"
-	root.sub(digits+"-").setIsToken(2) => integer
-	integer.sub(digits,integer) # loop back
-	integer.sub(".").sub(digits).setIsToken(3) => float 
-	float.sub(digits,float) # loop back
-	
-	identFirstChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"
-	identInnerChars = identFirstChars + "0123456789"
-	
-	root.sub(identFirstChars).setIsToken(4) => ident
-	ident.sub(identInnerChars, ident) # loop back
-	
-	List('"',"'")->c 
-		root.sub(c) => insideString
-		insideString.setDefault(insideString)
-		insideString.sub("\").setDefault(insideString)
-		insideString.sub(c).setIsToken(5)
-	|
-	
-	# return value is the root node
-	root
+    digits = "0123456789"
+    root.sub(digits+"-").setIsToken(2) => integer
+    integer.sub(digits,integer) # loop back
+    integer.sub(".").sub(digits).setIsToken(3) => float 
+    float.sub(digits,float) # loop back
+    
+    identFirstChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"
+    identInnerChars = identFirstChars + "0123456789"
+    
+    root.sub(identFirstChars).setIsToken(4) => ident
+    ident.sub(identInnerChars, ident) # loop back
+    
+    List('"',"'")->c 
+        root.sub(c) => insideString
+        insideString.setDefault(insideString)
+        insideString.sub("\").setDefault(insideString)
+        insideString.sub(c).setIsToken(5)
+    |
+    
+    # return value is the root node
+    root
 /RootNode
 
 
 # Example JSON code
 # ---
-	Sequence(
-		@ {
-		@    "test": true,
-		@    number: 42,
-		@    "data" : {
-		@        ok : true
-		@    },
-		@    list : [
-		@       "a",11,"cc",{
-		@          "id" : "xyz", "number": 1
-		@       }
-		@    ]
-		@ }
-	)
+    Sequence(
+        @ {
+        @    "test": true,
+        @    number: 42,
+        @    "data" : {
+        @        ok : true
+        @    },
+        @    list : [
+        @       "a",11,"cc",{
+        @          "id" : "xyz", "number": 1
+        @       }
+        @    ]
+        @ }
+    )
 /exampleJSON
 
 
 
 
 # object
-	P(1) => ts
-	obj = Dict
-	ts.match("{","expected '{'")
-	comma=false
-	loop
-		break(ts.match("}"))
-		if (comma) ts.match(",","expected comma or '}'") 
-		# match string or identifier + colon + Value
-		name=ts.peek
-		if (ts.peekType == 5) {
-			# String - strip quotes
-			name=name.sub(1,name.length-1).replace('\"','"')
-		} else if (ts.peekType != 4) { # identifier
-			error(ts.sourceLocation + " Expected String or Identifier for object field name, got '" + name + "'")
-		}
-		ts.next
-		ts.match(":","expected colon")
-		value=MatchValue(ts)
-		obj.set(name,value)
-		comma=true
-	|
-	obj
+    P(1) => ts
+    obj = Dict
+    ts.match("{","expected '{'")
+    comma=false
+    loop
+        break(ts.match("}"))
+        if (comma) ts.match(",","expected comma or '}'") 
+        # match string or identifier + colon + Value
+        name=ts.peek
+        if (ts.peekType == 5) {
+            # String - strip quotes
+            name=name.sub(1,name.length-1).replace('\"','"')
+        } else if (ts.peekType != 4) { # identifier
+            error(ts.sourceLocation + " Expected String or Identifier for object field name, got '" + name + "'")
+        }
+        ts.next
+        ts.match(":","expected colon")
+        value=MatchValue(ts)
+        obj.set(name,value)
+        comma=true
+    |
+    obj
 /MatchObject
 
 
 
 # Value
 # 
-	P(1)=> ts
-	if (ts.peek()=="{") {
-		MatchObject(ts)
-	} else if (ts.peek()=="[") {
-		MatchList(ts)
-	} else if (ts.peek()=="true") {
-		ts.next
-		true
-	} else if (ts.peek()=="false") {
-		ts.next
-		false
-	} else if (ts.peek()=="null") {
-		ts.next
-		null
-	} else if (ts.peekType()==4) {  # identifier
-		func=ts.peek
-		#println("Matching function '" + func + "'")
-		ts.next
-		ts.match("(","exected '(' function call syntax (MongoDB)")
-		func=func+"("
-		Inner {
-			comma=false
-			loop
-				break(ts.match(")"))
-				if (comma) {
-					ts.match(",","Expected comma or ')' closing function call MongoDB style")
-					func=func+","
-				}
-				func=func+MatchValue(ts)
-				comma=true
-				
-			|
-			func=func+")"
-			#println("FUNCTION COMPLETE: " + func)
-		}
-		func
-		#error(""+ts.sourceLocation + " Invalid value: (identifier) " + ts.peek)
-	} else if (ts.peekType()==2) { # int
-		s=ts.peek
-		if (!s.?parseInt) error(""+ts.sourceLocation+" Invalid int: " + s)
-		ts.next
-		s.parseInt
-	} else if (ts.peekType()==3) { # float
-		s=ts.peek
-		if (!s.?parseFloat) error(""+ts.sourceLocation+" Invalid float: " + s)
-		ts.next
-		s.parseFloat
-	} else if (ts.peekType()==5) { # string
-		s=ts.peek
-		ts.next
-		s
-		s.sub(1,s.length-1).replace('\"','"')  # strip quotes and unescape double quotes inside
-		
-	} else {
-		error(""+ts.sourceLocation+" Unexpected token: '" + ts.peek + "'")
-	}
+    P(1)=> ts
+    if (ts.peek()=="{") {
+        MatchObject(ts)
+    } else if (ts.peek()=="[") {
+        MatchList(ts)
+    } else if (ts.peek()=="true") {
+        ts.next
+        true
+    } else if (ts.peek()=="false") {
+        ts.next
+        false
+    } else if (ts.peek()=="null") {
+        ts.next
+        null
+    } else if (ts.peekType()==4) {  # identifier
+        func=ts.peek
+        #println("Matching function '" + func + "'")
+        ts.next
+        ts.match("(","exected '(' function call syntax (MongoDB)")
+        func=func+"("
+        Inner {
+            comma=false
+            loop
+                break(ts.match(")"))
+                if (comma) {
+                    ts.match(",","Expected comma or ')' closing function call MongoDB style")
+                    func=func+","
+                }
+                func=func+MatchValue(ts)
+                comma=true
+                
+            |
+            func=func+")"
+            #println("FUNCTION COMPLETE: " + func)
+        }
+        func
+        #error(""+ts.sourceLocation + " Invalid value: (identifier) " + ts.peek)
+    } else if (ts.peekType()==2) { # int
+        s=ts.peek
+        if (!s.?parseInt) error(""+ts.sourceLocation+" Invalid int: " + s)
+        ts.next
+        s.parseInt
+    } else if (ts.peekType()==3) { # float
+        s=ts.peek
+        if (!s.?parseFloat) error(""+ts.sourceLocation+" Invalid float: " + s)
+        ts.next
+        s.parseFloat
+    } else if (ts.peekType()==5) { # string
+        s=ts.peek
+        ts.next
+        s
+        s.sub(1,s.length-1).replace('\"','"')  # strip quotes and unescape double quotes inside
+        
+    } else {
+        error(""+ts.sourceLocation+" Unexpected token: '" + ts.peek + "'")
+    }
 /MatchValue
 
 
 
 # List
 # --
-	P(1) => ts
-	list = List
-	ts.match("[","expected '['")
-	comma=false
-	loop
-		break(ts.match("]"))
-		if (comma) ts.match(",","expected comma or ']'")
-		list.add(MatchValue(ts))
-		comma=true
-	|
-	list
+    P(1) => ts
+    list = List
+    ts.match("[","expected '['")
+    comma=false
+    loop
+        break(ts.match("]"))
+        if (comma) ts.match(",","expected comma or ']'")
+        list.add(MatchValue(ts))
+        comma=true
+    |
+    list
 /MatchList
-		
+        
 
 # Takes json string as parameter, or if null, reads from stdin, terminated by '.'
 # Throws soft errors if parse error.
 # --
-	P(1)=>json
+    P(1)=>json
 
-	if (json==null) {
-		println("Paste or enter JSON lines, then terminate by '.' on single line")
-		readLines(".") => json
-	}
-	
-	start=currentTimeMillis
+    if (json==null) {
+        println("Paste or enter JSON lines, then terminate by '.' on single line")
+        readLines(".") => json
+    }
+    
+    start=currentTimeMillis
 
-	RootNode => root
-	Lib.Text.Lexer => lexer
-	json->line 
-		lexer.addLine(line) 
-	|
+    RootNode => root
+    Lib.Text.Lexer => lexer
+    json->line 
+        lexer.addLine(line) 
+    |
 
-	ts=lexer.getTokenStream(root)
+    ts=lexer.getTokenStream(root)
 
-	MatchValue(ts)
+    MatchValue(ts)
 /Parse
 
 
@@ -216,95 +237,95 @@ nicely formatted JSON.
 
 # Generate output version of JSON structure
 # --
-	P(1)=>jsonValue
-	PP(jsonValue)->line out(line.trim) | _.concat(" ")
+    P(1)=>jsonValue
+    PP(jsonValue)->line out(line.trim) | _.concat(" ")
 /Export
 
 
 
 # Pretty-print value
 # --
-	P(1)=>value
-	P(2,"")=>indent
-	P(3,Lambda{P(1)})=>LOut
+    P(1)=>value
+    P(2,"")=>indent
+    P(3,Lambda{P(1)})=>LOut
 
-	indent2=indent #+"  "
+    indent2=indent #+"  "
 
-	t=getType(value)
+    t=getType(value)
 
-	if (t=="Dict") {
-		PPObj(value,indent2,LOut)
-	} else if (t=="List") {
-		PPList(value,indent2,LOut)
-	} else if (t=="Dict") {
-		PPObj(value,indent2,LOut)
-	} else if (t=="String") {
-		LOut.call('"' + value.replace('"','\"')+'"')
-	} else {
-		LOut.call(""+value)
-	}
+    if (t=="Dict") {
+        PPObj(value,indent2,LOut)
+    } else if (t=="List") {
+        PPList(value,indent2,LOut)
+    } else if (t=="Dict") {
+        PPObj(value,indent2,LOut)
+    } else if (t=="String") {
+        LOut.call('"' + value.replace('"','\"')+'"')
+    } else {
+        LOut.call(""+value)
+    }
 /PPValue
-	
+    
 
 
 # Pretty-print object
 # --
-	P(1,Dict)=>object
-	P(2,"")=>indent
-	P(3,Lambda{P(1)})=>LOut
+    P(1,Dict)=>object
+    P(2,"")=>indent
+    P(3,Lambda{P(1)})=>LOut
 
-	indent2=indent+"  "
-	NEWLINE="^n".unEsc
+    indent2=indent+"  "
+    NEWLINE="^n".unEsc
 
-	LOut.call("{"+NEWLINE)
+    LOut.call("{"+NEWLINE)
 
-	comma=false
-	object.keys->key
-		if (comma) LOut.call(","+NEWLINE)
-		LOut.call(indent2+'"' + key.replace('"','\"') + '": ')
-		value=object.get(key)
-		PPValue(value,indent2,LOut)
-		comma=true
-	|
-	LOut.call(NEWLINE+indent+"}")
-/PPObj	
+    comma=false
+    object.keys->key
+        if (comma) LOut.call(","+NEWLINE)
+        LOut.call(indent2+'"' + key.replace('"','\"') + '": ')
+        value=object.get(key)
+        PPValue(value,indent2,LOut)
+        comma=true
+    |
+    LOut.call(NEWLINE+indent+"}")
+/PPObj  
 
 
 # Pretty-print list
 # --
-	P(1,List)=>list
-	P(2,"")=>indent
-	P(3,Lambda{P(1)})=>LOut
+    P(1,List)=>list
+    P(2,"")=>indent
+    P(3,Lambda{P(1)})=>LOut
 
-	indent2=indent+"  "
-	NEWLINE="^n".unEsc
+    indent2=indent+"  "
+    NEWLINE="^n".unEsc
 
-	LOut.call("["+NEWLINE+indent2)
-	comma=false
-	list->x
-		if (comma) LOut.call(","+NEWLINE+indent2)
-		PPValue(x,indent2,LOut)
-		comma=true
-	|
-	LOut.call(NEWLINE+indent+"]")
+    LOut.call("["+NEWLINE+indent2)
+    comma=false
+    list->x
+        if (comma) LOut.call(","+NEWLINE+indent2)
+        PPValue(x,indent2,LOut)
+        comma=true
+    |
+    LOut.call(NEWLINE+indent+"]")
 /PPList
 
 
 
 # Pretty-print data structure as formatted JSON
 # --
-	P(1)=>JSONValue
+    P(1)=>JSONValue
 
-	Dict
-		.set("data",List)
-		.set("LOut",Lambda{
-			self.data.add(P(1))
-		})
-		=> obj
+    Dict
+        .set("data",List)
+        .set("LOut",Lambda{
+            self.data.add(P(1))
+        })
+        => obj
 
-	PPValue(JSONValue,"",obj.LOut)
-	NEWLINE="^n".unEsc
-	obj.data.concat.split(NEWLINE)
+    PPValue(JSONValue,"",obj.LOut)
+    NEWLINE="^n".unEsc
+    obj.data.concat.split(NEWLINE)
 /PP
 
 

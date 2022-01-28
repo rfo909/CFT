@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020 Roar Foshaug
+Copyright (C) 2020-2022 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -149,25 +149,25 @@ public abstract class Obj {
      * Lookup member function by name. 
      */
     public Function getFunction (String name) {
-//    	// first implementation : 5600ms
-//    	if (functionArr != null) {
-//    		for (Function f:functionArr) functions.put(f.getName(),f);
-//    		functionArr=null;
-//    	}
-//    	return functions.get(name);
-    	
-    	// 4200ms
-    	Function x=functions.get(name);
-    	if (x != null) return x;
-    	
+//      // first implementation : 5600ms
+//      if (functionArr != null) {
+//          for (Function f:functionArr) functions.put(f.getName(),f);
+//          functionArr=null;
+//      }
+//      return functions.get(name);
+        
+        // 4200ms
+        Function x=functions.get(name);
+        if (x != null) return x;
+        
         if (functionArr != null) {
-    		for (Function f:functionArr) {
-    			if (f.getName().equals(name)) {
-    				functions.put(name, f);
-    				return f;
-    			}
-    		}
-    		return null;
+            for (Function f:functionArr) {
+                if (f.getName().equals(name)) {
+                    functions.put(name, f);
+                    return f;
+                }
+            }
+            return null;
         }
         return null;
     }
@@ -245,16 +245,16 @@ public abstract class Obj {
         
         boolean foundSpecial=false;
         for (String name:fNames) {
-        	if (name.startsWith("_")) {
-        		objGlobal.addSystemMessage(functions.get(name).getShortDesc());
-        		foundSpecial=true;
-        	}
+            if (name.startsWith("_")) {
+                objGlobal.addSystemMessage(functions.get(name).getShortDesc());
+                foundSpecial=true;
+            }
         }
         if (foundSpecial) {
-        	objGlobal.addSystemMessage("");
+            objGlobal.addSystemMessage("");
         }
         for (String name:fNames) {
-        	if (!name.startsWith("_")) objGlobal.addSystemMessage(functions.get(name).getShortDesc());
+            if (!name.startsWith("_")) objGlobal.addSystemMessage(functions.get(name).getShortDesc());
         }
     }
 

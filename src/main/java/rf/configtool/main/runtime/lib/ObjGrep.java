@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020 Roar Foshaug
+Copyright (C) 2020-2022 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -107,18 +107,18 @@ public class ObjGrep extends Obj {
         if (matchParts.size() > 0) {
             matchList.add(new StrMatch(matchParts));
         }
-		Function[] arr={
-				new FunctionMatch(),
-				new FunctionReject(),
-				new FunctionMatchRegex(),
-				new FunctionRejectRegex(),
-				new FunctionFile(),
-				new FunctionFileCount(),
-				new FunctionLimitFirst(),
-				new FunctionLimitLast(),
-				new FunctionLine(),
-		};
-		setFunctions(arr);
+        Function[] arr={
+                new FunctionMatch(),
+                new FunctionReject(),
+                new FunctionMatchRegex(),
+                new FunctionRejectRegex(),
+                new FunctionFile(),
+                new FunctionFileCount(),
+                new FunctionLimitFirst(),
+                new FunctionLimitLast(),
+                new FunctionLine(),
+        };
+        setFunctions(arr);
         
     }
     

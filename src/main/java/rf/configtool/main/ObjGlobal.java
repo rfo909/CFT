@@ -1,6 +1,6 @@
 /*
 - an interactive programmable shell for automation 
-Copyright (C) 2020 Roar Foshaug
+Copyright (C) 2020-2022 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -508,8 +508,8 @@ public class ObjGlobal extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() == 0) return new ValueObj(new ObjDict());
             if (params.size() == 1) {
-            	String name=getString("name", params, 0);
-            	return new ValueObj(new ObjDict(name));
+                String name=getString("name", params, 0);
+                return new ValueObj(new ObjDict(name));
             }
             throw new Exception("Expected optional name parameter");
         }
@@ -726,7 +726,7 @@ public class ObjGlobal extends Obj {
                 s=TabUtil.substituteTabs(s, 4);
                 int w=ctx.getObjGlobal().getRoot().getObjTerm().getScreenWidth();
                 if (s.length() >= w-1) {
-                	s=s.substring(0, w-2)+"+";
+                    s=s.substring(0, w-2)+"+";
                 }
                 stdio.println(s);
                 return new ValueString(s);
@@ -787,10 +787,10 @@ public class ObjGlobal extends Obj {
     }
 
     
-	private static ValueObj staticSys=new ValueObj(new ObjSys());
+    private static ValueObj staticSys=new ValueObj(new ObjSys());
    
     class FunctionSys extends Function {
-    	
+        
         public String getName() {
             return "Sys";
         }
@@ -879,21 +879,21 @@ public class ObjGlobal extends Obj {
         @Override
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() == 2 || params.size() == 3) { 
-            	String str=getString("typeStr", params, 0);
-            	Value v=params.get(1);
-            	ObjDict dict=null;
-            	if (params.size()==3) {
-            		Obj obj=getObj("metaDict", params, 2);
-            		if (obj instanceof ObjDict) {
-            			dict=(ObjDict) obj;
-            		} else {
-            	    	throw new Exception("Expected parameters typeStr,value,metaDict?");
-            		}
-            	}
-            	if (dict==null) dict=new ObjDict();
-            	return new ValueObj(new ObjAnnotatedValue(str,v,dict));
+                String str=getString("typeStr", params, 0);
+                Value v=params.get(1);
+                ObjDict dict=null;
+                if (params.size()==3) {
+                    Obj obj=getObj("metaDict", params, 2);
+                    if (obj instanceof ObjDict) {
+                        dict=(ObjDict) obj;
+                    } else {
+                        throw new Exception("Expected parameters typeStr,value,metaDict?");
+                    }
+                }
+                if (dict==null) dict=new ObjDict();
+                return new ValueObj(new ObjAnnotatedValue(str,v,dict));
             }
-   	    	throw new Exception("Expected parameters typeStr,value,metaDict?");
+            throw new Exception("Expected parameters typeStr,value,metaDict?");
         }
     }
     
@@ -940,9 +940,9 @@ public class ObjGlobal extends Obj {
             int len=hex.length();
             byte[] data=new byte[len/2];
             for (int i=0; i<data.length; i++) {
-            	char c1=hex.charAt(i*2);
-            	char c2=hex.charAt(i*2+1);
-            	data[i]=(byte) Integer.parseInt(""+c1+c2,16);
+                char c1=hex.charAt(i*2);
+                char c2=hex.charAt(i*2+1);
+                data[i]=(byte) Integer.parseInt(""+c1+c2,16);
             }
             return new ValueBinary(data);
         }
@@ -958,64 +958,64 @@ public class ObjGlobal extends Obj {
             return "_Stmt() - display information about Statements in CFT";
         }
         private String[] data= {
-        	"",
-        	"Statements in CFT",
-        	"-----------------",
-        	"",
-        	"Looping and iteration over lists:", 
-        	"   loop ... break(cond)",
-        	"   list -> variable ...",
-        	"",
-        	"Loop control:",
-        	"   assert (boolExpr)",
-        	"   reject (boolExpr)",
-        	"   break (boolExpr)",
-        	"   break",
-        	"",
-        	"Loop output:",
-        	"   out (expr)",
-        	"   condOut (boolExpr,expr)",
-        	"   report (expr,expr,...)",
-        	"   reportList (listExpr)",
-        	"",
-        	"The help command shows available functions in objects, and takes two forms:", 
-        	"   help           : show global functions",
-        	"   <value> help   : help about top value on stack",
-        	"",
-        	"Interactive commands:",
-        	"   ls",
-        	"   ls a*.txt",
-        	"   ls /some/path",
-        	"   ls (dirExpr)",
-        	"   cd",
-        	"   cd ../path",
-        	"   cd (dirExpr)",
-        	"   cat file.txt",
-        	"   cat (fileExpr)",
-        	"   edit file.txt",
-        	"   edit (fileExpr)",
-        	"   touch file.txt",
-        	"   touch *.txt",
-        	"   touch (fileExpr)",
-        	"",
-        	"   (note) the ls command comes in two additional variants:",
-        	"       lsd ...   : list directories only",
-        	"       lsf ...   : list files only",
-        	"",
-        	"printDebug (expr)", 
-        	"timeExpr (expr)",
-        	"",
-        	"Expressions are also statements",
-        	"",
-        	"More system commands are implemented as functions in the Sys object:",
-        	"",
-        	"Sys help",
+            "",
+            "Statements in CFT",
+            "-----------------",
+            "",
+            "Looping and iteration over lists:", 
+            "   loop ... break(cond)",
+            "   list -> variable ...",
+            "",
+            "Loop control:",
+            "   assert (boolExpr)",
+            "   reject (boolExpr)",
+            "   break (boolExpr)",
+            "   break",
+            "",
+            "Loop output:",
+            "   out (expr)",
+            "   condOut (boolExpr,expr)",
+            "   report (expr,expr,...)",
+            "   reportList (listExpr)",
+            "",
+            "The help command shows available functions in objects, and takes two forms:", 
+            "   help           : show global functions",
+            "   <value> help   : help about top value on stack",
+            "",
+            "Interactive commands:",
+            "   ls",
+            "   ls a*.txt",
+            "   ls /some/path",
+            "   ls (dirExpr)",
+            "   cd",
+            "   cd ../path",
+            "   cd (dirExpr)",
+            "   cat file.txt",
+            "   cat (fileExpr)",
+            "   edit file.txt",
+            "   edit (fileExpr)",
+            "   touch file.txt",
+            "   touch *.txt",
+            "   touch (fileExpr)",
+            "",
+            "   (note) the ls command comes in two additional variants:",
+            "       lsd ...   : list directories only",
+            "       lsf ...   : list files only",
+            "",
+            "printDebug (expr)", 
+            "timeExpr (expr)",
+            "",
+            "Expressions are also statements",
+            "",
+            "More system commands are implemented as functions in the Sys object:",
+            "",
+            "Sys help",
         };
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	for (String line:data) {
+            for (String line:data) {
                 ctx.getObjGlobal().addSystemMessage(line);
-        	}
-        	return new ValueBoolean(true);
+            }
+            return new ValueBoolean(true);
         }        
     } 
     
@@ -1027,80 +1027,80 @@ public class ObjGlobal extends Obj {
             return "_Expr() - display information about expressions in CFT";
         }
         private String[] data= {
-        	"",
-        	"Expressions in CFT",
-        	"------------------",
-        	"",
-        	"Logical",
-        	"   bool || bool",
-        	"   bool && bool",
-        	"",
-        	"Compare",
-        	"   >  <  >=  <= == !=",
-        	"",
-        	"Calculate",
-        	"",
-        	"   + - * / % div",
-        	"",
-        	"Assign local variable",
-        	"   ident = Expr",
-        	"   expr => ident",
-        	"",
-        	"Blocks",
-        	"   {...}",
-        	"   Inner{...}",
-        	"   Lambda{...}",
-        	"",
-        	"Exception handling",
-        	"   tryCatch(Expr)",
-        	"   tryCatchSoft(Expr)",
-        	"",
-        	"Various",
-        	"   ( expr )",
-        	"   !expr",
-        	"   -expr",
-        	"   _",
-        	"   if(expr,expr,expr)",
-        	"   if(expr) Stmt [else Stmt]",
-        	"       (note that Expr is a valid Stmt)",
-        	"   pwd",
-        	"   null",
-        	"   ScriptName:func(...)",
-        	"   Sequence(Expr ...)",
-        	"   CondSequence(BoolExpr Expr ...)",
-        	"   SymDict(ident,...)",
-        	"   P(N[,expr])",
-        	"   PDict(Str,...)",
-        	"   SpawnProcess(Dict,expr[,lambda])",
-        	"",
-        	"Background processes",
-        	"   The SpawnProcess() expression has an interactive, simpler syntax:",
-        	"      & expr",
-        	"      & expr , name",
-        	"         Name is an expression or an identifier",
-        	"         Use Sys.Jobs or Jobs script to manage",
-        	"",
-        	"Value tokens",
-        	"   int, string, float",
-        	"   true",
-        	"   false",
-        	"",
-        	"Function calls",
-        	"   func",
-        	"   func(...)",
-        	"",
-        	"Dotted lookup",
-        	"   a.b.c(...).d.e",
-        	"",
-        	"Raw string",
-        	"   @ ...",
-        	"",
+            "",
+            "Expressions in CFT",
+            "------------------",
+            "",
+            "Logical",
+            "   bool || bool",
+            "   bool && bool",
+            "",
+            "Compare",
+            "   >  <  >=  <= == !=",
+            "",
+            "Calculate",
+            "",
+            "   + - * / % div",
+            "",
+            "Assign local variable",
+            "   ident = Expr",
+            "   expr => ident",
+            "",
+            "Blocks",
+            "   {...}",
+            "   Inner{...}",
+            "   Lambda{...}",
+            "",
+            "Exception handling",
+            "   tryCatch(Expr)",
+            "   tryCatchSoft(Expr)",
+            "",
+            "Various",
+            "   ( expr )",
+            "   !expr",
+            "   -expr",
+            "   _",
+            "   if(expr,expr,expr)",
+            "   if(expr) Stmt [else Stmt]",
+            "       (note that Expr is a valid Stmt)",
+            "   pwd",
+            "   null",
+            "   ScriptName:func(...)",
+            "   Sequence(Expr ...)",
+            "   CondSequence(BoolExpr Expr ...)",
+            "   SymDict(ident,...)",
+            "   P(N[,expr])",
+            "   PDict(Str,...)",
+            "   SpawnProcess(Dict,expr[,lambda])",
+            "",
+            "Background processes",
+            "   The SpawnProcess() expression has an interactive, simpler syntax:",
+            "      & expr",
+            "      & expr , name",
+            "         Name is an expression or an identifier",
+            "         Use Sys.Jobs or Jobs script to manage",
+            "",
+            "Value tokens",
+            "   int, string, float",
+            "   true",
+            "   false",
+            "",
+            "Function calls",
+            "   func",
+            "   func(...)",
+            "",
+            "Dotted lookup",
+            "   a.b.c(...).d.e",
+            "",
+            "Raw string",
+            "   @ ...",
+            "",
         };
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	for (String line:data) {
+            for (String line:data) {
                 ctx.getObjGlobal().addSystemMessage(line);
-        	}
-        	return new ValueBoolean(true);
+            }
+            return new ValueBoolean(true);
         }
         
         

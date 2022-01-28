@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020 Roar Foshaug
+Copyright (C) 2020-2022 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -39,26 +39,26 @@ public class StmtTouch extends StmtShellInteractive {
 
     @Override
     protected void processDefault(Ctx ctx) throws Exception {
-    	throw new Exception("Expected file to create");
+        throw new Exception("Expected file to create");
     }
     
     @Override
     protected void processOne (Ctx ctx, File file) throws Exception {
-    	if (!file.exists()) {
+        if (!file.exists()) {
             file.createNewFile();
-    	} else {
-			Path path=file.toPath();
-			FileTime ft = FileTime.fromMillis(System.currentTimeMillis());
-			Files.setLastModifiedTime(path, ft);
-    	}
-    	Value result=new ValueObj(new ObjFile(file.getCanonicalPath(), Protection.NoProtection));
-    	ctx.push(result);
+        } else {
+            Path path=file.toPath();
+            FileTime ft = FileTime.fromMillis(System.currentTimeMillis());
+            Files.setLastModifiedTime(path, ft);
+        }
+        Value result=new ValueObj(new ObjFile(file.getCanonicalPath(), Protection.NoProtection));
+        ctx.push(result);
     }
     
     
     @Override
     protected void processSet (Ctx ctx, List<File> elements) throws Exception {
-    	for (File file:elements) processOne(ctx,file);
+        for (File file:elements) processOne(ctx,file);
     }
     
     @Override

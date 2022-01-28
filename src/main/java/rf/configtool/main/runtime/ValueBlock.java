@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020 Roar Foshaug
+Copyright (C) 2020-2022 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -85,12 +85,12 @@ public class ValueBlock extends Value {
     public Value callInnerBlock (Ctx callerCtx) throws Exception {
         // Execute as Inner code block, which means it has Ctx lookup up the Ctx stack, including
         // parameters to the function, but using the isInnerBlock flag for the contexts for each
-    	// progLine, to block loop trigger-propagation from interfering with the callerCtx.
+        // progLine, to block loop trigger-propagation from interfering with the callerCtx.
         
         Value retVal=null;
         
         for (ProgramLine progLine:programLines) {
-        	
+            
             Ctx sub=callerCtx.subNewData(true);  
 
             if (retVal != null) sub.push(retVal);
@@ -146,10 +146,10 @@ public class ValueBlock extends Value {
         Value retVal=null;
         
         for (ProgramLine progLine:programLines) {
-        	// CodeLines.execute() creates new independent Ctx for each Code Line. We
-        	// can not do that here, because we want variable lookup, BUT that is the
-        	// reason loop output from separate programLines gets lumped together
-        	
+            // CodeLines.execute() creates new independent Ctx for each Code Line. We
+            // can not do that here, because we want variable lookup, BUT that is the
+            // reason loop output from separate programLines gets lumped together
+            
             Ctx sub=independentCtx.subNewData(false);
             
             if (retVal != null) sub.push(retVal);

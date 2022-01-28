@@ -1,166 +1,187 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2022 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 
 
 
 # Display set of values as a simple list, or as columns
 # --
-	P(1,List) => values
-	P(2,10) => maxLines 
-	P(3,0) => maxWidth
-	P(4,0) => COLWIDTH
-	P(5,false) => useGlobbing
-	P(6,5) => SPACING
+    P(1,List) => values
+    P(2,10) => maxLines 
+    P(3,0) => maxWidth
+    P(4,0) => COLWIDTH
+    P(5,false) => useGlobbing
+    P(6,5) => SPACING
 
-	if (maxWidth==0) {
-		maxWidth=Term.w-3
-	}
-	if (COLWIDTH==0) {
-		COLWIDTH=CalculateColWidth(values)
-	}
+    if (maxWidth==0) {
+        maxWidth=Term.w-3
+    }
+    if (COLWIDTH==0) {
+        COLWIDTH=CalculateColWidth(values)
+    }
 
-	NumCols=(maxWidth/(COLWIDTH+SPACING)).floor
+    NumCols=(maxWidth/(COLWIDTH+SPACING)).floor
 
-	if (values.length <= maxLines) {
-		values
-	} else if (values.length <= maxLines * NumCols) {
-		ShowColumns(values, maxLines, NumCols, COLWIDTH, SPACING)
-	} else {
-		if (useGlobbing) {
-			values=CompressWithGlobbing(values)
-		}
-		ShowColumns(values, maxLines, NumCols, COLWIDTH, SPACING)
-	}
+    if (values.length <= maxLines) {
+        values
+    } else if (values.length <= maxLines * NumCols) {
+        ShowColumns(values, maxLines, NumCols, COLWIDTH, SPACING)
+    } else {
+        if (useGlobbing) {
+            values=CompressWithGlobbing(values)
+        }
+        ShowColumns(values, maxLines, NumCols, COLWIDTH, SPACING)
+    }
 /DisplayData
 
 
 
 # Calculate col-width
 # --
-	P(1,List) => values
-	P(2,0.8) => fractionNotTruncated
-	
-	Inner{values->v out(v.length) | (_.sum/values.length).floor } => currWidth  #average
+    P(1,List) => values
+    P(2,0.8) => fractionNotTruncated
+    
+    Inner{values->v out(v.length) | (_.sum/values.length).floor } => currWidth  #average
 
-	loop
-		Inner {values->v assert(v.length < currWidth) out(v) | (_.length/values.length) } => fract
-		break(fract >= fractionNotTruncated)
-		currWidth=currWidth+1
-	|
-	currWidth
+    loop
+        Inner {values->v assert(v.length < currWidth) out(v) | (_.length/values.length) } => fract
+        break(fract >= fractionNotTruncated)
+        currWidth=currWidth+1
+    |
+    currWidth
 /CalculateColWidth
 
 
 # Display list of values in columns
 # --
-	P(1,List)=>values
-	P(2,10) => lines
-	P(3,4) => cols
-	P(4,20) => colWidth
-	P(5,3) => colSpacing
+    P(1,List)=>values
+    P(2,10) => lines
+    P(3,4) => cols
+    P(4,20) => colWidth
+    P(5,3) => colSpacing
 
-	
+    
 
-	if (lines==0) {
-		lines=(values.length/cols).floor+1
-	}
+    if (lines==0) {
+        lines=(values.length/cols).floor+1
+    }
 
-	Lib.Data.for(0,lines,1) -> lineNo
-		Inner{
-			Lib.Data.for(0,cols,1) -> colNo
-				pos=colNo*lines+lineNo
-				
-				remaining=values.length-pos
-				if (lineNo==lines-1 && colNo==cols-1 && remaining>1) {
-					out(adjust(Curses:Bold+"<< +"+ remaining+" >>"+Curses:Reset))
-				} else {
-					if (pos < values.length) {
-						s=values.nth(pos)
-						if (s.length >= colWidth) {
-							s=s.first(colWidth-2)+"+"
-						}
-						if (colNo < cols-1) {
-							s=adjust(s,colWidth+colSpacing)
-						}
-						out(s)
-					} else {
-						if (colNo < cols-1) {
-							out(adjust("",colWidth+colSpacing))
-						} 
-					} 
-				}
-		} => colValues
-		out(colValues.concat)
-	}
+    Lib.Data.for(0,lines,1) -> lineNo
+        Inner{
+            Lib.Data.for(0,cols,1) -> colNo
+                pos=colNo*lines+lineNo
+                
+                remaining=values.length-pos
+                if (lineNo==lines-1 && colNo==cols-1 && remaining>1) {
+                    out(adjust(Curses:Bold+"<< +"+ remaining+" >>"+Curses:Reset))
+                } else {
+                    if (pos < values.length) {
+                        s=values.nth(pos)
+                        if (s.length >= colWidth) {
+                            s=s.first(colWidth-2)+"+"
+                        }
+                        if (colNo < cols-1) {
+                            s=adjust(s,colWidth+colSpacing)
+                        }
+                        out(s)
+                    } else {
+                        if (colNo < cols-1) {
+                            out(adjust("",colWidth+colSpacing))
+                        } 
+                    } 
+                }
+        } => colValues
+        out(colValues.concat)
+    }
 /ShowColumns
-	
+    
 
 # Helper
 # --
-	P(1,"") => s
-	P(2,20) => width
+    P(1,"") => s
+    P(2,20) => width
 
-	loop
-		s=(s+"          ").first(width)
-		break(s.length==width)
-	|
-	s
+    loop
+        s=(s+"          ").first(width)
+        break(s.length==width)
+    |
+    s
 //adjust
 
-				
+                
 
 # Compress list of file names to glob-expressions for the different file types
 # --
-	P(1,List)=>names
+    P(1,List)=>names
 
-	dict=Dict
-	Inner {
-		names->s
-			reject(s.contains("*"))
-			assert(s.contains("."))
+    dict=Dict
+    Inner {
+        names->s
+            reject(s.contains("*"))
+            assert(s.contains("."))
 
-			x="*."+s.afterLast(".")
-			dict.set(x,dict.get(x,0)+1)
-	}
-	Inner {
-		dict.keys->key 
-			assert(dict.get(key) >= 2) 
-			out(key)
-	} => patternList
+            x="*."+s.afterLast(".")
+            dict.set(x,dict.get(x,0)+1)
+    }
+    Inner {
+        dict.keys->key 
+            assert(dict.get(key) >= 2) 
+            out(key)
+    } => patternList
 
-	# Generate output
-	{
-		patternList->p out(p)
-	}
+    # Generate output
+    {
+        patternList->p out(p)
+    }
 
-	{
-		names->s
-			reject(s.contains("*"))
-			match=false
-			Inner {
-				patternList->p
-					regex=Glob(p).regex
-					if(regex.match(s)) match=true
-			}
-			if (!match) out(s)
-		}
-	}
+    {
+        names->s
+            reject(s.contains("*"))
+            match=false
+            Inner {
+                patternList->p
+                    regex=Glob(p).regex
+                    if(regex.match(s)) match=true
+            }
+            if (!match) out(s)
+        }
+    }
 /CompressWithGlobbing
 
 
 
 # Test 
 # --
-	P(1,Dir) => dir
-	Inner {
-		Dir.files->f out(f.name)
-	} => values
-	DisplayData(values)		
+    P(1,Dir) => dir
+    Inner {
+        Dir.files->f out(f.name)
+    } => values
+    DisplayData(values)     
 //t
 
 # Test 
 # --
-	P(1,Dir) => dir
-	Inner {
-		Dir.allFiles->f out(f.name)
-	} => values
-	DisplayData(values)		
+    P(1,Dir) => dir
+    Inner {
+        Dir.allFiles->f out(f.name)
+    } => values
+    DisplayData(values)     
 //t1

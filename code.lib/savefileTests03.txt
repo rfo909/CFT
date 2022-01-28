@@ -1,3 +1,24 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2022 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 # Testing the protect mechanism of files and directories.
 
 # These tests are all "negative", in that they succeed only when failing
@@ -8,14 +29,14 @@
 
 # Test directory
 # --
-	Dir("/tmp").sub(Sys.sessionUUID).create
+    Dir("/tmp").sub(Sys.sessionUUID).create
 /dir
 
 
 # Cleanup
 # --
-	dir.allFiles->f f.delete |
-	dir.allDirs->d d.delete |
+    dir.allFiles->f f.delete |
+    dir.allDirs->d d.delete |
 /Cleanup
 
 
@@ -116,25 +137,25 @@ dir.protect.file("f").binaryCreate(Lib.Util.randomBinary("sdf"))
 
 # Run all TestX - note that each MUST fail with error to pass 
 # --
-	Sys.functions.sort->f
-		assert(f.startsWith("Test"))
-		
-		Cleanup
-		tryCatch(eval(f)) => result
-		
-		completed=false
-		
-		if (!result.ok) {
-			Inner {
-				result.stack->line
-					if (line.contains("Protection.validateDestructiveOperation")) completed=true
-			}
-		}
-		report(f,completed)
-	| => output
-	Cleanup
-	dir.delete
-	output
+    Sys.functions.sort->f
+        assert(f.startsWith("Test"))
+        
+        Cleanup
+        tryCatch(eval(f)) => result
+        
+        completed=false
+        
+        if (!result.ok) {
+            Inner {
+                result.stack->line
+                    if (line.contains("Protection.validateDestructiveOperation")) completed=true
+            }
+        }
+        report(f,completed)
+    | => output
+    Cleanup
+    dir.delete
+    output
 /RunAll
 
 

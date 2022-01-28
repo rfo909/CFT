@@ -1,3 +1,20 @@
+/*
+CFT - an interactive programmable shell for automation 
+Copyright (C) 2020-2022 Roar Foshaug
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>
+*/
+
 package rf.configtool.main.runtime.lib;
 
 import java.io.BufferedReader;
@@ -104,7 +121,7 @@ public class ObjProcess extends Obj {
         (new Thread(runner)).start();
         
         if (onChange != null) {
-        	OnChangeRunner runner2=new OnChangeRunner(ctx, onChange, this);
+            OnChangeRunner runner2=new OnChangeRunner(ctx, onChange, this);
             (new Thread(runner2)).start();
         }
 
@@ -136,7 +153,7 @@ public class ObjProcess extends Obj {
     }
 
     public synchronized boolean isAlive() {
-    	return (exitValue==null);
+        return (exitValue==null);
     }
     
     
@@ -169,9 +186,9 @@ public class ObjProcess extends Obj {
                 Throwable t=ex;
                 Stdio stdio = ctx.getStdio();
                 stdio.println("Process fails with Exception: " + t.getMessage());
-				for (StackTraceElement line : t.getStackTrace()) {
-					stdio.println("   " + line.toString());
-				}
+                for (StackTraceElement line : t.getStackTrace()) {
+                    stdio.println("   " + line.toString());
+                }
                 process.setExitValue(new ValueNull());
             }
         }
@@ -196,31 +213,31 @@ public class ObjProcess extends Obj {
 
         public void run() {
             try {
-            	for(;;) {
-	            	Thread.sleep(31);
-	            	
-	            	boolean isCompleted;
-	            	
-	                synchronized (EXIT_LOCK) {
-	                    isCompleted = (exitValue != null);
-	                }
-	                
-	                if (isCompleted || stdioVirtual.hasBufferedOutput()) {
-	                	// call closure
-	                	List<Value> params=new ArrayList<Value>();
-	                	params.add(new ValueObj(process));
-	                	closure.callClosure(ctx, params);
-	                }
-	                if (isCompleted) break; // no more calls
-            	}
+                for(;;) {
+                    Thread.sleep(31);
+                    
+                    boolean isCompleted;
+                    
+                    synchronized (EXIT_LOCK) {
+                        isCompleted = (exitValue != null);
+                    }
+                    
+                    if (isCompleted || stdioVirtual.hasBufferedOutput()) {
+                        // call closure
+                        List<Value> params=new ArrayList<Value>();
+                        params.add(new ValueObj(process));
+                        closure.callClosure(ctx, params);
+                    }
+                    if (isCompleted) break; // no more calls
+                }
             } catch (Exception ex) {
                 // Generating full exception log to virtual stdout if process fails
                 Throwable t=ex;
                 Stdio stdio = ctx.getStdio();
                 stdio.println("OnChangeRunner fails with Exception: " + t.getMessage());
-				for (StackTraceElement line : t.getStackTrace()) {
-					stdio.println("   " + line.toString());
-				}
+                for (StackTraceElement line : t.getStackTrace()) {
+                    stdio.println("   " + line.toString());
+                }
             }
         }
     }

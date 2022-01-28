@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020 Roar Foshaug
+Copyright (C) 2020-2022 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ public class ExprSpawnProcess extends ExprCommon {
         ts.matchStr(",","Expected ','");
         expr = new Expr(ts);
         if (ts.matchStr(",")) {
-        	onChangeLambdaOrClosure = new Expr(ts);
+            onChangeLambdaOrClosure = new Expr(ts);
         }
         ts.matchStr(")", "expected ')' closing spawn statement");
     }
@@ -68,18 +68,18 @@ public class ExprSpawnProcess extends ExprCommon {
         }
                
         if (oc==null) {
-        	closOk=true;
+            closOk=true;
         } else {
-        	if (oc instanceof ValueBlock) {
-    			closure=new ObjClosure(new ObjDict(), (ValueBlock) oc);
-    			closOk=true;
-        	} else if (oc instanceof ValueObj) {
-        		Obj x=((ValueObj) oc).getVal();
-        		if (x instanceof ObjClosure) {
-        			closure=(ObjClosure) x;
-        			closOk=true;
-        		}
-        	}
+            if (oc instanceof ValueBlock) {
+                closure=new ObjClosure(new ObjDict(), (ValueBlock) oc);
+                closOk=true;
+            } else if (oc instanceof ValueObj) {
+                Obj x=((ValueObj) oc).getVal();
+                if (x instanceof ObjClosure) {
+                    closure=(ObjClosure) x;
+                    closOk=true;
+                }
+            }
         }
  
         if (!dictOk || !closOk) throw new Exception("Expected parameters Dict, Expr [,lambdaOrClosure]");

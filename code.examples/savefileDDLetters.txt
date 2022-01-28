@@ -1,58 +1,79 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2022 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 
 
 # DDText - writes along the "forward" direction, up is left and down is right.
 # Each letter is 7x5 and space between letters and lines is 2, so next line
 # is .right(7+2) (line height + extra space)
 # --
-	P(1)=>world
-	P(2)=>ref
-	P(3,"test")=>str
-	P(4,Lib.Color(0,0,0))=>color
-	
-	brush=world.Brush(-0.5,0.5).setColor(color)
-	
-	Letters7x5:GetText(str) => lines
-	Lib.Data.each(0,lines.length-1)->lineNo
-		line=lines.nth(lineNo)
-		Lib.Data.each(0,line.length-1)->charNo
-			char=line.chars.nth(charNo)
-			assert(char=="#") 
-			ref.left(3).right(lineNo).fwd(charNo).fwd(0.5)=>dotCenter
-			brush.penDown(dotCenter.back(0.5))
-			brush.penDown(dotCenter.fwd(0.5))
-			brush.penUp
-/DDText			
+    P(1)=>world
+    P(2)=>ref
+    P(3,"test")=>str
+    P(4,Lib.Color(0,0,0))=>color
+    
+    brush=world.Brush(-0.5,0.5).setColor(color)
+    
+    Letters7x5:GetText(str) => lines
+    Lib.Data.each(0,lines.length-1)->lineNo
+        line=lines.nth(lineNo)
+        Lib.Data.each(0,line.length-1)->charNo
+            char=line.chars.nth(charNo)
+            assert(char=="#") 
+            ref.left(3).right(lineNo).fwd(charNo).fwd(0.5)=>dotCenter
+            brush.penDown(dotCenter.back(0.5))
+            brush.penDown(dotCenter.fwd(0.5))
+            brush.penUp
+/DDText         
 
 
 
 # Target dir for demo
 # --
-	Sys.homeDir.sub("anim").sub("2d").create
+    Sys.homeDir.sub("anim").sub("2d").create
 /Target
 
 # Testing 2D graphics
 # --
-	Lib.DD.World => world
-	Lib.DD.Ref => ref
-	
-	
-	world.LineBrush => b2
-	Lib.DD.Ref => ref
-	b2.penDown(ref)
-	b2.penDown(ref.right(100))
-	b2.penUp
-	b2.penDown(ref)
-	b2.penDown(ref.fwd(300))
-	b2.penUp
+    Lib.DD.World => world
+    Lib.DD.Ref => ref
+    
+    
+    world.LineBrush => b2
+    Lib.DD.Ref => ref
+    b2.penDown(ref)
+    b2.penDown(ref.right(100))
+    b2.penUp
+    b2.penDown(ref)
+    b2.penDown(ref.fwd(300))
+    b2.penUp
 
-	DDText(world, ref.right(100).turnRight(90).fwd(10).scaleUp(2), "right", Lib.Color(255,0,0))
-	DDText(world, ref.fwd(300).fwd(10).scaleUp(2), "fwd", Lib.Color(255,0,0))
-	
-	Lib.DD.Ref.back(40).turnRight(20).setScaleFactor(3) => textRef
-	DDText(world, textRef, "Testing DD library")
-	DDText(world, textRef.right(7+2), "Second line")
+    DDText(world, ref.right(100).turnRight(90).fwd(10).scaleUp(2), "right", Lib.Color(255,0,0))
+    DDText(world, ref.fwd(300).fwd(10).scaleUp(2), "fwd", Lib.Color(255,0,0))
+    
+    Lib.DD.Ref.back(40).turnRight(20).setScaleFactor(3) => textRef
+    DDText(world, textRef, "Testing DD library")
+    DDText(world, textRef.right(7+2), "Second line")
 
-	world.render(Target.file("letters.png"))
+    world.render(Target.file("letters.png"))
 /demo
 
 

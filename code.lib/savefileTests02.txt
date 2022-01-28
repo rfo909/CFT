@@ -1,3 +1,24 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2022 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 # Testing Dictonaries after adding code to maintain key
 # sequence.
 
@@ -28,7 +49,7 @@ Dict.set("a",1).set("23",2).set("x",3).keys.concat=="a23x"
 
 
 Lambda{
-	PDict("a","b","2")
+    PDict("a","b","2")
 }.call(1,2).keys.concat=="ab2"
 /Test05_PDict
 
@@ -60,16 +81,16 @@ a : 5
 b = roar
 c: test
 >>> EOF
-	->line
-		dict.setStr(line)
+    ->line
+        dict.setStr(line)
 |
-	dict.keys.concat=="abc" && dict.a=="5" && dict.b=="roar" && dict.c=="test"
+    dict.keys.concat=="abc" && dict.a=="5" && dict.b=="roar" && dict.c=="test"
 /Test08_setStr
 
 
 
-	
-	
+    
+    
 Dict.set("a",1).set("b",2).set("c",3).subset("b a x".split, "default").keys.concat=="bax"
 /Test09_subset
 
@@ -93,18 +114,18 @@ JSON:Parse("{b:1, a:2, c:3, x:{y:1, z:2}, d:4}").keys.concat=="bacxd"
 # which in turn needed to be stripped from raw string tokens when converting
 # them to normal strings. 
 # ------ 
-	list1=
+    list1=
 <<<< EOF
 a
 b
 c
 >>>> EOF
-	list2=Sequence(
-		@ a
-		@ b
-		@ c
-	)
-	list1.concat==list2.concat
+    list2=Sequence(
+        @ a
+        @ b
+        @ c
+    )
+    list1.concat==list2.concat
 /Test11_Here_doc_vs_Sequence
 
 
@@ -116,9 +137,9 @@ c
 
 # Run all TestX
 # --
-	Sys.functions.sort->f
-		assert(f.startsWith("Test"))
-		report(f,eval(f))
+    Sys.functions.sort->f
+        assert(f.startsWith("Test"))
+        report(f,eval(f))
 /RunAll
 
 

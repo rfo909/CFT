@@ -2,7 +2,7 @@
 <<< EOF
 #
 # CFT - an interactive programmable shell for automation 
-# Copyright (C) 2020 Roar Foshaug
+# Copyright (C) 2020-2022 Roar Foshaug
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -43,30 +43,30 @@ choice.
 # Edit file
 # --
     P(1,Sys.savefile) => file
-	P(2,true) => detach
-	
-	if (!detach) {
-		# Need to run editor that we can wait for
-		#
-		if (Sys.isWindows) {
-			Dir.run("cmd","/c","notepad",file.path)
-		} else {
-			Dir.run("nano",file.path)
-		}
-	} else {
-		# regular processing
-		
-		if(Sys.isWindows) {
-			npp = Dir("C:\Program Files (x86)\Notepad++")
-			if (npp.exists) {
-				Dir.runDetach(npp.path + "\notepad++.exe", file.path)
-			} else {
-				Dir.runDetach("cmd","/c","notepad",file.path)
-			}
-		} else {
-			ShowLinuxEditor(file)
-		}
-	}
+    P(2,true) => detach
+    
+    if (!detach) {
+        # Need to run editor that we can wait for
+        #
+        if (Sys.isWindows) {
+            Dir.run("cmd","/c","notepad",file.path)
+        } else {
+            Dir.run("nano",file.path)
+        }
+    } else {
+        # regular processing
+        
+        if(Sys.isWindows) {
+            npp = Dir("C:\Program Files (x86)\Notepad++")
+            if (npp.exists) {
+                Dir.runDetach(npp.path + "\notepad++.exe", file.path)
+            } else {
+                Dir.runDetach("cmd","/c","notepad",file.path)
+            }
+        } else {
+            ShowLinuxEditor(file)
+        }
+    }
 /e
 
 
@@ -84,44 +84,44 @@ choice.
 
 # Get file from lastResult if possible, otherwise error
 # --
-	x = Sys.lastResult
-	if (getType(x)=="List") {
-		files=Inner{x->e assert(getType(e)=="File") out(e)}
-		error(files.empty,"No files in lastResult")
-		Lib:MenuSelect(files,Lambda{P(1).name},null,true) => x
-	}
-	error(getType(x)!="File","Not a file")
-	x
+    x = Sys.lastResult
+    if (getType(x)=="List") {
+        files=Inner{x->e assert(getType(e)=="File") out(e)}
+        error(files.empty,"No files in lastResult")
+        Lib:MenuSelect(files,Lambda{P(1).name},null,true) => x
+    }
+    error(getType(x)!="File","Not a file")
+    x
 /GetLastResultFile
 
 
 
 # Linux helper
 # --
-	P(1,"ls")=>program
-	Dir.runCapture("which", program) => lines
-	if (lines.length >= 1 && lines.first.contains("/"+program)) {
-		true
-	} else {
-		false
-	}
+    P(1,"ls")=>program
+    Dir.runCapture("which", program) => lines
+    if (lines.length >= 1 && lines.first.contains("/"+program)) {
+        true
+    } else {
+        false
+    }
 //LinuxHasProgram
 
 
 # Show graphical file manager
 # --
-	P(1,Dir) => dir
-	if (Sys.isWindows) {
-		dir.run("explorer",dir.path)
-	} else {
-		if (LinuxHasProgram("nautilus")) {
-			dir.runDetach("nautilus",dir.path)
-		} else if (LinuxHasProgram("xfe")) { 	
-			dir.runDetach("xfe",dir.path)
-		} else {
-			error("Found no file manager")
-		}
-	}
+    P(1,Dir) => dir
+    if (Sys.isWindows) {
+        dir.run("explorer",dir.path)
+    } else {
+        if (LinuxHasProgram("nautilus")) {
+            dir.runDetach("nautilus",dir.path)
+        } else if (LinuxHasProgram("xfe")) {  
+            dir.runDetach("xfe",dir.path)
+        } else {
+            error("Found no file manager")
+        }
+    }
 /fileManager
 
 
@@ -131,39 +131,39 @@ choice.
     false =>updated
 
     if (Term.isTerminal) {
-		if(!Sys.isWindows) {
-		    # Linux
-		    Dir.runCapture("which","stty").nth.contains("/stty") =>hasStty
-		    if(hasStty, Inner{
-		        Dir.runCapture("stty","size").nth.split =>list
+        if(!Sys.isWindows) {
+            # Linux
+            Dir.runCapture("which","stty").nth.contains("/stty") =>hasStty
+            if(hasStty, Inner{
+                Dir.runCapture("stty","size").nth.split =>list
 
-		        Term.h(list.nth(0).parseInt)
-		        Term.w(list.nth(1).parseInt)
-		        true =>updated
-		    })
-		} else {
-		    # Windows (a bit slow)
-			# 2021-08-18 RFO: some windows environments fail running powershell
-			tryCatch ({
-				Dir.runCapture("powershell","(Get-Host).UI.RawUI.WindowSize.Width").nth.parseInt =>w
-				Dir.runCapture("powershell","(Get-Host).UI.RawUI.WindowSize.Height").nth.parseInt =>h
-			}) => result
-			if (!result.ok) {
-				key="GetTerminalSize Windows Fails"
-				if (Util:HasTimedOut(key,3600)) {
-					Lib:ShowWarn("GetTerminalSize() fails (windows) - using 80x24")
-					Util:SetTimeMark(key)
-				}
-				w=80
-				h=24
-			}
-		    Term.w(w)
-		    Term.h(h)
-		    true =>updated
-		}
-	}
-	#if(updated, Term, null)
-	Term
+                Term.h(list.nth(0).parseInt)
+                Term.w(list.nth(1).parseInt)
+                true =>updated
+            })
+        } else {
+            # Windows (a bit slow)
+            # 2021-08-18 RFO: some windows environments fail running powershell
+            tryCatch ({
+                Dir.runCapture("powershell","(Get-Host).UI.RawUI.WindowSize.Width").nth.parseInt =>w
+                Dir.runCapture("powershell","(Get-Host).UI.RawUI.WindowSize.Height").nth.parseInt =>h
+            }) => result
+            if (!result.ok) {
+                key="GetTerminalSize Windows Fails"
+                if (Util:HasTimedOut(key,3600)) {
+                    Lib:ShowWarn("GetTerminalSize() fails (windows) - using 80x24")
+                    Util:SetTimeMark(key)
+                }
+                w=80
+                h=24
+            }
+            Term.w(w)
+            Term.h(h)
+            true =>updated
+        }
+    }
+    #if(updated, Term, null)
+    Term
 /GetTerminalSize
             
 
@@ -171,13 +171,13 @@ choice.
 # Select Linux editor and remember selection for next time, open file in editor
 # --
   P(1,Sys.savefile) =>file
-  	Dict
-  		.set("sublime",Lambda { P(1)=>file Dir.runDetach("subl",file.path) })
-  		.set("gedit", Lambda { P(1)=>file Dir.runDetach("gedit",file.path) })
-  		.set("leafpad",Lambda { P(1)=>file Dir.runDetach("leafpad",file.path) })
-  		.set("nano", Lambda { P(1)=>file Dir.run("nano", file.path) })
-  		.set("micro",Lambda { P(1)=>file Dir.run("micro", file.path) })
-  	=> actions
+    Dict
+        .set("sublime",Lambda { P(1)=>file Dir.runDetach("subl",file.path) })
+        .set("gedit", Lambda { P(1)=>file Dir.runDetach("gedit",file.path) })
+        .set("leafpad",Lambda { P(1)=>file Dir.runDetach("leafpad",file.path) })
+        .set("nano", Lambda { P(1)=>file Dir.run("nano", file.path) })
+        .set("micro",Lambda { P(1)=>file Dir.run("micro", file.path) })
+    => actions
 
    if(Db2:Get("Lib","linuxEditor")==null) {
         MenuSelect(actions.keys, Lambda { P(1) },"Select editor") =>ed
@@ -185,7 +185,7 @@ choice.
     }
 
 
-	ed = Db2:Get("Lib","linuxEditor")
+    ed = Db2:Get("Lib","linuxEditor")
     actions.get(ed).call(file)
 //ShowLinuxEditor
 
@@ -201,95 +201,95 @@ choice.
 
 # Get the private dir
 # --
-	Sys.homeDir.sub("private") =>d
-	if(!d.exists) d.create
-	d
+    Sys.homeDir.sub("private") =>d
+    if(!d.exists) d.create
+    d
 /DirPrivate
 
 
 
 # Create name of temp file under /tmp or under c:\temp if windows
 # --
-	P(1,"tmp") =>name 
-	P(2,"txt") => type
-	Util:Counter("Lib.TmpFile.id") => x
-	s=name+Lib.Db.UUID+"-"+x+"."+type
+    P(1,"tmp") =>name 
+    P(2,"txt") => type
+    Util:Counter("Lib.TmpFile.id") => x
+    s=name+Lib.Db.UUID+"-"+x+"."+type
     if (Sys.isWindows,
-		Dir("c:\temp").file(s),
-    	Dir("/tmp").file(s) 
+        Dir("c:\temp").file(s),
+        Dir("/tmp").file(s) 
     )
 /TmpFile
 
 
 # Create temporary directory - remember to delete it when done
 # --
-	P(1,"tmp") => name
-	if (Sys.isWindows,
-		Dir("c:\temp\"+name+currentTimeMillis),
-		Dir("/tmp/"+name+currentTimeMillis)
-	) =>d
-	if (!d.exists) {
-		d.create
-	}
-	d
+    P(1,"tmp") => name
+    if (Sys.isWindows,
+        Dir("c:\temp\"+name+currentTimeMillis),
+        Dir("/tmp/"+name+currentTimeMillis)
+    ) =>d
+    if (!d.exists) {
+        d.create
+    }
+    d
 /TmpDir
 
 
 # Copy directory tree. Both fromDir and toDir must exist.
 # --
-	P(1) => fromDir
-	P(2) => toDir
-	P(3,false) => verbose
-	P(4,true) => execute  # set false to do "dry run"
-	P(5, Lambda{true}) => LInclude
+    P(1) => fromDir
+    P(2) => toDir
+    P(3,false) => verbose
+    P(4,true) => execute  # set false to do "dry run"
+    P(5, Lambda{true}) => LInclude
 
-	error(!fromDir.exists, "Invalid fromDir: " + fromDir.path)
-	error(execute && !toDir.exists, "Invalid toDir: " + toDir.path)
-	error(fromDir.path==toDir.path, "fromDir == toDir")
+    error(!fromDir.exists, "Invalid fromDir: " + fromDir.path)
+    error(execute && !toDir.exists, "Invalid toDir: " + toDir.path)
+    error(fromDir.path==toDir.path, "fromDir == toDir")
 
-	fromDir.files->f 
-		assert(LInclude.call(f))
-		if(verbose) {
-			println("FROM: " + f.path) 
-			println("TO  : " + toDir.path)
-		}
-		if (execute) toDir.copy(f) 
-	|
-	fromDir.dirs->d 
-		toDir.sub(d.name) => d2
-		if(!d2.exists && execute) d2.create
-		CopyDirTree(d,d2,verbose,execute,LInclude)
-	|
+    fromDir.files->f 
+        assert(LInclude.call(f))
+        if(verbose) {
+            println("FROM: " + f.path) 
+            println("TO  : " + toDir.path)
+        }
+        if (execute) toDir.copy(f) 
+    |
+    fromDir.dirs->d 
+        toDir.sub(d.name) => d2
+        if(!d2.exists && execute) d2.create
+        CopyDirTree(d,d2,verbose,execute,LInclude)
+    |
 /CopyDirTree
 
 
 
 # Compare files from source tree to target tree, prints report to stdout
 # --
-	P(1) => fromDir
-	P(2) => toDir
-	P(3,true) => recurse
+    P(1) => fromDir
+    P(2) => toDir
+    P(3,true) => recurse
 
-	error(!fromDir.exists, "Invalid fromDir: " + fromDir.path)
-	error(!toDir.exists, "Invalid toDir: " + toDir.path)
+    error(!fromDir.exists, "Invalid fromDir: " + fromDir.path)
+    error(!toDir.exists, "Invalid toDir: " + toDir.path)
 
-	fromDir.files->f
-		toDir.file(f.name) => f2
-		if (f2.exists) {
-			if (f2.length != f.length || f2.hash != f.hash) println("DIFFERS: " + f2.path)
-		} else {
-			println("NOT FOUND: " + f2.path)
-		}
-	|
-	if (recurse) {
-		fromDir.dirs->d 
-			toDir.sub(d.name) => d2
-			if(!d2.exists) {
-				println("NO DIR: " + d2.path)
-			} else {
-				CompareFiles(d,d2,true)
-			}
-	}
+    fromDir.files->f
+        toDir.file(f.name) => f2
+        if (f2.exists) {
+            if (f2.length != f.length || f2.hash != f.hash) println("DIFFERS: " + f2.path)
+        } else {
+            println("NOT FOUND: " + f2.path)
+        }
+    |
+    if (recurse) {
+        fromDir.dirs->d 
+            toDir.sub(d.name) => d2
+            if(!d2.exists) {
+                println("NO DIR: " + d2.path)
+            } else {
+                CompareFiles(d,d2,true)
+            }
+    }
 /CompareFiles
 
 
@@ -297,24 +297,24 @@ choice.
 # Delete directory tree, asks for interactive confirm
 # Leaves root directory
 # --
-	P(1)=>xdir
-	Sequence(
-		@
-		@ ------------------------------------------
-		@ ------------------------------------------
-		@     Deleting directory tree confirm
-		@ ------------------------------------------
-		@
-		xdir.path
-		@
-		@ ------------------------------------------
-		@
-	)->x println(x) |
-	readLine("Are you really SURE? Type 'Yes'")=="Yes" =>ok
-	error(!ok,"Aborting")
-	
-	xdir.allFiles->f f.delete |
-	xdir.allDirs->d d.delete |
+    P(1)=>xdir
+    Sequence(
+        @
+        @ ------------------------------------------
+        @ ------------------------------------------
+        @     Deleting directory tree confirm
+        @ ------------------------------------------
+        @
+        xdir.path
+        @
+        @ ------------------------------------------
+        @
+    )->x println(x) |
+    readLine("Are you really SURE? Type 'Yes'")=="Yes" =>ok
+    error(!ok,"Aborting")
+    
+    xdir.allFiles->f f.delete |
+    xdir.allDirs->d d.delete |
 /DelDirTree
 
 
@@ -322,7 +322,7 @@ choice.
 # Run external program and collect stdout, stderr and exitCode - returns intermediate Dict
 # representing the running process, with a member closure called "wait", which in turn
 # delivers a result Dict with the following fields:
-# 		cmd, stdin, stdout, stderr, exitCode
+#       cmd, stdin, stdout, stderr, exitCode
 #
 # Run external program in background.
 #
@@ -332,10 +332,10 @@ choice.
 #     a.wait.call => aResult
 #     b.wait.call => bResult
 # --
-	P(1,List("ls","-l")) => cmd
-	P(2,List) => stdinLines
-	P(3,false) => acceptErrors
-	P(4,false) => showDebug
+    P(1,List("ls","-l")) => cmd
+    P(2,List) => stdinLines
+    P(3,false) => acceptErrors
+    P(4,false) => showDebug
 
     if (getType(cmd) != "List") {
         cmd=List(cmd) # wrap as list
@@ -349,8 +349,8 @@ choice.
     
     inFile.create(stdinLines)
 
-	# The Dir.runProcess call
-	process = Dir.runProcess(inFile,outFile,errFile,cmd)
+    # The Dir.runProcess call
+    process = Dir.runProcess(inFile,outFile,errFile,cmd)
 
     Dict
         .set("cmd", cmd)
@@ -361,81 +361,81 @@ choice.
         .set("stderr", errFile)
         .set("process", process)
         .set("isCompleted", Lambda {
-        	self.process==null || !self.process.isAlive
+            self.process==null || !self.process.isAlive
         })
         .set("wait", Lambda{
-        	# Delay until process terminated
-        	loop 
-        		break(self.process==null || !self.process.isAlive) 
-        		Sys.sleep(5) 
-        	|
-        	
-        	# Read temp files
-        	result = Dict
-        		.set("cmd", self.cmd)
-        		.set("stdin", self.stdin.read)
-        		.set("stdout", if(self.stdout.exists, self.stdout.read, List))
-        		.set("stderr", if(self.stderr.exists, self.stderr.read, List))
-        		.set("exitCode", if(self.process==null, -1, self.process.exitCode))
+            # Delay until process terminated
+            loop 
+                break(self.process==null || !self.process.isAlive) 
+                Sys.sleep(5) 
+            |
+            
+            # Read temp files
+            result = Dict
+                .set("cmd", self.cmd)
+                .set("stdin", self.stdin.read)
+                .set("stdout", if(self.stdout.exists, self.stdout.read, List))
+                .set("stderr", if(self.stderr.exists, self.stderr.read, List))
+                .set("exitCode", if(self.process==null, -1, self.process.exitCode))
 
-			# Delete temp-files
-			# --
-			# Note: Windows external processes do not allow files to be deleted
-			# immediately even after returning isAlive() == false.
-			Del = Lambda {
-        		P(1)=>f 
-				count=0
-				loop
-					if(f.exists && count <= 20) {
-						count=count+1
-						if (count>15) println("File delete failed, trying again: " + f.path)
-						Sys.sleep(5)
-						f.delete
-					} else {
-						break
-					}
-        	}
-        	Del.call(self.stdin)
-        	Del.call(self.stdout)
-        	Del.call(self.stderr)
-        	
-        	# Show debug
-        	
-    	    FAIL = false
-		    if (result.exitCode != 0 && !self.acceptErrors) {
-		        FAIL = true
-		    }
+            # Delete temp-files
+            # --
+            # Note: Windows external processes do not allow files to be deleted
+            # immediately even after returning isAlive() == false.
+            Del = Lambda {
+                P(1)=>f 
+                count=0
+                loop
+                    if(f.exists && count <= 20) {
+                        count=count+1
+                        if (count>15) println("File delete failed, trying again: " + f.path)
+                        Sys.sleep(5)
+                        f.delete
+                    } else {
+                        break
+                    }
+            }
+            Del.call(self.stdin)
+            Del.call(self.stdout)
+            Del.call(self.stderr)
+            
+            # Show debug
+            
+            FAIL = false
+            if (result.exitCode != 0 && !self.acceptErrors) {
+                FAIL = true
+            }
 
-		    if(self.showDebug || FAIL) {
-		        Inner {  # "hide" loops inside inner block, so as not to affect return value of function
-		            println("- cmd:")
-		            result.get("cmd")->line println("    " + line) |
+            if(self.showDebug || FAIL) {
+                Inner {  # "hide" loops inside inner block, so as not to affect return value of function
+                    println("- cmd:")
+                    result.get("cmd")->line println("    " + line) |
 
-		            println("- exitCode = " + result.get("exitCode"))
+                    println("- exitCode = " + result.get("exitCode"))
 
-		            println("- stdin:")
-		            result.get("stdin")->line println("   # " + line) |
+                    println("- stdin:")
+                    result.get("stdin")->line println("   # " + line) |
 
-		            println("- stdout:")
-		            result.get("stdout")->line println("   # " + line) |
+                    println("- stdout:")
+                    result.get("stdout")->line println("   # " + line) |
 
-		            println("- stderr:")
-		            result.get("stderr")->line println("   # " + line) |
-		            println
-		        }
-		    }
-		    
-		    error(FAIL,"run failed with error")
-		    
-		    # return value
-		    result
+                    println("- stderr:")
+                    result.get("stderr")->line println("   # " + line) |
+                    println
+                }
+            }
+            
+            error(FAIL,"run failed with error")
+            
+            # return value
+            result
 
         })  # Lambda "wait"
     =>obj
 
-	if (showDebug) Inner{
-		println("--- runProcess result ---")
-    	Util:ShowDict(obj,true)
+    if (showDebug) Inner{
+        println("--- runProcess result ---")
+        Util:ShowDict(obj,true)
     }
     
     obj
@@ -446,15 +446,15 @@ choice.
 # Run external program and collect stdout, stderr and exitCode - returns Dict
 # with fields cmd, stdin, stdout, stderr, exitCode
 # --
-	P(1,List("ls","-l")) => cmd
-	P(2,List) => stdinLines
-	P(3,false) => acceptErrors
-	P(4,false) => showDebug
+    P(1,List("ls","-l")) => cmd
+    P(2,List) => stdinLines
+    P(3,false) => acceptErrors
+    P(4,false) => showDebug
 
-	runProcess (cmd,stdinLines,acceptErrors,showDebug) => processDict
-	
-	# return value
-	processDict.wait.call
+    runProcess (cmd,stdinLines,acceptErrors,showDebug) => processDict
+    
+    # return value
+    processDict.wait.call
 
 /run
 
@@ -482,8 +482,8 @@ run(null,null,null,true)
     P(1,List) =>options
     P(2,Lambda { "name"}) =>LLabel
     P(3,false) =>emptyMeansNone
-	P(4,LLabel) => LValue
-	
+    P(4,LLabel) => LValue
+    
         sel=readLine("Enter exact or part of value?").trim
         if(emptyMeansNone && sel=="") {
             # empty list
@@ -518,19 +518,19 @@ run(null,null,null,true)
 
 # Display info message
 # --
-	P(1,"Message") => msg
-	
-	println("* INFO: " + msg)
+    P(1,"Message") => msg
+    
+    println("* INFO: " + msg)
 /ShowInfo
 
 
 # Display warning message
 # --
-	P(1,"Message") => msg
-	
-	println
-	println("### WARNING ### " + msg)
-	println
+    P(1,"Message") => msg
+    
+    println
+    println("### WARNING ### " + msg)
+    println
 /ShowWarn
 
 
@@ -538,38 +538,38 @@ run(null,null,null,true)
 
 # Select single value from list of options. Using lambda to extract name for each element.
 # --
-	P(1,List)=>options 
-	P(2,Lambda {P(1)}) =>LLabel   ## display value
-	P(3,"Select element") =>title 
-	P(4,false) => emptyMeansNone
-	P(5,LLabel) =>LValue          ## separate (narrower) value for matching input?
+    P(1,List)=>options 
+    P(2,Lambda {P(1)}) =>LLabel   ## display value
+    P(3,"Select element") =>title 
+    P(4,false) => emptyMeansNone
+    P(5,LLabel) =>LValue          ## separate (narrower) value for matching input?
 
-	error(getType(options) != "List", "Options must be a list (" + title + ")")
-	error(options.length==0,"No elements in options list (" + title + ")")
-	
-	if(options.length==1) {
-		options.first
-	} else Inner {
-		selectedElement=null
-		loop
-		    println("")
-		    if(title != null) Header(title)
-			if (emptyMeansNone) println("(Enter blank for none)")
+    error(getType(options) != "List", "Options must be a list (" + title + ")")
+    error(options.length==0,"No elements in options list (" + title + ")")
+    
+    if(options.length==1) {
+        options.first
+    } else Inner {
+        selectedElement=null
+        loop
+            println("")
+            if(title != null) Header(title)
+            if (emptyMeansNone) println("(Enter blank for none)")
 
-		    ShowOptions(options, LLabel)
-		    println("")
-		    SelectOptions(options, LLabel, emptyMeansNone, LValue) =>result
-		    
-		    if(result.length==1) {
-				selectedElement=result.first
-			} else {
-				selectedElement=null
-			}
-			#println("SelectedElement = " + selectedElement)
-		    break(selectedElement != null || emptyMeansNone)
-		    println("** No match or not unique")
-		| selectedElement
-	}
+            ShowOptions(options, LLabel)
+            println("")
+            SelectOptions(options, LLabel, emptyMeansNone, LValue) =>result
+            
+            if(result.length==1) {
+                selectedElement=result.first
+            } else {
+                selectedElement=null
+            }
+            #println("SelectedElement = " + selectedElement)
+            break(selectedElement != null || emptyMeansNone)
+            println("** No match or not unique")
+        | selectedElement
+    }
 /MenuSelect
 
 
@@ -617,21 +617,21 @@ P(1,"label") =>label P(2) =>currVal P(3,"yes") =>trueVal P(4,"no") =>falseVal
 
 # Get confirmation (true or false)
 # --
-	P(1,"Please confirm")=>label
-	P(2,"yes")=>confirmString
-	P(3,"no")=>defaultValue
-	readLine(label + " ("+defaultValue+")") => inp
-	if (inp.trim=="") inp=defaultValue
-	
-	inp.toLower == confirmString.toLower
+    P(1,"Please confirm")=>label
+    P(2,"yes")=>confirmString
+    P(3,"no")=>defaultValue
+    readLine(label + " ("+defaultValue+")") => inp
+    if (inp.trim=="") inp=defaultValue
+    
+    inp.toLower == confirmString.toLower
 /Confirm
 
 
 
 
 # If value is Dict, for each key found, return corresponding value (as list). Otherwise true if value found, false if not found
-	P(1,List) =>lines
-	P(2) =>value
+    P(1,List) =>lines
+    P(2) =>value
     if(getType(value)=="Dict") Inner{
         # match keys and result corresponding values as list
         dict=value
@@ -652,190 +652,190 @@ P(1,"label") =>label P(2) =>currVal P(3,"yes") =>trueVal P(4,"no") =>falseVal
 # List available save files across all code directories
 #
 # --
-	Sys.codeDirs.reverse->d
-		Lib:Header(d.path)
-		Inner {
-			d.files(Glob("savefile*.txt"))->f 
-				out(Str(f.name,f)) 
-			| _.sort->x
-				f=x.data
-				println("   " + f.name.after("savefile").before(".txt"))
-		}
+    Sys.codeDirs.reverse->d
+        Lib:Header(d.path)
+        Inner {
+            d.files(Glob("savefile*.txt"))->f 
+                out(Str(f.name,f)) 
+            | _.sort->x
+                f=x.data
+                println("   " + f.name.after("savefile").before(".txt"))
+        }
 /Scripts
 
 
 
 # Current user (linux)
 # --
-	P(1,"") => pre
-	P(2,"") => post
-	if (!Sys.isWindows) {
-		pre + Dir.runCapture("whoami").nth.trim + post
-	} else {
-		""
-	}
+    P(1,"") => pre
+    P(2,"") => post
+    if (!Sys.isWindows) {
+        pre + Dir.runCapture("whoami").nth.trim + post
+    } else {
+        ""
+    }
 /LoggedInUser
 
 
 
 # Search text files under current directory
 # --
-	P(1,Dir) => dir
-	P(2,Input("Search term").get) => st
-	P(3,Input("Enter partial file name, or glob pattern with '*'").get) => fname
-	P(4,Input("Include sub-dirs y/n").setCurrCond("y")).get.toLower=="y" => subDirs
-	
-	glob=if(fname.contains("*"),Glob(fname),Glob("*"+fname+"*"))
-	
-	grep=Grep(st)
+    P(1,Dir) => dir
+    P(2,Input("Search term").get) => st
+    P(3,Input("Enter partial file name, or glob pattern with '*'").get) => fname
+    P(4,Input("Include sub-dirs y/n").setCurrCond("y")).get.toLower=="y" => subDirs
+    
+    glob=if(fname.contains("*"),Glob(fname),Glob("*"+fname+"*"))
+    
+    grep=Grep(st)
 
-	totalCount=0
-	if(subDirs,dir.allFiles(glob), dir.files(glob))->file 
-		out(Int(file.lastModified,file)) 
-	| _.sort-> x
-		f=x.data
-		match=grep.file(f).length
-		totalCount=totalCount+match
-		if (match>0) out(f)
-	| => files
-	
-	dirs=Dict
-	files->file
-		dirs.set(file.dir.path,1)
-	|
-	dirCount=dirs.keys.length
-	
-	if (totalCount<2000 || dirCount==1) {
-		# Show details
-		Inner{
-			files->f
-					grep.file(f)->line
-						report(line.file.name, line.lineNumber, line)
-		}
-	} else {
-		# Show drilldown
-		if (files.length > 0) Inner {
-			Inner {
-				pos=0
-				files -> f
-					report(pos, f.path, Date.diff(Date(f.lastModified)).fmt)
-					pos=pos+1
-			} -> line
-				println(line)
-			|
-			println
-			println("---> GOT " + totalCount + " HITS ...")
-			println
-			readLine("Drill down to directory of file (pos), ENTER to cancel").trim=>drillDown
-			if (drillDown != "") {
-				Sys.stdin("cd " + files.nth(drillDown.parseInt).dir.path)
-			}
-		}
-		
-	}
+    totalCount=0
+    if(subDirs,dir.allFiles(glob), dir.files(glob))->file 
+        out(Int(file.lastModified,file)) 
+    | _.sort-> x
+        f=x.data
+        match=grep.file(f).length
+        totalCount=totalCount+match
+        if (match>0) out(f)
+    | => files
+    
+    dirs=Dict
+    files->file
+        dirs.set(file.dir.path,1)
+    |
+    dirCount=dirs.keys.length
+    
+    if (totalCount<2000 || dirCount==1) {
+        # Show details
+        Inner{
+            files->f
+                    grep.file(f)->line
+                        report(line.file.name, line.lineNumber, line)
+        }
+    } else {
+        # Show drilldown
+        if (files.length > 0) Inner {
+            Inner {
+                pos=0
+                files -> f
+                    report(pos, f.path, Date.diff(Date(f.lastModified)).fmt)
+                    pos=pos+1
+            } -> line
+                println(line)
+            |
+            println
+            println("---> GOT " + totalCount + " HITS ...")
+            println
+            readLine("Drill down to directory of file (pos), ENTER to cancel").trim=>drillDown
+            if (drillDown != "") {
+                Sys.stdin("cd " + files.nth(drillDown.parseInt).dir.path)
+            }
+        }
+        
+    }
 
 /SearchTextFiles
 
-	
+    
 
 # Locate files under current directory
 # --
-	P(1,Dir) => dir
-	P(2,readLine("Enter partial file name, or glob pattern with '*'")) => fname
+    P(1,Dir) => dir
+    P(2,readLine("Enter partial file name, or glob pattern with '*'")) => fname
 
-	if (fname=="") fname="*"
-	glob=if(fname.contains("*"),Glob(fname,true),Glob("*"+fname+"*",true))
-	
-	dir.allFiles(glob)->f
-		out(Int(f.lastModified, f))
-	| _.sort->x
-		out(x.data)
-	| => files
+    if (fname=="") fname="*"
+    glob=if(fname.contains("*"),Glob(fname,true),Glob("*"+fname+"*",true))
+    
+    dir.allFiles(glob)->f
+        out(Int(f.lastModified, f))
+    | _.sort->x
+        out(x.data)
+    | => files
 
-	if (files.length > 0) Inner {
-		Inner {
-			pos=0
-			files -> f
-				report(pos, f.path, Date.diff(Date(f.lastModified)).fmt)
-				pos=pos+1
-		} -> line
-			println(line)
-		|
-		println
-		readLine("Edit file (pos), ENTER to cancel").trim=>pos
-		if (pos != "") {
-			Lib:e(files.nth(pos.parseInt))
-		}
-	}
+    if (files.length > 0) Inner {
+        Inner {
+            pos=0
+            files -> f
+                report(pos, f.path, Date.diff(Date(f.lastModified)).fmt)
+                pos=pos+1
+        } -> line
+            println(line)
+        |
+        println
+        readLine("Edit file (pos), ENTER to cancel").trim=>pos
+        if (pos != "") {
+            Lib:e(files.nth(pos.parseInt))
+        }
+    }
 /LocateFiles
 
-	
-	
+    
+    
 
 # Copy file into "clipboard"
 # --
-	P(1,Dir)=>currentDir
-	P(2,false)=>deleteOnPaste
+    P(1,Dir)=>currentDir
+    P(2,false)=>deleteOnPaste
 
-	data=Sys.lastResult
-	files=List
-	
-	if (getType(data)=="File") {
-		 files.add(data)
-	} else if (getType(data)=="List") Inner {
-		data->x
-			if (getType(x)=="File") {
-				files.add(x)
-			}
-	}
-	println("XXX=" + files.length)
-	if (files.empty) {
-		Db2:Set("Lib","ClipboardFiles",null)
-		error("Can only copy single File or list of File to clipboard")
-	}
+    data=Sys.lastResult
+    files=List
+    
+    if (getType(data)=="File") {
+         files.add(data)
+    } else if (getType(data)=="List") Inner {
+        data->x
+            if (getType(x)=="File") {
+                files.add(x)
+            }
+    }
+    println("XXX=" + files.length)
+    if (files.empty) {
+        Db2:Set("Lib","ClipboardFiles",null)
+        error("Can only copy single File or list of File to clipboard")
+    }
 
-	Db2:Set("Lib","ClipboardFiles",files)
-	Db2:Set("Lib","ClipboardFilesDeleteOnPaste", deleteOnPaste)
-	Inner {
-		Lib:Header("Files stored to clipboard")
-		files->f println(f.path)
-		if (deleteOnPaste) {
-			println println("** NOTE: originals are deleted on paste")
-		}
-	}
-	"Copied " + files.length + " " + if(files.length==1,"file","files")
+    Db2:Set("Lib","ClipboardFiles",files)
+    Db2:Set("Lib","ClipboardFilesDeleteOnPaste", deleteOnPaste)
+    Inner {
+        Lib:Header("Files stored to clipboard")
+        files->f println(f.path)
+        if (deleteOnPaste) {
+            println println("** NOTE: originals are deleted on paste")
+        }
+    }
+    "Copied " + files.length + " " + if(files.length==1,"file","files")
 /ClipboardCopy
 
 
 
 # Paste file from "clipboard"
 # --
-	P(1,Dir) => currentDir
-	
-	Db2:Get("Lib","ClipboardFiles", null) => files
-	error(files==null, "No files found")
+    P(1,Dir) => currentDir
+    
+    Db2:Get("Lib","ClipboardFiles", null) => files
+    error(files==null, "No files found")
 
-	Lib:Header("Files in clipboard")
-	Inner{
-		files->file println(file.path)
-	}
+    Lib:Header("Files in clipboard")
+    Inner{
+        files->file println(file.path)
+    }
 
-	deleteOnPaste=Db2:Get("Lib","ClipboardFilesDeleteOnPaste",false)
+    deleteOnPaste=Db2:Get("Lib","ClipboardFilesDeleteOnPaste",false)
 
-	yesToAll=false
-	files->file
-		if (!yesToAll) {
-			readLine(if(deleteOnPaste,"Move ","Copy ") + file.path + " to " + currentDir.path + "? (yes/no/y/n/all/none)").toLower => confirm
+    yesToAll=false
+    files->file
+        if (!yesToAll) {
+            readLine(if(deleteOnPaste,"Move ","Copy ") + file.path + " to " + currentDir.path + "? (yes/no/y/n/all/none)").toLower => confirm
 
-			error(confirm=="none", "Aborting paste!")
-			assert(confirm=="yes" || confirm=="y" || confirm=="all")
-			if (confirm=="all") yesToAll=true
-		}
-		println(if(deleteOnPaste,"Moving ","Copying ") + file.path)
-		currentDir.copy(file)
-		if (deleteOnPaste) file.delete
-	|
-	
+            error(confirm=="none", "Aborting paste!")
+            assert(confirm=="yes" || confirm=="y" || confirm=="all")
+            if (confirm=="all") yesToAll=true
+        }
+        println(if(deleteOnPaste,"Moving ","Copying ") + file.path)
+        currentDir.copy(file)
+        if (deleteOnPaste) file.delete
+    |
+    
 /ClipboardPaste
 
 

@@ -1,3 +1,20 @@
+/*
+CFT - an interactive programmable shell for automation 
+Copyright (C) 2020-2022 Roar Foshaug
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>
+*/
+
 package rf.configtool.main.runtime.lib.ddd;
 
 import java.util.List;
@@ -13,25 +30,25 @@ import rf.configtool.main.runtime.lib.ddd.core.Vector3d;
 
 public class DDDVector extends Obj {
 
-	private Vector3d vec;
-	
-	public Vector3d getVec() {
-		return vec;
-	}
-	
+    private Vector3d vec;
+    
+    public Vector3d getVec() {
+        return vec;
+    }
+    
     public DDDVector (Vector3d vec) {
-    	this.vec=vec;
-    	
-    	this.add(new FunctionX());
-    	this.add(new FunctionY());
-    	this.add(new FunctionZ());
-    	this.add(new FunctionLength());
-    	this.add(new FunctionAdd());
-    	this.add(new FunctionSub());
-    	this.add(new FunctionScale());
-    	this.add(new FunctionScaleTo());
-    	this.add(new FunctionAngle());
-    	
+        this.vec=vec;
+        
+        this.add(new FunctionX());
+        this.add(new FunctionY());
+        this.add(new FunctionZ());
+        this.add(new FunctionLength());
+        this.add(new FunctionAdd());
+        this.add(new FunctionSub());
+        this.add(new FunctionScale());
+        this.add(new FunctionScaleTo());
+        this.add(new FunctionAngle());
+        
     }
 
     
@@ -67,8 +84,8 @@ public class DDDVector extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 0) throw new RuntimeException("Expected no parameters");
-        	return new ValueFloat(vec.getX());
+            if (params.size() != 0) throw new RuntimeException("Expected no parameters");
+            return new ValueFloat(vec.getX());
         }
     }
 
@@ -82,8 +99,8 @@ public class DDDVector extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 0) throw new RuntimeException("Expected no parameters");
-        	return new ValueFloat(vec.getY());
+            if (params.size() != 0) throw new RuntimeException("Expected no parameters");
+            return new ValueFloat(vec.getY());
         }
     }
 
@@ -97,8 +114,8 @@ public class DDDVector extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 0) throw new RuntimeException("Expected no parameters");
-        	return new ValueFloat(vec.getZ());
+            if (params.size() != 0) throw new RuntimeException("Expected no parameters");
+            return new ValueFloat(vec.getZ());
         }
     }
 
@@ -112,8 +129,8 @@ public class DDDVector extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 0) throw new RuntimeException("Expected no parameters");
-        	return new ValueFloat(self().vec.length());
+            if (params.size() != 0) throw new RuntimeException("Expected no parameters");
+            return new ValueFloat(self().vec.length());
         }
     }
 
@@ -127,14 +144,14 @@ public class DDDVector extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 1) throw new RuntimeException("Expected 3d Vector parameter");
-        	Obj vec1=getObj("vector",params,0);
-        	if (vec1 instanceof DDDVector) {
-        		Vector3d x=((DDDVector) vec1).getVec();
-        		return new ValueObj(new DDDVector(getVec().add(x)));
-        	} else {
-        		throw new RuntimeException("Expected 3d Vector parameter");
-        	}
+            if (params.size() != 1) throw new RuntimeException("Expected 3d Vector parameter");
+            Obj vec1=getObj("vector",params,0);
+            if (vec1 instanceof DDDVector) {
+                Vector3d x=((DDDVector) vec1).getVec();
+                return new ValueObj(new DDDVector(getVec().add(x)));
+            } else {
+                throw new RuntimeException("Expected 3d Vector parameter");
+            }
         }
     }
 
@@ -148,14 +165,14 @@ public class DDDVector extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 1) throw new RuntimeException("Expected 3d Vector parameter");
-        	Obj vec1=getObj("vector",params,0);
-        	if (vec1 instanceof DDDVector) {
-        		Vector3d x=((DDDVector) vec1).getVec();
-        		return new ValueObj(new DDDVector(getVec().intuitiveSub(x)));
-        	} else {
-        		throw new RuntimeException("Expected 3d Vector parameter");
-        	}
+            if (params.size() != 1) throw new RuntimeException("Expected 3d Vector parameter");
+            Obj vec1=getObj("vector",params,0);
+            if (vec1 instanceof DDDVector) {
+                Vector3d x=((DDDVector) vec1).getVec();
+                return new ValueObj(new DDDVector(getVec().intuitiveSub(x)));
+            } else {
+                throw new RuntimeException("Expected 3d Vector parameter");
+            }
         }
     }
 
@@ -170,9 +187,9 @@ public class DDDVector extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 1) throw new RuntimeException("Expected Scale parameter");
-        	double factor = getFloat("factor",params,0);
-        	return new ValueObj(new DDDVector(getVec().mul(factor)));
+            if (params.size() != 1) throw new RuntimeException("Expected Scale parameter");
+            double factor = getFloat("factor",params,0);
+            return new ValueObj(new DDDVector(getVec().mul(factor)));
         }
     }
 
@@ -188,11 +205,11 @@ public class DDDVector extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 1) throw new RuntimeException("Expected Length parameter");
-        	double length = getFloat("length",params,0);
-        	double factor=length/vec.length();
-        	
-        	return new ValueObj(new DDDVector(getVec().mul(factor)));
+            if (params.size() != 1) throw new RuntimeException("Expected Length parameter");
+            double length = getFloat("length",params,0);
+            double factor=length/vec.length();
+            
+            return new ValueObj(new DDDVector(getVec().mul(factor)));
         }
     }
     
@@ -208,14 +225,14 @@ public class DDDVector extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 1) throw new RuntimeException("Expected 3d Vector parameter");
-        	Obj vec1=getObj("vector",params,0);
-        	if (vec1 instanceof DDDVector) {
-        		Vector3d x=((DDDVector) vec1).getVec();
-        		return new ValueFloat(getVec().calcAbsoluteAngleNormalized(x)*90);
-        	} else {
-        		throw new RuntimeException("Expected 3d Vector parameter");
-        	}
+            if (params.size() != 1) throw new RuntimeException("Expected 3d Vector parameter");
+            Obj vec1=getObj("vector",params,0);
+            if (vec1 instanceof DDDVector) {
+                Vector3d x=((DDDVector) vec1).getVec();
+                return new ValueFloat(getVec().calcAbsoluteAngleNormalized(x)*90);
+            } else {
+                throw new RuntimeException("Expected 3d Vector parameter");
+            }
         }
     }
 

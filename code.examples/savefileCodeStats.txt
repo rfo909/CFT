@@ -1,8 +1,29 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2022 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 Sys.homeDir.sub("src").allFiles(Glob("*.java"))
 /JavaFiles
 
 JavaFiles->f
-	out(f.read.length)
+    out(f.read.length)
 | _.sum
 /JavaLines
 
@@ -10,7 +31,7 @@ JavaFiles->f
 P(1)=>str
 grep=Grep(str)
 JavaFiles->f 
-	out(grep.fileCount(f))
+    out(grep.fileCount(f))
 | _.sum
 /JFind
 
@@ -34,16 +55,16 @@ Sys.homeDir.sub(d).allFiles(Glob("savefile*.txt"))->f out(f)
 
 
 ScriptFiles->f
-	out(f.read.length)
+    out(f.read.length)
 | _.sum
 /ScriptLines
 
 
 # Main
 # --
-	println("Script code:      " + ScriptLines + " lines")
-	println("Java code:        " + JavaLines + " lines")
-	println("Functions:        " + JavaFunctions)
-	println("Object types:     " + JavaObjectTypes)
-	println("Value types:      " + JavaValueTypes)
+    println("Script code:      " + ScriptLines + " lines")
+    println("Java code:        " + JavaLines + " lines")
+    println("Functions:        " + JavaFunctions)
+    println("Object types:     " + JavaObjectTypes)
+    println("Value types:      " + JavaValueTypes)
 /main

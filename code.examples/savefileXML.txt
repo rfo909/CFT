@@ -1,3 +1,24 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2022 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 # Readme
 <<<< EOF
 XML parser written in CFT.
@@ -12,9 +33,9 @@ What works?
 Handles strings (by unquoting them). Allows identifier values, seen as strings without quotes.
 Unescapes strings and text (&lt; becomes '<' etc)
 Handles comments and processing rules
-	<!-- bla bla -->
-	<? do this ?>
-	
+    <!-- bla bla -->
+    <? do this ?>
+    
 PrettyPrint (PP) implemented, 
 
 2021-04-29 as of v2.4.5 we also support multi-line tokens (comments and processing rules)
@@ -26,83 +47,83 @@ PrettyPrint (PP) implemented,
 
 # Build root lexer Node for tokens in XML
 # --
-	Lib.Text.Lexer.Node => root
-	
-	# WS = 1
-	root.sub(" ^n^r^t".unEsc).setIsToken(1) => ws # whitespace
-	ws.sub(" ^n^r^t".unEsc,ws)  # loop back
-	
-	# Specials = 2
-	List("<",">","</","/>","=",":")->t root.addToken(t).setIsToken(2) |
-	
-	# Numbers = 3
-	digits = "0123456789"
-	root.sub(digits+"-"+"+").setIsToken(3) => integer
-	integer.sub(digits,integer) # loop back
-	integer.sub(".").sub(digits).setIsToken(31) => float 
-	float.sub(digits,float) # loop back
-	
+    Lib.Text.Lexer.Node => root
+    
+    # WS = 1
+    root.sub(" ^n^r^t".unEsc).setIsToken(1) => ws # whitespace
+    ws.sub(" ^n^r^t".unEsc,ws)  # loop back
+    
+    # Specials = 2
+    List("<",">","</","/>","=",":")->t root.addToken(t).setIsToken(2) |
+    
+    # Numbers = 3
+    digits = "0123456789"
+    root.sub(digits+"-"+"+").setIsToken(3) => integer
+    integer.sub(digits,integer) # loop back
+    integer.sub(".").sub(digits).setIsToken(31) => float 
+    float.sub(digits,float) # loop back
+    
 
-	# Identifiers = 4
-	identFirstChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"
-	identInnerChars = identFirstChars + "0123456789"
-	
-	root.sub(identFirstChars).setIsToken(4) => ident
-	ident.sub(identInnerChars, ident) # loop back
+    # Identifiers = 4
+    identFirstChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"
+    identInnerChars = identFirstChars + "0123456789"
+    
+    root.sub(identFirstChars).setIsToken(4) => ident
+    ident.sub(identInnerChars, ident) # loop back
 
-	# Strings = 5
-	List('"',"'")->c 
-		root.sub(c) => insideString
-		insideString.setDefault(insideString)
-		insideString.sub("\").setDefault(insideString)
-		insideString.sub(c).setIsToken(5)
-	|
-	
-	# XML specials = 10
-	root.addToken("<?").setDefault => x
-	x.setDefault(x)
-	x.addToken("?>").setIsToken(10)  # processing instruction
-	
-	root.addToken("<!--").setDefault => x
-	x.setDefault(x)
-	x.addToken("-->").setIsToken(10)  # comment
-	
-
-
-	# Everything else = 99	
-	root.setDefault.setIsToken(99)
+    # Strings = 5
+    List('"',"'")->c 
+        root.sub(c) => insideString
+        insideString.setDefault(insideString)
+        insideString.sub("\").setDefault(insideString)
+        insideString.sub(c).setIsToken(5)
+    |
+    
+    # XML specials = 10
+    root.addToken("<?").setDefault => x
+    x.setDefault(x)
+    x.addToken("?>").setIsToken(10)  # processing instruction
+    
+    root.addToken("<!--").setDefault => x
+    x.setDefault(x)
+    x.addToken("-->").setIsToken(10)  # comment
+    
 
 
-	# return value is the root node
-	root
+    # Everything else = 99  
+    root.setDefault.setIsToken(99)
+
+
+    # return value is the root node
+    root
 //RootNode
 
 
 
 # Example XML code
 # ---
-	Sequence(
-		@    <!-- this is 
-		@         a comment 
-		@           2021/01/01 12:00:55 
-		@    --><a:parent a="test" b=42 >
-		@	 
-		@       <element a=5 b="test" c=ident d=23.5 e=+18 f=-9>2 + 3 &gt; 5</element>
-		@		<? this is a test ?>
-		@       <item>another line of text
-		@			<title>Donald Duck &amp; Co</title>
-		@ 			<status>
-		@     non-strict line (i)
+    Sequence(
+        @    <!-- this is 
+        @         a comment 
+        @           2021/01/01 12:00:55 
+        @    --><a:parent a="test" b=42 >
+        @  
+        @       <element a=5 b="test" c=ident d=23.5 e=+18 f=-9>2 + 3 &gt; 5</element>
+        @   <? this is a test ?>
+        @       <item>another line of text
+        @       <title>Donald Duck &amp; Co</title>
+        @           <status>
+        @     non-strict line (i)
         @        - since there is inner XML element
-		@				<count>2</count>
-		@     non-strict line (2)
-		@               <x a=1>xxx</x>
-		@     non-strict line (c)
-		@			</status>
-		@		</item>
-		@       <emptyTag a="a"/>
-		@    </a:parent>
-	)
+        @           <count>2</count>
+        @     non-strict line (2)
+        @               <x a=1>xxx</x>
+        @     non-strict line (c)
+        @       </status>
+        @   </item>
+        @       <emptyTag a="a"/>
+        @    </a:parent>
+    )
 /exampleXML
 
 
@@ -110,53 +131,53 @@ PrettyPrint (PP) implemented,
 
 # Tokenize XML, then parse 
 # --
-	P(1)=>xml
-	P(2,false)=>debug
-	P(3,true)=>contentStrict
+    P(1)=>xml
+    P(2,false)=>debug
+    P(3,true)=>contentStrict
 
-	if (xml==null) {
-		println("Paste or enter XML, then terminate by '.' on single line")
-		readLines(".") => xml
-	}
-	
-	start=currentTimeMillis
+    if (xml==null) {
+        println("Paste or enter XML, then terminate by '.' on single line")
+        readLines(".") => xml
+    }
+    
+    start=currentTimeMillis
 
-	RootNode => root
-	Lib.Text.Lexer => lexer
-	
-	xml->line 
-		lexer.addLine(line) 
-	|
+    RootNode => root
+    Lib.Text.Lexer => lexer
+    
+    xml->line 
+        lexer.addLine(line) 
+    |
 
 
-	if (debug) Inner {
-		lexer.getTokens(root)->t
-			println("(" + t.tokenType + ") : " + t.str)
-		|
-	}
+    if (debug) Inner {
+        lexer.getTokens(root)->t
+            println("(" + t.tokenType + ") : " + t.str)
+        |
+    }
 
-	ts=lexer.getTokenStream(root)
-	ws(ts)
-	
-	list=List
-	loop
-		break(ts.EOF)
-		ws(ts)
-		break(ts.EOF)
-		if (ts.peekType==10) {
-			list.add(Dict.set("Special",ts.peek))
-			ts.next
-		} else 
-		if (ts.peek=="<") {
-			list.add(Obj(ts))
-		} else {
-			break(ts.EOF)
-			list.add(ts.peek)
-			ts.next
-		}
-	|
+    ts=lexer.getTokenStream(root)
+    ws(ts)
+    
+    list=List
+    loop
+        break(ts.EOF)
+        ws(ts)
+        break(ts.EOF)
+        if (ts.peekType==10) {
+            list.add(Dict.set("Special",ts.peek))
+            ts.next
+        } else 
+        if (ts.peek=="<") {
+            list.add(Obj(ts))
+        } else {
+            break(ts.EOF)
+            list.add(ts.peek)
+            ts.next
+        }
+    |
 
-	if(contentStrict,Strictify(list),list)
+    if(contentStrict,Strictify(list),list)
 /Parse
 
 
@@ -167,8 +188,8 @@ PrettyPrint (PP) implemented,
 
 # Eat whitespace
 # --
-	P(1)=>ts
-	loop break(ts.EOF || ts.peekType != 1) ts.next
+    P(1)=>ts
+    loop break(ts.EOF || ts.peekType != 1) ts.next
 //ws
 
 
@@ -176,27 +197,27 @@ PrettyPrint (PP) implemented,
 
 # Unescape special characters in string
 # --
-	P(1)=>s
-	Dict.set("&lt;","<")
-		.set("&gt;",">")
-		.set("&amp;","&")
-		.set("&apos;","'")
-		.set("&quot;",'"')
-		=>data	
-	s.merge(data)
+    P(1)=>s
+    Dict.set("&lt;","<")
+        .set("&gt;",">")
+        .set("&amp;","&")
+        .set("&apos;","'")
+        .set("&quot;",'"')
+        =>data  
+    s.merge(data)
 /UnescapeXMLString
 
 
 
 # Escape special characters in string
 # --
-	P(1)=>s
-	Dict.set("<","&lt;")
-		.set(">","&gt;")
-		.set("'","&apos;")
-		.set('"',"&quot;")
-		=>data	
-	s.replace("&","&amp;").merge(data)
+    P(1)=>s
+    Dict.set("<","&lt;")
+        .set(">","&gt;")
+        .set("'","&apos;")
+        .set('"',"&quot;")
+        =>data  
+    s.replace("&","&amp;").merge(data)
 /EscapeXMLString
 
 
@@ -205,68 +226,68 @@ PrettyPrint (PP) implemented,
 # or <a ... />
 #
 # --
-	P(1)=>ts
+    P(1)=>ts
 
-	dict=Dict
-	
-	ts.match("<","expected '<'")
-	ws(ts)
+    dict=Dict
+    
+    ts.match("<","expected '<'")
+    ws(ts)
 
-	error(ts.peekType != 4, ts.sourceLocation + ": expected identifier")
-	elementName=ts.peek	
-	ts.next
-	ws(ts)
-	
-	if (ts.peek==":") {
-		elementName=elementName+":"   # name space
-		ts.next
-		ws(ts)
-		error(ts.peekType != 4, ts.sourceLocation + ": expected identifier")
-		elementName=elementName+ts.peek
-		ts.next
-		ws(ts)
-	}
-	
-	dict.set("name",elementName)
-	dict.set("attr", Dict)
-	
-	Inner {
-		loop
-			ws(ts)
-			if (ts.peek==">") {
-				ts.next
-				dict.set("content",Content(ts, dict.name))  # list of strings and Dict's, until closing my name
-				break
-			} else if (ts.peek=="/>") {
-				ts.next
-				break
-			} else {
-				error(ts.peekType != 4, ts.sourceLocation + ": expected attribute name identifier")
-				attrName=ts.peek
-				ts.next
-				ws(ts)
-				ts.match("=","expected '=' following attribute name " + attrName)
-				ws(ts)
-				
-				if (ts.peekType==3) { # int
-					value=ts.peek.parseInt
-				} else if (ts.peekType==31) { # float
-					value=ts.peek.parseFloat
-				} else if (ts.peekType==4) {  # identifier
-					value=ts.peek
-				} else if (ts.peekType==5) {  # string
-					value=ts.peek
-					value=value.sub(1,value.length-1)  # strip quotes
-					value=UnescapeXMLString(value)
-				} else {
-					error(ts.sourceLocation + ": Invalid token: " + ts.peek)
-				}
-				ts.next
-				ws(ts)
-				dict.attr.set(""+attrName,value)
-			}
-	}
-	dict
+    error(ts.peekType != 4, ts.sourceLocation + ": expected identifier")
+    elementName=ts.peek   
+    ts.next
+    ws(ts)
+    
+    if (ts.peek==":") {
+        elementName=elementName+":"   # name space
+        ts.next
+        ws(ts)
+        error(ts.peekType != 4, ts.sourceLocation + ": expected identifier")
+        elementName=elementName+ts.peek
+        ts.next
+        ws(ts)
+    }
+    
+    dict.set("name",elementName)
+    dict.set("attr", Dict)
+    
+    Inner {
+        loop
+            ws(ts)
+            if (ts.peek==">") {
+                ts.next
+                dict.set("content",Content(ts, dict.name))  # list of strings and Dict's, until closing my name
+                break
+            } else if (ts.peek=="/>") {
+                ts.next
+                break
+            } else {
+                error(ts.peekType != 4, ts.sourceLocation + ": expected attribute name identifier")
+                attrName=ts.peek
+                ts.next
+                ws(ts)
+                ts.match("=","expected '=' following attribute name " + attrName)
+                ws(ts)
+                
+                if (ts.peekType==3) { # int
+                    value=ts.peek.parseInt
+                } else if (ts.peekType==31) { # float
+                    value=ts.peek.parseFloat
+                } else if (ts.peekType==4) {  # identifier
+                    value=ts.peek
+                } else if (ts.peekType==5) {  # string
+                    value=ts.peek
+                    value=value.sub(1,value.length-1)  # strip quotes
+                    value=UnescapeXMLString(value)
+                } else {
+                    error(ts.sourceLocation + ": Invalid token: " + ts.peek)
+                }
+                ts.next
+                ws(ts)
+                dict.attr.set(""+attrName,value)
+            }
+    }
+    dict
 //Obj
 
 
@@ -274,72 +295,72 @@ PrettyPrint (PP) implemented,
 
 # Returns list of content inside <x>...</x> - includes text and objects
 # --
-	P(1)=>ts
-	P(2)=>currObjectName
-	
-	
-	list=List
-	
-	Inner {
-		text=""
-		loop
-			if (ts.peekType==10) {  # processing rule
-				
-				text=text.trim
-				if (text.length>0) {
-					list.add(UnescapeXMLString(text))
-				}
-				text=""
-				
-				list.add(Dict.set("Special",ts.peek))
-				ts.next
-			} else
-			if (ts.peek=="</") {
-				
-				text=text.trim
-				if (text.length>0) {
-					list.add(UnescapeXMLString(text))
-				}
-				text=""
-				
-				ts.next
-				ws(ts)
+    P(1)=>ts
+    P(2)=>currObjectName
+    
+    
+    list=List
+    
+    Inner {
+        text=""
+        loop
+            if (ts.peekType==10) {  # processing rule
+                
+                text=text.trim
+                if (text.length>0) {
+                    list.add(UnescapeXMLString(text))
+                }
+                text=""
+                
+                list.add(Dict.set("Special",ts.peek))
+                ts.next
+            } else
+            if (ts.peek=="</") {
+                
+                text=text.trim
+                if (text.length>0) {
+                    list.add(UnescapeXMLString(text))
+                }
+                text=""
+                
+                ts.next
+                ws(ts)
 
-				error(ts.peekType != 4, ts.sourceLocation + ": expected identifier")
+                error(ts.peekType != 4, ts.sourceLocation + ": expected identifier")
 
-				name=ts.peek
-				ts.next
-				ws(ts)
-				
-				if (ts.peek==":") {
-					name=name+":"
-					ts.next
-					ws(ts)
-					
-					error(ts.peekType != 4, ts.sourceLocation + ": expected identifier")
-					name=name+ts.peek
-					ts.next
-					ws(ts)
-				}
-				error(name != currObjectName, ts.sourceLocation + ": Invalid </"+name+"> - expected " + currObjectName)
-				ts.match(">","expected '>' following '</"+name)
+                name=ts.peek
+                ts.next
+                ws(ts)
+                
+                if (ts.peek==":") {
+                    name=name+":"
+                    ts.next
+                    ws(ts)
+                    
+                    error(ts.peekType != 4, ts.sourceLocation + ": expected identifier")
+                    name=name+ts.peek
+                    ts.next
+                    ws(ts)
+                }
+                error(name != currObjectName, ts.sourceLocation + ": Invalid </"+name+"> - expected " + currObjectName)
+                ts.match(">","expected '>' following '</"+name)
 
-				break
-			} else if (ts.peek=="<") {
-			
-				text=text.trim
-				if (text.length>0) {
-					list.add(UnescapeXMLString(text))
-				}
-				text=""
-				
-				list.add(Obj(ts))
-			} else {
-				text=text+ts.peek
-				ts.next
-			}
-	}
-	list	
+                break
+            } else if (ts.peek=="<") {
+            
+                text=text.trim
+                if (text.length>0) {
+                    list.add(UnescapeXMLString(text))
+                }
+                text=""
+                
+                list.add(Obj(ts))
+            } else {
+                text=text+ts.peek
+                ts.next
+            }
+    }
+    list    
 //Content
 
 
@@ -348,112 +369,112 @@ PrettyPrint (PP) implemented,
 # Present content in compact fashion
 # Alternatively use PP() to create valid (and nicely formatted) XML.
 # --
-	P(1,Parse(exampleXML))=>data
-	P(2,"")=>pre
-	P(3,List)=>output
+    P(1,Parse(exampleXML))=>data
+    P(2,"")=>pre
+    P(3,List)=>output
 
-	if (getType(data) != List, List(data), data) => list
-	
-	list->element
-		if (getType(element)=="List") {
-			element->x
-				ShowData(x,pre+"[]",output)
-		}
-		
-		assert(getType(element)=="Dict")
-		
-		assert(element.has("name"))
-		
-		#println("name=" + element.name)
-		pre2=pre+"|"+element.name
-		
-		{element.attr.keys->key
-			output.add(pre2 + " "+key+"="+element.attr.get(key))
-		}
-		
-		assert(element.has("content"))
-		{element.content->c 
-			if (getType(c)=="Dict") ShowData(c,pre+"|"+element.name,output)
-			else {
-				s=(""+c).trim
-				if (s.length>0) output.add(pre2 + "[]" + s)
-			}
-		}
-	|
-	output
+    if (getType(data) != List, List(data), data) => list
+    
+    list->element
+        if (getType(element)=="List") {
+            element->x
+                ShowData(x,pre+"[]",output)
+        }
+        
+        assert(getType(element)=="Dict")
+        
+        assert(element.has("name"))
+        
+        #println("name=" + element.name)
+        pre2=pre+"|"+element.name
+        
+        {element.attr.keys->key
+            output.add(pre2 + " "+key+"="+element.attr.get(key))
+        }
+        
+        assert(element.has("content"))
+        {element.content->c 
+            if (getType(c)=="Dict") ShowData(c,pre+"|"+element.name,output)
+            else {
+                s=(""+c).trim
+                if (s.length>0) output.add(pre2 + "[]" + s)
+            }
+        }
+    |
+    output
 /ShowData
 
 
 
 
-		
-		
-	
+        
+        
+    
 
 
 
 
 # Look up content element by name
 # --
-	P(1) => data
-	P(2) => name
-	
-	if (getType(data)=="Dict") data=data.content
-	data->x
-		assert(getType(x)=="Dict" && x.has("name"))
-		assert(x.name==name)
-		out(x)
+    P(1) => data
+    P(2) => name
+    
+    if (getType(data)=="Dict") data=data.content
+    data->x
+        assert(getType(x)=="Dict" && x.has("name"))
+        assert(x.name==name)
+        out(x)
 /Get
 
 
 
 # Look up content elements by names in path (separated by space). See test L3.
 # --
-	P(1)=>data
-	P(2)=>path
-	
-	if (getType(data) != List, List(data), data) => list
-	
-	path.split->part
-		Inner {
-			output=List
-			
-			list->element
-				result=output+Get(element,part)
-				output=output+result
-			|
-			#println("Looking up " + part + " resulted in " + output.length + " items")
-			
-		}
-		list=output
-	|
-	list
+    P(1)=>data
+    P(2)=>path
+    
+    if (getType(data) != List, List(data), data) => list
+    
+    path.split->part
+        Inner {
+            output=List
+            
+            list->element
+                result=output+Get(element,part)
+                output=output+result
+            |
+            #println("Looking up " + part + " resulted in " + output.length + " items")
+            
+        }
+        list=output
+    |
+    list
 /GetPath
 
 
 # Look up attribute names of node
 # --
-	P(1) => data
-	error(getType(data) != "Dict", "Must be dictionary")
-	data.attr.keys
+    P(1) => data
+    error(getType(data) != "Dict", "Must be dictionary")
+    data.attr.keys
 /GetAttrNames
 
 
 # Look up attribute of node
 # --
-	P(1) => data
-	P(2) => attr
-	error(getType(data) != "Dict", "Must be dictionary")
-	data.attr.get(attr,null)
+    P(1) => data
+    P(2) => attr
+    error(getType(data) != "Dict", "Must be dictionary")
+    data.attr.get(attr,null)
 /GetAttr
 
 
 
 # Get content of node
 # --
-	P(1) => data
-	error(getType(data) != "Dict", "Must be dictionary")
-	data.content
+    P(1) => data
+    error(getType(data) != "Dict", "Must be dictionary")
+    data.content
 /GetContent
 
 
@@ -462,109 +483,109 @@ PrettyPrint (PP) implemented,
 
 # Generate output
 # --
-	P(1)=>data   # Dict or List of (Dict | String)
-	P(2,"")=>indent
-	P(3,Lambda { println(""+P(1)) } )=>LOut
-	
-	hasElement=false
-	data->element if(getType(element)=="Dict") hasElement=true
-	|
-	
-	data->element
-		type=getType(element)
-		if (type=="Dict") {
-			if (element.has("Special")) {
-				LOut.call(indent+element.get("Special").trim)
-			} else {
-				OutObject(element,indent,LOut)
-			}	
-		} else if (type=="String") {
-			val=element.trim
-			if (val != "") LOut.call(indent+EscapeXMLString(val))
-		}
+    P(1)=>data   # Dict or List of (Dict | String)
+    P(2,"")=>indent
+    P(3,Lambda { println(""+P(1)) } )=>LOut
+    
+    hasElement=false
+    data->element if(getType(element)=="Dict") hasElement=true
+    |
+    
+    data->element
+        type=getType(element)
+        if (type=="Dict") {
+            if (element.has("Special")) {
+                LOut.call(indent+element.get("Special").trim)
+            } else {
+                OutObject(element,indent,LOut)
+            } 
+        } else if (type=="String") {
+            val=element.trim
+            if (val != "") LOut.call(indent+EscapeXMLString(val))
+        }
 //OutContent
 
 
 
 # Generate output
 # --
-	P(1)=>obj
-	P(2)=>indent
-	P(3,Lambda { println(""+P(1)) } )=>LOut
-	
-	
-	firstTag="<"+obj.name
-	obj.attr.keys->attrName
-		value=obj.attr.get(attrName)
-		if (getType(value)=="String") {
-			value='"' + EscapeXMLString(value) + '"'
-		} 
-		firstTag=firstTag + " " + attrName + "=" + value
-	|
-	hasContent=true
-	if (!obj.has("content") || obj.content.length==0) {
-		firstTag=firstTag+"/>"
-		hasContent=false
-		LOut.call(indent+firstTag)
-	} else {
-		firstTag=firstTag + ">"
-	}
-	if (hasContent) {
-		lastTag="</"+obj.name+">"
-		if (obj.content.length==1 && getType(obj.content.first)=="String") {
-			LOut.call(indent+firstTag+obj.content.first.trim+lastTag)
-		} else {
-			LOut.call(indent+firstTag)
-			OutContent(obj.content,indent+"   ",LOut)
-			LOut.call(indent+lastTag)
-		}
-	}
+    P(1)=>obj
+    P(2)=>indent
+    P(3,Lambda { println(""+P(1)) } )=>LOut
+    
+    
+    firstTag="<"+obj.name
+    obj.attr.keys->attrName
+        value=obj.attr.get(attrName)
+        if (getType(value)=="String") {
+            value='"' + EscapeXMLString(value) + '"'
+        } 
+        firstTag=firstTag + " " + attrName + "=" + value
+    |
+    hasContent=true
+    if (!obj.has("content") || obj.content.length==0) {
+        firstTag=firstTag+"/>"
+        hasContent=false
+        LOut.call(indent+firstTag)
+    } else {
+        firstTag=firstTag + ">"
+    }
+    if (hasContent) {
+        lastTag="</"+obj.name+">"
+        if (obj.content.length==1 && getType(obj.content.first)=="String") {
+            LOut.call(indent+firstTag+obj.content.first.trim+lastTag)
+        } else {
+            LOut.call(indent+firstTag)
+            OutContent(obj.content,indent+"   ",LOut)
+            LOut.call(indent+lastTag)
+        }
+    }
 //OutObject
 
 
 # "Strictify" list of XML elements
 # --
-	P(1) => list
-	
-	list->e 
-		assert(getType(e)=="Dict") 
-		out(StrictifyDict(e))
-	| => dicts
-	
-	if (dicts.length>0, dicts, list)
+    P(1) => list
+    
+    list->e 
+        assert(getType(e)=="Dict") 
+        out(StrictifyDict(e))
+    | => dicts
+    
+    if (dicts.length>0, dicts, list)
 //StrictifyList
 
 
 # "Strictify dict"
 # --
-	P(1)=>dict
-	if (dict.has("content")) {
-		dict.set("content",StrictifyList(dict.content))
-	}
-	dict
+    P(1)=>dict
+    if (dict.has("content")) {
+        dict.set("content",StrictifyList(dict.content))
+    }
+    dict
 //StrictifyDict
-	
+    
 
 
 # Strictify data, eliminating strings if there are Dict's present in a content list
 # --
-	P(1,Parse(exampleXML,false)) => data
-	if (getType(data)=="List") {
-		StrictifyList(data)
-	} else {
-		StricityDict(data)
-	}
+    P(1,Parse(exampleXML,false)) => data
+    if (getType(data)=="List") {
+        StrictifyList(data)
+    } else {
+        StricityDict(data)
+    }
 /Strictify
 
 
 # Pretty-print XML
 # --
-	P(1)=>data   # list of Dict
-	
-	Dict.set("list",List).set( "LAdd",Lambda{self.list.add(P(1))} ) => obj
-	OutContent(data,"",obj.LAdd)
-	
-	obj.list
+    P(1)=>data   # list of Dict
+    
+    Dict.set("list",List).set( "LAdd",Lambda{self.list.add(P(1))} ) => obj
+    OutContent(data,"",obj.LAdd)
+    
+    obj.list
 /PP
 
 
@@ -573,8 +594,8 @@ PrettyPrint (PP) implemented,
 # --
 JSON:PP(Parse(exampleXML))
 /t
-	
-	
+    
+    
 # JSON:PP - non-strict mode, including text in scopes with other elements
 JSON:PP(Parse(exampleXML,false,false))
 /t2
@@ -589,33 +610,33 @@ JSON:PP(Parse(exampleXML,false,true))
 
 # Test lookups
 # --
-	Parse(exampleXML) => obj
-	XML:Get(obj,"a:parent") -> parent
-		XML:Get(parent,"element") -> element
-			XML:GetAttrNames(element)->attr
-				println("-> " + attr + "=" + XML:GetAttr(element,attr))
+    Parse(exampleXML) => obj
+    XML:Get(obj,"a:parent") -> parent
+        XML:Get(parent,"element") -> element
+            XML:GetAttrNames(element)->attr
+                println("-> " + attr + "=" + XML:GetAttr(element,attr))
 //L1
 
 
 
 # Test lookups
 # --
-	Parse(exampleXML) => obj
-	XML:Get(obj,"a:parent") -> parent
-		XML:Get(parent,"item") -> item
-			XML:Get(item,"title")->title
-				println("title=" + GetContent(title))
+    Parse(exampleXML) => obj
+    XML:Get(obj,"a:parent") -> parent
+        XML:Get(parent,"item") -> item
+            XML:Get(item,"title")->title
+                println("title=" + GetContent(title))
 //L2
 
 
 
 # Test lookups with space separated path of names
 # --
-	Parse(exampleXML) => obj
-	XML:GetPath(obj,"a:parent item title") -> title
-				println("title=" + GetContent(title))
+    Parse(exampleXML) => obj
+    XML:GetPath(obj,"a:parent item title") -> title
+                println("title=" + GetContent(title))
 //L3
-	
+    
 
 
 

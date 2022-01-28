@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020 Roar Foshaug
+Copyright (C) 2020-2022 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@ import rf.configtool.main.runtime.ValueString;
  */
 public class ObjDict extends Obj {
     
-	private String name;
+    private String name;
     private Map<String,Value> values=new HashMap<String,Value>();
     private List<String> keySequence=new ArrayList<String>();
     
@@ -56,7 +56,7 @@ public class ObjDict extends Obj {
     }
     
     public Iterator<String> getKeys() {
-    	return keySequence.iterator();
+        return keySequence.iterator();
     }
     
     private final List<Function> baseFunctions;
@@ -65,12 +65,12 @@ public class ObjDict extends Obj {
     
 
     public ObjDict () {
-    	this(null);
+        this(null);
     }
 
     public ObjDict (String name) {
-    	super();
-    	this.name=name;
+        super();
+        this.name=name;
         baseFunctions=new ArrayList<Function>();
         baseFunctions.add(new FunctionSet());
         baseFunctions.add(new FunctionGet());
@@ -93,21 +93,21 @@ public class ObjDict extends Obj {
     
     @Override
     public Function getFunction (String name) {
-    	verifyInnerFunctions();
-    	return super.getFunction(name);
+        verifyInnerFunctions();
+        return super.getFunction(name);
     }
     
     
     @Override
     public void generateHelp(Ctx ctx) {
-    	verifyInnerFunctions();
-    	super.generateHelp(ctx);
+        verifyInnerFunctions();
+        super.generateHelp(ctx);
     } 
     
     public void set (String key, Value value) {
-    	if (values.get(key) == null) {
-    		keySequence.add(key);
-    	}
+        if (values.get(key) == null) {
+            keySequence.add(key);
+        }
 
         // 2020-10: special processing for Lambda's and Closures - the point is that storing a
         // Lambda in a Dict, we wrap the Lambda in a Closure, so that the Lambda becomes a
@@ -116,47 +116,47 @@ public class ObjDict extends Obj {
         //
         // This means doing Dict.get("somefunc").call(...) invokes a closure instead of a lambda.
         if (value instanceof ValueBlock) {
-        	ValueBlock lambda=(ValueBlock) value;
-        	//System.out.println("Wrapping lambda in closure for key " + key);
-        	value=new ValueObj(new ObjClosure(self(), lambda));
+            ValueBlock lambda=(ValueBlock) value;
+            //System.out.println("Wrapping lambda in closure for key " + key);
+            value=new ValueObj(new ObjClosure(self(), lambda));
         } else if (value instanceof ValueObj) {
-        	Obj obj=((ValueObj) value).getVal();
-        	if (obj instanceof ObjClosure) {
-        		ValueBlock lambda=((ObjClosure) obj).getLambda();
-        		//System.out.println("Recoding closure for key " + key);
-        		value=new ValueObj(new ObjClosure(self(), lambda));
-        	}
+            Obj obj=((ValueObj) value).getVal();
+            if (obj instanceof ObjClosure) {
+                ValueBlock lambda=((ObjClosure) obj).getLambda();
+                //System.out.println("Recoding closure for key " + key);
+                value=new ValueObj(new ObjClosure(self(), lambda));
+            }
         }
 
-    	
-    	values.put(key, value);
+        
+        values.put(key, value);
         if (isIdentifier(key) && !allFunctionNames.contains(key)) refreshInnerFunctions=true;
-    	
-    	// quick and easy sanity check
-    	if (values.keySet().size() != keySequence.size()) {
-    		StringBuffer sb1=new StringBuffer();
-    		StringBuffer sb2=new StringBuffer();
-    		for (String s:keySequence) {
-    			if (values.get(s)==null) {
-    				sb1.append(" "+s);
-    			}
-    		}
-    		for (String s:values.keySet()) {
-    			if (!keySequence.contains(s)) {
-    				sb2.append(" " + s);
-    			}
-    		}
-    		
-    		throw new RuntimeException("Dict: internal error: (s1=" + sb1.toString().trim() + ")  (s2=" + sb2.toString().trim() + ")");
-    	}
+        
+        // quick and easy sanity check
+        if (values.keySet().size() != keySequence.size()) {
+            StringBuffer sb1=new StringBuffer();
+            StringBuffer sb2=new StringBuffer();
+            for (String s:keySequence) {
+                if (values.get(s)==null) {
+                    sb1.append(" "+s);
+                }
+            }
+            for (String s:values.keySet()) {
+                if (!keySequence.contains(s)) {
+                    sb2.append(" " + s);
+                }
+            }
+            
+            throw new RuntimeException("Dict: internal error: (s1=" + sb1.toString().trim() + ")  (s2=" + sb2.toString().trim() + ")");
+        }
     }
     
     
     
     private synchronized void verifyInnerFunctions() {
-    	if (!refreshInnerFunctions) return;
-    	refreshInnerFunctions=false;
-    	
+        if (!refreshInnerFunctions) return;
+        refreshInnerFunctions=false;
+        
         clearFunctions();
         allFunctionNames.clear();
         
@@ -164,7 +164,7 @@ public class ObjDict extends Obj {
         List<Function> allFunctions=new ArrayList<Function>();
         
         for (Function f:baseFunctions) {
-        	allFunctionNames.add(f.getName());
+            allFunctionNames.add(f.getName());
             allFunctions.add(f);
         }
         for (String name:keySequence) {
@@ -179,7 +179,7 @@ public class ObjDict extends Obj {
     }
     
     private ObjDict self() {
-    	return this;
+        return this;
     }
     
     private boolean isIdentifier(String name) {
@@ -218,7 +218,7 @@ public class ObjDict extends Obj {
         StringBuffer sb=new StringBuffer();
         sb.append("Dict");
         if (name != null) {
-        	sb.append("(" + new ValueString(name).synthesize() + ")");
+            sb.append("(" + new ValueString(name).synthesize() + ")");
         }
 
         for (String propName:keySequence) {
@@ -227,14 +227,14 @@ public class ObjDict extends Obj {
             // NOTE: closures are not synthesizable, but lambdas are, and setting a field in a Dict to 
             // a lambda, recreates a closure, so that's how this is handled.
             if (value instanceof ValueObj) {
-            	Obj obj=((ValueObj) value).getVal();
-            	if (obj instanceof ObjClosure) {
-            		ValueBlock lambda=((ObjClosure) obj).getLambda();
-            		value = lambda;
-            	} 
+                Obj obj=((ValueObj) value).getVal();
+                if (obj instanceof ObjClosure) {
+                    ValueBlock lambda=((ObjClosure) obj).getLambda();
+                    value = lambda;
+                } 
             } else if (value instanceof ValueBlock) {
-            	// simple sanity check
-            	throw new Exception("Internal errors: Dict should contain ref to Lambda as it should be auto-wrapped as Closure");
+                // simple sanity check
+                throw new Exception("Internal errors: Dict should contain ref to Lambda as it should be auto-wrapped as Closure");
             }
             sb.append(".set(" + new ValueString(propName).synthesize() + "," + value.synthesize() + ")");
         }
@@ -316,7 +316,7 @@ public class ObjDict extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             List<Value> result=new ArrayList<Value>();
             for (String key:keySequence) {
-            	result.add(new ValueString(key));
+                result.add(new ValueString(key));
             }
             return new ValueList(result);
         }
@@ -424,16 +424,16 @@ public class ObjDict extends Obj {
             return "mergeCodes([pre,post]?) - create copy where all keys are rewritten as ${key} or <pre>key<post>";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	String pre="${";
-        	String post="}";
-        	if (params.size()==2) {
-        		pre=getString("pre",params,0);
-        		post=getString("post",params,1);
-        	} else if (params.size() != 0) {
-        		throw new Exception("Expected no parameters or two parameters: pre,post");
-        	}
+            String pre="${";
+            String post="}";
+            if (params.size()==2) {
+                pre=getString("pre",params,0);
+                post=getString("post",params,1);
+            } else if (params.size() != 0) {
+                throw new Exception("Expected no parameters or two parameters: pre,post");
+            }
         
-        	ObjDict x=new ObjDict();
+            ObjDict x=new ObjDict();
            
             for (String key:keySequence) {
                 x.set(pre + key + post, values.get(key));
@@ -481,8 +481,8 @@ public class ObjDict extends Obj {
             boolean found=false;
             for (String key:keySequence) {
                 if (values.get(key) instanceof ValueNull) {
-                	found=true;
-                	break;
+                    found=true;
+                    break;
                 }
             }
             return new ValueBoolean(found);
@@ -517,16 +517,16 @@ public class ObjDict extends Obj {
              return "getMany(keyList) - return list of values for list of keys";
          }
          public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	 if (params.size() != 1) throw new Exception("Expected single list of keys");
-        	 List<Value> keys = getList("keyList",params,0);
-        	 List<Value> result=new ArrayList<Value>();
-        	 
-        	 for (Value key:keys) {
-        		 String s=key.getValAsString();
-        		 Value value=values.get(s);
-        		 if (value==null) result.add(new ValueNull()); else result.add(value);
-        	 }
-        	 return new ValueList(result);
+             if (params.size() != 1) throw new Exception("Expected single list of keys");
+             List<Value> keys = getList("keyList",params,0);
+             List<Value> result=new ArrayList<Value>();
+             
+             for (Value key:keys) {
+                 String s=key.getValAsString();
+                 Value value=values.get(s);
+                 if (value==null) result.add(new ValueNull()); else result.add(value);
+             }
+             return new ValueList(result);
          }
      }
 
@@ -538,18 +538,18 @@ public class ObjDict extends Obj {
              return "copyFrom(Dict) - add and replace values in current Dict with values from parameter Dict - returns self";
          }
          public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	 if (params.size() != 1) throw new Exception("Expected Dict parameter");
-        	 Obj obj=getObj("Dict",params,0);
-        	 if (obj instanceof ObjDict) {
-        		 ObjDict d=(ObjDict) obj;
-        		 for (String key:d.keySequence) { 
-        			 Value value=d.getValue(key);
-        			 set(key, value);
-        		 }
-        	 } else {
-        		 throw new Exception("Expected Dict parameter");
-        	 }
-        	 return new ValueObj(self());
+             if (params.size() != 1) throw new Exception("Expected Dict parameter");
+             Obj obj=getObj("Dict",params,0);
+             if (obj instanceof ObjDict) {
+                 ObjDict d=(ObjDict) obj;
+                 for (String key:d.keySequence) { 
+                     Value value=d.getValue(key);
+                     set(key, value);
+                 }
+             } else {
+                 throw new Exception("Expected Dict parameter");
+             }
+             return new ValueObj(self());
          }
      }
 
@@ -562,23 +562,23 @@ public class ObjDict extends Obj {
              return "subset(keyList,defaultValue) - create new Dict with keys from keyList, using defaultValue for missing keys";
          }
          public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	 if (params.size() != 2) throw new Exception("Expected parameters keyList, defaultValue");
-        	 List<Value> list=getList("keyList",params,0);
-        	 Value defaultValue=params.get(1);
-        	 
-        	 ObjDict x=new ObjDict();
+             if (params.size() != 2) throw new Exception("Expected parameters keyList, defaultValue");
+             List<Value> list=getList("keyList",params,0);
+             Value defaultValue=params.get(1);
+             
+             ObjDict x=new ObjDict();
 
-        	 Map<String,Value> data=new HashMap<String,Value>();
-        	 for (Value v:list) {
-        		 if (!(v instanceof ValueString)) throw new Exception("Expected keyList parameter to contain strings");
-        		 String key=((ValueString)v).getVal();
-        		 if (self().values.containsKey(key)) {
-        			 x.set(key, self().values.get(key));
-        		 } else {
-        			 x.set(key, defaultValue);
-        		 }
-        	 }
-        	 return new ValueObj(x);
+             Map<String,Value> data=new HashMap<String,Value>();
+             for (Value v:list) {
+                 if (!(v instanceof ValueString)) throw new Exception("Expected keyList parameter to contain strings");
+                 String key=((ValueString)v).getVal();
+                 if (self().values.containsKey(key)) {
+                     x.set(key, self().values.get(key));
+                 } else {
+                     x.set(key, defaultValue);
+                 }
+             }
+             return new ValueObj(x);
          }
      }
      
@@ -607,12 +607,12 @@ public class ObjDict extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 1) throw new Exception("Expected name string|null parameter");
             if (params.get(0) instanceof ValueNull) {
-            	name=null;
+                name=null;
             } else {
-	            String str=getString("name",params,0);
-	            name=str;
+                String str=getString("name",params,0);
+                name=str;
             }
-	        return new ValueObj(self());
+            return new ValueObj(self());
          }
     }
 

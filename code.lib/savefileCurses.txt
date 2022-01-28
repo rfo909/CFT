@@ -1,3 +1,24 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2022 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 <<< EOF
 Color and cursor control with ANSI Escape sequences.
 >>> EOF
@@ -6,25 +27,25 @@ Color and cursor control with ANSI Escape sequences.
 # Enable use of ANSI escape sequences (default)
 # --
 P(1,true)=>enabled
-	Db2:Set("Curses","Enabled",enabled)
-	if (enabled) Inner {
-		List(TxtRed,TxtGreen,TxtBlue,TxtYellow,TxtMagenta,TxtCyan,TxtWhite,TxtBlack,Underline,Reversed)->x
-			println(x+"Curses using ANSI escape sequences" + Bold + " ENABLED" + Reset)
-		|
-	}
-	true 
+    Db2:Set("Curses","Enabled",enabled)
+    if (enabled) Inner {
+        List(TxtRed,TxtGreen,TxtBlue,TxtYellow,TxtMagenta,TxtCyan,TxtWhite,TxtBlack,Underline,Reversed)->x
+            println(x+"Curses using ANSI escape sequences" + Bold + " ENABLED" + Reset)
+        |
+    }
+    true 
 /Enable
 
 
 # Disable ANSI escape sequences
 # --
-	Enable(false)
+    Enable(false)
 /Disable
 
 
 # Is curses enabled?
 # --
-	Db2:Get("Curses","Enabled",false)
+    Db2:Get("Curses","Enabled",false)
 /Enabled
 
 
@@ -69,36 +90,36 @@ if(ena,Esc+"[37m","")
 
 # Select color
 # --
-	if (!ena) {
-		println("Curses disabled, returning empty string (no color)")
-		""
-	} else Inner {
-		SymDict(TxtBlack, TxtRed, TxtGreen, TxtYellow, TxtBlue, TxtMagenta, TxtCyan, TxtWhite, Bold, Underline, Reversed) => colors
-		data=Inner{
-			colors.keys->key 
-				value=colors.get(key) 
-				label=key + " " + value+"example"+Curses:Reset 
-				out(SymDict(label,value))
-		}
-		LLabel=Lambda{P(1).label}
-		Lib:MenuSelect(data, LLabel, "Select text color") => result
-		if (result == null) {
-			#println("Selected none")
-			""
-		} else {
-			result.value
-		}
-	}
+    if (!ena) {
+        println("Curses disabled, returning empty string (no color)")
+        ""
+    } else Inner {
+        SymDict(TxtBlack, TxtRed, TxtGreen, TxtYellow, TxtBlue, TxtMagenta, TxtCyan, TxtWhite, Bold, Underline, Reversed) => colors
+        data=Inner{
+            colors.keys->key 
+                value=colors.get(key) 
+                label=key + " " + value+"example"+Curses:Reset 
+                out(SymDict(label,value))
+        }
+        LLabel=Lambda{P(1).label}
+        Lib:MenuSelect(data, LLabel, "Select text color") => result
+        if (result == null) {
+            #println("Selected none")
+            ""
+        } else {
+            result.value
+        }
+    }
 /SelectColor
 
 
 if(ena) {
-	Esc+"[2J"
+    Esc+"[2J"
 } else {
-	nl=if(Sys.isWindows,"^r^n".unEsc, "^n".unEsc)
-	Inner {
-		Lib.Data.yes(Term.h,nl) | _.concat
-	}
+    nl=if(Sys.isWindows,"^r^n".unEsc, "^n".unEsc)
+    Inner {
+        Lib.Data.yes(Term.h,nl) | _.concat
+    }
 }
 /Cls
 
@@ -143,9 +164,9 @@ if(ena,Esc+"["+n+"D","")
 
 P(1,1)=>x
 P(2,1)=>y
-	if(ena,
-		Home+CurRight(x-1)+CurDown(y-1),
-		"")
+    if(ena,
+        Home+CurRight(x-1)+CurDown(y-1),
+        "")
 /CurGoto
 
 
@@ -153,7 +174,7 @@ P(2,1)=>y
 
 P(1)=>char
 P(2)=>count
-	Lib.Data.yes(count,char) | _.concat
+    Lib.Data.yes(count,char) | _.concat
 /Seq
 
 
@@ -163,30 +184,30 @@ P(1,10)=>x1
 P(2,5)=>y1
 P(3,50)=>x2
 P(4,12)=>y2
-	if(ena) Inner {
-		w=x2-x1-1
-		top=Sys.uchar("2554")+Seq(Sys.uchar("2550"),w)+Sys.uchar("2557")
-		mid=Sys.uchar("2551")+Seq(" ",w) + Sys.uchar("2551")
-		bot=Sys.uchar("255a")+Seq(Sys.uchar("2550"),w)+Sys.uchar("255d")
-		Lib.Data.each(y1,y2)->y
-			pre=CurGoto(x1,y)
-			if (y==y1) println(pre+top)
-			else if (y==y2) println(pre+bot)
-			else println(pre+mid)
-	} else {
-		println
-	}
+    if(ena) Inner {
+        w=x2-x1-1
+        top=Sys.uchar("2554")+Seq(Sys.uchar("2550"),w)+Sys.uchar("2557")
+        mid=Sys.uchar("2551")+Seq(" ",w) + Sys.uchar("2551")
+        bot=Sys.uchar("255a")+Seq(Sys.uchar("2550"),w)+Sys.uchar("255d")
+        Lib.Data.each(y1,y2)->y
+            pre=CurGoto(x1,y)
+            if (y==y1) println(pre+top)
+            else if (y==y2) println(pre+bot)
+            else println(pre+mid)
+    } else {
+        println
+    }
 /Box
-		
+        
 
 
 
 # Test
 # --
-	println(Clear)
-	List(TxtRed,TxtGreen,TxtBlue,TxtYellow,TxtMagenta,TxtCyan,TxtWhite,TxtBlack,Reversed)->x
-		println(x+"Curses using ANSI escape sequences" + Bold + " ENABLED" + Reset)
-	|
-	Box(10,5,32,12)
+    println(Clear)
+    List(TxtRed,TxtGreen,TxtBlue,TxtYellow,TxtMagenta,TxtCyan,TxtWhite,TxtBlack,Reversed)->x
+        println(x+"Curses using ANSI escape sequences" + Bold + " ENABLED" + Reset)
+    |
+    Box(10,5,32,12)
 /test
 

@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020 Roar Foshaug
+Copyright (C) 2020-2022 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -118,12 +118,12 @@ public class StmtCatEditMore extends StmtShellInteractive {
     
     @Override
     protected boolean processUnknown (Ctx ctx, File file) throws Exception {
-    	if (!this.name.equals("edit")) return false; 
-    	
-		file.createNewFile();
-		ObjFile theFile=new ObjFile(file.getCanonicalPath(), Protection.NoProtection);
-		callMacro(ctx, theFile);
-		ctx.push(new ValueObj(theFile));
+        if (!this.name.equals("edit")) return false; 
+        
+        file.createNewFile();
+        ObjFile theFile=new ObjFile(file.getCanonicalPath(), Protection.NoProtection);
+        callMacro(ctx, theFile);
+        ctx.push(new ValueObj(theFile));
         return true;
     }
     

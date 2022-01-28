@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020 Roar Foshaug
+Copyright (C) 2020-2022 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -68,16 +68,16 @@ public class Main {
         boolean noTerminal = false;
         
         while(args.hasNext() && args.peek().startsWith("-")) {
-	        if (args.peek().equals("-d")) {
-	        	args.get("advance past known -d");
-	        	scriptDir=args.get("scriptDir following -d");
-	        } else if (args.peek().equals("-noterm")) {
-	        	args.get("comsume -noterm");
-	        	noTerminal=true;
-	        } else {
-	        	System.out.println("Invalid flag. Run CFT with -help.");
-	        	System.exit(1);
-	        }
+            if (args.peek().equals("-d")) {
+                args.get("advance past known -d");
+                scriptDir=args.get("scriptDir following -d");
+            } else if (args.peek().equals("-noterm")) {
+                args.get("comsume -noterm");
+                noTerminal=true;
+            } else {
+                System.out.println("Invalid flag. Run CFT with -help.");
+                System.exit(1);
+            }
         }
 
             

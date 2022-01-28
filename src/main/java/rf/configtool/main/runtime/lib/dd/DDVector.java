@@ -1,3 +1,20 @@
+/*
+CFT - an interactive programmable shell for automation 
+Copyright (C) 2020-2022 Roar Foshaug
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>
+*/
+
 package rf.configtool.main.runtime.lib.dd;
 
 import java.util.List;
@@ -17,26 +34,26 @@ import rf.configtool.main.runtime.ValueObj;
 */
 public class DDVector extends Obj {
 
-	private Vector2d vec;
-	
-	public DDVector (Vector2d vec) {
-		this.vec=vec;
+    private Vector2d vec;
+    
+    public DDVector (Vector2d vec) {
+        this.vec=vec;
 
-		this.add(new FunctionAdd());
-		this.add(new FunctionSub());
-		this.add(new FunctionAngleDeg());
-		this.add(new FunctionLength());
-		this.add(new FunctionX());
-		this.add(new FunctionY());
-		this.add(new FunctionScaleTo());
-		this.add(new FunctionScale());
-	}
-	
-	public Vector2d getVec() {
-		return vec;
-	}
+        this.add(new FunctionAdd());
+        this.add(new FunctionSub());
+        this.add(new FunctionAngleDeg());
+        this.add(new FunctionLength());
+        this.add(new FunctionX());
+        this.add(new FunctionY());
+        this.add(new FunctionScaleTo());
+        this.add(new FunctionScale());
+    }
+    
+    public Vector2d getVec() {
+        return vec;
+    }
 
-	@Override
+    @Override
     public boolean eq(Obj x) {
         return x==this;
     }
@@ -61,18 +78,18 @@ public class DDVector extends Obj {
     private DDVector self() {
         return this;
     }
-	    
+        
 
  
-	private Vector2d getVector (String name, List<Value> params, int pos, String err) throws Exception {
-		Obj obj=getObj(name, params, pos);
-		if (obj instanceof DDVector) return ((DDVector) obj).getVec();
-		throw new Exception(err);
-	}
-	
-	class FunctionAdd extends Function {
-		public String getName() {
-			return "add";
+    private Vector2d getVector (String name, List<Value> params, int pos, String err) throws Exception {
+        Obj obj=getObj(name, params, pos);
+        if (obj instanceof DDVector) return ((DDVector) obj).getVec();
+        throw new Exception(err);
+    }
+    
+    class FunctionAdd extends Function {
+        public String getName() {
+            return "add";
         }
         public String getShortDesc() {
             return "add(Vector2d) - add vector";
@@ -84,9 +101,9 @@ public class DDVector extends Obj {
         }
     }
 
-	class FunctionSub extends Function {
-		public String getName() {
-			return "sub";
+    class FunctionSub extends Function {
+        public String getName() {
+            return "sub";
         }
         public String getShortDesc() {
             return "sub(Vector2d) - return vector that points from given vector point to THIS vector point";
@@ -100,9 +117,9 @@ public class DDVector extends Obj {
     }
 
 
-	class FunctionAngleDeg extends Function {
-		public String getName() {
-			return "angle";
+    class FunctionAngleDeg extends Function {
+        public String getName() {
+            return "angle";
         }
         public String getShortDesc() {
             return "angle(Vector2d) - get absolute angle in degrees between vectors (0-90)";
@@ -115,9 +132,9 @@ public class DDVector extends Obj {
     }
 
 
-	class FunctionLength extends Function {
-		public String getName() {
-			return "length";
+    class FunctionLength extends Function {
+        public String getName() {
+            return "length";
         }
         public String getShortDesc() {
             return "length() - get length";
@@ -129,9 +146,9 @@ public class DDVector extends Obj {
     }
 
 
-	class FunctionX extends Function {
-		public String getName() {
-			return "x";
+    class FunctionX extends Function {
+        public String getName() {
+            return "x";
         }
         public String getShortDesc() {
             return "x() - get x component";
@@ -143,9 +160,9 @@ public class DDVector extends Obj {
     }
 
 
-	class FunctionY extends Function {
-		public String getName() {
-			return "y";
+    class FunctionY extends Function {
+        public String getName() {
+            return "y";
         }
         public String getShortDesc() {
             return "y() - get y component";
@@ -157,9 +174,9 @@ public class DDVector extends Obj {
     }
 
 
-	class FunctionScaleTo extends Function {
-		public String getName() {
-			return "scaleTo";
+    class FunctionScaleTo extends Function {
+        public String getName() {
+            return "scaleTo";
         }
         public String getShortDesc() {
             return "scaleTo(targetLength) - create vector of given length";
@@ -173,9 +190,9 @@ public class DDVector extends Obj {
 
 
 
-	class FunctionScale extends Function {
-		public String getName() {
-			return "scale";
+    class FunctionScale extends Function {
+        public String getName() {
+            return "scale";
         }
         public String getShortDesc() {
             return "scale(xScale,yScale) - scale x and y (floats)";

@@ -1,3 +1,24 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2022 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 # Readme!
 <<< EOF
 ElasticSearch / Kibana / Logstash install and configure
@@ -19,11 +40,11 @@ Then run
 - ES1 / ElasticSearchComplete       Works!
 
 - KIB1 / InstallKibanaAll           Works!
-- KIB2 / ConfigureKibanaAll			Works!
+- KIB2 / ConfigureKibanaAll         Works!
 
-- LS1 / InstallLogstashAll			Works!
+- LS1 / InstallLogstashAll          Works!
 
-- TestLogstashPipeline			    Works!
+- TestLogstashPipeline              Works!
 
 Logstash pipelines must be configured outside this script,
 using the code from TestLogstashPipeline as template, for
@@ -58,84 +79,84 @@ Input("ssh target user@host").get
 
 # Get, set or confirm config data
 # --
-	P(1,false) => forceUpdate
+    P(1,false) => forceUpdate
 
-	Db2:Get("ElasticSearch","Config") => dict
+    Db2:Get("ElasticSearch","Config") => dict
 
-	save=false
-	
-	if (dict==null) {
-		forceUpdate=true
-		dict=Dict
-	}
+    save=false
+    
+    if (dict==null) {
+        forceUpdate=true
+        dict=Dict
+    }
 
-	if (forceUpdate || Util:HasTimedOut("ElasticSearch.ConfigCheck", 4*3600)) {
-		Input("All host names - space-separated") => inp
-		inp.clear.setCurr(dict.get("hosts",List).concat(" "))
-		dict.set("hosts", inp.get.split)
-	
-		Input("Master host names - space-separated") => inp
-		inp.clear.setCurr(dict.get("masterHosts",List).concat(" "))
-		dict.set("masterHosts", inp.get.split)
-	
-		Input("Logstash host names - space-separated") => inp
-		inp.clear.setCurr(dict.get("logstashHosts",List).concat(" "))
-		dict.set("logstashHosts", inp.get.split)
-	
-		Input("Kibana host names - space-separated") => inp
-		inp.clear.setCurr(dict.get("kibanaHosts",List).concat(" "))
-		dict.set("kibanaHosts", inp.get.split)
-	
-		Input("SSH user name") => inp
-		inp.clear.setCurr(dict.get("user",""))
-		dict.set("user", inp.get)
+    if (forceUpdate || Util:HasTimedOut("ElasticSearch.ConfigCheck", 4*3600)) {
+        Input("All host names - space-separated") => inp
+        inp.clear.setCurr(dict.get("hosts",List).concat(" "))
+        dict.set("hosts", inp.get.split)
+    
+        Input("Master host names - space-separated") => inp
+        inp.clear.setCurr(dict.get("masterHosts",List).concat(" "))
+        dict.set("masterHosts", inp.get.split)
+    
+        Input("Logstash host names - space-separated") => inp
+        inp.clear.setCurr(dict.get("logstashHosts",List).concat(" "))
+        dict.set("logstashHosts", inp.get.split)
+    
+        Input("Kibana host names - space-separated") => inp
+        inp.clear.setCurr(dict.get("kibanaHosts",List).concat(" "))
+        dict.set("kibanaHosts", inp.get.split)
+    
+        Input("SSH user name") => inp
+        inp.clear.setCurr(dict.get("user",""))
+        dict.set("user", inp.get)
 
-		Lib:Header("Current config")
-		Util:ShowDict(dict,true)
+        Lib:Header("Current config")
+        Util:ShowDict(dict,true)
 
-		error(!Lib:Confirm,"Aborting")
+        error(!Lib:Confirm,"Aborting")
 
-		Db2:Set("ElasticSearch","Config",dict)
+        Db2:Set("ElasticSearch","Config",dict)
 
-		save=true
-	}
+        save=true
+    }
 
-	Util:SetTimeMark("ElasticSearch.ConfigCheck")
+    Util:SetTimeMark("ElasticSearch.ConfigCheck")
 
-	dict
+    dict
 //GetConfigData
 
 
 
 # Show config data
 # --
-	Util:ShowDict(GetConfigData,true)
+    Util:ShowDict(GetConfigData,true)
 /ShowConfigData
 
 
 
 # Hosts in cluster
 # --
-	GetConfigData.hosts
+    GetConfigData.hosts
 /hosts
 
 
 # Master hosts
 # --
-	GetConfigData.masterHosts
+    GetConfigData.masterHosts
 /masterHosts
 
 
 
 # Logstash hosts
 # --
-	GetConfigData.logstashHosts
+    GetConfigData.logstashHosts
 /logstashHosts
 
 
 
 # Kibana hosts
-	GetConfigData.kibanaHosts
+    GetConfigData.kibanaHosts
 /kibanaHosts
 
 
@@ -143,7 +164,7 @@ Input("ssh target user@host").get
 
 # SSH user
 # --
-	GetConfigData.user
+    GetConfigData.user
 /user
 
 
@@ -158,41 +179,41 @@ Input("ssh target user@host").get
 
 # Lookup ip address
 # --
-	P(1,"elk03.v")=>host
-	foundName=false
-	result=null
-	Lib:run("nslookup",host).stdout->line
-		if(line.startsWith("Name:") && line.contains(host)) {
-			foundName=true
-			assert(false)
-		}
-		if (foundName && line.startsWith("Address:")) {
-			result=line.after(":").trim
-		}
-	|
-	error(result==null,"Could not resolve " + host)
-	result
+    P(1,"elk03.v")=>host
+    foundName=false
+    result=null
+    Lib:run("nslookup",host).stdout->line
+        if(line.startsWith("Name:") && line.contains(host)) {
+            foundName=true
+            assert(false)
+        }
+        if (foundName && line.startsWith("Address:")) {
+            result=line.after(":").trim
+        }
+    |
+    error(result==null,"Could not resolve " + host)
+    result
 //GetIp
 
 
 # Ensure /mnt/storage ok
 # --
-	P(1,GetTarget)=>target
-	P(2,"")=>prefix
+    P(1,GetTarget)=>target
+    P(2,"")=>prefix
 
-	println(prefix+"Checking /mnt/storage/ISO ok")
-	SSH:sudo(target,"mount -a")
-	SSH:sudo(target,"ls /mnt/storage/ISO", true).get("exitCode") != 0 => notFound
-	if (notFound) {
-		println(prefix+"Creating /mnt/storage")
-		SSH:sudo(target,"mkdir /mnt/storage", true) # ignore errors
-		println(prefix+"Updating /etc/fstab")
-		SSH:sudo(target,'echo "storage.s:/mnt/storage  /mnt/storage    nfs   rw    0 0" >> /etc/fstab')
-		println(prefix,"mount -a")
-		SSH:sudo(target,"mount -a")
-	}
-	SSH:sudo(target,"ls /mnt/storage/ISO", true).get("exitCode") != 0 => notFound
-	error(notFound,"Failed to fix /mnt/storage mount on " + target)
+    println(prefix+"Checking /mnt/storage/ISO ok")
+    SSH:sudo(target,"mount -a")
+    SSH:sudo(target,"ls /mnt/storage/ISO", true).get("exitCode") != 0 => notFound
+    if (notFound) {
+        println(prefix+"Creating /mnt/storage")
+        SSH:sudo(target,"mkdir /mnt/storage", true) # ignore errors
+        println(prefix+"Updating /etc/fstab")
+        SSH:sudo(target,'echo "storage.s:/mnt/storage  /mnt/storage    nfs   rw    0 0" >> /etc/fstab')
+        println(prefix,"mount -a")
+        SSH:sudo(target,"mount -a")
+    }
+    SSH:sudo(target,"ls /mnt/storage/ISO", true).get("exitCode") != 0 => notFound
+    error(notFound,"Failed to fix /mnt/storage mount on " + target)
 //CheckOrFixMntStorage
 
 
@@ -203,108 +224,108 @@ Input("ssh target user@host").get
     P(1,GetTarget) =>target
     P(2,"") =>prefix
 
-	println(prefix+"INSTALLING " + target)
+    println(prefix+"INSTALLING " + target)
 
-	#APTUpdate:run(target,null,true)
+    #APTUpdate:run(target,null,true)
 
-	println(prefix+"Checking Java")
+    println(prefix+"Checking Java")
     Java:VerifyJava (target, prefix+"   ")
 
-	println("Installing apt-transport-https")
-	SSH:sudo(target,"apt-get install -y apt-transport-https")
+    println("Installing apt-transport-https")
+    SSH:sudo(target,"apt-get install -y apt-transport-https")
 
-	CheckOrFixMntStorage(target,prefix+"   ")
-	println(prefix+"Installing " + ESImage)
-	SSH:sudo(target,"apt-get install -y /mnt/storage/ISO/" + ESImage)
+    CheckOrFixMntStorage(target,prefix+"   ")
+    println(prefix+"Installing " + ESImage)
+    SSH:sudo(target,"apt-get install -y /mnt/storage/ISO/" + ESImage)
 
-	println("Enabling service")
-	SSH:sudo(target,"systemctl enable elasticsearch")
+    println("Enabling service")
+    SSH:sudo(target,"systemctl enable elasticsearch")
 
-//InstallElasticSearch	
+//InstallElasticSearch  
 
 
 # Set up ElasticSearch configuration file
 # --
-	P(1,GetTarget) => target
-	P(2,List(target)) => masterHosts
-	P(3,"")=>prefix
+    P(1,GetTarget) => target
+    P(2,List(target)) => masterHosts
+    P(3,"")=>prefix
 
-	target.after("@") => nodeHost
-	GetIp(nodeHost) => nodeHostIp
+    target.after("@") => nodeHost
+    GetIp(nodeHost) => nodeHostIp
 
-	nodeHost.before(".") => nodeName
+    nodeHost.before(".") => nodeName
 
-	isMasterHost=""+masterHosts.contains(nodeHost)
-	isDataHost=""+(!masterHosts.contains(nodeHost))
+    isMasterHost=""+masterHosts.contains(nodeHost)
+    isDataHost=""+(!masterHosts.contains(nodeHost))
 
-	masterHosts->host
-		out('"' + host + '"')
-	| _.concat(", ") => masterNodes
+    masterHosts->host
+        out('"' + host + '"')
+    | _.concat(", ") => masterNodes
 
-	masterHosts->host
-		out('"' + GetIp(host) + '"')
-	| _.concat(", ") => masterNodesIp
+    masterHosts->host
+        out('"' + GetIp(host) + '"')
+    | _.concat(", ") => masterNodesIp
 
-	hosts->host
-		out('"' + host + '"')
-	| _.concat(", ") => allNodes
+    hosts->host
+        out('"' + host + '"')
+    | _.concat(", ") => allNodes
 
-	hosts->host
-		out('"' + GetIp(host) + '"')
-	| _.concat(", ") => allNodesIp
+    hosts->host
+        out('"' + GetIp(host) + '"')
+    | _.concat(", ") => allNodesIp
 
-	SymDict(nodeHost,nodeHostIp,
-		nodeName,isMasterHost,isDataHost,
-		masterNodes,masterNodesIp,allNodes,allNodesIp
-	).mergeCodes=>data
+    SymDict(nodeHost,nodeHostIp,
+        nodeName,isMasterHost,isDataHost,
+        masterNodes,masterNodesIp,allNodes,allNodesIp
+    ).mergeCodes=>data
 
-	# IP-numbers vs host names
-	# ------------------------
-	# The clue here is that by using IP addresses for network.host as well as
-	# in the initial_master_nodes and the unicast.hosts, everything works, as the
-	# check on network.host is LITERAL. With this config, we can NOT do
-	# curl to localhost, only to the IP-address. Doing CURL from outside, we can also
-	# not use host names, but have to use IP-addresses. Because the network.host
-	# field for Elastic is about ACCESS CONTROL and it is taken literally.
+    # IP-numbers vs host names
+    # ------------------------
+    # The clue here is that by using IP addresses for network.host as well as
+    # in the initial_master_nodes and the unicast.hosts, everything works, as the
+    # check on network.host is LITERAL. With this config, we can NOT do
+    # curl to localhost, only to the IP-address. Doing CURL from outside, we can also
+    # not use host names, but have to use IP-addresses. Because the network.host
+    # field for Elastic is about ACCESS CONTROL and it is taken literally.
 
-	Sequence(
-		@ cluster.name: mycluster
-		@ node.name: ${nodeName}
-		@ node.data: ${isDataHost}
-		@ node.ingest: ${isDataHost}
-		@ node.master: ${isMasterHost}
- 		@ network.host: "${nodeHostIp}"
-		@ http.port: 9200
-		@ path.data: /var/lib/elasticsearch
-		@ path.logs: /var/log/elasticsearch
-		@ cluster.initial_master_nodes: [ ${masterNodesIp} ]
-		@ discovery.zen.ping.unicast.hosts: [ ${allNodesIp} ]
-	)->line
-		out(line.merge(data))
-	| => config
+    Sequence(
+        @ cluster.name: mycluster
+        @ node.name: ${nodeName}
+        @ node.data: ${isDataHost}
+        @ node.ingest: ${isDataHost}
+        @ node.master: ${isMasterHost}
+    @ network.host: "${nodeHostIp}"
+        @ http.port: 9200
+        @ path.data: /var/lib/elasticsearch
+        @ path.logs: /var/log/elasticsearch
+        @ cluster.initial_master_nodes: [ ${masterNodesIp} ]
+        @ discovery.zen.ping.unicast.hosts: [ ${allNodesIp} ]
+    )->line
+        out(line.merge(data))
+    | => config
 
-	Lib:TmpFile("elasticsearch","yml") => f 
-	f.create(config)
+    Lib:TmpFile("elasticsearch","yml") => f 
+    f.create(config)
 
-	println(prefix+"Configuration for " + target)
-	println("---")
-	f.read->line println(line) 
-	|
-	println("---")
+    println(prefix+"Configuration for " + target)
+    println("---")
+    f.read->line println(line) 
+    |
+    println("---")
 
-	SSH:copy(f,target,"./elasticsearch.yml")
-	SSH:sudo(target,"cp ./elasticsearch.yml /etc/elasticsearch")
-	f.delete
+    SSH:copy(f,target,"./elasticsearch.yml")
+    SSH:sudo(target,"cp ./elasticsearch.yml /etc/elasticsearch")
+    f.delete
 
-	println("Creating directories for data and log")
-	SSH:sudo(target,"mkdir -p /var/lib/elasticsearch")
-	SSH:sudo(target,"mkdir -p /var/log/elasticsearch")
+    println("Creating directories for data and log")
+    SSH:sudo(target,"mkdir -p /var/lib/elasticsearch")
+    SSH:sudo(target,"mkdir -p /var/log/elasticsearch")
 
-	SSH:sudo(target,"chmod 755 /var/lib/elasticsearch")
-	SSH:sudo(target,"chmod 755 /var/log/elasticsearch")
+    SSH:sudo(target,"chmod 755 /var/lib/elasticsearch")
+    SSH:sudo(target,"chmod 755 /var/log/elasticsearch")
 
-	SSH:sudo(target,"chown elasticsearch /var/lib/elasticsearch")
-	SSH:sudo(target,"chown elasticsearch /var/log/elasticsearch")
+    SSH:sudo(target,"chown elasticsearch /var/lib/elasticsearch")
+    SSH:sudo(target,"chown elasticsearch /var/log/elasticsearch")
 
 //InstallElasticSearchConfig
 
@@ -313,11 +334,11 @@ Input("ssh target user@host").get
 
 # Stop ElasticSearch nodes
 # --
-	hosts->host
-		target=user+"@"+host
-		println("STOPPING elasticsearch on " + target)
-		##SSH:sudo(target,"systemctl stop elasticsearch")
-		SSH:sudo(target,"service elasticsearch stop")
+    hosts->host
+        target=user+"@"+host
+        println("STOPPING elasticsearch on " + target)
+        ##SSH:sudo(target,"systemctl stop elasticsearch")
+        SSH:sudo(target,"service elasticsearch stop")
 /StopElasticSearch
 
 
@@ -325,37 +346,37 @@ Input("ssh target user@host").get
 
 # Start ElasticSearch nodes
 # --
-	<<<<<< XXX
-	# First start masterNodes separately, before starting the rest
-	masterHosts->host
-		target=user+"@"+host
-		println("STARTING " + target)
-		SpawnProcess(SymDict(target), 
-			##SSH:sudo(target,"systemctl start elasticsearch")
-			SSH:sudo(target,"service elasticsearch start")
-		) =>proc
-		out(proc)
-	| _->proc
-		proc.wait
-		println("Started " + proc.data.target)
-	|
-	>>>>>>>> XXX
+    <<<<<< XXX
+    # First start masterNodes separately, before starting the rest
+    masterHosts->host
+        target=user+"@"+host
+        println("STARTING " + target)
+        SpawnProcess(SymDict(target), 
+            ##SSH:sudo(target,"systemctl start elasticsearch")
+            SSH:sudo(target,"service elasticsearch start")
+        ) =>proc
+        out(proc)
+    | _->proc
+        proc.wait
+        println("Started " + proc.data.target)
+    |
+    >>>>>>>> XXX
 
-	# Starting data hosts
-	hosts->host
-		#reject(masterHosts.contains(host))
-		println("STARTING elasticsearch on " + host)
-		target=user+"@"+host
-		SpawnProcess(SymDict(target),{
-			SSH:sudo(target,"systemctl start elasticsearch")
-		}) => proc out(proc)
-	| => processes
+    # Starting data hosts
+    hosts->host
+        #reject(masterHosts.contains(host))
+        println("STARTING elasticsearch on " + host)
+        target=user+"@"+host
+        SpawnProcess(SymDict(target),{
+            SSH:sudo(target,"systemctl start elasticsearch")
+        }) => proc out(proc)
+    | => processes
 
-	processes->proc
-		proc.wait
-		println("Started " + proc.data.target)
- 	|
-	println("All done!")
+    processes->proc
+        proc.wait
+        println("Started " + proc.data.target)
+  |
+    println("All done!")
 /StartElasticSearch
 
 
@@ -363,58 +384,58 @@ Input("ssh target user@host").get
 # Complete install ElasticSearch 
 # --
 
-	hosts->host
-		target=user+"@"+host
-		InstallElasticSearch(target)
-		InstallElasticSearchConfig(target,masterHosts)
-	|
-	StopElasticSearch
-	println
-	StartElasticSearch
+    hosts->host
+        target=user+"@"+host
+        InstallElasticSearch(target)
+        InstallElasticSearchConfig(target,masterHosts)
+    |
+    StopElasticSearch
+    println
+    StartElasticSearch
 /ElasticSearchComplete
 
 
 
 # Check install
 # --
-	P(1,GetTarget) => target
+    P(1,GetTarget) => target
 
-	# Only works using IP-address, not "localhost", see text in
-	# the InstallElasticSearchConfig function
+    # Only works using IP-address, not "localhost", see text in
+    # the InstallElasticSearchConfig function
 
-	target.after("@") => host
-	GetIp(host) => ip
-	SSH:run(target,"curl -XGET 'http://"+ip+":9200/_cluster/state?pretty'").stdout
+    target.after("@") => host
+    GetIp(host) => ip
+    SSH:run(target,"curl -XGET 'http://"+ip+":9200/_cluster/state?pretty'").stdout
 /CheckInstall
 
 
 # Check install remote
 # --
-	P(1,GetTarget) => target
+    P(1,GetTarget) => target
 
-	# Only works using IP-address, not "localhost", see text in
-	# the InstallElasticSearchConfig function
+    # Only works using IP-address, not "localhost", see text in
+    # the InstallElasticSearchConfig function
 
-	target.after("@") => host
-	GetIp(host) => ip
-	SSH:run(target,"curl -XGET 'http://"+ip+":9200/_cluster/state?pretty'").stdout
+    target.after("@") => host
+    GetIp(host) => ip
+    SSH:run(target,"curl -XGET 'http://"+ip+":9200/_cluster/state?pretty'").stdout
 /CheckInstallRemote
 
 
 
-	
+    
 # Install kibana
 # --
-	kibanaHosts->host
-		target=user+"@"+host
-		println("INSTALLING kibana " + host)
-		CheckOrFixMntStorage(target)
+    kibanaHosts->host
+        target=user+"@"+host
+        println("INSTALLING kibana " + host)
+        CheckOrFixMntStorage(target)
 
-		println("Installing " + KibanaImage)
-		SSH:sudo(target,"apt-get install -y /mnt/storage/ISO/" + KibanaImage)
+        println("Installing " + KibanaImage)
+        SSH:sudo(target,"apt-get install -y /mnt/storage/ISO/" + KibanaImage)
 
-		println("Enabling service")
-		SSH:sudo(target,"systemctl enable kibana")
+        println("Enabling service")
+        SSH:sudo(target,"systemctl enable kibana")
 /InstallKibanaAll
 
 
@@ -425,77 +446,77 @@ Input("ssh target user@host").get
 # Port 5601
 # Note: Kibana uses a bit of time after restart, to become available!
 # --
-	kibanaHosts->host
-		target=user+"@"+host
-		
-		println("Configure Kibana " + host)
+    kibanaHosts->host
+        target=user+"@"+host
+        
+        println("Configure Kibana " + host)
 
 
-		# Create config
-		
-		Inner {
-			masterHosts->host 
-				out('"http://' + GetIp(host) + ':9200"')
-			| _.concat(", ")
-		} => masterNodesIp
+        # Create config
+        
+        Inner {
+            masterHosts->host 
+                out('"http://' + GetIp(host) + ':9200"')
+            | _.concat(", ")
+        } => masterNodesIp
 
-		SymDict(masterNodesIp).mergeCodes => data
+        SymDict(masterNodesIp).mergeCodes => data
 
-		println("Creating log dir /var/log/kibana")
-		SSH:sudo(target,"mkdir -p /var/log/kibana")
-		SSH:sudo(target,"chown kibana /var/log/kibana")
+        println("Creating log dir /var/log/kibana")
+        SSH:sudo(target,"mkdir -p /var/log/kibana")
+        SSH:sudo(target,"chown kibana /var/log/kibana")
 
 
-		# For Kibana, server.host 0.0.0.0 means all, also
-		# when called using host name instead of IP address
-		
-		Inner {
-			Sequence(
-				@ server.host: "0.0.0.0"
-				@ server.port: 5601
-				@ logging.dest: /var/log/kibana/kibana.log
-				#@ logging.verbose: true
-		        @ elasticsearch.hosts: [ ${masterNodesIp} ]
-			)->line
-				out(line.merge(data))
-		} => config
+        # For Kibana, server.host 0.0.0.0 means all, also
+        # when called using host name instead of IP address
+        
+        Inner {
+            Sequence(
+                @ server.host: "0.0.0.0"
+                @ server.port: 5601
+                @ logging.dest: /var/log/kibana/kibana.log
+                #@ logging.verbose: true
+                @ elasticsearch.hosts: [ ${masterNodesIp} ]
+            )->line
+                out(line.merge(data))
+        } => config
 
-		Lib:TmpFile("kibana","yml") => f
-		f.create(config)
+        Lib:TmpFile("kibana","yml") => f
+        f.create(config)
 
-		println("Creating kibana.yml")
-		println("---")
-		{ f.read->line println(line) }
-		println("---")
+        println("Creating kibana.yml")
+        println("---")
+        { f.read->line println(line) }
+        println("---")
 
-		SSH:copy(f,target,"./kibana.yml")
-		SSH:sudo(target,"cp ./kibana.yml /etc/kibana/kibana.yml")
+        SSH:copy(f,target,"./kibana.yml")
+        SSH:sudo(target,"cp ./kibana.yml /etc/kibana/kibana.yml")
 
-		f.delete
-	|
-	println("Restarting kibana")
-	StopKibana
-	println
-	StartKibana
+        f.delete
+    |
+    println("Restarting kibana")
+    StopKibana
+    println
+    StartKibana
 /ConfigureKibanaAll
 
 
 # Stop kibana
 # --
-	kibanaHosts->host
-		target=user+"@"+host
-		println("STOPPING kibana " + host)
-		SSH:sudo(target,"systemctl stop kibana")
+    kibanaHosts->host
+        target=user+"@"+host
+        println("STOPPING kibana " + host)
+        SSH:sudo(target,"systemctl stop kibana")
 /StopKibana
 
-		
-	
+        
+    
 # Start kibana
 # --
-	kibanaHosts->host
-		target=user+"@"+host
-		println("STARTING kibana " + host)
-		SSH:sudo(target,"systemctl start kibana")
+    kibanaHosts->host
+        target=user+"@"+host
+        println("STARTING kibana " + host)
+        SSH:sudo(target,"systemctl start kibana")
 /StartKibana
 
 
@@ -509,7 +530,7 @@ Input("ssh target user@host").get
     P(1,GetTarget) =>target
     P(2,"") =>prefix
 
-	println(prefix+"INSTALLING logstash " + target)
+    println(prefix+"INSTALLING logstash " + target)
     # Check if logstash already installed
     SSH:sudo (target, "systemctl status logstash.service", true).get("exitCode")!=4 =>found
     if (found) {
@@ -529,9 +550,9 @@ Input("ssh target user@host").get
 
         println(prefix+"Installing logstash")
         SSH:sudo (target, cmd)
-	}
-	println(prefix+"Enabling logstash")
-	SSH:sudo (target,"systemctl enable logstash")
+    }
+    println(prefix+"Enabling logstash")
+    SSH:sudo (target,"systemctl enable logstash")
 /InstallLogstash
 
 
@@ -540,35 +561,35 @@ Input("ssh target user@host").get
 # Note: configuration not included, just remember to use IP addresses of
 # the ElasticSearch cluster nodes!!
 # --
-	logstashHosts->host
-		target=user+"@"+host
-		InstallLogstash(target)
+    logstashHosts->host
+        target=user+"@"+host
+        InstallLogstash(target)
 /InstallLogstashAll
 
 
 # Stop logstash
 # --
-	logstashHosts->host
-		println("STOPPING logstash " + host)
-		target=user+"@"+host
-		SSH:sudo(target,"systemctl stop logstash")
+    logstashHosts->host
+        println("STOPPING logstash " + host)
+        target=user+"@"+host
+        SSH:sudo(target,"systemctl stop logstash")
 /StopLogstash
 
 
-	
+    
 # Start logstash
 # --
-	logstashHosts->host
-		println("STARTING logstash " + host)
-		target=user+"@"+host
-		SSH:sudo(target,"systemctl start logstash")
+    logstashHosts->host
+        println("STARTING logstash " + host)
+        target=user+"@"+host
+        SSH:sudo(target,"systemctl start logstash")
 /StartLogstash
 
 
 
 # Clear logstash pipelines
 # --
-	Db2Obj:DeleteCollection("LogstashPipeline")
+    Db2Obj:DeleteCollection("LogstashPipeline")
 /ClearLogstashPipelines
 
 
@@ -576,76 +597,76 @@ Input("ssh target user@host").get
 
 # Add logstash pipeline
 # --
-	P(1) => pipelineName
-	P(2) => pipelineJSON
-	P(3) => esHostsMergeCode
+    P(1) => pipelineName
+    P(2) => pipelineJSON
+    P(3) => esHostsMergeCode
 
-	# Create esHosts merge value
-	masterHosts->h out('"' + GetIp(h) + ':9200"') | _.concat(", ") => esHosts
-	Dict.set(esHostsMergeCode, esHosts).mergeCodes => data
+    # Create esHosts merge value
+    masterHosts->h out('"' + GetIp(h) + ':9200"') | _.concat(", ") => esHosts
+    Dict.set(esHostsMergeCode, esHosts).mergeCodes => data
 
-	# Merge esHosts into JSON
-	pipelineJSON->line out(line.merge(data)) | _=> pipelineJSON
+    # Merge esHosts into JSON
+    pipelineJSON->line out(line.merge(data)) | _=> pipelineJSON
 
-	# Store in database
-	Db2Obj:AddObject("LogstashPipeline", SymDict(pipelineName, pipelineJSON))
+    # Store in database
+    Db2Obj:AddObject("LogstashPipeline", SymDict(pipelineName, pipelineJSON))
 /AddLogstashPipeline
 
 
 
 # Update logstash config
 # --
-	P(1,GetTarget) => target
+    P(1,GetTarget) => target
 
-	println("PushLogstashConfig " + target)
+    println("PushLogstashConfig " + target)
 
-	list = Db2Obj:FindObjects("LogstashPipeline")
-	error(list.empty,"No Logstash pipelines have been added")
+    list = Db2Obj:FindObjects("LogstashPipeline")
+    error(list.empty,"No Logstash pipelines have been added")
 
-	pipelinesYml = List
-	list->x
-		p=x.value
-		#Util:ShowDict(p,true) error("x")
-		p.mergeCodes => data
-		{
-			Sequence(
-				@@- pipeline.id: ${pipelineName}
-				@@  pipeline.workers: 1
-				@@  path.config: "/etc/logstash/conf.d/${pipelineName}.conf"
-			) -> line 
-				pipelinesYml.add(line.merge(data))
-		}
-		Lib:TmpFile(p.get("pipelineName"),"conf") => f
-		f.create(p.get("pipelineJSON"))
-	
-		fname=p.get("pipelineName")+".conf"
-		
-		println("Deploying " + fname)
-		println("---")
-		f.read->line println(line) |
-		println("---")
-		SSH:copy(f,target,"./"+fname)
-		SSH:sudo(target,"cp ./"+fname+" /etc/logstash/conf.d")
-		f.delete
+    pipelinesYml = List
+    list->x
+        p=x.value
+        #Util:ShowDict(p,true) error("x")
+        p.mergeCodes => data
+        {
+            Sequence(
+                @@- pipeline.id: ${pipelineName}
+                @@  pipeline.workers: 1
+                @@  path.config: "/etc/logstash/conf.d/${pipelineName}.conf"
+            ) -> line 
+                pipelinesYml.add(line.merge(data))
+        }
+        Lib:TmpFile(p.get("pipelineName"),"conf") => f
+        f.create(p.get("pipelineJSON"))
+    
+        fname=p.get("pipelineName")+".conf"
+        
+        println("Deploying " + fname)
+        println("---")
+        f.read->line println(line) |
+        println("---")
+        SSH:copy(f,target,"./"+fname)
+        SSH:sudo(target,"cp ./"+fname+" /etc/logstash/conf.d")
+        f.delete
 
 
-	# The pipelines.yml default points to conf.d/*.conf
-	#
-	# Still, this is cleaner, as it avoid problems with old
-	# conf-files.
+    # The pipelines.yml default points to conf.d/*.conf
+    #
+    # Still, this is cleaner, as it avoid problems with old
+    # conf-files.
 
-	Lib:TmpFile("pipelines","yml") => f
+    Lib:TmpFile("pipelines","yml") => f
 
-	f.create(pipelinesYml)
-	println("Deploying pipelines.yml")
-	println("---")
-	f.read->line println(line) |
-	println("---")
-	SSH:copy(f,target,"./pipelines.yml")
-	SSH:sudo(target,"cp ./pipelines.yml /etc/logstash")
-	f.delete
+    f.create(pipelinesYml)
+    println("Deploying pipelines.yml")
+    println("---")
+    f.read->line println(line) |
+    println("---")
+    SSH:copy(f,target,"./pipelines.yml")
+    SSH:sudo(target,"cp ./pipelines.yml /etc/logstash")
+    f.delete
 
-	"ok"
+    "ok"
 /PushLogstashConfig
 
 
@@ -654,21 +675,21 @@ Input("ssh target user@host").get
 
 # Update logstash config all 
 # --
-	logstashHosts->host
-		Lib:Header("Update logstash " + host)
-		target=user+"@"+host
-		PushLogstashConfig(target)
-	|
-	StopLogstash
-	println
-	StartLogstash
+    logstashHosts->host
+        Lib:Header("Update logstash " + host)
+        target=user+"@"+host
+        PushLogstashConfig(target)
+    |
+    StopLogstash
+    println
+    StartLogstash
 /PushLogstashConfigAll
 
-	
-	
+    
+    
 
-		
-	
+        
+    
 
 ElasticSearchComplete 
 /ES1
@@ -700,24 +721,24 @@ InstallLogstashAll
 # Add example logstash pipeline
 # It receives beats data and insert them unmodified into Elastic in index beatstest-*
 # --
-	ClearLogstashPipelines
+    ClearLogstashPipelines
 <<<<<<<<<<<<<<<<< EOF
 input {
-	beats {
-		port => "5044"
-	}
+    beats {
+        port => "5044"
+    }
 }
 output {
-	elasticsearch {
-		index => "beatstest-%{+YYYY.MM.dd}"
-		hosts => [ ${esHosts} ]
-	}
+    elasticsearch {
+        index => "beatstest-%{+YYYY.MM.dd}"
+        hosts => [ ${esHosts} ]
+    }
 }
 >>>>>>>>>>>>>>>>> EOF
-	=> json
+    => json
 
-	AddLogstashPipeline("test", json, "esHosts")
-	PushLogstashConfigAll
+    AddLogstashPipeline("test", json, "esHosts")
+    PushLogstashConfigAll
 /TestLogstashPipeline
 
 

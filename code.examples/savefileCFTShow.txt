@@ -1,180 +1,201 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2022 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 <<<<< TEXT
 .h Intro
 
-	# CFT: "ConfigTool"
-	# Dev since May 2018, on git since 2020
-	# GNU GPL 3.0 ("open source")
-	# --
+    # CFT: "ConfigTool"
+    # Dev since May 2018, on git since 2020
+    # GNU GPL 3.0 ("open source")
+    # --
 
 
-	# Script language
+    # Script language
 
-	# Shell
+    # Shell
 
 
 
 .h Unusual
 
-	# - Function names follow code
-	
-	1+1
-	/two
+    # - Function names follow code
+    
+    1+1
+    /two
 
-	# - Iteration with single arrow + out()
+    # - Iteration with single arrow + out()
 
-	List(1,2,3)->x out(x+10)
+    List(1,2,3)->x out(x+10)
 
-	# - PIPE ("|"): code spaces
+    # - PIPE ("|"): code spaces
 
-	List(1,2,3)->x out(x+10) | _.sum
+    List(1,2,3)->x out(x+10) | _.sum
 
-	# Function return values
-	# - result from last code space
+    # Function return values
+    # - result from last code space
 
-	# Code space result value
-	# - if contains loops: list via out() or report()
-	# - otherwise: top value from stack
+    # Code space result value
+    # - if contains loops: list via out() or report()
+    # - otherwise: top value from stack
 
 
 
 .h Functions
 
-	# - no classes
-	# - no global state
+    # - no classes
+    # - no global state
 
-	# - functions only
-	# - system objects (~70)
-	#    - int, String, List, Dir, File ...
+    # - functions only
+    # - system objects (~70)
+    #    - int, String, List, Dir, File ...
 
-	1+1
-	/two
+    1+1
+    /two
 
-	two+two
+    two+two
 
 
-	Dir.allFiles(Glob("*.java"))
-	/JavaFiles
+    Dir.allFiles(Glob("*.java"))
+    /JavaFiles
 
-	JavaFiles.length
-	/CountJavaFiles
+    JavaFiles.length
+    /CountJavaFiles
 
 
 
 
 .h Help
 
-	# Interactive help
+    # Interactive help
 
-	help
+    help
 
-	File("x") help
+    File("x") help
 
-	List help
+    List help
 
-	3 help
+    3 help
 
-	"" help
+    "" help
 
-	
+    
 
 .h Loops
 
-	# Iterate over content
-	# Filter and modify
+    # Iterate over content
+    # Filter and modify
 
-	Dir.files->f assert(f.name.endsWith(".txt")) out(f)
-	/txtFiles
+    Dir.files->f assert(f.name.endsWith(".txt")) out(f)
+    /txtFiles
 
-	Dir.files->f assert(f.lastModified > currentTimeMillis-86400*1000) out(f)
-	/recentFiles
+    Dir.files->f assert(f.lastModified > currentTimeMillis-86400*1000) out(f)
+    /recentFiles
 
-	help
-	File("x") help
+    help
+    File("x") help
 
 
 
 
 .h Iteration
 
-	## Foreach loop: <stack value> -> ident
+    ## Foreach loop: <stack value> -> ident
 
-	List(1,2,3)->x out("a"+x)
-	Dir.files->f out(f.path)
-	Dir.files->f report(f.name, f.length)
+    List(1,2,3)->x out("a"+x)
+    Dir.files->f out(f.path)
+    Dir.files->f report(f.name, f.length)
 
-	## Filtering
+    ## Filtering
 
-	Dir.files->f assert(f.name.endsWith(".md")) out(f)
-	Dir.files->f assert(f.name.endsWith(".txt")) out(f)
+    Dir.files->f assert(f.name.endsWith(".md")) out(f)
+    Dir.files->f assert(f.name.endsWith(".txt")) out(f)
 
-	# or just 
+    # or just 
 
-	ls *.txt
+    ls *.txt
 
-	## Pipes
+    ## Pipes
 
-	Dir.allFiles("*.java")->f out(f.read.length) | _.sum
+    Dir.allFiles("*.java")->f out(f.read.length) | _.sum
 
 
 
 .h Search
 
-	# Projects = Script for searching
-	# Multiple projects, fast switching
-	# --
+    # Projects = Script for searching
+    # Multiple projects, fast switching
+    # --
 
-	@
-	@P
+    @
+    @P
 
-	?
-	ch
+    ?
+    ch
 
-	S
-	FL
+    S
+    FL
 
-	EditConfig
+    EditConfig
 
 
 
 .h Shell
 
-	ls, lsd, lsf
+    ls, lsd, lsf
 
-	cat, more, edit
+    cat, more, edit
 
-	ls
-	:N
-	edit/cat/more
+    ls
+    :N
+    edit/cat/more
 
-	@fm
+    @fm
 
-	@S
-	@FL
+    @S
+    @FL
 
-	!dir
-	shell
+    !dir
+    shell
 
 
 
 .h Templates
 
-	:save Demo
-	@e
-	
-	# Create notification
-	# --
-		P(1,"MyCollection") => collection
-		P(2,readLine("Field"))=>field
-		P(3,readLine("Value")) => value
+    :save Demo
+    @e
+    
+    # Create notification
+    # --
+        P(1,"MyCollection") => collection
+        P(2,readLine("Field"))=>field
+        P(3,readLine("Value")) => value
 
-		Sequence(
-			@ printjson(
-			@   db.<<collection>>.find(
-			@     {"<<field>>": "<<value>>"}
-			@   ).count()
-			@ )
-		).mergeExpr
-	/MongoCount
+        Sequence(
+            @ printjson(
+            @   db.<<collection>>.find(
+            @     {"<<field>>": "<<value>>"}
+            @   ).count()
+            @ )
+        ).mergeExpr
+    /MongoCount
 
 
 
@@ -186,41 +207,41 @@
 
 # Process line
 # --
-	P(1) => line
-	P(2) => first
-	if (line.startsWith(".h")) {
-		if (!first) {
-			readLine("Enter")
-		}
-		println(Curses:Clear)
-		Inner {
-			Letters7x5:GetText(line.sub(2).trim.toUpper)->line println(Curses:TxtGreen + line + Curses:Reset)
-			|
-			println
-		}
-	} else {
-		println(line)
-		Sys.sleep(10)
-	}
+    P(1) => line
+    P(2) => first
+    if (line.startsWith(".h")) {
+        if (!first) {
+            readLine("Enter")
+        }
+        println(Curses:Clear)
+        Inner {
+            Letters7x5:GetText(line.sub(2).trim.toUpper)->line println(Curses:TxtGreen + line + Curses:Reset)
+            |
+            println
+        }
+    } else {
+        println(line)
+        Sys.sleep(10)
+    }
 //ProcessLine
 
 
 # Show text
 # --
-	P(1,List) => lines
-	first=true
-	lines->line 
-		ProcessLine(line, first)
-		first=false
-	|
-	"Done"
+    P(1,List) => lines
+    first=true
+    lines->line 
+        ProcessLine(line, first)
+        first=false
+    |
+    "Done"
 //Show
 
 
 
 # Show text
 # --
-	Show(text)
+    Show(text)
 /t
 
 

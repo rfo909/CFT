@@ -1,3 +1,24 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2022 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 # Readme
 <<< EOF
 
@@ -13,109 +34,109 @@ Rancher responding (on web).
 
 # SSH target
 # --
-	"roar@k1.v"
+    "roar@k1.v"
 /Target
 
 # Verify
-	SSH:sudo(Target,'kubectl get nodes',false,false).stdout
+    SSH:sudo(Target,'kubectl get nodes',false,false).stdout
 /Verify
 
 
 # Select between Rancher stable or latest
-	true
+    true
 /RANCHER_STABLE
 
 
 
 # Intall Helm (Kubernetes package manager)
 # --
-	println("Installing helm")
-	SSH:sudo(Target,'curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash', false, false).stdout->line
-		println("  " + line)
-	|
-	println("Adding rancher stable repo to helm")
-	SSH:sudo(Target,'helm repo add rancher-stable https://releases.rancher.com/server-charts/stable').stdout->line
-		println("  " + line)
-	|
-	println("Adding rancher latest repo to helm")
-	SSH:sudo(Target,'helm repo add rancher-latest https://releases.rancher.com/server-charts/latest').stdout->line
-		println("  " + line)
-	|
-	println("Helm update")
-	SSH:sudo(Target,'helm repo update',false,false).stdout->line
-		println("  " + line)
-	|
+    println("Installing helm")
+    SSH:sudo(Target,'curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash', false, false).stdout->line
+        println("  " + line)
+    |
+    println("Adding rancher stable repo to helm")
+    SSH:sudo(Target,'helm repo add rancher-stable https://releases.rancher.com/server-charts/stable').stdout->line
+        println("  " + line)
+    |
+    println("Adding rancher latest repo to helm")
+    SSH:sudo(Target,'helm repo add rancher-latest https://releases.rancher.com/server-charts/latest').stdout->line
+        println("  " + line)
+    |
+    println("Helm update")
+    SSH:sudo(Target,'helm repo update',false,false).stdout->line
+        println("  " + line)
+    |
 /HelmInstall
 
 
 # Create kubernetes namespace for Rancher
 # --
-	println("Creating name space")
-	SSH:sudo(Target,'kubectl create namespace cattle-system',true).stdout->line
-		println("  " + line)
-	|
+    println("Creating name space")
+    SSH:sudo(Target,'kubectl create namespace cattle-system',true).stdout->line
+        println("  " + line)
+    |
 /RancherNamespace
 
 
 # SSL configuration / Rancher generated certificate
 # --
-	println("Installing cert-manager")
-	SSH:sudo(Target,'kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v1.0.4/cert-manager.crds.yaml').stdout->line
-		println("  " + line)
-	|
-	println("SSH namespace")
-	SSH:sudo(Target,'kubectl create namespace cert-manager',true).stdout->line
-		println("  " + line)
-	|
-	println("Helm repo")
-	SSH:sudo(Target,'helm repo add jetstack https://charts.jetstack.io').stdout->line
-		println("  " + line)
-	|
-	println("Helm repo update")
-	SSH:sudo(Target,'helm repo update').stdout->line
-		println("  " + line)
-	|
-	println("Install cert manager with helm")
-	SSH:sudo(Target,'helm install'
-		+ ' cert-manager jetstack/cert-manager'
-		+ ' --namespace cert-manager'
-		+ ' --version v1.0.4').stdout->line
-			println("  " + line)
-	|
+    println("Installing cert-manager")
+    SSH:sudo(Target,'kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v1.0.4/cert-manager.crds.yaml').stdout->line
+        println("  " + line)
+    |
+    println("SSH namespace")
+    SSH:sudo(Target,'kubectl create namespace cert-manager',true).stdout->line
+        println("  " + line)
+    |
+    println("Helm repo")
+    SSH:sudo(Target,'helm repo add jetstack https://charts.jetstack.io').stdout->line
+        println("  " + line)
+    |
+    println("Helm repo update")
+    SSH:sudo(Target,'helm repo update').stdout->line
+        println("  " + line)
+    |
+    println("Install cert manager with helm")
+    SSH:sudo(Target,'helm install'
+        + ' cert-manager jetstack/cert-manager'
+        + ' --namespace cert-manager'
+        + ' --version v1.0.4').stdout->line
+            println("  " + line)
+    |
 /SSLConfig
 
 # Verify pods in cert-manager namespace
 # --
-	SSH:sudo(Target,'kubectl get pods --namespace cert-manager').stdout
+    SSH:sudo(Target,'kubectl get pods --namespace cert-manager').stdout
 /VerifyPodsCM
 
 
 
 # Install Rancher with helm
 # --
-	SSH:sudo(Target,'helm install rancher'
-		+ ' ' + if(RANCHER_STABLE,'rancher-stable/rancher','rancher-latest/rancher')
-		+ ' --namespace cattle-system'
-		+ ' --set hostname=k1.v').stdout->line  # should really use load-balancer here
-			println("  " + line)
+    SSH:sudo(Target,'helm install rancher'
+        + ' ' + if(RANCHER_STABLE,'rancher-stable/rancher','rancher-latest/rancher')
+        + ' --namespace cattle-system'
+        + ' --set hostname=k1.v').stdout->line  # should really use load-balancer here
+            println("  " + line)
 
-	# NOTE: Doing install of "default" version with apt-get install ... (in script KubInstall),
-	# used version 1.20.2, which the rancher install refused, with the following:
+    # NOTE: Doing install of "default" version with apt-get install ... (in script KubInstall),
+    # used version 1.20.2, which the rancher install refused, with the following:
 
-	# Error: chart requires kubeVersion: < 1.20.0-0 which is incompatible 
-	# with Kubernetes v1.20.2
+    # Error: chart requires kubeVersion: < 1.20.0-0 which is incompatible 
+    # with Kubernetes v1.20.2
 
-	# Changed the KubInstall script to use specified version
+    # Changed the KubInstall script to use specified version
 
-	# Rancher 2.5.x -> kubernetes 1.19.6 (default)
+    # Rancher 2.5.x -> kubernetes 1.19.6 (default)
 /RancherInstall
 
 
 
 # Monitor Rancher rollout
 # --
-	SSH:sudo(Target,'kubectl -n cattle-system rollout status deploy/rancher').stdout
+    SSH:sudo(Target,'kubectl -n cattle-system rollout status deploy/rancher').stdout
 /Check
 
 
-		
+        

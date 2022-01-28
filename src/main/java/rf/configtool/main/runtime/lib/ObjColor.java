@@ -1,3 +1,20 @@
+/*
+CFT - an interactive programmable shell for automation 
+Copyright (C) 2020-2022 Roar Foshaug
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>
+*/
+
 package rf.configtool.main.runtime.lib;
 
 import java.awt.Color;
@@ -12,13 +29,13 @@ import rf.configtool.main.runtime.ValueInt;
 
 public class ObjColor extends Obj {
     
-	private int r,g,b;
+    private int r,g,b;
     
     public ObjColor (int r, int g, int b) {
-    	this.r=r;
-    	this.g=g;
-    	this.b=b;
-    	
+        this.r=r;
+        this.g=g;
+        this.b=b;
+        
         this.add(new FunctionR());
         this.add(new FunctionG());
         this.add(new FunctionB());
@@ -26,26 +43,26 @@ public class ObjColor extends Obj {
     
 
     public int getR() {
-		return r;
-	}
+        return r;
+    }
 
 
-	public int getG() {
-		return g;
-	}
+    public int getG() {
+        return g;
+    }
 
 
-	public int getB() {
-		return b;
-	}
+    public int getB() {
+        return b;
+    }
 
 
-	public Color getAWTColor() {
-		return new Color(r,g,b);
-	}
-	
-	
-	@Override
+    public Color getAWTColor() {
+        return new Color(r,g,b);
+    }
+    
+    
+    @Override
     public boolean eq(Obj x) {
         return x==this;
     }

@@ -1,3 +1,20 @@
+/*
+CFT - an interactive programmable shell for automation 
+Copyright (C) 2020-2022 Roar Foshaug
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>
+*/
+
 package rf.configtool.main.runtime.lib.ddd;
 
 import java.util.List;
@@ -18,28 +35,28 @@ import rf.configtool.main.runtime.lib.ddd.core.Vector3d;
  */
 public class DDDRef extends Obj {
 
-	private Ref ref;
-	
-	public Ref getRef() {
-		return ref;
-	}
-	
+    private Ref ref;
+    
+    public Ref getRef() {
+        return ref;
+    }
+    
     public DDDRef (Ref ref) {
-    	this.ref=ref;
-    	this.add(new FunctionScaleUp());
-    	this.add(new FunctionScaleDown());
-    	
-    	this.add(new FunctionTurnLeft());
-    	this.add(new FunctionTurnRight());
-    	this.add(new FunctionRollLeft());
-    	this.add(new FunctionRollRight());
-    	this.add(new FunctionTurnUp());
-    	this.add(new FunctionTurnDown());
-    	
+        this.ref=ref;
+        this.add(new FunctionScaleUp());
+        this.add(new FunctionScaleDown());
+        
+        this.add(new FunctionTurnLeft());
+        this.add(new FunctionTurnRight());
+        this.add(new FunctionRollLeft());
+        this.add(new FunctionRollRight());
+        this.add(new FunctionTurnUp());
+        this.add(new FunctionTurnDown());
+        
         this.add(new FunctionFwd());
         this.add(new FunctionBack());
-    	this.add(new FunctionLeft());
-    	this.add(new FunctionRight());
+        this.add(new FunctionLeft());
+        this.add(new FunctionRight());
         this.add(new FunctionUp());
         this.add(new FunctionDown());
         
@@ -53,7 +70,7 @@ public class DDDRef extends Obj {
     }
 
     public DDDRef () {
-    	this(new Ref());
+        this(new Ref());
     }
     
     
@@ -89,10 +106,10 @@ public class DDDRef extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 1) throw new RuntimeException("Expected factor parameter");
-        	double factor=getFloat("factor", params, 0);
-        	
-        	return new ValueObj(new DDDRef(ref.scaleUp(factor)));
+            if (params.size() != 1) throw new RuntimeException("Expected factor parameter");
+            double factor=getFloat("factor", params, 0);
+            
+            return new ValueObj(new DDDRef(ref.scaleUp(factor)));
         }
     }
 
@@ -107,10 +124,10 @@ public class DDDRef extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 1) throw new RuntimeException("Expected factor parameter");
-        	double factor=getFloat("factor", params, 0);
-        	
-        	return new ValueObj(new DDDRef(ref.scaleDown(factor)));
+            if (params.size() != 1) throw new RuntimeException("Expected factor parameter");
+            double factor=getFloat("factor", params, 0);
+            
+            return new ValueObj(new DDDRef(ref.scaleDown(factor)));
         }
     }
     
@@ -126,10 +143,10 @@ public class DDDRef extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 1) throw new RuntimeException("Expected degrees parameter");
-        	double degrees=getFloat("degrees", params, 0);
-        	
-        	return new ValueObj(new DDDRef(ref.turnLeftDeg(degrees)));
+            if (params.size() != 1) throw new RuntimeException("Expected degrees parameter");
+            double degrees=getFloat("degrees", params, 0);
+            
+            return new ValueObj(new DDDRef(ref.turnLeftDeg(degrees)));
         }
     }
     
@@ -145,10 +162,10 @@ public class DDDRef extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 1) throw new RuntimeException("Expected degrees parameter");
-        	double degrees=getFloat("degrees", params, 0);
-        	
-        	return new ValueObj(new DDDRef(ref.turnRightDeg(degrees)));
+            if (params.size() != 1) throw new RuntimeException("Expected degrees parameter");
+            double degrees=getFloat("degrees", params, 0);
+            
+            return new ValueObj(new DDDRef(ref.turnRightDeg(degrees)));
         }
     }
     
@@ -164,10 +181,10 @@ public class DDDRef extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 1) throw new RuntimeException("Expected degrees parameter");
-        	double degrees=getFloat("degrees", params, 0);
-        	
-        	return new ValueObj(new DDDRef(ref.rollLeftDeg(degrees)));
+            if (params.size() != 1) throw new RuntimeException("Expected degrees parameter");
+            double degrees=getFloat("degrees", params, 0);
+            
+            return new ValueObj(new DDDRef(ref.rollLeftDeg(degrees)));
         }
     }
     
@@ -182,10 +199,10 @@ public class DDDRef extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 1) throw new RuntimeException("Expected degrees parameter");
-        	double degrees=getFloat("degrees", params, 0);
-        	
-        	return new ValueObj(new DDDRef(ref.rollRightDeg(degrees)));
+            if (params.size() != 1) throw new RuntimeException("Expected degrees parameter");
+            double degrees=getFloat("degrees", params, 0);
+            
+            return new ValueObj(new DDDRef(ref.rollRightDeg(degrees)));
         }
     }
     
@@ -200,10 +217,10 @@ public class DDDRef extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 1) throw new RuntimeException("Expected degrees parameter");
-        	double degrees=getFloat("degrees", params, 0);
-        	
-        	return new ValueObj(new DDDRef(ref.turnUpDeg(degrees)));
+            if (params.size() != 1) throw new RuntimeException("Expected degrees parameter");
+            double degrees=getFloat("degrees", params, 0);
+            
+            return new ValueObj(new DDDRef(ref.turnUpDeg(degrees)));
         }
     }
     
@@ -218,10 +235,10 @@ public class DDDRef extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 1) throw new RuntimeException("Expected degrees parameter");
-        	double degrees=getFloat("degrees", params, 0);
-        	
-        	return new ValueObj(new DDDRef(ref.turnDownDeg(degrees)));
+            if (params.size() != 1) throw new RuntimeException("Expected degrees parameter");
+            double degrees=getFloat("degrees", params, 0);
+            
+            return new ValueObj(new DDDRef(ref.turnDownDeg(degrees)));
         }
     }
     
@@ -236,10 +253,10 @@ public class DDDRef extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 1) throw new RuntimeException("Expected distance parameter");
-        	double dist=getFloat("dist", params, 0);
-        	
-        	return new ValueObj(new DDDRef(ref.forward(dist)));
+            if (params.size() != 1) throw new RuntimeException("Expected distance parameter");
+            double dist=getFloat("dist", params, 0);
+            
+            return new ValueObj(new DDDRef(ref.forward(dist)));
         }
     }
 
@@ -254,10 +271,10 @@ public class DDDRef extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 1) throw new RuntimeException("Expected distance parameter");
-        	double dist=getFloat("dist", params, 0);
-        	
-        	return new ValueObj(new DDDRef(ref.backward(dist)));
+            if (params.size() != 1) throw new RuntimeException("Expected distance parameter");
+            double dist=getFloat("dist", params, 0);
+            
+            return new ValueObj(new DDDRef(ref.backward(dist)));
         }
     }
 
@@ -272,10 +289,10 @@ public class DDDRef extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 1) throw new RuntimeException("Expected distance parameter");
-        	double dist=getFloat("dist", params, 0);
-        	
-        	return new ValueObj(new DDDRef(ref.left(dist)));
+            if (params.size() != 1) throw new RuntimeException("Expected distance parameter");
+            double dist=getFloat("dist", params, 0);
+            
+            return new ValueObj(new DDDRef(ref.left(dist)));
         }
     }
 
@@ -290,10 +307,10 @@ public class DDDRef extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 1) throw new RuntimeException("Expected distance parameter");
-        	double dist=getFloat("dist", params, 0);
-        	
-        	return new ValueObj(new DDDRef(ref.right(dist)));
+            if (params.size() != 1) throw new RuntimeException("Expected distance parameter");
+            double dist=getFloat("dist", params, 0);
+            
+            return new ValueObj(new DDDRef(ref.right(dist)));
         }
     }
 
@@ -308,10 +325,10 @@ public class DDDRef extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 1) throw new RuntimeException("Expected distance parameter");
-        	double dist=getFloat("dist", params, 0);
-        	
-        	return new ValueObj(new DDDRef(ref.up(dist)));
+            if (params.size() != 1) throw new RuntimeException("Expected distance parameter");
+            double dist=getFloat("dist", params, 0);
+            
+            return new ValueObj(new DDDRef(ref.up(dist)));
         }
     }
 
@@ -326,10 +343,10 @@ public class DDDRef extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 1) throw new RuntimeException("Expected distance parameter");
-        	double dist=getFloat("dist", params, 0);
-        	
-        	return new ValueObj(new DDDRef(ref.down(dist)));
+            if (params.size() != 1) throw new RuntimeException("Expected distance parameter");
+            double dist=getFloat("dist", params, 0);
+            
+            return new ValueObj(new DDDRef(ref.down(dist)));
         }
     }
 
@@ -344,16 +361,16 @@ public class DDDRef extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 1) throw new RuntimeException("Expected 3d vector parameter");
+            if (params.size() != 1) throw new RuntimeException("Expected 3d vector parameter");
 
-        	Obj vec1=getObj("vec",params,0);
-        	if (vec1 instanceof DDDVector) {
-        		Vector3d vec=((DDDVector) vec1).getVec();
-        		Ref newRef=self().ref.translate(vec);
-        		return new ValueObj(new DDDRef(newRef));
-        	} else {
-        		throw new RuntimeException("Expected 3D vector parameter");
-        	}
+            Obj vec1=getObj("vec",params,0);
+            if (vec1 instanceof DDDVector) {
+                Vector3d vec=((DDDVector) vec1).getVec();
+                Ref newRef=self().ref.translate(vec);
+                return new ValueObj(new DDDRef(newRef));
+            } else {
+                throw new RuntimeException("Expected 3D vector parameter");
+            }
         }
     }
 
@@ -368,9 +385,9 @@ public class DDDRef extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 0) throw new RuntimeException("Expected no parameters");
-        	DDDVector pos=new DDDVector( self().ref.getPos() );
-        	return new ValueObj(pos);
+            if (params.size() != 0) throw new RuntimeException("Expected no parameters");
+            DDDVector pos=new DDDVector( self().ref.getPos() );
+            return new ValueObj(pos);
         }
     }
 
@@ -385,9 +402,9 @@ public class DDDRef extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 0) throw new RuntimeException("Expected no parameters");
-        	double factor=self().ref.getScaleFactor();
-        	return new ValueFloat(factor);
+            if (params.size() != 0) throw new RuntimeException("Expected no parameters");
+            double factor=self().ref.getScaleFactor();
+            return new ValueFloat(factor);
         }
     }
 
@@ -402,15 +419,15 @@ public class DDDRef extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 1) throw new RuntimeException("Expected 3D vector parameter");
-        	Obj vec1=getObj("vec",params,0);
-        	if (vec1 instanceof DDDVector) {
-        		Vector3d vec=((DDDVector) vec1).getVec();
-        		Vector3d result=self().ref.transformLocalToGlobal(vec);
-        		return new ValueObj(new DDDVector(result));
-        	} else {
-        		throw new RuntimeException("Expected 3D vector parameter");
-        	}
+            if (params.size() != 1) throw new RuntimeException("Expected 3D vector parameter");
+            Obj vec1=getObj("vec",params,0);
+            if (vec1 instanceof DDDVector) {
+                Vector3d vec=((DDDVector) vec1).getVec();
+                Vector3d result=self().ref.transformLocalToGlobal(vec);
+                return new ValueObj(new DDDVector(result));
+            } else {
+                throw new RuntimeException("Expected 3D vector parameter");
+            }
         }
     }
 
@@ -426,9 +443,9 @@ public class DDDRef extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 1) throw new RuntimeException("Expected scaleFactor parameter");
-        	double factor=getFloat("factor", params, 0);
-        	return new ValueObj(new DDDRef(ref.setScaleFactor(factor)));
+            if (params.size() != 1) throw new RuntimeException("Expected scaleFactor parameter");
+            double factor=getFloat("factor", params, 0);
+            return new ValueObj(new DDDRef(ref.setScaleFactor(factor)));
         }
     }
 

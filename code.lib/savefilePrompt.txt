@@ -1,70 +1,91 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2022 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 # Is root on linux?
 # --
-	if (!Sys.isWindows) {
-		Dir.runCapture("whoami").nth.trim=="root"
-	} else {
-		false
-	}
+    if (!Sys.isWindows) {
+        Dir.runCapture("whoami").nth.trim=="root"
+    } else {
+        false
+    }
 //IsRoot
 
 
 # IsRootMark
 # --
-	if(IsRoot,Curses:Reversed + "#root#" + Curses:Reset + " ", "")
+    if(IsRoot,Curses:Reversed + "#root#" + Curses:Reset + " ", "")
 /IsRootMark
 
 
 # Get hostname string if defined / for inclusion in prompt
 # --
-	h=Db2:Get(Sys.scriptId,"hostname",null)
-	if (h==null) h=""
-	if (h.length > 0) h="|"+h
-	h
+    h=Db2:Get(Sys.scriptId,"hostname",null)
+    if (h==null) h=""
+    if (h.length > 0) h="|"+h
+    h
 /Hostname
 
 
 # Set hostname string (used in prompt)
 # --
-	P(1,readLine("Hostname"))=>hostName
-	Db2:Set(Sys.scriptId,"hostname", hostName)
+    P(1,readLine("Hostname"))=>hostName
+    Db2:Set(Sys.scriptId,"hostname", hostName)
 /SetHostname
 
 
 # Set text color for current path in prompt
 # --
-	P(1,Curses:SelectColor) => col
-	Db2:Set(Sys.scriptId,"path.color", col)
+    P(1,Curses:SelectColor) => col
+    Db2:Set(Sys.scriptId,"path.color", col)
 /SetPathColor
 
 
 # Get text color for path (in Path function)
 # --
-	if (Curses:Enabled, Db2:Get(Sys.scriptId,"path.color",""), "")
+    if (Curses:Enabled, Db2:Get(Sys.scriptId,"path.color",""), "")
 /GetPathColor
 
 
 
 # Format current dir for prompt
 # --
-	P(1,Dir)=>dir
-	s=dir.path
-	maxLen=(Term.w/2).i
-	if (maxLen < 30) maxLen=30
+    P(1,Dir)=>dir
+    s=dir.path
+    maxLen=(Term.w/2).i
+    if (maxLen < 30) maxLen=30
 
-	# return value
-	GetPathColor + if (s.length > maxLen, "+"+s.last(maxLen-1), s) + Curses:Reset
+    # return value
+    GetPathColor + if (s.length > maxLen, "+"+s.last(maxLen-1), s) + Curses:Reset
 /Path
 
 
 # List completed jobs (when changes)
 # --
-	list=Jobs:Completed
-	str=list.concat("|")
-	if (str != Db2:Get(Sys.scriptId,"CompletedJobs","")) Inner {
-		Db2:Set(Sys.scriptId,"CompletedJobs",str)
-		list -> name
-			println("COMPLETED " + name)
-	}
+    list=Jobs:Completed
+    str=list.concat("|")
+    if (str != Db2:Get(Sys.scriptId,"CompletedJobs","")) Inner {
+        Db2:Set(Sys.scriptId,"CompletedJobs",str)
+        list -> name
+            println("COMPLETED " + name)
+    }
 
 /CompletedJobs
-	
+    

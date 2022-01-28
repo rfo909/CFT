@@ -1,3 +1,20 @@
+/*
+CFT - an interactive programmable shell for automation 
+Copyright (C) 2020-2022 Roar Foshaug
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>
+*/
+
 package rf.configtool.main.runtime.lib;
 
 import java.util.List;
@@ -11,23 +28,23 @@ import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
 
 public class ObjAnnotatedValue extends Obj {
-	
-	private String annotation;
-	private Value value;
-	private ObjDict metadata;
+    
+    private String annotation;
+    private Value value;
+    private ObjDict metadata;
 
-	public ObjAnnotatedValue (String annotation, Value value, ObjDict metadata) {
-		this.annotation=annotation;
-		this.value=value;
-		if (metadata==null) metadata=new ObjDict();
-		this.metadata=metadata;
-		
-		this.add(new FunctionA());
-		this.add(new FunctionVal());
-		this.add(new FunctionMeta());
-	}
+    public ObjAnnotatedValue (String annotation, Value value, ObjDict metadata) {
+        this.annotation=annotation;
+        this.value=value;
+        if (metadata==null) metadata=new ObjDict();
+        this.metadata=metadata;
+        
+        this.add(new FunctionA());
+        this.add(new FunctionVal());
+        this.add(new FunctionMeta());
+    }
 
-	private ObjAnnotatedValue self() {
+    private ObjAnnotatedValue self() {
         return this;
     }
     
@@ -49,7 +66,7 @@ public class ObjAnnotatedValue extends Obj {
     
     @Override
     public String synthesize() throws Exception {
-    	return "AValue(" + (new ValueString(annotation)).synthesize() + ","+value.synthesize()+","+metadata.synthesize() + ")";
+        return "AValue(" + (new ValueString(annotation)).synthesize() + ","+value.synthesize()+","+metadata.synthesize() + ")";
     }
     
    

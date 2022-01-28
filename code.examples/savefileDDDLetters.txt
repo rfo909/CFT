@@ -1,133 +1,154 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2022 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 # Generate pixelated letters using squares
 # Returns ref for additional text
 # --
-	P(1,"TXT")=>str
-	P(2)=>world
-	P(3)=>ref
-	P(4,10)=>pixelSize
-	P(5,Lib.Color(255,0,0)) => color
-	P(6,0.8) => pixelSizeFactor
-	
-	thickness=pixelSize/3
-	
-	if (str=="") str=" "
-	
-	# ref is pointing along direction of text, centered in height
-	
-	bSize=pixelSize*pixelSizeFactor
-	b1=world.Brush.box(bSize,bSize,color)
+    P(1,"TXT")=>str
+    P(2)=>world
+    P(3)=>ref
+    P(4,10)=>pixelSize
+    P(5,Lib.Color(255,0,0)) => color
+    P(6,0.8) => pixelSizeFactor
+    
+    thickness=pixelSize/3
+    
+    if (str=="") str=" "
+    
+    # ref is pointing along direction of text, centered in height
+    
+    bSize=pixelSize*pixelSizeFactor
+    b1=world.Brush.box(bSize,bSize,color)
 
-	
-	lines=Letters7x5:GetText(str)
-	Lib.Data.each(0,6)->lineNo
-		line=lines.nth(lineNo)
-		Lib.Data.each(0,line.length-1)->charNo
-			ch=line.chars.nth(charNo)
-			if (ch != " ") {
-				pos=ref.up(3.5*pixelSize)
-					.down(lineNo*pixelSize)
-					.fwd(charNo*pixelSize)
-					.down(0.5*pixelSize)
-					.fwd(0.5*pixelSize)
-					.turnRight(90)
-					.back(thickness/2)
-				b1.penDown(pos)
-				b1.penDown(pos.fwd(thickness))
-				b1.penUp
-			}
-	|
-	ref.fwd((lines.first.length+2)*pixelSize)
+    
+    lines=Letters7x5:GetText(str)
+    Lib.Data.each(0,6)->lineNo
+        line=lines.nth(lineNo)
+        Lib.Data.each(0,line.length-1)->charNo
+            ch=line.chars.nth(charNo)
+            if (ch != " ") {
+                pos=ref.up(3.5*pixelSize)
+                    .down(lineNo*pixelSize)
+                    .fwd(charNo*pixelSize)
+                    .down(0.5*pixelSize)
+                    .fwd(0.5*pixelSize)
+                    .turnRight(90)
+                    .back(thickness/2)
+                b1.penDown(pos)
+                b1.penDown(pos.fwd(thickness))
+                b1.penUp
+            }
+    |
+    ref.fwd((lines.first.length+2)*pixelSize)
 /Letters3d
 
-		
+        
 # Target dir
 # --
-	Lib:DirPrivate.sub("anim").create
+    Lib:DirPrivate.sub("anim").create
 /TargetDir
 
 
 # Subdir
 # --
-	TargetDir.sub("letters").create
+    TargetDir.sub("letters").create
 /SubDir
 
 # Test
 # --
-	P(1)=> rot	
-		Lib.DDD.World.init(35,36,24,800,600,Lib.Color(0,0,0)) => world
-		ref = Lib.DDD.Ref.setScaleFactor(1000)
-		ref = ref
-			.fwd(5.3-Lib.Math.sin(rot*2)*0.7)
-			.left(2+Lib.Math.sin(rot*3)*0.4)
-			.turnRight(60)
-			.rollLeft(Lib.Math.sin(rot)*30)
+    P(1)=> rot  
+        Lib.DDD.World.init(35,36,24,800,600,Lib.Color(0,0,0)) => world
+        ref = Lib.DDD.Ref.setScaleFactor(1000)
+        ref = ref
+            .fwd(5.3-Lib.Math.sin(rot*2)*0.7)
+            .left(2+Lib.Math.sin(rot*3)*0.4)
+            .turnRight(60)
+            .rollLeft(Lib.Math.sin(rot)*30)
 
 
-		str="CFT POWER"
-		Inner {
-			Lib.Data.for(0,str.length,1)->charPos
-				offset=rot+charPos*2
-				red=(Lib.Math.cos(offset*2)*127+127).i
-				green=(Lib.Math.cos(offset+180)*60+127).i
-				blue=(Lib.Math.sin(offset+90)*127+127).i
-				color=Lib.Color(red,green,blue)
-				
-				ref=DDDLetters:Letters3d(str.chars.nth(charPos),world,ref.rollRight(rot/2),0.1,color)
-		}
+        str="CFT POWER"
+        Inner {
+            Lib.Data.for(0,str.length,1)->charPos
+                offset=rot+charPos*2
+                red=(Lib.Math.cos(offset*2)*127+127).i
+                green=(Lib.Math.cos(offset+180)*60+127).i
+                blue=(Lib.Math.sin(offset+90)*127+127).i
+                color=Lib.Color(red,green,blue)
+                
+                ref=DDDLetters:Letters3d(str.chars.nth(charPos),world,ref.rollRight(rot/2),0.1,color)
+        }
 
-		#ref = DDDLetters:Letters3d("GNT ",world,ref,0.1,color)
-		#ref = DDDLetters:Letters3d("RULES",world,ref,0.1,Lib.Color(255,255,0))
-		
-		rotStr=("0000"+rot).last(3)
-		
-		println("rot="+rotStr)
-		f=SubDir.create.file("letters_" + rotStr +".png")
-		world.render(f)
+        #ref = DDDLetters:Letters3d("GNT ",world,ref,0.1,color)
+        #ref = DDDLetters:Letters3d("RULES",world,ref,0.1,Lib.Color(255,255,0))
+        
+        rotStr=("0000"+rot).last(3)
+        
+        println("rot="+rotStr)
+        f=SubDir.create.file("letters_" + rotStr +".png")
+        world.render(f)
 /makeFrame
 
 
 # Run all frames
 # --
-	processes=List
-	start=currentTimeMillis
-	
-	NUM_THREADS=(Sys.cpuCores*1.4).i
-	apm=Util:AutomaticProcessMonitor(NUM_THREADS)
-	
-		# Testing by calling runX, and reading out the last,
+    processes=List
+    start=currentTimeMillis
+    
+    NUM_THREADS=(Sys.cpuCores*1.4).i
+    apm=Util:AutomaticProcessMonitor(NUM_THREADS)
+    
+        # Testing by calling runX, and reading out the last,
  
-		# on 16 core server, Dual Xeon 8-core E5-2690 0 @ 2.90GHz (no HT)
+        # on 16 core server, Dual Xeon 8-core E5-2690 0 @ 2.90GHz (no HT)
         # ---
         # 12.1 seconds /  with 22 threads on 16 cpu cores
         
         # on 12 core server, Dual Xeon 6-core E5-2643 v2 @ 3.50GHz (no HT)
         # ---
-		# 9.3 seconds / with 18 threads on 12 cpu cores
+        # 9.3 seconds / with 18 threads on 12 cpu cores
 
 
-	Lib.Data.for(0,720,1)->rot
-		println("rot=" + rot)
-		apm.LWait.call
-		apm.LAdd.call(SpawnProcess(SymDict(rot), makeFrame(rot)))
-	|
-	apm.LWaitAll.call
-	end=currentTimeMillis
-	
-	println("Processing time for images: " + (end-start) + " ms with " 
-		+ NUM_THREADS + " threads on " + Sys.cpuCores + " cpu cores")
+    Lib.Data.for(0,720,1)->rot
+        println("rot=" + rot)
+        apm.LWait.call
+        apm.LAdd.call(SpawnProcess(SymDict(rot), makeFrame(rot)))
+    |
+    apm.LWaitAll.call
+    end=currentTimeMillis
+    
+    println("Processing time for images: " + (end-start) + " ms with " 
+        + NUM_THREADS + " threads on " + Sys.cpuCores + " cpu cores")
 /run
 
 # Capacity testing
 # --
-	run run run run run
-	run run run run run
+    run run run run run
+    run run run run run
 /runX
 
 
 # Create mp4 movie (requires ffmpeg)
 # --
-	SubDir.run("ffmpeg -i letters_%3d.png result.mp4".split)
-	SubDir.run("ffmpeg -i letters_%3d.png result.avi".split)
+    SubDir.run("ffmpeg -i letters_%3d.png result.mp4".split)
+    SubDir.run("ffmpeg -i letters_%3d.png result.avi".split)
 /makeMovie
 
 

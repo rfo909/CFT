@@ -1,3 +1,20 @@
+/*
+CFT - an interactive programmable shell for automation 
+Copyright (C) 2020-2022 Roar Foshaug
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>
+*/
+
 package rf.configtool.main.runtime.lib.web;
 
 import java.util.List;
@@ -10,41 +27,41 @@ import rf.configtool.main.runtime.lib.ObjDict;
 
 public class ObjRequest extends Obj {
     
-	private Map<String,String> headers;
-	private String method;
-	private String url;
-	private Map<String,String> urlParams;
-	private byte[] body;
-	private Map<String,String> bodyParams;
+    private Map<String,String> headers;
+    private String method;
+    private String url;
+    private Map<String,String> urlParams;
+    private byte[] body;
+    private Map<String,String> bodyParams;
 
-	public ObjRequest(Map<String,String> headers, String method, String url, Map<String,String> urlParams, byte[] body, Map<String,String> bodyParams) {
-		this.headers = headers;
-		this.method = method;
-		this.url = url;
-		this.urlParams=urlParams;
-		this.body=body;
-		this.bodyParams=bodyParams;
+    public ObjRequest(Map<String,String> headers, String method, String url, Map<String,String> urlParams, byte[] body, Map<String,String> bodyParams) {
+        this.headers = headers;
+        this.method = method;
+        this.url = url;
+        this.urlParams=urlParams;
+        this.body=body;
+        this.bodyParams=bodyParams;
 
-		this.add(new FunctionHeaders());
-		this.add(new FunctionMethod());
-		this.add(new FunctionUrl());
-		this.add(new FunctionURLParams());
-		this.add(new FunctionBody());
-		this.add(new FunctionBodyParams());
+        this.add(new FunctionHeaders());
+        this.add(new FunctionMethod());
+        this.add(new FunctionUrl());
+        this.add(new FunctionURLParams());
+        this.add(new FunctionBody());
+        this.add(new FunctionBodyParams());
     }
 
-	public Map<String,String> getHeaders() {
-		return headers;
-	}
-	
-	public String getMethod() {
-		return method;
-	}
-	
-	public String getUrl() {
-		return url;
-	}
-	
+    public Map<String,String> getHeaders() {
+        return headers;
+    }
+    
+    public String getMethod() {
+        return method;
+    }
+    
+    public String getUrl() {
+        return url;
+    }
+    
     
     @Override
     public boolean eq(Obj x) {
@@ -159,14 +176,14 @@ public class ObjRequest extends Obj {
     
     
     private Value createStringDict (Map<String, String> data) {
-		ObjDict dict = new ObjDict();
-		if (data==null) return new ValueObj(dict);
-		
-		for (String name:data.keySet()) {
-			Value v=new ValueString(data.get(name));
-			dict.set(name, v);
-		}
-		return new ValueObj(dict);
+        ObjDict dict = new ObjDict();
+        if (data==null) return new ValueObj(dict);
+        
+        for (String name:data.keySet()) {
+            Value v=new ValueString(data.get(name));
+            dict.set(name, v);
+        }
+        return new ValueObj(dict);
 
     }
     

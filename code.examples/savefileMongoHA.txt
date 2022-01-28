@@ -1,3 +1,24 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2022 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 <<<<<<<<<<<<<<<<<<<<<<<<< EOF
 CFT v1.5.4
 CFT v1.8.1
@@ -54,26 +75,26 @@ Installation
 
 
 P(1,"temp") =>name
-	Lib:TmpFile(name)
+    Lib:TmpFile(name)
 /TmpFile
 
 
 # To enable installing multiple full HA configs, we use a prefix
 # --
-	Lib:Header("Host prefix")
-	prefix = readLine("Enter host prefix, blank for none")
-	Db2:Set("MongoHA.install","hostPrefix",prefix)
-	println("Set to '" + prefix + "'")
+    Lib:Header("Host prefix")
+    prefix = readLine("Enter host prefix, blank for none")
+    Db2:Set("MongoHA.install","hostPrefix",prefix)
+    println("Set to '" + prefix + "'")
 /SetHostPrefix
 
 
 
 # Get host prefix
 # --
-	prefix = Db2:Get("MongoHA.install","hostPrefix")
-	if (prefix==null) SetHostPrefix
-	
-	Db2:Get("MongoHA.install","hostPrefix")
+    prefix = Db2:Get("MongoHA.install","hostPrefix")
+    if (prefix==null) SetHostPrefix
+    
+    Db2:Get("MongoHA.install","hostPrefix")
 /HostPrefix
 
 
@@ -81,7 +102,7 @@ P(1,"temp") =>name
 
 # After install, the prefix should be cleared
 # --
-	Db2:Set("MongoHA.install","hostPrefix",null)
+    Db2:Set("MongoHA.install","hostPrefix",null)
 /ClearHostPrefix
 
 
@@ -89,36 +110,36 @@ P(1,"temp") =>name
 
 # Where to store data (inserted into mongod.conf)
 # --
-	Lib:Header("dbPath")
-	currVal=Db2:Get("MongoHA.install", "dbPath")
-	println("- previous value: '" + currVal + "'")
-	println
-	println("Default value is /var/lib/mongodb")
-	println
+    Lib:Header("dbPath")
+    currVal=Db2:Get("MongoHA.install", "dbPath")
+    println("- previous value: '" + currVal + "'")
+    println
+    println("Default value is /var/lib/mongodb")
+    println
 
-	dbPath=readLine("Enter dbPath on VM's (enter for default)")
-	if (dbPath.trim=="") dbPath="/var/lib/mongodb"
+    dbPath=readLine("Enter dbPath on VM's (enter for default)")
+    if (dbPath.trim=="") dbPath="/var/lib/mongodb"
 
-	Db2:Set("MongoHA.install","dbPath",dbPath)
-	println("Set to '" + dbPath + "'")
+    Db2:Set("MongoHA.install","dbPath",dbPath)
+    println("Set to '" + dbPath + "'")
 /SetDbPath
 
 
 # Get dbPath value 
-	dbPath=Db2:Get("MongoHA.install","dbPath")
-	if (dbPath==null) SetDbPath
+    dbPath=Db2:Get("MongoHA.install","dbPath")
+    if (dbPath==null) SetDbPath
 
-	Db2:Get("MongoHA.install","dbPath")
+    Db2:Get("MongoHA.install","dbPath")
 /DbPath
 
 
 
 
 # Config data
-	# Get host prefix
-	prefix = HostPrefix
-	error(prefix==null,"No host prefix set - should at least be empty string")
-	
+    # Get host prefix
+    prefix = HostPrefix
+    error(prefix==null,"No host prefix set - should at least be empty string")
+    
     # Note: the config replica set name 'conf' must not be changed, unless
     # also modifying the MongosStartScript function, which depends on it
     create = Lambda { 
@@ -127,10 +148,10 @@ P(1,"temp") =>name
         P(3,"conf")=>replSetName
         P(4,"configsvr")=>clusterRole
         hosts->host
-        	prefixedHost=prefix+host
+            prefixedHost=prefix+host
             out(Dict.set("host",prefixedHost)
-            	.set("replSetName",replSetName)
-            	.set("clusterRole",clusterRole)
+                .set("replSetName",replSetName)
+                .set("clusterRole",clusterRole)
             )
     }
 
@@ -235,8 +256,8 @@ P(1,GetTarget) =>target
         break(confirmed)
     |
 
-	println("* Checking that dbPath " + DbPath + " exists")
-	SSH:sudo (target, "ls " + DbPath)
+    println("* Checking that dbPath " + DbPath + " exists")
+    SSH:sudo (target, "ls " + DbPath)
     
     println("* Removing /etc/mongod.conf if exists as apt install doesn't like it")
     SSH:sudo (target, "rm /etc/mongod.conf", true)
@@ -248,8 +269,8 @@ P(1,GetTarget) =>target
     SSH:sudo (target, "systemctl enable mongod")
 
     println("* Setting permissions on dbPath " + DbPath)
-	SSH:sudo (target, "chown -R mongodb:mongodb " + DbPath)
-	
+    SSH:sudo (target, "chown -R mongodb:mongodb " + DbPath)
+    
     target.after("@") =>host
 
     println("* Creating mondod.cfg file")
@@ -326,9 +347,9 @@ Input("host").get =>host
 
 
 # Identify conf servers
-	MongodData->d
-		assert(d.clusterRole=="configsvr")
-		out(d.host)	
+    MongodData->d
+        assert(d.clusterRole=="configsvr")
+        out(d.host)   
 /MongosHosts
 
 
@@ -419,7 +440,7 @@ Input("ssh user").get => user
 
 ## Create Mongos start script
 ## --
-	P(1,27018) => port
+    P(1,27018) => port
     MongodData->d 
         assert(d.replSetName=="conf") 
         out(d.host+":27017") 
@@ -444,8 +465,8 @@ mongos \
 # Create mongod.conf
 # --
 PDict("replSetName","clusterRole")
-	.set("dbPath", DbPath)
-	.mergeCodes => data 
+    .set("dbPath", DbPath)
+    .mergeCodes => data 
 
 error(data.hasNullValue,"Expected parameters replSetName, clusterRole")
 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< EOF
@@ -505,5 +526,5 @@ sharding:
 # OPS Manager
 # --
 
-	CfgOPSManager
+    CfgOPSManager
 /t

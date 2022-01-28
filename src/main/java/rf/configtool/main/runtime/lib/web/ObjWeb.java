@@ -2,7 +2,7 @@ package rf.configtool.main.runtime.lib.web;
 
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020 Roar Foshaug
+Copyright (C) 2020-2022 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ import rf.configtool.main.runtime.*;
 public class ObjWeb extends Obj {
     
     public ObjWeb() {
-    	this.add(new FunctionServer());
+        this.add(new FunctionServer());
     }
     
     @Override

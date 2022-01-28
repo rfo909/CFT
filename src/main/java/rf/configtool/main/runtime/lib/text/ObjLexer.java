@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020 Roar Foshaug
+Copyright (C) 2020-2022 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -207,65 +207,65 @@ public class ObjLexer extends Obj {
             return "_Example() - display example";
         }
         private String[] data= {
-        		"",
-        		"Example (based on JSON script)",
-        		"------------------------------",
-        		"",
-        		"# Build root lexer Node for all known tokens in JSON",
-        		"# --",
-        		"    Lib.Text.Lexer.Node => root",
-        		"    ",
-        		"    root.sub(\"{}:,[]()\").setIsToken(1)  # specials",
-        		"    root.sub(\" ^n^r^t\".unEsc).setIsToken(-1) # whitespace",
-        		"",
-        		"    digits = \"0123456789\"",
-        		"    root.sub(digits+\"-\").setIsToken(2) => integer",
-        		"    integer.sub(digits,integer) # loop back",
-        		"    integer.sub(\".\").sub(digits).setIsToken(3) => float ",
-        		"    float.sub(digits,float) # loop back",
-        		"    ",
-        		"    identFirstChars = \"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_\"",
-        		"    identInnerChars = identFirstChars + digits",
-        		"    ",
-        		"    root.sub(identFirstChars).setIsToken(4) => ident",
-        		"    ident.sub(identInnerChars, ident) # loop back",
-        		"    ",
-        		"    List('\"',\"'\")->c ",
-        		"        root.sub(c) => insideString",
-        		"        insideString.setDefault(insideString)",
-        		"        insideString.sub(\"\\\").setDefault(insideString)",
-        		"        insideString.sub(c).setIsToken(5)",
-        		"    |",
-        		"    ",
-        		"    # return value is the root node",
-        		"    root",
-        		"/RootNode",
-        		"",
-        		"# Takes json string as parameter",
-        		"# --",
-        		"    P(1)=>json",
-        		"",
-        		"    Lib.Text.Lexer => lexer",
-        		"    json->line ",
-        		"        lexer.addLine(line) ",
-        		"    |",
-        		"",
-        		"    RootNode => root",
-        		"    ts=lexer.getTokenStream(root)",
-        		"",
-        		"    MatchValue(ts)",
-        		"/Parse",
-        		"",
-        		"For details on how to build a recursive-descent parser,",
-        		"see the JSON parser script.",
-        		"",
-        		":load JSON"
+                "",
+                "Example (based on JSON script)",
+                "------------------------------",
+                "",
+                "# Build root lexer Node for all known tokens in JSON",
+                "# --",
+                "    Lib.Text.Lexer.Node => root",
+                "    ",
+                "    root.sub(\"{}:,[]()\").setIsToken(1)  # specials",
+                "    root.sub(\" ^n^r^t\".unEsc).setIsToken(-1) # whitespace",
+                "",
+                "    digits = \"0123456789\"",
+                "    root.sub(digits+\"-\").setIsToken(2) => integer",
+                "    integer.sub(digits,integer) # loop back",
+                "    integer.sub(\".\").sub(digits).setIsToken(3) => float ",
+                "    float.sub(digits,float) # loop back",
+                "    ",
+                "    identFirstChars = \"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_\"",
+                "    identInnerChars = identFirstChars + digits",
+                "    ",
+                "    root.sub(identFirstChars).setIsToken(4) => ident",
+                "    ident.sub(identInnerChars, ident) # loop back",
+                "    ",
+                "    List('\"',\"'\")->c ",
+                "        root.sub(c) => insideString",
+                "        insideString.setDefault(insideString)",
+                "        insideString.sub(\"\\\").setDefault(insideString)",
+                "        insideString.sub(c).setIsToken(5)",
+                "    |",
+                "    ",
+                "    # return value is the root node",
+                "    root",
+                "/RootNode",
+                "",
+                "# Takes json string as parameter",
+                "# --",
+                "    P(1)=>json",
+                "",
+                "    Lib.Text.Lexer => lexer",
+                "    json->line ",
+                "        lexer.addLine(line) ",
+                "    |",
+                "",
+                "    RootNode => root",
+                "    ts=lexer.getTokenStream(root)",
+                "",
+                "    MatchValue(ts)",
+                "/Parse",
+                "",
+                "For details on how to build a recursive-descent parser,",
+                "see the JSON parser script.",
+                "",
+                ":load JSON"
         };
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	for (String line:data) {
+            for (String line:data) {
                 ctx.getObjGlobal().addSystemMessage(line);
-        	}
-        	return new ValueBoolean(true);
+            }
+            return new ValueBoolean(true);
         }
     }
 

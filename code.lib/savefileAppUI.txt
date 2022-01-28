@@ -1,3 +1,24 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2022 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 # Readme
 <<<< EOF
 AppUI
@@ -6,7 +27,7 @@ For standardized and good looking console user interface
 
 Remember doing initial call to  
 
-	Lib:GetTerminalSize
+    Lib:GetTerminalSize
 
 so the Term object gives correct dimensions for the terminal.
  
@@ -20,11 +41,11 @@ See 'example' function
 # --
 P(1," ")=>char
 P(2,0)=>length
-	if (length==0) {
-		""
-	} else Inner {
-		Lib.Data.each(0,length-1)->x out(char) | _.concat
-	}
+    if (length==0) {
+        ""
+    } else Inner {
+        Lib.Data.each(0,length-1)->x out(char) | _.concat
+    }
 /Chars
 
 
@@ -34,142 +55,142 @@ P(2,0)=>length
 P(1) => str
 P(2) => char
 P(3) => len
-	if (str.length<len) str=str+Chars(char,len-str.length)
-	str
+    if (str.length<len) str=str+Chars(char,len-str.length)
+    str
 /Pad
 
 
 # Helper, converts to box drawing characters
 # --
 P(1,"r---")=>s
-	# https://en.wikipedia.org/wiki/Box-drawing_character
-	Dict
-	.set("r",Sys.uchar("2554"))
-	.set("-", Sys.uchar("2550"))
-	.set("+",Sys.uchar("2560"))
-	.set("|",Sys.uchar("2551"))
-	=> map
+    # https://en.wikipedia.org/wiki/Box-drawing_character
+    Dict
+    .set("r",Sys.uchar("2554"))
+    .set("-", Sys.uchar("2550"))
+    .set("+",Sys.uchar("2560"))
+    .set("|",Sys.uchar("2551"))
+    => map
 
-	s.chars->c
-		out(map.get(c,c))
-	| _.concat => result
+    s.chars->c
+        out(map.get(c,c))
+    | _.concat => result
 
-	result
+    result
 /fix
-		
+        
 
 
 # Show top line with optional title, starts layout
 # --
-	P(1,null) => title
-	titleLine=fix("r--") + if(title!=null," ["+title+"] ","")
-	titleLine=Curses:Clear + Pad(titleLine,fix("-"),Term.w-2)
-	println(titleLine)
-	""
+    P(1,null) => title
+    titleLine=fix("r--") + if(title!=null," ["+title+"] ","")
+    titleLine=Curses:Clear + Pad(titleLine,fix("-"),Term.w-2)
+    println(titleLine)
+    ""
 /DoShowTopLine
-	
-	
+    
+    
 # Show header line within layout
 # --
-	P(1,null) => header
-	println(fix("+- ") + header)
+    P(1,null) => header
+    println(fix("+- ") + header)
 /DoShowHeader
 
 
-	
+    
 
 # Show status or stage as defined by a number of short names and a current
-# --	
-	P(1,List) => shortNames
-	P(2) => current
+# --    
+    P(1,List) => shortNames
+    P(2) => current
 
-	line1=""
-	line2=""
-	Inner {
-		space=false
-		shortNames->name
-			if (space) {line1=line1+" " line2=line2+" "}
-			line1=line1+name
-			line2=line2+Chars(
-				if (name==current, "^", " "),
-				name.length
-			)
-			space=true
-	}
-	println(fix("| ") + line1)
-	println(fix("| ") + line2)
+    line1=""
+    line2=""
+    Inner {
+        space=false
+        shortNames->name
+            if (space) {line1=line1+" " line2=line2+" "}
+            line1=line1+name
+            line2=line2+Chars(
+                if (name==current, "^", " "),
+                name.length
+            )
+            space=true
+    }
+    println(fix("| ") + line1)
+    println(fix("| ") + line2)
 /DoShowContext
-	
+    
 
 
 # Present some text
 # --
-	P(1)=>text
-	P(2,true) => wordWrap
+    P(1)=>text
+    P(2,true) => wordWrap
 
-	if (!wordWrap) {
-		println(fix("+ ") + text)
-	} else {
-		DoShowList((""+text).split)
-	}
+    if (!wordWrap) {
+        println(fix("+ ") + text)
+    } else {
+        DoShowList((""+text).split)
+    }
 /DoShowText
 
 
 
-# Present content of list		
+# Present content of list   
 # --
-	P(1,List)=>list
-	
+    P(1,List)=>list
+    
 
-	line=fix("|")
-	list->x
-		if (line.length+1+(""+x).length >= Term.w) {
-			println(line)
-			line=fix("| ")
-		}
-		line=line+" "+x
-	|
-	println(line.trim) 
+    line=fix("|")
+    list->x
+        if (line.length+1+(""+x).length >= Term.w) {
+            println(line)
+            line=fix("| ")
+        }
+        line=line+" "+x
+    |
+    println(line.trim) 
 /DoShowList
 
 
 
 # Show progress bar
 # --
-	P(1,0) => doneCount
-	P(2,0) => totalCount
-	P(3,50) => charsWidth
+    P(1,0) => doneCount
+    P(2,0) => totalCount
+    P(3,50) => charsWidth
 
-	line=fix("|  ")
-	if (line.length+charsWidth+1 >= Term.w) {
-		charsWidth=Term.w-line.length-1
-	}
-	dataChars=charsWidth
-	if (totalCount > 0) {
-		doneChars=(dataChars*doneCount/totalCount).i
-		if (doneChars > dataChars) doneChars=dataChars
-	} else {
-		doneChars=0
-	}
+    line=fix("|  ")
+    if (line.length+charsWidth+1 >= Term.w) {
+        charsWidth=Term.w-line.length-1
+    }
+    dataChars=charsWidth
+    if (totalCount > 0) {
+        doneChars=(dataChars*doneCount/totalCount).i
+        if (doneChars > dataChars) doneChars=dataChars
+    } else {
+        doneChars=0
+    }
 
-	line=line+Chars(Sys.uchar("2588"),doneChars) + Chars(".",dataChars-doneChars)
-	println(line)
+    line=line+Chars(Sys.uchar("2588"),doneChars) + Chars(".",dataChars-doneChars)
+    println(line)
 /DoShowProgressBar
-	
+    
 
 # Ask for input
-# --	
-	P(1,"Label") => label
-	P(2,null) => currValue
+# --    
+    P(1,"Label") => label
+    P(2,null) => currValue
 
-	DoShowText(" [?] " + Curses:Bold + label + Curses:Reset)
-	if(currValue != null) {
-		DoShowText("    Enter for ["+currValue+"]")
-	}
-	
-	readLine => val
-	if (val=="") val=currValue
-	val
+    DoShowText(" [?] " + Curses:Bold + label + Curses:Reset)
+    if(currValue != null) {
+        DoShowText("    Enter for ["+currValue+"]")
+    }
+    
+    readLine => val
+    if (val=="") val=currValue
+    val
 /DoInput
 
 
@@ -177,58 +198,58 @@ P(1,"r---")=>s
 # Create summary object, which is controlled via two lambdas, for
 # adding data and showing (add to layout)
 # --
-	Dict
-	.set("data",List)
-	.set("Lrow",Lambda{
-		P(1)=>shortName
-		P(2)=>longName
-		P(3)=>value
-		self.data.add(SymDict(shortName,longName,value))
-	})
-	.set("Lshow",Lambda{
-		sLen=0
-		lLen=0
-		vLen=0
-		self.data->x 
-			sLen=if(x.shortName.length>sLen, x.shortName.length, sLen)
-			lLen=if(x.longName.length>lLen, x.longName.length, lLen)
-			vLen=if(x.value.length>vLen, x.value.length, vLen)
-		|
-		self.data->x
-			line=AppUI:fix("| ") + 
-				AppUI:Pad(x.shortName + " ","-",sLen+4)
-				+ if(lLen>0, " " + AppUI:Pad(x.longName+" ","-",lLen+4), "")
-				+ " [" + x.value + "]"
-			println(line)
-		|
-		println(AppUI:fix("|"))
-	})
+    Dict
+    .set("data",List)
+    .set("Lrow",Lambda{
+        P(1)=>shortName
+        P(2)=>longName
+        P(3)=>value
+        self.data.add(SymDict(shortName,longName,value))
+    })
+    .set("Lshow",Lambda{
+        sLen=0
+        lLen=0
+        vLen=0
+        self.data->x 
+            sLen=if(x.shortName.length>sLen, x.shortName.length, sLen)
+            lLen=if(x.longName.length>lLen, x.longName.length, lLen)
+            vLen=if(x.value.length>vLen, x.value.length, vLen)
+        |
+        self.data->x
+            line=AppUI:fix("| ") + 
+                AppUI:Pad(x.shortName + " ","-",sLen+4)
+                + if(lLen>0, " " + AppUI:Pad(x.longName+" ","-",lLen+4), "")
+                + " [" + x.value + "]"
+            println(line)
+        |
+        println(AppUI:fix("|"))
+    })
 /DoSummaryObj
 
 
 
 # Present menu
 # --
-	P(1,List) => data
-	P(2, Lambda{P(1)}) => LambdaLabel
-	println(fix("|"))
-	pos=1
-	data->row
-		println(fix("|  ") + Pad(""+pos," ",5) + LambdaLabel.call(row))
-		pos=pos+1
-	|
-	println(fix("|"))
-	DoInput("Enter number",null,false) => str
-	if (str.?parseInt) {
-		n=str.parseInt-1
-		if (n<0 || n>data.length-1) {
-			null
-		} else {
-			data.nth(n)
-		}
-	} else {
-		null
-	}
+    P(1,List) => data
+    P(2, Lambda{P(1)}) => LambdaLabel
+    println(fix("|"))
+    pos=1
+    data->row
+        println(fix("|  ") + Pad(""+pos," ",5) + LambdaLabel.call(row))
+        pos=pos+1
+    |
+    println(fix("|"))
+    DoInput("Enter number",null,false) => str
+    if (str.?parseInt) {
+        n=str.parseInt-1
+        if (n<0 || n>data.length-1) {
+            null
+        } else {
+            data.nth(n)
+        }
+    } else {
+        null
+    }
 /DoMenu
 
 
@@ -236,7 +257,7 @@ P(1,"r---")=>s
 
 # Space
 # --
-	println(fix("|"))
+    println(fix("|"))
 /DoSpace
 
 
@@ -245,63 +266,63 @@ P(1,"r---")=>s
 P(1,"Please confirm")=>label
 P(2,"yes")=>confirmString
 P(3,"no")=>defaultValue
-	DoShowText("[?] " + label + " ("+defaultValue+")")
-	readLine => inp
-	if (inp.trim=="") inp=defaultValue
-	
-	inp.toLower == confirmString.toLower
+    DoShowText("[?] " + label + " ("+defaultValue+")")
+    readLine => inp
+    if (inp.trim=="") inp=defaultValue
+    
+    inp.toLower == confirmString.toLower
 /DoConfirm
 
 
 
 # Clear screen
 # --
-	println(Curses:Clear)
+    println(Curses:Clear)
 /DoCls
 
 
-	
+    
 # Test
 # --
-	Lib:GetTerminalSize  # update Term
-	
-	
-	DoShowTopLine("Clone VM")
-	DoShowContext(
-		"Orig Name CPU RAM Disk Nic Confirm".split,
-		"Name"
-		)
-	DoInput(
-		"Name of new VM",
-		"mcfg1.v"
-		)
+    Lib:GetTerminalSize  # update Term
+    
+    
+    DoShowTopLine("Clone VM")
+    DoShowContext(
+        "Orig Name CPU RAM Disk Nic Confirm".split,
+        "Name"
+        )
+    DoInput(
+        "Name of new VM",
+        "mcfg1.v"
+        )
 
-	# ---
+    # ---
 
-	DoShowTopLine("Clone VM")
-	DoShowContext(
-		"Orig Name CPU RAM Disk Nic Confirm".split,
-		"Confirm"
-		)
-	DoShowHeader("Confirm")
-	
-	obj=DoSummaryObj
-	obj.Lrow.call("Orig","VM to clone","kubs05.v")
-	obj.Lrow.call("Name","Name of new VM", "mcfg1.v")
-	obj.Lrow.call("CPU","Number of CPUs", "4")
-	obj.Lrow.call("RAM","GB of RAM","8")
-	obj.Lrow.call("Disk","GB of disk","32")
-	obj.Lrow.call("Nic","Network NIC name","ens3")
-	obj.Lshow.call
-	
-	DoInput(
-		"Type 'yes' to confirm",
-		"no"
-		)
+    DoShowTopLine("Clone VM")
+    DoShowContext(
+        "Orig Name CPU RAM Disk Nic Confirm".split,
+        "Confirm"
+        )
+    DoShowHeader("Confirm")
+    
+    obj=DoSummaryObj
+    obj.Lrow.call("Orig","VM to clone","kubs05.v")
+    obj.Lrow.call("Name","Name of new VM", "mcfg1.v")
+    obj.Lrow.call("CPU","Number of CPUs", "4")
+    obj.Lrow.call("RAM","GB of RAM","8")
+    obj.Lrow.call("Disk","GB of disk","32")
+    obj.Lrow.call("Nic","Network NIC name","ens3")
+    obj.Lshow.call
+    
+    DoInput(
+        "Type 'yes' to confirm",
+        "no"
+        )
 
-	# ---
-	
-	DoShowTopLine("Top menu")
-	DoMenu(List("Create VM from scratch","Clone existing VM","Show VM status","Start VM", "Stop VM"))
-	
+    # ---
+    
+    DoShowTopLine("Top menu")
+    DoMenu(List("Create VM from scratch","Clone existing VM","Show VM status","Start VM", "Stop VM"))
+    
 /example

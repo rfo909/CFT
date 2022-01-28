@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020 Roar Foshaug
+Copyright (C) 2020-2022 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -74,33 +74,33 @@ public class ObjDir extends Obj {
         }
 
 
-		Function[] arr={
-				new FunctionName(),
-				new FunctionPath(),
-				new FunctionExists(),
-				new FunctionSub(),
-				new FunctionFiles(),
-				new FunctionDirs(),
-				new FunctionCreate(),
-				new FunctionDelete(),
-				new FunctionAllFiles(),
-				new FunctionAllDirs(),
-				new FunctionFile(),
-				new FunctionCopy(),
-				new FunctionRun(),
-				new FunctionRunDetach(),
-				new FunctionRunProcess(),
-				new FunctionRunCapture(),
-				new FunctionShowTree(),
-				new FunctionProtect(),
-				new FunctionUnprotect(),
-				new FunctionSetAsCurrentDir(),
-				new FunctionVerify(),
-				new FunctionNewestFile(),
-				new FunctionNewestFiles(),
-				new FunctionStats(),
-		};
-		setFunctions(arr);
+        Function[] arr={
+                new FunctionName(),
+                new FunctionPath(),
+                new FunctionExists(),
+                new FunctionSub(),
+                new FunctionFiles(),
+                new FunctionDirs(),
+                new FunctionCreate(),
+                new FunctionDelete(),
+                new FunctionAllFiles(),
+                new FunctionAllDirs(),
+                new FunctionFile(),
+                new FunctionCopy(),
+                new FunctionRun(),
+                new FunctionRunDetach(),
+                new FunctionRunProcess(),
+                new FunctionRunCapture(),
+                new FunctionShowTree(),
+                new FunctionProtect(),
+                new FunctionUnprotect(),
+                new FunctionSetAsCurrentDir(),
+                new FunctionVerify(),
+                new FunctionNewestFile(),
+                new FunctionNewestFiles(),
+                new FunctionStats(),
+        };
+        setFunctions(arr);
 
     }
     
@@ -277,12 +277,12 @@ public class ObjDir extends Obj {
     
     
     private ObjGlob getObjGlob (List<Value> params, int pos) throws Exception {
-    	Value objOrString = params.get(pos);
-    	if (objOrString instanceof ValueString) {
+        Value objOrString = params.get(pos);
+        if (objOrString instanceof ValueString) {
             boolean ignoreCase=(File.separator.equals("\\"));  // ignore case on Windows, otherwise not
-    		return new ObjGlob( ((ValueString) objOrString).getVal(), ignoreCase);
-    	}
-    	Obj obj=getObj("Glob", params, pos);
+            return new ObjGlob( ((ValueString) objOrString).getVal(), ignoreCase);
+        }
+        Obj obj=getObj("Glob", params, pos);
         if (!(obj instanceof ObjGlob)) throw new Exception("Expected String or Glob parameter");
         return (ObjGlob) obj;
     }
@@ -298,7 +298,7 @@ public class ObjDir extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             ObjGlob glob=null;
             if (params.size()==1) {
-            	glob=getObjGlob(params,0);
+                glob=getObjGlob(params,0);
             } else if (params.size() != 0) {
                 throw new Exception("Expected optional Glob parameter only");
             }
@@ -327,7 +327,7 @@ public class ObjDir extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             ObjGlob glob=null;
             if (params.size()==1) {
-            	glob=getObjGlob(params,0);
+                glob=getObjGlob(params,0);
             } else if (params.size() != 0) {
                 throw new Exception("Expected optional Glob parameter only");
             }
@@ -454,7 +454,7 @@ public class ObjDir extends Obj {
             OutText outText=ctx.getOutText();
             ObjGlob glob=null;
             if (params.size()==1) {
-            	glob=getObjGlob(params,0);
+                glob=getObjGlob(params,0);
             } else if (params.size() != 0) {
                 throw new Exception("Expected optional Glob parameter only");
             }
@@ -480,7 +480,7 @@ public class ObjDir extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             ObjGlob glob=null;
             if (params.size()==1) {
-            	glob=getObjGlob(params,0);
+                glob=getObjGlob(params,0);
             } else if (params.size() != 0) {
                 throw new Exception("Expected optional Glob parameter only");
             }
@@ -835,7 +835,7 @@ public class ObjDir extends Obj {
             OutText outText=ctx.getOutText();
             ObjGlob glob=null;
             if (params.size()==1) {
-            	glob = getObjGlob(params,0);
+                glob = getObjGlob(params,0);
             } else if (params.size() != 0) {
                 throw new Exception("Expected optional Glob parameter only");
             }
@@ -869,37 +869,37 @@ public class ObjDir extends Obj {
             return "newestFiles(Glob,count) - return sorted list (newest first) of newest files";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 2) throw new Exception("Expected parameter glob, count");
-        	ObjGlob glob=getObjGlob(params,0);
-        	int count=(int) getInt("count",params,1);
-        	
-        	List<ObjFile> sortedList=new ArrayList<ObjFile>();
+            if (params.size() != 2) throw new Exception("Expected parameter glob, count");
+            ObjGlob glob=getObjGlob(params,0);
+            int count=(int) getInt("count",params,1);
+            
+            List<ObjFile> sortedList=new ArrayList<ObjFile>();
             File f=new File(name);
             File[] content = f.listFiles();
 
             List<File> fileList=new ArrayList<File>();
             for (File x:content) {
-            	try {
-	            	if (x.isFile()) { fileList.add(x); } 
-            	} catch (Exception ex) {
-            		// ignore
-            	}
+                try {
+                    if (x.isFile()) { fileList.add(x); } 
+                } catch (Exception ex) {
+                    // ignore
+                }
             }
 
-        	
-        	Comparator<File> comp=new Comparator<File>() {
+            
+            Comparator<File> comp=new Comparator<File>() {
                 public int compare(File a, File b) {
-                	long ia;
-                	try {
-                		ia=a.lastModified();
-                	} catch (Exception ex) {
-                		ia=0L;
-                	}
+                    long ia;
+                    try {
+                        ia=a.lastModified();
+                    } catch (Exception ex) {
+                        ia=0L;
+                    }
                     long ib;
                     try {
-                    	ib=b.lastModified();
+                        ib=b.lastModified();
                     } catch (Exception ex) {
-                    	ib=0L;
+                        ib=0L;
                     }
                     if (ia>ib) return -1;
                     if (ia==ib) return 0;
@@ -912,14 +912,14 @@ public class ObjDir extends Obj {
             List<Value> valList=new ArrayList<Value>();
             if (count > fileList.size()) count=fileList.size();
             CREATE_RESULT: for (File file:fileList) {
-            	try {
-            		valList.add(new ValueObj(new ObjFile(file.getAbsolutePath(), Protection.NoProtection)));
-            	} catch (Exception ex) {
-            		// ignore
-            	}
-            	if (valList.size()==count) break CREATE_RESULT;
+                try {
+                    valList.add(new ValueObj(new ObjFile(file.getAbsolutePath(), Protection.NoProtection)));
+                } catch (Exception ex) {
+                    // ignore
+                }
+                if (valList.size()==count) break CREATE_RESULT;
             }
-        	
+            
             return new ValueList(valList);
         }
     }
@@ -943,12 +943,12 @@ public class ObjDir extends Obj {
 
             File[] content = f.listFiles();
             for (File x:content) {
-            	try {
-	            	if (x.isFile()) { fileCount++; } 
-	            	else if (x.isDirectory()) { dirCount++; }
-            	} catch (Exception ex) {
-            		// ignore
-            	}
+                try {
+                    if (x.isFile()) { fileCount++; } 
+                    else if (x.isDirectory()) { dirCount++; }
+                } catch (Exception ex) {
+                    // ignore
+                }
             }
             ObjDict dict=new ObjDict();
             dict.set("fileCount", new ValueInt(fileCount));

@@ -1,3 +1,20 @@
+/*
+CFT - an interactive programmable shell for automation 
+Copyright (C) 2020-2022 Roar Foshaug
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>
+*/
+
 package rf.configtool.main.runtime.lib.ddd;
 
 import java.awt.Color;
@@ -19,7 +36,7 @@ import rf.configtool.main.runtime.lib.ddd.core.VisibleAttributes;
  *
  */
 public class DDD extends Obj {
-	
+    
 
     public DDD() {
         this.add(new FunctionRef());
@@ -60,7 +77,7 @@ public class DDD extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	return new ValueObj(new DDDRef());
+            return new ValueObj(new DDDRef());
         }
     }
 
@@ -77,12 +94,12 @@ public class DDD extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 3) throw new RuntimeException("Expected parameters x,y,z");
-        	double x=getFloat("x", params, 0);
-        	double y=getFloat("y", params, 1);
-        	double z=getFloat("z", params, 2);
-        	Vector3d vec=new Vector3d(x,y,z);
-        	return new ValueObj(new DDDVector(vec));
+            if (params.size() != 3) throw new RuntimeException("Expected parameters x,y,z");
+            double x=getFloat("x", params, 0);
+            double y=getFloat("y", params, 1);
+            double z=getFloat("z", params, 2);
+            Vector3d vec=new Vector3d(x,y,z);
+            return new ValueObj(new DDDVector(vec));
         }
     }
     
@@ -96,7 +113,7 @@ public class DDD extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	return new ValueObj(new DDDWorld());
+            return new ValueObj(new DDDWorld());
         }
     }
     
@@ -110,22 +127,22 @@ public class DDD extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 4) throw new RuntimeException("Expected Ref parameters a,b,c + color");
-        	Obj a1=getObj("a",params,0);
-        	Obj b1=getObj("b",params,1);
-        	Obj c1=getObj("c",params,2);
-        	Obj col1=getObj("color",params,3);
-        	
-        	if (!(a1 instanceof DDDRef) || !(b1 instanceof DDDRef) || !(c1 instanceof DDDRef) || !(col1 instanceof ObjColor)) {
-        		throw new RuntimeException("Expected Ref parameters a,b,c + color");
-        	}
-        	Vector3d a=((DDDRef) a1).getRef().getPos();
-        	Vector3d b=((DDDRef) b1).getRef().getPos();
-        	Vector3d c=((DDDRef) c1).getRef().getPos();
-        	
-        	Color color=((ObjColor) col1).getAWTColor();
-        	Triangle t=new Triangle(a,b,c,new VisibleAttributes(color));
-        	return new ValueObj(new DDDTriangle(t));
+            if (params.size() != 4) throw new RuntimeException("Expected Ref parameters a,b,c + color");
+            Obj a1=getObj("a",params,0);
+            Obj b1=getObj("b",params,1);
+            Obj c1=getObj("c",params,2);
+            Obj col1=getObj("color",params,3);
+            
+            if (!(a1 instanceof DDDRef) || !(b1 instanceof DDDRef) || !(c1 instanceof DDDRef) || !(col1 instanceof ObjColor)) {
+                throw new RuntimeException("Expected Ref parameters a,b,c + color");
+            }
+            Vector3d a=((DDDRef) a1).getRef().getPos();
+            Vector3d b=((DDDRef) b1).getRef().getPos();
+            Vector3d c=((DDDRef) c1).getRef().getPos();
+            
+            Color color=((ObjColor) col1).getAWTColor();
+            Triangle t=new Triangle(a,b,c,new VisibleAttributes(color));
+            return new ValueObj(new DDDTriangle(t));
         }
     }
     
@@ -141,22 +158,22 @@ public class DDD extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	if (params.size() != 4) throw new RuntimeException("Expected Vector parameters a,b,c + color");
-        	Obj a1=getObj("a",params,0);
-        	Obj b1=getObj("b",params,1);
-        	Obj c1=getObj("c",params,2);
-        	Obj col1=getObj("color",params,3);
-        	
-        	if (!(a1 instanceof DDDVector) || !(b1 instanceof DDDVector) || !(c1 instanceof DDDVector) || !(col1 instanceof ObjColor)) {
-        		throw new RuntimeException("Expected Ref parameters a,b,c + color");
-        	}
-        	Vector3d a=((DDDVector) a1).getVec();
-        	Vector3d b=((DDDVector) b1).getVec();
-        	Vector3d c=((DDDVector) c1).getVec();
-        	
-        	Color color=((ObjColor) col1).getAWTColor();
-        	Triangle t=new Triangle(a,b,c,new VisibleAttributes(color));
-        	return new ValueObj(new DDDTriangle(t));
+            if (params.size() != 4) throw new RuntimeException("Expected Vector parameters a,b,c + color");
+            Obj a1=getObj("a",params,0);
+            Obj b1=getObj("b",params,1);
+            Obj c1=getObj("c",params,2);
+            Obj col1=getObj("color",params,3);
+            
+            if (!(a1 instanceof DDDVector) || !(b1 instanceof DDDVector) || !(c1 instanceof DDDVector) || !(col1 instanceof ObjColor)) {
+                throw new RuntimeException("Expected Ref parameters a,b,c + color");
+            }
+            Vector3d a=((DDDVector) a1).getVec();
+            Vector3d b=((DDDVector) b1).getVec();
+            Vector3d c=((DDDVector) c1).getVec();
+            
+            Color color=((ObjColor) col1).getAWTColor();
+            Triangle t=new Triangle(a,b,c,new VisibleAttributes(color));
+            return new ValueObj(new DDDTriangle(t));
         }
     }
     

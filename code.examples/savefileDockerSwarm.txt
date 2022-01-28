@@ -1,3 +1,24 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2022 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 # Readme
 # --
 <<< EOF
@@ -15,14 +36,14 @@ If the swarm has more than one manager, it should be an odd number.
 
 # Get target
 # --
-	P(1,"Enter target on form user@host")=>label
-	Input(label).get
+    P(1,"Enter target on form user@host")=>label
+    Input(label).get
 /GetTarget
 
 
 # Get existing manager target
 # --
-	GetTarget("Enter existing manager target on form user@host")
+    GetTarget("Enter existing manager target on form user@host")
 /GetManager
 
 
@@ -32,25 +53,25 @@ If the swarm has more than one manager, it should be an odd number.
 #
 # https://docs.docker.com/engine/install/ubuntu/
 # --
-	P(1,GetTarget) => target
-	P(2,false) => debug
+    P(1,GetTarget) => target
+    P(2,false) => debug
 
-	println(""+target + " Installing Docker")
-	
-	# Remove old version if installed
-	SSH:sudo(target,"apt-get remove docker docker-engine docker.io containerd runc", true, debug)
-	
-	SSH:sudo(target,"apt-get update", false, debug)
-	SSH:sudo(target,"apt-get install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common",false,debug)
-	SSH:sudo(target,"curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -", false, debug)
-	SSH:sudo(target,"apt-key fingerprint 0EBFCD88", false, debug)
-	SSH:sudo(target,'add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"', false, debug)
-	SSH:sudo(target,"apt-get update", false, debug)
-	SSH:sudo(target,"apt-get -y install docker-ce docker-ce-cli containerd.io", false, debug)
+    println(""+target + " Installing Docker")
+    
+    # Remove old version if installed
+    SSH:sudo(target,"apt-get remove docker docker-engine docker.io containerd runc", true, debug)
+    
+    SSH:sudo(target,"apt-get update", false, debug)
+    SSH:sudo(target,"apt-get install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common",false,debug)
+    SSH:sudo(target,"curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -", false, debug)
+    SSH:sudo(target,"apt-key fingerprint 0EBFCD88", false, debug)
+    SSH:sudo(target,'add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"', false, debug)
+    SSH:sudo(target,"apt-get update", false, debug)
+    SSH:sudo(target,"apt-get -y install docker-ce docker-ce-cli containerd.io", false, debug)
 
-	println(""+target + " Installing Docker Compose")
-	SSH:sudo(target,'curl -L "https://github.com/docker/compose/releases/download/1.28.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose', false, debug)
-	SSH:sudo(target,'chmod +x /usr/local/bin/docker-compose', false, debug)
+    println(""+target + " Installing Docker Compose")
+    SSH:sudo(target,'curl -L "https://github.com/docker/compose/releases/download/1.28.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose', false, debug)
+    SSH:sudo(target,'chmod +x /usr/local/bin/docker-compose', false, debug)
 
 /Install
 
@@ -59,11 +80,11 @@ If the swarm has more than one manager, it should be an odd number.
 
 # Create first swarm manager in cluster 
 # --
-	P(1,GetTarget) => target
-	P(2,true) => debug
+    P(1,GetTarget) => target
+    P(2,true) => debug
 
-	println(""+target+": Create first swarm manager with docker swarm init")
-	SSH:sudo(target,"docker swarm init",false,debug)
+    println(""+target+": Create first swarm manager with docker swarm init")
+    SSH:sudo(target,"docker swarm init",false,debug)
 /SwarmFirstManager
 
 
@@ -71,19 +92,19 @@ If the swarm has more than one manager, it should be an odd number.
 
 # Get join command from manager
 # --
-	P(1,GetManager) => existingManager
-	P(2,Input("Enter role: 'worker' or 'manager'").get) => role
-	P(3,false) => debug
+    P(1,GetManager) => existingManager
+    P(2,Input("Enter role: 'worker' or 'manager'").get) => role
+    P(3,false) => debug
 
-	# Obtain join command from existingManager
-	joinCommand=null
-	println(""+existingManager+": getting join-command for role=" + role)
-	SSH:sudo(existingManager,"docker swarm join-token "+role, false, debug).stdout->line
-		assert(line.trim.startsWith("docker swarm join"))
-		joinCommand=line.trim
-	|
-	error(joinCommand==null,"No join-command for role=" + role + " received from " + existingManager)
-	joinCommand
+    # Obtain join command from existingManager
+    joinCommand=null
+    println(""+existingManager+": getting join-command for role=" + role)
+    SSH:sudo(existingManager,"docker swarm join-token "+role, false, debug).stdout->line
+        assert(line.trim.startsWith("docker swarm join"))
+        joinCommand=line.trim
+    |
+    error(joinCommand==null,"No join-command for role=" + role + " received from " + existingManager)
+    joinCommand
 /GetJoinCommand
 
 
@@ -91,102 +112,102 @@ If the swarm has more than one manager, it should be an odd number.
 
 # Add target host as additional manager in swarm
 # --
-	P(1,GetTarget) => target
-	P(2,GetManager) => existingManager
-	P(3,true) => debug
+    P(1,GetTarget) => target
+    P(2,GetManager) => existingManager
+    P(3,true) => debug
 
-	# Obtain join command from existingManager
-	joinCommand=GetJoinCommand(existingManager,"manager")
+    # Obtain join command from existingManager
+    joinCommand=GetJoinCommand(existingManager,"manager")
 
-	# Run this command on target
-	println(""+target+": joining additional manager to swarm")
-	SSH:sudo(target, joinCommand, false, debug)
-	
+    # Run this command on target
+    println(""+target+": joining additional manager to swarm")
+    SSH:sudo(target, joinCommand, false, debug)
+    
 /SwarmManagerJoin
-	
+    
 
 
 # Join worker to swarm
 # -- 
-	P(1,GetTarget) => target
-	P(2,GetManager) => existingManager
-	P(3,true) => debug
+    P(1,GetTarget) => target
+    P(2,GetManager) => existingManager
+    P(3,true) => debug
 
-	# Obtain join command from existingManager
-	joinCommand=GetJoinCommand(existingManager,"worker")
+    # Obtain join command from existingManager
+    joinCommand=GetJoinCommand(existingManager,"worker")
 
-	println(""+target+": Joining worker to swarm")
-	SSH:sudo(target,joinCommand, false, debug)
+    println(""+target+": Joining worker to swarm")
+    SSH:sudo(target,joinCommand, false, debug)
 /SwarmWorkerJoin
-	
+    
 
 
 # Leave swarm (workers and managers)
 # -- 
-	P(1,GetTarget) => target
-	P(2,true) => debug
+    P(1,GetTarget) => target
+    P(2,true) => debug
 
-	println(""+target+": Swarm leave")
-	SSH:sudo(target,"docker swarm leave --force", true, debug)
+    println(""+target+": Swarm leave")
+    SSH:sudo(target,"docker swarm leave --force", true, debug)
 /SwarmLeave
 
 
 
 # List docker nodes
 # --
-	P(1,GetManager) => target
-	P(2,false) => debug
+    P(1,GetManager) => target
+    P(2,false) => debug
 
-	SSH:sudo(target,"docker node ls", false, debug) => result
+    SSH:sudo(target,"docker node ls", false, debug) => result
 
-	result.stdout
+    result.stdout
 /NodesList
 
 
 
 # Call docker system info - displays Swarm info
 # --
-	P(1,GetTarget) => target
-	P(2,false) => debug
+    P(1,GetTarget) => target
+    P(2,false) => debug
 
-	SSH:sudo(target,"docker system info", false, debug) => result
+    SSH:sudo(target,"docker system info", false, debug) => result
 
-	result.stdout
+    result.stdout
 /SystemInfo
 
 
 
 # Test targets
 # --
-	"roar@t1.v roar@t2.v roar@t3.v roar@t4.v roar@t5.v roar@t6.v roar@t7.v roar@t8.v".split
+    "roar@t1.v roar@t2.v roar@t3.v roar@t4.v roar@t5.v roar@t6.v roar@t7.v roar@t8.v".split
 /TestTargets
 
 
 # Install all test targets
 # --
-	TestTargets->t
-		Install(t)
+    TestTargets->t
+        Install(t)
 /TestTargetsInstall
 
 
 # Test script
 # --
 
-	# --- Clear up old swarm config
+    # --- Clear up old swarm config
 
-	TestTargets->t
-		SwarmLeave(t,false)
-	|
+    TestTargets->t
+        SwarmLeave(t,false)
+    |
 
-	SwarmFirstManager("roar@t1.v", false)
-	SwarmManagerJoin("roar@t2.v", "roar@t1.v", false)
-	SwarmManagerJoin("roar@t3.v", "roar@t1.v", false)
+    SwarmFirstManager("roar@t1.v", false)
+    SwarmManagerJoin("roar@t2.v", "roar@t1.v", false)
+    SwarmManagerJoin("roar@t3.v", "roar@t1.v", false)
 
-	SwarmWorkerJoin("roar@t4.v", "roar@t1.v", false)
-	SwarmWorkerJoin("roar@t5.v", "roar@t1.v", false)
-	SwarmWorkerJoin("roar@t6.v", "roar@t1.v", false)
-	SwarmWorkerJoin("roar@t7.v", "roar@t1.v", false)
-	SwarmWorkerJoin("roar@t8.v", "roar@t1.v", false)
+    SwarmWorkerJoin("roar@t4.v", "roar@t1.v", false)
+    SwarmWorkerJoin("roar@t5.v", "roar@t1.v", false)
+    SwarmWorkerJoin("roar@t6.v", "roar@t1.v", false)
+    SwarmWorkerJoin("roar@t7.v", "roar@t1.v", false)
+    SwarmWorkerJoin("roar@t8.v", "roar@t1.v", false)
 /TestTargetsSwarm
 
 

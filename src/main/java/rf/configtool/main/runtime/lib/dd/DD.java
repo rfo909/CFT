@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020 Roar Foshaug
+Copyright (C) 2020-2022 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -29,9 +29,9 @@ import rf.configtool.main.runtime.ValueObj;
 public class DD extends Obj {
     
     public DD() {
-    	this.add(new FunctionVec());
-    	this.add(new FunctionRef());
-    	this.add(new FunctionWorld());
+        this.add(new FunctionVec());
+        this.add(new FunctionRef());
+        this.add(new FunctionWorld());
     }
     
     @Override
@@ -92,7 +92,7 @@ public class DD extends Obj {
         }
     }
     
-	   
+       
  class FunctionWorld extends Function {
      public String getName() {
          return "World";

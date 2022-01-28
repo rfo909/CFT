@@ -1,3 +1,24 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2022 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 # Readme
 <<<< EOF
 -------------------------------------------------------------
@@ -19,32 +40,32 @@ To change to different host name, call MyHost(true)
 
 # Known hostnames
 # ---
-	Db2:Get("ElasticAPI","KnownHosts")
+    Db2:Get("ElasticAPI","KnownHosts")
 /KnownHosts
 
 # Get/set target hostname
 # --
-	P(1,false) => change
+    P(1,false) => change
 
-	Db2:Get("ElasticAPI","host") => name
+    Db2:Get("ElasticAPI","host") => name
 
-	if (name==null || change) {
-		println("Enter elasticsearch host:port (usually :9200)")
-		Inner{
-			KnownHosts->h println("  - " + h)
-		}
-		readLine("host:port") => name
-		error(!name.contains(":"), "Missing :PORT")
-		Db2:Set("ElasticAPI","host",name)
-	}
-	name
+    if (name==null || change) {
+        println("Enter elasticsearch host:port (usually :9200)")
+        Inner{
+            KnownHosts->h println("  - " + h)
+        }
+        readLine("host:port") => name
+        error(!name.contains(":"), "Missing :PORT")
+        Db2:Set("ElasticAPI","host",name)
+    }
+    name
 /MyHost
 
 
 
 # Change target hostname
 # --
-	MyHost(true)
+    MyHost(true)
 /ChangeMyHost
 
 
@@ -52,40 +73,40 @@ To change to different host name, call MyHost(true)
 
 # Create Kibana URL
 # --
-	MyHost.before(":") + ":5601/app/kibana"
+    MyHost.before(":") + ":5601/app/kibana"
 /KibanaURL
 
 
 
 # List indexes
-	Util:CURL("http",MyHost,"GET","/_cat/indices?pretty",null,true)
+    Util:CURL("http",MyHost,"GET","/_cat/indices?pretty",null,true)
 /ListIndexes
 
 
 # Create index
-	P(1,Input("Create index name").get) => name
+    P(1,Input("Create index name").get) => name
 
-	Dict.set("settings",Dict
-		.set("number_of_shards",1)
-		.set("number_of_replicas",1)
-	) => data
+    Dict.set("settings",Dict
+        .set("number_of_shards",1)
+        .set("number_of_replicas",1)
+    ) => data
 
-	url = "/"+name+"?pretty"		
-	Util:CURL("http",MyHost,"PUT", url, data, true)
+    url = "/"+name+"?pretty"        
+    Util:CURL("http",MyHost,"PUT", url, data, true)
 /CreateIndex
 
 
 # Check lifecycle progress
-	Util:CURL("http",MyHost,"GET","/.ds-timeseries-*/_ilm/explain")
+    Util:CURL("http",MyHost,"GET","/.ds-timeseries-*/_ilm/explain")
 /LifecycleProgress
 
 
 # Create Index Lifecycle Policy
 # --
-	P(1,"RFTest")=>ilpName
-	P(2,30)=>expirationDays
+    P(1,"RFTest")=>ilpName
+    P(2,30)=>expirationDays
 
-	SymDict(expirationDays).mergeCodes => data
+    SymDict(expirationDays).mergeCodes => data
 
 <<<<<<<< EOF
 {
@@ -111,11 +132,11 @@ To change to different host name, call MyHost(true)
   }
 }
 >>>>>>>> EOF
-	->line out(line.merge(data).trim)
-	| _.concat(" ") => json
+    ->line out(line.merge(data).trim)
+    | _.concat(" ") => json
 
-	url="/_ilm/policy/" + ilpName
-	Util:CURL("http",MyHost,"PUT",url,json,true)
+    url="/_ilm/policy/" + ilpName
+    Util:CURL("http",MyHost,"PUT",url,json,true)
 /CreateILP
 
 
@@ -123,96 +144,96 @@ To change to different host name, call MyHost(true)
 
 # Create Index Template and link it to Index Lifecycle Policy
 # --
-	P(1,"main2*") => indexPattern
-	P(1,"OneMonth") => lifeCycleName
+    P(1,"main2*") => indexPattern
+    P(1,"OneMonth") => lifeCycleName
 
-	Dict
-		.set("index_patterns",List(indexPattern))
-		.set("template",Dict
-			.set("settings",Dict
-				.set("number_of_shards",1)
-				.set("number_of_replicas",1)
-				.set("index.lifecycle.name",lifeCycleName)
-				.set("index.lifecycle.rollover_alias","timeseries")
-			)
-		)
-	=> data
-		
-	json=JSON:Export(data)
-	println(json)
-	println
-	Util:CURL("http",MyHost,"PUT","/_index_template/main2?pretty",json,true)
-		
+    Dict
+        .set("index_patterns",List(indexPattern))
+        .set("template",Dict
+            .set("settings",Dict
+                .set("number_of_shards",1)
+                .set("number_of_replicas",1)
+                .set("index.lifecycle.name",lifeCycleName)
+                .set("index.lifecycle.rollover_alias","timeseries")
+            )
+        )
+    => data
+        
+    json=JSON:Export(data)
+    println(json)
+    println
+    Util:CURL("http",MyHost,"PUT","/_index_template/main2?pretty",json,true)
+        
 /CreateIndexTemplate
 
 
 
 # Delete dated indexes older than N days
 # --
-	P(1,30)=>keepDays
-	P(2,60)=>scanSinceDays
-	P(3,Lambda{P(1,Date)=>date error("Lambda not implemented")}) => LIndexName
-		# The lambda takes a Date object, and should return an index name
-		# for that day.
-	P(4,false)=>enable
-		# Leave false while testing, set to true to call DELETE
+    P(1,30)=>keepDays
+    P(2,60)=>scanSinceDays
+    P(3,Lambda{P(1,Date)=>date error("Lambda not implemented")}) => LIndexName
+        # The lambda takes a Date object, and should return an index name
+        # for that day.
+    P(4,false)=>enable
+        # Leave false while testing, set to true to call DELETE
 
-	Lib.Data.for(scanSinceDays,keepDays,-1)->daysAgo
-		date = Date.sub(Date.Duration.days(daysAgo))
-		indexName=LIndexName.call(date)
-		if (enable) {
-			result = Util:CURL("http",MyHost,"DELETE","/"+indexName,null,false)
-			ok = true
-			{result.stdout->line if(line.contains("index_not_found_exception")) ok=false}
-			if (ok) 
-				println("Deleted: " + indexName)
-#			else
-#				println("Not found: " + indexName)
-		} else {
-			println("indexName=" + indexName)
-		}
+    Lib.Data.for(scanSinceDays,keepDays,-1)->daysAgo
+        date = Date.sub(Date.Duration.days(daysAgo))
+        indexName=LIndexName.call(date)
+        if (enable) {
+            result = Util:CURL("http",MyHost,"DELETE","/"+indexName,null,false)
+            ok = true
+            {result.stdout->line if(line.contains("index_not_found_exception")) ok=false}
+            if (ok) 
+                println("Deleted: " + indexName)
+#       else
+#           println("Not found: " + indexName)
+        } else {
+            println("indexName=" + indexName)
+        }
 /DeleteIndexes
 
 
 # Delete day-indexes named on format <prefix><date>
 # --
-	P(1,Input("Get index prefix up to date string").get)=>prefix
-	P(2,"yyyy.MM.dd")=>dateFormat
-	P(3,30)=>keepDays
-	P(4,60)=>scanSinceDays
-	P(5,false)=>enable
+    P(1,Input("Get index prefix up to date string").get)=>prefix
+    P(2,"yyyy.MM.dd")=>dateFormat
+    P(3,30)=>keepDays
+    P(4,60)=>scanSinceDays
+    P(5,false)=>enable
 
-	SymDict(prefix,dateFormat).set("LIndexName",
-		Lambda {
-			P(1)=>date
-			self.prefix + date.setFormat(self.dateFormat).fmt
-		}
-	) => obj
-	DeleteIndexes(keepDays,scanSinceDays,obj.LIndexName,enable)
+    SymDict(prefix,dateFormat).set("LIndexName",
+        Lambda {
+            P(1)=>date
+            self.prefix + date.setFormat(self.dateFormat).fmt
+        }
+    ) => obj
+    DeleteIndexes(keepDays,scanSinceDays,obj.LIndexName,enable)
 /DeletePrefixedDatedIndexes
 
 
 # Delete day-indexes named on format main2-yyyy.MM.dd or similar
 # --
-	"main2-" => prefix
-	"yyyy.MM.dd" => dateFormat
-	30 => keepDays
-	60 => scanSinceDays
-	
-	true => enable
-	
-	DeletePrefixedDatedIndexes(prefix, dateFormat, keepDays, scanSinceDays, enable)
+    "main2-" => prefix
+    "yyyy.MM.dd" => dateFormat
+    30 => keepDays
+    60 => scanSinceDays
+    
+    true => enable
+    
+    DeletePrefixedDatedIndexes(prefix, dateFormat, keepDays, scanSinceDays, enable)
 /DeleteMain2
 
 
 # Delete day-indexes named on format winlogbeat-6.4.2-yyyy.MM.dd or similar
 # --
-	"winlogbeat-6.4.2-" => prefix
-	"yyyy.MM.dd" => dateFormat
-	90 => keepDays
-	180 => scanSinceDays
-	
-	true => enable
-	
-	DeletePrefixedDatedIndexes(prefix, dateFormat, keepDays, scanSinceDays, enable)
+    "winlogbeat-6.4.2-" => prefix
+    "yyyy.MM.dd" => dateFormat
+    90 => keepDays
+    180 => scanSinceDays
+    
+    true => enable
+    
+    DeletePrefixedDatedIndexes(prefix, dateFormat, keepDays, scanSinceDays, enable)
 /DeleteWinlogbeat642
