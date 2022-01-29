@@ -38,11 +38,6 @@ To change to different host name, call MyHost(true)
 >>>> EOF
 /Readme
 
-# Known hostnames
-# ---
-    Db2:Get("ElasticAPI","KnownHosts")
-/KnownHosts
-
 # Get/set target hostname
 # --
     P(1,false) => change
@@ -50,12 +45,10 @@ To change to different host name, call MyHost(true)
     Db2:Get("ElasticAPI","host") => name
 
     if (name==null || change) {
-        println("Enter elasticsearch host:port (usually :9200)")
-        Inner{
-            KnownHosts->h println("  - " + h)
-        }
+        println("Enter elasticsearch host[:port] (port defaults to 9200)")
+        
         readLine("host:port") => name
-        error(!name.contains(":"), "Missing :PORT")
+        if(!name.contains(":")) name=name+":9200"
         Db2:Set("ElasticAPI","host",name)
     }
     name
@@ -96,17 +89,41 @@ To change to different host name, call MyHost(true)
 /CreateIndex
 
 
+# Add data WITH timestamp, in order to enable Index Lifetime Policies (ILP)
+# --
+	P(1,Input("Index name").get) => indexName
+
+	Util:Counter("customer_id") => x
+	data='{"name": "Roar", "timestamp": ' + currentTimeMillis + '}'
+	Util:CURL("http",
+		MyHost,
+		"POST",
+		"/" + indexName + "/_doc/"+x, 
+		data,
+		false
+		)
+		println(data)
+/AddIndexData
+
+
 # Check lifecycle progress
     Util:CURL("http",MyHost,"GET","/.ds-timeseries-*/_ilm/explain")
 /LifecycleProgress
 
 
-# Create Index Lifecycle Policy
+# Create or modify Index Lifecycle Policy - using minutes for testing
+# NOTE: ILP can only be applied to Index that contains time field!!!
 # --
-    P(1,"RFTest")=>ilpName
-    P(2,30)=>expirationDays
-
-    SymDict(expirationDays).mergeCodes => data
+    P(1,Input("Index Lifecycle Policy name").setCurrCond("RFTest").get) =>ilpName
+    P(2,Input("Expiration minutes").get.parseInt)=>expirationMinutes
+	
+	rolloverMinutes=(expirationMinutes/3).i
+	
+	# Seems the rollover-part is not changed when running function
+	# repeatedly, while the delete-part is.
+	#
+	# Deleting the policy from inside Kibana, then recreating it
+	# with this function, we get it correct!
 
 <<<<<<<< EOF
 {
@@ -115,56 +132,80 @@ To change to different host name, call MyHost(true)
       "hot": {
         "min_age": "0ms",
         "actions": {
-          "set_priority": {
-            "priority": 100
+          "rollover": {
+            "max_age": "<< rolloverMinutes >>m",
+            "max_size": "2mb"
           }
         }
       },
       "delete": {
-        "min_age": "${expirationDays}d",
+        "min_age": "<< expirationMinutes >>m",
         "actions": {
-          "delete": {
-            "delete_searchable_snapshot": true
-          }
+          "delete": {}
         }
       }
     }
   }
 }
 >>>>>>>> EOF
-    ->line out(line.merge(data).trim)
-    | _.concat(" ") => json
+	=> lines
+	lines.mergeExpr->line out(line.trim) | _.concat(" ") => json
+   
+	# Show JSON
+	Inner { JSON:PP(JSON:Parse(json))->line println(line) }
 
     url="/_ilm/policy/" + ilpName
-    Util:CURL("http",MyHost,"PUT",url,json,true)
+    Util:CURL("http",MyHost,"PUT",url,json,false)
 /CreateILP
 
 
 
-
-# Create Index Template and link it to Index Lifecycle Policy
+# List ILP's
 # --
-    P(1,"main2*") => indexPattern
-    P(1,"OneMonth") => lifeCycleName
+	Util:CURL("http",MyHost,"GET","/_ilm/policy").stdout => json
+	JSON:PP(JSON:Parse(json))
+/ListILP
 
-    Dict
-        .set("index_patterns",List(indexPattern))
-        .set("template",Dict
-            .set("settings",Dict
-                .set("number_of_shards",1)
-                .set("number_of_replicas",1)
-                .set("index.lifecycle.name",lifeCycleName)
-                .set("index.lifecycle.rollover_alias","timeseries")
-            )
-        )
-    => data
-        
-    json=JSON:Export(data)
+
+# Create Index Template - this is needed to connect indexes to ILM Policies
+# https://www.elastic.co/guide/en/elasticsearch/reference/7.7/indices-templates.html
+#
+# Following this step, in kibana, go to Index Lifecycle policies, then 
+# for our life cycle, select Action, then Add Policy to Index Template
+#
+# --
+    P(1,Input("Index pattern").get) => indexPattern
+	P(2,Input("Index template name").get) => templateName
+<<< EOF
+{
+  "index_patterns": ["<< indexPattern >>"],
+  "settings": {
+    "number_of_shards": 1
+  },
+  "mappings": {
+    "_source": {
+      "enabled": false
+    },
+    "properties": {
+      "host_name": {
+        "type": "keyword"
+      },
+      "created_at": {
+        "type": "date",
+        "format": "EEE MMM dd HH:mm:ss Z yyyy"
+      }
+    }
+  }
+}
+>>> EOF
+	_.mergeExpr->line out(line.trim) | _.concat(" ") => json
+
     println(json)
     println
-    Util:CURL("http",MyHost,"PUT","/_index_template/main2?pretty",json,true)
+    Util:CURL("http",MyHost,"POST","/_template/" + templateName + "?pretty",json,true)
         
 /CreateIndexTemplate
+
 
 
 
