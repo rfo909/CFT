@@ -82,17 +82,13 @@ public class StmtCatEditMore extends StmtShellInteractive {
         SourceLocation loc=propsFile.getSourceLocation(name);
         
         String macro;
-        String fieldName;
 
         if (name.equals("cat")) {
             macro=propsFile.getMCat();
-            fieldName="mCat";
         } else if (name.equals("edit")) {
             macro=propsFile.getMEdit(); 
-            fieldName="mEdit";
         } else if (name.equals("more")) {
             macro=propsFile.getMMore();
-            fieldName="mMore";
         } else {
             throw new Exception("Invalid statement name, expected edit or more: " + name);
         }
@@ -118,13 +114,7 @@ public class StmtCatEditMore extends StmtShellInteractive {
     
     @Override
     protected boolean processUnknown (Ctx ctx, File file) throws Exception {
-        if (!this.name.equals("edit")) return false; 
-        
-        file.createNewFile();
-        ObjFile theFile=new ObjFile(file.getCanonicalPath(), Protection.NoProtection);
-        callMacro(ctx, theFile);
-        ctx.push(new ValueObj(theFile));
-        return true;
+    	return false;
     }
     
 
