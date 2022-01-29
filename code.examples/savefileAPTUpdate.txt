@@ -26,7 +26,7 @@ Input("Enter ssh target on format user@host").get
 
 
 # Run Update and Upgrade on target, unless it has been updated within 20 hours
-# Returns Dict to be stored in database
+# Returns boolean true if ok, false if error
 # --
 P(1,GetSSHTarget) =>target
 P(2,36) => hoursSinceLast
@@ -40,45 +40,46 @@ P(3,false) => includeDistUpgrade
 
     target.after("@") =>host
     tMark=Sys.scriptName+".lastrun."+host
-    if (Util:HasTimedOut(tMark, hoursSinceLast*3600)) {
 
-        println("Performing update")
-        result = SSH:sudo(target,"apt-get -y update", true)
 
+    println("Performing update")
+    result = SSH:sudo(target,"apt-get -y update", true)
+
+    FAIL = result.get("exitCode") != 0 
+    if (FAIL) Inner {
+        Lib:Header("Update failed")
+        result.stdout->line println(line) |
+        result.stdout->line println("##ERR## " + line)
+    } 
+
+      if (!FAIL) {
+        println("Performing upgrade")
+        SSH:sudo(target,"apt-get -y upgrade", true) =>result
         FAIL = result.get("exitCode") != 0 
         if (FAIL) Inner {
-            Lib:Header("Update failed")
+            Lib:Header("Upgrade failed")
             result.stdout->line println(line) |
             result.stdout->line println("##ERR## " + line)
         } 
+      }
 
-          if (!FAIL) {
-            println("Performing upgrade")
-            SSH:sudo(target,"apt-get -y upgrade", true) =>result
-            FAIL = result.get("exitCode") != 0 
-            if (FAIL) Inner {
-                Lib:Header("Upgrade failed")
-                result.stdout->line println(line) |
-                result.stdout->line println("##ERR## " + line)
-            } 
-          }
+      if (includeDistUpgrade && !FAIL) {
+        println("Performing dist-upgrade")
+        SSH:sudo(target,"apt-get -y dist-upgrade", true) =>result
+        FAIL = result.get("exitCode") != 0 
+        if (FAIL) Inner {
+            Lib:HEader("Dist-upgrade failed")
+            result.stdout->line println(line) |
+            result.stdout->line println("##ERR## " + line)
+        } 
+      }
 
-          if (includeDistUpgrade && !FAIL) {
-            println("Performing dist-upgrade")
-            SSH:sudo(target,"apt-get -y dist-upgrade", true) =>result
-            FAIL = result.get("exitCode") != 0 
-            if (FAIL) Inner {
-                Lib:HEader("Dist-upgrade failed")
-                result.stdout->line println(line) |
-                result.stdout->line println("##ERR## " + line)
-            } 
-          }
-
-          if (!FAIL) {
-            Util:SetTimeMark(tMark)
-          }
-    } else {
-        println("Ignoring: last checked on " + Util:GetTimeMark(tMark).fmt)
+      if (!FAIL) {
+        Util:SetTimeMark(tMark)
+      }
+      
+      # return value
+      !FAIL
     }
 /run
 

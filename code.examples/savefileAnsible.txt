@@ -61,6 +61,7 @@
 
 
 # Run APT Update + upgrade + dist upgrade on one host
+# Returns true/false for ok/nok
 # --
     P(1,Input("target").get)=>target
     println("Calling APTUpdate:run for target="+target)
@@ -99,9 +100,11 @@
         #println("*   starting process for " + target)
         process = SpawnProcess(processData, {
             start=currentTimeMillis
-            AptUpdate(target)
+            result = AptUpdate(target)
             end=currentTimeMillis
             println("### time=" + (end-start) + " ms")
+            # return value
+            result
         })
         mon.Ladd.call(process,host)
         
@@ -117,27 +120,36 @@
     processList -> process
         
         target=process.data.target
-        Lib:Header("Waiting for " + target)
-        
-        exitValue=process.wait.exitValue
+        exitValue=process.exitValue
         output=process.output
-
-        println("exitValue=" + exitValue)
-        Inner{
-            output->line println("OUT: " + line)
-        }
-        type="APTUpdateUpgrade"
+        date=Date
         
-        obj=SymDict(target,exitValue,output,type)
-        
-        Db2Obj:AddObject("Ansible.APTUpdateUpgrade",obj)
-
-        readLine("Press ENTER for next")
+        obj=SymDict(date,target,exitValue,output)
+        Db2:Set("Ansible.APTUpdateUpgrade", target, obj)
+        report(target, exitValue)
+	| => reportLines
+	
+	Db2:Set("Ansible.APTUpdateUpgrade.LastRun","report",reportLines)
+	reportLines->line println(line)
     
 /AptUpdateAll
 
 
-        
+# Show details from APT Update
+# --
+	Lib:Header("Last run output")
+	reportLines = Db2:Get("Ansible.APTUpdateUpgrade.LastRun","report",List)
+	reportLines->line 
+		println(line)
+	|
+	keys=Db2:Keys("Ansible.APTUpdateUpgrade")
+	key=Lib:MenuSelect(keys,null,"Select target")
+	Db2:Get("Ansible.APTUpdateUpgrade",key) => data
+	Lib:Header(data.date.fmt + " " + key)
+	println("exitValue=" + data.exitValue)
+	data.output->line println(line)
+/UpdateDetails
+	
     
 
 # Decide if debian host should be booted
