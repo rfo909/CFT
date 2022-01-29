@@ -113,9 +113,6 @@
 
     mon.Lwait.call(0,true)  # true=verbose
 
-    Lib:Header("Press ENTER to see results")
-    readLine
-
 
     processList -> process
         
@@ -127,10 +124,6 @@
         obj=SymDict(date,target,exitValue,output)
         Db2:Set("Ansible.APTUpdateUpgrade", target, obj)
         report(target, exitValue)
-	| => reportLines
-	
-	Db2:Set("Ansible.APTUpdateUpgrade.LastRun","report",reportLines)
-	reportLines->line println(line)
     
 /AptUpdateAll
 
@@ -138,12 +131,23 @@
 # Show details from APT Update
 # --
 	Lib:Header("Last run output")
-	reportLines = Db2:Get("Ansible.APTUpdateUpgrade.LastRun","report",List)
-	reportLines->line 
+	keys=Db2:Keys("Ansible.APTUpdateUpgrade")
+	Inner {
+		keys->key
+			obj=Db2:Get("Ansible.APTUpdateUpgrade",key)
+			date=obj.date.fmt
+			exitValue=obj.exitValue
+			report(key,date,exitValue)
+	} ->line 
 		println(line)
 	|
-	keys=Db2:Keys("Ansible.APTUpdateUpgrade")
-	key=Lib:MenuSelect(keys,null,"Select target")
+	readLine("Enter host name or part of host name") => host
+	key = Inner {
+		keys->key
+			assert(key.contains(host)) 
+			out(key)
+		| _.first
+	}
 	Db2:Get("Ansible.APTUpdateUpgrade",key) => data
 	Lib:Header(data.date.fmt + " " + key)
 	println("exitValue=" + data.exitValue)
