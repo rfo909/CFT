@@ -190,7 +190,7 @@ files with no access, etc.
     
     Input("Backup log file path").get => fPath
     
-    file=targetDir.file(fPath)
+    file=File(fPath)
     error(!file.exists,"No such file: " + fPath)
     
     pathPrefix=null
