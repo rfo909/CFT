@@ -92,17 +92,36 @@ To change to different host name, call MyHost(true)
 # Add data WITH timestamp, in order to enable Index Lifetime Policies (ILP)
 # --
 	P(1,Input("Index name").get) => indexName
+	P(2,Input("Number of entries").get.parseInt) => count
+	P(3,Input("Sleep ms").get.parseInt) => delay
 
-	Util:Counter("customer_id") => x
-	data='{"name": "Roar", "timestamp": ' + currentTimeMillis + '}'
-	Util:CURL("http",
-		MyHost,
-		"POST",
-		"/" + indexName + "/_doc/"+x, 
-		data,
-		false
-		)
-		println(data)
+	Lib.Data.each(1,count)->i
+		Util:Counter("customer_id") => recordId
+
+		value=(Lib.Math.sin(i)*100).i
+
+		Date.sub(Date.Duration.hours(1)).setFormat("yyyy-MM-dd'T'HH:mm:ss").fmt => dateString
+
+		data = Dict.set("name","Roar")
+			.set("timestamp", dateString)
+			.set("value",value)
+
+		json=JSON:PP(data).concat(" ")
+		println("i="+i)
+		#Inner {
+		#	json->line println(line)
+		#}
+
+		println(json)
+		Util:CURL("http",
+			MyHost,
+			"POST",
+			"/" + indexName + "/_doc/"+recordId, 
+			json,
+			false
+			)
+
+		Sys.sleep(delay)
 /AddIndexData
 
 

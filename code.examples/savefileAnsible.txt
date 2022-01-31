@@ -454,6 +454,8 @@ DNS=10.0.0.3 10.0.0.4
     P(3,Input("Clone host name").get) => hostname
     P(4,Input("Management username").get) => username
 
+	readLine("Press ENTER to continue")
+
     target=username + "@" + templateIp
 
     # Creating CFT script to run on new VM

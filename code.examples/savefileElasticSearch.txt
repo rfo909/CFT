@@ -90,7 +90,8 @@ Input("ssh target user@host").get
         dict=Dict
     }
 
-    if (forceUpdate || Util:HasTimedOut("ElasticSearch.ConfigCheck", 4*3600)) {
+	# one week timeout for settings
+    if (forceUpdate || Util:HasTimedOut("ElasticSearch.ConfigCheck", 7*24*3600)) {
         Input("All host names - space-separated") => inp
         inp.clear.setCurr(dict.get("hosts",List).concat(" "))
         dict.set("hosts", inp.get.split)
@@ -116,6 +117,7 @@ Input("ssh target user@host").get
 
         error(!Lib:Confirm,"Aborting")
 
+		# Refresh time mark
         Db2:Set("ElasticSearch","Config",dict)
 
         save=true
@@ -382,6 +384,9 @@ Input("ssh target user@host").get
 
 # Complete install ElasticSearch 
 # --
+	
+	ShowConfigData
+	readLine("Press ENTER to continue")
 
     hosts->host
         target=user+"@"+host
