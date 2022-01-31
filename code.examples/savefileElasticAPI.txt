@@ -73,23 +73,33 @@ To change to different host name, call MyHost(true)
 
 # List indexes
 # --
-    Util:CURL("http",MyHost,"GET","/_cat/indices?pretty",null,true)
+    Util:CURL("http",MyHost,"GET","/_cat/indices?format=json&pretty=true",null,false).stdout
+
 /ListIndexes
 
 
-# Create index
+# Create index with lifecycle management
 # --
-    P(1,Input("Create index name").get) => indexName
-	P(2,Input("Index Lifecycle Policy name (blank for none)").get) => ilpName
+    P(1,Input("Index name xxx-1 or similar").get) => indexName
+	P(2,Input("index.lifecycle.name").get) => ilpName
+	P(3,Input("index.lifecycle.rollover_alias").get) => ilpAlias
+
+	
 
     Dict.set("settings",Dict
-		    .set("number_of_shards",1)
-		    .set("number_of_replicas",1)
+		.set("number_of_shards",1)
+		.set("number_of_replicas",1)
+		.set("index.lifecycle.name", ilpName)
+		.set("index.lifecycle.rollover_alias", ilpAlias)
+	).set("aliases",Dict
+		.set(ilpAlias, Dict
+			.set("is_write_index", true)
+		)
 	)
 	=> data
 
 	if (ilpName != "") {
-		data.settings.set("index.lifecycle.name", ilpName)
+		data.settings
 	}
 
     url = "/"+indexName+"?pretty" 
@@ -103,21 +113,24 @@ To change to different host name, call MyHost(true)
 /CreateIndex
 
 
-# Add data WITH timestamp on yyyy-MM-dd'T'HH:mm:ss format, in order to enable time searches
+# Add data WITH timestamp on yyyy-MM-dd'T'HH:mm:ss format, 
+# in order to enable time searches, into time-separated indexes,
+# which enables manual delete of old data!
 # --
 	P(1,Input("Index name").get) => indexName
-	P(2,Input("Number of entries").get.parseInt) => count
-	P(3,Input("Sleep ms").get.parseInt) => delay
+	P(2,Input("Sleep ms").get.parseInt) => delay
 
-	Lib.Data.each(1,count)->i
+	i=0
+	loop
+		i=i+1
 		Util:Counter("customer_id") => recordId
 
 		value=(Lib.Math.sin(i)*100).i
 
-		Date.sub(Date.Duration.hours(1)).setFormat("yyyy-MM-dd'T'HH:mm:ss").fmt => dateString
+		Date.sub(Date.Duration.hours(1)).setFormat("yyyy-MM-dd'T'HH:mm:ss").fmt => timestamp
 
 		data = Dict.set("name","Roar")
-			.set("timestamp", dateString)
+			.set("timestamp", timestamp)
 			.set("value",value)
 
 		json=JSON:PP(data).concat(" ")
@@ -127,6 +140,7 @@ To change to different host name, call MyHost(true)
 		#}
 
 		println(json)
+
 		Util:CURL("http",
 			MyHost,
 			"POST",
@@ -140,30 +154,44 @@ To change to different host name, call MyHost(true)
 
 
 
-# Index Lifecycle Policy README
+# Add data into time-separated indexes, as decided via Date format string
 # --
-<<<<<< EOF
-- Create index with some timestamp on format
+	P(1,Input("Index name").get) => indexName
+	P(2,Input("Sleep ms").get.parseInt) => delay
+	P(3,Input("Date/Time pattern").setCurr("yyyy-MM-dd-HH-mm").get)=>dateFormat
 
-		yyyy-MM-dd'T'HH:mm:ss
+	i=0
+	loop
+		i=i+1
+		Util:Counter("customer_id") => recordId
 
-	** possibly not required for ILP, but good for displaying
-	   data along time axis, to see if ILP does anything)
+		value=(Lib.Math.sin(i)*100).i
 
-- When creating Kibana Index Pattern, use this field as time field
-	This enables presenting data on time axis (when exploring etc)
+		Date.sub(Date.Duration.hours(1)).setFormat("yyyy-MM-dd'T'HH:mm:ss").fmt => timestamp
+		data = Dict.set("name","Roar")
+			.set("value",value)
+			.set("timestamp",timestamp)
+
+		json=JSON:PP(data).concat(" ")
+		println("i="+i)
+
+		println(json)
+
+		indexDatePart=Date.setFormat(dateFormat).fmt
+
+		Util:CURL("http",
+			MyHost,
+			"POST",
+			"/" + indexName + "-" + indexDatePart + "/_doc/"+recordId, 
+			json,
+			false
+			)
+
+		Sys.sleep(delay)
+/AddMultiIndexData
 
 
-- Create Index Template under Index management -> Index Templates
-	- give index patterns for the indices it controls 
 
-
-- Create Index Lifecycle Policy
-	- Actions: Add policy to Index template
-
->>>>>> EOF
-	-> line println("| " + line)
-/ILPReadme
 
 
 # Create or modify Index Lifecycle Policy - using minutes for testing
@@ -272,74 +300,104 @@ To change to different host name, call MyHost(true)
 /CreateIndexTemplate
 
 
-
-
-# Delete dated indexes older than N days
-# --
-    P(1,30)=>keepDays
-    P(2,60)=>scanSinceDays
-    P(3,Lambda{P(1,Date)=>date error("Lambda not implemented")}) => LIndexName
-        # The lambda takes a Date object, and should return an index name
-        # for that day.
-    P(4,false)=>enable
-        # Leave false while testing, set to true to call DELETE
-
-    Lib.Data.for(scanSinceDays,keepDays,-1)->daysAgo
-        date = Date.sub(Date.Duration.days(daysAgo))
-        indexName=LIndexName.call(date)
-        if (enable) {
-            result = Util:CURL("http",MyHost,"DELETE","/"+indexName,null,false)
-            ok = true
-            {result.stdout->line if(line.contains("index_not_found_exception")) ok=false}
-            if (ok) 
-                println("Deleted: " + indexName)
-#       else
-#           println("Not found: " + indexName)
-        } else {
-            println("indexName=" + indexName)
-        }
-/DeleteIndexes
-
-
-# Delete day-indexes named on format <prefix><date>
+# Delete time-stamped index, named on format <prefix><date>
 # --
     P(1,Input("Get index prefix up to date string").get)=>prefix
-    P(2,"yyyy.MM.dd")=>dateFormat
-    P(3,30)=>keepDays
-    P(4,60)=>scanSinceDays
-    P(5,false)=>enable
+    P(2,"yyyy-MM-dd")=>dateFormat
+    P(3,Date.sub(Date.Duration.days(30)))=>cutoffDate
 
-    SymDict(prefix,dateFormat).set("LIndexName",
-        Lambda {
-            P(1)=>date
-            self.prefix + date.setFormat(self.dateFormat).fmt
-        }
-    ) => obj
-    DeleteIndexes(keepDays,scanSinceDays,obj.LIndexName,enable)
-/DeletePrefixedDatedIndexes
+	json=Util:CURL("http",MyHost,"GET","/_cat/indices?format=json&pretty=true",null,false).stdout
+	data=JSON:Parse(json)
+	# should be a list of index objects
+
+	error(getType(data) != "List", "Expected list, got " + getType(data))
+
+	# Iterate over indexes, and from their name, parse the date/time.
+	# For those older than cutoffDate: delete
+	data->ix
+		indexName=ix.index
+		assert(indexName.startsWith(prefix))
+		indexName.sub(prefix.length) => datePart
+		println("Index-name: " + indexName + " date/time-part: " + datePart)
+		Date.setFormat(dateFormat).parse(datePart) => indexDate
+
+		if (indexDate.before(cutoffDate)) {
+			println("* Deleting index " + indexName)
+			Util:CURL("http",MyHost,"DELETE","/"+indexName,null,false)
+		} 
+/DeleteDatedIndexes
 
 
-# Delete day-indexes named on format main2-yyyy.MM.dd or similar
+# Test DeleteDatedIndexes
 # --
-    "main2-" => prefix
-    "yyyy.MM.dd" => dateFormat
-    30 => keepDays
-    60 => scanSinceDays
-    
-    true => enable
-    
-    DeletePrefixedDatedIndexes(prefix, dateFormat, keepDays, scanSinceDays, enable)
-/DeleteMain2
+	DeleteDatedIndexes("roar1-", "yyyy-MM-dd-HH-mm", Date.sub(Date.Duration.minutes(10)))
+/t
 
 
-# Delete day-indexes named on format winlogbeat-6.4.2-yyyy.MM.dd or similar
+
+
+# Index Lifecycle Policy README
 # --
-    "winlogbeat-6.4.2-" => prefix
-    "yyyy.MM.dd" => dateFormat
-    90 => keepDays
-    180 => scanSinceDays
-    
-    true => enable
-    
-    DeletePrefixedDatedIndexes(prefix, dateFormat, keepDays, scanSinceDays, enable)
-/DeleteWinlogbeat642
+<<<<<< EOF
+
+Setting up ILP before creating index
+-------------------------------------
+- Create Index Lifecycle Policy
+- Run CreateIndex, entering the name, and an alias
+
+The alias is mandatory. Don't know what it's used for.
+
+The index had to be named xxx-N or we got an error
+when it got time to do roll over. Called it main-1 
+
+Note that the error above didn't show up before trying
+to execute the ILP. Good thing it had short timeouts.
+
+When it became time to roll over, it then created an 
+index main-0000002, which was empty, and
+after a further while, it reset the the main-1, purging
+all content. 
+
+So the ILP was doing something, just not anything
+meaningful.
+ 
+
+Setting up ILP for existing index
+---------------------------------
+NOTE: does not work at all! :-)
+
+- Create index with some timestamp on format
+
+		yyyy-MM-dd'T'HH:mm:ss
+
+	** possibly not required for ILP, but good for displaying
+	   data along time axis, to see if ILP does anything)
+
+- When creating Kibana Index Pattern, use this field as time field
+	This enables presenting data on time axis (when exploring etc)
+
+
+- Create Index Template under Index management -> Index Templates
+	- give index patterns for the indices it controls 
+
+
+- Create Index Lifecycle Policy
+	- Actions: Add policy to Index template
+
+
+*** Use date pattern in indexes
+-------------------------------
+Requires external scripting to purge old data
+BUT IT WORKS!
+See functions
+
+- AddMultiIndexData
+- DeleteDatedIndexes
+
+
+
+
+>>>>>> EOF
+	-> line println("| " + line)
+/ILPReadme
+
