@@ -72,24 +72,38 @@ To change to different host name, call MyHost(true)
 
 
 # List indexes
+# --
     Util:CURL("http",MyHost,"GET","/_cat/indices?pretty",null,true)
 /ListIndexes
 
 
 # Create index
-    P(1,Input("Create index name").get) => name
+# --
+    P(1,Input("Create index name").get) => indexName
+	P(2,Input("Index Lifecycle Policy name (blank for none)").get) => ilpName
 
     Dict.set("settings",Dict
-        .set("number_of_shards",1)
-        .set("number_of_replicas",1)
-    ) => data
+		    .set("number_of_shards",1)
+		    .set("number_of_replicas",1)
+	)
+	=> data
 
-    url = "/"+name+"?pretty"        
+	if (ilpName != "") {
+		data.settings.set("index.lifecycle.name", ilpName)
+	}
+
+    url = "/"+indexName+"?pretty" 
+
+	println("url=" + url)       
+	Inner{
+		JSON:PP(data)->line println(line)
+	}
+
     Util:CURL("http",MyHost,"PUT", url, data, true)
 /CreateIndex
 
 
-# Add data WITH timestamp, in order to enable Index Lifetime Policies (ILP)
+# Add data WITH timestamp on yyyy-MM-dd'T'HH:mm:ss format, in order to enable time searches
 # --
 	P(1,Input("Index name").get) => indexName
 	P(2,Input("Number of entries").get.parseInt) => count
@@ -125,13 +139,35 @@ To change to different host name, call MyHost(true)
 /AddIndexData
 
 
-# Check lifecycle progress
-    Util:CURL("http",MyHost,"GET","/.ds-timeseries-*/_ilm/explain")
-/LifecycleProgress
+
+# Index Lifecycle Policy README
+# --
+<<<<<< EOF
+- Create index with some timestamp on format
+
+		yyyy-MM-dd'T'HH:mm:ss
+
+	** possibly not required for ILP, but good for displaying
+	   data along time axis, to see if ILP does anything)
+
+- When creating Kibana Index Pattern, use this field as time field
+	This enables presenting data on time axis (when exploring etc)
+
+
+- Create Index Template under Index management -> Index Templates
+	- give index patterns for the indices it controls 
+
+
+- Create Index Lifecycle Policy
+	- Actions: Add policy to Index template
+
+>>>>>> EOF
+	-> line println("| " + line)
+/ILPReadme
 
 
 # Create or modify Index Lifecycle Policy - using minutes for testing
-# NOTE: ILP can only be applied to Index that contains time field!!!
+# NOTE: can ILP only be applied to Index that contains time field?
 # --
     P(1,Input("Index Lifecycle Policy name").setCurrCond("RFTest").get) =>ilpName
     P(2,Input("Expiration minutes").get.parseInt)=>expirationMinutes
@@ -175,7 +211,17 @@ To change to different host name, call MyHost(true)
 
     url="/_ilm/policy/" + ilpName
     Util:CURL("http",MyHost,"PUT",url,json,false)
-/CreateILP
+/ILPCreate
+
+
+
+# Check lifecycle progress
+# --
+	P(1,Input("Index name or pattern").setCurr("*").get) => index
+    json = Util:CURL("http",MyHost,"GET","/" + index + "/_ilm/explain").stdout
+	JSON:PP(JSON:Parse(json))
+/ILPProgress
+
 
 
 
@@ -183,7 +229,7 @@ To change to different host name, call MyHost(true)
 # --
 	Util:CURL("http",MyHost,"GET","/_ilm/policy").stdout => json
 	JSON:PP(JSON:Parse(json))
-/ListILP
+/ILPList
 
 
 # Create Index Template - this is needed to connect indexes to ILM Policies
