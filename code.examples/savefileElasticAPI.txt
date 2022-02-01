@@ -158,7 +158,7 @@ To change to different host name, call MyHost(true)
 # --
 	P(1,Input("Index name").get) => indexName
 	P(2,Input("Sleep ms").get.parseInt) => delay
-	P(3,Input("Date/Time pattern").setCurr("yyyy-MM-dd-HH-mm").get)=>dateFormat
+	P(3,Input("Date/Time pattern").setCurr("yyyy-MM-dd-HH").get)=>dateFormat
 
 	i=0
 	loop
@@ -330,7 +330,7 @@ To change to different host name, call MyHost(true)
 
 # Test DeleteDatedIndexes
 # --
-	DeleteDatedIndexes("roar1-", "yyyy-MM-dd-HH-mm", Date.sub(Date.Duration.minutes(10)))
+	DeleteDatedIndexes("roar1-", "yyyy-MM-dd-HH", Date.sub(Date.Duration.hours(4)))
 /t
 
 
