@@ -394,6 +394,9 @@ See functions
 - AddMultiIndexData
 - DeleteDatedIndexes
 
+NOTE: it seems the Kibana Index pattern MUST be on the form "xxx-*"
+and not just "xxx*". Bugix. 
+
 
 
 
