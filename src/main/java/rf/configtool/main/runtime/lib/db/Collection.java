@@ -117,6 +117,7 @@ public class Collection {
                     
                     dataLinesRead++;
                     int pos=line.indexOf(' ');
+                    if (pos < 0) continue; // invalid lines are ignored
                     data.put(line.substring(0,pos), line.substring(pos+1));
                 }
             } finally {
