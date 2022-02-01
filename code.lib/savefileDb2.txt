@@ -81,6 +81,12 @@ knowing the UUID.
 		tryCatch(
 			eval(value)
 		)=>x
+		if (!x.ok) {
+			Db2:Set(collection,key,defaultValue)		
+			error("Db2 collection " + collection 
+				+ " invalid value for key=" + key + " '" + value 
+				+ "' - saved defaultValue (" + defaultValue + ") for this key!!")	
+		}
 		if (x.ok) value=x.result else value=defaultValue
 	} else {
 		value=defaultValue
