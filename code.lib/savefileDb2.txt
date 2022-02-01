@@ -75,7 +75,18 @@ knowing the UUID.
     
     value=Lib.Db.Db2.get(collection,key)
 
-    if (value == null, defaultValue, eval(value))
+	if (value != null) {
+		# the eval only fails if collection is corrupted, but we
+		# want to continue operating still
+		tryCatch(
+			eval(value)
+		)=>x
+		if (x.ok) value=x.result else value=defaultValue
+	} else {
+		value=defaultValue
+	}
+	
+	value
 /Get
 
 
