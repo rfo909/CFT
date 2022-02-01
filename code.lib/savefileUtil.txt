@@ -65,7 +65,7 @@ P(2,999999999999) => maxValue
     
     id="counter:"+(name.replace(" ","_"))
     
-    TRANS="Util.Counter.Transaction:" + id
+    TRANS="Util.Counter.Transaction"
         # Individual Db2 collection accesses are protected by collection locks, but
         # below we have a transaction, where we read a value, update it
         # and write it back.
