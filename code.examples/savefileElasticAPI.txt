@@ -111,7 +111,7 @@ To change to different host name, call MyHost(true)
 # Add alias to index
 # --
 	P(1,Input("Index name").get) => indexName
-	P(2,Input("Index alias").get) => alias
+	P(2,Input("Index alias").setCurr(indexName).get) => alias
 	
 	Dict.set("actions",List(
 		Dict.set("add", Dict.set("index",indexName).set("alias",alias))
@@ -315,7 +315,8 @@ To change to different host name, call MyHost(true)
     P(1,Input("Get index prefix up to date string").get)=>prefix
     P(2,"yyyy-MM-dd")=>dateFormat
     P(3,Date.sub(Date.Duration.days(30)))=>cutoffDate
-
+	P(4,false)=>enable
+	
 	json=Util:CURL("http",MyHost,"GET","/_cat/indices?format=json&pretty=true",null,false).stdout
 	data=JSON:Parse(json)
 	# should be a list of index objects
@@ -333,14 +334,27 @@ To change to different host name, call MyHost(true)
 
 		if (indexDate.before(cutoffDate)) {
 			println("* Deleting index " + indexName)
-			Util:CURL("http",MyHost,"DELETE","/"+indexName,null,false)
+			if (enable) Util:CURL("http",MyHost,"DELETE","/"+indexName,null,false)
 		} 
 /DeleteDatedIndexes
 
 
+# Delete winlogbeat-6.4.2-yyyy.MM.dd, metricbeat-7.2.0-yyyy.MM.dd and filebeat-7.9.3-yyyy.MM.dd older than 90 days
+# --
+	expiration=Date.sub(Date.Duration.days(30))
+	ENABLE=false
+	
+	DeleteDatedIndexes("winlogbeat-6.4.2-", "yyyy.MM.dd", expiration, ENABLE)
+	DeleteDatedIndexes("metricbeat-7.2.0-", "yyyy.MM.dd", expiration, ENABLE)
+	DeleteDatedIndexes("filebeat-7.9.3-", "yyyy.MM.dd", expiration, ENABLE)
+/Cleanup
+
+
+
+
 # Test DeleteDatedIndexes
 # --
-	DeleteDatedIndexes("roar1-", "yyyy-MM-dd-HH", Date.sub(Date.Duration.hours(4)))
+	DeleteDatedIndexes("roar1-", "yyyy-MM-dd-HH", Date.sub(Date.Duration.hours(4)), true)
 /t
 
 
