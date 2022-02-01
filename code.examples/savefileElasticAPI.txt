@@ -84,8 +84,6 @@ To change to different host name, call MyHost(true)
 	P(2,Input("index.lifecycle.name").get) => ilpName
 	P(3,Input("index.lifecycle.rollover_alias").get) => ilpAlias
 
-	
-
     Dict.set("settings",Dict
 		.set("number_of_shards",1)
 		.set("number_of_replicas",1)
@@ -98,10 +96,6 @@ To change to different host name, call MyHost(true)
 	)
 	=> data
 
-	if (ilpName != "") {
-		data.settings
-	}
-
     url = "/"+indexName+"?pretty" 
 
 	println("url=" + url)       
@@ -111,6 +105,22 @@ To change to different host name, call MyHost(true)
 
     Util:CURL("http",MyHost,"PUT", url, data, true)
 /CreateIndex
+
+
+
+# Add alias to index
+# --
+	P(1,Input("Index name").get) => indexName
+	P(2,Input("Index alias").get) => alias
+	
+	Dict.set("actions",List(
+		Dict.set("add", Dict.set("index",indexName).set("alias",alias))
+	))
+	=> data
+	JSON:PP(data)->line println(line) |
+	
+	Util:CURL("http",MyHost,"POST", "/_aliases", data, true)
+/AddIndexAlias
 
 
 # Add data WITH timestamp on yyyy-MM-dd'T'HH:mm:ss format, 
@@ -340,12 +350,12 @@ To change to different host name, call MyHost(true)
 # --
 <<<<<< EOF
 
-Setting up ILP before creating index
+Adding ILP directly to existing index
 -------------------------------------
+- If the index has no alias (watever that is), then add one with AddIndexAlias
+- Verify in Kibana
 - Create Index Lifecycle Policy
-- Run CreateIndex, entering the name, and an alias
-
-The alias is mandatory. Don't know what it's used for.
+- Click on the index, and manage, add lifecycle policy
 
 The index had to be named xxx-N or we got an error
 when it got time to do roll over. Called it main-1 
@@ -362,9 +372,9 @@ So the ILP was doing something, just not anything
 meaningful.
  
 
-Setting up ILP for existing index
+Setting up ILP via Index Template
 ---------------------------------
-NOTE: does not work at all! :-)
+NOTE: does not work! :-)
 
 - Create index with some timestamp on format
 
