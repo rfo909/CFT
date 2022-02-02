@@ -80,9 +80,16 @@ To change to different host name, call MyHost(true)
 
 # Create index with lifecycle management
 # --
-    P(1,Input("Index name xxx-1 or similar").get) => indexName
+    P(1,Input("Index name (-000001 will be added)").get) => indexName
+
+	error(Regex("^.*\d.*$").match(indexName),
+		"Invalid index name, should not contain digits")
+	
 	P(2,Input("index.lifecycle.name").get) => ilpName
-	P(3,Input("index.lifecycle.rollover_alias").get) => ilpAlias
+	P(3,Input("index.lifecycle.rollover_alias").setCurr(indexName).get) => ilpAlias
+
+	indexName=indexName+"-000001"
+
 
     Dict.set("settings",Dict
 		.set("number_of_shards",1)
@@ -144,17 +151,19 @@ To change to different host name, call MyHost(true)
 			.set("value",value)
 
 		json=JSON:PP(data).concat(" ")
-		println("i="+i)
+		println("i="+i + " " + indexName)
 		#Inner {
 		#	json->line println(line)
 		#}
 
+		url="/" + indexName + "/_doc/"+recordId
+		println(url)
 		println(json)
 
 		Util:CURL("http",
 			MyHost,
 			"POST",
-			"/" + indexName + "/_doc/"+recordId, 
+			url, 
 			json,
 			false
 			)
@@ -183,7 +192,7 @@ To change to different host name, call MyHost(true)
 			.set("timestamp",timestamp)
 
 		json=JSON:PP(data).concat(" ")
-		println("i="+i)
+		println("i="+i+" "+indexName)
 
 		println(json)
 
@@ -371,6 +380,8 @@ Adding ILP directly to existing index
 - Create Index Lifecycle Policy
 - Click on the index, and manage, add lifecycle policy
 
+DOES NOT WORK (7.16)
+
 The index had to be named xxx-N or we got an error
 when it got time to do roll over. Called it main-1 
 
@@ -385,6 +396,11 @@ all content.
 So the ILP was doing something, just not anything
 meaningful.
  
+Setting up ILP when creating Index
+----------------------------------
+The CreateIndex function does this, setting up an alias and
+coupling the index to an ILP. Seems to work.
+
 
 Setting up ILP via Index Template
 ---------------------------------

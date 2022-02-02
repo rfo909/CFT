@@ -69,10 +69,10 @@ All can be run multiple times.
 Input("ssh target user@host").get
 //GetTarget
 
-"elasticsearch-7.7.1-amd64.deb"
+"elasticsearch-7.16.3-amd64.deb"
 //ESImage
 
-"kibana-7.7.1-amd64.deb"
+"kibana-7.16.3-amd64.deb"
 //KibanaImage
 
 
