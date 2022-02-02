@@ -311,9 +311,12 @@ Dict.set("list",List)
     url=protocol + HostPort + path
     cmd.add(url)
     if (jsonData != null) {
-        cmd.add("-d")
-        cmd.add(if (getType(jsonData)=="String", jsonData, JSON:Export(jsonData)) )
+		cmd.add("-d")
+		str=if (getType(jsonData)=="String", jsonData, JSON:Export(jsonData))
+		if (Sys.isWindows) str=str.replace('"','\"')
+        cmd.add(str)
     }
+	
     if (verbose) {
         println
         Inner {
