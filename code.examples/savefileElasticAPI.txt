@@ -105,10 +105,9 @@ To change to different host name, call MyHost(true)
 
     url = "/"+indexName+"?pretty" 
 
-	println("url=" + url)       
-	Inner{
-		JSON:PP(data)->line println(line)
-	}
+	println("PUT " + url)
+	JSON:PP(data,true)
+	Lib:HardConfirm("Continue")
 
     Util:CURL("http",MyHost,"PUT", url, data, true)
 /CreateIndex
@@ -124,9 +123,13 @@ To change to different host name, call MyHost(true)
 		Dict.set("add", Dict.set("index",indexName).set("alias",alias))
 	))
 	=> data
-	JSON:PP(data)->line println(line) |
+
+	url="/_aliases"
+	println("POST " + url)
+	JSON:PP(data,true)
+	Lib:HardConfirm
 	
-	Util:CURL("http",MyHost,"POST", "/_aliases", data, true)
+	Util:CURL("http",MyHost,"POST", url, data, true)
 /AddIndexAlias
 
 
@@ -150,21 +153,18 @@ To change to different host name, call MyHost(true)
 			.set("timestamp", timestamp)
 			.set("value",value)
 
-		json=JSON:PP(data).concat(" ")
 		println("i="+i + " " + indexName)
-		#Inner {
-		#	json->line println(line)
-		#}
-
+	
 		url="/" + indexName + "/_doc/"+recordId
-		println(url)
-		println(json)
+		println("POST " + url)
+		JSON:PP(data,true)
+
 
 		Util:CURL("http",
 			MyHost,
 			"POST",
 			url, 
-			json,
+			data,
 			false
 			)
 
@@ -191,18 +191,19 @@ To change to different host name, call MyHost(true)
 			.set("value",value)
 			.set("timestamp",timestamp)
 
-		json=JSON:PP(data).concat(" ")
 		println("i="+i+" "+indexName)
 
-		println(json)
-
 		indexDatePart=Date.setFormat(dateFormat).fmt
+
+		url="/" + indexName + "-" + indexDatePart + "/_doc/"+recordId
+		println("POST " + url)
+		JSON:PP(data,true)
 
 		Util:CURL("http",
 			MyHost,
 			"POST",
-			"/" + indexName + "-" + indexDatePart + "/_doc/"+recordId, 
-			json,
+			url, 
+			data,
 			false
 			)
 
@@ -214,7 +215,7 @@ To change to different host name, call MyHost(true)
 
 
 # Create or modify Index Lifecycle Policy - using minutes for testing
-# NOTE: can ILP only be applied to Index that contains time field?
+# https://www.elastic.co/guide/en/elasticsearch/reference/7.7/getting-started-index-lifecycle-management.html#ilm-gs-create-policy
 # --
     P(1,Input("Index Lifecycle Policy name").setCurrCond("RFTest").get) =>ilpName
     P(2,Input("Expiration minutes").get.parseInt)=>expirationMinutes
@@ -279,42 +280,35 @@ To change to different host name, call MyHost(true)
 /ILPList
 
 
-# Create Index Template - this is needed to connect indexes to ILM Policies
-# https://www.elastic.co/guide/en/elasticsearch/reference/7.7/indices-templates.html
+# Create Index Template
 #
-# Following this step, in kibana, go to Index Lifecycle policies, then 
-# for our life cycle, select Action, then Add Policy to Index Template
+# https://www.elastic.co/guide/en/elasticsearch/reference/7.7/indices-templates.html
+# https://www.elastic.co/guide/en/elasticsearch/reference/7.7/getting-started-index-lifecycle-management.html#ilm-gs-create-policy
 #
 # --
     P(1,Input("Index pattern").get) => indexPattern
 	P(2,Input("Index template name").get) => templateName
-<<< EOF
-{
-  "index_patterns": ["<< indexPattern >>"],
-  "settings": {
-    "number_of_shards": 1
-  },
-  "mappings": {
-    "_source": {
-      "enabled": false
-    },
-    "properties": {
-      "host_name": {
-        "type": "keyword"
-      },
-      "created_at": {
-        "type": "date",
-        "format": "EEE MMM dd HH:mm:ss Z yyyy"
-      }
-    }
-  }
-}
->>> EOF
-	_.mergeExpr->line out(line.trim) | _.concat(" ") => json
+	P(3,Input("index.lifecycle.name").get) => lifecycleName
+	P(4,Input("index.lifecycle.rollover_alias").get) => alias
 
-    println(json)
-    println
-    Util:CURL("http",MyHost,"POST","/_template/" + templateName + "?pretty",json,true)
+	Dict.set("index_patterns",List(
+			indexPattern
+			)
+		)
+		.set("settings",Dict
+			.set("number_of_shards", 1)
+			.set("number_of_replicas", 1)
+			.set("index.lifecycle.name", lifecycleName)
+			.set("index.lifecycle.rollover_alias", alias)
+		)
+	=>data
+	url="/_template/" + templateName + "?pretty"
+
+	println("POST " + url)
+	JSON:PP(data,true)
+	Lib:HardConfirm("Continue")
+
+    Util:CURL("http",MyHost,"POST",url,json,true)
         
 /CreateIndexTemplate
 
@@ -330,9 +324,10 @@ To change to different host name, call MyHost(true)
 	
 	json=Util:CURL("http",MyHost,"GET","/_cat/indices?format=json&pretty=true",null,false).stdout
 	data=JSON:Parse(json)
+
 	# should be a list of index objects
 
-	error(getType(data) != "List", "Expected list, got " + getType(data) + " " + json)
+	error(getType(data) != "List", "Expected list, got " + getType(data))
 
 	# Iterate over indexes, and from their name, parse the date/time.
 	# For those older than cutoffDate: delete

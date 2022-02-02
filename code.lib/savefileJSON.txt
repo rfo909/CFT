@@ -315,6 +315,7 @@ nicely formatted JSON.
 # Pretty-print data structure as formatted JSON
 # --
     P(1)=>JSONValue
+	P(2,false)=>print
 
     Dict
         .set("data",List)
@@ -325,7 +326,11 @@ nicely formatted JSON.
 
     PPValue(JSONValue,"",obj.LOut)
     NEWLINE="^n".unEsc
-    obj.data.concat.split(NEWLINE)
+    result = obj.data.concat.split(NEWLINE)
+	if(print) Inner{
+		result->line println(line)
+	}
+	result
 /PP
 
 

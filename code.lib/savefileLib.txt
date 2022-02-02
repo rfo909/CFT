@@ -620,12 +620,26 @@ P(1,"label") =>label P(2) =>currVal P(3,"yes") =>trueVal P(4,"no") =>falseVal
     P(1,"Please confirm")=>label
     P(2,"yes")=>confirmString
     P(3,"no")=>defaultValue
-    readLine(label + " ("+defaultValue+")") => inp
+	
+	options=confirmString + "/" + defaultValue
+    readLine(label + " " + options + " ("+defaultValue+")") => inp
     if (inp.trim=="") inp=defaultValue
     
     inp.toLower == confirmString.toLower
 /Confirm
 
+
+
+# Get confirmation or abort with error
+# --
+    P(1,"Continue")=>label
+    P(2,"yes")=>confirmString
+    P(3,"no")=>defaultValue
+	
+	label="!!! " + label
+	println
+	error(!Confirm(label,confirmString,defaultValue),"Aborting")
+/HardConfirm
 
 
 
