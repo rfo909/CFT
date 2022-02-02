@@ -321,16 +321,18 @@ To change to different host name, call MyHost(true)
 
 # Delete time-stamped index, named on format <prefix><date>
 # --
-    P(1,Input("Get index prefix up to date string").get)=>prefix
+    P(1,"xxx-")=>prefix
     P(2,"yyyy-MM-dd")=>dateFormat
     P(3,Date.sub(Date.Duration.days(30)))=>cutoffDate
 	P(4,false)=>enable
+		# If false, we display what indexes would be deleted
+		# If true, they are actually deleted
 	
 	json=Util:CURL("http",MyHost,"GET","/_cat/indices?format=json&pretty=true",null,false).stdout
 	data=JSON:Parse(json)
 	# should be a list of index objects
 
-	error(getType(data) != "List", "Expected list, got " + getType(data))
+	error(getType(data) != "List", "Expected list, got " + getType(data) + " " + json)
 
 	# Iterate over indexes, and from their name, parse the date/time.
 	# For those older than cutoffDate: delete
