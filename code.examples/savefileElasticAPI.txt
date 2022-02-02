@@ -82,8 +82,8 @@ To change to different host name, call MyHost(true)
 # --
     P(1,Input("Index name (-000001 will be added)").get) => indexName
 
-	error(Regex("^.*\d.*$").match(indexName),
-		"Invalid index name, should not contain digits")
+	error(Regex("^.*-\d.*$").match(indexName),
+		"Invalid index name, should not contain -N where N is a digit")
 	
 	P(2,Input("index.lifecycle.name").get) => ilpName
 	P(3,Input("index.lifecycle.rollover_alias").setCurr(indexName).get) => ilpAlias
@@ -111,6 +111,36 @@ To change to different host name, call MyHost(true)
 
     Util:CURL("http",MyHost,"PUT", url, data, true)
 /CreateIndex
+
+
+
+# Create index managed via index template
+# https://www.elastic.co/guide/en/elasticsearch/reference/7.7/getting-started-index-lifecycle-management.html#ilm-gs-create-policy
+# --
+    P(1,Input("Index name (-000001 will be added)").get) => indexName
+	P(2,Input("Index alias").get) => alias
+
+	error(Regex("^.*-\d.*$").match(indexName),
+		"Invalid index name, should not contain -N where N is a digit")
+	
+	indexName=indexName+"-000001"
+
+	Dict
+		.set("aliases",Dict
+			.set(alias, Dict
+				.set("is_write_index", true)
+			)
+		)
+	=>data
+
+    url = "/"+indexName 
+
+	println("PUT " + url)
+	JSON:PP(data,true)
+	Lib:HardConfirm("Continue")
+
+    Util:CURL("http",MyHost,"PUT", url, data, true)
+/CreateIndexForTemplate
 
 
 
@@ -214,13 +244,12 @@ To change to different host name, call MyHost(true)
 
 
 
-# Create or modify Index Lifecycle Policy - using minutes for testing
+# Create or modify Index Lifecycle Policy - using hours for testing
 # https://www.elastic.co/guide/en/elasticsearch/reference/7.7/getting-started-index-lifecycle-management.html#ilm-gs-create-policy
 # --
-    P(1,Input("Index Lifecycle Policy name").setCurrCond("RFTest").get) =>ilpName
-    P(2,Input("Expiration minutes").get.parseInt)=>expirationMinutes
-	
-	rolloverMinutes=(expirationMinutes/3).i
+    P(1,Input("Index Lifecycle Policy name").get) =>ilpName
+    P(2,Input("Rollover hours").get.parseInt)=>rolloverHours
+    P(3,Input("Expiration hours").get.parseInt)=>expirationHours
 	
 	# Seems the rollover-part is not changed when running function
 	# repeatedly, while the delete-part is.
@@ -233,16 +262,15 @@ To change to different host name, call MyHost(true)
   "policy": {
     "phases": {
       "hot": {
-        "min_age": "0ms",
         "actions": {
           "rollover": {
-            "max_age": "<< rolloverMinutes >>m",
+            "max_age": "<< rolloverHours >>h",
             "max_size": "2mb"
           }
         }
       },
       "delete": {
-        "min_age": "<< expirationMinutes >>m",
+        "min_age": "<< expirationHours >>h",
         "actions": {
           "delete": {}
         }
@@ -253,12 +281,15 @@ To change to different host name, call MyHost(true)
 >>>>>>>> EOF
 	=> lines
 	lines.mergeExpr->line out(line.trim) | _.concat(" ") => json
+    url="/_ilm/policy/" + ilpName
    
 	# Show JSON
-	Inner { JSON:PP(JSON:Parse(json))->line println(line) }
+	println("PUT " + url)
+	JSON:PP(JSON:Parse(json),true)
+	Lib:HardConfirm
 
-    url="/_ilm/policy/" + ilpName
-    Util:CURL("http",MyHost,"PUT",url,json,false)
+    Util:CURL("http",MyHost,"PUT",url,json,false).stdout => output
+	JSON:PP(JSON:Parse(output),true)
 /ILPCreate
 
 
@@ -308,7 +339,7 @@ To change to different host name, call MyHost(true)
 	JSON:PP(data,true)
 	Lib:HardConfirm("Continue")
 
-    Util:CURL("http",MyHost,"POST",url,json,true)
+    Util:CURL("http",MyHost,"POST",url,data,true)
         
 /CreateIndexTemplate
 
@@ -360,7 +391,7 @@ To change to different host name, call MyHost(true)
 
 # Test DeleteDatedIndexes
 # --
-	DeleteDatedIndexes("roar1-", "yyyy-MM-dd-HH", Date.sub(Date.Duration.hours(4)), true)
+	DeleteDatedIndexes("mix-", "yyyy-MM-dd-HH", Date.sub(Date.Duration.hours(4)), true)
 /t
 
 
