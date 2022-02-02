@@ -71,14 +71,31 @@ To change to different host name, call MyHost(true)
 
 
 
-# List indexes
+# List indexes, either just names or specific index by entering name (glob)
 # --
-    Util:CURL("http",MyHost,"GET","/_cat/indices?format=json&pretty=true",null,false).stdout
+	P(1,Input("Enter name as glob expression").setCurr("*").get)=>globExpr
+	showNamesOnly=(globExpr=="*")
+	regex=Glob(globExpr,true).regex
 
+    Util:CURL("http",MyHost,"GET","/_cat/indices?format=json&pretty=true",null,false).stdout => json
+	data=JSON:Parse(json)
+
+	# Sort list of indexes by name
+	data = Inner {
+		data->ix out(Str(ix.index,ix)) | _.sort->x out(x.data)
+	}
+
+	# generate output
+	data->ix
+		name=ix.index
+		assert(regex.match(name))
+		if (showNamesOnly) println(name) else JSON:PP(ix,true)
 /ListIndexes
 
 
 # Create index with lifecycle management
+#   NOTE: does not really work, must use Index Templates to control lifecycle
+#   for all indexes created via rollover.
 # --
     P(1,Input("Index name (-000001 will be added)").get) => indexName
 
@@ -114,7 +131,7 @@ To change to different host name, call MyHost(true)
 
 
 
-# Create index managed via index template
+# Create index managed via index template (see CreateIndexTemplate)
 # https://www.elastic.co/guide/en/elasticsearch/reference/7.7/getting-started-index-lifecycle-management.html#ilm-gs-create-policy
 # --
     P(1,Input("Index name (-000001 will be added)").get) => indexName
@@ -163,12 +180,63 @@ To change to different host name, call MyHost(true)
 /AddIndexAlias
 
 
-# Add data WITH timestamp on yyyy-MM-dd'T'HH:mm:ss format, 
-# in order to enable time searches, into time-separated indexes,
-# which enables manual delete of old data!
+
+# Locate newest index that matches pattern, by looking for -NNNNNN version number
+# at the end of the name, selecting the highest number. 
+#
+# Checks at most every minute, caches result in Db2.
 # --
-	P(1,Input("Index name").get) => indexName
+	P(1,Input("Enter index pattern").get)=>pattern
+
+	dbId="newest_index:"+pattern
+	timerId=Sys.scriptId+"_locateNewestIndex"
+
+	value=Db2:Get(Sys.scriptId,dbId)
+
+	if (value==null || Util:HasTimedOut(timerId,60)) {	
+		regex=Glob(pattern,true).regex
+		Util:CURL("http",MyHost,"GET","/_cat/indices?format=json&pretty=true",null,false).stdout => json
+		data=JSON:Parse(json)
+
+		# Iterate over all index objects, find one with highest version		
+		maxValue=-1
+		maxValueIndex=null
+		Inner {
+			data->ix 
+				name=ix.index
+				assert(regex.match(name))
+				if (Regex("^.*-\d+$").match(name)) {
+					num=name.afterLast("-").parseInt
+					if (num > maxValue) {
+						maxValue=num
+						maxValueIndex=name
+					}
+				}
+		}
+		error(maxValueIndex==null,"No numbered indexes for pattern " + pattern)
+
+		# Success
+		value=maxValueIndex
+
+		# Store in database
+		Db2:Set(Sys.scriptId, dbId, value)
+
+		# Set timer
+		Util:SetTimeMark(timerId)
+	}
+
+	value	
+/LocateNewestIndex
+
+
+# Add data WITH timestamp in order to enable time searches
+# If the given index name is a pattern, we regularly search for the newest
+# index that matches that pattern, by looking for -NNNNNN at the end of the
+# name, selecting the highest number. 
+# --
+	P(1,Input("Index pattern or name").get) => indexPattern
 	P(2,Input("Sleep ms").get.parseInt) => delay
+
 
 	i=0
 	loop
@@ -178,10 +246,13 @@ To change to different host name, call MyHost(true)
 		value=(Lib.Math.sin(i)*100).i
 
 		Date.sub(Date.Duration.hours(1)).setFormat("yyyy-MM-dd'T'HH:mm:ss").fmt => timestamp
+	
 
 		data = Dict.set("name","Roar")
 			.set("timestamp", timestamp)
 			.set("value",value)
+
+		indexName=if(indexPattern.contains("*")) LocateNewestIndex(indexPattern) else indexPattern
 
 		println("i="+i + " " + indexName)
 	
