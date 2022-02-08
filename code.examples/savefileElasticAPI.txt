@@ -31,9 +31,6 @@ this in database.
 
 To change to different host name, call MyHost(true)
 
-#Note: the Util:CURL function has problems with JSON data
-# on windows. Works fine on Linux / WSL
-
 -------------------------------------------------------------
 >>>> EOF
 /Readme
@@ -59,7 +56,7 @@ To change to different host name, call MyHost(true)
 # Change target hostname
 # --
     MyHost(true)
-/ChangeMyHost
+/SetMyHost
 
 
 

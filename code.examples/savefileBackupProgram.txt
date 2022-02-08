@@ -19,6 +19,33 @@
 >>> EOF
 /License
 
+# Version for script
+# --
+<<< EOF
+# 4aad29f99494b51cc1267e2f621e3ea1a72bf6fae8fcaea2846264c882e63db0
+>>> EOF
+/CurrVersion
+
+# Verify version
+# --
+	data = Inner {Sys.savefile.read->line reject(line.startsWith("#")) out(line)}
+	file = Lib:TmpFile("xxx").setWriteLF
+	file.create(data)
+	hash = file.hash
+	if(CurrVersion.first.after(" ") != hash) {
+		println(hash)
+		println("The current version of the BackupProgram has been modified!!!")
+		error("Modified version!!")
+	} else {
+		println("BackupProgram script: version verified")
+	}
+//VerifyVersion
+
+# On load
+# --
+	VerifyVersion
+/onLoad
+
 # Readme
 <<<< EOF
 ---------------------------------
