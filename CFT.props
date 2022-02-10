@@ -60,6 +60,7 @@ shortcut:v    = "---- paste files from clipboard ----"    Lib:ClipboardPaste(Dir
 
 # Search files under current dir
 shortcut:S    = "---- search files under curr dir ----"   Lib:SearchTextFiles(Dir)
+shortcut:FS   = "---- search files under curr dir ----"   Lib:SearchTextFiles(Dir)
 shortcut:FL   = "---- File Locate under curr Dir ----"    Lib:LocateFiles(Dir)
 
 # Projects script 
