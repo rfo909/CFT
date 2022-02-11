@@ -1,4 +1,5 @@
 # License
+# License
 <<< EOF
 #
 # CFT - an interactive programmable shell for automation 
@@ -755,7 +756,7 @@ P(1,"label") =>label P(2) =>currVal P(3,"yes") =>trueVal P(4,"no") =>falseVal
 # Locate files under current directory
 # --
     P(1,Dir) => dir
-    P(2,readLine("Enter partial file name, or glob pattern with '*'")) => fname
+    P(2,Input("Enter partial file name, or glob pattern with '*'").get) => fname
 
     if (fname=="") fname="*"
     glob=if(fname.contains("*"),Glob(fname,true),Glob("*"+fname+"*",true))
