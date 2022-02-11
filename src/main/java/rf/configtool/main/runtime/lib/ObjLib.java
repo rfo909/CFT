@@ -32,7 +32,6 @@ import rf.configtool.main.runtime.lib.conversions.ObjConvert;
 import rf.configtool.main.runtime.lib.db.ObjDb;
 import rf.configtool.main.runtime.lib.dd.DD;
 import rf.configtool.main.runtime.lib.ddd.DDD;
-import rf.configtool.main.runtime.lib.integrations.ObjIntegrations;
 import rf.configtool.main.runtime.lib.java.ObjJava;
 import rf.configtool.main.runtime.lib.math.ObjMath;
 import rf.configtool.main.runtime.lib.text.ObjText;
@@ -49,7 +48,6 @@ public class ObjLib extends Obj {
         this.add(new FunctionText());
         this.add(new FunctionDb());
         this.add(new FunctionUtil());
-        this.add(new FunctionIntegrations());
         this.add(new FunctionJava());
         this.add(new FunctionWeb());
         this.add(new FunctionDD());
@@ -214,20 +212,7 @@ public class ObjLib extends Obj {
             return new ValueObj(new ObjUtil());
         }
     } 
-    
-    class FunctionIntegrations extends Function {
-        public String getName() {
-            return "Integrations";
-        }
-        public String getShortDesc() {
-            return "Integrations() - create Integrations object";
-        }
-        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 0) throw new Exception("Expected no parameters");
-            return new ValueObj(new ObjIntegrations());
-        }
-    } 
-    
+  
    
     
     class FunctionJava extends Function {
