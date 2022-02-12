@@ -200,11 +200,21 @@ public class Vector3d {
 
 
     private String fmt (double d) {
-        int i=(int) d;
-        int j=(int) (d*10);
-        j=j%10;
-        return ""+i+"."+j;
+    	String s=""+d;
+    	StringBuffer sb=new StringBuffer();
+    	boolean foundDot=false;
+    	int decCount=2;
+    	for (int i=0; i<s.length(); i++) {
+    		char c=s.charAt(i);
+    		sb.append(c);
+    		if (foundDot) decCount--;
+    		if (decCount<=0) break;
+    		if (c=='.') foundDot=true;
+    	}
+    	return sb.toString();
     }
+    
+    
     public String toString() {
         return "[" + fmt(x) + ", " + fmt(y) + ", " + fmt(z) + "]";
     }

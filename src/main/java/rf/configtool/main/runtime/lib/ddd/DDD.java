@@ -44,6 +44,7 @@ public class DDD extends Obj {
         this.add(new FunctionWorld());
         this.add(new FunctionRTriangle());
         this.add(new FunctionVTriangle());
+        this.add(new FunctionBezier());
     }
 
     @Override
@@ -177,6 +178,20 @@ public class DDD extends Obj {
         }
     }
     
+
+    class FunctionBezier extends Function {
+        public String getName() {
+            return "Bezier";
+        }
+
+        public String getShortDesc() {
+            return "Bezier() - create object for calculating bezier curve";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+            return new ValueObj(new DDDBezier());
+        }
+    }
 
  
     
