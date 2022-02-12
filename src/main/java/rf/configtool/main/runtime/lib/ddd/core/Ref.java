@@ -79,6 +79,10 @@ public class Ref {
     public Vector3d getPos() {
         return pos;  // may return the original since Vector3d objects are immutable
     }
+    
+    public Ref setPos (Vector3d pos) {
+    	return new Ref(pos, x, y, z);
+    }
 
     public Vector3d getUnitVectorX() {
         return x;

@@ -61,6 +61,7 @@ public class DDDRef extends Obj {
         this.add(new FunctionDown());
         
         this.add(new FunctionTranslate());
+        this.add(new FunctionMoveTo());
         
         this.add(new FunctionGetPosVector());
         this.add(new FunctionGetScaleFactor());
@@ -357,7 +358,7 @@ public class DDDRef extends Obj {
         }
 
         public String getShortDesc() {
-            return "translate(vec) - create new Ref";
+            return "translate(vec) - translate Ref pos, subject to scale, create new Ref";
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
@@ -367,6 +368,30 @@ public class DDDRef extends Obj {
             if (vec1 instanceof DDDVector) {
                 Vector3d vec=((DDDVector) vec1).getVec();
                 Ref newRef=self().ref.translate(vec);
+                return new ValueObj(new DDDRef(newRef));
+            } else {
+                throw new RuntimeException("Expected 3D vector parameter");
+            }
+        }
+    }
+
+    
+    class FunctionMoveTo extends Function {
+        public String getName() {
+            return "moveTo";
+        }
+
+        public String getShortDesc() {
+            return "moveTo(absoluteVector) - move Ref to absolute pos, no scale considerations, return new Ref";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new RuntimeException("Expected 3d vector parameter");
+
+            Obj vec1=getObj("absoluteVector",params,0);
+            if (vec1 instanceof DDDVector) {
+                Vector3d vec=((DDDVector) vec1).getVec();
+                Ref newRef = ref.setPos(vec);
                 return new ValueObj(new DDDRef(newRef));
             } else {
                 throw new RuntimeException("Expected 3D vector parameter");

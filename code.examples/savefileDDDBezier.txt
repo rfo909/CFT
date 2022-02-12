@@ -1,0 +1,107 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2022 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
+
+# Readme
+# --
+<<<< EOF
+Example of using the Bezier function in 3D
+>>>> EOF
+/Readme
+
+        
+# Target dir
+# --
+    Sys.homeDir.sub("anim").sub("3d").create
+/TargetDir
+
+
+
+# Bezier demo
+# --
+    P(1)=>world
+    P(2)=>ref
+    P(3,TargetDir.file("bezier.png"))=>file
+
+    ref=ref.setScaleFactor(10)  ## cm
+   
+   	dataPoints=Sequence( 
+   		ref.left(100).up(100)
+   		ref.right(100).up(100)
+   		ref.right(100).down(100)
+   		ref.left(100).down(100)
+   		ref.left(120).up(50)
+   		ref.right(120).up(50)
+	)
+
+	
+	# Create Bezier object and initialize with points
+	# --
+	bezier=Lib.DDD.Bezier
+	dataPoints->p
+		bezier.addPoint(p) 
+	|
+	
+		
+   	# Calculate bezier curve, then plot points
+   	# --
+   	points=bezier.calculate(200)
+		# List of DDD.Vector
+		
+	brush = world.Brush.box(2,2,Lib.Color(120,80,40))
+   	points->point
+   		x=ref.moveTo(point)
+   		
+   		brush.penDown(x)
+   		brush.penDown(x.fwd(2))
+   		brush.penUp
+   	|
+
+	# Show data points in blue
+	# --
+	brush = world.Brush.box(3,3,Lib.Color(0,0,200))
+	dataPoints->x
+		brush.penDown(x)
+		brush.penDown(x.fwd(3))
+		brush.penUp
+	|
+	
+	
+	# Render to file
+	# --
+    world.render(file)
+
+    Util:ShowDict(world.getStats,true)
+    println("Wrote file " + file.path)
+/RenderBezier
+
+
+
+# Main function
+# --
+    world = Lib.DDD.World
+        # by default the world scale is in millimeters
+
+    ref = Lib.DDD.Ref.setScaleFactor(1000)  # going up to meter scale
+    ref=ref.fwd(4)  # create viewable position for center of wheel
+    
+    RenderBezier(world,ref)
+/run
