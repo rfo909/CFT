@@ -444,6 +444,30 @@ To change to different host name, call MyHost(true)
 /DeleteDatedIndexes
 
 
+
+# Delete indexes based on prefix string
+# --
+   	P(1,"xxx-")=>prefix
+	P(2,false)=>enable
+		# If false, we display what indexes would be deleted
+		# If true, they are actually deleted
+	
+	json=Util:CURL("http",MyHost,"GET","/_cat/indices?format=json&pretty=true",null,false).stdout
+	data=JSON:Parse(json)
+
+	# should be a list of index objects
+
+	error(getType(data) != "List", "Expected list, got " + getType(data))
+
+	# Iterate over indexes
+	data->ix
+		indexName=ix.index
+		assert(indexName.startsWith(prefix))
+		println( if(enable,"Deleting ","Would delete ") + indexName)
+		if (enable) Util:CURL("http",MyHost,"DELETE","/"+indexName,null,false)
+/DeleteIndexes
+
+
 # Delete winlogbeat-6.4.2-yyyy.MM.dd, metricbeat-7.2.0-yyyy.MM.dd and filebeat-7.9.3-yyyy.MM.dd older than 90 days
 # --
 	expiration=Date.sub(Date.Duration.days(30))
