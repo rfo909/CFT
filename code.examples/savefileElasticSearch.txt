@@ -566,7 +566,7 @@ Input("ssh target user@host").get
     logstashHosts->host
         println("STOPPING logstash " + host)
         target=user+"@"+host
-        SSH:sudo(target,"systemctl stop logstash")
+        SSH:sudo(target,"systemctl stop logstash",true)
 /StopLogstash
 
 
@@ -607,6 +607,43 @@ Input("ssh target user@host").get
 /AddLogstashPipeline
 
 
+# Example logstash pipeline
+# --
+	P(1,"test1")=>pipelineName
+
+	targetIndex=pipelineName
+
+	Sequence(
+		@ input {
+		@     file {
+		@          path => [ "/home/roar/logs/*.txt" ]
+		@     }
+		@ }
+		@ filter {
+		@ }
+		@ output {
+		@     elasticsearch {
+		@         hosts => [ ${ELKMasterHosts} ]
+		@         data_stream => "true"
+		#@ 		index => "<<targetIndex>>"
+		@     }
+		@     stdout { codec => rubydebug }
+		@ }
+	).mergeExpr => json
+	ClearLogstashPipelines
+	AddLogstashPipeline(pipelineName, json, "ELKMasterHosts")
+/AddExampleLogstashPipeline
+
+
+# Add example logstash pipeline, to scan txt files from a 
+# directory on the server. Then run PushLogstashConfig to update
+# single logstash target. Log in to the target, and cd to /etc/logstash,
+# then run the <pipelineName>.sh script to run logstash in foreground, 
+# to test configuration file.
+# --
+AddExampleLogstashPipeline
+/lsEx
+
 
 # Update logstash config
 # --
@@ -621,6 +658,9 @@ Input("ssh target user@host").get
     list->x
         p=x.value
         #Util:ShowDict(p,true) error("x")
+
+		# Add logstash.yml configuration for pipeline
+		# --
         p.mergeCodes => data
         {
             Sequence(
@@ -630,6 +670,8 @@ Input("ssh target user@host").get
             ) -> line 
                 pipelinesYml.add(line.merge(data))
         }
+		# Create pipeline config file
+		# --
         Lib:TmpFile(p.get("pipelineName"),"conf") => f
         f.create(p.get("pipelineJSON"))
     
@@ -642,6 +684,24 @@ Input("ssh target user@host").get
         SSH:copy(f,target,"./"+fname)
         SSH:sudo(target,"cp ./"+fname+" /etc/logstash/conf.d")
         f.delete
+
+		# Also create test script for running pipeline interactively
+		# --
+		pipelineName=p.get("pipelineName")
+		Lib:TmpFile(pipelineName,"sh")=>f
+		SSH:run(target,"which bash").stdout.first => bash
+
+		Sequence(
+			"#!"+bash
+			"/usr/share/logstash/bin/logstash -f /etc/logstash/conf.d/" + pipelineName + ".conf"
+		) =>lines
+		f.create(lines)
+		SSH:copy(f,target,"./"+pipelineName+".sh")
+		SSH:sudo(target,"cp ./"+pipelineName+".sh /etc/logstash")
+		SSH:sudo(target,"chmod +x /etc/logstash/" + pipelineName + ".sh")
+		println("Created /etc/logstash/" + pipelineName + ".sh")
+		f.delete
+	|
 
 
     # The pipelines.yml default points to conf.d/*.conf
@@ -662,8 +722,6 @@ Input("ssh target user@host").get
 
     "ok"
 /PushLogstashConfig
-
-
 
 
 
