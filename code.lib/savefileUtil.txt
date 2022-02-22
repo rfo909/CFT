@@ -364,3 +364,46 @@ Dict.set("list",List)
         if (x.ok, x.result, List)
 /ComplexPatternLineSearch
 
+
+# Quick and dirty formatter of text with (), [] and {}
+#
+# TODO: use parser to identify strings correctly, to avoid 
+# formatting blocks inside those.
+# --
+	P(1)=>text
+	if (text==null) {
+		println("Paste text, terminate with '.' on single line")
+		text=readLines(".")
+	}
+	line=""
+	indent=""
+	text->textline
+		textline.chars->c
+			if ("{[(".contains(c)) {
+				line=line+c
+				out(line)
+				indent=indent+" "
+				line=indent
+			} else if (")]}".contains(c)) {
+				out(line)
+				if (indent.length>0) {
+					indent=indent.sub(0,indent.length-1)
+				}
+				line=indent+c
+				out(line)
+				line=indent
+			} else if (c==",") {
+				line=line+c
+				out(line)
+				line=indent
+			} else {
+				line=line+c
+			}
+	| => result
+	result.add(line)
+	# remove blank lines
+	result->line assert(line.trim != "") out(line) | => result
+
+	result
+/BlockFormatter
+
