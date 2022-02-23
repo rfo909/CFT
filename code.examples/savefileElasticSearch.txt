@@ -624,8 +624,11 @@ Input("ssh target user@host").get
 		@ output {
 		@     elasticsearch {
 		@         hosts => [ ${ELKMasterHosts} ]
-		@         data_stream => "true"
-		#@ 		index => "<<targetIndex>>"
+		@         ilm_enabled => true
+		@         ilm_rollover_alias => "<<targetIndex>>"
+		@         ilm_policy => "30-days-default"
+		##@         data_stream => "true"
+		##@ 		  index => "<<targetIndex>>"
 		@     }
 		@     stdout { codec => rubydebug }
 		@ }
@@ -719,6 +722,21 @@ AddExampleLogstashPipeline
     SSH:copy(f,target,"./pipelines.yml")
     SSH:sudo(target,"cp ./pipelines.yml /etc/logstash")
     f.delete
+
+	# Logstash.yml
+	# --
+	Lib:TmpFile("logstash","yml") => f
+	println("Deploying logstash.yml")
+	f.create(List(
+		"path.data: /var/lib/logstash",
+		"path.logs: /var/log/logstash"
+	))
+	SSH:copy(f,target,"./logstash.yml")
+	SSH:sudo(target,"cp ./logstash.yml /etc/logstash")
+	f.delete
+
+
+
 
     "ok"
 /PushLogstashConfig
