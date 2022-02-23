@@ -24,6 +24,9 @@
 ElasticSearch / Kibana / Logstash install and configure
 ########################################################
 
+- For Linux only
+- Modify depending on where install files are located
+
 Set up a number of VM's and ensure password-less access
 via SSH, and that the SSH user is added to 
 /etc/sudoers.
@@ -52,16 +55,28 @@ getting multiple pipelines correctly configured.
 
 To configure Logstash
 ----------------------
+See function ExamplePLs which pushes some example pipelines to
+a single host running Logstash. To push config to all defined
+hosts with Logstash, run PushLogstashConfigAll.
 
-- ClearLogstashPipelines
-- AddLogstashPipeline ("xyz",List)   // list of lines
-- ...
-- PushLogstashConfigAll
+To stop and start logstash on all Logstash hosts:
+
 - StopLogstash
 - StartLogstash
 
+Host definitions
+----------------
+When installing, you are asked to enter lists of host names:
+- ElasticSearch host names = master nodes and worker nodes
+- Master hosts
+- Logstash hosts
+- Kibana hosts
+- SSH user name
 
-All can be run multiple times.
+To inspect or modify the host definitions, run
+
+GetConfigData(true)
+
 
 >>> EOF
 /Readme
@@ -92,7 +107,7 @@ Input("ssh target user@host").get
 
 	# one week timeout for settings
     if (forceUpdate || Util:HasTimedOut("ElasticSearch.ConfigCheck", 7*24*3600)) {
-        Input("All host names - space-separated") => inp
+        Input("All ElasticSearch host names (masters and data nodes) - space-separated") => inp
         inp.clear.setCurr(dict.get("hosts",List).concat(" "))
         dict.set("hosts", inp.get.split)
     
@@ -607,9 +622,20 @@ Input("ssh target user@host").get
 /AddLogstashPipeline
 
 
+
+
 # Example logstash pipeline
+#
+# Add example logstash pipeline, to scan txt files from a 
+# directory on the server. Then run PushLogstashConfig to update
+# single logstash target. Log in to the target, sudo, then cd to /etc/logstash,
+# then run the <pipelineName>.sh script to run logstash in foreground, 
+# to test configuration file.
+#
+# Or: service logstash start
 # --
 	P(1,"test1")=>pipelineName
+	P(2,"10-30-rfo")=>indexLifePolicy
 
 	targetIndex=pipelineName
 
@@ -626,29 +652,62 @@ Input("ssh target user@host").get
 		@         hosts => [ ${ELKMasterHosts} ]
 		@         ilm_enabled => true
 		@         ilm_rollover_alias => "<<targetIndex>>"
-		@         ilm_policy => "30-days-default"
+		@         ilm_policy => "<< indexLifePolicy >>"
 		##@         data_stream => "true"
 		##@ 		  index => "<<targetIndex>>"
 		@     }
 		@     stdout { codec => rubydebug }
 		@ }
 	).mergeExpr => json
-	ClearLogstashPipelines
 	AddLogstashPipeline(pipelineName, json, "ELKMasterHosts")
 /AddExampleLogstashPipeline
 
 
-# Add example logstash pipeline, to scan txt files from a 
-# directory on the server. Then run PushLogstashConfig to update
-# single logstash target. Log in to the target, and cd to /etc/logstash,
-# then run the <pipelineName>.sh script to run logstash in foreground, 
-# to test configuration file.
+
+
+# Example logstash pipeline for processing beats data
 # --
-AddExampleLogstashPipeline
-/lsEx
+	P(1,"test2")=>pipelineName
+	P(2,"10-30-rfo")=>indexLifePolicy
+
+	targetIndex=pipelineName
+
+	Sequence(
+		@ input {
+		@     beats {
+		@          port => 5044
+		@     }
+		@ }
+		@ filter {
+		@ }
+		@ output {
+		@     elasticsearch {
+		@         hosts => [ ${ELKMasterHosts} ]
+		@         ilm_enabled => true
+		@         ilm_rollover_alias => "<<targetIndex>>"
+		@         ilm_policy => "<< indexLifePolicy >>"
+		@     }
+		@     stdout { codec => rubydebug }
+		@ }
+	).mergeExpr => json
+	AddLogstashPipeline(pipelineName, json, "ELKMasterHosts")
+/AddExampleLogstashPipelineBeats
 
 
-# Update logstash config
+# Add Example logstash pipelines for testing, and push to Logstash host
+# Does not start or stop logstash service on target host.
+# --
+	P(1,GetTarget)=>target
+
+	ClearLogstashPipelines
+	AddExampleLogstashPipeline
+	AddExampleLogstashPipelineBeats
+
+	PushLogstashConfig(target)
+/ExamplePLs
+
+
+# Push updated logstash config to target host
 # --
     P(1,GetTarget) => target
 
@@ -734,9 +793,6 @@ AddExampleLogstashPipeline
 	SSH:copy(f,target,"./logstash.yml")
 	SSH:sudo(target,"cp ./logstash.yml /etc/logstash")
 	f.delete
-
-
-
 
     "ok"
 /PushLogstashConfig
