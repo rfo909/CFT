@@ -118,18 +118,29 @@ P(1) => name
 
 
 
-# Show file without comment lines
+# Return list of lines from (config) file, after removing comments and empty lines.
+#
+# Either give File object as parameter, or produce a File object as Sys.lastResult
+# for example via ls *.yml followed by :N to select one, or run Util:SelectFile
+# function (via shortcut @fsel)
 # --
-P(1) => file
-P(2,"#") => commentStart
-    file.read->line
+	P(1,"#") => commentStart
+	P(2) => file
+
+	if (file==null) {
+		file=Sys.lastResult
+		error(getType(file) != "File", "No file")
+	}
+	Lib:Header(file.name)
+	file.read->line
         s=line.trim
         reject(s.startsWith(commentStart) || s=="")
         out(line)
 /UncommentFile
 
 
-# Select file from directory (by number). 
+
+# Select file from directory (by number) or by entering partial name until finding one file
 # Alternatively, just use Lib:MenuSelect
 #
 #   files=Dir.files

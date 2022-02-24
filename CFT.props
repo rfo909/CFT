@@ -52,6 +52,7 @@ shortcut:rsh  = "---- Remote shell via ssh ----"          SSH:remoteShell
 shortcut:scr  = "---- Show all scripts ----"              Lib:Scripts
 
 shortcut:home = "---- move to script dir ----"			  Sys.savefile.dir.setAsCurrentDir
+shortcut:fsel = "---- select file from current dir ----"  Util:SelectFile(Dir)
 
 # copy / paste file
 shortcut:c    = "---- copy files to clipboard ----"       Lib:ClipboardCopy(Dir)
