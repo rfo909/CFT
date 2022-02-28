@@ -49,7 +49,10 @@ Configuration for logstash and beats on Windows!
 # Logstash config dir for host
 # --
 	P(1,HostsLogstash.first) => host
-	Dir("\\" + host + "\" + LogstashInstallDir).dirs("logstash*")->dir
+	Dir("\\" + host + "\" + LogstashInstallDir) => rootDir
+	error(!rootDir.exists, "Directory " + rootDir.path + " not found")
+
+	rootDir.dirs("logstash*")->dir
 		out(Int(dir.lastModified,dir))
 	| _.sort.last.data.sub("config")
 /LogstashConfigDir
@@ -81,7 +84,7 @@ path.logs: /ProgramData/logstash
 
 
 
-# Pipeline skeleton for beats input
+# Pipeline skeleton for logstash beats input
 # --
 	P(1,5044) => BeatsPort
 	P(2,HostsMaster) => MasterHosts
@@ -111,7 +114,7 @@ path.logs: /ProgramData/logstash
 		@     #stdout { codec => rubydebug }
 		@ }	
 	).mergeExpr
-/BeatsPipelineTemplate
+/LogstashBeatsPipelineTemplate
 
 
 # pipelines.yml logstash config
@@ -130,10 +133,97 @@ path.logs: /ProgramData/logstash
 		configFile=configFile.replace("\","/")
 		
 		Sequence(
-			@ - pipeline.id: << pipeline >>
+			@ - pipeline.id: "<< pipeline >>"
 			@   pipeline.workers: 1
 			@   path.config: "<< configFile >>"			
 		).mergeExpr->line 
 			out(line)
 /PipelinesYml
 
+
+
+# Filebeat config skeleton - direct delivery to ElasticSearch
+# --
+	P(1,"c:\logs\*.log") => path
+	P(2,"data") => indexName
+	P(3,"logs30days") => ilmPolicy
+	P(4,HostsMaster) => MasterHosts
+	P(5,"/ProgramData/filebeat") => LogDir
+
+	MasterHosts->h
+		out('"' + h + ":9200" + '"')
+	| _.concat(", ")
+	=> MasterHosts
+
+<<<< EOF
+filebeat.inputs:
+- type: log
+  enabled: true
+  paths:
+    - << path >>
+
+filebeat.config.modules:
+  path: ${path.config}/modules.d/*.yml
+  reload.enabled: false
+
+setup.template.settings:
+  index.number_of_shards: 1
+
+setup.template.name: "<< indexName >>"
+setup.template.pattern: "<< indexName >>"
+
+# https://www.elastic.co/guide/en/beats/filebeat/7.17/ilm.html
+setup.ilm.enabled: auto
+setup.ilm.rollover_alias: "<< indexName >>"
+setup.ilm.pattern: "{now/d}-000001"
+setup.ilm.policy_name: "<< ilmPolicy >>"
+
+output.elasticsearch:
+  hosts: [ << MasterHosts >> ]
+  protocol: "http"
+
+logging.level: info
+logging.to_files: true
+logging.files:
+  path: << LogDir >>
+  name: filebeat
+>>>> EOF
+.mergeExpr
+/FilebeatYmlDirect
+
+
+
+
+# Filebeat config skeleton - indirect delivery via Logstash
+# --
+	P(1,"c:\logs\*.log") => path
+	P(2,HostsLogstash) => LogstashHosts
+	P(3,"/ProgramData/filebeat") => LogDir
+
+	LogstashHosts->h
+		out('"' + h + ":9200" + '"')
+	| _.concat(", ")
+	=> LogstashHosts
+
+<<<< EOF
+filebeat.inputs:
+- type: log
+  enabled: true
+  paths:
+    - << path >>
+
+filebeat.config.modules:
+  path: ${path.config}/modules.d/*.yml
+  reload.enabled: false
+
+output.logstash:
+  hosts: [ << LogstashHosts >> ]
+
+logging.level: info
+logging.to_files: true
+logging.files:
+  path: "<< LogDir >>"
+  name: filebeat
+>>>> EOF
+.mergeExpr
+/FilebeatYmlLogstash
