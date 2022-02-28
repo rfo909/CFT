@@ -324,7 +324,7 @@ loop
 
 # Show lines for 3 newest files for current topic
     println
-    files = GetTopicLogFiles.last(3)
+    files = GetTopicLogFiles #.last(3)
     files->f
         f.read->line
             println("| " + line)

@@ -99,6 +99,7 @@ public class ObjDir extends Obj {
                 new FunctionNewestFile(),
                 new FunctionNewestFiles(),
                 new FunctionStats(),
+                new FunctionLastModified(),
         };
         setFunctions(arr);
 
@@ -957,5 +958,20 @@ public class ObjDir extends Obj {
             return new ValueObj(dict);
         }
     }
+    
+    class FunctionLastModified extends Function {
+        public String getName() {
+            return "lastModified";
+        }
+        public String getShortDesc() {
+            return "lastModified() - return time of last modification as int";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            File f=new File(name);
+            return new ValueInt(f.lastModified());
+        }
+    }
+
 
 }
