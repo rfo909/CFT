@@ -300,7 +300,8 @@ Dict.set("list",List)
 /AutomaticProcessMonitor
 
 
-# Invoke curl - does not work for jsonData on Windows (but ok on Linux / WSL)
+
+# Invoke curl with detailed parameters
 # --
     P(1,"http")=>protocol
     P(2)=>HostPort
@@ -343,6 +344,59 @@ Dict.set("list",List)
     }
     result
 /CURL
+
+
+
+# Interactive CURL 
+# --
+	P(1,false) => verbose
+	P(2,Input("Enter protocol and host + port, ex. http://somehost:1234").get) => hostPort
+	P(3,Input("Enter URL, prefixed by method if not GET").get) => str
+	P(4,readLine("Paste JSON or blank if none")) => jsonData
+
+	if(jsonData.trim=="") {
+		jsonData=null
+	} else {
+		tryCatch(JSON:Parse(jsonData)) =>result
+		error(!result.ok,"Invalid JSON: " + result.msg)
+	}
+	
+	if (hostPort.endsWith("/")) hostPort=hostPort.beforeLast("/")
+
+	"GET PUT POST DELETE".split => methods
+	method=null
+	Inner {
+		methods->m if (str.toUpper.startsWith(m+" ")) { method=m }
+	}
+	if (method != null) str=str.sub(method.length+1).trim
+	if (method == null) method="GET"
+
+	if (!str.startsWith("/")) str="/"+str
+
+	cmd=List("curl","-X",method)
+    if (jsonData != null) {
+        cmd.add("--header")
+        cmd.add("Content-Type: application/json")
+    }
+    cmd.add(hostPort + str)
+    if (jsonData != null) {
+		cmd.add("-d")
+		str=if (getType(jsonData)=="String", jsonData, JSON:Export(jsonData))
+		if (Sys.isWindows) str=str.replace('"','\"')
+        cmd.add(str)
+    }
+
+    result = Lib:run(cmd)
+    if (verbose) {
+        println("exitCode = " + result.exitCode)
+        {result.stdout->line println("(out) " + line)}
+        {result.stderr->line println("(err) " + line)}
+    }
+	tryCatch(JSON:PP(JSON:Parse(result.stdout),true))
+	
+    result
+/iCURL
+
 
 
 # Search for complex pattern (dates etc), in text line, returns list of hits
