@@ -363,7 +363,7 @@ Dict.set("list",List)
 	
 	if (hostPort.endsWith("/")) hostPort=hostPort.beforeLast("/")
 
-	"GET PUT POST DELETE".split => methods
+	"GET PUT POST DELETE HEAD".split => methods
 	method=null
 	Inner {
 		methods->m if (str.toUpper.startsWith(m+" ")) { method=m }
@@ -379,6 +379,7 @@ Dict.set("list",List)
         cmd.add("Content-Type: application/json")
     }
     cmd.add(hostPort + str)
+	Lib:Header(hostPort + str)
     if (jsonData != null) {
 		cmd.add("-d")
 		str=if (getType(jsonData)=="String", jsonData, JSON:Export(jsonData))
