@@ -352,13 +352,23 @@ Dict.set("list",List)
 	P(1,false) => verbose
 	P(2,Input("Enter protocol and host + port, ex. http://somehost:1234").get) => hostPort
 	P(3,Input("Enter URL, prefixed by method if not GET").get) => str
-	P(4,readLine("Paste JSON or blank if none")) => jsonData
+	P(4) => jsonData
+		
+	if (jsonData == null) {
+		println("Paste JSON data terminated by '.' on separate line")
+		println("Or type just '.' if no json data")
+		readLines(".") => jsonData
+		# Filter out blank lines (if any)
+		jsonData=Inner{jsonData->line reject(line.trim=="") out(line)}
+	}
 
-	if(jsonData.trim=="") {
+	if(jsonData.length==0) {
 		jsonData=null
 	} else {
 		tryCatch(JSON:Parse(jsonData)) =>result
-		error(!result.ok,"Invalid JSON: " + result.msg)
+		if (!result.ok) {
+			error("Invalid JSON: " + result.msg)
+		}
 	}
 	
 	if (hostPort.endsWith("/")) hostPort=hostPort.beforeLast("/")
@@ -379,7 +389,11 @@ Dict.set("list",List)
         cmd.add("Content-Type: application/json")
     }
     cmd.add(hostPort + str)
-	Lib:Header(hostPort + str)
+	Lib:Header(cmd.concat(" "))
+	if (jsonData != null) {
+		JSON:PP(JSON:Parse(jsonData),true)
+	}
+
     if (jsonData != null) {
 		cmd.add("-d")
 		str=if (getType(jsonData)=="String", jsonData, JSON:Export(jsonData))
@@ -393,8 +407,15 @@ Dict.set("list",List)
         {result.stdout->line println("(out) " + line)}
         {result.stderr->line println("(err) " + line)}
     }
-	tryCatch(JSON:PP(JSON:Parse(result.stdout),true))
-	
+
+	# If stdout is JSON, pretty-print it
+	tryCatch(JSON:PP(JSON:Parse(result.stdout),true)) => parseResult
+	if (!parseResult.ok) {
+		# Just list stdout to screen
+		result.stdout->line println(line)
+	}
+
+	# Return the result dict, where we can grab .stdout and .exitCode etc
     result
 /iCURL
 

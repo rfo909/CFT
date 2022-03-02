@@ -226,7 +226,7 @@ To change to different host name, call MyHost(true)
 /LocateNewestIndex
 
 
-# Add data WITH timestamp in order to enable time searches
+# Add test-data WITH timestamp in order to enable time searches
 # If the given index name is a pattern, we regularly search for the newest
 # index that matches that pattern, by looking for -NNNNNN at the end of the
 # name, selecting the highest number. 
@@ -271,7 +271,8 @@ To change to different host name, call MyHost(true)
 
 
 
-# Add data into time-separated indexes, as decided via Date format string
+# Add test-data into time-separated indexes, indexName-DATE, as decided via Date format string
+# (no sequence-number)
 # --
 	P(1,Input("Index name").get) => indexName
 	P(2,Input("Sleep ms").get.parseInt) => delay
@@ -312,12 +313,14 @@ To change to different host name, call MyHost(true)
 
 
 
-# Create or modify Index Lifecycle Policy - using hours for testing
+# Create or modify Index Lifecycle Policy
 # https://www.elastic.co/guide/en/elasticsearch/reference/7.7/getting-started-index-lifecycle-management.html#ilm-gs-create-policy
 # --
     P(1,Input("Index Lifecycle Policy name").get) =>ilpName
-    P(2,Input("Rollover hours").get.parseInt)=>rolloverHours
-    P(3,Input("Expiration hours").get.parseInt)=>expirationHours
+    P(2,Input("Rollover days").get.parseInt)=>rolloverDays
+	P(3,Input("Max index size (GB)").get.parseInt)=>maxSizeGb
+    P(3,Input("Expiration days").get.parseInt)=>expirationDays
+	
 	
 	# Seems the rollover-part is not changed when running function
 	# repeatedly, while the delete-part is.
@@ -332,13 +335,13 @@ To change to different host name, call MyHost(true)
       "hot": {
         "actions": {
           "rollover": {
-            "max_age": "<< rolloverHours >>h",
-            "max_size": "2mb"
+            "max_age": "<< rolloverDays >>d",
+            "max_size": "<<maxSizeGb>>gb"
           }
         }
       },
       "delete": {
-        "min_age": "<< expirationHours >>h",
+        "min_age": "<< expirationDays >>d",
         "actions": {
           "delete": {}
         }
