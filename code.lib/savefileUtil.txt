@@ -131,6 +131,7 @@ P(1) => name
 		file=Sys.lastResult
 		error(getType(file) != "File", "No file")
 	}
+	error(getType(file) != "File", "Expected File, got " + getType(file))
 	Lib:Header(file.name)
 	file.read->line
         s=line.trim
