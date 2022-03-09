@@ -419,10 +419,12 @@ To change to different host name, call MyHost(true)
 # --
     P(1,"xxx-")=>prefix
     P(2,"yyyy-MM-dd")=>dateFormat
-    P(3,Date.sub(Date.Duration.days(30)))=>cutoffDate
+	P(3,30)=>keepDays
 	P(4,false)=>enable
 		# If false, we display what indexes would be deleted
 		# If true, they are actually deleted
+
+    Date.sub(Date.Duration.days(keepDays))=>cutoffDate
 	
 	json=Util:CURL("http",MyHost,"GET","/_cat/indices?format=json&pretty=true",null,false).stdout
 	data=JSON:Parse(json)
