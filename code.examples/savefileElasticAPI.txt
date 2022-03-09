@@ -418,7 +418,7 @@ To change to different host name, call MyHost(true)
 # Delete time-stamped index, named on format <prefix><date>
 # --
     P(1,"xxx-")=>prefix
-    P(2,"yyyy-MM-dd")=>dateFormat
+    P(2,"yyyy.MM.dd")=>dateFormat
 	P(3,30)=>keepDays
 	P(4,false)=>enable
 		# If false, we display what indexes would be deleted
