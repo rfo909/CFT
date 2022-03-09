@@ -439,13 +439,15 @@ To change to different host name, call MyHost(true)
 		indexName=ix.index
 		assert(indexName.startsWith(prefix))
 		indexName.sub(prefix.length) => datePart
-		println("Index-name: " + indexName + " date/time-part: " + datePart)
+		#println("Index-name: " + indexName + " date/time-part: " + datePart)
 		Date.setFormat(dateFormat).parse(datePart) => indexDate
 
 		if (indexDate.before(cutoffDate)) {
-			println("* Deleting index " + indexName)
+			println("* " + if(enable,"Deleting","Would delete") + " index " + indexName)
 			if (enable) Util:CURL("http",MyHost,"DELETE","/"+indexName,null,false)
-		} 
+		} else {
+			println("* KEEPING index " + indexName)
+		}
 /DeleteDatedIndexes
 
 
