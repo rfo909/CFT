@@ -87,6 +87,13 @@ files with no access, etc.
 
 
 
+# Reset current password
+# --
+	Vault:SessionSecretClear("Backup encryption password")
+/ResetPassword
+
+
+
 # Run full backup
 # --
     P(1,Dir) => rootDir
