@@ -65,7 +65,9 @@
 # --
     P(1,Input("target").get)=>target
     println("Calling APTUpdate:run for target="+target)
-    APTUpdate:run(target,3,true)
+    distUpgrade=false
+    APTUpdate:run(target,3,distUpgrade)
+    	# Danger: doing dist-upgrade on ELK and KUB may cause problems!
 /AptUpdate
 
 
@@ -229,25 +231,19 @@
     println("host=" + host)
     println("sshUser=" + sshUser)
 
-    tMark=Sys.scriptName+".lastrun."+host
-    if (Util:HasTimedOut(tMark)) {
-        println("# host " + host)
+    println("# host " + host)
 
-        if (!SSH:HostOk (host)) {
-            println("Host unreachable")
-        } else {        
-            sshUser+"@"+host =>target
-            println("Updating " + target)
-            
-            assert(SSH:HostOkSSH (target))
+    if (!SSH:HostOk (host)) {
+        println("Host unreachable")
+    } else {        
+        sshUser+"@"+host =>target
+        println("Updating " + target)
+        
+        assert(SSH:HostOkSSH (target))
 
-            Java:VerifyCFT (target)
-            Util:SetTimeMark(tMark)
-        }
-    } else {
-        println("Last checked at " + Util:GetTimeMark(tMark).fmt)
+        Java:VerifyCFT (target)
     }
-//UpdateCFT
+/UpdateCFT
 
 
 # Update CFT all

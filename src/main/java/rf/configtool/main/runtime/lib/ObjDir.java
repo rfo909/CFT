@@ -94,7 +94,7 @@ public class ObjDir extends Obj {
                 new FunctionShowTree(),
                 new FunctionProtect(),
                 new FunctionUnprotect(),
-                new FunctionSetAsCurrentDir(),
+                new FunctionCd(),
                 new FunctionVerify(),
                 new FunctionNewestFile(),
                 new FunctionNewestFiles(),
@@ -790,12 +790,12 @@ public class ObjDir extends Obj {
     
 
   
-    class FunctionSetAsCurrentDir extends Function {
+    class FunctionCd extends Function {
         public String getName() {
-            return "setAsCurrentDir";
+            return "cd";
         }
         public String getShortDesc() {
-            return "setAsCurrentDir() - use this Dir as current work dir - returns self";
+            return "cd() - use this Dir as current work dir - returns self";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
