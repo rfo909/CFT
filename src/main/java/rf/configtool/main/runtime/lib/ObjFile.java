@@ -1273,15 +1273,17 @@ public class ObjFile extends Obj {
     private void encryptDecrypt (Ctx ctx, List<Value> params, boolean modeEncrypt) throws Exception {
         if (params.size() != 3) throw new Exception("Expected parameters passwordBinary, saltString, targetFile");
         
+        final byte[] ENCRYPT_BLOCKS_MAGIC="usdfocvbi;ObjFile.encryptDecrypt.blocks.v1".getBytes("UTF-8");
+        
         ValueBinary password=getBinary("passwordBinary",params,0);
         String salt=getString("saltString", params, 1);
         Obj fileObj=getObj("targetFile", params, 2);
         
         if (!(fileObj instanceof ObjFile)) throw new Exception("Expected parameters passwordBinary, saltString, targetFile");
+
         
         ObjFile targetFile=(ObjFile) fileObj;
-        
-        Encrypt enc=new Encrypt(password.getVal(), ("ObjFile:"+salt).getBytes("UTF-8"));
+        targetFile.validateDestructiveOperation("encrypt/decrypt target file");
         
         File src=getFile();
         File target=targetFile.getFile();
@@ -1293,20 +1295,76 @@ public class ObjFile extends Obj {
             in=new FileInputStream(src);
             out=new FileOutputStream(target);
             
-            byte[] buf=new byte[1024*64];
-            for (;;) {
-                int count=in.read(buf);
-                if (count <= 0) break;
-                for (int i=0; i<count; i++) {
-                    buf[i]=enc.process(modeEncrypt, buf[i]);
-                }
-                out.write(buf,0,count);
+            if (modeEncrypt) {
+            	out.write(ENCRYPT_BLOCKS_MAGIC);
+            	encryptDecryptBlocks(ctx, password, salt, in, out, modeEncrypt);
+            } else {
+            	// decrypt: check if file starts with magic or not
+            	byte[] data=new byte[ENCRYPT_BLOCKS_MAGIC.length];
+            	int count=in.read(data);
+            	boolean foundMagic=true;
+            	if (count!=ENCRYPT_BLOCKS_MAGIC.length) {
+            		foundMagic=false;
+            	} else {
+            		// compare bytes
+            		for (int i=0; i<ENCRYPT_BLOCKS_MAGIC.length; i++) {
+            			if (data[i] != ENCRYPT_BLOCKS_MAGIC[i]) {
+            				foundMagic=false;
+            				break;
+            			}
+            		}
+            	}
+            	if (foundMagic) {
+            		encryptDecryptBlocks(ctx,password, salt, in, out, modeEncrypt);
+            	} else {
+        			in.close();
+        			in=new FileInputStream(src);
+        			// fallback to original implementation
+        			encryptDecryptSerial(ctx, password, salt, in, out, modeEncrypt);
+            	}
             }
-            
         } finally {
             if (in != null) try {in.close();} catch (Exception ex) {};
             if (out != null) try {out.close();} catch (Exception ex) {};
         }
+    }
+    
+    /**
+     * New version that encrypts block independently, with different keys, enabling (future) parallel
+     * implementation for speed.
+     */
+    private void encryptDecryptBlocks (Ctx ctx, ValueBinary password, String salt, FileInputStream in, FileOutputStream out, boolean modeEncrypt) throws Exception {
+    	byte[] buf = new byte[1024 * 16];
+		
+		for (int blockNo=0;true;blockNo++) {
+			int count = in.read(buf);
+			if (count <= 0) break;
+			
+			Encrypt enc = new Encrypt(password.getVal(), ("ObjFile:" + salt+"-blockNo:" + blockNo).getBytes("UTF-8"));
+
+			for (int i = 0; i < count; i++) {
+				buf[i] = enc.process(modeEncrypt, buf[i]);
+			}
+			out.write(buf, 0, count);
+		}
+    }
+    
+    /**
+     * Original implementation, now only used for decrypt of files without magic marker at start
+     */
+    private void encryptDecryptSerial (Ctx ctx, ValueBinary password, String salt, FileInputStream in, FileOutputStream out, boolean modeEncrypt) throws Exception {
+		Encrypt enc = new Encrypt(password.getVal(), ("ObjFile:" + salt).getBytes("UTF-8"));
+		byte[] buf = new byte[1024 * 64];
+		for (;;) {
+			int count = in.read(buf);
+			if (count <= 0)
+				break;
+			for (int i = 0; i < count; i++) {
+				buf[i] = enc.process(modeEncrypt, buf[i]);
+			}
+			out.write(buf, 0, count);
+		}
+
     }
     
     
@@ -1318,7 +1376,6 @@ public class ObjFile extends Obj {
             return "encrypt(passwordBinary,saltString,targetFile) - returns self";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            validateDestructiveOperation("encrypt file");
             encryptDecrypt(ctx, params, true);
             return new ValueObj(self());
         }
@@ -1333,7 +1390,6 @@ public class ObjFile extends Obj {
             return "decrypt(passwordBinary,saltString,targetFile) - returns self";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            validateDestructiveOperation("decrypt file");
             encryptDecrypt(ctx, params, false);
             return new ValueObj(self());
         }

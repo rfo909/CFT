@@ -13,6 +13,24 @@
 
 <h1>CFT Change log</h1>
 
+<h3>3.2.2 2022-03-17 Lib.DDD.Bezier</h3>
+<p>
+	Modified File.encrypt/decrypt to allow for parallellizing the encryption
+	and decryption, as the encryption algorithm is heavily CPU-bound. Added simple
+	implementation now, not using threads. Writing a magic mark at the start of
+	encrypted files, and in this way remaining compatible with the old (serial) code,
+	that maintains a single Encrypt-object through the complete file.
+</p>
+<p>
+	Have verified that fallback to old implementation works, using the BackupProgram script. All new 
+	encryptions of files use the new "blocked" code, which is detected on decrypt via magic bytes.
+</p>
+<p>
+	Should also make it harder to do analysis on encrypted data, since every 16k a new setting is 
+	used.
+</p>
+
+
 <h3>3.2.1 2022-02-12 Lib.DDD.Bezier</h3>
 <p>
 	Added Bezier curve for 3d. Also added function .moveTo(absoluteVector) for Lib.DDD.Ref, and created demo script
