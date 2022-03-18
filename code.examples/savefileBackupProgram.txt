@@ -22,20 +22,35 @@
 
 # Readme
 <<<< EOF
----------------------------------
-WARNING: highly unstable
-         experimental
----------------------------------
+Run incremental backup to some (shared/mounted) directory.
+Writes encrypted log file, which tells where all data are stored.
+All file data are encrypted also.
 
-Run incremental backup to some (shared) dir.
-Writes encrypted log file.
-Restore according to log file.
+Steps
+-----
+Mount remote directory or plug in backup disk.
+Navigate to target directory
 
-Mostly works, but needs hardening, so it doesn't
-crash when hitting soft links, directories or 
-files with no access, etc.
+> SetTargetDir
 
-2021-08-21 RFO
+Navigate to directory to back up.
+
+> Backup
+
+Restore
+-------
+Ensure target dir correct
+Navigate to directory to restore to
+
+> Restore
+
+This lists the available backups (log files). Enter name
+of one. Then you are asked for a path prefix, which must
+end with "/" (Linux). To restore all just type "/".
+
+Enter password when prompted.
+
+
 >>>> EOF
 /Readme
 
@@ -45,6 +60,7 @@ files with no access, etc.
     P(1,Dir) => targetDir
     error(targetDir==null,"Parameter 1 must be target dir")
     Db2:Set("Backup","targetDir",targetDir)
+    println("Backup is stored in: " + targetDir.path)
 /SetTargetDir
 
 
