@@ -226,7 +226,8 @@ files with no access, etc.
             println(path)
         } else {
             # --- Restore file if matching pathPrefix ---
-            if (path.startsWith(pathPrefix)) {
+			match=if(Sys.isWindows, path.toLower.startsWith(pathPrefix.toLower), path.startsWith(pathPrefix))
+            if (match) {
                 backupFile=BackupFile(backupFileName)
                 
                 File(backupFile.path+".salt").read.first => fileSalt
