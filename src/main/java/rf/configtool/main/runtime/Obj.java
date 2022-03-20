@@ -31,6 +31,8 @@ import rf.configtool.main.Ctx;
 import rf.configtool.main.ObjGlobal;
 import rf.configtool.main.OutText;
 import rf.configtool.main.Version;
+import rf.configtool.main.runtime.lib.ObjClosure;
+import rf.configtool.main.runtime.lib.ObjDict;
 import rf.configtool.parsetree.ProgramLine;
 
 /**
@@ -142,6 +144,25 @@ public abstract class Obj {
         Value v=args.get(pos);
         if (!(v instanceof ValueObj)) throw new Exception(name + ": type error, expected obj, got " + v.getTypeName());
         return ((ValueObj) v).getVal();
+    }
+    
+    /**
+     * Match ObjClosure directly, or if lambda (ValueBlock) create Closure wrapping it
+     */
+    protected ObjClosure getClosure (String name, List<Value> args, int pos) throws Exception {
+    	Value v=args.get(pos);
+
+    	if (v instanceof ValueBlock) {
+    		return new ObjClosure(new ObjDict(), (ValueBlock) v);
+    	}
+    	
+    	if (v instanceof ValueObj) {
+    		Obj obj=((ValueObj) v).getVal();
+    		if (obj instanceof ObjClosure) {
+    			return (ObjClosure) obj; 
+    		}
+    	}
+    	throw new Exception(name + ": expected Lambda or Closure, got " + v.getTypeName());
     }
     
     

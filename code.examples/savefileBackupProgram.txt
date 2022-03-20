@@ -133,6 +133,17 @@ Enter password when prompted.
 /Backup
 
 
+# Sort list of File 
+# --
+	P(1)->f out(Str(f.name,f)) | _.sort->x out(x.data)
+//sortFiles
+
+# Sort list of Dir 
+# --
+	P(1)->d out(Str(d.name,d)) | _.sort->x out(x.data)
+//sortDirs
+
+
 
 # Process directory doing backup
 # --
@@ -143,7 +154,7 @@ Enter password when prompted.
     
     
     statusLines=List
-    dir.files->f
+    sortFiles(dir.files)->f
         saltString=""+countDict.count
         tryCatch( 
             processFile(password,f,statusLines,saltString)
@@ -156,7 +167,7 @@ Enter password when prompted.
     |
     StatusFile(backupName).append(statusLines)
     
-    dir.dirs->d
+    sortDirs(dir.dirs)->d
     	reject(d.name.startsWith("."))
         tryCatch(
             processDir(password,d,countDict,backupName)

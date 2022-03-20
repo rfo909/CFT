@@ -87,7 +87,6 @@ public class ObjText extends Obj {
         }
     }
     
-
-  
+ 
 
 }

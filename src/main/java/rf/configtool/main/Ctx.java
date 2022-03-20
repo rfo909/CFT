@@ -112,6 +112,11 @@ public class Ctx {
         }
     }
     
+    public void debug (String s) {
+    	objGlobal.addSystemMessage("[debug] " + s);
+    }
+    
+    
     public void addSystemMessage (String s) {
         objGlobal.addSystemMessage(s);
     }

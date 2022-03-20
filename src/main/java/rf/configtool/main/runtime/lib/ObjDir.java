@@ -623,7 +623,7 @@ public class ObjDir extends Obj {
             return capt.getCapturedLines();
         }
     }
-
+    
 
     private Process startProcess (Ctx ctx, File input, File output, File stderr, List<Value> params) throws Exception {
 
@@ -660,7 +660,6 @@ public class ObjDir extends Obj {
         // set current directory
         processBuilder.directory(new File(name));
         
-        long startTime=System.currentTimeMillis();
         Process process = processBuilder.start();
 
         return process;
@@ -668,20 +667,21 @@ public class ObjDir extends Obj {
     }
 
 
+
     class FunctionRunProcess extends Function {
         public String getName() {
             return "runProcess";
         }
         public String getShortDesc() {
-            return "runProcess(stdinFile, stdoutFile, stdErrFile, list|...) - execute external program in - returns Process object";
+            return "runProcess(stdinFile, stdoutFile, stdErrFile, list|...) - start external program - returns Process object";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             ObjFile stdin = (ObjFile) getObj("stdinFile", params, 0);
             ObjFile stdout = (ObjFile) getObj("stdoutFile", params, 1);
             ObjFile stderr = (ObjFile) getObj("stderrFile", params, 2);
             
-              List<Value> cmd=new ArrayList<Value>();
-              for (int i=3; i<params.size(); i++) cmd.add(params.get(i));
+		      List<Value> cmd=new ArrayList<Value>();
+		      for (int i=3; i<params.size(); i++) cmd.add(params.get(i));
             
             
             Process process = startProcess(ctx, stdin.getFile(), stdout.getFile(), stderr.getFile(), cmd);
@@ -689,7 +689,7 @@ public class ObjDir extends Obj {
             return new ValueObj(new ObjExtProcess(process));
         }
     }
-    
+
 
     class FunctionShowTree extends Function {
         public String getName() {
