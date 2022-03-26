@@ -55,6 +55,15 @@ Enter password when prompted.
 /Readme
 
 
+# Report current target directory
+# --
+	Lib:Header("Target directory")
+	println(TargetDir.path)
+	println
+	println
+/onLoad
+
+
 # Set target directory
 # --
     P(1,Dir) => targetDir
@@ -114,6 +123,11 @@ Enter password when prompted.
 # --
     P(1,Dir) => rootDir
     P(2,"Backup"+"_"+rootDir.name) => backupName
+    
+    Lib:Header("Target directory")
+    println(TargetDir.path)
+    println
+    println
 
     Input("Enter backup name").setCurr(backupName).get => backupName
     
@@ -216,8 +230,17 @@ Enter password when prompted.
         backupFileTmp.move(backupFile)
         countDict.set("saved",countDict.saved+1)
     }
-
     statusLines.add(logLine)
+
+	# Uncrypted metadata, to restore create-time and modified-time correctly,
+	# written as separate file, to avoid changing the statusLines syntax
+	
+    metadataFile=File(backupFile.path+".meta")
+    if (!metadataFile.exists && file.?getTimes) {
+    	data=file.getTimes  ### v3.2.4+
+    	metadataFile.create(syn(data))
+    }
+
 //processFile
 
         
@@ -275,6 +298,13 @@ Enter password when prompted.
                 if (!resultDir.exists) resultDir.create
                 
                 backupFile.decrypt(password,fileSalt,resultFile)
+                
+				metadataFile=File(backupFile.path+".meta")
+				if (metadataFile.exists) {
+					data=eval(metadataFile.read.first)
+					resultFile.setTimes(data.created, data.modified, data.accessed)
+				}
+                
             }
         }
 /Restore        
