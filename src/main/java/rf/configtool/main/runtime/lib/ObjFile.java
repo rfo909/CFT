@@ -30,6 +30,9 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributeView;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -121,6 +124,8 @@ public class ObjFile extends Obj {
                 new FunctionVerify(),
                 new FunctionEncrypt(),
                 new FunctionDecrypt(),
+                new FunctionGetTimes(),
+                new FunctionSetTimes(),
         };
         setFunctions(arr);
 
@@ -552,7 +557,7 @@ public class ObjFile extends Obj {
             return new ValueInt(f.lastModified());
         }
     }
-
+    
 
     class FunctionHash extends Function {
         public String getName() {
@@ -1395,7 +1400,56 @@ public class ObjFile extends Obj {
         }
     }
     
+    class FunctionGetTimes extends Function {
+        public String getName() {
+            return "getTimes";
+        }
+        public String getShortDesc() {
+            return "getTimes() - return Dict with .created .modified .accessed int values";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            
+            Path file = Paths.get(name);
+            BasicFileAttributes attr = Files.readAttributes(file, BasicFileAttributes.class);
 
+            ObjDict dict=new ObjDict();
+            
+            dict.set("created", new ValueInt(attr.creationTime().toMillis()));
+            dict.set("modified", new ValueInt(attr.lastModifiedTime().toMillis()));
+            dict.set("accessed", new ValueInt(attr.lastAccessTime().toMillis()));
+            
+            return new ValueObj(dict);
+            
+        }
+    }
+    
+
+    class FunctionSetTimes extends Function {
+        public String getName() {
+            return "setTimes";
+        }
+        public String getShortDesc() {
+            return "setTimes(timeCreated, timeModified, timeAccessed) - set file times";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 3) throw new Exception("Expected integer parameters timeCreated, timeModified, timeAccessed");
+            
+            long timeCreated = getInt("timeCreated",params,0);
+            long timeModified = getInt("timeModified",params,1);
+            long timeAccessed = getInt("timeAccessed",params,2);
+            
+            FileTime created=FileTime.fromMillis(timeCreated);
+            FileTime modified=FileTime.fromMillis(timeModified);
+            FileTime accessed=FileTime.fromMillis(timeAccessed);
+            
+            BasicFileAttributeView attributes = Files.getFileAttributeView(Paths.get(name), BasicFileAttributeView.class);
+            attributes.setTimes(modified, accessed, created);
+
+            return new ValueObj(self());
+        }
+    }
+ 
 
     private String fmt (int i, int n) {
         String s=""+i;
