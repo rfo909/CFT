@@ -124,7 +124,7 @@ Enter password when prompted.
     
     password=verifyAndConvertPassword(password)  # Now a Binary
   
-    Dict.set("count",0) => countDict
+    Dict.set("count",0).set("saved",0) => countDict
 
     StatusFile(backupName) => sf
     if (sf.exists) sf.delete
@@ -157,7 +157,7 @@ Enter password when prompted.
     sortFiles(dir.files)->f
         saltString=""+countDict.count
         tryCatch( 
-            processFile(password,f,statusLines,saltString)
+            processFile(password,f,statusLines,saltString,countDict)
         ) => result
         if (!result.ok) {
             println(f.path)
@@ -174,7 +174,7 @@ Enter password when prompted.
         )
     |
 
-    println("" + countDict.count + " " + dir.path)
+    println("#Files=" + countDict.count + " (saved=" + countDict.saved + ") " + dir.path)
 //processDir
 
 
@@ -192,6 +192,7 @@ Enter password when prompted.
     P(2) => file
     P(3) => statusLines
     P(4) => saltBase
+    P(5) => countDict
     
     key=file.path + ";" + file.length + ";" + file.lastModified + ";" + password.hex
     backupFile=BackupFile(key.hash)
@@ -213,6 +214,7 @@ Enter password when prompted.
         file.encrypt(password, salt, backupFileTmp)
         
         backupFileTmp.move(backupFile)
+        countDict.set("saved",countDict.saved+1)
     }
 
     statusLines.add(logLine)
