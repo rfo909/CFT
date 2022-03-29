@@ -158,6 +158,18 @@ Enter password when prompted.
 //sortDirs
 
 
+# Read .nobackup content if exists
+# --
+	P(1,Dir)=>dir
+	file=dir.file(".nobackup")
+	if (file.exists) Inner {
+		file.read->line assert(line.trim.length > 0) out(line)
+	} else {
+		List
+	}
+//NoBackupDirs
+	
+
 
 # Process directory doing backup
 # --
@@ -166,6 +178,7 @@ Enter password when prompted.
     P(3)=>countDict
     P(4)=>backupName
     
+    blockedDirs=NoBackupDirs(dir)
     
     statusLines=List
     sortFiles(dir.files)->f
@@ -183,7 +196,9 @@ Enter password when prompted.
     
     sortDirs(dir.dirs)->d
     	reject(d.name.startsWith("."))
-        tryCatch(
+    	if (blockedDirs.contains(d.name)) {
+    		println("BLOCKED: " + d.path)
+    	} else tryCatch(
             processDir(password,d,countDict,backupName)
         )
     |
@@ -307,7 +322,7 @@ Enter password when prompted.
                 
             }
         }
-/Restore        
+/Restore
 
 
 # Show content of backup
@@ -336,5 +351,13 @@ Enter password when prompted.
     # result
     (f1.hash==f3.hash)
 //test
-    
 
+
+# The .noBackup files block this program from
+# visiting a list of directories under current dir
+# --
+Dir.allFiles(".nobackup")->f
+	f.read->line
+		reject(line.trim.length==0)
+		report(f.path,line)
+/NoBackupFiles
