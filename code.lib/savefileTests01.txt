@@ -566,3 +566,34 @@ tryCatch(t37b(Dict)).ok==false
 
 
 
+
+
+
+# Generic function (sort of) that produces an object (Dict)
+# with a Lambda (converted to closure) for setting values of given type.
+# --
+	P(1) as String => type
+	P(2) as (List(type,"null")) => value
+	SymDict(type,value).set("update",Lambda{
+	  P(1) as (self.type)=>x self.set("value",x)  # set does not accept null
+	})
+/t38_getTypedObject
+
+
+# Test it
+# --
+  t38_getTypedObject("String",null) => obj
+  obj.update.call("value")  # ok
+  
+  tryCatch(
+  	obj.update.call(23)
+  ).ok==false # should fail
+/Test38_typechecking_with_closure
+
+
+
+
+
+  
+  
+

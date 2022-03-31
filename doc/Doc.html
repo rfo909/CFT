@@ -2982,6 +2982,35 @@ codeDirs = . ; code.examples ; code.lib
 <p>
   If an "as" fails, a hard error is thrown, with details about what was expected, and what was found.
 </p>
+<h3>Null-values</h3>
+<p>
+  The type of null-value is "null". To allow a value to be optional:
+</p>
+<pre>
+  P(1) as ("String null".split) =&gt; optionalStringValue
+</pre>
+<h3>Complex example</h3>
+<pre>
+  # Generic function (sort of) that produces an object (Dict)
+  # with a Lambda (converted to closure) for setting values of given type.
+  # --
+    P(1) as String =&gt; type
+    P(2) as (List(type,"null")) =&gt; value
+    SymDict(type,value).set("update",Lambda{
+      P(1) as (self.type)=&gt;x self.set("value",x)  # update does not accept null, only String 
+    })
+  /getTypedObject
+
+
+  # Test it
+  # --
+    getTypedObject("String",null) =&gt; obj
+    obj.update.call("value")  # ok
+    
+    obj.update.call(23) # fails
+  /test  
+</pre>
+
 
 
 

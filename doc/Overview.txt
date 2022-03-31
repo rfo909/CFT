@@ -229,6 +229,8 @@ Error handling
 Get type of value
 
 Type checking with "as"
+ |   Null-values
+ |   Complex example
 
 Dict set with strings
 

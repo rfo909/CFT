@@ -21,7 +21,7 @@ public class ValueNull extends Value {
 
     @Override
     public String getTypeName() {
-        return "<null-type>";
+        return "null";
     }
 
 

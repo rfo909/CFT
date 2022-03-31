@@ -2648,6 +2648,33 @@ P(1) as (types) ...
 
 If an "as" fails, a hard error is thrown, with details about what was expected, and what was found.
 
+### Null-values
+
+
+The type of null-value is "null". To allow a value to be optional:
+
+```
+P(1) as ("String null".split) => optionalStringValue
+```
+### Complex example
+
+```
+# Generic function (sort of) that produces an object (Dict)
+# with a Lambda (converted to closure) for setting values of given type.
+# --
+P(1) as String => type
+P(2) as (List(type,"null")) => value
+SymDict(type,value).set("update",Lambda{
+P(1) as (self.type)=>x self.set("value",x)  # update does not accept null, only String
+})
+/getTypedObject
+# Test it
+# --
+getTypedObject("String",null) => obj
+obj.update.call("value")  # ok
+obj.update.call(23) # fails
+/test
+```
 # Dict set with strings
 
 
