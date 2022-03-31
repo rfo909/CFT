@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2021-12-19 RFO
-v3.0.3
+Last updated: 2022-03-31 RFO
+v3.2.5
 ```
 # Introduction
 
@@ -2614,6 +2614,40 @@ $ getType(Dict)
 <String>
 Dict
 ```
+# Type checking with "as"
+
+
+**v3.2.5**
+
+The getType() has frequently been combined with error() to do type checking of parameters.
+
+```
+P(1)=>x
+error(getType(x) != "String")
+```
+
+The problem, is that it is easy to mistype, like getType("x") which of course always is "String".
+
+
+The "as" syntax simplifies this to the following:
+
+```
+P(1) as String => x
+```
+
+A secondary form exists, where instead of an identifier type, such as String in the example, we take allowed type name(s) from
+an expression. It must be written inside ()'s. If it returns a list, then it's assumed to be a list of valid type names.
+
+```
+type="String"
+P(1) as (type) => x
+# or
+types="String int".split
+P(1) as (types) ...
+```
+
+If an "as" fails, a hard error is thrown, with details about what was expected, and what was found.
+
 # Dict set with strings
 
 
@@ -4126,6 +4160,18 @@ Running CodeStats:main
 Script code:      12751 lines
 Java code:        30244 lines
 Functions:        483
+Object types:     69
+Value types:      13
+```
+### 2022-03-31 v3.2.5
+
+
+Running CodeStats:main
+
+```
+Script code:      15695 lines
+Java code:        32022 lines
+Functions:        490
 Object types:     69
 Value types:      13
 ```

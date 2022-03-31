@@ -228,6 +228,8 @@ Error handling
 
 Get type of value
 
+Type checking with "as"
+
 Dict set with strings
 
 Dict.get with default value
@@ -330,3 +332,4 @@ Comments and digressions
  |   2021-09-26
  |   2021-10-16
  |   2021-12-17 v3.0.0
+ |   2022-03-31 v3.2.5

@@ -39,6 +39,11 @@ public class ExprTerminal extends ExprCommon {
         super(ts);
         
         
+        if (ts.peekStr("as")) {
+        	expr=new ExprAs(ts);
+        	return;
+        }
+        
         if (ts.peekStr("=>")) {
             expr=new ExprAssign(ts);
             return;

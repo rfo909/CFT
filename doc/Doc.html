@@ -15,9 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2021-12-19 RFO
-v3.0.3
-
+Last updated: 2022-03-31 RFO
+v3.2.5
 
 </pre>
 
@@ -2948,6 +2947,44 @@ codeDirs = . ; code.examples ; code.lib
 
 
 
+<h1>Type checking with "as"</h1>
+<p>
+  <i>v3.2.5</i>
+</p>
+<p>
+  The getType() has frequently been combined with error() to do type checking of parameters.
+</p>
+<pre>
+  P(1)=&gt;x
+  error(getType(x) != "String")
+</pre>
+<p>
+  The problem, is that it is easy to mistype, like getType("x") which of course always is "String". 
+</p>
+<p>
+  The "as" syntax simplifies this to the following:
+</p>
+<pre>
+  P(1) as String =&gt; x
+</pre>
+<p>
+  A secondary form exists, where instead of an identifier type, such as String in the example, we take allowed type name(s) from
+  an expression. It must be written inside ()'s. If it returns a list, then it's assumed to be a list of valid type names.
+</p>
+<pre>
+  type="String"
+  P(1) as (type) =&gt; x
+
+  # or
+  types="String int".split
+  P(1) as (types) ...
+</pre>
+<p>
+  If an "as" fails, a hard error is thrown, with details about what was expected, and what was found.
+</p>
+
+
+
 <h1>Dict set with strings</h1>
 <p>
   Reading name-value assignments from a property file or similar, is best done via the .setStr()
@@ -4599,6 +4636,15 @@ Colon commands
   Value types:      13
 </pre>
 
+<h3>2022-03-31 v3.2.5</h3>
+<p>Running CodeStats:main</p>
+<pre>
+  Script code:      15695 lines
+  Java code:        32022 lines
+  Functions:        490
+  Object types:     69
+  Value types:      13
+</pre>  
 
 
 

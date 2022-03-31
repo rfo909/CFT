@@ -13,7 +13,25 @@
 
 <h1>CFT Change log</h1>
 
-<h3>3.2.3 2022-03-25 File.getTimes and File.setTimes</h3>
+<h3>3.2.5 2022-03-31 Added "as" for type checking</h3>
+<p>
+	Doing error(getType(x) != "String", "Expected string") can now be written as:
+</p>
+<pre>
+	x as String
+</pre>
+<p>
+	Also added support for expression, so that we can say
+</p>
+<pre>
+	x as ("int String".split)
+</pre>
+<p>
+  Added a section to documentation and created some simple tests in Tests01 script.
+</p>
+
+
+<h3>3.2.4 2022-03-25 File.getTimes and File.setTimes</h3>
 <p>
 	For when we want to copy files and preserve time information, etc
 </p>

@@ -515,7 +515,6 @@ a=5 b=6 Sequence(
 
 
 
-
 a=5 b=6 
 <<<<<<<<< EOF
 a=<< a >>
@@ -523,4 +522,47 @@ b=<<b>>
 >>>>>>>>> EOF
 .mergeExpr.concat("|")=="a=5|b=6"
 /Test33_heredoc_mergeExpr
+
+
+
+
+# type checking with "as"
+
+3 as int == 3
+/Test34_typechecking_as_int
+
+
+
+3 as ("String int".split) == 3
+/Test35_typechecking_as_expr
+
+
+
+# "something" "as something" are TWO expressions, not one, the second
+# pops a value off the stack and if all ok, returns it (to be pushed back on the stack).
+# 
+# This means that using tryCatch() isn't straight forward, and neither is putting 
+# parantheses around them, because (expr) can not match what is really (expr expr)
+#
+# For its intended use, this is not a problem.
+
+P(1) as String
+/t36
+
+tryCatch(t36(3)).ok==false
+/Test36_typechecking_negative_as_int
+
+
+List("String","int")
+/t37a
+
+P(1) as (t37a) => x
+/t37b
+
+
+tryCatch(t37b(1)).ok==true
+tryCatch(t37b(Dict)).ok==false
+/Test37_typechecking_negative_as_expr
+
+
 
