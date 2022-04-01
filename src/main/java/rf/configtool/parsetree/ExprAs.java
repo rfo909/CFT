@@ -28,6 +28,7 @@ public class ExprAs extends ExprCommon {
 
     private String typeName;
     private Expr typeNameExpr;
+    private boolean orNull=false;
     
     public ExprAs (TokenStream ts) throws Exception {
         super(ts);
@@ -37,6 +38,9 @@ public class ExprAs extends ExprCommon {
         	ts.matchStr(")", "expected ')' following as-expression");
         } else {
         	typeName=ts.matchIdentifier("expected variable name");
+        }
+        if (ts.matchStr("?")) {
+        	orNull=true;
         }
     }
     
@@ -65,6 +69,7 @@ public class ExprAs extends ExprCommon {
         		typeNames.add(exprValue.getValAsString());
         	}
         }
+        if (orNull) typeNames.add("null");
         
         boolean ok=false;
         for (String type:typeNames) {

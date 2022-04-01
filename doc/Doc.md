@@ -2651,10 +2651,12 @@ If an "as" fails, a hard error is thrown, with details about what was expected, 
 ### Null-values
 
 
-The type of null-value is "null". To allow a value to be optional:
+The type of null-value is "null". To allow a value to be optional is to allow it to be of type "null"
 
 ```
 P(1) as ("String null".split) => optionalStringValue
+P(1) as String? > optionalStringValue  # The '?' means "or null"
+P(1) as ("String int".split)?    # String, int or null
 ```
 ### Complex example
 
@@ -2663,7 +2665,7 @@ P(1) as ("String null".split) => optionalStringValue
 # with a Lambda (converted to closure) for setting values of given type.
 # --
 P(1) as String => type
-P(2) as (List(type,"null")) => value
+P(2) as (type)? => value
 SymDict(type,value).set("update",Lambda{
 P(1) as (self.type)=>x self.set("value",x)  # update does not accept null, only String
 })
