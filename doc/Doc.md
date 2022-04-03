@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2022-03-31 RFO
-v3.2.5
+Last updated: 2022-04-03 RFO
+v3.3.0
 ```
 # Introduction
 
@@ -1748,14 +1748,16 @@ process. It has two closures of interest.
 
 
 A 
-**closure** is a callable object, which
-runs code "inside" a dictionary, via a 
-**lambda**. Closures and lambdas are invoked
-via their .call(...) function.
+**closure** is a lambda, with a self-reference to a dictionary, and
+so acts like a "member function" of that dictionary, as it has access to data and
+other closures of that dictionary object.
 
+<o>
+In this context we usually refer the closures with dotted notation, which
+means they are run.
 ```
-result.isCompleted.call     # returns boolean
-result.wait.call            # waits for process to finish, then returns another Dict
+result.isCompleted     # returns boolean
+result.wait            # waits for process to finish, then returns another Dict
 ```
 
 The result.wait closure, when called, returns a Dict with the following content:
@@ -1783,9 +1785,6 @@ To show the Lib:runProcess function code
 ```
 $ ?Lib:runProcess
 ```
-
-Warning: it's a bit complex
-
 ## Lib:run utility function
 
 ```
@@ -2676,6 +2675,21 @@ getTypedObject("String",null) => obj
 obj.update.call("value")  # ok
 obj.update.call(23) # fails
 /test
+```
+### Closures and Lambdas
+
+
+Both lambdas and closures are assigned the type "Callable", which simplifies type checking, as they have identical
+.call() functions to invoke.
+
+
+If one needs to detect if a value is a lambda or a closure, that is easiest done by checking for the presence of
+one of the functions that closures implement, and lambdas do not, for example the .lambda function of closures,
+to obtain the lambda component.
+
+```
+P(1) as Callable => callable
+isClosure = callable.?lambda  # returns true if callable has function lambda, which lambda does not
 ```
 # Dict set with strings
 
@@ -3656,6 +3670,7 @@ Nice for event based callbacks.
 
 ```
 Dict =>data
+data.set("received_value",null)
 data.bind(Lambda{
 self.set("received_value", P(1))
 }) =>closure
@@ -3664,7 +3679,7 @@ data.get("received_value")  # returns "test"
 ```
 
 For robustness and testing, when lambdas are run directly (not via closures)
-there is also a "self" variable, which points at an empty Dict object.
+there is also created a "self" variable, which points at an empty Dict object.
 
 ## Another example
 
@@ -3689,11 +3704,16 @@ $ Strip(2).call("this is a test")
 <String>
 is is a te
 ```
-# Closures / Dict Objects
+# Closures as member functions of Dict Objects
 
 
-Letting the dictionary .set function detect lambdas, they are automatically wrapped inside
-closures, with "self" pointing to the dictionary in question.
+The dictionary .set function detects lambdas, and concert them to closures, with the
+"self" variable pointing to the dictionary.
+
+
+NOTE that for the case where we refer a Closure via .ident lookup in a dictionary, the
+closure is called automatically, so do not use the .call() function. It will be attempted
+run on the result, which will fail unless the result is another Closure or Lambda.
 
 
 This means we can now do this:
@@ -3706,14 +3726,22 @@ amount=P(1,1)
 self.set("i",self.i+amount)
 })
 =>data
-data.incr.call(10) # data.i is now 11
+data.incr(10) # data.i is now 11
 println(data.i)
 /test
 ```
-## Member lambdas calling each other
+## Member closures calling each other
 
 
-The mechanism of letting individual "member" lambdas have a shared idea of "self", also allows for this:
+The mechanism of letting individual "member" closures have a shared idea of "self", lets them call each
+other.
+
+
+As the self variable points to a dictionary, calling another closure with .ident lookup, eliminates the
+.call() function. It is only when working with closures and lambdas as objects, either through Dict.bind() or
+looked up in a dictionary with .get("ident"), which is to say, when they are "standalone", that they are
+invoked with call(), since in this state we need to pass them around as parameters etc, without inducing
+an invocation.
 
 ```
 Dict
@@ -3723,15 +3751,15 @@ amount=P(1,1)
 self.set("i",self.i+amount)
 })
 .set("incr50",Lambda{
-self.incr.call(50)
+self.incr(50)
 })
 =>data
-data.incr50.call  # data.i is now 51
+data.incr50  # data.i is now 51
 println(data.i)
 /test
 ```
 
-The incr50 lambda calls the incr lambda within the environment defined by the Dict object.
+The incr50 closure calls the incr closure within the environment defined by the Dict object.
 
 ## Copy lambdas between dictionaries
 

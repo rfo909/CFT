@@ -591,7 +591,9 @@ tryCatch(t37b(Dict)).ok==false
 /Test38_typechecking_with_closure
 
 
-
+###
+# v3.3.0 -- 2022-04 
+### 
 
 # Auto-calling Closures when looked up in Dict
 # --
@@ -642,4 +644,42 @@ Dict.set("a",1).set("b",Lambda{P(1) as int=>x self.a+x})
 	d.add(5)==6
 /Test42_object_lambda_calling_member_lambda
 
+
+
+
+
+# Dict.bind creates a Closure which we call with .call
+# It is only in the specialized syntax where we use .ident on a Dict that
+# a closure gets automatically called.
+# --
+	Dict.set("a",2).bind(Lambda{self.a}) => closure
+	closure.call==2
+/Test43_closure_dot_call
+
+
+
+# Closures can also be taken from a Dict, with .get() and must
+# then be called in the same way
+# --
+	Dict.set("a",2).set("func",Lambda{self.a}).get("func").call==2
+/Test44_member_closure_dot_call
+
+
+
+# The .? lookup now also applies to dictionary lookup
+# --
+	Dict.set("a",1).?a == true
+/Test44_cond_lookup_in_dict
+
+
+# .? lookup for closures
+# --
+	Dict.set("a",Lambda{})=>x x.?a == true
+/Test45_cond_lookup_dict_closure
+
+
+# .? lookup for closures
+# --
+	Dict.set("a",Lambda{})=>x x.?b == false
+/Test45b_cond_lookup_dict_closure_inverted
 

@@ -231,6 +231,7 @@ Get type of value
 Type checking with "as"
  |   Null-values
  |   Complex example
+ |   Closures and Lambdas
 
 Dict set with strings
 
@@ -299,8 +300,8 @@ Lib.Text.Lexer
 Manual closures
  * Another example
 
-Closures / Dict Objects
- * Member lambdas calling each other
+Closures as member functions of Dict Objects
+ * Member closures calling each other
  * Copy lambdas between dictionaries
  * Lambdas are synthesizable
 
