@@ -116,8 +116,8 @@ s*.s   [no]
             | _.unique.sort
         })
         .set("Lget", Lambda{
-            P(1)=>host
-            P(2)=>field
+            P(1) as String =>host
+            P(2) as String =>field
             P(3)=>defaultValue
 
             result=defaultValue
@@ -139,8 +139,8 @@ s*.s   [no]
                     out(List(host,field,value))
         })
         .set("Lhas", Lambda{
-            P(1)=>host
-            P(2)=>field
+            P(1) as String => host
+            P(2) as String => field
             P(3)=>value
             ok=false
             if (self.data.has(host)) {

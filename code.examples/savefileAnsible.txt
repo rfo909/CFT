@@ -1,4 +1,4 @@
-# License
+ License
 <<< EOF
 #
 # CFT - an interactive programmable shell for automation 
@@ -75,10 +75,6 @@
 # --
     data=Hosts:Parse
     
-    allHosts=data.LallHosts
-    lget = data.Lget
-
-
     mon=Util:ProcessMonitor
     
     data.LallHosts->host
