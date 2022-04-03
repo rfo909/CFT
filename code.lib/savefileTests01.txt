@@ -687,10 +687,10 @@ Dict.set("a",1).set("b",Lambda{P(1) as int=>x self.a+x})
 # Dict.ident=Expr
 # --
 	Dict
-		.set("a",1)
-		.set("f",Lambda{
+		_.a=1
+		_.f=Lambda{
 			self.a=self.a+1
-		})
+		}
 	=> obj
 	
 	obj.f
@@ -700,8 +700,4 @@ Dict.set("a",1).set("b",Lambda{P(1) as int=>x self.a+x})
 
 
 
-# Dict.a=1 _.b=2 _.c=3
-# --
-	Dict.a=1 _.b=2 _.c=3 _.keys.concat=="abc"
-/Test47_Dict_dot_x_assignment_multiple
 

@@ -56,7 +56,7 @@ public class DottedAssign extends LexicalElement {
         	dict.set(ident, v);
         	return new ValueObj(dict);
         } else {
-        	throw new Exception("Expected a dictionary to save " + ident + " value into");
+        	throw new Exception("Expected a dictionary to set '" + ident + "' - got " + obj.getTypeName());
         }
     }
 
