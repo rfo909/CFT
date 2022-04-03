@@ -13,6 +13,22 @@
 
 <h1>CFT Change log</h1>
 
+<h3>3.3.0 2022-04-03 DottedAssign for Dict.ident=Expr</h3>
+<p>
+	Modified ExprE which is the parent of DottedCall, and introduced a DottedAssign, which matches
+	.ident=Expr and when current object is a Dict, performs the set(), and returns the Dict, as with .set()
+</p>
+<pre>
+	d=Dict d.a=3 println("d.a=" + d.a)   ## "3"
+</pre>
+<p>
+	Using the "_" underscore function, we can do the following:
+</p>
+<ore>
+	Dict.a="hello" _.b="there" _.c="mr" _.d="president"
+</ore>
+
+
 <h3>3.3.0 2022-04-03 Closures / Dict / DottedCall</h3>
 <p>
 	Moved responsibility for Dict.xxx for value lookup instead of Dict.get("xxx") from Dict to DottedCall.java.
@@ -42,6 +58,7 @@
 	d.add(5)==6
 /Test42_object_lambda_calling_member_lambda
 </pre>
+
 
 
 

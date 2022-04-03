@@ -683,3 +683,25 @@ Dict.set("a",1).set("b",Lambda{P(1) as int=>x self.a+x})
 	Dict.set("a",Lambda{})=>x x.?b == false
 /Test45b_cond_lookup_dict_closure_inverted
 
+
+# Dict.ident=Expr
+# --
+	Dict
+		.set("a",1)
+		.set("f",Lambda{
+			self.a=self.a+1
+		})
+	=> obj
+	
+	obj.f
+	obj.f
+	obj.a==3
+/Test46_Dict_dot_x_assigment
+
+
+
+# Dict.a=1 _.b=2 _.c=3
+# --
+	Dict.a=1 _.b=2 _.c=3 _.keys.concat=="abc"
+/Test47_Dict_dot_x_assignment_multiple
+
