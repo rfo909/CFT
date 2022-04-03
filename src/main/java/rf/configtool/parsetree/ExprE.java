@@ -19,6 +19,7 @@ package rf.configtool.parsetree;
 
 import java.util.*;
 
+import rf.configtool.lexer.Token;
 import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.runtime.Value;
@@ -27,19 +28,32 @@ public class ExprE extends ExprCommon {
     
     private ExprTerminal firstPart;
     private List<DottedCall> dottedLookups=new ArrayList<DottedCall>();
+    private DottedAssign dottedAssign;
     
     public ExprE (TokenStream ts) throws Exception {
         super(ts);
         firstPart=new ExprTerminal(ts);
-        while (ts.peekStr(".")) {
+        for (;;) {
+        	
+        	if (ts.peekStr(".") && ts.peekType(1,Token.TOK_IDENTIFIER) && ts.peekStr(2,"=")) {
+        		dottedAssign=new DottedAssign(ts);
+        		break; // terminates sequence
+        	}
+        	
+        	if (!ts.peekStr(".")) break;
+        	//
             dottedLookups.add(new DottedCall(ts));
         }
     }
     
     public Value resolve (Ctx ctx) throws Exception {
         Value v=firstPart.resolve(ctx);
-        for (DottedCall x:dottedLookups) {
-            v=x.resolve(ctx, v);
+        
+        for (DottedCall dottedCall:dottedLookups) {
+            v=dottedCall.resolve(ctx, v);
+        }
+        if (dottedAssign != null) {
+        	v=dottedAssign.resolve(ctx,v);
         }
         return v;
     }

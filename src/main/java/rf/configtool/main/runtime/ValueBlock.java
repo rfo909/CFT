@@ -45,7 +45,7 @@ public class ValueBlock extends Value {
     
     @Override
     public String getTypeName() {
-        return "Lambda";
+        return "Callable";
     }
 
 

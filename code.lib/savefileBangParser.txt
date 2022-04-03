@@ -142,26 +142,26 @@ BangParser is a separate script.
             if (!Sys.isWindows) {
                 value=value.sub(1,value.length-1) # strip quotes
             }
-            obj.LAdd.call(value)
+            obj.LAdd(value)
         } else if (token.tokenType==3) { # codeSpace
             value=token.str
             value=value.sub(1,value.length-1) # strip "[" and "]"
             value=eval(value)
             if (getType(value)=="List") {
                 value->v
-                    obj.LAdd.call(fixValue(v))
+                    obj.LAdd(fixValue(v))
             } else {
-                obj.LAdd.call(fixValue(value))
+                obj.LAdd(fixValue(value))
             }
         } else {
             # token type = 1 ("nonspace")
             if (token.str.contains("*")) {
                 # attempt Glob expansion
                 Inner {
-                    currentDir.files(token.str)->f obj.LAdd.call(f.name)
+                    currentDir.files(token.str)->f obj.LAdd(f.name)
                 } 
             } else {
-                obj.LAdd.call(token.str)
+                obj.LAdd(token.str)
             }
         }
     |

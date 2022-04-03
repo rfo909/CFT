@@ -15,8 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2022-03-31 RFO
-v3.2.5
+Last updated: 2022-04-03 RFO
+v3.3.0
 
 </pre>
 
@@ -886,6 +886,27 @@ v3.2.5
   $ d.a
   b
 </pre>  
+
+
+<h3>Setting values with identifier names</h3>
+<p>
+  Another simplification is that to set a value in the dictionary, if that value has a name
+  that is a valid identifier, the following two do the same:
+</p>
+<pre>
+  Dict.set("x",1)
+  Dict.x=1
+</pre>
+<p>
+  Combining this with properties as functions:
+</p>
+<pre>
+  Dict.a=1 => data
+  data.a=data.a+1
+  data.a  
+  # 2
+</pre>
+
 
 
 <h3>SymDict</h3>
@@ -1987,13 +2008,16 @@ codeDirs = . ; code.examples ; code.lib
   process. It has two closures of interest.
 </p>
 <p>
-  A <i>closure</i> is a callable object, which
-  runs code "inside" a dictionary, via a <i>lambda</i>. Closures and lambdas are invoked
-  via their .call(...) function.
+  A <i>closure</i> is a lambda, with a self-reference to a dictionary, and
+  so acts like a "member function" of that dictionary, as it has access to data and
+  other closures of that dictionary object. 
 </p>
+<o>
+  In this context we usually refer the closures with dotted notation, which 
+  means they are run.
 <pre>
-  result.isCompleted.call     # returns boolean
-  result.wait.call            # waits for process to finish, then returns another Dict
+  result.isCompleted     # returns boolean
+  result.wait            # waits for process to finish, then returns another Dict
 </pre>
 <p>
   The result.wait closure, when called, returns a Dict with the following content:
@@ -2011,9 +2035,6 @@ codeDirs = . ; code.examples ; code.lib
 <pre>
   $ ?Lib:runProcess
 </pre>
-<p>
-  Warning: it's a bit complex
-</p>
 
 
 
@@ -2211,6 +2232,7 @@ codeDirs = . ; code.examples ; code.lib
   &lt;String&gt;
   Dear Julius 
 </pre>
+
 
 <h2>Dict.mergeCodes()</h2>
 
@@ -3002,7 +3024,8 @@ codeDirs = . ; code.examples ; code.lib
     P(1) as String =&gt; type
     P(2) as (type)? =&gt; value
     SymDict(type,value).set("update",Lambda{
-      P(1) as (self.type)=&gt;x self.set("value",x)  # update does not accept null, only String 
+      P(1) as (self.type)=&gt;x  # does not accept null, only String
+      self.value=x   
     })
   /getTypedObject
 
@@ -3014,6 +3037,22 @@ codeDirs = . ; code.examples ; code.lib
     
     obj.update.call(23) # fails
   /test  
+</pre>
+
+<h3>Closures and Lambdas</h3>
+<p>
+  Both lambdas and closures are assigned the type "Callable", which simplifies type checking, as they have identical
+  .call() functions to invoke. 
+</p>
+<p>
+  If one needs to detect if a value is a lambda or a closure, that is easiest done by checking for the presence of
+  one of the functions that closures implement, and lambdas do not, for example the .lambda function of closures,
+  to obtain the lambda component. 
+</p>
+<pre>
+  P(1) as Callable =&gt; callable
+
+  isClosure = callable.?lambda  # returns true if callable has function lambda, which lambda does not
 </pre>
 
 
@@ -3064,6 +3103,29 @@ codeDirs = . ; code.examples ; code.lib
   data.keys        # returns list with "a"
   data.get("a",5)  # returns 3 as it was set above
 </pre>
+
+
+
+
+<h1>Dict.ident=Expr</h1>
+<p>
+  <i>v3.3.0</i>
+</p>
+<p>
+  Extended parser so that we don't have to use Dict.set() for values with a name that's an identifier:
+</p>
+<pre>
+  data=Dict
+  data.name="test"
+</pre>
+<p>
+  The return value from this assignment is the Dict object. Multiple assignments can be chained using
+  the underscore ("_") global function, which returns the value on the data stack:
+</p>
+<pre>
+  Dict.name="test" _.role="manager" _.age=40 => data
+</pre>
+
 
 
 
@@ -4115,17 +4177,22 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
 </p>
 <pre>
   Dict =&gt;data
+  data.received_value=null
   data.bind(Lambda{
-    self.set("received_value", P(1))
+    self.received_value=P(1)
   }) =&gt;closure
 
   closure.call("test")
-  data.get("received_value")  # returns "test"
+  
+  # Get value passed to closure, possibly by someone else
+  data.received_value  # returns "test"
 </pre>
 <p>
   For robustness and testing, when lambdas are run directly (not via closures)
-  there is also a "self" variable, which points at an empty Dict object.
+  there is also created a "self" variable, which points at an empty Dict object.
 </p>
+
+
 <h2>Another example</h2>
 <p>
   Here we create a Closure that when called strips N characters from the
@@ -4153,10 +4220,15 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
 
 
 
-<h1>Closures / Dict Objects</h1>
+<h1>Closures as member functions of Dict Objects</h1>
 <p>
-  Letting the dictionary .set function detect lambdas, they are automatically wrapped inside
-  closures, with "self" pointing to the dictionary in question.
+  The dictionary .set function detects lambdas, and concert them to closures, with the
+  "self" variable pointing to the dictionary.
+</p>
+<p>
+  NOTE that for the case where we refer a Closure via .ident lookup in a dictionary, the
+  closure is called automatically, so do not use the .call() function. It will be attempted
+  run on the result, which will fail unless the result is another Closure or Lambda.
 </p>
 <p>
    This means we can now do this:
@@ -4166,11 +4238,11 @@ Dict
   .set("i",1)
   .set("incr",Lambda{
     amount=P(1,1)
-    self.set("i",self.i+amount)
+    self.i=self.i+amount
   })
   =&gt;data
 
-  data.incr.call(10) # data.i is now 11
+  data.incr(10) # data.i is now 11
   println(data.i)
 /test
 </pre>
@@ -4178,28 +4250,36 @@ Dict
 
 
 
-<h2>Member lambdas calling each other</h2>
+<h2>Member closures calling each other</h2>
 <p>
-  The mechanism of letting individual "member" lambdas have a shared idea of "self", also allows for this:
+  The mechanism of letting individual "member" closures have a shared idea of "self", lets them call each
+  other.
 </p>
+<p>
+  As the self variable points to a dictionary, calling another closure with .ident lookup, eliminates the 
+  .call() function. It is only when working with closures and lambdas as objects, either through Dict.bind() or
+  looked up in a dictionary with .get("ident"), which is to say, when they are "standalone", that they are
+  invoked with call(), since in this state we need to pass them around as parameters etc, without inducing
+  an invocation.
+</p> 
 <pre>
 Dict
   .set("i",1)
   .set("incr",Lambda{
     amount=P(1,1)
-    self.set("i",self.i+amount)
+    self.i=self.i+amount
   })
   .set("incr50",Lambda{
-    self.incr.call(50)
+    self.incr(50)
   })
   =&gt;data
 
-  data.incr50.call  # data.i is now 51
+  data.incr50  # data.i is now 51
   println(data.i)
 /test
 </pre>
 <p>
-  The incr50 lambda calls the incr lambda within the environment defined by the Dict object.
+  The incr50 closure calls the incr closure within the environment defined by the Dict object.
 </p>
 
 
@@ -4211,6 +4291,8 @@ Dict
   Lambda inside, then wrapping it inside a new closure pointing back to 
   itself (via "self" variable in lambda).
 </p>
+
+
 
 
 

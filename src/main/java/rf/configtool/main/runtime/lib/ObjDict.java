@@ -115,6 +115,10 @@ public class ObjDict extends Obj {
         // storing a Closure, we unwrap the Lambda and create a new Closure, as described above.
         //
         // This means doing Dict.get("somefunc").call(...) invokes a closure instead of a lambda.
+        // 2022-04 RFO Also, have moved the detection of Dict.ident to DottedCall.java, which
+        // implements doing auto-invoke of Closures from Dict. The Dict.get("xxx") does not aut-invoke,
+        // only Dict.xxx
+        //
         if (value instanceof ValueBlock) {
             ValueBlock lambda=(ValueBlock) value;
             //System.out.println("Wrapping lambda in closure for key " + key);
@@ -129,26 +133,8 @@ public class ObjDict extends Obj {
         }
 
         
-        values.put(key, value);
-        if (isIdentifier(key) && !allFunctionNames.contains(key)) refreshInnerFunctions=true;
-        
-        // quick and easy sanity check
-        if (values.keySet().size() != keySequence.size()) {
-            StringBuffer sb1=new StringBuffer();
-            StringBuffer sb2=new StringBuffer();
-            for (String s:keySequence) {
-                if (values.get(s)==null) {
-                    sb1.append(" "+s);
-                }
-            }
-            for (String s:values.keySet()) {
-                if (!keySequence.contains(s)) {
-                    sb2.append(" " + s);
-                }
-            }
-            
-            throw new RuntimeException("Dict: internal error: (s1=" + sb1.toString().trim() + ")  (s2=" + sb2.toString().trim() + ")");
-        }
+       values.put(key, value);
+
     }
     
     
@@ -167,11 +153,8 @@ public class ObjDict extends Obj {
             allFunctionNames.add(f.getName());
             allFunctions.add(f);
         }
-        for (String name:keySequence) {
-            if (allFunctionNames.contains(name) || !isIdentifier(name)) continue;
-            allFunctionNames.add(name);
-            allFunctions.add(new FunctionGetDynamic(name));
-        }
+
+        // convert to array and call setFunctions()
         Function[] arr=new Function[allFunctions.size()];
         for (int i=0; i<allFunctions.size(); i++) arr[i]=allFunctions.get(i);
         
@@ -182,20 +165,20 @@ public class ObjDict extends Obj {
         return this;
     }
     
-    private boolean isIdentifier(String name) {
-        try {
-            Lexer p=new Lexer();
-            CodeLine cl=new CodeLine(new SourceLocation("xxx",0,0), name);
-            p.processLine (cl);
-            TokenStream ts=p.getTokenStream();
-            if (ts.getTokenCount() != 2) return false;  // identifier + EOF
-            if (!ts.peekType(Token.TOK_IDENTIFIER)) return false;
-        } catch (Exception ex) {
-            return false;
-        }
-        return true;
-        
-    }
+//    private boolean isIdentifier(String name) {
+//        try {
+//            Lexer p=new Lexer();
+//            CodeLine cl=new CodeLine(new SourceLocation("xxx",0,0), name);
+//            p.processLine (cl);
+//            TokenStream ts=p.getTokenStream();
+//            if (ts.getTokenCount() != 2) return false;  // identifier + EOF
+//            if (!ts.peekType(Token.TOK_IDENTIFIER)) return false;
+//        } catch (Exception ex) {
+//            return false;
+//        }
+//        return true;
+//        
+//    }
     
     private ObjDict theDict() {
         return this;
@@ -337,8 +320,6 @@ public class ObjDict extends Obj {
                 values.remove(key);
                 keySequence.remove(key);
             } 
-            
-            if (isIdentifier(key)) refreshInnerFunctions=true;
             
             return new ValueObj(theDict());
         }

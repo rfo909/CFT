@@ -85,6 +85,11 @@ public class TokenStream {
         return t.matchType(type);
     }
     
+    public boolean peekType (int offset, int type) throws Exception {
+        Token t=curr(offset);
+        return t.matchType(type);
+    }
+    
     public String showNextTokens (int count) {
         StringBuffer sb=new StringBuffer();
         for (int i=0; i<count; i++) {

@@ -128,10 +128,10 @@
 
     Lib.Data.for(0,720,1)->rot
         println("rot=" + rot)
-        apm.LWait.call
-        apm.LAdd.call(SpawnProcess(SymDict(rot), makeFrame(rot)))
+        apm.LWait
+        apm.LAdd(SpawnProcess(SymDict(rot), makeFrame(rot)))
     |
-    apm.LWaitAll.call
+    apm.LWaitAll
     end=currentTimeMillis
     
     println("Processing time for images: " + (end-start) + " ms with " 

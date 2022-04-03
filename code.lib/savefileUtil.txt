@@ -207,9 +207,9 @@ P(3,Lambda{P(1)}) => processList
 #   limit = 4 
 # 
 #   # --- when about to start a process
-#   mon.Lwait.call(limit)
+#   mon.Lwait(limit)
 #   proc = SpawnProcess(...)
-#   mon.Ladd.call(proc,"desc")
+#   mon.Ladd(proc,"desc")
 #
 #   ...
 #   # when done
@@ -232,15 +232,15 @@ Dict.set("list",List)
         P(2,false)=>verbose
         if (limit<1) limit=1  ## less-than in test below
         loop
-            self.Lrunning.call => running
+            self.Lrunning => running
             if(verbose) {
-                self.Ldone.call => completed
+                self.Ldone => completed
 
                 AppUI:DoShowTopLine(self.title)
                 AppUI:DoShowProgressBar(completed.length, completed.length+running.length,50)
                 AppUI:DoShowHeader("Completed")
-                AppUI:DoShowText("#"+self.Ldone.call.length)
-                AppUI:DoShowList(self.Ldone.call.filter(Lambda{P(1).name}))
+                AppUI:DoShowText("#"+self.Ldone.length)
+                AppUI:DoShowList(self.Ldone.filter(Lambda{P(1).name}))
                 AppUI:DoSpace
                 AppUI:DoShowHeader("Running")
                 AppUI:DoShowText("#"+running.length)
@@ -270,10 +270,10 @@ Dict.set("list",List)
 # Usage:
 #    apm=Util:AutomaticProcessMonitor
 #    loop
-#       apm.LWait.call
-#       apm.LAdd.call(SpawnProcess(...))
+#       apm.LWait
+#       apm.LAdd(SpawnProcess(...))
 #    |
-#    apm.LWaitAll.call
+#    apm.LWaitAll
 #
 # --
     P(1,Sys.cpuCores+2) => numThreads
