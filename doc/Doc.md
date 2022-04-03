@@ -791,6 +791,26 @@ $ /d
 $ d.a
 b
 ```
+### Setting values with identifier names
+
+
+Another simplification is that to set a value in the dictionary, if that value has a name
+that is a valid identifier, the following two do the same:
+
+```
+Dict.set("x",1)
+Dict.x=1
+```
+
+Combining this with properties as functions:
+
+```
+Dict.a=1 =>
+ data
+data.a=data.a+1
+data.a
+# 2
+```
 ### SymDict
 
 
@@ -2666,7 +2686,8 @@ P(1) as ("String int".split)?    # String, int or null
 P(1) as String => type
 P(2) as (type)? => value
 SymDict(type,value).set("update",Lambda{
-P(1) as (self.type)=>x self.set("value",x)  # update does not accept null, only String
+P(1) as (self.type)=>x  # does not accept null, only String
+self.value=x
 })
 /getTypedObject
 # Test it
@@ -2732,6 +2753,25 @@ data=Dict
 data.get("a",3)  # returns 3
 data.keys        # returns list with "a"
 data.get("a",5)  # returns 3 as it was set above
+```
+# Dict.ident=Expr
+
+
+**v3.3.0**
+
+Extended parser so that we don't have to use Dict.set() for values with a name that's an identifier:
+
+```
+data=Dict
+data.name="test"
+```
+
+The return value from this assignment is the Dict object. Multiple assignments can be chained using
+the underscore ("_") global function, which returns the value on the data stack:
+
+```
+Dict.name="test" _.role="manager" _.age=40 =>
+ data
 ```
 # List.nth() negative indexes
 
@@ -3670,12 +3710,13 @@ Nice for event based callbacks.
 
 ```
 Dict =>data
-data.set("received_value",null)
+data.received_value=null
 data.bind(Lambda{
-self.set("received_value", P(1))
+self.received_value=P(1)
 }) =>closure
 closure.call("test")
-data.get("received_value")  # returns "test"
+# Get value passed to closure, possibly by someone else
+data.received_value  # returns "test"
 ```
 
 For robustness and testing, when lambdas are run directly (not via closures)
@@ -3723,7 +3764,7 @@ Dict
 .set("i",1)
 .set("incr",Lambda{
 amount=P(1,1)
-self.set("i",self.i+amount)
+self.i=self.i+amount
 })
 =>data
 data.incr(10) # data.i is now 11
@@ -3748,7 +3789,7 @@ Dict
 .set("i",1)
 .set("incr",Lambda{
 amount=P(1,1)
-self.set("i",self.i+amount)
+self.i=self.i+amount
 })
 .set("incr50",Lambda{
 self.incr(50)

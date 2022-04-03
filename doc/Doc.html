@@ -888,6 +888,27 @@ v3.3.0
 </pre>  
 
 
+<h3>Setting values with identifier names</h3>
+<p>
+  Another simplification is that to set a value in the dictionary, if that value has a name
+  that is a valid identifier, the following two do the same:
+</p>
+<pre>
+  Dict.set("x",1)
+  Dict.x=1
+</pre>
+<p>
+  Combining this with properties as functions:
+</p>
+<pre>
+  Dict.a=1 => data
+  data.a=data.a+1
+  data.a  
+  # 2
+</pre>
+
+
+
 <h3>SymDict</h3>
 <p>
   A special global expression, SymDict is used to create a dictionary from a list of
@@ -2212,6 +2233,7 @@ codeDirs = . ; code.examples ; code.lib
   Dear Julius 
 </pre>
 
+
 <h2>Dict.mergeCodes()</h2>
 
 <p>
@@ -3002,7 +3024,8 @@ codeDirs = . ; code.examples ; code.lib
     P(1) as String =&gt; type
     P(2) as (type)? =&gt; value
     SymDict(type,value).set("update",Lambda{
-      P(1) as (self.type)=&gt;x self.set("value",x)  # update does not accept null, only String 
+      P(1) as (self.type)=&gt;x  # does not accept null, only String
+      self.value=x   
     })
   /getTypedObject
 
@@ -3080,6 +3103,29 @@ codeDirs = . ; code.examples ; code.lib
   data.keys        # returns list with "a"
   data.get("a",5)  # returns 3 as it was set above
 </pre>
+
+
+
+
+<h1>Dict.ident=Expr</h1>
+<p>
+  <i>v3.3.0</i>
+</p>
+<p>
+  Extended parser so that we don't have to use Dict.set() for values with a name that's an identifier:
+</p>
+<pre>
+  data=Dict
+  data.name="test"
+</pre>
+<p>
+  The return value from this assignment is the Dict object. Multiple assignments can be chained using
+  the underscore ("_") global function, which returns the value on the data stack:
+</p>
+<pre>
+  Dict.name="test" _.role="manager" _.age=40 => data
+</pre>
+
 
 
 
@@ -4131,13 +4177,15 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
 </p>
 <pre>
   Dict =&gt;data
-  data.set("received_value",null)
+  data.received_value=null
   data.bind(Lambda{
-    self.set("received_value", P(1))
+    self.received_value=P(1)
   }) =&gt;closure
 
   closure.call("test")
-  data.get("received_value")  # returns "test"
+  
+  # Get value passed to closure, possibly by someone else
+  data.received_value  # returns "test"
 </pre>
 <p>
   For robustness and testing, when lambdas are run directly (not via closures)
@@ -4190,7 +4238,7 @@ Dict
   .set("i",1)
   .set("incr",Lambda{
     amount=P(1,1)
-    self.set("i",self.i+amount)
+    self.i=self.i+amount
   })
   =&gt;data
 
@@ -4219,7 +4267,7 @@ Dict
   .set("i",1)
   .set("incr",Lambda{
     amount=P(1,1)
-    self.set("i",self.i+amount)
+    self.i=self.i+amount
   })
   .set("incr50",Lambda{
     self.incr(50)

@@ -17,22 +17,15 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.parsetree;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.Ctx;
-import rf.configtool.main.SourceException;
-import rf.configtool.main.runtime.Function;
 import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
-import rf.configtool.main.runtime.ValueBoolean;
 import rf.configtool.main.runtime.ValueObj;
-import rf.configtool.main.runtime.lib.ObjClosure;
 import rf.configtool.main.runtime.lib.ObjDict;
 
 /**
- * .x=Expr
+ * <Dict>.x=Expr
  */
 public class DottedAssign extends LexicalElement {
 

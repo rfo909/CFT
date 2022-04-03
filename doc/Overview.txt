@@ -69,6 +69,7 @@ Core types
  * String literals
  * Dictionaries
  |   Properties as functions
+ |   Setting values with identifier names
  |   SymDict
  |   Name
  * Binary type
@@ -236,6 +237,8 @@ Type checking with "as"
 Dict set with strings
 
 Dict.get with default value
+
+Dict.ident=Expr
 
 List.nth() negative indexes
 
