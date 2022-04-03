@@ -205,7 +205,7 @@ P(2, Input("Enter service").get) =>service
     )
     LLabel=Lambda{P(1)=>x x.date.setFormat("yyyy-MM-dd").fmt + " : " + x.key}
     LValue=Lambda{P(1)=>x x.key}
-    Lib:MenuSelect(menuEntries, LLabel, "Known hosts", false, LValue).process.call => host
+    Lib:MenuSelect(menuEntries, LLabel, "Known hosts", false, LValue).process => host
     _shPutHost(host)
     host
 //_shGetHost

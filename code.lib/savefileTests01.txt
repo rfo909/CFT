@@ -583,17 +583,63 @@ tryCatch(t37b(Dict)).ok==false
 # Test it
 # --
   t38_getTypedObject("String",null) => obj
-  obj.update.call("value")  # ok
+  obj.update("value")  # ok
   
   tryCatch(
-  	obj.update.call(23)
+  	obj.update(23)
   ).ok==false # should fail
 /Test38_typechecking_with_closure
 
 
 
 
+# Auto-calling Closures when looked up in Dict
+# --
 
+Dict.set("a",1).set("b",Lambda{P(1) as int=>x self.a+x})
+/t39_dict
+
+
+# Doing the Dict.<identifier> is resolved in DottedCall.java, and 
+# if value is a Closure, then it is automatically invoked, with
+# parameters (if defined)
+# --
+	dict=t39_dict
+	dict.b(3)==4
+/Test39_auto_invoke_closure_from_dict_lookup
+
+
+# Using Dict.get("str") does NOT result in invoking the closure
+# To simplify type checking with "as", both Lambdas and Closures
+# have type "Callable" in CFT.
+# --
+	closure = t39_dict.get("b")
+	
+	# verify that variable "closure" is not result from auto-invoke
+	getType(closure)=="Callable"  
+	
+/Test40_non_auto_invoke_closure_when_dict_get
+
+
+
+# Verifying type of Lambda
+# --
+	getType(Lambda{})=="Callable"
+/Test41_verify_lambda_is_callable
   
-  
+
+
+# Object functions calling each other - still uses self
+# --
+	Dict
+		.set("baseValue",Lambda{
+			1
+		})
+		.set("add",Lambda{
+			P(1,0) as int=>x self.baseValue+x ## identical syntax for variables and no-parameter lambda
+		})
+	=> d
+	d.add(5)==6
+/Test42_object_lambda_calling_member_lambda
+
 

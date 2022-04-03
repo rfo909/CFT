@@ -187,7 +187,10 @@ choice.
 
 
     ed = Db2:Get("Lib","linuxEditor")
+    
+    # invoke lambda (really a closure, since part of a Dict, but that doesn't matter here)
     actions.get(ed).call(file)
+    
 //ShowLinuxEditor
 
 
@@ -330,8 +333,8 @@ choice.
 # Example of use:
 #     runProcess(...)  => a
 #     runProcess(...)  => b
-#     a.wait.call => aResult
-#     b.wait.call => bResult
+#     a.wait => aResult
+#     b.wait => bResult
 # --
     P(1,List("ls","-l")) => cmd
     P(2,List) => stdinLines
@@ -383,6 +386,7 @@ choice.
             # --
             # Note: Windows external processes do not allow files to be deleted
             # immediately even after returning isAlive() == false.
+            
             Del = Lambda {
                 P(1)=>f 
                 count=0
@@ -455,7 +459,7 @@ choice.
     runProcess (cmd,stdinLines,acceptErrors,showDebug) => processDict
     
     # return value
-    processDict.wait.call
+    processDict.wait
 
 /run
 

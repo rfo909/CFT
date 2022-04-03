@@ -13,6 +13,38 @@
 
 <h1>CFT Change log</h1>
 
+<h3>3.3.0 2022-04-03 Closures / Dict / DottedCall</h3>
+<p>
+	Moved responsibility for Dict.xxx for value lookup instead of Dict.get("xxx") from Dict to DottedCall.java.
+</p>
+<p>
+	Also modified DottedCall to detect when Dict.xxx returns a Closure, calling this directly, possibly with
+	parameters as given.
+</p>
+<p>
+	Created some tests in Tests01 script. Modified CFT code base, by searching for .call, and for the case where
+	we have .identifier.call, the ".call" is removed. Note that inside Lambdas in objects, we still need to 
+	use self to access object content.
+</p>
+<p>
+	Example from Tests01
+<pre>
+# Object functions calling each other - still uses self
+# --
+	Dict
+		.set("baseValue",Lambda{
+			1
+		})
+		.set("add",Lambda{
+			P(1,0) as int=&gt;x self.baseValue+x ## identical syntax for variables and no-parameter lambda
+		})
+	=&gt; d
+	d.add(5)==6
+/Test42_object_lambda_calling_member_lambda
+</pre>
+
+
+
 <h3>3.2.5 2022-03-31 Added "as" for type checking</h3>
 <p>
 	Doing error(getType(x) != "String", "Expected string") can now be written as:

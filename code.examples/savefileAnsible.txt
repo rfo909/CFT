@@ -23,8 +23,8 @@
 # Verify all hosts have copy of SSH key
 # --
     data=Hosts:Parse
-    data.LallHosts.call->host
-        sshUser=data.Lget.call(host,"SSHUser")
+    data.LallHosts->host
+        sshUser=data.Lget(host,"SSHUser")
         assert(sshUser != null)
         target=sshUser+"@"+host
         println("------ " + target)
@@ -37,10 +37,10 @@
 # Test SSH (and dns)
 # ---
     HostData=Hosts:Parse
-    HostData.LallHosts.call.sort->host
-        assert(HostData.Lget.call(host, "OS")=="linux")
+    HostData.LallHosts.sort->host
+        assert(HostData.Lget(host, "OS")=="linux")
                
-            HostData.Lget.call (host, "SSHUser") =>sshUser
+            HostData.Lget (host, "SSHUser") =>sshUser
              assert(sshUser != null)
 
             target=sshUser+"@"+host
@@ -81,15 +81,15 @@
 
     mon=Util:ProcessMonitor
     
-    data.LallHosts.call->host
+    data.LallHosts->host
 
         #println("* " + host)
 
-        pm=data.Lget.call(host,"PackageManager")
+        pm=data.Lget(host,"PackageManager")
         assert(pm=="apt")
         #println("*   pm==apt ok")
 
-        sshUser=data.Lget.call(host,"SSHUser")
+        sshUser=data.Lget(host,"SSHUser")
         assert(sshUser != null)
         #println("*   sshUser != null ok")
 
@@ -97,7 +97,7 @@
         processData = SymDict(target)
 
         # Block until less than given number of active processes
-        mon.Lwait.call(10, true)
+        mon.Lwait(10, true)
         
         #println("*   starting process for " + target)
         process = SpawnProcess(processData, {
@@ -108,12 +108,12 @@
             # return value
             result
         })
-        mon.Ladd.call(process,host)
+        mon.Ladd(process,host)
         
         out(process)
     | => processList
 
-    mon.Lwait.call(0,true)  # true=verbose
+    mon.Lwait(0,true)  # true=verbose
 
 
     processList -> process
@@ -181,14 +181,14 @@
     # only one host from each reboot group can boot at a time
     rebootGroups=List
 
-    HostData.LallHosts.call.sort->host
-        assert(HostData.Lhas.call (host,"OSFamily","debian"))
-        HostData.Lget.call (host, "SSHUser") =>sshUser
+    HostData.LallHosts.sort->host
+        assert(HostData.Lhas (host,"OSFamily","debian"))
+        HostData.Lget (host, "SSHUser") =>sshUser
 
         sshUser+"@"+host =>target
-        HostData.Lget.call (host, "RebootGroup", null) => rebootGroup
+        HostData.Lget (host, "RebootGroup", null) => rebootGroup
 
-        HostData.Lhas.call (host, "Auto.reboot", "yes") => allowReboot
+        HostData.Lhas (host, "Auto.reboot", "yes") => allowReboot
         
         Inner {
             SSH:HostOkSSH (target) =>hostOk
@@ -251,23 +251,23 @@
     mon=Util:ProcessMonitor
     
     HostData=Hosts:Parse
-    HostData.LallHosts.call.sort->host
-        assert(HostData.Lhas.call(host,"Install.CFT","1"))
-        sshUser=HostData.Lget.call (host,"SSHUser")
+    HostData.LallHosts.sort->host
+        assert(HostData.Lhas(host,"Install.CFT","1"))
+        sshUser=HostData.Lget (host,"SSHUser")
         assert(sshUser != null)
 
-        mon.Lwait.call(8,true)
+        mon.Lwait(8,true)
         println("Spawning process for host="+host)
         
         ctx=SymDict(host,sshUser)
         process=SpawnProcess(ctx, UpdateCFT(host, sshUser))
 
-        mon.Ladd.call(process,host)
+        mon.Ladd(process,host)
         
         out(process)
     | => processes
 
-    mon.Lwait.call(0,true)
+    mon.Lwait(0,true)
 
     
     
@@ -309,12 +309,12 @@ P(4)=>lineFilter
     
     mon=Util:ProcessMonitor
 
-    HostData.LallHosts.call->host
+    HostData.LallHosts->host
 
-        HostData.Lget.call(host, "OS") => os
+        HostData.Lget(host, "OS") => os
         assert(os=="linux")
         
-            HostData.Lget.call(host, "SSHUser") =>sshUser
+            HostData.Lget(host, "SSHUser") =>sshUser
             assert(sshUser != null)
         
         sshUser+"@"+host =>target
@@ -323,11 +323,11 @@ P(4)=>lineFilter
             proc=SpawnProcess(ctx,
                 SysStat(host,target,command,lineFilter)
             )
-        mon.Ladd.call(proc,host)
+        mon.Ladd(proc,host)
         out(proc)
     | _=>procList
 
-    mon.Lwait.call(0,true)
+    mon.Lwait(0,true)
 
     procList -> proc
         proc.wait
@@ -356,10 +356,10 @@ SysStatAll("iostat")
     file=Lib:TmpFile("resolved_conf")
     file.create(resolved_conf)
     
-    HostData.LallHosts.call->host
-        assert(HostData.Lget.call(host, "OSFamily")=="debian")
+    HostData.LallHosts->host
+        assert(HostData.Lget(host, "OSFamily")=="debian")
                
-        HostData.Lget.call (host, "SSHUser") =>sshUser
+        HostData.Lget (host, "SSHUser") =>sshUser
         assert(sshUser != null)
 
         Lib:Header(host)
@@ -414,7 +414,7 @@ DNS=10.0.0.3 10.0.0.4
 # filter string, to isolate hosts, property names or values
 # -- 
     P(1,null)=>filter
-    Hosts:Parse.Ldump.call->line  
+    Hosts:Parse.Ldump->line  
         # each line is a list with three elements: host, setting name and setting value
         assert(filter==null || line.concat("|").contains(filter))
         reportList(line)

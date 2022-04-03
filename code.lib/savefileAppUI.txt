@@ -307,13 +307,13 @@ P(3,"no")=>defaultValue
     DoShowHeader("Confirm")
     
     obj=DoSummaryObj
-    obj.Lrow.call("Orig","VM to clone","kubs05.v")
-    obj.Lrow.call("Name","Name of new VM", "mcfg1.v")
-    obj.Lrow.call("CPU","Number of CPUs", "4")
-    obj.Lrow.call("RAM","GB of RAM","8")
-    obj.Lrow.call("Disk","GB of disk","32")
-    obj.Lrow.call("Nic","Network NIC name","ens3")
-    obj.Lshow.call
+    obj.Lrow("Orig","VM to clone","kubs05.v")
+    obj.Lrow("Name","Name of new VM", "mcfg1.v")
+    obj.Lrow("CPU","Number of CPUs", "4")
+    obj.Lrow("RAM","GB of RAM","8")
+    obj.Lrow("Disk","GB of disk","32")
+    obj.Lrow("Nic","Network NIC name","ens3")
+    obj.Lshow
     
     DoInput(
         "Type 'yes' to confirm",

@@ -28,6 +28,8 @@ import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueBoolean;
 import rf.configtool.main.runtime.ValueObj;
+import rf.configtool.main.runtime.lib.ObjClosure;
+import rf.configtool.main.runtime.lib.ObjDict;
 
 /**
  * Lookup of identifier or call of function
@@ -69,8 +71,30 @@ public class DottedCall extends LexicalElement {
         for (Expr e:params) values.add(e.resolve(ctx.sub()));
         
         if (obj instanceof ValueObj) {
+        	// unwrap Obj
             obj=((ValueObj) obj).getVal();
         }
+        
+        if (obj instanceof ObjDict) {
+        	ObjDict dict=(ObjDict) obj;
+        	Value v=dict.getValue(ident);
+        	if (v != null) {
+        		//System.out.println("DottedCall: found dict value for '" + ident + "' " + v.getDescription());
+        		// Check if closure
+        		if (v instanceof ValueObj) {
+	        		Obj x=((ValueObj) v).getVal();
+	        		if (x instanceof ObjClosure) {
+	        			if (values.size()==0) {
+	        				System.out.println("DottedCall: " + getSourceLocation() + " Auto-invoking closure " + ident + " without params");
+	        			}
+	        			return ((ObjClosure) x).callClosure(ctx, values);
+	        		}
+        		}
+        		// not closure, just return value
+        		return v;
+        	}
+        }
+        
         Function f=obj.getFunction(ident);
         if (f==null) {
             if (checkMode) return new ValueBoolean(false);

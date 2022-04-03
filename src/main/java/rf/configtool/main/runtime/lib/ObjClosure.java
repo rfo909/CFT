@@ -51,7 +51,7 @@ public class ObjClosure extends Obj {
 
 
     public String getTypeName() {
-        return "Closure";
+        return "Callable";
     }
     
 
