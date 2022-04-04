@@ -23,9 +23,11 @@ import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.SourceException;
 import rf.configtool.main.runtime.*;
+import rf.configtool.main.runtime.lib.ObjDict;
 
 public class ExprAs extends ExprCommon {
 
+	private boolean isDictName=false;
     private String typeName;
     private Expr typeNameExpr;
     private boolean orNull=false;
@@ -33,6 +35,7 @@ public class ExprAs extends ExprCommon {
     public ExprAs (TokenStream ts) throws Exception {
         super(ts);
         ts.matchStr("as","expected 'as'");
+        isDictName = ts.matchStr("&");
         if (ts.matchStr("(")) {
         	typeNameExpr=new Expr(ts);
         	ts.matchStr(")", "expected ')' following as-expression");
@@ -60,7 +63,7 @@ public class ExprAs extends ExprCommon {
         
         final List<String> typeNames=new ArrayList<String>();
         
-        
+        // either got a typename identifier or an Expr
         if (typeName != null) {
         	typeNames.add(typeName);
         } else {
@@ -74,11 +77,34 @@ public class ExprAs extends ExprCommon {
         		typeNames.add(exprValue.getValAsString());
         	}
         }
+        // and optional '?' allowing for null
         if (orNull) typeNames.add("null");
+        
+        
+        final String valueTypeName;
+        
+//        System.out.println("theValue=" + theValue.getTypeName());
+//        System.out.println("isDictName=" + isDictName);
+        
+        if (isDictName) {
+        	if (!(theValue instanceof ObjDict)) {
+	        	throw new SourceException(getSourceLocation(),
+	        			"Expected value of type Dict with name " + typeName + " - got " + theValue.getTypeName() + ": " + showValue(stackValue));
+        	}
+        	valueTypeName=((ObjDict) theValue).getName();
+        	if (valueTypeName==null) {
+        		throw new SourceException(getSourceLocation(),
+        				"Expected value of type Dict with name " + typeName + " - got unnamed Dict: " + showValue(stackValue));
+        	}
+        } else {
+        	valueTypeName=theValue.getTypeName();
+        }
+        
+//    	System.out.println("Got valueTypeName=" + valueTypeName);
         
         boolean ok=false;
         for (String type:typeNames) {
-        	if (theValue.getTypeName().equals(type)) {
+        	if (valueTypeName.equals(type)) {
         		ok=true;
         		break;
         	}
@@ -93,8 +119,11 @@ public class ExprAs extends ExprCommon {
 	        	sb.append(type);
 	        }
 
-    		throw new SourceException(getSourceLocation(), 
-    			"Expected value as type [" + sb.toString() + "] - got " + theValue.getTypeName() + ": " + showValue(stackValue));
+    		throw new SourceException(getSourceLocation(),
+    			(isDictName 
+    					? "Expected Dict of type [" + sb.toString() + "]" 
+    					: "Expected value as type [" + sb.toString() + "]"
+    			) + " - got " + theValue.getTypeName() + ": " + showValue(stackValue));
     	}
     	
     	// return value

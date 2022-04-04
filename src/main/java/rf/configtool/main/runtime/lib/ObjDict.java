@@ -138,6 +138,9 @@ public class ObjDict extends Obj {
     }
     
     
+    public String getName() {
+    	return name;
+    }
     
     private synchronized void verifyInnerFunctions() {
         if (!refreshInnerFunctions) return;
