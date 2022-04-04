@@ -230,11 +230,16 @@ public class ObjDict extends Obj {
 
     @Override
     public ColList getContentDescription() {
-        StringBuffer str=new StringBuffer();
+        StringBuffer sb=new StringBuffer();
         for (String key:keySequence) {
-            str.append(" "+key);
+            sb.append(" "+key);
         }
-        return ColList.list().regular("Dict: " + str.toString().trim());
+        String str=sb.toString().trim();
+        if (str.length() > 60) str=str.substring(0,55) + "+";
+        
+        String sn="";
+        if (name != null) sn=":"+name;
+        return ColList.list().regular("Dict" + sn + " [" + str + "]");
     }
         
 

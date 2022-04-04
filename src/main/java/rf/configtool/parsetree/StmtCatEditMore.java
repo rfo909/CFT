@@ -98,7 +98,7 @@ public class StmtCatEditMore extends StmtShellInteractive {
         
         CodeLines codeLines=new CodeLines(macro, loc);
         
-        Value ret = ctx.getObjGlobal().getRuntime().processCodeLines(ctx.getStdio(), codeLines, new FunctionState());
+        Value ret = ctx.getObjGlobal().getRuntime().processCodeLines(ctx.getStdio(), codeLines, new FunctionState(null,null));
         if (!(ret instanceof ValueBlock)) throw new Exception("Not a macro: " + macro + " ---> " + ret.synthesize());
         
         ValueBlock macroObj=(ValueBlock) ret;

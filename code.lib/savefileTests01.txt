@@ -700,4 +700,34 @@ Dict.set("a",1).set("b",Lambda{P(1) as int=>x self.a+x})
 
 
 
+# "as" Dict name
+# --
+	x=Lambda{ P(1) as &Data => value }
+	
+	tryCatch(
+		x.call(Dict("Data"))
+	).ok==true
+/Test47_as_dict_name
+
+
+
+# "as" Dict name
+# --
+	x=Lambda{ P(1) as &Data => value }
+	
+	tryCatch(
+		x.call(Dict("XYZ"))
+	).ok==false
+/Test47b_as_dict_name_inverse
+
+
+
+# "as" Dict name
+# --
+	x=Lambda{ P(1) as &Data => value }
+	
+	tryCatch(
+		x.call("ugh")
+	).ok==false
+/Test47c_as_dict_name_inverse_nondict_value
 

@@ -319,7 +319,7 @@ public class ObjGlobal extends Obj {
         CodeLines onLoad = currScriptCode.getNamedCodeLines("onLoad");
         if (onLoad != null) {
             try {
-                this.runtime.processCodeLines(stdio, onLoad, new FunctionState());
+                this.runtime.processCodeLines(stdio, onLoad, new FunctionState("onLoad"));
             } catch (Exception ex) {
                 stdio.println("onLoad function failed with exception");
             }
@@ -619,7 +619,7 @@ public class ObjGlobal extends Obj {
             if (params.size() != 1) throw new Exception("Expected parameter str");
             String str=getString("str",params,0);
             SourceLocation loc=new SourceLocation("<eval>", 0, 0);
-            return runtime.processCodeLines(ctx.getStdio(), new CodeLines(str, loc),null);
+            return runtime.processCodeLines(ctx.getStdio(), new CodeLines(str, loc),new FunctionState(null,null));
         }
     }
 

@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import rf.configtool.lexer.SourceLocation;
 import rf.configtool.main.CodeLines;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.PropsFile;
@@ -69,6 +70,7 @@ public class ObjSys extends Obj {
                 new FunctionScriptId(),
                 new FunctionCPUCores(),
                 new FunctionJobs(),
+                new FunctionCurrFunction(),
         };
         setFunctions(arr);
         
@@ -595,5 +597,20 @@ public class ObjSys extends Obj {
 
     }
     
-    
+    class FunctionCurrFunction extends Function {
+        public String getName() {
+            return "currFunction";
+        }
+
+        public String getShortDesc() {
+            return "currFunction() - returns name of current script function";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueString(ctx.getFunctionState().getScriptFunctionName());
+        }
+
+    }
+  
 }

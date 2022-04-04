@@ -231,6 +231,7 @@ Get type of value
 
 Type checking with "as"
  |   Null-values
+ |   Dict names
  |   Complex example
  |   Closures and Lambdas
 

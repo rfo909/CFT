@@ -97,7 +97,7 @@ public class ObjProcess extends Obj {
         
         // Creating empty function state to be populated with local variables matching
         // the Dictionary content
-        FunctionState functionState = new FunctionState();
+        FunctionState functionState = new FunctionState(null,null);
         
         // Each Dict value must be run through an eval(syn(value)) pipeline, to make them
         // guaranteed independent of all other internal structures in CFT. 

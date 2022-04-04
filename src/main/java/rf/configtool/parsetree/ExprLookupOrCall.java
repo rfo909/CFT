@@ -74,7 +74,7 @@ public class ExprLookupOrCall extends ExprCommon {
         if (codeLines!= null) {
             // execute code line
             Runtime rt=new Runtime(objGlobal);
-            return rt.processCodeLines(ctx.getStdio(), codeLines, new FunctionState(values));
+            return rt.processCodeLines(ctx.getStdio(), codeLines, new FunctionState(ident, values));
         }
         
         throw new SourceException(getSourceLocation(), "unknown symbol '" + ident + "'");

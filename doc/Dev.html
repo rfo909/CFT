@@ -14,6 +14,21 @@
 <h1>CFT Change log</h1>
 
 
+<h3>3.3.1 2022-04-04 Expr as &amp;Col / Sys.currFunction / </h3>
+<p>
+	Modified "as" to accept an &amp; (ampersand) in front of either the single Identifier, or
+	the (Expr). If present, the type we check for is the "name" of Dict (via .getName - not a
+	dictionary value). 
+</p>
+<p>
+	Created Sys.currFunction, which gives the name of the current script function. For creating
+	dictionary self=Dict(Sys.currFunction) when creating objects in functions, if we want our
+	objects to have the same name as the function where defined.
+</p>
+
+
+
+
 <h2 class="tag">3.3.0 2022-04-03 Merged branch 3.3.0</h2>
 <p>
 	This marks version 3.3.0 - some intense 8-10 hours over two days; had to scrap first attempt from yesterday, and narrow

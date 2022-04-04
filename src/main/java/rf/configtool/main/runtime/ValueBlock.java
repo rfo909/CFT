@@ -138,7 +138,7 @@ public class ValueBlock extends Value {
      */
     public Value callLambda (Ctx ctx, ObjDict dict, List<Value> params) throws Exception {
         if (params==null) params=new ArrayList<Value>();
-        FunctionState fs=new FunctionState(params);
+        FunctionState fs=new FunctionState(null,params);
         fs.set("self", new ValueObj(dict));
         
         Ctx independentCtx=new Ctx(ctx.getStdio(), ctx.getObjGlobal(), fs);

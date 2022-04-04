@@ -217,7 +217,7 @@ public class Root {
     
                     String pre;
                     try {
-                        Value ret = objGlobal.getRuntime().processCodeLines(stdio, promptCodeLines, new FunctionState());
+                        Value ret = objGlobal.getRuntime().processCodeLines(stdio, promptCodeLines, new FunctionState(null,null));
                         pre=ret.getValAsString();
                     } catch (Exception ex) {
                         if (debugMode) {
@@ -282,7 +282,7 @@ public class Root {
 
                 CodeLines codeLines = new CodeLines(shortcutCode, loc);
 
-                Value ret = objGlobal.getRuntime().processCodeLines(stdio, codeLines, new FunctionState());
+                Value ret = objGlobal.getRuntime().processCodeLines(stdio, codeLines, new FunctionState(null,null));
                 postProcessResult(ret);
                 showSystemLog();
 
@@ -301,7 +301,7 @@ public class Root {
 
                 List<Value> params=new ArrayList<Value>();
                 params.add(new ValueString(str));
-                objGlobal.getRuntime().processCodeLines(stdio, codeLines, new FunctionState(params));
+                objGlobal.getRuntime().processCodeLines(stdio, codeLines, new FunctionState(null,params));
                 return;
             } 
 
@@ -408,7 +408,7 @@ public class Root {
             if (line.trim().length() > 0) {
                 // program line
                 currScriptCode.setCurrLine(line);
-                Value result = objGlobal.getRuntime().processCodeLines(stdio, new CodeLines(line, loc), null);
+                Value result = objGlobal.getRuntime().processCodeLines(stdio, new CodeLines(line, loc), new FunctionState(null,null));
 
                 postProcessResult(result);
                 showSystemLog();

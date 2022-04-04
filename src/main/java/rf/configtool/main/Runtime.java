@@ -41,7 +41,7 @@ public class Runtime {
      */
     public Value processCodeLines (Stdio stdio, CodeLines lines, FunctionState functionState) throws Exception {
 
-        if (functionState==null) functionState=new FunctionState();
+        if (functionState == null) throw new Exception("No functionState");
         
         
         List<ProgramLine> progLines=lines.getProgramLines();

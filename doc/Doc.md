@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2022-04-03 RFO
-v3.3.0
+Last updated: 2022-04-04 RFO
+v3.3.1
 ```
 # Introduction
 
@@ -2677,24 +2677,54 @@ P(1) as ("String null".split) => optionalStringValue
 P(1) as String? > optionalStringValue  # The '?' means "or null"
 P(1) as ("String int".split)?    # String, int or null
 ```
+### Dict names
+
+
+The Dict object has an optional name, either set at creation by Dict("something") or via Dict.setName("something").
+This name can be filtered in the "as" expression, prefixing the type identifier or type expression inside ()'s with
+an &amp; (ampersand) as follows:
+
+```
+# Accept dictionary named as MyData only, or null
+# --
+P(1) as &amp;MyData? =>
+ data
+...
+/f
+# Create such data
+# --
+Dict("MyData")
+_.a=1
+_.b=2
+=>
+ myData
+f(myData) # matches the type correctly
+/test
+```
 ### Complex example
 
 ```
-# Generic function (sort of) that produces an object (Dict)
-# with a Lambda (converted to closure) for setting values of given type.
+# Generic function (sort of) that produces a Container object (Dict)
+# with a member function "update" for setting values of given type only.
 # --
+self=Dict(Sys.currFunction)
 P(1) as String => type
 P(2) as (type)? => value
-SymDict(type,value).set("update",Lambda{
-P(1) as (self.type)=>x  # does not accept null, only String
+self.type=type
+self.value=value
+self.update=Lambda{
+P(1) as (self.type)? =>x
 self.value=x
-})
-/getTypedObject
+}
+# return object
+self
+/Container
 # Test it
 # --
-getTypedObject("String",null) => obj
-obj.update.call("value")  # ok
-obj.update.call(23) # fails
+Container("String",null) => obj
+obj.update("value")  # ok
+obj.update(23) # fails, as 23 is not a String
+obj.value # returns current value
 /test
 ```
 ### Closures and Lambdas

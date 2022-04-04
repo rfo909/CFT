@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import rf.configtool.lexer.SourceLocation;
 import rf.configtool.main.runtime.Value;
 
 /**
@@ -34,20 +35,32 @@ import rf.configtool.main.runtime.Value;
  */
 public class FunctionState {
 
+	private String scriptFunctionName;  
+		// Used by Sys.currFunction
+		// Note: FunctionState objects do not provide a full stack of calls; they are
+		// only stacked (via parent pointer) for sub-scopes within functions.
+	
     private FunctionState parent;
     private List<Value> params;
     private HashMap<String,Value> assignedVariables=new HashMap<String,Value>();
 
-    public FunctionState() {
-        this(new ArrayList<Value>());
+    public FunctionState(String scriptFunctionName) {
+        this(scriptFunctionName, new ArrayList<Value>());
     }
     private FunctionState(List<Value> innerParams, FunctionState parent) {
         this.params=innerParams;
         this.parent=parent;
     }
-    public FunctionState (List<Value> params) {
+    public FunctionState (String scriptFunctionName, List<Value> params) {
+    	this.scriptFunctionName=scriptFunctionName;
         if (params==null) params=new ArrayList<Value>();
         this.params=params;
+    }
+    
+    public String getScriptFunctionName() {
+    	if (scriptFunctionName != null) return scriptFunctionName;
+    	if (parent != null) return parent.getScriptFunctionName();
+    	return null;
     }
     
     public List<Value> getParams() {

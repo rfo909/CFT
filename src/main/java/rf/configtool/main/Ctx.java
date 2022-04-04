@@ -65,7 +65,7 @@ public class Ctx {
     }
     
     private Ctx (Ctx parent, OutData outData,  OutText outText, Stdio stdio, ObjGlobal objGlobal, FunctionState functionState) {
-        if (functionState==null) functionState=new FunctionState();
+        if (functionState==null) functionState=new FunctionState(null,null);
         
         this.parent=parent;
         this.outData=outData;

@@ -89,12 +89,12 @@ public class ExprAs extends ExprCommon {
         if (isDictName) {
         	if (!(theValue instanceof ObjDict)) {
 	        	throw new SourceException(getSourceLocation(),
-	        			"Expected value of type Dict with name " + typeName + " - got " + theValue.getTypeName() + ": " + showValue(stackValue));
+	        			"Expected value of type Dict with name - got " + theValue.getTypeName() + ": " + showValue(stackValue));
         	}
         	valueTypeName=((ObjDict) theValue).getName();
         	if (valueTypeName==null) {
         		throw new SourceException(getSourceLocation(),
-        				"Expected value of type Dict with name " + typeName + " - got unnamed Dict: " + showValue(stackValue));
+        				"Expected value of type Dict with name - got " + showValue(stackValue));
         	}
         } else {
         	valueTypeName=theValue.getTypeName();
@@ -121,9 +121,9 @@ public class ExprAs extends ExprCommon {
 
     		throw new SourceException(getSourceLocation(),
     			(isDictName 
-    					? "Expected Dict of type [" + sb.toString() + "]" 
-    					: "Expected value as type [" + sb.toString() + "]"
-    			) + " - got " + theValue.getTypeName() + ": " + showValue(stackValue));
+    					? "Expected Dict of type(s) [" + sb.toString() + "]" 
+    					: "Expected value as type(s) [" + sb.toString() + "]"
+    			) + " - got " + showValue(stackValue));
     	}
     	
     	// return value
