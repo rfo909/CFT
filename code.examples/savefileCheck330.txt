@@ -1,0 +1,56 @@
+# Readme
+<<<<<< EOF
+# With the upgrade to version 3.3.0, looking up a closure
+# from a Dictionary via .identifier means the closure is
+# invoked, possibly with parameters, as for all dotted
+# parts.
+#
+# This script contains functions to locate places in 
+# script code that may have to be updated.
+#
+# Note that Lambda and Closure objects do not automatically
+# get invoked other than when retrieved via dictionary
+# lookup, so for example the following code remains unchanged:
+#
+#  P(1,Lambda{}) => Lsomething
+#  ...
+#  Lsomething.call
+#
+>>>>>> EOF
+/Readme
+
+
+
+# Text files 
+# --
+Dir.allFiles("savefile*.txt")
+//tf
+
+
+# Common search function
+# --
+	P(1) as Grep => grep
+
+	tf->f
+		grep.file(f)->line
+			report(line.file.name, line.lineNumber, line)
+//DoSearch
+
+# Display locations which must be changed from .ident.call to .ident
+# --
+	re=Regex("[.][a-zA-Z0-9_]+[.]call")
+	grep=Grep.matchRegex(re)
+	DoSearch(grep)
+/Search1
+
+
+# Display all lines containing .set to find code locations
+# which may be simplified to Dict.ident=expr, from old 
+# form Dict.set("ident",Expr) - which is still supported, and
+# will not be removed, as it allows storing non-identifier
+# named values.
+# --
+	DoSearch(Grep(".call"))
+/Search2
+
+

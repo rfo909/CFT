@@ -53,6 +53,11 @@ public class ExprAs extends ExprCommon {
     public Value resolve (Ctx ctx) throws Exception {
         final Value stackValue=ctx.pop();
         
+        Obj theValue=stackValue;
+        if (theValue instanceof ValueObj) {
+        	theValue=((ValueObj) theValue).getVal(); // unwrap Obj 
+        }
+        
         final List<String> typeNames=new ArrayList<String>();
         
         
@@ -73,7 +78,7 @@ public class ExprAs extends ExprCommon {
         
         boolean ok=false;
         for (String type:typeNames) {
-        	if (stackValue.getTypeName().equals(type)) {
+        	if (theValue.getTypeName().equals(type)) {
         		ok=true;
         		break;
         	}
@@ -89,7 +94,7 @@ public class ExprAs extends ExprCommon {
 	        }
 
     		throw new SourceException(getSourceLocation(), 
-    			"Expected value as type [" + sb.toString() + "] - got " + stackValue.getTypeName() + ": " + showValue(stackValue));
+    			"Expected value as type [" + sb.toString() + "] - got " + theValue.getTypeName() + ": " + showValue(stackValue));
     	}
     	
     	// return value
