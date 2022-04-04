@@ -13,8 +13,73 @@
 
 <h1>CFT Change log</h1>
 
+<h3>3.3.2 2022-04-04 classes v1 </h3>
+<p>
+	Created the class block. It inherits parameters from the function it is in. It also inherits the name
+	of the function for the class, unless specified explictly following the "class" keyword.
+</p>
+<p>
+	Behind the scenes, the class expression sets up the self dictionary, then runs the block of code as a lambda,
+	with "self" as a local variable, and 
+	inheriting parameters from the function, and finally, returns the self object.
+</p>
+<pre>
+# Test class
+# --
+	class {
+		P(1) as String =&gt; name
+		self.name=name
+		self.present=Lambda{
+			"&lt;b&gt;"+self.name+"&lt;/b&gt;"
+		}
+	}
+/TestClass
 
-<h3>3.3.1 2022-04-04 Expr as &amp;Col / Sys.currFunction / </h3>
+# Example use
+# --
+	tc=TestClass("this is a test")
+	tc.present
+/example
+</pre>
+
+<h4>Inheritance</h4>
+<p>
+	Inheritance uses the fact that "self" is a dictionary, and has a .copyFrom(otherDict) function. This means that
+	there is no path up the inheritance chain, but instead that we copy content from super-class to subclass.
+</p>
+<p>
+	It is all about creating objects that reuse code. As we see below, the subclass updates its' self with
+	content from super class ("TestClass"), then copies the reference to self.present into self.origPresent
+	before redefining self.present, which in turn calls self.origPresent. This of course corresponds to
+	"super.present()" in Java, but is more manual. There also is nothing preventing multiple inheritance, as
+	the content of the "self" is managed programmatically in the class block.
+</p>
+<pre>
+# Subclass
+# --
+	class {
+		P(1) as String =&gt; name
+		
+		# inheritance via copying object content
+		self.copyFrom(TestClass(name))
+
+		self.origPresent=self.present
+		self.present=Lambda{
+			# Calls inherited (copied) render function from TestClass
+			@ &lt;p&gt;Extra text&lt;/p&gt;&lt;&lt; self.origPresent &gt;&gt;
+			.mergeExpr
+		}
+	}
+/Subclass
+
+# Example use
+# --
+	Subclass("test").present
+/example2
+
+</pre>
+
+<h3>3.3.1 2022-04-04 "as" to check Dict types / Sys.currFunction</h3>
 <p>
 	Modified "as" to accept an &amp; (ampersand) in front of either the single Identifier, or
 	the (Expr). If present, the type we check for is the "name" of Dict (via .getName - not a

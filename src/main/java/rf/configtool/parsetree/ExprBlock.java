@@ -20,20 +20,25 @@ package rf.configtool.parsetree;
 import java.util.ArrayList;
 import java.util.List;
 
+import rf.configtool.lexer.Token;
 import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.CodeLines;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.SourceException;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueBlock;
+import rf.configtool.main.runtime.ValueObj;
+import rf.configtool.main.runtime.lib.ObjDict;
 
 public class ExprBlock extends ExprCommon {
 
     public static final int MODE_INNER = 0;
     public static final int MODE_LAMBDA = 1;
     public static final int MODE_LOCAL = 2;
+    public static final int MODE_CLASS = 3;
     
     private int mode;
+    private String className;
     
     private List<ProgramLine> programLines=new ArrayList<ProgramLine>();
     private String synString;
@@ -53,6 +58,12 @@ public class ExprBlock extends ExprCommon {
             ts.matchStr("{","expected '{'");
         } else if (ts.matchStr("{")) {
             mode=MODE_LOCAL;
+        } else if (ts.matchStr("class")) {
+        	mode=MODE_CLASS;
+        	if (ts.peekType(Token.TOK_IDENTIFIER)) {
+        		className=ts.matchIdentifier("internal error");
+        	}
+        	ts.matchStr("{","expected '{'");
         }
         
         List<ProgramLine> progLines=new ArrayList<ProgramLine>();
@@ -66,7 +77,7 @@ public class ExprBlock extends ExprCommon {
             }
             ts.matchStr("}","expected '}' closing " + getBlockModeName() + " starting at " + this.getSourceLocation());
         } else {
-            // INNER and LAMBDA
+            // INNER, LAMBDA and CLASS
             for(;;) {
                 progLines.add(new ProgramLine(ts));
                 if (ts.matchStr(CodeLines.PIPE_SYMBOL)) continue;
@@ -90,6 +101,7 @@ public class ExprBlock extends ExprCommon {
         if (mode==MODE_INNER) return "inner block";
         if (mode==MODE_LAMBDA) return "lambda block";
         if (mode==MODE_LOCAL) return "local block";
+        if (mode==MODE_CLASS) return "class block";
         throw new RuntimeException("Unknown mode: " + mode);
     }
     
@@ -106,6 +118,13 @@ public class ExprBlock extends ExprCommon {
             return b.callInnerBlock(ctx);
         } else if (mode==MODE_LOCAL) {
             return b.callLocalBlock(ctx);
+        } else if (mode==MODE_CLASS) {
+        	if (className == null) className=ctx.getFunctionState().getScriptFunctionName();
+        	if (className == null) throw new Exception("Could not identify script function name for class name");
+        	ObjDict self=new ObjDict(className);
+        	List<Value> params=ctx.getFunctionState().getParams(); // inherit params from surroundings
+        	b.callLambda(ctx,self,params);
+        	return new ValueObj(self);
         } else {
             throw new Exception("Invalid mode: " + mode);
         }

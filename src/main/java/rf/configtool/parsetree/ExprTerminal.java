@@ -139,7 +139,7 @@ public class ExprTerminal extends ExprCommon {
             literalValue=new ValueBoolean(false);
             return;
         }
-        if (ts.peekStr("Inner") || ts.peekStr("Lambda") || ts.peekStr("{")) {
+        if (ts.peekStr("Inner") || ts.peekStr("Lambda") || ts.peekStr("{") || ts.peekStr("class")) {
             expr = new ExprBlock(ts);
             return;
         }

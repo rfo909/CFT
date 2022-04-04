@@ -608,7 +608,9 @@ public class ObjSys extends Obj {
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
-            return new ValueString(ctx.getFunctionState().getScriptFunctionName());
+            String str=ctx.getFunctionState().getScriptFunctionName();
+            if (str==null) str="<unknown-value>";
+            return new ValueString(str);
         }
 
     }

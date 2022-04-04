@@ -124,7 +124,6 @@ public class ValueBlock extends Value {
         return executeLocalBlock(ctx);
     }
     
-    
     /**
      * Call lambda, running in an isolated Ctx
      */
@@ -136,10 +135,10 @@ public class ValueBlock extends Value {
      * Call lambda with "self" dictionary - this is a Closure feature. The
      * dictionary is stored in the "self" variable inside the lambda.
      */
-    public Value callLambda (Ctx ctx, ObjDict dict, List<Value> params) throws Exception {
+    public Value callLambda (Ctx ctx, ObjDict self, List<Value> params) throws Exception {
         if (params==null) params=new ArrayList<Value>();
         FunctionState fs=new FunctionState(null,params);
-        fs.set("self", new ValueObj(dict));
+        fs.set("self", new ValueObj(self));
         
         Ctx independentCtx=new Ctx(ctx.getStdio(), ctx.getObjGlobal(), fs);
         
