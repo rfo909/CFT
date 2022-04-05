@@ -135,7 +135,6 @@ below can be checked for like this:
 			).mergeExpr
 
 			post=Sequence(
-				#@ <<rows>>
 				@ </table>
 				@ </div>
 			).mergeExpr
