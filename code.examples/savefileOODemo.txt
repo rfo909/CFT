@@ -1,0 +1,158 @@
+# Readme
+# --
+<<<<<< EOF
+As of version 3.3.2, CFT has simple support for object oriented programming.
+
+Class hiearchies represent a computational overhead, but also can lead to
+reuse of code, via selective inheritance. 
+
+Note that class [ident] {....} is an expression, and still needs to
+be executed in a function. The good part is that if no class name is
+given, the class is given the name of the function it runs inside.
+
+The name of a class isn't really important, until passing class objects
+as parameters to functions or class member lambdas. Then our Val classes
+below can be checked for like this:
+
+# Some function that accepts Val objects only
+# --
+	P(1) as &Val => valObject
+	...
+/f
+
+
+>>>>>> EOF
+/Readme
+
+
+
+# Val class - instantiated with a type string
+#
+# For rendering HTML. Remember that for non-string values, we must
+# subclass and redefine the toPresentationFormat and fromPresentationFormat
+# functions, to convert between internal non-string value and external
+# string value.
+# --
+	class {
+		P(1) as String => type
+		P(2) as (type)? => value
+		P(3,Lib.Db.UUID) as String => name
+
+		self.copyFrom(SymDict(type,value,name))
+
+		self.isEditable=true
+		self.isDisabled=false
+
+		self.set=Lambda{
+			P(1) as (self.type)? => value
+			self.value=value
+			# make chainable
+			self
+		}
+		self.setEditable=Lambda{
+			self.isEditable = {P(1) as boolean}
+			self
+		}
+		self.setDisabled=Lambda{
+			self.isDisabled = {P(1) as boolean}
+			self
+		}
+		self.toPresentationFormat=Lambda{
+			self.value
+		}
+		self.fromPresentationFormat=Lambda{
+			P(1) as String? => s
+			self.set(s)
+		}
+
+		self.render=Lambda{
+			P(1,self.isEditable) as boolean => isEditable
+			P(2,self.isDisabled) as boolean => isEnabled
+
+			if (isEditable) {
+				@ <input type="text" <<if(isEnabled,"","disable=disable")>> name="<<self.name>>" value="<<self.toPresentationFormat>>"/>
+				.mergeExpr
+			} else {
+				@ <<self.value>>
+				.mergeExpr
+			}
+		}
+	}
+/Val
+
+
+# ValInt - identifies itself as "Val" 
+#
+# Inherits most from the Val function class, but add mods in the form
+# of custom mapping to and from external string format.
+# --
+	class Val {
+		P(1) as int? => value
+		P(2) as String? => name
+
+		self.copyFrom(Val("int", value, name))
+		
+		self.toPresentationFormat=Lambda{
+			"" + self.value
+		}
+		self.fromPresentationFormat=Lambda{
+			P(1) as String? => s
+			if (s==null) {
+				self.set(null)
+			} else {
+				self.set(s.parseInt)
+			}
+		}
+	}
+/ValInt
+
+
+
+# Page class
+# --
+	class {
+		P(1,"Title") => title
+	
+		self.title=title
+		self.rows=List
+		self.addRow=Lambda{
+			P(1) as String => title
+			P(2) as &Val => val
+			self.rows.add(SymDict(title,val))
+		}
+		self.render=Lambda{
+			rows = Inner {
+				self.rows->row
+					@ <tr><td><< row.title >></td><td><< row.val.render >></td></tr>
+					.mergeExpr->line
+						out(line)
+			}
+
+			pre = Sequence(
+				@ <div>
+				@ <h1><<self.title>></h1>
+				@ <table>
+			).mergeExpr
+
+			post=Sequence(
+				#@ <<rows>>
+				@ </table>
+				@ </div>
+			).mergeExpr
+
+			# return 
+			pre + rows + post
+		}
+	}
+/Page
+
+
+
+# Test
+# --
+	p=Page("My page")
+	p.addRow("Name", Val("String","Roar"))
+	p.addRow("Title", Val("String", "Boss man"))
+	p.addRow("Age", ValInt(55).setEditable(false))
+	p.render
+/demo
