@@ -247,7 +247,7 @@ nicely formatted JSON.
 # --
     P(1)=>value
     P(2,"")=>indent
-    P(3,Lambda{P(1)})=>LOut
+    P(3,Lambda{P(1)}) as Callable=>LOut
 
     indent2=indent #+"  "
 
@@ -295,7 +295,7 @@ nicely formatted JSON.
 # --
     P(1,List)=>list
     P(2,"")=>indent
-    P(3,Lambda{P(1)})=>LOut
+    P(3,Lambda{P(1)}) as Callable=>LOut
 
     indent2=indent+"  "
     NEWLINE="^n".unEsc
@@ -324,7 +324,7 @@ nicely formatted JSON.
         })
         => obj
 
-    PPValue(JSONValue,"",obj.LOut)
+    PPValue(JSONValue,"",obj.get("LOut"))
     NEWLINE="^n".unEsc
     result = obj.data.concat.split(NEWLINE)
 	if(print) Inner{

@@ -495,3 +495,28 @@ Dict.set("list",List)
 	result
 /BlockFormatter
 
+
+
+# Escape special character in XML / HTML string
+# --
+    P(1,readLine("XML string")) as String =>s
+    Dict.set("<","&lt;")
+        .set(">","&gt;")
+        .set("'","&apos;")
+        .set('"',"&quot;")
+        =>data  
+    s.replace("&","&amp;").merge(data)
+/EscapeXMLString
+
+
+# Unescape special characters in XML/HTML string
+# --
+    P(1,readLine("XML string")) as String =>s
+    Dict.set("&lt;","<")
+        .set("&gt;",">")
+        .set("&amp;","&")
+        .set("&apos;","'")
+        .set("&quot;",'"')
+        =>data  
+    s.merge(data)
+/UnescapeXMLString

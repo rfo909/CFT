@@ -198,32 +198,37 @@ P(1,"r---")=>s
 # Create summary object, which is controlled via two lambdas, for
 # adding data and showing (add to layout)
 # --
-    Dict
-    .set("data",List)
-    .set("Lrow",Lambda{
-        P(1)=>shortName
-        P(2)=>longName
-        P(3)=>value
-        self.data.add(SymDict(shortName,longName,value))
-    })
-    .set("Lshow",Lambda{
-        sLen=0
-        lLen=0
-        vLen=0
-        self.data->x 
-            sLen=if(x.shortName.length>sLen, x.shortName.length, sLen)
-            lLen=if(x.longName.length>lLen, x.longName.length, lLen)
-            vLen=if(x.value.length>vLen, x.value.length, vLen)
-        |
-        self.data->x
-            line=AppUI:fix("| ") + 
-                AppUI:Pad(x.shortName + " ","-",sLen+4)
-                + if(lLen>0, " " + AppUI:Pad(x.longName+" ","-",lLen+4), "")
-                + " [" + x.value + "]"
-            println(line)
-        |
-        println(AppUI:fix("|"))
-    })
+	class SummaryObj {
+		self.data=List
+		self.Lrow=Lambda{
+			P(1) as String => shortName
+			P(2) as String => longName
+			P(3) as String => value
+			self.data.add(SymDict(shortName,longName,value))
+		}
+		self.Lshow=Lambda{
+			P(1," ") as String => padChar
+			error(padChar.length != 1, "padChar must be single character")
+
+			# Identify width of columns
+			sLen=0
+			lLen=0
+			vLen=0
+			self.data->x 
+				sLen=if(x.shortName.length>sLen, x.shortName.length, sLen)
+				lLen=if(x.longName.length>lLen, x.longName.length, lLen)
+				vLen=if(x.value.length>vLen, x.value.length, vLen)
+			|
+			self.data->x
+				line=AppUI:fix("| ") + 
+					AppUI:Pad(x.shortName + " ",padChar,sLen+4)
+					+ if(lLen>0, " " + AppUI:Pad(x.longName+" ",padChar,lLen+4), "")
+					+ " [" + x.value + "]"
+				println(line)
+			|
+			println(AppUI:fix("|"))
+		}
+	}
 /DoSummaryObj
 
 
