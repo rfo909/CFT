@@ -27,6 +27,7 @@ import rf.configtool.main.runtime.lib.ObjDict;
 
 public class ExprAs extends ExprCommon {
 
+	private boolean testMode=false;
 	private boolean isDictName=false;
     private String typeName;
     private Expr typeNameExpr;
@@ -35,6 +36,7 @@ public class ExprAs extends ExprCommon {
     public ExprAs (TokenStream ts) throws Exception {
         super(ts);
         ts.matchStr("as","expected 'as'");
+        testMode=ts.matchStr("?");
         isDictName = ts.matchStr("&");
         if (ts.matchStr("(")) {
         	typeNameExpr=new Expr(ts);
@@ -83,18 +85,23 @@ public class ExprAs extends ExprCommon {
         
         final String valueTypeName;
         
-//        System.out.println("theValue=" + theValue.getTypeName());
-//        System.out.println("isDictName=" + isDictName);
-        
         if (isDictName) {
         	if (!(theValue instanceof ObjDict)) {
-	        	throw new SourceException(getSourceLocation(),
+	        	if (testMode) {
+	        		return new ValueBoolean(false);
+	        	} else {
+	        		throw new SourceException(getSourceLocation(),
 	        			"Expected value of type Dict with name - got " + theValue.getTypeName() + ": " + showValue(stackValue));
+	        	} 
         	}
         	valueTypeName=((ObjDict) theValue).getName();
         	if (valueTypeName==null) {
-        		throw new SourceException(getSourceLocation(),
+        		if (testMode) {
+        			return new ValueBoolean(false);
+        		} else {
+        			throw new SourceException(getSourceLocation(),
         				"Expected value of type Dict with name - got " + showValue(stackValue));
+        		} 
         	}
         } else {
         	valueTypeName=theValue.getTypeName();
@@ -111,6 +118,8 @@ public class ExprAs extends ExprCommon {
         }
         
         if (!ok) {
+        	if (testMode) return new ValueBoolean(false);
+        	
 	        StringBuffer sb=new StringBuffer();
 	        boolean first=true;
 	        for (String type:typeNames) {
@@ -119,7 +128,7 @@ public class ExprAs extends ExprCommon {
 	        	sb.append(type);
 	        }
 
-    		throw new SourceException(getSourceLocation(),
+			throw new SourceException(getSourceLocation(),
     			(isDictName 
     					? "Expected Dict of type(s) [" + sb.toString() + "]" 
     					: "Expected value as type(s) [" + sb.toString() + "]"
@@ -127,6 +136,8 @@ public class ExprAs extends ExprCommon {
     	}
     	
     	// return value
+        if (testMode) return new ValueBoolean(true);
+        
     	return stackValue;
     }
 

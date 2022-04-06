@@ -45,6 +45,89 @@ PrettyPrint (PP) implemented,
 
 
 
+# XML node class
+# --
+	class XMLNode {
+		P(1) as String => tagName
+		P(2,Dict) as Dict => attributes
+		P(3,XMLList) as &XMLList => content
+		
+		self.tagName=tagName
+		self.attributes=attributes
+		self.content=content
+
+		self.setAttribute=Lambda{
+			P(1) as String => name
+			P(2) => value
+			self.attributes.set(name,value)
+		}
+		self.getAttribute=Lambda{
+			P(1) as String => name
+			P(2) => defaultValue
+			if (self.attributes.has(name)) self.attributes.get(name) else defaultValue
+		}
+
+	}
+/XMLNode
+
+
+
+
+# XML content list
+# --
+	class XMLList {
+		P(1) as List? => content
+
+		if (content != null) Inner {
+			# Validate content
+			content->x
+				x as? String => a
+				x as? &XMLNode => b
+				error (!a && !b, "Invalid value, should be String and &XMLNode only, got : " + x)
+			|
+			self.list=content
+		} else {
+			self.list=List
+		}
+		self.addString=Lambda{
+			P(1) as String => str
+			list.add(str)
+		}
+		self.addNode=Lambda{
+			P(1) as &XMLNode => node
+			list.add(node)
+		}
+		self.getStrings=Lambda{
+			list=List
+			self.list->x
+				if (getType(x)=="String") list.add(x)
+			|
+			list
+		}
+		self.getNodes=Lambda{
+			P(1) as String? => tagName
+			list=List
+			self.list->x
+				x as? &XMLNode => ok
+				if(ok && (tagName==null || x.tagName==tagName)) list.add(x)
+			|
+			list
+		}
+	}
+/XMLList
+
+
+
+# test
+# --
+	Util:ShowDict(
+		XMLNode("test")
+	)
+//node
+
+
+
+
 # Build root lexer Node for tokens in XML
 # --
     Lib.Text.Lexer.Node => root
@@ -113,12 +196,9 @@ PrettyPrint (PP) implemented,
         @       <item>another line of text
         @       <title>Donald Duck &amp; Co</title>
         @           <status>
-        @     non-strict line (i)
-        @        - since there is inner XML element
+        @             on-hold
         @           <count>2</count>
-        @     non-strict line (2)
         @               <x a=1>xxx</x>
-        @     non-strict line (c)
         @       </status>
         @   </item>
         @       <emptyTag a="a"/>
@@ -129,11 +209,10 @@ PrettyPrint (PP) implemented,
 
 
 
-# Tokenize XML, then parse 
+# Tokenize XML, then parse.
 # --
     P(1)=>xml
     P(2,false)=>debug
-    P(3,true)=>contentStrict
 
     if (xml==null) {
         println("Paste or enter XML, then terminate by '.' on single line")
@@ -165,7 +244,7 @@ PrettyPrint (PP) implemented,
         ws(ts)
         break(ts.EOF)
         if (ts.peekType==10) {
-            list.add(Dict.set("Special",ts.peek))
+            list.add(ts.peek)
             ts.next
         } else 
         if (ts.peek=="<") {
@@ -176,8 +255,7 @@ PrettyPrint (PP) implemented,
             ts.next
         }
     |
-
-    if(contentStrict,Strictify(list),list)
+    XMLList(list)
 /Parse
 
 
@@ -189,7 +267,8 @@ PrettyPrint (PP) implemented,
 # Eat whitespace
 # --
     P(1)=>ts
-    loop break(ts.EOF || ts.peekType != 1) ts.next
+    loop 
+    	break(ts.EOF || ts.peekType != 1) ts.next
 //ws
 
 
@@ -198,38 +277,24 @@ PrettyPrint (PP) implemented,
 # Unescape special characters in string
 # --
     P(1)=>s
-    Dict.set("&lt;","<")
-        .set("&gt;",">")
-        .set("&amp;","&")
-        .set("&apos;","'")
-        .set("&quot;",'"')
-        =>data  
-    s.merge(data)
-/UnescapeXMLString
+    Util:UnescapeXMLString(s)
+//UnescapeXMLString
 
 
 
 # Escape special characters in string
 # --
     P(1)=>s
-    Dict.set("<","&lt;")
-        .set(">","&gt;")
-        .set("'","&apos;")
-        .set('"',"&quot;")
-        =>data  
-    s.replace("&","&amp;").merge(data)
-/EscapeXMLString
+    Util:EscapeXMLString(s)
+//EscapeXMLString
 
 
 
-# Match object <a ...> ... </a> 
-# or <a ... />
+# Match object <a ...> ... </a> or <a ... /> - returns XMLNode object
 #
 # --
     P(1)=>ts
 
-    dict=Dict
-    
     ts.match("<","expected '<'")
     ws(ts)
 
@@ -247,16 +312,16 @@ PrettyPrint (PP) implemented,
         ts.next
         ws(ts)
     }
-    
-    dict.set("name",elementName)
-    dict.set("attr", Dict)
-    
+
+	obj=XMLNode(elementName)
+
     Inner {
         loop
             ws(ts)
             if (ts.peek==">") {
                 ts.next
-                dict.set("content",Content(ts, dict.name))  # list of strings and Dict's, until closing my name
+                obj.content=Content(ts, elementName)
+                #dict.set("content",Content(ts, dict.name))  # list of strings and Dict's, until closing my name
                 break
             } else if (ts.peek=="/>") {
                 ts.next
@@ -270,9 +335,9 @@ PrettyPrint (PP) implemented,
                 ws(ts)
                 
                 if (ts.peekType==3) { # int
-                    value=ts.peek.parseInt
+                    value="" + ts.peek.parseInt
                 } else if (ts.peekType==31) { # float
-                    value=ts.peek.parseFloat
+                    value="" + ts.peek.parseFloat
                 } else if (ts.peekType==4) {  # identifier
                     value=ts.peek
                 } else if (ts.peekType==5) {  # string
@@ -284,16 +349,16 @@ PrettyPrint (PP) implemented,
                 }
                 ts.next
                 ws(ts)
-                dict.attr.set(""+attrName,value)
+                obj.setAttribute(attrName, value)
             }
     }
-    dict
+    obj
 //Obj
 
 
 
 
-# Returns list of content inside <x>...</x> - includes text and objects
+# Returns list of content inside <x>...</x> - includes text and objects as XMLList object
 # --
     P(1)=>ts
     P(2)=>currObjectName
@@ -312,7 +377,8 @@ PrettyPrint (PP) implemented,
                 }
                 text=""
                 
-                list.add(Dict.set("Special",ts.peek))
+                # "Special"
+                list.add(ts.peek)
                 ts.next
             } else
             if (ts.peek=="</") {
@@ -360,170 +426,66 @@ PrettyPrint (PP) implemented,
                 ts.next
             }
     }
-    list    
+    XMLList(list)
 //Content
 
 
 
 
-# Present content in compact fashion
-# Alternatively use PP() to create valid (and nicely formatted) XML.
+# JSON:PP(Parse(...)) using defaults
+# (Shows all closures but not the object types)
 # --
-    P(1,Parse(exampleXML))=>data
-    P(2,"")=>pre
-    P(3,List)=>output
-
-    if (getType(data) != List, List(data), data) => list
+JSON:PP(Parse(exampleXML),false,true)
+/t
     
-    list->element
-        if (getType(element)=="List") {
-            element->x
-                ShowData(x,pre+"[]",output)
-        }
-        
-        assert(getType(element)=="Dict")
-        
-        assert(element.has("name"))
-        
-        #println("name=" + element.name)
-        pre2=pre+"|"+element.name
-        
-        {element.attr.keys->key
-            output.add(pre2 + " "+key+"="+element.attr.get(key))
-        }
-        
-        assert(element.has("content"))
-        {element.content->c 
-            if (getType(c)=="Dict") ShowData(c,pre+"|"+element.name,output)
-            else {
-                s=(""+c).trim
-                if (s.length>0) output.add(pre2 + "[]" + s)
-            }
-        }
-    |
-    output
-/ShowData
-
-
-
-
-        
-        
-    
-
-
-
-
-# Look up content element by name
-# --
-    P(1) => data
-    P(2) => name
-    
-    if (getType(data)=="Dict") data=data.content
-    data->x
-        assert(getType(x)=="Dict" && x.has("name"))
-        assert(x.name==name)
-        out(x)
-/Get
-
-
-
-# Look up content elements by names in path (separated by space). See test L3.
-# --
-    P(1)=>data
-    P(2)=>path
-    
-    if (getType(data) != List, List(data), data) => list
-    
-    path.split->part
-        Inner {
-            output=List
-            
-            list->element
-                result=output+Get(element,part)
-                output=output+result
-            |
-            #println("Looking up " + part + " resulted in " + output.length + " items")
-            
-        }
-        list=output
-    |
-    list
-/GetPath
-
-
-# Look up attribute names of node
-# --
-    P(1) => data
-    error(getType(data) != "Dict", "Must be dictionary")
-    data.attr.keys
-/GetAttrNames
-
-
-# Look up attribute of node
-# --
-    P(1) => data
-    P(2) => attr
-    error(getType(data) != "Dict", "Must be dictionary")
-    data.attr.get(attr,null)
-/GetAttr
-
-
-
-# Get content of node
-# --
-    P(1) => data
-    error(getType(data) != "Dict", "Must be dictionary")
-    data.content
-/GetContent
-
 
 
 
 
 # Generate output
 # --
-    P(1)=>data   # Dict or List of (Dict | String)
+    P(1)=>data   # &XMLNode or &XMLList  or List of (Dict | String)
     P(2,"")=>indent
     P(3,Lambda { println(""+P(1)) } )=>LOut
     
-    hasElement=false
-    data->element if(getType(element)=="Dict") hasElement=true
-    |
+    data as? XMLList => isList
+    data as? XMLNode => isNode
     
-    data->element
-        type=getType(element)
-        if (type=="Dict") {
-            if (element.has("Special")) {
-                LOut.call(indent+element.get("Special").trim)
-            } else {
-                OutObject(element,indent,LOut)
-            } 
-        } else if (type=="String") {
-            val=element.trim
-            if (val != "") LOut.call(indent+EscapeXMLString(val))
-        }
+    if (isNode) {
+    	OutObject(data,ident,LOut)
+    } else {
+		data.list->element
+		    type=getType(element)
+		    println("OutContent: " + element)
+		    if (type=="Dict") {
+		        OutObject(element,indent,LOut)
+		    } else {
+		        val=element.trim
+		        if (val != "") LOut.call(indent+EscapeXMLString(val))
+		    }
+	}
 //OutContent
 
 
 
 # Generate output
 # --
-    P(1)=>obj
+    P(1) as &XMLNode
+     =>obj
     P(2)=>indent
     P(3,Lambda { println(""+P(1)) } )=>LOut
     
     
-    firstTag="<"+obj.name
-    obj.attr.keys->attrName
-        value=obj.attr.get(attrName)
+    firstTag="<"+obj.tagName
+    obj.attributes.keys->attrName
+        value=obj.attributes.get(attrName)
         if (getType(value)=="String") {
             value='"' + EscapeXMLString(value) + '"'
         } 
         firstTag=firstTag + " " + attrName + "=" + value
     |
     hasContent=true
-    if (!obj.has("content") || obj.content.length==0) {
+    if (!obj.has("content") || obj.content.list.length==0) {
         firstTag=firstTag+"/>"
         hasContent=false
         LOut.call(indent+firstTag)
@@ -531,9 +493,9 @@ PrettyPrint (PP) implemented,
         firstTag=firstTag + ">"
     }
     if (hasContent) {
-        lastTag="</"+obj.name+">"
-        if (obj.content.length==1 && getType(obj.content.first)=="String") {
-            LOut.call(indent+firstTag+obj.content.first.trim+lastTag)
+        lastTag="</"+obj.tagName+">"
+        if (obj.content.list.length==1 && getType(obj.content.list.first)=="String") {
+            LOut.call(indent+firstTag+obj.content.list.first.trim+lastTag)
         } else {
             LOut.call(indent+firstTag)
             OutContent(obj.content,indent+"   ",LOut)
@@ -543,68 +505,21 @@ PrettyPrint (PP) implemented,
 //OutObject
 
 
-# "Strictify" list of XML elements
-# --
-    P(1) => list
-    
-    list->e 
-        assert(getType(e)=="Dict") 
-        out(StrictifyDict(e))
-    | => dicts
-    
-    if (dicts.length>0, dicts, list)
-//StrictifyList
-
-
-# "Strictify dict"
-# --
-    P(1)=>dict
-    if (dict.has("content")) {
-        dict.set("content",StrictifyList(dict.content))
-    }
-    dict
-//StrictifyDict
-    
-
-
-# Strictify data, eliminating strings if there are Dict's present in a content list
-# --
-    P(1,Parse(exampleXML,false)) => data
-    if (getType(data)=="List") {
-        StrictifyList(data)
-    } else {
-        StricityDict(data)
-    }
-/Strictify
-
-
 # Pretty-print XML
 # --
-    P(1)=>data   # list of Dict
+    P(1) as &XMLList => data
     
-    Dict.set("list",List).set( "LAdd",Lambda{self.list.add(P(1))} ) => obj
-    OutContent(data,"",obj.LAdd)
+    obj=Dict.set("list",List)
+    obj.bind(Lambda{self.list.add(P(1))} ) => closure
+    	
+    OutContent(data,"",closure)
     
     obj.list
 /PP
 
 
-
-# JSON:PP(Parse(...)) using defaults
-# --
-JSON:PP(Parse(exampleXML))
-/t
-    
-    
-# JSON:PP - non-strict mode, including text in scopes with other elements
-JSON:PP(Parse(exampleXML,false,false))
+PP(Parse(exampleXML))
 /t2
-
-# JSON:PP - strict mode, deleting text in scopes with other elements
-JSON:PP(Parse(exampleXML,false,true))
-/t3
-
-
 
 
 

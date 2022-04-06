@@ -232,7 +232,6 @@ Get type of value
 Type checking with "as"
  |   Null-values
  |   Dict names
- |   Complex example
  |   Closures and Lambdas
 
 Dict set with strings
@@ -240,6 +239,8 @@ Dict set with strings
 Dict.get with default value
 
 Dict.ident=Expr
+
+Classes
 
 List.nth() negative indexes
 

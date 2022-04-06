@@ -731,3 +731,50 @@ Dict.set("a",1).set("b",Lambda{P(1) as int=>x self.a+x})
 	).ok==false
 /Test47c_as_dict_name_inverse_nondict_value
 
+
+
+# Test 48 - Verify that shared structures from super classes are
+# properly copied when creating subclasses. The Dict.copyFrom function
+# only copies Value objects, not cloning anything, but as we see below,
+# each time class B is instantiated, it in turn instantiates a new class A 
+# instance which it copies data from.
+#
+# This test documents this feature, more than being a real test.
+# --
+
+# test class A
+# --
+	class A {
+		self.a=List
+		self.b=Dict
+	}
+/t48a
+
+# test class B
+# --
+	class B {
+		self.copyFrom(t48a)
+	}
+/t48b
+
+# Test48
+# --
+	x=t48b
+	y=t48b
+	x.a.add("aaa")
+	x.b.bbb="bbb"
+	# test
+	!x.a.empty && !x.b.keys.empty && y.a.empty && y.b.keys.empty
+/Test48_class_inheritance_independence
+
+
+
+# Test 49 - verify that both lambdas and closure have type "Callable"
+# --
+	getType(Lambda{})=="Callable"
+	&&
+	getType(Dict.set("a",Lambda{}).get("a"))=="Callable"
+/Test49_verify_lambda_and_closure_of_type_Callable
+
+
+

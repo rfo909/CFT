@@ -61,7 +61,7 @@ public class ObjClosure extends Obj {
 
     
     private String getDesc() {
-        return "Closure";
+        return "Callable";
     }
     
     private ObjClosure theObj () {

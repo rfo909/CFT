@@ -13,6 +13,28 @@
 
 <h1>CFT Change log</h1>
 
+<h3>3.3.3 2022-04-06 Various </h3>
+<p>
+	Extended the "as" expression into a "testMode" or predicate mode, as follows:
+</p>
+<pre>
+	3 as? int # true
+	3 as? String # false
+</pre>
+<p>
+	Also created new data structures for the XML script using classes. Parsing and pretty-printing mostly works. The
+	query functions are a bit lacking. Maybe later.
+</p>
+<p>
+	Modified the JSON script slightly to optionally filter out closures ("Callable") when using the PP function
+	to pretty-print XML data.
+</p>
+<p>
+	Updated Doc.html with info about classes.
+</p>
+
+
+
 <h3>3.3.2 2022-04-04 classes v1 </h3>
 <p>
 	Created the class block. It inherits parameters from the function it is in. It also inherits the name

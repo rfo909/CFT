@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2022-04-04 RFO
-v3.3.1
+Last updated: 2022-04-06 RFO
+v3.3.3
 ```
 # Introduction
 
@@ -2298,8 +2298,8 @@ fields in the corresponding dictionaries.
 # Processing XML
 
 
-The "XML" script handles parsing and pretty-printing XML. It uses only List and Dict
-objects, and has not (per v2.5.3) probably not found its final form.
+The "XML" script handles parsing and pretty-printing XML. It used classes, but as of version 3.3.3
+it isn't really complete.
 
 # Use as a calculator
 
@@ -2701,32 +2701,6 @@ _.b=2
 f(myData) # matches the type correctly
 /test
 ```
-### Complex example
-
-```
-# Generic function (sort of) that produces a Container object (Dict)
-# with a member function "update" for setting values of given type only.
-# --
-self=Dict(Sys.currFunction)
-P(1) as String => type
-P(2) as (type)? => value
-self.type=type
-self.value=value
-self.update=Lambda{
-P(1) as (self.type)? =>x
-self.value=x
-}
-# return object
-self
-/Container
-# Test it
-# --
-Container("String",null) => obj
-obj.update("value")  # ok
-obj.update(23) # fails, as 23 is not a String
-obj.value # returns current value
-/test
-```
 ### Closures and Lambdas
 
 
@@ -2802,6 +2776,94 @@ the underscore ("_") global function, which returns the value on the data stack:
 ```
 Dict.name="test" _.role="manager" _.age=40 =>
  data
+```
+# Classes
+
+
+v3.3.2
+
+
+CFT supports classes, which are really just dictionaries with lambdas for member functions,
+combined with the Dict.name=expr syntax for a more natural class-like feel. Inheritance is
+supported using the Dict.copyFrom function.
+
+
+Classes are created 
+**inside** functions, usually one class per function, as the class
+expression inherits the function parameters, and optionally also the function name.
+
+
+Class names have no purpose with regards to inheritance, only for type checking parameters,
+so if class B inherits class A and makes adjustments, it may just as well be named A, for
+easier type checking, if the instances of the two offer the same interface.
+
+
+Below we create a Container class, and two subclasses, which modify the original class
+in the same way, but by different means:
+
+```
+# Create a container
+# --
+class {
+P(1,0) as int => initValue
+self.value=initValue
+self.incr=Lambda{
+P(1) as int => value
+self.value=self.value+value
+}
+}
+/Container
+# Create subclass where we can only increment by 1
+# --
+class Container {
+P(1,0) as int => initValue
+self.copyFrom(Container(initValue))
+self.incr=Lambda{
+self.value=self.value+1
+}
+}
+/Subclass1
+# Create subclass where we can only increment by 1, but by calling the "incr" from
+# the super-class with value 1, instead of redefining it as we did in Subclass1
+# --
+class Container {
+P(1,0) as int => initValue
+self.copyFrom(Container(initValue))
+self.superIncr=self.get("incr")
+self.incr=Lambda{
+self.superIncr(1)
+}
+}
+/Subclass2
+# Test the above
+# --
+Sequence(
+Container(0).incr(10).value  # 10
+Subclass1(0).incr(10).value  # 1
+Subclass2(0).incr(20).value  # 1
+)
+/test
+```
+
+The Container class gets its name from the function, which is "Container", while for the Subclass1 and Subclass2 functions, we
+specify the class name explicitly as "Container" following the "class" keyword. If omitted, they would
+get the names "Subclass1" and "Subclass2".
+
+
+The subclasses call the Container function and copies content from that object into itself. This means
+it now has a self.value field and the self.incr lambda from the parent object. In Subclass1 we then redefine
+self.incr to a new Lambda that ignores parameters and increases the value by 1.
+
+
+In Subclass2 we instead store the super-version of "incr" under another name, self.superIncr. To do this we use the
+self.get("incr") instead of self.incr, as the .get("incr") returns the lambda (or Closure at this point), while
+self.incr calls the lambda.
+
+
+We then create a new Lambda for self.incr, which calls self.superIncr with value 1 as parameter.
+
+```
+:-)
 ```
 # List.nth() negative indexes
 
