@@ -31,7 +31,7 @@ import rf.configtool.root.ScriptState;
 /**
  * Return directory object for current directory
  */
-public class ExprCall extends ExprCommon {
+public class ExprScriptCall extends ExprCommon {
 
     private String script;
     private String func;
@@ -39,7 +39,7 @@ public class ExprCall extends ExprCommon {
     
     // call "savefile:name" with Data (...)
     
-    public ExprCall (TokenStream ts) throws Exception {
+    public ExprScriptCall (TokenStream ts) throws Exception {
         super(ts);
         script=ts.matchIdentifier("expected script name (identifier)");
         ts.matchStr(":", "expected ':'");

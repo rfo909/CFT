@@ -143,7 +143,7 @@ public class ValueBlock extends Value {
         FunctionState fs=new FunctionState(null,params);
         fs.set("self", new ValueObj(self));
  
-        ctx.getStdio().pushStackFrame(caller);
+        ctx.getStdio().pushCFTCallStackFrame(caller);
         Ctx independentCtx=new Ctx(ctx.getStdio(), ctx.getObjGlobal(), fs);
         
         Value retVal=null;
@@ -171,7 +171,7 @@ public class ValueBlock extends Value {
             retVal=sub.getResult();
         }
 
-        ctx.getStdio().popStackFrame(caller);
+        ctx.getStdio().popCFTCallStackFrame(caller);
         return retVal;
     }
     

@@ -41,13 +41,14 @@ public class Runtime {
      */
     public Value processCodeLines (Stdio stdio, CFTCallStackFrame caller, CodeLines lines, FunctionState functionState) throws Exception {
 
+    	stdio.pushCFTCallStackFrame(caller);
+
         if (functionState == null) throw new Exception("No functionState");
         
         
         List<ProgramLine> progLines=lines.getProgramLines();
 
         Value retVal=null;
-        stdio.pushStackFrame(caller);
         
         for (ProgramLine progLine:progLines) {
             Ctx ctx=new Ctx(stdio, objGlobal, functionState);
@@ -69,7 +70,7 @@ public class Runtime {
             retVal=ctx.getResult();
         }
         
-        stdio.popStackFrame(caller);
+        stdio.popCFTCallStackFrame(caller);
         return retVal;
     }
 

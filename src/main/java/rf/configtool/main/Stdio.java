@@ -58,17 +58,20 @@ public abstract class Stdio {
   
      private List<CFTCallStackFrame> callStack=new ArrayList<CFTCallStackFrame>();
      
-     public void pushStackFrame (CFTCallStackFrame caller) {
+     public void pushCFTCallStackFrame (CFTCallStackFrame caller) {
     	 callStack.add(caller);
      }
      
-     public void popStackFrame (CFTCallStackFrame caller) throws Exception {
-    	 if (callStack.isEmpty()) throw new RuntimeException("callStack underflow");
-    	 if (callStack.get(callStack.size()-1) != caller) throw new RuntimeException("callStack, expected pop of " + caller.toString());
+     public void popCFTCallStackFrame (CFTCallStackFrame caller) throws Exception {
+    	 if (callStack.isEmpty()) throw new RuntimeException("popCFTCallStackFrame: callStack underflow, expected to pop off " + caller.toString());
+    	 if (callStack.get(callStack.size()-1) != caller) {
+    		 throw new RuntimeException("popCFTCallStackFrame: expected to pop off " + caller.toString() + " found " + 
+    				 callStack.get(callStack.size()-1).toString());
+    	 }
     	 callStack.remove(callStack.size()-1);
      }
      
-     public void showCallStack() {
+     public void showCFTCallStack() {
     	 for (int i=callStack.size()-1; i>=0; i--) {
     		 CFTCallStackFrame x=callStack.get(i);
     		 println("  called from: " + x.toString());

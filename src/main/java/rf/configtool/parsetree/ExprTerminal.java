@@ -86,7 +86,7 @@ public class ExprTerminal extends ExprCommon {
             return;
         }
         if (ts.peekStr(1,":")) {
-            expr=new ExprCall(ts);
+            expr=new ExprScriptCall(ts);
             return;
         }
         if (ts.peekStr("tryCatch")) {

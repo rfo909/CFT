@@ -430,7 +430,7 @@ public class Root {
                 // ignore
             }
             stdio.println("ERROR: " + t.getMessage());
-            stdio.showCallStack();
+            stdio.showCFTCallStack();
             if (debugMode) {
                 if (t instanceof SourceException) {
                     SourceException se=(SourceException) t;
