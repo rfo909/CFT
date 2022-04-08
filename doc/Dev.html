@@ -13,6 +13,14 @@
 
 <h1>CFT Change log</h1>
 
+<h3>3.4.0 2022-04-08 CFT Stack trace</h3>
+<p>
+	Whenever an error propagates to the Root.processInteractiveInput() method in Java, it displays a
+	call stack. It exists in the Stdio class, as this is the object that persists across the
+	exact scope we want to log stack trace for.
+</p>
+
+
 <h3>3.3.4 2022-04-08 JCIFS / SMB</h3>
 <p>
 	Needed to test CIFS/SMB library for Java. Created Lib.Util.CIFS. Will probably
