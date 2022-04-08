@@ -1,4 +1,4 @@
-package rf.configtool.main.runtime.lib;
+package rf.configtool.main.runtime.lib.cifs;
 
 import java.io.BufferedReader;
 import java.io.InputStream;

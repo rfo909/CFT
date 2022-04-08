@@ -1,4 +1,4 @@
-package rf.configtool.main.runtime.lib;
+package rf.configtool.main.runtime.lib.cifs;
 
 /*
 CFT - an interactive programmable shell for automation 
@@ -38,7 +38,7 @@ public class ObjCIFS extends Obj {
     public ObjCIFS () {
     	this.add(new FunctionCIFSFile());
     	this.add(new FunctionCreateURL());
-}
+    }
     
     private ObjCIFS self() {
         return this;

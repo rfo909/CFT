@@ -28,6 +28,7 @@ import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueBinary;
 import rf.configtool.main.runtime.ValueFloat;
 import rf.configtool.main.runtime.ValueObj;
+import rf.configtool.main.runtime.lib.cifs.ObjCIFS;
 
 public class ObjUtil extends Obj {
 
