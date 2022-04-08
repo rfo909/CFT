@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import rf.configtool.lexer.TokenStream;
+import rf.configtool.main.CFTCallStackFrame;
 import rf.configtool.main.CodeLines;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.FunctionState;
@@ -74,7 +75,8 @@ public class ExprLookupOrCall extends ExprCommon {
         if (codeLines!= null) {
             // execute code line
             Runtime rt=new Runtime(objGlobal);
-            return rt.processCodeLines(ctx.getStdio(), codeLines, new FunctionState(ident, values));
+        	CFTCallStackFrame caller=new CFTCallStackFrame(getSourceLocation(), "Calling " + ident);
+            return rt.processCodeLines(ctx.getStdio(), caller, codeLines, new FunctionState(ident, values));
         }
         
         throw new SourceException(getSourceLocation(), "unknown symbol '" + ident + "'");

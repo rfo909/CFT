@@ -23,7 +23,7 @@ import java.util.*;
 
 import rf.configtool.main.Version;
 
-public    class ClientMain implements Runnable {
+public class ClientMain implements Runnable {
 
     private final Socket sock;
     private final ObjServer objServer;

@@ -39,7 +39,7 @@ public class Runtime {
      * Returns value from executing program line. Note may return java null if no return
      * value identified
      */
-    public Value processCodeLines (Stdio stdio, CodeLines lines, FunctionState functionState) throws Exception {
+    public Value processCodeLines (Stdio stdio, CFTCallStackFrame caller, CodeLines lines, FunctionState functionState) throws Exception {
 
         if (functionState == null) throw new Exception("No functionState");
         
@@ -47,9 +47,11 @@ public class Runtime {
         List<ProgramLine> progLines=lines.getProgramLines();
 
         Value retVal=null;
+        stdio.pushStackFrame(caller);
         
         for (ProgramLine progLine:progLines) {
             Ctx ctx=new Ctx(stdio, objGlobal, functionState);
+            
             if (retVal != null) ctx.push(retVal);
             
             progLine.execute(ctx);
@@ -66,6 +68,8 @@ public class Runtime {
             
             retVal=ctx.getResult();
         }
+        
+        stdio.popStackFrame(caller);
         return retVal;
     }
 

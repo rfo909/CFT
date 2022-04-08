@@ -23,6 +23,11 @@ import java.util.List;
 import rf.configtool.lexer.SourceLocation;
 import rf.configtool.main.runtime.ValueString;
 
+/**
+ * <<< EOF
+ * ...
+ * >>> EOF
+ */
 public class CodeInlineDocument {
     private String eofMark;
     private List<String> lines;

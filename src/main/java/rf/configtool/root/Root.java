@@ -29,6 +29,7 @@ import rf.configtool.lexer.Lexer;
 import rf.configtool.lexer.SourceLocation;
 import rf.configtool.lexer.Token;
 import rf.configtool.lexer.TokenStream;
+import rf.configtool.main.CFTCallStackFrame;
 import rf.configtool.main.CodeLine;
 import rf.configtool.main.CodeLines;
 import rf.configtool.main.FunctionState;
@@ -217,7 +218,9 @@ public class Root {
     
                     String pre;
                     try {
-                        Value ret = objGlobal.getRuntime().processCodeLines(stdio, promptCodeLines, new FunctionState(null,null));
+                    	CFTCallStackFrame caller=new CFTCallStackFrame("<interactive-input>");
+
+                        Value ret = objGlobal.getRuntime().processCodeLines(stdio, caller, promptCodeLines, new FunctionState(null,null));
                         pre=ret.getValAsString();
                     } catch (Exception ex) {
                         if (debugMode) {
@@ -271,6 +274,8 @@ public class Root {
         ObjGlobal objGlobal = currScript.getObjGlobal();
         ScriptCode currScriptCode = objGlobal.getCodeHistory();
 
+        stdio.clearCallStack();
+        
         try {
             // Shortcuts
 
@@ -282,7 +287,8 @@ public class Root {
 
                 CodeLines codeLines = new CodeLines(shortcutCode, loc);
 
-                Value ret = objGlobal.getRuntime().processCodeLines(stdio, codeLines, new FunctionState(null,null));
+            	CFTCallStackFrame caller=new CFTCallStackFrame("<interactive-input>");
+                Value ret = objGlobal.getRuntime().processCodeLines(stdio, caller, codeLines, new FunctionState(null,null));
                 postProcessResult(ret);
                 showSystemLog();
 
@@ -301,7 +307,8 @@ public class Root {
 
                 List<Value> params=new ArrayList<Value>();
                 params.add(new ValueString(str));
-                objGlobal.getRuntime().processCodeLines(stdio, codeLines, new FunctionState(null,params));
+            	CFTCallStackFrame caller=new CFTCallStackFrame("<bang-command>");
+                objGlobal.getRuntime().processCodeLines(stdio, caller, codeLines, new FunctionState(null,params));
                 return;
             } 
 
@@ -408,7 +415,9 @@ public class Root {
             if (line.trim().length() > 0) {
                 // program line
                 currScriptCode.setCurrLine(line);
-                Value result = objGlobal.getRuntime().processCodeLines(stdio, new CodeLines(line, loc), new FunctionState(null,null));
+            	CFTCallStackFrame caller=new CFTCallStackFrame("<interactive-input>");
+
+                Value result = objGlobal.getRuntime().processCodeLines(stdio, caller, new CodeLines(line, loc), new FunctionState(null,null));
 
                 postProcessResult(result);
                 showSystemLog();
@@ -421,6 +430,7 @@ public class Root {
                 // ignore
             }
             stdio.println("ERROR: " + t.getMessage());
+            stdio.showCallStack();
             if (debugMode) {
                 if (t instanceof SourceException) {
                     SourceException se=(SourceException) t;

@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import rf.configtool.lexer.TokenStream;
+import rf.configtool.main.CFTCallStackFrame;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.SourceException;
 import rf.configtool.main.runtime.Function;
@@ -43,6 +44,7 @@ public class DottedCall extends LexicalElement {
     
     public DottedCall (TokenStream ts) throws Exception {
         super(ts);
+        
         code=ts.showNextTokens(10);
         //System.out.println("DottedCall: " + code);
         ts.matchStr(".","Expected .identifier");
@@ -89,7 +91,10 @@ public class DottedCall extends LexicalElement {
         		if (v instanceof ValueObj) {
 	        		Obj x=((ValueObj) v).getVal();
 	        		if (x instanceof ObjClosure) {
-	        			return ((ObjClosure) x).callClosure(ctx, values);
+	        	    	CFTCallStackFrame caller=new CFTCallStackFrame(getSourceLocation(),"Calling Dict.closure " + ident);
+
+	        			Value result = ((ObjClosure) x).callClosure(ctx, caller, values);
+	        			return result;
 	        		}
         		}
         		// not closure, just return value

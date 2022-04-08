@@ -32,7 +32,8 @@ public class StdioReal extends Stdio {
         super(stdin);
         this.stdout=stdout;
     }
-   
+    
+ 
     @Override
     public synchronized void println (String s) {
         stdout.println(s);

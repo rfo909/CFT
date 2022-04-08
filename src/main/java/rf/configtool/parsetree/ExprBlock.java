@@ -22,6 +22,7 @@ import java.util.List;
 
 import rf.configtool.lexer.Token;
 import rf.configtool.lexer.TokenStream;
+import rf.configtool.main.CFTCallStackFrame;
 import rf.configtool.main.CodeLines;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.SourceException;
@@ -123,7 +124,10 @@ public class ExprBlock extends ExprCommon {
         	if (className == null) throw new Exception("Could not identify script function name for class name");
         	ObjDict self=new ObjDict(className);
         	List<Value> params=ctx.getFunctionState().getParams(); // inherit params from surroundings
-        	b.callLambda(ctx,self,params);
+        	
+        	CFTCallStackFrame caller=new CFTCallStackFrame(getSourceLocation(),"Calling lambda");
+        	b.callLambda(ctx,caller,self,params);
+        	
         	return new ValueObj(self);
         } else {
             throw new Exception("Invalid mode: " + mode);

@@ -19,6 +19,7 @@ package rf.configtool.main.runtime.lib;
 
 import java.util.List;
 
+import rf.configtool.main.CFTCallStackFrame;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.runtime.ColList;
 import rf.configtool.main.runtime.Function;
@@ -77,7 +78,9 @@ public class ObjClosure extends Obj {
             return "call(...) - call closure with parameters";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            return callClosure(ctx,params);
+        	CFTCallStackFrame caller=new CFTCallStackFrame("ObjClosure.FunctionCall()","Calling closure");
+
+            return callClosure(ctx,caller,params);
         }
     }
     
@@ -105,8 +108,8 @@ public class ObjClosure extends Obj {
         }
     }
 
-    public Value callClosure (Ctx ctx, List<Value> params) throws Exception {
-        return lambda.callLambda(ctx, dict, params);
+    public Value callClosure (Ctx ctx, CFTCallStackFrame caller, List<Value> params) throws Exception {
+        return lambda.callLambda(ctx, caller, dict, params);
     }
 
 }

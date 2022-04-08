@@ -23,6 +23,7 @@ import java.util.List;
 
 import rf.configtool.lexer.SourceLocation;
 import rf.configtool.lexer.TokenStream;
+import rf.configtool.main.CFTCallStackFrame;
 import rf.configtool.main.CodeLines;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.FunctionState;
@@ -98,7 +99,9 @@ public class StmtCatEditMore extends StmtShellInteractive {
         
         CodeLines codeLines=new CodeLines(macro, loc);
         
-        Value ret = ctx.getObjGlobal().getRuntime().processCodeLines(ctx.getStdio(), codeLines, new FunctionState(null,null));
+    	CFTCallStackFrame caller=new CFTCallStackFrame("Lambda for " + name);
+
+        Value ret = ctx.getObjGlobal().getRuntime().processCodeLines(ctx.getStdio(), caller, codeLines, new FunctionState(null,null));
         if (!(ret instanceof ValueBlock)) throw new Exception("Not a macro: " + macro + " ---> " + ret.synthesize());
         
         ValueBlock macroObj=(ValueBlock) ret;

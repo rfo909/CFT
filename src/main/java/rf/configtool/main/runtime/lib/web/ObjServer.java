@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import rf.configtool.main.CFTCallStackFrame;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.runtime.ColList;
 import rf.configtool.main.runtime.Function;
@@ -207,7 +208,9 @@ public class ObjServer extends ObjPersistent {
                 List<Value> params=new ArrayList<Value>();
                 params.add(new ValueObj(request));
 
-                Value output = closure.callClosure(asyncCtx.sub(), params);
+            	CFTCallStackFrame caller=new CFTCallStackFrame(getPersistenceId(),"GET: Calling closure");
+
+                Value output = closure.callClosure(asyncCtx.sub(), caller, params);
                 byte[] data = createBytesFromValue(output);
                 return new ResponseData(contentType, data);
             }
@@ -230,7 +233,9 @@ public class ObjServer extends ObjPersistent {
                 List<Value> params=new ArrayList<Value>();
                 params.add(new ValueObj(request));
 
-                Value output = closure.callClosure(asyncCtx.sub(), params);
+            	CFTCallStackFrame caller=new CFTCallStackFrame(getPersistenceId(),"POST: Calling closure");
+
+                Value output = closure.callClosure(asyncCtx.sub(), caller, params);
                 byte[] data = createBytesFromValue(output);
                 return new ResponseData(contentType, data);
             }

@@ -46,6 +46,42 @@ public abstract class Stdio {
         this.stdin=stdin;
      }
      
+     // -------------------------------------
+     // The CFT Callstack is maintained here, because the Stdio objects 
+     // exactly cover the scope of where we want to collect callstack,
+     // as it is instantiated only two places, once for StdioReal in Main and
+     // once for StdioVirtual in ObjProcess.
+     //
+     // Perhaps ideally we would like another name, for an object that contains
+     // the Stdio, but for now this will have to do.
+     // -------------------------------------
+  
+     private List<CFTCallStackFrame> callStack=new ArrayList<CFTCallStackFrame>();
+     
+     public void pushStackFrame (CFTCallStackFrame caller) {
+    	 callStack.add(caller);
+     }
+     
+     public void popStackFrame (CFTCallStackFrame caller) throws Exception {
+    	 if (callStack.isEmpty()) throw new RuntimeException("callStack underflow");
+    	 if (callStack.get(callStack.size()-1) != caller) throw new RuntimeException("callStack, expected pop of " + caller.toString());
+    	 callStack.remove(callStack.size()-1);
+     }
+     
+     public void showCallStack() {
+    	 for (int i=callStack.size()-1; i>=0; i--) {
+    		 CFTCallStackFrame x=callStack.get(i);
+    		 println("  called from: " + x.toString());
+    	 }
+     }
+     
+     public void clearCallStack() {
+    	 callStack.clear();
+     }
+
+     
+    
+     
      
      // NOTE on synchronized:
      //

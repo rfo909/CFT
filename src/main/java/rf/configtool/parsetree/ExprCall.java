@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import rf.configtool.lexer.TokenStream;
+import rf.configtool.main.CFTCallStackFrame;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.ObjGlobal;
 import rf.configtool.main.Stdio;
@@ -66,7 +67,8 @@ public class ExprCall extends ExprCommon {
         
         //return objGlobal.getRoot().invokeScriptFunction(script, func, args);
         ScriptState x=objGlobal.getRoot().getScriptState(script, false);
-        Value retVal=x.invokeFunction (stdio, func, args);
+        CFTCallStackFrame caller=new CFTCallStackFrame(getSourceLocation(), "Calling " + script + ":" + func);
+        Value retVal=x.invokeFunction (stdio, caller, func, args);
         return retVal;
     }
 }

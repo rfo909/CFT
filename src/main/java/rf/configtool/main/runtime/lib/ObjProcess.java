@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import rf.configtool.main.CFTCallStackFrame;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.FunctionState;
 import rf.configtool.main.Stdio;
@@ -226,7 +227,9 @@ public class ObjProcess extends Obj {
                         // call closure
                         List<Value> params=new ArrayList<Value>();
                         params.add(new ValueObj(process));
-                        closure.callClosure(ctx, params);
+                    	CFTCallStackFrame caller=new CFTCallStackFrame("ObjProcess.run()","Calling closure");
+
+                        closure.callClosure(ctx, caller, params);
                     }
                     if (isCompleted) break; // no more calls
                 }

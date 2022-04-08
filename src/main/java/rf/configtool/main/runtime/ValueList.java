@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import rf.configtool.main.CFTCallStackFrame;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.runtime.lib.ObjClosure;
 
@@ -609,7 +610,10 @@ public class ValueList extends Value {
                 for (Value v:val) {
                     List<Value> args=new ArrayList<Value>();
                     args.add(v);
-                    Value x=closure.callClosure(ctx, args);
+
+                    CFTCallStackFrame caller=new CFTCallStackFrame("List.filter","Calling closure");
+
+                    Value x=closure.callClosure(ctx, caller, args);
                     if (!(x instanceof ValueNull)) result.add(x);
                 }
                 return new ValueList(result);

@@ -173,41 +173,4 @@ public class CodeLines {
 
         return progLines;
     }
-
-//    ## NEVER CALLED
-//    
-//    /**
-//     * Execute code, by creating a parse tree via getProgramLines() then executing by calling execute() method
-//     * on each ProgramLine object, and transferring result value from each to the next via the data stack (ctx.push()).
-//     */
-//    public Value execute(Stdio stdio, ObjGlobal objGlobal, FunctionState functionState) throws Exception {
-//
-//        if (functionState == null) throw new Exception("No functionState");
-//
-//        List<ProgramLine> progLines = getProgramLines();
-//
-//        Value retVal = null;  // in-language null values are objects of type ValueNull
-//
-//        for (ProgramLine progLine : progLines) {
-//            Ctx ctx = new Ctx(stdio, objGlobal, functionState);
-//            if (retVal != null)
-//                ctx.push(retVal);
-//
-//            progLine.execute(ctx);
-//
-//            OutText outText = ctx.getOutText();
-//
-//            // Column data is formatted to text and added to outData as String objects
-//            List<List<Value>> outData = outText.getData();
-//            Report report = new Report();
-//            List<String> formattedText = report.formatDataValues(outData);
-//            for (String s : formattedText) {
-//                ctx.getOutData().out(new ValueString(s));
-//            }
-//
-//            retVal = ctx.getResult();
-//        }
-//        return retVal;
-//    }
-//
 }

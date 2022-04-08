@@ -20,6 +20,7 @@ package rf.configtool.main.runtime;
 import java.util.ArrayList;
 import java.util.List;
 
+import rf.configtool.main.CFTCallStackFrame;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.FunctionState;
 import rf.configtool.main.OutText;
@@ -128,18 +129,21 @@ public class ValueBlock extends Value {
      * Call lambda, running in an isolated Ctx
      */
     public Value callLambda (Ctx ctx, List<Value> params) throws Exception {
-        return callLambda(ctx, new ObjDict(), params);
+    	CFTCallStackFrame caller=new CFTCallStackFrame("ValueBlock.callLambda()","Calling lambda");
+
+        return callLambda(ctx, caller, new ObjDict(), params);
     }
     
     /**
      * Call lambda with "self" dictionary - this is a Closure feature. The
      * dictionary is stored in the "self" variable inside the lambda.
      */
-    public Value callLambda (Ctx ctx, ObjDict self, List<Value> params) throws Exception {
+    public Value callLambda (Ctx ctx, CFTCallStackFrame caller, ObjDict self, List<Value> params) throws Exception {
         if (params==null) params=new ArrayList<Value>();
         FunctionState fs=new FunctionState(null,params);
         fs.set("self", new ValueObj(self));
-        
+ 
+        ctx.getStdio().pushStackFrame(caller);
         Ctx independentCtx=new Ctx(ctx.getStdio(), ctx.getObjGlobal(), fs);
         
         Value retVal=null;
@@ -167,6 +171,7 @@ public class ValueBlock extends Value {
             retVal=sub.getResult();
         }
 
+        ctx.getStdio().popStackFrame(caller);
         return retVal;
     }
     
