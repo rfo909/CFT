@@ -31,6 +31,11 @@ public class ObjCIFSFile extends Obj {
 
     	this.add(new FunctionRead());
     	this.add(new FunctionLength());
+    	this.add(new FunctionIsFile());
+    	this.add(new FunctionIsDir());
+    	this.add(new FunctionExists());
+    	this.add(new FunctionList());
+
     }
     
     private ObjCIFSFile self() {
@@ -103,6 +108,61 @@ public class ObjCIFSFile extends Obj {
         }
     }
 
+    class FunctionIsFile extends Function {
+        public String getName() {
+            return "isFile";
+        }
+        public String getShortDesc() {
+            return "isFile() - boolean";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueBoolean(smbFile.isFile());
+        }
+    }
     
+    class FunctionIsDir extends Function {
+        public String getName() {
+            return "isDir";
+        }
+        public String getShortDesc() {
+            return "isDir() - boolean";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueBoolean(smbFile.isDirectory());
+        }
+    }
+    
+    class FunctionExists extends Function {
+        public String getName() {
+            return "exists";
+        }
+        public String getShortDesc() {
+            return "exists() - boolean";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueBoolean(smbFile.exists());
+        }
+    }
+
+    class FunctionList extends Function {
+        public String getName() {
+            return "list";
+        }
+        public String getShortDesc() {
+            return "list() - returns list of strings for content in directory";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            if (!smbFile.isDirectory()) throw new Exception("Not a directory");
+            List<Value> result=new ArrayList<Value>();
+            for (String s:smbFile.list()) {
+            	result.add(new ValueString(s));
+            }
+            return new ValueList(result);
+        }
+    }
 
 }
