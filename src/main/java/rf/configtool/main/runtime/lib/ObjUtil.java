@@ -36,6 +36,7 @@ public class ObjUtil extends Obj {
         this.add(new FunctionDecrypt());
         this.add(new FunctionRandomBinary());
         this.add(new FunctionRandom());
+        this.add(new FunctionCIFS());
     }
     
     private ObjUtil self() {
@@ -133,6 +134,21 @@ public class ObjUtil extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
             return new ValueFloat(Math.random());
+        }
+        
+    } 
+       
+   
+    class FunctionCIFS extends Function {
+        public String getName() {
+            return "CIFS";
+        }
+        public String getShortDesc() {
+            return "CIFS() - returns CIFS object";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueObj(new ObjCIFS());
         }
         
     } 
