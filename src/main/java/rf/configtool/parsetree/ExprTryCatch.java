@@ -21,8 +21,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import rf.configtool.lexer.TokenStream;
+import rf.configtool.main.CFTCallStackFrame;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.SourceException;
+import rf.configtool.main.Stdio;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueBoolean;
 import rf.configtool.main.runtime.ValueList;
@@ -45,22 +47,40 @@ public class ExprTryCatch extends ExprCommon {
         ts.matchStr(")", "expected ')' closing tryCatch() expression");
     }
     
+    
+    
     public Value resolve (Ctx ctx) throws Exception {
         Value result=null;
-        ValueList stackTrace=null;
+        ValueList cftStackTrace=null;
+        ValueList javaStackTrace=null;
         Value msg=null;
+        
+        CFTCallStackFrame top=ctx.getStdio().getTopCFTCallStackFrame();
+        
         try {
             result = expr.resolve(ctx);
         } catch (Exception ex) {
-            stackTrace=getStackTrace(ex);
+        	cftStackTrace=getCFTStackTrace(ctx.getStdio(),top);
+            javaStackTrace=getStackTrace(ex);
             msg=new ValueString(ex.getMessage());
         }
         ObjDict x=new ObjDict();
         x.set("ok", new ValueBoolean(result != null));
         if (result != null) x.set("result", result);
-        if (stackTrace != null) x.set("stack", stackTrace);
+        if (cftStackTrace != null) x.set("stack", cftStackTrace);
+        if (javaStackTrace != null) x.set("javastack", javaStackTrace);
         if (msg != null) x.set("msg", msg);
+        
         return new ValueObj(x);
+    }
+    
+    private ValueList getCFTStackTrace (Stdio stdio, CFTCallStackFrame oldTop) {
+    	List<Value> result=new ArrayList<Value>();
+    	List<CFTCallStackFrame> frames = stdio.getAndClearCFTCallStack(oldTop);
+    	for (CFTCallStackFrame frame:frames) {
+    		result.add(new ValueString(frame.toString()));
+    	}
+    	return new ValueList(result);
     }
     
     private ValueList getStackTrace(Exception ex) {

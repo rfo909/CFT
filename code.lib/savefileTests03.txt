@@ -147,7 +147,7 @@ dir.protect.file("f").binaryCreate(Lib.Util.randomBinary("sdf"))
         
         if (!result.ok) {
             Inner {
-                result.stack->line
+                result.javastack->line
                     if (line.contains("Protection.validateDestructiveOperation")) completed=true
             }
         }

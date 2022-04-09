@@ -274,7 +274,7 @@ public class Root {
         ObjGlobal objGlobal = currScript.getObjGlobal();
         ScriptCode currScriptCode = objGlobal.getCodeHistory();
 
-        stdio.clearCallStack();
+        stdio.clearCFTCallStack();
         
         try {
             // Shortcuts
@@ -430,7 +430,7 @@ public class Root {
                 // ignore
             }
             stdio.println("ERROR: " + t.getMessage());
-            stdio.showCFTCallStack();
+            stdio.showAndClearCFTCallStack();
             if (debugMode) {
                 if (t instanceof SourceException) {
                     SourceException se=(SourceException) t;

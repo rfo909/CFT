@@ -20,6 +20,8 @@ package rf.configtool.main;
 import java.io.BufferedReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
+
 
 /**
  * 2020-11 RFO
@@ -56,30 +58,65 @@ public abstract class Stdio {
      // the Stdio, but for now this will have to do.
      // -------------------------------------
   
-     private List<CFTCallStackFrame> callStack=new ArrayList<CFTCallStackFrame>();
+     private Stack<CFTCallStackFrame> cftCallStack=new Stack<CFTCallStackFrame>();
      
+     /**
+      * The idea here is that we let Java methods that represent calling functions, lambdas
+      * or closures, require a parameter CFTCallStackFrame, which is the caller representing
+      * its' source location. The method that calls CFT functionality manages pushing the
+      * caller stack frame on the CFT call stack, doing the CFT function/closure/lambda invocation,
+      * then popping the stack frame
+	  *
+	  * This narrows down the number of code locations where we need to match push/pop against
+	  * the CFT call stack, and lets the Java compiler aid us in locating dependencies without
+	  * adding complexity of tens of locations where we must carefully match push with pop.
+      */
      public void pushCFTCallStackFrame (CFTCallStackFrame caller) {
-    	 callStack.add(caller);
+    	 cftCallStack.push(caller);
      }
      
+     /**
+      * Doing hard checks to ensure that the caller popped from the stack matches the top element of
+      * the stack, to avoid call stack mis-alignment issues, which would be very hard to debug.
+      */
      public void popCFTCallStackFrame (CFTCallStackFrame caller) throws Exception {
-    	 if (callStack.isEmpty()) throw new RuntimeException("popCFTCallStackFrame: callStack underflow, expected to pop off " + caller.toString());
-    	 if (callStack.get(callStack.size()-1) != caller) {
+    	 if (cftCallStack.isEmpty()) throw new RuntimeException("popCFTCallStackFrame: callStack underflow, expected to pop off " + caller.toString());
+    	 if (cftCallStack.peek() != caller) {
     		 throw new RuntimeException("popCFTCallStackFrame: expected to pop off " + caller.toString() + " found " + 
-    				 callStack.get(callStack.size()-1).toString());
+    				 cftCallStack.peek().toString());
     	 }
-    	 callStack.remove(callStack.size()-1);
+    	 cftCallStack.pop();
      }
      
-     public void showCFTCallStack() {
-    	 for (int i=callStack.size()-1; i>=0; i--) {
-    		 CFTCallStackFrame x=callStack.get(i);
+     /**
+      * Pop CFT call stack frames from top of stack down to but not including
+      * target frame (used by tryCatch()). If the aboveTarget is null, it means
+      * the stack was empty when getTopCFTCallStackFrame was called, and so the
+      * whole stack is returned (and cleared).
+      */
+     public List<CFTCallStackFrame> getAndClearCFTCallStack (CFTCallStackFrame aboveTarget) {
+    	 List<CFTCallStackFrame> result=new ArrayList<CFTCallStackFrame>();
+    	 while (!cftCallStack.isEmpty()) {
+    		 if (aboveTarget != null && cftCallStack.peek()==aboveTarget) break;
+    		 result.add(cftCallStack.pop());
+    	 }
+    	 return result;
+     }
+     
+     public void showAndClearCFTCallStack () {
+    	 while (!cftCallStack.isEmpty()) {
+    		 CFTCallStackFrame x=cftCallStack.pop();
     		 println("  called from: " + x.toString());
     	 }
      }
      
-     public void clearCallStack() {
-    	 callStack.clear();
+     public CFTCallStackFrame getTopCFTCallStackFrame () {
+    	 if (cftCallStack.isEmpty()) return null;
+    	 return cftCallStack.peek();
+     }
+     
+     public void clearCFTCallStack() {
+    	 cftCallStack.clear();
      }
 
      

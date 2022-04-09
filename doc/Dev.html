@@ -13,6 +13,18 @@
 
 <h1>CFT Change log</h1>
 
+<h3>3.4.1 2022-04-08 CFT Stack trace fixes</h3>
+<p>
+	Fixed including CFT Stack listing in results from tryCatch() and tryCatchSoft(), at the
+	same time maintaining correct state of the CFT stack. These return a Dict, where
+	.stack now refers to CFT call stack, and for tryCatch() the java stack trace is renamed
+	to .javastack.
+</p>
+<p>
+	Had to fix Tests03 which depended on particular string in java stack accordingly.
+</p>
+
+
 <h3>3.4.0 2022-04-08 CFT Stack trace</h3>
 <p>
 	Whenever an error propagates to the Root.processInteractiveInput() method in Java, it displays a

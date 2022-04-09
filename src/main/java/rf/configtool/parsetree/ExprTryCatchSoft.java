@@ -17,12 +17,18 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.parsetree;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import rf.configtool.lexer.TokenStream;
+import rf.configtool.main.CFTCallStackFrame;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.SoftErrorException;
 import rf.configtool.main.SourceException;
+import rf.configtool.main.Stdio;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueBoolean;
+import rf.configtool.main.runtime.ValueList;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
 import rf.configtool.main.runtime.lib.ObjDict;
@@ -47,6 +53,8 @@ public class ExprTryCatchSoft extends ExprCommon {
         
         Value result=null;
 
+        CFTCallStackFrame top=ctx.getStdio().getTopCFTCallStackFrame();
+
         try {
             result = expr.resolve(ctx);
         } catch (Exception ex) {
@@ -67,8 +75,18 @@ public class ExprTryCatchSoft extends ExprCommon {
         x.set("ok", new ValueBoolean(result != null));
         if (result != null) x.set("result", result);
         if (softEx != null) x.set("msg", new ValueString(softEx.getMessage()));
+        x.set("stack", getCFTStackTrace(ctx.getStdio(),top));
   
         return new ValueObj(x);
+    }
+    
+    private ValueList getCFTStackTrace (Stdio stdio, CFTCallStackFrame oldTop) {
+    	List<Value> result=new ArrayList<Value>();
+    	List<CFTCallStackFrame> frames = stdio.getAndClearCFTCallStack(oldTop);
+    	for (CFTCallStackFrame frame:frames) {
+    		result.add(new ValueString(frame.toString()));
+    	}
+    	return new ValueList(result);
     }
     
 }
