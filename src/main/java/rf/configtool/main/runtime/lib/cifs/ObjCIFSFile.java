@@ -183,7 +183,9 @@ public class ObjCIFSFile extends Obj {
             if (params.size() != 1) throw new Exception("Expected targetFile parameter");
             Obj obj=getObj("targetFile",params,0);
             if (obj instanceof ObjFile) {
-            	File f=((ObjFile) obj).getFile();
+            	ObjFile file=(ObjFile) obj;
+            	file.validateDestructiveOperation("copyTo");
+            	File f=file.getFile();
             		InputStream in=null;
             		OutputStream out=null;
             	try {
