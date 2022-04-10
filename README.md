@@ -1,5 +1,10 @@
 ## [Full Youtube tutorial](https://www.youtube.com/playlist?list=PLj58HwpT4Qy80WhDBycFKxIhWFzv5WkwO).
 
+2022-04-10 v3.4.1
+
+- Built-in function count is 592, across 85 object types.
+- Library and example script code ~15k lines
+- Java source code ~33k lines
 
 # Automation at all levels
 
