@@ -174,7 +174,7 @@ P(2,"") =>prefix
     println(prefix+"Verify GIT installed")
     SSH:run (target,"which git",true) =>result
     if(result.get("exitCode") != 0) {
-        println(prefix+"Installing ANT")
+        println(prefix+"Installing GIT")
         SSH:sudo (target,"apt-get -y install git")
     }
     println(prefix+"GIT ok")
