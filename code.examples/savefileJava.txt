@@ -48,15 +48,6 @@ openjdk-11-jdk-headless
 openjdk-13-jdk-headless
 openjdk-14-jdk-headless
 
-Functions
----------
-VerifyJava (target, prefix)
-VerifyAnt (target, prefix)    # calls VerifyJava
-    # target is user@host
-    # prefix is indentation string, defaults to ""
-    
-Both functions are interactive if no target given.
-
 >>>>>>>>>>>>>>>>>>>>>>>>> EOF
  =>lines
 Dict.set("${target}",targetPackage) =>data
@@ -175,6 +166,22 @@ P(2,"") =>prefix
 /VerifyAnt
 
 
+# Install GIT if missing 
+# 2022-04: missing for a clean Ubuntu Desktop install
+# --
+P(1,GetSSHTarget) =>target
+P(2,"") =>prefix
+    println(prefix+"Verify GIT installed")
+    SSH:run (target,"which git",true) =>result
+    if(result.get("exitCode") != 0) {
+        println(prefix+"Installing ANT")
+        SSH:sudo (target,"apt-get -y install git")
+    }
+    println(prefix+"GIT ok")
+/VerifyGIT
+
+
+
 # Install Maven if missing - calls VerifyJava
 # --
 P(1,GetSSHTarget) => target
@@ -213,6 +220,7 @@ P(2,"") => prefix
         
         if (!hasCFT) {
             println(prefix+"Installing and compiling CFT")
+            VerifyGIT(prefix+"   ",target)
             List(
                 "git clone https://github.com/rfo909/CFT.git",
                 "cd CFT",
