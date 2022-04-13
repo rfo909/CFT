@@ -120,7 +120,7 @@ PrettyPrint (PP) implemented,
         @           2021/01/01 12:00:55 
         @    --><a:parent a="test" b=42 >
         @  
-        @       <element a=5 b="test" c=ident d=23.5 e=+18 f=-9>2 + 3 &gt; 5</element>
+        @       <element "a"=5 b="test" c=ident d=23.5 e=+18 f=-9>2 + 3 &gt; 5</element>
         @   <? this is a test ?>
         @       <item>another line of text
         @       <title>Donald Duck &amp; Co</title>
@@ -195,17 +195,6 @@ exampleXML
 		self.tagName=tagName
 		self.attributes=attributes
 		self.content=content
-		self.parent=null
-		
-		self.path=Lambda{
-			Inner {
-				node=self
-				loop
-					break(node==null)
-					out(node.tagName)
-					node=node.parent
-			}.reverse
-		}
 		
 		self.dump=Lambda{
 			P(1,"")=>indent
@@ -225,10 +214,6 @@ exampleXML
 			|
 		}
 		
-		self.pathStr=Lambda{
-			self.path.concat(" -> ")
-		}	
-
 		self.setAttribute=Lambda{
 			P(1) as String => name
 			P(2) => value
@@ -253,7 +238,7 @@ exampleXML
     				ts.next
     		}
 
-			# OPENING TAG
+			# START TAG BEGIN + TAG NAME
 			
 			error(!ts.peek=="<",ts.sourceLocation + ": expected '<' starting a tag")
 			ts.next
@@ -277,8 +262,6 @@ exampleXML
         	#println("STARTING tag " + name)
         	self.tagName=name
         	
-        	#println(self.pathStr)
-        	
         	
         	# TAG ATTRIBUTES
         	
@@ -286,11 +269,16 @@ exampleXML
         		loop
         			ws.call(ts)
         			break(ts.peek==">" || ts.peek=="/>")
-        			
+
+        				
 		 			error (ts.peekType != 4 && ts.peekType != 5, 
 		 				ts.sourceLocation + ": Expected identifier or string attribute name - got " + ts.peek)
 		 				
 		 			attrName=ts.peek
+		 			if (ts.peekType==5) {
+		 				# Strip quotes
+		 				attrName=attrName.sub(1,attrName.length-1)
+		 			}
 		 			ts.next
 		 			ws.call(ts)
 		 			error(ts.peek != "=", 
@@ -301,6 +289,12 @@ exampleXML
 		 			error(ts.peekType != 4 && ts.peekType != 5 && ts.peekType() != 3, 
 		 				ts.sourceLocation + ": Expected identifier, string or number value for attribtute " + attrName + " - got "+ ts.peek)
 		 			attrValue=ts.peek
+
+		 			if (ts.peekType==5) {
+		 				# Strip quotes
+		 				attrValue=attrValue.sub(1,attrValue.length-1)
+		 			}
+
 		 			ts.next
 		 			ws.call(ts)
 		 			
@@ -330,7 +324,6 @@ exampleXML
         				self.content.add(text) 
         				text=""
         				node=XMLNode
-        				node.parent=self
         				node.parse(ts)
         				self.content.add(node)
       				}
@@ -399,134 +392,22 @@ exampleXML
 
 
 
-# JSON:PP(Parse(...)) using defaults
-# (Shows all closures but not the object types)
+# XMLNode.dump to show result from parse
 # --
 	node = Parse(exampleXML).first
+	#JSON:PP(node)
 	node.dump
-	
-/t
-    
+/t1
 
 
-
-
-
-# Generate output
+# JSON:PP to show result from parse
 # --
-    P(1)=>data   # &XMLNode or &XMLList  or List of (Dict | String)
-    P(2,"")=>indent
-    P(3,Lambda { println(""+P(1)) } )=>LOut
-    
-    data as? XMLList => isList
-    data as? XMLNode => isNode
-    
-    if (isNode) {
-    	OutObject(data,ident,LOut)
-    } else {
-		data.list->element
-		    type=getType(element)
-		    println("OutContent: " + element)
-		    if (type=="Dict") {
-		        OutObject(element,indent,LOut)
-		    } else {
-		        val=element.trim
-		        if (val != "") LOut.call(indent+EscapeXMLString(val))
-		    }
-	}
-//OutContent
-
-
-
-# Generate output
-# --
-    P(1) as &XMLNode
-     =>obj
-    P(2)=>indent
-    P(3,Lambda { println(""+P(1)) } )=>LOut
-    
-    
-    firstTag="<"+obj.tagName
-    obj.attributes.keys->attrName
-        value=obj.attributes.get(attrName)
-        if (getType(value)=="String") {
-            value='"' + EscapeXMLString(value) + '"'
-        } 
-        firstTag=firstTag + " " + attrName + "=" + value
-    |
-    hasContent=true
-    if (!obj.has("content") || obj.content.list.length==0) {
-        firstTag=firstTag+"/>"
-        hasContent=false
-        LOut.call(indent+firstTag)
-    } else {
-        firstTag=firstTag + ">"
-    }
-    if (hasContent) {
-        lastTag="</"+obj.tagName+">"
-        if (obj.content.list.length==1 && getType(obj.content.list.first)=="String") {
-            LOut.call(indent+firstTag+obj.content.list.first.trim+lastTag)
-        } else {
-            LOut.call(indent+firstTag)
-            OutContent(obj.content,indent+"   ",LOut)
-            LOut.call(indent+lastTag)
-        }
-    }
-//OutObject
-
-
-# Pretty-print XML
-# --
-    P(1) as &XMLList => data
-    
-    obj=Dict.set("list",List)
-    obj.bind(Lambda{self.list.add(P(1))} ) => closure
-    	
-    OutContent(data,"",closure)
-    
-    obj.list
-/PP
-
-
-PP(Parse(exampleXML))
+	node = Parse(exampleXML).first
+	JSON:PP(node)
 /t2
 
 
-
-# Test lookups
-# --
-    Parse(exampleXML) => obj
-    XML:Get(obj,"a:parent") -> parent
-        XML:Get(parent,"element") -> element
-            XML:GetAttrNames(element)->attr
-                println("-> " + attr + "=" + XML:GetAttr(element,attr))
-//L1
-
-
-
-# Test lookups
-# --
-    Parse(exampleXML) => obj
-    XML:Get(obj,"a:parent") -> parent
-        XML:Get(parent,"item") -> item
-            XML:Get(item,"title")->title
-                println("title=" + GetContent(title))
-//L2
-
-
-
-# Test lookups with space separated path of names
-# --
-    Parse(exampleXML) => obj
-    XML:GetPath(obj,"a:parent item title") -> title
-                println("title=" + GetContent(title))
-//L3
     
-
-
-
-exampleXML
-//e
 
 
 Lib.Text.Lexer help
