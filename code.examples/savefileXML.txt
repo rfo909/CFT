@@ -45,77 +45,6 @@ PrettyPrint (PP) implemented,
 
 
 
-# XML node class
-# --
-	class XMLNode {
-		P(1) as String => tagName
-		P(2,Dict) as Dict => attributes
-		P(3,XMLList) as &XMLList => content
-		
-		self.tagName=tagName
-		self.attributes=attributes
-		self.content=content
-
-		self.setAttribute=Lambda{
-			P(1) as String => name
-			P(2) => value
-			self.attributes.set(name,value)
-		}
-		self.getAttribute=Lambda{
-			P(1) as String => name
-			P(2) => defaultValue
-			if (self.attributes.has(name)) self.attributes.get(name) else defaultValue
-		}
-
-	}
-/XMLNode
-
-
-
-
-# XML content list
-# --
-	class XMLList {
-		P(1) as List? => content
-
-		if (content != null) Inner {
-			# Validate content
-			content->x
-				x as? String => a
-				x as? &XMLNode => b
-				error (!a && !b, "Invalid value, should be String and &XMLNode only, got : " + x)
-			|
-			self.list=content
-		} else {
-			self.list=List
-		}
-		self.addString=Lambda{
-			P(1) as String => str
-			list.add(str)
-		}
-		self.addNode=Lambda{
-			P(1) as &XMLNode => node
-			list.add(node)
-		}
-		self.getStrings=Lambda{
-			list=List
-			self.list->x
-				if (getType(x)=="String") list.add(x)
-			|
-			list
-		}
-		self.getNodes=Lambda{
-			P(1) as String? => tagName
-			list=List
-			self.list->x
-				x as? &XMLNode => ok
-				if(ok && (tagName==null || x.tagName==tagName)) list.add(x)
-			|
-			list
-		}
-	}
-/XMLList
-
 
 
 # test
@@ -143,7 +72,7 @@ PrettyPrint (PP) implemented,
     digits = "0123456789"
     root.sub(digits+"-"+"+").setIsToken(3) => integer
     integer.sub(digits,integer) # loop back
-    integer.sub(".").sub(digits).setIsToken(31) => float 
+    integer.sub(".").sub(digits).setIsToken(3) => float 
     float.sub(digits,float) # loop back
     
 
@@ -195,21 +124,25 @@ PrettyPrint (PP) implemented,
         @   <? this is a test ?>
         @       <item>another line of text
         @       <title>Donald Duck &amp; Co</title>
+        @       <emptyTag a=5/>
         @           <status>
         @             on-hold
         @           <count>2</count>
-        @               <x a=1>xxx</x>
+        @               <x a="1"> xxx </x>
         @       </status>
-        @   </item>
+        @   	</item>
         @       <emptyTag a="a"/>
         @    </a:parent>
     )
 /exampleXML
 
 
+exampleXML
+//ex
 
 
 # Tokenize XML, then parse.
+# Returns list of top-level objects, skipping text at outer level
 # --
     P(1)=>xml
     P(2,false)=>debug
@@ -235,41 +168,216 @@ PrettyPrint (PP) implemented,
         |
     }
 
-    ts=lexer.getTokenStream(root)
-    ws(ts)
+    lexer.getTokenStream(root) as LexerTokenStream => ts
     
     list=List
     loop
-        break(ts.EOF)
-        ws(ts)
-        break(ts.EOF)
-        if (ts.peekType==10) {
-            list.add(ts.peek)
-            ts.next
-        } else 
-        if (ts.peek=="<") {
-            list.add(Obj(ts))
-        } else {
-            break(ts.EOF)
-            list.add(ts.peek)
-            ts.next
-        }
+   		break(ts.EOF)
+    	if (ts.peek=="<") {
+    		obj=XMLNode
+    		obj.parse(ts)
+    		list.add(obj)
+    	} else {
+    		ts.next
+    	}
     |
-    XMLList(list)
+	list
 /Parse
 
 
-
-
-
-
-
-# Eat whitespace
+# XML node class
 # --
-    P(1)=>ts
-    loop 
-    	break(ts.EOF || ts.peekType != 1) ts.next
-//ws
+	class XMLNode {
+		P(1) as String? => tagName
+		P(2,Dict) as Dict => attributes
+		P(3,List) => content
+		
+		self.tagName=tagName
+		self.attributes=attributes
+		self.content=content
+		self.parent=null
+		
+		self.path=Lambda{
+			Inner {
+				node=self
+				loop
+					break(node==null)
+					out(node.tagName)
+					node=node.parent
+			}.reverse
+		}
+		
+		self.dump=Lambda{
+			P(1,"")=>indent
+
+			println(indent+self.tagName)
+			self.attributes.keys->attrName
+				println(indent+"   "+attrName+"="+self.attributes.get(attrName))
+			|
+			self.content->x
+				x as? &XMLNode => isNode
+				if (isNode) {
+					x.dump(indent+"   ")
+				} else Inner {
+					x.split->word out(word.trim) | _.concat(" ") => str
+					println(indent+"     " + str)
+				}
+			|
+		}
+		
+		self.pathStr=Lambda{
+			self.path.concat(" -> ")
+		}	
+
+		self.setAttribute=Lambda{
+			P(1) as String => name
+			P(2) => value
+			self.attributes.set(name,value)
+		}
+		self.getAttribute=Lambda{
+			P(1) as String => name
+			P(2) => defaultValue
+			if (self.attributes.has(name)) self.attributes.get(name) else defaultValue
+		}
+		
+		## Parse from token stream
+		## -----------------------
+		
+		self.parse=Lambda{
+			P(1) as LexerTokenStream => ts
+
+			ws=Lambda{ 
+				P(1) as LexerTokenStream => ts 
+				loop 
+    				break(ts.EOF || ts.peekType != 1) 
+    				ts.next
+    		}
+
+			# OPENING TAG
+			
+			error(!ts.peek=="<",ts.sourceLocation + ": expected '<' starting a tag")
+			ts.next
+        	ws.call(ts)
+
+        	error(ts.peekType != 4, ts.sourceLocation + ": expected identifier")
+        	name=ts.peek
+        	ts.next
+        	
+        	ws.call(ts)
+        	if (ts.peek==":") {
+        		name=name+":"
+        		ts.next
+        		ws.call(ts)
+        		error(ts.peekType != 4, ts.sourceLocation + ": expected identifier following " + name)
+        		name=name+ts.peek
+        		ts.next
+        		ws.call(ts)
+        	}
+        	
+        	#println("STARTING tag " + name)
+        	self.tagName=name
+        	
+        	#println(self.pathStr)
+        	
+        	
+        	# TAG ATTRIBUTES
+        	
+        	Inner {
+        		loop
+        			ws.call(ts)
+        			break(ts.peek==">" || ts.peek=="/>")
+        			
+		 			error (ts.peekType != 4 && ts.peekType != 5, 
+		 				ts.sourceLocation + ": Expected identifier or string attribute name - got " + ts.peek)
+		 				
+		 			attrName=ts.peek
+		 			ts.next
+		 			ws.call(ts)
+		 			error(ts.peek != "=", 
+		 				ts.sourceLocation + ": expected '=' for attribute " + attrName)
+
+		 			ts.next
+		 			ws.call(ts)
+		 			error(ts.peekType != 4 && ts.peekType != 5 && ts.peekType() != 3, 
+		 				ts.sourceLocation + ": Expected identifier, string or number value for attribtute " + attrName + " - got "+ ts.peek)
+		 			attrValue=ts.peek
+		 			ts.next
+		 			ws.call(ts)
+		 			
+		 			self.setAttribute(attrName, attrValue)	
+        	}
+        	
+        	# START TAG END
+        	
+        	ws.call(ts)
+        	hasContent=true
+        	if (ts.peek==">") {
+        		ts.next
+        	} else if (ts.peek=="/>") {
+        		hasContent=false
+        		ts.next
+        	} else {
+        		error(ts.sourceLocation + ": expected '>' or '/>' closing tag " + name)
+        	}
+        	
+        	
+        	# CONTENT
+        	if (hasContent) Inner {
+        		text=""
+        		loop
+        			break(ts.peek=="</")
+        			if(ts.peek=="<") {
+        				self.content.add(text) 
+        				text=""
+        				node=XMLNode
+        				node.parent=self
+        				node.parse(ts)
+        				self.content.add(node)
+      				}
+      				# Everything else  			
+        			text=text+ts.peek
+        			ts.next
+        		|
+        		self.content.add(text)
+ 			}    
+ 			
+
+			# CLOSING TAG
+			if (hasContent) {
+				ws.call(ts)
+				error(ts.peek != "</", ts.sourceLocation + ": expected </ closing " + self.tagName)
+
+            	ts.next
+            	ws.call(ts)
+
+            	error(ts.peekType != 4, ts.sourceLocation + ": expected identifier")
+
+            	name=ts.peek
+            	ts.next
+            	ws.call(ts)
+            
+            	if (ts.peek==":") {
+                	name=name+":"
+               		ts.next
+                	ws.call(ts)
+                
+                	error(ts.peekType != 4, ts.sourceLocation + ": expected identifier")
+                	name=name+ts.peek
+                	ts.next
+                	ws.call(ts)
+            	}
+            	error(self.tagName != name, ts.sourceLocation + ": Expected </" + self.tagName + "> - got </" + name + ">")
+            	ts.match(">","expected '>' following '</"+name)
+            	
+   	 			#println("Got matching END-TAG to " + self.tagName)   			
+            }
+		
+
+		} # self.parse
+	}
+/XMLNode
+
+
 
 
 
@@ -290,154 +398,16 @@ PrettyPrint (PP) implemented,
 
 
 
-# Match object <a ...> ... </a> or <a ... /> - returns XMLNode object
-#
-# --
-    P(1)=>ts
-
-    ts.match("<","expected '<'")
-    ws(ts)
-
-    error(ts.peekType != 4, ts.sourceLocation + ": expected identifier")
-    elementName=ts.peek   
-    ts.next
-    ws(ts)
-    
-    if (ts.peek==":") {
-        elementName=elementName+":"   # name space
-        ts.next
-        ws(ts)
-        error(ts.peekType != 4, ts.sourceLocation + ": expected identifier")
-        elementName=elementName+ts.peek
-        ts.next
-        ws(ts)
-    }
-
-	obj=XMLNode(elementName)
-
-    Inner {
-        loop
-            ws(ts)
-            if (ts.peek==">") {
-                ts.next
-                obj.content=Content(ts, elementName)
-                #dict.set("content",Content(ts, dict.name))  # list of strings and Dict's, until closing my name
-                break
-            } else if (ts.peek=="/>") {
-                ts.next
-                break
-            } else {
-                error(ts.peekType != 4, ts.sourceLocation + ": expected attribute name identifier")
-                attrName=ts.peek
-                ts.next
-                ws(ts)
-                ts.match("=","expected '=' following attribute name " + attrName)
-                ws(ts)
-                
-                if (ts.peekType==3) { # int
-                    value="" + ts.peek.parseInt
-                } else if (ts.peekType==31) { # float
-                    value="" + ts.peek.parseFloat
-                } else if (ts.peekType==4) {  # identifier
-                    value=ts.peek
-                } else if (ts.peekType==5) {  # string
-                    value=ts.peek
-                    value=value.sub(1,value.length-1)  # strip quotes
-                    value=UnescapeXMLString(value)
-                } else {
-                    error(ts.sourceLocation + ": Invalid token: " + ts.peek)
-                }
-                ts.next
-                ws(ts)
-                obj.setAttribute(attrName, value)
-            }
-    }
-    obj
-//Obj
-
-
-
-
-# Returns list of content inside <x>...</x> - includes text and objects as XMLList object
-# --
-    P(1)=>ts
-    P(2)=>currObjectName
-    
-    
-    list=List
-    
-    Inner {
-        text=""
-        loop
-            if (ts.peekType==10) {  # processing rule
-                
-                text=text.trim
-                if (text.length>0) {
-                    list.add(UnescapeXMLString(text))
-                }
-                text=""
-                
-                # "Special"
-                list.add(ts.peek)
-                ts.next
-            } else
-            if (ts.peek=="</") {
-                
-                text=text.trim
-                if (text.length>0) {
-                    list.add(UnescapeXMLString(text))
-                }
-                text=""
-                
-                ts.next
-                ws(ts)
-
-                error(ts.peekType != 4, ts.sourceLocation + ": expected identifier")
-
-                name=ts.peek
-                ts.next
-                ws(ts)
-                
-                if (ts.peek==":") {
-                    name=name+":"
-                    ts.next
-                    ws(ts)
-                    
-                    error(ts.peekType != 4, ts.sourceLocation + ": expected identifier")
-                    name=name+ts.peek
-                    ts.next
-                    ws(ts)
-                }
-                error(name != currObjectName, ts.sourceLocation + ": Invalid </"+name+"> - expected " + currObjectName)
-                ts.match(">","expected '>' following '</"+name)
-
-                break
-            } else if (ts.peek=="<") {
-            
-                text=text.trim
-                if (text.length>0) {
-                    list.add(UnescapeXMLString(text))
-                }
-                text=""
-                
-                list.add(Obj(ts))
-            } else {
-                text=text+ts.peek
-                ts.next
-            }
-    }
-    XMLList(list)
-//Content
-
-
-
 
 # JSON:PP(Parse(...)) using defaults
 # (Shows all closures but not the object types)
 # --
-JSON:PP(Parse(exampleXML),false,true)
+	node = Parse(exampleXML).first
+	node.dump
+	
 /t
     
+
 
 
 
