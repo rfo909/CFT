@@ -18,7 +18,7 @@ It's been in continous use since creation in 2018.
 
 Written from scratch in Java; runs both on Linux and Windows environments. 
 
-*README last updated 2022-01-11*
+*README last updated 2022-04-13*
 
 
 ## Terminal based - shell-like
@@ -79,11 +79,16 @@ arrow "->" followed by identifier "part" is the "for-each" of CFT, with "part" a
 - lists and dictionaries
 - run external programs in foreground or background
 - text templating with merge code processing
-- spawning CFT expressions as background threads
+- spawn CFT expressions as background threads
 - lambdas and closures
 - tryCatch with two-tiered exception hierarchy ("soft" and "hard")
-- integrated data store (Db2) 
-- integrated lexer; JSON recursive-descent parser written in CFT
+- integrated data store (Db2)
+
+Given my interest in parsing, CFT has integrated Lexer support, and is sophisticated
+enough to write recursive-descent parsers:
+ 
+- JSON recursive-descent parser written in CFT
+- (2022-04) got XML parser operational, also written in CFT 
 
 ### Editing script code
 
@@ -422,7 +427,7 @@ List functions in script with "?".
 	/checkPing 
 ```
 
-### Rewritten to do parallel pings
+### Rewrite to do parallel pings
 
 Since pinging hosts that don't respond may take a while, we decide to run
 all pings in parallel, then collect information. 
