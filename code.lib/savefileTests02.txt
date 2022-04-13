@@ -19,8 +19,7 @@
 >>> EOF
 /License
 
-# Testing Dictonaries after adding code to maintain key
-# sequence.
+# Testing all things dictionaries
 
 
 Dict.set("a",1).set("c",3).set("a",2).keys.concat(" ")=="a c"
@@ -102,11 +101,6 @@ JSON:Parse("{b:1, a:2, c:3, x:{y:1, z:2}, d:4}").keys.concat=="bacxd"
 
 
 
-# --------------------------
-# General topics
-# --------------------------
-
-
 
 # Test 11: 
 # Verify that here-doc and Sequence of "raw" strings produce the same result
@@ -129,6 +123,24 @@ c
 /Test11_Here_doc_vs_Sequence
 
 
+
+# Testing XML parser
+# --
+	XML:test01
+/Test12_XML_test01_parse_pp_output
+	
+
+# Testing XML parser
+# --
+	XML:test02
+/Test13_XML_test02_lookup_test1
+	
+
+# Testing XML parser
+# --
+	XML:test03
+/Test14_XML_test03_lookup_test2
+	
 
 
 

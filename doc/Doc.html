@@ -15,8 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2022-04-06 RFO
-v3.3.3
+Last updated: 2022-04-13 RFO
+v3.4.2
 
 </pre>
 
@@ -2576,9 +2576,73 @@ codeDirs = . ; code.examples ; code.lib
 
 <h1>Processing XML</h1>
 <p>
-  The "XML" script handles parsing and pretty-printing XML. It used classes, but as of version 3.3.3
-  it isn't really complete.
+  The "XML" script handles parsing and pretty-printing XML. It also has functions for constructing
+  an XML object with code.
 </p>
+
+<h2>Parsing XML</h2>
+<p>
+  Call XML:Parse with list of strings, or single string. Then call .PP (pretty-print) on the
+  root node, to see the result. 
+</p>
+
+<pre>
+  # XML:t1
+
+  rootNode = XML:Parse(XML:exampleXML).first
+  rootNode.PP  # pretty-print
+</pre>
+
+<h2>Creating structure with code</h2>
+
+<pre>
+  # XML:constructedObject
+  # XML:t4
+
+  root = XMLNode("root")
+  root.attributes.pi="3.14"
+
+  root.addText("root test before A")
+  
+  # add sub-node with name and populate it
+  a=root.sub("A")
+  a.attributes.inner="a"
+  a.addText("a-text")
+
+  root.addText("root test after A")
+
+  # and another sub-node with two inner nodes
+  b=root.sub("B")
+  b.sub("C")
+  b.sub("D")
+
+  # Show structure
+  root.PP
+</pre>
+
+<h2>Looking up content</h2>
+<p>
+  Use the .attrGet(name) for attributes that may not exist. It will then return null, while
+  using dotted lookup will fail with error, if name not found.
+</p>
+<pre>
+  # Assuming object built in example above
+  root = XML:constructedObject
+
+  root.attrGet("pi"))  # "3.14"
+  root.subNodes("A").first.attrGet("inner") # "a"
+
+  root.attrGet("does-not-exist")  # null
+</pre>
+<p>
+  Show available data and functions for the XMLNode object: 
+</p>
+<pre>
+  XML:Show
+</pre>
+
+
+
 
 
 

@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2022-04-06 RFO
-v3.3.3
+Last updated: 2022-04-13 RFO
+v3.4.2
 ```
 # Introduction
 
@@ -2298,9 +2298,59 @@ fields in the corresponding dictionaries.
 # Processing XML
 
 
-The "XML" script handles parsing and pretty-printing XML. It used classes, but as of version 3.3.3
-it isn't really complete.
+The "XML" script handles parsing and pretty-printing XML. It also has functions for constructing
+an XML object with code.
 
+## Parsing XML
+
+
+Call XML:Parse with list of strings, or single string. Then call .PP (pretty-print) on the
+root node, to see the result.
+
+```
+# XML:t1
+rootNode = XML:Parse(XML:exampleXML).first
+rootNode.PP  # pretty-print
+```
+## Creating structure with code
+
+```
+# XML:constructedObject
+# XML:t4
+root = XMLNode("root")
+root.attributes.pi="3.14"
+root.addText("root test before A")
+# add sub-node with name and populate it
+a=root.sub("A")
+a.attributes.inner="a"
+a.addText("a-text")
+root.addText("root test after A")
+# and another sub-node with two inner nodes
+b=root.sub("B")
+b.sub("C")
+b.sub("D")
+# Show structure
+root.PP
+```
+## Looking up content
+
+
+Use the .attrGet(name) for attributes that may not exist. It will then return null, while
+using dotted lookup will fail with error, if name not found.
+
+```
+# Assuming object built in example above
+root = XML:constructedObject
+root.attrGet("pi"))  # "3.14"
+root.subNodes("A").first.attrGet("inner") # "a"
+root.attrGet("does-not-exist")  # null
+```
+
+Show available data and functions for the XMLNode object:
+
+```
+XML:Show
+```
 # Use as a calculator
 
 ## Expressions and "variables"

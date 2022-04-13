@@ -66,66 +66,80 @@ public class DottedCall extends LexicalElement {
     }
     
     public Value resolve (Ctx ctx, Obj obj) throws Exception {
-//      System.out.println("DottedCall.resolve: " + code);
-//      System.out.println("DottedCall.resolve obj=" + obj.getTypeName());
-        // parameters
-        List<Value> values=new ArrayList<Value>();
-        for (Expr e:params) values.add(e.resolve(ctx.sub()));
-        
-        if (obj instanceof ValueObj) {
-        	// unwrap Obj
-            obj=((ValueObj) obj).getVal();
-        }
-        
-        if (obj instanceof ObjDict) {
-        	ObjDict dict=(ObjDict) obj;
-        	Value v=dict.getValue(ident);
-        	if (v != null) {
-        		// as a funny side effect from moving Dict.ident lookup of values here from Dict, is that
-        		// Dict.?xxx supports same functionality as Dict.has("xxx") :-)
-        		
-        		if (checkMode) return new ValueBoolean(true);
-        		
-        		//System.out.println("DottedCall: found dict value for '" + ident + "' " + v.getDescription());
-        		// Check if closure
-        		if (v instanceof ValueObj) {
-	        		Obj x=((ValueObj) v).getVal();
-	        		if (x instanceof ObjClosure) {
-	        	    	CFTCallStackFrame caller=new CFTCallStackFrame(getSourceLocation(),"Calling Dict.closure " + ident);
 
-	        			Value result = ((ObjClosure) x).callClosure(ctx, caller, values);
-	        			return result;
+    	CFTCallStackFrame callStackTarget = null;
+    	if (checkMode) {
+    		callStackTarget = ctx.getStdio().getTopCFTCallStackFrame();
+    	}
+    	try {
+	        // parameters
+	        List<Value> values=new ArrayList<Value>();
+	        for (Expr e:params) values.add(e.resolve(ctx.sub()));
+	        
+	        if (obj instanceof ValueObj) {
+	        	// unwrap Obj
+	            obj=((ValueObj) obj).getVal();
+	        }
+	        
+	        if (obj instanceof ObjDict) {
+	        	ObjDict dict=(ObjDict) obj;
+	        	Value v=dict.getValue(ident);
+	        	if (v != null) {
+	        		// as a funny side effect from moving Dict.ident lookup of values here from Dict, is that
+	        		// Dict.?xxx supports same functionality as Dict.has("xxx") :-)
+	        		
+	        		if (checkMode) return new ValueBoolean(true);
+	        		
+	        		//System.out.println("DottedCall: found dict value for '" + ident + "' " + v.getDescription());
+	        		// Check if closure
+	        		if (v instanceof ValueObj) {
+		        		Obj x=((ValueObj) v).getVal();
+		        		if (x instanceof ObjClosure) {
+		        	    	CFTCallStackFrame caller=new CFTCallStackFrame(getSourceLocation(),"Calling Dict.closure " + ident);
+	
+		        			Value result = ((ObjClosure) x).callClosure(ctx, caller, values);
+		        			return result;
+		        		}
 	        		}
-        		}
-        		// not closure, just return value
-        		return v;
-        	}
-        }
-        
-        Function f=obj.getFunction(ident);
-        if (f==null) {
-            if (checkMode) return new ValueBoolean(false);
-            
-            String msg=getSourceLocation() + " " + obj.getDescription() + " no function '" + ident + "'";
-            throw new Exception(msg);
-        }
-        
-        try {
-            Value result=f.callFunction(ctx, values);
-            //System.out.println("DottedCall result=" + result.getClass().getName());
-            if (!checkMode) return result;
-            return new ValueBoolean(true);
-        } catch (Exception ex) {
-            if (checkMode) {
-                return new ValueBoolean(false);
-            } else {
-                if (!(ex instanceof SourceException)) {
-                    throw new SourceException(getSourceLocation(), ex);
-                } else {
-                    throw ex;
-                }
-            }
-        }
+	        		// not closure, just return value
+	        		return v;
+	        	}
+	        }
+	        
+	        Function f=obj.getFunction(ident);
+	        if (f==null) {
+	            if (checkMode) return new ValueBoolean(false);
+	            
+	            String msg=getSourceLocation() + " " + obj.getDescription() + " no function '" + ident + "'";
+	            throw new Exception(msg);
+	        }
+	        
+	        try {
+	            Value result=f.callFunction(ctx, values);
+	            //System.out.println("DottedCall result=" + result.getClass().getName());
+	            if (!checkMode) return result;
+	            return new ValueBoolean(true);
+	        } catch (Exception ex) {
+	            if (checkMode) {
+	                return new ValueBoolean(false);
+	            } else {
+	                if (!(ex instanceof SourceException)) {
+	                    throw new SourceException(getSourceLocation(), ex);
+	                } else {
+	                    throw ex;
+	                }
+	            }
+	        }
+    	} finally {
+    		// if running in checkMode, we stored the top off the callStack
+    		// in the top of this method, and are now restoring the callstack,
+    		// because if a x.?y fails, there will have been an exception,
+    		// which means the callstack is out of sync. Correcting this here!
+    		//
+    		// See Tests01:Test52...
+    		
+    		if (callStackTarget != null) ctx.getStdio().getAndClearCFTCallStack(callStackTarget);
+    	}
     }
 
 }

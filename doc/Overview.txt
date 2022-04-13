@@ -190,6 +190,9 @@ Processing text
 Processing JSON
 
 Processing XML
+ * Parsing XML
+ * Creating structure with code
+ * Looking up content
 
 Use as a calculator
  * Expressions and "variables"

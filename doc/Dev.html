@@ -13,6 +13,24 @@
 
 <h1>CFT Change log</h1>
 
+<h3>3.4.2 2022-04-13 Bug fix for predicate calls</h3>
+<p>
+	Doing xxx.?yyy is a nice short hand for tryCatch(xxx.yyy).ok, as a way of finding out
+	if a function is supported, or runs okay. As this is an implicit try-catch, if the 
+	check fails, it means there was an exception somewhere inside, and that messed up
+	the CFT call stack.
+</p>
+<p>
+	Fixed in DottedCall.java, with reference to Tests01:Test52 which was written before
+	the fix, and verified to identify the problem, and now is ok.
+</p>
+<p>
+	Issue came up as doing Util:ShowDict on an XMLNode (.show lambda). XMLNode objects contain closures. These are
+	not synthesizable, and that's what crashed the code, as Util:ShowDict determines if 
+	value synthesizable in order to present it properly. 
+</p>
+
+
 <h3>3.4.1 2022-04-08 CFT Stack trace fixes</h3>
 <p>
 	Fixed including CFT Stack listing in results from tryCatch() and tryCatchSoft(), at the

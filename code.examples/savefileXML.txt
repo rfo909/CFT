@@ -24,21 +24,9 @@
 XML parser written in CFT.
 --------------------------
 
-EXPERIMENTAL / 2021-04-28 RFO
-
-Status: parses XML and checks for errors.
-
-What works?
------------
-Handles strings (by unquoting them). Allows identifier values, seen as strings without quotes.
-Unescapes strings and text (&lt; becomes '<' etc)
-Handles comments and processing rules
-    <!-- bla bla -->
-    <? do this ?>
-    
-PrettyPrint (PP) implemented, 
-
-2021-04-29 as of v2.4.5 we also support multi-line tokens (comments and processing rules)
+2022-04-13 Somewhat stable, good enough for now. Parses and pretty-prints
+XML nodes. Rewritten using a single class (XMLNode), after introducing classes
+in v3.3.2
 
 >>>> EOF
 /Readme
@@ -197,9 +185,34 @@ exampleXML
 		self.attributes=attributes
 		self.content=content
 		
+		# Create sub-node 
+		# --
+		self.sub=Lambda{
+			P(1) as String => tagName
+			x=XMLNode(tagName)
+			self.content.add(x)
+			x
+		}
+		
+		# Add text
+		# --
+		self.addText=Lambda{
+			P(1) as String? => text
+			if (text != null) {
+				self.content.add(text)
+			}
+		}
+		
+		# Get attribute or null if undefined
+		# --
+		self.attrGet=Lambda{
+			P(1) as String => attrName
+			if (self.attributes.has(attrName), self.attributes.get(attrName), null)
+		}
+		
 		# Get list of XMLNode from content
 		# --
-		self.contentNodes=Lambda{
+		self.subNodes=Lambda{
 			P(1) as String? => tag
 			self.content->x
 				x as? &XMLNode => isNode
@@ -208,7 +221,7 @@ exampleXML
 				out(x)
 		}
 		
-		
+			
 		## Parse from token stream
 		## -----------------------
 		
@@ -308,17 +321,17 @@ exampleXML
         		loop
         			break(ts.peek=="</")
         			if(ts.peek=="<") {
-        				self.content.add(text) 
+        				self.content.add(UnescapeXMLString(text)) 
         				text=""
         				node=XMLNode
         				node.parse(ts)
         				self.content.add(node)
       				}
-      				# Everything else  			
+      				# Everything else (text)
         			text=text+ts.peek
         			ts.next
         		|
-        		self.content.add(text)
+        		self.content.add(UnescapeXMLString(text))
  			}    
  			
 
@@ -355,6 +368,8 @@ exampleXML
 
 		} # self.parse
 		
+		
+		
 		## Pretty-print XML
 		## ----------------
 		self.PP=Lambda{
@@ -378,7 +393,7 @@ exampleXML
 							x.PP(indent2,result)
 						} else {
 							s=x.trim
-							if (s.length>0) result.add(indent2 + s)
+							if (s.length>0) result.add(indent2 + EscapeXMLString(s))
 						}
 				}
 				result.add(indent+"</"+self.tagName+">")
@@ -387,9 +402,23 @@ exampleXML
 			result
 		}
 		
+		
+		# Export XML structure as single line of text
+		# --
+		self.export=Lambda{
+			self.PP->line
+				out(line.trim)
+			| _.concat(" ")
+		}
 	}
 /XMLNode
 
+
+
+# Show XMLNode content
+# --
+	Util:ShowDict(XMLNode("ROOT"))
+/Show
 
 
 
@@ -425,25 +454,70 @@ exampleXML
 /t2
 
 
-# Parse example, then pretty-print it. Parse the output, and pretty-print that.
-# Compare the two outputs, should match
+# Export test
+# --
+	Parse(exampleXML).first.export
+/t3
+
+
+# Construct XML object test
+# --
+	root = XMLNode("root")
+	root.attributes.pi="3.14"
+	root.addText("root test before A")
+	a=root.sub("A")
+	a.attributes.inner="a"
+	a.addText("a-text")
+	root.addText("root test after A")
+	b=root.sub("B")
+	b.sub("C")
+	b.sub("D")
+	
+	root
+//constructedObject
+
+# Show constructed object
+# --
+	constructedObject.PP
+/t4
+
+
+# Lookup test
+# --
+	root=constructedObject
+	println("nonExist = " + root.attrGet("nonExist"))
+	println("A.attr.inner = " + root.subNodes("A").first.attrGet("inner"))
+/t5	
+
+
+# Parse example, then pretty-print it. Parse the output, and pretty-print that. Compare the two outputs, 
+# should match
 # --
 	node = Parse(exampleXML).first
 	result1=node.PP
 	node = Parse(result1).first
 	result2=node.PP
 	#
-	ok=result1.concat(" ")==result2.concat(" ")
-	Lib:Header("Parse + PP1 + Parse + PP2 / PP1==PP2?")
-	println(ok)
-/t3
+	result1.concat(" ")==result2.concat(" ")
+//test01
 
 
 # Lookup test
 # --
 	node=Parse(exampleXML).first
-	node.contentNodes("item").first.contentNodes("title").first.content.first
-/lt1
+	node.subNodes("item").first.subNodes("title").first.content.first => str
+	str.trim=="Donald Duck & Co"
+//test02
+
+
+# Lookup test
+# --
+	node=Parse(exampleXML).first
+	node.subNodes("element").first.content.first => str
+	str.trim=="2 + 3 > 5"
+//test03
+
+
 
 
 

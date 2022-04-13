@@ -777,4 +777,59 @@ Dict.set("a",1).set("b",Lambda{P(1) as int=>x self.a+x})
 /Test49_verify_lambda_and_closure_of_type_Callable
 
 
+# Test 50 - verify predicate version of "as"
+# --
+	1 as? int => a
+	1 as? String => b
+	1 as? String? => c
+	
+	a && !b && !c
+/Test50_as_predicate_version
+
+# Test 51 - predicate version of "as" for classes
+# --
+	class X {} => obj
+	
+	obj as? Dict => a
+	obj as? &X => b
+	obj as? &x => c
+	
+	a && b && !c
+/Test51_as_predicate_version_class_object
+	
+
+
+# Test 52 - predicate call is a try-catch, must handle call stack
+# --
+	# Copied from Util:ShowDict, where the problem first manifested
+	
+    LPresent=Lambda{
+        P(1)=>val
+        # Inner lambda to check if synthesizable via predicate call
+        LSyn=Lambda{syn(P(1))}
+        
+        if (LSyn.?call(val)) {
+            # value is synthesizable
+            syn(val)
+        } else {
+            val
+        }
+    }
+
+	tryCatch({
+		Inner {
+			Dict
+				_.a=1
+				_.b=Lambda{}  # closure - can not be synthesized in "stand-alone" form, only as part of Dict
+				=> x
+				
+		    x.keys->key
+		        val=LPresent.call(x.get(key))
+		        #report(key,val)
+		    |
+		}
+	}).ok
+    
+    
+/Test52_predicate_call_dot_Q_messing_up_call_stack
 
