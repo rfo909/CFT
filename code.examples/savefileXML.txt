@@ -122,7 +122,8 @@ PrettyPrint (PP) implemented,
         @  
         @       <element "a"=5 b="test" c=ident d=23.5 e=+18 f=-9>2 + 3 &gt; 5</element>
         @   <? this is a test ?>
-        @       <item>another line of text
+        @       <item>first item line
+        @            second item line
         @       <title>Donald Duck &amp; Co</title>
         @       <emptyTag a=5/>
         @           <status>
@@ -196,55 +197,17 @@ exampleXML
 		self.attributes=attributes
 		self.content=content
 		
-		self.dump=Lambda{
-			P(1,"")=>indent
-
-			println(indent+self.tagName)
-			self.attributes.keys->attrName
-				println(indent+"   "+attrName+"="+self.attributes.get(attrName))
-			|
+		# Get list of XMLNode from content
+		# --
+		self.contentNodes=Lambda{
+			P(1) as String? => tag
 			self.content->x
 				x as? &XMLNode => isNode
-				if (isNode) {
-					x.dump(indent+"   ")
-				} else Inner {
-					x.split->word out(word.trim) | _.concat(" ") => str
-					println(indent+"     " + str)
-				}
-			|
+				assert(isNode)
+				assert(tag==null || x.tagName==tag)
+				out(x)
 		}
 		
-		## Pretty-print XML
-		## ----------------
-		self.PP=Lambda{
-			P(1,"") as String => indent
-			P(2,List) as List => result
-			
-			attributes=Inner{
-				self.attributes.keys->attrName
-					out(attrName + '="' + self.attributes.get(attrName) + '"')
-				| _.concat(" ")
-			}
-			if (attributes.length>0) attributes=" "+attributes
-			
-			result.add(indent+"<"+self.tagName + attributes + if(self.content.length==0,"/>",">"))
-			indent2=indent+"   "
-			if (self.content.length>0) {
-				Inner {
-					self.content->x
-						x as? &XMLNode => isNode
-						if (isNode) {
-							x.PP(indent2,result)
-						} else {
-							s=x.trim
-							if (s.length>0) result.add(indent2 + s)
-						}
-				}
-				result.add(indent+"</"+self.tagName+">")
-			}
-			
-			result
-		}
 		
 		## Parse from token stream
 		## -----------------------
@@ -270,6 +233,9 @@ exampleXML
         	ts.next
         	
         	ws.call(ts)
+        	
+        	# Supporting tag names with XML name spaces: xxx:yyy
+        	
         	if (ts.peek==":") {
         		name=name+":"
         		ts.next
@@ -388,6 +354,39 @@ exampleXML
 		
 
 		} # self.parse
+		
+		## Pretty-print XML
+		## ----------------
+		self.PP=Lambda{
+			P(1,"") as String => indent
+			P(2,List) as List => result
+			
+			attributes=Inner{
+				self.attributes.keys->attrName
+					out(attrName + '="' + self.attributes.get(attrName) + '"')
+				| _.concat(" ")
+			}
+			if (attributes.length>0) attributes=" "+attributes
+			
+			result.add(indent+"<"+self.tagName + attributes + if(self.content.length==0,"/>",">"))
+			indent2=indent+"   "
+			if (self.content.length>0) {
+				Inner {
+					self.content->x
+						x as? &XMLNode => isNode
+						if (isNode) {
+							x.PP(indent2,result)
+						} else {
+							s=x.trim
+							if (s.length>0) result.add(indent2 + s)
+						}
+				}
+				result.add(indent+"</"+self.tagName+">")
+			}
+			
+			result
+		}
+		
 	}
 /XMLNode
 
@@ -413,11 +412,17 @@ exampleXML
 
 
 
-# XMLNode.dump to show result from parse
+# XMLNode.PP to show result from parse
 # --
 	node = Parse(exampleXML).first
 	node.PP
 /t1
+
+# JSON:PP for all details after parse
+# --
+	node = Parse(exampleXML).first
+	JSON:PP(node)
+/t2
 
 
 # Parse example, then pretty-print it. Parse the output, and pretty-print that.
@@ -431,9 +436,14 @@ exampleXML
 	ok=result1.concat(" ")==result2.concat(" ")
 	Lib:Header("Parse + PP1 + Parse + PP2 / PP1==PP2?")
 	println(ok)
-/t2
+/t3
 
 
+# Lookup test
+# --
+	node=Parse(exampleXML).first
+	node.contentNodes("item").first.contentNodes("title").first.content.first
+/lt1
 
 
 
