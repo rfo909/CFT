@@ -214,15 +214,36 @@ exampleXML
 			|
 		}
 		
-		self.setAttribute=Lambda{
-			P(1) as String => name
-			P(2) => value
-			self.attributes.set(name,value)
-		}
-		self.getAttribute=Lambda{
-			P(1) as String => name
-			P(2) => defaultValue
-			if (self.attributes.has(name)) self.attributes.get(name) else defaultValue
+		## Pretty-print XML
+		## ----------------
+		self.PP=Lambda{
+			P(1,"") as String => indent
+			P(2,List) as List => result
+			
+			attributes=Inner{
+				self.attributes.keys->attrName
+					out(attrName + '="' + self.attributes.get(attrName) + '"')
+				| _.concat(" ")
+			}
+			if (attributes.length>0) attributes=" "+attributes
+			
+			result.add(indent+"<"+self.tagName + attributes + if(self.content.length==0,"/>",">"))
+			indent2=indent+"   "
+			if (self.content.length>0) {
+				Inner {
+					self.content->x
+						x as? &XMLNode => isNode
+						if (isNode) {
+							x.PP(indent2,result)
+						} else {
+							s=x.trim
+							if (s.length>0) result.add(indent2 + s)
+						}
+				}
+				result.add(indent+"</"+self.tagName+">")
+			}
+			
+			result
 		}
 		
 		## Parse from token stream
@@ -298,7 +319,7 @@ exampleXML
 		 			ts.next
 		 			ws.call(ts)
 		 			
-		 			self.setAttribute(attrName, attrValue)	
+		 			self.attributes.attrName=attrValue	
         	}
         	
         	# START TAG END
@@ -395,16 +416,25 @@ exampleXML
 # XMLNode.dump to show result from parse
 # --
 	node = Parse(exampleXML).first
-	#JSON:PP(node)
-	node.dump
+	node.PP
 /t1
 
 
-# JSON:PP to show result from parse
+# Parse example, then pretty-print it. Parse the output, and pretty-print that.
+# Compare the two outputs, should match
 # --
 	node = Parse(exampleXML).first
-	JSON:PP(node)
+	result1=node.PP
+	node = Parse(result1).first
+	result2=node.PP
+	#
+	ok=result1.concat(" ")==result2.concat(" ")
+	Lib:Header("Parse + PP1 + Parse + PP2 / PP1==PP2?")
+	println(ok)
 /t2
+
+
+
 
 
     
