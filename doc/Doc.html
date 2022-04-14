@@ -15,8 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2022-04-13 RFO
-v3.4.2
+Last updated: 2022-04-14 RFO
+v3.4.3
 
 </pre>
 
@@ -1814,12 +1814,7 @@ codeDirs = . ; code.examples ; code.lib
 <h1>Output to screen</h1>
 <pre>
   println("a")
-  printDebug("b")
 </pre>
-<p>
-  The printDebug() includes location in the source, and appends the log lines to
-  a "system messages" list, which is displayed after processing has completed.
-</p>
 
 
 
@@ -2865,12 +2860,17 @@ codeDirs = . ; code.examples ; code.lib
 
 <h1>Debugging</h1>
 <p>
-  In addition to the printDebug("something") statement, there is also implemented a simple
+  In addition to the addDebug("something") statement, there is also implemented a simple
   "lint" function, which operates on current script, checking that all functions parse ok.
 </p>
 <pre>
   Sys.lint
 </pre>
+<p>
+  The addDebug() includes the source location, and adds lines to the current stack frame of
+  the CFT call stack, so that if there is a problem, output via those are included in the
+  stack trace.
+</p>
 
 
 
@@ -4703,7 +4703,7 @@ Sys.homeDir.allFiles(Glob("*.java"))->f
   <li>Looping and iteration over lists</li>
   <li>assert/reject/break</li>
   <li>out(), condOut() and report()</li>
-  <li>the printDebug() command</li>
+  <li>the addDebug() command</li>
   <li>the help command</li>
   <li>interactive commands "cat", "edit", "ls", "cd"</li>
   <li>the "showCode" command</li>
