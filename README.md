@@ -18,7 +18,7 @@ It's been in continous use since creation in 2018.
 
 Written from scratch in Java; runs both on Linux and Windows environments. 
 
-*README last updated 2022-04-13*
+*README last updated 2022-04-14*
 
 
 ## Terminal based - shell-like
@@ -71,6 +71,7 @@ dotted format, such as
 CFT is dynamically typed. Variables are not declared, just used, such as the "parts" variable above. The
 arrow "->" followed by identifier "part" is the "for-each" of CFT, with "part" as loop variable.
 
+Note that loop variables (the name after the -> arrow) can not be assigned other values inside the loop.
 
 ## Functionality
 
@@ -81,14 +82,20 @@ arrow "->" followed by identifier "part" is the "for-each" of CFT, with "part" a
 - text templating with merge code processing
 - spawn CFT expressions as background threads
 - lambdas and closures
-- tryCatch with two-tiered exception hierarchy ("soft" and "hard")
+- tryCatch/tryCatchSoft (using two-tiered exception hierarchy, soft and hard)
 - integrated data store (Db2)
+- simple classes
+
+### Writing recursive-descent parsers in CFT
 
 Given my interest in parsing, CFT has integrated Lexer support, and is sophisticated
-enough to write recursive-descent parsers:
+enough to write recursive-descent parsers. Two have been created so far:
  
-- JSON recursive-descent parser written in CFT
+- (2020-11) JSON recursive-descent parser written in CFT
 - (2022-04) got XML parser operational, also written in CFT 
+
+The Lib.Text.Lexer uses the same implementation that is used to parse the CFT language, and
+builds a graph of nodes matching single characters, for recognizing tokens.
 
 ### Editing script code
 
@@ -201,13 +208,13 @@ Strings can be written with single and double quotes.
 	  3
 ```
 
-# Inspired by PowerShell
+# Data are objects
 
-CFT was inspired by PowerShell, working with objects instead of just strings, as in bash. 
+CFT was inspired by PowerShell, by working with objects instead of just strings, as in bash. 
 
-Apart from a couple of "peculiarities", CFT strives for a regular, compact and predictable syntax, 
-compared to PowerShell and bash. Also contrary to PowerShell, there is no guessing as to what the users
-is trying to do, and silent conversions of data. A list in CFT remains a list until explicitly converted
+Apart from a couple of specialities, CFT aims at a regular, compact and predictable syntax, 
+compared to PowerShell and bash. Contrary to PowerShell, there is no guessing as to what the users
+is trying to do, or silent conversions of data. A list in CFT remains a list until explicitly converted
 to something else, etc.
 
 The interactive approach made possible a help system, where one can always run some expression, and list 
@@ -323,21 +330,56 @@ The result list is then sorted, and another iteration unwraps the original eleme
 There also exist global functions Str() and Float() following the same pattern. 
 
 
+## Simple classes
+
+Since the introduction of lambdas and then closures, which is created by letting a Lambda have a "self" pointer 
+to some dictionary, it was possible to create objects with data plus code working on those data. The object
+was always created by a function, not some static or global declaration. 
+
+The "class" keyword came much later, and really does the same thing, but in a more readable fashion. Together with
+certain refinements in how to access dictionary content, we can now write:
+
+```
+	# Create simple class
+	# --
+		class Greet {
+			P(1) as String => name
+			self.name=name
+			
+			self.greet=Lambda{
+				"Dear " + self.name
+			}
+		}
+	/Greet
+	
+	# Using it
+	# --
+		x=Greet("Santa Claus")
+		x.greet
+		# Returns "Dear Santa Claus"
+	/test
+```
+
+The Greet function returns an object, with a lambda inside, that we call in the test function.
+
 ## No global state
 
-To keep the language simple, CFT *does not support* user defined classes, only user defined functions.
+CFT is all about functions, and has no global variables. There also is no script state. Scripts are
+just collections of functions, and do not directly contain code.
 
-This in turn correlated well with making the language as stateless as possible, for multiple reasons, 
-mostly script robustness, but also enabling safe multi-threading. 
+State data may of course be stored to external
+locations, on file or using the integrated data object store (Db2), but is otherwise not globally
+available. This limits
+unwanted side effects, which makes script code more robust, and in turn enabled safe multi-threading.
 
-CFT has no global variables, and there is no script state. A script in CFT is a collection of related
-functions, nothing more. 
+This mainly means that all data needed are created, used, then thrown away in order to produce output
+from some function, including class objects, which are just a fancy way of managing functionality plus
+transitory state, although their power may still also give rise to more complex errors.
 
-There are options for storing data, either to file, or using the integrated Db2 data store. This requires
-an explicit effort, and is not something that "just happens". The goal is to minimize or eliminate unwanted
-side effects.
+The integrated data store (Db2) works by converting data to and from string format, and in doing so
+ensures that loading a value from a collection creates an independent copy from the original that
+was stored. This avoids race conditions when multiple threads access the same data.
 
- 
 
 
 # Scripting vs programming?
@@ -435,7 +477,7 @@ all pings in parallel, then collect information.
 Total time is then the time of the single slowest ping, not the sum of times for all pings.
 
 Threads are created by calling SpawnProcess() with a dictionary for local
-variables, and an expression. This immediately returns Process objects, which
+variables used in the following expression. This immediately returns Process objects, which
 are collected in a list via the out() statement.
 
 When all processes have been spawned, we loop through the processes, wait for
@@ -447,11 +489,14 @@ each to terminate, then report its result.
 		hosts->host 
 			out(SpawnProcess(SymDict(host), SSH:HostOk(host)))
 		| ->proc
-			println("Waiting for " + proc.data.host)
 			proc.wait
 			report(proc.data.host, proc.exitValue)
 	/checkPing 
 ```
+
+Here we first start a set of processes, then iterate over the result from the first loop, which is
+now a list of Process objects. We wait for each to complete, and then generate the output via
+calls to report().
 
 ### The SSH:HostOk function
 
@@ -473,8 +518,6 @@ as the concept of creating a hierarchy of functions with no (or very few) side e
 high level reliability, such as the HostOk function.
 
 ## Running background jobs from the command line
-
-Added in v2.12.1
 
 Some times we have jobs that take a while, and using the '&' expression, we can delegate those to
 run in the background, to avoid blocking the REPL. 
