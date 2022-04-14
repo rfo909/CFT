@@ -22,6 +22,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
+import rf.configtool.main.runtime.Value;
+import rf.configtool.main.runtime.ValueList;
+import rf.configtool.main.runtime.ValueString;
+
 
 /**
  * 2020-11 RFO
@@ -103,13 +107,41 @@ public abstract class Stdio {
     	 return result;
      }
      
+     /**
+      * Utility method, combining CFT stack trace and any debug lines within each
+      * stack frame, as ValueList object (of strings)
+      */
+     public ValueList getCFTStackTrace (CFTCallStackFrame oldTop) {
+     	List<Value> result=new ArrayList<Value>();
+     	List<CFTCallStackFrame> frames = getAndClearCFTCallStack(oldTop);
+     	for (CFTCallStackFrame frame:frames) {
+     		result.add(new ValueString(frame.toString()));
+     		for (String line:frame.getDebugLines()) {
+     			result.add(new ValueString("   debug: " + line));
+     		}
+     	}
+     	return new ValueList(result);
+     }
+     
+
      public void showAndClearCFTCallStack () {
     	 while (!cftCallStack.isEmpty()) {
     		 CFTCallStackFrame x=cftCallStack.pop();
     		 println("  called from: " + x.toString());
+    		 for (String line:x.getDebugLines()) {
+    			 println("      debug: " + line);
+    		 }
     	 }
      }
      
+
+     public void addDebug (String line) {
+    	 if (!cftCallStack.isEmpty()) {
+    		 cftCallStack.peek().addDebugLine(line);
+    	 }
+     }
+     
+ 
      public CFTCallStackFrame getTopCFTCallStackFrame () {
     	 if (cftCallStack.isEmpty()) return null;
     	 return cftCallStack.peek();

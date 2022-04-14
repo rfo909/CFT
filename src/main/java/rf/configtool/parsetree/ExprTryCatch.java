@@ -60,7 +60,7 @@ public class ExprTryCatch extends ExprCommon {
         try {
             result = expr.resolve(ctx);
         } catch (Exception ex) {
-        	cftStackTrace=getCFTStackTrace(ctx.getStdio(),top);
+        	cftStackTrace=ctx.getStdio().getCFTStackTrace(top);
             javaStackTrace=getStackTrace(ex);
             msg=new ValueString(ex.getMessage());
         }
@@ -72,15 +72,6 @@ public class ExprTryCatch extends ExprCommon {
         if (msg != null) x.set("msg", msg);
         
         return new ValueObj(x);
-    }
-    
-    private ValueList getCFTStackTrace (Stdio stdio, CFTCallStackFrame oldTop) {
-    	List<Value> result=new ArrayList<Value>();
-    	List<CFTCallStackFrame> frames = stdio.getAndClearCFTCallStack(oldTop);
-    	for (CFTCallStackFrame frame:frames) {
-    		result.add(new ValueString(frame.toString()));
-    	}
-    	return new ValueList(result);
     }
     
     private ValueList getStackTrace(Exception ex) {

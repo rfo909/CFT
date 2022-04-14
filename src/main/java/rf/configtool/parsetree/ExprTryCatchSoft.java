@@ -75,18 +75,11 @@ public class ExprTryCatchSoft extends ExprCommon {
         x.set("ok", new ValueBoolean(result != null));
         if (result != null) x.set("result", result);
         if (softEx != null) x.set("msg", new ValueString(softEx.getMessage()));
-        x.set("stack", getCFTStackTrace(ctx.getStdio(),top));
+        x.set("stack", ctx.getStdio().getCFTStackTrace(top));
   
         return new ValueObj(x);
     }
     
-    private ValueList getCFTStackTrace (Stdio stdio, CFTCallStackFrame oldTop) {
-    	List<Value> result=new ArrayList<Value>();
-    	List<CFTCallStackFrame> frames = stdio.getAndClearCFTCallStack(oldTop);
-    	for (CFTCallStackFrame frame:frames) {
-    		result.add(new ValueString(frame.toString()));
-    	}
-    	return new ValueList(result);
-    }
+ 
     
 }

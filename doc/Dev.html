@@ -13,6 +13,18 @@
 
 <h1>CFT Change log</h1>
 
+<h3>3.4.3 2022-04-14 addDebug()</h3>
+<p>
+	Renamed previous printDebug() statement to addDebug(), and changed it to 
+	call new method addDebug() in Stdio. Extended the CFTCallStackFrame to contain these debug lines, and
+	letting Stdio.addDebug() add debug line to top stackframe. These debug lines are only displayed
+	when something goes wrong, together with the stack trace.
+</p>
+<p>
+	The point is that one can leave addDebug() statements in the code for a long time, as their output will
+	only be displayed if there is a crash.
+</p>
+
 <h3>3.4.2 2022-04-13 Bug fix for predicate calls</h3>
 <p>
 	Doing xxx.?yyy is a nice short hand for tryCatch(xxx.yyy).ok, as a way of finding out

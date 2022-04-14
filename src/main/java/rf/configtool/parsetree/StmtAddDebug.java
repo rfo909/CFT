@@ -21,22 +21,22 @@ import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.Stdio;
 
-public class StmtPrintDebug extends Stmt {
+public class StmtAddDebug extends Stmt {
 
     private Expr value;
     
-    public StmtPrintDebug (TokenStream ts) throws Exception {
+    public StmtAddDebug (TokenStream ts) throws Exception {
         super(ts);
-        ts.matchStr("printDebug","expected 'printDebug'");
-        ts.matchStr("(", "expected '(' following printDebug");
+        ts.matchStr("addDebug","expected 'addDebug'");
+        ts.matchStr("(", "expected '(' following addDebug");
         value=new Expr(ts);
-        ts.matchStr(")", "expected ')' closing printDebug stmt");
+        ts.matchStr(")", "expected ')' closing addDebug stmt");
     }
 
     public void execute (Ctx ctx) throws Exception {
         Stdio stdio=ctx.getStdio();
         String loc = this.getSourceLocation().toString();
-        ctx.addSystemMessage(loc + " " + value.resolve(ctx).getValAsString());
+        stdio.addDebug(loc + " " + value.resolve(ctx).getValAsString());
     }
 
 }
