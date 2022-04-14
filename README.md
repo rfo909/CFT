@@ -208,7 +208,7 @@ Strings can be written with single and double quotes.
 	  3
 ```
 
-# Data are objects
+# Using objects instead of just text
 
 CFT was inspired by PowerShell, by working with objects instead of just strings, as in bash. 
 
