@@ -22,7 +22,7 @@ import java.util.List;
 
 import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.CFTCallStackFrame;
-import rf.configtool.main.CodeLines;
+import rf.configtool.main.FunctionCodeLines;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.FunctionState;
 import rf.configtool.main.ObjGlobal;
@@ -71,7 +71,7 @@ public class ExprLookupOrCall extends ExprCommon {
         
         // Code lookup
         ObjGlobal objGlobal=ctx.getObjGlobal();
-        CodeLines codeLines=objGlobal.getCodeHistory().getNamedCodeLines(ident);
+        FunctionCodeLines codeLines=objGlobal.getCurrScriptCode().getFunctionCodeLines(ident);
         if (codeLines!= null) {
             // execute code line
             Runtime rt=new Runtime(objGlobal);

@@ -44,7 +44,7 @@ import rf.configtool.util.Hash;
  * result value is produced.
  *
  */
-public class CodeLines {
+public class FunctionCodeLines {
 
     public static final String PIPE_SYMBOL = "|"; // separates multiple ProgramLines on same line
 
@@ -53,14 +53,14 @@ public class CodeLines {
     private List<CodeLine> codeLines;
     private String hashString;
 
-    public CodeLines(String singleLine, SourceLocation loc) {
+    public FunctionCodeLines(String singleLine, SourceLocation loc) {
         // SourceLocation loc=new SourceLocation("<>", 0, 0);
         codeLines = new ArrayList<CodeLine>();
         codeLines.add(new CodeLine(loc, "")); // blank line between previous function and this one
         codeLines.add(new CodeLine(loc, singleLine));
     }
 
-    public CodeLines(List<CodeLine> saveFormat) {
+    public FunctionCodeLines(List<CodeLine> saveFormat) {
         this.codeLines = saveFormat;
     }
 

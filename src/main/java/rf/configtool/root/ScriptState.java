@@ -20,7 +20,7 @@ package rf.configtool.root;
 import java.util.List;
 
 import rf.configtool.main.CFTCallStackFrame;
-import rf.configtool.main.CodeLines;
+import rf.configtool.main.FunctionCodeLines;
 import rf.configtool.main.FunctionState;
 import rf.configtool.main.ObjGlobal;
 import rf.configtool.main.Stdio;
@@ -60,7 +60,7 @@ public class ScriptState {
     public Value invokeFunction (Stdio stdio, CFTCallStackFrame caller, String func, List<Value> params) throws Exception {
 
       // Code lookup
-      CodeLines codeLines=objGlobal.getCodeHistory().getNamedCodeLines(func);
+      FunctionCodeLines codeLines=objGlobal.getCurrScriptCode().getFunctionCodeLines(func);
       if (codeLines != null) {
           // execute code line
           Runtime rt=new Runtime(objGlobal);

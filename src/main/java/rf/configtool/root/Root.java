@@ -31,7 +31,7 @@ import rf.configtool.lexer.Token;
 import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.CFTCallStackFrame;
 import rf.configtool.main.CodeLine;
-import rf.configtool.main.CodeLines;
+import rf.configtool.main.FunctionCodeLines;
 import rf.configtool.main.FunctionState;
 import rf.configtool.main.ObjGlobal;
 import rf.configtool.main.ObjTerm;
@@ -214,7 +214,7 @@ public class Root {
                     // Run the prompt code line to produce possibly dynamic prompt
                     String promptCode = propsFile.getPromptCode();
                     SourceLocation loc = new SourceLocation("prompt", 0, 0);
-                    CodeLines promptCodeLines = new CodeLines(promptCode, loc);
+                    FunctionCodeLines promptCodeLines = new FunctionCodeLines(promptCode, loc);
     
                     String pre;
                     try {
@@ -272,7 +272,7 @@ public class Root {
         line = line.trim();
         TokenStream ts = null;
         ObjGlobal objGlobal = currScript.getObjGlobal();
-        ScriptCode currScriptCode = objGlobal.getCodeHistory();
+        ScriptCode currScriptCode = objGlobal.getCurrScriptCode();
 
         stdio.clearCFTCallStack();
         
@@ -285,7 +285,7 @@ public class Root {
                 String shortcutCode = propsFile.getShortcutCode(shortcutName);
                 SourceLocation loc = new SourceLocation("shortcut:" + shortcutName, 0, 0);
 
-                CodeLines codeLines = new CodeLines(shortcutCode, loc);
+                FunctionCodeLines codeLines = new FunctionCodeLines(shortcutCode, loc);
 
             	CFTCallStackFrame caller=new CFTCallStackFrame("<interactive-input>");
                 Value ret = objGlobal.getRuntime().processCodeLines(stdio, caller, codeLines, new FunctionState(null,null));
@@ -303,7 +303,7 @@ public class Root {
                 // Run the shell command parser
                 String code = propsFile.getBangCommand();
                 SourceLocation loc = new SourceLocation("bangCommand", 0, 0);
-                CodeLines codeLines = new CodeLines(code, loc);
+                FunctionCodeLines codeLines = new FunctionCodeLines(code, loc);
 
                 List<Value> params=new ArrayList<Value>();
                 params.add(new ValueString(str));
@@ -379,7 +379,7 @@ public class Root {
                             throw new Exception("No such script: " + ident);
                         }
                         
-                        ScriptCode hist = sstate.getObjGlobal().getCodeHistory();
+                        ScriptCode hist = sstate.getObjGlobal().getCurrScriptCode();
 
                         // script: may in turn be followed by another identifier for partial or
                         // complete match, as before
@@ -417,7 +417,7 @@ public class Root {
                 currScriptCode.setCurrLine(line);
             	CFTCallStackFrame caller=new CFTCallStackFrame("<interactive-input>");
 
-                Value result = objGlobal.getRuntime().processCodeLines(stdio, caller, new CodeLines(line, loc), new FunctionState(null,null));
+                Value result = objGlobal.getRuntime().processCodeLines(stdio, caller, new FunctionCodeLines(line, loc), new FunctionState(null,null));
 
                 postProcessResult(result);
                 showSystemLog();
@@ -493,7 +493,7 @@ public class Root {
 
     private void processColonCommand(TokenStream ts) throws Exception {
         ObjGlobal objGlobal = currScript.getObjGlobal();
-        ScriptCode codeHistory = objGlobal.getCodeHistory();
+        ScriptCode codeHistory = objGlobal.getCurrScriptCode();
 
         if (ts.matchStr("quit")) {
             terminationFlag = true;

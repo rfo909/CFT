@@ -39,7 +39,7 @@ public class Runtime {
      * Returns value from executing program line. Note may return java null if no return
      * value identified
      */
-    public Value processCodeLines (Stdio stdio, CFTCallStackFrame caller, CodeLines lines, FunctionState functionState) throws Exception {
+    public Value processCodeLines (Stdio stdio, CFTCallStackFrame caller, FunctionCodeLines lines, FunctionState functionState) throws Exception {
 
     	stdio.pushCFTCallStackFrame(caller);
 

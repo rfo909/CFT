@@ -39,7 +39,7 @@ public class ScriptCode {
      
     private PropsFile props;
     private File savefile;
-    private Map<String, CodeLines> namedLines=new HashMap<String,CodeLines>();
+    private Map<String, FunctionCodeLines> namedFunctions=new HashMap<String,FunctionCodeLines>();
     private Set<String> privateFunctions=new HashSet<String>();
     private List<String> namesInSequence=new ArrayList<String>();
     private ObjTerm term;
@@ -61,24 +61,24 @@ public class ScriptCode {
     }
     
     public boolean assignPublicName(String name, boolean force) throws Exception {
-        return assignName(name, false, force);
+        return assignFunctionName(name, false, force);
     }
     
     public boolean assignPrivateName (String name, boolean force) throws Exception {
-        return assignName(name, true, force);
+        return assignFunctionName(name, true, force);
     }
     
     
-    private boolean assignName(String name, boolean isPrivate, boolean force) throws Exception {
+    private boolean assignFunctionName(String name, boolean isPrivate, boolean force) throws Exception {
         if (currLine==null) throw new Exception("No current code line");
-        if (namedLines.get(name) != null && !force) return false;
+        if (namedFunctions.get(name) != null && !force) return false;
         
         if (!namesInSequence.contains(name)) namesInSequence.add(name);
-        CodeLines c=namedLines.get(name);
+        FunctionCodeLines c=namedFunctions.get(name);
         SourceLocation loc=new SourceLocation("<func> " + name, 0, 0);
         if (c==null) {
-            c=new CodeLines(currLine, loc);
-            namedLines.put(name, c);
+            c=new FunctionCodeLines(currLine, loc);
+            namedFunctions.put(name, c);
         } else {
             c.update(currLine, loc);
         }
@@ -90,8 +90,8 @@ public class ScriptCode {
         return true;
     }
 
-    public CodeLines getNamedCodeLines (String name) {
-        return namedLines.get(name); // may be null
+    public FunctionCodeLines getFunctionCodeLines (String name) {
+        return namedFunctions.get(name); // may be null
     }
     
 
@@ -153,7 +153,7 @@ public class ScriptCode {
                 String label=name;
                 while(label.length()<nameMaxLength) label=label+" ";
                 if (showFull) {
-                    CodeLines codeLines = getNamedCodeLines(name);
+                    FunctionCodeLines codeLines = getFunctionCodeLines(name);
                     List<String> text = codeLines.getSaveFormat();
                     boolean foundContent=false;
                     stdio.println();
@@ -166,7 +166,7 @@ public class ScriptCode {
                     stdio.println("/" + name);
                     stdio.println();
                 } else {
-                    String namedLine=getNamedCodeLines(name).getFirstNonBlankLine();
+                    String namedLine=getFunctionCodeLines(name).getFirstNonBlankLine();
                     
                     String pre=" ";
                     if (privateFunctions.contains(name)) pre="/";
@@ -225,7 +225,7 @@ public class ScriptCode {
         PrintStream ps=new PrintStream(new FileOutputStream(this.savefile));
         
         for (String s:namesInSequence) {
-            CodeLines c=namedLines.get(s);
+            FunctionCodeLines c=namedFunctions.get(s);
             List<String> saveLines=c.getSaveFormat();
             for (String x:saveLines) {
                 ps.println(x);
@@ -245,7 +245,7 @@ public class ScriptCode {
     }
     
     public void load(String scriptName, File currentDir) throws Exception {
-        namedLines.clear();
+        namedFunctions.clear();
         namesInSequence.clear();
         
         
@@ -311,8 +311,8 @@ public class ScriptCode {
 
                 if (namesInSequence.contains(name)) namesInSequence.remove(name);
                 namesInSequence.add(name);
-                CodeLines c=new CodeLines(lines);
-                namedLines.put(name, c);
+                FunctionCodeLines c=new FunctionCodeLines(lines);
+                namedFunctions.put(name, c);
                 
                 if (privateFunctions.contains(name)) privateFunctions.remove(name);
                 if (isPrivate) privateFunctions.add(name);
@@ -330,16 +330,16 @@ public class ScriptCode {
     
     
     public void clear (String name) throws Exception {
-        if (namedLines.containsKey(name)) namedLines.remove(name);
+        if (namedFunctions.containsKey(name)) namedFunctions.remove(name);
         if (namesInSequence.contains(name)) namesInSequence.remove(name);
         if (privateFunctions.contains(name)) privateFunctions.remove(name);
     }
     
     public void copy (String fromName, String toName) throws Exception {
-        if (!namedLines.containsKey(fromName)) throw new Exception("No such named line: " + fromName);
-        if (namedLines.containsKey(toName)) throw new Exception("Target name '" + toName + "'exists - clear it first");
+        if (!namedFunctions.containsKey(fromName)) throw new Exception("No such named line: " + fromName);
+        if (namedFunctions.containsKey(toName)) throw new Exception("Target name '" + toName + "'exists - clear it first");
         
-        namedLines.put(toName, namedLines.get(fromName));
+        namedFunctions.put(toName, namedFunctions.get(fromName));
         namesInSequence.add(toName);
         if (privateFunctions.contains(fromName)) privateFunctions.add(toName);
     }

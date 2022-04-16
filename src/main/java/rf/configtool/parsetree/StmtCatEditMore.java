@@ -24,7 +24,7 @@ import java.util.List;
 import rf.configtool.lexer.SourceLocation;
 import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.CFTCallStackFrame;
-import rf.configtool.main.CodeLines;
+import rf.configtool.main.FunctionCodeLines;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.FunctionState;
 import rf.configtool.main.PropsFile;
@@ -97,7 +97,7 @@ public class StmtCatEditMore extends StmtShellInteractive {
         //OutText out = ctx.getOutText();
         //out.addSystemMessage("Running " + PropsFile.PROPS_FILE + "." + fieldName + " macro: " + macro);
         
-        CodeLines codeLines=new CodeLines(macro, loc);
+        FunctionCodeLines codeLines=new FunctionCodeLines(macro, loc);
         
     	CFTCallStackFrame caller=new CFTCallStackFrame("Lambda for " + name);
 

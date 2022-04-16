@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import rf.configtool.lexer.SourceLocation;
-import rf.configtool.main.CodeLines;
+import rf.configtool.main.FunctionCodeLines;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.PropsFile;
 import rf.configtool.main.Stdio;
@@ -126,7 +126,7 @@ public class ObjSys extends Obj {
             if (params.size() != 0)
                 throw new Exception("Expected no parameters");
             List<Value> values = new ArrayList<Value>();
-            List<String> names = ctx.getObjGlobal().getCodeHistory().getNames();
+            List<String> names = ctx.getObjGlobal().getCurrScriptCode().getNames();
             for (String name : names)
                 values.add(new ValueString(name));
             return new ValueList(values);
@@ -519,9 +519,9 @@ public class ObjSys extends Obj {
             
             List<Value> result=new ArrayList<Value>();
             
-            List<String> names = ctx.getObjGlobal().getCodeHistory().getNames();
+            List<String> names = ctx.getObjGlobal().getCurrScriptCode().getNames();
             for (String name : names) {
-                CodeLines code = ctx.getObjGlobal().getCodeHistory().getNamedCodeLines(name);
+                FunctionCodeLines code = ctx.getObjGlobal().getCurrScriptCode().getFunctionCodeLines(name);
                 try {
                     code.getProgramLines(); // parses text
                 } catch (Exception ex) {

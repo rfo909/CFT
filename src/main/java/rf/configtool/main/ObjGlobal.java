@@ -295,7 +295,7 @@ public class ObjGlobal extends Obj {
         }
     }
 
-    public ScriptCode getCodeHistory() {
+    public ScriptCode getCurrScriptCode() {
         return currScriptCode;
     }
     
@@ -316,7 +316,7 @@ public class ObjGlobal extends Obj {
 
         updateSavefileState();
  
-        CodeLines onLoad = currScriptCode.getNamedCodeLines("onLoad");
+        FunctionCodeLines onLoad = currScriptCode.getFunctionCodeLines("onLoad");
         if (onLoad != null) {
             try {
             	CFTCallStackFrame caller=new CFTCallStackFrame("Script " + scriptName+":onLoad");
@@ -621,7 +621,7 @@ public class ObjGlobal extends Obj {
             String str=getString("str",params,0);
             SourceLocation loc=new SourceLocation("<eval>", 0, 0);
         	CFTCallStackFrame caller=new CFTCallStackFrame("eval");
-            return runtime.processCodeLines(ctx.getStdio(), caller, new CodeLines(str, loc),new FunctionState(null,null));
+            return runtime.processCodeLines(ctx.getStdio(), caller, new FunctionCodeLines(str, loc),new FunctionState(null,null));
         }
     }
 

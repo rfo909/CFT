@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import rf.configtool.lexer.TokenStream;
-import rf.configtool.main.CodeLines;
+import rf.configtool.main.FunctionCodeLines;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueList;
@@ -37,7 +37,7 @@ public class StmtIterate extends Stmt {
         ts.matchStr("->", "expected '->'");
         loopVariable=ts.matchIdentifier("expected loop variable name");
         
-        while (!ts.atEOF() && !ts.peekStr(CodeLines.PIPE_SYMBOL) && !ts.peekStr("}")) {
+        while (!ts.atEOF() && !ts.peekStr(FunctionCodeLines.PIPE_SYMBOL) && !ts.peekStr("}")) {
             body.add(Stmt.parse(ts));
         }
         

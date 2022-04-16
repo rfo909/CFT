@@ -23,7 +23,7 @@ import java.util.List;
 import rf.configtool.lexer.Token;
 import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.CFTCallStackFrame;
-import rf.configtool.main.CodeLines;
+import rf.configtool.main.FunctionCodeLines;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.SourceException;
 import rf.configtool.main.runtime.Value;
@@ -72,16 +72,16 @@ public class ExprBlock extends ExprCommon {
             // only one program line as "PIPE" not allowed
             progLines.add(new ProgramLine(ts));
             
-            if (ts.matchStr(CodeLines.PIPE_SYMBOL)) {
+            if (ts.matchStr(FunctionCodeLines.PIPE_SYMBOL)) {
                 // specific exception for this case
-                throw new SourceException(getSourceLocation(),"Local block can not contain the PIPE '" + CodeLines.PIPE_SYMBOL + "' character");
+                throw new SourceException(getSourceLocation(),"Local block can not contain the PIPE '" + FunctionCodeLines.PIPE_SYMBOL + "' character");
             }
             ts.matchStr("}","expected '}' closing " + getBlockModeName() + " starting at " + this.getSourceLocation());
         } else {
             // INNER, LAMBDA and CLASS
             for(;;) {
                 progLines.add(new ProgramLine(ts));
-                if (ts.matchStr(CodeLines.PIPE_SYMBOL)) continue;
+                if (ts.matchStr(FunctionCodeLines.PIPE_SYMBOL)) continue;
                 break;
             }
             ts.matchStr("}","expected '}' closing " + getBlockModeName() + " starting at " + this.getSourceLocation());

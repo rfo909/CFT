@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import rf.configtool.lexer.TokenStream;
-import rf.configtool.main.CodeLines;
+import rf.configtool.main.FunctionCodeLines;
 import rf.configtool.main.Ctx;
 
 /**
@@ -35,7 +35,7 @@ public class ProgramLine extends LexicalElement {
 
     public ProgramLine (TokenStream ts) throws Exception {
         super(ts);
-        while (!ts.atEOF() && !ts.peekStr(CodeLines.PIPE_SYMBOL) && !ts.peekStr("}")) {
+        while (!ts.atEOF() && !ts.peekStr(FunctionCodeLines.PIPE_SYMBOL) && !ts.peekStr("}")) {
             Stmt stmt=Stmt.parse(ts);
             statements.add(stmt);
         }
