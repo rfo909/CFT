@@ -69,6 +69,7 @@ public class ObjDate extends Obj {
                 new FunctionBefore(),
                 new FunctionGetFormat(),
                 new FunctionTimeSinceMidnight(),
+                new FunctionDayOfWeek(),
         };
         setFunctions(arr);
         
@@ -448,6 +449,22 @@ public class ObjDate extends Obj {
             return new ValueObj(new ObjDuration(h+m+s+ms));
         }
     }
+    
+    
+    class FunctionDayOfWeek extends Function {
+        public String getName() {
+            return "dayOfWeek";
+        }
+        public String getShortDesc() {
+            return "dayOfWeek() - return day of week 1-7 (sunday=1)";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            int dow = getCalendarValue(Calendar.DAY_OF_WEEK);
+            return new ValueInt(dow);
+        }
+    }
+
 
 
 
