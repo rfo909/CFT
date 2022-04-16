@@ -119,7 +119,7 @@ public class ObjSys extends Obj {
         }
 
         public String getShortDesc() {
-            return "functions() - returns list of custom functions";
+            return "functions() - returns list of script functions (strings)";
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
@@ -614,5 +614,8 @@ public class ObjSys extends Obj {
         }
 
     }
+
+    
+ 
   
 }

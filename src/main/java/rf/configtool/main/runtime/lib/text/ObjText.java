@@ -25,12 +25,16 @@ import rf.configtool.main.runtime.Function;
 import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueObj;
+import rf.configtool.main.runtime.ValueString;
 
 public class ObjText extends Obj {
     
     public ObjText() {
-        this.add(new FunctionLexer());
-        this.add(new FunctionFilter());
+        add(new FunctionLexer());
+        add(new FunctionFilter());
+        add(new FunctionCRLF());
+        add(new FunctionLF());
+        add(new FunctionTAB());
     }
     
     @Override
@@ -87,6 +91,52 @@ public class ObjText extends Obj {
         }
     }
     
- 
+    class FunctionCRLF extends Function {
+        public String getName() {
+            return "CRLF";
+        }
+
+        public String getShortDesc() {
+            return "CRLF() - returns CRLF string";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueString("\r\n");
+        }
+
+    }
+    
+    class FunctionLF extends Function {
+        public String getName() {
+            return "LF";
+        }
+
+        public String getShortDesc() {
+            return "LF() - returns LF string";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueString("\n");
+        }
+
+    }
+    
+    class FunctionTAB extends Function {
+        public String getName() {
+            return "TAB";
+        }
+
+        public String getShortDesc() {
+            return "TAB() - returns TAB string";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueString("\t");
+        }
+
+    }
 
 }

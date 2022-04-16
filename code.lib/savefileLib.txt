@@ -516,7 +516,7 @@ run(null,null,null,true)
     P(1,"Title") =>title
     println
     println(title)
-    println( Lib.Data.yes(title.length,"-").concat )
+    println( "-".times(title.length) )
 /Header
 
 

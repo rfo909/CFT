@@ -65,6 +65,7 @@ public class ValueString extends Value {
                 new FunctionFirst(),
                 new FunctionPrintable(),
                 new FunctionMergeExpr(),
+                new FunctionTimes(),
             };
             setFunctions(arr);
         
@@ -861,6 +862,27 @@ public class ValueString extends Value {
         return resultList;
 
     }
+
+    
+    class FunctionTimes extends Function {
+        public String getName() {
+            return "times";
+        }
+        public String getShortDesc() {
+            return "times(Count) - returns string repeated Count times";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	long count=getInt("Count", params, 0);
+            StringBuffer sb=new StringBuffer();
+            for (int i=0; i<count; i++) {
+            	sb.append(val);
+            }
+            return new ValueString(sb.toString());
+        }
+    }
+    
+    
+
     
     /**
      * Process list, possibly containing inner lists, into single

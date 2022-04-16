@@ -51,6 +51,21 @@ end with "/" (Linux). To restore all just type "/".
 Enter password when prompted.
 
 
+What is backed up
+-----------------
+Files starting with dot are backed up, but directories
+starting with dot are not. 
+
+In addition, you can create .nobackup-files to block
+a list of local directories. The CFT home directory
+contains a .nobackup-file with a single line
+
+target
+
+This prevents the target directory from being backed up,
+as it contains generated content.
+
+
 >>>> EOF
 /Readme
 
