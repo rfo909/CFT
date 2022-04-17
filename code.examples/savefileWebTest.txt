@@ -36,6 +36,8 @@
     
     Root.Context("my.css","text/css")
         .GET(Lambda{
+            P(1) as WebRequest => requestObj
+
             Sequence(
                 @ * {font-family: courier}
                 @ body {background-color:#AAFF99}
@@ -43,9 +45,11 @@
     })
         
     Root.GET(Lambda{
+        P(1) as WebRequest => requestObj
+
         Sequence(
-            @ <<BodyStart>>
-            @ <h3>Menu</h3>
+            @ << BodyStart >>
+            @ <h3>Select</h3>
             @ <p>
             @ <a href="/text">/text</a> (text/plain test)<br/>
             @ </p>
@@ -55,66 +59,59 @@
             @ <p>
             @ <a href="/formtest">/formtest</a><br/>
             @ </p>
-            @ <<BodyEnd>>
+            @ << BodyEnd >>
         ).mergeExpr
     })
         
     Root.Context("text","text/plain").GET(Lambda{
-        files=Lambda{
-            Dir.files->f report(f.name, f.length)
-        }
-        Sequence(
-            #@ <<BodyStart>>
-            #@ <h1>Plain text test</h1>
-            @ <<files.call>>
-            #@ <<BodyEnd>>
-        ).mergeExpr
+        P(1) as WebRequest => requestObj
+
+        Dir.files->f report(f.name, f.length)
     })
     Root.Context("status")
         .GET(Lambda{
-            P(1)=>requestObj
-            headers=Lambda{
-                P(1)=>requestObj
-                Util:ShowDict(requestObj.headers)->line out(line+"<br/>")
-            }
+            P(1) as WebRequest => requestObj
+
             Sequence(
-                @ <<BodyStart>>
+                @ << BodyStart >>
+                @ Type of requestObj=<< getType(requestObj) >>
                 @ <h1>Headers</h1>
-                @ <<headers.call(requestObj)>>
-                @ <<BodyEnd>>
+                @ << ShowRequest(requestObj) >>
+                @ << BodyEnd >>
             ).mergeExpr
         })
 
     Root.Context("formtest")
         .GET(Lambda{
-            P(1)=>requestObj
+            P(1) as WebRequest => requestObj
+
             Sequence(
-                @ <<BodyStart>>
+                @ << BodyStart >>
                 @ <h1>Formtest</h1>
                 @ <form action="/formtest" method="POST">
                 @ <br/>
                 @ <textarea name="c" cols=80 rows=5></textarea>
                 @ <input type="submit" value="Submit">
                 @ </form>
-                @ <<BodyEnd>>
+                @ << ShowRequest(requestObj) >>
+                @ << BodyEnd >>
             ).mergeExpr
         })
         .POST(Lambda{
-            P(1)=>requestObj
+            P(1) as WebRequest => requestObj
             
             Sequence(
-                @ <<BodyStart>>
-                @ <h1>Form POST</h1>
+                @ << BodyStart >>
                 @ <form action="/formtest" method="POST">
                 @ <textarea name="c" cols=80 rows=5><<requestObj.bodyParams.c>></textarea>
                 @ <br/>
                 @ <input type="submit" value="Submit">
                 @ <br/>
-                @ <pre><<eval(requestObj.bodyParams.c)>></pre>
-                @ </form>
-                @ <<ShowRequest(requestObj)>>
-                @ <<BodyEnd>>
+                @ << ShowRequest(requestObj) >>
+                @ << BodyEnd >>
             ).mergeExpr
+            
+            
         })
 /Init
 
@@ -130,6 +127,7 @@
             @   <link rel="stylesheet" href="/my.css">
             @ </head>
             @ <body>
+            @ <div style="background-color:white; padding:10px">
     )
 //BodyStart
 
@@ -137,6 +135,7 @@
 # Close Body 
 # --
     Sequence(
+    	@ </div>
         @ </body>
         @ </html>
     )
