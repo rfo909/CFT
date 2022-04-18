@@ -1,10 +1,5 @@
 ## [Full Youtube tutorial](https://www.youtube.com/playlist?list=PLj58HwpT4Qy80WhDBycFKxIhWFzv5WkwO).
 
-2022-04-10 v3.4.1
-
-- Built-in function count is 592, across 85 object types.
-- Library and example script code ~15k lines
-- Java source code ~33k lines
 
 # Automation at all levels
 
@@ -18,7 +13,7 @@ It's been in continous use since creation in 2018.
 
 Written from scratch in Java; runs both on Linux and Windows environments. 
 
-*README last updated 2022-04-14*
+*README last updated 2022-04-18*
 
 
 ## Terminal based - shell-like
@@ -139,44 +134,53 @@ the CFT.props file, and by default include:
 List all shortcuts by typing a single '@' and press enter.
 
 
-## Global functions
+## Built-in functions
 
-CFT currently implements 70+ object types, with 390+ library functions. Of these, about 30 are global, the
-rest exist as object member functions, such as the String.split() invoked in above example.
+For v3.4.4 CFT implements 85 object types, among them String, int, List and File. 
 
-The global functions return different values, such as the current
-directory, an empty dictionary, and so on. 
+There are 507 library functions. Of these, about 30 are global.
 
-In the example below, note that the '$' is the prompt.
+The rest are member functions inside the objects, where at
+least one exists to create each of the object types, such as 
+
+```
+Lib.Text.Lexer   # Lexer object is used to parse text to tokens
+```
+
+Data types like lists and strings naturally are the result from lots of library functions.
+
+
+Below we see some more examples of global functions.
+
 
 ```
 	## Create empty List object
 
-	$ List
+	List
 
 	## Create List with members
 
-	$ List(1,2,3)
+	List(1,2,3)
 
 	## Create empty dictionary
 
-	$ Dict
+	Dict
 
 	## Create Date object for "now"
 
-	$ Date
+	Date
 
 	## Get directory object for current dir
 
-	$ Dir
+	Dir
 
 	## ... or for some path
 
-	$ Dir("/some/path")
+	Dir("/some/path")
 
 	## Get list of files in current directory
 
-	$ Dir.files
+	Dir.files
 ```
   
 ## Values are objects
@@ -184,10 +188,11 @@ In the example below, note that the '$' is the prompt.
 All values in CFT are objects, written in Java. These in turn have member functions, which we call to either
 modify the value, or get information from it, etc.
 
-There are no primitive types in the classic ("atomic") sense. The values of the "int" type in CFT corresponds to Java long,
-and the "float" to Java double. 
+There are no primitive types in the classic sense. 
 
-Strings can be written with single and double quotes.
+The values of the "int" type in CFT corresponds to Java long, and the "float" to Java double. 
+
+Strings can be written with single and double quotes. There is no value type for single characters, other than String.
 
 
 ```
