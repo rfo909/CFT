@@ -3093,10 +3093,6 @@ an optional lambda or closure, which if defined gets called with the Process obj
 whenever there is new output or the process has terminated.
 
 
-The lambda/closure executes in the caller's environment. See the Cron example script for
-example.
-
-
 The named values from the
 context dictionary become local variables when the expression is executed, which takes
 place in a separate process.
