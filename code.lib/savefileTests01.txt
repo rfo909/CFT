@@ -855,6 +855,88 @@ Dict.set("a",1).set("b",Lambda{P(1) as int=>x self.a+x})
 
 
 
+# Test54: Call stack
+# --
+
+# Create Lambda
+# --
+	Lambda{P(1)+1}
+/t54_A
+
+# Another lambda, taking A as parameter and calling it
+# with invalid argument (Dict)
+# --
+	Lambda{
+		P(1) as Callable => a
+		a.call(Dict)
+	}
+/t54_B
+
+# Function calling B with A as parameter
+# --
+	t54_B.call(t54_A)
+/t54_call
+
+# Function calling the _call function
+# --
+	t54_call
+/t54_outer
+
+
+
+# Interactive result
+# --
+<<<<<< EOF
+calling Test54 interactively, we get the following
+
+ERROR: [<script> Tests01:861.8] Invalid value Dict [] + 1
+  called from: ValueBlock.callLambda() Calling lambda
+  called from: ValueBlock.callLambda() Calling lambda
+  called from: [<script> Tests01:880.1] Calling t54_call
+  called from: [<script> Tests01:886.1] Calling t54_outer
+  called from: [input] Calling Test54
+  called from: <interactive-input>
+>>>>>> EOF
+//t54_comment
+
+
+# Test54: verify call stack
+# --
+	tryCatch(t54_outer) => ex
+	
+	# Note that interactive stack trace contains data from .msg (the actual error message)
+	List(ex.msg) + ex.stack => stack
+	
+	foundAll=true
+	
+	# Look for specific parts in stack trace
+	List("t54_outer","t54_call","Invalid value Dict")->str
+		found=false
+		{stack->line
+			if (line.contains(str)) found=true
+		}
+		if (!found) {
+			println("Missing: '" + str + "'")
+			foundAll=false
+		}
+	|
+	foundAll
+/Test54_CFT_stack_trace
+
+
+
+
+# Test55: shouldn't stack trace give location inside lambdas?
+# --
+	false
+/Test55_call_stack_inside_lambda_code
+
+# Test56: shouldn't a synthesized and eval'ed Lambda remember source locations?
+# --
+	false
+/Test56_call_stack_from_synthesized_lambda
+
+
 
 
 
