@@ -19,13 +19,19 @@
 >>> EOF
 /License
 
-# Testing the protect mechanism of files and directories.
+# Readme
+# --
+<<<<<< EOF
 
-# These tests are all "negative", in that they succeed only when failing
-# with an error, and a stack trace that indicates that it was the
-# protect mechanism that caused the error.
-#
+Testing the protect mechanism of files and directories.
 
+These tests are all "negative", in that they succeed only when failing
+with an error, and a stack trace that indicates that it was the
+protect mechanism that caused the error.
+
+
+>>>>>> EOF
+/Readme
 
 # Test directory
 # --
@@ -135,7 +141,7 @@ dir.protect.file("f").binaryCreate(Lib.Util.randomBinary("sdf"))
 
 
 
-# Run all TestX - note that each MUST fail with error to pass 
+# Run all TestX - note that each MUST fail with error and stack trace containing "Protection.validateDesructiveOperation" to pass 
 # --
     Sys.functions.sort->f
         assert(f.startsWith("Test"))

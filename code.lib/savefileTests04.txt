@@ -23,7 +23,8 @@
 <<<<<<<<<<<<<<<< EOF
 Script testing
 
-2021-11-12 RFO
+Time consuming tests related to Db2 and locking
+
 >>>>>>>>>>>>>>>> EOF
 /Readme
 
@@ -60,8 +61,8 @@ Script testing
 # The idea is that we check that each counter value is obtained
 # only once!
 #
-# Note: needed to add "named lock" for transaction inside Util:Counter,
-# which consists of a read and a write.  
+# Note: found flaw in Util:Counter, in that it needed a "named lock" for transaction 
+# protection, as it consists of a read and a write. :-)
 # --
     P(1,20)=>numThreads
     i=0
@@ -80,7 +81,7 @@ Script testing
      
      
 
-# Basic verify for locks
+# Basic verify for locks. 
 # --
     Lib.Db.obtainLock("Tests04",1000)
     SpawnProcess(Dict, Lib.Db.obtainLock("Tests04",1000)).wait.output => output

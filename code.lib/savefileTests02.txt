@@ -19,7 +19,13 @@
 >>> EOF
 /License
 
-# Testing all things dictionaries
+
+# Readme
+# ---
+<<<<<< EOF
+Testing all things dictionaries
+>>>>>> EOF
+/Readme
 
 
 Dict.set("a",1).set("c",3).set("a",2).keys.concat(" ")=="a c"
@@ -155,5 +161,3 @@ c
 /RunAll
 
 
-Dict help
-/dh

@@ -25,6 +25,8 @@ Testing that local blocks scope and operation is correct (v2.4.0)
 Also verifying that inner blocks and lambdas do not affect outer loop logic
 
 2021-03-13 RFO
+
+Later expanded to all sorts of true/false tests.
 >>>>>>>>>>>>>>>> EOF
 /Readme
 
@@ -246,15 +248,6 @@ t10.concat("-")=="1-2-3"
 /Test12_Inner_With_loop_pipe_loop
 
 
-
-
-
-# Run all TestX
-# --
-    Sys.functions.sort->f
-        assert(f.startsWith("Test"))
-        report(f,eval(f))
-/RunAll
 
 
 
@@ -832,4 +825,60 @@ Dict.set("a",1).set("b",Lambda{P(1) as int=>x self.a+x})
     
     
 /Test52_predicate_call_dot_Q_messing_up_call_stack
+
+
+
+
+# Test 53 - discoved a bug, which is that a Lambda has access to
+# functions in the script where it exists. Lambdas should not
+# be considered members of a script, particularly as they can be
+# synthesized and brought back with eval, and if done in a
+# different script, will fail when called, if depending on local
+# functions.
+
+# Local function
+# --
+	3
+/t53_data
+
+# Lambda call should fail
+# --
+	Lambda{t53_data}.call
+/t53_call
+
+# Use tryCatch to verify fail
+# --
+	tryCatch(t53_call).ok==false
+/Test53_Lambda_limited_scope
+
+
+
+
+
+
+
+
+
+# Run all TestX
+# --
+	P(1,false)=>showAll
+	
+    
+    allOk=true
+    count=0
+    Sys.functions.sort->f
+        assert(f.startsWith("Test"))
+        count=count+1
+        result=eval(f)
+        allOk=allOk && result
+        if(showAll || result==false) report(f,result)
+    | -> line
+    	println(line)
+    |
+    println("Ran " + count + " tests!")
+
+    allOk
+/RunAll
+
+
 
