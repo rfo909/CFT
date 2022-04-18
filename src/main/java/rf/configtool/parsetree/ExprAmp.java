@@ -41,6 +41,8 @@ public class ExprAmp extends ExprCommon {
     
     private String name;
     private Expr nameExpr;
+    
+    private String stringRep;
 
     private String getName(String text) {
         String s="(" + (counter++) + ")";
@@ -55,6 +57,8 @@ public class ExprAmp extends ExprCommon {
         super(ts);
 
         ts.matchStr("&", "expected symbol '&'");
+        int startPos=ts.getCurrPos();
+        
         expr = new Expr(ts);
         if (ts.matchStr(",")) {
             if (ts.peekType(Token.TOK_IDENTIFIER)) {
@@ -63,6 +67,18 @@ public class ExprAmp extends ExprCommon {
                 nameExpr=new Expr(ts);
             }
         }
+        int endPos=ts.getCurrPos();
+        
+        
+        StringBuffer sb=new StringBuffer();
+        int prevType=-992;
+        for (int i=startPos; i<endPos; i++) {
+        	sb.append(ts.getTokenAtPos(i).getOriginalStringRep());
+        	int type=ts.getTokenAtPos(i).getType();
+        	if (type==prevType) sb.append(" ");
+        	prevType=type;
+        }
+        stringRep=sb.toString().trim();
     }
     
 
@@ -82,6 +98,9 @@ public class ExprAmp extends ExprCommon {
             if (text.length() > maxLength) {
                 text=text.substring(maxLength-4) + " ...";
             }
+        }
+        if (text==null) {
+        	text=this.stringRep;
         }
         
         // add to Jobs object

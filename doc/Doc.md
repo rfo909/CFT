@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2022-04-14 RFO
-v3.4.3
+Last updated: 2022-04-18 RFO
+v3.4.4
 ```
 # Introduction
 
@@ -336,13 +336,11 @@ CFT lets us run any
 the '&amp;' expression syntax.
 
 ```
-$ &amp; 1+1, "addition"
-$ &amp; someFunction(...), "description"
+$ &amp; 1+1
+$ &amp; someFunction(...)
 ```
 
-The "2+3" and "someFunction" are the expressions that are run as background jobs, and the value
-after the comma is an optional name, which helps us remember what each of the (numbered)
-background jobs do.
+The "2+3" and "someFunction" are the expressions that are run as background jobs.
 
 
 To list all jobs, use the @J shortcut. To get the result from the first completed job,
@@ -356,8 +354,15 @@ results from any of the terminated jobs, we can use the @JCL shortcut ("jobs cle
 clears completed jobs from the jobs registry.
 
 
-And of course, jobs don't survive killing the CFT process.
+Note that jobs don't survive killing the CFT process.
 
+
+If one wants better descriptions for jobs, this can be done as follows
+
+```
+$ &amp; 1+1, Addition # identifier becomes name
+$ &amp; someFunction(...), "String description"
+```
 # The "protect" mechanism
 
 

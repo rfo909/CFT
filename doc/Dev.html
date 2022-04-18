@@ -13,6 +13,14 @@
 
 <h1>CFT Change log</h1>
 
+<h3>3.4.4 2022-04-18 Fixed '&' commands</h3>
+<p>
+	Creating ok string rep from commands following '&', but keeping the
+	option to do "," (comma) and either an identifier without quotes,
+	or a string expression.
+</p>
+
+
 <h3>3.4.4 2022-04-18 Lambdas are not synthesizable</h3>
 <p>
 	Currently Lambdas are anonymous functions that are defined within a script environment, and
@@ -22,8 +30,8 @@
 </p>
 <p>
 	The other option was to say Lambda's have no source file connection, which would in turn
-	complicate call stack location handling, which we now aim to make work for code inside
-	lambdas, with reference to file and line, as for regular functions.
+	complicate call stack location handling, with reference to file and line, as for regular functions,
+	which currently works.
 </p>
 <p>
 	Have deleted the synthesize() implementation for ValueBlock.

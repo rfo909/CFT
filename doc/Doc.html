@@ -15,8 +15,8 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2022-04-14 RFO
-v3.4.3
+Last updated: 2022-04-18 RFO
+v3.4.4
 
 </pre>
 
@@ -363,13 +363,11 @@ v3.4.3
   the '&amp;' expression syntax. 
 </p>
 <pre>
-  $ &amp; 1+1, "addition"
-  $ &amp; someFunction(...), "description"
+  $ &amp; 1+1
+  $ &amp; someFunction(...)
 </pre>
 <p>
-  The "2+3" and "someFunction" are the expressions that are run as background jobs, and the value
-  after the comma is an optional name, which helps us remember what each of the (numbered)
-  background jobs do.
+  The "2+3" and "someFunction" are the expressions that are run as background jobs.
 </p>
 <p>
   To list all jobs, use the @J shortcut. To get the result from the first completed job, 
@@ -383,8 +381,15 @@ v3.4.3
   clears completed jobs from the jobs registry.
 </p>
 <p>
-  And of course, jobs don't survive killing the CFT process.
+  Note that jobs don't survive killing the CFT process.
 </p>
+<p>
+  If one wants better descriptions for jobs, this can be done as follows
+</p>
+<pre>
+  $ &amp; 1+1, Addition # identifier becomes name
+  $ &amp; someFunction(...), "String description"
+</pre>
 
 
 
