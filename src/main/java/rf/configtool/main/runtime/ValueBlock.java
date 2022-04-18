@@ -136,14 +136,14 @@ public class ValueBlock extends Value {
         fs.set("self", new ValueObj(self));
  
         ctx.getStdio().pushCFTCallStackFrame(caller);
+        
         Ctx independentCtx=new Ctx(ctx.getStdio(), ctx.getObjGlobal(), fs);
         
         Value retVal=null;
         
         for (ProgramLine progLine:programLines) {
-            // CodeLines.execute() creates new independent Ctx for each Code Line. We
-            // can not do that here, because we want variable lookup, BUT that is the
-            // reason loop output from separate programLines gets lumped together
+            // Note that independentCtx is created from scratch, so there is no parent 
+        	// and therefore no lookup from parent Ctx. 
             
             Ctx sub=independentCtx.subNewData(false);
             

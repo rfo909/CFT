@@ -32,11 +32,10 @@ Later expanded to all sorts of true/false tests.
 
 
 
-a={1+1}
-println("a="+a)
+{1+1}
 /t1
 
-t1=="a=2"
+t1==2
 /Test01_SumInsideLocalBlock
 
 
@@ -726,6 +725,20 @@ Dict.set("a",1).set("b",Lambda{P(1) as int=>x self.a+x})
 
 
 
+# Test47d - check that lambda can not access creating context
+# --
+	a=1
+	Lambda{a}.call
+//t47d_x
+
+# tryCatch, verify error message
+# --
+	tryCatch(t47d_x) => ex
+	ex.msg.contains("unknown symbol 'a'")
+/Test47d_verify_lambda_no_access_to_create_context
+
+
+
 # Test 48 - Verify that shared structures from super classes are
 # properly copied when creating subclasses. The Dict.copyFrom function
 # only copies Value objects, not cloning anything, but as we see below,
@@ -779,6 +792,8 @@ Dict.set("a",1).set("b",Lambda{P(1) as int=>x self.a+x})
 	a && !b && !c
 /Test50_as_predicate_version
 
+
+
 # Test 51 - predicate version of "as" for classes
 # --
 	class X {} => obj
@@ -829,27 +844,29 @@ Dict.set("a",1).set("b",Lambda{P(1) as int=>x self.a+x})
 
 
 
-# Test 53 - discoved a bug, which is that a Lambda has access to
-# functions in the script where it exists. Lambdas should not
-# be considered members of a script, particularly as they can be
-# synthesized and brought back with eval, and if done in a
-# different script, will fail when called, if depending on local
-# functions.
+# Test 53 - What was for a brief moment considered a bug,
+# is now a feature, and that is that a Lambda is part of
+# a script file in the same way that functions are. 
+#
+# Here we are verifying that scope decision, which means it
+# gets to call functions without qualifying "script": in front.
 
 # Local function
 # --
 	3
 /t53_data
 
-# Lambda call should fail
+
+# Lambda call 
 # --
 	Lambda{t53_data}.call
 /t53_call
 
-# Use tryCatch to verify fail
+
+# Use tryCatch to verify ok
 # --
-	tryCatch(t53_call).ok==false
-/Test53_Lambda_limited_scope
+	tryCatch(t53_call).ok
+/Test53_Lambda_script_scope
 
 
 
@@ -921,9 +938,7 @@ ERROR: [<script> Tests01:861.8] Invalid value Dict [] + 1
 		}
 	|
 	foundAll
-/Test54_CFT_stack_trace
-
-
+/Test54_CFT_call_stack_with_lambdas
 
 
 

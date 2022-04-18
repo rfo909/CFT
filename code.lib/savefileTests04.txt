@@ -96,11 +96,3 @@ Time consuming tests related to Db2 and locking
 
 
 
-# Background process
-# --
-	Lib.Data.each(1,3)->i
-		Sys.sleep(200)
-		println("i=" + i)
-/t03_bg
-
-
