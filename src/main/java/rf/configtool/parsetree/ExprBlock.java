@@ -42,7 +42,6 @@ public class ExprBlock extends ExprCommon {
     private String className;
     
     private List<ProgramLine> programLines=new ArrayList<ProgramLine>();
-    private String synString;
     
     // See Runtime.processCodeLines() method to extend to loops and supporting PROGRAM_LINE_SEPARATOR - must in addition 
     // add '}' as terminator character inside ProgramLine
@@ -90,12 +89,6 @@ public class ExprBlock extends ExprCommon {
         
         int tsEnd=ts.getCurrPos();
         
-        StringBuffer sb=new StringBuffer();
-        for (int i=tsStart; i<tsEnd; i++) {
-            sb.append(" ");
-            sb.append(ts.getTokenAtPos(i).getOriginalStringRep());
-        }
-        this.synString=sb.toString();
     }
     
     private String getBlockModeName() {
@@ -108,7 +101,7 @@ public class ExprBlock extends ExprCommon {
     
     
     public Value resolve (Ctx ctx) throws Exception {
-        ValueBlock b=new ValueBlock(programLines, synString);
+        ValueBlock b=new ValueBlock(programLines);
         if (mode==MODE_LAMBDA) {
             return b;  // ValueBlock
         }

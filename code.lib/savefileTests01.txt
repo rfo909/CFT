@@ -926,16 +926,6 @@ ERROR: [<script> Tests01:861.8] Invalid value Dict [] + 1
 
 
 
-# Test55: shouldn't stack trace give location inside lambdas?
-# --
-	false
-/Test55_call_stack_inside_lambda_code
-
-# Test56: shouldn't a synthesized and eval'ed Lambda remember source locations?
-# --
-	false
-/Test56_call_stack_from_synthesized_lambda
-
 
 
 

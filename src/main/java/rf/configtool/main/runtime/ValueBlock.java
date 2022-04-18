@@ -35,11 +35,9 @@ import rf.configtool.parsetree.ProgramLine;
 public class ValueBlock extends Value {
     
     private List<ProgramLine> programLines;
-    private String synString;
     
-    public ValueBlock (List<ProgramLine> programLines, String synString) {
+    public ValueBlock (List<ProgramLine> programLines) {
         this.programLines=programLines;
-        this.synString=synString;
         
         add(new FunctionCall());
     }
@@ -67,12 +65,6 @@ public class ValueBlock extends Value {
         return true;
     }
 
-    @Override
-    public String synthesize() {
-        return synString;
-    }
-
-   
     private Value executeLocalBlock (Ctx ctx) throws Exception {
         if (programLines.size() != 1) throw new Exception("Internal error: local block should contain ONE ProgramLine");
         programLines.get(0).execute(ctx);

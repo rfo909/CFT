@@ -13,6 +13,22 @@
 
 <h1>CFT Change log</h1>
 
+<h3>3.4.4 2022-04-18 Lambdas are not synthesizable</h3>
+<p>
+	Currently Lambdas are anonymous functions that are defined within a script environment, and
+	like other functions, have access to functions in that environment directly by name. This means
+	we can not synthesize them and bring them back in code inside another script and expect
+	them to work.
+</p>
+<p>
+	The other option was to say Lambda's have no source file connection, which would in turn
+	complicate call stack location handling, which we now aim to make work for code inside
+	lambdas, with reference to file and line, as for regular functions.
+</p>
+<p>
+	Have deleted the synthesize() implementation for ValueBlock.
+</p>
+
 <h3>3.4.3 2022-04-14 addDebug()</h3>
 <p>
 	Renamed previous printDebug() statement to addDebug(), and changed it to 
