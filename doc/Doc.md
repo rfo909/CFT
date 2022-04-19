@@ -1410,7 +1410,7 @@ $ MyLambda.call(1,2)
 ```
 
 Can be used to create local functions inside regular functions, but mostly used to create
-closures and/or Dict objects.
+closures and/or Dict objects / classes.
 
 ## Block expressions summary
 
@@ -3952,19 +3952,6 @@ The Dict.set function also detects when it is fed a closure, unwrapping the
 Lambda inside, then wrapping it inside a new closure pointing back to
 itself (via "self" variable in lambda).
 
-## Lambdas are synthesizable
-
-
-This means we can store function code in the database, or on file.
-
-
-Also, Dict objects (with lambdas) are serializable, because even though Closures are not,
-the serialization of a Dict with Closures is rewritten into adding the original
-Lambda's which will in turn be wrapped into Closures at later runtime.
-
-
-This means stateful objects can be "serialized" to the database as well.
-
 # ANSI escape codes
 
 
@@ -4279,9 +4266,6 @@ The "problem" is that CFT code (and so shortcuts) can run colon commands via "ab
 
 
 - Int
-
-
-- Lambda
 
 
 - List

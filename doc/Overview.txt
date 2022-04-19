@@ -311,7 +311,6 @@ Manual closures
 Closures as member functions of Dict Objects
  * Member closures calling each other
  * Copy lambdas between dictionaries
- * Lambdas are synthesizable
 
 ANSI escape codes
 

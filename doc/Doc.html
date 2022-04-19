@@ -1613,7 +1613,7 @@ codeDirs = . ; code.examples ; code.lib
 </pre>
 <p>
   Can be used to create local functions inside regular functions, but mostly used to create
-  closures and/or Dict objects.
+  closures and/or Dict objects / classes.
 </p>
 
 
@@ -4462,22 +4462,6 @@ Dict
 
 
 
-<h2>Lambdas are synthesizable</h2>
-<p>
-  This means we can store function code in the database, or on file. 
-</p>
-<p>
-  Also, Dict objects (with lambdas) are serializable, because even though Closures are not,
-  the serialization of a Dict with Closures is rewritten into adding the original
-  Lambda's which will in turn be wrapped into Closures at later runtime.
-</p>
-<p>
-  This means stateful objects can be "serialized" to the database as well. 
-</p>
-
-
-
-
 
 
 
@@ -4791,7 +4775,6 @@ Colon commands
     <li>Float</li>
     <li>Glob</li>
     <li>Int</li>
-    <li>Lambda</li>
     <li>List</li>
     <li>Regex</li>
     <li>Str</li>
