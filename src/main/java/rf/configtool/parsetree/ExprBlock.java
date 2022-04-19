@@ -118,7 +118,7 @@ public class ExprBlock extends ExprCommon {
         	ObjDict self=new ObjDict(className);
         	List<Value> params=ctx.getFunctionState().getParams(); // inherit params from surroundings
         	
-        	CFTCallStackFrame caller=new CFTCallStackFrame(getSourceLocation(),"Calling lambda");
+        	CFTCallStackFrame caller=new CFTCallStackFrame(getSourceLocation(),"Creating class " + className);
         	b.callLambda(ctx,caller,self,params);
         	
         	return new ValueObj(self);

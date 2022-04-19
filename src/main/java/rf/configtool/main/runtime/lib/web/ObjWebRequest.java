@@ -25,7 +25,7 @@ import rf.configtool.main.runtime.*;
 import rf.configtool.main.runtime.lib.ObjDict;
 
 
-public class ObjRequest extends Obj {
+public class ObjWebRequest extends Obj {
     
     private Map<String,String> headers;
     private String method;
@@ -34,7 +34,7 @@ public class ObjRequest extends Obj {
     private byte[] body;
     private Map<String,String> bodyParams;
 
-    public ObjRequest(Map<String,String> headers, String method, String url, Map<String,String> urlParams, byte[] body, Map<String,String> bodyParams) {
+    public ObjWebRequest(Map<String,String> headers, String method, String url, Map<String,String> urlParams, byte[] body, Map<String,String> bodyParams) {
         this.headers = headers;
         this.method = method;
         this.url = url;

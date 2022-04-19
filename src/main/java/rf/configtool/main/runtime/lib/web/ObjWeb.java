@@ -63,12 +63,12 @@ public class ObjWeb extends Obj {
             return "Server";
         }
         public String getShortDesc() {
-            return "Server(port) - returns Server object";
+            return "Server(port) - returns WebServer object";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 1) throw new Exception("Expected port parameter (int)");
             int port=(int) getInt("port", params, 0);
-            return ctx.getObjGlobal().getOrAddPersistentObject(new ObjServer(port,ctx));
+            return ctx.getObjGlobal().getOrAddPersistentObject(new ObjWebServer(port,ctx));
         }
     }
     

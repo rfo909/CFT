@@ -23,9 +23,9 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-public    class ServerMainLoop implements Runnable {
+public class ServerMainLoop implements Runnable {
     private int serverPort;
-    private ObjServer objServer;
+    private ObjWebServer objServer;
     
     private boolean shuttingDown=false;
     private boolean completed=false;
@@ -33,7 +33,7 @@ public    class ServerMainLoop implements Runnable {
     
     private int clientCounter=0;
     
-    public ServerMainLoop (int serverPort, ObjServer objServer) {
+    public ServerMainLoop (int serverPort, ObjWebServer objServer) {
         this.serverPort=serverPort;
         this.objServer=objServer;
     }

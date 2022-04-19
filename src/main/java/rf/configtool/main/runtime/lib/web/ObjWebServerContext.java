@@ -31,20 +31,20 @@ import rf.configtool.main.runtime.lib.ObjDict;
  * tied in with different context objects. 
  */
 
-public class ObjContext extends Obj {
+public class ObjWebServerContext extends Obj {
     
-    private ObjServer server;
+    private ObjWebServer server;
     private String path;
     private String contentType;
     
     private ObjClosure closureGET;
     private ObjClosure closurePOST;
     
-    public ObjContext(ObjServer server, String path) {
+    public ObjWebServerContext(ObjWebServer server, String path) {
         this(server, path, "text/html");
     }
     
-    public ObjContext(ObjServer server, String path, String contentType) {
+    public ObjWebServerContext(ObjWebServer server, String path, String contentType) {
         
         this.contentType=contentType;
         this.server=server;
@@ -94,11 +94,11 @@ public class ObjContext extends Obj {
         return "WebServerContext";
     }
     
-    private ObjServer theServer() {
+    private ObjWebServer theServer() {
         return server;
     }
     
-    private ObjContext theContext () {
+    private ObjWebServerContext theContext () {
         return this;
     }
     
@@ -114,7 +114,7 @@ public class ObjContext extends Obj {
             String subPath=getString("subPath", params, 0);
             String contentType="text/html";
             if (params.size()==2) contentType=getString("contentType", params, 1);
-            return new ValueObj(new ObjContext(server, (path+subPath).replace("//", "/"), contentType));
+            return new ValueObj(new ObjWebServerContext(server, (path+subPath).replace("//", "/"), contentType));
         }
     }
     

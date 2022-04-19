@@ -4035,7 +4035,7 @@ See Db2:GetSessionPassword() function for example.
 # Reference: object types
 
 
-**Per v3.0.2**
+**Per v3.4.4**
 ```
 Grep("extends Obj") =>
  g
@@ -4051,18 +4051,22 @@ println(x)
 DD
 DDBrush
 DDD
+DDDBezier
 DDDBrush
 DDDRef
 DDDTriangle
 DDDVector
 DDDWorld
+DDLineBrush
 DDRef
 DDVector
 DDWorld
 ObjAnnotatedValue
+ObjCIFS
+ObjCIFSContext
+ObjCIFSFile
 ObjClosure
 ObjColor
-ObjContext
 ObjConvert
 ObjData
 ObjDataFile
@@ -4083,7 +4087,6 @@ ObjGlob
 ObjGlobal
 ObjGrep
 ObjInput
-ObjIntegrations
 ObjJava
 ObjJavaClass
 ObjJavaConstructor
@@ -4108,20 +4111,20 @@ ObjPersistent
 ObjPlot
 ObjProcess
 ObjRegex
-ObjRequest
-ObjSentry
-ObjServer
 ObjSys
 ObjTerm
 ObjText
 ObjUtil
 ObjWeb
+ObjWebRequest
+ObjWebServer
+ObjWebServerContext
 Value
 ```
 # Reference: Value types
 
 
-**Per v3.0.2**
+**Per v3.4.4**
 ```
 Grep("extends Value") =>
  g
@@ -4414,6 +4417,18 @@ Script code:      15695 lines
 Java code:        32022 lines
 Functions:        490
 Object types:     69
+Value types:      13
+```
+### 2022-04-19 v3.4.4
+
+
+Running CodeStats:main
+
+```
+Script code:      16094 lines
+Java code:        32990 lines
+Functions:        507
+Object types:     72
 Value types:      13
 ```
 

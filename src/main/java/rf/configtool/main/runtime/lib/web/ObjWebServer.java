@@ -43,16 +43,16 @@ import rf.configtool.main.runtime.lib.ObjPersistent;
  * Web server
  */
 
-public class ObjServer extends ObjPersistent {
+public class ObjWebServer extends ObjPersistent {
     
     private int serverPort;
     private Ctx asyncCtx;
     private File serverLogFile;
     
-    private HashMap<String,ObjContext> bindings=new HashMap<String,ObjContext>();
+    private HashMap<String,ObjWebServerContext> bindings=new HashMap<String,ObjWebServerContext>();
     private ServerMainLoop serverMainLoop;
 
-    public ObjServer(int serverPort, Ctx asyncCtx) {
+    public ObjWebServer(int serverPort, Ctx asyncCtx) {
         this.serverPort=serverPort;
         this.asyncCtx=asyncCtx;
 
@@ -84,7 +84,7 @@ public class ObjServer extends ObjPersistent {
     /**
      * Service function 
      */
-    public void bind (String path, ObjContext context) {
+    public void bind (String path, ObjWebServerContext context) {
         bindings.put(path,context);
     }
 
@@ -157,7 +157,7 @@ public class ObjServer extends ObjPersistent {
         return "WebServer";
     }
     
-    private ObjServer theServer () {
+    private ObjWebServer theServer () {
         return this;
     }
     
@@ -166,11 +166,11 @@ public class ObjServer extends ObjPersistent {
             return "RootContext";
         }
         public String getShortDesc() {
-            return "RootContext() - returns Context object for path '/'";
+            return "RootContext() - returns WebServerContext object for path '/'";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
-            return new ValueObj(new ObjContext(theServer(), "/"));
+            return new ValueObj(new ObjWebServerContext(theServer(), "/"));
         }
     }
     
@@ -198,8 +198,8 @@ public class ObjServer extends ObjPersistent {
     /**
      * Callback method via ServerMainLoop -> ClientMain
      */
-    public synchronized ResponseData processGETRequest(ObjRequest request) throws Exception {
-        ObjContext context = bindings.get(request.getUrl());
+    public synchronized ResponseData processGETRequest(ObjWebRequest request) throws Exception {
+        ObjWebServerContext context = bindings.get(request.getUrl());
         if (context != null) {
             ObjClosure closure = context.getClosureGET();
             String contentType=context.getContentType();
@@ -223,8 +223,8 @@ public class ObjServer extends ObjPersistent {
     /**
      * Callback method via ServerMainLoop -> ClientMain
      */
-    public synchronized ResponseData processPOSTRequest(ObjRequest request) throws Exception {
-        ObjContext context = bindings.get(request.getUrl());
+    public synchronized ResponseData processPOSTRequest(ObjWebRequest request) throws Exception {
+        ObjWebServerContext context = bindings.get(request.getUrl());
         if (context != null) {
             ObjClosure closure = context.getClosurePOST();
             String contentType=context.getContentType();

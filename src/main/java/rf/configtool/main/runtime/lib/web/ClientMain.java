@@ -26,7 +26,7 @@ import rf.configtool.main.Version;
 public class ClientMain implements Runnable {
 
     private final Socket sock;
-    private final ObjServer objServer;
+    private final ObjWebServer objServer;
     private final int id;
     
     private boolean completed=false;
@@ -38,7 +38,7 @@ public class ClientMain implements Runnable {
         this.completed=true;
     }
     
-    public ClientMain (Socket sock, ObjServer objServer, int id) {
+    public ClientMain (Socket sock, ObjWebServer objServer, int id) {
         this.sock=sock;
         this.objServer=objServer;
         this.id=id;
@@ -157,7 +157,7 @@ public class ClientMain implements Runnable {
             }
             
             
-            ObjRequest request=new ObjRequest(headers, method, url, urlParams, body, bodyParams);
+            ObjWebRequest request=new ObjWebRequest(headers, method, url, urlParams, body, bodyParams);
             
             if (method.equals("GET")) {
                 try {
