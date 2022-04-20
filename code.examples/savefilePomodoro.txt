@@ -64,9 +64,19 @@
         } else {
             i=i+1
         }
-|
+	|
+	Alarm
 
 /CountDown
+
+
+
+# Alarm
+# --
+	Lib.Data.each(1,7)->x
+		println("Completed" + Sys.uchar(7))
+		Sys.sleep(2000)
+/Alarm
 
 
 # Pomodoro countdown timer
