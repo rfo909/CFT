@@ -48,23 +48,15 @@
         
         percent=(100*i/seconds).i
         println(prefix + bar+remaining+" " + percent + " %")
-    
-        if (remainingTime <= 60) {
-        
-            println
 
-            lines=Letters7x5:GetTextX2(""+remainingTime)
-            lines->line println(prefix + line)
-        }
         break(i>=seconds)
         if (seconds-i > 300) {
             i=i+10
-        } else if (seconds-i > 120) {
-            i=i+3
         } else {
-            i=i+1
+            i=i+3
         }
 	|
+	println
 	Alarm
 
 /CountDown
@@ -74,7 +66,7 @@
 # Alarm
 # --
 	Lib.Data.each(1,7)->x
-		println("Completed" + Sys.uchar(7))
+		println("ALARM!!" + Sys.uchar(7))
 		Sys.sleep(2000)
 /Alarm
 
