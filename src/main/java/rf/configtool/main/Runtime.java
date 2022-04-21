@@ -22,7 +22,7 @@ import java.util.List;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueString;
 import rf.configtool.main.runtime.reporttool.Report;
-import rf.configtool.parsetree.ProgramCodeSpace;
+import rf.configtool.parsetree.CodeSpace;
 
 /**
  * Executing one statement at a time, possibly saving last statement in symbol table.
@@ -39,18 +39,18 @@ public class Runtime {
      * Returns value from executing program line. Note may return java null if no return
      * value identified
      */
-    public Value processCodeLines (Stdio stdio, CFTCallStackFrame caller, FunctionCodeLines lines, FunctionState functionState) throws Exception {
+    public Value processCodeLines (Stdio stdio, CFTCallStackFrame caller, FunctionBody lines, FunctionState functionState) throws Exception {
 
     	stdio.pushCFTCallStackFrame(caller);
 
         if (functionState == null) throw new Exception("No functionState");
         
         
-        List<ProgramCodeSpace> codeSpaces=lines.getCodeSpaces();
+        List<CodeSpace> codeSpaces=lines.getCodeSpaces();
 
         Value retVal=null;
         
-        for (ProgramCodeSpace codeSpace:codeSpaces) {
+        for (CodeSpace codeSpace:codeSpaces) {
             Ctx ctx=new Ctx(stdio, objGlobal, functionState);
             
             if (retVal != null) ctx.push(retVal);

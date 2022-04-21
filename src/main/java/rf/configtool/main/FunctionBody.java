@@ -26,41 +26,41 @@ import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueString;
 import rf.configtool.main.runtime.reporttool.Report;
-import rf.configtool.parsetree.ProgramCodeSpace;
+import rf.configtool.parsetree.CodeSpace;
 import rf.configtool.util.Hash;
 
 /**
- * CodeLines is a container for a list of CodeLine objects, which represent
- * lines of code for a function, or a single line of input from the user, etc.
+ * This class is a container for a list of ScriptSourceLine objects, which represent
+ * lines of text for a function (from file) or a single text line of input from the user, if
+ * defined interactively. 
  * 
  * The text lines are tokenized via getTokenStream() method, then split into
- * a sequence ProgramLine objects, each representing what is called "loop space"
+ * a sequence CodeSpace objects, each representing what is called "loop space"
  * or "code space" in the docs. Function code is split into many such by the PIPE_SYMBOL.
  * 
- * The ProgramLine class constructor identifies code as a sequence of statements, and
+ * The CodeSpace constructor identifies code as a sequence of statements, and
  * builds a complete parse tree from the code.
  * 
  * In the execute() method, the sequence of ProgramLine objects are executed, and a
  * result value is produced.
  *
  */
-public class FunctionCodeLines {
+public class FunctionBody {
 
-    public static final String PIPE_SYMBOL = "|"; // separates multiple ProgramLines on same line
+    public static final String PIPE_SYMBOL = "|"; // separates sequence of CodeSpace
 
-    private static CodeLinesParseCache clpCache = new CodeLinesParseCache();
+    private static FunctionBodyParseCache clpCache = new FunctionBodyParseCache();
 
     private List<ScriptSourceLine> sourceLines;
     private String hashString;
 
-    public FunctionCodeLines(String singleLine, SourceLocation loc) {
-        // SourceLocation loc=new SourceLocation("<>", 0, 0);
+    public FunctionBody(String singleLine, SourceLocation loc) {
         sourceLines = new ArrayList<ScriptSourceLine>();
         sourceLines.add(new ScriptSourceLine(loc, "")); // blank line between previous function and this one
         sourceLines.add(new ScriptSourceLine(loc, singleLine));
     }
 
-    public FunctionCodeLines(List<ScriptSourceLine> saveFormat) {
+    public FunctionBody(List<ScriptSourceLine> saveFormat) {
         this.sourceLines = saveFormat;
     }
 
@@ -153,17 +153,17 @@ public class FunctionCodeLines {
     /**
      * Return code as sequence of ProgramCodeSpace objects, created by
      * splitting code body by PIPE. This involves invoking the recursive
-     * descent parser, building a parse tree 
+     * descent parser, building a parse tree for the complete function body.
      */
-    public List<ProgramCodeSpace> getCodeSpaces() throws Exception {
+    public List<CodeSpace> getCodeSpaces() throws Exception {
         String key = getHash();
-        List<ProgramCodeSpace> progLines = clpCache.get(key);
+        List<CodeSpace> progLines = clpCache.get(key);
 
         if (progLines == null) {
             TokenStream ts = getTokenStream();
-            progLines = new ArrayList<ProgramCodeSpace>();
+            progLines = new ArrayList<CodeSpace>();
             for (;;) {
-                progLines.add(new ProgramCodeSpace(ts));
+                progLines.add(new CodeSpace(ts));
                 if (ts.matchStr(PIPE_SYMBOL))
                     continue;
                 break;

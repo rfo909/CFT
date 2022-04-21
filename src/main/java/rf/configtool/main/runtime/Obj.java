@@ -33,7 +33,7 @@ import rf.configtool.main.OutText;
 import rf.configtool.main.Version;
 import rf.configtool.main.runtime.lib.ObjClosure;
 import rf.configtool.main.runtime.lib.ObjDict;
-import rf.configtool.parsetree.ProgramCodeSpace;
+import rf.configtool.parsetree.CodeSpace;
 
 /**
  * Superclass of all object types, including Value hierarchy
@@ -220,7 +220,7 @@ public abstract class Obj {
             Lexer p=new Lexer();
             p.processLine(new ScriptSourceLine(new SourceLocation(), s));
             TokenStream ts = p.getTokenStream();
-            ProgramCodeSpace progLine=new ProgramCodeSpace(ts);
+            CodeSpace progLine=new CodeSpace(ts);
             
             Ctx ctx=callCtx.sub();
             progLine.execute(ctx);

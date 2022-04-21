@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import rf.configtool.lexer.TokenStream;
-import rf.configtool.main.FunctionCodeLines;
+import rf.configtool.main.FunctionBody;
 import rf.configtool.main.Ctx;
 
 /**
@@ -29,13 +29,13 @@ import rf.configtool.main.Ctx;
  * class constructor is the top element of the recursive-descent parser that identifies every
  * element of the language, and in turn implements methods for executing or resolving them.
  */
-public class ProgramCodeSpace extends LexicalElement {
+public class CodeSpace extends LexicalElement {
     
     private List<Stmt> statements=new ArrayList<Stmt>();
 
-    public ProgramCodeSpace (TokenStream ts) throws Exception {
+    public CodeSpace (TokenStream ts) throws Exception {
         super(ts);
-        while (!ts.atEOF() && !ts.peekStr(FunctionCodeLines.PIPE_SYMBOL) && !ts.peekStr("}")) {
+        while (!ts.atEOF() && !ts.peekStr(FunctionBody.PIPE_SYMBOL) && !ts.peekStr("}")) {
             Stmt stmt=Stmt.parse(ts);
             statements.add(stmt);
         }

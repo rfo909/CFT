@@ -26,7 +26,7 @@ import rf.configtool.main.FunctionState;
 import rf.configtool.main.OutText;
 import rf.configtool.main.runtime.lib.ObjDict;
 import rf.configtool.main.runtime.reporttool.Report;
-import rf.configtool.parsetree.ProgramCodeSpace;
+import rf.configtool.parsetree.CodeSpace;
 
 /**
  * Block of code - takes three different forms, but only one is available as
@@ -34,9 +34,9 @@ import rf.configtool.parsetree.ProgramCodeSpace;
  */
 public class ValueBlock extends Value {
     
-    private List<ProgramCodeSpace> programLines;
+    private List<CodeSpace> programLines;
     
-    public ValueBlock (List<ProgramCodeSpace> programLines) {
+    public ValueBlock (List<CodeSpace> programLines) {
         this.programLines=programLines;
         
         add(new FunctionCall());
@@ -82,7 +82,7 @@ public class ValueBlock extends Value {
         
         Value retVal=null;
         
-        for (ProgramCodeSpace progLine:programLines) {
+        for (CodeSpace progLine:programLines) {
             
             Ctx sub=callerCtx.subNewData(true);  
 
@@ -141,7 +141,7 @@ public class ValueBlock extends Value {
         
         Value retVal=null;
         
-        for (ProgramCodeSpace progLine:programLines) {
+        for (CodeSpace progLine:programLines) {
             // Note that independentCtx is created from scratch, so there is no parent 
         	// and therefore no lookup from parent Ctx. 
             

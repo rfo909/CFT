@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import rf.configtool.lexer.TokenStream;
-import rf.configtool.main.FunctionCodeLines;
+import rf.configtool.main.FunctionBody;
 import rf.configtool.main.Ctx;
 
 public class StmtLoop extends Stmt {
@@ -33,7 +33,7 @@ public class StmtLoop extends Stmt {
         
         ts.matchStr("loop","expected keyword 'loop'");
         
-        while (!ts.atEOF() && !ts.peekStr(FunctionCodeLines.PIPE_SYMBOL) && !ts.peekStr("}")) {
+        while (!ts.atEOF() && !ts.peekStr(FunctionBody.PIPE_SYMBOL) && !ts.peekStr("}")) {
             body.add(Stmt.parse(ts));
         }
         

@@ -28,7 +28,7 @@ import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueList;
 import rf.configtool.main.runtime.ValueNull;
 import rf.configtool.parsetree.Expr;
-import rf.configtool.parsetree.ProgramCodeSpace;
+import rf.configtool.parsetree.CodeSpace;
 import rf.configtool.parsetree.Stmt;
 
 /**
@@ -267,7 +267,7 @@ public class Ctx {
         p.processLine(new ScriptSourceLine(new SourceLocation(), s));
         
         TokenStream ts = p.getTokenStream();
-        ProgramCodeSpace progLine=new ProgramCodeSpace(ts);
+        CodeSpace progLine=new CodeSpace(ts);
         if (!ts.atEOF()) throw new Exception(ts.error("Invalid token - expected EOF"));
         
         Ctx ctx=this.sub();

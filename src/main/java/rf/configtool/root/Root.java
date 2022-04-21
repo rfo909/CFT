@@ -31,7 +31,7 @@ import rf.configtool.lexer.Token;
 import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.CFTCallStackFrame;
 import rf.configtool.main.ScriptSourceLine;
-import rf.configtool.main.FunctionCodeLines;
+import rf.configtool.main.FunctionBody;
 import rf.configtool.main.FunctionState;
 import rf.configtool.main.ObjGlobal;
 import rf.configtool.main.ObjTerm;
@@ -214,7 +214,7 @@ public class Root {
                     // Run the prompt code line to produce possibly dynamic prompt
                     String promptCode = propsFile.getPromptCode();
                     SourceLocation loc = new SourceLocation("prompt", 0, 0);
-                    FunctionCodeLines promptCodeLines = new FunctionCodeLines(promptCode, loc);
+                    FunctionBody promptCodeLines = new FunctionBody(promptCode, loc);
     
                     String pre;
                     try {
@@ -285,7 +285,7 @@ public class Root {
                 String shortcutCode = propsFile.getShortcutCode(shortcutName);
                 SourceLocation loc = new SourceLocation("shortcut:" + shortcutName, 0, 0);
 
-                FunctionCodeLines codeLines = new FunctionCodeLines(shortcutCode, loc);
+                FunctionBody codeLines = new FunctionBody(shortcutCode, loc);
 
             	CFTCallStackFrame caller=new CFTCallStackFrame("<interactive-input>");
                 Value ret = objGlobal.getRuntime().processCodeLines(stdio, caller, codeLines, new FunctionState(null,null));
@@ -303,7 +303,7 @@ public class Root {
                 // Run the shell command parser
                 String code = propsFile.getBangCommand();
                 SourceLocation loc = new SourceLocation("bangCommand", 0, 0);
-                FunctionCodeLines codeLines = new FunctionCodeLines(code, loc);
+                FunctionBody codeLines = new FunctionBody(code, loc);
 
                 List<Value> params=new ArrayList<Value>();
                 params.add(new ValueString(str));
@@ -417,7 +417,7 @@ public class Root {
                 currScriptCode.setCurrLine(line);
             	CFTCallStackFrame caller=new CFTCallStackFrame("<interactive-input>");
 
-                Value result = objGlobal.getRuntime().processCodeLines(stdio, caller, new FunctionCodeLines(line, loc), new FunctionState(null,null));
+                Value result = objGlobal.getRuntime().processCodeLines(stdio, caller, new FunctionBody(line, loc), new FunctionState(null,null));
 
                 postProcessResult(result);
                 showSystemLog();

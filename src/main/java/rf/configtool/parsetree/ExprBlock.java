@@ -23,7 +23,7 @@ import java.util.List;
 import rf.configtool.lexer.Token;
 import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.CFTCallStackFrame;
-import rf.configtool.main.FunctionCodeLines;
+import rf.configtool.main.FunctionBody;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.SourceException;
 import rf.configtool.main.runtime.Value;
@@ -41,7 +41,7 @@ public class ExprBlock extends ExprCommon {
     private int mode;
     private String className;
     
-    private List<ProgramCodeSpace> programLines=new ArrayList<ProgramCodeSpace>();
+    private List<CodeSpace> programLines=new ArrayList<CodeSpace>();
     
     // See Runtime.processCodeLines() method to extend to loops and supporting PROGRAM_LINE_SEPARATOR - must in addition 
     // add '}' as terminator character inside ProgramLine
@@ -66,21 +66,21 @@ public class ExprBlock extends ExprCommon {
         	ts.matchStr("{","expected '{'");
         }
         
-        List<ProgramCodeSpace> progLines=new ArrayList<ProgramCodeSpace>();
+        List<CodeSpace> progLines=new ArrayList<CodeSpace>();
         if (mode==MODE_LOCAL) {
             // only one program line as "PIPE" not allowed
-            progLines.add(new ProgramCodeSpace(ts));
+            progLines.add(new CodeSpace(ts));
             
-            if (ts.matchStr(FunctionCodeLines.PIPE_SYMBOL)) {
+            if (ts.matchStr(FunctionBody.PIPE_SYMBOL)) {
                 // specific exception for this case
-                throw new SourceException(getSourceLocation(),"Local block can not contain the PIPE '" + FunctionCodeLines.PIPE_SYMBOL + "' character");
+                throw new SourceException(getSourceLocation(),"Local block can not contain the PIPE '" + FunctionBody.PIPE_SYMBOL + "' character");
             }
             ts.matchStr("}","expected '}' closing " + getBlockModeName() + " starting at " + this.getSourceLocation());
         } else {
             // INNER, LAMBDA and CLASS
             for(;;) {
-                progLines.add(new ProgramCodeSpace(ts));
-                if (ts.matchStr(FunctionCodeLines.PIPE_SYMBOL)) continue;
+                progLines.add(new CodeSpace(ts));
+                if (ts.matchStr(FunctionBody.PIPE_SYMBOL)) continue;
                 break;
             }
             ts.matchStr("}","expected '}' closing " + getBlockModeName() + " starting at " + this.getSourceLocation());

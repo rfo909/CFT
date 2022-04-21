@@ -39,7 +39,7 @@ public class ScriptCode {
      
     private PropsFile props;
     private File savefile;
-    private Map<String, FunctionCodeLines> namedFunctions=new HashMap<String,FunctionCodeLines>();
+    private Map<String, FunctionBody> namedFunctions=new HashMap<String,FunctionBody>();
     private Set<String> privateFunctions=new HashSet<String>();
     private List<String> namesInSequence=new ArrayList<String>();
     private ObjTerm term;
@@ -74,10 +74,10 @@ public class ScriptCode {
         if (namedFunctions.get(name) != null && !force) return false;
         
         if (!namesInSequence.contains(name)) namesInSequence.add(name);
-        FunctionCodeLines c=namedFunctions.get(name);
+        FunctionBody c=namedFunctions.get(name);
         SourceLocation loc=new SourceLocation("<func> " + name, 0, 0);
         if (c==null) {
-            c=new FunctionCodeLines(currLine, loc);
+            c=new FunctionBody(currLine, loc);
             namedFunctions.put(name, c);
         } else {
             c.update(currLine, loc);
@@ -90,7 +90,7 @@ public class ScriptCode {
         return true;
     }
 
-    public FunctionCodeLines getFunctionCodeLines (String name) {
+    public FunctionBody getFunctionCodeLines (String name) {
         return namedFunctions.get(name); // may be null
     }
     
@@ -153,7 +153,7 @@ public class ScriptCode {
                 String label=name;
                 while(label.length()<nameMaxLength) label=label+" ";
                 if (showFull) {
-                    FunctionCodeLines codeLines = getFunctionCodeLines(name);
+                    FunctionBody codeLines = getFunctionCodeLines(name);
                     List<String> text = codeLines.getSaveFormat();
                     boolean foundContent=false;
                     stdio.println();
@@ -225,7 +225,7 @@ public class ScriptCode {
         PrintStream ps=new PrintStream(new FileOutputStream(this.savefile));
         
         for (String s:namesInSequence) {
-            FunctionCodeLines c=namedFunctions.get(s);
+            FunctionBody c=namedFunctions.get(s);
             List<String> saveLines=c.getSaveFormat();
             for (String x:saveLines) {
                 ps.println(x);
@@ -311,7 +311,7 @@ public class ScriptCode {
 
                 if (namesInSequence.contains(name)) namesInSequence.remove(name);
                 namesInSequence.add(name);
-                FunctionCodeLines c=new FunctionCodeLines(lines);
+                FunctionBody c=new FunctionBody(lines);
                 namedFunctions.put(name, c);
                 
                 if (privateFunctions.contains(name)) privateFunctions.remove(name);

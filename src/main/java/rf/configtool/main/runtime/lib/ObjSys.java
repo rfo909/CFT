@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import rf.configtool.lexer.SourceLocation;
-import rf.configtool.main.FunctionCodeLines;
+import rf.configtool.main.FunctionBody;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.PropsFile;
 import rf.configtool.main.Stdio;
@@ -521,7 +521,7 @@ public class ObjSys extends Obj {
             
             List<String> names = ctx.getObjGlobal().getCurrScriptCode().getNames();
             for (String name : names) {
-                FunctionCodeLines code = ctx.getObjGlobal().getCurrScriptCode().getFunctionCodeLines(name);
+                FunctionBody code = ctx.getObjGlobal().getCurrScriptCode().getFunctionCodeLines(name);
                 try {
                     code.getCodeSpaces(); 
                     	// parses text but as this is "lint", we don't execute anything, only capturing exceptions
