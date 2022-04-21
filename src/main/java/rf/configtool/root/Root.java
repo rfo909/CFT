@@ -220,7 +220,7 @@ public class Root {
                     try {
                     	CFTCallStackFrame caller=new CFTCallStackFrame("<interactive-input>");
 
-                        Value ret = objGlobal.getRuntime().processCodeLines(stdio, caller, promptCodeLines, new FunctionState(null,null));
+                        Value ret = objGlobal.getRuntime().processFunction(stdio, caller, promptCodeLines, new FunctionState(null,null));
                         pre=ret.getValAsString();
                     } catch (Exception ex) {
                         if (debugMode) {
@@ -288,7 +288,7 @@ public class Root {
                 FunctionBody codeLines = new FunctionBody(shortcutCode, loc);
 
             	CFTCallStackFrame caller=new CFTCallStackFrame("<interactive-input>");
-                Value ret = objGlobal.getRuntime().processCodeLines(stdio, caller, codeLines, new FunctionState(null,null));
+                Value ret = objGlobal.getRuntime().processFunction(stdio, caller, codeLines, new FunctionState(null,null));
                 postProcessResult(ret);
                 showSystemLog();
 
@@ -308,7 +308,7 @@ public class Root {
                 List<Value> params=new ArrayList<Value>();
                 params.add(new ValueString(str));
             	CFTCallStackFrame caller=new CFTCallStackFrame("<bang-command>");
-                objGlobal.getRuntime().processCodeLines(stdio, caller, codeLines, new FunctionState(null,params));
+                objGlobal.getRuntime().processFunction(stdio, caller, codeLines, new FunctionState(null,params));
                 return;
             } 
 
@@ -417,7 +417,7 @@ public class Root {
                 currScriptCode.setCurrLine(line);
             	CFTCallStackFrame caller=new CFTCallStackFrame("<interactive-input>");
 
-                Value result = objGlobal.getRuntime().processCodeLines(stdio, caller, new FunctionBody(line, loc), new FunctionState(null,null));
+                Value result = objGlobal.getRuntime().processFunction(stdio, caller, new FunctionBody(line, loc), new FunctionState(null,null));
 
                 postProcessResult(result);
                 showSystemLog();

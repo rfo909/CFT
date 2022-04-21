@@ -64,7 +64,7 @@ public class ScriptState {
       if (codeLines != null) {
           // execute code line
           Runtime rt=new Runtime(objGlobal);
-          Value v = rt.processCodeLines(stdio, caller, codeLines, new FunctionState(func,params));
+          Value v = rt.processFunction(stdio, caller, codeLines, new FunctionState(func,params));
           return v;
       }
       

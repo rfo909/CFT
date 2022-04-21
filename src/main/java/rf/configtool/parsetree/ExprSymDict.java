@@ -48,7 +48,7 @@ public class ExprSymDict extends ExprCommon {
     public Value resolve (Ctx ctx) throws Exception {
         ObjDict x=new ObjDict();
         for (String name:identifiers) {
-            x.set(name,ctx.resolveProgramLine(name));
+            x.set(name,ctx.resolveCodeSpaceString(name));
         }
         return new ValueObj(x);
     }

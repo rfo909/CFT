@@ -320,7 +320,7 @@ public class ObjGlobal extends Obj {
         if (onLoad != null) {
             try {
             	CFTCallStackFrame caller=new CFTCallStackFrame("Script " + scriptName+":onLoad");
-                this.runtime.processCodeLines(stdio, caller, onLoad, new FunctionState("onLoad"));
+                this.runtime.processFunction(stdio, caller, onLoad, new FunctionState("onLoad"));
             } catch (Exception ex) {
                 stdio.println("onLoad function failed with exception");
             }
@@ -621,7 +621,7 @@ public class ObjGlobal extends Obj {
             String str=getString("str",params,0);
             SourceLocation loc=new SourceLocation("<eval>", 0, 0);
         	CFTCallStackFrame caller=new CFTCallStackFrame("eval");
-            return runtime.processCodeLines(ctx.getStdio(), caller, new FunctionBody(str, loc),new FunctionState(null,null));
+            return runtime.processFunction(ctx.getStdio(), caller, new FunctionBody(str, loc),new FunctionState(null,null));
         }
     }
 

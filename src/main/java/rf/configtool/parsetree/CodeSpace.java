@@ -28,6 +28,10 @@ import rf.configtool.main.Ctx;
  * Given a TokenStream, identify a sequence of Stmt objects, until reaching a PIPE_SYMBOL. This
  * class constructor is the top element of the recursive-descent parser that identifies every
  * element of the language, and in turn implements methods for executing or resolving them.
+ * 
+ * Above this level, see the FunctionBody and ValueBlock classes elsewhere, which deal with
+ * various combinations of code spaces. Function bodies allow multiple code spaces, separated
+ * by PIPE, as do Inner blocks, Lambdas and classes, while local blocks do not.
  */
 public class CodeSpace extends LexicalElement {
     

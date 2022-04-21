@@ -831,7 +831,7 @@ public class ValueString extends Value {
             sb.append(val.substring(currPos,pos));
             currPos=pos2+after.length();
             String expr=val.substring(pos+before.length(),pos2);
-            Value v=ctx.subNewData(true).resolveProgramLine(expr);
+            Value v=ctx.subNewData(true).resolveCodeSpaceString(expr);
             
             if (v instanceof ValueList) {
                 List<String> renderResult=new ArrayList<String>();

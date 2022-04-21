@@ -260,18 +260,19 @@ public class Ctx {
     
     // Utility method
     /**
-     * Resolve ProgramLine (sequence of statements) on string format - does not support PIPE
+     * Resolve Code Space (sequence of statements) on string format - does not support PIPE as it 
+     * breaks a code body into multiple code spaces.
      */
-    public Value resolveProgramLine (String s) throws Exception {
+    public Value resolveCodeSpaceString (String s) throws Exception {
         Lexer p=new Lexer();
         p.processLine(new ScriptSourceLine(new SourceLocation(), s));
         
         TokenStream ts = p.getTokenStream();
-        CodeSpace progLine=new CodeSpace(ts);
+        CodeSpace codeSpace=new CodeSpace(ts);
         if (!ts.atEOF()) throw new Exception(ts.error("Invalid token - expected EOF"));
         
         Ctx ctx=this.sub();
-        progLine.execute(ctx);
+        codeSpace.execute(ctx);
         return ctx.getResult();
     }
 }

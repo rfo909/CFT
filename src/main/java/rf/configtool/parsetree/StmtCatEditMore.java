@@ -101,7 +101,7 @@ public class StmtCatEditMore extends StmtShellInteractive {
         
     	CFTCallStackFrame caller=new CFTCallStackFrame("Lambda for " + name);
 
-        Value ret = ctx.getObjGlobal().getRuntime().processCodeLines(ctx.getStdio(), caller, codeLines, new FunctionState(null,null));
+        Value ret = ctx.getObjGlobal().getRuntime().processFunction(ctx.getStdio(), caller, codeLines, new FunctionState(null,null));
         if (!(ret instanceof ValueBlock)) throw new Exception("Not a macro: " + macro + " ---> " + ret.synthesize());
         
         ValueBlock macroObj=(ValueBlock) ret;

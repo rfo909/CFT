@@ -38,6 +38,12 @@ import rf.configtool.util.Hash;
  * a sequence CodeSpace objects, each representing what is called "loop space"
  * or "code space" in the docs. Function code is split into many such by the PIPE_SYMBOL.
  * 
+ * NOTE that the ScriptSourceLines are a modified version of the lines that are read
+ * from file, in that here-documents have been modified into code creating corresponding
+ * lists, and so we parse only "NORMAL" and "GENERATED" ScriptSourceLines, not "ORIGINAL",
+ * which is used when saving the script, to write it in the same form it was read, before
+ * the pre-processing into GENERATED lines where applicable.
+ * 
  * The CodeSpace constructor identifies code as a sequence of statements, and
  * builds a complete parse tree from the code.
  * 

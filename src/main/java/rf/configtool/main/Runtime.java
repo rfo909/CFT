@@ -25,7 +25,8 @@ import rf.configtool.main.runtime.reporttool.Report;
 import rf.configtool.parsetree.CodeSpace;
 
 /**
- * Executing one statement at a time, possibly saving last statement in symbol table.
+ * Executing function body one CodeSpace at a time, managing transfer of result from one
+ * code space to data stack of next, or if last code space, function return value.
  */
 public class Runtime {
     
@@ -39,7 +40,7 @@ public class Runtime {
      * Returns value from executing program line. Note may return java null if no return
      * value identified
      */
-    public Value processCodeLines (Stdio stdio, CFTCallStackFrame caller, FunctionBody lines, FunctionState functionState) throws Exception {
+    public Value processFunction (Stdio stdio, CFTCallStackFrame caller, FunctionBody lines, FunctionState functionState) throws Exception {
 
     	stdio.pushCFTCallStackFrame(caller);
 

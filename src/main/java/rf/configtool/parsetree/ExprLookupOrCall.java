@@ -76,7 +76,7 @@ public class ExprLookupOrCall extends ExprCommon {
             // execute code line
             Runtime rt=new Runtime(objGlobal);
         	CFTCallStackFrame caller=new CFTCallStackFrame(getSourceLocation(), "Calling " + ident);
-            return rt.processCodeLines(ctx.getStdio(), caller, codeLines, new FunctionState(ident, values));
+            return rt.processFunction(ctx.getStdio(), caller, codeLines, new FunctionState(ident, values));
         }
         
         throw new SourceException(getSourceLocation(), "unknown symbol '" + ident + "'");

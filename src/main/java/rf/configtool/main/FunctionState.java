@@ -30,14 +30,12 @@ import rf.configtool.main.runtime.Value;
  * 
  * Contains function parameters and assigned variables.
  * 
- * 2020-06-13 Created parent pointers to support macros with parameters inside functions.
- *
  */
 public class FunctionState {
 
 	private String scriptFunctionName;  
 		// Used by Sys.currFunction
-		// Note: FunctionState objects do not provide a full stack of calls; they are
+		// Note: FunctionState objects (via parent) do not provide a full stack of calls; they are
 		// only stacked (via parent pointer) for sub-scopes within functions.
 	
     private FunctionState parent;
