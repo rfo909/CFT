@@ -718,26 +718,24 @@ public class ObjGlobal extends Obj {
             return "println";
         }
         public String getShortDesc() {
-            return "println(str) - print string";
+            return "println([str[,...]]?) - print string";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             Stdio stdio=ctx.getStdio();
-
-            if (params.size() == 1) {
-                String s=params.get(0).getValAsString();
-                s=TabUtil.substituteTabs(s, 4);
-                int w=ctx.getObjGlobal().getRoot().getObjTerm().getScreenWidth();
-                if (s.length() >= w-1) {
-                    s=s.substring(0, w-2)+"+";
-                }
-                stdio.println(s);
-                return new ValueString(s);
-            } else if (params.size() == 0) {
-                stdio.println();
-                return new ValueString("");
+            StringBuffer sb=new StringBuffer();
+            for (int i=0; i<params.size(); i++) {
+            	if (i>0) sb.append(" ");
+            	sb.append(params.get(i).getValAsString());
             }
+            String s=sb.toString();
 
-            throw new Exception("Expected no parameter or string parameter");
+            s=TabUtil.substituteTabs(s, 4);
+            int w=ctx.getObjGlobal().getRoot().getObjTerm().getScreenWidth();
+            if (s.length() >= w-1) {
+                s=s.substring(0, w-2)+"+";
+            }
+            stdio.println(s);
+            return new ValueString(s);
         }
     }
     
