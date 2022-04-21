@@ -30,7 +30,7 @@ import rf.configtool.lexer.SourceLocation;
 import rf.configtool.lexer.Token;
 import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.CFTCallStackFrame;
-import rf.configtool.main.CodeLine;
+import rf.configtool.main.ScriptSourceLine;
 import rf.configtool.main.FunctionCodeLines;
 import rf.configtool.main.FunctionState;
 import rf.configtool.main.ObjGlobal;
@@ -328,7 +328,7 @@ public class Root {
             // identify input tokens
             Lexer p = new Lexer();
             SourceLocation loc = new SourceLocation("input", 0, 0);
-            p.processLine(new CodeLine(loc, line));
+            p.processLine(new ScriptSourceLine(loc, line));
             ts = p.getTokenStream();
 
             // execute input

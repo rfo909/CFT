@@ -30,7 +30,7 @@ import rf.configtool.lexer.SourceLocation;
  * A "normal" line is one that is read from file and parsed.
  *
  */
-public class CodeLine {
+public class ScriptSourceLine {
     public static final int TYPE_LINE_NORMAL = 0;
     public static final int TYPE_LINE_ORIGINAL = 1;
     public static final int TYPE_LINE_GENERATED = 2;
@@ -43,11 +43,11 @@ public class CodeLine {
         return line.trim().length()==0;
     }
     
-    public CodeLine(SourceLocation loc, String line) {
+    public ScriptSourceLine(SourceLocation loc, String line) {
         this(loc,line,TYPE_LINE_NORMAL);
     }
     
-    public CodeLine(SourceLocation loc, String line, int type) {
+    public ScriptSourceLine(SourceLocation loc, String line, int type) {
         super();
         this.loc = loc;
         this.line = line;

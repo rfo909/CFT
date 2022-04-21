@@ -26,7 +26,7 @@ import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueString;
 import rf.configtool.main.runtime.reporttool.Report;
-import rf.configtool.parsetree.ProgramLine;
+import rf.configtool.parsetree.ProgramCodeSpace;
 import rf.configtool.util.Hash;
 
 /**
@@ -50,22 +50,22 @@ public class FunctionCodeLines {
 
     private static CodeLinesParseCache clpCache = new CodeLinesParseCache();
 
-    private List<CodeLine> codeLines;
+    private List<ScriptSourceLine> sourceLines;
     private String hashString;
 
     public FunctionCodeLines(String singleLine, SourceLocation loc) {
         // SourceLocation loc=new SourceLocation("<>", 0, 0);
-        codeLines = new ArrayList<CodeLine>();
-        codeLines.add(new CodeLine(loc, "")); // blank line between previous function and this one
-        codeLines.add(new CodeLine(loc, singleLine));
+        sourceLines = new ArrayList<ScriptSourceLine>();
+        sourceLines.add(new ScriptSourceLine(loc, "")); // blank line between previous function and this one
+        sourceLines.add(new ScriptSourceLine(loc, singleLine));
     }
 
-    public FunctionCodeLines(List<CodeLine> saveFormat) {
-        this.codeLines = saveFormat;
+    public FunctionCodeLines(List<ScriptSourceLine> saveFormat) {
+        this.sourceLines = saveFormat;
     }
 
     public SourceLocation getSourceLocation() {
-    	for (CodeLine cl:codeLines) {
+    	for (ScriptSourceLine cl:sourceLines) {
     		if (cl.getLoc() != null) return cl.getLoc();
     	}
     	return null;
@@ -75,8 +75,8 @@ public class FunctionCodeLines {
         // SourceLocation loc=new SourceLocation("<>", 0, 0);
 
         // keep initial non-code lines, if present
-        List<CodeLine> x = new ArrayList<CodeLine>();
-        for (CodeLine s : codeLines) {
+        List<ScriptSourceLine> x = new ArrayList<ScriptSourceLine>();
+        for (ScriptSourceLine s : sourceLines) {
             if (s.isWhitespace()) {
                 x.add(s);
             } else {
@@ -84,18 +84,18 @@ public class FunctionCodeLines {
             }
         }
         if (x.size() == 0)
-            x.add(new CodeLine(loc, "")); // at least one empty line before function body
+            x.add(new ScriptSourceLine(loc, "")); // at least one empty line before function body
 
         // then add the new single line, without any attempts at breaking it up
-        x.add(new CodeLine(loc, singleLine));
-        this.codeLines = x;
+        x.add(new ScriptSourceLine(loc, singleLine));
+        this.sourceLines = x;
         this.hashString = null;
     }
 
     public List<String> getSaveFormat() {
         List<String> list = new ArrayList<String>();
-        for (CodeLine c : codeLines) {
-            if (c.getType() == CodeLine.TYPE_LINE_GENERATED)
+        for (ScriptSourceLine c : sourceLines) {
+            if (c.getType() == ScriptSourceLine.TYPE_LINE_GENERATED)
                 continue; // write NORMAL and ORIGINAL
             list.add(c.getLine());
         }
@@ -103,7 +103,7 @@ public class FunctionCodeLines {
     }
 
     public String getFirstNonBlankLine() {
-        for (CodeLine s : codeLines) {
+        for (ScriptSourceLine s : sourceLines) {
             if (s.isWhitespace())
                 continue;
             return s.getLine();
@@ -113,7 +113,7 @@ public class FunctionCodeLines {
 
     public boolean hasMultipleCodeLines() {
         int count = 0;
-        for (CodeLine s : codeLines) {
+        for (ScriptSourceLine s : sourceLines) {
             if (s.isWhitespace())
                 continue;
             count++;
@@ -128,20 +128,20 @@ public class FunctionCodeLines {
      * Parse the sequence of CodeLine objects, and return TokenStream
      */
     private TokenStream getTokenStream() throws Exception {
-        Lexer p = new Lexer();
-        for (CodeLine cl : codeLines) {
-            if (cl.getType() == CodeLine.TYPE_LINE_ORIGINAL)
+        Lexer lexer = new Lexer();
+        for (ScriptSourceLine cl : sourceLines) {
+            if (cl.getType() == ScriptSourceLine.TYPE_LINE_ORIGINAL)
                 continue; // only execute NORMAL and GENERATED
-            p.processLine(cl);
+            lexer.processLine(cl);
         }
-        return p.getTokenStream();
+        return lexer.getTokenStream();
     }
 
     private synchronized String getHash() throws Exception {
         if (this.hashString == null) {
             Hash hash = new Hash();
-            for (CodeLine cl : codeLines) {
-                if (cl.getType() == CodeLine.TYPE_LINE_ORIGINAL)
+            for (ScriptSourceLine cl : sourceLines) {
+                if (cl.getType() == ScriptSourceLine.TYPE_LINE_ORIGINAL)
                     continue;
                 hash.add(cl.getLine().getBytes("UTF-8"));
             }
@@ -151,19 +151,19 @@ public class FunctionCodeLines {
     }
 
     /**
-     * Return code lines as sequence of ProgramLine objects, created by
+     * Return code as sequence of ProgramCodeSpace objects, created by
      * splitting code body by PIPE. This involves invoking the recursive
-     * descent parser, building a parse tree (ProgramLine constructor)
+     * descent parser, building a parse tree 
      */
-    public List<ProgramLine> getProgramLines() throws Exception {
+    public List<ProgramCodeSpace> getCodeSpaces() throws Exception {
         String key = getHash();
-        List<ProgramLine> progLines = clpCache.get(key);
+        List<ProgramCodeSpace> progLines = clpCache.get(key);
 
         if (progLines == null) {
             TokenStream ts = getTokenStream();
-            progLines = new ArrayList<ProgramLine>();
+            progLines = new ArrayList<ProgramCodeSpace>();
             for (;;) {
-                progLines.add(new ProgramLine(ts));
+                progLines.add(new ProgramCodeSpace(ts));
                 if (ts.matchStr(PIPE_SYMBOL))
                     continue;
                 break;

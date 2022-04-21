@@ -523,7 +523,8 @@ public class ObjSys extends Obj {
             for (String name : names) {
                 FunctionCodeLines code = ctx.getObjGlobal().getCurrScriptCode().getFunctionCodeLines(name);
                 try {
-                    code.getProgramLines(); // parses text
+                    code.getCodeSpaces(); 
+                    	// parses text but as this is "lint", we don't execute anything, only capturing exceptions
                 } catch (Exception ex) {
                     result.add(new ValueString(name + " : " + ex.getMessage()));
                 }

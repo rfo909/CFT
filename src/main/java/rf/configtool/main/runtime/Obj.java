@@ -26,14 +26,14 @@ import java.util.List;
 import rf.configtool.lexer.Lexer;
 import rf.configtool.lexer.SourceLocation;
 import rf.configtool.lexer.TokenStream;
-import rf.configtool.main.CodeLine;
+import rf.configtool.main.ScriptSourceLine;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.ObjGlobal;
 import rf.configtool.main.OutText;
 import rf.configtool.main.Version;
 import rf.configtool.main.runtime.lib.ObjClosure;
 import rf.configtool.main.runtime.lib.ObjDict;
-import rf.configtool.parsetree.ProgramLine;
+import rf.configtool.parsetree.ProgramCodeSpace;
 
 /**
  * Superclass of all object types, including Value hierarchy
@@ -218,9 +218,9 @@ public abstract class Obj {
             String s=obj.synthesize();
 
             Lexer p=new Lexer();
-            p.processLine(new CodeLine(new SourceLocation(), s));
+            p.processLine(new ScriptSourceLine(new SourceLocation(), s));
             TokenStream ts = p.getTokenStream();
-            ProgramLine progLine=new ProgramLine(ts);
+            ProgramCodeSpace progLine=new ProgramCodeSpace(ts);
             
             Ctx ctx=callCtx.sub();
             progLine.execute(ctx);

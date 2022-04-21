@@ -19,7 +19,7 @@ package rf.configtool.main;
 
 import java.util.*;
 
-import rf.configtool.parsetree.ProgramLine;
+import rf.configtool.parsetree.ProgramCodeSpace;
 
 /**
  * Caching parsed function bodies, with periodic purge, as command line inputs are
@@ -29,7 +29,7 @@ public class CodeLinesParseCache {
     
     public static final long timeout = 60000L; // one minute
 
-    private Map<String,List<ProgramLine>> cache=new HashMap<String,List<ProgramLine>>();
+    private Map<String,List<ProgramCodeSpace>> cache=new HashMap<String,List<ProgramCodeSpace>>();
     private Map<String,Long> used=new HashMap<String,Long>();
     
     private long lastPurge;
@@ -38,12 +38,12 @@ public class CodeLinesParseCache {
         lastPurge=System.currentTimeMillis();
     }
     
-    public synchronized List<ProgramLine> get (String key) {
+    public synchronized List<ProgramCodeSpace> get (String key) {
         used.put(key, System.currentTimeMillis());
         return cache.get(key);
     }
     
-    public synchronized void put (String key, List<ProgramLine> value) {
+    public synchronized void put (String key, List<ProgramCodeSpace> value) {
         cache.put(key, value);
         used.put(key, System.currentTimeMillis());
         

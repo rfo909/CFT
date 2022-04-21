@@ -29,11 +29,11 @@ import rf.configtool.main.Ctx;
  * class constructor is the top element of the recursive-descent parser that identifies every
  * element of the language, and in turn implements methods for executing or resolving them.
  */
-public class ProgramLine extends LexicalElement {
+public class ProgramCodeSpace extends LexicalElement {
     
     private List<Stmt> statements=new ArrayList<Stmt>();
 
-    public ProgramLine (TokenStream ts) throws Exception {
+    public ProgramCodeSpace (TokenStream ts) throws Exception {
         super(ts);
         while (!ts.atEOF() && !ts.peekStr(FunctionCodeLines.PIPE_SYMBOL) && !ts.peekStr("}")) {
             Stmt stmt=Stmt.parse(ts);

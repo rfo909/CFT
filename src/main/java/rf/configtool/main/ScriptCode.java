@@ -255,7 +255,7 @@ public class ScriptCode {
         }
         BufferedReader reader=new BufferedReader(new FileReader(savefile));
         
-        List<CodeLine> lines=new ArrayList<CodeLine>();
+        List<ScriptSourceLine> lines=new ArrayList<ScriptSourceLine>();
         CodeInlineDocument inlineDoc=null;
        
         for(int lineNumber=1; true; lineNumber++) {
@@ -280,21 +280,21 @@ public class ScriptCode {
             if (inlineDoc != null) {
                 // check for end marker
                 if (trimmed.startsWith(">>>") && inlineDoc.matchesEofMark(getInlineIdentifier(trimmed, loc, "expected identifier following sequence of >>> and space"))) {
-                    lines.add(new CodeLine(loc,s,CodeLine.TYPE_LINE_ORIGINAL));
+                    lines.add(new ScriptSourceLine(loc,s,ScriptSourceLine.TYPE_LINE_ORIGINAL));
                     // add generated code line
-                    lines.add(new CodeLine(loc,inlineDoc.createCodeLine(),CodeLine.TYPE_LINE_GENERATED));
+                    lines.add(new ScriptSourceLine(loc,inlineDoc.createCodeLine(),ScriptSourceLine.TYPE_LINE_GENERATED));
                     inlineDoc=null;
                     continue;
                 }
                 // add raw text line
                 inlineDoc.addLine(s);
-                lines.add(new CodeLine(loc,s,CodeLine.TYPE_LINE_ORIGINAL));
+                lines.add(new ScriptSourceLine(loc,s,ScriptSourceLine.TYPE_LINE_ORIGINAL));
                 continue;
             }
             if (trimmed.startsWith("<<<")) {
                 String inlineEofMark=getInlineIdentifier(trimmed, loc, "expected identifier following sequence of <<< and space");
                 inlineDoc=new CodeInlineDocument(inlineEofMark, loc);
-                lines.add(new CodeLine(loc, s, CodeLine.TYPE_LINE_ORIGINAL));
+                lines.add(new ScriptSourceLine(loc, s, ScriptSourceLine.TYPE_LINE_ORIGINAL));
                 continue;
             }
 
@@ -317,11 +317,11 @@ public class ScriptCode {
                 if (privateFunctions.contains(name)) privateFunctions.remove(name);
                 if (isPrivate) privateFunctions.add(name);
                 
-                lines=new ArrayList<CodeLine>();
+                lines=new ArrayList<ScriptSourceLine>();
                 continue;
             } 
                 
-            lines.add(new CodeLine(loc,s));
+            lines.add(new ScriptSourceLine(loc,s));
         }
         
         reader.close();

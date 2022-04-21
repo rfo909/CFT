@@ -22,7 +22,7 @@ import java.util.List;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueString;
 import rf.configtool.main.runtime.reporttool.Report;
-import rf.configtool.parsetree.ProgramLine;
+import rf.configtool.parsetree.ProgramCodeSpace;
 
 /**
  * Executing one statement at a time, possibly saving last statement in symbol table.
@@ -46,16 +46,16 @@ public class Runtime {
         if (functionState == null) throw new Exception("No functionState");
         
         
-        List<ProgramLine> progLines=lines.getProgramLines();
+        List<ProgramCodeSpace> codeSpaces=lines.getCodeSpaces();
 
         Value retVal=null;
         
-        for (ProgramLine progLine:progLines) {
+        for (ProgramCodeSpace codeSpace:codeSpaces) {
             Ctx ctx=new Ctx(stdio, objGlobal, functionState);
             
             if (retVal != null) ctx.push(retVal);
             
-            progLine.execute(ctx);
+            codeSpace.execute(ctx);
             
             OutText outText=ctx.getOutText();
     

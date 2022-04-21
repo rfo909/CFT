@@ -41,7 +41,7 @@ public class ExprBlock extends ExprCommon {
     private int mode;
     private String className;
     
-    private List<ProgramLine> programLines=new ArrayList<ProgramLine>();
+    private List<ProgramCodeSpace> programLines=new ArrayList<ProgramCodeSpace>();
     
     // See Runtime.processCodeLines() method to extend to loops and supporting PROGRAM_LINE_SEPARATOR - must in addition 
     // add '}' as terminator character inside ProgramLine
@@ -66,10 +66,10 @@ public class ExprBlock extends ExprCommon {
         	ts.matchStr("{","expected '{'");
         }
         
-        List<ProgramLine> progLines=new ArrayList<ProgramLine>();
+        List<ProgramCodeSpace> progLines=new ArrayList<ProgramCodeSpace>();
         if (mode==MODE_LOCAL) {
             // only one program line as "PIPE" not allowed
-            progLines.add(new ProgramLine(ts));
+            progLines.add(new ProgramCodeSpace(ts));
             
             if (ts.matchStr(FunctionCodeLines.PIPE_SYMBOL)) {
                 // specific exception for this case
@@ -79,7 +79,7 @@ public class ExprBlock extends ExprCommon {
         } else {
             // INNER, LAMBDA and CLASS
             for(;;) {
-                progLines.add(new ProgramLine(ts));
+                progLines.add(new ProgramCodeSpace(ts));
                 if (ts.matchStr(FunctionCodeLines.PIPE_SYMBOL)) continue;
                 break;
             }

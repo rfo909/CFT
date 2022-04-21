@@ -20,7 +20,7 @@ package rf.configtool.lexer;
 import java.io.*;
 import java.util.ArrayList;
 
-import rf.configtool.main.CodeLine;
+import rf.configtool.main.ScriptSourceLine;
 import rf.configtool.main.SourceException;
 
 /**
@@ -63,7 +63,7 @@ public class Lexer {
     }
   
 
-    public void processLine (CodeLine cl) throws Exception {
+    public void processLine (ScriptSourceLine cl) throws Exception {
         String line=cl.getLine();
         CharSource source=new CharSource();
         SourceLocation loc=cl.getLoc();

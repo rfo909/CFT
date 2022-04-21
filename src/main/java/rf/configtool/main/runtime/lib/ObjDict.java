@@ -29,7 +29,7 @@ import rf.configtool.lexer.Lexer;
 import rf.configtool.lexer.SourceLocation;
 import rf.configtool.lexer.Token;
 import rf.configtool.lexer.TokenStream;
-import rf.configtool.main.CodeLine;
+import rf.configtool.main.ScriptSourceLine;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.runtime.ColList;
 import rf.configtool.main.runtime.Function;
