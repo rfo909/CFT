@@ -202,7 +202,7 @@ P(3,Lambda{P(1)}) => processList
 #
 # Example of use
 #
-#   # --- create monitor object, set limit of active running processes
+#   # --- create monitor object, decide limit of active running processes
 #   mon = Util:ProcessMonitor
 #   limit = 4 
 # 
@@ -228,7 +228,7 @@ Dict.set("list",List)
         self.list->data assert(data.proc.isDone) out(data)
     })
     .set("Lwait",Lambda{
-        P(1)=>limit
+        P(1,1)=>limit
         P(2,false)=>verbose
         if (limit<1) limit=1  ## less-than in test below
         loop

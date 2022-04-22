@@ -301,14 +301,14 @@ v3.5.0
 
 <h2>Windows backslash</h2>
 <p>
-	Note that backslash is NOT an escape character in CFT, so no need to escape it.
+	Note that backslash is NOT an escape character in CFT, so just use it like any other character.
 </p>
 <pre>
 	Dir("c:\program files\")
 	/ProgramFilesDir
 </pre>
 <p>
-	This of course goes interactively as well:
+	This goes interactively as well:
 </p>
 <pre>
 	$ cd d:\logs
@@ -336,6 +336,27 @@ v3.5.0
 </pre>
 
 
+<h2>Shell commands not suited in functions</h2>
+<p>
+  Due to how the "shell commands" (cd and ls, cat and more + edit) parse the command line (globbing), they
+  are not suited for running inside function code.
+</p>
+<p>
+  Function code should instead use the Dir and File functions:
+</p>
+<pre>
+  dir = Dir.sub("xyz")
+  dir.create
+  dir.cd  # set current dir
+
+  dir.files  # list content in directory
+  dir.dirs
+
+  Lib:m(dir.file("x.txt"))   # The Lib script contains function "m" for paging through a file
+  Lib:e(dir.file("x.txt"))   # "e" for opening file in editor
+</pre>
+
+
 
 <h2>No shell-like destructive commands!</h2>
 <p>
@@ -345,14 +366,27 @@ v3.5.0
 	This is by choice.
 </p>
 <p>
-  The reason is to force the user to use regular CFT syntax, that is, create script code, for 
-  better security. 
+  The reason is to encourage the user to use regular CFT syntax, and create functions for often
+  repeated needs. The "protect" functionality helps avoid mistakes such as deleting or modifying 
+  directories and files that should not be touched. 
 </p>
 <p>
 	Alternatively one can use "bang commands" or the shell function. Can also use the
   shortcut @fm, which opens a graphical file manager for the current directory.
 </p>
-
+<p>
+  Bang commands are commands that start with "!", and are sent to the shell for execution.
+</p>
+<pre>
+  $ !rm x.txt
+</pre>
+<p>
+  The shell command runs bash or powershell (configurable in CFT.props) in the foreground. When
+  exiting the shell, you are back at CFT.
+</p>
+<pre>
+  $ shell
+</pre>
 
 
 
@@ -390,14 +424,16 @@ v3.5.0
   $ &amp; someFunction(...), "String description"
 </pre>
 
-
+<p>
+  The '&' way to run background jobs can be used in functions, as a light-weight alternative to
+  the SpawnProcess() built-in function.
+</p>
 
 
 <h1>The "protect" mechanism</h1>
 <p>
-  Performing changes, such as copying, deleting and creating files, is supposed to be scripted
-  with code, so no "command line" style functionality exists for this. Alternatively one can use
-  the "shell" command, or "bang" commands, which are sent through to the shell.
+  Regularly performing changes, such as copying, deleting and creating files, should be scripted
+  with code. Therefore, no "command line" style functionality exists for this..
 </p>
 <pre>
   $ &lt;DirExpression&gt;.file("xxx.txt").delete
@@ -408,7 +444,7 @@ v3.5.0
   files or directories: <i>the "protect" mechanism</i>.
 </p>
 <pre>
-  $ Dir("/someDir/logs").protect
+  $ Dir("/someNfsDir/logs").protect
   $ /LogDir
 </pre>
 <p>
@@ -425,7 +461,7 @@ v3.5.0
 
 <p>
 	This protects our script code from doing bad things, but also interactively, as we tend to call
-  functions like LogDir from the command line instead of typing Dir("/somedir/logs"). 
+  functions like LogDir from the command line instead of typing Dir("/someNfsdir/logs"). 
 </p>
 
 
@@ -527,10 +563,11 @@ v3.5.0
 
 <p>
   Many functions are available on a List object. One frequently used is "nth", which
-  gets a specific element, defaulting to 0 if no argument.
+  gets a specific element, defaulting to 0 if no argument, but there also exist "first" and "last"
+  and a few others.
 </p>
 <pre>
-  $ List("a","b","c").nth
+  $ List("a","b","c").first
   &lt;String&gt;
   a
 </pre>
@@ -557,7 +594,7 @@ v3.5.0
 </pre>
 <p>
   This line of code generates a list of all java files under the current directory or sub-directories.
-  When we are satisfied with the result of the code line, we give it a name.
+  When we see that the code works, we give it a name.
 </p>
 
 <pre>
@@ -577,12 +614,12 @@ v3.5.0
 
 
 <p>
-  The single "arrow" followed by an identifier is the "for each" construct, with the identifier becoming
+  The "single arrow" followed by an identifier is the "for each" construct, with the identifier becoming
   the "loop variable".  The out() statement is used to generate output from the loop.
 </p>
 <p>
-  The "pipe" character terminates the loop, and delivers the result from the loop (list of int) to the next part,
-  where the "_" (underscore) symbol picks it off the stack, then calls the sum() function on it,
+  The "PIPE" character ("|") terminates the loop, and delivers the result from the loop (in this case a list of int) to the next part,
+  where the "_" (underscore) function picks it off the stack, then calls the sum() function on it,
   returning a single int value.
 </p>
 <p>
@@ -644,7 +681,7 @@ v3.5.0
   /textfiles
 </pre>
 <p>
-  This function lists all files of type .java and .txt
+  This function lists all files of type .java and .txt under current directory.
 </p>
 
 
@@ -668,7 +705,7 @@ v3.5.0
 </p>
 <p>
   To access or create files in other directories, enter an absolute or relative
-  path in the parameter to File(), or use the file() function inside
+  path in the parameter to File(), or use the .file() function inside
   some Dir object:
 </p>
 <pre>
@@ -686,6 +723,33 @@ v3.5.0
 <pre>
   more x.txt
 </pre>
+<p>
+  To do the same with function code:
+</p>
+<pre>
+  SomeDir.file("x.txt") => file
+  Lib:m(file)
+</pre>
+
+
+
+
+<h2>Edit a (text) file</h2>
+
+<p>
+  To edit a text file
+</p>
+<pre>
+  edit x.txt
+</pre>
+<p>
+  To do the same with function code:
+</p>
+<pre>
+  SomeDir.file("x.txt") => file
+  Lib:e(file)
+</pre>
+
 
 
 
@@ -700,6 +764,8 @@ v3.5.0
 
 
 
+
+
 <h2>Encoding</h2>
 <p>
   Default encoding is "ISO_8859_1", but this can be changed, for example:
@@ -707,6 +773,7 @@ v3.5.0
 <pre>
   File("x.txt").encoding("UTF-8")
 </pre>
+
 
 
 
@@ -749,12 +816,21 @@ v3.5.0
   object offers multiple member functions, one of which is <b>.files()</b>, which produces a list of files in 
   the directory. Another is <b>.allFiles()</b> which return files from all subdirectories as well.
 </p>
+<p>
+  These support "globbing", which is to use "*" to match groups of files.
+</p>
+<pre>
+  $ Dir.files("*.txt")
+  $ Dir.allDirs(".git")
+</pre>
+
 
 
 <h2>Create a subdirectory</h2>
 <pre>
   Dir.sub("someDir").create
 </pre>
+
 
 
 <h2>Parent directory</h2>
@@ -765,28 +841,43 @@ v3.5.0
   Dir.sub("..")
 </pre>
 
+
+
 <h2>Get files in a directory</h2>
 <pre>
   Dir.files
 </pre>
+
 
 <h2>Create a file in a directory</h2>
 <pre>
   Dir.file("x.txt").create("something")
 </pre>
 
+
+
 <h2>Get immediate directories in a directory</h2>
 <pre>
   Dir.dirs
 </pre>
+
+
 <h2>Get all files recursively under a directory</h2>
 <pre>
   Dir.allFiles
 </pre>
+
+
 <h2>Get all directories recursively under a directory:</h2>
 <pre>
   Dir.allDirs
 </pre>
+<p>
+  Note: these are delivered in a sequence so that if all are empty of files, they can
+  be safely deleted (leaf-directories first, root last). 
+</p>
+
+
 <h2>Delete a sub-directory</h2>
 <p>
   The sub-directory must be empty
@@ -795,13 +886,17 @@ v3.5.0
   Dir.sub("something").delete
 </pre>
 
+
+
+
 <h2>Set current directory</h2>
 <p>
   Apart from navigating interactively, to set current directory via code:
 </p>
 <pre>
-  Dir.setAsCurrentDir
+  Dir.cd
 </pre>
+
 
 
 <h2>Newest file in directory</h2>
@@ -832,7 +927,7 @@ v3.5.0
 </ul>
 <p>
   All values in CFT are objects, which may contain functions. Strings can be written using double
-  or single quotes. 
+  or single quotes.  
 </p>
 
 <h2>String literals</h2>
@@ -860,11 +955,11 @@ v3.5.0
   @ this is a raw string, extending to the end of the line
 </pre>
 <p>
-  Since '@' is the shortcut character, you can not enter a raw string in the 
-  command line interface. To test interactively, type:
+  Since '@' is the shortcut character, you can not enter a raw string directly in the 
+  command line interface, but you can do this:
 </p>
 <pre>
-  $ "" + @ something
+  $ "" + @ something ...
 </pre>
 
 
@@ -877,53 +972,34 @@ v3.5.0
   $ x=Dict x.set("a",1) x.get("a")
   1
 </pre>
-
-
-<h3>Properties as functions</h3>
 <p>
-  For readability, values with names that are valid identifiers, and don't conflict with regular 
-  member functions of Dict, can be referenced via dotted notation
+  Note: We will often store values by names that are valid identifiers. For these we can use dotted notation
+  both when setting and fetching the values:
 </p>
 <pre>
-  $ Dict.set("a","b")
-  $ /d
-  $ d.a
-  b
-</pre>  
-
-
-<h3>Setting values with identifier names</h3>
-<p>
-  Another simplification is that to set a value in the dictionary, if that value has a name
-  that is a valid identifier, the following two do the same:
-</p>
-<pre>
-  Dict.set("x",1)
-  Dict.x=1
+  $ x=Dict x.a=1 x.a=x.a+1 x.a  # returns 2
 </pre>
-<p>
-  Combining this with properties as functions:
-</p>
-<pre>
-  Dict.a=1 => data
-  data.a=data.a+1
-  data.a  
-  # 2
-</pre>
+
+
+
+
+
 
 
 
 <h3>SymDict</h3>
 <p>
   A special global expression, SymDict is used to create a dictionary from a list of
-  symbols, which must be present as local variables, or parameterless functions. This
+  symbols (identifiers), which must be present as local variables, or parameterless functions. This
   saves some typing. Example code:
 </p>
 <pre>
   # Without SymDict()
   a=1
   b=2
-  dict=Dict.set("a",a).set("b",b)
+  dict=Dict
+  dict.a=a
+  dict.b=b
 
   # With SymDict
   a=1
@@ -936,6 +1012,18 @@ If testing interactively, all needs to be on the same line:
 <pre>
 	$ a=1 b=2 SymDict(a,b)
 </pre>
+<p>
+  Note that assigning a value to a dict, using dotted notation, returns the Dict object, and 
+  using the underscore function, which refers to the value on the data stack, we can
+  initialize dictionaries as follows:
+</p>
+<pre>
+  Dict 
+    _.a=1
+    _.b=2
+    =&gt; dict
+  </pre>
+
 
 
 
@@ -950,6 +1038,28 @@ If testing interactively, all needs to be on the same line:
   The name can be accessed via Dict.getName() and modified/set via Dict.setName(). To
   clear, do Dict.setName(null)
 </p>
+<p>
+  This name property of dictionaries is used to convey type information for dictionaries,
+  together with "as" type checking. This is discussed in more detail elsewhere. A simple
+  example:
+</p>
+<pre>
+  Dict("Point")
+    _.x=1
+    _.y=2
+    =&gt; point
+
+  # Some function expecting a Point dictionary as parameter
+  # --
+    P(1) as &amp;Point =&gt; point
+    ...
+  /f
+</pre>
+<p>
+  The '&amp;' in front of the type is to indicate that we are interested in the name of a Dict. Omitting it
+  we can check for regular types, such as int, String, List, Dict and a whole lot of others.
+</p>
+
 
 
 <h2>Binary type</h2>
@@ -1290,9 +1400,7 @@ codeDirs = . ; code.examples ; code.lib
   Example: 
     Lib:Header("This is a test")
 </pre>
-<p>
-  Parameters are given as a list of values inside ()'s, which may be omitted if no parameters.
-</p>
+
 
 
 
@@ -1305,7 +1413,7 @@ codeDirs = . ; code.examples ; code.lib
 </p>
 <pre>
   $ ?Lib:                  # lists functions inside Lib
-  $ ?Lib:m                 # displays code of function 'm'
+  $ ?Lib:m                 # displays code of function 'm' (to page through a text file)
 </pre>
 
 
@@ -1326,7 +1434,7 @@ codeDirs = . ; code.examples ; code.lib
 <p>
   The '?' command omits these local functions, for a cleaner summary of the main functions
   of a script. To see all functions, type '??'. The local functions are
-  prefixed by a single '/' slash. 
+  then prefixed by a single '/' slash. 
 </p>
 <p>
   When inspecting
@@ -1334,7 +1442,7 @@ codeDirs = . ; code.examples ; code.lib
   also not displayed, while using "??ScriptName:" includes them. 
 </p>
 <p>
-  Also note, that "local" functions are not private in the Java sense, and so are callable
+  Also note, that "local" functions are not private in the Java sense, and are fulle callable
   from the outside. Marking functions as local is all about filtering what is shown on the
   single "?" command.
 </p>
@@ -1351,10 +1459,6 @@ codeDirs = . ; code.examples ; code.lib
 <p>
   The shortcut @scr calls this function.
 </p>
-
-
-
-
 
 
 
@@ -1421,7 +1525,7 @@ codeDirs = . ; code.examples ; code.lib
 </pre>
 
 <p>
-  As we see from the above code, code spaces don't <em>need</em> containing loops. The 
+  As we see from the above code, code spaces don't <em>need</em> to contain loops. The 
   following is perfectly legal, although a little silly.
 </p>
 <pre>
@@ -1470,7 +1574,7 @@ codeDirs = . ; code.examples ; code.lib
 </pre>
 <p>
   This is a valid function, but entering it interactively fails, because it is immediately
-  parsed and executed, and there are no parameters. To overcome this, the P() expressions
+  parsed and executed, and there are no parameter values. To overcome this, the P() expressions
   take a second parameter, which is a default value.
 </p>
 <p>
@@ -1514,7 +1618,8 @@ codeDirs = . ; code.examples ; code.lib
 <p>
   The difference is that Input remembers unique input values, and lets the user
   press enter to use the last (current) value, or enter colon to select between previous
-  (history) values. It also has functions to manipulate the history and the "current" value.
+  (history) values. It also has functions to manipulate the history and the "current" value, or
+  press colon ":" to select a previous value.
 </p>
 <p>
   The readLine() is much simpler, and allows for empty input, as Enter
@@ -1569,7 +1674,7 @@ codeDirs = . ; code.examples ; code.lib
   affecting the result of the caller.
 </p>
 <p>
-  They are like calling a function, as their inner
+  They are like calling an inline function (no parameters though), as their inner
   workings do not affect the caller, <em>except</em> that they have access to, and can
   modify local variables.
 </p>
@@ -1580,20 +1685,21 @@ codeDirs = . ; code.examples ; code.lib
     Dir.files-&gt;f
       count=Inner{
         f.read-&gt;line
-          assert(line.contains(pattern)) out(line)
+          assert(line.contains(pattern)) 
+          out(line)
         | _.length
       }
       report(f.name, count)
     /CountMatches
 </pre>
 <p>
-  Apart from how this could have been implemented better with Grep.fileCount(), this
+  Apart from how this example could have been implemented much better with Grep.fileCount(), this
   is an illustration of how Inner blocks are more general and powerful than using
   the PIPE to split function bodies into code spaces. 
 </p>
 <p>
   Of course, inner blocs can themselves be partitioned into code spaces, as we see
-  in the above example.
+  in the above example, and in turn contain blocks ...
 </p>
 
 
@@ -1601,11 +1707,13 @@ codeDirs = . ; code.examples ; code.lib
 
 <h2>Lambdas</h2>
 <p>
-  A Lambda is an object (a value) that contains code, so it can be called, with parameters. The code
+  A Lambda is an object (a value) that contains a block of code, so it can be called, with parameters. The code
   inside runs detached from the caller, and behaves exactly like a function.
 </p>
 <pre>
-  Lambda{P(1)+P(2)}
+  Lambda{
+    P(1)+P(2)
+  }
   /MyLambda
 
   $ MyLambda.call(1,2)
@@ -1613,6 +1721,10 @@ codeDirs = . ; code.examples ; code.lib
 <p>
   Can be used to create local functions inside regular functions, but mostly used to create
   closures and/or Dict objects / classes.
+</p>
+<p>
+  The above vode defines a regular function, MyLambda, that returns a Lambda object, which can
+  then be called with the .call().
 </p>
 
 
@@ -1632,7 +1744,8 @@ codeDirs = . ; code.examples ; code.lib
   can be split into parts with PIPE, just like functions.
 </p>
 <p>
-  Lambdas are "functions" as values.
+  Lambdas are callable functions as values. There is a lot more to say about Lambdas and their
+  close cousin, the Closure, later in this document.
 </p>
 
 
@@ -1655,12 +1768,10 @@ codeDirs = . ; code.examples ; code.lib
 
 
 
-
-
 <h1>List filtering with Lambda</h1>
 <p>
   Instead of using processing loops, filtering lists can also be done
-  using .filter() function.
+  using .filter() function of the List object.
 </p>
 <pre>
 "12345".chars
@@ -1668,12 +1779,15 @@ codeDirs = . ; code.examples ; code.lib
 .sum
 /t
 </pre>
+<p>
+  Here, the lambda is used to convert strings to int values.
+</p>
 
 
 
 <h2>Removing items</h2>
 <p>
-  To remove items, the Lambda should return null.
+  To remove items from the list, we let the Lambda return null.
 </p>
 <pre>
 "12345".chars.filter (Lambda{ P(1).parseInt=&gt;x if(x&gt;=3,x,null) })
@@ -1685,6 +1799,7 @@ codeDirs = . ; code.examples ; code.lib
 
 
 
+
 <h1>Conditionals - if expression</h1>
 <p>
   Conditional execution of code is done in two ways in CFT, with the first being how we
@@ -1692,8 +1807,9 @@ codeDirs = . ; code.examples ; code.lib
 </p>
 <p>
   Then there is the if-exression. It takes two forms, but is always considered an expression, not a statement.
-  The difference is that expressions always return a value, which statements need not.
+  The difference between expressions and statements, is that expressions always return a value, which statements need not.
 </p>
+
 <h3>Inline form</h3>
 <pre>
   if (condition, expr1, expr2)
@@ -1719,6 +1835,7 @@ codeDirs = . ; code.examples ; code.lib
   if (value != null, value, "defaultValue") =&gt;value
 </pre>
 
+
 <h3>Example 2</h3>
 <p>
   Using traditional form to call statement "break".
@@ -1730,6 +1847,8 @@ codeDirs = . ; code.examples ; code.lib
     if (i&gt;=10) break else i=i+1
 </pre>
 
+
+
 <h3>Expressions are statements ...</h3>
 <p>
   Note that all expressions are also statements, which means the first example can be
@@ -1739,15 +1858,29 @@ codeDirs = . ; code.examples ; code.lib
   if (value != null) value else "defaultValue" => value
 </pre>
 
+
 <h3>Blocks are expressions ...</h3>
 <p>
-  Also note, that (local) blocks are expressions, which can contain statements, so we can even do:
+  Also note, that (local and Inner) blocks are expressions, which can contain statements, so we can do this:
 </p>
 <pre>
   i=1
   loop
     out(i)
     if (i&gt;=10,{break},i=i+1)
+</pre>
+<p>
+  Or this, which is perhaps the most readable:
+</p>
+<pre>
+  i=1
+  loop
+    out(i)
+    if (i&gt;=10) {
+      break
+    } else {
+      i=i+1
+    }
 </pre>
 
 
@@ -1771,28 +1904,35 @@ codeDirs = . ; code.examples ; code.lib
 <pre>
   code = if (x=="a") 1 else if (x=="b") 2 else if (x=="c") 3 else 4
 </pre>
-
+<p>
+  Note: the above is not very elegant. It might be better populating a
+  dictionary or something. 
+</p>
 
 
 
 
 
 <h1>Lazy evaluation</h1>
-<h4>Lazy if</h4>
+
+<h3>Lazy if</h3>
 <p>
   The if-expression uses lazy evaluation, which means that only the selected
   value expression (if any) gets evaluated. This is the same as every other
   language.
 </p>
-<h4>Lazy AND, OR - &amp;&amp; ||</h4>
+
+<h3>Lazy AND, OR - &amp;&amp; ||</h3>
 <p>
   Boolean expressions with logical AND and OR, are lazy, again as in
   every other language. 
 </p>
-<h4>Lazy P(N,defaultExpr)</h4>
+
+
+<h3>Lazy P(N,defaultExpr)</h3>
 <p>
   The P() expression to access function parameters only evaluates the default
-  expression if parameter N is null.
+  expression if function parameter N has no value or null-value.
 </p>
 
 
@@ -1803,7 +1943,7 @@ codeDirs = . ; code.examples ; code.lib
 <p>
   The error() global function contains a conditional part, and if true, throws
   a soft error with the string part, terminating current execution. Alternatively it can
-  be used without the condition, which means it always throws a soft error.
+  be used without the condition, which means it will usually be used together with "if".
 </p>
 <pre>
   error(1+1 != 2,"this should not happen")
@@ -1818,87 +1958,8 @@ codeDirs = . ; code.examples ; code.lib
 <h1>Output to screen</h1>
 <pre>
   println("a")
+  println("a",a,"b=",b)
 </pre>
-
-
-
-<h1>Protecting files and directories</h1>
-<p>
-  The protect mechanism in CFT lets us attach a protect state to any Dir and File object,
-  which guarantees that:
-</p>
-<ol>
-  <li>all files and directories derived from it are also protected</li>
-  <li>blocks destructive modifications</li>
-</ol>
-
-
-<h2>Example</h2>
-<p>
-  Adding .protect to each file that the JavaFiles function generates, ensures that all
-  files returned from this function are blocked against accidental delete and modifications.
-</p>
-<pre>
-  $ Dir.allFiles-&gt; f assert(f.name.endsWith(".java")) out(f.protect)
-  $ /JavaFiles
-</pre>
-<p>
-  Demonstration:
-</p>
-<pre>
-  $ JavaFiles.nth.append("")   # Trying to append empty line to first file
-  ERROR: [input:16] INVALID-OP append : /home/roar/.../xyz.java (PROTECTED: -) (java.lang.Exception)
-</pre>
-<p>
-  The .protect() function can also take a description string, which if present, is displayed in this error.
-</p>
-
-<h2>A protected directory does not allow</h2>
-
-<ul>
-<li>create</li>
-<li>delete</li>
-<li>copy file into dir - includes blocking File.uncompress when target dir is protected</li>
-</ul>
-
-
-<h2>A protected file does not allow</h2>
-<ul>
-  <li>delete</li>
-  <li>create</li>
-  <li>append</li>
-  <li>copyFrom (target)</li>
-  <li>copyTo</li>
-  <li>move (source or target)</li>
-</ul>
-
-
-
-
-
-<h2>No guarantee</h2>
-<p>
-  Calling .protect on a Dir object, before using it to locate files, will propagate the protected
-  state to all those files. However, creating a new Dir object for the same path, without calling 
-  .protect() on it, and then accessing content via this, does not protect anything.
-</p>
-<p>
-  Note also that .protect can not detect for example using the path of a protected File object in
-  an external program, or even to create a new File object (which will not be protected). Example:
-</p>
-<pre>
-  File(protectedFile.path)
-</pre>
-
-
-
-<h2>Unprotect</h2>
-<p>
-  If there is an expression that returns some protected directory or some protected files, and we
-  are explicitly sure we want to modify it, we can use the .unprotect() function. It removes the
-  protect flag, but fails with an error if there is no such flag there when called.
-</p>
-
 
 
 
@@ -1911,7 +1972,7 @@ codeDirs = . ; code.examples ; code.lib
 
 <h2>Summary</h2>
 <p>
-  The functions for running external programs are part of the Dir object, implicitly defining
+  The functions for running external programs are part of the Dir object, which defines the
   working directory for the program.
 </p>
 
@@ -2057,11 +2118,11 @@ codeDirs = . ; code.examples ; code.lib
 <h2>Work directory issues</h2>
 <p>
   For external programs that depend on running from a specific directly, either navigate to current directory
-  interactively, or just let your code call the .setAsCurrentDir() function on some Dir object before
+  interactively, or just let your code call the .cd() function on some Dir object before
   calling Lib:run. 
 </p>
 <pre>
-  Dir("/home/user/xyz").setAsCurrentDir
+  Dir("/home/user/xyz").cd
   Lib:run(...) =&gt; result
 </pre>
 
@@ -2075,7 +2136,7 @@ codeDirs = . ; code.examples ; code.lib
   to stdout using a marker to eliminate the welcome text when logging in etc.
 </p>
 
-<p><b>Side note: ssh without password</b></p>
+<h3>Side note: ssh without password</h3>
 <p>
   To set up ssh login without password, create and distribute an ssh key, then
   copy it to the target host, as follows (in Linux shell).
@@ -2099,7 +2160,7 @@ codeDirs = . ; code.examples ; code.lib
 <ol>
   <li>The :syn command syntesizes code from the last result.</li>
   <li>The :NN  (where NN is an integer) syntesizes the indicated element of the last result list. If 
-  last result is not a list, an error is reported.</li>
+  last result is not a list, you get an error.</li>
 </ol>
 
 
@@ -2121,22 +2182,29 @@ codeDirs = . ; code.examples ; code.lib
 </pre>
 
 <p>
-  Running the code Dir.sub("src") creates a Dir object for the src subdirectory. 
+  Running the code Dir.sub("src") creates a Dir object for the src subdirectory (regardless of 
+  whether it exists or not). 
 </p>
 <p>
-  When we run the ":syn" command, as CFT remembers the last result value, it creates code for it.
+  When we run the ":syn" command, and as CFT remembers the last result value, it creates code for it.
 </p>
 <p>
-  If this succeeds, it inserts the generated code line tino the "code history", as the 
-  last command, which means it can now be assigned a name, for example "DirProject"
+  If this succeeds, it inserts the generated code line tino the "code history", pretending
+  it was a command given by the user, which means it can now be assigned a name, for example "DirProject"
 </p>
 
 <p>
-  Calling function "DirProject" will now always generate a Dir object pointing to the same
-  directory. Having synthesized a value, makes it independent of how it was created, which
+  Calling function "DirProject" will now always return a Dir object pointing to the same
+  directory, as the specific value was turned into code, not taking into account how the value
+  was created (and that Dir without params returns current directory, which may change).
+</p>
+<p>
+  Having synthesized a value makes it independent of how it was created, which
   in this case means that DirProject always returns that specific directory, regardless
   of current directory.
 </p>
+
+
 
 <h2>Example using :NN</h2>
 
@@ -2167,8 +2235,7 @@ codeDirs = . ; code.examples ; code.lib
 
 
 
-
-<h1>Output format / Term</h1>
+<h1>Output format / Term object</h1>
 <p>
   Output to screen is regulated via a Term object. It is a session object, remembering the
   current size of the terminal window. 
@@ -2220,7 +2287,12 @@ codeDirs = . ; code.examples ; code.lib
 <h2>Merging text with Dict</h2>
 
 <p>
-  To merge values into a template, we use a dictionary object (Dict) combined with the
+  This was the original implementation, but it has mostly been replaced by the
+  ability to merge output from expressions directly into text. Skip to the 
+  section for .mergeExpr for for details about this.
+</p>
+<p>
+  To merge values into a template, we may use a dictionary object (Dict) combined with the
   merge() function of strings. This replaces occurrences of names in the dictionary
   with their values (as strings).
 </p>
@@ -2233,7 +2305,8 @@ codeDirs = . ; code.examples ; code.lib
 </pre>
 
 
-<h2>Dict.mergeCodes()</h2>
+
+<h3>Dict.mergeCodes()</h3>
 
 <p>
   The merge is based on a direct match. Often we like to mark our merge codes. The Dict
@@ -2263,42 +2336,7 @@ codeDirs = . ; code.examples ; code.lib
   Dear Julius 
 </pre>
 
-
-<h2>PDict()</h2>
-<p>
-  With many parameters to be merged into the template text, the special expression PDict() saves
-  us some typing. Instead of having to do this:
-</p>
-<pre>
-  P(1) => name
-  P(2) => ip
-  Dict
-    .set("name",name)
-    .set("ip",ip)
-    .mergeCodes =&gt; data
-</pre>
-<p>
-  ... we can instead just say:
-</p>
-<pre>
-  PDict("name","ip").mergeCodes =&gt; data
-</pre>
-<p>
-  The PDict function takes a list of names, and map them to the function parameters
-  in sequence. Missing values result in "null", which in turn (when calling String.merge),
-  get replaced with empty strings. 
-</p>
-<p>
-  If missing values are a problem:
-</p>
-<pre>
-  PDict("name","ip").mergeCodes =&gt; data
-  error(data.hasNullValue,"Missing parameters!")
-</pre>
-
-
-
-<h2>Example using raw strings and Sequence()</h2>
+<h3>Example using raw strings and Sequence</h3>
 <p>
   <b>Raw strings</b> are a special notation for strings, that is as follows:
 </p>
@@ -2318,8 +2356,11 @@ codeDirs = . ; code.examples ; code.lib
   an empty list. Since lists can be concatenated with "+", we can do this:
 </p>
 <pre>
-  PDict("replSetName","clusterRole").mergeCodes=&gt;data
-  isConfNode = (P(2)=="configsvr")
+  P(1) => replSetName
+  P(2) => clusterRole
+
+  SymDict(replSetName, clusterRole).mergeCodes =&gt;data
+  isConfNode = (clusterRole=="configsvr")
   
   Sequence(
     @  :
@@ -2339,14 +2380,14 @@ codeDirs = . ; code.examples ; code.lib
     @ sharding:
     @   clusterRole: '${clusterRole}'
   )
-  ->line out(line.merge(data))
+  -&gt;line out(line.merge(data))
   /CreateMongodCfg
 </pre>
 
 
 
 
-<h2>List.mergeExpr</h2>
+<h2>.mergeExpr</h2>
 <p>
   The List.mergeExpr is another option. Instead of merging data from a dictionary
   into the template, the template contains CFT expressions inside &lt;&lt; and &gt;&gt;.
@@ -2358,24 +2399,36 @@ codeDirs = . ; code.examples ; code.lib
     P(2,List)=>hobbies
 
     Sequence(
-      @ p>Dear &lt;&lt;name&gt;&gt;
+      @ Dear &lt;&lt;name&gt;&gt;
       @ We see that you have &lt;&lt;hobbies.length&gt;&gt; hobbies:
       @ &lt;&lt; hobbies-&gt;h out("   - " + h) &gt;&gt;
     ).mergeExpr
   /GetTemplate
 </pre>
-<p>
-  Note that Sequence() is just another way of creating a List.
-</p>
+
 <p>
   Expressions can include iterating over a list, as seen, and creating Inner
-  blocks, if using PIPE inside. Usually we will probably refer variables, 
-  or call functions().
+  blocks, if we want to use PIPE inside. Usually we will probably refer variables, 
+  or call functions.
 </p>
 
-<h1>Processing text</h1>
 <p>
-  Here are different ways of working with text in CFT.
+  Note: the .mergeExpr function optionally takes two parameters for start and stop
+  symbols, so we can do this:
+</p>
+
+<pre>
+  Sequence(
+    @ Dear [name] ...
+  ).mergeExpr("[","]")
+</pre>
+
+
+
+<h1>Text processing</h1>
+<p>
+  In the section on templating, we used the Sequence() and raw strings, to represent text. This
+  section summarizes the different ways of working with text.
 </p>
 <ul>
   <li>Reading separate text files</li>
@@ -2462,9 +2515,10 @@ codeDirs = . ; code.examples ; code.lib
   The function DataFile.get() returns only non-blank lines. To get all lines, use function getAll().
 </p>
 
-<h3>Filter away comments</h3>
+
+<h3>Allowing comments</h3>
 <p>
-  Also, DataFile has support for comments in the template text, which can be automatically
+  DataFile has support for comments in the template text, which can be automatically
   removed. They are defined by another prefix string as follows:
 </p>
 <pre>
@@ -2474,6 +2528,7 @@ codeDirs = . ; code.examples ; code.lib
 <p>
   Now all lines starting with "//" are automatically stripped from any output.
 </p>
+
 
 
 
@@ -2521,13 +2576,13 @@ codeDirs = . ; code.examples ; code.lib
 
 <h1>Processing JSON</h1>
 <p>
-  The "JSON" script handles parsing JSON into a Dict/List structure, and
+  The JSON script handles parsing JSON into a Dict/List structure, and
   conversely, takes a Dict/List structure to JSON format again.
 </p>
 <p>
-  Worth noting that the JSON library is a CFT script, not built-in functionality.
-  The parser is written in CFT, using the Lib.Text.Lexer to tokenize the input,
-  and a plain recursive-descent parser as functions inside the JSON script.
+  The JSON library is a CFT script, which means it is written in CFT, using the 
+  Lib.Text.Lexer to tokenize the input, and a plain recursive-descent parser as 
+  functions inside the JSON script.
 </p>
 <p>
   Parse example:
@@ -2646,76 +2701,6 @@ codeDirs = . ; code.examples ; code.lib
 
 
 
-<h1>Use as a calculator</h1>
-
-<h2>Expressions and "variables"</h2>
-<p>
-  Having a running instance of CFT on the desktop means access to a capable calculator.
-</p>
-<pre>
-  $ 24*60*60
-  &lt;int&gt;
-  86400
-  /x
-
-  x*365
-  &lt;int&gt;
-  31536000
-</pre>
-<p>
-  As noted before, the symbol "x" does not refer to the value 86400, but to the code that 
-  generates the value.
-</p>
-
-
-
-<h2>Lib.Math</h2>
-<p>
-  The global function Lib() creates a Lib object, which in turn contains functions that
-  create other objects, such as the Math object, which contains trigonometric functions.
-</p>
-<p>
-  For vector logic and rendering see Lib.DD and Lib.DDD (2D and 3D).
-</p>
-
-
-<h2>Lib.Convert</h2>
-<p>
-  The Lib.Convert function returns another object, which contains code for lots of common
-  conversions. Use the help system to show all options.
-</p>
-<pre>
-  $ Lib.Convert help
-</pre>
-
-
-
-<h2>Lib.Plot</h2>
-<p>
-  The Lib.Plot function returns an object with functions for creating a primitive plot, for
-  visualizing data. Again, use the help system to examine options.
-</p>
-<p>
-  Note that Lib.Plot is a quick-and-dirty implementation. For better graphs, some external
-  package should be invoked.
-</p>
-<pre>
-  File("/tmp/" + currentTimeMillis+".txt")
-  /tmpFile
-
-  
-  f = tmpFile
-  Lib.Data.each(0,720)-&gt;i
-    f.append(""+Lib.Math.sin(i) + "," + Lib.Math.cos(i))
-  |
-  Lib.Plot.typeTimeline.readCSVFile(f).plot(File("out.png"))
-  f.delete
-  /DemoPlot
-</pre>
-<p>
-  The above code generates an example plot as a png file in the current directory.
-</p>
-
 
 
 
@@ -2726,17 +2711,25 @@ codeDirs = . ; code.examples ; code.lib
   supports GET and POST, does parameter and form input parsing. 
 </p>
 <p>
-  See WebTest script, which was modified in v2.9.1 with the addition of
-  String method .mergeExpr where expressions inside <<...>> are evaluated and
-  inserted, creating a list of strings (as the sub-expression may result in
-  many lines of output).
+  See WebTest script. Running the Init function sets up a very simple web "site" on
+  port 2500 on localhost.
 </p>
+<p>
+  Remember to re-run Init after changing the code, as the
+  web-server runs as a Java background thread, and needs to be updated, in order to serve new
+  content.
+</p>
+<p>
+  A bit of a work in progress, not terribly useful, bit it sort of works.
+</p>
+
+
 
 
 
 <h1>3D library</h1>
 <p>
-  Included and adapted an old 3d-library written over 20 years ago, for rendering 3D scenes,
+  Included and adapted an old 3d-library written by me, over 20 years ago, for rendering 3D scenes,
   working purely in Java, without any acceleration. It is slow, but gets the job done.
 </p>
 <p>
@@ -2864,17 +2857,30 @@ codeDirs = . ; code.examples ; code.lib
 
 <h1>Debugging</h1>
 <p>
-  In addition to the addDebug("something") statement, there is also implemented a simple
-  "lint" function, which operates on current script, checking that all functions parse ok.
+  After editing a script, normally you need to test all functions even for basic syntax
+  errors, as CFT functions are parsed only when run.
+</p>
+
+<h2>@lint</h2>
+<p>
+  A simple lint function is available in Sys.lint. It checks that all functions in current
+  script parses ok. It is mostly invoked using a shortcut:
 </p>
 <pre>
-  Sys.lint
+  @lint
 </pre>
+
+
+<h2>addDebug()</h2>
 <p>
-  The addDebug() includes the source location, and adds lines to the current stack frame of
-  the CFT call stack, so that if there is a problem, output via those are included in the
-  stack trace.
+  The global addDebug() function takes some string, and creates a log line that also contains
+  the source location, and adds this to the current stack frame of the CFT call stack. 
 </p>
+<p>
+  This means no output is displayed until something goes wrong, and the CFT stack trace
+  is displayed.
+</p>
+
 
 
 
@@ -2894,7 +2900,7 @@ codeDirs = . ; code.examples ; code.lib
   readLines("XXX")
   (paste or enter text, then enter end-marker manually)
   XXX
-  &lt;list&gt;
+  &lt;List&gt;
   0: ...
   1: ...
 
@@ -2903,7 +2909,10 @@ codeDirs = . ; code.examples ; code.lib
   
   ...
 </pre>
-
+<p>
+  The ":syn" command synthesizes the List object, and we then create a function "SomeName" for it. If we save the
+  script, we can now run SomeName to produce the list of lines pasted or entered.
+</p>
 
 
 
@@ -2947,6 +2956,7 @@ codeDirs = . ; code.examples ; code.lib
   &lt;boolean&gt;
   true
 </pre>
+
 
 
 
@@ -3037,6 +3047,85 @@ codeDirs = . ; code.examples ; code.lib
 
 
 
+<h1>Closures and dictionary-objects</h1>
+
+<h2>Manual closure</h2>
+
+<p>
+  A closure is a Lambda that is bound together with a dictionary object. The dictionary object is
+  available via the automatic variable "self" inside the lambda (now closure). 
+</p>
+<pre>
+  data=Dict
+  closure = data.bind(Lambda{
+    P(1) =&gt; value
+    self.value=value
+  })
+  closure.call("x")
+
+  data.value   # returns "x"
+</pre>
+<p>
+  Here we create a dictionary. We then call .bind with a lambda, which produces a closure.
+</p>
+<p>
+  If we now pass the generated closure as a parameter to some function that expects a lambda or closure,
+  commonly type-identified as "Callable", when it is called with a single parameter value, that value
+  gets stored inside the data dictionary, which means we can access it after the function we called has returned.
+</p>
+
+
+<h2>Dictionary objects</h2>
+<p>
+  Another way of creating closures, is by storing lambdas into dictionaries. The lambda gets automatically
+  converted to a closure, which refers the dictionary. 
+</p>
+<pre>
+  data=Dict
+  data.value=null
+
+  data.f = Lambda{
+    P(1) =&gt; value
+    self.value=value
+  }
+
+  closure=data.get("f")
+  callSomeFunctionWithIt(closure)
+
+  # get value passed when that function called the closure
+  data.value
+</pre>
+<p>
+  The "data" dictionary now is a simple object, which contains both a value and a closure.
+</p>
+
+
+
+<h2>Auto-invoke</h2>
+<p>
+  Lambdas and Closures, when stored in a variable, are invoked with .call(...).
+</p>
+<p>
+  Obtaining a Closure from a dictionary with dotted notation, however, implies an automatic invocation, again
+  with or without parameters.
+</p>
+<pre>
+  data=Dict
+  data.f=Lambda{println("called f")}
+
+  data.f   # prints "called f" to the screen.
+
+  # To get a reference to the closure, we use the .get() function of Dict
+  data.get("f")    # returns Closure object without invoking it
+</pre>
+
+
+
+
+
+
+
+
 <h1>Type checking with "as"</h1>
 <p>
   <i>v3.2.5</i>
@@ -3068,13 +3157,21 @@ codeDirs = . ; code.examples ; code.lib
   # or
   types="String int".split
   P(1) as (types) ...
+
+  # or even
+  P(1) as ("String int".split) ...
 </pre>
+
 <p>
   If an "as" fails, a hard error is thrown, with details about what was expected, and what was found.
 </p>
+
+
 <h3>Null-values</h3>
 <p>
-  The type of null-value is "null". To allow a value to be optional is to allow it to be of type "null"
+  The type of null-value is "null". To allow a value to be optional is to allow it to be of type "null". Since
+  this is a common thing to do, we can add a '?' after the type (identifier or expression inside parantheses), which
+  simply means "or null":
 </p>
 <pre>
   P(1) as ("String null".split) =&gt; optionalStringValue
@@ -3084,9 +3181,14 @@ codeDirs = . ; code.examples ; code.lib
   P(1) as ("String int".split)?    # String, int or null
 </pre>
 
+
+
+
 <h3>Dict names</h3>
 <p>
   The Dict object has an optional name, either set at creation by Dict("something") or via Dict.setName("something").
+</p>
+<p>
   This name can be filtered in the "as" expression, prefixing the type identifier or type expression inside ()'s with
   an &amp; (ampersand) as follows:
 </p>
@@ -3103,9 +3205,13 @@ codeDirs = . ; code.examples ; code.lib
       _.a=1
       _.b=2
       => myData
-    f(myData) # matches the type correctly
+
+    # Call f with this object  
+    f(myData) # should match "as" type of "f"
   /test
 </pre>
+
+
 
 
 <h3>Closures and Lambdas</h3>
@@ -3114,7 +3220,10 @@ codeDirs = . ; code.examples ; code.lib
   .call() functions to invoke. 
 </p>
 <p>
-  If one needs to detect if a value is a lambda or a closure, that is easiest done by checking for the presence of
+  Mostly a function does not need to know if an assumed Lambda is in fact a Closure. 
+</p>
+<p>
+  Still, if one needs to detect if a value is a lambda or a closure, it's easiest done by checking for the presence of
   one of the functions that closures implement, and lambdas do not, for example the .lambda function of closures,
   to obtain the lambda component. 
 </p>
@@ -3123,6 +3232,8 @@ codeDirs = . ; code.examples ; code.lib
 
   isClosure = callable.?lambda  # returns true if value has function lambda, which means it is a closure
 </pre>
+
+
 <p>
   <b>Note:</b> When referring a lambda or closure as part of something else, that is, using "." in front of it, it is
   invoked directly with or without params, so no ".call" then. Referring a lambda or closure via a parameter or
@@ -3148,6 +3259,105 @@ codeDirs = . ; code.examples ; code.lib
 <p>
   The closure can now be passed as an argument to some function somewhere, who uses .call() to invoke it.
 </p>
+
+
+
+
+
+
+
+
+
+
+<h1>Classes</h1>
+<p>
+  v3.5.0
+</p>
+<p>
+  CFT supports primitive classes, which are really just dictionaries with closures for member functions, 
+  combined with the name attribute of all Dict objects, created by Dict(name) or Dict.setName(name), which we can check
+  for in the "as" type checks with &amp;name.
+</p> 
+  Inheritance is supported using the Dict.copyFrom function, or any other means of copying
+  data and lambdas from one Dict to another. as there is no "class definition", only a
+  block of code (class function) that sets up the class object.
+</p>
+<p>
+  Classes are functions, and are defined similarly to functions, by code followed by 
+  slash something. Defining a simple class MyClass:
+</p>
+<pre>
+  # my class
+  # --
+    P(1) as int =&gt; x
+    self.x=x
+
+  /class MyClass
+</pre>
+
+
+<h2>Class object types</h2>
+<p>
+  There is no differentiation between classes and objects. A class function returns an object.
+  Inheritance is possible by some class function instantiating a class object of some other type,
+  and incorporating elements from it into itself, possibly using the Dict.copyFrom(anotherDict) 
+  function, as the "self" object inside an object is a Dict. 
+</p>
+<p>
+  The OODemo script examplifies this, and also employs the second version of the /class line,
+  where we supply the type explicitly.
+</p>
+<pre>
+  # Common Val class
+  # --
+    P(1) as String => type
+    P(2) as (type) => value
+    ...
+  /class Val
+
+  # Val class for processing int
+  # --
+    P(1) as int => value
+    self.copyFrom(Val("int",value))
+    ...
+  /class ValInt as Val
+</pre>
+
+
+<h2>What a "/class" function does</h2>
+<p>
+  There is no problem creating dictionary objects without using /class functions.
+</p>
+<pre>
+# TypedContainer class (using /class)
+# --
+  P(1) as String =&gt; type
+
+  self.type=type
+  self.value=null
+  
+  self.set=Lambda{
+    P(1) as (self.type) => value
+    self.value=value
+  }
+/class TypedContainer
+
+
+# Create custom subclass of TypedContainer inside normal function (without using /class)
+# --
+  self=Dict("TypedContainer")
+  self.copyFrom(TypedContainer("int"))
+  self
+/IntContainer
+
+
+# Test it
+
+IntContainer.set("test")  # Fails with error, expects int
+
+</pre>
+
+
 
 
 
@@ -3226,103 +3436,6 @@ codeDirs = . ; code.examples ; code.lib
 
 
 
-<h1>Classes</h1>
-<p>
-  v3.5.0
-</p>
-<p>
-  CFT supports primitive classes, which are really just dictionaries with closures for member functions, 
-  combined with the name attribute of all Dict objects, created by Dict(name) or Dict.setName(name), which we can check
-  for in the "as" type checks with &amp;name.
-</p> 
-  Inheritance is supported using the Dict.copyFrom function, or any other means of copying
-  data and lambdas from one Dict to another. as there is no "class definition", only a
-  block of code (class function) that sets up the class object.
-</p>
-<p>
-  Classes are functions, and are defined similarly to functions, by code followed by 
-  slash something. Defining a simple class MyClass:
-</p>
-<pre>
-  # my class
-  # --
-    P(1) as int =&gt; x
-    self.x=x
-
-  /class MyClass
-</pre>
-
-
-<h2>Class object types</h2>
-<p>
-  There is no differentiation between classes and objects. A class function returns an object.
-  Inheritance is possible by some class function instantiating a class object of some other type,
-  and incorporating elements from it into itself, possibly using the Dict.copyFrom(anotherDict) 
-  function, as the "self" object inside an object is a Dict. 
-</p>
-<p>
-  The OODemo script examplifies this, and also employs the second version of the /class line,
-  where we supply the type explicitly.
-</p>
-<pre>
-  # Common Val class
-  # --
-    P(1) as String => type
-    P(2) as (type) => value
-    ...
-  /class Val
-
-  # Val class for processing int
-  # --
-    P(1) as int => value
-    self.copyFrom(Val("int",value))
-    ...
-  /class ValInt as Val
-</pre>
-
-
-<h2>What a "/class" function does</h2>
-<p>
-  There is no problem creating class objects without using /class functions. They are only dictionaries,
-  which use the name property to store a type string, and with lambdas which call each other.
-</p>
-<pre>
-# TypedContainer class (using /class)
-# --
-  P(1) as String =&gt; type
-
-  self.type=type
-  self.value=null
-  
-  self.set=Lambda{
-    P(1) as (self.type) => value
-    self.value=value
-  }
-/class TypedContainer
-
-
-# Create custom subclass of TypedContainer inside normal function (without using /class)
-# --
-  self=Dict("TypedContainer")
-  self.copyFrom(TypedContainer("int"))
-  self
-/IntContainer
-
-
-# Test it
-
-IntContainer.set("test")  # Fails with error, expects int
-
-</pre>
-
-
-
-
-
-
-
-
-
 
 
 <h1>List.nth() negative indexes</h1>
@@ -3339,23 +3452,42 @@ IntContainer.set("test")  # Fails with error, expects int
 
 
 
-<h1>Function parameters as List or Dict</h1>
+<h1>Function parameters ...</h1>
 
 <p>
   In addition to grabbing one parameter at a time, using P(pos), we can also process the
   parameter values as a list and as a dictionary.
 </p>
 
+<h2>Get parameters as List</h2>
 <p>
   The function parameter expression P() when used with no parameters, returns a list of
   the parameter values as passed to the function.
 </p>
+<pre>
+  # Some function
+  # --
+    P =&gt; paramList
+    ...
+  /example
+</pre>
+
+
+
+<h2>Get parameters as Dict</h2>
 
 <p>
   The PDict() expression takes a sequence of names to be mapped to parameters by position,
   resulting in a Dict object. Missing values lead to the special value null being stored
   in the dictionary.
 </p>
+<pre>
+  # Some function with three parameters
+  # --
+    PDict("a","b","c") =&gt; paramsDict
+    ...
+  /example
+</pre>
 
 
 
@@ -3474,14 +3606,14 @@ IntContainer.set("test")  # Fails with error, expects int
 
 
 
-<h1>Objects vs Scripts</h1>
+<h1>Lib object vs Lib scripts</h1>
 <p>
   As for the case of two Db2 entites above, with a script and an object of the same name,
   this is also the situation for "Lib", where the (global) funciton Lib produces a Lib object, 
   while there also exists a Lib script.
 </p>
 <p>
-  The Lib object, like all CFT objects, has its functions implemented in Java, while the
+  The Lib object, like all CFT built-in objects, has its functions implemented in Java, while the
   Lib script is a text file with functions written in the CFT programming language, which are
   interpreted by Java when called.
 </p>
@@ -3935,11 +4067,11 @@ String.getMethod("concat",String).call(obj,paramObj).value
 </p>
 <pre>
   a=List(1,2,3)
-  b=Sys.clone(a).add(4)  # b contains 1,2,3,4 while a remains unchanged
+  b=Sys.clone(a).add(4)  # "b" contains 1,2,3,4 while "a" remains unchanged
 </pre>
 
 <p>
-  The same can be done manually:
+  The clone can also be done manually:
 </p>
 <pre>
   a=List(1,2,3)
@@ -4007,50 +4139,6 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
 </p>
 
 
-
-
-
-
-
-<h1>Some example code</h1>
-
-<h2>Windows PowerShell</h2>
-<p>
-  The following code is an effective way of using PowerShell from CFT, saving lots of typing.
-</p>
-<pre>
-  # Run remote PowerShell script-block
-    host=P(1) 
-    cmd=P(2)  
-    fullCmd = List("powershell","invoke-command","-computername",host,"-scriptblock","{" + cmd + "}")
-    Dir.run(fullCmd)
-  /PSRun
-
-  # List services via PowerShell (interactive)
-    host = Input("Host").get
-    Input("Service name (including wildcards)").get =service
-    cmd = "get-service -name " + service  # no splitting
-    PSRun(host, cmd)
-  /PSGetService
-
-</pre>
-
-
-<h2>Windows CMD</h2>
-<p>
-  Running commands using CMD in windows, mostly requires the "/c" flag.
-</p>
-<pre>
-  Dir("...")
-  /DirProject
-
-  # Add, commit and push with git
-    DirProject.run("cmd","/c","git","add",".")
-    msg=Input("Commit message").get
-    DirProject.run("cmd","/c","git","commit","-m",msg)
-    DirProject.run("cmd","/c","git","push","origin","master")
-  /GitPush
-</pre>
 
 
 
@@ -4435,7 +4523,10 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
 </p>
 
 <p>
-  See Db2:GetSessionPassword() function for example.
+  The Vault script uses this to persist session secrets, in a secure way, stored
+  in Db2 encrypted with the secure session id. By encrypting a second static value,
+  it detects whenever there is a new session, prompting the user to enter the
+  the secret values, to store for that session.
 </p>
 
 
@@ -4558,6 +4649,8 @@ Sys.homeDir.allFiles(Glob("*.java"))->f
  ValueObjStr 
  ValueString 
 </pre> 
+
+
 
 
 <h1>Reference: Expressions vs statements</h1>

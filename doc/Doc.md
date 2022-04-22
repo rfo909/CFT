@@ -279,14 +279,14 @@ cd "c:\program files"
 ## Windows backslash
 
 
-Note that backslash is NOT an escape character in CFT, so no need to escape it.
+Note that backslash is NOT an escape character in CFT, so just use it like any other character.
 
 ```
 Dir("c:\program files\")
 /ProgramFilesDir
 ```
 
-This of course goes interactively as well:
+This goes interactively as well:
 
 ```
 $ cd d:\logs
@@ -310,6 +310,24 @@ Dir("/SomewhereElse/xyz").file("data.txt")
 $ cd (LogDir)
 $ edit (DataFile)
 ```
+## Shell commands not suited in functions
+
+
+Due to how the "shell commands" (cd and ls, cat and more + edit) parse the command line (globbing), they
+are not suited for running inside function code.
+
+
+Function code should instead use the Dir and File functions:
+
+```
+dir = Dir.sub("xyz")
+dir.create
+dir.cd  # set current dir
+dir.files  # list content in directory
+dir.dirs
+Lib:m(dir.file("x.txt"))   # The Lib script contains function "m" for paging through a file
+Lib:e(dir.file("x.txt"))   # "e" for opening file in editor
+```
 ## No shell-like destructive commands!
 
 
@@ -320,13 +338,27 @@ CFT
 This is by choice.
 
 
-The reason is to force the user to use regular CFT syntax, that is, create script code, for
-better security.
+The reason is to encourage the user to use regular CFT syntax, and create functions for often
+repeated needs. The "protect" functionality helps avoid mistakes such as deleting or modifying
+directories and files that should not be touched.
 
 
 Alternatively one can use "bang commands" or the shell function. Can also use the
 shortcut @fm, which opens a graphical file manager for the current directory.
 
+
+Bang commands are commands that start with "!", and are sent to the shell for execution.
+
+```
+$ !rm x.txt
+```
+
+The shell command runs bash or powershell (configurable in CFT.props) in the foreground. When
+exiting the shell, you are back at CFT.
+
+```
+$ shell
+```
 ## Background jobs
 
 
@@ -362,12 +394,15 @@ If one wants better descriptions for jobs, this can be done as follows
 $ &amp; 1+1, Addition # identifier becomes name
 $ &amp; someFunction(...), "String description"
 ```
+
+The '&' way to run background jobs can be used in functions, as a light-weight alternative to
+the SpawnProcess() built-in function.
+
 # The "protect" mechanism
 
 
-Performing changes, such as copying, deleting and creating files, is supposed to be scripted
-with code, so no "command line" style functionality exists for this. Alternatively one can use
-the "shell" command, or "bang" commands, which are sent through to the shell.
+Regularly performing changes, such as copying, deleting and creating files, should be scripted
+with code. Therefore, no "command line" style functionality exists for this..
 
 ```
 $ <DirExpression>.file("xxx.txt").delete
@@ -379,7 +414,7 @@ files or directories:
 **the "protect" mechanism**.
 
 ```
-$ Dir("/someDir/logs").protect
+$ Dir("/someNfsDir/logs").protect
 $ /LogDir
 ```
 
@@ -396,7 +431,7 @@ ERROR: [input:18] INVALID-OP delete : /someNfsDir/logs/log01.txt (PROTECTED: -) 
 ```
 
 This protects our script code from doing bad things, but also interactively, as we tend to call
-functions like LogDir from the command line instead of typing Dir("/somedir/logs").
+functions like LogDir from the command line instead of typing Dir("/someNfsdir/logs").
 
 # Bang commands
 
@@ -471,10 +506,11 @@ $ "one:two:three".split(":")
 ```
 
 Many functions are available on a List object. One frequently used is "nth", which
-gets a specific element, defaulting to 0 if no argument.
+gets a specific element, defaulting to 0 if no argument, but there also exist "first" and "last"
+and a few others.
 
 ```
-$ List("a","b","c").nth
+$ List("a","b","c").first
 <String>
 a
 ```
@@ -494,7 +530,7 @@ $ Dir.allFiles(Glob("*.java"))
 ```
 
 This line of code generates a list of all java files under the current directory or sub-directories.
-When we are satisfied with the result of the code line, we give it a name.
+When we see that the code works, we give it a name.
 
 ```
 $ /JavaFiles
@@ -510,12 +546,12 @@ $ JavaFiles->f out(f.read.length) | _.sum
 /linecount
 ```
 
-The single "arrow" followed by an identifier is the "for each" construct, with the identifier becoming
+The "single arrow" followed by an identifier is the "for each" construct, with the identifier becoming
 the "loop variable".  The out() statement is used to generate output from the loop.
 
 
-The "pipe" character terminates the loop, and delivers the result from the loop (list of int) to the next part,
-where the "_" (underscore) symbol picks it off the stack, then calls the sum() function on it,
+The "PIPE" character ("|") terminates the loop, and delivers the result from the loop (in this case a list of int) to the next part,
+where the "_" (underscore) function picks it off the stack, then calls the sum() function on it,
 returning a single int value.
 
 
@@ -566,7 +602,7 @@ Dir.allFiles->f type=f.name.afterLast(".") assert(types.contains(type)) out(f)
 /textfiles
 ```
 
-This function lists all files of type .java and .txt
+This function lists all files of type .java and .txt under current directory.
 
 # Files
 
@@ -585,7 +621,7 @@ the CFT home directory. This gives predictability for certain data files etc.
 
 
 To access or create files in other directories, enter an absolute or relative
-path in the parameter to File(), or use the file() function inside
+path in the parameter to File(), or use the .file() function inside
 some Dir object:
 
 ```
@@ -598,6 +634,30 @@ To page through text file
 
 ```
 more x.txt
+```
+
+To do the same with function code:
+
+```
+SomeDir.file("x.txt") =>
+ file
+Lib:m(file)
+```
+## Edit a (text) file
+
+
+To edit a text file
+
+```
+edit x.txt
+```
+
+To do the same with function code:
+
+```
+SomeDir.file("x.txt") =>
+ file
+Lib:e(file)
 ```
 ## Show file as hex
 
@@ -651,6 +711,13 @@ object offers multiple member functions, one of which is
 the directory. Another is 
 **.allFiles()** which return files from all subdirectories as well.
 
+
+These support "globbing", which is to use "*" to match groups of files.
+
+```
+$ Dir.files("*.txt")
+$ Dir.allDirs(".git")
+```
 ## Create a subdirectory
 
 ```
@@ -689,6 +756,10 @@ Dir.allFiles
 ```
 Dir.allDirs
 ```
+
+Note: these are delivered in a sequence so that if all are empty of files, they can
+be safely deleted (leaf-directories first, root last).
+
 ## Delete a sub-directory
 
 
@@ -703,7 +774,7 @@ Dir.sub("something").delete
 Apart from navigating interactively, to set current directory via code:
 
 ```
-Dir.setAsCurrentDir
+Dir.cd
 ```
 ## Newest file in directory
 
@@ -768,11 +839,11 @@ In script code, there is an additional way of creating strings:
 @ this is a raw string, extending to the end of the line
 ```
 
-Since '@' is the shortcut character, you can not enter a raw string in the
-command line interface. To test interactively, type:
+Since '@' is the shortcut character, you can not enter a raw string directly in the
+command line interface, but you can do this:
 
 ```
-$ "" + @ something
+$ "" + @ something ...
 ```
 ## Dictionaries
 
@@ -783,50 +854,27 @@ Dictionaries are maps that store any value identified by names (strings).
 $ x=Dict x.set("a",1) x.get("a")
 1
 ```
-### Properties as functions
 
-
-For readability, values with names that are valid identifiers, and don't conflict with regular
-member functions of Dict, can be referenced via dotted notation
+Note: We will often store values by names that are valid identifiers. For these we can use dotted notation
+both when setting and fetching the values:
 
 ```
-$ Dict.set("a","b")
-$ /d
-$ d.a
-b
-```
-### Setting values with identifier names
-
-
-Another simplification is that to set a value in the dictionary, if that value has a name
-that is a valid identifier, the following two do the same:
-
-```
-Dict.set("x",1)
-Dict.x=1
-```
-
-Combining this with properties as functions:
-
-```
-Dict.a=1 =>
- data
-data.a=data.a+1
-data.a
-# 2
+$ x=Dict x.a=1 x.a=x.a+1 x.a  # returns 2
 ```
 ### SymDict
 
 
 A special global expression, SymDict is used to create a dictionary from a list of
-symbols, which must be present as local variables, or parameterless functions. This
+symbols (identifiers), which must be present as local variables, or parameterless functions. This
 saves some typing. Example code:
 
 ```
 # Without SymDict()
 a=1
 b=2
-dict=Dict.set("a",a).set("b",b)
+dict=Dict
+dict.a=a
+dict.b=b
 # With SymDict
 a=1
 b=2
@@ -837,6 +885,17 @@ If testing interactively, all needs to be on the same line:
 
 ```
 $ a=1 b=2 SymDict(a,b)
+```
+
+Note that assigning a value to a dict, using dotted notation, returns the Dict object, and
+using the underscore function, which refers to the value on the data stack, we can
+initialize dictionaries as follows:
+
+```
+Dict
+_.a=1
+_.b=2
+=> dict
 ```
 ### Name
 
@@ -849,6 +908,26 @@ Dict("name")
 
 The name can be accessed via Dict.getName() and modified/set via Dict.setName(). To
 clear, do Dict.setName(null)
+
+
+This name property of dictionaries is used to convey type information for dictionaries,
+together with "as" type checking. This is discussed in more detail elsewhere. A simple
+example:
+
+```
+Dict("Point")
+_.x=1
+_.y=2
+=> point
+# Some function expecting a Point dictionary as parameter
+# --
+P(1) as &amp;Point => point
+...
+/f
+```
+
+The '&amp;' in front of the type is to indicate that we are interested in the name of a Dict. Omitting it
+we can check for regular types, such as int, String, List, Dict and a whole lot of others.
 
 ## Binary type
 
@@ -1134,9 +1213,6 @@ Script:Function (...)
 Example:
 Lib:Header("This is a test")
 ```
-
-Parameters are given as a list of values inside ()'s, which may be omitted if no parameters.
-
 # Examining external scripts
 
 
@@ -1145,7 +1221,7 @@ another script, as well as listing the code of particular function.
 
 ```
 $ ?Lib:                  # lists functions inside Lib
-$ ?Lib:m                 # displays code of function 'm'
+$ ?Lib:m                 # displays code of function 'm' (to page through a text file)
 ```
 # Helper / local functions
 
@@ -1161,7 +1237,7 @@ $ //SomeConstant
 
 The '?' command omits these local functions, for a cleaner summary of the main functions
 of a script. To see all functions, type '??'. The local functions are
-prefixed by a single '/' slash.
+then prefixed by a single '/' slash.
 
 
 When inspecting
@@ -1169,7 +1245,7 @@ script from outside via the "?ScriptName:" functionality, the local functions ar
 also not displayed, while using "??ScriptName:" includes them.
 
 
-Also note, that "local" functions are not private in the Java sense, and so are callable
+Also note, that "local" functions are not private in the Java sense, and are fulle callable
 from the outside. Marking functions as local is all about filtering what is shown on the
 single "?" command.
 
@@ -1237,7 +1313,7 @@ $ Dir.files->f out(f.length) | _.sum
 ```
 
 As we see from the above code, code spaces don't 
-**need** containing loops. The
+**need** to contain loops. The
 following is perfectly legal, although a little silly.
 
 ```
@@ -1281,7 +1357,7 @@ $ P(1)=>a P(2)=>b a+b
 ```
 
 This is a valid function, but entering it interactively fails, because it is immediately
-parsed and executed, and there are no parameters. To overcome this, the P() expressions
+parsed and executed, and there are no parameter values. To overcome this, the P() expressions
 take a second parameter, which is a default value.
 
 
@@ -1327,7 +1403,8 @@ value = readLine("Enter value")
 
 The difference is that Input remembers unique input values, and lets the user
 press enter to use the last (current) value, or enter colon to select between previous
-(history) values. It also has functions to manipulate the history and the "current" value.
+(history) values. It also has functions to manipulate the history and the "current" value, or
+press colon ":" to select a previous value.
 
 
 The readLine() is much simpler, and allows for empty input, as Enter
@@ -1368,7 +1445,7 @@ An Inner block is a separate "code space", where we can do loops and call out() 
 affecting the result of the caller.
 
 
-They are like calling a function, as their inner
+They are like calling an inline function (no parameters though), as their inner
 workings do not affect the caller, 
 **except** that they have access to, and can
 modify local variables.
@@ -1381,35 +1458,42 @@ pattern
 Dir.files->f
 count=Inner{
 f.read->line
-assert(line.contains(pattern)) out(line)
+assert(line.contains(pattern))
+out(line)
 | _.length
 }
 report(f.name, count)
 /CountMatches
 ```
 
-Apart from how this could have been implemented better with Grep.fileCount(), this
+Apart from how this example could have been implemented much better with Grep.fileCount(), this
 is an illustration of how Inner blocks are more general and powerful than using
 the PIPE to split function bodies into code spaces.
 
 
 Of course, inner blocs can themselves be partitioned into code spaces, as we see
-in the above example.
+in the above example, and in turn contain blocks ...
 
 ## Lambdas
 
 
-A Lambda is an object (a value) that contains code, so it can be called, with parameters. The code
+A Lambda is an object (a value) that contains a block of code, so it can be called, with parameters. The code
 inside runs detached from the caller, and behaves exactly like a function.
 
 ```
-Lambda{P(1)+P(2)}
+Lambda{
+P(1)+P(2)
+}
 /MyLambda
 $ MyLambda.call(1,2)
 ```
 
 Can be used to create local functions inside regular functions, but mostly used to create
 closures and/or Dict objects / classes.
+
+
+The above vode defines a regular function, MyLambda, that returns a Lambda object, which can
+then be called with the .call().
 
 ## Block expressions summary
 
@@ -1424,7 +1508,8 @@ out(), assert(), reject() and break() inside, has no effect on loops outside the
 can be split into parts with PIPE, just like functions.
 
 
-Lambdas are "functions" as values.
+Lambdas are callable functions as values. There is a lot more to say about Lambdas and their
+close cousin, the Closure, later in this document.
 
 ## Local variables scope
 
@@ -1441,7 +1526,7 @@ $ {x=3} x
 
 
 Instead of using processing loops, filtering lists can also be done
-using .filter() function.
+using .filter() function of the List object.
 
 ```
 "12345".chars
@@ -1449,10 +1534,13 @@ using .filter() function.
 .sum
 /t
 ```
+
+Here, the lambda is used to convert strings to int values.
+
 ## Removing items
 
 
-To remove items, the Lambda should return null.
+To remove items from the list, we let the Lambda return null.
 
 ```
 "12345".chars.filter (Lambda{ P(1).parseInt=>x if(x>=3,x,null) })
@@ -1468,7 +1556,7 @@ control processing loops with assert, reject and break.
 
 
 Then there is the if-exression. It takes two forms, but is always considered an expression, not a statement.
-The difference is that expressions always return a value, which statements need not.
+The difference between expressions and statements, is that expressions always return a value, which statements need not.
 
 ### Inline form
 
@@ -1519,13 +1607,26 @@ if (value != null) value else "defaultValue" =>
 ### Blocks are expressions ...
 
 
-Also note, that (local) blocks are expressions, which can contain statements, so we can even do:
+Also note, that (local and Inner) blocks are expressions, which can contain statements, so we can do this:
 
 ```
 i=1
 loop
 out(i)
 if (i>=10,{break},i=i+1)
+```
+
+Or this, which is perhaps the most readable:
+
+```
+i=1
+loop
+out(i)
+if (i>=10) {
+break
+} else {
+i=i+1
+}
 ```
 ## if-ladders
 
@@ -1547,33 +1648,37 @@ Decoding some value x into a numeric code, we can enter the following
 ```
 code = if (x=="a") 1 else if (x=="b") 2 else if (x=="c") 3 else 4
 ```
+
+Note: the above is not very elegant. It might be better populating a
+dictionary or something.
+
 # Lazy evaluation
 
-#### Lazy if
+### Lazy if
 
 
 The if-expression uses lazy evaluation, which means that only the selected
 value expression (if any) gets evaluated. This is the same as every other
 language.
 
-#### Lazy AND, OR - &amp;&amp; ||
+### Lazy AND, OR - &amp;&amp; ||
 
 
 Boolean expressions with logical AND and OR, are lazy, again as in
 every other language.
 
-#### Lazy P(N,defaultExpr)
+### Lazy P(N,defaultExpr)
 
 
 The P() expression to access function parameters only evaluates the default
-expression if parameter N is null.
+expression if function parameter N has no value or null-value.
 
 # The error() function
 
 
 The error() global function contains a conditional part, and if true, throws
 a soft error with the string part, terminating current execution. Alternatively it can
-be used without the condition, which means it always throws a soft error.
+be used without the condition, which means it will usually be used together with "if".
 
 ```
 error(1+1 != 2,"this should not happen")
@@ -1585,103 +1690,14 @@ error("oops again")
 
 ```
 println("a")
+println("a",a,"b=",b)
 ```
-# Protecting files and directories
-
-
-The protect mechanism in CFT lets us attach a protect state to any Dir and File object,
-which guarantees that:
-
-
-
-- all files and directories derived from it are also protected
-
-
-- blocks destructive modifications
-
-
-## Example
-
-
-Adding .protect to each file that the JavaFiles function generates, ensures that all
-files returned from this function are blocked against accidental delete and modifications.
-
-```
-$ Dir.allFiles-> f assert(f.name.endsWith(".java")) out(f.protect)
-$ /JavaFiles
-```
-
-Demonstration:
-
-```
-$ JavaFiles.nth.append("")   # Trying to append empty line to first file
-ERROR: [input:16] INVALID-OP append : /home/roar/.../xyz.java (PROTECTED: -) (java.lang.Exception)
-```
-
-The .protect() function can also take a description string, which if present, is displayed in this error.
-
-## A protected directory does not allow
-
-
-
-- create
-
-
-- delete
-
-
-- copy file into dir - includes blocking File.uncompress when target dir is protected
-
-
-## A protected file does not allow
-
-
-
-- delete
-
-
-- create
-
-
-- append
-
-
-- copyFrom (target)
-
-
-- copyTo
-
-
-- move (source or target)
-
-
-## No guarantee
-
-
-Calling .protect on a Dir object, before using it to locate files, will propagate the protected
-state to all those files. However, creating a new Dir object for the same path, without calling
-.protect() on it, and then accessing content via this, does not protect anything.
-
-
-Note also that .protect can not detect for example using the path of a protected File object in
-an external program, or even to create a new File object (which will not be protected). Example:
-
-```
-File(protectedFile.path)
-```
-## Unprotect
-
-
-If there is an expression that returns some protected directory or some protected files, and we
-are explicitly sure we want to modify it, we can use the .unprotect() function. It removes the
-protect flag, but fails with an error if there is no such flag there when called.
-
 # Running external programs
 
 ## Summary
 
 
-The functions for running external programs are part of the Dir object, implicitly defining
+The functions for running external programs are part of the Dir object, which defines the
 working directory for the program.
 
 ```
@@ -1823,11 +1839,11 @@ $ ?Lib:run
 
 
 For external programs that depend on running from a specific directly, either navigate to current directory
-interactively, or just let your code call the .setAsCurrentDir() function on some Dir object before
+interactively, or just let your code call the .cd() function on some Dir object before
 calling Lib:run.
 
 ```
-Dir("/home/user/xyz").setAsCurrentDir
+Dir("/home/user/xyz").cd
 Lib:run(...) => result
 ```
 ## Doing ssh
@@ -1837,8 +1853,8 @@ If you need to run SSH commands on remote targets, use the SSH library script, w
 contains two major functions: run() and sudo(), These call Lib:run then filter the output
 to stdout using a marker to eliminate the welcome text when logging in etc.
 
+### Side note: ssh without password
 
-**Side note: ssh without password**
 
 To set up ssh login without password, create and distribute an ssh key, then
 copy it to the target host, as follows (in Linux shell).
@@ -1861,7 +1877,7 @@ The
 
 
 - The :NN  (where NN is an integer) syntesizes the indicated element of the last result list. If
-last result is not a list, an error is reported.
+last result is not a list, you get an error.
 
 
 ## Example using :syn
@@ -1880,18 +1896,23 @@ Assign to name by /xxx as usual
 $ /DirProject1
 ```
 
-Running the code Dir.sub("src") creates a Dir object for the src subdirectory.
+Running the code Dir.sub("src") creates a Dir object for the src subdirectory (regardless of
+whether it exists or not).
 
 
-When we run the ":syn" command, as CFT remembers the last result value, it creates code for it.
+When we run the ":syn" command, and as CFT remembers the last result value, it creates code for it.
 
 
-If this succeeds, it inserts the generated code line tino the "code history", as the
-last command, which means it can now be assigned a name, for example "DirProject"
+If this succeeds, it inserts the generated code line tino the "code history", pretending
+it was a command given by the user, which means it can now be assigned a name, for example "DirProject"
 
 
-Calling function "DirProject" will now always generate a Dir object pointing to the same
-directory. Having synthesized a value, makes it independent of how it was created, which
+Calling function "DirProject" will now always return a Dir object pointing to the same
+directory, as the specific value was turned into code, not taking into account how the value
+was created (and that Dir without params returns current directory, which may change).
+
+
+Having synthesized a value makes it independent of how it was created, which
 in this case means that DirProject always returns that specific directory, regardless
 of current directory.
 
@@ -1917,7 +1938,7 @@ Assign to name by /xxx as usual
 
 If the last value was not a list, the ":NN" command will fail with an error.
 
-# Output format / Term
+# Output format / Term object
 
 
 Output to screen is regulated via a Term object. It is a session object, remembering the
@@ -1953,7 +1974,12 @@ This is useful for producing configuration files, generating code, and similar.
 ## Merging text with Dict
 
 
-To merge values into a template, we use a dictionary object (Dict) combined with the
+This was the original implementation, but it has mostly been replaced by the
+ability to merge output from expressions directly into text. Skip to the
+section for .mergeExpr for for details about this.
+
+
+To merge values into a template, we may use a dictionary object (Dict) combined with the
 merge() function of strings. This replaces occurrences of names in the dictionary
 with their values (as strings).
 
@@ -1964,7 +1990,7 @@ $ "Dear name".merge(data)
 <String>
 Dear Julius
 ```
-## Dict.mergeCodes()
+### Dict.mergeCodes()
 
 
 The merge is based on a direct match. Often we like to mark our merge codes. The Dict
@@ -1993,41 +2019,7 @@ $ "Dear [name]".merge(data)
 <String>
 Dear Julius
 ```
-## PDict()
-
-
-With many parameters to be merged into the template text, the special expression PDict() saves
-us some typing. Instead of having to do this:
-
-```
-P(1) =>
- name
-P(2) =>
- ip
-Dict
-.set("name",name)
-.set("ip",ip)
-.mergeCodes => data
-```
-
-... we can instead just say:
-
-```
-PDict("name","ip").mergeCodes => data
-```
-
-The PDict function takes a list of names, and map them to the function parameters
-in sequence. Missing values result in "null", which in turn (when calling String.merge),
-get replaced with empty strings.
-
-
-If missing values are a problem:
-
-```
-PDict("name","ip").mergeCodes => data
-error(data.hasNullValue,"Missing parameters!")
-```
-## Example using raw strings and Sequence()
+### Example using raw strings and Sequence
 
 
 **Raw strings** are a special notation for strings, that is as follows:
@@ -2049,8 +2041,12 @@ The CondSequence() is conditional, which means if the first parameter is false, 
 an empty list. Since lists can be concatenated with "+", we can do this:
 
 ```
-PDict("replSetName","clusterRole").mergeCodes=>data
-isConfNode = (P(2)=="configsvr")
+P(1) =>
+ replSetName
+P(2) =>
+ clusterRole
+SymDict(replSetName, clusterRole).mergeCodes =>data
+isConfNode = (clusterRole=="configsvr")
 Sequence(
 @  :
 @  :
@@ -2069,11 +2065,10 @@ Sequence(
 @ sharding:
 @   clusterRole: '${clusterRole}'
 )
-->
-line out(line.merge(data))
+->line out(line.merge(data))
 /CreateMongodCfg
 ```
-## List.mergeExpr
+## .mergeExpr
 
 
 The List.mergeExpr is another option. Instead of merging data from a dictionary
@@ -2087,25 +2082,31 @@ name
 P(2,List)=>
 hobbies
 Sequence(
-@ p>
-Dear <<name>>
+@ Dear <<name>>
 @ We see that you have <<hobbies.length>> hobbies:
 @ << hobbies->h out("   - " + h) >>
 ).mergeExpr
 /GetTemplate
 ```
 
-Note that Sequence() is just another way of creating a List.
-
-
 Expressions can include iterating over a list, as seen, and creating Inner
-blocks, if using PIPE inside. Usually we will probably refer variables,
-or call functions().
-
-# Processing text
+blocks, if we want to use PIPE inside. Usually we will probably refer variables,
+or call functions.
 
 
-Here are different ways of working with text in CFT.
+Note: the .mergeExpr function optionally takes two parameters for start and stop
+symbols, so we can do this:
+
+```
+Sequence(
+@ Dear [name] ...
+).mergeExpr("[","]")
+```
+# Text processing
+
+
+In the section on templating, we used the Sequence() and raw strings, to represent text. This
+section summarizes the different ways of working with text.
 
 
 
@@ -2189,10 +2190,10 @@ template A
 
 The function DataFile.get() returns only non-blank lines. To get all lines, use function getAll().
 
-### Filter away comments
+### Allowing comments
 
 
-Also, DataFile has support for comments in the template text, which can be automatically
+DataFile has support for comments in the template text, which can be automatically
 removed. They are defined by another prefix string as follows:
 
 ```
@@ -2246,13 +2247,13 @@ directly into the script code.
 # Processing JSON
 
 
-The "JSON" script handles parsing JSON into a Dict/List structure, and
+The JSON script handles parsing JSON into a Dict/List structure, and
 conversely, takes a Dict/List structure to JSON format again.
 
 
-Worth noting that the JSON library is a CFT script, not built-in functionality.
-The parser is written in CFT, using the Lib.Text.Lexer to tokenize the input,
-and a plain recursive-descent parser as functions inside the JSON script.
+The JSON library is a CFT script, which means it is written in CFT, using the
+Lib.Text.Lexer to tokenize the input, and a plain recursive-descent parser as
+functions inside the JSON script.
 
 
 Parse example:
@@ -2350,68 +2351,6 @@ Show available data and functions for the XMLNode object:
 ```
 XML:Show
 ```
-# Use as a calculator
-
-## Expressions and "variables"
-
-
-Having a running instance of CFT on the desktop means access to a capable calculator.
-
-```
-$ 24*60*60
-<int>
-86400
-/x
-x*365
-<int>
-31536000
-```
-
-As noted before, the symbol "x" does not refer to the value 86400, but to the code that
-generates the value.
-
-## Lib.Math
-
-
-The global function Lib() creates a Lib object, which in turn contains functions that
-create other objects, such as the Math object, which contains trigonometric functions.
-
-
-For vector logic and rendering see Lib.DD and Lib.DDD (2D and 3D).
-
-## Lib.Convert
-
-
-The Lib.Convert function returns another object, which contains code for lots of common
-conversions. Use the help system to show all options.
-
-```
-$ Lib.Convert help
-```
-## Lib.Plot
-
-
-The Lib.Plot function returns an object with functions for creating a primitive plot, for
-visualizing data. Again, use the help system to examine options.
-
-
-Note that Lib.Plot is a quick-and-dirty implementation. For better graphs, some external
-package should be invoked.
-
-```
-File("/tmp/" + currentTimeMillis+".txt")
-/tmpFile
-f = tmpFile
-Lib.Data.each(0,720)->i
-f.append(""+Lib.Math.sin(i) + "," + Lib.Math.cos(i))
-|
-Lib.Plot.typeTimeline.readCSVFile(f).plot(File("out.png"))
-f.delete
-/DemoPlot
-```
-
-The above code generates an example plot as a png file in the current directory.
-
 # Internal web-server
 
 
@@ -2419,19 +2358,21 @@ There is a small embedded web-server in CFT, available in the Lib.Web object. It
 supports GET and POST, does parameter and form input parsing.
 
 
-See WebTest script, which was modified in v2.9.1 with the addition of
-String method .mergeExpr where expressions inside 
-<
-<...>
->
- are evaluated and
-inserted, creating a list of strings (as the sub-expression may result in
-many lines of output).
+See WebTest script. Running the Init function sets up a very simple web "site" on
+port 2500 on localhost.
+
+
+Remember to re-run Init after changing the code, as the
+web-server runs as a Java background thread, and needs to be updated, in order to serve new
+content.
+
+
+A bit of a work in progress, not terribly useful, bit it sort of works.
 
 # 3D library
 
 
-Included and adapted an old 3d-library written over 20 years ago, for rendering 3D scenes,
+Included and adapted an old 3d-library written by me, over 20 years ago, for rendering 3D scenes,
 working purely in Java, without any acceleration. It is slow, but gets the job done.
 
 
@@ -2548,16 +2489,27 @@ Available via Sys.environment() function.
 # Debugging
 
 
-In addition to the addDebug("something") statement, there is also implemented a simple
-"lint" function, which operates on current script, checking that all functions parse ok.
+After editing a script, normally you need to test all functions even for basic syntax
+errors, as CFT functions are parsed only when run.
+
+## @lint
+
+
+A simple lint function is available in Sys.lint. It checks that all functions in current
+script parses ok. It is mostly invoked using a shortcut:
 
 ```
-Sys.lint
+@lint
 ```
+## addDebug()
 
-The addDebug() includes the source location, and adds lines to the current stack frame of
-the CFT call stack, so that if there is a problem, output via those are included in the
-stack trace.
+
+The global addDebug() function takes some string, and creates a log line that also contains
+the source location, and adds this to the current stack frame of the CFT call stack.
+
+
+This means no output is displayed until something goes wrong, and the CFT stack trace
+is displayed.
 
 # Working with pasted text lines from stdin
 
@@ -2574,13 +2526,17 @@ some function name, using synthesis.
 readLines("XXX")
 (paste or enter text, then enter end-marker manually)
 XXX
-<list>
+<List>
 0: ...
 1: ...
 :syn
 /someName
 ...
 ```
+
+The ":syn" command synthesizes the List object, and we then create a function "SomeName" for it. If we save the
+script, we can now run SomeName to produce the list of lines pasted or entered.
+
 # Differing between Windows and Linux
 
 
@@ -2687,6 +2643,68 @@ $ getType(Dict)
 <String>
 Dict
 ```
+# Closures and dictionary-objects
+
+## Manual closure
+
+
+A closure is a Lambda that is bound together with a dictionary object. The dictionary object is
+available via the automatic variable "self" inside the lambda (now closure).
+
+```
+data=Dict
+closure = data.bind(Lambda{
+P(1) => value
+self.value=value
+})
+closure.call("x")
+data.value   # returns "x"
+```
+
+Here we create a dictionary. We then call .bind with a lambda, which produces a closure.
+
+
+If we now pass the generated closure as a parameter to some function that expects a lambda or closure,
+commonly type-identified as "Callable", when it is called with a single parameter value, that value
+gets stored inside the data dictionary, which means we can access it after the function we called has returned.
+
+## Dictionary objects
+
+
+Another way of creating closures, is by storing lambdas into dictionaries. The lambda gets automatically
+converted to a closure, which refers the dictionary.
+
+```
+data=Dict
+data.value=null
+data.f = Lambda{
+P(1) => value
+self.value=value
+}
+closure=data.get("f")
+callSomeFunctionWithIt(closure)
+# get value passed when that function called the closure
+data.value
+```
+
+The "data" dictionary now is a simple object, which contains both a value and a closure.
+
+## Auto-invoke
+
+
+Lambdas and Closures, when stored in a variable, are invoked with .call(...).
+
+
+Obtaining a Closure from a dictionary with dotted notation, however, implies an automatic invocation, again
+with or without parameters.
+
+```
+data=Dict
+data.f=Lambda{println("called f")}
+data.f   # prints "called f" to the screen.
+# To get a reference to the closure, we use the .get() function of Dict
+data.get("f")    # returns Closure object without invoking it
+```
 # Type checking with "as"
 
 
@@ -2717,6 +2735,8 @@ P(1) as (type) => x
 # or
 types="String int".split
 P(1) as (types) ...
+# or even
+P(1) as ("String int".split) ...
 ```
 
 If an "as" fails, a hard error is thrown, with details about what was expected, and what was found.
@@ -2724,7 +2744,9 @@ If an "as" fails, a hard error is thrown, with details about what was expected, 
 ### Null-values
 
 
-The type of null-value is "null". To allow a value to be optional is to allow it to be of type "null"
+The type of null-value is "null". To allow a value to be optional is to allow it to be of type "null". Since
+this is a common thing to do, we can add a '?' after the type (identifier or expression inside parantheses), which
+simply means "or null":
 
 ```
 P(1) as ("String null".split) => optionalStringValue
@@ -2735,6 +2757,8 @@ P(1) as ("String int".split)?    # String, int or null
 
 
 The Dict object has an optional name, either set at creation by Dict("something") or via Dict.setName("something").
+
+
 This name can be filtered in the "as" expression, prefixing the type identifier or type expression inside ()'s with
 an &amp; (ampersand) as follows:
 
@@ -2752,7 +2776,8 @@ _.a=1
 _.b=2
 =>
  myData
-f(myData) # matches the type correctly
+# Call f with this object
+f(myData) # should match "as" type of "f"
 /test
 ```
 ### Closures and Lambdas
@@ -2762,7 +2787,10 @@ Both lambdas and closures are assigned the type "Callable", which simplifies typ
 .call() functions to invoke.
 
 
-If one needs to detect if a value is a lambda or a closure, that is easiest done by checking for the presence of
+Mostly a function does not need to know if an assumed Lambda is in fact a Closure.
+
+
+Still, if one needs to detect if a value is a lambda or a closure, it's easiest done by checking for the presence of
 one of the functions that closures implement, and lambdas do not, for example the .lambda function of closures,
 to obtain the lambda component.
 
@@ -2795,6 +2823,86 @@ f2=d.get("f")  # returns lambda (closure)
 
 The closure can now be passed as an argument to some function somewhere, who uses .call() to invoke it.
 
+# Classes
+
+
+v3.5.0
+
+
+CFT supports primitive classes, which are really just dictionaries with closures for member functions,
+combined with the name attribute of all Dict objects, created by Dict(name) or Dict.setName(name), which we can check
+for in the "as" type checks with &amp;name.
+
+Inheritance is supported using the Dict.copyFrom function, or any other means of copying
+data and lambdas from one Dict to another. as there is no "class definition", only a
+block of code (class function) that sets up the class object.
+
+
+Classes are functions, and are defined similarly to functions, by code followed by
+slash something. Defining a simple class MyClass:
+
+```
+# my class
+# --
+P(1) as int => x
+self.x=x
+/class MyClass
+```
+## Class object types
+
+
+There is no differentiation between classes and objects. A class function returns an object.
+Inheritance is possible by some class function instantiating a class object of some other type,
+and incorporating elements from it into itself, possibly using the Dict.copyFrom(anotherDict)
+function, as the "self" object inside an object is a Dict.
+
+
+The OODemo script examplifies this, and also employs the second version of the /class line,
+where we supply the type explicitly.
+
+```
+# Common Val class
+# --
+P(1) as String =>
+ type
+P(2) as (type) =>
+ value
+...
+/class Val
+# Val class for processing int
+# --
+P(1) as int =>
+ value
+self.copyFrom(Val("int",value))
+...
+/class ValInt as Val
+```
+## What a "/class" function does
+
+
+There is no problem creating dictionary objects without using /class functions.
+
+```
+# TypedContainer class (using /class)
+# --
+P(1) as String => type
+self.type=type
+self.value=null
+self.set=Lambda{
+P(1) as (self.type) =>
+ value
+self.value=value
+}
+/class TypedContainer
+# Create custom subclass of TypedContainer inside normal function (without using /class)
+# --
+self=Dict("TypedContainer")
+self.copyFrom(TypedContainer("int"))
+self
+/IntContainer
+# Test it
+IntContainer.set("test")  # Fails with error, expects int
+```
 # Dict set with strings
 
 
@@ -2857,87 +2965,6 @@ the underscore ("_") global function, which returns the value on the data stack:
 Dict.name="test" _.role="manager" _.age=40 =>
  data
 ```
-# Classes
-
-
-v3.5.0
-
-
-CFT supports primitive classes, which are really just dictionaries with closures for member functions,
-combined with the name attribute of all Dict objects, created by Dict(name) or Dict.setName(name), which we can check
-for in the "as" type checks with &amp;name.
-
-Inheritance is supported using the Dict.copyFrom function, or any other means of copying
-data and lambdas from one Dict to another. as there is no "class definition", only a
-block of code (class function) that sets up the class object.
-
-
-Classes are functions, and are defined similarly to functions, by code followed by
-slash something. Defining a simple class MyClass:
-
-```
-# my class
-# --
-P(1) as int => x
-self.x=x
-/class MyClass
-```
-## Class object types
-
-
-There is no differentiation between classes and objects. A class function returns an object.
-Inheritance is possible by some class function instantiating a class object of some other type,
-and incorporating elements from it into itself, possibly using the Dict.copyFrom(anotherDict)
-function, as the "self" object inside an object is a Dict.
-
-
-The OODemo script examplifies this, and also employs the second version of the /class line,
-where we supply the type explicitly.
-
-```
-# Common Val class
-# --
-P(1) as String =>
- type
-P(2) as (type) =>
- value
-...
-/class Val
-# Val class for processing int
-# --
-P(1) as int =>
- value
-self.copyFrom(Val("int",value))
-...
-/class ValInt as Val
-```
-## What a "/class" function does
-
-
-There is no problem creating class objects without using /class functions. They are only dictionaries,
-which use the name property to store a type string, and with lambdas which call each other.
-
-```
-# TypedContainer class (using /class)
-# --
-P(1) as String => type
-self.type=type
-self.value=null
-self.set=Lambda{
-P(1) as (self.type) =>
- value
-self.value=value
-}
-/class TypedContainer
-# Create custom subclass of TypedContainer inside normal function (without using /class)
-# --
-self=Dict("TypedContainer")
-self.copyFrom(TypedContainer("int"))
-self
-/IntContainer
-# Test it
-IntContainer.set("test")  # Fails with error, expects int
-```
 # List.nth() negative indexes
 
 
@@ -2948,21 +2975,39 @@ last element, -2 the second last, and so on.
 List(1,2,3,4).nth(-1)
 <int>
 ```
-# Function parameters as List or Dict
+# Function parameters ...
 
 
 In addition to grabbing one parameter at a time, using P(pos), we can also process the
 parameter values as a list and as a dictionary.
 
+## Get parameters as List
+
 
 The function parameter expression P() when used with no parameters, returns a list of
 the parameter values as passed to the function.
+
+```
+# Some function
+# --
+P => paramList
+...
+/example
+```
+## Get parameters as Dict
 
 
 The PDict() expression takes a sequence of names to be mapped to parameters by position,
 resulting in a Dict object. Missing values lead to the special value null being stored
 in the dictionary.
 
+```
+# Some function with three parameters
+# --
+PDict("a","b","c") => paramsDict
+...
+/example
+```
 # The general loop statement
 
 
@@ -3059,7 +3104,7 @@ Db2:Get(Sys.scriptId,"someValue") =>
 Db2:Set(Sys.scriptId,"someValue",data)
 Lib.Db.releaseLock("Unique lock name")
 ```
-# Objects vs Scripts
+# Lib object vs Lib scripts
 
 
 As for the case of two Db2 entites above, with a script and an object of the same name,
@@ -3067,7 +3112,7 @@ this is also the situation for "Lib", where the (global) funciton Lib produces a
 while there also exists a Lib script.
 
 
-The Lib object, like all CFT objects, has its functions implemented in Java, while the
+The Lib object, like all CFT built-in objects, has its functions implemented in Java, while the
 Lib script is a text file with functions written in the CFT programming language, which are
 interpreted by Java when called.
 
@@ -3496,10 +3541,10 @@ synthesizable. If not, an error is returned.
 
 ```
 a=List(1,2,3)
-b=Sys.clone(a).add(4)  # b contains 1,2,3,4 while a remains unchanged
+b=Sys.clone(a).add(4)  # "b" contains 1,2,3,4 while "a" remains unchanged
 ```
 
-The same can be done manually:
+The clone can also be done manually:
 
 ```
 a=List(1,2,3)
@@ -3553,42 +3598,6 @@ This is a shortcut itself, that traverses the CFT.props file and identifies and
 displays the
 shortcut definitions from it.
 
-# Some example code
-
-## Windows PowerShell
-
-
-The following code is an effective way of using PowerShell from CFT, saving lots of typing.
-
-```
-# Run remote PowerShell script-block
-host=P(1)
-cmd=P(2)
-fullCmd = List("powershell","invoke-command","-computername",host,"-scriptblock","{" + cmd + "}")
-Dir.run(fullCmd)
-/PSRun
-# List services via PowerShell (interactive)
-host = Input("Host").get
-Input("Service name (including wildcards)").get =service
-cmd = "get-service -name " + service  # no splitting
-PSRun(host, cmd)
-/PSGetService
-```
-## Windows CMD
-
-
-Running commands using CMD in windows, mostly requires the "/c" flag.
-
-```
-Dir("...")
-/DirProject
-# Add, commit and push with git
-DirProject.run("cmd","/c","git","add",".")
-msg=Input("Commit message").get
-DirProject.run("cmd","/c","git","commit","-m",msg)
-DirProject.run("cmd","/c","git","push","origin","master")
-/GitPush
-```
 # Lib.Text.Lexer
 
 
@@ -3925,7 +3934,10 @@ Sys.getSecureSessionID(). It is a secure Binary object, which means it has no
 functions, and can only be passed as parameter to system functions, like encryption.
 
 
-See Db2:GetSessionPassword() function for example.
+The Vault script uses this to persist session secrets, in a secure way, stored
+in Db2 encrypted with the secure session id. By encrypting a second static value,
+it detects whenever there is a new session, prompting the user to enter the
+the secret values, to store for that session.
 
 # Reference: object types
 

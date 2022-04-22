@@ -28,6 +28,7 @@ CFT as a shell
  * Paths with space
  * Windows backslash
  * Combine shell commands with CFT function results
+ * Shell commands not suited in functions
  * No shell-like destructive commands!
  * Background jobs
 
@@ -49,6 +50,7 @@ Local variables
 
 Files
  * Page through a file
+ * Edit a (text) file
  * Show file as hex
  * Encoding
  * end-of-line
@@ -68,8 +70,6 @@ Directories
 Core types
  * String literals
  * Dictionaries
- |   Properties as functions
- |   Setting values with identifier names
  |   SymDict
  |   Name
  * Binary type
@@ -136,20 +136,13 @@ Conditionals - if expression
  * if-ladders
 
 Lazy evaluation
- |     Lazy if
- |     Lazy AND, OR - &amp;&amp; ||
- |     Lazy P(N,defaultExpr)
+ |   Lazy if
+ |   Lazy AND, OR - &amp;&amp; ||
+ |   Lazy P(N,defaultExpr)
 
 The error() function
 
 Output to screen
-
-Protecting files and directories
- * Example
- * A protected directory does not allow
- * A protected file does not allow
- * No guarantee
- * Unprotect
 
 Running external programs
  * Summary
@@ -161,30 +154,30 @@ Running external programs
  * Lib:run utility function
  * Work directory issues
  * Doing ssh
+ |   Side note: ssh without password
 
 Synthesis
  * Creating code from values
  * Example using :syn
  * Example using :NN
 
-Output format / Term
+Output format / Term object
  * The @term shortcut
  * Line wrapping
 
 Templating
  * Merging text with Dict
- * Dict.mergeCodes()
+ |   Dict.mergeCodes()
  |   Custom merge codes
- * PDict()
- * Example using raw strings and Sequence()
- * List.mergeExpr
+ |   Example using raw strings and Sequence
+ * .mergeExpr
 
-Processing text
+Text processing
  * Reading text files
  * Script file "here" documents
  * DataFile
  |   Include blank lines
- |   Filter away comments
+ |   Allowing comments
  * Sequence() and raw strings
 
 Processing JSON
@@ -193,12 +186,6 @@ Processing XML
  * Parsing XML
  * Creating structure with code
  * Looking up content
-
-Use as a calculator
- * Expressions and "variables"
- * Lib.Math
- * Lib.Convert
- * Lib.Plot
 
 Internal web-server
 
@@ -217,6 +204,8 @@ Command line args
 Environment variables
 
 Debugging
+ * @lint
+ * addDebug()
 
 Working with pasted text lines from stdin
 
@@ -232,10 +221,19 @@ Error handling
 
 Get type of value
 
+Closures and dictionary-objects
+ * Manual closure
+ * Dictionary objects
+ * Auto-invoke
+
 Type checking with "as"
  |   Null-values
  |   Dict names
  |   Closures and Lambdas
+
+Classes
+ * Class object types
+ * What a "/class" function does
 
 Dict set with strings
 
@@ -243,13 +241,11 @@ Dict.get with default value
 
 Dict.ident=Expr
 
-Classes
- * Class object types
- * What a "/class" function does
-
 List.nth() negative indexes
 
-Function parameters as List or Dict
+Function parameters ...
+ * Get parameters as List
+ * Get parameters as Dict
 
 The general loop statement
 
@@ -260,7 +256,7 @@ The CFT database
  * Lib.Db.Db2 vs Db2 script?
  * Synchronization
 
-Objects vs Scripts
+Lib object vs Lib scripts
 
 onLoad functions
 
@@ -290,10 +286,6 @@ CFT.props - mCat, mEdit and mMore lambdas
 
 CFT.props - shortcuts
  |   Show all shortcuts
-
-Some example code
- * Windows PowerShell
- * Windows CMD
 
 Lib.Text.Lexer
  * Concept
