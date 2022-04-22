@@ -58,16 +58,26 @@ public class FunctionBody {
     private static FunctionBodyParseCache clpCache = new FunctionBodyParseCache();
 
     private List<ScriptSourceLine> sourceLines;
+    private boolean isPrivate;
+    private ClassDetails classDetails;
     private String hashString;
 
     public FunctionBody(String singleLine, SourceLocation loc) {
+    	this(singleLine, false, loc);
+    }
+
+    public FunctionBody(String singleLine, boolean isPrivate, SourceLocation loc) {
         sourceLines = new ArrayList<ScriptSourceLine>();
         sourceLines.add(new ScriptSourceLine(loc, "")); // blank line between previous function and this one
         sourceLines.add(new ScriptSourceLine(loc, singleLine));
+        this.classDetails=null; // can not define class functions interactively
+        this.isPrivate=isPrivate;
     }
-
-    public FunctionBody(List<ScriptSourceLine> saveFormat) {
+    
+    public FunctionBody(List<ScriptSourceLine> saveFormat, boolean isPrivate, ClassDetails classDetails) {
         this.sourceLines = saveFormat;
+        this.isPrivate = isPrivate;
+        this.classDetails=classDetails; // may be null
     }
 
     public SourceLocation getSourceLocation() {
@@ -77,9 +87,14 @@ public class FunctionBody {
     	return null;
     }
     
-    public void update(String singleLine, SourceLocation loc) {
+    /**
+     * Redefine function interactively
+     */
+    public void redefineFunctionInteractively (String singleLine, SourceLocation loc) {
         // SourceLocation loc=new SourceLocation("<>", 0, 0);
-
+        this.classDetails=null;
+        this.isPrivate=false;
+        
         // keep initial non-code lines, if present
         List<ScriptSourceLine> x = new ArrayList<ScriptSourceLine>();
         for (ScriptSourceLine s : sourceLines) {
@@ -96,6 +111,22 @@ public class FunctionBody {
         x.add(new ScriptSourceLine(loc, singleLine));
         this.sourceLines = x;
         this.hashString = null;
+    }
+    
+    /**
+     * If this function is a class function ("constructor") this is the data about the class, which are
+     * needed when calling the function, ensuring the creation and return of a self object.
+     */
+    public ClassDetails getClassDetails() {
+    	return classDetails;
+    }
+    
+    public boolean isClass() {
+    	return classDetails != null;
+    }
+    
+    public boolean isPrivate() {
+    	return this.isPrivate;
     }
 
     public List<String> getSaveFormat() {

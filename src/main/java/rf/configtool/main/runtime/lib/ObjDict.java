@@ -168,20 +168,7 @@ public class ObjDict extends Obj {
         return this;
     }
     
-//    private boolean isIdentifier(String name) {
-//        try {
-//            Lexer p=new Lexer();
-//            CodeLine cl=new CodeLine(new SourceLocation("xxx",0,0), name);
-//            p.processLine (cl);
-//            TokenStream ts=p.getTokenStream();
-//            if (ts.getTokenCount() != 2) return false;  // identifier + EOF
-//            if (!ts.peekType(Token.TOK_IDENTIFIER)) return false;
-//        } catch (Exception ex) {
-//            return false;
-//        }
-//        return true;
-//        
-//    }
+
     
     private ObjDict theDict() {
         return this;

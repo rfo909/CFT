@@ -60,7 +60,7 @@ public class ScriptState {
     public Value invokeFunction (Stdio stdio, CFTCallStackFrame caller, String func, List<Value> params) throws Exception {
 
       // Code lookup
-      FunctionBody codeLines=objGlobal.getCurrScriptCode().getFunctionCodeLines(func);
+      FunctionBody codeLines=objGlobal.getCurrScriptCode().getFunctionBody(func);
       if (codeLines != null) {
           // execute code line
           Runtime rt=new Runtime(objGlobal);

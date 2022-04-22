@@ -244,6 +244,7 @@ Dict.get with default value
 Dict.ident=Expr
 
 Classes
+ * Class object types
 
 List.nth() negative indexes
 

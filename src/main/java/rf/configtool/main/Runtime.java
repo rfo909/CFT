@@ -20,7 +20,9 @@ package rf.configtool.main;
 import java.util.List;
 
 import rf.configtool.main.runtime.Value;
+import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
+import rf.configtool.main.runtime.lib.ObjDict;
 import rf.configtool.main.runtime.reporttool.Report;
 import rf.configtool.parsetree.CodeSpace;
 
@@ -40,14 +42,28 @@ public class Runtime {
      * Returns value from executing program line. Note may return java null if no return
      * value identified
      */
-    public Value processFunction (Stdio stdio, CFTCallStackFrame caller, FunctionBody lines, FunctionState functionState) throws Exception {
+    public Value processFunction (Stdio stdio, CFTCallStackFrame caller, FunctionBody functionBody, FunctionState functionState) throws Exception {
 
     	stdio.pushCFTCallStackFrame(caller);
 
         if (functionState == null) throw new Exception("No functionState");
+
+        ClassDetails cd=functionBody.getClassDetails();
         
+        if (cd != null) {
+        	String typeName=cd.getType();
+        	ObjDict self=new ObjDict(typeName);
+        	functionState.set("self", new ValueObj(self));
+        	doProcessFunction(stdio, caller, functionBody, functionState);
+        	return new ValueObj(self);
+        } else {
+        	return doProcessFunction(stdio,caller, functionBody, functionState);
+        }
         
-        List<CodeSpace> codeSpaces=lines.getCodeSpaces();
+    }
+     
+    private Value doProcessFunction(Stdio stdio, CFTCallStackFrame caller, FunctionBody functionBody, FunctionState functionState) throws Exception {
+        List<CodeSpace> codeSpaces=functionBody.getCodeSpaces();
 
         Value retVal=null;
         

@@ -316,7 +316,7 @@ public class ObjGlobal extends Obj {
 
         updateSavefileState();
  
-        FunctionBody onLoad = currScriptCode.getFunctionCodeLines("onLoad");
+        FunctionBody onLoad = currScriptCode.getFunctionBody("onLoad");
         if (onLoad != null) {
             try {
             	CFTCallStackFrame caller=new CFTCallStackFrame("Script " + scriptName+":onLoad");

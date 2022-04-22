@@ -71,7 +71,7 @@ public class ExprLookupOrCall extends ExprCommon {
         
         // Code lookup
         ObjGlobal objGlobal=ctx.getObjGlobal();
-        FunctionBody codeLines=objGlobal.getCurrScriptCode().getFunctionCodeLines(ident);
+        FunctionBody codeLines=objGlobal.getCurrScriptCode().getFunctionBody(ident);
         if (codeLines!= null) {
             // execute code line
             Runtime rt=new Runtime(objGlobal);

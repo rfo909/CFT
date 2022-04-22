@@ -750,18 +750,14 @@ Dict.set("a",1).set("b",Lambda{P(1) as int=>x self.a+x})
 
 # test class A
 # --
-	class A {
-		self.a=List
-		self.b=Dict
-	}
-/t48a
+	self.a=List
+	self.b=Dict
+/class t48a
 
 # test class B
 # --
-	class B {
-		self.copyFrom(t48a)
-	}
-/t48b
+	self.copyFrom(t48a)
+/class t48b
 
 # Test48
 # --
@@ -794,12 +790,16 @@ Dict.set("a",1).set("b",Lambda{P(1) as int=>x self.a+x})
 
 
 
+# class X
+# --
+/class t51X
+
 # Test 51 - predicate version of "as" for classes
 # --
-	class X {} => obj
+	t51X => obj
 	
 	obj as? Dict => a
-	obj as? &X => b
+	obj as? &t51X => b
 	obj as? &x => c
 	
 	a && b && !c

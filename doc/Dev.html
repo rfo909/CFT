@@ -13,6 +13,51 @@
 
 <h1>CFT Change log</h1>
 
+
+
+<h3>3.5.0 2022-04-22 Classes version 2</h3>
+<p>
+	Changed classes from v3.3.2 in-function auto-inherit of function parameters, returning
+   to a modified function definition:
+</p>
+<pre>
+	# Class A
+	# --
+		P(1)=>x
+		self.x=x
+		...
+	/class A
+</pre>
+<p>
+	In both the old and current implementation, the aim is to generate a "class object",
+	which can be used directly as an object, but also can be instantiated and copied into
+	an ohter class object, which then becomes a sub-class of the first.
+</p>
+<p>
+	The code above defines classes in the same way as functions, but instead of /name, we use
+	the /class ... line, which comes in two variants:
+</p>
+<pre>
+	/class A
+	/class A as T
+</pre>
+<p>
+	The A is the name of the function, which creates the class object, which is the one we 
+	call. The optional part, T, is used to define the class object type. If no type is given, the type defaults
+	to the class function name.
+</p>
+<p>
+	The type of an object in CFT is kind of a "promise" or perhaps "an informal interface name", which
+	is selected freely, to simplify functions and lambdas doing "as" type checking, not having to know all subclasses
+	of some class, but instead either use a root class name or some other freely selected name to describe a
+	set of features, and check for that.
+</p>
+<p>
+	The OODemo script illustrates all this.
+</p>
+
+
+
 <h3>3.4.4 2022-04-18 Fixed '&' commands</h3>
 <p>
 	Creating ok string rep from commands following '&', but keeping the

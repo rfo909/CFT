@@ -22,6 +22,7 @@ import java.util.ArrayList;
 
 import rf.configtool.main.ScriptSourceLine;
 import rf.configtool.main.SourceException;
+import rf.configtool.parsetree.CodeSpace;
 
 /**
  * Fast lexer using CharTable. Note that for saved scripts, lines are massaged by the ScriptCode.load() method,
@@ -160,6 +161,21 @@ public class Lexer {
     }
     
     
-    
+	public static boolean stringIsIdentifier (String name) {
+		try {
+			Lexer lexer = new Lexer();
+			ScriptSourceLine line = new ScriptSourceLine(new SourceLocation(), name);
+			lexer.processLine(line);
+			TokenStream ts = lexer.getTokenStream();
+			if (ts.getTokenCount() != 2)
+				return false; // identifier + EOF
+			if (!ts.peekType(Token.TOK_IDENTIFIER))
+				return false;
+		} catch (Exception ex) {
+			return false;
+		}
+		return true;
+
+	}    
 
 }

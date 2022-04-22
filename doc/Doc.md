@@ -7,8 +7,8 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2022-04-18 RFO
-v3.4.4
+Last updated: 2022-04-22 RFO
+v3.5.0
 ```
 # Introduction
 
@@ -69,8 +69,7 @@ as well as being interactive.
 It is command line based, and can be programmed interactively, creating one-line functions, but
 mostly we use editors for creating function code.
 
-The language is object oriented, with all values being objects, but
-does not allow user-defined classes. Here we call a
+The language is object oriented, with all values being objects. Here we call a
 function "bin()" inside an integer object.
 
 ```
@@ -2835,90 +2834,56 @@ Dict.name="test" _.role="manager" _.age=40 =>
 # Classes
 
 
-v3.3.2
+v3.5.0
 
 
-CFT supports classes, which are really just dictionaries with lambdas for member functions,
-combined with the Dict.name=expr syntax for a more natural class-like feel. Inheritance is
-supported using the Dict.copyFrom function.
+CFT supports primitive classes, which are really just dictionaries with lambdas for member functions,
+combined with the name attribute of all Dict objects, created by Dict(name) or Dict.setName(name), which we can check
+for in the "as" type checks with &amp;name.
+
+Inheritance is supported using the Dict.copyFrom function, or any other means of copying
+data and lambdas from one Dict to another. as there is no "class definition", only a
+block of code (class function) that sets up the class object.
 
 
-Classes are created 
-**inside** functions, usually one class per function, as the class
-expression inherits the function parameters, and optionally also the function name.
-
-
-Class names have no purpose with regards to inheritance, only for type checking parameters,
-so if class B inherits class A and makes adjustments, it may just as well be named A, for
-easier type checking, if the instances of the two offer the same interface.
-
-
-Below we create a Container class, and two subclasses, which modify the original class
-in the same way, but by different means:
+Classes are functions, and are defined similarly to functions, by code followed by
+slash something. Defining a simple class MyClass:
 
 ```
-# Create a container
+# my class
 # --
-class {
-P(1,0) as int => initValue
-self.value=initValue
-self.incr=Lambda{
-P(1) as int => value
-self.value=self.value+value
-}
-}
-/Container
-# Create subclass where we can only increment by 1
-# --
-class Container {
-P(1,0) as int => initValue
-self.copyFrom(Container(initValue))
-self.incr=Lambda{
-self.value=self.value+1
-}
-}
-/Subclass1
-# Create subclass where we can only increment by 1, but by calling the "incr" from
-# the super-class with value 1, instead of redefining it as we did in Subclass1
-# --
-class Container {
-P(1,0) as int => initValue
-self.copyFrom(Container(initValue))
-self.superIncr=self.get("incr")
-self.incr=Lambda{
-self.superIncr(1)
-}
-}
-/Subclass2
-# Test the above
-# --
-Sequence(
-Container(0).incr(10).value  # 10
-Subclass1(0).incr(10).value  # 1
-Subclass2(0).incr(20).value  # 1
-)
-/test
+P(1) as int => x
+self.x=x
+/class MyClass
 ```
-
-The Container class gets its name from the function, which is "Container", while for the Subclass1 and Subclass2 functions, we
-specify the class name explicitly as "Container" following the "class" keyword. If omitted, they would
-get the names "Subclass1" and "Subclass2".
+## Class object types
 
 
-The subclasses call the Container function and copies content from that object into itself. This means
-it now has a self.value field and the self.incr lambda from the parent object. In Subclass1 we then redefine
-self.incr to a new Lambda that ignores parameters and increases the value by 1.
+There is no differentiation between classes and objects. A class function returns an object.
+Inheritance is possible by some class function instantiating a class object of some other type,
+and incorporating elements from it into itself, possibly using the Dict.copyFrom(anotherDict)
+function, as the "self" object inside an object is a Dict.
 
 
-In Subclass2 we instead store the super-version of "incr" under another name, self.superIncr. To do this we use the
-self.get("incr") instead of self.incr, as the .get("incr") returns the lambda (or Closure at this point), while
-self.incr calls the lambda.
-
-
-We then create a new Lambda for self.incr, which calls self.superIncr with value 1 as parameter.
+The OODemo script examplifies this, and also employs the second version of the /class line,
+where we supply the type explicitly.
 
 ```
-:-)
+# Common Val class
+# --
+P(1) as String =>
+ type
+P(2) as (type) =>
+ value
+...
+/class Val
+# Val class for processing int
+# --
+P(1) as int =>
+ value
+self.copyFrom(Val("int",value))
+...
+/class ValInt as Val
 ```
 # List.nth() negative indexes
 

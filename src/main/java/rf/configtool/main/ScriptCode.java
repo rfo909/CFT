@@ -29,7 +29,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import rf.configtool.lexer.Lexer;
 import rf.configtool.lexer.SourceLocation;
+import rf.configtool.lexer.TokenStream;
 import rf.configtool.util.TabUtil;
 
 
@@ -40,7 +42,6 @@ public class ScriptCode {
     private PropsFile props;
     private File savefile;
     private Map<String, FunctionBody> namedFunctions=new HashMap<String,FunctionBody>();
-    private Set<String> privateFunctions=new HashSet<String>();
     private List<String> namesInSequence=new ArrayList<String>();
     private ObjTerm term;
     
@@ -71,26 +72,22 @@ public class ScriptCode {
     
     private boolean assignFunctionName(String name, boolean isPrivate, boolean force) throws Exception {
         if (currLine==null) throw new Exception("No current code line");
+        if (!Lexer.stringIsIdentifier(name)) throw new Exception("Invalid function name: " + name);
         if (namedFunctions.get(name) != null && !force) return false;
         
         if (!namesInSequence.contains(name)) namesInSequence.add(name);
-        FunctionBody c=namedFunctions.get(name);
+        FunctionBody body=namedFunctions.get(name);
         SourceLocation loc=new SourceLocation("<func> " + name, 0, 0);
-        if (c==null) {
-            c=new FunctionBody(currLine, loc);
-            namedFunctions.put(name, c);
+        if (body==null) {
+            body=new FunctionBody(currLine, isPrivate, loc);
+            namedFunctions.put(name, body);
         } else {
-            c.update(currLine, loc);
-        }
-        if (isPrivate) {
-            privateFunctions.add(name);
-        } else {
-            if (privateFunctions.contains(name)) privateFunctions.remove(name);
+            body.redefineFunctionInteractively(currLine, loc);
         }
         return true;
     }
 
-    public FunctionBody getFunctionCodeLines (String name) {
+    public FunctionBody getFunctionBody (String name) {
         return namedFunctions.get(name); // may be null
     }
     
@@ -148,12 +145,17 @@ public class ScriptCode {
                 
             boolean showFull = (matchingNames.size()==1 && symbolSubStr != null);
             for (String name:matchingNames) {
-                if ( (privateFunctions.contains(name) && publicOnly && !showFull) ) continue;
+            	
+            	FunctionBody body=getFunctionBody(name);
+            	
+                if ( (body.isPrivate() && publicOnly && !showFull) ) continue;
+                
+                
                 
                 String label=name;
                 while(label.length()<nameMaxLength) label=label+" ";
                 if (showFull) {
-                    FunctionBody codeLines = getFunctionCodeLines(name);
+                    FunctionBody codeLines = getFunctionBody(name);
                     List<String> text = codeLines.getSaveFormat();
                     boolean foundContent=false;
                     stdio.println();
@@ -163,13 +165,24 @@ public class ScriptCode {
                         if (line.length() > available) line=line.substring(0,available-1)+"+";
                         stdio.println(line);
                     }
-                    stdio.println("/" + name);
+                    if (body.isPrivate()) {
+                    	stdio.println("//"+name);
+                    } else if (body.isClass()) {
+                    	stdio.println(body.getClassDetails().createClassDefString());
+                    } else {
+                    	stdio.println("/"+name);
+                    }
                     stdio.println();
                 } else {
-                    String namedLine=getFunctionCodeLines(name).getFirstNonBlankLine();
+                    String namedLine=getFunctionBody(name).getFirstNonBlankLine();
                     
                     String pre=" ";
-                    if (privateFunctions.contains(name)) pre="/";
+                    if (body.isClass()) {
+                    	pre="*";
+                    } else if (body.isPrivate()) {
+                    	pre="/";
+                    }
+                    
                     String s="| " + pre + label + ": " + TabUtil.substituteTabs(namedLine,1);
     
                     if (s.length() > available) s=s.substring(0,available-1)+"+";
@@ -224,15 +237,20 @@ public class ScriptCode {
         
         PrintStream ps=new PrintStream(new FileOutputStream(this.savefile));
         
-        for (String s:namesInSequence) {
-            FunctionBody c=namedFunctions.get(s);
-            List<String> saveLines=c.getSaveFormat();
+        for (String functionName:namesInSequence) {
+            FunctionBody body=namedFunctions.get(functionName);
+            List<String> saveLines=body.getSaveFormat();
             for (String x:saveLines) {
                 ps.println(x);
             }
-            String pre="/";
-            if (privateFunctions.contains(s)) pre="//";
-            ps.println(pre + s);
+
+            if (body.isClass()) {
+            	ps.println(body.getClassDetails().createClassDefString());
+            } else if (body.isPrivate()) {
+            	ps.println("//"+functionName);
+            } else {
+            	ps.println("/"+functionName);
+            }
         }
         ps.close();
         return;
@@ -301,21 +319,38 @@ public class ScriptCode {
 
             if (trimmed.startsWith("/")) {
                 boolean isPrivate=false;
-                String name;
-                if (trimmed.startsWith("//")) {
-                    isPrivate=true;
-                    name=trimmed.substring(2);
-                } else {
-                    name=trimmed.substring(1);
-                }
-
-                if (namesInSequence.contains(name)) namesInSequence.remove(name);
-                namesInSequence.add(name);
-                FunctionBody c=new FunctionBody(lines);
-                namedFunctions.put(name, c);
                 
-                if (privateFunctions.contains(name)) privateFunctions.remove(name);
-                if (isPrivate) privateFunctions.add(name);
+                ClassDetails cd=null;
+                
+                String functionName;
+                
+                if (trimmed.startsWith("/class") || trimmed.startsWith("//class")) { 
+                	Lexer lexer=new Lexer();
+                	lexer.processLine(new ScriptSourceLine(loc, trimmed));
+                	TokenStream ts=lexer.getTokenStream();
+
+                	cd=new ClassDetails(ts); // parse the /class ident ... string
+                	functionName=cd.getName();
+                } else if (trimmed.startsWith("//")) {
+                    isPrivate=true;
+                    functionName=trimmed.substring(2);
+                    if (!Lexer.stringIsIdentifier(functionName)) throw new SourceException(loc,"Expected function name to be identifier: '" + functionName + "'");
+                } else {
+                    functionName=trimmed.substring(1);
+                    if (!Lexer.stringIsIdentifier(functionName)) throw new SourceException(loc,"Expected function name to be identifier: '" + functionName + "'");
+                }
+                
+                
+                Lexer lexer=new Lexer();
+                lexer.processLine(new ScriptSourceLine(new SourceLocation(), functionName));
+                
+
+                if (namesInSequence.contains(functionName)) namesInSequence.remove(functionName);
+                namesInSequence.add(functionName);
+                
+                FunctionBody body=new FunctionBody(lines,isPrivate,cd);
+                
+                namedFunctions.put(functionName, body);
                 
                 lines=new ArrayList<ScriptSourceLine>();
                 continue;
@@ -332,7 +367,6 @@ public class ScriptCode {
     public void clear (String name) throws Exception {
         if (namedFunctions.containsKey(name)) namedFunctions.remove(name);
         if (namesInSequence.contains(name)) namesInSequence.remove(name);
-        if (privateFunctions.contains(name)) privateFunctions.remove(name);
     }
     
     public void copy (String fromName, String toName) throws Exception {
@@ -341,6 +375,5 @@ public class ScriptCode {
         
         namedFunctions.put(toName, namedFunctions.get(fromName));
         namesInSequence.add(toName);
-        if (privateFunctions.contains(fromName)) privateFunctions.add(toName);
     }
 }
