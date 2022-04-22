@@ -1641,7 +1641,7 @@ codeDirs = . ; code.examples ; code.lib
 
 <h2>Local variables scope</h2>
 <p>
-  Local variables inside functions (and lambdas) all share the same scope. This
+  Local variables inside functions (and local / Inner blocks) all share the same scope. This
   means that there are no sub-scopes inside local or inner blocks inside a 
   function body. 
 </p>
@@ -3121,9 +3121,33 @@ codeDirs = . ; code.examples ; code.lib
 <pre>
   P(1) as Callable =&gt; callable
 
-  isClosure = callable.?lambda  # returns true if callable has function lambda, which lambda does not
+  isClosure = callable.?lambda  # returns true if value has function lambda, which means it is a closure
 </pre>
+<p>
+  <b>Note:</b> When referring a lambda or closure as part of something else, that is, using "." in front of it, it is
+  invoked directly with or without params, so no ".call" then. Referring a lambda or closure via a parameter or
+  local variable, and wanting to invoke it, use ".call" with or without params.
+</p>
+<pre>
+  d=Dict
+  f=Lambda{ 
+    P(1) as String => name 
+    "hello " + name 
+  }
+  d.f=f
 
+  f.call("Bob")  # no dotted lookup of lambda, so use .call() to invoke it
+  d.f("Bob")  # dotted lookup (".f") means we invoke closure without ".call"
+</pre>
+<p>
+  To access a closure from within a dictionary, without calling it, use instead the .get() function
+</p>
+<pre>
+  f2=d.get("f")  # returns lambda (closure)
+</pre>
+<p>
+  The closure can now be passed as an argument to some function somewhere, who uses .call() to invoke it.
+</p>
 
 
 
@@ -3137,6 +3161,7 @@ codeDirs = . ; code.examples ; code.lib
 </p>
 <pre>
   Dict.setStr("a : b")
+    .setStr("c=d")
   /d
   d.get("a")
   &lt;String&gt;
@@ -3184,7 +3209,7 @@ codeDirs = . ; code.examples ; code.lib
   <i>v3.3.0</i>
 </p>
 <p>
-  Extended parser so that we don't have to use Dict.set() for values with a name that's an identifier:
+  Extended parser so that we don't have to use Dict.set() for values with a name that are valid identifiers:
 </p>
 <pre>
   data=Dict
@@ -3206,7 +3231,7 @@ codeDirs = . ; code.examples ; code.lib
   v3.5.0
 </p>
 <p>
-  CFT supports primitive classes, which are really just dictionaries with lambdas for member functions, 
+  CFT supports primitive classes, which are really just dictionaries with closures for member functions, 
   combined with the name attribute of all Dict objects, created by Dict(name) or Dict.setName(name), which we can check
   for in the "as" type checks with &amp;name.
 </p> 
@@ -3226,6 +3251,7 @@ codeDirs = . ; code.examples ; code.lib
 
   /class MyClass
 </pre>
+
 
 <h2>Class object types</h2>
 <p>
@@ -3253,6 +3279,44 @@ codeDirs = . ; code.examples ; code.lib
     ...
   /class ValInt as Val
 </pre>
+
+
+<h2>What a "/class" function does</h2>
+<p>
+  There is no problem creating class objects without using /class functions. They are only dictionaries,
+  which use the name property to store a type string, and with lambdas which call each other.
+</p>
+<pre>
+# TypedContainer class (using /class)
+# --
+  P(1) as String =&gt; type
+
+  self.type=type
+  self.value=null
+  
+  self.set=Lambda{
+    P(1) as (self.type) => value
+    self.value=value
+  }
+/class TypedContainer
+
+
+# Create custom subclass of TypedContainer inside normal function (without using /class)
+# --
+  self=Dict("TypedContainer")
+  self.copyFrom(TypedContainer("int"))
+  self
+/IntContainer
+
+
+# Test it
+
+IntContainer.set("test")  # Fails with error, expects int
+
+</pre>
+
+
+
 
 
 
@@ -3312,7 +3376,7 @@ codeDirs = . ; code.examples ; code.lib
   3
 </pre>
 <p>
-  If you forget to increment the variable a, or forget or create an invalid break(), then
+  If you forget to increment the variable a, or forget or create a valid break(), then
   the loop may never terminate, and CFT has to be killed with ^C
 </p>
 
@@ -3330,7 +3394,7 @@ codeDirs = . ; code.examples ; code.lib
 </p>
 <p>
   To restore the structure, we use the global eval() function.
-
+</p>
 <pre>
 
   P(1)=&gt;file
@@ -3433,7 +3497,7 @@ codeDirs = . ; code.examples ; code.lib
 </p>
 <pre>
   $ Lib.Text               # call function Text inside object
-  $ Lib:Header("Hello")    # call function Header in script
+  $ Lib:Header("Hello")    # call function Header in script
 </pre>
 
 
@@ -3703,12 +3767,12 @@ $ Db2Obj:FindObjects("stats",Lambda{P(1).value.host=="s04.s"}).first.value.outpu
   someData-&gt;data
     # About to spawn new process using data
 
-    mon.Lwait.call (limit)
+    mon.Lwait (limit)
     proc=SpawnProcess(SymDict(data), ...)
-    mon.Ladd.call(proc)
+    mon.Ladd(proc)
   |
   # Wait for all processes to complete
-  mon.Lwait.call
+  mon.Lwait
 
   # Inspect result from the processes
   mon.list-&gt;process
@@ -4287,141 +4351,6 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
 <p>
   Feels like Regex character classes, no?
 </p>
-
-
-
-
-
-
-<h1>Manual closures</h1>
-<p>
-  A closure is created by binding a Lambda to a Dict object. The Closure
-  has a .call function just like the Lambda, and invokes the lambda, with
-  the Dict object referenced via "self" variable.
-</p>
-<p>
-  Nice for event based callbacks.
-</p>
-<pre>
-  Dict =&gt;data
-  data.received_value=null
-  data.bind(Lambda{
-    self.received_value=P(1)
-  }) =&gt;closure
-
-  closure.call("test")
-  
-  # Get value passed to closure, possibly by someone else
-  data.received_value  # returns "test"
-</pre>
-<p>
-  For robustness and testing, when lambdas are run directly (not via closures)
-  there is also created a "self" variable, which points at an empty Dict object.
-</p>
-
-
-<h2>Another example</h2>
-<p>
-  Here we create a Closure that when called strips N characters from the
-  start and end of a string.
-</p>
-<pre>
-  P(1)=&gt;n
-  Dict.set("n",n).bind(Lambda{
-    P(1)=&gt;s 
-    self.get("n")=&gt;n
-    s.sub(n,s.length-n)
-  })
-/Strip
-</pre>
-<p>
-  Test:
-</p>
-<pre>
-  $ Strip(2).call("this is a test")
-  &lt;String&gt;
-  is is a te
-</pre>
-
-
-
-
-
-<h1>Closures as member functions of Dict Objects</h1>
-<p>
-  The dictionary .set function detects lambdas, and concert them to closures, with the
-  "self" variable pointing to the dictionary.
-</p>
-<p>
-  NOTE that for the case where we refer a Closure via .ident lookup in a dictionary, the
-  closure is called automatically, so do not use the .call() function. It will be attempted
-  run on the result, which will fail unless the result is another Closure or Lambda.
-</p>
-<p>
-   This means we can now do this:
-</p>
-<pre>
-Dict
-  .set("i",1)
-  .set("incr",Lambda{
-    amount=P(1,1)
-    self.i=self.i+amount
-  })
-  =&gt;data
-
-  data.incr(10) # data.i is now 11
-  println(data.i)
-/test
-</pre>
-
-
-
-
-<h2>Member closures calling each other</h2>
-<p>
-  The mechanism of letting individual "member" closures have a shared idea of "self", lets them call each
-  other.
-</p>
-<p>
-  As the self variable points to a dictionary, calling another closure with .ident lookup, eliminates the 
-  .call() function. It is only when working with closures and lambdas as objects, either through Dict.bind() or
-  looked up in a dictionary with .get("ident"), which is to say, when they are "standalone", that they are
-  invoked with call(), since in this state we need to pass them around as parameters etc, without inducing
-  an invocation.
-</p> 
-<pre>
-Dict
-  .set("i",1)
-  .set("incr",Lambda{
-    amount=P(1,1)
-    self.i=self.i+amount
-  })
-  .set("incr50",Lambda{
-    self.incr(50)
-  })
-  =&gt;data
-
-  data.incr50  # data.i is now 51
-  println(data.i)
-/test
-</pre>
-<p>
-  The incr50 closure calls the incr closure within the environment defined by the Dict object.
-</p>
-
-
-
-
-<h2>Copy lambdas between dictionaries</h2>
-<p>
-  The Dict.set function also detects when it is fed a closure, unwrapping the
-  Lambda inside, then wrapping it inside a new closure pointing back to 
-  itself (via "self" variable in lambda).
-</p>
-
-
-
-
 
 
 

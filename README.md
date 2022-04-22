@@ -13,7 +13,7 @@ It's been in continous use since creation in 2018.
 
 Written from scratch in Java; runs both on Linux and Windows environments. 
 
-*README last updated 2022-04-18*
+*README last updated 2022-04-22*
 
 
 ## Terminal based - shell-like
@@ -341,21 +341,20 @@ Since the introduction of lambdas and then closures, which is created by letting
 to some dictionary, it was possible to create objects with data plus code working on those data. The object
 was always created by a function, not some static or global declaration. 
 
-The "class" keyword came much later, and really does the same thing, but in a more readable fashion. Together with
+The "class" keyword came much later, and really does the same thing, but in a slightly more compact and readable fashion. Together with
 certain refinements in how to access dictionary content, we can now write:
 
 ```
-	# Create simple class
+	# Greet class
 	# --
-		class Greet {
-			P(1) as String => name
-			self.name=name
-			
-			self.greet=Lambda{
-				"Dear " + self.name
-			}
+		P(1) as String => name
+		self.name=name
+		
+		self.greet=Lambda{
+			"Dear " + self.name
 		}
-	/Greet
+	/class Greet
+
 	
 	# Using it
 	# --
@@ -363,9 +362,13 @@ certain refinements in how to access dictionary content, we can now write:
 		x.greet
 		# Returns "Dear Santa Claus"
 	/test
+
 ```
 
+
 The Greet function returns an object, with a lambda inside, that we call in the test function.
+
+Notice the special naming of class functions: "/class Greet".
 
 ## No global state
 

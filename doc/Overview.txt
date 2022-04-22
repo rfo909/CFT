@@ -245,6 +245,7 @@ Dict.ident=Expr
 
 Classes
  * Class object types
+ * What a "/class" function does
 
 List.nth() negative indexes
 
@@ -305,13 +306,6 @@ Lib.Text.Lexer
  * Complex tokens
  |   Regular Node.addToken() example
  |   Node.addTokenComplex() example
-
-Manual closures
- * Another example
-
-Closures as member functions of Dict Objects
- * Member closures calling each other
- * Copy lambdas between dictionaries
 
 ANSI escape codes
 
