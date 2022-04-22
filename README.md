@@ -531,20 +531,20 @@ Some times we have jobs that take a while, and using the '&' expression, we can 
 run in the background, to avoid blocking the REPL. 
 
 ```
-  & timeConsumingFunction(...), "Some meaningful name"
+  & timeConsumingFunction(...)
 ```
 
 Strictly speaking, '&' runs an expression, and function calls are expressions.
 
 This spawns off a Process, similar to the SpawnProcess() example above, but in addition registers the job in
-a job register. 
+a job register, for interactive examination.
 
 The "Jobs" script contains code to manage both running and completed jobs, and in turn is made
 available through a few shortcuts, defined in CFT.props.
 
 ```
 	@J - list background jobs
-	@JJ - get result from first of completed jobs (if any)
+	@JJ - get result from first completed job (if any)
 	@JCL - clear set of completed jobs
 	@JFG - bring running job to foreground, for interactivity
 ```
