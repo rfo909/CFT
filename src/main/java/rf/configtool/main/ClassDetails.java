@@ -12,7 +12,9 @@ public class ClassDetails {
 	 */
 	public ClassDetails (TokenStream ts) throws Exception {
 		final String msg="expected '/class Name [as Type]'";
-		ts.matchStr("/", msg + " - expected '/'");
+		if (!ts.matchStr("//")) { // allow double slash, but ignore it
+			ts.matchStr("/", msg + " - expected '/'");
+		}
 		ts.matchStr("class", msg + " - expected keyword 'class'");
 		name=ts.matchIdentifier(msg + " - expected Name");
 		if (ts.matchStr("as")) {

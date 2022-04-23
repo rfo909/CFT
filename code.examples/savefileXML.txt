@@ -35,14 +35,6 @@ in v3.3.2
 
 
 
-# test
-# --
-	Util:ShowDict(
-		XMLNode("test")
-	)
-//node
-
-
 
 
 # Build root lexer Node for tokens in XML
@@ -413,7 +405,6 @@ exampleXML
 /class XMLNode
 
 
-
 # Show XMLNode content
 # --
 	Util:ShowDict(XMLNode("ROOT"))
@@ -459,7 +450,7 @@ exampleXML
 /t3
 
 
-# Construct XML object test
+# Construct XML structure with code
 # --
 	root = XMLNode("root")
 	root.attributes.pi="3.14"
@@ -469,23 +460,31 @@ exampleXML
 	a.addText("a-text")
 	root.addText("root test after A")
 	b=root.sub("B")
-	b.sub("C")
+	root.addText("after B, special chars <>&")
+	
+	b.sub("C").addText("Inside C")
 	b.sub("D")
 	
 	root
-//constructedObject
+/constructedObject
 
-# Show constructed object
+# Show constructed object by calling its PP function
 # --
 	constructedObject.PP
 /t4
 
 
-# Lookup test
+# Parse constructedObject.PP and PP it
+# --
+	Parse(constructedObject.PP).first.PP
+/t4b
+
+# Lookup test, accessing data inside constructedObject - call t4 to see it prettyprinted
 # --
 	root=constructedObject
-	println("nonExist = " + root.attrGet("nonExist"))
+	println("root.attr.nonExist = " + root.attrGet("nonExist"))
 	println("A.attr.inner = " + root.subNodes("A").first.attrGet("inner"))
+	println("A.content.last = " + root.content.last) # special characters test
 /t5	
 
 
