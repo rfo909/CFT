@@ -4212,41 +4212,48 @@ made little sense. Instead you write some code
 that does something useful, then decides what to call it.
 
 
-This might at some point be changed, at least for script files, as it still feels backward, but this
-is the reason.
+An "advantage" of this is that functions don't need to be parsed when loading a script. Functions are
+defined as all lines of text since top of file or since last "/xxx" line. Now, searching for the first
+non-blank line of a function, to present in the "?" list of functions, and letting that be a comment,
+makes sense.
+
+While pondering how to integrate classes as top-level elements along with functions, I decided
+to keep the /something notation, because it lets the code dealing with both loading and saving
+source files deal with lines of text, not parsing.
 
 
 The syntax with the slash and an identifier was inspired by PostScript.
 
 
-Another issue is how to integrate or maintain the use of the P() function for
-parameter processing, which feels superior to what one can do in a
-more traditional format:
+I also am very pleased with parameter handling in CFT functions, so even if we were to move to
+a more mainstream notation, I would want to keep the P() function and now also the "as" type
+checks.
 
-```
-function X (a,b) { ... }
-```
 ## Using Sys.stdin to run colon commands etc
 
 
 This functionality is an example of an "unexpected feature", as the Sys.stdin() was created to automate
 functions that used
-Input and readLine(). There was a moment of confusion when discovering what happened to input lines not consumed
+Input and readLine(). There even was a moment of confusion when discovering what happened to input lines not consumed
 by those interactive functions.
 
 ## Code spaces / the "pipe"
 
 
-This all stems from the "one-line-at-a-time" period, where scripts were entered from
+This stems from the "one-line-at-a-time" period, where scripts were entered from
 the command line, at a time long before introducing block expressions. Being a fairly compact
 and efficient notation, and frequently used, code spaces and the "pipe" symbol will
 remain in the language.
 
+
+The nice thing with the PIPE is that it is global within the function body, but this
+may also be a weakness when one is used to nesting stuff with braces, like in Java.
+
 ## Code spaces vs Inner blocks
 
 
-To be clear: code spaces were invented long before any blocks. Code spaces, separated by
-the "pipe" character is enough for most designs.
+Code spaces were invented long before any blocks. Splitting the function body into
+spaces with the PIPE is enough for most tasks.
 
 
 The need for code blocks only really arised after the "if" was added. The first implementation
@@ -4256,6 +4263,16 @@ shared the "local" block syntax, but functionally worked like an "Inner" block.
 It took a while back and forth deciding we needed two different non-lambda block expressions,
 and defining them in terms of code spaces.
 
+
+The Inner blocks should possibly have a better name. I have considered many, but not
+decided on one that gives a more intuitive feel.
+
+```
+# Any of these?
+do {...}
+Compute {...}
+sub {...}
+```
 ## Script and code size
 
 ### 2020-11-13 v2.0.0
@@ -4323,14 +4340,14 @@ Functions:        490
 Object types:     69
 Value types:      13
 ```
-### 2022-04-19 v3.4.4
+### 2022-04-22 v3.5.0
 
 
 Running CodeStats:main
 
 ```
-Script code:      16094 lines
-Java code:        32990 lines
+Script code:      16091 lines
+Java code:        33120 lines
 Functions:        507
 Object types:     72
 Value types:      13

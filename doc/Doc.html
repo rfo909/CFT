@@ -4784,20 +4784,23 @@ Colon commands
   that does something useful, then decides what to call it.
 </p>
 <p>
-  This might at some point be changed, at least for script files, as it still feels backward, but this 
-  is the reason. 
+  An "advantage" of this is that functions don't need to be parsed when loading a script. Functions are
+  defined as all lines of text since top of file or since last "/xxx" line. Now, searching for the first
+  non-blank line of a function, to present in the "?" list of functions, and letting that be a comment,
+  makes sense.
+<p>
+  While pondering how to integrate classes as top-level elements along with functions, I decided
+  to keep the /something notation, because it lets the code dealing with both loading and saving
+  source files deal with lines of text, not parsing. 
 </p>
 <p>
   The syntax with the slash and an identifier was inspired by PostScript.
 </p>
 <p>
-  Another issue is how to integrate or maintain the use of the P() function for
-  parameter processing, which feels superior to what one can do in a
-  more traditional format:
+  I also am very pleased with parameter handling in CFT functions, so even if we were to move to
+  a more mainstream notation, I would want to keep the P() function and now also the "as" type
+  checks.
 </p>
-<pre>
-  function X (a,b) { ... }
-</pre>
 
 
 
@@ -4805,7 +4808,7 @@ Colon commands
 <p>
   This functionality is an example of an "unexpected feature", as the Sys.stdin() was created to automate 
   functions that used
-  Input and readLine(). There was a moment of confusion when discovering what happened to input lines not consumed
+  Input and readLine(). There even was a moment of confusion when discovering what happened to input lines not consumed
   by those interactive functions.
 </p>
 
@@ -4814,18 +4817,21 @@ Colon commands
 
 <h2>Code spaces / the "pipe"</h2>
 <p>
-  This all stems from the "one-line-at-a-time" period, where scripts were entered from
+  This stems from the "one-line-at-a-time" period, where scripts were entered from
   the command line, at a time long before introducing block expressions. Being a fairly compact
   and efficient notation, and frequently used, code spaces and the "pipe" symbol will
   remain in the language.
 </p>
-
+<p>
+  The nice thing with the PIPE is that it is global within the function body, but this
+  may also be a weakness when one is used to nesting stuff with braces, like in Java.
+</p>
 
 
 <h2>Code spaces vs Inner blocks</h2>
 <p>
-  To be clear: code spaces were invented long before any blocks. Code spaces, separated by
-  the "pipe" character is enough for most designs.
+  Code spaces were invented long before any blocks. Splitting the function body into
+  spaces with the PIPE is enough for most tasks.
 </p>
 <p>
   The need for code blocks only really arised after the "if" was added. The first implementation
@@ -4835,6 +4841,17 @@ Colon commands
   It took a while back and forth deciding we needed two different non-lambda block expressions, 
   and defining them in terms of code spaces.
 </p>
+<p>
+  The Inner blocks should possibly have a better name. I have considered many, but not
+  decided on one that gives a more intuitive feel.
+</p>
+<pre>
+  # Any of these?
+
+  do {...}
+  Compute {...}
+  sub {...}
+</pre>
 
 
 
@@ -4897,11 +4914,11 @@ Colon commands
   Value types:      13
 </pre>  
 
-<h3>2022-04-19 v3.4.4</h3>
+<h3>2022-04-22 v3.5.0</h3>
 <p>Running CodeStats:main</p>
 <pre>
-  Script code:      16094 lines
-  Java code:        32990 lines
+  Script code:      16091 lines
+  Java code:        33120 lines
   Functions:        507
   Object types:     72
   Value types:      13
