@@ -101,13 +101,15 @@ completes.
     Lib:MenuSelect(Sys.Jobs.namesRunning,null,"Select job") => name
 
     Lib:Header("Selected job: " + name)
+
+	addDebug("name='" + name + "'")
+
     println("Below follows an input loop.")
     println("Output from the job is displayed, and you may enter input to it")
     println
-    println("To detach from job, type '.quit' and to wait for more output,")
-    println("type '...'")
-    println
-    println("All other inputs are sent to stdin of the job")
+    println("- To detach from job, type 'q'")
+    println("- To send data to job, type a space followed by content: ' xxx'")
+	println("- To refresh output from job, just press Enter")
     println
     println("Text following below the line, is output from the job.")
     println
@@ -118,19 +120,35 @@ completes.
     println("--------------------------------------------------------------------")
 
     proc=Sys.Jobs.getRunning(name)
+	
+	dbKey=name.toHexString
+
     error(proc==null,"No running process " + name)
     loop
-        Inner { proc.output->line println(line) }
+		Sys.sleep(800)
+		Db2:Get(Sys.scriptId,dbKey,List) + proc.output => output
+		output.last(100) => output
+		
+		Db2:Set(Sys.scriptId,dbKey,output)
+
         if (proc.isDone) {
             println("(Job completed)")
-            #result=proc.exitValue
-            #Sys.Jobs.deleteCompleted(name)
             break
         }
-        readLine => line
-        break(line==".quit")
-        if (line != "...") proc.sendLine(line)
-        Sys.sleep(1000)
+		Inner {
+			output->line println(line)
+		}
+
+		println
+        readLine("q to quit, .xxx to send data, Enter to refresh") => line
+		break(line=="q")
+		if (line.startsWith(" ")) {
+			line=line.sub(1)
+			proc.sendLine(line)
+			output.add(line)
+			Db2:Set(Sys.scriptId,dbKey,output)
+		} 
+		# else repeat loop, updating output from the process
     |
     "Done"
 /ToForeground
