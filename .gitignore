@@ -9,8 +9,8 @@ investigate.d/
 Db/
 anim/
 
-# various savefiles in home dir
-*.txt
+# various savefiles in this dir
+/*.txt
 
 
 # Compiled class file
