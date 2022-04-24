@@ -25,6 +25,21 @@ import java.io.*;
 
 /**
  * Lock files work ok on Linux, but on windows they really don't.
+ * So created a TCP server instead. The idea here is that only one
+ * process may bind to the given PORT number. The first CFT process
+ * using the lock server grabs the port. Other instances of CFT
+ * will fail setting up the server, but instead depend on the
+ * already existing instance. 
+ * 
+ * Improvement: each local instance should run a listen-server, which
+ * gets updated every time the master server allocates or frees
+ * a lock, so that if the CFT instance with the server is terminated, 
+ * whomever of the other CFT processes first needs to do lock
+ * operations, can start a server with the correct state. 
+ * 
+ * To avoid port management, this could be implemented as polling requests
+ * to the fixed PORT, where the server delays response on those connections
+ * for up to a certain max time, or immediately on state changes.
  */
 public class LockServer {
     public static final int PORT=2911;

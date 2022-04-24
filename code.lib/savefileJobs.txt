@@ -49,6 +49,28 @@ completes.
 /Readme
 
 
+
+# When starting, check if time for a purge of old data from Db2 collection 
+# associated with this script. Doing this by grabbing a lock that is not
+# released again
+# --
+	sysKey=Sys.scriptId+"_system"
+
+	Db2:Get(sysKey,"lastPurge",0) => lastPurge
+
+	if (currentTimeMillis - lastPurge > 86400*1000) {
+		if (Lib.Db.?obtainLock(sysKey,10)) {
+			println("Jobs:onLoad cleaning up Db2 old content")
+			addDebug("Purging Db2 collection for Jobs script: " + Sys.scriptId)
+			Db2:DeleteCollection(Sys.scriptId)
+			Db2:Set(sysKey,"lastPurge", currentTimeMillis)
+			## NOT releasing the lock
+			###Lib.Db.releaseLock(sysKey)
+		}
+	}
+//onLoad
+
+
 # Get all jobs
 # --
     Inner {
@@ -140,7 +162,7 @@ completes.
 		}
 
 		println
-        readLine("q to quit, .xxx to send data, Enter to refresh") => line
+        readLine("q to quit, <SPACE>xxx to send data, Enter to refresh") => line
 		break(line=="q")
 		if (line.startsWith(" ")) {
 			line=line.sub(1)

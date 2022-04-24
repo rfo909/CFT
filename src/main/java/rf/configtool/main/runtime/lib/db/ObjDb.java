@@ -115,7 +115,7 @@ public class ObjDb extends Obj {
             return "releaseLock";
         }
         public String getShortDesc() {
-            return "releaseLock(name) - release named lock obtained previously - throws error if not owner";
+            return "releaseLock(name) - release named lock obtained previously - always returns true";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 1) throw new Exception("Expected name parameter");
