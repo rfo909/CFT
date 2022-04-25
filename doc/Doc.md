@@ -7,56 +7,140 @@ If you have problems, consider viewing the Doc.html file instead.
 # CFT / ConfigTool
 
 ```
-Last updated: 2022-04-22 RFO
+Last updated: 2022-04-25 RFO
 v3.5.0
 ```
 # Introduction
 
 
-**CFT is an interactive programmable environment for automation.**
-
-Automation is done by creating functions, which call each other, as well
-as a set of global functions, and member functions inside objects. All values
-are objects, implemented in Java, and with member functions inside.
+CFT is a programming language and an interactive command shell, with focus on data filtering, compactness and
+general usefulness. The name is short for "ConfigTool".
 
 
-A rich set of predefined objects exists, along with global functions to
-create them. An example is the global "Dir" function, which returns a
-"Dir" object, with functions inside, such as .files, which returns list
-of files in the directory. Both the list and the files are objects.
+CFT implements a system library of 500+ system functions, and some 80+ system object types (v3.5.0). There is about 30 global functions, with
+the rest existing as member functions inside the system objects.
 
 
+The system objects represent strings, integers and floats, booleans, lists, dictionaries, files and directories, and many others
+related to various uses.
 
-- directory objects
-
-
-- file objects
-
-
-- lists
+## Compact code
 
 
-- dictionaries
+Code in CFT is kept compact, because of powerful library functions.
 
 
-- strings
+Example:
+
+```
+Dir("/some/path").file("log.txt").append(Date.fmt + " something happened")
+```
+
+The corresponding Java code would easily require 10+ lines of code for this simple
+operation.
 
 
-- ...
+We can easily modify this into a callable function
+that takes the log line as parameter, or if no parameter given, asks for it:
+
+```
+P(1,readLine("Log line"))=>
+x Dir("/some/path").file("log.txt").append(Date.fmt + " " + x)
+/LogLine
+```
+
+Entering text in interactive mode, each line is considered a function body, and immediately executed.
 
 
+We then enter "/LogLine" which
+creates a named function from the last line of input. We can now run it again by typing LogLine and pressing Enter. It will ask
+you to input a "Log line" string, and then add it to the file.
 
-CFT is tested on Linux and Windows, and easily integrates with external programs
-on both, such as PowerShell, git, ssh. It should run anywhere that supports Java.
+
+Having defined a function, we can decide to save the current script to file, which means
+we can load it later to interactively call its functions. Script functions can also be
+called from other functions, in the same or from other scripts.
+
+```
+:save MyScript
+:load MyScript
+```
+## Editing script files
 
 
-Development has been going on since May 2018, and on github since July 2020.
+We normally don't enter functions interactively, but instead edit the script file. CFT has
+something called shortcuts, which by default start with the '@' character.
 
+
+The most frequently used is @e which opens current script in an editor. We can now create an improved and more readable
+version of our code. Function names follow code, just as when entered at the prompt.
+
+```
+# Log directory
+# --
+Dir("/some/path")
+/LogDir
+# Log file
+# --
+LogDir.file("log.txt")
+/LogFile
+# Add log line prefixed with date and time
+# --
+P(1,readLine("Log line")) => logLine
+LogFile.append(Date.fmt + " " + logLine)
+/LogAdd
+```
+## Integrated help
+
+
+All functionality in CFT is documented via the interactive help system.
+
+
+Global system functions are listed by typing
+
+```
+help
+```
+
+Functions inside a system object are listed by typing
+
+```
+Dir help
+Date help
+""  help
+List help
+1 help
+```
+
+Here, we get help about the value on top of the stack, showing
+member functions inside a Dir object, or a Date object, and so on.
+
+
+The "Dir" and "Date" identifiers above refer to global functions
+that return objects of those types, as documented via simple "help"
+without an expression in front.
+
+### Normal expression syntax :-)
+
+
+Even though there is a data stack, expressions follow
+normal "infix" syntax:
+
+```
+2+3*5
+17
+"("+Date.fmt+")"
+(2022-04-22 19:20:58)
+```
 # Platform
 
 
 CFT is written in Java. It has been continously tested on both Linux
-and Windows.
+and Windows, and easily integrates with running external programs on
+both platforms, including PowerShell on Windows.
+
+
+Development has been going on since May 2018, and on github since July 2020.
 
 # Functionality
 
@@ -71,6 +155,9 @@ mostly we use editors for creating function code.
 
 The language is object oriented, with all values being objects. Here we call a
 function "bin()" inside an integer object.
+
+
+In the following examples, the '$' is the prompt.
 
 ```
 $ 1.bin

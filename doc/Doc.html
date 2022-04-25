@@ -3,7 +3,7 @@
 
 <style type="text/css">
 	* {font-family: arial}
-	pre {font-family:courier; margin-left:1Em; padding-left: 1Em; font-size: 16pt}
+	pre {font-family:courier; font-weight: bold; margin-left:1Em; padding-left: 1Em; font-size: 16pt; color: #008800}
 	h1 {padding-top:1Em; color: blue}
 </style>
 </head>
@@ -15,21 +15,23 @@ CFT / ConfigTool
 
 <pre style="padding-left:0; margin-left:0">
 
-Last updated: 2022-04-22 RFO
+Last updated: 2022-04-25 RFO
 v3.5.0
-
 </pre>
 
 <h1>Introduction</h1>
 
 <p>
-  CFT is programming language and an interactive (REPL loop) command shell, with focus on data filtering and
-  presentation. 
+  CFT is a programming language and an interactive command shell, with focus on data filtering, compactness and 
+  general usefulness. The name is short for "ConfigTool". 
 </p>
 <p>
-  CFT implements a big system library of functions and objects. 
+  CFT implements a system library of 500+ system functions, and some 80+ system object types (v3.5.0). There is about 30 global functions, with
+  the rest existing as member functions inside the system objects. 
 </p>
-  There is a total of 500+ system functions (v3.5.0), of which about 30 are global, and the rest are member functions inside system objects.
+<p>
+  The system objects represent strings, integers and floats, booleans, lists, dictionaries, files and directories, and many others
+  related to various uses.
 </p>
 
 <h2>Compact code</h2>
@@ -40,31 +42,66 @@ v3.5.0
   Example:
 </p>
 <pre>
-  logFileName=Date.setFormat("yyyy-MM-dd").fmt + "_log.txt"
-  timestamp=Date.setFormat("HH:mm:ss").fmt
-  Dir("/some/path").file(logFileName).append(timestamp + " something happened")
+  Dir("/some/path").file("log.txt").append(Date.fmt + " something happened")
 </pre>
-<p>
+<p> 
   The corresponding Java code would easily require 10+ lines of code for this simple
-  operation. With a few more lines, we can modify this into a callable function
-  that takes the log line as parameter, and has a descriptive comment which is displayed
-  when listing script functions (entering '?'):
+  operation.
+</p>
+<p>
+  We can easily modify this into a callable function
+  that takes the log line as parameter, or if no parameter given, asks for it:
 </p>
 <pre>
-  # Add data to log files so and so (one file per day)
-  # --
-	  P(1) => logLine
-	  logFileName=Date.setFormat("yyyy-MM-dd").fmt + "_log.txt"
-	  timestamp=Date.setFormat("HH:mm:ss").fmt
-	  Dir("/some/path").file(logFileName).append(timestamp + logLine)
-  /AddLog
+  P(1,readLine("Log line"))=>x Dir("/some/path").file("log.txt").append(Date.fmt + " " + x)
+  /LogLine
 </pre>
 <p>
-  The functions we write are stored in simple text files, which we
-  call scripts. These can be loaded later, letting us run the functions
-  inside. We can also invoke functions in one script from functions in
-  other scripts.
+  Entering text in interactive mode, each line is considered a function body, and immediately executed.
 </p>
+<p>
+  We then enter "/LogLine" which
+  creates a named function from the last line of input. We can now run it again by typing LogLine and pressing Enter. It will ask
+  you to input a "Log line" string, and then add it to the file.
+</p>
+<p>
+  Having defined a function, we can decide to save the current script to file, which means
+  we can load it later to interactively call its functions. Script functions can also be 
+  called from other functions, in the same or from other scripts.
+</p>
+<pre>
+  :save MyScript
+  :load MyScript
+</pre>
+
+
+<h2>Editing script files</h2>
+<p>
+  We normally don't enter functions interactively, but instead edit the script file. CFT has
+  something called shortcuts, which by default start with the '@' character.
+</p>
+<p>
+  The most frequently used is @e which opens current script in an editor. We can now create an improved and more readable
+  version of our code. Function names follow code, just as when entered at the prompt.
+</p>
+<pre>
+  # Log directory
+  # --
+    Dir("/some/path")
+  /LogDir
+
+  # Log file 
+  # --
+    LogDir.file("log.txt")
+  /LogFile
+
+  # Add log line prefixed with date and time
+  # --
+    P(1,readLine("Log line")) =&gt; logLine
+    LogFile.append(Date.fmt + " " + logLine)
+  /LogAdd
+</pre>
+
 
 <h2>Integrated help</h2>
 <p>

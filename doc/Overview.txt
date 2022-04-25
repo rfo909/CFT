@@ -3,6 +3,10 @@ Generated file - see script file savefileOverview.txt
 ------------------------------------------------------------------
 
 Introduction
+ * Compact code
+ * Editing script files
+ * Integrated help
+ |   Normal expression syntax :-)
 
 Platform
 
