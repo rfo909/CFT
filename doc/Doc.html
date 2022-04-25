@@ -23,44 +23,103 @@ v3.5.0
 <h1>Introduction</h1>
 
 <p>
-  <i>CFT is an interactive programmable environment for automation.</i>
+  CFT is programming language and an interactive (REPL loop) command shell, with focus on data filtering and
+  presentation. 
 </p>
 <p>
-  Automation is done by creating functions, which call each other, as well
-  as a set of global functions, and member functions inside objects. All values
-  are objects, implemented in Java, and with member functions inside.
+  CFT implements a big system library of functions and objects. 
 </p>
-<p>
-  A rich set of predefined objects exists, along with global functions to
-  create them. An example is the global "Dir" function, which returns a 
-  "Dir" object, with functions inside, such as .files, which returns list
-  of files in the directory. Both the list and the files are objects.
-</p>
-<ul>
-  <li>directory objects</li>
-  <li>file objects</li>
-  <li>lists</li>
-  <li>dictionaries</li>
-  <li>strings</li>
-  <li>...</li>
-</ul>
-<p>
-  CFT is tested on Linux and Windows, and easily integrates with external programs
-  on both, such as PowerShell, git, ssh. It should run anywhere that supports Java.
+  There is a total of 500+ system functions (v3.5.0), of which about 30 are global, and the rest are member functions inside system objects.
 </p>
 
+<h2>Compact code</h2>
 <p>
-  Development has been going on since May 2018, and on github since July 2020.
+  Code in CFT is kept compact, because of powerful library functions.
+</p>
+<p>
+  Example:
+</p>
+<pre>
+  logFileName=Date.setFormat("yyyy-MM-dd").fmt + "_log.txt"
+  timestamp=Date.setFormat("HH:mm:ss").fmt
+  Dir("/some/path").file(logFileName).append(timestamp + " something happened")
+</pre>
+<p>
+  The corresponding Java code would easily require 10+ lines of code for this simple
+  operation. With a few more lines, we can modify this into a callable function
+  that takes the log line as parameter, and has a descriptive comment which is displayed
+  when listing script functions (entering '?'):
+</p>
+<pre>
+  # Add data to log files so and so (one file per day)
+  # --
+	  P(1) => logLine
+	  logFileName=Date.setFormat("yyyy-MM-dd").fmt + "_log.txt"
+	  timestamp=Date.setFormat("HH:mm:ss").fmt
+	  Dir("/some/path").file(logFileName).append(timestamp + logLine)
+  /AddLog
+</pre>
+<p>
+  The functions we write are stored in simple text files, which we
+  call scripts. These can be loaded later, letting us run the functions
+  inside. We can also invoke functions in one script from functions in
+  other scripts.
 </p>
 
+<h2>Integrated help</h2>
+<p>
+  All functionality in CFT is documented via the interactive help system.
+</p>
+<p> 
+  Global system functions are listed by typing
+</p>
+<pre>
+  help
+</pre>
+<p>
+  Functions inside a system object are listed by typing
+</p>
+<pre>
+  Dir help
+  Date help
+  ""  help
+  List help
+  1 help
+</pre>
+<p>
+  Here, we get help about the value on top of the stack, showing
+  member functions inside a Dir object, or a Date object, and so on.
+</p>
+<p>
+  The "Dir" and "Date" identifiers above refer to global functions 
+  that return objects of those types, as documented via simple "help"
+  without an expression in front.
+</p>
 
+<h3>Normal expression syntax :-)</h3>
+<p>
+Even though there is a data stack, expressions follow
+normal "infix" syntax:
+</p>
+<pre>
+2+3*5
+17
+
+"("+Date.fmt+")"
+(2022-04-22 19:20:58)
+</pre>
 
 
 
 <h1>Platform</h1>
 <p>
   CFT is written in Java. It has been continously tested on both Linux
-  and Windows.
+  and Windows, and easily integrates with running external programs on
+  both platforms, including PowerShell on Windows.
+</p>
+
+<p>
+  Development has been going on since May 2018, and on github since July 2020.
 </p>
 
 
@@ -78,6 +137,9 @@ v3.5.0
 <p>
   The language is object oriented, with all values being objects. Here we call a
   function "bin()" inside an integer object. 
+</p>
+<p>
+  In the following examples, the '$' is the prompt.
 </p>
 <pre>
   $ 1.bin
