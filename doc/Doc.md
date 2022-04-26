@@ -696,7 +696,7 @@ path in the parameter to File(), or use the .file() function inside
 some Dir object:
 
 ```
-$ Dir("...").file("x.txt")
+$ Dir("/some/path").file("x.txt")
 ```
 ## Page through a file
 
@@ -710,9 +710,7 @@ more x.txt
 To do the same with function code:
 
 ```
-SomeDir.file("x.txt") =>
- file
-Lib:m(file)
+SomeDir.file("x.txt") => file Lib:m(file)
 ```
 ## Edit a (text) file
 
@@ -726,9 +724,7 @@ edit x.txt
 To do the same with function code:
 
 ```
-SomeDir.file("x.txt") =>
- file
-Lib:e(file)
+SomeDir.file("x.txt") => file Lib:e(file)
 ```
 ## Show file as hex
 
@@ -744,8 +740,9 @@ File("x.txt").hex
 Default encoding is "ISO_8859_1", but this can be changed, for example:
 
 ```
-File("x.txt").encoding("UTF-8")
+File("x.txt").encoding("UTF-8").create(...)
 ```
+
 ## end-of-line
 
 
@@ -762,9 +759,11 @@ example LF, we can do the following:
 
 ```
 f=File("x.txt") lines=f.read f.setWriteLF.create(lines)
+
 # or more compact
 f=File("x.txt") f.setWriteLF.create(f.read)
 ```
+
 # Directories
 
 ```
@@ -946,16 +945,11 @@ b=2
 dict=Dict
 dict.a=a
 dict.b=b
+
 # With SymDict
 a=1
 b=2
 dict=SymDict(a,b)
-```
-
-If testing interactively, all needs to be on the same line:
-
-```
-$ a=1 b=2 SymDict(a,b)
 ```
 
 Note that assigning a value to a dict, using dotted notation, returns the Dict object, and
@@ -968,7 +962,7 @@ _.a=1
 _.b=2
 => dict
 ```
-### Name
+### Dictionary name
 
 
 Dictionary objects support a simple string name, in addition to named properties.
@@ -990,6 +984,7 @@ Dict("Point")
 _.x=1
 _.y=2
 => point
+
 # Some function expecting a Point dictionary as parameter
 # --
 P(1) as &amp;Point => point
@@ -1007,7 +1002,7 @@ Used in connection with encryption etc. Can be created from strings, or represen
 the content of a file.
 
 ```
-"password".getBytes("UTF-8")
+$ "password".getBytes("UTF-8")
 <Binary>
 0x..
 ```
@@ -1178,9 +1173,9 @@ To sort a list of files on their size, biggest first, we do the following:
 
 ```
 Dir.files->f
-out(Int(f.lastModified,f))
+	out(Int(f.lastModified,f))
 | _.sort.reverse->x
-out(x.data)
+	out(x.data)
 ```
 
 The first loop wraps each File object inside an Int object, which is created by
@@ -1281,6 +1276,7 @@ implemented with with the following syntax:
 
 ```
 Script:Function (...)
+
 Example:
 Lib:Header("This is a test")
 ```
@@ -1524,16 +1520,15 @@ modify local variables.
 ```
 # List number of lines containing a pattern, in files under current dir
 # --
-P(1,readLine("pattern"))=>
-pattern
-Dir.files->f
-count=Inner{
-f.read->line
-assert(line.contains(pattern))
-out(line)
-| _.length
-}
-report(f.name, count)
+	P(1,readLine("pattern"))=>pattern
+	Dir.files->f
+		count=Inner{
+				f.read->line
+				assert(line.contains(pattern))
+				out(line)
+			| _.length
+		}
+		report(f.name, count)
 /CountMatches
 ```
 
@@ -1552,9 +1547,7 @@ A Lambda is an object (a value) that contains a block of code, so it can be call
 inside runs detached from the caller, and behaves exactly like a function.
 
 ```
-Lambda{
-P(1)+P(2)
-}
+Lambda{P(1)+P(2)}
 /MyLambda
 $ MyLambda.call(1,2)
 ```
@@ -1600,9 +1593,7 @@ Instead of using processing loops, filtering lists can also be done
 using .filter() function of the List object.
 
 ```
-"12345".chars
-.filter(Lambda{P(1).parseInt})
-.sum
+"12345".chars.filter(Lambda{P(1).parseInt}).sum
 /t
 ```
 
@@ -1683,8 +1674,8 @@ Also note, that (local and Inner) blocks are expressions, which can contain stat
 ```
 i=1
 loop
-out(i)
-if (i>=10,{break},i=i+1)
+	out(i)
+	if (i>=10,{break},i=i+1)
 ```
 
 Or this, which is perhaps the most readable:
@@ -1692,12 +1683,12 @@ Or this, which is perhaps the most readable:
 ```
 i=1
 loop
-out(i)
-if (i>=10) {
-break
-} else {
-i=i+1
-}
+	out(i)
+	if (i>=10) {
+		break
+	} else {
+		i=i+1
+	}
 ```
 ## if-ladders
 
@@ -1754,7 +1745,7 @@ be used without the condition, which means it will usually be used together with
 ```
 error(1+1 != 2,"this should not happen")
 if (1+1 != 2) {
-error("oops again")
+	error("oops again")
 }
 ```
 # Output to screen
@@ -1853,14 +1844,13 @@ The result object is a Dict with various system info, representing the running
 process. It has two closures of interest.
 
 
-A 
-**closure** is a lambda, with a self-reference to a dictionary, and
+A **closure** is a lambda, with a "self"-reference to a dictionary, and
 so acts like a "member function" of that dictionary, as it has access to data and
 other closures of that dictionary object.
 
-<o>
+
 In this context we usually refer the closures with dotted notation, which
-means they are run.
+means they are automatically called.
 ```
 result.isCompleted     # returns boolean
 result.wait            # waits for process to finish, then returns another Dict
@@ -1871,17 +1861,9 @@ The result.wait closure, when called, returns a Dict with the following content:
 
 
 - cmd - the command (list)
-
-
 - stdin - the stdin lines (list)
-
-
 - stdout - stdout lines (list)
-
-
 - stderr - stderr lines (list)
-
-
 - exitCode - int
 
 
@@ -1955,16 +1937,16 @@ last result is not a list, you get an error.
 
 ```
 $ Dir.sub("src")
-# /home/roar
 <obj: Dir>
 src/
+
 $ :syn
 synthesize ok
 +-----------------------------------------------------
 | .  : Dir("/home/roar/CFT/src")
 +-----------------------------------------------------
 Assign to name by /xxx as usual
-$ /DirProject1
+$ /DirSrc
 ```
 
 Running the code Dir.sub("src") creates a Dir object for the src subdirectory (regardless of
@@ -1975,10 +1957,10 @@ When we run the ":syn" command, and as CFT remembers the last result value, it c
 
 
 If this succeeds, it inserts the generated code line tino the "code history", pretending
-it was a command given by the user, which means it can now be assigned a name, for example "DirProject"
+it was a command given by the user, which means it can now be assigned a name, for example "DirSrc"
 
 
-Calling function "DirProject" will now always return a Dir object pointing to the same
+Calling function "DirSrc" will now always return a Dir object pointing to the same
 directory, as the specific value was turned into code, not taking into account how the value
 was created (and that Dir without params returns current directory, which may change).
 
@@ -2047,7 +2029,7 @@ This is useful for producing configuration files, generating code, and similar.
 
 This was the original implementation, but it has mostly been replaced by the
 ability to merge output from expressions directly into text. Skip to the
-section for .mergeExpr for for details about this.
+section for *.mergeExpr* for for details about this.
 
 
 To merge values into a template, we may use a dictionary object (Dict) combined with the
@@ -2112,31 +2094,29 @@ The CondSequence() is conditional, which means if the first parameter is false, 
 an empty list. Since lists can be concatenated with "+", we can do this:
 
 ```
-P(1) =>
- replSetName
-P(2) =>
- clusterRole
-SymDict(replSetName, clusterRole).mergeCodes =>data
-isConfNode = (clusterRole=="configsvr")
-Sequence(
-@  :
-@  :
-@ replication:
-@   replSetName: '${replSetName}'
-@
-) + CondSequence(isConf,
-@
-@ # NOTE: config replica set node
-@
-) + CondSequence(!isConf,
-@
-@ # NOTE: data shard replica set node
-@
-)+Sequence(
-@ sharding:
-@   clusterRole: '${clusterRole}'
-)
-->line out(line.merge(data))
+	P(1) => replSetName
+	P(2) => clusterRole
+	SymDict(replSetName, clusterRole).mergeCodes =>data
+	isConfNode = (clusterRole=="configsvr")
+	Sequence(
+		@  :
+		@  :
+		@ replication:
+		@   replSetName: '${replSetName}'
+		@
+	) + CondSequence(isConf,
+		@
+		@ # NOTE: config replica set node
+		@
+	) + CondSequence(!isConf,
+		@
+		@ # NOTE: data shard replica set node
+		@
+	)+Sequence(
+		@ sharding:
+		@   clusterRole: '${clusterRole}'
+	)
+	->line out(line.merge(data))
 /CreateMongodCfg
 ```
 ## .mergeExpr
@@ -2148,15 +2128,13 @@ into the template, the template contains CFT expressions inside << and >>.
 ```
 # Create template
 # --
-P(1,"John Doe")=>
-name
-P(2,List)=>
-hobbies
-Sequence(
-@ Dear <<name>>
-@ We see that you have <<hobbies.length>> hobbies:
-@ << hobbies->h out("   - " + h) >>
-).mergeExpr
+	P(1,"John Doe")=>name
+	P(2,List)=>hobbies
+	Sequence(
+		@ Dear <<name>>
+		@ We see that you have <<hobbies.length>> hobbies:
+		@ << hobbies->h out("   - " + h) >>
+	).mergeExpr
 /GetTemplate
 ```
 
@@ -2166,7 +2144,7 @@ or call functions.
 
 
 Note: the .mergeExpr function optionally takes two parameters for start and stop
-symbols, so we can do this:
+symbols, similarly to the .mergeCodes of Dict, so we can do this:
 
 ```
 Sequence(
@@ -2182,14 +2160,8 @@ section summarizes the different ways of working with text.
 
 
 - Reading separate text files
-
-
 - "here" documents in script files
-
-
 - DataFile
-
-
 - Sequence() and raw strings
 
 
@@ -2284,11 +2256,11 @@ for max readability when creating a template.
 
 ```
 Sequence(
-@ header
+	@ header
 )+CondSequence(<condition>
-@ optional-part
+	@ optional-part
 )+Sequence(
-@ footer
+	@ footer
 )
 ```
 
@@ -2299,13 +2271,8 @@ objects, which are then concatenated via the "+" operator.
 The "@" type "raw" strings can be used in regular code as well. The behaviour is as follows:
 
 
-
 - When "@" is followed by single space, that single space is removed from the string
-
-
 - When "@" is followed by another "@", all characters following that sequence becomes the string
-
-
 - When "@" is followed by anything else, all of the rest of the line becomes the string
 
 
@@ -2386,20 +2353,23 @@ rootNode.PP  # pretty-print
 ## Creating structure with code
 
 ```
-# XML:constructedObject
-# XML:t4
+# See XML:constructedObject
+# and XML:t4
 root = XMLNode("root")
 root.attributes.pi="3.14"
 root.addText("root test before A")
+
 # add sub-node with name and populate it
 a=root.sub("A")
 a.attributes.inner="a"
 a.addText("a-text")
 root.addText("root test after A")
+
 # and another sub-node with two inner nodes
 b=root.sub("B")
 b.sub("C")
 b.sub("D")
+
 # Show structure
 root.PP
 ```
@@ -2636,6 +2606,7 @@ and the function name.
 "sdf".?parseInt
 <boolean>
 false
+
 "123".?parseInt
 <boolean>
 true
@@ -2725,8 +2696,8 @@ available via the automatic variable "self" inside the lambda (now closure).
 ```
 data=Dict
 closure = data.bind(Lambda{
-P(1) => value
-self.value=value
+	P(1) => value
+	self.value=value
 })
 closure.call("x")
 data.value   # returns "x"
@@ -2749,11 +2720,13 @@ converted to a closure, which refers the dictionary.
 data=Dict
 data.value=null
 data.f = Lambda{
-P(1) => value
-self.value=value
+	P(1) => value
+	self.value=value
 }
 closure=data.get("f")
+
 callSomeFunctionWithIt(closure)
+
 # get value passed when that function called the closure
 data.value
 ```
@@ -2766,16 +2739,19 @@ The "data" dictionary now is a simple object, which contains both a value and a 
 Lambdas and Closures, when stored in a variable, are invoked with .call(...).
 
 
-Obtaining a Closure from a dictionary with dotted notation, however, implies an automatic invocation, again
+Obtaining a Closure from a dictionary with dotted notation, however, implies an automatic invocation,
 with or without parameters.
 
 ```
 data=Dict
 data.f=Lambda{println("called f")}
 data.f   # prints "called f" to the screen.
+
 # To get a reference to the closure, we use the .get() function of Dict
 data.get("f")    # returns Closure object without invoking it
 ```
+
+
 # Type checking with "as"
 
 
@@ -2803,9 +2779,11 @@ an expression. It must be written inside ()'s. If it returns a list, then it's a
 ```
 type="String"
 P(1) as (type) => x
+
 # or
 types="String int".split
 P(1) as (types) ...
+
 # or even
 P(1) as ("String int".split) ...
 ```
@@ -2821,34 +2799,34 @@ simply means "or null":
 
 ```
 P(1) as ("String null".split) => optionalStringValue
+
 P(1) as String? > optionalStringValue  # The '?' means "or null"
 P(1) as ("String int".split)?    # String, int or null
 ```
-### Dict names
+### Dict (type) names
 
 
-The Dict object has an optional name, either set at creation by Dict("something") or via Dict.setName("something").
-
+The Dict object has an optional name property, either set at creation by Dict("something") or via Dict.setName("something").
 
 This name can be filtered in the "as" expression, prefixing the type identifier or type expression inside ()'s with
-an &amp; (ampersand) as follows:
+an & (ampersand) as follows:
 
 ```
 # Accept dictionary named as MyData only, or null
 # --
-P(1) as &amp;MyData? =>
- data
-...
+	P(1) as &MyData? => data
+	...
 /f
+
 # Create such data
 # --
-Dict("MyData")
-_.a=1
-_.b=2
-=>
- myData
-# Call f with this object
-f(myData) # should match "as" type of "f"
+	Dict("MyData")
+		_.a=1
+		_.b=2
+		=> myData
+		
+	# Call f with this object
+	f(myData) # should match "as" type of "f"
 /test
 ```
 ### Closures and Lambdas
@@ -2870,18 +2848,23 @@ P(1) as Callable => callable
 isClosure = callable.?lambda  # returns true if value has function lambda, which means it is a closure
 ```
 
-**Note:** When referring a lambda or closure as part of something else, that is, using "." in front of it, it is
-invoked directly with or without params, so no ".call" then. Referring a lambda or closure via a parameter or
+
+### Dotted lookup => auto call
+
+When referring a lambda or closure as part of something else, that is, using "." in front of it, it is
+invoked directly with or without parameters, so no ".call" then. Referring a lambda or closure via a parameter or
 local variable, and wanting to invoke it, use ".call" with or without params.
+
+Also note that ALL lambdas stored in dictionaries are converted to closures.
 
 ```
 d=Dict
 f=Lambda{
-P(1) as String =>
- name
-"hello " + name
+	P(1) as String => name
+	"hello " + name
 }
 d.f=f
+
 f.call("Bob")  # no dotted lookup of lambda, so use .call() to invoke it
 d.f("Bob")  # dotted lookup (".f") means we invoke closure without ".call"
 ```
@@ -2915,14 +2898,16 @@ slash something. Defining a simple class MyClass:
 ```
 # my class
 # --
-P(1) as int => x
-self.x=x
+	P(1) as int => x
+	self.x=x
 /class MyClass
 ```
 ## Class object types
 
 
-There is no differentiation between classes and objects. A class function returns an object.
+There is no differentiation between classes and objects. 
+
+A class function returns an object.
 Inheritance is possible by some class function instantiating a class object of some other type,
 and incorporating elements from it into itself, possibly using the Dict.copyFrom(anotherDict)
 function, as the "self" object inside an object is a Dict.
@@ -2934,20 +2919,19 @@ where we supply the type explicitly.
 ```
 # Common Val class
 # --
-P(1) as String =>
- type
-P(2) as (type) =>
- value
-...
+	P(1) as String => type
+	P(2) as (type) => value
+	...
 /class Val
+
 # Val class for processing int
 # --
-P(1) as int =>
- value
-self.copyFrom(Val("int",value))
-...
+	P(1) as int => value
+	self.copyFrom(Val("int",value)) # "inheritance"
+	...
 /class ValInt as Val
 ```
+
 ## What a "/class" function does
 
 
@@ -2956,21 +2940,22 @@ There is no problem creating dictionary objects without using /class functions.
 ```
 # TypedContainer class (using /class)
 # --
-P(1) as String => type
-self.type=type
-self.value=null
-self.set=Lambda{
-P(1) as (self.type) =>
- value
-self.value=value
-}
+	P(1) as String => type
+	self.type=type
+	self.value=null
+	self.set=Lambda{
+		P(1) as (self.type) => value
+		self.value=value
+	}
 /class TypedContainer
+
 # Create custom subclass of TypedContainer inside normal function (without using /class)
 # --
-self=Dict("TypedContainer")
-self.copyFrom(TypedContainer("int"))
-self
+	self=Dict("TypedContainer")
+	self.copyFrom(TypedContainer("int"))
+	self
 /IntContainer
+
 # Test it
 IntContainer.set("test")  # Fails with error, expects int
 ```
@@ -2981,8 +2966,7 @@ Reading name-value assignments from a property file or similar, is best done via
 function on the Dict object. It strips whitespace and accepts both colon and '='.
 
 ```
-Dict.setStr("a : b")
-.setStr("c=d")
+Dict.setStr("a : b").setStr("c=d")
 /d
 d.get("a")
 <String>
@@ -2993,16 +2977,19 @@ To process a property file, assuming commented lines start with '#', we can do
 this:
 
 ```
-P(1) =>propFile
-Dict =>d
-propFile.read->line
-reject(line.trim.startsWith("#"))
-assert(line.contains(":") || line.contains("="))
-d.setStr(line)
-|
-d
+# Read property file
+# --
+	P(1) =>propFile
+	Dict =>d
+		propFile.read->line
+		reject(line.trim.startsWith("#"))
+		assert(line.contains(":") || line.contains("="))
+		d.setStr(line)
+	|
+	d
 /GetProps
 ```
+
 # Dict.get with default value
 
 
@@ -3062,7 +3049,7 @@ the parameter values as passed to the function.
 # Some function
 # --
 P => paramList
-...
+	...
 /example
 ```
 ## Get parameters as Dict
@@ -3075,8 +3062,8 @@ in the dictionary.
 ```
 # Some function with three parameters
 # --
-PDict("a","b","c") => paramsDict
-...
+	PDict("a","b","c") => paramsDict
+	...
 /example
 ```
 # The general loop statement
@@ -3096,7 +3083,7 @@ a=0 loop break(a>3) out(a) a=a+1
 ```
 
 If you forget to increment the variable a, or forget or create a valid break(), then
-the loop may never terminate, and CFT has to be killed with ^C
+the loop may never terminate, and CFT has to be killed with CTRL-C 
 
 # Storing CFT data structures to file - syn() and eval()
 
@@ -3111,12 +3098,16 @@ consuming computations.
 To restore the structure, we use the global eval() function.
 
 ```
-P(1)=>file
-P(2,"data") =>data
-file.create(syn(data))
+# Save data to file
+# --
+	P(1)=>file
+	P(2,"data") =>data
+	file.create(syn(data))
 /saveData
-P(1)=>file
-eval(file.read.nth)
+
+# Restore synthesized data
+	P(1)=>file
+	eval(file.read.nth)
 /restoreData
 ```
 
@@ -3169,17 +3160,17 @@ contains support for named locks. Example:
 
 ```
 Lib.Db.obtainLock("Unique Lock Name",5000) ## 5000 = wait max 5 seconds before failing
-Db2:Get(Sys.scriptId,"someValue") =>
- data
+Db2:Get(Sys.scriptId,"someValue") => data
 # (modify data)
 Db2:Set(Sys.scriptId,"someValue",data)
 Lib.Db.releaseLock("Unique lock name")
 ```
+
 # Lib object vs Lib scripts
 
 
 As for the case of two Db2 entites above, with a script and an object of the same name,
-this is also the situation for "Lib", where the (global) funciton Lib produces a Lib object,
+this is also the situation for "Lib", where the (global) function "Lib" produces a Lib object,
 while there also exists a Lib script.
 
 
@@ -3188,17 +3179,29 @@ Lib script is a text file with functions written in the CFT programming language
 interpreted by Java when called.
 
 
+
 Getting information about functions inside objects and scripts differ as follows:
 
 ```
-$ Lib help    # display functions inside object "Lib"
-$ ?Lib:       # display functions inside script
+# Lib object content
+
+$ Lib help
+
+
+# Lib script content
+
+$ ?Lib:
+
+# or
+
+$ :load Lib
+$ ?
 ```
 
 Calling functions inside objects and libraries differ as well.
 
 ```
-$ Lib.Text               # call function Text inside object
+$ Lib.Text               # call function Text inside Lib object
 $ Lib:Header("Hello")    # call function Header in script
 ```
 # onLoad functions
@@ -3211,17 +3214,6 @@ and (automatically) reloaded in GNT. Nice for clearing defaults, when new sessio
 Each individual session is identified by a session UUID, which may be stored in the
 database, so the onLoad can detect this and reset state in the database.
 
-
-Below is an onLoad function from the Projects script, which remembers current project
-via the database, but resets it when new session.
-```
-# Reset selected projects if new session
-if (Db2:Get("Projects","session") != Sys.sessionUUID) {
-Db2:Set("Projects","Project",null)
-Db2:Set("Projects","session", Sys.sessionUUID)
-}
-/onLoad
-```
 # Multitasking in CFT
 
 
@@ -3318,19 +3310,18 @@ function returns false.
 # Ping host, return boolean (true if ok)
 # --
 P(1)=>host
-println("Pinging host " + host)
-Lib:run(List("ping","-c","1",host), List, true) =>
- res
-if (res.exitCode==0) {
-true
-} else {
-println("FAILED with exitCode=" + res.exitCode)
-Inner {
-res.stdout->line println(line) |
-res.stderr->line println("#ERR# " + line) |
-}
-false
-}
+	println("Pinging host " + host)
+	Lib:run(List("ping","-c","1",host), List, true) => res
+	if (res.exitCode==0) {
+		true
+	} else {
+		println("FAILED with exitCode=" + res.exitCode)
+		Inner {
+			res.stdout->line println(line) |
+			res.stderr->line println("#ERR# " + line) |
+		}
+		false
+	}
 /ping
 ```
 
@@ -3345,36 +3336,41 @@ the function CheckPing, which iterates over these.
 ```
 "s01.s s02.s s03.s s04.s s05.s s06.s s07.s".split
 /Hosts
+
 # Delete previous ping stats from database, then run ping on all
 # hosts in parallel, collecting results and store in database.
 # --
-COLLECTION="stats"  ## Database collection name
-# Clear out results from earlier runs, if any
-# --
-Db2Obj:DeleteObjects(COLLECTION, Lambda{P(1).value.op=="ping"})
-# Iterate over hosts
-# --
-Hosts->host
-# Start individual processes, each calling the ping function with a host
-# --
-data=Dict.set("host",host)
-proc=SpawnProcess(data,ping(host))
-out(proc)
-| _->proc
-# Wait for each process in turn, and collect results
-# --
-proc.wait
-dbObj=Dict
-.set("op","ping")
-.set("host", proc.data.host)  # the data dict from SpawnProcess
-.set("ok",proc.exitValue)
-if (proc.exitValue==false) {
-# failed
-dbObj.set("output", proc.output)
-}
-# Log everything to database
-# --
-Db2Obj:AddObject(COLLECTION, dbObj)
+	COLLECTION="stats"  ## Database collection name
+
+	# Clear out results from earlier runs, if any
+	# --
+	Db2Obj:DeleteObjects(COLLECTION, Lambda{P(1).value.op=="ping"})
+
+	# Iterate over hosts
+	# --
+	Hosts->host
+		# Start individual processes, each calling the ping function with a host
+		# --
+		data=Dict.set("host",host)
+		proc=SpawnProcess(data,ping(host))
+		out(proc)
+	| _->proc
+
+		# Wait for each process in turn, and collect results
+		# --
+		proc.wait
+		dbObj=Dict
+			.set("op","ping")
+			.set("host", proc.data.host)  # the data dict from SpawnProcess
+			.set("ok",proc.exitValue)
+		if (proc.exitValue==false) {
+			# failed
+			dbObj.set("output", proc.output)
+		}
+
+		# Log everything to database
+		# --
+		Db2Obj:AddObject(COLLECTION, dbObj)
 /CheckPing
 ```
 
@@ -3450,16 +3446,19 @@ help indicate that they contain lambdas (though strictly they are closures).
 mon=Util:ProcessMonitor
 limit=4
 someData->data
-# About to spawn new process using data
-mon.Lwait (limit)
-proc=SpawnProcess(SymDict(data), ...)
-mon.Ladd(proc)
+
+	# About to spawn new process using data
+	mon.Lwait (limit)
+	proc=SpawnProcess(SymDict(data), ...)
+	mon.Ladd(proc)
 |
+
 # Wait for all processes to complete
 mon.Lwait
+
 # Inspect result from the processes
 mon.list->process
-...
+	...
 |
 ```
 
@@ -3750,17 +3749,16 @@ The sub() function of any node is used to connect pointers from one map to anoth
 three forms:
 
 ```
-(1)
-someNode.sub("abc",someOtherNode)
+(1) someNode.sub("abc",someOtherNode)
 # when at someNode and one of the characters ("abc") are next character in input
 # string, then consume character, and move to that other node, which may of course
 # be "someNode" (back-pointer) or some different node
-(2)
-someNode.sub("abc")
+
+(2) someNode.sub("abc")
 # When no node parameter, an empty node is created, which "abc" points to from
 # someNode. The new node is returned.
-(3)
-someNode.sub(someOtherNode)
+
+(3) someNode.sub(someOtherNode)
 # When creating libraries of reusable nodes, they always must define a set of
 # characters which are called "firstChars". These are the characters that indicate
 # the start of some sort of data. For example for Lib.Text.Lexer.Identifier, the
@@ -3781,30 +3779,33 @@ lets those characters point at it.
 ```
 # Create reusable node for integers.
 # --
-"0123456789"=>digits
-Lib.Text.Lexer.Node(digits) =>x
-x.sub(digits,x)
-x.setIsToken(1)
-x
+	"0123456789"=>digits
+	Lib.Text.Lexer.Node(digits) =>x
+	x.sub(digits,x)
+	x.setIsToken(1)
+	x
 /NodeInt
+
 # Now we can for example match a IP v4 address
 # --
-Lib.Text.Lexer.Node =top
-a=NodeInt
-b=NodeInt
-c=NodeInt
-d=NodeInt
-top.sub(a)
-a.sub(".").sub(b) # creates intermediary nodes for the dots
-b.sub(".").sub(c)
-c.sub(".").sub(d)
-d.setIsToken(2)
-top
+	Lib.Text.Lexer.Node =>top
+	a=NodeInt
+	b=NodeInt
+	c=NodeInt
+	d=NodeInt
+	top.sub(a)
+	a.sub(".").sub(b) # creates intermediary nodes for the dots
+	b.sub(".").sub(c)
+	c.sub(".").sub(d)
+	d.setIsToken(2)
+	top
 /MatchIPAddress
+
 # Test
 # --
-word="192.168.1.1 xxx" MatchIPAddress.match(word))
-# should return 11 (character count)
+	str="192.168.1.1 xxx" 
+	MatchIPAddress.match(str)
+	# should return 11 (character count)
 /t1
 ```
 ## Processing single lines
@@ -3822,31 +3823,33 @@ tokens a negative token type, as those get automatically ignored.
 ```
 # Identifiers
 # --
-"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_" =>firstChars
-firstChars+"0123456789" =>innerChars
-ident = Lib.Text.Lexer.Node(firstChars)
-ident.sub(innerChars,ident)
-ident.setIsToken(1)
-ident
+	"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_" =>firstChars
+	firstChars+"0123456789" =>innerChars
+	ident = Lib.Text.Lexer.Node(firstChars)
+	ident.sub(innerChars,ident)
+	ident.setIsToken(1)
+	ident
 /Identifiers
+
 # Whitespace
 # --
-" ^t^n^r".unEsc =>chars
-Lib.Text.Lexer.Node(chars) =>ws
-ws.sub(chars,ws)
-ws.setIsToken(-1)
-ws
+	" ^t^n^r".unEsc =>chars
+	Lib.Text.Lexer.Node(chars) =>ws
+	ws.sub(chars,ws)
+	ws.setIsToken(-1)
+	ws
 /WhiteSpace
+
 # Root node
 # --
-Lib.Text.Lexer.Node =>root
-root.sub(Identifiers)
-root.sub(WhiteSpace)
+	Lib.Text.Lexer.Node =>root
+	root.sub(Identifiers)
+	root.sub(WhiteSpace)
 /Root
 ```
 
 With the Root node ready, we can now parse strings consisting of identifiers and space,
-and since space is assigned a negative token type, it gets automatically ignorined.
+and since space is assigned a negative token type, it gets automatically ignored.
 
 ```
 # Test
@@ -3854,9 +3857,9 @@ and since space is assigned a negative token type, it gets automatically ignorin
 # Using getTokens(), with the Root node as parameter, which returns
 # a list of token objects.
 # --
-Lib.Text.Lexer.addLine("this is a test").getTokens(Root)->
-token
-report(token.sourceLocation, token.str, token.tokenType)
+	Lib.Text.Lexer.addLine("this is a test").getTokens(Root)->
+	token
+	report(token.sourceLocation, token.str, token.tokenType)
 /test
 ```
 
@@ -3913,8 +3916,9 @@ With the normal .addToken() function, we can do something like this:
 
 ```
 Lib.Text.Node =>grade
-"A AA AAA B C".split->
-x grade.addToken(x).setIsToken
+"A AA AAA B C".split->x 
+	grade.addToken(x).setIsToken
+|
 ```
 
 Overlapping definitions, such as "A" and "AA" and "AAA" is not a problem for Node.addToken()
@@ -4012,20 +4016,17 @@ the secret values, to store for that session.
 
 # Reference: object types
 
-
 **Per v3.4.4**
+
 ```
-Grep("extends Obj") =>
- g
-Sys.homeDir.allFiles(Glob("*.java"))->
-f
-g.file(f)->
-line
-out(line.after("class").before("extends"))
-| _.sort->
-x
+Grep("extends Obj") => g
+Sys.homeDir.allFiles(Glob("*.java"))->f
+	g.file(f)-> line
+		out(line.after("class").before("extends"))
+| _.sort->x
 println(x)
 /objects
+
 DD
 DDBrush
 DDD
@@ -4104,16 +4105,15 @@ Value
 
 **Per v3.4.4**
 ```
-Grep("extends Value") =>
- g
-Sys.homeDir.allFiles(Glob("*.java"))->
-f
-g.file(f)->
-line
-out(line.after("class").before("extends"))
+Grep("extends Value") => g
+Sys.homeDir.allFiles(Glob("*.java"))->f
+	g.file(f)->line
+		out(line.after("class").before("extends"))
 | _.sort->
 x
 println(x)
+
+
 /values
 ValueBinary
 ValueBlock
