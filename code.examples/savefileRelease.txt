@@ -40,21 +40,31 @@ Add, Commit and Push.
 /HomeDir
 
 
+# Create overview lines from Doc.md file
+# --
+	inCode=false
+	
+	HomeDir.sub("doc").file("Doc.md").protect.read->line
+		if (line.startsWith("```")) {
+			inCode=!inCode
+		}
+		reject(inCode)
+		assert(line.startsWith("#"))
+		
+		line
+			.replace("###","       ")
+			.replace("##", "  | ")
+			.replace("#",  "*")
+			=>str
+		out(str)
+/Overview
 
 
 # Run git add
 # ---
 
-    # Update the Overview.txt file and create md-version of doc
-    # Except when on windows (CRLF)
-    
-    # Disabling this, moving to using .md file onlu
-    
-    #if (!Sys.isWindows) {
-    #    Overview:CreateOverview
-    #    MD:Run
-    #}
-
+    HomeDir.sub("doc").file("Overview.txt").setWriteLF.create(Overview)
+	
     # Run git
     HomeDir.run("git","add",".")
     GitStatus

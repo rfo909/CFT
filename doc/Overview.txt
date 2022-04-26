@@ -1,337 +1,249 @@
-------------------------------------------------------------------
-Generated file - see script file savefileOverview.txt
-------------------------------------------------------------------
-
-Introduction
- * Compact code
- * Editing script files
- * Integrated help
- |   Normal expression syntax :-)
-
-Platform
-
-Functionality
- * Another example
-
-Getting help
- * Show all global functions
-
-Show functions inside value objects
-
-Create functions
-
-Show your functions
-
-Save and load
-
-Edit script file - shortcuts
-
-Shortcuts vs colon commands
-
-CFT as a shell
- * Paths with space
- * Windows backslash
- * Combine shell commands with CFT function results
- * Shell commands not suited in functions
- * No shell-like destructive commands!
- * Background jobs
-
-The "protect" mechanism
-
-Bang commands
-
-The "shell" command
-
-Show content of file
- * Open a file in editor
-
-List basics
-
-Introduction to loops
- * Filtering
-
-Local variables
-
-Files
- * Page through a file
- * Edit a (text) file
- * Show file as hex
- * Encoding
- * end-of-line
-
-Directories
- * Create a subdirectory
- * Parent directory
- * Get files in a directory
- * Create a file in a directory
- * Get immediate directories in a directory
- * Get all files recursively under a directory
- * Get all directories recursively under a directory:
- * Delete a sub-directory
- * Set current directory
- * Newest file in directory
-
-Core types
- * String literals
- * Dictionaries
- |   SymDict
- |   Name
- * Binary type
-
-List processing
- * Iterating over list content
- * Filtering with assert(), reject() and break() + out()
- * The condOut() statement
- * Produce columns
- * List addition
- * List subtraction
- |   Removing a single value from a list
- |   Removing multiple values from a list
-
-Sorting
- * Int(), Str() and Float()
- * Converting between int and float
-
-Savefiles - "scripts"
- * Save
- * Load
- * Create new empty script
- * The @e shortcut
- * CFT.props - codeDirs
-
-Comments
-
-Calling functions in other scripts
-
-Examining external scripts
-
-Helper / local functions
-
-Displaying all known scripts
-
-Nested loops
-
-Code spaces - "pipes"
- * Result value from a code space
- |   Code space result value
- |   Otherwise ...
-
-Function parameters
-
-User input
-
-Block expressions
- * Local blocks
- * Inner blocks
- * Lambdas
- * Block expressions summary
- * Local variables scope
-
-List filtering with Lambda
- * Removing items
-
-Conditionals - if expression
- |   Inline form
- |   Traditional form
- |   Example 1
- |   Example 2
- |   Expressions are statements ...
- |   Blocks are expressions ...
- * if-ladders
-
-Lazy evaluation
- |   Lazy if
- |   Lazy AND, OR - &amp;&amp; ||
- |   Lazy P(N,defaultExpr)
-
-The error() function
-
-Output to screen
-
-Running external programs
- * Summary
- * Dir.run()
- * Dir.runCapture()
- * Dir.runDetach()
- * Dir.runProcess
- * Lib:runProcess utility function
- * Lib:run utility function
- * Work directory issues
- * Doing ssh
- |   Side note: ssh without password
-
-Synthesis
- * Creating code from values
- * Example using :syn
- * Example using :NN
-
-Output format / Term object
- * The @term shortcut
- * Line wrapping
-
-Templating
- * Merging text with Dict
- |   Dict.mergeCodes()
- |   Custom merge codes
- |   Example using raw strings and Sequence
- * .mergeExpr
-
-Text processing
- * Reading text files
- * Script file "here" documents
- * DataFile
- |   Include blank lines
- |   Allowing comments
- * Sequence() and raw strings
-
-Processing JSON
-
-Processing XML
- * Parsing XML
- * Creating structure with code
- * Looking up content
-
-Internal web-server
-
-3D library
- * Ref
- * World
- * Brushes
- * Rendering
- * Drawing a spoked wheel
-
-2D library
- * Spoked wheel
-
-Command line args
-
-Environment variables
-
-Debugging
- * @lint
- * addDebug()
-
-Working with pasted text lines from stdin
-
-Differing between Windows and Linux
-
-Predicate calls
-
-The onLoad function
-
-Error handling
- * Soft errors
- * Hard errors
-
-Get type of value
-
-Closures and dictionary-objects
- * Manual closure
- * Dictionary objects
- * Auto-invoke
-
-Type checking with "as"
- |   Null-values
- |   Dict names
- |   Closures and Lambdas
-
-Classes
- * Class object types
- * What a "/class" function does
-
-Dict set with strings
-
-Dict.get with default value
-
-Dict.ident=Expr
-
-List.nth() negative indexes
-
-Function parameters ...
- * Get parameters as List
- * Get parameters as Dict
-
-The general loop statement
-
-Storing CFT data structures to file - syn() and eval()
-
-The CFT database
- * Collections
- * Lib.Db.Db2 vs Db2 script?
- * Synchronization
-
-Lib object vs Lib scripts
-
-onLoad functions
-
-Multitasking in CFT
- * Key concepts
- |   Intended use
- * The Process
- * Example: pinging a list of hosts
- |   Create and test regular ping function
- |   Management function, with logging via Db2Obj database script
- |   Checking results (in database)
- * Advantages
- * Flow control
-
-Calling Java
-
-String .esc() and .unEsc()
- * Escape codes
- |   Note: CRLF / LF with text files ...
-
-Automating interactive functions / Sys.stdin()
- * Running colon commands from script code
-
-Clone any value
-
-CFT.props - mCat, mEdit and mMore lambdas
-
-CFT.props - shortcuts
- |   Show all shortcuts
-
-Lib.Text.Lexer
- * Concept
- * Implementation
- |   .sub()
- * Reusable nodes - integer sequence
- * Processing single lines
- * Limitations
- * Different uses
- * Complex tokens
- |   Regular Node.addToken() example
- |   Node.addTokenComplex() example
-
-ANSI escape codes
-
-Passwords, encryption, binary data
- * Passwords
- |   Encrypt / decrypt
- |   Binary data
- |   Session data
-
-Reference: object types
-
-Reference: Value types
-
-Reference: Expressions vs statements
- * Statements
-
-Reference: Colon commands
-
-Reference: Synthesizable types
-
-Comments and digressions
- * Function name AFTER code?
- * Using Sys.stdin to run colon commands etc
- * Code spaces / the "pipe"
- * Code spaces vs Inner blocks
- * Script and code size
- |   2020-11-13 v2.0.0
- |   2021-04-01
- |   2021-09-26
- |   2021-10-16
- |   2021-12-17 v3.0.0
- |   2022-03-31 v3.2.5
- |   2022-04-22 v3.5.0
+* CFT / ConfigTool
+* Introduction
+  |  Compact code
+  |  Editing script files
+  |  Integrated help
+        Normal expression syntax :-)
+* Platform
+* Functionality
+  |  An example
+  |  Another example
+* Getting help
+  |  Show all global functions
+* Show functions inside value objects
+* Create functions
+* Show your functions
+* Save and load
+* Edit script file - shortcuts
+* Shortcuts vs colon commands
+* CFT as a shell
+  |  Paths with space
+  |  Windows backslash
+  |  Combine shell commands with CFT function results
+  |  Shell commands not suited in functions
+  |  No shell-like destructive commands!
+  |  Background jobs
+* The "protect" mechanism
+* Bang commands
+* The "shell" command
+* Show content of file
+  |  Open a file in editor
+* List basics
+* Introduction to loops
+  |  Filtering
+* Local variables
+* Files
+  |  Page through a file
+  |  Edit a (text) file
+  |  Show file as hex
+  |  Encoding
+  |  end-of-line
+* Directories
+  |  Create a subdirectory
+  |  Parent directory
+  |  Get files in a directory
+  |  Create a file in a directory
+  |  Get immediate directories in a directory
+  |  Get all files recursively under a directory
+  |  Get all directories recursively under a directory:
+  |  Delete a sub-directory
+  |  Set current directory
+  |  Newest file in directory
+* Core types
+  |  String literals
+  |  Dictionaries
+        SymDict
+        Dictionary name
+  |  Binary type
+* List processing
+  |  Iterating over list content
+  |  Filtering with assert(), reject() and break() + out()
+  |  The condOut() statement
+  |  Produce columns with report()
+  |  List addition
+  |  List subtraction
+        Removing a single value from a list
+        Removing multiple values from a list
+* Sorting
+  |  Int(), Str() and Float()
+  |  Converting between int and float
+* Savefiles - "scripts"
+  |  Save
+  |  Load
+  |  Create new empty script
+  |  The @e shortcut
+  |  CFT.props - codeDirs
+* Comments
+* Calling functions in other scripts
+* Examining external scripts
+* Helper / local functions
+* Displaying all known scripts
+* Nested loops
+* Code spaces - "pipes"
+  |  Result value from a code space
+        Code space result value
+        Otherwise ...
+* Function parameters
+* User input
+* Block expressions
+  |  Local blocks
+  |  Inner blocks
+  |  Lambdas
+  |  Block expressions summary
+  |  Local variables scope
+* List filtering with Lambda
+  |  Removing items
+* Conditionals - if expression
+        Inline form
+        Traditional form
+        Example 1
+        Example 2
+        Expressions are statements ...
+        Blocks are expressions ...
+  |  if-ladders
+* Lazy evaluation
+        Lazy if
+        Lazy AND, OR - &amp;&amp; ||
+        Lazy P(N,defaultExpr)
+* The error() function
+* Output to screen
+* Running external programs
+  |  Summary
+  |  Dir.run()
+  |  Dir.runCapture()
+  |  Dir.runDetach()
+  |  Dir.runProcess
+  |  Lib:runProcess utility function
+  |  Lib:run utility function
+  |  Work directory issues
+  |  Doing ssh
+        Side note: ssh without password
+* Synthesis
+  |  Creating code from values
+  |  Example using :syn
+  |  Example using :NN
+* Output format / Term object
+  |  The @term shortcut
+  |  Line wrapping
+* Templating
+  |  Merging text with Dict
+        Dict.mergeCodes()
+        Custom merge codes
+        Example using raw strings and Sequence
+  |  .mergeExpr
+* Text processing
+  |  Reading text files
+  |  Script file "here" documents
+  |  DataFile
+        Include blank lines
+        Allowing comments
+  |  Sequence() and raw strings
+* Processing JSON
+* Processing XML
+  |  Parsing XML
+  |  Creating structure with code
+  |  Looking up content
+* Internal web-server
+* 3D library
+  |  Ref
+  |  World
+  |  Brushes
+  |  Rendering
+  |  Drawing a spoked wheel
+* 2D library
+  |  Spoked wheel
+* Environment variables
+* Debugging
+  |  @lint
+  |  addDebug()
+* Working with pasted text lines from stdin
+* Differing between Windows and Linux
+* Predicate calls
+* The onLoad function
+* Error handling
+  |  Soft errors
+  |  Hard errors
+* Get type of value
+* Closures and dictionary-objects
+  |  Manual closure
+  |  Dictionary objects
+  |  Auto-invoke
+* Type checking with "as"
+        Null-values
+        Dict (type) names
+        Closures and Lambdas
+        Dotted lookup => auto call
+* Classes
+  |  Class object types
+  |  What a "/class" function does
+* Dict set with strings
+* Dict.get with default value
+* Dict.ident=Expr
+* List.nth() negative indexes
+* Function parameters ...
+  |  Get parameters as List
+  |  Get parameters as Dict
+* The general loop statement
+* Storing CFT data structures to file - syn() and eval()
+* The CFT database
+  |  Collections
+  |  Lib.Db.Db2 vs Db2 script?
+  |  Synchronization
+* Lib object vs Lib scripts
+* onLoad functions
+* Multitasking in CFT
+  |  Key concepts
+        Intended use
+  |  The Process
+  |  Example: pinging a list of hosts
+        Create and test regular ping function
+        Management function, with logging via Db2Obj database script
+        Checking results (in database)
+  |  Advantages
+  |  Flow control
+* Calling Java
+* String .esc() and .unEsc()
+  |  Escape codes
+        Note: CRLF / LF with text files ...
+* Automating interactive functions / Sys.stdin()
+  |  Running colon commands from script code
+* Clone any value
+* CFT.props - mCat, mEdit and mMore lambdas
+* CFT.props - shortcuts
+        Show all shortcuts
+* Lib.Text.Lexer
+  |  Concept
+  |  Implementation
+        .sub()
+  |  Reusable nodes - integer sequence
+  |  Processing single lines
+  |  Limitations
+  |  Different uses
+  |  Complex tokens
+        Regular Node.addToken() example
+        Node.addTokenComplex() example
+* ANSI escape codes
+* Passwords, encryption, binary data
+  |  Passwords
+        Encrypt / decrypt
+        Binary data
+        Session data
+* Reference: object types
+* Reference: Value types
+* Reference: Expressions vs statements
+  |  Statements
+* Reference: Colon commands
+* Reference: Synthesizable types
+* Comments and digressions
+  |  Function name AFTER code?
+  |  Using Sys.stdin to run colon commands etc
+  |  Code spaces / the "pipe"
+  |  Code spaces vs Inner blocks
+  |  Script and code size
+        2020-11-13 v2.0.0
+        2021-04-01
+        2021-09-26
+        2021-10-16
+        2021-12-17 v3.0.0
+        2022-03-31 v3.2.5
+        2022-04-22 v3.5.0

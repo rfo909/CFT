@@ -1,10 +1,10 @@
 
 # CFT / ConfigTool
 
-```
 Last updated: 2022-04-26 RFO
-v3.5.0
-```
+
+v3.5.1
+
 # Introduction
 
 
@@ -16,8 +16,8 @@ CFT implements a system library of 500+ system functions, and some 80+ system ob
 the rest existing as member functions inside the system objects.
 
 
-The system objects represent strings, integers and floats, booleans, lists, dictionaries, files and directories, and many others
-related to various uses.
+The system objects represent strings, integers and floats, booleans, lists, dictionaries, files and directories, and many others related to various uses.
+
 
 ## Compact code
 
@@ -63,13 +63,16 @@ called from other functions, in the same or from other scripts.
 
 
 We normally don't enter functions interactively, but instead edit the script file. CFT has
-something called shortcuts, which by default start with the '@' character.
+the ability to define shortcuts, which by default start with the '@' character. They are defined
+in the CFT.props file.
 
 
 The most frequently used is @e which opens current script in an editor. 
 
 We can now create an improved and more readable
-version of our code. Function names follow code, just as when entered at the prompt.
+version of our code, as editing the script file, functions can span many lines. 
+Function names follow code, just as when entered at the prompt.
+
 
 ```
 # Log directory
@@ -131,6 +134,10 @@ normal "infix" syntax:
 "("+Date.fmt+")"
 (2022-04-22 19:20:58)
 ```
+
+
+
+
 # Platform
 
 
@@ -151,6 +158,8 @@ as well as being interactive.
 
 It is command line based, and can be programmed interactively, creating one-line functions, but
 mostly we use editors for creating function code.
+
+## An example
 
 The language is object oriented, with all values being objects. Here we call a
 function "bin()" inside an integer object.
@@ -194,7 +203,6 @@ $ help
 
 Note the two global functions, _Stmt and _Expr, which produce summaries
 of statements and expressions. To run them, just type their name and press Enter:
-
 ```
 $ _Stmt
 $ _Expr
@@ -332,7 +340,6 @@ CFT contains a number of "shell like commands", with different syntax from the r
 The syntax for these commands correspond to how they are used in Linux/Unix, with support for
 globbing ("*.txt" etc). They are meant for easy navigation around the directory trees, and for
 inspecting files, with "cat", "more" and "edit".
-
 ```
 $ pwd
 $ cd ..
@@ -1091,7 +1098,7 @@ if (x<2) out(")")
 | _.concat
 /f
 ```
-## Produce columns
+## Produce columns with report()
 
 
 Using report() instead of out() lets us produce as output a list of strings,
