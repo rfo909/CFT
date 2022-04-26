@@ -44,7 +44,7 @@ Source.read->line
     if(line.contains("</body"), Inner{false =>enable })
     assert(enable && !skipThis)
     line.trim =>s
-    assert(s.length>0)
+    #assert(s.length>0)
     out(s)  
 /Lines
 

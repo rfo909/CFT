@@ -47,10 +47,13 @@ Add, Commit and Push.
 
     # Update the Overview.txt file and create md-version of doc
     # Except when on windows (CRLF)
-    if (!Sys.isWindows) {
-        Overview:CreateOverview
-        MD:Run
-    }
+    
+    # Disabling this, moving to using .md file onlu
+    
+    #if (!Sys.isWindows) {
+    #    Overview:CreateOverview
+    #    MD:Run
+    #}
 
     # Run git
     HomeDir.run("git","add",".")

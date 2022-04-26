@@ -495,8 +495,8 @@ normal "infix" syntax:
   the '&amp;' expression syntax. 
 </p>
 <pre>
-  $ &amp; 1+1
-  $ &amp; someFunction(...)
+  $ & 2+3
+  $ & someFunction(...)
 </pre>
 <p>
   The "2+3" and "someFunction" are the expressions that are run as background jobs.
@@ -519,13 +519,13 @@ normal "infix" syntax:
   If one wants better descriptions for jobs, this can be done as follows
 </p>
 <pre>
-  $ &amp; 1+1, Addition # identifier becomes name
-  $ &amp; someFunction(...), "String description"
+  $ & 1+1, Addition      # identifier becomes name
+  $ & someFunction(...), "String description"
 </pre>
 
 <p>
   The '&' way to run background jobs can be used in functions, as a light-weight alternative to
-  the SpawnProcess() built-in function.
+  the SpawnProcess() built-in function, if no state needs to be duplicated into the process.
 </p>
 
 

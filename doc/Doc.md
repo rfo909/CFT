@@ -44,8 +44,7 @@ We can easily modify this into a callable function
 that takes the log line as parameter, or if no parameter given, asks for it:
 
 ```
-P(1,readLine("Log line"))=>
-x Dir("/some/path").file("log.txt").append(Date.fmt + " " + x)
+P(1,readLine("Log line"))=> x Dir("/some/path").file("log.txt").append(Date.fmt + " " + x)
 /LogLine
 ```
 
@@ -80,10 +79,12 @@ version of our code. Function names follow code, just as when entered at the pro
 # --
 Dir("/some/path")
 /LogDir
+
 # Log file
 # --
 LogDir.file("log.txt")
 /LogFile
+
 # Add log line prefixed with date and time
 # --
 P(1,readLine("Log line")) => logLine
@@ -129,6 +130,7 @@ normal "infix" syntax:
 ```
 2+3*5
 17
+
 "("+Date.fmt+")"
 (2022-04-22 19:20:58)
 ```
@@ -200,6 +202,7 @@ of statements and expressions. To run them, just type their name and press Enter
 $ _Stmt
 $ _Expr
 ```
+
 # Show functions inside value objects
 
 
@@ -321,20 +324,10 @@ CFT contains a number of "shell like commands", with different syntax from the r
 
 
 - ls
-
-
 - cd
-
-
 - pwd
-
-
 - cat
-
-
 - more
-
-
 - edit
 
 
@@ -387,6 +380,7 @@ also support using output from some CFT function. Say we have some functions:
 ```
 Dir("/SomePath/logs")
 /LogDir
+
 Dir("/SomewhereElse/xyz").file("data.txt")
 /DataFile
 ```
@@ -400,34 +394,40 @@ $ edit (DataFile)
 ## Shell commands not suited in functions
 
 
-Due to how the "shell commands" (cd and ls, cat and more + edit) parse the command line (globbing), they
-are not suited for running inside function code.
+Due to how some of the "shell commands" parse input, due to globbing, they are not suited for running inside function
+code, only interactively. 
 
+This applies to the following:
 
-Function code should instead use the Dir and File functions:
+- cd
+- ls
+- cat
+- more
+- edit
+
+Function code should instead use the Dir and File functions, etc:
 
 ```
-dir = Dir.sub("xyz")
-dir.create
-dir.cd  # set current dir
-dir.files  # list content in directory
-dir.dirs
-Lib:m(dir.file("x.txt"))   # The Lib script contains function "m" for paging through a file
-Lib:e(dir.file("x.txt"))   # "e" for opening file in editor
+dirExpr.cd                 # set current dir
+dirExpr.files              # list content in directory
+dirExpr.dirs
+
+Lib:m(fileExpr)            # The Lib script contains function "m" for paging through a file
+Lib:e(fileExpr)            # "e" for opening file in editor
 ```
+
 ## No shell-like destructive commands!
 
 
-CFT 
-**does not** include direct "shell-like" destructive commands ("rm", "cp", "mv", "mkdir" etc).
+CFT **does not** include direct "shell-like" destructive commands ("rm", "cp", "mv", "mkdir" etc).
 
 
-This is by choice.
+*This is by choice.*
 
 
 The reason is to encourage the user to use regular CFT syntax, and create functions for often
-repeated needs. The "protect" functionality helps avoid mistakes such as deleting or modifying
-directories and files that should not be touched.
+repeated needs, as this in turn enables the "protect" functionality, which helps avoid mistakes, 
+such as deleting or modifying directories and files that should not be touched.
 
 
 Alternatively one can use "bang commands" or the shell function. Can also use the
@@ -446,16 +446,16 @@ exiting the shell, you are back at CFT.
 ```
 $ shell
 ```
+
 ## Background jobs
 
 
-CFT lets us run any 
-**expression** (usually a function call) as a background job, using
+CFT lets us run any *expression* (usually a function call) as a background job, using
 the '&amp;' expression syntax.
 
 ```
-$ &amp; 1+1
-$ &amp; someFunction(...)
+$ & 2+3
+$ & someFunction(...)
 ```
 
 The "2+3" and "someFunction" are the expressions that are run as background jobs.
@@ -475,50 +475,34 @@ clears completed jobs from the jobs registry.
 Note that jobs don't survive killing the CFT process.
 
 
-If one wants better descriptions for jobs, this can be done as follows
-
-```
-$ &amp; 1+1, Addition # identifier becomes name
-$ &amp; someFunction(...), "String description"
-```
-
-The '&' way to run background jobs can be used in functions, as a light-weight alternative to
-the SpawnProcess() built-in function.
-
 # The "protect" mechanism
 
 
 Regularly performing changes, such as copying, deleting and creating files, should be scripted
-with code. Therefore, no "command line" style functionality exists for this..
+with code. Therefore, no "command line" (rm/del) style functionality exists for this.
+
+Example:
 
 ```
-$ <DirExpression>.file("xxx.txt").delete
+# Our log dir
+# We want to process files in this directory, but they MUST NOT
+# be modified or deleted, so we add .protect to the Dir()-expression
+# --
+	Dir("/home/roar/logs").protect
+/LogDir
 ```
 
-The point here is that the "DirExpression" as well as functionality to provide sets of files
-and similar, are CFT code, and CFT has a special provision to avoid deleting or modifying the wrong
-files or directories: 
-**the "protect" mechanism**.
+Now, if we either interactively or via another function do something like this, then it 
+fails with an error:
 
 ```
-$ Dir("/someNfsDir/logs").protect
-$ /LogDir
+$ LogDir.files->f f.delete
 ```
 
-What this does is set an internal flag in the Dir object that the function creates, that prevents
-operations like deleting or modifying the directory.
+The protect function sets a mark in the Dir or File object to which it is applied. This
+mark is in turn inherited by all Dir/File objects derived from it, so LogDir.files
+produces a list of files, each with the protection mark set.
 
-
-As we call LogDir.files, each File object created, inherits the 
-**protect** flag.
-
-```
-$ LogDir.file("log01.txt").delete
-ERROR: [input:18] INVALID-OP delete : /someNfsDir/logs/log01.txt (PROTECTED: -) (java.lang.Exception)
-```
-
-This protects our script code from doing bad things, but also interactively, as we tend to call
-functions like LogDir from the command line instead of typing Dir("/someNfsdir/logs").
 
 # Bang commands
 
@@ -538,6 +522,7 @@ For details of the default bang command parser:
 ```
 $ BangParser:Readme
 ```
+
 # The "shell" command
 
 
@@ -650,9 +635,7 @@ returning a single int value.
 Filtering list data is an essential function in CFT. Here is a simple example:
 
 ```
-$ List(1,2,3,4,3,2,1)->
-x assert(x>
-2) out(x)
+$ List(1,2,3,4,3,2,1)-> x assert(x>2) out(x)
 <List>
 3
 4
@@ -685,6 +668,7 @@ Example:
 ```
 List("java","txt")
 /types
+
 Dir.allFiles->f type=f.name.afterLast(".") assert(types.contains(type)) out(f)
 /textfiles
 ```
