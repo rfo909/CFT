@@ -71,7 +71,7 @@ public class ObjSys extends Obj {
                 new FunctionCPUCores(),
                 new FunctionJobs(),
                 new FunctionCurrFunction(),
-                new FunctionGetCallStack(),
+                new FunctionGetCallHistory(),
         };
         setFunctions(arr);
         
@@ -618,13 +618,13 @@ public class ObjSys extends Obj {
     }
 
     
-    class FunctionGetCallStack extends Function {
+    class FunctionGetCallHistory extends Function {
         public String getName() {
-            return "getCallStack";
+            return "getCallHistory";
         }
 
         public String getShortDesc() {
-            return "getCallStack() - returns full callstack as list of strings";
+            return "getCallHistory() - returns full call history as list of strings";
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {

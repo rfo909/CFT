@@ -156,6 +156,8 @@
 * Debugging
   |  @lint
   |  addDebug()
+  |  Sys.getCallHistory
+  |  setBreakPoint(str)
 * Working with pasted text lines from stdin
 * Differing between Windows and Linux
 * Predicate calls

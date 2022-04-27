@@ -1,9 +1,9 @@
 
 # CFT / ConfigTool
 
-Last updated: 2022-04-26 RFO
+Last updated: 2022-04-27 RFO
 
-v3.5.1
+v3.5.2
 
 # Introduction
 
@@ -2555,6 +2555,19 @@ the source location, and adds this to the current stack frame of the CFT call st
 
 This means no output is displayed until something goes wrong, and the CFT stack trace
 is displayed.
+
+
+## Sys.getCallHistory
+
+This function returns the call history as a list of text lines, which can be logged or displayed.
+
+
+## setBreakPoint(str)
+
+This statement stops execution, and shows call history, and asks if we want to abort ("y") or
+not (Enter).
+
+
 
 # Working with pasted text lines from stdin
 
