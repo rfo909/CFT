@@ -42,9 +42,15 @@ public class StmtSetBreakPoint extends Stmt {
         String loc = this.getSourceLocation().toString();
         String msg=value.resolve(ctx).getValAsString();
         
+        String functionName=ctx.getFunctionState().getScriptFunctionName();
+        if (functionName==null) {
+        	functionName="";
+        } else {
+        	functionName=" in function " + functionName;
+        }
         ValueList stack = ctx.getStdio().peekFullCFTStackTrace();
         
-        stdio.println("### setBreakPoint: " + msg + " " + loc);
+        stdio.println("### setBreakPoint" + functionName + ": " + msg + " " + loc);
         for (Value line : stack.getVal()) {
         	stdio.println(" CALL-HISTORY: " + line.getValAsString());
         }
