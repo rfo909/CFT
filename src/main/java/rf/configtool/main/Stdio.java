@@ -124,6 +124,23 @@ public abstract class Stdio {
      }
      
 
+     /**
+      * Utility method, combining CFT stack trace and any debug lines within each
+      * stack frame, as ValueList object (of strings)
+      */
+     public ValueList peekFullCFTStackTrace () {
+     	List<Value> result=new ArrayList<Value>();
+     	
+     	for (CFTCallStackFrame frame : cftCallStack) {
+     		result.add(new ValueString(frame.toString()));
+     		for (String line:frame.getDebugLines()) {
+     			result.add(new ValueString("   debug: " + line));
+     		}
+     	}
+     	return new ValueList(result);
+     }
+     
+
      public void showAndClearCFTCallStack () {
     	 while (!cftCallStack.isEmpty()) {
     		 CFTCallStackFrame x=cftCallStack.pop();
