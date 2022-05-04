@@ -35,6 +35,16 @@ To change to different host name, call MyHost(true)
 >>>> EOF
 /Readme
 
+# onload show target host
+# --
+	host=MyHost
+
+	Lib:Header("Target ElasticSearch host")
+	println(host)
+	println
+/onLoad
+
+
 # Get/set target hostname
 # --
     P(1,false) => change
@@ -61,12 +71,6 @@ To change to different host name, call MyHost(true)
 
 
 
-# Create Kibana URL
-# --
-    MyHost.before(":") + ":5601/app/kibana"
-/KibanaURL
-
-
 
 # List indexes, either just names or specific index by entering name (glob)
 # --
@@ -90,45 +94,11 @@ To change to different host name, call MyHost(true)
 /ListIndexes
 
 
-# Create index with lifecycle management
-#   NOTE: does not really work, must use Index Templates to control lifecycle
-#   for all indexes created via rollover.
-# --
-    P(1,Input("Index name (-000001 will be added)").get) => indexName
-
-	error(Regex("^.*-\d.*$").match(indexName),
-		"Invalid index name, should not contain -N where N is a digit")
-	
-	P(2,Input("index.lifecycle.name").get) => ilpName
-	P(3,Input("index.lifecycle.rollover_alias").setCurr(indexName).get) => ilpAlias
-
-	indexName=indexName+"-000001"
-
-
-    Dict.set("settings",Dict
-		.set("number_of_shards",1)
-		.set("number_of_replicas",1)
-		.set("index.lifecycle.name", ilpName)
-		.set("index.lifecycle.rollover_alias", ilpAlias)
-	).set("aliases",Dict
-		.set(ilpAlias, Dict
-			.set("is_write_index", true)
-		)
-	)
-	=> data
-
-    url = "/"+indexName+"?pretty" 
-
-	println("PUT " + url)
-	JSON:PP(data,true)
-	Lib:HardConfirm("Continue")
-
-    Util:CURL("http",MyHost,"PUT", url, data, true)
-/CreateIndex
 
 
 
-# Create index managed via index template (see CreateIndexTemplate)
+
+# Manually create index managed via index template (see CreateIndexTemplate)
 # https://www.elastic.co/guide/en/elasticsearch/reference/7.7/getting-started-index-lifecycle-management.html#ilm-gs-create-policy
 # --
     P(1,Input("Index name (-000001 will be added)").get) => indexName
@@ -452,7 +422,7 @@ To change to different host name, call MyHost(true)
 
 
 
-# Delete indexes based on prefix string
+# Helper called by DeleteIndexes - delete or display what would be deleted, based on prefix
 # --
    	P(1,"xxx-")=>prefix
 	P(2,false)=>enable
@@ -470,8 +440,21 @@ To change to different host name, call MyHost(true)
 	data->ix
 		indexName=ix.index
 		assert(indexName.startsWith(prefix))
-		println( if(enable,"Deleting ","Would delete ") + indexName)
+		println( if(enable,"Deleting ","Would delete index: ") + indexName)
 		if (enable) Util:CURL("http",MyHost,"DELETE","/"+indexName,null,false)
+//DoDeleteIndexes
+
+
+# Delete indexes based on prefix
+# --
+	Input("Enter prefix for deleting indexes").get =>prefix
+	error(prefix.contains("*"), "Prefix must not be '*' expression, just string")
+	
+	DoDeleteIndexes(prefix,false)
+	
+	Lib:HardConfirm
+	
+	DoDeleteIndexes(prefix,true)
 /DeleteIndexes
 
 
@@ -483,7 +466,7 @@ To change to different host name, call MyHost(true)
 	DeleteDatedIndexes("winlogbeat-6.4.2-", "yyyy.MM.dd", expiration, ENABLE)
 	DeleteDatedIndexes("metricbeat-7.2.0-", "yyyy.MM.dd", expiration, ENABLE)
 	DeleteDatedIndexes("filebeat-7.9.3-", "yyyy.MM.dd", expiration, ENABLE)
-/Cleanup
+//Cleanup
 
 
 
@@ -492,82 +475,4 @@ To change to different host name, call MyHost(true)
 # --
 	DeleteDatedIndexes("mix-", "yyyy-MM-dd-HH", Date.sub(Date.Duration.hours(4)), true)
 /t
-
-
-
-
-# Index Lifecycle Policy README
-# --
-<<<<<< EOF
-
-Adding ILP directly to existing index
--------------------------------------
-- If the index has no alias (watever that is), then add one with AddIndexAlias
-- Verify in Kibana
-- Create Index Lifecycle Policy
-- Click on the index, and manage, add lifecycle policy
-
-DOES NOT WORK (7.16)
-
-The index had to be named xxx-N or we got an error
-when it got time to do roll over. Called it main-1 
-
-Note that the error above didn't show up before trying
-to execute the ILP. Good thing it had short timeouts.
-
-When it became time to roll over, it then created an 
-index main-0000002, which was empty, and
-after a further while, it reset the the main-1, purging
-all content. 
-
-So the ILP was doing something, just not anything
-meaningful.
- 
-Setting up ILP when creating Index
-----------------------------------
-The CreateIndex function does this, setting up an alias and
-coupling the index to an ILP. Seems to work.
-
-
-Setting up ILP via Index Template
----------------------------------
-NOTE: does not work! :-)
-
-- Create index with some timestamp on format
-
-		yyyy-MM-dd'T'HH:mm:ss
-
-	** possibly not required for ILP, but good for displaying
-	   data along time axis, to see if ILP does anything)
-
-- When creating Kibana Index Pattern, use this field as time field
-	This enables presenting data on time axis (when exploring etc)
-
-
-- Create Index Template under Index management -> Index Templates
-	- give index patterns for the indices it controls 
-
-
-- Create Index Lifecycle Policy
-	- Actions: Add policy to Index template
-
-
-*** Use date pattern in indexes
--------------------------------
-Requires external scripting to purge old data
-BUT IT WORKS!
-See functions
-
-- AddMultiIndexData
-- DeleteDatedIndexes
-
-NOTE: it seems the Kibana Index pattern MUST be on the form "xxx-*"
-and not just "xxx*". Bugix. 
-
-
-
-
->>>>>> EOF
-	-> line println("| " + line)
-/ILPReadme
 
