@@ -25,60 +25,34 @@
 Simple script library for interfacing a running
 ElasticSearch node (or cluster via one of its nodes),
 through the REST API.
-
-Initially asks for host+port on format xxx:NNN, then stores
-this in database. 
-
-To change to different host name, call MyHost(true)
-
 -------------------------------------------------------------
 >>>> EOF
 /Readme
 
-# onload show target host
+# Get host+port
 # --
-	host=MyHost
-
-	Lib:Header("Target ElasticSearch host")
-	println(host)
-	println
-/onLoad
-
-
-# Get/set target hostname
-# --
-    P(1,false) => change
-
-    Db2:Get("ElasticAPI","host") => name
-
-    if (name==null || change) {
-        println("Enter elasticsearch host[:port] (port defaults to 9200)")
-        
-        readLine("host:port") => name
-        if(!name.contains(":")) name=name+":9200"
-        Db2:Set("ElasticAPI","host",name)
-    }
-    name
-/MyHost
-
-
-
-# Change target hostname
-# --
-    MyHost(true)
-/SetMyHost
-
-
+	name=Db2:Get(Sys.scriptId,"HostPort")
+	
+	inp=Input("Enter elasticsearch host[:port] (port defaults to 9200)")
+	if (name != null) inp.setCurrCond(name)
+	
+	inp.get => name
+	if(!name.contains(":")) name=name+":9200"
+	Db2:Set(Sys.scriptId,"HostPort", name)
+	name
+/GetHostPort
 
 
 
 # List indexes, either just names or specific index by entering name (glob)
 # --
-	P(1,Input("Enter name as glob expression").setCurr("*").get)=>globExpr
+	P(1,GetHostPort) => host
+	P(2,Input("Enter name as glob expression").setCurr("*").get)=>globExpr
+	
 	showNamesOnly=(globExpr=="*")
 	regex=Glob(globExpr,true).regex
 
-    Util:CURL("http",MyHost,"GET","/_cat/indices?format=json&pretty=true",null,false).stdout => json
+    Util:CURL("http",host,"GET","/_cat/indices?format=json&pretty=true",null,false).stdout => json
 	data=JSON:Parse(json)
 
 	# Sort list of indexes by name
@@ -98,40 +72,12 @@ To change to different host name, call MyHost(true)
 
 
 
-# Manually create index managed via index template (see CreateIndexTemplate)
-# https://www.elastic.co/guide/en/elasticsearch/reference/7.7/getting-started-index-lifecycle-management.html#ilm-gs-create-policy
-# --
-    P(1,Input("Index name (-000001 will be added)").get) => indexName
-	P(2,Input("Index alias").get) => alias
-
-	error(Regex("^.*-\d.*$").match(indexName),
-		"Invalid index name, should not contain -N where N is a digit")
-	
-	indexName=indexName+"-000001"
-
-	Dict
-		.set("aliases",Dict
-			.set(alias, Dict
-				.set("is_write_index", true)
-			)
-		)
-	=>data
-
-    url = "/"+indexName 
-
-	println("PUT " + url)
-	JSON:PP(data,true)
-	Lib:HardConfirm("Continue")
-
-    Util:CURL("http",MyHost,"PUT", url, data, true)
-/CreateIndexForTemplate
-
-
 
 # Add alias to index
 # --
-	P(1,Input("Index name").get) => indexName
-	P(2,Input("Index alias").setCurr(indexName).get) => alias
+	P(1,GetHostPort) => host
+	P(2,Input("Index name").get) => indexName
+	P(3,Input("Index alias").setCurr(indexName).get) => alias
 	
 	Dict.set("actions",List(
 		Dict.set("add", Dict.set("index",indexName).set("alias",alias))
@@ -143,141 +89,10 @@ To change to different host name, call MyHost(true)
 	JSON:PP(data,true)
 	Lib:HardConfirm
 	
-	Util:CURL("http",MyHost,"POST", url, data, true)
+	Util:CURL("http",host,"POST", url, data, true)
 /AddIndexAlias
 
 
-
-# Locate newest index that matches pattern, by looking for -NNNNNN version number
-# at the end of the name, selecting the highest number. 
-#
-# Checks at most every minute, caches result in Db2.
-# --
-	P(1,Input("Enter index pattern").get)=>pattern
-
-	dbId="newest_index:"+pattern
-	timerId=Sys.scriptId+"_locateNewestIndex"
-
-	value=Db2:Get(Sys.scriptId,dbId)
-
-	if (value==null || Util:HasTimedOut(timerId,60)) {	
-		regex=Glob(pattern,true).regex
-		Util:CURL("http",MyHost,"GET","/_cat/indices?format=json&pretty=true",null,false).stdout => json
-		data=JSON:Parse(json)
-
-		# Iterate over all index objects, find one with highest version		
-		maxValue=-1
-		maxValueIndex=null
-		Inner {
-			data->ix 
-				name=ix.index
-				assert(regex.match(name))
-				if (Regex("^.*-\d+$").match(name)) {
-					num=name.afterLast("-").parseInt
-					if (num > maxValue) {
-						maxValue=num
-						maxValueIndex=name
-					}
-				}
-		}
-		error(maxValueIndex==null,"No numbered indexes for pattern " + pattern)
-
-		# Success
-		value=maxValueIndex
-
-		# Store in database
-		Db2:Set(Sys.scriptId, dbId, value)
-
-		# Set timer
-		Util:SetTimeMark(timerId)
-	}
-
-	value	
-/LocateNewestIndex
-
-
-# Add test-data WITH timestamp in order to enable time searches
-# If the given index name is a pattern, we regularly search for the newest
-# index that matches that pattern, by looking for -NNNNNN at the end of the
-# name, selecting the highest number. 
-# --
-	P(1,Input("Index pattern or name").get) => indexPattern
-	P(2,Input("Sleep ms").get.parseInt) => delay
-
-
-	i=0
-	loop
-		i=i+1
-		Util:Counter("customer_id") => recordId
-
-		value=(Lib.Math.sin(i)*100).i
-
-		Date.sub(Date.Duration.hours(1)).setFormat("yyyy-MM-dd'T'HH:mm:ss").fmt => timestamp
-	
-
-		data = Dict.set("name","Roar")
-			.set("timestamp", timestamp)
-			.set("value",value)
-
-		indexName=if(indexPattern.contains("*")) LocateNewestIndex(indexPattern) else indexPattern
-
-		println("i="+i + " " + indexName)
-	
-		url="/" + indexName + "/_doc/"+recordId
-		println("POST " + url)
-		JSON:PP(data,true)
-
-
-		Util:CURL("http",
-			MyHost,
-			"POST",
-			url, 
-			data,
-			false
-			)
-
-		Sys.sleep(delay)
-/AddIndexData
-
-
-
-# Add test-data into time-separated indexes, indexName-DATE, as decided via Date format string
-# (no sequence-number)
-# --
-	P(1,Input("Index name").get) => indexName
-	P(2,Input("Sleep ms").get.parseInt) => delay
-	P(3,Input("Date/Time pattern").setCurr("yyyy-MM-dd-HH").get)=>dateFormat
-
-	i=0
-	loop
-		i=i+1
-		Util:Counter("customer_id") => recordId
-
-		value=(Lib.Math.sin(i)*100).i
-
-		Date.sub(Date.Duration.hours(1)).setFormat("yyyy-MM-dd'T'HH:mm:ss").fmt => timestamp
-		data = Dict.set("name","Roar")
-			.set("value",value)
-			.set("timestamp",timestamp)
-
-		println("i="+i+" "+indexName)
-
-		indexDatePart=Date.setFormat(dateFormat).fmt
-
-		url="/" + indexName + "-" + indexDatePart + "/_doc/"+recordId
-		println("POST " + url)
-		JSON:PP(data,true)
-
-		Util:CURL("http",
-			MyHost,
-			"POST",
-			url, 
-			data,
-			false
-			)
-
-		Sys.sleep(delay)
-/AddMultiIndexData
 
 
 
@@ -286,10 +101,11 @@ To change to different host name, call MyHost(true)
 # Create or modify Index Lifecycle Policy
 # https://www.elastic.co/guide/en/elasticsearch/reference/7.7/getting-started-index-lifecycle-management.html#ilm-gs-create-policy
 # --
-    P(1,Input("Index Lifecycle Policy name").get) =>ilpName
-    P(2,Input("Rollover days").get.parseInt)=>rolloverDays
-	P(3,Input("Max index size (GB)").get.parseInt)=>maxSizeGb
-    P(3,Input("Expiration days").get.parseInt)=>expirationDays
+	P(1,GetHostPort)=>host
+    P(2,Input("Index Lifecycle Policy name").get) =>ilpName
+    P(3,Input("Rollover days").get.parseInt)=>rolloverDays
+	P(4,Input("Max index size (GB)").get.parseInt)=>maxSizeGb
+    P(5,Input("Expiration days").get.parseInt)=>expirationDays
 	
 	
 	# Seems the rollover-part is not changed when running function
@@ -329,7 +145,7 @@ To change to different host name, call MyHost(true)
 	JSON:PP(JSON:Parse(json),true)
 	Lib:HardConfirm
 
-    Util:CURL("http",MyHost,"PUT",url,json,false).stdout => output
+    Util:CURL("http",host,"PUT",url,json,false).stdout => output
 	JSON:PP(JSON:Parse(output),true)
 /ILPCreate
 
@@ -337,8 +153,9 @@ To change to different host name, call MyHost(true)
 
 # Check lifecycle progress
 # --
-	P(1,Input("Index name or pattern").setCurr("*").get) => index
-    json = Util:CURL("http",MyHost,"GET","/" + index + "/_ilm/explain").stdout
+	P(1,GetHostPort)=>host
+	P(2,Input("Index name or pattern").setCurr("*").get) => index
+    json = Util:CURL("http",host,"GET","/" + index + "/_ilm/explain").stdout
 	JSON:PP(JSON:Parse(json))
 /ILPProgress
 
@@ -347,9 +164,23 @@ To change to different host name, call MyHost(true)
 
 # List ILP's
 # --
-	Util:CURL("http",MyHost,"GET","/_ilm/policy").stdout => json
-	JSON:PP(JSON:Parse(json))
+	P(1,GetHostPort)=>host
+	P(2,Input("ILP name glob, '*' for all").setCurrCond("*").get) => name
+	
+	regex=Glob(name,false).regex 
+	
+	Util:CURL("http",host,"GET","/_ilm/policy").stdout => json
+	data = JSON:Parse(json) # object with each policy as a field
+	
+	# Delete wrongly named ILP's
+	data.keys->key
+		println(key)
+		if (!regex.match(key)) data.remove(key)
+	|
+	
+	JSON:PP(data)
 /ILPList
+
 
 
 # Create Index Template
@@ -358,10 +189,11 @@ To change to different host name, call MyHost(true)
 # https://www.elastic.co/guide/en/elasticsearch/reference/7.7/getting-started-index-lifecycle-management.html#ilm-gs-create-policy
 #
 # --
-    P(1,Input("Index pattern").get) => indexPattern
-	P(2,Input("Index template name").get) => templateName
-	P(3,Input("index.lifecycle.name").get) => lifecycleName
-	P(4,Input("index.lifecycle.rollover_alias").get) => alias
+	P(1,GetHostPort)=>host
+    P(2,Input("Index pattern").get) => indexPattern
+	P(3,Input("Index template name").get) => templateName
+	P(4,Input("index.lifecycle.name").get) => lifecycleName
+	P(5,Input("index.lifecycle.rollover_alias").get) => alias
 
 	Dict.set("index_patterns",List(
 			indexPattern
@@ -380,99 +212,57 @@ To change to different host name, call MyHost(true)
 	JSON:PP(data,true)
 	Lib:HardConfirm("Continue")
 
-    Util:CURL("http",MyHost,"POST",url,data,true)
+    Util:CURL("http",host,"POST",url,data,true)
         
 /CreateIndexTemplate
 
 
-# Delete time-stamped index, named on format <prefix><date>
-# --
-    P(1,"xxx-")=>prefix
-    P(2,"yyyy.MM.dd")=>dateFormat
-	P(3,30)=>keepDays
-	P(4,false)=>enable
-		# If false, we display what indexes would be deleted
-		# If true, they are actually deleted
-
-    Date.sub(Date.Duration.days(keepDays))=>cutoffDate
-	
-	json=Util:CURL("http",MyHost,"GET","/_cat/indices?format=json&pretty=true",null,false).stdout
-	data=JSON:Parse(json)
-
-	# should be a list of index objects
-
-	error(getType(data) != "List", "Expected list, got " + getType(data))
-
-	# Iterate over indexes, and from their name, parse the date/time.
-	# For those older than cutoffDate: delete
-	data->ix
-		indexName=ix.index
-		assert(indexName.startsWith(prefix))
-		indexName.sub(prefix.length) => datePart
-		#println("Index-name: " + indexName + " date/time-part: " + datePart)
-		Date.setFormat(dateFormat).parse(datePart) => indexDate
-
-		if (indexDate.before(cutoffDate)) {
-			println("* " + if(enable,"Deleting","Would delete") + " index " + indexName)
-			if (enable) Util:CURL("http",MyHost,"DELETE","/"+indexName,null,false)
-		} else {
-			println("* KEEPING index " + indexName)
-		}
-/DeleteDatedIndexes
-
-
 
 # Helper called by DeleteIndexes - delete or display what would be deleted, based on prefix
+# Returns number of indexes that will be or was deleted
 # --
-   	P(1,"xxx-")=>prefix
-	P(2,false)=>enable
+	P(1) => host
+   	P(2)=>prefix
+	P(3,false)=>enable
 		# If false, we display what indexes would be deleted
 		# If true, they are actually deleted
 	
-	json=Util:CURL("http",MyHost,"GET","/_cat/indices?format=json&pretty=true",null,false).stdout
+	json=Util:CURL("http",host,"GET","/_cat/indices?format=json&pretty=true",null,false).stdout
 	data=JSON:Parse(json)
 
 	# should be a list of index objects
 
 	error(getType(data) != "List", "Expected list, got " + getType(data))
 
-	# Iterate over indexes
+	# Iterate over indexes and count matches
+	matches=0
 	data->ix
 		indexName=ix.index
 		assert(indexName.startsWith(prefix))
+		matches=matches+1
 		println( if(enable,"Deleting ","Would delete index: ") + indexName)
 		if (enable) Util:CURL("http",MyHost,"DELETE","/"+indexName,null,false)
+	|
+	
+	matches
 //DoDeleteIndexes
 
 
 # Delete indexes based on prefix
 # --
+	P(1,GetHostPort) => host
 	Input("Enter prefix for deleting indexes").get =>prefix
 	error(prefix.contains("*"), "Prefix must not be '*' expression, just string")
 	
-	DoDeleteIndexes(prefix,false)
+	count = DoDeleteIndexes(host,prefix,false)
 	
-	Lib:HardConfirm
-	
-	DoDeleteIndexes(prefix,true)
+	if (count > 0) {
+		
+		Lib:HardConfirm
+		
+		DoDeleteIndexes(host,prefix,true) + " indexes deleted"
+	} else {
+		"No indexes found"
+	}
 /DeleteIndexes
-
-
-# Delete winlogbeat-6.4.2-yyyy.MM.dd, metricbeat-7.2.0-yyyy.MM.dd and filebeat-7.9.3-yyyy.MM.dd older than 90 days
-# --
-	expiration=Date.sub(Date.Duration.days(30))
-	ENABLE=false
-	
-	DeleteDatedIndexes("winlogbeat-6.4.2-", "yyyy.MM.dd", expiration, ENABLE)
-	DeleteDatedIndexes("metricbeat-7.2.0-", "yyyy.MM.dd", expiration, ENABLE)
-	DeleteDatedIndexes("filebeat-7.9.3-", "yyyy.MM.dd", expiration, ENABLE)
-//Cleanup
-
-
-
-
-# Test DeleteDatedIndexes
-# --
-	DeleteDatedIndexes("mix-", "yyyy-MM-dd-HH", Date.sub(Date.Duration.hours(4)), true)
-/t
 
