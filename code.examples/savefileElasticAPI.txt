@@ -40,7 +40,30 @@ through the REST API.
 	if(!name.contains(":")) name=name+":9200"
 	Db2:Set(Sys.scriptId,"HostPort", name)
 	name
-/GetHostPort
+//GetHostPort
+
+
+
+# List index names, according to glob pattern
+# --
+	P(1,GetHostPort) => host
+	P(2,Input("Enter name as glob expression").setCurrCond("*").get)=>globExpr
+	
+	regex=Glob(globExpr,true).regex
+
+    Util:CURL("http",host,"GET","/_cat/indices?format=json&pretty=true",null,false).stdout => json
+	data=JSON:Parse(json)
+
+	# Filter index names and sort
+	Inner {
+		data->ix 
+			name=ix.index
+			assert(regex.match(name))
+			out(name)
+		| _.sort
+	}
+/ListIndexes
+
 
 
 
@@ -69,31 +92,6 @@ through the REST API.
 
 
 
-# List index names, according to glob pattern
-# --
-	P(1,GetHostPort) => host
-	P(2,Input("Enter name as glob expression").setCurrCond("*").get)=>globExpr
-	
-	regex=Glob(globExpr,true).regex
-
-    Util:CURL("http",host,"GET","/_cat/indices?format=json&pretty=true",null,false).stdout => json
-	data=JSON:Parse(json)
-
-	# Filter index names and sort
-	Inner {
-		data->ix 
-			name=ix.index
-			assert(regex.match(name))
-			out(name)
-		| _.sort
-	}
-/ListIndexes
-
-
-
-
-
-
 
 # Add alias to index
 # --
@@ -113,9 +111,6 @@ through the REST API.
 	
 	Util:CURL("http",host,"POST", url, data, true)
 /AddIndexAlias
-
-
-
 
 
 
