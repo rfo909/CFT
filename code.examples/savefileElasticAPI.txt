@@ -93,6 +93,26 @@ through the REST API.
 
 
 
+# Get documents from index
+# --
+	P(1,GetHostPort) => host
+	P(2,Input("Enter index name (including date and seqNo)").get) => indexName
+	P(3,Input("Enter document id").get) => id
+
+	url="/" + indexName + "/_doc/" + id
+
+	Util:CURL("http",host,"GET", url, null, false) => result
+
+	if (result.exitCode == 0) {
+		JSON:Parse(result.stdout) => data
+		JSON:PP(data,true)
+	} else {
+		result
+	}
+/GetDocs
+
+
+
 # Add alias to index
 # --
 	P(1,GetHostPort) => host
@@ -268,7 +288,8 @@ through the REST API.
 # Delete indexes based on prefix
 # --
 	P(1,GetHostPort) => host
-	Input("Enter prefix for deleting indexes").get =>prefix
+	P(2,Input("Enter prefix for deleting indexes").get) =>prefix
+	
 	error(prefix.contains("*"), "Prefix must not be '*' expression, just string")
 	
 	count = DoDeleteIndexes(host,prefix,false)
