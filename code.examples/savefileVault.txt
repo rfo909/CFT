@@ -31,7 +31,7 @@ passwords and other secrets for the duration of the session.
 # Get or ask for session secret. It is stored in database, encrypted with Sys.secureSessionId.
 # --
     P(1,"Label") => label
-    P(2,true) => echo
+    P(2,false) => echo
     
     label.toHexString => key
     "v"+key => verifyKey
@@ -58,14 +58,6 @@ passwords and other secrets for the duration of the session.
     }
 /SessionSecretGet
 
-# Remove the verification value for a session secret, forcing SessionSecretGet to ask for it
-# --
-    P(1,"Label") => label
-    label.toHexString => key
-    "v"+key => verifyKey
-    Db2:Set("Vault",verifyKey,"")
-/SessionSecretClear
-
 
 # Set session secret, non-interactively
 # --
@@ -80,4 +72,55 @@ passwords and other secrets for the duration of the session.
     Lib.Util.Encrypt(Sys.secureSessionId,"verify").processString("verified") => eVerified
     Db2:Set("Vault", verifyKey, eVerified)
 /SessionSecretSet
+
+
+
+# Clear session secret, as identified by label
+# Removing verification value for a session secret, forcing SessionSecretGet to ask for it
+# --
+    P(1,"Label") => label
+    label.toHexString => key
+    "v"+key => verifyKey
+    Db2:Set("Vault",verifyKey,"")
+/SessionSecretClear
+
+
+
+
+# Get or ask for session property (non encrypted)
+# --
+	P(1,"Label") as String => label
+	
+	dbField = Sys.scriptId + ":" + label.toHexString
+	
+	Db2:Get(Sys.sessionUUID,dbField) => s
+	if (s==null) {
+		readLine(label) => s
+		Db2:Set(Sys.sessionUUID,dbField,s)
+	}
+	s
+/SessionPropertyGet
+
+
+
+# Set session property non-interactivel (not encrypted)
+# --
+	P(1,"Label") as String => label
+	P(2, "") => value
+	
+	dbField = Sys.scriptId + ":" + label.toHexString
+	
+	Db2:Set(Sys.sessionUUID,dbField,value)
+/SessionPropertySet
+
+
+
+
+# Clear session property
+# --
+	P(1,"Label") as String => label
+	dbField=Sys.scriptId + ":" + label.toHexString
+	Db2:Set(Sys.sessionUUID,dbField,null)
+/SessionPropertyClear
+
 

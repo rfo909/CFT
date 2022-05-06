@@ -1,0 +1,10 @@
+# Returns CIFSFile
+# --
+	url = Vault:SessionPropertyGet("Enter URL, on format smb://host/share/path/file.txt")
+
+	user = Vault:SessionPropertyGet("User name")
+	password = Vault:SessionSecretGet("Password")
+	
+	context=Lib.Util.CIFS.CIFSContext(null, user, password)
+	Lib.Util.CIFS.CIFSFile(url,context)
+/CIFSFile
