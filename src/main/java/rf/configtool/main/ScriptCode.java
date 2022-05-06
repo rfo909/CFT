@@ -178,7 +178,7 @@ public class ScriptCode {
                     
                     String pre=" ";
                     if (body.isClass()) {
-                    	pre="*";
+                    	pre="&";
                     } else if (body.isPrivate()) {
                     	pre="/";
                     }
