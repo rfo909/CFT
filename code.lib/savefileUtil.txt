@@ -522,3 +522,22 @@ Dict.set("list",List)
 /UnescapeXMLString
 
 
+
+# Stack
+# --
+	self.data=List
+	self.push = Lambda {
+		P(1) => val
+		self.data.insert(0,val)
+	}
+	self.peek = Lambda {
+		self.data.first
+	}
+	self.pop = Lambda {
+		x=self.data.first
+		if (self.data.length > 0) self.data.remove(0)
+		x
+	}
+/class Stack	
+
+

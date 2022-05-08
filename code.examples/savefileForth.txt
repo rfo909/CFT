@@ -1,0 +1,467 @@
+# Readme
+<<<<<< EOF
+Forth-inspired language intended for micro controllers.
+
+This is a "test implementation" of a compiler.
+
+Defining functions is outside the language, as in CFT, for example
+
+=b =a a 1 + b 1 + *
+/+1mul
+
+We need to compile code libraries into byte format, and put those
+sequences into PROG_MEM structures in the interpreter code, which is
+written in C. 
+
+To test functions, we compile them and generate a hex-string format to send to 
+the uC via serial, inspecting feedback via serial (and additional log device).
+
+If ok, we name the function, and it gets added to the code library on the
+next build, but also it gets added to the uC in RAM.
+
+Ideally we want CFT to communicate directly with the uC, as well as modifying 
+the .hh and .cpp files for the project, so that it can be recompiled and deployed
+to get updated use of PROG_MEM.
+
+Both a base library and all application functions are created this way.
+
+>>>>>> EOF
+/Readme
+
+
+# Upper bits of 16 bit int
+# --
+	P(1,12553) => i
+	if (getType(i)=="String") i=i.parseInt
+	i.bin(16).first(8).parseInt(2)
+/High
+
+# Lower bits of 16 bit int
+# --
+	P(1,12553) => i
+	if (getType(i)=="String") i=i.parseInt
+	i.bin(16).parseInt(2)
+/Low
+
+
+# Ref object - represents a yet unresolved label
+# --
+	P(1) as String => label
+	
+	self.label=label
+/class Ref
+
+
+# Label object 
+# --
+	P(1) as String => label
+	
+	self.label=label
+/class Label
+
+
+
+# Generating the OpCodes function body from data (renumbering)
+# --
+<<< EOF
+	JMP  		| n n		|
+	ZJMP 		| n n		| JMP if zero
+	RETURN
+	EOF			|			| end-of-function
+	CALL 		| n n		| call defined function
+	PC			|			| get program counter
+	CSTACK		|			| call stack depth
+	STACK		|			| data stack depth
+	INT			| n n		| inline value, push on stack
+	LREAD		| n			| local variable read
+	LWRITE		| n			| local variable write
+	READ		| n n		| read byte from memory address
+	READ2		| n n		| read two bytes as int from memory address
+	WRITE		| n n		| write byte to memory address
+	WRITE2		| n	n		| write two bytes int to memory address
+	DUP
+	SWAP
+	POP
+	GT
+	LT
+	GE
+	LE
+	NE
+	EQ
+	AND
+	OR
+	NOT
+	ADD
+	SUB
+	MUL
+	DIV
+	MOD
+	LSHIFT	| n
+	RSHIFT	| n
+	BIN_AND
+	BIN_OR
+>>> EOF
+	=> data
+	
+	id=1
+	println("	Dict")
+	data->line
+		line.split("|") => parts
+		name=parts.first.trim
+		comment=""
+		if (parts.length >= 3) {
+			comment="  # " + (parts.nth(2).trim)
+		}
+		idStr=("          "+id).last(10)
+		s="'"+name+"',"
+		Inner {
+			loop
+				break(s.length % 15 == 0)
+				s=s+" "
+		}
+		println("		.set(" + s + idStr + ")" + comment)
+		id=id+1
+
+//CodeGen
+ 	
+# Op-codes - the definition
+# --
+    Dict
+        .set('JMP',                  1)
+        .set('ZJMP',                 2)  # JMP if zero
+        .set('RETURN',               3)
+        .set('EOF',                  4)  # end-of-function
+        .set('CALL',                 5)  # call defined function
+        .set('PC',                   6)  # get program counter
+        .set('CSTACK',               7)  # call stack depth
+        .set('STACK',                8)  # data stack depth
+        .set('INT',                  9)  # inline value, push on stack
+        .set('LREAD',               10)  # local variable read
+        .set('LWRITE',              11)  # local variable write
+        .set('READ',                12)  # read byte from memory address
+        .set('READ2',               13)  # read two bytes as int from memory address
+        .set('WRITE',               14)  # write byte to memory address
+        .set('WRITE2',              15)  # write two bytes int to memory address
+        .set('DUP',                 16)
+        .set('SWAP',                17)
+        .set('POP',                 18)
+        .set('GT',                  19)
+        .set('LT',                  20)
+        .set('GE',                  21)
+        .set('LE',                  22)
+        .set('NE',                  23)
+        .set('EQ',                  24)
+        .set('AND',                 25)
+        .set('OR',                  26)
+        .set('NOT',                 27)
+        .set('ADD',                 28)
+        .set('SUB',                 29)
+        .set('MUL',                 30)
+        .set('DIV',                 31)
+        .set('MOD',                 32)
+        .set('LSHIFT',              33)
+        .set('RSHIFT',              34)
+        .set('BIN_AND',             35)
+        .set('BIN_OR',              36)
+		
+/OpCodes
+
+
+
+
+# Output object contains of
+# - strings (comments)
+# - opcodes and data (bytes as int)
+# - Ref and Label objects
+#
+# Before generating binary output, Ref's must match up with Label's positions
+# in the code, completing those JMP's 
+# --
+	self.opCodes=OpCodes
+	
+	self.code=List
+		# Strings are comment, ints are code
+	
+	self.str=Lambda{
+		P(1) as String => s
+		self.code.add(s)
+	}
+	
+	self.ref=Lambda{
+		P(1) as &Ref => ref
+		self.code.add(ref)
+	}
+	
+	self.label=Lambda{
+		P(1) as &Label => label
+		self.code.add(label)
+	}
+	
+	self.bin=Lambda{
+		P(1) as int => i
+		self.code.add(i)
+	}
+	
+	self.op=Lambda{
+		P(1) as String => opName
+		error (!self.opCodes.has(opName),"Invalid opName " + opName)
+		i=self.opCodes.get(opName)
+		self.bin(i)
+	}
+		
+	self.show=Lambda{
+		self.code->x
+			x as? String => isString
+			x as? &Ref => isRef
+			x as? &Label => isLabel
+			x as? int => isInt
+
+			if (isString) {
+				println(x)
+			} else if (isRef) {
+				# ignore
+			} else if (isLabel) {
+				# ignore
+			} else if (isInt) {
+				println("   " + x)
+			} else {
+				error("Unexpected value in self.code: " + x)
+			}
+		|
+	}
+	
+	self.getBinary=Lambda{
+		# Step 1: resolve label positions
+		
+		byteCount=0
+		labels=Dict
+		self.code->x
+			x as? String => isString
+			x as? &Ref => isRef
+			x as? &Label => isLabel
+			x as? int => isInt
+			
+			if (isString) {
+				# ignore
+			} else if (isRef) {
+				byteCount=byteCount+2
+			} else if (isLabel) {
+				labels.set(x.label,byteCount)
+			} else if (isInt) {
+				byteCount=byteCount+1
+			} else {
+				error("Unexpected value in self.code: " + x)
+			}
+		|
+			
+		# Step 2: generate binary output
+		self.code->x
+			x as? String => isString
+			x as? &Ref => isRef
+			x as? &Label => isLabel
+			x as? int => isInt
+			
+			if (isString) {
+				# ignore
+			} else if (isRef) {
+				label=x.label
+				error(!labels.has(label),"No label " + label)
+				i=labels.get(label)
+				out(High(i))
+				out(Low(i))
+			} else if (isLabel) {
+				# ignore
+			} else if (isInt) {
+				out(x)
+			} else {
+				error("Unexpected value in self.code: " + x)
+			}
+	}
+		
+/class Output
+
+
+
+Util:ShowDict(Output,true)
+/h
+
+
+# Get unique id
+# --
+	Util:Counter(Sys.scriptId + "_counter", 1000)
+/id
+
+
+
+# context object for if conditional
+# --
+	P(1) as &Output => output
+	self.output=output
+	self.endLabel=":endIf_" + id
+	
+	self.output.str("ZJMP " + self.endLabel)
+	self.output.op("ZJMP")
+	self.output.ref(Ref(self.endLabel))
+	
+	self.close = Lambda {
+		self.output.str(self.endLabel)
+		self.output.label(Label(self.endLabel))
+	}
+/class CtxCond
+
+# context object for loop
+# --
+	P(1) as &Output => output
+	
+	self.output=output
+	self.loopLabel=":loop_start_" + id
+	self.endLabel=":loop_end_" + id
+	
+	self.output.str(self.loopLabel)
+	self.output.label(Label(self.loopLabel))
+	
+	self.condBreak = Lambda {
+		self.output.str("NOT ZJMP " + self.endLabel + " # break")
+		self.output.op("NOT")
+		self.output.op("ZJMP")
+		self.output.ref(Ref(self.endLabel))
+	}
+	self.close = Lambda {
+		self.output.str("JMP " + self.loopLabel)
+		self.output.op("JMP")
+		self.output.ref(Ref(self.loopLabel))
+		
+		self.output.str(self.endLabel)
+		self.output.label(Label(self.endLabel))
+	}
+/class CtxLoop
+
+
+
+# Zero-argument instructions
+# --
+	Dict
+		.set(">","GT")
+		.set("<","LT")
+		.set(">=","GE")
+		.set("<=","LE")
+		.set("!=","NE")
+		.set("==","EQ")
+		.set("+","ADD")
+		.set("-","SUB")
+		.set("*","MUL")
+		.set("-","DIV")
+		.set("%","MOD")
+		.set(":byte","TYPE_BYTE")
+		.set(":int","TYPE_INT")
+		.set(":?","TYPE_ANY")
+		.set("&&","AND")
+		.set("||","OR")
+		.set("&","BIT_AND")
+		.set("|","BIT_OR")
+		.set("!","NOT")
+		.set("dup","DUP")
+		.set("swap","SWAP")
+		.set("pop","POP")
+/Instr
+
+
+# Forth compiler
+# --
+	P(1,readLine("Enter code")) => line
+	P(2,Output) => output
+	
+	Lib:Header(line)
+	stack=Util:Stack
+	
+	instr=Instr
+	
+	localVariables=Dict
+		
+	line.split->part
+		if (part=="if{") {
+			stack.push(CtxCond(output))
+		} else if (part=="loop{") {
+			stack.push(CtxLoop(output))
+		} else if (part=="}") {
+			stack.pop.close
+		} else if (part=="break") {
+			ctx=stack.peek
+			ctx as? &CtxLoop => isLoop
+			if (isLoop) ctx.condBreak
+		} else if (part.startsWith("=")) {
+			name=part.sub(1)
+			output.str("LWRITE " + name)
+			pos=localVariables.keys.length
+			localVariables.set(name,pos)
+			output.op("LWRITE")
+			output.bin(pos)
+		} else {
+			ctx=stack.peek
+			ctx as? &CtxFunc => inFunc
+			
+			if (inFunc && !ctx.hasName) {
+				ctx.setName(part)
+				
+			} else if (localVariables.has(part)) {
+				output.str("LREAD " + part)
+				output.op("LREAD")
+				output.bin(localVariables.get(part))
+
+			} else if (instr.has(part)) {
+				opCode=instr.get(part)
+				output.str(opCode)
+				output.op(opCode)
+			
+			} else if (OpCodes.has(part)) {
+				output.str(part)
+				output.op(part)
+				
+			} else {
+				if (part.?parseInt) {
+					output.str("INT " + part)
+					output.op("INT")
+					i=part.parseInt
+					output.bin(High(i))
+					output.bin(Low(i))
+				} else {
+					output.str("CALL " + part + " # not implemented yet")
+					output.op("CALL")
+					output.bin(999)
+					output.bin(999)
+				}
+			}
+		}	
+	|
+	output.str("EOF (end-of-function)")
+	output.op("EOF")
+	output		
+/Compile	
+
+
+# Test compile
+# --
+	P(1,readLine("Enter code line")) => code
+	
+	Compile(code) => output
+	output.show
+	code=output.getBinary
+	println("CODE: " + code.concat(" "))
+	println("#bytes = " + code.length)
+	
+/test
+
+
+# Fixed code line
+# --
+	code = "=b =a a b + 10 < if{ a b doSomething }"
+	test(code)
+/t1
+
+
+# Fixed code line
+# --
+	code = "1 =i loop{ i 1 + dup =i 10 >= break }"
+	test(code)
+/t2
+
