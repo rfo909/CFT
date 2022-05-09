@@ -120,7 +120,7 @@ Both a base library and all application functions are created this way.
         .set('EQ',                  25)
         .set('AND',                 26)
         .set('OR',                  27)
-        .set('NOT',                 28)
+        .set('NOT',                 28)  # data - data    | binary invert bits
         .set('ADD',                 29)
         .set('SUB',                 30)
         .set('MUL',                 31)
@@ -128,8 +128,8 @@ Both a base library and all application functions are created this way.
         .set('MOD',                 33)
         .set('LSHIFT',              34)
         .set('RSHIFT',              35)
-        .set('BIN_AND',             36)
-        .set('BIN_OR',              37)
+        .set('BIT_AND',             36)
+        .set('BIT_OR',              37)
         .set('NEGATE',              38)  #  data - data    | invert number sign
 /OpCodes
 
@@ -217,9 +217,9 @@ Both a base library and all application functions are created this way.
 		
 			self.push7bit(c)   # c
 
-			#self.str("-> BIN_OR BIN_OR")
-			self.op("BIN_OR")
-			self.op("BIN_OR")
+			#self.str("-> BIT_OR BIT_OR")
+			self.op("BIT_OR")
+			self.op("BIT_OR")
 		}
 
 		if (inv) {
@@ -382,7 +382,7 @@ Util:ShowDict(Output,true)
 
 
 
-# Mapping internal functions to instructions
+# Mapping to instructions
 # --
 	Dict
 		.set(">","GT")
@@ -396,21 +396,20 @@ Util:ShowDict(Output,true)
 		.set("*","MUL")
 		.set("-","DIV")
 		.set("%","MOD")
-		.set(":byte","TYPE_BYTE")
-		.set(":int","TYPE_INT")
-		.set(":?","TYPE_ANY")
+#		.set(":byte","TYPE_BYTE")
+#		.set(":int","TYPE_INT")
+#		.set(":?","TYPE_ANY")
 		.set("&&","AND")
 		.set("||","OR")
-		.set("&","BIN_AND")
-		.set("|","BIN_OR")
-		.set("!","NOT")
+		.set("&","BIT_AND")
+		.set("|","BIT_OR")
+#		.set("!","NOT")
 		.set("<<","LSHIFT")
 		.set(">>","RSHIFT")
 	=>dict
 
-	# Allow instructions
+	# Allow instructions in lower case
 	OpCodes.keys->key
-		dict.set(key,key)
 		dict.set(key.toLower, key)
 	|
 	dict
@@ -493,9 +492,9 @@ Util:ShowDict(Output,true)
 				output.str(opCode)
 				output.op(opCode)
 			
-			} else if (OpCodes.has(part)) {
-				output.str(part)
-				output.op(part)
+			#} else if (OpCodes.has(part)) {
+			#	output.str(part)
+			#	output.op(part)
 				
 			} else {
 				if (part.?parseInt) {
@@ -565,7 +564,7 @@ Util:ShowDict(Output,true)
 
 # Fixed code line
 # --
-	code = "1 =i loop{ i 1 + DUP =i 10 >= break }"
+	code = "1 =i loop{ i 1 + dup =i 10 >= break }"
 	test(code)
 /t2
 
@@ -576,12 +575,38 @@ Util:ShowDict(Output,true)
 <<< EOF
 	1 7 << =SPIF
 	loop{
-		SPSR READ SPIF & break
+		SPSR read SPIF & break
 	}
 >>> EOF
 	-> line out(line.trim) | _.concat(" ") => code
 	run(code,"SPI_WAIT")
 /t3
+
+# Set bit in register
+# (reg mask - )
+# --
+<<< EOF
+	=mask =reg
+	reg read 
+		mask or 
+			reg write
+>>> EOF
+	-> line out(line.trim) | _.concat(" ") => code
+	run(code,"SET_BIT")
+/t4
+
+# Clear bit in register
+# (reg mask - )
+# --
+<<< EOF
+	=mask =reg
+	reg read 
+		mask not and
+			reg write
+>>> EOF
+	-> line out(line.trim) | _.concat(" ") => code
+	run(code,"CLR_BIT")
+/t5
 
 
 # Select compiled function by name
