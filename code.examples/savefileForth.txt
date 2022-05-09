@@ -101,6 +101,7 @@ Both a base library and all application functions are created this way.
         .set('CSTACK',               7)  #               | call stack depth
         .set('STACK',                8)  #               | data stack depth
 
+		.set('U14',					10)  # hi7 low7 - int | (hi7 << 7 | low7)
 
         .set('LREAD',               11)  #  pos - data   | local variable read
         .set('LWRITE',              12)  #  pos -        | local variable write
@@ -179,14 +180,23 @@ Both a base library and all application functions are created this way.
 		P(1) as int => i
 
 		inv=false
-		if (i<1) {
+		if (i<0) {
 			i=-i
 			inv=true
 		}
 
 		if (i<=127) {
 			self.push7bit(i)
+		} else if (i <= 16383) {
+			# 14 bits
+			digits=i.bin(14)
+			a=digits.first(7).parseInt(2)
+			b=digits.last(7).parseInt(2)
+			self.push7bit(a)
+			self.push7bit(b)
+			self.op("U14")
 		} else {
+			# full 16 bits
 			digits = i.bin(16)
 			a = digits.first(6).parseInt(2)
 			digits=digits.last(10)
@@ -272,7 +282,7 @@ Both a base library and all application functions are created this way.
 			if (isString) {
 				# ignore
 			} else if (isRef) {
-				byteCount=byteCount+2
+				byteCount=byteCount+3
 			} else if (isLabel) {
 				labels.set(x.label,byteCount)
 			} else if (isInt) {
@@ -283,6 +293,8 @@ Both a base library and all application functions are created this way.
 		|
 			
 		# Step 2: generate binary output
+		OpCodes.get("U14") => u14
+
 		self.code->x
 			x as? String => isString
 			x as? &Ref => isRef
@@ -295,8 +307,12 @@ Both a base library and all application functions are created this way.
 				label=x.label
 				error(!labels.has(label),"No label " + label)
 				i=labels.get(label)
-				out(High(i))
-				out(Low(i))
+				# 7+7 bits, each embedded in op-code starting with 1 ("PUSH")
+				("1" + i.bin(14).first(7)).parseInt(2) => op1
+				("1" + i.bin(7)).parseInt(2) => op2
+				out(op1)
+				out(op2)
+				out(u14)  # special instruction creating U14 integer from 2 x 7-bit bytes
 			} else if (isLabel) {
 				# ignore
 			} else if (isInt) {
@@ -390,6 +406,14 @@ Util:ShowDict(Output,true)
 		.set("!","NOT")
 		.set("<<","LSHIFT")
 		.set(">>","RSHIFT")
+	=>dict
+
+	# Allow instructions
+	OpCodes.keys->key
+		dict.set(key,key)
+		dict.set(key.toLower, key)
+	|
+	dict
 /Instr
 
 
@@ -455,13 +479,13 @@ Util:ShowDict(Output,true)
 			output.str("LWRITE " + name)
 			pos=localVariables.keys.length
 			localVariables.set(name,pos)
-			output.outInt(pos)
+			output.pushInt(pos)
 			output.op("LWRITE")
 		} else {
 
 			if (localVariables.has(part)) {
 				output.str("LREAD " + part)
-				output.outInt(localVariables.get(part))
+				output.pushInt(localVariables.get(part))
 				output.op("LREAD")
 
 			} else if (instr.has(part)) {
@@ -501,12 +525,13 @@ Util:ShowDict(Output,true)
 # --
 	P(1,readLine("Enter code line")) => code
 	
+	
 	Compile(code) => output
 	output.show
 	code=output.getBinary
 	println("#bytes = " + code.length)
 	
-	readLine("Enter function name, ENTER to abort").trim => fname
+	P(2,readLine("Enter function name, ENTER to abort")).trim => fname
 	if (fname != "") {
 		CompiledFunctions.add(fname,code)
 	}
@@ -547,17 +572,15 @@ Util:ShowDict(Output,true)
 # Advanced example
 # --
 
-# Wait for SPI_READY bit 
+# Wait for SPI_READY bit (19.5.2)
 <<< EOF
-	12 =SPI_REG
-	4 =SPI_READY
-	1 SPI_READY << =mask
+	1 7 << =SPIF
 	loop{
-		SPI_REG READ mask & break
+		SPSR READ SPIF & break
 	}
 >>> EOF
 	-> line out(line.trim) | _.concat(" ") => code
-	test(code)
+	run(code,"SPI_WAIT")
 /t3
 
 
@@ -586,15 +609,15 @@ Util:ShowDict(Output,true)
 
 	loop
 		instr=data.nth(pos)
-		println("instr=" + instr)
+		#println("instr=" + instr)
 		if (instr.bin(8).startsWith("1")) {
 			instr.bin(7) => bin
 			report(pos,"PUSH",bin)
-			println(""+pos + ": PUSH " + bin)
+			#println(""+pos + ": PUSH " + bin)
 		} else {
 			opcode=dict.get(""+instr)
-			report(opcode)
-			println(opcode)
+			report(pos,opcode)
+			#println(opcode)
 		}
 		break(instr==4)  # EOF
 		pos=pos+1
@@ -612,3 +635,165 @@ Util:ShowDict(Output,true)
 # Implementing this in Output.pushInt(), and extending byte count for REF to 3.
 # 
 # Nice not to use opcode 0, as it detects bad number processing!
+
+
+
+
+
+
+
+# ----------------
+
+
+# atmega328p registers
+# --
+
+# Note add offset 0x20
+<<< EOF
+
+03 PINB
+04 DDRB
+05 PORTB
+
+06 PINC
+07 DDRC
+08 PORTC
+
+09 PIND
+0A DDRD
+0B PORTD
+
+16 TIFR1
+17 TIFR2
+
+1B PCIFR
+1C EIFR
+1D EIMSK
+1E GPIOR0
+1F EECR
+20 EEDR
+21 EEARL
+22 EEARH
+23 GTCCR
+
+24 TCCR0A
+25 TCCR0B
+26 TCNT0
+
+27 OCR0A
+28 OCR0B
+
+2A GPIOR1
+2B GPIOR2
+
+2C SPCR
+2D SPSR
+2D SPDR
+30 ACSR
+33 SMCR
+
+34 MCUSR
+35 MCUCR
+37 SPMCSR
+3D SPL
+3D SPH
+
+60 WDTSCR
+61 CLKPR
+64 PRR
+66 OSCCAL
+68 PCICR
+69 EICRA
+6B PCMSK0
+6C PCMSK1
+6D PCMSK2
+6E TIMSK0
+6F TIMSK1
+70 TIMSK2
+
+78 ADCL
+79 ADCH
+7A ADCSRA
+7B ADSCRB
+7C ADMUX
+
+7E DIDR0
+7F DIDR1
+80 TCCR1A
+81 TCCR1B
+82 TCCR1C
+84 TCNT1L
+85 TCNT1H
+86 ICR1L
+87 ICR1H
+88 OCR1AL
+89 OCR1AH
+8A OCR1BL
+8B OCR1BH
+
+B0 TCCR2A
+B1 TCCR2B
+B2 TCNT2
+B3 OCR2A
+B4 OCR2B
+
+B6 ASSR
+
+B8 TWBR
+B9 TWSR
+BA TWAR
+BB TWDR
+BC TWCR
+BD TWAMR
+
+C0 UCSR0A
+C1 UCSR0B
+C2 UCSR0C
+
+C4 UBRR0L
+C5 UBRR0H
+C6 UDR0
+
+>>>> EOF
+	=> lines
+
+	dict=Dict # checking against duplicates
+	lines->line
+		reject(line.trim=="")
+		line.split.first.parseInt(16) => addr
+		if (addr < "60".parseInt(16)) { addr=addr+"20".parseInt(16) }
+
+		line.split.last => name
+		error(dict.has(name), "Duplicate: " + name)
+		dict.set(name,1)
+
+		Forth:run(""+addr, name)|
+/atmega328p_reg
+
+
+# Init atmega328p
+# --
+	CompiledFunctions.clear
+
+	# R* general registers
+	Lib.Data.each(0,31)->x
+		Forth:run(""+x,"R"+x)
+	|
+
+	# System registers
+	atmega328p_reg
+
+	# XYZ registers
+	Forth:run("R26","XL")
+	Forth:run("R27","XH")
+	Forth:run("R28","YL")
+	Forth:run("R29","YH")
+	Forth:run("R30","ZL")
+	Forth:run("R31","ZH")
+
+	Lib:Header("SUMMARY")
+	println("Code space: " + CompiledFunctions.data.length)
+	println("Func names: " + (CompiledFunctions.dict.keys.concat.length) + " chars")
+	println("Num functions: " + (CompiledFunctions.list.length))
+
+/init328
