@@ -61,109 +61,78 @@ Both a base library and all application functions are created this way.
 
 
 
-# Generating the OpCodes function body from data (renumbering)
-# --
-<<< EOF
-	JMP  		| n n		|
-	ZJMP 		| n n		| JMP if zero
-	RETURN
-	EOF			|			| end-of-function
-	CALL 		| n n		| call defined function
-	PC			|			| get program counter
-	CSTACK		|			| call stack depth
-	STACK		|			| data stack depth
-	INT			| n n		| inline value, push on stack
-	LREAD		| n			| local variable read
-	LWRITE		| n			| local variable write
-	READ		| n n		| read byte from memory address
-	READ2		| n n		| read two bytes as int from memory address
-	WRITE		| n n		| write byte to memory address
-	WRITE2		| n	n		| write two bytes int to memory address
-	DUP
-	SWAP
-	POP
-	GT
-	LT
-	GE
-	LE
-	NE
-	EQ
-	AND
-	OR
-	NOT
-	ADD
-	SUB
-	MUL
-	DIV
-	MOD
-	LSHIFT	| n
-	RSHIFT	| n
-	BIN_AND
-	BIN_OR
->>> EOF
-	=> data
-	
-	id=1
-	println("	Dict")
-	data->line
-		line.split("|") => parts
-		name=parts.first.trim
-		comment=""
-		if (parts.length >= 3) {
-			comment="  # " + (parts.nth(2).trim)
-		}
-		idStr=("          "+id).last(10)
-		s="'"+name+"',"
-		Inner {
-			loop
-				break(s.length % 15 == 0)
-				s=s+" "
-		}
-		println("		.set(" + s + idStr + ")" + comment)
-		id=id+1
 
-//CodeGen
  	
 # Op-codes - the definition
+# Each op-code is 1 byte.
+#
+# The PUSH command takes in-op-code 7 bit value and pushes it on the stack.
+# It is the only OP-code that starts with a 1-bit.
+# 
+# Compiler must build code. Using (n) notation for values inside OP-code
+#
+# Example: push -0xFFFF (invalid sign, but worst case)
+#
+# PUSH(0x7F) 
+# PUSH(1) 
+# LSHIFT  
+# PUSH(1) 
+# ADD 
+# PUSH(8)
+# LSHIFT # got "high byte" of int
+# PUSH(0x7F) 
+# PUSH(1) 
+# LSHIFT
+# PUSH(1) 
+# ADD  # "low byte"
+# BIT_OR
+# INV_SIGN # flip sign
+
+# A total of max 14 instructions
+
 # --
     Dict
         .set('JMP',                  1)
-        .set('ZJMP',                 2)  # JMP if zero
+        .set('ZJMP',                 2)  #  cond addr -		| JMP if zero
         .set('RETURN',               3)
-        .set('EOF',                  4)  # end-of-function
-        .set('CALL',                 5)  # call defined function
-        .set('PC',                   6)  # get program counter
-        .set('CSTACK',               7)  # call stack depth
-        .set('STACK',                8)  # data stack depth
-        .set('INT',                  9)  # inline value, push on stack
-        .set('LREAD',               10)  # local variable read
-        .set('LWRITE',              11)  # local variable write
-        .set('READ',                12)  # read byte from memory address
-        .set('READ2',               13)  # read two bytes as int from memory address
-        .set('WRITE',               14)  # write byte to memory address
-        .set('WRITE2',              15)  # write two bytes int to memory address
-        .set('DUP',                 16)
-        .set('SWAP',                17)
-        .set('POP',                 18)
-        .set('GT',                  19)
-        .set('LT',                  20)
-        .set('GE',                  21)
-        .set('LE',                  22)
-        .set('NE',                  23)
-        .set('EQ',                  24)
-        .set('AND',                 25)
-        .set('OR',                  26)
-        .set('NOT',                 27)
-        .set('ADD',                 28)
-        .set('SUB',                 29)
-        .set('MUL',                 30)
-        .set('DIV',                 31)
-        .set('MOD',                 32)
-        .set('LSHIFT',              33)
-        .set('RSHIFT',              34)
-        .set('BIN_AND',             35)
-        .set('BIN_OR',              36)
-		
+        .set('EOF',                  4)  #               	| end-of-function
+        .set('CALL',                 5)  #  addr            | call defined function
+        .set('PC',                   6)  #               | get program counter
+        .set('CSTACK',               7)  #               | call stack depth
+        .set('STACK',                8)  #               | data stack depth
+
+
+        .set('LREAD',               11)  #  pos - data   | local variable read
+        .set('LWRITE',              12)  #  pos -        | local variable write
+        .set('READ',                13)  #  addr - data    | read byte from memory address
+        .set('READ2',               14)  #  addr - data    | read two bytes as int from memory address
+        .set('WRITE',               15)  #  data addr -    | write byte to memory address
+        .set('WRITE2',              16)  #  data addr -    | write two bytes int to memory address
+        .set('DUP',                 17)
+        .set('SWAP',                18)
+        .set('POP',                 19)
+        .set('GT',                  20)
+        .set('LT',                  21)
+        .set('GE',                  22)
+        .set('LE',                  23)
+        .set('NE',                  24)
+        .set('EQ',                  25)
+        .set('AND',                 26)
+        .set('OR',                  27)
+        .set('NOT',                 28)
+        .set('ADD',                 29)
+        .set('SUB',                 30)
+        .set('MUL',                 31)
+        .set('DIV',                 32)
+        .set('MOD',                 33)
+        .set('LSHIFT',              34)
+        .set('RSHIFT',              35)
+        .set('BIN_AND',             36)
+        .set('BIN_OR',              37)
+        .set('NEGATE',              38)  #  data - data    | invert number sign
+
+
+		#.set('PUSH',				127) # the last 7 bits are data
 /OpCodes
 
 
@@ -208,6 +177,57 @@ Both a base library and all application functions are created this way.
 		i=self.opCodes.get(opName)
 		self.bin(i)
 	}
+
+	self.pushInt=Lambda{
+		P(1) as int => i
+
+		inv=false
+		if (i<1) {
+			i=-i
+			inv=true
+		}
+
+		if (i<=127) {
+			self.push7bit(i)
+		} else {
+			digits = i.bin(16)
+			a = digits.first(6).parseInt(2)
+			digits=digits.last(10)
+			b = digits.first(5).parseInt(2)
+			c = digits.last(5).parseInt(2)
+			
+			self.push7bit(a)
+
+			#self.str("-> LSHIFT(10)")
+			self.push7bit(10)
+			self.op("LSHIFT") # a
+
+			self.push7bit(b)
+
+			#self.str("-> LSHIFT(5)")
+			self.push7bit(5)
+			self.op("LSHIFT") # b
+		
+			self.push7bit(c)   # c
+
+			#self.str("-> BIN_OR BIN_OR")
+			self.op("BIN_OR")
+			self.op("BIN_OR")
+		}
+
+		if (inv) {
+			self.op("NEGATE")
+		}
+	}
+
+	self.push7bit=Lambda{
+		P(1) as int => i
+		
+		#self.str("PUSH("+i + "=" + i.bin(8) + ")")
+		digits="1"+(i.bin(8).last(7))
+		# self.str("-> OP=" + digits)
+		self.bin(digits.parseInt(2))
+	}
 		
 	self.show=Lambda{
 		self.code->x
@@ -223,13 +243,21 @@ Both a base library and all application functions are created this way.
 			} else if (isLabel) {
 				# ignore
 			} else if (isInt) {
-				println("   " + x)
+				s=("   " + x).last(3)
+				bin=x.bin(8)
+				if (bin.first(1) == "0") {
+					bin=""
+				} else {
+					bin="  " + bin
+				}
+				println("   " + s + bin)
 			} else {
 				error("Unexpected value in self.code: " + x)
 			}
 		|
+
 	}
-	
+
 	self.getBinary=Lambda{
 		# Step 1: resolve label positions
 		
@@ -386,6 +414,14 @@ Util:ShowDict(Output,true)
 		P(1) as String => name
 		if (self.dict.has(name), self.dict.get(name), null)
 	}
+	self.list = Lambda {
+		self.dict.keys
+	}
+	self.clear = Lambda {
+		self.data=List
+		self.dict=Dict
+		self.save
+	}
 /class CompiledFunctions
 	
 
@@ -440,19 +476,16 @@ Util:ShowDict(Output,true)
 				
 			} else {
 				if (part.?parseInt) {
-					output.str("INT " + part)
-					output.op("INT")
-					i=part.parseInt
-					output.bin(High(i))
-					output.bin(Low(i))
+					output.str("PUSH " + part)
+					output.pushInt(part.parseInt)
 				} else {
 					pos=compiledFunctions.lookup(part)
-					error(pos=null,"Unknown function: " + part)
-					output.str("CALL " + part)
-					output.op("CALL")
+					error(pos==null,"Unknown function: " + part)
+					output.str("CALL " + part + " (pos=" + pos + ")")
+					output.str("->PUSH " + pos)
+					output.pushInt(pos)
 					
-					output.bin(High(pos))
-					output.bin(Low(pos))
+					output.op("CALL")
 				}
 			}
 		}	
@@ -463,7 +496,9 @@ Util:ShowDict(Output,true)
 /Compile	
 
 
-# Test compile
+
+
+# Enter and run code, optionally naming it a function
 # --
 	P(1,readLine("Enter code line")) => code
 	
@@ -477,7 +512,13 @@ Util:ShowDict(Output,true)
 		CompiledFunctions.add(fname,code)
 	}
 	
-/test
+/run
+
+
+# Show functions
+# --
+	CompiledFunctions.list
+/list
 
 
 # Fixed code line
