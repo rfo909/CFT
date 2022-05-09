@@ -366,17 +366,41 @@ Util:ShowDict(Output,true)
 /Instr
 
 
+# PROGMEM compiled functions
+# --
+	self.data=Db2:Get(Sys.scriptId,"data",List)
+	self.dict=Db2:Get(Sys.scriptId,"dict",Dict)
+
+	self.add = Lambda{
+		P(1) as String => name
+		P(2) as List => code
+		self.dict.set(name, self.data.length)
+		self.data=self.data + code
+		self.save
+	}
+	self.save = Lambda {
+		Db2:Set(Sys.scriptId,"data",self.data)
+		Db2:Set(Sys.scriptId,"dict",self.dict)
+	}
+	self.lookup = Lambda {
+		P(1) as String => name
+		if (self.dict.has(name), self.dict.get(name), null)
+	}
+/class CompiledFunctions
+	
+
 # Forth compiler
 # --
 	P(1,readLine("Enter code")) => line
 	P(2,Output) => output
 	
 	Lib:Header(line)
-	stack=Util:Stack
+	stack=Util:Stack   # context stack, for nested if's and loops
 	
 	instr=Instr
 	
 	localVariables=Dict
+	compiledFunctions=CompiledFunctions
 		
 	line.split->part
 		if (part=="if{") {
@@ -384,7 +408,9 @@ Util:ShowDict(Output,true)
 		} else if (part=="loop{") {
 			stack.push(CtxLoop(output))
 		} else if (part=="}") {
-			stack.pop.close
+			ctx=stack.pop
+			error(ctx==null,"no current context: '}'")
+			ctx.close
 		} else if (part=="break") {
 			ctx=stack.peek
 			ctx as? &CtxLoop => isLoop
@@ -397,13 +423,8 @@ Util:ShowDict(Output,true)
 			output.op("LWRITE")
 			output.bin(pos)
 		} else {
-			ctx=stack.peek
-			ctx as? &CtxFunc => inFunc
-			
-			if (inFunc && !ctx.hasName) {
-				ctx.setName(part)
-				
-			} else if (localVariables.has(part)) {
+
+			if (localVariables.has(part)) {
 				output.str("LREAD " + part)
 				output.op("LREAD")
 				output.bin(localVariables.get(part))
@@ -425,10 +446,13 @@ Util:ShowDict(Output,true)
 					output.bin(High(i))
 					output.bin(Low(i))
 				} else {
-					output.str("CALL " + part + " # not implemented yet")
+					pos=compiledFunctions.lookup(part)
+					error(pos=null,"Unknown function: " + part)
+					output.str("CALL " + part)
 					output.op("CALL")
-					output.bin(999)
-					output.bin(999)
+					
+					output.bin(High(pos))
+					output.bin(Low(pos))
 				}
 			}
 		}	
@@ -446,8 +470,12 @@ Util:ShowDict(Output,true)
 	Compile(code) => output
 	output.show
 	code=output.getBinary
-	println("CODE: " + code.concat(" "))
 	println("#bytes = " + code.length)
+	
+	readLine("Enter function name, ENTER to abort").trim => fname
+	if (fname != "") {
+		CompiledFunctions.add(fname,code)
+	}
 	
 /test
 
