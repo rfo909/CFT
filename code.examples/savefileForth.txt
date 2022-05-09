@@ -130,9 +130,6 @@ Both a base library and all application functions are created this way.
         .set('BIN_AND',             36)
         .set('BIN_OR',              37)
         .set('NEGATE',              38)  #  data - data    | invert number sign
-
-
-		#.set('PUSH',				127) # the last 7 bits are data
 /OpCodes
 
 
@@ -230,6 +227,7 @@ Both a base library and all application functions are created this way.
 	}
 		
 	self.show=Lambda{
+		P(1,true) as boolean => includeBinary
 		self.code->x
 			x as? String => isString
 			x as? &Ref => isRef
@@ -243,14 +241,16 @@ Both a base library and all application functions are created this way.
 			} else if (isLabel) {
 				# ignore
 			} else if (isInt) {
-				s=("   " + x).last(3)
-				bin=x.bin(8)
-				if (bin.first(1) == "0") {
-					bin=""
-				} else {
-					bin="  " + bin
+				if (includeBinary) {
+					s=("   " + x).last(3)
+					bin=x.bin(8)
+					if (bin.first(1) == "0") {
+						bin=""
+					} else {
+						bin="  " + bin
+					}
+					println("   " + s + bin)
 				}
-				println("   " + s + bin)
 			} else {
 				error("Unexpected value in self.code: " + x)
 			}
@@ -328,8 +328,8 @@ Util:ShowDict(Output,true)
 	self.endLabel=":endIf_" + id
 	
 	self.output.str("ZJMP " + self.endLabel)
-	self.output.op("ZJMP")
 	self.output.ref(Ref(self.endLabel))
+	self.output.op("ZJMP")
 	
 	self.close = Lambda {
 		self.output.str(self.endLabel)
@@ -366,7 +366,7 @@ Util:ShowDict(Output,true)
 
 
 
-# Zero-argument instructions
+# Mapping internal functions to instructions
 # --
 	Dict
 		.set(">","GT")
@@ -385,12 +385,11 @@ Util:ShowDict(Output,true)
 		.set(":?","TYPE_ANY")
 		.set("&&","AND")
 		.set("||","OR")
-		.set("&","BIT_AND")
-		.set("|","BIT_OR")
+		.set("&","BIN_AND")
+		.set("|","BIN_OR")
 		.set("!","NOT")
-		.set("dup","DUP")
-		.set("swap","SWAP")
-		.set("pop","POP")
+		.set("<<","LSHIFT")
+		.set(">>","RSHIFT")
 /Instr
 
 
@@ -456,14 +455,14 @@ Util:ShowDict(Output,true)
 			output.str("LWRITE " + name)
 			pos=localVariables.keys.length
 			localVariables.set(name,pos)
+			output.outInt(pos)
 			output.op("LWRITE")
-			output.bin(pos)
 		} else {
 
 			if (localVariables.has(part)) {
 				output.str("LREAD " + part)
+				output.outInt(localVariables.get(part))
 				output.op("LREAD")
-				output.bin(localVariables.get(part))
 
 			} else if (instr.has(part)) {
 				opCode=instr.get(part)
@@ -515,6 +514,17 @@ Util:ShowDict(Output,true)
 /run
 
 
+# Test compilation only
+# --
+	P(1,readLine("Enter code line")) => code
+	
+	Compile(code) => output
+	output.show(false)
+	println
+	println("### Number of bytes: " + output.getBinary.length)
+/test
+
+
 # Show functions
 # --
 	CompiledFunctions.list
@@ -530,7 +540,75 @@ Util:ShowDict(Output,true)
 
 # Fixed code line
 # --
-	code = "1 =i loop{ i 1 + dup =i 10 >= break }"
+	code = "1 =i loop{ i 1 + DUP =i 10 >= break }"
 	test(code)
 /t2
 
+# Advanced example
+# --
+
+# Wait for SPI_READY bit 
+<<< EOF
+	12 =SPI_REG
+	4 =SPI_READY
+	1 SPI_READY << =mask
+	loop{
+		SPI_REG READ mask & break
+	}
+>>> EOF
+	-> line out(line.trim) | _.concat(" ") => code
+	test(code)
+/t3
+
+
+# Select compiled function by name
+# --
+	Lib:MenuSelect(CompiledFunctions.list, null, "Select function")
+//SelectCompiledFunction
+
+
+# Disassemble
+# --
+	P(1,SelectCompiledFunction) => funcName
+	CompiledFunctions => cfunc
+	cfunc.lookup(funcName) => pos
+	cfunc.data => data
+
+	# reverse the OpCodes dict to map from int to code
+	dict=Dict
+	opc=OpCodes
+	Inner {
+		opc.keys->key
+			val=""+opc.get(key)
+			dict.set(val,key)
+	}
+	
+
+	loop
+		instr=data.nth(pos)
+		println("instr=" + instr)
+		if (instr.bin(8).startsWith("1")) {
+			instr.bin(7) => bin
+			report(pos,"PUSH",bin)
+			println(""+pos + ": PUSH " + bin)
+		} else {
+			opcode=dict.get(""+instr)
+			report(opcode)
+			println(opcode)
+		}
+		break(instr==4)  # EOF
+		pos=pos+1
+/dis
+
+
+# Disassembler reveals JMP's (Labels and Refs) is broken, as the patching of
+# Label positions into corresponding Ref's assumes two data bytes. We need
+# to encode these as 
+#
+#	PUSH upper-7-bits
+#   PUSH lower-7-bits
+#   U14   # combine the two into U14 for JUMPS
+#
+# Implementing this in Output.pushInt(), and extending byte count for REF to 3.
+# 
+# Nice not to use opcode 0, as it detects bad number processing!
