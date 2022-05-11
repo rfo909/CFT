@@ -662,88 +662,101 @@ Util:ShowDict(Output,true)
 # Nice not to use opcode 0, as it detects bad number processing!
 
 
-
-
-
-
-
 # ----------------
 
 
 # atmega328p registers
 # --
-
-# Note add offset 0x20
 <<< EOF
+00 R0
+01 R1
+02 R2
+03 R3
+04 R4
+05 R5
+06 R6
+07 R7
+08 R8
+09 R9
+0a R10
+0b R11
+0c R12
+0d R13
+0e R14
+0f R15
+10 R16
+11 R17
+12 R18
+13 R19
+14 R20
+15 R21
+16 R22
+17 R23
+18 R24
+19 R25
+1a R26
+1b R27
+1c R28
+1d R29
+1e R30
+1f R31
 
-03 PINB
-04 DDRB
-05 PORTB
-
-06 PINC
-07 DDRC
-08 PORTC
-
-09 PIND
-0A DDRD
-0B PORTD
-
-16 TIFR1
-17 TIFR2
-
-1B PCIFR
-1C EIFR
-1D EIMSK
-1E GPIOR0
-1F EECR
-20 EEDR
-21 EEARL
-22 EEARH
-23 GTCCR
-
-24 TCCR0A
-25 TCCR0B
-26 TCNT0
-
-27 OCR0A
-28 OCR0B
-
-2A GPIOR1
-2B GPIOR2
-
-2C SPCR
-2D SPSR
-2D SPDR
-30 ACSR
-33 SMCR
-
-34 MCUSR
-35 MCUCR
-37 SPMCSR
-3D SPL
-3D SPH
-
+23 PINB
+24 DDRB
+25 PORTB
+26 PINC
+27 DDRC
+28 PORTC
+29 PIND
+2a DDRD
+2b PORTD
+36 TIFR1
+37 TIFR2
+3b PCIFR
+3c EIFR
+3d EIMSK
+3e GPIOR0
+3f EECR
+40 EEDR
+41 EEARL
+42 EEARH
+43 GTCCR
+44 TCCR0A
+45 TCCR0B
+46 TCNT0
+47 OCR0A
+48 OCR0B
+4a GPIOR1
+4b GPIOR2
+4c SPCR
+4d SPSR
+4d SPDR
+50 ACSR
+53 SMCR
+54 MCUSR
+55 MCUCR
+57 SPMCSR
+5d SPL
+5d SPH
 60 WDTSCR
 61 CLKPR
 64 PRR
 66 OSCCAL
 68 PCICR
 69 EICRA
-6B PCMSK0
-6C PCMSK1
-6D PCMSK2
-6E TIMSK0
-6F TIMSK1
+6b PCMSK0
+6c PCMSK1
+6d PCMSK2
+6e TIMSK0
+6f TIMSK1
 70 TIMSK2
-
 78 ADCL
 79 ADCH
-7A ADCSRA
-7B ADSCRB
-7C ADMUX
-
-7E DIDR0
-7F DIDR1
+7a ADCSRA
+7b ADSCRB
+7c ADMUX
+7e DIDR0
+7f DIDR1
 80 TCCR1A
 81 TCCR1B
 82 TCCR1C
@@ -753,32 +766,26 @@ Util:ShowDict(Output,true)
 87 ICR1H
 88 OCR1AL
 89 OCR1AH
-8A OCR1BL
-8B OCR1BH
-
-B0 TCCR2A
-B1 TCCR2B
-B2 TCNT2
-B3 OCR2A
-B4 OCR2B
-
-B6 ASSR
-
-B8 TWBR
-B9 TWSR
-BA TWAR
-BB TWDR
-BC TWCR
-BD TWAMR
-
-C0 UCSR0A
-C1 UCSR0B
-C2 UCSR0C
-
-C4 UBRR0L
-C5 UBRR0H
-C6 UDR0
-
+8a OCR1BL
+8b OCR1BH
+b0 TCCR2A
+b1 TCCR2B
+b2 TCNT2
+b3 OCR2A
+b4 OCR2B
+b6 ASSR
+b8 TWBR
+b9 TWSR
+ba TWAR
+bb TWDR
+bc TWCR
+bd TWAMR
+c0 UCSR0A
+c1 UCSR0B
+c2 UCSR0C
+c4 UBRR0L
+c5 UBRR0H
+c6 UDR0
 >>>> EOF
 	=> lines
 
@@ -786,27 +793,21 @@ C6 UDR0
 	lines->line
 		reject(line.trim=="")
 		line.split.first.parseInt(16) => addr
-		if (addr < "60".parseInt(16)) { addr=addr+"20".parseInt(16) }
-
 		line.split.last => name
+
 		error(dict.has(name), "Duplicate: " + name)
 		dict.set(name,1)
 
-		Forth:run(""+addr, name)|
-/atmega328p_reg
+		Forth:run(""+addr, name)
+/registers
 
 
 # Init atmega328p
 # --
 	CompiledFunctions.clear
 
-	# R* general registers
-	Lib.Data.each(0,31)->x
-		Forth:run(""+x,"R"+x)
-	|
-
 	# System registers
-	atmega328p_reg
+	registers
 
 	# XYZ registers
 	Forth:run("R26","XL")
