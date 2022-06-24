@@ -227,6 +227,7 @@ just add a second "Dir:" line.
     # 
     dirs->dirName
         fileGlobs->glob
+			assert(Dir(dirName).exists)
             Dir(dirName).allFiles(glob)->f 
                 assert(pathOk.call(f.path, dirIgnores))
                 assert(fileOk.call(f,fileIgnores))
