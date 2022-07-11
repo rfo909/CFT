@@ -1,0 +1,44 @@
+# Pinout / breadboard Arduino Nano Classic / Every
+# --
+<<<<< EOF
+                                
+                            USB                             
+SCK/D13                       o  X  o                     D12/MISO
+3V3                           o  X  o                     ~D11/MOSI
+AREF                          o  X  o                     ~D10/SS
+A0/D14                        o  X  o                     ~D9
+A1/D15                        o  X  o                     D8 
+A2/D16                        o  X  o                     D7 
+A3/D17                        o  X  o                     ~D6 
+SDA/A4/D18                    o  X  o                     ~D5 
+SCL/A5/D19                    o  X  o                      D4 
+A6/D20                        o  X  o                      ~D3 
+A7/D21                        o  X  o                      D2
++5V                           o  X  o                      GND
+RST                           o  X  o                      RST 
+GND                           o  X  o                      RX
+VIn                           o  X  o                      TX 
+                                                            
+                                                            
+                                                            
+                                                            
+                                                            
+                                                            
+                              o  X  o                                  
+                              o  X  o                                  
+                              o  X  o                                  
+                              o  X  o                                  
+                              o  X  o                                  
+                              o  X  o                                  
+                              o  X  o                                  
+                              o  X  o                                  
+                              o  X  o                                  
+                              o  X  o                                  
+                                                            
+                                                            
+                                                            
+                                                            
+                                                            
+                                                            
+>>>> EOF
+/Nano
