@@ -58,19 +58,6 @@
 				report(line.file.name, line.lineNumber, line)
 	/S
 
-.h FUNC PARAMS
-
-	P(1) => a
-	P(2) => b
-	a+b
-	/sum
-
-	P(1,readLine("Value a").parseInt) => a
-	P(2,readLine("Value b").parseInt) => b
-	a+b
-	/sum
-
-
 .h HELP
 
 	help
@@ -88,13 +75,20 @@
 	:
 	@
 
-	
+	# List scripts
+	@scr
+
+	# Show script functions
+	?Lib:
+	?Lib:TmpDir
 
 
 .h Loops
 
     # Iterate over content
     # Filter and modify
+
+	List(1,2,3)->x out(x+10)
 
 	# Show files updated last 24 hours
 	# --
@@ -114,21 +108,21 @@
 	/javaLines
 
 
-.h Threads
 
-	:load Test
-	cd \
-	cd prosjekter
-	cd stas_platform
-	& newFiles
+.h FUNC PARAMS
 
-	cd ..
-	cd mvrs_project
-	& newFiles, "mvrs"
+	P(1) => a
+	P(2) => b
+	a+b
+	/sum
 
-	@J
-	@JJ
-	
+	P(1,readLine("Value a").parseInt) => a
+	P(2,readLine("Value b").parseInt) => b
+	a+b
+	/sum
+
+
+
 
 .h Shell
 
@@ -147,7 +141,6 @@
 
     !dir
     shell
-
 
 
 
@@ -170,25 +163,6 @@
 
 
 
-.h Templates
-
-    :save Demo
-    @e
-    
-    # Create notification
-    # --
-        P(1,"MyCollection") => collection
-        P(2,readLine("Field"))=>field
-        P(3,readLine("Value")) => value
-
-        Sequence(
-            @ printjson(
-            @   db.<<collection>>.find(
-            @     {"<<field>>": "<<value>>"}
-            @   ).count()
-            @ )
-        ).mergeExpr
-    /MongoCount
 
 
 .h Run programs
@@ -196,6 +170,12 @@
 	Dir.run("cmd","/c","git","status")
 	
 	Dir.runCapture("cmd","/c","dir")
+
+	@scr
+	?PS:
+	?PS:GetService
+	?PS:CallInt
+	
 
 
 
@@ -216,7 +196,7 @@
         println(Curses:Clear)
         Inner {
             Letters7x5:GetText(line.sub(2).trim.toUpper)->line 
-				str=line.replace("#","O")
+				str=line #.replace("#","O")
 				println(Curses:TxtGreen + str + Curses:Reset)
             |
             println
