@@ -49,25 +49,29 @@
 
 	@e
 
-	# Search
-	# --
-		Input("Enter search term").get => term
-		grep=Grep(term)
-		Dir.allFiles("*.java")+Dir.allFiles("*.txt")->f
-			grep.file(f) -> line
-				report(line.file.name, line.lineNumber, line)
-	/S
+	3.14
+	/pi
+
+
+
 
 .h HELP
 
+	# List functions in current script
+	?
+
+	# Show function code
+	?two
+
+	# Global functions
 	help
 
+	# Object functions
 	Dir help
-
 	Dir.files help
-
 	Dir.files.first help
 
+	# Expressions and statements
 	_Expr
 	_Stmt
 
@@ -78,29 +82,16 @@
 	# List scripts
 	@scr
 
-	# Show script functions
+	# Show details of another script
 	?Lib:
 	?Lib:TmpDir
 
 
 .h Loops
 
-    # Iterate over content
-    # Filter and modify
+    # Iterate over content, filter or modify
 
 	List(1,2,3)->x out(x+10)
-
-	# Show files updated last 24 hours
-	# --
-		Dir.allFiles->f 
-			assert(currentTimeMillis - f.lastModified < 24*3600*1000)
-			out(f.path)
-	/newFiles
-
-	# Shortcut
-	# --
-		newFiles
-	/nf
 
 	# Count number of lines of java
 	# --
@@ -111,16 +102,19 @@
 
 .h FUNC PARAMS
 
-	P(1) => a
-	P(2) => b
-	a+b
+	# Simple example
+	# --
+		P(1) => a
+		P(2) => b
+		a+b
 	/sum
 
-	P(1,readLine("Value a").parseInt) => a
-	P(2,readLine("Value b").parseInt) => b
-	a+b
+	# Defaults
+	# --
+		P(1,readLine("Value a").parseInt) => a
+		P(2,readLine("Value b").parseInt) => b
+		a+b
 	/sum
-
 
 
 
@@ -165,17 +159,20 @@
 
 
 
-.h Run programs
+.h Ext. programs
 
 	Dir.run("cmd","/c","git","status")
-	
-	Dir.runCapture("cmd","/c","dir")
+	Dir.run("powershell","git","status")
 
-	@scr
-	?PS:
-	?PS:GetService
-	?PS:CallInt
-	
+	Lib:run(List("powershell","ls")
+	/x
+
+	Util:ShowDict(x)
+	x.stdin
+	x.stdout
+	x.exitCode
+
+
 
 
 
