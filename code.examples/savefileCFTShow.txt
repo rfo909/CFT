@@ -20,17 +20,24 @@
 /License
 
 <<<<< TEXT
-.h Intro
+.h CFT
 
-    # CFT: "ConfigTool"
-    # Dev since May 2018, on git since 2020
-    # GNU GPL 3.0 ("open source")
-    # --
+    CFT = ConfigTool
+    
+	Dev since May 2018, on git since 2020
+    GNU GPL 3.0 ("open source")
 
+	https://github.com/rfo909/CFT
 
-    # Script language
+    - Script language
+	- Shell
 
-    # Shell
+	Written in Java
+
+	git clone https://github.com/rfo909/CFT.git
+	cd CFT
+	mvn package
+	.\cft
 
 
 .h FUNCTIONS
@@ -98,6 +105,22 @@
 		Dir.allFiles("*.java")->f out(f.read.length) | _.sum
 	/javaLines
 
+	---
+
+	# Clean up old logfiles
+	# --
+		Date.sub(Date.Duration.days(30)).get => limit
+		SomeHostList->host
+			LogDir(host).files->f
+				assert(f.lastModified < limit)
+				f.delete
+	/Cleanup
+	
+	# Log dir for a host
+	# --
+		P(1) => host
+		Dir("\\"+host+"\c$\elk\logstash\logs")
+	/LogDir
 
 
 .h FUNC PARAMS
