@@ -100,7 +100,7 @@
 /MinutesSinceMidnight
 
 
-# Count down seconds
+# Show minutes since midnight
 # --
     loop
         println(Curses:Clear)
@@ -109,6 +109,41 @@
             lines->line println(line)
         }
         Sys.sleep(13000)
-|
+/ShowMSM
 
-/CountMinutes
+
+# Reset minutes counter
+# --
+	Db2:Set(Sys.scriptId,"mStart",currentTimeMillis)
+/ResetMC
+
+
+
+# Minutes counter since reset
+# --
+	if (Db2:Get(Sys.scriptId,"mStart",0)==0) {
+		ResetMC
+	}
+	ms=currentTimeMillis-Db2:Get(Sys.scriptId,"mStart")
+	min=(ms/60000).i
+	min
+/GetMC
+	
+
+
+# Count minutes since last reset
+# --
+	lastVal=-99
+    loop
+		val=GetMC
+		if (val != lastVal) {
+			println(Curses:Clear)
+			lines=Letters7x5:GetTextX2(""+GetMC)
+			Inner {
+				lines->line println(line)
+			}
+			lastVal=val
+		}
+        Sys.sleep(3000)
+/ShowMC
+
