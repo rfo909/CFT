@@ -125,8 +125,7 @@
 		ResetMC
 	}
 	ms=currentTimeMillis-Db2:Get(Sys.scriptId,"mStart")
-	min=(ms/60000).i
-	min
+	ms div 60000
 /GetMC
 	
 
