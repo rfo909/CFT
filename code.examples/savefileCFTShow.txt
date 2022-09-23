@@ -22,8 +22,6 @@
 <<<<< TEXT
 .h CFT
 
-    CFT = ConfigTool
-    
 	Dev since May 2018, on git since 2020
     GNU GPL 3.0 ("open source")
 
@@ -33,6 +31,7 @@
 	- Shell
 
 	Written in Java
+	"Functional"
 
 	git clone https://github.com/rfo909/CFT.git
 	cd CFT
@@ -45,12 +44,16 @@
 	1+1
 	/two
 
+	two
+
+	two+two
+	/four
+
 	Dir.files.length
 	/x
 
-	x+two
-
-	?
+	cd ..
+	x
 
 	:save Test
 
@@ -59,7 +62,7 @@
 	3.14
 	/pi
 
-
+	?
 
 
 .h HELP
@@ -105,39 +108,44 @@
 		Dir.allFiles("*.java")->f out(f.read.length) | _.sum
 	/javaLines
 
-	---
 
-	# Clean up old logfiles
-	# --
-		Date.sub(Date.Duration.days(30)).get => limit
-		SomeHostList->host
-			LogDir(host).files->f
-				assert(f.lastModified < limit)
-				f.delete
-	/Cleanup
+.h List / Dict
+
+	List(1,2,3)
+	"abcd".chars
+	Dir.dirs
+	Dir.files.first.read
 	
-	# Log dir for a host
-	# --
-		P(1) => host
-		Dir("\\"+host+"\c$\elk\logstash\logs")
-	/LogDir
+	Dict.set("a",1).set("b",2)
+	
+	Dict.a=1 _.b=2 _.c=3
+	/x
+
+	Util:ShowDict(x)
+
 
 
 .h FUNC PARAMS
 
 	# Simple example
 	# --
-		P(1) => a
-		P(2) => b
+		a = P(1)
+		b = P(2)
 		a+b
 	/sum
 
 	# Defaults
 	# --
-		P(1,readLine("Value a").parseInt) => a
-		P(2,readLine("Value b").parseInt) => b
+		a = P(1,readLine("Value a").parseInt)
+		b = P(2,readLine("Value b").parseInt)
 		a+b
 	/sum
+
+
+	--- local variables
+
+	a = 5
+	5 => a
 
 
 
