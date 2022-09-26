@@ -207,24 +207,46 @@
 
 .h Templates
 
-	<<< EOF
-	this
-	is
-	a
-	test
-	a=<<a>>
-	b=<<b>>
-	>>> EOF
-	=>text
+	# Template demo
+	# --
 		a=1
 		b=2
-		text.mergeExpr
-	/lines
+
+		<<< EOF
+		this
+		is
+		a
+		test
+		a=<<a>>
+		b=<<b>>
+		>>> EOF
+			.mergeExpr
+	/t1
 
 
+.h Templates 2
+
+	# Template demo 2
+	# --
+		P(1)=>name
+		lines = Sequence(
+			@ this is
+			@ a test
+		) + CondSequence(name != null,
+			@ name=<<name>>
+		) + CondSequence(name==null,
+			@ (no name)
+		) + Sequence(
+			@ --
+			@ Footer
+		)
+
+		lines.mergeExpr
+	/t2
+	
 
 >>>>> TEXT
-/text
+//text
 
 # Process line
 # --
