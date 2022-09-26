@@ -1,0 +1,58 @@
+# Readme
+# --
+<<<< EOF
+WSL X-windows 
+-------------
+The Run function detects the IP address of the windows
+host, then sets up DISPLAY variable and enables LIBGL acceleration,
+before starting the following applications:
+
+   xterm
+   lxterminal
+   nautilus
+
+Does not work?
+--------------
+If it does not work, check that X server has access
+control disabled!!
+
+
+>>>> EOF
+/Readme
+
+
+# Get IP address of windows host
+# --
+	ip=null
+	File("/etc/resolv.conf").read->line
+		assert(line.startsWith("nameserver")) 
+		ip=line.split.last
+		break
+	|
+	error(ip==null,"No ip-address found")
+	ip
+/GetIP
+
+# Create temporary shell script
+# --
+	Sequence(
+		@ #!/bin/bash
+		@
+		@ export DISPLAY=<<GetIP>>:0.0
+		@ export LIBGL_ALWAYS_INDIRECT=1
+		@ xterm &
+		@ lxterminal &
+		@ nautilus &
+	).mergeExpr => code
+
+	Inner{
+		Readme->line println(line)
+	}
+	println
+
+	scriptFile=Lib:TmpFile("RunX","sh")
+	scriptFile.create(code)
+	Dir.run("chmod","+x",scriptFile.path)
+	Dir.run(scriptFile.path)
+	scriptFile.delete
+/Run
