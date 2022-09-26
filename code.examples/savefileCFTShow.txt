@@ -205,12 +205,26 @@
 
 
 
+.h Templates
+
+	<<< EOF
+	this
+	is
+	a
+	test
+	a=<<a>>
+	b=<<b>>
+	>>> EOF
+	=>text
+		a=1
+		b=2
+		text.mergeExpr
+	/lines
+
 
 
 >>>>> TEXT
-//text
-
-
+/text
 
 # Process line
 # --
