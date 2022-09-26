@@ -243,7 +243,87 @@
 
 		lines.mergeExpr
 	/t2
+
+
+
+
+.h Lambda
+
+	# Select file
+	# --
+		labelLookup=Lambda{
+			P(1) as File => file
+			file.name
+		}
+		Lib:MenuSelect(Dir.files, labelLookup)
+	/selectFile
+
+
+
+.h Closures
+
+	# Dictionary + lambda = closure
+	# --
+		Dict
+		.set("count",0)
+		.set("add",Lambda{
+			self.count=self.count+1 
+			self
+		})
+	/counter
+
+
+	counter.add.add.count
+
+	# Can pass the closure to another function
+	# --
+		x=counter
+		someFunction(x.get("add")) 
+		println("Called " + x.count + " times")
+	/test
+
 	
+
+
+.h Classes
+
+	# Simple class
+	# --
+		P(1) => name
+		self.name=name
+		self.present=Lambda{
+			"my name is " + self.name
+		}
+	/class Test
+
+
+	# Sub-class
+	# --
+		P(1)=>name
+		P(2)=>age
+		self.copyFrom(Test(name))
+		self.age=age
+		self.presentAge=Lambda{
+			"the age is " + self.age
+		}
+	/class Sub
+
+
+
+.h Generics
+
+	# Generic class
+	# --
+		P(1) as String => type
+		P(2) as (type) => value
+		self.copyFrom(SymDict(type,value))
+	/Val
+
+	Val("int",3)
+	Val("String",3)  # Fails, because 3 is not a string
+
+
+
 
 >>>>> TEXT
 //text
