@@ -310,20 +310,6 @@
 
 
 
-.h Generics
-
-	# Generic class
-	# --
-		P(1) as String => type
-		P(2) as (type) => value
-		self.copyFrom(SymDict(type,value))
-	/Val
-
-	Val("int",3)
-	Val("String",3)  # Fails, because 3 is not a string
-
-
-
 
 >>>>> TEXT
 //text
