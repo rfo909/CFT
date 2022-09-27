@@ -30,9 +30,6 @@
     - Script language
 	- Shell
 
-	Written in Java
-	"Functional"
-
 	git clone https://github.com/rfo909/CFT.git
 	cd CFT
 	mvn package
@@ -43,11 +40,6 @@
 
 	1+1
 	/two
-
-	two
-
-	two+two
-	/four
 
 	Dir.files.length
 	/x
@@ -62,6 +54,13 @@
 	3.14
 	/pi
 
+	# Parameters (with default expr)
+	# --
+		a=P(1,Input("Enter a").parseInt)
+		b=P(2,Input("Enter b").parseInt)
+		a+b
+	/sum
+
 	?
 
 
@@ -71,7 +70,7 @@
 	?
 
 	# Show function code
-	?two
+	?sum
 
 	# Global functions
 	help
@@ -107,46 +106,6 @@
 	# --
 		Dir.allFiles("*.java")->f out(f.read.length) | _.sum
 	/javaLines
-
-
-.h List / Dict
-
-	List(1,2,3)
-	"abcd".chars
-	Dir.dirs
-	Dir.files.first.read
-	
-	Dict.set("a",1).set("b",2)
-	
-	Dict.a=1 _.b=2 _.c=3
-	/x
-
-	Util:ShowDict(x)
-
-
-
-.h FUNC PARAMS
-
-	# Simple example
-	# --
-		a = P(1)
-		b = P(2)
-		a+b
-	/sum
-
-	# Defaults
-	# --
-		a = P(1,readLine("Value a").parseInt)
-		b = P(2,readLine("Value b").parseInt)
-		a+b
-	/sum
-
-
-	--- local variables
-
-	a = 5
-	5 => a
-
 
 
 .h Shell
@@ -188,102 +147,84 @@
 
 
 
-
-
-.h Ext. programs
-
-	Dir.run("cmd","/c","git","status")
-	Dir.run("powershell","git","status")
-
-	Lib:run(List("powershell","ls")
-	/x
-
-	Util:ShowDict(x)
-	x.stdin
-	x.stdout
-	x.exitCode
-
-
-
 .h Templates
 
-	# Template demo
+	# Get IP address of windows host
 	# --
-		a=1
-		b=2
+		ip=null
+		File("/etc/resolv.conf").read->line
+			assert(line.startsWith("nameserver")) 
+			ip=line.split.last
+			break
+		|
+		error(ip==null,"No ip-address found")
+		ip
+	/GetIP
 
-		<<< EOF
-		this
-		is
-		a
-		test
-		a=<<a>>
-		b=<<b>>
-		>>> EOF
-			.mergeExpr
-	/t1
-
-
-.h Templates 2
-
-	# Template demo 2
+	# Create temporary shell script
 	# --
-		P(1)=>name
-		lines = Sequence(
-			@ this is
-			@ a test
-		) + CondSequence(name != null,
-			@ name=<<name>>
-		) + CondSequence(name==null,
-			@ (no name)
-		) + Sequence(
-			@ --
-			@ Footer
-		)
+		Sequence(
+			@ #!/bin/bash
+			@
+			@ export DISPLAY=<<GetIP>>:0.0
+			@ export LIBGL_ALWAYS_INDIRECT=1
+			@ xterm &
+			@ lxterminal &
+			@ nautilus &
+		).mergeExpr => code
 
-		lines.mergeExpr
-	/t2
+		scriptFile=Lib:TmpFile("RunX","sh")
+		scriptFile.create(code)
 
-
+		Dir.run("chmod","+x",scriptFile.path)
+		Dir.run(scriptFile.path)
+		scriptFile.delete
+	/Run
 
 
 .h Lambda
 
 	# Select file
 	# --
-		labelLookup=Lambda{
+		getLabel=Lambda{
 			P(1) as File => file
 			file.name
 		}
-		Lib:MenuSelect(Dir.files, labelLookup)
+		Lib:MenuSelect(Dir.files, getLabel)
 	/selectFile
 
-
+	
 
 .h Closures
 
-	# Dictionary + lambda = closure
+	# Dictionaries
+	# --
+
+	Dict .set("a",1) .set("b",2)
+
+	Dict.a=1 _.b=2
+
+	# Lambda stored in Dict becomes a closure
 	# --
 		Dict
-		.set("count",0)
-		.set("add",Lambda{
+		_.count=0
+		_.add=Lambda{
 			self.count=self.count+1 
 			self
-		})
+		}
 	/counter
 
-
 	counter.add.add.count
+	Util:ShowDict(counter)
 
 	# Can pass the closure to another function
 	# --
 		x=counter
-		someFunction(x.get("add")) 
+		someFunction(x.get("add"))  ## x.add would call it 
 		println("Called " + x.count + " times")
 	/test
 
 	
-
 
 .h Classes
 
@@ -291,22 +232,13 @@
 	# --
 		P(1) => name
 		self.name=name
-		self.present=Lambda{
-			"my name is " + self.name
+		self.showName=Lambda{
+			"Name: " + self.name
 		}
 	/class Test
 
 
-	# Sub-class
-	# --
-		P(1)=>name
-		P(2)=>age
-		self.copyFrom(Test(name))
-		self.age=age
-		self.presentAge=Lambda{
-			"the age is " + self.age
-		}
-	/class Sub
+	Test("x").showName
 
 
 
