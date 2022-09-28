@@ -322,3 +322,13 @@ together multiple masters to form single cluster.
 /VerifyWorkers
 
 
+# Run kubectl or kubeadm commands on the first master host
+# --
+    P(1,Input("Enter command").setCurrCond("kubectl get nodes").get) => command
+    debug=false
+    HostTarget(MasterHosts.first) => masterNode
+    SSH:sudo(masterNode, command, false, debug).stdout
+/Call
+
+
+
