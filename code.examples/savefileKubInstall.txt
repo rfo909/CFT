@@ -328,20 +328,40 @@ together multiple masters to form single cluster.
 	Lib:DirPrivate.file("KubInstall_Call.txt")
 //CallLogFile
 
-# Run kubectl or kubeadm commands on the first master host
+ Run kubectl or kubeadm commands on the first master host
 # --
-    P(1,Input("Enter command").setCurrCond("kubectl get nodes").get) => command
-    log=CallLogFile
-    s="-".times(command.length)
-    log.append(List("",s,command,s,""))
+    loop
+       readLine("Enter command, q to quit, h for history") => command
+       break(command=="q" || command==".q")
+
+       log=CallLogFile
+
+       if (command=="h") {
+          Inner{
+             log.read->line assert(line.startsWith(">>> ")) out(line) | _.unique->line println(line)
+          }
+          assert(false)
+       }
+
+       c=">>> " + command
+       s="-".times(c.length)
+       log.append(List("",s,c,s,""))
     
-    debug=false
-    HostTarget(MasterHosts.first) => masterNode
-    SSH:sudo(masterNode, command, false, debug).stdout => output
+       debug=false
+       HostTarget(MasterHosts.first) => masterNode
+       SSH:sudo(masterNode, command, true, debug).stdout => output
     
-    log.append(output)
-    output
+       log.append(output)
+       Inner{
+          count=Term.h-3
+          output->line
+             println(line)
+             count=count-1
+             if (count<=0) {
+                readLine("More?")=>str
+                break(str.toLower=="q")
+                count=Term.h-3
+             }
+      }
 /Call
-
-
 
