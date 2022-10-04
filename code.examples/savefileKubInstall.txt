@@ -325,16 +325,20 @@ together multiple masters to form single cluster.
 
 # File to add log from Call function below
 # --
-	Lib:DirPrivate.file("KubInstall_Call.txt")
-//CallLogFile
+	Lib:DirPrivate.file("kubctl_log.txt")
+/KubctlLogFile
 
- Run kubectl or kubeadm commands on the first master host
+
+# Run kubectl or kubeadm commands locally and capture all output.
+#
+# To configure kubectl for local use, install it, then copy the /etc/kubernetes/admin.conf under $HOME/.kube/config
+# and assure access with chmod +r
 # --
     loop
-       readLine("Enter command, q to quit, h for history") => command
+       readLine("Enter kubectl command, q to quit, h for history") => command
        break(command=="q" || command==".q")
 
-       log=CallLogFile
+       log=KubctlLogFile
 
        if (command=="h") {
           Inner{
@@ -348,8 +352,7 @@ together multiple masters to form single cluster.
        log.append(List("",s,c,s,""))
     
        debug=false
-       HostTarget(MasterHosts.first) => masterNode
-       SSH:sudo(masterNode, command, true, debug).stdout => output
+       Dir.runCapture(("kubectl " + command).split) _=> output
     
        log.append(output)
        Inner{
@@ -363,5 +366,5 @@ together multiple masters to form single cluster.
                 count=Term.h-3
              }
       }
-/Call
+/kubectl
 
