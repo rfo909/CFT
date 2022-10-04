@@ -368,3 +368,7 @@ together multiple masters to form single cluster.
       }
 /kubectl
 
+
+kubectl
+/k
+
