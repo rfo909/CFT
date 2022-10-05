@@ -1,0 +1,76 @@
+# Scripts for following this tutorial on kubernetes:
+#
+# https://www.youtube.com/watch?v=JeAHlTYB1Qk&t=1439s
+#
+# ----
+
+
+# Build the docker images
+# --
+	sql="docker build . -t aimvector/mysql-example"
+	wp="docker build . -t aimvector/wordpress-example"
+	Sys.savefile.dir.sub("sql").run(sql.split)
+	Sys.savefile.dir.sub("wordpress").run(wp.split)
+/dockerBuild
+
+
+# Create wordpress secret
+# --
+<<< EOF
+	kubectl -n cms create secret generic wordpress
+	--from-literal WORDPRESS_DB_HOST=mysql
+	--from-literal WORDPRESS_DB_USER=exampleuser
+	--from-literal WORDPRESS_DB_PASSWORD=examplepassword
+	--from-literal WORDPRESS_DB_NAME=exampledb
+>>> EOF
+=> command
+run(command)
+/wpSecret
+
+# Create mysql secret
+<<< EOF
+	kubectl -n cms create secret generic sql
+	--from-literal MYSQL_USER=exampleuser
+	--from-literal MYSQL_PASSWORD=examplepassword
+	--from-literal MYSQL_DATABASE=exampledb
+>>> EOF
+=>command
+run(command)
+/sqlSecret
+
+
+# Commands run so far (via the KubInstall:k function which logs commands and output)
+# --
+<<<< EOF
+>>> get ns
+>>> create ns example
+>>> get namespace
+>>> delete ns example
+>>> cd ..
+>>> get nodes
+>>> create namespace cms
+>>> create ns cms
+>>> ns ls
+>>> -n cms create configmap mysql --from-literal MYSQL_RANDOM_ROOT_PASSWORD=1
+>>> -n cmd get configmap
+>>> -n cms get configmap
+>>> -n cms get cm mysql -o yaml
+>>> -n cms get secret
+>>> -n cms apply -f deploy.yaml
+>>> -n cms get pods
+>>>> EOF
+/commands
+
+
+
+
+
+# Run command
+# -- 
+	P(1).concat(" ")=>cmd
+	list = Inner{cmd.split->part out(part.trim)}
+	Dir.run(list)
+//run 
+	
+KubInstall:k
+/k

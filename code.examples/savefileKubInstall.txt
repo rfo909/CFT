@@ -352,7 +352,7 @@ together multiple masters to form single cluster.
        log.append(List("",s,c,s,""))
     
        debug=false
-       Dir.runCapture(("kubectl " + command).split) _=> output
+       Dir.runCapture(("kubectl " + command).split) => output
     
        log.append(output)
        Inner{
