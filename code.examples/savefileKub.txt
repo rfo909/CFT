@@ -71,6 +71,83 @@ run(command)
 	list = Inner{cmd.split->part out(part.trim)}
 	Dir.run(list)
 //run 
-	
-KubInstall:k
+
+
+# Run kubectl and log result
+# --	
+KubInstall:kubectl(Dir)
 /k
+
+
+# Include (yaml) file into log
+# --
+	file=Sys.lastResult
+	error(getType(file) != "File", "Sys.lastResult not a file")
+	error(!file.exists,"File does not exist: " + file.path)
+	
+	log=KubInstall:KubctlLogFile
+	
+	c="/// " + file.path
+	s="-".times(c.length)
+	log.append(List("",s,c,s,""))
+	log.append(file.read)
+	
+	println("Added to log: " + file.name)
+//KubAppendFile
+
+
+# Append file (Sys.lastResult) text to log
+# --
+KubAppendFile
+/f
+
+# Show history
+# --
+	P(1) => showForPos
+	pos=0
+	Inner {
+		KubInstall:KubctlLogFile.read->line
+			if(line.startsWith(">>> ")) {
+				pos=pos+1
+				if (showForPos == null) report(pos,line)
+			}
+	
+			if (pos==showForPos) {
+				report(pos,line)
+			}
+	} -> reportLine
+		println(reportLine)
+	|
+	if (showForPos==null) {
+		println("Enter number to show full log, or blank to continue")
+		readLine => x
+		if (x.?parseInt) {
+			h(x.parseInt)
+		}
+	}
+/h
+
+# Cat log for last command
+# --
+	list=List
+	KubInstall:KubctlLogFile.read->line
+		if (line.startsWith(">>> ")) list=List
+		list.add(line)
+	|
+	list
+/last
+
+# Add comment
+# --
+	println("Enter comment, end with '.' on separate line") 
+	readLines(".")=>lines
+	lines=List("") + Inner{lines->l out("| " + l)} + List("")
+	KubInstall:KubctlLogFile.append(lines)
+/comment
+
+
+# Edit log
+# --
+Lib:e(KubInstall:KubctlLogFile)
+/EditLog
+

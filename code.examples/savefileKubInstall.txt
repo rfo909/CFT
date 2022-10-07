@@ -334,41 +334,41 @@ together multiple masters to form single cluster.
 # To configure kubectl for local use, install it, then copy the /etc/kubernetes/admin.conf under $HOME/.kube/config
 # and assure access with chmod +r
 # --
-    loop
-       readLine("Enter kubectl command, q to quit, h for history") => command
-       break(command=="q" || command==".q")
+	P(1,Dir) => currDir
+	
+	readLine("Enter kubectl command, blank to abort") => command
+	error(command=="","Aborting")
+	
+	if (command.startsWith("kubectl ")) command=command.after(" ")
 
-       log=KubctlLogFile
+	log=KubctlLogFile
 
-       if (command=="h") {
-          Inner{
-             log.read->line assert(line.startsWith(">>> ")) out(line) | _.unique->line println(line)
-          }
-          assert(false)
-       }
+	c=">>> kubectl " + command
+	s="-".times(c.length)
+	log.append(List("",s,c,s,""))
 
-       c=">>> " + command
-       s="-".times(c.length)
-       log.append(List("",s,c,s,""))
-    
-       debug=false
-       Dir.runCapture(("kubectl " + command).split) => output
-    
-       log.append(output)
-       Inner{
-          count=Term.h-3
-          output->line
-             println(line)
-             count=count-1
-             if (count<=0) {
-                readLine("More?")=>str
-                break(str.toLower=="q")
-                count=Term.h-3
-             }
-      }
+	debug=false
+	currDir.runCapture(("kubectl " + command).split) => output
+
+	log.append(output)
+	Inner{
+	  count=Term.h-3
+	  output->line
+		 println(line)
+		 count=count-1
+		 if (count<=0) {
+		    readLine("More?")=>str
+		    break(str.toLower=="q")
+		    count=Term.h-3
+		 }
+	}
 /kubectl
 
 
 kubectl
 /k
 
+# kubectl history
+# --
+	 KubctlLogFile.read->line assert(line.startsWith(">>> ")) out(line) | _.unique->line println(line)
+/h
