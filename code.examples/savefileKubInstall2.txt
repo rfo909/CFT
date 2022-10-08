@@ -155,7 +155,7 @@ https://www.youtube.com/watch?v=U1VzcjCB_sY&t=1770s
 /step5
 		
 
-# Step6 - br_netfilter + reboot
+# Step 6 - br_netfilter + reboot
 # --
 	allHosts->h
 		target=sshUser+"@"+h
@@ -171,5 +171,25 @@ https://www.youtube.com/watch?v=U1VzcjCB_sY&t=1770s
 		SSH:sudo(target,"reboot",true,false)
 /step6
 		
+		
+		
+# Step 7 - install tools
+# --
+	allHosts->h
+		target=sshUser+"@"+h
+		SSH:sudo(target,"curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg",false,true)
+		SSH:sudo(target,"apt install kubeadm kubectl kubelet",false,true)
+/step7
 
+
+
+# Step 8 - controller only // TODO
+# --
+	error("NOT READY")
+	masterHosts->h
+		target=sshUser+"@"+h
+		cpEndpoint="xxx"
+		nodeName="yyy"
+		SSH:sudo(target,"sudo kubeadm init --control-plane-endpoint="+cpEndPoint+" --node-name "+nodeName+" --pod-network-cidr=10.244.0.0/16", false, true)
+/step8	
 		
