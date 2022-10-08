@@ -168,7 +168,7 @@ https://www.youtube.com/watch?v=U1VzcjCB_sY&t=1770s
   	 	SSH:copy(cftScript, target, "./CFT/savefileNetFilter.txt")
     	SSH:sudo(target, './RunCFT NetFilter run ":quit"', false, false)
 		cftScript.delete
-		SSH:sudo(target,"reboot")
+		SSH:sudo(target,"reboot",true,false)
 /step6
 		
 
