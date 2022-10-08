@@ -178,7 +178,7 @@ https://www.youtube.com/watch?v=U1VzcjCB_sY&t=1770s
 	allHosts->h
 		target=sshUser+"@"+h
 		SSH:sudo(target,"curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg",false,true)
-		SSH:sudo(target,"apt install kubeadm kubectl kubelet",false,true)
+		SSH:sudo(target,"snap install kubeadm kubectl kubelet",false,true)
 /step7
 
 
