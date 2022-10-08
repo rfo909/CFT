@@ -137,7 +137,6 @@ https://www.youtube.com/watch?v=U1VzcjCB_sY&t=1770s
 # --
 	allHosts->h
 		target=sshUser+"@"+h
-		Java:VerifyCFT(target)
 		cftScript=Lib:TmpFile("cft")
 		cftScript.create(Sequence(
 			@ File("/etc/sysctl.conf") => f
@@ -151,7 +150,7 @@ https://www.youtube.com/watch?v=U1VzcjCB_sY&t=1770s
 			@ /run
 		).mergeExpr)
   	 	SSH:copy(cftScript, target, "./CFT/savefileIpForward.txt")
-    	#SSH:sudo(target, './RunCFT IpForward run ":quit"', false, false)
+    	SSH:sudo(target, './RunCFT IpForward run ":quit"', false, false)
 		cftScript.delete
 /step5
 		
