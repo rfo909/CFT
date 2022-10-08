@@ -154,4 +154,22 @@ https://www.youtube.com/watch?v=U1VzcjCB_sY&t=1770s
 		cftScript.delete
 /step5
 		
+
+# Step6 - br_netfilter + reboot
+# --
+	allHosts->h
+		target=sshUser+"@"+h
+		cftScript=Lib:TmpFile("cft")
+		cftScript.create(Sequence(
+			@ File("/etc/modules-load.d/k8s.conf") => f
+			@ f.create("br_netfilter")
+			@ /run
+		).mergeExpr)
+  	 	SSH:copy(cftScript, target, "./CFT/savefileNetFilter.txt")
+    	SSH:sudo(target, './RunCFT NetFilter run ":quit"', false, false)
+		cftScript.delete
+		SSH:sudo(target,"reboot")
+/step6
+		
+
 		
