@@ -1,9 +1,11 @@
 # Readme
 # --
 <<<< EOF
+
 Run on host with passwordless ssh access to hosts
 
 https://www.youtube.com/watch?v=U1VzcjCB_sY&t=1770s
+
 >>>> EOF
 /Readme
 
@@ -23,7 +25,7 @@ https://www.youtube.com/watch?v=U1VzcjCB_sY&t=1770s
 	masterHosts+workerHosts
 /allHosts
 
-# ssh user name
+# Helper - get ssh user name
 # --
 	Db2:Get(Sys.scriptId,"ssh-user") => name
 	if (name==null) {
@@ -31,7 +33,7 @@ https://www.youtube.com/watch?v=U1VzcjCB_sY&t=1770s
 		Db2:Set(Sys.scriptId,"ssh-user",name)
 	}
 	name
-/sshUser
+//sshUser
 
 
 # Step 1 - update + install qemu-guest-agent
@@ -173,23 +175,107 @@ https://www.youtube.com/watch?v=U1VzcjCB_sY&t=1770s
 		
 		
 		
-# Step 7 - install tools
+# Step 7 - install common tools
 # --
 	allHosts->h
 		target=sshUser+"@"+h
-		SSH:sudo(target,"curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg",false,true)
-		SSH:sudo(target,"snap install kubeadm kubectl kubelet",false,true)
+		SSH:sudo(target,"curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg",false,false)
+		SSH:sudo(target,'echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list')
+		SSH:sudo(target,"apt update")
+		SSH:sudo(target,"apt install kubeadm kubectl kubelet -y",false,true)
 /step7
 
 
-
-# Step 8 - controller only // TODO
+# Helper: get ip of host
 # --
-	error("NOT READY")
-	masterHosts->h
+	P(1)=>hostname
+	found=false
+	address=null
+	Dir.runCapture("nslookup",hostname)->line
+		if (line.toLower.contains(hostname.toLower)) found=true
+		if (found && line.contains("Address:")) {
+			address=line.after(":").trim
+			break
+		}
+	|
+	address
+//GetIP
+
+
+# Step 8 - first master host - kubeadm init
+# --
+	masterHosts.first->h
 		target=sshUser+"@"+h
-		cpEndpoint="xxx"
-		nodeName="yyy"
-		SSH:sudo(target,"sudo kubeadm init --control-plane-endpoint="+cpEndPoint+" --node-name "+nodeName+" --pod-network-cidr=10.244.0.0/16", false, true)
+		cpEndpoint=GetIP(h)
+		nodeName=h
+		SSH:sudo(target, "kubeadm init --control-plane-endpoint="+cpEndpoint+" --node-name "+nodeName+" --pod-network-cidr=10.244.0.0/16", false, true) => result
+		File("k-cluster_init.txt") => log
+		println("Created " + log.path)
+		log.create(result.stdout)
 /step8	
+
+
+
+# Step 9 - kubectl rights on first master host
+# --
+	target=sshUser + "@" + masterHosts.first 		
 		
+	# Set up kubectl rights on host
+	SSH:run(target,"mkdir -p $HOME/.kube")
+	SSH:run(target,"sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config")
+	SSH:run(target,"sudo chown $(id -u):$(id -g) $HOME/.kube/config")
+/step9
+
+
+# Step 10 - overlay network / flannel
+# --
+	target=sshUser + "@" + masterHosts.first 		
+
+	SSH:run(target,"kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml",false,true)
+/step10
+
+
+
+# Helper: get join command for cluster
+# --
+	P(1,false) => forMasterNode
+	
+	target=sshUser + "@" + masterHosts.first 		
+	
+	SSH:run(target,"kubeadm token create --print-join-command").stdout->line
+		assert(line.contains("join"))
+		out(line)
+		break
+	| _.first => joinCommand
+	
+	if (forMasterNode) joinCommand=joinCommand + " --control-plane"
+	
+	joinCommand
+//GetJoinCommand
+	
+	
+
+
+# Step 11 - add worker nodes
+# --
+	joinCommand=GetJoinCommand(false)
+	
+	workerHosts->h
+		target=sshUser + "@" + h
+		println("JOINING WORKER " + h)
+		SSH:sudo(target,joinCommand,false,true)
+		
+/step11
+
+
+
+# Step 12 - add remaining master nodes
+# --
+	joinCommand=GetJoinCommand(true)
+
+	masterHosts.keep(1)->h
+		target=sshUser + "@" + h
+		println("JOINING MASTER " + h)
+		SSH:sudo(target,joinCommand,false,true)
+/step12			
+
