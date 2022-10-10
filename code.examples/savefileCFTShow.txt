@@ -56,8 +56,8 @@
 
 	# Parameters (with default expr)
 	# --
-		a=P(1,Input("Enter a").parseInt)
-		b=P(2,Input("Enter b").parseInt)
+		a=P(1,Input("Enter a").get.parseInt)
+		b=P(2,Input("Enter b").get.parseInt)
 		a+b
 	/sum
 
@@ -181,6 +181,8 @@
 		scriptFile.delete
 	/Run
 
+	(WSLX script)
+
 
 .h Lambda
 
@@ -194,52 +196,6 @@
 	/selectFile
 
 	
-
-.h Closures
-
-	# Dictionaries
-	# --
-
-	Dict .set("a",1) .set("b",2)
-
-	Dict.a=1 _.b=2
-
-	# Lambda stored in Dict becomes a closure
-	# --
-		Dict
-		_.count=0
-		_.add=Lambda{
-			self.count=self.count+1 
-			self
-		}
-	/counter
-
-	counter.add.add.count
-	Util:ShowDict(counter)
-
-	# Can pass the closure to another function
-	# --
-		x=counter
-		someFunction(x.get("add"))  ## x.add would call it 
-		println("Called " + x.count + " times")
-	/test
-
-	
-
-.h Classes
-
-	# Simple class
-	# --
-		P(1) => name
-		self.name=name
-		self.showName=Lambda{
-			"Name: " + self.name
-		}
-	/class Test
-
-
-	Test("x").showName
-
 
 
 
