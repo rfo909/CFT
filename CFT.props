@@ -58,6 +58,7 @@ shortcut:fsel = "---- select file from current dir ----"  Util:SelectFile(Dir)
 shortcut:c    = "---- copy files to clipboard ----"       Lib:ClipboardCopy(Dir)
 shortcut:x    = "---- move files to clipboard ----"       Lib:ClipboardCopy(Dir,true)
 shortcut:v    = "---- paste files from clipboard ----"    Lib:ClipboardPaste(Dir)
+shortcut:rm   = "---- delete files (lastResult) ----"     Lib:RemoveFiles
 
 # Search files under current dir
 shortcut:S    = "---- search files under curr dir ----"   Lib:SearchTextFiles(Dir)

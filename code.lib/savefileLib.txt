@@ -858,3 +858,28 @@ P(1,"label") =>label P(2) =>currVal P(3,"yes") =>trueVal P(4,"no") =>falseVal
 /ClipboardPaste
 
 
+# Remove files as present in Sys.lastResult
+# --
+	files=Sys.lastResult
+	if (getType(files)=="File") {
+		files=List(files)
+	}
+	if (getType(files)=="List" && !files.empty) {
+		# verify content are files that exist
+		Inner {
+			files->x
+				error(getType(x) != "File", "Expected files, got " + files)
+				error(!x.exists, "File not found: " + x.path)
+		}
+	} else {
+		error("Expected files, got " + files)
+	}
+	{files->file println(file.path)}
+	println
+	if (Lib:Confirm("Delete files?")) {
+		files->file 
+			println("Deleting " + file.path)
+			file.delete
+	}
+/RemoveFiles
+
