@@ -57,15 +57,37 @@ P(2,false)=>print
 
 
 # Run command list or string (must split correctly) and report it to screen
+# Works both on
 # --
 	P(1,Input("Command").get) => cmd
 	P(2,Dir) => dir
 
 	Lib:Header("Run command")
-	
+
 	if (getType(cmd)!="List") {
 		cmd=cmd.split
 	}
+
+	# Strip "cmd /c" or "powershell -c", in order to 
+	# print a clean command to stdout. When executing, if
+	# on windows, we always prefix with "cmd /c" or "powershell -c",
+	# depending on what we detect below.
+	ps=false
+	loop
+		if (cmd.length > 2) {
+			del=false
+			if (cmd.first.toLower=="cmd" && cmd.nth(1).toLower=="/c") del=true
+			if (cmd.first.toLower=="powershell" && cmd.nth(1).toLower=="-c") {ps=true del=true}
+
+			if (del) {
+				cmd=cmd.keep(2)
+			} else {
+				break
+			}
+		} else {
+			break
+		}
+	|
 
 	if (cmd.concat(" ").length < 80) {
 		println(cmd.concat(" "))
@@ -76,10 +98,16 @@ P(2,false)=>print
 			println(if(isFirst,"","        ") + line + if(line != lastLine, " \", ""))
 			isFirst=false
 	}
+
 	println
 	if (Sys.isWindows) {
-		dir.run(List("cmd","/c")+cmd)
+		if (ps) {
+			dir.run(List("powershell","-c")+cmd)
+		} else {
+			dir.run(List("cmd","/c")+cmd)
+		}
 	} else {
+		# Sane operating systems
 		dir.run(cmd)
 	}
 /Run

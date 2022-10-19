@@ -96,7 +96,7 @@ Bash       - run bash shell inside running container
 	Dir.runCapture("docker","image","ls").keep(1)->line
 		println(line)
 		line.split.nth(2) => id
-		Dir.run("cmd","/c","docker","image","rm","-f",id)
+		Dir.run("docker","image","rm","-f",id)
 
 /IDeleteAll
 
