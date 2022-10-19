@@ -1,0 +1,121 @@
+# Readme
+# --
+<<<< EOF
+
+Common docker commands
+
+IList      - list images
+CList      - list containers
+IDelete    - delete image
+IDeleteAll - remove all images
+CDeleteAll - remove all containers
+
+Bash       - run bash shell inside running container
+
+>>>> EOF
+	->line println("| " + line)
+/Readme
+
+
+# Restart docker service (on windows)
+# 
+# - must do this after logging on with VPN,
+#   for containers to access servers properly
+# --
+	Dir.run("powershell","restart-service","*docker*")
+/RestartDocker
+
+
+
+# Report progress
+# --
+	Lib:Header(P(1))
+//rep
+
+
+# List docker processes
+# --
+	Util:Run("docker ps -a")
+/ps
+
+
+# List all containers
+# --
+	ps
+/CList
+
+
+# List docker images
+# --
+	Util:Run("docker image list")
+/IList
+
+# Select docker image, return IMAGE ID
+# --
+	P(1,"") => searchTerm
+
+	Lib:Header("Select docker image")
+	images = Inner{
+		Dir.runCapture("docker","image","list").keep(1)->line # keep(1) to strip header line
+			assert(line.contains(searchTerm)) 
+			out(line)
+	}
+	error(images.length==0, "No docker images")
+
+	Inner{
+		i=0
+		images->img report(i,img)
+		i=i+1
+	} ->line 
+		println(line)
+	|
+	println
+	readLine("Enter pos or blank to abort").trim => x
+	error(x=="","Aborted, no docker image selected")
+	img = images.nth(x.parseInt)
+
+	# confirm selection
+	println(img)
+	# isolate image id
+	img.split.nth(2)
+/SelectImage
+	
+
+
+# Delete specific docker image
+# --
+	id=SelectImage
+	Util:Run("docker image rm " + id)
+	IList
+/IDelete
+
+
+
+# Delete all images (-f)
+# --
+	Dir.runCapture("docker","image","ls").keep(1)->line
+		println(line)
+		line.split.nth(2) => id
+		Dir.run("cmd","/c","docker","image","rm","-f",id)
+
+/IDeleteAll
+
+
+# Delete all docker containers
+# --
+	rep("Removing all docker containers")
+	Dir.runCapture("docker", "ps", "-a")->line
+		line.split=>cols
+		reject(cols.last=="NAMES") ## skip header line
+		Util:Run("docker stop " + cols.last)
+		Util:Run("docker rm -f " + cols.last)
+/CDeleteAll
+
+
+
+# Attach interactive bash to running container
+# --
+	CList
+	Input("Enter container id").get => id
+	Util:Run("docker exec -it " + id + " bash")
+/Bash

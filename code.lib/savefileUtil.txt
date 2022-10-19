@@ -56,6 +56,49 @@ P(2,false)=>print
 
 
 
+# Run command list or string (must split correctly) and report it to screen
+# --
+	P(1,Input("Command").get) => cmd
+	P(2,Dir) => dir
+
+	Lib:Header("Run command")
+	
+	if (getType(cmd)!="List") {
+		cmd=cmd.split
+	}
+
+	if (cmd.concat(" ").length < 80) {
+		println(cmd.concat(" "))
+	} else {
+		lastLine=cmd.last
+		isFirst=true
+		cmd->line
+			println(if(isFirst,"","        ") + line + if(line != lastLine, " \", ""))
+			isFirst=false
+	}
+	println
+	if (Sys.isWindows) {
+		dir.run(List("cmd","/c")+cmd)
+	} else {
+		dir.run(cmd)
+	}
+/Run
+
+
+# Read properties file, with lines a=b, c=d etc, and return Dict with values
+# --
+	P(1) as File => file
+	
+	settings = Dict
+	file.read->line
+		reject(line.trim.startsWith("#"))
+		reject(line.trim=="")
+		settings.setStr(line)
+	|
+	settings
+/ReadPropertiesFile
+
+
 # Create / access counter
 # --
 P(1) => name
@@ -83,7 +126,7 @@ P(2,999999999999) => maxValue
 
 
 
-# Set time mark
+# Set time mark - used with HasTimedOut below
 # --
 P(1) => name
     id="timemark:"+(name.replace(" ","_"))
@@ -192,6 +235,71 @@ P(3,Lambda{P(1)}) => processList
     }
     result
 /SelectFile
+
+
+
+
+
+# Show settings 
+# --
+	P(1) as Dict => settings
+	P(2,"Configure settings") => title
+
+	AppUI:DoShowTopLine(title)
+	AppUI:DoSpace
+
+	obj=AppUI:DoSummaryObj
+	settings.keys->key
+		path=settings.get(key,null)
+		if (path==null) path="-"
+		obj.Lrow(key,"", path)
+	|
+	obj.Lshow
+/ShowSettings
+
+
+
+# Verify and/or change settings
+# --
+	P(1) as Dict => settings
+	P(2,"Configure settings") => title
+	
+
+	Lib:GetTerminalSize
+
+	doEdit=false
+	loop
+		if (doEdit) {
+			Inner {
+				settings.keys->key
+					ShowSettings(settings,title)
+					AppUI:DoSpace
+					AppUI:DoShowHeader("Verify or change value for")
+					AppUI:DoSpace
+					AppUI:DoInput(key,settings.get(key,null)) => newVal
+					settings.set(key,newVal)
+			}
+		} 
+
+		ShowSettings(settings,title)
+		AppUI:DoSpace
+		
+		okay=false
+		doEdit=false
+		
+		AppUI:DoInput("Is this okay? (y/n)") => s
+		if (s != null) s=s.toLower
+		if (s=="y") {okay=true}
+		if (s=="n") {doEdit=true}
+				
+		break(okay)
+	|
+	AppUI:DoCls
+	
+/VerifySettings
+
+
+
 
 
 
