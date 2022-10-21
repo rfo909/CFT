@@ -301,17 +301,26 @@ choice.
 # Print directory tree structure
 # --
 	P(1,Dir)=>dir
-	P(2,"")=>indent
 
-	indent2=indent+"|  "
-	println(indent+"+ " + dir.name)
+	# recursion control parameters
+	P(2,0)=>nestCount
+	P(3,List)=>output
+
+	indent="|  ".times(nestCount)
+	indent2="|  ".times(nestCount+1)
+	indent2="|  ".times(nestCount+1)
+
+	output.add(indent+"+ " + dir.name)
+
+	error(output.length > 1000,"Over 1000 lines of text generated. Aborting.")
+
 	Inner{
 		files=dir.files
 		line=indent2
 		lineCount=0
 		files->f 
 			if (line.length+1+f.name.length >= Term.w) {
-				println(line)
+				output.add(line)
 				lineCount=lineCount+1
 				line=indent2
 			}
@@ -319,17 +328,19 @@ choice.
 			break(lineCount >= 3)
 		|
 		if (lineCount >= 3) {
-			println(indent2 + " ...") 
+			output.add(indent2 + " ...")
 		} else {
-			if (line.length > indent2.length) println(line)
+			if (line.length > indent2.length) output.add(line)
 		}
-		println(indent2)
+		output.add(indent2)
 	}
 	Inner{
 		dir.dirs->d 
 			reject(d.name.startsWith("."))  # ignore system directories
-			ShowTree(d,indent2)
+			ShowTree(d,nestCount+1,output)
 	}
+
+	output
 /ShowTree
 		
 
