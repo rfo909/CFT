@@ -298,6 +298,42 @@ choice.
 
 
 
+# Print directory tree structure
+# --
+	P(1,Dir)=>dir
+	P(2,"")=>indent
+
+	indent2=indent+"|  "
+	println(indent+"+ " + dir.name)
+	Inner{
+		files=dir.files
+		line=indent2
+		lineCount=0
+		files->f 
+			if (line.length+1+f.name.length >= Term.w) {
+				println(line)
+				lineCount=lineCount+1
+				line=indent2
+			}
+			line=line + " " + f.name
+			break(lineCount >= 3)
+		|
+		if (lineCount >= 3) {
+			println(indent2 + " ...") 
+		} else {
+			if (line.length > indent2.length) println(line)
+		}
+		println(indent2)
+	}
+	Inner{
+		dir.dirs->d 
+			reject(d.name.startsWith("."))  # ignore system directories
+			ShowTree(d,indent2)
+	}
+/ShowTree
+		
+
+
 # Delete directory tree, asks for interactive confirm
 # Leaves root directory
 # --

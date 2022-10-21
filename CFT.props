@@ -64,6 +64,7 @@ shortcut:rm   = "---- delete files (lastResult) ----"     Lib:RemoveFiles
 shortcut:S    = "---- search files under curr dir ----"   Lib:SearchTextFiles(Dir)
 shortcut:FS   = "---- search files under curr dir ----"   Lib:SearchTextFiles(Dir)
 shortcut:FL   = "---- File Locate under curr Dir ----"    Lib:LocateFiles(Dir)
+shortcut:tree = "---- Show directory tree curr dir ----"  Lib:ShowTree(Dir)
 
 # Projects script 
 shortcut:P    = "---- Projects ----"                      Sys.stdin(":load Projects","curr")
