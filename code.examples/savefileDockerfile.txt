@@ -100,15 +100,23 @@
 
 # Select copy statement
 # --
+	P(1,"Select statement") => label
 	count=0
 	table=Util:Cols
+
+	Lib:Header("Statements")
+	println
 
 	CopyList->stmt
 		table.add(""+count+" -","COPY", stmt.src.path + Sys.fileSeparator + stmt.glob, stmt.target)
 		count=count+1
 	|
-	table.getLines->line println(line) 
+	table.getLines->line 
+		println(line) 
+		println
 	|
+
+	println(label)
 	readLine("Select number, or blank to abort") => x
 	error(x.trim=="","Aborting")
 	x.trim.parseInt
@@ -135,7 +143,7 @@ Examine
 
 # Show copy statements
 # --
-	SelectStmt => i
+	SelectStmt("Select statement to delete?") => i
 	CopyList.remove(i) => newList
 	Save(newList)
 	println("Delete ok")
