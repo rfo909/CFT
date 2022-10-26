@@ -677,3 +677,36 @@ Dict.set("list",List)
 /class Stack	
 
 
+
+# Cols - format columns of data
+# Either set .data or call .add with parameters, once for each row, then
+# call .show
+# --
+	self.data=List
+	self.add=Lambda{ self.data.add(P) }
+	self.getLines=Lambda{
+		widths=Dict
+		Inner {
+			self.data->line
+				i=0
+				line->element
+					key=""+i
+					e=""+element
+					if (e.length > widths.get(key,0)) widths.set(key,e.length)
+					i=i+1
+		}
+		# generate output
+		self.data->line
+			i=0
+			outLine=""
+			Inner {
+				line->element
+					key=""+i
+					e=""+element
+					pad=widths.get(key)-e.length+1
+					outLine=outLine + e + " ".times(pad)
+					i=i+1
+			}
+			out(outLine.trim) # remove added trailing space
+	}
+/class Cols

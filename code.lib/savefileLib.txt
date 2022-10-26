@@ -310,7 +310,7 @@ choice.
 	indent2="|  ".times(nestCount+1)
 	indent2="|  ".times(nestCount+1)
 
-	output.add(indent+"+ " + dir.name)
+	output.add(indent + "+ " + dir.name)
 
 	error(output.length > 1000,"Over 1000 lines of text generated. Aborting.")
 
@@ -325,9 +325,9 @@ choice.
 				line=indent2
 			}
 			line=line + " " + f.name
-			break(lineCount >= 3)
+			break(lineCount >= 5)
 		|
-		if (lineCount >= 3) {
+		if (lineCount >= 5) {
 			output.add(indent2 + " ...")
 		} else {
 			if (line.length > indent2.length) output.add(line)
