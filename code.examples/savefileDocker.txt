@@ -119,3 +119,16 @@ Bash       - run bash shell inside running container
 	Input("Enter container id").get => id
 	Util:Run("docker exec -it " + id + " bash")
 /Bash
+
+
+
+# Check if docker image exists
+# --
+	P(1, readLine("Repository (name)")) => name
+	P(2, readLine("TAG")) => tag
+	Dir.runCapture("docker","image","list")->line
+		assert(line.split.nth(0)==name && line.split.nth(1)==tag)
+		out(line)
+	| _.length > 0
+/HasImage
+	
