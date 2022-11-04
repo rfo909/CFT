@@ -36,7 +36,7 @@
 	.\cft
 
 
-.h FUNCTIONS
+.h Functions
 
 	1+1
 	/two
@@ -46,6 +46,8 @@
 
 	cd ..
 	x
+
+	cd
 
 	:save Test
 
@@ -62,6 +64,37 @@
 	/sum
 
 	?
+
+
+.h Loops 
+
+    # Iterate over content, filter or modify, 
+	# use out() to generate result from loop.
+
+	List(1,2,3)->x out(x+10)
+
+	# Loops terminate at end of function or at PIPE character
+
+	"123".chars->c println(c) | println("done")
+
+	# A loop returns a list, which is populated by calls to out()
+	# It becomes either function return value or input to next 
+	# section. The expression "_" returns that value.
+
+
+	# Count number of lines of java
+	# --
+		Dir.allFiles("*.java")->f 
+			out(f.read.length) 
+		| _.sum
+	/javaLines
+
+	# Filter data 
+	# --
+		List(1,2,3,4)->x
+			assert(x%2==0)
+			out(x)
+	/evenNumbers
 
 
 .h HELP
@@ -96,21 +129,14 @@
 	?Lib:TmpDir
 
 
-.h Loops
-
-    # Iterate over content, filter or modify
-
-	List(1,2,3)->x out(x+10)
-
-	# Count number of lines of java
-	# --
-		Dir.allFiles("*.java")->f out(f.read.length) | _.sum
-	/javaLines
-
-
 .h Shell
 
     ls, lsd, lsf
+	pwd
+
+	cd
+	cd ...
+	cd (expr)
 
     cat, more, edit
 
@@ -131,71 +157,25 @@
 .h Search
 
     # Projects = Script for searching
-    # Multiple projects, fast switching
+    # Multiple projects, each with multiple directories etc
+	# Fast switch between projects
     # --
 
-    @
     @P
+
+    EditConfig
 
     ?
     ch
 
-    S
+	# Search
+    S, S2, 
+
+	# Locate file(s) and optionally open one in editor
     FL
 
-    EditConfig
 
 
-
-.h Templates
-
-	# Get IP address of windows host
-	# --
-		ip=null
-		File("/etc/resolv.conf").read->line
-			assert(line.startsWith("nameserver")) 
-			ip=line.split.last
-			break
-		|
-		error(ip==null,"No ip-address found")
-		ip
-	/GetIP
-
-	# Create temporary shell script
-	# --
-		Sequence(
-			@ #!/bin/bash
-			@
-			@ export DISPLAY=<<GetIP>>:0.0
-			@ export LIBGL_ALWAYS_INDIRECT=1
-			@ xterm &
-			@ lxterminal &
-			@ nautilus &
-		).mergeExpr => code
-
-		scriptFile=Lib:TmpFile("RunX","sh")
-		scriptFile.create(code)
-
-		Dir.run("chmod","+x",scriptFile.path)
-		Dir.run(scriptFile.path)
-		scriptFile.delete
-	/Run
-
-	(WSLX script)
-
-
-.h Lambda
-
-	# Select file
-	# --
-		getLabel=Lambda{
-			P(1) as File => file
-			file.name
-		}
-		Lib:MenuSelect(Dir.files, getLabel)
-	/selectFile
-
-	
 
 
 
@@ -213,7 +193,7 @@
         }
         println(Curses:Clear)
         Inner {
-            Letters7x5:GetText(line.sub(2).trim.toUpper)->line 
+            Letters7x5:GetText(line.sub(2).trim)->line 
 				str=line #.replace("#","O")
 				println(Curses:TxtGreen + str + Curses:Reset)
             |
