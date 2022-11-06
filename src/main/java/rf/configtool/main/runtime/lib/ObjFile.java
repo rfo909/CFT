@@ -57,6 +57,7 @@ import rf.configtool.util.Encrypt;
 import rf.configtool.util.FileInfo;
 import rf.configtool.util.Hex;
 import rf.configtool.util.TabUtil;
+import rf.configtool.util.DateTimeDurationFormatter;
 
 
 public class ObjFile extends Obj {
@@ -279,33 +280,15 @@ public class ObjFile extends Obj {
         if (!f.isFile()) {
             return ColList.list().regular(fix(name)).status("").status("").status("NOT-A-FILE");
         }
-        long secondsSinceModify=(System.currentTimeMillis()-f.lastModified())/1000L;
-        return ColList.list().regular(fix(name)).status(fmtSize(f.length())).status(""+f.length()).status(fmtDuration(secondsSinceModify)).status(fmtDate(f.lastModified()));
+        long millisSinceModify=System.currentTimeMillis()-f.lastModified();
+        String ageString=new DateTimeDurationFormatter(millisSinceModify).fmt();
+        return ColList.list().regular(fix(name)).status(fmtSize(f.length())).status(""+f.length()).status(ageString).status(fmtDate(f.lastModified()));
     }
     
     private String fix (String name) {
         int pos=name.lastIndexOf(File.separator);
         if (pos > 0) name=name.substring(pos+1);
         return name;
-    }
-    
-    private String fmtDuration (long numSeconds) {
-        long x=numSeconds;
-        long seconds=x % 60;   x/=60;   // x is now minutes
-        long minutes=x % 60;   x/=60;   // x is now hours
-        long hours=x%24;       x/=24;   // x is now days
-        long days=x;
-        
-        if (days >= 1) {
-            return "d:"+days;
-        }
-        return "d:<1";
-    }
-    
-    private String fmt (long x, int digits) {
-        String s="" + x;
-        while(s.length()<digits) s="0"+s;
-        return s;
     }
     
     private String dateFmt="yyyy-MM-dd HH:mm:ss";

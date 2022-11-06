@@ -45,6 +45,7 @@ import rf.configtool.main.runtime.ValueInt;
 import rf.configtool.main.runtime.ValueList;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
+import rf.configtool.util.FileModifiedSort;
 
 public class ObjDir extends Obj {
 
@@ -867,49 +868,58 @@ public class ObjDir extends Obj {
             return "newestFiles";
         }
         public String getShortDesc() {
-            return "newestFiles(Glob,count) - return sorted list (newest first) of newest files";
+            return "newestFiles(Glob?,count) - return sorted list (newest first) of newest files";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 2) throw new Exception("Expected parameter glob, count");
-            ObjGlob glob=getObjGlob(params,0);
-            int count=(int) getInt("count",params,1);
+            ObjGlob glob=null;
+            int count=0;
+            if (params.size() == 2) {
+        		glob=getObjGlob(params,0);
+            	count=(int) getInt("count",params,1);
+        	} else if (params.size()==1) {
+            	count=(int) getInt("count",params,0);
+        	} else {
+            	throw new Exception("Expected parameter glob?, count");
+        	}
             
-            List<ObjFile> sortedList=new ArrayList<ObjFile>();
             File f=new File(name);
             File[] content = f.listFiles();
 
             List<File> fileList=new ArrayList<File>();
             for (File x:content) {
                 try {
-                    if (x.isFile()) { fileList.add(x); } 
+                    if (x.isFile()) {
+                    	if (glob == null || glob.matches(x.getName())) fileList.add(x); 
+                    } 
                 } catch (Exception ex) {
                     // ignore
                 }
             }
 
+//            
+//            Comparator<File> comp=new Comparator<File>() {
+//                public int compare(File a, File b) {
+//                    long ia;
+//                    try {
+//                        ia=a.lastModified();
+//                    } catch (Exception ex) {
+//                        ia=0L;
+//                    }
+//                    long ib;
+//                    try {
+//                        ib=b.lastModified();
+//                    } catch (Exception ex) {
+//                        ib=0L;
+//                    }
+//                    if (ia>ib) return -1;
+//                    if (ia==ib) return 0;
+//                    return 1;
+//                    
+//                }
+//            };
+//          
             
-            Comparator<File> comp=new Comparator<File>() {
-                public int compare(File a, File b) {
-                    long ia;
-                    try {
-                        ia=a.lastModified();
-                    } catch (Exception ex) {
-                        ia=0L;
-                    }
-                    long ib;
-                    try {
-                        ib=b.lastModified();
-                    } catch (Exception ex) {
-                        ib=0L;
-                    }
-                    if (ia>ib) return -1;
-                    if (ia==ib) return 0;
-                    return 1;
-                    
-                }
-            };
-          
-            fileList.sort(comp);
+            FileModifiedSort.sort(fileList);
             List<Value> valList=new ArrayList<Value>();
             if (count > fileList.size()) count=fileList.size();
             CREATE_RESULT: for (File file:fileList) {

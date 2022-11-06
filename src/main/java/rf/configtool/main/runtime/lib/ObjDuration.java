@@ -28,6 +28,8 @@ import rf.configtool.main.runtime.ValueInt;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
 
+import rf.configtool.util.DateTimeDurationFormatter;
+
 /**
  * Duration is an absolute value, no negatives allowed, for addition or subtraction from Date values.
  */
@@ -36,32 +38,6 @@ public class ObjDuration extends Obj {
     private long timeValue;
     private String dateFmt="yyyy-MM-dd HH:mm:ss";
 
-    class Details {
-        long millis, seconds, minutes, hours, days;
-        public Details(long timeValue) {
-            long x=timeValue;
-            millis=x % 1000;  x/=1000; // x is now seconds
-            seconds=x % 60;   x/=60;   // x is now minutes
-            minutes=x % 60;   x/=60;   // x is now hours
-            hours=x%24;       x/=24;   // x is now days
-            days=x;
-        }
-        private String f(long x, int n) {
-            String s=""+x;
-            while (s.length() < n) s="0"+s;
-            return s;
-        }
-        
-        public String fmt() {
-            if (days > 185) return (days/30) + "mo"; 
-            if (days > 2) return days+"d";
-            if (days > 0) return days+"d " + hours + "h";
-            if (hours > 0) return f(hours,2) + ":" + f(minutes,2);
-            if (minutes > 0) return f(hours,2)+":" + f(minutes,2)+":"+f(seconds,2);
-            return seconds+"."+f(millis,3) + "s";
-        }
-    }
-    
     
     public ObjDuration () {
         this(0L);
@@ -118,7 +94,7 @@ public class ObjDuration extends Obj {
     
     @Override
     public ColList getContentDescription() {
-        return ColList.list().regular("Duration: " + (new Details(timeValue)).fmt());
+        return ColList.list().regular("Duration: " + (new DateTimeDurationFormatter(timeValue)).fmt());
     }
     
 
@@ -220,7 +196,7 @@ public class ObjDuration extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
             
-            return new ValueString(""+(new Details(timeValue)).fmt());
+            return new ValueString(""+(new DateTimeDurationFormatter(timeValue)).fmt());
         }
     }
 
