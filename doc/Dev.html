@@ -13,6 +13,17 @@
 
 <h1>CFT Change log</h1>
 
+<h3>3.5.2 2022-11-06 Bug fix + ls improvement</h3>
+<p>
+	Fixed bug in Dir.newestFiles(), which required a glob expression but did not use it.
+	Also made the glob parameter optional.
+</p>
+<p>
+	Improved File age reporting by moving and improving the formatter from Date.Duration to
+	util and using it in the ObjFile object.
+</p>
+
+
 <h3>3.5.2 2022-04-27 Debug tools</h3>
 <p>
 Added Sys.getCallHistory, and new statement setBreakPoint(strExpr), which also presents
