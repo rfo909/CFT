@@ -81,6 +81,33 @@ Bash       - run bash shell inside running container
 /SelectImage
 	
 
+# Get image line
+# --
+	P(1,SelectImage) => id
+
+	images = Inner{
+		Dir.runCapture("docker","image","list").keep(1)->line # keep(1) to strip header line
+			assert(line.split.nth(2).startsWith(id))
+			out(line)
+	}
+	error(images.empty, "No image found for id '" + id + "'")
+	images.first
+//GetImageLine
+
+
+# Get image repository / local name
+# --
+	P(1,SelectImage) => id
+	GetImageLine(id).split.nth(0)
+/GetImageRepo
+
+
+# Get image repository / local name
+# --
+	P(1,SelectImage) => id
+	GetImageLine(id).split.nth(1)
+/GetImageVersion
+
 
 # Delete specific docker image
 # --
