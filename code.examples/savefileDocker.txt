@@ -81,7 +81,7 @@ Bash       - run bash shell inside running container
 /SelectImage
 	
 
-# Get image line
+# Get image line for id
 # --
 	P(1,SelectImage) => id
 
@@ -95,14 +95,14 @@ Bash       - run bash shell inside running container
 //GetImageLine
 
 
-# Get image repository / local name
+# Get image repository / local name for id
 # --
 	P(1,SelectImage) => id
 	GetImageLine(id).split.nth(0)
 /GetImageRepo
 
 
-# Get image repository / local name
+# Get image version for id
 # --
 	P(1,SelectImage) => id
 	GetImageLine(id).split.nth(1)
@@ -159,3 +159,36 @@ Bash       - run bash shell inside running container
 	| _.length > 0
 /HasImage
 	
+
+
+# Upload docker image to Sonatype Nexus Repository Manager
+# --
+	P(1,Input("Nexus host:port").get) => hostPort
+	P(2,Docker:SelectImage) => imageId
+	P(3,Input("Tag").get) => tag
+
+	Lib:ShowInfo("NOTE: contains confirm before pushing!!")
+
+	repo=Docker:GetImageRepo(imageId)
+
+	if (hostPort.endsWith("/")) hostPort=hostPort.first(hostPort.length-1)
+	if (!repo.startsWith("/")) repo="/"+repo
+
+	# creating a version string
+	readLine("Version info following date").replace(" ","_") => vInfo
+	version = Date.setFormat("yyyy-MM-dd").fmt + "_" + vInfo
+
+	commands=List(
+		"docker tag " + tag + " " + hostPort + repo + ":" + version,
+		"docker login " + hostPort,
+		"docker push " + hostPort + repo + ":" + version
+	)
+
+	Lib:Header("About to execute the following commands")
+	Inner {commands->cmd println("  " + cmd) }
+	
+	println
+	error(!Lib:Confirm,"Aborting docker push")
+
+	commands->cmd Util:Run(cmd)
+/NexusPush
