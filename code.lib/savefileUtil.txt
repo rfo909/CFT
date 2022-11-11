@@ -60,7 +60,7 @@ P(2,false)=>print
 # Works both on
 # --
 	P(1,Input("Command").get) => cmd
-	P(2,Dir) => dir
+	P(2,Dir) as Dir => dir
 
 	Lib:Header("Run command")
 
