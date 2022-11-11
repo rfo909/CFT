@@ -53,8 +53,9 @@ Bash       - run bash shell inside running container
 # Select docker image, return IMAGE ID
 # --
 	P(1,"") => searchTerm
+	P(2,"Select docker image") => header
 
-	Lib:Header("Select docker image")
+	Lib:Header(header)
 	images = Inner{
 		Dir.runCapture("docker","image","list").keep(1)->line # keep(1) to strip header line
 			assert(line.contains(searchTerm)) 
@@ -192,3 +193,61 @@ Bash       - run bash shell inside running container
 
 	commands->cmd Util:Run(cmd)
 /NexusPush
+
+
+
+
+# Get repository available versions for an item inside a repository
+# Returns all, in correctly sorted ascending order.
+# --
+	P(1) => protocol
+	P(2) => hostPort
+	P(3) => repo
+	P(4) => itemName
+
+	list=List
+
+	continuationToken=null
+
+	loop
+		query="/service/rest/v1/search?repository=" + repo + "&name="+itemName
+		if (continuationToken != null) query=query + "&continuationToken="+continuationToken
+
+		Lib:ShowInfo("Doing query: " + query)
+
+		Util:CURL(protocol,hostPort,"GET",query) => result
+		error(result.exitCode != 0, "CURL failed")
+
+		data = JSON:Parse(result.stdout)
+		Inner {
+			data.items->item list.add(item.version)
+		}
+		if (data.has("continuationToken") && data.continuationToken != null) {
+			continuationToken=data.continuationToken
+		} else {
+			break
+		}
+	|
+	SortVersionsList(list)
+/GetRepoItemVersions
+
+
+
+# Sort versions list by converting all number-only parts to 0-prefixed fixed length
+# --
+	P(1)=>list
+
+	list->v
+		sortVersion=""
+		modParts = Inner {
+			v.split(".")->part
+				if (part.?parseInt) {
+					out(("0000000000"+part).last(10))
+				} else {
+					out(part)
+				}
+		}
+		out(Str(modParts.concat("."), v))
+	| _.sort->x 
+		out(x.data)
+//SortVersionsList
