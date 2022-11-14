@@ -169,11 +169,18 @@
     ch
 
 	# Search
-    S, S2, 
+    
+	S, S2, S3
 
 	# Locate file(s) and optionally open one in editor
+	
     FL
 
+
+	# Shortcuts (single directory only)
+	
+	@S
+	@FL
 
 
 
