@@ -868,18 +868,18 @@ public class ObjDir extends Obj {
             return "newestFiles";
         }
         public String getShortDesc() {
-            return "newestFiles(Glob?,count) - return sorted list (newest first) of newest files";
+            return "newestFiles(count,Glob?) - return sorted list (newest first) of newest files";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             ObjGlob glob=null;
             int count=0;
             if (params.size() == 2) {
-        		glob=getObjGlob(params,0);
-            	count=(int) getInt("count",params,1);
+        		glob=getObjGlob(params,1);
+            	count=(int) getInt("count",params,0);
         	} else if (params.size()==1) {
             	count=(int) getInt("count",params,0);
         	} else {
-            	throw new Exception("Expected parameter glob?, count");
+            	throw new Exception("Expected parameter count, glob?");
         	}
             
             File f=new File(name);
@@ -895,40 +895,17 @@ public class ObjDir extends Obj {
                     // ignore
                 }
             }
-
-//            
-//            Comparator<File> comp=new Comparator<File>() {
-//                public int compare(File a, File b) {
-//                    long ia;
-//                    try {
-//                        ia=a.lastModified();
-//                    } catch (Exception ex) {
-//                        ia=0L;
-//                    }
-//                    long ib;
-//                    try {
-//                        ib=b.lastModified();
-//                    } catch (Exception ex) {
-//                        ib=0L;
-//                    }
-//                    if (ia>ib) return -1;
-//                    if (ia==ib) return 0;
-//                    return 1;
-//                    
-//                }
-//            };
-//          
-            
             FileModifiedSort.sort(fileList);
             List<Value> valList=new ArrayList<Value>();
             if (count > fileList.size()) count=fileList.size();
-            CREATE_RESULT: for (File file:fileList) {
+            
+            for (int i=0; i<count; i++) {
+            	File file=fileList.get(i);
                 try {
                     valList.add(new ValueObj(new ObjFile(file.getAbsolutePath(), Protection.NoProtection)));
                 } catch (Exception ex) {
                     // ignore
                 }
-                if (valList.size()==count) break CREATE_RESULT;
             }
             
             return new ValueList(valList);
