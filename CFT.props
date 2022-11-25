@@ -47,6 +47,7 @@ shortcut:e    = "---- open script in editor ----"         if(Sys.savefile != nul
 shortcut:ee   = "---- clear editor selection ----"        Lib:ClearEditor "Editor cleared"
 shortcut:lint = "---- check curr script ----"             Sys.lint
 shortcut:fm   = "---- open file manager (curr dir) ---"   Lib:fileManager(Dir)
+shortcut:cmd  = "---- open cmd in curr dir ----"          Lib:OpenCMD(Dir)
 shortcut:term = "---- Update terminal size ----"          Lib:GetTerminalSize
 shortcut:rsh  = "---- Remote shell via ssh ----"          SSH:remoteShell
 shortcut:scr  = "---- Show all scripts ----"              Lib:Scripts

@@ -203,6 +203,17 @@ choice.
 
 
 
+# Open command shell in given directory
+# --
+	P(1) as Dir => dir
+	if (Sys.isWindows) {
+		dir.run("wt.exe","-d",dir.path)
+	} else {
+		dir.run("lxterminal") 
+	}
+/OpenCMD
+		
+
 # Get the private dir
 # --
     Sys.homeDir.sub("private") =>d
