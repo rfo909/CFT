@@ -529,6 +529,10 @@ b=<<b>>
 /Test35_typechecking_as_expr
 
 
+3 as ("int") == 3
+/Test35_typechecking_as_expr_single
+
+
 
 # "something" "as something" are TWO expressions, not one, the second
 # pops a value off the stack and if all ok, returns it (to be pushed back on the stack).
