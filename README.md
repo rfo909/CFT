@@ -509,7 +509,7 @@ run in the background, to avoid blocking the REPL.
 
 Strictly speaking, '&' runs an expression, and function calls are expressions.
 
-This spawns off a Process, similar to the SpawnProcess() example above, but in addition registers the job in
+This spawns off a Process, and registers the job in
 a job register, for interactive examination.
 
 The "Jobs" script contains code to manage both running and completed jobs, and in turn is made
