@@ -30,7 +30,7 @@ using the following commands.
 
 ## Functions and scripts
 
-Automation in CFT is done by creating functions. These are in turn saved in script files. Functions can be one-lines
+Automation in CFT is done by creating functions. These are in turn saved in script files. Functions can be one-liners
 created interactively, or span multiple lines, created and modified by opening script file in editor.
 
 ```
@@ -45,7 +45,7 @@ Once a function is defined, it can be called by typing its name, optionally foll
 '$' is the prompt.
 
 ```
-$ jc
+jc
  <int>
  0
 ```
@@ -124,7 +124,7 @@ Note that loop variables (the name after the -> arrow) can not be assigned other
 - text templating with merge code processing
 - spawn CFT expressions as background threads
 - lambdas and closures
-- tryCatch/tryCatchSoft (using two-tiered exception hierarchy, soft and hard)
+- two-tiered exception hierarchy, soft and hard
 - integrated data store (Db2)
 - simple classes
 
@@ -164,7 +164,11 @@ the CFT.props file, and by default include:
 @v       - paste selection of files to current dir
 ```
 
-List all shortcuts by typing a single '@' and press enter.
+To list all shortcuts, type '@' and press Enter.
+
+```
+@
+```
 
 
 ## Built-in functions
@@ -172,8 +176,10 @@ List all shortcuts by typing a single '@' and press enter.
 A number of global functions are defined, which return various data, such as a Dir object for the
 current directory, or for creating lists or dictionaries. 
 
-Data returned from these functions are objects, which in turn contain member functions, like .split()
-of String objects, or .bin() of int objects. For Dir objects, there are functions that return files
+All values in CFT are objects, which in turn contain member functions, like .split()
+of String objects, or .bin() of int objects. 
+
+For Dir objects, there are functions that return files
 in that directory and so on.
 
 Below we see some examples of global functions.
@@ -210,19 +216,32 @@ Below we see some examples of global functions.
 	
 ```
   
-For function calls with no parameters, the use of ()'s is optional, and usually omitted. The global Dir() function
-called without parameters, returns a Dir object for the current directory, while it also supports a String parameter,
-giving a path. 
+For function calls with no parameters, the use of ()'s is optional, and usually omitted. The global Dir() function, 
+if called without parameters, returns a Dir object for the current directory, but it also supports a String (path) parameter.
+
+Example, creating a file.
+
+```
+Dir("/tmp").file("theFile").create("this is a test")
+
+# or
+
+File("/tmp/theFile").create("this is a test")
+```
+
+The first one creates the File object using the .file() function of Dir objects, while the second creates
+it using the global File() function, and including the complete path as a string.
+
 
 
 ## Values are objects
 
-All values in CFT are objects, written in Java. These in turn have member functions, which we call to either
-modify the value, or get information from it, etc.
+All values in CFT are *objects*, and have member functions, which we call to either
+modify the object, or get information from it, etc.
 
 There are no primitive types in the classic sense. 
 
-The values of the "int" type in CFT corresponds to Java long, and the "float" to Java double. 
+The number values of the "int" type in CFT corresponds to Java long, and the "float" to Java double. 
 
 Strings can be written with single and double quotes. There is no separate type for single characters, those are
 just strings as well.
@@ -251,25 +270,33 @@ just strings as well.
 CFT is inspired by PowerShell, and works with objects instead of just strings, as in traditional unix shells. 
 
 Apart from a couple of specialities, CFT aims at a regular, compact and predictable syntax, 
-compared to PowerShell and bash. There is no guessing as to what the users
-is trying to do, or silent conversions of data. A list in CFT remains a list until explicitly converted
-to something else, etc.
+compared to PowerShell and bash. 
 
-CFT has an interactive help system, where one can always run some expression, and list 
-member function of the resulting object.
+This means there is no "guessing" as to what the users
+is trying to do, or silent conversions of data, as in PowerShell. 
+
+Also, differing from both PowerShell and unix shells, there is no automatic substitution of "dollar-expressions".
+
+
+The String and List values contain functions for this, which must then be called explicitly. This eliminates
+different meaning for single or double quotes.
 
 ```
-"test" help
-1 help
-List help
-Dir help
+'"' + "$x" + '"'
+  <String>
+  "$x"
 ```
+
+
 
 
 ## Compact code
 
 Letting values be objects with a rich set of member functions means the code we write can be
-quite compact. For example, to create a hash string for
+quite compact, as much complexity is hidden inside the implementation of those functions (written
+in Java). 
+
+For example, to create a hash string for
 a file, in order to locate duplicates, or checking if it has changed, we just call the .hash() function of
 any File object.
 
@@ -278,7 +305,7 @@ least amount of hassle. The implementation of .hash() has to deal with FileInput
 reads binary file data into some buffer, to be passed on to the hash function, and finally, code for converting
 the binary hash to a hex string.
 
-This means the CFT "API" runs at a much higher level than Java, which results in compact code.
+This means the CFT "API" runs at a *much higher level* than Java, which results in compact code.
  
 
 ## Variable substitution / templating
@@ -303,7 +330,7 @@ strings, unless told to.
 ```
 
 The Sequence() expression creates a List, but without the requirement of commas, and the '@ ...' is
-the "raw string" format in CFT. Alternatively we could use inline "here" documents, for easy copy/paste.
+the "raw string" format in CFT. 
 
 The .mergeExpr is a member function of List objects, which evaluates expressions inside "<<" and ">>", inserting
 resulting values as text into the template sequence. 
@@ -321,7 +348,7 @@ In combination with assert(), reject() and break(), this makes it easy to filter
 The result from a loop is generated with calls to out(), creating a new list.
 
 ```
-	$ List(1,2,3,4)->x assert(x%2==0) out(x+100)
+	List(1,2,3,4)->x assert(x%2==0) out(x+100)
 	  <List>
 	   0: 102
 	   1: 104
