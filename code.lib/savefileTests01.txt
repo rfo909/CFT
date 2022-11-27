@@ -339,7 +339,7 @@ t10.concat("-")=="1-2-3"
 
 
 
-# Inner block return values
+# Local block return values
 # --
     2
     {3}
@@ -357,22 +357,22 @@ t10.concat("-")=="1-2-3"
 
 
 
-# Inner block return values
+# Local block return values
 # --
     2
     {null}
 /t16
 
 
-# Local block return value
+# Local block return value null
 # --
     t16==null
-/Test16_local_block_return_value
+/Test16_local_block_return_value_null
 
 
 
 
-# Lib.Java
+# Lib.Java - accessing Java methods and constructors
 # 2021-09-08
 # This code exercises key functionality: class lookup, constructor lookup and call with params, 
 # method lookup and call with params, and conversion of values as parameters and return value from function
@@ -552,10 +552,16 @@ P(1) as (t37a) => x
 /t37b
 
 
-tryCatch(t37b(1)).ok==true
-tryCatch(t37b(Dict)).ok==false
+tryCatch(t37b(1)).ok==true && tryCatch(t37b(Dict)).ok==false
 /Test37_typechecking_negative_as_expr
 
+#
+# On the other hand, we CAN write {something as something} if we want to use
+# tryCatch directly, as {...} is an expr
+#
+
+tryCatch({33 as String}).ok==false
+/Test37b_typechecking_with_local_block
 
 
 
@@ -719,7 +725,7 @@ Dict.set("a",1).set("b",Lambda{P(1) as int=>x self.a+x})
 	x=Lambda{ P(1) as &Data => value }
 	
 	tryCatch(
-		x.call("ugh")
+		x.call("Data")  # string
 	).ok==false
 /Test47c_as_dict_name_inverse_nondict_value
 
@@ -728,7 +734,7 @@ Dict.set("a",1).set("b",Lambda{P(1) as int=>x self.a+x})
 # Test47d - check that lambda can not access creating context
 # --
 	a=1
-	Lambda{a}.call
+	Lambda{a}.call  # should fail
 //t47d_x
 
 # tryCatch, verify error message
@@ -943,12 +949,39 @@ ERROR: [<script> Tests01:861.8] Invalid value Dict [] + 1
 
 
 
+#
+# Class object types, letting different classes appear as the same type
+#
+
+# figure class
+# --
+	self.isSomething=Lambda{true}
+/class t55_figure
+
+
+# Another figure class
+# --
+	self.isSomething=Lambda{false}
+/class t55_secondfigure as t55_figure
+
+
+# Type check against t55_figure, which is the actual class name of t55_figure, and
+# the added object type of t55_secondfigure. Also, since a Dict can store only one
+# name, adding an object type invalidates the actual class name, when doing type
+# comparisons.
+# --
+	{t55_figure as? &t55_figure}                    # actual class
+	&& {t55_secondfigure as? &t55_figure}           # object type
+	&& {t55_secondfigure as? &t55_secondfigure}==false     # actual class name irrelevant when object type defined
+	&& t55_secondfigure.getName=="t55_figure"      # verifying dict name property directly
+/Test55_class_object_type_checking
+
 
 
 
 # Run all TestX
 # --
-	P(1,false)=>showAll
+	P(1,true)=>showAll
 	
     
     allOk=true
