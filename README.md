@@ -7,13 +7,13 @@ CFT is short for *ConfigTool*, and is an interpreted and interactive programming
 and shell.
 
 It was initiated because of a need for a decent automation tool in my job as a 
-software developer, combined with my interest in parsers and interpreters. 
+software developer, that needed to run on Windows and Linux. 
 
-It's been in continous use since creation in 2018.
+It's been in continous daily use since creation in 2018.
 
 Written from scratch in Java; runs both on Linux and Windows environments. 
 
-*README last updated 2022-04-22*
+*README last updated 2022-11-27*
 
 
 ## Terminal based - shell-like
@@ -30,18 +30,61 @@ using the following commands.
 
 ## Functions and scripts
 
-Automation in CFT is done by creating functions. These are in turn saved in script files. 
+Automation in CFT is done by creating functions. These are in turn saved in script files. Functions can be one-lines
+created interactively, or span multiple lines, created and modified by opening script file in editor.
 
-Functions are run from the command line, or they call each other, both inside the same script file
-and functions in other script files. Script files have no state, as they are just collections of
-functions.
+```
+Dir.files("*.java").length
+/jc
+```
 
-The base of CFT is its built-in objects and functions.
+The first line is the code of the function, and as we press Enter, it gets executed. If it does what we want, we
+can assign it a name, which is the second line above, naming the function "jc" (java count).
 
-Functions can be created interactively, by assigning a name to the previously executed line
-of code, but usually we create functions by editing the script file.
+Once a function is defined, it can be called by typing its name, optionally followed by parameters inside ()'s. The
+'$' is the prompt.
 
-In CFT, code comes before the function name. The P(N) expression returns parameters by position.
+```
+$ jc
+ <int>
+ 0
+```
+
+Functions are stored in scripts which are simple text files. This is done by using the "colon command" to 
+save the current set of functions:
+
+```
+:save Test
+```
+
+There also is a "colon command" to load a script.
+
+```
+:load Test
+```
+
+Script files are collections of functions only; they have no state and are really only name spaces.
+
+Functions are run from the command line, and they call each other, both inside the same script file
+and functions from other script files, using the following syntax:
+
+```
+Test:js
+
+```
+
+### Editing script file
+
+A *shortcut* has been defined to open the current script in an editor.
+
+```
+@e
+```
+
+We can now enter more complex functions, spanning multiple lines. The last line is the
+one starting with '/' which assigns a name to the lines of code before it.
+
+In this example, P(n) means grabbing the n'th parameter (1-based).
 
 ```
 # Convert IP address to binary format
@@ -55,11 +98,15 @@ In CFT, code comes before the function name. The P(N) expression returns paramet
 /IpToBinary
 ```
 
-This example uses the built-in function .split() of the String type, which returns a list. We then iterate over the
-list, and for each part, parse the string to int, then convert it to binary. The result is concatenated back to
-dotted format, such as 
+Assuming correct input, we get a string value in variable ipAddr. String values offer the split() function, which
+returns a list. We then iterate over this
+list, and for each part, parse the string to int, then convert it to binary. The foreach loop returns a list of
+the values that are passed to the out() statement. The pipe character ("|") marks the end of the loop, and
+concatenates the elements of the result from the loop, separating parts by dot, and we get a string value,
+such as 
 
 00001010.00000000.00000000.00000011
+
 
 ### Types
 
@@ -81,32 +128,6 @@ Note that loop variables (the name after the -> arrow) can not be assigned other
 - integrated data store (Db2)
 - simple classes
 
-### Writing recursive-descent parsers in CFT
-
-Given my interest in parsing, CFT has integrated Lexer support, and is sophisticated
-enough to write recursive-descent parsers. Two have been created so far:
- 
-- (2020-11) JSON recursive-descent parser written in CFT
-- (2022-04) got XML parser operational, also written in CFT 
-
-The Lib.Text.Lexer uses the same implementation that is used to parse the CFT language, and
-builds a graph of nodes matching single characters, for recognizing tokens.
-
-### Editing script code
-
-Originally, the idea was to build code from the bottom up, one line at a time, interactively,
-but nowadays we usually edit the script file code in some editor. 
-
-The shortcut @e opens current script file to be edited in notepad or notepad++ on windows, and 
-whatever preferred editor is selected on Linux.
-
-Script code is managed via "colon commands", which are management functions outside the language:
-
-```
-:save <scriptName>
-:load <scriptName>
-:new
-```
 
 
 ## Documentation
@@ -117,9 +138,21 @@ There also is a Youtube tutorial, plus
 another playlist with shorter "howto"-videos.
 
 
+## Colon commands
+
+There are a few commands that operate outside the language, such as saving and loading scripts. These
+start with a colon. To list all colon commands, type a colon and press Enter
+
+```
+:
+```
+
+Colon commands are hard-coded into the program.
+
+
 ## Shortcuts
 
-Frequently used commands or command sequences can be stored as shortcuts. These are defined in
+Frequently used functionality, expressed as CFT code, can be stored as shortcuts. These are defined in
 the CFT.props file, and by default include:
 
 ```
@@ -136,21 +169,14 @@ List all shortcuts by typing a single '@' and press enter.
 
 ## Built-in functions
 
-For v3.4.4 CFT implements 85 object types, among them String, int, List and File. 
+A number of global functions are defined, which return various data, such as a Dir object for the
+current directory, or for creating lists or dictionaries. 
 
-There are 507 library functions. Of these, about 30 are global.
+Data returned from these functions are objects, which in turn contain member functions, like .split()
+of String objects, or .bin() of int objects. For Dir objects, there are functions that return files
+in that directory and so on.
 
-The rest are member functions inside the objects, where at
-least one exists to create each of the object types, such as 
-
-```
-Lib.Text.Lexer   # Lexer object is used to parse text to tokens
-```
-
-Data types like lists and strings naturally are the result from lots of library functions.
-
-
-Below we see some more examples of global functions.
+Below we see some examples of global functions.
 
 
 ```
@@ -181,8 +207,14 @@ Below we see some more examples of global functions.
 	## Get list of files in current directory
 
 	Dir.files
+	
 ```
   
+For function calls with no parameters, the use of ()'s is optional, and usually omitted. The global Dir() function
+called without parameters, returns a Dir object for the current directory, while it also supports a String parameter,
+giving a path. 
+
+
 ## Values are objects
 
 All values in CFT are objects, written in Java. These in turn have member functions, which we call to either
@@ -192,7 +224,8 @@ There are no primitive types in the classic sense.
 
 The values of the "int" type in CFT corresponds to Java long, and the "float" to Java double. 
 
-Strings can be written with single and double quotes. There is no value type for single characters, other than String.
+Strings can be written with single and double quotes. There is no separate type for single characters, those are
+just strings as well.
 
 
 ```
@@ -215,28 +248,37 @@ Strings can be written with single and double quotes. There is no value type for
 
 # Using objects instead of just text
 
-CFT was inspired by PowerShell, by working with objects instead of just strings, as in bash. 
+CFT is inspired by PowerShell, and works with objects instead of just strings, as in traditional unix shells. 
 
 Apart from a couple of specialities, CFT aims at a regular, compact and predictable syntax, 
-compared to PowerShell and bash. Contrary to PowerShell, there is no guessing as to what the users
+compared to PowerShell and bash. There is no guessing as to what the users
 is trying to do, or silent conversions of data. A list in CFT remains a list until explicitly converted
 to something else, etc.
 
-The interactive approach made possible a help system, where one can always run some expression, and list 
+CFT has an interactive help system, where one can always run some expression, and list 
 member function of the resulting object.
+
+```
+"test" help
+1 help
+List help
+Dir help
+```
+
 
 ## Compact code
 
-Creating custom functions inside system objects makes CFT code compact. For example, to create a hash string for
+Letting values be objects with a rich set of member functions means the code we write can be
+quite compact. For example, to create a hash string for
 a file, in order to locate duplicates, or checking if it has changed, we just call the .hash() function of
 any File object.
 
 The idea is to let objects, such as File, contain relevant functions that deliver useful results with the
 least amount of hassle. The implementation of .hash() has to deal with FileInputStream, and a loop that
 reads binary file data into some buffer, to be passed on to the hash function, and finally, code for converting
-the binary hash to hex.
+the binary hash to a hex string.
 
-This means the CFT "API" runs at a higher level than Java, and this results in compact code.
+This means the CFT "API" runs at a much higher level than Java, which results in compact code.
  
 
 ## Variable substitution / templating
@@ -261,13 +303,13 @@ strings, unless told to.
 ```
 
 The Sequence() expression creates a List, but without the requirement of commas, and the '@ ...' is
-the "raw string" format in CFT. Alternatively we can use inline "here" documents, for easy copy/paste.
+the "raw string" format in CFT. Alternatively we could use inline "here" documents, for easy copy/paste.
 
 The .mergeExpr is a member function of List objects, which evaluates expressions inside "<<" and ">>", inserting
 resulting values as text into the template sequence. 
 
 
-# CFT specialities
+# CFT specialities / oddities
 
 ## "Foreach"
 
@@ -287,20 +329,18 @@ The result from a loop is generated with calls to out(), creating a new list.
  
 ## Pipes
 
-In order to do multiple stages of processing, rather than just create helper functions, we may 
-split the code of single functions into a sequence of  "code spaces", with the Pipe ("|") character.
+In order to do multiple stages of processing, we may use the pipe character ("|") to split the
+code of a function into multiple "loop spaces", which simply acts as a terminator of all
+loops, and puts the output on the data stack, available via special function "_", or by
+directly assigning a variable using the stack based assignment operation:
 
-The output from one code space is the "piped" as input to the next, via the data stack.
+```
+3 => x
+```
 
 
-The next code space may then either assign the value to a local variable, with "=> ident" syntax, which
-is the stack-based assignment operation, or using the "single underscore" expression, which refers to the 
-top value on the data stack.
-
-
-Example. The P(N) get parameter value by position (1-based) and P(N,defaultExpr) resolve the defaultExpr if the parameter N
-is null or missing. Supplying defaults for parameters mean we can run functions without parameters for testing
-or common use, with the option of supplying parameters as needed.
+In this example the P(n) get parameter value by position (1-based), while the P(n,defaultExpr) resolve the defaultExpr 
+if the parameter is null or missing. 
 
 ```
 	# Count number of files modified within the last week,
@@ -314,25 +354,7 @@ or common use, with the option of supplying parameters as needed.
 			out(f)
 		| _.length
 	/ModifiedLastWeek
-
-
-	# Present files sorted by size, biggest first,
-	# in current directory
-	# --
-		Dir.files->f
-			out(Int(f.length,f))
-		| _.sort.reverse->x
-			out(x.data)
-	/BiggestFirst
 ```
-
-The sort example illustrates all sorting in CFT, which consists of converting a list of something, such as files,
-into a list of wrappers that represent a sortable attribute, in this case global function Int(), representing
-file size. 
-
-The result list is then sorted, and another iteration unwraps the original elements.
-
-There also exist global functions Str() and Float() following the same pattern. 
 
 
 ## Simple classes
@@ -373,32 +395,21 @@ Notice the special naming of class functions: "/class Greet".
 ## No global state
 
 CFT is all about functions, and has no global variables. There also is no script state. Scripts are
-just collections of functions, and do not directly contain code.
+just collections of functions (name spaces).
 
 State data may of course be stored to external
 locations, on file or using the integrated data object store (Db2), but is otherwise not globally
 available. This limits
 unwanted side effects, which makes script code more robust, and in turn enabled safe multi-threading.
 
-This mainly means that all data needed are created, used, then thrown away in order to produce output
-from some function, including class objects, which are just a fancy way of managing functionality plus
-transitory state, although their power may still also give rise to more complex errors.
-
-The integrated data store (Db2) works by converting data to and from string format, and in doing so
-ensures that loading a value from a collection creates an independent copy from the original that
-was stored. This avoids race conditions when multiple threads access the same data.
-
 
 
 # Scripting vs programming?
 
-  If being a scripting language simply means interpreted, then CFT is a scripting language.
+CFT is a programming language with an interactive command interface.
 
-  If "scripting" or script programming instead means running external commands directly 
-  from either the command line, or as stand-alone program lines inside scripts, then CFT 
-  is a programming language, not a scripting language.
-
-  Example:
+It does not readily understand running external programs just by entering their name and parameters, but
+instead require calls to external programs to be written as code:
 
 ```
   # If CFT were a scripting language, the following might be a valid
@@ -409,6 +420,10 @@ was stored. This avoids race conditions when multiple threads access the same da
   # This is not valid in CFT, as we require a bit of code, such as
 
   Dir.run("git","pull","origin","master")
+  
+  # or ...
+  
+  Dir.run("git pull origin master".split)
 ```
 
 The disadvantage of having to write code instead of just running a program
@@ -418,9 +433,7 @@ return value and complexity.
 
 
 
-
-
-# Frequent uses
+# Frequent CFT uses
 
 - check out + run build + distribute files + cleanup
 - search project trees
@@ -428,13 +441,17 @@ return value and complexity.
 - various install and deployment tasks
 - automate powershell command sequences
 
+
 ## The Projects script
 
-For searching through projects (source code, text files, html, css etc), a script called "Projects" has been written
-and refined over time. It is easily activated via shortcut @P.
+The "Projects" script was created for quickly searching through project files (source code, text files, html, css etc).
+A shortcut @P loads the "Projects" script. 
 
 Before one can start using it, the config file must be created. First run the Readme function, then call
 EditConfig, to enter details for your projects, such as directories and file types.
+
+The most used function is called "S" which means search, but there are other variants, for searching with
+multiple arguments etc. 
 
 ```
 $ @P
@@ -453,77 +470,6 @@ To search through files, run functions "S" (search), "S2" (search with 2 params)
 List functions in script with "?".
 
 
-## Example: ping some hosts
-
-```
-	# Readme function
-	# --
-	<<< EOF
-	Check if hosts respond to ping
-		(The arrow plus identifier is a foreach)
-		(The  /name lines define functions from the preceding code lines)
-	>>> EOF
-	/Readme
-
-	# Define hosts
-	# --
-		List("host1","host2","host3")
-	/hosts
-
-
-	# Create report
-	# --
-		hosts->host report(host,SSH:HostOk(host))
-	/checkPing 
-```
-
-### Rewrite to do parallel pings
-
-Since pinging hosts that don't respond may take a while, we decide to run
-all pings in parallel, then collect information. 
-
-Total time is then the time of the single slowest ping, not the sum of times for all pings.
-
-Threads are created by calling SpawnProcess() with a dictionary for local
-variables used in the following expression. This immediately returns Process objects, which
-are collected in a list via the out() statement.
-
-When all processes have been spawned, we loop through the processes, wait for
-each to terminate, then report its result. 
-
-```
-	# Create report
-	# --
-		hosts->host 
-			out(SpawnProcess(SymDict(host), SSH:HostOk(host)))
-		| ->proc
-			proc.wait
-			report(proc.data.host, proc.exitValue)
-	/checkPing 
-```
-
-Here we first start a set of processes, then iterate over the result from the first loop, which is
-now a list of Process objects. We wait for each to complete, and then generate the output via
-calls to report().
-
-### The SSH:HostOk function
-
-Above we're calling the HostOk function inside the SSH script. It is implemented as follows.
-
-```
-	# Check if server responds on ping
-	P(1) =>target
-		if(target.contains("@"), target.after("@"), target) =>host
-		Lib:run(List("ping","-c","1",host),List,true).exitCode => ex
-
-		ex == 0
-	/HostOk
-```
-
-It in turn calls function "run()" inside Lib script, which eventually ends up doing a call 
-to Dir.runProcess() which actually runs the external program. The details don't matter so much
-as the concept of creating a hierarchy of functions with no (or very few) side effects, providing
-high level reliability, such as the HostOk function.
 
 ## Running background jobs from the command line
 
