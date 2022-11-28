@@ -207,7 +207,7 @@ choice.
 # --
 	P(1) as Dir => dir
 	if (Sys.isWindows) {
-		dir.run("wt.exe","-d",dir.path)
+		dir.run("powershell -c start-process powershell".split)
 	} else {
 		dir.run("lxterminal") 
 	}
