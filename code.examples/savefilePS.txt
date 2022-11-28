@@ -475,3 +475,11 @@ P(1)=>path
     # return dictionary
     SymDict(host,driveLetter,used,free,usagePercent,usedGb,freeGb)
 /GetRemoteDiskUse
+
+
+
+# Show installed software ... ish
+# --
+	cmd=@ (Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*).DisplayName
+	Dir.runCapture("powershell","-c",cmd)
+/InstalledPrograms
