@@ -6,20 +6,20 @@
 CFT is short for *ConfigTool*, and is an interpreted and interactive programming language
 and shell.
 
-It was initiated because of a need for a decent automation tool in my job as a 
-software developer, that needed to run on Windows and Linux. 
+It was initiated because of a need for a decent "personal automation tool" in my job as a 
+software developer, to run on Windows and Linux. 
 
 It's been in continous daily use since creation in 2018.
 
 Written from scratch in Java; runs both on Linux and Windows environments. 
 
-*README last updated 2022-11-27*
+*README last updated 2022-11-29*
 
 
 ## Terminal based - shell-like
 
 The command line interface makes CFT feel like a shell, for navigating the directory tree, and inspecting files,
-using the following commands.
+using the following commands:
 
 - cd
 - ls
@@ -31,27 +31,26 @@ using the following commands.
 ## Functions and scripts
 
 Automation in CFT is done by creating functions. These are in turn saved in script files. Functions can be one-liners
-created interactively, or span multiple lines, created and modified by opening script file in editor.
+created interactively, or span multiple lines, created and modified by opening the script file in an editor.
 
 ```
-Dir.files("*.java").length
+Dir.allFiles("*.java").length
 /jc
 ```
 
-The first line is the code of the function, and as we press Enter, it gets executed. If it does what we want, we
-can assign it a name, which is the second line above, naming the function "jc" (java count).
+Entered interactively, the first line is the code of the function, and as we press Enter, it gets executed. If it does what we want, we
+can assign it a name, which is the second line above, creating a function "jc" from the line of code.
 
-Once a function is defined, it can be called by typing its name, optionally followed by parameters inside ()'s. The
-'$' is the prompt.
+Once a function is defined, it can be called by typing its name, optionally followed by parameters inside ()'s. 
 
 ```
 jc
  <int>
- 0
+ 215
 ```
 
-Functions are stored in scripts which are simple text files. This is done by using the "colon command" to 
-save the current set of functions:
+Functions are stored in scripts which are simple text files. When starting CFT, you're working with an unnamed
+script, which can be saved to file using the following "colon command":
 
 ```
 :save Test
@@ -63,15 +62,49 @@ There also is a "colon command" to load a script.
 :load Test
 ```
 
-Script files are collections of functions only; they have no state and are really only name spaces.
+To start creating a new unnamed script, type
 
-Functions are run from the command line, and they call each other, both inside the same script file
-and functions from other script files, using the following syntax:
+```
+:new
+```
+
+### Calling functions
+
+CFT has one "current script" at any time. The functions  in the current script can be listed by
+entering a '?' and pressing Enter.
+
+```
+?
+
++-----------------------------------------------------
+|  jc : Dir.allFiles("*.java").length
++-----------------------------------------------------
+| .  : jc
++-----------------------------------------------------
+```
+
+To run the "jc" function from the command line, just type "jc" and press Enter. 
+
+If you load another script, and wants to run "jc" inside the "Test" script, type the following, and press Enter
 
 ```
 Test:js
+```
+
+### Script file = namespace
+
+Script files are collections of functions only; they have no state and no code that is not stored inside
+functions. To make a script execute code as it is (re)loaded, just define a function named onLoad
 
 ```
+println("Welcome")
+/onLoad
+:save
+:load
+```
+
+The ":load" reloads the current script, and should result in the Welcome message being displayed. 
+
 
 ### Editing script file
 
@@ -98,22 +131,18 @@ In this example, P(n) means grabbing the n'th parameter (1-based).
 /IpToBinary
 ```
 
-Assuming correct input, we get a string value in variable ipAddr. String values offer the split() function, which
-returns a list. We then iterate over this
-list, and for each part, parse the string to int, then convert it to binary. The foreach loop returns a list of
-the values that are passed to the out() statement. The pipe character ("|") marks the end of the loop, and
-concatenates the elements of the result from the loop, separating parts by dot, and we get a string value,
-such as 
+Assuming correct input
 
-00001010.00000000.00000000.00000011
+```
+IpToBinary("10.0.0.3")
+ <String>
+ 00001010.00000000.00000000.00000011
+```
 
+### Automatic reload
 
-### Types
-
-CFT is dynamically typed. Variables are not declared, just used, such as the "parts" variable above. The
-arrow "->" followed by identifier "part" is the "for-each" of CFT, with "part" as loop variable.
-
-Note that loop variables (the name after the -> arrow) can not be assigned other values inside the loop.
+Whenever we change script files, they get reloaded automatically as we enter the next command in
+the CFT input loop. 
 
 ## Functionality
 
@@ -135,7 +164,7 @@ Note that loop variables (the name after the -> arrow) can not be assigned other
 The documentation is extensive, and kept up-to-date. 
 
 There also is a Youtube tutorial, plus
-another playlist with shorter "howto"-videos.
+another playlist with shorter "howto"-videos, for solutions to specific tasks.
 
 
 ## Colon commands
@@ -145,6 +174,20 @@ start with a colon. To list all colon commands, type a colon and press Enter
 
 ```
 :
+
+Colon commands
+--------------
+:save [ident]?           - save script
+:load [ident]?           - load script
+:new                     - create new empty script
+:sw [ident]?             - switch between loaded scripts
+:delete ident [, ident]* - delete function(s)
+:copy ident ident        - copy function
+:wrap                    - line wrap on/off
+:debug                   - enter or leave debug mode
+:syn                     - synthesize last result
+:<int>                   - synthesize a row from last result (must be list)
+:quit                    - terminate CFT
 ```
 
 Colon commands are hard-coded into the program.
@@ -173,17 +216,73 @@ To list all shortcuts, type '@' and press Enter.
 
 ## Built-in functions
 
-A number of global functions are defined, which return various data, such as a Dir object for the
+A set of global functions are defined, which return various data, such as a Dir object for the
 current directory, or for creating lists or dictionaries. 
 
-All values in CFT are objects, which in turn contain member functions, like .split()
-of String objects, or .bin() of int objects. 
+To list global functions, type 'help' and press Enter
 
-For Dir objects, there are functions that return files
-in that directory and so on.
+```
+help
 
-Below we see some examples of global functions.
+  <obj: %GLOBAL%>
+  GLOBAL
+  # v3.5.2b
+  #
+  # _Expr() - display information about expressions in CFT
+  # _Stmt() - display information about Statements in CFT
+  #
+  # AValue(str,any,metaDict?) - created AValue (annotated value) object
+  # Binary(hexString) - convert hex string to Binary value
+  # DataFile(file,prefix) - create DataFile object
+  # Date(int?) - create Date and time object - uses current time if no parameter
+  # Dict(name?) - create Dict object with optional string name
+  # Dir(str?) - creates Dir object
+  # File(str) - creates File object
+  # FileLine(str, lineNo, File) - create FileLine object
+  # Float(value,data) - create Float object - for sorting
+  # Glob(pattern,ignoreCase?) - creates Glob object for file name matching, such as '*.txt' - igno+
+  # Grep() or Grep(a,b,...) or Grep(list) - create Grep object
+  # Input(label) - create Input object
+  # Int(value,data) - create Int object - for sorting
+  # Lib() - create Lib object
+  # List(a,b,c,...,x) - creates list object
+  # Regex(str) - creates Regex object
+  # Str(value,data) - create Str object - for sorting
+  # Sys() - create Sys object
+  # Term - get terminal config object
+  # currentTimeMillis() - return current time as millis
+  # error(cond?, msg) - if expr is true or no expr, throw soft error exception
+  # eval(str) - execute program line and return result
+  # getExprCount() - get number of expressions resolved
+  # getType(any) - get value or object type
+  # println([str[,...]]?) - print string
+  # readLine(prompt?) - read single input line
+  # readLines(endmarker) - read input until label on separate line, returns list of strings
+  # shell() - runs shell as configured in CFT.props
+  # syn(value) - get value as syntesized string, or exception if it can not be synthesized
+```
 
+### Object help
+
+Values in CFT are objects, which in turn contain member functions, like .split()
+for String objects, or .bin() for int objects. 
+
+To list member functions inside objects, create an object of that type, followed by 'help'
+
+```
+List help
+Dir help
+File("x") help  ## File() function requires a name, but the file needs not exist
+"" help         ## String object help
+2 help          ## int object help
+Date help
+```
+
+### Files and directories
+
+Among the most frequently used global functions are Dir, File and List. Below are some
+examples of how these are used. Also note that string values are objects, which have member
+functions as well.
 
 ```
 	## Create empty List object
@@ -194,10 +293,6 @@ Below we see some examples of global functions.
 
 	List(1,2,3)
 
-	## Create empty dictionary
-
-	Dict
-
 	## Create Date object for "now"
 
 	Date
@@ -206,7 +301,7 @@ Below we see some examples of global functions.
 
 	Dir
 
-	## ... or for some path
+	## ... or for some explicit path
 
 	Dir("/some/path")
 
@@ -215,11 +310,8 @@ Below we see some examples of global functions.
 	Dir.files
 	
 ```
-  
-For function calls with no parameters, the use of ()'s is optional, and usually omitted. The global Dir() function, 
-if called without parameters, returns a Dir object for the current directory, but it also supports a String (path) parameter.
 
-Example, creating a file.
+### Creating a file
 
 ```
 Dir("/tmp").file("theFile").create("this is a test")
@@ -229,23 +321,13 @@ Dir("/tmp").file("theFile").create("this is a test")
 File("/tmp/theFile").create("this is a test")
 ```
 
-The first one creates the File object using the .file() function of Dir objects, while the second creates
+The first one creates the File object using the .file() member function of Dir objects, while the second creates
 it using the global File() function, and including the complete path as a string.
 
+*NOTE:* using the File() global function without an absolute path, always creates a file in or relative to the
+CFT home directory. We usually use Dir.file() to create a file in a certain directory.
 
-
-## Values are objects
-
-All values in CFT are *objects*, and have member functions, which we call to either
-modify the object, or get information from it, etc.
-
-There are no primitive types in the classic sense. 
-
-The number values of the "int" type in CFT corresponds to Java long, and the "float" to Java double. 
-
-Strings can be written with single and double quotes. There is no separate type for single characters, those are
-just strings as well.
-
+### Some more examples
 
 ```
 	$ "test".length
@@ -265,53 +347,33 @@ just strings as well.
 	  3
 ```
 
-# Using objects instead of just text
 
-CFT is inspired by PowerShell, and works with objects instead of just strings, as in traditional unix shells. 
+# Objects instead of strings
 
-Apart from a couple of specialities, CFT aims at a regular, compact and predictable syntax, 
-compared to PowerShell and bash. 
+CFT is inspired by PowerShell, as it works with objects instead of just strings, as in traditional unix shells. This
+enables the use of member functions, instead of some huge global namespace.  
 
-This means there is no "guessing" as to what the users
-is trying to do, or silent conversions of data, as in PowerShell. 
+Apart from a couple of specialities or quirks, CFT aims at a regular, compact and predictable syntax, 
+compared both to PowerShell and bash. 
 
-Also, differing from both PowerShell and unix shells, there is no automatic substitution of "dollar-expressions".
+This means there is no "guessing" as to what the users is trying to do, or silent conversions of data, as in PowerShell. 
 
-
-The String and List values contain functions for this, which must then be called explicitly. This eliminates
-different meaning for single or double quotes.
+Also, differing from both PowerShell and unix shells, there is no automatic substitution of "dollar-expressions", which
+means that single and double quotes have no special or different meaning.
 
 ```
-'"' + "$x" + '"'
+'"' + "'$x'" + '"'
   <String>
-  "$x"
+  "'$x'"
 ```
 
-
-
-
-## Compact code
-
-Letting values be objects with a rich set of member functions means the code we write can be
-quite compact, as much complexity is hidden inside the implementation of those functions (written
-in Java). 
-
-For example, to create a hash string for
-a file, in order to locate duplicates, or checking if it has changed, we just call the .hash() function of
-any File object.
-
-The idea is to let objects, such as File, contain relevant functions that deliver useful results with the
-least amount of hassle. The implementation of .hash() has to deal with FileInputStream, and a loop that
-reads binary file data into some buffer, to be passed on to the hash function, and finally, code for converting
-the binary hash to a hex string.
-
-This means the CFT "API" runs at a *much higher level* than Java, which results in compact code.
- 
 
 ## Variable substitution / templating
 
 Contrary to PowerShell and bash, CFT performs no automatic substitution of "dollar-expressions" inside
 strings, unless told to.
+
+The "=>varName" is the stack based variable assignment operation. The P(1) and P(2) return parameters 1 and 2 (1-based).
 
 ```
 	# Create javascript query for MongoDb, counting objects for given status,
@@ -330,9 +392,9 @@ strings, unless told to.
 ```
 
 The Sequence() expression creates a List, but without the requirement of commas, and the '@ ...' is
-the "raw string" format in CFT. 
+the "raw string" format in CFT, which makes a String from the rest of the line. 
 
-The .mergeExpr is a member function of List objects, which evaluates expressions inside "<<" and ">>", inserting
+The .mergeExpr is a member function of List objects, which by default evaluates expressions inside "<<" and ">>", inserting
 resulting values as text into the template sequence. 
 
 
@@ -359,15 +421,10 @@ The result from a loop is generated with calls to out(), creating a new list.
 In order to do multiple stages of processing, we may use the pipe character ("|") to split the
 code of a function into multiple "loop spaces", which simply acts as a terminator of all
 loops, and puts the output on the data stack, available via special function "_", or by
-directly assigning a variable using the stack based assignment operation:
+directly assigning a variable using stack based variable assignment.
 
-```
-3 => x
-```
-
-
-In this example the P(n) get parameter value by position (1-based), while the P(n,defaultExpr) resolve the defaultExpr 
-if the parameter is null or missing. 
+In this example the P() function calls are extended with a default-expression, which is resolved if
+the parameter value is null (or missing).
 
 ```
 	# Count number of files modified within the last week,
@@ -435,8 +492,9 @@ unwanted side effects, which makes script code more robust, and in turn enabled 
 
 CFT is a programming language with an interactive command interface.
 
-It does not readily understand running external programs just by entering their name and parameters, but
-instead require calls to external programs to be written as code:
+The reason it should not be considered a script language, is that it does not allow calling external 
+programs just by entering their name and parameters, but instead require calls to external programs 
+to be written as code:
 
 ```
   # If CFT were a scripting language, the following might be a valid
@@ -444,7 +502,7 @@ instead require calls to external programs to be written as code:
 
   git pull origin master
 
-  # This is not valid in CFT, as we require a bit of code, such as
+  # However, this is not valid in CFT, as we require a bit of code, such as
 
   Dir.run("git","pull","origin","master")
   
@@ -456,7 +514,12 @@ instead require calls to external programs to be written as code:
 The disadvantage of having to write code instead of just running a program
 is believed to be out-weighed by a richer "vocabulary", as there are 4 different
 functions inside the Dir object for running external programs, with varying functionality,
-return value and complexity. 
+return value and complexity, for example
+
+```
+# Run external program and return stdout lines as List of String
+Dir.runCapture("cmd","/c","dir")  
+```
 
 
 
@@ -482,9 +545,9 @@ multiple arguments etc.
 
 ```
 $ @P
-[Projects]$ Readme
+CFT <Projects> C:\CFT> Readme
  ...
-[Projects]$ EditConfig
+CFT <Projects> C:\CFT> EditConfig
   # (opens configuration file in editor)
 
 ```
@@ -494,32 +557,32 @@ selection is stored in the integrated database.
 
 To search through files, run functions "S" (search), "S2" (search with 2 params) and so on.
 
-List functions in script with "?".
-
-
-
-## Running background jobs from the command line
-
-Some times we have jobs that take a while, and using the '&' expression, we can delegate those to
-run in the background, to avoid blocking the REPL. 
+Show available functions in script with "?".
 
 ```
-  & timeConsumingFunction(...)
-```
+CFT <Projects> C:\CFT> ?
 
-Strictly speaking, '&' runs an expression, and function calls are expressions.
-
-This spawns off a Process, and registers the job in
-a job register, for interactive examination.
-
-The "Jobs" script contains code to manage both running and completed jobs, and in turn is made
-available through a few shortcuts, defined in CFT.props.
-
-```
-	@J - list background jobs
-	@JJ - get result from first completed job (if any)
-	@JCL - clear set of completed jobs
-	@JFG - bring running job to foreground, for interactivity
++-----------------------------------------------------
+|  License          : # License
+|  Readme           : # Readme
+|  ConfigFile       : # The projects.txt file
+|  EditConfig       : # Edit config file (see Readme)
+|  SetFileFilter    : # Limit search to file names containing a certain string
+|  ShowFileFilter   : # Show info on current FileFilter (if defined)
+|  ClearFileFilter  : # Clear file filter
+|  S                : # Search with one parameter
+|  S2               : # Search with two parameters
+|  S3               : # Search with three parameters
+|  SN               : # Search with one positive and one negative parameter
+|  gfc              : # Get file content around a given line number as List of lines
+|  sfc              : # Show file content around a given line number, report style
+|  FL               : # FileLocator, interactive, sorted presentation, newest first
+|  TF               : # Show text files (that are being searched)
+|  curr             : # Display current project
+|  ch               : # Change project
++-----------------------------------------------------
+| .                : Curses:Enable
++-----------------------------------------------------
 ```
 
 
