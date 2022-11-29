@@ -28,6 +28,20 @@ using the following commands:
 - more
 - edit
 
+
+## Functionality
+
+- shell-like command line interface / REPL
+- create functions, do interactive testing, use interactive help
+- lists and dictionaries
+- run external programs in foreground or background
+- text templating with merge code processing
+- spawn CFT expressions as background threads
+- lambdas and closures
+- two-tiered exception hierarchy, soft and hard
+- integrated data store (Db2)
+- simple classes
+
 ## Functions and scripts
 
 Automation in CFT is done by creating functions. These are in turn saved in script files. Functions can be one-liners
@@ -68,7 +82,7 @@ To start creating a new unnamed script, type
 :new
 ```
 
-### Calling functions
+### List functions in current script
 
 CFT has one "current script" at any time. The functions  in the current script can be listed by
 entering a '?' and pressing Enter.
@@ -83,12 +97,14 @@ entering a '?' and pressing Enter.
 +-----------------------------------------------------
 ```
 
-To run the "jc" function from the command line, just type "jc" and press Enter. 
+### Calling functions
+
+To run the "jc" function from the command line, when the current script is Test, just type "jc" and press Enter. 
 
 If you load another script, and wants to run "jc" inside the "Test" script, type the following, and press Enter
 
 ```
-Test:js
+Test:jc
 ```
 
 ### Script file = namespace
@@ -144,27 +160,13 @@ IpToBinary("10.0.0.3")
 Whenever we change script files, they get reloaded automatically as we enter the next command in
 the CFT input loop. 
 
-## Functionality
+*NOTE:* there is no automatic save, so if you add a function from the command line, that you want to keep,
+remember to do
 
-- shell-like command line interface / REPL
-- create functions, do interactive testing, use interactive help
-- lists and dictionaries
-- run external programs in foreground or background
-- text templating with merge code processing
-- spawn CFT expressions as background threads
-- lambdas and closures
-- two-tiered exception hierarchy, soft and hard
-- integrated data store (Db2)
-- simple classes
+```
+:save
+```
 
-
-
-## Documentation
-
-The documentation is extensive, and kept up-to-date. 
-
-There also is a Youtube tutorial, plus
-another playlist with shorter "howto"-videos, for solutions to specific tasks.
 
 
 ## Colon commands
@@ -201,10 +203,12 @@ the CFT.props file, and by default include:
 ```
 @e       - open current script in editor
 @fm      - open file manager for current dir
-@home    - move to script directory
+@cmd     - open OS shell for current dir in new windows
+@term    - update terminal size (after resizing window)
 @c       - copy selection of files to clipboard, to be copied on @v
 @x       - copy selection of files to clipboard, to be moved on @v
 @v       - paste selection of files to current dir
+@P       - load and set Projects script, for searching
 ```
 
 To list all shortcuts, type '@' and press Enter.
@@ -262,6 +266,15 @@ help
   # syn(value) - get value as syntesized string, or exception if it can not be synthesized
 ```
 
+The number of global functions is about 30, but the total number of system functions, available as
+global functions and member functions inside value objects, is 508 for version 3.5.2b, distributed 
+across 85 types of objects.
+
+```
+CodeStats:main
+```
+
+
 ### Object help
 
 Values in CFT are objects, which in turn contain member functions, like .split()
@@ -278,7 +291,7 @@ File("x") help  ## File() function requires a name, but the file needs not exist
 Date help
 ```
 
-### Files and directories
+### Lists, files and directories
 
 Among the most frequently used global functions are Dir, File and List. Below are some
 examples of how these are used. Also note that string values are objects, which have member
@@ -311,7 +324,7 @@ functions as well.
 	
 ```
 
-### Creating a file
+### Creating a text file
 
 ```
 Dir("/tmp").file("theFile").create("this is a test")
@@ -326,6 +339,14 @@ it using the global File() function, and including the complete path as a string
 
 *NOTE:* using the File() global function without an absolute path, always creates a file in or relative to the
 CFT home directory. We usually use Dir.file() to create a file in a certain directory.
+
+
+### Examine binary files
+
+```
+Sys.homeDir.sub("target").file("cft.jar").hex
+```
+
 
 ### Some more examples
 
@@ -373,14 +394,12 @@ means that single and double quotes have no special or different meaning.
 Contrary to PowerShell and bash, CFT performs no automatic substitution of "dollar-expressions" inside
 strings, unless told to.
 
-The "=>varName" is the stack based variable assignment operation. The P(1) and P(2) return parameters 1 and 2 (1-based).
-
 ```
 	# Create javascript query for MongoDb, counting objects for given status,
 	# to be invoked via Mongo shell
 	# --
-		P(1)=>table
-		P(2)=>status
+		P(1)=>table   # parameter 1 assigned to local variable 'table'
+		P(2)=>status  # ...
 		
 		# remember printjson() to produce output through Mongo Shell
 		Sequence(
@@ -398,12 +417,11 @@ The .mergeExpr is a member function of List objects, which by default evaluates 
 resulting values as text into the template sequence. 
 
 
-# CFT specialities / oddities
+# CFT oddities
 
-## "Foreach"
+## Foreach
 
-One of the pecularities of CFT is its extremely compact notation for doing a "foreach" loop over content,
-using a single arrow and an identifier.
+Doing a for-each loop is done with the single arrow and an identifier, which is the current value.  
 
 In combination with assert(), reject() and break(), this makes it easy to filter and modify list data. 
 
@@ -440,53 +458,39 @@ the parameter value is null (or missing).
 	/ModifiedLastWeek
 ```
 
-
-## Simple classes
-
-Since the introduction of lambdas and then closures, which is created by letting a Lambda have a "self" pointer 
-to some dictionary, it was possible to create objects with data plus code working on those data. The object
-was always created by a function, not some static or global declaration. 
-
-The "class" keyword came much later, and really does the same thing, but in a slightly more compact and readable fashion. Together with
-certain refinements in how to access dictionary content, we can now write:
+## Optional parantheses if no parameters
 
 ```
-	# Greet class
-	# --
-		P(1) as String => name
-		self.name=name
-		
-		self.greet=Lambda{
-			"Dear " + self.name
-		}
-	/class Greet
+Dir.files
 
-	
-	# Using it
-	# --
-		x=Greet("Santa Claus")
-		x.greet
-		# Returns "Dear Santa Claus"
-	/test
+# or
 
+Dir().files()
 ```
-
-
-The Greet function returns an object, with a lambda inside, that we call in the test function.
-
-Notice the special naming of class functions: "/class Greet".
 
 ## No global state
 
 CFT is all about functions, and has no global variables. There also is no script state. Scripts are
-just collections of functions (name spaces).
+just collections of functions (name spaces). 
 
-State data may of course be stored to external
-locations, on file or using the integrated data object store (Db2), but is otherwise not globally
-available. This limits
-unwanted side effects, which makes script code more robust, and in turn enabled safe multi-threading.
+Constant values are easily represented as functions:
+
+```
+3.14
+/pi
+```
 
 
+## Synthesis
+
+The "synthesis" functionality is a way of serializing data as code. This allows storing big data structures
+as strings to file, using the intergrated data object store, Db2.
+
+```
+Db2:Set("MyCollection","MyKey",Dir.files)
+Db2:Get("MyCollection","MyKey)
+	# returns and displays the file list from the call to Set()
+```
 
 # Scripting vs programming?
 
@@ -517,7 +521,7 @@ functions inside the Dir object for running external programs, with varying func
 return value and complexity, for example
 
 ```
-# Run external program and return stdout lines as List of String
+# Run external program and return stdout as List of String
 Dir.runCapture("cmd","/c","dir")  
 ```
 
