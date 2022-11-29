@@ -124,7 +124,8 @@ The ":load" reloads the current script, and should result in the Welcome message
 
 ### Editing script file
 
-A *shortcut* has been defined to open the current script in an editor.
+A *shortcut* has been defined to open the current script file in an editor. If the script has not been
+saved to a file, you get a short message: "No savefile". 
 
 ```
 @e
@@ -351,19 +352,19 @@ Sys.homeDir.sub("target").file("cft.jar").hex
 ### Some more examples
 
 ```
-	$ "test".length
+	"test".length
 	  <int>
 	  4
 
-	$ 23.bin
+	23.bin
 	  <String>
 	  00010111
 
-	$ "abc".chars.reverse.concat
+	"abc".chars.reverse.concat
 	  <String>
 	  "cba"
 	  
-	$ 3.14.i
+	3.14.i
 	  <int>
 	  3
 ```
@@ -492,9 +493,9 @@ Db2:Get("MyCollection","MyKey)
 	# returns and displays the file list from the call to Set()
 ```
 
-# Scripting vs programming?
+# Script language or programming language?
 
-CFT is a programming language with an interactive command interface.
+CFT is a *programming language* with an interactive command interface.
 
 The reason it should not be considered a script language, is that it does not allow calling external 
 programs just by entering their name and parameters, but instead require calls to external programs 
@@ -534,11 +535,12 @@ Dir.runCapture("cmd","/c","dir")
 - collect and search log files 
 - various install and deployment tasks
 - automate powershell command sequences
+- built-in JSON and XML parsers (written in CFT)
 
 
 ## The Projects script
 
-The "Projects" script was created for quickly searching through project files (source code, text files, html, css etc).
+The "Projects" script was created for quickly searching through project text files (source code, text files, html, css etc).
 A shortcut @P loads the "Projects" script. 
 
 Before one can start using it, the config file must be created. First run the Readme function, then call
@@ -595,7 +597,7 @@ CFT <Projects> C:\CFT> ?
 Type "help" lists all global functions. 
 
 ```
-$ help
+help
   # v2.9.0
   # 
   # _Expr() - display information about expressions in CFT
@@ -615,7 +617,7 @@ Note two special functions starting with underscore, which
 provide info in built-in statements and expressions when run, like this:
 
 ```
-$ _Stmt
+_Stmt
   # 
   # Statements in CFT
   # -----------------
@@ -630,7 +632,7 @@ $ _Stmt
      :
      :
 
-$ _Expr
+_Expr
   # 
   # Expressions in CFT
   # ------------------
@@ -649,7 +651,7 @@ $ _Expr
 To list functions inside an object, such as string, we type:
 
 ```
-$ "" help
+"" help
   # after(str) - return string following given string
   # afterLast(str) - return string following last position of given string
   # before(str) - return string up to given string
