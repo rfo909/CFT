@@ -965,7 +965,7 @@ P(1,"label") =>label P(2) =>currVal P(3,"yes") =>trueVal P(4,"no") =>falseVal
 	
 	# Show all symbols
 	println
-	Inner { Lib:Symbols->line println(line) }
+	Inner { Lib:Symbols(false)->line println(line) }
 	println
 	value
 //SymbolSet
@@ -990,16 +990,35 @@ P(1,"label") =>label P(2) =>currVal P(3,"yes") =>trueVal P(4,"no") =>falseVal
 	}
 //SymbolGet
 
-# Show symbols
+# Show symbols (helper)
 # --
 	Db2:Get(Sys.scriptId,"symbolDict",Dict)=>data
 	LIMIT = Date.sub(Date.Duration.days(5)).get
-	data.keys->key
+	data.keys.sort->key
 		data.get(key)=>entryDict
 		reject(entryDict.time < LIMIT)
 		value=entryDict.value
 		s=""+value
 		if (getType(value)=="File" || getType(value)=="Dir") s=value.path
 		report(key,s)
+//SymbolsReport	
+
+
+# Show and optionally delete symbols
+# --
+	P(1,true)=>edit
+	loop
+		Lib:Header("Defined symbols")
+		Inner {
+			SymbolsReport->line println(line)
+		}
+		break(!edit)
+		println
+		readLine("Enter symbol to delete, Enter for none") => line
+		break(line=="")
+		Db2:Get(Sys.scriptId,"symbolDict",Dict) => data
+		data.remove(line.trim)
+		Db2:Set(Sys.scriptId,"symbolDict",data)
+		println
 //Symbols
 
