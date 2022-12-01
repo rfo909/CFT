@@ -1001,7 +1001,7 @@ P(1,"label") =>label P(2) =>currVal P(3,"yes") =>trueVal P(4,"no") =>falseVal
 		value=entryDict.value
 		s=""+value
 		if (getType(value)=="File" || getType(value)=="Dir") s=value.path
-		report(key,s)
+		report(key,getType(value),s)
 //SymbolsReport	
 
 
