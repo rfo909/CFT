@@ -260,10 +260,10 @@ public class ObjGlobal extends Obj {
     }
     
     public String getTypeName() {
-        return "%GLOBAL%";
+        return "<GLOBAL>";
     }
     public ColList getContentDescription() {
-        return ColList.list().status("GLOBAL");
+        return ColList.list().status("<GLOBAL>");
     }
 
     // -----------------------------------------------------------------

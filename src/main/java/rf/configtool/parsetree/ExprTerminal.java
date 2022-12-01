@@ -117,6 +117,14 @@ public class ExprTerminal extends ExprCommon {
             expr=new ExprSymDict(ts);
             return;
         }
+        if (ts.peekStr("%%")) {
+        	expr=new ExprSymGetSet(ts,true);
+        	return;
+        }
+        if (ts.peekStr("%")) {
+        	expr=new ExprSymGetSet(ts,false);
+        	return;
+        }
         
         
         if (ts.peekType(Token.TOK_INT)) {

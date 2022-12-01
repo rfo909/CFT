@@ -46,6 +46,8 @@ public class PropsFile {
     private String mCat;
     private String mEdit;
     private String mMore;
+    private String mSymGet;
+    private String mSymSet;
     
     private String shortcutPrefix;
     private Map<String,String> shortcuts;
@@ -90,9 +92,11 @@ public class PropsFile {
         winShell = "powershell";
         
         // code
-        mCat  = "Lambda {error('mCat macro undefined in " + PROPS_FILE + "') }";
-        mEdit = "Lambda {error('mEdit macro undefined in " + PROPS_FILE + "') }";
-        mMore = "Lambda{error('mMore macro undefined in " + PROPS_FILE + "') }";
+        mCat  = "Lambda {error('mCat lambda undefined in " + PROPS_FILE + "') }";
+        mEdit = "Lambda {error('mEdit lambda undefined in " + PROPS_FILE + "') }";
+        mMore = "Lambda{error('mMore lambda undefined in " + PROPS_FILE + "') }";
+        mSymGet = "Lambda{error('mSymGet lambda undefined in " + PROPS_FILE + "') }";
+        mSymSet = "Lambda{error('mSymSet lambda undefined in " + PROPS_FILE + "') }";
         
         
         shortcutPrefix = "@";
@@ -140,7 +144,13 @@ public class PropsFile {
                     if (name.equals("mMore")) {
                         mMore=value;
                     } else
-                    
+                    if (name.equals("mSymGet")) {
+                        mSymGet=value;
+                    } else
+                    if (name.equals("mSymSet")) {
+                        mSymSet=value;
+                    } else
+
                     if (name.equals("shortcutPrefix")) {
                         shortcutPrefix=value;
                     } else
@@ -208,6 +218,14 @@ public class PropsFile {
     
     public String getMMore() {
         return mMore;
+    }
+    
+    public String getMSymGet () {
+    	return mSymGet;
+    }
+    
+    public String getMSymSet () {
+    	return mSymSet;
     }
     
     

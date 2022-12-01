@@ -952,3 +952,54 @@ P(1,"label") =>label P(2) =>currVal P(3,"yes") =>trueVal P(4,"no") =>falseVal
 		Dir.run("diff",a.path,b.path)
 	}
 /diff
+
+
+# Symbol set
+# --
+	P(1) as String => symbol
+	Sys.lastResult => value
+	Db2:Get(Sys.scriptId,"symbolDict",Dict) => data
+	time=currentTimeMillis
+	data.set(symbol,SymDict(value,time))
+	Db2:Set(Sys.scriptId,"symbolDict",data)
+	
+	# Show all symbols
+	println
+	Inner { Lib:Symbols->line println(line) }
+	println
+	value
+//SymbolSet
+
+# Symbol get
+# --
+	P(1) as String => symbol
+	Db2:Get(Sys.scriptId,"symbolDict",Dict) => data
+	if (data.has(symbol)) {
+		data.get(symbol) => entryDict
+
+		LIMIT = Date.sub(Date.Duration.days(5)).get
+		if (entryDict==null || entryDict.time < LIMIT) {
+			null
+		} else {
+			entryDict.time=currentTimeMillis
+			Db2:Set(Sys.scriptId,"symbols",data)
+			entryDict.value
+		}	
+	} else {
+		null
+	}
+//SymbolGet
+
+# Show symbols
+# --
+	Db2:Get(Sys.scriptId,"symbolDict",Dict)=>data
+	LIMIT = Date.sub(Date.Duration.days(5)).get
+	data.keys->key
+		data.get(key)=>entryDict
+		reject(entryDict.time < LIMIT)
+		value=entryDict.value
+		s=""+value
+		if (getType(value)=="File" || getType(value)=="Dir") s=value.path
+		report(key,s)
+//Symbols
+

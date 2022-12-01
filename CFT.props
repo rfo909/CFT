@@ -31,6 +31,8 @@ mEdit = Lambda { P(1)=>file if(file==null, Lib:GetLastResultFile, file) => file 
 
 mMore = Lambda { P(1)=>file if(file==null, Lib:GetLastResultFile, file) => file Lib:m(file) }
 
+mSymGet = Lambda { P(1)=>sym Lib:SymbolGet(sym) }
+mSymSet = Lambda { P(1)=>sym Lib:SymbolSet(sym) }
 
 # Shortcuts
 #
@@ -41,7 +43,6 @@ mMore = Lambda { P(1)=>file if(file==null, Lib:GetLastResultFile, file) => file 
 # input line. 
 # ---
 shortcutPrefix = @
-
 
 shortcut:e    = "---- open script in editor ----"         if(Sys.savefile != null, Lib:e(Sys.savefile),"No savefile")
 shortcut:ee   = "---- clear editor selection ----"        Lib:ClearEditor "Editor cleared"
@@ -55,7 +56,11 @@ shortcut:scr  = "---- Show all scripts ----"              Lib:Scripts
 shortcut:home = "---- move to script dir ----"			  Sys.savefile.dir.cd
 shortcut:fsel = "---- select file from current dir ----"  Util:SelectFile(Dir)
 
-# copy / paste file
+shortcut:%    = "---- show current symbols ----"          Lib:Symbols
+
+
+# copy / paste files
+
 shortcut:c    = "---- copy files to clipboard ----"       Lib:ClipboardCopy(Dir)
 shortcut:x    = "---- move files to clipboard ----"       Lib:ClipboardCopy(Dir,true)
 shortcut:v    = "---- paste files from clipboard ----"    Lib:ClipboardPaste(Dir)
@@ -87,7 +92,6 @@ shortcut:rel  = "---- Release ----"                       Sys.stdin(":load Relea
 # List available shortcuts when typing '@' only
 # ---
 shortcut:     = "---- Show all shortcuts ----"            File("CFT.props").read->line assert(line.startsWith("shortcut:")) out(line)
-
 
 
 
