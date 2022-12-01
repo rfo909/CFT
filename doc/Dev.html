@@ -15,9 +15,11 @@
 
 <h3>3.5.3 2022-12-01 Stored symbols</h3>
 <p>
-	After wondering how to implement cp, mv and diff in an efficient way, spanning different directories, and also
+	After deciding CFT needs "destructive" shell-like commands, and wondering how to implement cp, mv and diff
+	in an efficient way, particularly when spanning different directories, and also
 	how to jump between various directories and files, the Symbols notation was invented.
 </p>
+
 <p>
 	This consists of the following parts:
 </p>
@@ -43,13 +45,16 @@ pwd
 
 <p>
 Both %x and %%x are valid expressions, and in a sense they are global variables, but intended for 
-interactive use. Perhaps we should have implemented %%x parsing inside the interactive command line interpreter
-instead of as a general language feature, to make that point clearer, but why limit functionality? With
-values being stored in Db2, there are no race conditions on the values themselves.
+interactive use, and tied in with Sys.lastResult. Ideally we could have implemented %%x parsing inside the 
+interactive command line interpreter instead of as a general language feature, to make that point clearer, 
+but %%x is pretty useless inside general code, as it will always return Sys.lastResult, which is
+fixed until next command line input is completed. 
 </p>
 
 <p>
-Also added a listing of all values whenever setting a symbol, which should discourage in-program use :-)
+Also added warning when trying to define symbol value that is neither File nor Dir, as thats what
+the mechanism is mostly assumed to be used for, jumping between locations, comparing and copying
+between locations, etc.
 </p>
 
 <h3>3.5.2b 2022-11-14 Improved Dir.newestFiles()</h3>
