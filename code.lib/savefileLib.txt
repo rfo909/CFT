@@ -957,7 +957,14 @@ P(1,"label") =>label P(2) =>currVal P(3,"yes") =>trueVal P(4,"no") =>falseVal
 # Symbol set
 # --
 	P(1) as String => symbol
+
 	Sys.lastResult => value
+
+	if (getType(value) != "Dir" && getType(value) != "File") {
+		Lib:ShowWarn("Sys.lastResult not Dir or File, value=" + value)
+		error(readLine("Press y to continue, otherwise abort").toLower != "y","Aborting")
+	}
+
 	Db2:Get(Sys.scriptId,"symbolDict",Dict) => data
 	time=currentTimeMillis
 	data.set(symbol,SymDict(value,time))
@@ -970,21 +977,17 @@ P(1,"label") =>label P(2) =>currVal P(3,"yes") =>trueVal P(4,"no") =>falseVal
 	value
 //SymbolSet
 
+
+
 # Symbol get
 # --
 	P(1) as String => symbol
 	Db2:Get(Sys.scriptId,"symbolDict",Dict) => data
 	if (data.has(symbol)) {
 		data.get(symbol) => entryDict
-
-		LIMIT = Date.sub(Date.Duration.days(5)).get
-		if (entryDict==null || entryDict.time < LIMIT) {
-			null
-		} else {
-			entryDict.time=currentTimeMillis
-			Db2:Set(Sys.scriptId,"symbols",data)
-			entryDict.value
-		}	
+		entryDict.time=currentTimeMillis
+		Db2:Set(Sys.scriptId,"symbols",data)
+		entryDict.value
 	} else {
 		null
 	}
@@ -993,10 +996,8 @@ P(1,"label") =>label P(2) =>currVal P(3,"yes") =>trueVal P(4,"no") =>falseVal
 # Show symbols (helper)
 # --
 	Db2:Get(Sys.scriptId,"symbolDict",Dict)=>data
-	LIMIT = Date.sub(Date.Duration.days(5)).get
 	data.keys.sort->key
 		data.get(key)=>entryDict
-		reject(entryDict.time < LIMIT)
 		value=entryDict.value
 		s=""+value
 		if (getType(value)=="File" || getType(value)=="Dir") s=value.path
