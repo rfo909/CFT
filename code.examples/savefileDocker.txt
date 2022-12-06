@@ -140,6 +140,14 @@ Bash       - run bash shell inside running container
 /CDeleteAll
 
 
+# Delete specific docker container
+# --
+        rep("Removing docker container?")
+		CList
+		readLine("Enter docker container id, blank to abort") => id
+		Util:Run("docker stop " + id)
+		Util:Run("docker rm -f " + id)
+/CDelete
 
 # Attach interactive bash to running container
 # --

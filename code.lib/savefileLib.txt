@@ -636,8 +636,10 @@ run(null,null,null,true)
 /MenuSelect
 
 
-
-P(1,"label") =>label P(2) =>currVal
+# Ask user for input
+# --
+	P(1,"label") =>label 
+	P(2) =>currVal
     println("")
     (label + if(currVal," ["+currVal+"]","") + " : ") =>prompt
     readLine(prompt) =>line
@@ -647,7 +649,10 @@ P(1,"label") =>label P(2) =>currVal
 
 
 
-P(1,"label") =>label P(2) =>currVal
+# Ask user for input
+# --
+	P(1,"label") =>label 
+	P(2) =>currVal
     null =>gotResult
     loop
         ReadValue(label,""+currVal) =>val
@@ -660,12 +665,18 @@ P(1,"label") =>label P(2) =>currVal
 
 
 
+# Ask user for input
+# --
+	P(1,"label") =>label 
+	P(2) =>currVal 
+	P(3,"yes") =>trueVal 
+	P(4,"no") =>falseVal
 
-P(1,"label") =>label P(2) =>currVal P(3,"yes") =>trueVal P(4,"no") =>falseVal
     null =>gotResult
     loop
         if(currVal != null, if(currVal, trueVal, falseVal), null) =>currStrVal
-        ReadValue(label,currStrVal) =>val
+		
+        ReadValue(label+" "+trueVal + "/" + falseVal,currStrVal) =>val
         if(val==trueVal) {true =>gotResult}
         if(val==falseVal) {false =>gotResult}
         break(gotResult != null)
