@@ -212,16 +212,18 @@ Bash       - run bash shell inside running container
 	P(2) => hostPort
 	P(3) => repo
 	P(4) => itemName
+	P(5,false) => verbose
 
 	list=List
 
 	continuationToken=null
 
+	if (!verbose) Lib:ShowInfo("Please wait ... fetching data from " + hostPort)
 	loop
 		query="/service/rest/v1/search?repository=" + repo + "&name="+itemName
 		if (continuationToken != null) query=query + "&continuationToken="+continuationToken
 
-		Lib:ShowInfo("Doing query: " + query)
+		if (verbose) Lib:ShowInfo("Doing query: " + query)
 
 		Util:CURL(protocol,hostPort,"GET",query) => result
 		error(result.exitCode != 0, "CURL failed")
