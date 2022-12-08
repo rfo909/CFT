@@ -45,9 +45,9 @@ public class ShellCommandsDetector {
 		List<String> parts=parseLineParts();
 		
 		// show parts
-		for (String s:parts) {
-			System.out.println("[" + s + "]");
-		}
+		//for (String s:parts) {
+		//	System.out.println("[" + s + "]");
+		//}
 		
 		String name=parts.get(0);
 		
@@ -85,6 +85,15 @@ public class ShellCommandsDetector {
 		char strQuote=' ';
 		
 		StringBuffer sb=new StringBuffer();
+		
+		// Note: there is a weakness in the parser, as it does not recognize symbol lookups
+		// particularly, which means that for example:
+		// 
+		// cd %someDir.sub("data")
+		//
+		// will not work, as this is split into the following parts: [cd] [%somedir.sub] [("data")]
+		//
+		// It is not an important issue, so not complicating matters over this now (v3.5.5)
 		
 		CHARS: for (int pos=0; pos<line.length(); pos++) {
 			final char c=line.charAt(pos);

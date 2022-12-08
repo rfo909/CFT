@@ -13,6 +13,11 @@
 
 <h1>CFT Change log</h1>
 
+<h3>3.5.5 2022-12-08 all old Shell commands rewritten</h3>
+<p>
+	Removed old implementation, and started using the code under rf.configtool.root.shell
+</p>
+
 <h3>3.5.4 2022-12-06 new parser for Shell commands</h3>
 <p>
 	Reimplemented Shell commands parser, to be used for existing shell commands (ls, cd, pwd, edit, more) and
@@ -30,7 +35,7 @@
 	This consists of the following parts:
 </p>
 <ul>
-<li>mSymGet and mSymSet lambdas defined also defined in CFT.props, pointing to Lib:SymbolGet and Lib:SymbolSet</li>
+<li>mSymGet and mSymSet lambdas defined in CFT.props, pointing to Lib:SymbolGet and Lib:SymbolSet</li>
 <li>New expression ExprSymGetSet parsed via ExprTerminal, on format %%xxx to set and %xxx to read symbol value</li>
 <li>ExprSymGetSet calls the two new lambdas. The Set stores the LastValue in Db2, and Get reads it back</li>
 <li>Added a shortcut @% that lists and lets us delete symbols</li>
