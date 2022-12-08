@@ -143,6 +143,7 @@ public class ObjGlobal extends Obj {
         // help
         add(new Function_Stmt());
         add(new Function_Expr());
+        add(new Function_Shell());
 
         // name spaces
         add(new FunctionSys());
@@ -982,25 +983,6 @@ public class ObjGlobal extends Obj {
             "   help           : show global functions",
             "   <value> help   : help about top value on stack",
             "",
-            "Interactive commands:",
-            "   ls",
-            "   ls a*.txt",
-            "   ls /some/path",
-            "   ls (dirExpr)",
-            "   cd",
-            "   cd ../path",
-            "   cd (dirExpr)",
-            "   cat file.txt",
-            "   cat (fileExpr)",
-            "   edit file.txt",
-            "   edit (fileExpr)",
-            "   touch file.txt",
-            "   touch *.txt",
-            "   touch (fileExpr)",
-            "",
-            "   (note) the ls command comes in two additional variants:",
-            "       lsd ...   : list directories only",
-            "       lsf ...   : list files only",
             "",
             "addDebug (stringExpr)",
             "setBreakPoint (stringExpr)",
@@ -1117,6 +1099,45 @@ public class ObjGlobal extends Obj {
         
         
     } 
+    
+    
+    class Function_Shell extends Function {
+        public String getName() {
+            return "_Shell";
+        }
+        public String getShortDesc() {
+            return "_Shell() - display information about interactive (shell only) commands";
+        }
+        private String[] data= {
+                "Interactive commands:",
+                "   ls",
+                "   ls a*.txt",
+                "   ls /some/path",
+                "   ls (dirExpr)",
+                "",
+                "   cd",
+                "   cd ../path",
+                "   cd (dirExpr)",
+                "",
+                "   cat|edit|more file.txt",
+                "   cat|edit|more (fileExpr)",
+                "   touch a.txt b.txt c.txt",
+                "   touch *.txt",
+                "   touch (fileExpr)",
+                "",
+                "   (note) the ls command comes in two additional variants:",
+                "       lsd ...   : list directories only",
+                "       lsf ...   : list files only",
+        };
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            for (String line:data) {
+                ctx.getObjGlobal().addSystemMessage(line);
+            }
+            return new ValueBoolean(true);
+        }        
+    } 
+    
+
 
 
 

@@ -35,7 +35,7 @@ public abstract class ShellCommand {
 			String part=parts.get(i);
 			String isExpr=null;
 			
-			if (part.startsWith("(")) {
+			if (part.startsWith("(") && part.endsWith(")")) {
 				isExpr=part.substring(1,part.length()-1); // (xxx) -> xxx
 			} else if (part.startsWith("%")) {
 				isExpr=part;
@@ -47,6 +47,8 @@ public abstract class ShellCommand {
 				lex.processLine(new ScriptSourceLine(loc, isExpr));
 				TokenStream ts=lex.getTokenStream();
 				Expr expr=new Expr(ts);
+				if (!ts.atEOF()) throw new Exception("Invalid expression: " + part);
+				
 				args.add(new ShellCommandArg(expr));
 				continue;
 			} else {

@@ -201,7 +201,11 @@ public class ObjDir extends Obj {
     private String fix (String name) {
         int pos=name.lastIndexOf(File.separator);
         if (pos > 0) name=name.substring(pos+1);
-        return name+File.separator; // to differ from files when presented in common list (presentation only)
+        if (!name.endsWith(File.separator)) {
+        	return name+File.separator; // to differ from files when presented in common list (presentation only)
+        } else {
+        	return name;
+        }
     }
 
     class FunctionSub extends Function {

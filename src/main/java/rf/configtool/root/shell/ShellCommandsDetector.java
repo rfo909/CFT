@@ -15,8 +15,10 @@ public class ShellCommandsDetector {
 	private final String line;
 	
 	public static final String[] OPS = {
-		"nls","nlsd","nlsf",
-		"ncd",
+		"ls","lsd","lsf",
+		"cd",
+		"cat","edit","more",
+		"touch",
 			
 	};
 
@@ -43,18 +45,24 @@ public class ShellCommandsDetector {
 		List<String> parts=parseLineParts();
 		
 		// show parts
-//		for (String s:parts) {
-//			System.out.println("[" + s + "]");
-//		}
+		for (String s:parts) {
+			System.out.println("[" + s + "]");
+		}
 		
 		String name=parts.get(0);
 		
 		
-		if (name.equals("nls") || name.equals("nlsd") || name.equals("nlsf")) {
+		if (name.equals("ls") || name.equals("lsd") || name.equals("lsf")) {
 			return new ShellLs(parts);
 		}
-		if (name.equals("ncd")) {
+		if (name.equals("cd")) {
 			return new ShellCd(parts);
+		}
+		if (name.equals("cat") || name.equals("edit") || name.equals("more")) {
+			return new ShellCatEditMore(parts);
+		}
+		if (name.equals("touch")) {
+			return new ShellTouch(parts);
 		}
 		// else ...
 		

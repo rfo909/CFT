@@ -34,17 +34,17 @@ public class ShellLs extends ShellCommand {
 		
 		String name=getName();
 		
-		if (name.equals("nls")) {
+		if (name.equals("nls") || name.equals("ls")) {
 			showFiles = true;
 			showDirs = true;
-		} else if (name.equals("nlsd")) {
+		} else if (name.equals("nlsd") || name.equals("lsd")) {
 			showFiles = false;
 			showDirs = true;
-		} else if (name.equals("nlsf")) {
+		} else if (name.equals("nlsf") || name.equals("lsf")) {
 			showFiles = true;
 			showDirs = false;
 		} else {
-			throw new Exception("Expected nls, nlsf or nlsd");
+			throw new Exception("Expected ls, lsf or lsd");
 		}
 	}
 
@@ -90,25 +90,23 @@ public class ShellLs extends ShellCommand {
 
 	
 	private Value generateResultList(FileSet fs) throws Exception {
-		List<String> dirList=fs.getDirectories();
-		List<String> fileList=fs.getFiles();
+		List<Value> result = new ArrayList<Value>();
 		
 		if (showDirs) {
+			List<String> dirList=fs.getDirectories();
 			sort(dirList);
-		} else {
-			dirList.clear();
+			for (String x : dirList) {
+				result.add(new ValueObj(new ObjDir(x, Protection.NoProtection)));
+			}
 		}
 		if (showFiles) {
+			List<String> fileList=fs.getFiles();
 			sort(fileList);
-		} else {
-			fileList.clear();
-		}
+			for (String x : fileList) {
+				result.add(new ValueObj(new ObjFile(x, Protection.NoProtection)));
+			}
 
-		List<Value> result = new ArrayList<Value>();
-		for (String x : dirList)
-			result.add(new ValueObj(new ObjDir(x, Protection.NoProtection)));
-		for (String x : fileList)
-			result.add(new ValueObj(new ObjFile(x, Protection.NoProtection)));
+		}
 
 		return new ValueList(result);
 

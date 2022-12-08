@@ -118,16 +118,20 @@ public class FileSet {
 
 	}
 
+	public void processArg (String currentDir, Ctx ctx, ShellCommandArg arg) throws Exception {
+		processArg(currentDir, ctx, arg, false, false);
+	}
+	
 	/**
 	 * Processing argument to shell function, doing wildcard globbing and
 	 * detecting absolute paths, resolving Expr if arg.isExpr()
 	 */
-	public void processArg (String currentDir, Ctx ctx, ShellCommandArg arg) throws Exception {
+	public void processArg (String currentDir, Ctx ctx, ShellCommandArg arg, boolean allowNewDir, boolean allowNewFile) throws Exception {
 		if (arg.isExpr()) {
 			Value v=arg.resolveExpr(ctx);
 			if (v instanceof ValueString) {
 				String str=((ValueString) v).getVal();
-				processStringArg(currentDir, str);
+				processStringArg(currentDir, str, allowNewDir, allowNewFile);
 			} else if (v instanceof ValueObj) {
 				Obj obj=((ValueObj) v).getVal();
 				if (obj instanceof ObjFile) {
@@ -137,12 +141,12 @@ public class FileSet {
 				}
 			}
 		} else {
-			processStringArg(currentDir, arg.getString());
+			processStringArg(currentDir, arg.getString(), allowNewDir, allowNewFile);
 		}
 	}
 	
 	
-	private void processStringArg (String currentDir, String arg) throws Exception {
+	private void processStringArg (String currentDir, String arg, boolean allowNewDir, boolean allowNewFile) throws Exception {
 		boolean isAbsolute;
 
 		if (isWindows()) {
@@ -178,7 +182,14 @@ public class FileSet {
 					this.addFilePath(f.getCanonicalPath());
 				}
 			} else {
-				throw new Exception("No such file or directory: " + f.getCanonicalPath());
+				
+				if (allowNewDir) {
+					this.addDirectoryPath(f.getCanonicalPath());
+				}
+				if (allowNewFile) {
+					this.addFilePath(f.getCanonicalPath());;
+				}
+				if (!allowNewDir && !allowNewFile) throw new Exception("No such file or directory: " + f.getCanonicalPath());
 			}
 			
 			return;

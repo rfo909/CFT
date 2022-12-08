@@ -29,22 +29,6 @@ public abstract class Stmt extends LexicalElement {
     
     public static Stmt parse (TokenStream ts) throws Exception {
         
-        // Shell interactive functionality
-        if (ts.peekStr("cd")) {
-            return new StmtCd(ts);
-        }
-        if (ts.peekStr("ls") || ts.peekStr("lsd") || ts.peekStr("lsf")) {
-            return new StmtLs(ts);
-        }
-        if (ts.peekStr("cat") || ts.peekStr("edit") || ts.peekStr("more")) {
-            return new StmtCatEditMore(ts);
-        }
-        if (ts.peekStr("touch")) {
-            return new StmtTouch(ts);
-        }
-        
-        // --------
-        
         if (ts.peekStr("->")) {
             return new StmtIterate(ts);
         }
