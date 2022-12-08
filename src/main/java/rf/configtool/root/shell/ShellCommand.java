@@ -1,12 +1,7 @@
 package rf.configtool.root.shell;
 
-import java.io.File;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
 import rf.configtool.lexer.Lexer;
