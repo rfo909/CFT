@@ -46,6 +46,7 @@ public class PropsFile {
     private String mCat;
     private String mEdit;
     private String mMore;
+    private String mTail;
     private String mSymGet;
     private String mSymSet;
     
@@ -95,6 +96,7 @@ public class PropsFile {
         mCat  = "Lambda {error('mCat lambda undefined in " + PROPS_FILE + "') }";
         mEdit = "Lambda {error('mEdit lambda undefined in " + PROPS_FILE + "') }";
         mMore = "Lambda{error('mMore lambda undefined in " + PROPS_FILE + "') }";
+        mTail = "Lambda{error('mTail lambda undefined in " + PROPS_FILE + "') }";
         mSymGet = "Lambda{error('mSymGet lambda undefined in " + PROPS_FILE + "') }";
         mSymSet = "Lambda{error('mSymSet lambda undefined in " + PROPS_FILE + "') }";
         
@@ -143,6 +145,9 @@ public class PropsFile {
                     } else 
                     if (name.equals("mMore")) {
                         mMore=value;
+                    } else
+                    if (name.equals("mTail")) {
+                    	mTail=value;
                     } else
                     if (name.equals("mSymGet")) {
                         mSymGet=value;
@@ -218,6 +223,10 @@ public class PropsFile {
     
     public String getMMore() {
         return mMore;
+    }
+    
+    public String getMTail() {
+    	return mTail;
     }
     
     public String getMSymGet () {

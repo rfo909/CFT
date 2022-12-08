@@ -21,7 +21,7 @@ winShell = powershell
 
 
 
-# Macros invoked for statements "cat", "edit" and "more". The single parameter
+# Macros invoked for statements "cat", "edit" and "more" etc. The single parameter
 # may be null or point to a file.
 # ----
 
@@ -31,7 +31,13 @@ mEdit = Lambda { P(1)=>file if(file==null, Lib:GetLastResultFile, file) => file 
 
 mMore = Lambda { P(1)=>file if(file==null, Lib:GetLastResultFile, file) => file Lib:m(file) }
 
+mTail = Lambda { P(1)=>file file.tail(500) }
+
+# Lambdas for symbol set and get
+# ----
+
 mSymGet = Lambda { P(1)=>sym Lib:SymbolGet(sym) }
+
 mSymSet = Lambda { P(1)=>sym Lib:SymbolSet(sym) }
 
 # Shortcuts

@@ -17,7 +17,7 @@ public class ShellCommandsDetector {
 	public static final String[] OPS = {
 		"ls","lsd","lsf",
 		"cd",
-		"cat","edit","more",
+		"cat","edit","more","tail",
 		"touch",
 			
 	};
@@ -58,8 +58,8 @@ public class ShellCommandsDetector {
 		if (name.equals("cd")) {
 			return new ShellCd(parts);
 		}
-		if (name.equals("cat") || name.equals("edit") || name.equals("more")) {
-			return new ShellCatEditMore(parts);
+		if (name.equals("cat") || name.equals("edit") || name.equals("more") || name.equals("tail")) {
+			return new ShellCatEditMoreTail(parts);
 		}
 		if (name.equals("touch")) {
 			return new ShellTouch(parts);

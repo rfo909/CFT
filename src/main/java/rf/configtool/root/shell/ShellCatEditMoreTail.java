@@ -16,9 +16,9 @@ import rf.configtool.main.runtime.lib.ObjDir;
 import rf.configtool.main.runtime.lib.ObjFile;
 import rf.configtool.main.runtime.lib.Protection;
 
-public class ShellCatEditMore  extends ShellCommand {
+public class ShellCatEditMoreTail  extends ShellCommand {
 
-	public ShellCatEditMore(List<String> parts) throws Exception {
+	public ShellCatEditMoreTail(List<String> parts) throws Exception {
 		super(parts);
 	}
 
@@ -59,6 +59,8 @@ public class ShellCatEditMore  extends ShellCommand {
             lambda=propsFile.getMEdit(); 
         } else if (name.equals("more")) {
             lambda=propsFile.getMMore();
+        } else if (name.equals("tail")) {
+        	lambda=propsFile.getMTail();
         } else {
             throw new Exception("Invalid statement name, expected cat, edit or more: " + name);
         }
