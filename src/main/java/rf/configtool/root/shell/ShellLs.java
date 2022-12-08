@@ -72,32 +72,17 @@ public class ShellLs extends ShellCommand {
 		List<ShellCommandArg> args=getArgs();
 		
 		for (ShellCommandArg arg:args) {
-			if (arg.isExpr()) {
-				Value v=arg.resolveExpr(ctx);
-				if (v instanceof ValueString) {
-					fs.processArg(currDir, ((ValueString) v).getVal());
-				} else if (v instanceof ValueObj) {
-					Obj obj=((ValueObj) v).getVal();
-					if (obj instanceof ObjFile) {
-						fs.addFilePath( ((ObjFile) obj).getFile().getCanonicalPath() );
-					} else if (obj instanceof ObjDir) {
-						fs.addDirectoryPath ( ((ObjDir) obj).getDir().getCanonicalPath() );
-					}
-				}
-			} else {
-				fs.processArg(currDir, arg.getString());
-			}
-
-			if (fs.getFiles().size()==0 && fs.getDirectories().size()==1) {
-				// ls someDir ---> list content inside that dir
-				String singleDir=fs.getDirectories().get(0);
-				
-				fs=new FileSet(showDirs,showFiles, enableLimits);
-				fs.addDirContent(singleDir, new ObjGlob("*"));
-			}
-
+			fs.processArg(currDir, ctx, arg);
 		}
 		
+		if (fs.getFiles().size()==0 && fs.getDirectories().size()==1 && !fs.argsContainGlobbing()) {
+			// ls someDir ---> list content inside that dir
+			String singleDir=fs.getDirectories().get(0);
+			
+			fs=new FileSet(showDirs,showFiles, enableLimits);
+			fs.addDirContent(singleDir, new ObjGlob("*"));
+		}
+
 		return generateResultList(fs);
 
 	}

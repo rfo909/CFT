@@ -16,6 +16,7 @@ public class ShellCommandsDetector {
 	
 	public static final String[] OPS = {
 		"nls","nlsd","nlsf",
+		"ncd",
 			
 	};
 
@@ -25,8 +26,10 @@ public class ShellCommandsDetector {
 	
 	public ShellCommand identifyShellCommand () throws Exception {
 		boolean found=false;
+		
+		// do simple string comparison to avoid running full parse for
+		// all interactive commands
 		for (String op:OPS) {
-			//System.out.println("Testing op=" + op + " against " + line);
 			if (line.equals(op) || line.startsWith(op+" ") || line.startsWith(op+"("))  found=true;
 		}
 		
@@ -35,20 +38,23 @@ public class ShellCommandsDetector {
 			return null;
 		}
 		
-		System.out.println("Found shell command: " + line);
+		//System.out.println("Found shell command: " + line);
 		
 		List<String> parts=parseLineParts();
 		
 		// show parts
-		for (String s:parts) {
-			System.out.println("[" + s + "]");
-		}
+//		for (String s:parts) {
+//			System.out.println("[" + s + "]");
+//		}
 		
 		String name=parts.get(0);
 		
 		
 		if (name.equals("nls") || name.equals("nlsd") || name.equals("nlsf")) {
 			return new ShellLs(parts);
+		}
+		if (name.equals("ncd")) {
+			return new ShellCd(parts);
 		}
 		// else ...
 		

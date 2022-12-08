@@ -10,6 +10,12 @@ import java.util.Iterator;
 import java.util.List;
 
 import rf.configtool.main.Ctx;
+import rf.configtool.main.runtime.Obj;
+import rf.configtool.main.runtime.Value;
+import rf.configtool.main.runtime.ValueObj;
+import rf.configtool.main.runtime.ValueString;
+import rf.configtool.main.runtime.lib.ObjDir;
+import rf.configtool.main.runtime.lib.ObjFile;
 import rf.configtool.main.runtime.lib.ObjGlob;
 
 public class FileSet {
@@ -29,6 +35,8 @@ public class FileSet {
 	private final boolean includeDirs;
 	private final boolean includeFiles;
 	private final boolean enableLimits;
+	
+	private boolean argsContainGlobbing = false;
 	
 	private boolean isWindows() {
 		return File.separatorChar=='\\';
@@ -69,7 +77,7 @@ public class FileSet {
 	}
 	
 	/**
-	 * Default processing, when no args. Contains checks on duration and number of files, to
+	 * Default processing for ls, when no args. Contains checks on duration and number of files, to
 	 * avoid hanging forever. To override, supply arg, for ex '*' or some path.
 	 */
 	public String addDirContent(String dir, ObjGlob glob) throws Exception {
@@ -110,12 +118,31 @@ public class FileSet {
 
 	}
 
-	
 	/**
 	 * Processing argument to shell function, doing wildcard globbing and
-	 * detecting absolute paths.
+	 * detecting absolute paths, resolving Expr if arg.isExpr()
 	 */
-	public void processArg (String currentDir, String arg) throws Exception {
+	public void processArg (String currentDir, Ctx ctx, ShellCommandArg arg) throws Exception {
+		if (arg.isExpr()) {
+			Value v=arg.resolveExpr(ctx);
+			if (v instanceof ValueString) {
+				String str=((ValueString) v).getVal();
+				processStringArg(currentDir, str);
+			} else if (v instanceof ValueObj) {
+				Obj obj=((ValueObj) v).getVal();
+				if (obj instanceof ObjFile) {
+					addFilePath( ((ObjFile) obj).getFile().getCanonicalPath() );
+				} else if (obj instanceof ObjDir) {
+					addDirectoryPath ( ((ObjDir) obj).getDir().getCanonicalPath() );
+				}
+			}
+		} else {
+			processStringArg(currentDir, arg.getString());
+		}
+	}
+	
+	
+	private void processStringArg (String currentDir, String arg) throws Exception {
 		boolean isAbsolute;
 
 		if (isWindows()) {
@@ -129,6 +156,7 @@ public class FileSet {
 		
 		int globPos = arg.lastIndexOf('*');
 		boolean usesGlobbing = (globPos >= 0);
+		if (usesGlobbing) argsContainGlobbing=true;
 		
 		if (usesGlobbing && containsSeparators && globPos < lastSeparatorPos) {
 			throw new Exception("Invalid globbing pattern: " + arg);
@@ -178,5 +206,9 @@ public class FileSet {
 		this.addDirContent(theDir, glob);
 	}
 
+	
+	public boolean argsContainGlobbing() {
+		return this.argsContainGlobbing;
+	}
 	
 }
