@@ -7,9 +7,15 @@ import java.util.List;
 import rf.configtool.lexer.Lexer;
 import rf.configtool.lexer.SourceLocation;
 import rf.configtool.lexer.TokenStream;
+import rf.configtool.main.CFTCallStackFrame;
 import rf.configtool.main.Ctx;
+import rf.configtool.main.FunctionBody;
+import rf.configtool.main.FunctionState;
+import rf.configtool.main.PropsFile;
 import rf.configtool.main.ScriptSourceLine;
 import rf.configtool.main.runtime.Value;
+import rf.configtool.main.runtime.ValueBlock;
+import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.parsetree.Expr;
 
 /**
@@ -73,6 +79,27 @@ public abstract class ShellCommand {
         };
         data.sort(c);
 
+    }
+    
+    protected Value callConfiguredLambda (String contextName, Ctx ctx, String lambda, Value[] lambdaArgs) throws Exception {
+		
+        PropsFile propsFile=ctx.getObjGlobal().getRoot().getPropsFile();
+
+        SourceLocation loc=propsFile.getSourceLocation(contextName);
+        
+        FunctionBody codeLines=new FunctionBody(lambda, loc);
+        
+    	CFTCallStackFrame caller=new CFTCallStackFrame("Lambda for '" + contextName + "'");
+
+        Value ret = ctx.getObjGlobal().getRuntime().processFunction(ctx.getStdio(), caller, codeLines, new FunctionState(null,null));
+        if (!(ret instanceof ValueBlock)) throw new Exception("Not a lambda: " + lambda + " ---> " + ret.synthesize());
+        
+        ValueBlock macroObj=(ValueBlock) ret;
+        
+        List<Value> params=new ArrayList<Value>();
+        for (Value v:lambdaArgs) params.add(v);
+        
+        return macroObj.callLambda(ctx.sub(), params);    	
     }
     
 }

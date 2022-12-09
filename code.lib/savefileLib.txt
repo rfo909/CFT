@@ -302,10 +302,10 @@ choice.
             if(!d2.exists) {
                 println("NO DIR: " + d2.path)
             } else {
-                CompareFiles(d,d2,true)
+                CompareTrees(d,d2,true)
             }
     }
-/CompareFiles
+/CompareTrees
 
 
 
@@ -927,32 +927,6 @@ run(null,null,null,true)
 /ClipboardPaste
 
 
-# Remove files as present in Sys.lastResult
-# --
-	files=Sys.lastResult
-	if (getType(files)=="File") {
-		files=List(files)
-	}
-	if (getType(files)=="List" && !files.empty) {
-		# verify content are files that exist
-		Inner {
-			files->x
-				error(getType(x) != "File", "Expected files, got " + files)
-				error(!x.exists, "File not found: " + x.path)
-		}
-	} else {
-		error("Expected files, got " + files)
-	}
-	{files->file println(file.path)}
-	println
-	if (Lib:Confirm("Delete files?")) {
-		files->file 
-			println("Deleting " + file.path)
-			file.delete
-	}
-/RemoveFiles
-
-
 # Diff files
 # --
 	P(1) as File => a
@@ -962,7 +936,32 @@ run(null,null,null,true)
 	} else {
 		Dir.run("diff",a.path,b.path)
 	}
-/diff
+/DiffFiles
+
+
+
+# Remove files and dirs. 
+# Service function for "rm" shell command, called via mRm lambda in CFT.props
+# --
+	P(1) as List => filesAndDirs
+
+	filesAndDirs->x
+		if (getType(x)=="File") {
+			ok = x.delete
+			report(ok,"File",x.path)
+		} else if (getType(x)=="Dir") {
+			ok = x.delete
+			if (ok) {
+				report(ok,"Dir",x.path)
+			} else {
+				if (Lib:Confirm("Confirm deleting " + x.path + " with content") ) {
+					{x.allFiles->f ok=f.delete report(ok,"File",f.path)}
+					{x.allDirs->d ok=d.delete report(ok,"Dir",d.path)}
+					{x->d ok=d.delete report(ok,"Dir",d.path)}
+				}
+			}
+		}
+//RmFilesAndDirs
 
 
 # Symbol set

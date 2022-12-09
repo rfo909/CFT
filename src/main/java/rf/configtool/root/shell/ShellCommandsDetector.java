@@ -20,6 +20,8 @@ public class ShellCommandsDetector {
 		"cat","edit","more","tail",
 		"touch",
 		"mv",
+		"rm",
+		"mkdir",
 			
 	};
 
@@ -67,6 +69,12 @@ public class ShellCommandsDetector {
 		}
 		if (name.equals("mv")) {
 			return new ShellMv(parts);
+		}
+		if (name.equals("rm")) {
+			return new ShellRm(parts);
+		}
+		if (name.equals("mkdir")) {
+			return new ShellMkdir(parts);
 		}
 		// else ...
 		

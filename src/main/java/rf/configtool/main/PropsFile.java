@@ -47,6 +47,8 @@ public class PropsFile {
     private String mEdit;
     private String mMore;
     private String mTail;
+    private String mRm;
+    
     private String mSymGet;
     private String mSymSet;
     
@@ -97,6 +99,8 @@ public class PropsFile {
         mEdit = "Lambda {error('mEdit lambda undefined in " + PROPS_FILE + "') }";
         mMore = "Lambda{error('mMore lambda undefined in " + PROPS_FILE + "') }";
         mTail = "Lambda{error('mTail lambda undefined in " + PROPS_FILE + "') }";
+        mRm = "Lambda{error('mRm lambda undefined in " + PROPS_FILE + "') }";
+        
         mSymGet = "Lambda{error('mSymGet lambda undefined in " + PROPS_FILE + "') }";
         mSymSet = "Lambda{error('mSymSet lambda undefined in " + PROPS_FILE + "') }";
         
@@ -149,6 +153,9 @@ public class PropsFile {
                     if (name.equals("mTail")) {
                     	mTail=value;
                     } else
+                    if (name.equals("mRm")) {
+                    	mRm=value;
+                    } else
                     if (name.equals("mSymGet")) {
                         mSymGet=value;
                     } else
@@ -169,7 +176,7 @@ public class PropsFile {
                     } else if (name.equals("globalOnLoad")) {
                         globalOnLoad=value;
                     } else {
-                        throw new Exception("Invalid configuration field: " + name);
+                        System.out.println("Invalid configuration field: " + name);
                     }
                 }
             }
@@ -227,6 +234,10 @@ public class PropsFile {
     
     public String getMTail() {
     	return mTail;
+    }
+    
+    public String getMRm() {
+    	return mRm;
     }
     
     public String getMSymGet () {

@@ -13,18 +13,31 @@
 
 <h1>CFT Change log</h1>
 
-<h3>3.5.6 2022-12-09 Implemented shell command 'mv'</h3>
+<h3>3.5.6 2022-12-09 Implemented shell command 'mkdir'</h3>
+<p>
+	Don't need rmdir, as rm handles directories
+</p>
+
 <pre>
 Remaining:
 ----------
-cp - config lambda with list of dirs and files (Dir.allFiles)
-rm - config-lambda with list of files and directories (Dir.allFiles)
-mkdir
-rmdir - config lambda with list of directories to remove (Dir.allFiles)
-
-diff - config lambda
+cp - config lambda with list of dirs and files when copying to target dir 
+diff - config lambda calling Lib:DiffFiles
 </pre>
 
+
+<h3>3.5.6 2022-12-09 Implemented shell command 'rm'</h3>
+<p>
+	It calls a lambda in CFT.props, mRm, which in turn calls
+	Lib:RmFilesAndDirs for interactive confirmation as needed.
+</p>
+
+
+<h3>3.5.6 2022-12-09 Implemented shell command 'mv'</h3>
+<p>
+	Fully implemented in Java, no lambda and CFT code needed. Uses java.io.File.renameTo(), which
+	may accept different things on different platforms.
+</p>
 
 <h3>3.5.5 2022-12-08 all old Shell commands rewritten</h3>
 <p>
