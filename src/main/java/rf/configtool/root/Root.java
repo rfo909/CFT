@@ -300,8 +300,13 @@ public class Root {
             
             // Bang command
             
-            if (line.startsWith("!")) {
-                String str=line.substring(1).trim();
+            if (line.startsWith("!") || line.endsWith("!")) {
+                String str=line;
+                if (str.startsWith("!")) {
+                	str = line.substring(1).trim();
+                } else if (str.endsWith("!")) {
+                	str = line.substring(0,line.length()-1);
+                }
 
                 // Run the shell command parser
                 String code = propsFile.getBangCommand();
