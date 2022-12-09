@@ -19,6 +19,7 @@ public class ShellCommandsDetector {
 		"cd",
 		"cat","edit","more","tail",
 		"touch",
+		"mv",
 			
 	};
 
@@ -63,6 +64,9 @@ public class ShellCommandsDetector {
 		}
 		if (name.equals("touch")) {
 			return new ShellTouch(parts);
+		}
+		if (name.equals("mv")) {
+			return new ShellMv(parts);
 		}
 		// else ...
 		
