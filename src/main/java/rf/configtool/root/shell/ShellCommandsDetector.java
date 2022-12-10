@@ -40,18 +40,10 @@ public class ShellCommandsDetector {
 		}
 		
 		if (!found) {
-			//System.out.println("Not shell command: " + line);
 			return null;
 		}
 		
-		//System.out.println("Found shell command: " + line);
-		
 		List<String> parts=parseLineParts();
-		
-		// show parts
-		//for (String s:parts) {
-		//	System.out.println("[" + s + "]");
-		//}
 		
 		String name=parts.get(0);
 		

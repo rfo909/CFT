@@ -9,7 +9,7 @@ import rf.configtool.main.runtime.ValueBoolean;
 
 
 public class ShellMv extends ShellCommand {
-
+	
 	public ShellMv(List<String> parts) throws Exception {
 		super(parts);
 	}
@@ -49,7 +49,6 @@ public class ShellMv extends ShellCommand {
 				File target=new File(targetDirs.get(0));
 				
 				if (target.exists()) {
-					if (!target.isDirectory()) throw new Exception(name + ": expected single target dir");
 					target=new File(target.getCanonicalPath() + File.separator + src.getName());
 				} 
 				

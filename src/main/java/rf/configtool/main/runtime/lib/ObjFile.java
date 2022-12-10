@@ -53,6 +53,8 @@ import rf.configtool.main.runtime.ValueInt;
 import rf.configtool.main.runtime.ValueList;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
+import rf.configtool.root.shell.FileSet;
+import rf.configtool.root.shell.ShellCommandArg;
 import rf.configtool.util.Encrypt;
 import rf.configtool.util.FileInfo;
 import rf.configtool.util.Hex;
@@ -127,6 +129,7 @@ public class ObjFile extends Obj {
                 new FunctionDecrypt(),
                 new FunctionGetTimes(),
                 new FunctionSetTimes(),
+                new FunctionTouch(),
         };
         setFunctions(arr);
 
@@ -1428,6 +1431,26 @@ public class ObjFile extends Obj {
             
             BasicFileAttributeView attributes = Files.getFileAttributeView(Paths.get(name), BasicFileAttributeView.class);
             attributes.setTimes(modified, accessed, created);
+
+            return new ValueObj(self());
+        }
+    }
+ 
+    
+    class FunctionTouch extends Function {
+        public String getName() {
+            return "touch";
+        }
+        public String getShortDesc() {
+            return "touch - create if not found, then update times to now";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            
+            FileTime now=FileTime.fromMillis(System.currentTimeMillis());
+
+            BasicFileAttributeView attributes = Files.getFileAttributeView(Paths.get(name), BasicFileAttributeView.class);
+            attributes.setTimes(now, now, now);
 
             return new ValueObj(self());
         }

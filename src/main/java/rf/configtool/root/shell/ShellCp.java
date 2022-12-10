@@ -10,7 +10,7 @@ import rf.configtool.main.runtime.ValueBoolean;
 
 public class ShellCp extends ShellCommand {
 
-	private boolean confirmAll=false;
+	private boolean confirmed=false;
 	
 	public ShellCp(List<String> parts) throws Exception {
 		super(parts);
@@ -42,14 +42,14 @@ public class ShellCp extends ShellCommand {
 		if (targetDir.exists() && !targetDir.isDirectory()) {
 			throw new Exception(getName() + ": target not a directory");
 		}
-		if (!confirmAll) {
+		if (!confirmed) {
 			ctx.getStdio().println("Confirm copy " + srcDir.getCanonicalPath() + " -> " + targetDir.getCanonicalPath());
 			ctx.getStdio().println("Type 'yes' to continue");
 			String line = ctx.getStdio().getInputLine();
 			if (!line.equals("yes")) {
 				return false;
 			}
-			confirmAll=true;
+			confirmed=true;
 		}
 		
 		if (!targetDir.exists()) {

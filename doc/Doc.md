@@ -1,9 +1,9 @@
 
 # CFT / ConfigTool
 
-Last updated: 2022-04-27 RFO
+Last updated: 2022-12-10 RFO
 
-v3.5.2
+v3.5.6
 
 # Introduction
 
@@ -164,11 +164,8 @@ mostly we use editors for creating function code.
 The language is object oriented, with all values being objects. Here we call a
 function "bin()" inside an integer object.
 
-
-In the following examples, the '$' is the prompt.
-
 ```
-$ 1.bin
+1.bin
 <String>
 00000001
 ```
@@ -178,7 +175,7 @@ Parantheses are optional when no parameters to a function.
 ## Another example
 
 ```
-$ Dir.files.length
+Dir.files.length
 <int>
 12
 ```
@@ -198,14 +195,14 @@ $ Dir.files.length
 ## Show all global functions
 
 ```
-$ help
+help
 ```
 
 Note the two global functions, _Stmt and _Expr, which produce summaries
 of statements and expressions. To run them, just type their name and press Enter:
 ```
-$ _Stmt
-$ _Expr
+_Stmt
+_Expr
 ```
 
 # Show functions inside value objects
@@ -216,13 +213,13 @@ Specifically, the help statement takes the value on top of the stack and lists i
 functions.
 
 ```
-$ 1 help               # integer
-$ 3.14 help            # float
-$ "xxx" help           # string
-$ List help
-$ Dict help
-$ Dir help
-$ File("x.txt") help   # the file needs not exist
+1 help               # integer
+3.14 help            # float
+"xxx" help           # string
+List help
+Dict help
+Dir help
+File("x.txt") help   # the file needs not exist
 ```
 # Create functions
 
@@ -233,17 +230,17 @@ Everything you type in at the prompt is considered code, and executed.
 Then, if you want, you can assign a name to the last line of code, and now you have a function.
 
 ```
-$ Dir.files.length
+Dir.files.length
 <int>
 12
-$ /filesInDir
+/filesInDir
 ```
 
 Now "filesInDir" is a function, referring to one line of code. It can
 be run again as follows:
 
 ```
-$ filesInDir
+filesInDir
 <int>
 12
 ```
@@ -253,17 +250,18 @@ $ filesInDir
 List functions in current script
 
 ```
-$ ?
+?
 ```
 
 To show the code of a function:
 
 ```
-$ ? name
+? name
 ```
 
 If the name doesn't match one function, it is used as a prefix to list a subset
 of the functions.
+
 
 # Save and load
 
@@ -272,9 +270,10 @@ Functions are saved into script files, via "colon" commands, which are system co
 the CFT language.
 
 ```
-$ :save myscript
-$ :load otherscript
+:save myscript
+:load otherscript
 ```
+
 # Edit script file - shortcuts
 
 
@@ -282,7 +281,7 @@ Instead of entering code via the command line, the script file can easily be ope
 an editor. To do this, the current script must be saved, then enter the following:
 
 ```
-$ @e
+@e
 ```
 
 This opens the script in an editor. On linux you will be asked which editor you prefer, and
@@ -296,7 +295,7 @@ reloads the script the next time you press ENTER.
 To list all shortcuts
 
 ```
-$ @
+@
 ```
 
 The shortcut character can be changed in the CFT.props configuration file.
@@ -310,48 +309,52 @@ Shortcuts are ways of running code, while colon commands are system commands.
 View all colon commands:
 
 ```
-$ :
+:
 ```
 
 View all shortcuts:
 
 ```
-$ @
+@
 ```
 
 Shortcuts are defined in the CFT.props file.
 
-# CFT as a shell
+# CFT as a shell / the "CFT shell commands"
 
 
-CFT contains a number of "shell like commands", with different syntax from the regular function calls.
+CFT contains a number of "shell like commands", with different syntax from the regular code, which is 
+all about function calls.
 
 
-
-- ls
+- ls | lsf | lsd
 - cd
-- pwd
 - cat
 - more
 - edit
-
-
+- tail
+- mkdir
+- rm
+- cp
+- mv
+- touch
 
 The syntax for these commands correspond to how they are used in Linux/Unix, with support for
 globbing ("*.txt" etc). They are meant for easy navigation around the directory trees, and for
-inspecting files, with "cat", "more" and "edit".
+inspecting files, with "cat", "more" and "edit", and so on.
 ```
-$ pwd
-$ cd ..
-$ ls *.txt
+pwd
+cd ..
+ls *.txt
 ```
 
 The "ls" command comes in two additional versions:
 
 ```
-$ lsf   # lists files
-$ lsd   # lists directories
+lsf   # lists files
+lsd   # lists directories
 ```
+
 ## Paths with space
 
 
@@ -359,7 +362,12 @@ To access directories of files with space in them, we use quotes, single or doub
 
 ```
 cd "c:\program files"
+
+or
+
+cd c:\program" "files
 ```
+
 ## Windows backslash
 
 
@@ -370,13 +378,8 @@ Dir("c:\program files\")
 /ProgramFilesDir
 ```
 
-This goes interactively as well:
 
-```
-$ cd d:\logs
-```
-## Combine shell commands with CFT function results
-
+## Combine CFT shell commands with CFT function results
 
 In addition to the above syntax, such as "cd /someDir/xyz" etc, these commands
 also support using output from some CFT function. Say we have some functions:
@@ -392,22 +395,19 @@ Dir("/SomewhereElse/xyz").file("data.txt")
 ... then we can do this:
 
 ```
-$ cd (LogDir)
-$ edit (DataFile)
+cd (LogDir)
+edit (DataFile)
 ```
-## Shell commands not suited in functions
+
+The expressions should return single Dir or File objects, not lists. If they return a string,
+that is used as any other path expression.
 
 
-Due to how some of the "shell commands" parse input, due to globbing, they are not suited for running inside function
-code, only interactively. 
+## CFT Shell commands not available in code
 
-This applies to the following:
+The CFT shell commands are parsed only when processing input, and so can not be called from function
+code.
 
-- cd
-- ls
-- cat
-- more
-- edit
 
 Function code should instead use the Dir and File functions, etc:
 
@@ -416,40 +416,31 @@ dirExpr.cd                 # set current dir
 dirExpr.files              # list content in directory
 dirExpr.dirs
 
+dirExpr.create
+dirExpr.delete
+
+fileExpr.delete
+
 Lib:m(fileExpr)            # The Lib script contains function "m" for paging through a file
 Lib:e(fileExpr)            # "e" for opening file in editor
-```
-
-## No shell-like destructive commands!
-
-
-CFT **does not** include direct "shell-like" destructive commands ("rm", "cp", "mv", "mkdir" etc).
-
-
-*This is by choice.*
-
-
-The reason is to encourage the user to use regular CFT syntax, and create functions for often
-repeated needs, as this in turn enables the "protect" functionality, which helps avoid mistakes, 
-such as deleting or modifying directories and files that should not be touched.
-
-
-Alternatively one can use "bang commands" or the shell function. Can also use the
-shortcut @fm, which opens a graphical file manager for the current directory.
-
-
-Bang commands are commands that start with "!", and are sent to the shell for execution.
+fileExpr.read              # "cat"
+fileExpr.touch
 
 ```
-$ !rm x.txt
+
+## Bang commands
+
+
+CFT supports "bang commands", where one can execute operating system level shell commands.
+
+
+Bang commands are commands that start or end with "!", and are sent to the shell for execution.
+
+```
+!ls -l
+ls -l!
 ```
 
-The shell command runs bash or powershell (configurable in CFT.props) in the foreground. When
-exiting the shell, you are back at CFT.
-
-```
-$ shell
-```
 
 ## Background jobs
 
@@ -458,8 +449,8 @@ CFT lets us run any *expression* (usually a function call) as a background job, 
 the '&amp;' expression syntax.
 
 ```
-$ & 2+3
-$ & someFunction(...)
+& 2+3
+& someFunction(...)
 ```
 
 The "2+3" and "someFunction" are the expressions that are run as background jobs.
@@ -483,7 +474,7 @@ Note that jobs don't survive killing the CFT process.
 
 
 Regularly performing changes, such as copying, deleting and creating files, should be scripted
-with code. Therefore, no "command line" (rm/del) style functionality exists for this.
+with code. .
 
 Example:
 
@@ -500,7 +491,7 @@ Now, if we either interactively or via another function do something like this, 
 fails with an error:
 
 ```
-$ LogDir.files->f f.delete
+LogDir.files->f f.delete
 ```
 
 The protect function sets a mark in the Dir or File object to which it is applied. This
@@ -508,60 +499,23 @@ mark is in turn inherited by all Dir/File objects derived from it, so LogDir.fil
 produces a list of files, each with the protection mark set.
 
 
-# Bang commands
 
-
-CFT supports a special syntax, where by starting a command line with "!", the following can
-directly run external commands, such as
-
-```
-$ !ps
-$ !git status
-$ !rm xxx.txt
-$ !top
-```
-
-For details of the default bang command parser:
-
-```
-$ BangParser:Readme
-```
-
-# The "shell" command
-
-
-The global shell() function starts a shell inside CFT. When you exit from it, you're back
-in CFT.
-
-```
-$ shell
-(starts bash or cmd or Powershell or something else)
-exit
-# Running /usr/bin/bash completed: 25529ms
-$
-```
-
-The shell function is configured in the CFT.props file which must exist in the CFT
-home directory.
-
-```
-shell = bash
-winShell = powershell
-```
 # Show content of file
 
 
 Now if we want to list content of file "TODO.txt", we can enter
 
 ```
-$ cat TODO.txt
-$ more TODO.txt
+cat TODO.txt
+more TODO.txt
 ```
 ## Open a file in editor
 
 ```
-$ edit TODO.txt
+edit TODO.txt
 ```
+
+
 # List basics
 
 
@@ -573,12 +527,12 @@ with the global List() function, which takes any number of parameters, and creat
 from those values.
 
 ```
-$ List                 # empty list
-$ List(1,2,3,4)
-$ Dir.files
-$ "abcdef".chars
-$ "one two three".split
-$ "one:two:three".split(":")
+List                 # empty list
+List(1,2,3,4)
+Dir.files
+"abcdef".chars
+"one two three".split
+"one:two:three".split(":")
 ```
 
 Many functions are available on a List object. One frequently used is "nth", which
@@ -586,7 +540,7 @@ gets a specific element, defaulting to 0 if no argument, but there also exist "f
 and a few others.
 
 ```
-$ List("a","b","c").first
+List("a","b","c").first
 <String>
 a
 ```
@@ -594,7 +548,7 @@ a
 For details of available functions, use the help system:
 
 ```
-$ List help
+List help
 ```
 # Introduction to loops
 
@@ -602,21 +556,21 @@ $ List help
 Loops in CFT are mostly concerned with iterating over lists. Let's create a list:
 
 ```
-$ Dir.allFiles(Glob("*.java"))
+Dir.allFiles(Glob("*.java"))
 ```
 
 This line of code generates a list of all java files under the current directory or sub-directories.
 When we see that the code works, we give it a name.
 
 ```
-$ /JavaFiles
+/JavaFiles
 ```
 
 We then iterate over the list of files returned, and count the number of lines in each, then
 sum it all up, creating the "linecount" function.
 
 ```
-$ JavaFiles->f out(f.read.length) | _.sum
+JavaFiles->f out(f.read.length) | _.sum
 <int>
 18946
 /linecount
@@ -639,7 +593,7 @@ returning a single int value.
 Filtering list data is an essential function in CFT. Here is a simple example:
 
 ```
-$ List(1,2,3,4,3,2,1)-> x assert(x>2) out(x)
+List(1,2,3,4,3,2,1)-> x assert(x>2) out(x)
 <List>
 3
 4
@@ -654,7 +608,7 @@ The assert() works like "if condition not satisfied, continue with next value"
 Function code may use local variables for simplifying expressions.
 
 ```
-$ a=3 b=2 a+b
+a=3 b=2 a+b
 <int>
 5
 ```
@@ -682,7 +636,7 @@ This function lists all files of type .java and .txt under current directory.
 # Files
 
 ```
-$ File("x.txt")
+File("x.txt")
 <obj: File>
 x.txt   DOES-NOT-EXIST
 ```
@@ -700,7 +654,7 @@ path in the parameter to File(), or use the .file() function inside
 some Dir object:
 
 ```
-$ Dir("/some/path").file("x.txt")
+Dir("/some/path").file("x.txt")
 ```
 ## Page through a file
 
@@ -771,7 +725,7 @@ f=File("x.txt") f.setWriteLF.create(f.read)
 # Directories
 
 ```
-$ Dir
+Dir
 <obj: Dir>
 ConfigTool/ d:5 f:20
 ```
@@ -789,8 +743,8 @@ the directory. Another is
 These support "globbing", which is to use "*" to match groups of files.
 
 ```
-$ Dir.files("*.txt")
-$ Dir.allDirs(".git")
+Dir.files("*.txt")
+Dir.allDirs(".git")
 ```
 ## Create a subdirectory
 
@@ -896,11 +850,11 @@ Strings are written in
 for all kinds of combinations.
 
 ```
-$ "double quotes"
-$ 'single quotes'
-$ "'a'"
+"double quotes"
+'single quotes'
+"'a'"
 'a'
-$ '"' + "'a'" + '"'
+'"' + "'a'" + '"'
 "'a'"
 ```
 
@@ -917,7 +871,7 @@ Since '@' is the shortcut character, you can not enter a raw string directly in 
 command line interface, but you can do this:
 
 ```
-$ "" + @ something ...
+"" + @ something ...
 ```
 ## Dictionaries
 
@@ -925,7 +879,7 @@ $ "" + @ something ...
 Dictionaries are maps that store any value identified by names (strings).
 
 ```
-$ x=Dict x.set("a",1) x.get("a")
+x=Dict x.set("a",1) x.get("a")
 1
 ```
 
@@ -933,7 +887,7 @@ Note: We will often store values by names that are valid identifiers. For these 
 both when setting and fetching the values:
 
 ```
-$ x=Dict x.a=1 x.a=x.a+1 x.a  # returns 2
+x=Dict x.a=1 x.a=x.a+1 x.a  # returns 2
 ```
 ### SymDict
 
@@ -1006,7 +960,7 @@ Used in connection with encryption etc. Can be created from strings, or represen
 the content of a file.
 
 ```
-$ "password".getBytes("UTF-8")
+"password".getBytes("UTF-8")
 <Binary>
 0x..
 ```
@@ -1019,16 +973,16 @@ Check the Lib.Util object, which contains functions that create objects Encrypt 
 Lists can be created manually using the global List() function.
 
 ```
-$ List(1,2,3)
-$ List("a","b","c")
+List(1,2,3)
+List("a","b","c")
 ```
 
 A much used way for creating lists of strings, is to use the string function split(), which by default
 splits a string on spaces. This means the following produce the same result.
 
 ```
-$ List("a","b","c")
-$ "a b c".split
+List("a","b","c")
+"a b c".split
 ```
 ## Iterating over list content
 
@@ -1037,7 +991,7 @@ The iterator in CFT takes the form of an arrow followed by a loop variable. For 
 to return output, we use the out() statement inside.
 
 ```
-$ "1 2 3".split->x out("a"+x)
+"1 2 3".split->x out("a"+x)
 <List>
 0: a1
 1: a2
@@ -1052,14 +1006,14 @@ The result is a list of strings, as displayed.
 Using the assert() statement, we may abort processing for elements that do not meet a condition.
 
 ```
-$ Dir.allFiles->f assert(f.name.endsWith(".java")) out(f)
+Dir.allFiles->f assert(f.name.endsWith(".java")) out(f)
 ```
 
 The reject() statement is the inverse of assert(), and aborts processing for elements that meet
 a certain condition.
 
 ```
-$ List(1,2,3,2,1)->x reject(x>2) out(x)
+List(1,2,3,2,1)->x reject(x>2) out(x)
 <List>
 1
 2
@@ -1083,7 +1037,7 @@ statement, which takes a boolean condition as first parameter, and the value to
 be sent out as second parameter. Can be useful some times.
 
 ```
-$ List(1,2,3,2,1)->x condOut(x<2,"(") out("b") condOut(x<2,")") | _.concat
+List(1,2,3,2,1)->x condOut(x<2,"(") out("b") condOut(x<2,")") | _.concat
 <String>
 (b)bbb(b)
 ```
@@ -1217,7 +1171,7 @@ Both the "int" and "float" type contain two functions for converting to int and 
 To save all named functions, enter the special command below
 
 ```
-$ :save Test
+:save Test
 ```
 
 This creates a file under the CFT home directory,
@@ -1226,7 +1180,7 @@ called savefileTest.txt.
 ## Load
 
 ```
-$ :load Test
+:load Test
 ```
 ## Create new empty script
 
@@ -1234,7 +1188,7 @@ $ :load Test
 To create a new script from scratch, there is the colon command:
 
 ```
-$ :new
+:new
 ```
 
 ## The @e shortcut
@@ -1243,7 +1197,7 @@ $ :new
 A common shortcut is @e, which opens current savefile in an editor:
 
 ```
-$ @e
+@e
 ```
 
 Shortcuts can be redefined in the CFT.props file.
@@ -1291,8 +1245,8 @@ The '?' interactive command has an extended syntax that allows you to list funct
 another script, as well as listing the code of particular function.
 
 ```
-$ ?Lib:                  # lists functions inside Lib
-$ ?Lib:m                 # displays code of function 'm' (to page through a text file)
+?Lib:                  # lists functions inside Lib
+?Lib:m                 # displays code of function 'm' (to page through a text file)
 ```
 # Helper / local functions
 
@@ -1302,8 +1256,8 @@ of the script interface, as seen from other scripts. This is done by defining th
 as follows:
 
 ```
-$ 23
-$ //SomeConstant
+23
+//SomeConstant
 ```
 
 The '?' command omits these local functions, for a cleaner summary of the main functions
@@ -1335,7 +1289,7 @@ The shortcut @scr calls this function.
 Loops are implemented using the "for each" functionality of "-> var". Loops may well be nested.
 
 ```
-$ List(1,2,3)->x List(1,2,3)->y  out(x*y)
+List(1,2,3)->x List(1,2,3)->y  out(x*y)
 <List>
 0: 1
 1: 2
@@ -1367,7 +1321,7 @@ return value from that code space and putting it onto the stack for the next loo
 space to work with (or do something else). Example:
 
 ```
-$ Dir.files->f out(f.length) | =>sizes sizes.sum
+Dir.files->f out(f.length) | =>sizes sizes.sum
 ```
 
 This single line of code first contains a loop, which outputs a list of integers for
@@ -1380,7 +1334,7 @@ To save us some typing, the special expression "_" (underscore) pops the topmost
 the stack.
 
 ```
-$ Dir.files->f out(f.length) | _.sum
+Dir.files->f out(f.length) | _.sum
 ```
 
 As we see from the above code, code spaces don't 
@@ -1388,7 +1342,7 @@ As we see from the above code, code spaces don't
 following is perfectly legal, although a little silly.
 
 ```
-$ 2+3 | | | | =>x x | =>y y | _ _ _ |
+2+3 | | | | =>x x | =>y y | _ _ _ |
 ```
 
 It returns 5.
@@ -1424,7 +1378,7 @@ identifies the parameter by position. Note that
 **parameter position is 1-based**.
 
 ```
-$ P(1)=>a P(2)=>b a+b
+P(1)=>a P(2)=>b a+b
 ```
 
 This is a valid function, but entering it interactively fails, because it is immediately
@@ -1454,11 +1408,11 @@ and may then ask the user to input the value.
 Above example again, now with default values for parameters:
 
 ```
-$ P(1,1)=>a P(2,2)=>b a+b
+P(1,1)=>a P(2,2)=>b a+b
 <int>
 3
-$ /f
-$ f(5,10)
+/f
+f(5,10)
 <int>
 15
 ```
@@ -1553,7 +1507,7 @@ inside runs detached from the caller, and behaves exactly like a function.
 ```
 Lambda{P(1)+P(2)}
 /MyLambda
-$ MyLambda.call(1,2)
+MyLambda.call(1,2)
 ```
 
 Can be used to create local functions inside regular functions, but mostly used to create
@@ -1587,7 +1541,7 @@ means that there are no sub-scopes inside local or inner blocks inside a
 function body.
 
 ```
-$ {x=3} x
+{x=3} x
 3
 ```
 # List filtering with Lambda
@@ -1767,10 +1721,10 @@ The functions for running external programs are part of the Dir object, which de
 working directory for the program.
 
 ```
-$ Dir.run ( list|...)
-$ Dir.runCapture ( list | ...)
-$ Dir.runDetach ( list|...)
-$ Dir.runProcess ( stdinFile, stdoutFile, stdErrFile, list|... )
+Dir.run ( list|...)
+Dir.runCapture ( list | ...)
+Dir.runDetach ( list|...)
+Dir.runProcess ( stdinFile, stdoutFile, stdErrFile, list|... )
 ```
 
 The parameters written as "list|..." means either a List object, or a list of
@@ -1784,7 +1738,7 @@ the program requires user input, we can give it, and the CFT code will not conti
 the external process has terminated.
 
 ```
-$ Dir.run("cmd","/c","git","pull","origin","master")
+Dir.run("cmd","/c","git","pull","origin","master")
 ```
 
 Many Windows programs require the "cmd","/c" in front of the actual program.
@@ -1807,7 +1761,7 @@ Use to run external program in the background. The CFT code continues running af
 off the background process. Nice for editors etc.
 
 ```
-$ Dir.runDetach("leafpad", Sys.savefile.path)
+Dir.runDetach("leafpad", Sys.savefile.path)
 ```
 
 This example runs the leapad editor in the background, with the path of the current savefile as
@@ -1875,7 +1829,7 @@ The result.wait closure, when called, returns a Dict with the following content:
 To show the Lib:runProcess function code
 
 ```
-$ ?Lib:runProcess
+?Lib:runProcess
 ```
 ## Lib:run utility function
 
@@ -1890,7 +1844,7 @@ calling the wait closure, as seen above, returning the result from that call.
 To show the Lib:run function code
 
 ```
-$ ?Lib:run
+?Lib:run
 ```
 ## Work directory issues
 
@@ -1917,8 +1871,8 @@ To set up ssh login without password, create and distribute an ssh key, then
 copy it to the target host, as follows (in Linux shell).
 
 ```
-$ ssh-keygen -t rsa
-$ ssh-copy-id user@host
+ssh-keygen -t rsa
+ssh-copy-id user@host
 ```
 # Synthesis
 
@@ -1940,17 +1894,17 @@ last result is not a list, you get an error.
 ## Example using :syn
 
 ```
-$ Dir.sub("src")
+Dir.sub("src")
 <obj: Dir>
 src/
 
-$ :syn
+:syn
 synthesize ok
 +-----------------------------------------------------
 | .  : Dir("/home/roar/CFT/src")
 +-----------------------------------------------------
 Assign to name by /xxx as usual
-$ /DirSrc
+/DirSrc
 ```
 
 Running the code Dir.sub("src") creates a Dir object for the src subdirectory (regardless of
@@ -1979,13 +1933,13 @@ of current directory.
 To synthesize a single element when the last result was a list, use :NN, as follows
 
 ```
-$ ls
+ls
 <List>
 0: runtime/              | d:2 | f:12
 1: CallScriptFunc.java   | 1k  | 1398  |             | 2020-02-28 22:38:09
 2: CodeHistory.java      | 10k | 10980 | 2d_22:23:24 | 2020-06-07 12:57:49
 3: CommandProcessor.java | 0k  | 365   |             | 2020-02-28 22:38:09
-$ :2
+:2
 synthesize ok
 +-----------------------------------------------------
 | .  : File("/home/roar/Prosjekter/Java/ConfigTool/src/rf/configtool/main/CodeHistory.java")
@@ -2007,7 +1961,7 @@ current size of the terminal window.
 After resizing the terminal, we need to update the Term object.
 
 ```
-$ @term
+@term
 ```
 
 This works on Linux (using stty command) and on Windows (powershell).
@@ -2041,9 +1995,9 @@ merge() function of strings. This replaces occurrences of names in the dictionar
 with their values (as strings).
 
 ```
-$ Dict.set("name","Julius")
-$ /data
-$ "Dear name".merge(data)
+Dict.set("name","Julius")
+/data
+"Dear name".merge(data)
 <String>
 Dear Julius
 ```
@@ -2056,9 +2010,9 @@ are rewritten into ${name}. Changing the template correspondingly, this eliminat
 accidentally matching text not meant as merge codes.
 
 ```
-$ Dict.set("name","Julius").mergeCodes
-$ /data
-$ "Dear ${name}".merge(data)
+Dict.set("name","Julius").mergeCodes
+/data
+"Dear ${name}".merge(data)
 <String>
 Dear Julius
 ```
@@ -2070,9 +2024,9 @@ strings for creating the merge codes. Note that either none or both of these mus
 given.
 
 ```
-$ Dict.set("name","Julius").mergeCodes("[","]")
-$ /data
-$ "Dear [name]".merge(data)
+Dict.set("name","Julius").mergeCodes("[","]")
+/data
+"Dear [name]".merge(data)
 <String>
 Dear Julius
 ```
@@ -2195,7 +2149,7 @@ some text
 Calling the myTemplate function from the interactive shell, produces the following result
 
 ```
-$ myTemplate
+myTemplate
 <List>
 0: This is
 1: some text
@@ -2225,9 +2179,10 @@ The code to use this file consists of creating the DataFile object, passing the 
 string as a parameter, then accessing the individual templates.
 
 ```
-$ DataFile(File("data.txt"),"###")
-$ /df
-$ df.get("A")
+DataFile(File("data.txt"),"###")
+/df
+
+df.get("A")
 <List>
 This is
 template A
@@ -2244,8 +2199,8 @@ DataFile has support for comments in the template text, which can be automatical
 removed. They are defined by another prefix string as follows:
 
 ```
-$ DataFile(someFile,"###").comment("//")
-$ /df
+DataFile(someFile,"###").comment("//")
+/df
 ```
 
 Now all lines starting with "//" are automatically stripped from any output.
@@ -2301,10 +2256,10 @@ functions inside the JSON script.
 Parse example:
 
 ```
-$ JSON:Parse("{a:1,b:[2,3,4]}")
+JSON:Parse("{a:1,b:[2,3,4]}")
 Dict: a b
-$ /x
-$ x.b
+/x
+x.b
 0: 2
 1: 3
 2: 4
@@ -2313,10 +2268,10 @@ $ x.b
 Generate JSON example
 
 ```
-$ Dict.set("a",1).set("b",2).set("c","xyz".chars)
+Dict.set("a",1).set("b",2).set("c","xyz".chars)
 Dict: a b c
-$ /y
-$ JSON:PP(y)
+/y
+JSON:PP(y)
 0: {
 1:   "a": 1,
 2:   "b": 2,
@@ -2326,7 +2281,7 @@ $ JSON:PP(y)
 6:     "z"
 7:   ]
 8: }
-$ JSON:Export(y)
+JSON:Export(y)
 { "a": 1, "b": 2, "c": [ "x", "y", "z" ] }
 ```
 
@@ -2602,7 +2557,7 @@ Calling function Sys.isWindows() is used to differ between the two in code. It d
 by checking if (Java) File.separator is a backslash.
 
 ```
-$ Sys.isWindows
+Sys.isWindows
 <boolean>
 false
 ```
@@ -2695,10 +2650,11 @@ The global function getType() takes one parameter, and returns
 the type name of that value, as a string
 
 ```
-$ getType(3)
+getType(3)
 <String>
 int
-$ getType(Dict)
+
+getType(Dict)
 <String>
 Dict
 ```
@@ -3202,24 +3158,24 @@ Getting information about functions inside objects and scripts differ as follows
 ```
 # Lib object content
 
-$ Lib help
+Lib help
 
 
 # Lib script content
 
-$ ?Lib:
+?Lib:
 
 # or
 
-$ :load Lib
-$ ?
+:load Lib
+?
 ```
 
 Calling functions inside objects and libraries differ as well.
 
 ```
-$ Lib.Text               # call function Text inside Lib object
-$ Lib:Header("Hello")    # call function Header in script
+Lib.Text               # call function Text inside Lib object
+Lib:Header("Hello")    # call function Header in script
 ```
 # onLoad functions
 
@@ -3296,7 +3252,7 @@ separate environment. Its standard I/O is virtualized by the Process object.
 Listing Process functions:
 
 ```
-$ SpawnProcess(Dict,1) help
+SpawnProcess(Dict,1) help
 # close() - close stdin for process
 # data() - returns the (original) context dictionary
 # exitValue() - returns exit value or null if still running
@@ -3408,7 +3364,7 @@ from earlier runs.
 After this has run, we look at the data in the "stats" collection:
 
 ```
-$ Db2Obj:ShowFields("stats",List("host","ok"))
+Db2Obj:ShowFields("stats",List("host","ok"))
 <List>
 0: 2020-11-05 22:48:44 | s01.s | true
 1: 2020-11-05 22:48:44 | s02.s | true
@@ -3423,7 +3379,7 @@ Here we list fields "host" and "ok" from the objects. We see that hosts "s04.s" 
 failed. We now check the output log for "s04.s".
 
 ```
-$ Db2Obj:FindObjects("stats",Lambda{P(1).value.host=="s04.s"}).first.value.output
+Db2Obj:FindObjects("stats",Lambda{P(1).value.host=="s04.s"}).first.value.output
 <List>
 0: Pinging host s04.s
 1: FAILED with exitCode=1
@@ -3678,7 +3634,7 @@ lists its content.
 To list defined shortcut, just type
 
 ```
-$ @
+@
 ```
 
 This is a shortcut itself, that traverses the CFT.props file and identifies and
@@ -3732,7 +3688,7 @@ have been consumed, or we find a character that we can not match, which is usual
 In the CFT functions, nodes are created via the Lib.Text.Lexer.Node function.
 
 ```
-$ Lib.Text.Lexer help
+Lib.Text.Lexer help
 # Node(firstChars?) - create empty node, possibly identifying firstChars list
 # addLine(line) - processes line, adds to internal token list - returns self
 # getTokenStream(rootNode) - get TokenStream object
@@ -3742,7 +3698,7 @@ $ Lib.Text.Lexer help
 The nodes in turn contain the following:
 
 ```
-$ Lib.Text.Lexer.Node help
+Lib.Text.Lexer.Node help
 # addToken(token) - create mappings for token string, returns resulting Node
 # addTokenComplex(token, charMapDict) - create mappings for complex string, returns resulting Node
 # setDefault(targetNode?) - map all non-specified characters to node, returns target node
@@ -3883,7 +3839,7 @@ and since space is assigned a negative token type, it gets automatically ignored
 Now running the test we get
 
 ```
-$ test
+test
 <List>
 0: pos=1  | this | 1
 1: pos=6  | is   | 1
@@ -4202,7 +4158,7 @@ These are listed at the top when typing help to show global functions.
 Colon commands are best described by entering a single colon at the CFT prompt.
 
 ```
-$ :
+:
 Colon commands
 --------------
 :save [ident]?           - save script
@@ -4232,56 +4188,22 @@ The "problem" is that CFT code (and so shortcuts) can run colon commands via "ab
 
 
 - boolean
-
-
 - int
-
-
 - float
-
-
 - string
-
-
 - null
-
-
 - AValue
-
-
 - Date
-
-
 - Date.Duration
-
-
 - Dict
-
-
 - Dir
-
-
 - File
-
-
 - FileLine
-
-
 - Float
-
-
 - Glob
-
-
 - Int
-
-
 - List
-
-
 - Regex
-
-
 - Str
 
 
@@ -4361,6 +4283,8 @@ do {...}
 Compute {...}
 sub {...}
 ```
+
+
 ## Script and code size
 
 ### 2020-11-13 v2.0.0
@@ -4440,4 +4364,5 @@ Functions:        507
 Object types:     72
 Value types:      13
 ```
+
 
