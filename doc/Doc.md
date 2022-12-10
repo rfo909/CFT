@@ -4365,4 +4365,14 @@ Object types:     72
 Value types:      13
 ```
 
+### 2022-12-10 v3.5.6
+
+```
+Script code:      17031 lines
+Java code:        33997 lines
+Functions:        510
+Object types:     72
+Value types:      13
+```
+
 

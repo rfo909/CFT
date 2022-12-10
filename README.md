@@ -13,7 +13,7 @@ It's been in continous daily use since creation in 2018.
 
 Written from scratch in Java; runs both on Linux and Windows environments. 
 
-*README last updated 2022-11-29*
+*README last updated 2022-12-10*
 
 
 ## Terminal based - shell-like
@@ -21,12 +21,17 @@ Written from scratch in Java; runs both on Linux and Windows environments.
 The command line interface makes CFT feel like a shell, for navigating the directory tree, and inspecting files,
 using the following commands:
 
-- cd
 - ls
-- pwd
+- cd
 - cat
 - more
 - edit
+- tail
+- mkdir
+- rm
+- cp
+- mv
+- touch
 
 
 ## Functionality
