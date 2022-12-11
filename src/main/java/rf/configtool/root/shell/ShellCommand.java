@@ -16,6 +16,7 @@ import rf.configtool.main.PropsFile;
 import rf.configtool.main.ScriptSourceLine;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueBlock;
+import rf.configtool.main.runtime.ValueList;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.parsetree.Expr;
 
@@ -40,8 +41,15 @@ public abstract class ShellCommand {
 			if (part.startsWith("(") && part.endsWith(")")) {
 				isExpr=part.substring(1,part.length()-1); // (xxx) -> xxx
 			} else if (part.startsWith("%")) {
+				// symbol lookup
 				isExpr=part;
-			} 
+			} else if (part.startsWith(":")) {
+				if (part.equals(":")) {
+					isExpr="Sys.lastResult";
+				} else {
+					isExpr="Sys.lastResult.nth(" + part.substring(1) + ")";
+				}
+			}
 			if (isExpr != null) {
 				// create Expr
 				Lexer lex=new Lexer();

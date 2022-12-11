@@ -356,6 +356,8 @@ lsf   # lists files
 lsd   # lists directories
 ```
 
+Run the global function _Shell to get up to date help on the CFT shell command interpreter.
+
 ## Paths with space
 
 

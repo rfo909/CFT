@@ -97,7 +97,7 @@ Add, Commit and Push.
 
 # Git diff
     HomeDir.run("git","diff")
-/diff
+/Diff
 
 
 
