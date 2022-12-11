@@ -16,7 +16,7 @@
 * Save and load
 * Edit script file - shortcuts
 * Shortcuts vs colon commands
-* CFT as a shell / the "CFT shell commands"
+* CFT as a shell / the "CFT shell-like commands"
   |  Paths with space
   |  Windows backslash
   |  Combine CFT shell commands with CFT function results

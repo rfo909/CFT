@@ -1,9 +1,9 @@
 
 # CFT / ConfigTool
 
-Last updated: 2022-12-10 RFO
+Last updated: 2022-12-11 RFO
 
-v3.5.6
+v3.6.0
 
 # Introduction
 
@@ -12,11 +12,14 @@ CFT is a programming language and an interactive command shell, with focus on da
 general usefulness. The name is short for "ConfigTool".
 
 
-CFT implements a system library of 500+ system functions, and some 80+ system object types (v3.5.0). There is about 30 global functions, with
+CFT implements a system library of 500+ system functions, and some 80+ system object types (v3.5.0). 
+
+There is about 30 global functions, with
 the rest existing as member functions inside the system objects.
 
 
-The system objects represent strings, integers and floats, booleans, lists, dictionaries, files and directories, and many others related to various uses.
+The system objects represent strings, integers and floats, booleans, lists, dictionaries, files and directories, and many
+others related to various uses.
 
 
 ## Compact code
@@ -31,7 +34,7 @@ Example:
 Dir("/some/path").file("log.txt").append(Date.fmt + " something happened")
 ```
 
-The corresponding Java code would easily require 10+ lines of code for this simple
+The corresponding Java code would easily require 10+ lines of code for this single
 operation.
 
 
@@ -43,7 +46,7 @@ P(1,readLine("Log line"))=> x Dir("/some/path").file("log.txt").append(Date.fmt 
 /LogLine
 ```
 
-Entering text in interactive mode, each line is considered a function body, and immediately executed.
+Entering text *interactively*, each line is considered a function body, and immediately executed.
 
 
 We then enter "/LogLine" which
@@ -59,6 +62,8 @@ called from other functions, in the same or from other scripts.
 :save MyScript
 :load MyScript
 ```
+
+
 ## Editing script files
 
 
@@ -146,7 +151,7 @@ and Windows, and easily integrates with running external programs on
 both platforms, including PowerShell on Windows.
 
 
-Development has been going on since May 2018, and on github since July 2020.
+Development has been going on since May 2018, and on github since version 1.0 in July 2020.
 
 # Functionality
 
@@ -182,11 +187,7 @@ Dir.files.length
 
 
 - The "Dir" global function returns the current directory as a Dir-object
-
-
 - We call the "files" function in the directory object, it returns a list object
-
-
 - We call the "length" function in the list object, it returns an int object
 
 
@@ -320,10 +321,10 @@ View all shortcuts:
 
 Shortcuts are defined in the CFT.props file.
 
-# CFT as a shell / the "CFT shell commands"
+# CFT as a shell / the "CFT shell-like commands"
 
 
-CFT contains a number of "shell like commands", with different syntax from the regular code, which is 
+CFT contains a number of "shell-like commands", with different syntax from the regular code, which is 
 all about function calls.
 
 
@@ -4400,7 +4401,7 @@ Running CodeStats:main
 
 ```
 Script code:      17031 lines
-Java code:        34107 lines
+Java code:        34123 lines
 Functions:        510
 Object types:     72
 Value types:      13

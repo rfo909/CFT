@@ -956,7 +956,7 @@ public class ObjGlobal extends Obj {
             return "_Stmt";
         }
         public String getShortDesc() {
-            return "_Stmt() - display information about Statements in CFT";
+            return "_Stmt() - information about Statements in CFT";
         }
         private String[] data= {
             "",
@@ -1007,7 +1007,7 @@ public class ObjGlobal extends Obj {
             return "_Expr";
         }
         public String getShortDesc() {
-            return "_Expr() - display information about expressions in CFT";
+            return "_Expr() - information about expressions in CFT";
         }
         private String[] data= {
             "",
@@ -1106,11 +1106,11 @@ public class ObjGlobal extends Obj {
             return "_Shell";
         }
         public String getShortDesc() {
-            return "_Shell() - display information about interactive (shell only) commands";
+            return "_Shell() - CFT shell-like commands";
         }
         private String[] data= {
-                "CFT shell - interactive commands:",
-                "---------------------------------",
+                "CFT shell-like (interactive) commands",
+                "-------------------------------------",
                 "",
                 "   ls / lsd / lsf ...",
         		"   cd <dir>",

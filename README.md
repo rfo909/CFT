@@ -13,7 +13,9 @@ It's been in continous daily use since creation in 2018.
 
 Written from scratch in Java; runs both on Linux and Windows environments. 
 
-*README last updated 2022-12-10*
+*README last updated 2022-12-11*
+
+v3.6.0
 
 
 ## Terminal based - shell-like
@@ -32,6 +34,10 @@ using the following commands:
 - cp
 - mv
 - touch
+- diff
+
+Run global function _Shell for information about the CFT shell-like commands.
+
 
 
 ## Functionality
@@ -234,13 +240,14 @@ To list global functions, type 'help' and press Enter
 ```
 help
 
-  <obj: %GLOBAL%>
-  GLOBAL
-  # v3.5.2b
-  #
-  # _Expr() - display information about expressions in CFT
-  # _Stmt() - display information about Statements in CFT
-  #
+  <obj: <GLOBAL>>
+  <GLOBAL>
+  # v3.5.6
+  # 
+  # _Expr() - information about expressions in CFT
+  # _Shell() - CFT shell-like commands
+  # _Stmt() - information about Statements in CFT
+  # 
   # AValue(str,any,metaDict?) - created AValue (annotated value) object
   # Binary(hexString) - convert hex string to Binary value
   # DataFile(file,prefix) - create DataFile object
@@ -250,7 +257,7 @@ help
   # File(str) - creates File object
   # FileLine(str, lineNo, File) - create FileLine object
   # Float(value,data) - create Float object - for sorting
-  # Glob(pattern,ignoreCase?) - creates Glob object for file name matching, such as '*.txt' - igno+
+  # Glob(pattern,ignoreCase?) - creates Glob object for file name matching, such as '*.txt' - ignoreCase defaults to true on win+
   # Grep() or Grep(a,b,...) or Grep(list) - create Grep object
   # Input(label) - create Input object
   # Int(value,data) - create Int object - for sorting
@@ -273,7 +280,7 @@ help
 ```
 
 The number of global functions is about 30, but the total number of system functions, available as
-global functions and member functions inside value objects, is 508 for version 3.5.2b, distributed 
+global functions and member functions inside value objects, is 510 for version 3.5.6, distributed 
 across 85 types of objects.
 
 ```

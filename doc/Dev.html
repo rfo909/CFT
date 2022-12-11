@@ -13,17 +13,9 @@
 
 <h1>CFT Change log</h1>
 
-<h3>3.5.6 2022-12-11 Implemented shell command 'diff'</h3>
+<h3 class="tag">3.6.0 2022-12-11 - complete rewrite shell-commands</h3>
 <p>
-	Added 'diff' command to compare two files. Considered adding File.diff, but diff is an 
-	interactive command. To check if two files match with code, use File.hash
-</p>
-<p>
-	This command invokes lambda mDiff defined in CFT.props, which in turn calls Lib:DiffFiles
-</p>
-
-<p>
-	Also added special notation to shell command args, so that typing ':' results in the
+	Added special notation to shell command args, so that typing ':' results in the
 	Sys.lastResult value, and :N results in Sys.lastResult.nth(N)
 </p>
 
@@ -33,6 +25,21 @@
 <p>
 	Updated doc, including symbols + updated _Shell global function. 
 </p>
+<p>
+	Calling this version 3.6.0, as the shell-like command parser has now been completely re-engineered,
+	with many improvements, including "destructive" commands to move, copy and delete files and directories.
+</p>
+
+
+<h3>3.5.6 2022-12-11 Implemented shell command 'diff'</h3>
+<p>
+	Added 'diff' command to compare two files. Considered adding File.diff, but diff is an 
+	interactive command. To check if two files match with code, use File.hash
+</p>
+<p>
+	This command invokes lambda mDiff defined in CFT.props, which in turn calls Lib:DiffFiles
+</p>
+
 
 <h3>3.5.6 2022-12-11 Sanity checks</h3>
 <p>
