@@ -34,6 +34,8 @@ mTail = Lambda { P(1)=>file file.tail(500) }
 
 mRm = Lambda { P(1) as List => x Lib:RmFilesAndDirs(x) }
 
+mDiff = Lambda { Lib:DiffFiles(P(1),P(2)) }
+
 # Lambdas for symbol set and get
 # ----
 

@@ -338,6 +338,7 @@ all about function calls.
 - cp
 - mv
 - touch
+- diff
 
 The syntax for these commands correspond to how they are used in Linux/Unix, with support for
 globbing ("*.txt" etc). They are meant for easy navigation around the directory trees, and for
@@ -4318,7 +4319,6 @@ Value types:      13
 ```
 ### 2021-10-16
 
-
 Running CodeStats:main
 
 ```
@@ -4365,11 +4365,13 @@ Object types:     72
 Value types:      13
 ```
 
-### 2022-12-10 v3.5.6
+### 2022-12-11 v3.5.6
+
+Running CodeStats:main
 
 ```
 Script code:      17031 lines
-Java code:        33997 lines
+Java code:        34107 lines
 Functions:        510
 Object types:     72
 Value types:      13

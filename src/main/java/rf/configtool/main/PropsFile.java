@@ -48,6 +48,7 @@ public class PropsFile {
     private String mMore;
     private String mTail;
     private String mRm;
+    private String mDiff;
     
     private String mSymGet;
     private String mSymSet;
@@ -100,6 +101,7 @@ public class PropsFile {
         mMore = "Lambda{error('mMore lambda undefined in " + PROPS_FILE + "') }";
         mTail = "Lambda{error('mTail lambda undefined in " + PROPS_FILE + "') }";
         mRm = "Lambda{error('mRm lambda undefined in " + PROPS_FILE + "') }";
+        mDiff = "Lambda{error('mDiff lambda undefined in " + PROPS_FILE + "') }";
         
         mSymGet = "Lambda{error('mSymGet lambda undefined in " + PROPS_FILE + "') }";
         mSymSet = "Lambda{error('mSymSet lambda undefined in " + PROPS_FILE + "') }";
@@ -155,6 +157,9 @@ public class PropsFile {
                     } else
                     if (name.equals("mRm")) {
                     	mRm=value;
+                    } else
+                    if (name.equals("mDiff")) {
+                    	mDiff=value;
                     } else
                     if (name.equals("mSymGet")) {
                         mSymGet=value;
@@ -238,6 +243,10 @@ public class PropsFile {
     
     public String getMRm() {
     	return mRm;
+    }
+    
+    public String getMDiff() {
+    	return mDiff;
     }
     
     public String getMSymGet () {

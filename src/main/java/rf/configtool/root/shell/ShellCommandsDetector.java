@@ -22,6 +22,7 @@ public class ShellCommandsDetector {
 		"mv",
 		"cp",
 		"rm",
+		"diff",
 		"mkdir",
 			
 	};
@@ -68,6 +69,9 @@ public class ShellCommandsDetector {
 		}
 		if (name.equals("rm")) {
 			return new ShellRm(parts);
+		}
+		if (name.equals("diff")) {
+			return new ShellDiff(parts);
 		}
 		if (name.equals("mkdir")) {
 			return new ShellMkdir(parts);

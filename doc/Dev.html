@@ -13,9 +13,32 @@
 
 <h1>CFT Change log</h1>
 
+<h3>3.5.6 2022-12-11 Implemented shell command 'diff'</h3>
+<p>
+	Added 'diff' command to compare two files. Considered adding File.diff, but diff is an 
+	interactive command. To check if two files match with code, use File.hash
+</p>
+<p>
+	This command invokes lambda mDiff from CFT.props, which in turn calls Lib:DiffFiles
+</p>
+
+
+
+<h3>3.5.6 2022-12-11 Sanity checks</h3>
+<p>
+	Added sanity checks for 'mv' and 'cp' to ensure not copying or 
+	moving between two directories where one is a subdirectory of the other.
+</p>
+<p>
+	Only applies to directory copying, and note that for example "cp someDir .." is
+	not forbidden, since it actually means "cp someDir ../someDir", and current
+	dir and ../someDir are independent.
+</p>
+
+
 <h3>3.5.6 2022-12-10 Implemented shell command 'cp'</h3>
 <p>
-	Same logic as in rm - implemented completely in Java, no calls to CFT code space via lambdas.
+	Same logic as in rm - but implemented completely in Java, no calls to CFT code space via lambdas.
 </p>
 <p>
 	Also implemented File.touch function to complement the shell command
@@ -23,6 +46,7 @@
 <p>
 	Updated doc/Doc.md
 </p>
+
 
 <h3>3.5.6 2022-12-09 Implemented shell command 'mkdir'</h3>
 <p>
