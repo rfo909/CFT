@@ -42,6 +42,9 @@ public class ShellCp extends ShellCommand {
 		if (targetDir.exists() && !targetDir.isDirectory()) {
 			throw new Exception(getName() + ": target not a directory");
 		}
+		
+		verifySourceTargetDirsIndependent(getName(), srcDir, targetDir);
+
 		if (!confirmed) {
 			ctx.getStdio().println("Confirm copy " + srcDir.getCanonicalPath() + " -> " + targetDir.getCanonicalPath());
 			ctx.getStdio().println("Type 'yes' to continue");

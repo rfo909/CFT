@@ -44,13 +44,15 @@ public class ShellMv extends ShellCommand {
 				FileSet fsTarget=new FileSet(true,false);
 				fsTarget.processArg(currentDir, ctx, lastArg, true, false); // allow new dir
 				List<String> targetDirs=fsTarget.getDirectories();
-				if (targetDirs.size() == 0) throw new Exception(name + ": invalid target dir");
-				if (targetDirs.size() > 1) throw new Exception(name + ": expected single target dir");
+
+				if (targetDirs.size() != 1) throw new Exception(name + ": expected single target dir");
 				File target=new File(targetDirs.get(0));
 				
 				if (target.exists()) {
 					target=new File(target.getCanonicalPath() + File.separator + src.getName());
-				} 
+				}
+				
+				verifySourceTargetDirsIndependent(name, src, target);
 				
 				boolean ok = src.renameTo(target);
 				ctx.addSystemMessage((ok?"OK   ":"FAIL ") + name + ": " + src.getCanonicalPath() + " -> " + target.getCanonicalPath());
@@ -99,6 +101,10 @@ public class ShellMv extends ShellCommand {
 			if (!target.exists() && !target.isDirectory()) throw new Exception(name + ": internal error");
 			
 			boolean allOk=true;
+			
+			for (String f:fsSource.getDirectories()) {
+				verifySourceTargetDirsIndependent(name, new File(f), target);
+			}
 			
 			// iterate over files and directories in args
 			for (String f:fsSource.getFiles()) {

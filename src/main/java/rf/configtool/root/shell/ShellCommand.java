@@ -1,5 +1,6 @@
 package rf.configtool.root.shell;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -102,4 +103,24 @@ public abstract class ShellCommand {
         return macroObj.callLambda(ctx.sub(), params);    	
     }
     
+	/**
+	 * Check if srcDir or targetDir equal to or sub-directory of the other, throwing exception if so
+	 */
+    protected void verifySourceTargetDirsIndependent (String op, File srcDir, File targetDir) throws Exception {
+		File t=targetDir.getCanonicalFile();
+		for (;;) {
+			if (t.equals(srcDir)) throw new Exception(op + ": invalid target");
+			t=t.getParentFile();
+			if (t==null) break;
+		}
+		File s=srcDir.getCanonicalFile();
+		for (;;) {
+			if (s.equals(targetDir)) throw new Exception(op + ": invalid source");
+			s=s.getParentFile();
+			if (s==null) break;
+		}
+		
+	}
+
+
 }
