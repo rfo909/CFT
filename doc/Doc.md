@@ -473,6 +473,33 @@ clears completed jobs from the jobs registry.
 Note that jobs don't survive killing the CFT process.
 
 
+## Symbols 
+
+*v3.5.3*
+
+If we regularly need to go to a particular directory, or check the status of some file,
+we can store these as symbols, and use them in expressions or interactively.
+
+```
+cd /some/dir
+pwd
+%%myDir
+
+cd %myDir
+%myDir.files
+```
+Symbols are persistent and shared between sessions.
+
+To see all symbols use shortcut
+
+```
+@%
+```
+
+This lists all defined symbols, and gives you the option of deleting symbols.
+
+
+
 # The "protect" mechanism
 
 
