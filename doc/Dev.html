@@ -13,6 +13,48 @@
 
 <h1>CFT Change log</h1>
 
+<h3>3.6.0b 2022-12-11 - improved shell parser</h3>
+<p>
+	Fixed weakness in shell parser, so that we can make complete expressions when
+	shell command parameter starts with symbol lookup '%' and Sys.lastResult reference ':'.
+</p>
+<pre>
+lsf subdir
+cd :0.dir     # go to dir of first file in list  
+
+# or
+
+lsf subdir
+:0            # colon command works as before 
+cd :.dir      # referring Sys.lastResult without list index
+</pre>
+<p>
+	Likewise with symbol lookups:
+</p>
+pwd
+%%a
+
+cd %a,sub(",,")
+</pre>
+
+<p>
+	For expressions with symbol references inside, use ()'s to mark it as an expression.
+</p>
+<p>
+	Also note, since colon lookup of Sys.lastResult is NOT a general expression (which symbol lookups are), it can not
+	be used inside expressions. The colon lookups in CFT shell-like commands, only works there
+	and only when an argument starts with the ':'.
+</p>
+<p>
+	<b>Further note:</b> we can not make :N a global function, because the parser will confuse it with
+	the syntax for calling functions in other scripts.
+</p>
+
+<p>
+	Also added optional pos parameter to Sys.lastResult, to get value from List.
+</p>
+
+
 <h3 class="tag">3.6.0 2022-12-11 - complete rewrite shell-commands</h3>
 <p>
 	Added special notation to shell command args, so that typing ':' results in the

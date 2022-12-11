@@ -1074,6 +1074,9 @@ public class ObjGlobal extends Obj {
             "         The name is a string-expression or an identifier",
             "         Use Sys.Jobs or Jobs script to manage (@J* shortcuts)",
             "",
+            "Symbol lookup",
+            "   %name             # See _Shell for more on symbols",
+            "",
             "Value tokens",
             "   int, string, float",
             "   true",
@@ -1144,7 +1147,11 @@ public class ObjGlobal extends Obj {
                 "   cd (dirExpr)             - dirExpr is a CFT function",
                 "",
                 "   cat :                    - The ':' corresponds to (Sys.lastResult)",
-                "   cd :N                    - The ':N' corresponds to (Sys.lastResult.nth(N))",
+                "   cd :N                    - The ':N' corresponds to (Sys.lastResult(N))",
+                "",
+                "Symbols are defined entering %%name which stores lastResult under",
+                "that name, usually some Dir or File. A warning will be issued when",
+                "storing any other type of value as a symbol.",
                 "",
         };
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {

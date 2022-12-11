@@ -13,13 +13,14 @@
 * Show functions inside value objects
 * Create functions
 * Show your functions
-* Save and load
-* Edit script file - shortcuts
-* Shortcuts vs colon commands
+* Save and load - colon commands
+* Edit script file
+* Shortcuts and colon commands
 * CFT as a shell / the "CFT shell-like commands"
   |  Paths with space
   |  Windows backslash
   |  Combine CFT shell commands with CFT function results
+  |  Use "lastResult"
   |  CFT Shell commands not available in code
   |  Bang commands
   |  Background jobs

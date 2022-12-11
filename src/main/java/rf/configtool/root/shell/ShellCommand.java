@@ -44,10 +44,19 @@ public abstract class ShellCommand {
 				// symbol lookup
 				isExpr=part;
 			} else if (part.startsWith(":")) {
-				if (part.equals(":")) {
-					isExpr="Sys.lastResult";
+				// identify optional sequence of numbers
+				int pos=1; // following the colon
+				
+				while (pos<part.length() && "0123456789".indexOf(part.charAt(pos)) >= 0) {
+					pos++;
+				}
+				//System.out.println("---> pos=" + pos);
+				String digits=part.substring(1,pos); // may be empty
+				String rest=part.substring(pos); // first non-digit char
+				if (pos==1) {
+					isExpr="Sys.lastResult" + rest;
 				} else {
-					isExpr="Sys.lastResult.nth(" + part.substring(1) + ")";
+					isExpr="Sys.lastResult(" + digits + ")" + rest;
 				}
 			}
 			if (isExpr != null) {

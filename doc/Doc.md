@@ -264,10 +264,10 @@ If the name doesn't match one function, it is used as a prefix to list a subset
 of the functions.
 
 
-# Save and load
+# Save and load - colon commands
 
 
-Functions are saved into script files, via "colon" commands, which are system commands outside
+Functions are saved into script files, via "colon commands", which are system commands outside
 the CFT language.
 
 ```
@@ -275,7 +275,13 @@ the CFT language.
 :load otherscript
 ```
 
-# Edit script file - shortcuts
+To show all colon commands;
+
+```
+:
+```
+
+# Edit script file
 
 
 Instead of entering code via the command line, the script file can easily be opened in
@@ -293,18 +299,12 @@ After changing a script in the editor, and saving, CFT automatically detects the
 reloads the script the next time you press ENTER.
 
 
-To list all shortcuts
-
-```
-@
-```
-
 The shortcut character can be changed in the CFT.props configuration file.
 
-# Shortcuts vs colon commands
+# Shortcuts and colon commands
 
-
-Shortcuts are ways of running code, while colon commands are system commands.
+Shortcuts are ways of running CFT code, while colon commands are system commands that run completely
+outside the language interpreter (written in Java).
 
 
 View all colon commands:
@@ -407,6 +407,35 @@ The expressions should return single Dir or File objects, not lists. If they ret
 that is used as any other path expression.
 
 
+## Use "lastResult"
+
+The function Sys.lastResult returns the result from the last interactive command. If that value
+is a list, we can get one of the values, by entering the position in the list:
+
+```
+lsd 
+cd (Sys.lastResult(3))   # usnig ()'s to run CFT expression
+```
+
+Since we frequently will need access to "lastResult" when issuing shell-like commands, 
+there is a shorthand notation similar to the ':N' colon
+command, to obtain a value from the "lastResult" list, or a single colon ':' to return
+the "lastResult" as-is. 
+
+```
+lsd
+cd :3
+
+lsd
+:3
+cd :
+
+Dir.allFiles("SomeClass.java")
+cd :0.dir            # go to directory of file 0 in lastResult
+
+```
+
+
 ## CFT Shell commands not available in code
 
 The CFT shell commands are parsed only when processing input, and so can not be called from function
@@ -487,7 +516,9 @@ pwd
 %%myDir
 
 cd %myDir
-%myDir.files
+%myDir.cd
+
+cat %myDir.files("*.java").first
 ```
 Symbols are persistent and shared between sessions.
 

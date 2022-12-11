@@ -199,17 +199,26 @@ public class ObjSys extends Obj {
         }
 
         public String getShortDesc() {
-            return "lastResult() - returns last interactive result";
+            return "lastResult(pos?) - returns last interactive result, or pos when list";
         }
 
         @Override
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 0)
-                throw new Exception("Expected no parameters");
-            return ctx.getObjGlobal().getRoot().getLastResult();
+            if (params.size() == 0) {
+            	return ctx.getObjGlobal().getRoot().getLastResult();
+            }
+            if (params.size()==1) {
+            	int i = (int) (long) getInt("pos", params, 0);
+            	Value v=ctx.getObjGlobal().getRoot().getLastResult();
+            	if (!(v instanceof ValueList)) throw new Exception("lastResult not a list");
+            	List<Value> list=((ValueList) v).getVal();
+            	if (i<0 || i>= list.size()) throw new Exception("lastResult pos out of range");
+            	return list.get(i);
+            }
+            throw new Exception("Expected optional int pos parameter");
         }
     }
-
+    
     class FunctionSleep extends Function {
         public String getName() {
             return "sleep";

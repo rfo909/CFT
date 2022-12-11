@@ -46,6 +46,10 @@ public class ShellCommandsDetector {
 		
 		List<String> parts=parseLineParts();
 		
+//		for (String p:parts) {
+//			System.out.println("[" + p + "]");
+//		}
+		
 		String name=parts.get(0);
 		
 		
@@ -92,21 +96,13 @@ public class ShellCommandsDetector {
 	private List<String> parseLineParts () throws Exception {
 		List<String> parts=new ArrayList<String>();
 		
+		boolean isExpr=false; // triggered by first character % or : (symbol or Sys.lastResult)
 		int parCount=0;
 		boolean inString=false;
 		char strQuote=' ';
 		
 		StringBuffer sb=new StringBuffer();
-		
-		// Note: there is a weakness in the parser, as it does not recognize symbol lookups
-		// particularly, which means that for example:
-		// 
-		// cd %someDir.sub("data")
-		//
-		// will not work, as this is split into the following parts: [cd] [%somedir.sub] [("data")]
-		//
-		// It is not an important issue, so not complicating matters over this now (v3.5.5)
-		
+				
 		CHARS: for (int pos=0; pos<line.length(); pos++) {
 			final char c=line.charAt(pos);
 			
@@ -120,6 +116,10 @@ public class ShellCommandsDetector {
 			}
 			
 			// !inString
+			
+			if (c=='%' || c==':') {
+				isExpr=true;
+			}
 				
 			if (parCount==0 && (c=='\'' || c=='"')) {
 				inString=true;
@@ -128,7 +128,7 @@ public class ShellCommandsDetector {
 			}
 			
 			if (parCount > 0 || c=='(') {
-				if (parCount==0 && sb.length() > 0) {
+				if (parCount==0 && !isExpr && sb.length() > 0) {
 					parts.add(sb.toString());
 					sb=new StringBuffer();
 				}
@@ -150,6 +150,7 @@ public class ShellCommandsDetector {
 
 			// outside ()'s parts are separated by space
 			if (c==' ') {
+				isExpr=false;
 				if (sb.length()>0) {
 					parts.add(sb.toString());
 					sb=new StringBuffer();

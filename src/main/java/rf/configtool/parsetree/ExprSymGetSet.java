@@ -25,9 +25,6 @@ public class ExprSymGetSet extends ExprCommon {
         String pre=(isSet ? "%%" : "%");
         
     	ts.matchStr(pre, "expected '" + pre + "'");
-//    	if (isSet) {
-//        	ts.matchStr("%", "expected '" + pre + "'");
-//    	}
     	
         symbol = ts.matchIdentifier("expected identifier following '" + pre + "'");
     }
