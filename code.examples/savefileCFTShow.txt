@@ -36,6 +36,30 @@
 	.\cft
 
 
+.h Shell
+
+	- ls | lsf | lsd
+	- cd
+	- cat
+	- more
+	- edit
+	- tail
+	- mkdir
+	- rm
+	- cp
+	- mv
+	- touch
+	- diff	
+
+	ls cft*
+	edit :N
+
+	lsd
+	cd :N
+
+	cd
+	
+
 .h Functions
 
 	1+1
