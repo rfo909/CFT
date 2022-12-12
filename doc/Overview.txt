@@ -21,10 +21,10 @@
   |  Windows backslash
   |  Combine CFT shell commands with CFT function results
   |  Use "lastResult"
+  |  Symbols 
   |  CFT Shell commands not available in code
   |  Bang commands
   |  Background jobs
-  |  Symbols 
 * The "protect" mechanism
 * Show content of file
   |  Open a file in editor

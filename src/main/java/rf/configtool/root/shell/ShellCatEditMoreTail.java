@@ -65,21 +65,15 @@ public class ShellCatEditMoreTail  extends ShellCommand {
             throw new Exception("Invalid statement name, expected cat, edit or more: " + name);
         }
 
-        FunctionBody codeLines=new FunctionBody(lambda, loc);
-        
-    	CFTCallStackFrame caller=new CFTCallStackFrame("Lambda for '" + name + "'");
+			
+		if (file != null) {
+			Value[] lambdaArgs= {new ValueObj(file)};
+			return callConfiguredLambda(name, ctx, lambda, lambdaArgs);
+		} else {
+			Value[] lambdaArgs= {};
+			return callConfiguredLambda(name, ctx, lambda, lambdaArgs);
+		}
 
-        Value ret = ctx.getObjGlobal().getRuntime().processFunction(ctx.getStdio(), caller, codeLines, new FunctionState(null,null));
-        if (!(ret instanceof ValueBlock)) throw new Exception("Not a lambda: " + lambda + " ---> " + ret.synthesize());
-        
-        ValueBlock macroObj=(ValueBlock) ret;
-        
-        List<Value> params=new ArrayList<Value>();
-        if (file != null) {
-            params.add(new ValueObj(file));
-        }
-        
-        return macroObj.callLambda(ctx.sub(), params);
     }
 
 

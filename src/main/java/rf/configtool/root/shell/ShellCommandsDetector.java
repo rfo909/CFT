@@ -23,6 +23,8 @@ public class ShellCommandsDetector {
 		"cp",
 		"rm",
 		"diff",
+		"showtree",
+		"hash",
 		"mkdir",
 			
 	};
@@ -77,6 +79,12 @@ public class ShellCommandsDetector {
 		if (name.equals("diff")) {
 			return new ShellDiff(parts);
 		}
+		if (name.equals("showtree")) {
+			return new ShellShowtree(parts);
+		}
+		if (name.equals("hash")) {
+			return new ShellHash(parts);
+		}
 		if (name.equals("mkdir")) {
 			return new ShellMkdir(parts);
 		}
@@ -109,6 +117,7 @@ public class ShellCommandsDetector {
 			if (inString) {
 				if (c==strQuote) {
 					inString=false;
+					if (isExpr) sb.append(c);
 				} else {
 					sb.append(c);
 				}
@@ -124,6 +133,7 @@ public class ShellCommandsDetector {
 			if (parCount==0 && (c=='\'' || c=='"')) {
 				inString=true;
 				strQuote=c;
+				if (isExpr) sb.append(c);
 				continue CHARS;
 			}
 			
@@ -138,7 +148,7 @@ public class ShellCommandsDetector {
 				} else if (c==')') {
 					sb.append(c); 
 					parCount--; 
-					if (parCount == 0) {
+					if (parCount == 0 && !isExpr) {
 						parts.add(sb.toString());
 						sb=new StringBuffer();
 					}
@@ -148,7 +158,7 @@ public class ShellCommandsDetector {
 				continue CHARS;
 			} 
 
-			// outside ()'s parts are separated by space
+			// outside strings and ()'s parts are separated by space
 			if (c==' ') {
 				isExpr=false;
 				if (sb.length()>0) {

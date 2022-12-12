@@ -36,12 +36,18 @@ mRm = Lambda { P(1) as List => x Lib:RmFilesAndDirs(x) }
 
 mDiff = Lambda { Lib:DiffFiles(P(1),P(2)) }
 
+mShowtree = Lambda { P(1)=>dir Lib:ShowTree(dir) }
+
+mHash = Lambda { Lib:HashFiles(P(1)) }
+
+
 # Lambdas for symbol set and get
 # ----
 
 mSymGet = Lambda { P(1)=>sym Lib:SymbolGet(sym) }
 
 mSymSet = Lambda { P(1)=>sym Lib:SymbolSet(sym) }
+
 
 # Shortcuts
 #

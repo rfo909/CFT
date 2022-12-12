@@ -1124,6 +1124,8 @@ public class ObjGlobal extends Obj {
         		"   rm ...",
         		"   mkdir <dir>",
         		"   diff <file1> <file2>",
+        		"   showtree <dir>?",
+        		"   hash <file> ...",
                 "",
                 "- The 'lsd' lists directories only, and 'lsf' files only.",
                 "",

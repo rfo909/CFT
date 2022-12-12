@@ -13,6 +13,33 @@
 
 <h1>CFT Change log</h1>
 
+<h3>3.6.1 2022-12-12 - improved shell parser / showtree / hash</h3>
+<p>
+   Added correct handling of strings inside % and : (isExpr==true) expressions, and
+   also prevented reaching parCount==0 from terminating the part, when isExpr; only
+   space outside nested strings and string literals, terminates that.
+</p>
+<p>
+	Needed to include quotes characters when starting and stopping strings, if isExpr.
+</p>
+<pre>
+lsd
+mkdir :0.name+"_2"
+:-)
+</pre>
+
+<p>
+	Added shell command <i>showtree</i>, which calls mShowtree lambda in CFT.props, which
+	in turn calls Lib:ShowTree. Also updated docs and the _Shell command.
+</p>
+<p>
+	Cleaned up lambda calling code in ShellCatEditMoreTail, to be in line with the rest.
+</p>
+<p>
+	Also added command <i>hash</i> which calls mHash and in turn Lib:HashFiles.
+</p>
+
+
 <h3>3.6.0b 2022-12-11 - improved shell parser</h3>
 <p>
 	Fixed weakness in shell parser, so that we can make complete expressions when

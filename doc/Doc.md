@@ -1,9 +1,9 @@
 
 # CFT / ConfigTool
 
-Last updated: 2022-12-11 RFO
+Last updated: 2022-12-12 RFO
 
-v3.6.0
+v3.6.1
 
 # Introduction
 
@@ -340,21 +340,23 @@ all about function calls.
 - mv
 - touch
 - diff
-
-The syntax for these commands correspond to how they are used in Linux/Unix, with support for
-globbing ("*.txt" etc). They are meant for easy navigation around the directory trees, and for
-inspecting files, with "cat", "more" and "edit", and so on.
-```
-pwd
-cd ..
-ls *.txt
-```
+- showtree
+- hash
 
 The "ls" command comes in two additional versions:
 
 ```
 lsf   # lists files
 lsd   # lists directories
+```
+
+The syntax for these commands correspond to how they are used in Linux/Unix, minus flags, with support for
+globbing ("*.txt" etc). They are meant for easy navigation around the directory trees, and for
+inspecting files, with "cat", "more" and "edit", and so on.
+```
+pwd
+cd ..
+ls *.txt
 ```
 
 Run the global function _Shell to get up to date help on the CFT shell command interpreter.
@@ -435,6 +437,34 @@ cd :0.dir            # go to directory of file 0 in lastResult
 
 ```
 
+## Symbols 
+
+If we regularly need to go to a particular directory, or check the status of some file,
+we can store these as symbols, and use them in expressions or interactively.
+
+```
+cd /some/dir
+pwd
+%%myDir
+
+cd %myDir
+%myDir.cd
+
+cat %myDir.files("*.java").first
+```
+Symbols are persistent and shared between sessions.
+
+To see all symbols use shortcut
+
+```
+@%
+```
+
+This lists all defined symbols, and gives you the option of deleting symbols.
+
+
+
+
 
 ## CFT Shell commands not available in code
 
@@ -501,35 +531,6 @@ clears completed jobs from the jobs registry.
 
 
 Note that jobs don't survive killing the CFT process.
-
-
-## Symbols 
-
-*v3.5.3*
-
-If we regularly need to go to a particular directory, or check the status of some file,
-we can store these as symbols, and use them in expressions or interactively.
-
-```
-cd /some/dir
-pwd
-%%myDir
-
-cd %myDir
-%myDir.cd
-
-cat %myDir.files("*.java").first
-```
-Symbols are persistent and shared between sessions.
-
-To see all symbols use shortcut
-
-```
-@%
-```
-
-This lists all defined symbols, and gives you the option of deleting symbols.
-
 
 
 # The "protect" mechanism

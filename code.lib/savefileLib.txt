@@ -1033,3 +1033,14 @@ run(null,null,null,true)
 		println
 //Symbols
 
+
+# Hash a number of files
+# Called by mHash in CFT.props
+# --
+	space=false
+	P(1) as List -> f
+		if (space) out("")
+		out(f.path)
+		out(f.hash)
+		space=true
+//HashFiles
