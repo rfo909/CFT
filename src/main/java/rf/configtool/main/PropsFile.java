@@ -51,6 +51,7 @@ public class PropsFile {
     private String mDiff;
     private String mShowtree;
     private String mHash;
+    private String mHex;
     
     private String mSymGet;
     private String mSymSet;
@@ -106,6 +107,7 @@ public class PropsFile {
         mDiff = "Lambda{error('mDiff lambda undefined in " + PROPS_FILE + "') }";
         mShowtree = "Lambda{error('mShowtree lambda undefined in " + PROPS_FILE + "') }";
         mHash = "Lambda{error('mHash lambda undefined in " + PROPS_FILE + "') }";
+        mHex = "Lambda{error('mHex lambda undefined in " + PROPS_FILE + "') }";
         
         mSymGet = "Lambda{error('mSymGet lambda undefined in " + PROPS_FILE + "') }";
         mSymSet = "Lambda{error('mSymSet lambda undefined in " + PROPS_FILE + "') }";
@@ -167,6 +169,9 @@ public class PropsFile {
                     } else
                     if (name.equals("mHash")) {
                     	mHash=value;
+                    } else
+                    if (name.equals("mHex")) {
+                    	mHex=value;
                     } else
                     if (name.equals("mShowtree")) {
                     	mShowtree=value;
@@ -265,6 +270,10 @@ public class PropsFile {
     
     public String getMHash () {
     	return mHash;
+    }
+    
+    public String getMHex () {
+    	return mHex;
     }
     
     public String getMSymGet () {

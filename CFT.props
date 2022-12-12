@@ -40,6 +40,7 @@ mShowtree = Lambda { P(1)=>dir Lib:ShowTree(dir) }
 
 mHash = Lambda { Lib:HashFiles(P(1)) }
 
+mHex = Lambda { P(1) as File => f f.hex }
 
 # Lambdas for symbol set and get
 # ----

@@ -25,6 +25,7 @@ public class ShellCommandsDetector {
 		"diff",
 		"showtree",
 		"hash",
+		"hex",
 		"mkdir",
 			
 	};
@@ -84,6 +85,9 @@ public class ShellCommandsDetector {
 		}
 		if (name.equals("hash")) {
 			return new ShellHash(parts);
+		}
+		if (name.equals("hex")) {
+			return new ShellHex(parts);
 		}
 		if (name.equals("mkdir")) {
 			return new ShellMkdir(parts);

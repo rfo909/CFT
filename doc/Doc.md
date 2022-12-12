@@ -342,6 +342,7 @@ all about function calls.
 - diff
 - showtree
 - hash
+- hex
 
 The "ls" command comes in two additional versions:
 
@@ -350,7 +351,7 @@ lsf   # lists files
 lsd   # lists directories
 ```
 
-The syntax for these commands correspond to how they are used in Linux/Unix, minus flags, with support for
+The syntax for these commands correspond to how they are used in Linux/Unix (where existing), minus flags, with support for
 globbing ("*.txt" etc). They are meant for easy navigation around the directory trees, and for
 inspecting files, with "cat", "more" and "edit", and so on.
 ```
