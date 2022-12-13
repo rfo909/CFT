@@ -32,9 +32,12 @@ public class FileSet {
 
 	private List<String> directoryList=new ArrayList<String>();
 	private List<String> fileList=new ArrayList<String>();;
+	
+	private final String opName;
 	private final boolean includeDirs;
 	private final boolean includeFiles;
-	private final boolean enableLimits;
+	
+	private boolean isDestructiveOperation = true;
 	
 	private boolean argsContainGlobbing = false;
 	
@@ -42,14 +45,17 @@ public class FileSet {
 		return File.separatorChar=='\\';
 	}
 
-	public FileSet (boolean includeDirs, boolean includeFiles) {
-		this(includeDirs,includeFiles, false);
-	}
-
-	public FileSet (boolean includeDirs, boolean includeFiles, boolean enableLimits) {
+	public FileSet (String opName, boolean includeDirs, boolean includeFiles) {
+		this.opName=opName;
 		this.includeDirs=includeDirs;
 		this.includeFiles=includeFiles;
-		this.enableLimits=enableLimits;
+	}
+	
+	/**
+	 * Override default value of isDestructiveOperation to false
+	 */
+	public void setIsSafeOperation () {
+		isDestructiveOperation=false;
 	}
 	
 	public void addFilePath (String path) {
@@ -135,9 +141,21 @@ public class FileSet {
 			} else if (v instanceof ValueObj) {
 				Obj obj=((ValueObj) v).getVal();
 				if (obj instanceof ObjFile) {
-					addFilePath( ((ObjFile) obj).getFile().getCanonicalPath() );
+					ObjFile file=((ObjFile) obj);
+					
+					if (isDestructiveOperation) {
+						file.validateDestructiveOperation(opName);
+					}
+					
+					addFilePath( file.getFile().getCanonicalPath() );
 				} else if (obj instanceof ObjDir) {
-					addDirectoryPath ( ((ObjDir) obj).getDir().getCanonicalPath() );
+					ObjDir dir=(ObjDir) obj;
+					
+					if (isDestructiveOperation) {
+						dir.validateDestructiveOperation(opName);
+					}
+					
+					addDirectoryPath ( dir.getDir().getCanonicalPath() );
 				}
 			}
 		} else {

@@ -30,13 +30,18 @@ public class ShellDiff extends ShellCommand {
 		
 		final String currentDir = ctx.getObjGlobal().getCurrDir();
 		List<ShellCommandArg> args=getArgs();
+		String name=getName();
 
 		if (args.size() != 2) throw new Exception(getName() + ": expected two files");
 		
-		FileSet fs1=new FileSet(false, true); 
+		FileSet fs1=new FileSet(name,false, true);
+		fs1.setIsSafeOperation();
+		
 		fs1.processArg(currentDir, ctx, args.get(0));
 
-		FileSet fs2=new FileSet(false, true); 
+		FileSet fs2=new FileSet(name, false, true);
+		fs2.setIsSafeOperation();
+		
 		fs2.processArg(currentDir, ctx, args.get(1));
 
 		List<String> list1=fs1.getFiles();

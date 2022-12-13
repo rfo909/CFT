@@ -32,7 +32,9 @@ public class ShellCatEditMoreTail  extends ShellCommand {
 		if (noArgs) {
 			return callMacro(ctx,null);
 		}
-		FileSet fs=new FileSet(false, true); // files only
+		FileSet fs=new FileSet(name,false, true); // files only
+		fs.setIsSafeOperation();
+		
 		for (ShellCommandArg arg : getArgs()) fs.processArg(currDir, ctx, arg);
 		
 		List<String> files=fs.getFiles();

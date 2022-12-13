@@ -20,7 +20,10 @@ public class ShellMkdir extends ShellCommand {
 
 		String currentDir = ctx.getObjGlobal().getCurrDir();
 		List<ShellCommandArg> args=getArgs();
-		FileSet fs=new FileSet(true,false);
+		String name=getName();
+		
+		FileSet fs=new FileSet(name,true,false);
+		
 		for (ShellCommandArg arg:args) {
 			fs.processArg(currentDir, ctx, arg, true, false);
 		}

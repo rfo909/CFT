@@ -32,7 +32,7 @@ public class Protection {
     }
     
     public Protection(String code) {
-        if (code==null) this.code="<no-code>";
+        if (code==null) this.code="-";
         else this.code=code;
     }
     

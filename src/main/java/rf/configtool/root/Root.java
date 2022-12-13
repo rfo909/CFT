@@ -300,7 +300,7 @@ public class Root {
             
             // Bang command
             
-            if (line.startsWith("!") || line.endsWith("!")) {
+            if (line.startsWith("!")) {
                 String str=line;
                 if (str.startsWith("!")) {
                 	str = line.substring(1).trim();
@@ -430,8 +430,9 @@ public class Root {
                 }
                 return; // abort further processing
             }
+            
             if (ts.matchStr(":")) {
-                processColonCommand(ts);
+                processColonCommand(ts,line);
                 return;
             }
 
@@ -515,7 +516,7 @@ public class Root {
         objGlobal.clearSystemMessages();
     }
 
-    private void processColonCommand(TokenStream ts) throws Exception {
+    private void processColonCommand(TokenStream ts, String inputLine) throws Exception {
         ObjGlobal objGlobal = currScript.getObjGlobal();
         ScriptCode codeHistory = objGlobal.getCurrScriptCode();
 

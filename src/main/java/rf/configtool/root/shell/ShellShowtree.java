@@ -25,7 +25,9 @@ public class ShellShowtree  extends ShellCommand {
 		if (args.size()==0) {
 			return callMacro(ctx,null);
 		}
-		FileSet fs=new FileSet(true, false); // directories only
+		FileSet fs=new FileSet(name,true, false); // directories only
+		fs.setIsSafeOperation();
+		
 		if (args.size() > 1) throw new Exception(name + ": Expected one optional parameter only - a directory");
 		
 		fs.processArg(currentDir, ctx, args.get(0));

@@ -51,10 +51,12 @@ public class ShellLs extends ShellCommand {
 	public Value execute(Ctx ctx) throws Exception {
 
 		String currDir = ctx.getObjGlobal().getCurrDir();
+		String name=getName();
 		boolean noArgs=getArgs().isEmpty();
 		boolean enableLimits=noArgs;
 		
-		FileSet fs=new FileSet(showDirs, showFiles, enableLimits);
+		FileSet fs=new FileSet(name,showDirs, showFiles);
+		fs.setIsSafeOperation();
 		
 		if (noArgs) {
 			ObjGlob glob=new ObjGlob("*");
@@ -79,7 +81,9 @@ public class ShellLs extends ShellCommand {
 			// ls someDir ---> list content inside that dir
 			String singleDir=fs.getDirectories().get(0);
 			
-			fs=new FileSet(showDirs,showFiles, enableLimits);
+			fs=new FileSet(name,showDirs,showFiles);
+			fs.setIsSafeOperation();
+			
 			fs.addDirContent(singleDir, new ObjGlob("*"));
 		}
 

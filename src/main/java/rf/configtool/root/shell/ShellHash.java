@@ -30,7 +30,9 @@ public class ShellHash extends ShellCommand {
 		
 		List<ShellCommandArg> args=getArgs();
 		
-		FileSet fs=new FileSet(false,true);  // files only
+		FileSet fs=new FileSet(name,false,true);  // files only
+		fs.setIsSafeOperation();
+		
 		for (ShellCommandArg arg:args) {
 			fs.processArg(currentDir, ctx, arg);  // no unknown files or dirs
 		}

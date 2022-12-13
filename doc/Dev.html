@@ -13,6 +13,14 @@
 
 <h1>CFT Change log</h1>
 
+<h3>3.6.2 2022-12-13 - shell + Dir/File protection</h3>
+<p>
+	When executing expressions, if resulting Dir/File is protected, then
+	for the unsafe commands, like rm, mv and cp target, mkdir and touch, 
+	throw exception.
+</p>
+
+
 <h3>3.6.1 2022-12-12 - shell command 'hex'</h3>
 <p>
    Added shell command hex, which shows hex dump of single file

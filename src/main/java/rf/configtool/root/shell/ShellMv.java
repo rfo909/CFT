@@ -22,7 +22,7 @@ public class ShellMv extends ShellCommand {
 		List<ShellCommandArg> args=getArgs();
 		if (args.size() < 2) throw new Exception(name + ": requires at least two args");
 		
-		FileSet fsSource = new FileSet(true,true);
+		FileSet fsSource = new FileSet(name,true,true);
 		for (int i=0; i<args.size()-1; i++) {
 			ShellCommandArg arg=args.get(i);
 			fsSource.processArg(currentDir, ctx, arg);
@@ -41,7 +41,7 @@ public class ShellMv extends ShellCommand {
 			if (dirs.size()==1 && files.size()==0) {
 				File src=new File(dirs.get(0));
 				
-				FileSet fsTarget=new FileSet(true,false);
+				FileSet fsTarget=new FileSet(name,true,false);
 				fsTarget.processArg(currentDir, ctx, lastArg, true, false); // allow new dir
 				List<String> targetDirs=fsTarget.getDirectories();
 
@@ -65,7 +65,7 @@ public class ShellMv extends ShellCommand {
 			if (files.size()==1 && dirs.size()==0) {
 				File src=new File(files.get(0));
 				
-				FileSet fsTarget=new FileSet(true,true);
+				FileSet fsTarget=new FileSet(name,true,true);
 				fsTarget.processArg(currentDir, ctx, lastArg, false, true); // allow new files
 				
 				if (fsTarget.getDirectories().size() + fsTarget.getFiles().size() != 1) {
@@ -91,7 +91,7 @@ public class ShellMv extends ShellCommand {
 		// -> this means target must always be existing dir
 		// ---------------------------------------------------------------------
 		{
-			FileSet fsTarget=new FileSet(true,false);
+			FileSet fsTarget=new FileSet(name,true,false);
 			fsTarget.processArg(currentDir, ctx, lastArg); // no new anything allowed
 			
 			if (fsTarget.getDirectories().size() != 1) {

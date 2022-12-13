@@ -22,6 +22,8 @@ public class ShellTouch extends ShellCommand {
 
 	public Value execute(Ctx ctx) throws Exception {
 
+		String name=getName();
+		
 		String currDir = ctx.getObjGlobal().getCurrDir();
 		boolean noArgs=getArgs().isEmpty();
 		
@@ -29,7 +31,8 @@ public class ShellTouch extends ShellCommand {
 		
 		List<ShellCommandArg> args=getArgs();
 		
-		FileSet fs=new FileSet(false,true);  // files only
+		FileSet fs=new FileSet(name,false,true);  // files only
+		
 		for (ShellCommandArg arg:args) {
 			fs.processArg(currDir, ctx, arg, false, true);  // allow unknown files
 		}

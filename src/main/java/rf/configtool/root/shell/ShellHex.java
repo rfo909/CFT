@@ -29,7 +29,9 @@ public class ShellHex extends ShellCommand {
 		List<ShellCommandArg> args=getArgs();
 		if (noArgs || args.size()>1) throw new Exception(name + ": expected single file");
 		
-		FileSet fs=new FileSet(false,true);  // files only
+		FileSet fs=new FileSet(name,false,true);  // files only
+		fs.setIsSafeOperation();
+		
 		for (ShellCommandArg arg:args) {
 			fs.processArg(currentDir, ctx, arg);  // no unknown files or dirs
 		}

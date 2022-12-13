@@ -28,7 +28,9 @@ public class ShellCd extends ShellCommand {
 		List<ShellCommandArg> args=getArgs();
 		if (args.size() != 1) throw new Exception("cd: expected zero or one arguments");
 		
-		FileSet fs=new FileSet(true, false);  // directories only
+		FileSet fs=new FileSet(getName(), true, false);  // directories only
+		fs.setIsSafeOperation();
+		
 		ShellCommandArg arg=args.get(0);
 		fs.processArg(currDir, ctx, args.get(0));
 		

@@ -29,9 +29,10 @@ public class ShellRm extends ShellCommand {
 	public Value execute(Ctx ctx) throws Exception {
 		
 		final String currentDir = ctx.getObjGlobal().getCurrDir();
+		String name=getName();
 		List<ShellCommandArg> args=getArgs();
 		
-		FileSet fs=new FileSet(true,true); // files and directories
+		FileSet fs=new FileSet(name,true,true); // files and directories
 		for (ShellCommandArg arg:args) {
 			fs.processArg(currentDir, ctx, arg);
 		}
