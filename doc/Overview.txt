@@ -1,6 +1,9 @@
-* CFT / ConfigTool
+* CFT ("ConfigTool")
 * Introduction
-  |  Compact code
+  |  Why?
+  |  Functions
+  |  Interactive example
+        Save and load
   |  Editing script files
   |  Integrated help
         Normal expression syntax :-)

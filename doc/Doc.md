@@ -1,28 +1,57 @@
 
-# CFT / ConfigTool
+# CFT ("ConfigTool")
 
-Last updated: 2022-12-12 RFO
+Last updated: 2022-12-14 RFO
 
-v3.6.1
+v3.6.2
+
 
 # Introduction
 
 
-CFT is a programming language and an interactive command shell, with focus on data filtering, compactness and
-general usefulness. The name is short for "ConfigTool".
+CFT is an interpreted script language, and an interactive command shell. The aim is to provide a
+rich library of functions and objects, to easily automate tasks involving directories and files, 
+be it collecting logs, searching source code or creating and deploying templated configuration
+files. 
 
+There are two aspects to CFT. It is an interactive shell, which offers normal shell-like functionality
+for listing files in current directory, and navigating the directory tree. Then there is programming,
+where we create functionality in the form of functions. Functions are organized into "script files",
+which we usually open in an editor, although functions can also be defined interactively.
 
-CFT implements a system library of 500+ system functions, and some 80+ system object types (v3.5.0). 
+The REPL (read-eval-print-loop) of CFT processes both shell-like commands like "ls" and "cd", as well
+as CFT expressions, loops, function calls.
 
-There is about 30 global functions, with
-the rest existing as member functions inside the system objects.
+## Why?
 
+The reason for developing CFT, is mainly the horrors of PowerShell, but also a desire for a an automation
+environment and shell that works the same on both Windows and Linux. 
 
-The system objects represent strings, integers and floats, booleans, lists, dictionaries, files and directories, and many
+But CFT is also inspired by PowerShell, as all values are objects, instead of just strings, as in the
+linux/unix shells. 
+
+Lastly it should be mentioned that parsers and intepreters, and language design is a long lasting interest,
+ever since creating a preprocessor for Ada for parallel simulation purposes at University pre 1993. 
+
+:-)
+
+## Functions
+
+The system library consists of a small set of about 30 global functions. These return values of
+various types, like directory or file objects, which in turn contain member functions like getting the
+files in a directory, or getting the directory of a file.
+
+The CFT language supports looping over lists, conditionals ("if" and various loop control mechanisms), and
+a bit more.
+
+Even though there are only 30 global functions, the system library contains 500+ functions, spread out across
+some 80+ object types. 
+
+These system objects represent strings, integers and floats, booleans, lists, dictionaries, files and directories, and many
 others related to various uses.
 
 
-## Compact code
+## Interactive example
 
 
 Code in CFT is kept compact, because of powerful library functions.
@@ -37,22 +66,33 @@ Dir("/some/path").file("log.txt").append(Date.fmt + " something happened")
 The corresponding Java code would easily require 10+ lines of code for this single
 operation.
 
+The line above can be typed at the interactive prompt of CFT, and when pressing enter, it
+gets parsed and executed. If it does what we want, we can give the line a name, creating
+a function-
 
-We can easily modify this into a callable function
-that takes the log line as parameter, or if no parameter given, asks for it:
+
+But before doing that, we will modify the code, into taking the log line as a parameter,
+which if not given, as is the case when interactively entering the line, have the code
+ask for it.
+
+When pressing Enter, the code line is executed, and if it runs okay, we give it the
+name "LogLine", by entering a line starting with a slash and the name.
 
 ```
 P(1,readLine("Log line"))=> x Dir("/some/path").file("log.txt").append(Date.fmt + " " + x)
 /LogLine
 ```
 
-Entering text *interactively*, each line is considered a function body, and immediately executed.
+To run the function, we can either just type LogLine and press Enter, which will make it
+ask for the value, or we can send it as a parameter.
+
+```
+LogLine     # No parantheses needed if no parameters
+LogLine("Add this line")
+```
 
 
-We then enter "/LogLine" which
-creates a named function from the last line of input. We can now run it again by typing LogLine and pressing Enter. It will ask
-you to input a "Log line" string, and then add it to the file.
-
+### Save and load
 
 Having defined a function, we can decide to save the current script to file, which means
 we can load it later to interactively call its functions. Script functions can also be
@@ -67,7 +107,9 @@ called from other functions, in the same or from other scripts.
 ## Editing script files
 
 
-We normally don't enter functions interactively, but instead edit the script file. CFT has
+We normally don't enter functions interactively, but instead edit the script file. 
+
+CFT has
 the ability to define shortcuts, which by default start with the '@' character. They are defined
 in the CFT.props file.
 
@@ -75,9 +117,10 @@ in the CFT.props file.
 The most frequently used is @e which opens current script in an editor. 
 
 We can now create an improved and more readable
-version of our code, as editing the script file, functions can span many lines. 
-Function names follow code, just as when entered at the prompt.
+version of our code, since code read from the script files allows functions to span
+more than one line.
 
+The naming of the function follows the interactive syntax, by following the code.
 
 ```
 # Log directory
@@ -96,6 +139,7 @@ P(1,readLine("Log line")) => logLine
 LogFile.append(Date.fmt + " " + logLine)
 /LogAdd
 ```
+
 ## Integrated help
 
 
@@ -108,23 +152,21 @@ Global system functions are listed by typing
 help
 ```
 
-Functions inside a system object are listed by typing
+Here you will see that there exist global functions Dir, Date, List and so on.
+
+Functions inside a system object are listed by putting an instance of some object on the
+data stack, followed by "help".
 
 ```
 Dir help
 Date help
-""  help
 List help
+""  help
 1 help
 ```
 
-Here, we get help about the value on top of the stack, showing
-member functions inside a Dir object, or a Date object, and so on.
+The exampel above also illustrates that String and int are also objects.
 
-
-The "Dir" and "Date" identifiers above refer to global functions
-that return objects of those types, as documented via simple "help"
-without an expression in front.
 
 ### Normal expression syntax :-)
 
