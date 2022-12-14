@@ -1,15 +1,4 @@
 * CFT ("ConfigTool")
-* Introduction
-  |  Two aspects
-  |  Why?
-  |  System library
-  |  Script library
-  |  Creating a function
-  |  Save and load
-  |  Current script
-  |  Editing script files
-  |  Integrated help
-  |  Special help functions
 * Platform
 * Shortcuts and colon commands
 * Shell-like commands

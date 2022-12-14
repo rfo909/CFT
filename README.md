@@ -1,21 +1,48 @@
 ## [Full Youtube tutorial](https://www.youtube.com/playlist?list=PLj58HwpT4Qy80WhDBycFKxIhWFzv5WkwO).
 
 
-# Automation at all levels
+# Introduction
 
-CFT is short for *ConfigTool*, and is an interpreted and interactive programming language
-and shell.
 
-It was initiated because of a need for a decent "personal automation tool" in my job as a 
-software developer, to run on Windows and Linux. 
+CFT is an interpreted script language, and an interactive command shell. The aim is to provide a
+rich library of functions and objects, to easily automate tasks involving directories and files, 
+be it collecting logs, searching source code or creating and deploying templated configuration
+files.
 
-It's been in continous daily use since creation in 2018.
+There are different ways of running external programs, and display or collect their output, 
+even running them in background threads. 
 
-Written from scratch in Java; runs both on Linux and Windows environments. 
+Code can also ask the user for input, as well as present results.
 
-*README last updated 2022-12-11*
 
-v3.6.0
+
+## Two aspects
+
+There are two major aspects to CFT: the *interactive shell*, and *programming*. 
+
+The interactive shell offers normal shell-like functionality
+for listing files in current directory, navigating the directory tree, copying and deleting, and 
+so on. 
+
+Second, there is programming. All code in CFT is stored as functions, which in turn are organized into "script files",
+which we usually work with using an editor. Functions can also be defined interactively.
+
+The input loop of CFT processes both shell-like commands like "ls" and "cd", as well
+as the full CFT language, with expressions, loops, function calls.
+
+
+## Why?
+
+The reason for developing CFT, is mainly the horrors of PowerShell, but also a desire for a an automation
+environment and shell that works the same on both Windows and Linux. 
+
+Still, CFT is also inspired by PowerShell, as all values are objects, instead of just strings, like in the
+linux/unix shells. 
+
+Lastly it should be mentioned that parsers and intepreters, and language design is a long lasting interest,
+ever since creating a preprocessor for Ada for parallel simulation purposes at University pre 1993. 
+
+:-)
 
 
 ## Terminal based - shell-like
@@ -40,394 +67,233 @@ Run global function _Shell for information about the CFT shell-like commands.
 
 
 
-## Functionality
+## System library
 
-- shell-like command line interface / REPL
-- create functions, do interactive testing, use interactive help
-- lists and dictionaries
-- run external programs in foreground or background
-- text templating with merge code processing
-- spawn CFT expressions as background threads
-- lambdas and closures
-- two-tiered exception hierarchy, soft and hard
-- integrated data store (Db2)
-- simple classes
+The system library consists of a small set of about 30 global functions. These return values of
+various types, like directory or file objects, which in turn contain member functions like getting the
+files in a directory, or getting the directory of a file.
 
-## Functions and scripts
+The CFT language interpreter supports function calling, local variables inside functions, looping over lists, 
+conditionals with "if" and various loop control mechanisms, and some block expressions. And that's about it.
 
-Automation in CFT is done by creating functions. These are in turn saved in script files. Functions can be one-liners
-created interactively, or span multiple lines, created and modified by opening the script file in an editor.
+Most functionality is implemented as member functions of objects, such as the Dir object, which is created
+via the global "Dir" function, and among others contains a function to run an external program:
 
 ```
-Dir.allFiles("*.java").length
-/jc
+Dir.run("git","status")
 ```
 
-Entered interactively, the first line is the code of the function, and as we press Enter, it gets executed. If it does what we want, we
-can assign it a name, which is the second line above, creating a function "jc" from the line of code.
+So even though there are only some 30 global functions, the system library consists of 500+ functions, spread out across
+80+ object types. 
 
-Once a function is defined, it can be called by typing its name, optionally followed by parameters inside ()'s. 
+Note that the call to the "Dir" function has *no parantheses*. Those are optional when calling a function
+with no parameters.
 
-```
-jc
- <int>
- 215
-```
 
-Functions are stored in scripts which are simple text files. When starting CFT, you're working with an unnamed
-script, which can be saved to file using the following "colon command":
+## Script library
+
+A library of CFT scripts exists, offering various utility functionality. In fact, several of the system
+commands are implemented using CFT script. An example is the "edit" shell-like command:
 
 ```
-:save Test
+edit somefile.txt
 ```
 
-There also is a "colon command" to load a script.
+The Java code parses this, and if the file exists, it looks up the following line in the CFT.props file:
 
 ```
-:load Test
-```
-
-To start creating a new unnamed script, type
+mEdit = Lambda { P(1)=>file if(file==null, Lib:GetLastResultFile, file) => file Lib:e(file) }
 
 ```
-:new
+
+(Lambas evolved from something called "macros" initially, hence the config name "mEdit" :-) )
+
+This defines a Lambda function, which is called from the Java code. It takes the single parameter
+as P(1), and ends up calling the Lib:e() function with the file, which means that we call
+function "e" inside the Lib script.
+
+The script library files are stored primarily under the code.lib directory, with some more
+useful examples and utilities under code.examples.
+
+The "@e" shortcut is also defined in CFT.props, and consists of running the following code (not
+expressed as a Lambda, since shortcuts can not take parameters):
+
+```
+if(Sys.savefile != null, Lib:e(Sys.savefile),"No savefile")
 ```
 
-### List functions in current script
+It also ends up calling the "Lib:e" function, which handles opening the editor.
 
-CFT has one "current script" at any time. The functions  in the current script can be listed by
-entering a '?' and pressing Enter.
+
+In total, CFT has some 17000 lines of CFT scripts under the two code.* directories, among them
+a full JSON parser, as well as an XML parser, as the CFT language has access to the Lexer 
+used to parse CFT itself, enabling recursive-descent parsers to be written in CFT itself.
+
+Calls to functions defined in other scripts are always recognized from the syntax.
+
+```
+Lib:DirPrivate   ## call function in Lib script
+Lib.Math.PI      ## call function in Lib object
+```
+
+Yes, we have both a Lib script and a Lib object. The script is a text file under code.lib and
+the object is implemented in Java. A bit confusing, but with different call syntax, it should
+be clear which is which.
+
+
+
+
+
+## Creating a function
+
+```
+Dir("/some/path").file("log.txt").append(Date.fmt + " something happened")
+```
+
+Pressing Enter, the code line is immediately parsed and executed.
+
+If it works, we may want to give it a name, which is how we create functions.
+
+But before doing that, we will modify the code a bit, into taking the log line as a parameter,
+and if no value is given, ask the user to enter it.
+
+When pressing Enter, the code line is again executed, and if it runs okay, we give it the
+name "LogLine", by entering a line starting with a slash and the name.
+
+```
+P(1,readLine("Enter log line"))=> x Dir("/some/path").file("log.txt").append(Date.fmt + " " + x)
+  :
+  : 
+/LogLine
+```
+
+To run the function, we can either just type LogLine and press Enter, which will make it
+ask for the value, or we can send it as a parameter.
+
+```
+LogLine     # No parantheses needed if no parameters
+LogLine("Add this line")
+```
+
+
+## Save and load
+
+Having defined a function, we can decide to save the current script to file, which means
+we can load it later to interactively call its functions. Script functions can also be
+called from other functions, and also from other scripts, by prefixing the function name with
+the name of the script and a colon.
+
+```
+:save MyScript
+:load MyScript
+```
+
+## Current script
+
+The CFT interactive loop has one "current script" at all times, which we can inspect,
+using the '?' command, listing the functions in the script. 
 
 ```
 ?
-
-+-----------------------------------------------------
-|  jc : Dir.allFiles("*.java").length
-+-----------------------------------------------------
-| .  : jc
-+-----------------------------------------------------
 ```
 
-### Calling functions
 
-To run the "jc" function from the command line, when the current script is Test, just type "jc" and press Enter. 
+## Editing script files
 
-If you load another script, and wants to run "jc" inside the "Test" script, type the following, and press Enter
+We normally don't enter functions interactively, but instead edit the script file, and
+use the interactive shell to call functions, by entering their name and press Enter. 
 
-```
-Test:jc
-```
-
-### Script file = namespace
-
-Script files are collections of functions only; they have no state and no code that is not stored inside
-functions. To make a script execute code as it is (re)loaded, just define a function named onLoad
-
-```
-println("Welcome")
-/onLoad
-:save
-:load
-```
-
-The ":load" reloads the current script, and should result in the Welcome message being displayed. 
-
-
-### Editing script file
-
-A *shortcut* has been defined to open the current script file in an editor. If the script has not been
-saved to a file, you get a short message: "No savefile". 
+To edit the current script, assuming it has been saved to a script file, we use what's
+called a shortcut. 
 
 ```
 @e
 ```
 
-We can now enter more complex functions, spanning multiple lines. The last line is the
-one starting with '/' which assigns a name to the lines of code before it.
+The '@e' shortcut opens current script file in an editor. On windows it uses notepad++ if
+installed, otherwise regular notepad. On linux you get to choose between different editors. The
+selection is stored for the future.
 
-In this example, P(n) means grabbing the n'th parameter (1-based).
+
+We can now create an improved and more readable version of our code, since code read from 
+cript files allows functions to span more than one line.
+
+The naming of the function follows the interactive syntax, by following the code.
 
 ```
-# Convert IP address to binary format
+# Log directory
 # --
-	ipAddr=P(1) # on format 10.0.0.3
-	
-	parts = ipAddr.split(".")
-	parts->part
-		out(part.parseInt.bin)
-	| _.concat(".")
-/IpToBinary
+  Dir("/some/path")
+/LogDir
+
+# Log file
+# --
+   LogDir.file("log.txt")
+/LogFile
+
+# Add log line prefixed with date and time
+# --
+   P(1,readLine("Log line")) => logLine
+   LogFile.append(Date.fmt + " " + logLine)
+/LogAdd
 ```
 
-Assuming correct input
+In addition to calling LogAdd, we can also call the other functions, and even combine them
+with shell commands, such as
 
 ```
-IpToBinary("10.0.0.3")
- <String>
- 00001010.00000000.00000000.00000011
+cd (LogDir)
 ```
 
-### Automatic reload
-
-Whenever we change script files, they get reloaded automatically as we enter the next command in
-the CFT input loop. 
-
-*NOTE:* there is no automatic save, so if you add a function from the command line, that you want to keep,
-remember to do
-
-```
-:save
-```
+Using ()'s around an argument to the shell-like commands, allows us to run CFT expressions.
 
 
 
-## Colon commands
-
-There are a few commands that operate outside the language, such as saving and loading scripts. These
-start with a colon. To list all colon commands, type a colon and press Enter
-
-```
-:
-
-Colon commands
---------------
-:save [ident]?           - save script
-:load [ident]?           - load script
-:new                     - create new empty script
-:sw [ident]?             - switch between loaded scripts
-:delete ident [, ident]* - delete function(s)
-:copy ident ident        - copy function
-:wrap                    - line wrap on/off
-:debug                   - enter or leave debug mode
-:syn                     - synthesize last result
-:<int>                   - synthesize a row from last result (must be list)
-:quit                    - terminate CFT
-```
-
-Colon commands are hard-coded into the program.
+## Integrated help
 
 
-## Shortcuts
+All functionality in CFT is documented via the interactive help system.
 
-Frequently used functionality, expressed as CFT code, can be stored as shortcuts. These are defined in
-the CFT.props file, and by default include:
-
-```
-@e       - open current script in editor
-@fm      - open file manager for current dir
-@cmd     - open OS shell for current dir in new windows
-@term    - update terminal size (after resizing window)
-@c       - copy selection of files to clipboard, to be copied on @v
-@x       - copy selection of files to clipboard, to be moved on @v
-@v       - paste selection of files to current dir
-@P       - load and set Projects script, for searching
-```
-
-To list all shortcuts, type '@' and press Enter.
-
-```
-@
-```
-
-
-## Built-in functions
-
-A set of global functions are defined, which return various data, such as a Dir object for the
-current directory, or for creating lists or dictionaries. 
-
-To list global functions, type 'help' and press Enter
+Global system functions are listed by typing
 
 ```
 help
-
-  <obj: <GLOBAL>>
-  <GLOBAL>
-  # v3.5.6
-  # 
-  # _Expr() - information about expressions in CFT
-  # _Shell() - CFT shell-like commands
-  # _Stmt() - information about Statements in CFT
-  # 
-  # AValue(str,any,metaDict?) - created AValue (annotated value) object
-  # Binary(hexString) - convert hex string to Binary value
-  # DataFile(file,prefix) - create DataFile object
-  # Date(int?) - create Date and time object - uses current time if no parameter
-  # Dict(name?) - create Dict object with optional string name
-  # Dir(str?) - creates Dir object
-  # File(str) - creates File object
-  # FileLine(str, lineNo, File) - create FileLine object
-  # Float(value,data) - create Float object - for sorting
-  # Glob(pattern,ignoreCase?) - creates Glob object for file name matching, such as '*.txt' - ignoreCase defaults to true on win+
-  # Grep() or Grep(a,b,...) or Grep(list) - create Grep object
-  # Input(label) - create Input object
-  # Int(value,data) - create Int object - for sorting
-  # Lib() - create Lib object
-  # List(a,b,c,...,x) - creates list object
-  # Regex(str) - creates Regex object
-  # Str(value,data) - create Str object - for sorting
-  # Sys() - create Sys object
-  # Term - get terminal config object
-  # currentTimeMillis() - return current time as millis
-  # error(cond?, msg) - if expr is true or no expr, throw soft error exception
-  # eval(str) - execute program line and return result
-  # getExprCount() - get number of expressions resolved
-  # getType(any) - get value or object type
-  # println([str[,...]]?) - print string
-  # readLine(prompt?) - read single input line
-  # readLines(endmarker) - read input until label on separate line, returns list of strings
-  # shell() - runs shell as configured in CFT.props
-  # syn(value) - get value as syntesized string, or exception if it can not be synthesized
 ```
 
-The number of global functions is about 30, but the total number of system functions, available as
-global functions and member functions inside value objects, is 510 for version 3.5.6, distributed 
-across 85 types of objects.
+Here you will see that there exist global functions Dir, Date, List and so on.
+
+Functions inside a system object are listed by putting an instance of some object on the
+data stack, followed by "help".
 
 ```
-CodeStats:main
-```
-
-
-### Object help
-
-Values in CFT are objects, which in turn contain member functions, like .split()
-for String objects, or .bin() for int objects. 
-
-To list member functions inside objects, create an object of that type, followed by 'help'
-
-```
-List help
 Dir help
-File("x") help  ## File() function requires a name, but the file needs not exist
-"" help         ## String object help
-2 help          ## int object help
 Date help
+List help
+""  help
+1 help
 ```
 
-### Lists, files and directories
+The exampel above also illustrates that String and int are also objects.
 
-Among the most frequently used global functions are Dir, File and List. Below are some
-examples of how these are used. Also note that string values are objects, which have member
-functions as well.
 
-```
-	## Create empty List object
+## Special help functions
 
-	List
+The "help" function only lists functions, either global or inside some object. 
 
-	## Create List with members
-
-	List(1,2,3)
-
-	## Create Date object for "now"
-
-	Date
-
-	## Get directory object for current dir
-
-	Dir
-
-	## ... or for some explicit path
-
-	Dir("/some/path")
-
-	## Get list of files in current directory
-
-	Dir.files
-	
-```
-
-### Creating a text file
+To aid with general syntax, there are two global functions that when you run them, 
+display information about statements and expressions in CFT:
 
 ```
-Dir("/tmp").file("theFile").create("this is a test")
-
-# or
-
-File("/tmp/theFile").create("this is a test")
+_Stmt
+_Expr
 ```
 
-The first one creates the File object using the .file() member function of Dir objects, while the second creates
-it using the global File() function, and including the complete path as a string.
-
-*NOTE:* using the File() global function without an absolute path, always creates a file in or relative to the
-CFT home directory. We usually use Dir.file() to create a file in a certain directory.
-
-
-### Examine binary files
+A third special help function summarizes the shell-like commands of CFT.
 
 ```
-Sys.homeDir.sub("target").file("cft.jar").hex
+_Shell
 ```
 
-
-### Some more examples
-
-```
-	"test".length
-	  <int>
-	  4
-
-	23.bin
-	  <String>
-	  00010111
-
-	"abc".chars.reverse.concat
-	  <String>
-	  "cba"
-	  
-	3.14.i
-	  <int>
-	  3
-```
-
-
-# Objects instead of strings
-
-CFT is inspired by PowerShell, as it works with objects instead of just strings, as in traditional unix shells. This
-enables the use of member functions, instead of some huge global namespace.  
-
-Apart from a couple of specialities or quirks, CFT aims at a regular, compact and predictable syntax, 
-compared both to PowerShell and bash. 
-
-This means there is no "guessing" as to what the users is trying to do, or silent conversions of data, as in PowerShell. 
-
-Also, differing from both PowerShell and unix shells, there is no automatic substitution of "dollar-expressions", which
-means that single and double quotes have no special or different meaning.
-
-```
-'"' + "'$x'" + '"'
-  <String>
-  "'$x'"
-```
-
-
-## Variable substitution / templating
-
-Contrary to PowerShell and bash, CFT performs no automatic substitution of "dollar-expressions" inside
-strings, unless told to.
-
-```
-	# Create javascript query for MongoDb, counting objects for given status,
-	# to be invoked via Mongo shell
-	# --
-		P(1)=>table   # parameter 1 assigned to local variable 'table'
-		P(2)=>status  # ...
-		
-		# remember printjson() to produce output through Mongo Shell
-		Sequence(
-			@ printjson(db.<<table>>.find({
-			@    status: "<<status>>"
-			@ }).count())
-		).mergeExpr
-	/MongoDbCountStatusJS	
-```
-
-The Sequence() expression creates a List, but without the requirement of commas, and the '@ ...' is
-the "raw string" format in CFT, which makes a String from the rest of the line. 
-
-The .mergeExpr is a member function of List objects, which by default evaluates expressions inside "<<" and ">>", inserting
-resulting values as text into the template sequence. 
 
 
 # CFT oddities
@@ -549,129 +415,6 @@ Dir.runCapture("cmd","/c","dir")
 - automate powershell command sequences
 - built-in JSON and XML parsers (written in CFT)
 
-
-## The Projects script
-
-The "Projects" script was created for quickly searching through project text files (source code, text files, html, css etc).
-A shortcut @P loads the "Projects" script. 
-
-Before one can start using it, the config file must be created. First run the Readme function, then call
-EditConfig, to enter details for your projects, such as directories and file types.
-
-The most used function is called "S" which means search, but there are other variants, for searching with
-multiple arguments etc. 
-
-```
-$ @P
-CFT <Projects> C:\CFT> Readme
- ...
-CFT <Projects> C:\CFT> EditConfig
-  # (opens configuration file in editor)
-
-```
-
-Once you have one or more projects defined, you select the project using the "ch" (change) function. The
-selection is stored in the integrated database. 
-
-To search through files, run functions "S" (search), "S2" (search with 2 params) and so on.
-
-Show available functions in script with "?".
-
-```
-CFT <Projects> C:\CFT> ?
-
-+-----------------------------------------------------
-|  License          : # License
-|  Readme           : # Readme
-|  ConfigFile       : # The projects.txt file
-|  EditConfig       : # Edit config file (see Readme)
-|  SetFileFilter    : # Limit search to file names containing a certain string
-|  ShowFileFilter   : # Show info on current FileFilter (if defined)
-|  ClearFileFilter  : # Clear file filter
-|  S                : # Search with one parameter
-|  S2               : # Search with two parameters
-|  S3               : # Search with three parameters
-|  SN               : # Search with one positive and one negative parameter
-|  gfc              : # Get file content around a given line number as List of lines
-|  sfc              : # Show file content around a given line number, report style
-|  FL               : # FileLocator, interactive, sorted presentation, newest first
-|  TF               : # Show text files (that are being searched)
-|  curr             : # Display current project
-|  ch               : # Change project
-+-----------------------------------------------------
-| .                : Curses:Enable
-+-----------------------------------------------------
-```
-
-
-# Interactive help
-
-Type "help" lists all global functions. 
-
-```
-help
-  # v2.9.0
-  # 
-  # _Expr() - display information about expressions in CFT
-  # _Stmt() - display information about Statements in CFT
-  # 
-  # Binary(hexString) - convert hex string to Binary value
-  # DataFile(file,prefix) - create DataFile object
-  # Date(int?) - create Date and time object - uses current time if no parameter
-  # Dict() - create Dict object
-  # Dir(str?) - creates Dir object
-  # File(str) - creates File object
-     :
-     :
-```
-
-Note two special functions starting with underscore, which
-provide info in built-in statements and expressions when run, like this:
-
-```
-_Stmt
-  # 
-  # Statements in CFT
-  # -----------------
-  # 
-  # Looping and iteration over lists:
-  #    loop ... break(cond)
-  #    list -> variable ...
-  # 
-  # Loop control:
-  #    assert (boolExpr)
-  #    reject (boolExpr)
-     :
-     :
-
-_Expr
-  # 
-  # Expressions in CFT
-  # ------------------
-  # 
-  # Logical
-  #    bool || bool
-  #    bool && bool
-  # 
-  # Compare
-  #    >  <  >=  <= == !=
-     :
-     :
-```
-
-
-To list functions inside an object, such as string, we type:
-
-```
-"" help
-  # after(str) - return string following given string
-  # afterLast(str) - return string following last position of given string
-  # before(str) - return string up to given string
-  # beforeLast(str) - return string up to last position of given string
-  # between(pre,post) - return string between two given strings
-     :
-     :
-```
 
 
 # Download and compile
