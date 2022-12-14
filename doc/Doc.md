@@ -12,22 +12,36 @@ v3.6.2
 CFT is an interpreted script language, and an interactive command shell. The aim is to provide a
 rich library of functions and objects, to easily automate tasks involving directories and files, 
 be it collecting logs, searching source code or creating and deploying templated configuration
-files. 
+files.
 
-There are two aspects to CFT. It is an interactive shell, which offers normal shell-like functionality
-for listing files in current directory, and navigating the directory tree. Then there is programming,
-where we create functionality in the form of functions. Functions are organized into "script files",
-which we usually open in an editor, although functions can also be defined interactively.
+There are different ways of running external programs, and display or collect their output, 
+even running them in background threads. 
 
-The REPL (read-eval-print-loop) of CFT processes both shell-like commands like "ls" and "cd", as well
-as CFT expressions, loops, function calls.
+Code can also ask the user for input, as well as present results.
+
+
+
+## Two aspects
+
+There are two major aspects to CFT: the *interactive shell*, and *programming*. 
+
+The interactive shell offers normal shell-like functionality
+for listing files in current directory, navigating the directory tree, copying and deleting, and 
+so on. 
+
+Second, there is programming. All code in CFT is stored as functions, which in turn are organized into "script files",
+which we usually work with using an editor. Functions can also be defined interactively.
+
+The input loop of CFT processes both shell-like commands like "ls" and "cd", as well
+as the full CFT language, with expressions, loops, function calls.
+
 
 ## Why?
 
 The reason for developing CFT, is mainly the horrors of PowerShell, but also a desire for a an automation
 environment and shell that works the same on both Windows and Linux. 
 
-But CFT is also inspired by PowerShell, as all values are objects, instead of just strings, as in the
+Still, CFT is also inspired by PowerShell, as all values are objects, instead of just strings, like in the
 linux/unix shells. 
 
 Lastly it should be mentioned that parsers and intepreters, and language design is a long lasting interest,
@@ -35,51 +49,103 @@ ever since creating a preprocessor for Ada for parallel simulation purposes at U
 
 :-)
 
-## Functions
+## System library
 
 The system library consists of a small set of about 30 global functions. These return values of
 various types, like directory or file objects, which in turn contain member functions like getting the
 files in a directory, or getting the directory of a file.
 
-The CFT language supports looping over lists, conditionals ("if" and various loop control mechanisms), and
-a bit more.
+The CFT language interpreter supports function calling, local variables inside functions, looping over lists, 
+conditionals with "if" and various loop control mechanisms, and some block expressions. And that's about it.
 
-Even though there are only 30 global functions, the system library contains 500+ functions, spread out across
-some 80+ object types. 
+Most functionality is implemented as member functions of objects, such as the Dir object, which is created
+via the global "Dir" function, and among others contains a function to run an external program:
 
-These system objects represent strings, integers and floats, booleans, lists, dictionaries, files and directories, and many
-others related to various uses.
+```
+Dir.run("git","status")
+```
+
+So even though there are only some 30 global functions, the system library consists of 500+ functions, spread out across
+80+ object types. 
+
+Note that the call to the "Dir" function has *no parantheses*. Those are optional when calling a function
+with no parameters.
 
 
-## Interactive example
+## Script library
+
+A library of CFT scripts exists, offering various utility functionality. In fact, several of the system
+commands are implemented using CFT script. An example is the "edit" shell-like command:
+
+```
+edit somefile.txt
+```
+
+The Java code parses this, and if the file exists, it looks up the following line in the CFT.props file:
+
+```
+mEdit = Lambda { P(1)=>file if(file==null, Lib:GetLastResultFile, file) => file Lib:e(file) }
+
+```
+
+(Lambas evolved from something called "macros" initially, hence the config name "mEdit" :-) )
+
+This defines a Lambda function, which is called from the Java code. It takes the single parameter
+as P(1), and ends up calling the Lib:e() function with the file, which means that we call
+function "e" inside the Lib script.
+
+The script library files are stored primarily under the code.lib directory, with some more
+useful examples and utilities under code.examples.
+
+The "@e" shortcut is also defined in CFT.props, and consists of running the following code (not
+expressed as a Lambda, since shortcuts can not take parameters):
+
+```
+if(Sys.savefile != null, Lib:e(Sys.savefile),"No savefile")
+```
+
+It also ends up calling the "Lib:e" function, which handles opening the editor.
 
 
-Code in CFT is kept compact, because of powerful library functions.
+In total, CFT has some 17000 lines of CFT scripts under the two code.* directories, among them
+a full JSON parser, as well as an XML parser, as the CFT language has access to the Lexer 
+used to parse CFT itself, enabling recursive-descent parsers to be written in CFT itself.
+
+Calls to functions defined in other scripts are always recognized from the syntax.
+
+```
+Lib:DirPrivate   ## call function in Lib script
+Lib.Math.PI      ## call function in Lib object
+```
+
+Yes, we have both a Lib script and a Lib object. The script is a text file under code.lib and
+the object is implemented in Java. A bit confusing, but with different call syntax, it should
+be clear which is which.
 
 
-Example:
+
+
+
+## Creating a function
 
 ```
 Dir("/some/path").file("log.txt").append(Date.fmt + " something happened")
 ```
 
-The corresponding Java code would easily require 10+ lines of code for this single
-operation.
+Pressing Enter, the code line is immediately parsed and executed.
 
-The line above can be typed at the interactive prompt of CFT, and when pressing enter, it
-gets parsed and executed. If it does what we want, we can give the line a name, creating
-a function-
+If it works, we may want to give it a name, which is how we create functions.
 
+But before doing that, we will modify the code a bit, into taking the log line as a parameter,
+and if no value is given, ask the user to enter it.
 
-But before doing that, we will modify the code, into taking the log line as a parameter,
-which if not given, as is the case when interactively entering the line, have the code
-ask for it.
-
-When pressing Enter, the code line is executed, and if it runs okay, we give it the
+When pressing Enter, the code line is again executed, and if it runs okay, we give it the
 name "LogLine", by entering a line starting with a slash and the name.
 
 ```
-P(1,readLine("Log line"))=> x Dir("/some/path").file("log.txt").append(Date.fmt + " " + x)
+P(1,readLine("Enter log line"))=> x Dir("/some/path").file("log.txt").append(Date.fmt + " " + x)
+  :
+  : 
 /LogLine
 ```
 
@@ -92,59 +158,83 @@ LogLine("Add this line")
 ```
 
 
-### Save and load
+## Save and load
 
 Having defined a function, we can decide to save the current script to file, which means
 we can load it later to interactively call its functions. Script functions can also be
-called from other functions, in the same or from other scripts.
+called from other functions, and also from other scripts, by prefixing the function name with
+the name of the script and a colon.
 
 ```
 :save MyScript
 :load MyScript
 ```
 
+## Current script
+
+The CFT interactive loop has one "current script" at all times, which we can inspect,
+using the '?' command, listing the functions in the script. 
+
+```
+?
+```
+
 
 ## Editing script files
 
+We normally don't enter functions interactively, but instead edit the script file, and
+use the interactive shell to call functions, by entering their name and press Enter. 
 
-We normally don't enter functions interactively, but instead edit the script file. 
+To edit the current script, assuming it has been saved to a script file, we use what's
+called a shortcut. 
 
-CFT has
-the ability to define shortcuts, which by default start with the '@' character. They are defined
-in the CFT.props file.
+```
+@e
+```
+
+The '@e' shortcut opens current script file in an editor. On windows it uses notepad++ if
+installed, otherwise regular notepad. On linux you get to choose between different editors. The
+selection is stored for the future.
 
 
-The most frequently used is @e which opens current script in an editor. 
-
-We can now create an improved and more readable
-version of our code, since code read from the script files allows functions to span
-more than one line.
+We can now create an improved and more readable version of our code, since code read from 
+cript files allows functions to span more than one line.
 
 The naming of the function follows the interactive syntax, by following the code.
 
 ```
 # Log directory
 # --
-Dir("/some/path")
+  Dir("/some/path")
 /LogDir
 
 # Log file
 # --
-LogDir.file("log.txt")
+   LogDir.file("log.txt")
 /LogFile
 
 # Add log line prefixed with date and time
 # --
-P(1,readLine("Log line")) => logLine
-LogFile.append(Date.fmt + " " + logLine)
+   P(1,readLine("Log line")) => logLine
+   LogFile.append(Date.fmt + " " + logLine)
 /LogAdd
 ```
+
+In addition to calling LogAdd, we can also call the other functions, and even combine them
+with shell commands, such as
+
+```
+cd (LogDir)
+```
+
+Using ()'s around an argument to the shell-like commands, allows us to run CFT expressions.
+
+
 
 ## Integrated help
 
 
 All functionality in CFT is documented via the interactive help system.
-
 
 Global system functions are listed by typing
 
@@ -168,20 +258,23 @@ List help
 The exampel above also illustrates that String and int are also objects.
 
 
-### Normal expression syntax :-)
+## Special help functions
 
+The "help" function only lists functions, either global or inside some object. 
 
-Even though there is a data stack, expressions follow
-normal "infix" syntax:
+To aid with general syntax, there are two global functions that when you run them, 
+display information about statements and expressions in CFT:
 
 ```
-2+3*5
-17
-
-"("+Date.fmt+")"
-(2022-04-22 19:20:58)
+_Stmt
+_Expr
 ```
 
+A third special help function summarizes the shell-like commands of CFT.
+
+```
+_Shell
+```
 
 
 
@@ -195,153 +288,7 @@ both platforms, including PowerShell on Windows.
 
 Development has been going on since May 2018, and on github since version 1.0 in July 2020.
 
-# Functionality
 
-
-The CFT programming language is a glue between library objects and functions, user input, and
-running external programs. It is designed for data filtering, and file processing,
-as well as being interactive.
-
-
-It is command line based, and can be programmed interactively, creating one-line functions, but
-mostly we use editors for creating function code.
-
-## An example
-
-The language is object oriented, with all values being objects. Here we call a
-function "bin()" inside an integer object.
-
-```
-1.bin
-<String>
-00000001
-```
-
-Parantheses are optional when no parameters to a function.
-
-## Another example
-
-```
-Dir.files.length
-<int>
-12
-```
-
-
-- The "Dir" global function returns the current directory as a Dir-object
-- We call the "files" function in the directory object, it returns a list object
-- We call the "length" function in the list object, it returns an int object
-
-
-# Getting help
-
-## Show all global functions
-
-```
-help
-```
-
-Note the two global functions, _Stmt and _Expr, which produce summaries
-of statements and expressions. To run them, just type their name and press Enter:
-```
-_Stmt
-_Expr
-```
-
-# Show functions inside value objects
-
-
-To show all functions inside an object, create an instance of that object followed by the word help.
-Specifically, the help statement takes the value on top of the stack and lists it's available
-functions.
-
-```
-1 help               # integer
-3.14 help            # float
-"xxx" help           # string
-List help
-Dict help
-Dir help
-File("x.txt") help   # the file needs not exist
-```
-# Create functions
-
-
-Everything you type in at the prompt is considered code, and executed.
-
-
-Then, if you want, you can assign a name to the last line of code, and now you have a function.
-
-```
-Dir.files.length
-<int>
-12
-/filesInDir
-```
-
-Now "filesInDir" is a function, referring to one line of code. It can
-be run again as follows:
-
-```
-filesInDir
-<int>
-12
-```
-# Show your functions
-
-
-List functions in current script
-
-```
-?
-```
-
-To show the code of a function:
-
-```
-? name
-```
-
-If the name doesn't match one function, it is used as a prefix to list a subset
-of the functions.
-
-
-# Save and load - colon commands
-
-
-Functions are saved into script files, via "colon commands", which are system commands outside
-the CFT language.
-
-```
-:save myscript
-:load otherscript
-```
-
-To show all colon commands;
-
-```
-:
-```
-
-# Edit script file
-
-
-Instead of entering code via the command line, the script file can easily be opened in
-an editor. To do this, the current script must be saved, then enter the following:
-
-```
-@e
-```
-
-This opens the script in an editor. On linux you will be asked which editor you prefer, and
-the selection is persisted for future invocations. To reset the editor selection, type @ee instead.
-
-
-After changing a script in the editor, and saving, CFT automatically detects the change, and
-reloads the script the next time you press ENTER.
-
-
-The shortcut character can be changed in the CFT.props configuration file.
 
 # Shortcuts and colon commands
 
@@ -363,10 +310,12 @@ View all shortcuts:
 
 Shortcuts are defined in the CFT.props file.
 
-# CFT as a shell / the "CFT shell-like commands"
 
 
-CFT contains a number of "shell-like commands", with different syntax from the regular code, which is 
+# Shell-like commands
+
+
+CFT contains a number of "shell-like" commands, with different syntax from the regular code, which is 
 all about function calls.
 
 
@@ -393,16 +342,18 @@ lsf   # lists files
 lsd   # lists directories
 ```
 
-The syntax for these commands correspond to how they are used in Linux/Unix (where existing), minus flags, with support for
-globbing ("*.txt" etc). They are meant for easy navigation around the directory trees, and for
-inspecting files, with "cat", "more" and "edit", and so on.
+The syntax for these commands correspond to how they are used in Linux/Unix (where existing), minus flags,
+with support for globbing ("*.txt" etc)
+
 ```
 pwd
 cd ..
 ls *.txt
+cp *.txt ../somePlace
 ```
 
 Run the global function _Shell to get up to date help on the CFT shell command interpreter.
+
 
 ## Paths with space
 
@@ -459,28 +410,33 @@ is a list, we can get one of the values, by entering the position in the list:
 
 ```
 lsd 
-cd (Sys.lastResult(3))   # usnig ()'s to run CFT expression
+cd (Sys.lastResult(3))   # using ()'s to run CFT expression
 ```
 
-Since we frequently will need access to "lastResult" when issuing shell-like commands, 
+Since we frequently will need access to "lastResult" when issuing CFT shell commands, 
 there is a shorthand notation similar to the ':N' colon
 command, to obtain a value from the "lastResult" list, or a single colon ':' to return
 the "lastResult" as-is. 
 
 ```
-lsd
-cd :3
+lsd         # lists directories
+cd :3       # cd into directory 4 (prefixed by index 3 in list)
+
+or 
 
 lsd
-:3
-cd :
+:3          # select index 3 element, it now becomes "lastResult"
+cd :        # cd into the directory
 
-Dir.allFiles("SomeClass.java")
-cd :0.dir            # go to directory of file 0 in lastResult
+
+Dir.allFiles("*.java")   
+cd :0.dir            # go to directory of a file in the output from previous command
 
 ```
 
 ## Symbols 
+
+*[this feature is experimental as of v3.6.2]*
 
 If we regularly need to go to a particular directory, or check the status of some file,
 we can store these as symbols, and use them in expressions or interactively.
@@ -529,6 +485,7 @@ fileExpr.delete
 
 Lib:m(fileExpr)            # The Lib script contains function "m" for paging through a file
 Lib:e(fileExpr)            # "e" for opening file in editor
+
 fileExpr.read              # "cat"
 fileExpr.touch
 
@@ -578,9 +535,13 @@ Note that jobs don't survive killing the CFT process.
 
 # The "protect" mechanism
 
+Working in production environments, there will be directories and files that *must not* be changed
+or deleted. 
 
-Regularly performing changes, such as copying, deleting and creating files, should be scripted
-with code. .
+Dir and File objects in CFT can have a "protect" mark set, which blocks destructive operations
+such as appending data to files, delete, rename, move etc.
+
+The protect mark is inherited by all Dir and File objects derived from a protected Dir or File. 
 
 Example:
 
@@ -600,26 +561,28 @@ fails with an error:
 LogDir.files->f f.delete
 ```
 
-The protect function sets a mark in the Dir or File object to which it is applied. This
-mark is in turn inherited by all Dir/File objects derived from it, so LogDir.files
-produces a list of files, each with the protection mark set.
+That's because the Dir object returned by the call to LogDir, is marked as protected, and
+all File objects created by calling the files() function of that object, also get protected,
+and as a consequence trying to delete these files fails.
 
-
-
-# Show content of file
-
-
-Now if we want to list content of file "TODO.txt", we can enter
+This also extends to the CFT shell commands, as long as we call that specific function ("LogDir").
 
 ```
-cat TODO.txt
-more TODO.txt
+rm (LogDir)
+ERROR: INVALID-OP rm : /home/roar/logs (PROTECTED: -)
 ```
-## Open a file in editor
+
+Note that the protect flag is a part of the Dir and File objects as returned by this specific function,
+as well as derived from those. The physical directory and content is not protected if accessed in
+other ways:
 
 ```
-edit TODO.txt
+cd (LogDir)
+rm *
 ```
+
+As always with Linux/Unix commands, you need to know what you're doing!!
+
 
 
 # List basics
@@ -628,9 +591,8 @@ edit TODO.txt
 Lists are return value from many functions, such as getting the files in a directory.
 
 
-Lists can also be created
-with the global List() function, which takes any number of parameters, and creates a List object
-from those values.
+Lists can also be created with the global List() function, which takes any number of 
+parameters, and creates a List object from those values.
 
 ```
 List                 # empty list
@@ -656,13 +618,15 @@ For details of available functions, use the help system:
 ```
 List help
 ```
+
+
 # Introduction to loops
 
 
 Loops in CFT are mostly concerned with iterating over lists. Let's create a list:
 
 ```
-Dir.allFiles(Glob("*.java"))
+Dir.allFiles("*.java")
 ```
 
 This line of code generates a list of all java files under the current directory or sub-directories.
@@ -672,7 +636,7 @@ When we see that the code works, we give it a name.
 /JavaFiles
 ```
 
-We then iterate over the list of files returned, and count the number of lines in each, then
+We now want iterate over the list of files returned, and count the number of lines in each, then
 sum it all up, creating the "linecount" function.
 
 ```
@@ -686,12 +650,13 @@ The "single arrow" followed by an identifier is the "for each" construct, with t
 the "loop variable".  The out() statement is used to generate output from the loop.
 
 
-The "PIPE" character ("|") terminates the loop, and delivers the result from the loop (in this case a list of int) to the next part,
-where the "_" (underscore) function picks it off the stack, then calls the sum() function on it,
-returning a single int value.
+The "PIPE" character ("|") terminates the loop, and delivers the result from the loop (in this case 
+a list of int) to the next part, where the "_" (underscore) function picks it off the stack, then 
+calls the sum() function on it, returning a single int value.
 
 
 **Note:** loop variables are not regular variables, and can not be reassigned.
+
 
 ## Filtering
 
@@ -739,211 +704,21 @@ Dir.allFiles->f type=f.name.afterLast(".") assert(types.contains(type)) out(f)
 
 This function lists all files of type .java and .txt under current directory.
 
-# Files
-
-```
-File("x.txt")
-<obj: File>
-x.txt   DOES-NOT-EXIST
-```
-
-The File() function requires a name, and returns a File object. As seen
-above, the file needs not exist.
 
 
-File objects created with a simple file name (no path), are always located in
-the CFT home directory. This gives predictability for certain data files etc.
-
-
-To access or create files in other directories, enter an absolute or relative
-path in the parameter to File(), or use the .file() function inside
-some Dir object:
-
-```
-Dir("/some/path").file("x.txt")
-```
-## Page through a file
-
-
-To page through text file
-
-```
-more x.txt
-```
-
-To do the same with function code:
-
-```
-SomeDir.file("x.txt") => file Lib:m(file)
-```
-## Edit a (text) file
-
-
-To edit a text file
-
-```
-edit x.txt
-```
-
-To do the same with function code:
-
-```
-SomeDir.file("x.txt") => file Lib:e(file)
-```
-## Show file as hex
-
-
-To page through hex listing of file
-
-```
-File("x.txt").hex
-```
-## Encoding
-
-
-Default encoding is "ISO_8859_1", but this can be changed, for example:
-
-```
-File("x.txt").encoding("UTF-8").create(...)
-```
-
-## end-of-line
-
-
-For windows, the default line terminator is CRLF, and for Linux it is LF. This can be
-overridden as follows:
-
-```
-someFile.setWriteCRLF
-someFile.setWriteLF
-```
-
-CFT reads both formats, and so to ensure a text file has all lines end with for
-example LF, we can do the following:
-
-```
-f=File("x.txt") lines=f.read f.setWriteLF.create(lines)
-
-# or more compact
-f=File("x.txt") f.setWriteLF.create(f.read)
-```
-
-# Directories
-
-```
-Dir
-<obj: Dir>
-ConfigTool/ d:5 f:20
-```
-
-Calling the Dir function with no parameters returns a Dir object for the current directory.
-
-
-The Dir
-object offers multiple member functions, one of which is 
-**.files()**, which produces a list of files in
-the directory. Another is 
-**.allFiles()** which return files from all subdirectories as well.
-
-
-These support "globbing", which is to use "*" to match groups of files.
-
-```
-Dir.files("*.txt")
-Dir.allDirs(".git")
-```
-## Create a subdirectory
-
-```
-Dir.sub("someDir").create
-```
-## Parent directory
-
-
-To get the parent directory of a Dir object:
-
-```
-Dir.sub("..")
-```
-## Get files in a directory
-
-```
-Dir.files
-```
-## Create a file in a directory
-
-```
-Dir.file("x.txt").create("something")
-```
-## Get immediate directories in a directory
-
-```
-Dir.dirs
-```
-## Get all files recursively under a directory
-
-```
-Dir.allFiles
-```
-## Get all directories recursively under a directory:
-
-```
-Dir.allDirs
-```
-
-Note: these are delivered in a sequence so that if all are empty of files, they can
-be safely deleted (leaf-directories first, root last).
-
-## Delete a sub-directory
-
-
-The sub-directory must be empty
-
-```
-Dir.sub("something").delete
-```
-## Set current directory
-
-
-Apart from navigating interactively, to set current directory via code:
-
-```
-Dir.cd
-```
-## Newest file in directory
-
-```
-Dir.newestFile
-Dir.newestFile(Glob("*.log"))
-```
 # Core types
 
 
 
 - String
-
-
 - int - (Java long)
-
-
 - float - (Java double)
-
-
 - boolean
-
-
 - List
-
-
 - Dict
-
-
 - Binary
-
-
 - Lambda
-
-
+- Closure
 
 All values in CFT are objects, which may contain functions. Strings can be written using double
 or single quotes.
@@ -952,7 +727,7 @@ or single quotes.
 
 
 Strings are written in 
-**single or double quotes**, and can be concatenated with '+', which allows
+*single or double quotes*, and can be concatenated with '+', which allows
 for all kinds of combinations.
 
 ```
@@ -966,7 +741,6 @@ for all kinds of combinations.
 
 Also, backslash is not used as escape character, simplifying Windows paths.
 
-
 In script code, there is an additional way of creating strings:
 
 ```
@@ -979,6 +753,8 @@ command line interface, but you can do this:
 ```
 "" + @ something ...
 ```
+
+
 ## Dictionaries
 
 
@@ -1074,7 +850,6 @@ the content of a file.
 Check the Lib.Util object, which contains functions that create objects Encrypt and Decrypt.
 
 # List processing
-
 
 Lists can be created manually using the global List() function.
 
@@ -1211,6 +986,16 @@ List(1,2,3,2,1)-List(2,3)
 1
 1
 ```
+
+### Removing duplicates from a list
+
+```
+List(1,1,2,2).unique
+<List>
+1
+2
+```
+
 # Sorting
 
 
@@ -1219,11 +1004,7 @@ The List object has a single .sort() member function, which does the following:
 
 
 - if all values are int, sort ascending on int value
-
-
 - if all values are float, sort ascending on float value
-
-
 - otherwise sort ascending on "string representation" of all values
 
 
@@ -1269,6 +1050,8 @@ Both the "int" and "float" type contain two functions for converting to int and 
 3.14.f  remains float 3.14
 3.14.i  becomes int   3
 ```
+
+
 # Savefiles - "scripts"
 
 ## Save
@@ -1327,12 +1110,7 @@ library code, used by most other scripts.
 Each script remembers where it was loaded from, so when saving it, it is written back
 to that location.
 
-# Comments
-
-
-The hash character '#' indicates that the rest of the line is a comment.
-
-# Calling functions in other scripts
+## Calling functions in other scripts
 
 
 Sometimes we want to call a useful function in another script file. This is
@@ -1344,7 +1122,10 @@ Script:Function (...)
 Example:
 Lib:Header("This is a test")
 ```
-# Examining external scripts
+
+
+
+## Examining non-current scripts
 
 
 The '?' interactive command has an extended syntax that allows you to list functions inside
@@ -1354,7 +1135,9 @@ another script, as well as listing the code of particular function.
 ?Lib:                  # lists functions inside Lib
 ?Lib:m                 # displays code of function 'm' (to page through a text file)
 ```
-# Helper / local functions
+
+
+# Helper functions
 
 
 In many cases, we need to create helper functions, which should not be visible as part
@@ -1389,6 +1172,8 @@ in the CFT.props file.
 
 The shortcut @scr calls this function.
 
+
+
 # Nested loops
 
 
@@ -1411,14 +1196,14 @@ List(1,2,3)->x List(1,2,3)->y  out(x*y)
 In this case, the body of each loop is all code following the "-> var"
 construct. But this can be changed using the "pipe" symbol, which "closes" all loops.
 
+
+
 # Code spaces - "pipes"
 
 
-**Code spaces have also been called "loop spaces" in earlier versions of the doc.**
-
 The body of any loop is the rest of the code of the function, or until a "pipe" symbol
 is found. The pipe symbol ("|") partitions code into a sequence of
-**code spaces**. Loops are limited within single code spaces, so the "pipe"
+*code spaces*. Loops are limited within single code spaces, so the "pipe"
 effectively is an end marker for all current loops.
 
 
@@ -1444,7 +1229,7 @@ Dir.files->f out(f.length) | _.sum
 ```
 
 As we see from the above code, code spaces don't 
-**need** to contain loops. The
+*need* to contain loops. The
 following is perfectly legal, although a little silly.
 
 ```
@@ -1457,8 +1242,9 @@ It returns 5.
 
 
 All function bodies in CFT consist of one or more 
-**code spaces**. The return value
+*code spaces*. The return value
 from the function is the result from the last code space.
+
 
 ### Code space result value
 

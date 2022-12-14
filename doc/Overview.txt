@@ -1,25 +1,18 @@
 * CFT ("ConfigTool")
 * Introduction
+  |  Two aspects
   |  Why?
-  |  Functions
-  |  Interactive example
-        Save and load
+  |  System library
+  |  Script library
+  |  Creating a function
+  |  Save and load
+  |  Current script
   |  Editing script files
   |  Integrated help
-        Normal expression syntax :-)
+  |  Special help functions
 * Platform
-* Functionality
-  |  An example
-  |  Another example
-* Getting help
-  |  Show all global functions
-* Show functions inside value objects
-* Create functions
-* Show your functions
-* Save and load - colon commands
-* Edit script file
 * Shortcuts and colon commands
-* CFT as a shell / the "CFT shell-like commands"
+* Shell-like commands
   |  Paths with space
   |  Windows backslash
   |  Combine CFT shell commands with CFT function results
@@ -29,29 +22,10 @@
   |  Bang commands
   |  Background jobs
 * The "protect" mechanism
-* Show content of file
-  |  Open a file in editor
 * List basics
 * Introduction to loops
   |  Filtering
 * Local variables
-* Files
-  |  Page through a file
-  |  Edit a (text) file
-  |  Show file as hex
-  |  Encoding
-  |  end-of-line
-* Directories
-  |  Create a subdirectory
-  |  Parent directory
-  |  Get files in a directory
-  |  Create a file in a directory
-  |  Get immediate directories in a directory
-  |  Get all files recursively under a directory
-  |  Get all directories recursively under a directory:
-  |  Delete a sub-directory
-  |  Set current directory
-  |  Newest file in directory
 * Core types
   |  String literals
   |  Dictionaries
@@ -67,6 +41,7 @@
   |  List subtraction
         Removing a single value from a list
         Removing multiple values from a list
+        Removing duplicates from a list
 * Sorting
   |  Int(), Str() and Float()
   |  Converting between int and float
@@ -76,10 +51,9 @@
   |  Create new empty script
   |  The @e shortcut
   |  CFT.props - codeDirs
-* Comments
-* Calling functions in other scripts
-* Examining external scripts
-* Helper / local functions
+  |  Calling functions in other scripts
+  |  Examining non-current scripts
+* Helper functions
 * Displaying all known scripts
 * Nested loops
 * Code spaces - "pipes"

@@ -1447,10 +1447,19 @@ public class ObjFile extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
             
-            FileTime now=FileTime.fromMillis(System.currentTimeMillis());
-
-            BasicFileAttributeView attributes = Files.getFileAttributeView(Paths.get(name), BasicFileAttributeView.class);
-            attributes.setTimes(now, now, now);
+            validateDestructiveOperation("touch");
+            
+            File x=new File(name);
+            if (!x.exists()) {
+            	boolean ok = x.createNewFile();
+            	if (!ok) throw new Exception("Could not create file");
+            } else {
+            	// update time stamp for existing file
+	            FileTime now=FileTime.fromMillis(System.currentTimeMillis());
+	
+	            BasicFileAttributeView attributes = Files.getFileAttributeView(Paths.get(name), BasicFileAttributeView.class);
+	            attributes.setTimes(now, now, now);
+            }
 
             return new ValueObj(self());
         }
