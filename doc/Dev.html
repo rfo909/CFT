@@ -13,6 +13,17 @@
 
 <h1>CFT Change log</h1>
 
+
+<h3>3.6.2 2022-12-13 - extended parsing :N</h3>
+<p>
+	Extended parsing of "colon commands" for :N where it is followed by something,
+	converting :N to "Sys.lastResult(N)" and running the code.
+</p>
+<pre>
+ls
+:0.name
+</pre>
+
 <h3>3.6.2 2022-12-13 - shell + Dir/File protection</h3>
 <p>
 	When executing expressions, if resulting Dir/File is protected, then

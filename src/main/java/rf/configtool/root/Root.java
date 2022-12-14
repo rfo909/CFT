@@ -653,6 +653,25 @@ public class Root {
                 stdio.println("Current value not a list");
                 return;
             }
+            
+            if (!ts.atEOF()) {
+            	// :N.expr
+            	String str=inputLine.trim().substring(1).trim(); // points at first digit
+            	int restPos=0;
+            	while (restPos < str.length() && "0123456789".indexOf(str.charAt(restPos)) >= 0) restPos++;
+            	String command="Sys.lastResult("+pos+")" + str.substring(restPos);
+            	
+                SourceLocation loc = new SourceLocation(":N-expr", 0);
+
+                FunctionBody codeLines = new FunctionBody(command, loc);
+
+            	CFTCallStackFrame caller=new CFTCallStackFrame("<interactive-input>");
+                Value ret = objGlobal.getRuntime().processFunction(stdio, caller, codeLines, new FunctionState(null,null));
+                postProcessResult(ret);
+                showSystemLog();
+                return;
+
+            }
 
             List<Value> values = ((ValueList) lastResult).getVal();
 

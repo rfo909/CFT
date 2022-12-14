@@ -498,11 +498,11 @@ fileExpr.touch
 CFT supports "bang commands", where one can execute operating system level shell commands.
 
 
-Bang commands are commands that start or end with "!", and are sent to the shell for execution.
+Bang commands are commands that start with "!", and are sent to the shell for execution.
 
 ```
 !ls -l
-ls -l!
+ls -l
 ```
 
 
