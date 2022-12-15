@@ -42,6 +42,8 @@ mHash = Lambda { Lib:HashFiles(P(1)) }
 
 mHex = Lambda { P(1) as File => f f.hex }
 
+mGrep = Lambda { P(1)=>str P(2)=>fileList Lib:GrepFiles(str,fileList) } 
+
 # Lambdas for symbol set and get
 # ----
 

@@ -1127,6 +1127,7 @@ public class ObjGlobal extends Obj {
         		"   showtree <dir>?",
         		"   hash <file> ...",
         		"   hex <file>",
+        		"   grep <str> <file> ...",
                 "",
                 "- The 'lsd' lists directories only, and 'lsf' files only.",
                 "",

@@ -52,6 +52,7 @@ public class PropsFile {
     private String mShowtree;
     private String mHash;
     private String mHex;
+    private String mGrep;
     
     private String mSymGet;
     private String mSymSet;
@@ -108,6 +109,7 @@ public class PropsFile {
         mShowtree = "Lambda{error('mShowtree lambda undefined in " + PROPS_FILE + "') }";
         mHash = "Lambda{error('mHash lambda undefined in " + PROPS_FILE + "') }";
         mHex = "Lambda{error('mHex lambda undefined in " + PROPS_FILE + "') }";
+        mGrep = "Lambda{error('mGrep lambda undefined in " + PROPS_FILE + "') }";
         
         mSymGet = "Lambda{error('mSymGet lambda undefined in " + PROPS_FILE + "') }";
         mSymSet = "Lambda{error('mSymSet lambda undefined in " + PROPS_FILE + "') }";
@@ -173,6 +175,9 @@ public class PropsFile {
                     if (name.equals("mHex")) {
                     	mHex=value;
                     } else
+                    if (name.equals("mGrep")) {
+                    	mGrep=value;
+                    } else
                     if (name.equals("mShowtree")) {
                     	mShowtree=value;
                     } else
@@ -182,7 +187,6 @@ public class PropsFile {
                     if (name.equals("mSymSet")) {
                         mSymSet=value;
                     } else
-
                     if (name.equals("shortcutPrefix")) {
                         shortcutPrefix=value;
                     } else
@@ -274,6 +278,10 @@ public class PropsFile {
     
     public String getMHex () {
     	return mHex;
+    }
+    
+    public String getMGrep () {
+    	return mGrep;
     }
     
     public String getMSymGet () {

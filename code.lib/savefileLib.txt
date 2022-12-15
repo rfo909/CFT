@@ -1053,3 +1053,19 @@ run(null,null,null,true)
 		out(f.hash)
 		space=true
 //HashFiles
+
+
+# Search through a list of files
+# Called by mGrep in CFT.props
+# --
+	P(1) => str
+	P(2) => fileList
+	
+	grep=Grep(str)
+	fileList->file
+		grep.file(file)->line
+			report(line.file.name, line.lineNumber, line)
+//GrepFiles
+
+
+GrepFiles(str,fileList)
