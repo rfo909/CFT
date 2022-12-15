@@ -92,14 +92,16 @@ with no parameters.
 
 ## Script library
 
-A library of CFT scripts exists, offering various utility functionality. In fact, several of the system
+A library of CFT scripts offers various utility functionality. 
+
+In fact, several of the system
 commands are implemented using CFT script. An example is the "edit" shell-like command:
 
 ```
 edit somefile.txt
 ```
 
-The Java code parses this, and if the file exists, it looks up the following line in the CFT.props file:
+The Java code parses this, then looks up the following definition in the CFT.props file:
 
 ```
 mEdit = Lambda { P(1)=>file if(file==null, Lib:GetLastResultFile, file) => file Lib:e(file) }
@@ -116,7 +118,7 @@ The script library files are stored primarily under the code.lib directory, with
 useful examples and utilities under code.examples.
 
 The "@e" shortcut is also defined in CFT.props, and consists of running the following code (not
-expressed as a Lambda, since shortcuts can not take parameters):
+expressed as a Lambda, since shortcuts do not take parameters):
 
 ```
 if(Sys.savefile != null, Lib:e(Sys.savefile),"No savefile")
@@ -127,7 +129,10 @@ It also ends up calling the "Lib:e" function, which handles opening the editor.
 
 In total, CFT has some 17000 lines of CFT scripts under the two code.* directories, among them
 a full JSON parser, as well as an XML parser, as the CFT language has access to the Lexer 
-used to parse CFT itself, enabling recursive-descent parsers to be written in CFT itself.
+used to parse CFT, enabling recursive-descent parsers to be written in CFT.
+
+There are also scripts for automating PowerShell use, installing and working with Docker and
+Kubernetes, and many others.
 
 Calls to functions defined in other scripts are always recognized from the syntax.
 
@@ -136,9 +141,17 @@ Lib:DirPrivate   ## call function in Lib script
 Lib.Math.PI      ## call function in Lib object
 ```
 
-Yes, we have both a Lib script and a Lib object. The script is a text file under code.lib and
-the object is implemented in Java. A bit confusing, but with different call syntax, it should
+Yes ... there is both a Lib script and a Lib object. The script is a text file under code.lib and
+the object is implemented in Java. A bit confusing, perhaps, but with different call syntax, it should
 be clear which is which.
+
+```
+?Lib:            ## List functions in Lib *script*
+:load Lib        ## Load Lib script, making it the current script
+
+Lib help         ## List functions inside the Lib *object*
+```
+
 
 
 
