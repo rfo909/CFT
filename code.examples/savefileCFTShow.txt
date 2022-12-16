@@ -48,8 +48,6 @@
 	- rm
 	- cp
 	- mv
-	- touch
-	- diff	
 
 	ls cft*
 	edit :N
@@ -57,8 +55,9 @@
 	lsd
 	cd :N
 
-	cd
-	
+	@cmd
+	@fm	
+
 
 .h Functions
 
@@ -82,8 +81,8 @@
 
 	# Parameters (with default expr)
 	# --
-		a=P(1,Input("Enter a").get.parseInt)
-		b=P(2,Input("Enter b").get.parseInt)
+		a=P(1,readLine("Enter a").parseInt)
+		b=P(2,readLine("Enter b").parseInt)
 		a+b
 	/sum
 
@@ -101,27 +100,26 @@
 
 	"123".chars->c println(c) | println("done")
 
-	# A loop returns a list, which is populated by calls to out()
-	# It becomes either function return value or input to next 
-	# section. The expression "_" returns that value.
-
-
+	# All Java files under current dir
+	# --
+		Dir.allFiles("*.java")
+	/JavaFiles
+	
 	# Count number of lines of java
 	# --
-		Dir.allFiles("*.java")->f 
-			out(f.read.length) 
-		| _.sum
-	/javaLines
+		JavaFiles->f out(f.read.length) | _.sum
+	/JavaLines
 
 	# Filter data 
 	# --
-		List(1,2,3,4)->x
-			assert(x%2==0)
-			out(x)
-	/evenNumbers
+		JavaFiles->f
+			assert(f.lastModified > currentTimeMillis-(86400*1000*7))
+			out(f)
+	/RecentlyModified
+	
+	# ... Date.sub(Date.Duration.days(7))
 
-
-.h HELP
+.h Help
 
 	# List functions in current script
 	?
@@ -134,12 +132,11 @@
 
 	# Object functions
 	Dir help
-	Dir.files help
-	Dir.files.first help
 
-	# Expressions and statements
+	# Internals
 	_Expr
 	_Stmt
+	_Shell
 
 	# List colon commands and shortcuts
 	:
@@ -153,32 +150,7 @@
 	?Lib:TmpDir
 
 
-.h Shell
-
-    ls, lsd, lsf
-	pwd
-
-	cd
-	cd ...
-	cd (expr)
-
-    cat, more, edit
-
-    ls
-    :N
-    edit/cat/more
-
-    @fm
-
-    @S
-    @FL
-
-    !dir
-    shell
-
-
-
-.h Search
+.h Projects 
 
     # Projects = Script for searching
     # Multiple projects, each with multiple directories etc
@@ -205,9 +177,6 @@
 	
 	@S
 	@FL
-
-
-
 
 
 >>>>> TEXT
