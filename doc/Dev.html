@@ -13,6 +13,13 @@
 
 <h1>CFT Change log</h1>
 
+<h3>3.6.3 2022-12-15 - minor mod (assign)</h3>
+<p>
+	Moved the stack pop assign from being an Expr to being a Stmt, so that it does not have
+	to return anything. This means a sequence of these assignments can pick a sequence of
+	values off the top of the stack. Just an "itch" :-)
+</p>
+
 <h3>3.6.2 2022-12-15 - created interactive grep</h3>
 <pre>
 grep "xyz" *.txt

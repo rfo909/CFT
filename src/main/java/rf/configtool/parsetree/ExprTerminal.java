@@ -44,12 +44,8 @@ public class ExprTerminal extends ExprCommon {
         	return;
         }
         
-        if (ts.peekStr("=>")) {
-            expr=new ExprAssign(ts);
-            return;
-        }
         if (ts.peekType(Token.TOK_IDENTIFIER) && ts.peekStr(1,"=")) {
-            expr = new ExprAssign2(ts);
+            expr = new ExprAssign(ts);
             return;
         }
         

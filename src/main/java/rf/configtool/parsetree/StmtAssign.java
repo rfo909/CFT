@@ -20,26 +20,28 @@ package rf.configtool.parsetree;
 import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.SourceException;
+import rf.configtool.main.Stdio;
 import rf.configtool.main.runtime.Value;
 
-public class ExprAssign2 extends ExprCommon {
+/**
+ * The stack pop assignment has moved from being an Expr to being a Stmt, in order
+ * that it not return anything. Expr always return a Value, but doing so in this
+ * case means we can not pop more than one value of the data stack, ever.
+ */
+public class StmtAssign extends Stmt {
 
     private String varName;
-    private Expr expr;
     
-    public ExprAssign2 (TokenStream ts) throws Exception {
+    public StmtAssign (TokenStream ts) throws Exception {
         super(ts);
+        ts.matchStr("=>","expected '=>'");
         varName=ts.matchIdentifier("expected variable name");
-        ts.matchStr("=","expected '='");
-        expr=new Expr(ts);
-       
     }
 
-    public Value resolve (Ctx ctx) throws Exception {
-        Value v=expr.resolve(ctx);
+    public void execute (Ctx ctx) throws Exception {
+        Value v=ctx.pop();
         if (ctx.isLoopVariable(varName)) throw new SourceException(getSourceLocation(), "Invalid assign: '" + varName + "' is a loop variable");
         ctx.getFunctionState().set(varName, v);
-        return v;
     }
 
 }

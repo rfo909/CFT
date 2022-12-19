@@ -65,6 +65,9 @@ public abstract class Stmt extends LexicalElement {
         if (ts.peekStr("setBreakPoint")) {
         	return new StmtSetBreakPoint(ts);
         }
+        if (ts.peekStr("=>")) {
+        	return new StmtAssign(ts);
+        }
     
         // otherwise it must be an expression
         return new StmtExpr(ts);

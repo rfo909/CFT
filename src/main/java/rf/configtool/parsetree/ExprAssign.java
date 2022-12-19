@@ -25,14 +25,18 @@ import rf.configtool.main.runtime.Value;
 public class ExprAssign extends ExprCommon {
 
     private String varName;
+    private Expr expr;
+    
     public ExprAssign (TokenStream ts) throws Exception {
         super(ts);
-        ts.matchStr("=>","expected '=>'");
         varName=ts.matchIdentifier("expected variable name");
+        ts.matchStr("=","expected '='");
+        expr=new Expr(ts);
+       
     }
 
     public Value resolve (Ctx ctx) throws Exception {
-        Value v=ctx.pop();
+        Value v=expr.resolve(ctx);
         if (ctx.isLoopVariable(varName)) throw new SourceException(getSourceLocation(), "Invalid assign: '" + varName + "' is a loop variable");
         ctx.getFunctionState().set(varName, v);
         return v;
