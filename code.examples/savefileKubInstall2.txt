@@ -12,12 +12,12 @@ https://www.youtube.com/watch?v=U1VzcjCB_sY&t=1770s
 
 # Master hosts
 # --
-	List("k1.v")
+	"123".chars->c out("k"+c+".v")
 /masterHosts
 
 # Worker hosts
 # --
-	List("k2.v")
+	"456".chars->c out("k"+c+".v")
 /workerHosts
 
 # All hosts

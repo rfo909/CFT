@@ -50,12 +50,12 @@ together multiple masters to form single cluster.
 # Master hosts
 # (Should ideally work with more than one)
 # --
-    "kub1.v".split
+    "123".chars->c out("kub"+c+".v")
 /MasterHosts
 
 # Worker hosts
 # --
-    "kub2.v kub3.v".split
+    "456".chars->c out("kub"+c+".v")
 /WorkerHosts
 
 
@@ -110,8 +110,10 @@ together multiple masters to form single cluster.
 
 # List all kubernetes versions ....
 # --
-    P(1,GetTarget) => target
-        SSH:sudo(target,"curl -s https://packages.cloud.google.com/apt/dists/kubernetes-xenial/main/binary-amd64/Packages | grep Version | awk '{print $2}'").stdout
+    lines = Dir.runCapture("curl -s https://packages.cloud.google.com/apt/dists/kubernetes-xenial/main/binary-amd64/Packages".split)
+    lines -> line
+	assert(line.contains("Version"))
+	out(line)
 /KubShowVersions
 
 
@@ -128,7 +130,7 @@ together multiple masters to form single cluster.
     P(2,false) => debug
 
     "kubeadm kubelet kubectl".split->app
-        println(""+target+": installating " + app + "=" + KubVersion)
+        println(""+target+": installing " + app + "=" + KubVersion)
         SSH:sudo(target,'apt-get install -y --allow-downgrades ' + app + "=" + KubVersion, false, debug)
     |
     println("Verifying install getting kubeadm version")
@@ -211,19 +213,21 @@ together multiple masters to form single cluster.
 /AssignHostnames
 
 
-# Initialize Kubernetes on Master nodes
+
+
+# Initialize Kubernetes on first master node
 # --
     debug=false
-    MasterHosts->host
+    MasterHosts.first->host
         Lib:Header(host)
         HostTarget(host) => masterNode
         
         SSH:sudo(masterNode,'sudo kubeadm init --pod-network-cidr=10.244.0.0/16',false,debug).stdout => stdout
-        File("KUB_Master_init_" + host + ".txt") => f
-        f.create(stdout)
+        File("KUB_Master_init_" + host + ".txt")=>f
+	f.create(stdout)
         ShowMainInitOutput
         println("--- Stdout stored: " + f.path)
-/InitMasterNodes
+/InitMasterNode
 
 
 
@@ -235,27 +239,74 @@ together multiple masters to form single cluster.
 /ShowMainInitOutput
 
 
-# Make HOME/.kube config
+# Make $HOME/.kube config on first master host
 # --
     debug=false
-    MasterHosts->host
+    MasterHosts.first->host
         Lib:Header(host)
         HostTarget(host) => masterNode
         
-        SSH:sudo(masterNode,'mkdir -p $HOME/.kube',true, debug)
-        SSH:sudo(masterNode,'cp -i /etc/kubernetes/admin.conf $HOME/.kube/config', false, debug)
-        SSH:sudo(masterNode,'chown $(id -u):$(id -g) $HOME/.kube/config', false, debug)
+        SSH:run(masterNode,'sudo mkdir -p $HOME/.kube',true, debug)
+        SSH:run(masterNode,'sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config', false, debug)
+        SSH:run(masterNode,'sudo chown $(id -u):$(id -g) $HOME/.kube/config', false, debug)
 /CreateHomeKubeConfig
+
+
+
+# Copy $HOME/.kube config from first master
+# --
+    debug=false
+    target=HostTarget(MasterHosts.first)
+
+    SSH:run(target,'sudo tar cf kube.tar .kube', true, debug)
+    Dir(Sys.environment.HOME) => HOME
+
+    Util:Run("scp " + target + ":./kube.tar .",HOME)    
+    Util:Run("tar xvf ./kube.tar",HOME)
+
+//LocalKubeConfig 
+    
+
+# Install kubeadm + kubectl on local host
+# --
+    Lib:Header("Adding repo")
+    script=Sequence(
+        @ curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add
+        @ apt-add-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main"
+    )
+
+
+    Lib:TmpFile("script","sh") =>f
+    f.create(script)
+    Util:Run("sudo sh " + f.path)
+    f.delete
+
+    Lib:Header("Installing tools")
+
+    "kubeadm kubectl".split->app
+        println("Installing " + app + "=" + KubVersion)
+        Util:Run('sudo apt-get install -y --allow-downgrades ' + app + "=" + KubVersion)
+    |
+//LocalKubeTools
+
+
+
+# Make local host install of kube tools
+# --
+	LocalKubeConfig
+	LocalKubeTools
+/LocalToolsInstall
+
 
 
 # Pod network - flannel
 # --
     debug=false
-    MasterHosts->host
+    MasterHosts.first->host
         Lib:Header(host)
         HostTarget(host) => masterNode
 
-        SSH:sudo(masterNode,'kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml', false, debug) => result
+        SSH:run(masterNode,'kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml', false, debug) => result
         File("KUB_Flannel_init_out.txt").create(result.stdout)
         File("KUB_Flannel_init_err.txt").create(result.stderr)
 
@@ -266,7 +317,7 @@ together multiple masters to form single cluster.
 # Verify Pod network
 # --
     debug=false
-    MasterHosts->host
+    MasterHosts.first->host
         Lib:Header(host)
         HostTarget(host) => masterNode
 
@@ -276,50 +327,87 @@ together multiple masters to form single cluster.
 
 
 
+# Get join command for cluster
+# --
+	P(1,false) => forMasterNode
+	target=HostTarget(MasterHosts.first)
+
+	SSH:run(target,"kubeadm token create --print-join-command").stdout->line
+		assert(line.contains("join"))
+		out(line)
+		break
+	| _.first=>joinCommand
+
+	if (forMasterNode) {
+		joinCommand=joinCommand + " --control-plane"
+	}
+	joinCommand
+//GetJoinCommand
+
+
+
+
 # Join worker nodes to network
 # --
     P(1,true) => debug
 
-    ShowMainInitOutput
-    
-    Lib:Header("Paste join command")
-    println("Terminate with '.' on separate line")
-    println
-    readLines(".")->line
-        if (line.endsWith("\")) {
-            out(line.sub(0,line.length-1).trim)
-        } else {
-            out(line.trim)
-        }
-    | _.concat(" ") => cmd
+    cmd=GetJoinCommand
 
     Lib:Header("Complete command")
     println(cmd)
-
-    println
-    readLine("Enter to continue")
 
     WorkerHosts->host
         Lib:Header(host)
         HostTarget(host) => worker
 
         SSH:sudo(worker,cmd,false,debug) => result
-        File("KUB_Worker_" + host + ".txt") => f
+        File("KUB_Worker_join_" + host + ".txt") => f
         f.create(result.stdout)
         result.stderr->line f.append("ERR " + line) |
 /JoinWorkers
 
 
-# Verify workers
+
+# Join additional master nodes to network
+# Does not work, gets error messages:
+#
+   # unable to add a new control plane instance a cluster that doesn't have a stable controlPlaneEndpoint address
+   # 
+   # Please ensure that:
+   # * The cluster has a stable controlPlaneEndpoint address.
+   # * The certificates that must be shared among control plane instances are provided.
+#
+# --
+    P(1,true) => debug
+
+    cmd=GetJoinCommand(true)
+
+    Lib:Header("Complete command")
+    println(cmd)
+
+    mh = MasterHosts - MasterHosts.first
+
+    mh->host
+        Lib:Header(host)
+        HostTarget(host) => master
+
+        SSH:sudo(master,cmd,false,debug) => result
+        File("KUB_Master_join_" + host + ".txt") => f
+        f.create(result.stdout)
+        result.stderr->line f.append("ERR " + line) |
+/JoinMasters
+
+
+# Show nodes (kubectl get nodes)
 # --
     debug=false
-    MasterHosts->host
-        Lib:Header(host)
-        HostTarget(host) => masterNode
+    host=MasterHosts.first
+
+    Lib:Header(host)
         
-        SSH:sudo(masterNode,'kubectl get nodes', false, debug).stdout->line
-            println(line)
-/VerifyWorkers
+    SSH:sudo(HostTarget(host),'kubectl get nodes', false, debug).stdout->line
+        println(line)
+/ShowNodes
 
 
 
