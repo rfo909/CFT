@@ -1,3 +1,20 @@
+/*
+CFT - an interactive programmable shell for automation 
+Copyright (C) 2020-2023 Roar Foshaug
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>
+*/
+
 package rf.configtool.root.shell;
 
 import java.util.List;
@@ -10,39 +27,39 @@ import rf.configtool.main.runtime.lib.Protection;
 
 public class ShellCd extends ShellCommand {
 
-	public ShellCd(List<String> parts) throws Exception {
-		super(parts);
-	}
+    public ShellCd(List<String> parts) throws Exception {
+        super(parts);
+    }
 
-	public Value execute(Ctx ctx) throws Exception {
+    public Value execute(Ctx ctx) throws Exception {
 
-		String currDir = ctx.getObjGlobal().getCurrDir();
-		boolean noArgs=getArgs().isEmpty();
-		
-		if (noArgs) {
-	        ctx.getObjGlobal().setCurrDir(null);
-	        ctx.getObjGlobal().addSystemMessage(ctx.getObjGlobal().getCurrDir());
-	        return new ValueObj(new ObjDir(ctx.getObjGlobal().getCurrDir(), Protection.NoProtection));
-		}
-		
-		List<ShellCommandArg> args=getArgs();
-		if (args.size() != 1) throw new Exception("cd: expected zero or one arguments");
-		
-		FileSet fs=new FileSet(getName(), true, false);  // directories only
-		fs.setIsSafeOperation();
-		
-		ShellCommandArg arg=args.get(0);
-		fs.processArg(currDir, ctx, args.get(0));
-		
-		List<String> dirs=fs.getDirectories();
-		if (dirs.size() != 1) throw new Exception("cd: got " + dirs.size() + " matches, should be one");
-		
+        String currDir = ctx.getObjGlobal().getCurrDir();
+        boolean noArgs=getArgs().isEmpty();
+        
+        if (noArgs) {
+            ctx.getObjGlobal().setCurrDir(null);
+            ctx.getObjGlobal().addSystemMessage(ctx.getObjGlobal().getCurrDir());
+            return new ValueObj(new ObjDir(ctx.getObjGlobal().getCurrDir(), Protection.NoProtection));
+        }
+        
+        List<ShellCommandArg> args=getArgs();
+        if (args.size() != 1) throw new Exception("cd: expected zero or one arguments");
+        
+        FileSet fs=new FileSet(getName(), true, false);  // directories only
+        fs.setIsSafeOperation();
+        
+        ShellCommandArg arg=args.get(0);
+        fs.processArg(currDir, ctx, args.get(0));
+        
+        List<String> dirs=fs.getDirectories();
+        if (dirs.size() != 1) throw new Exception("cd: got " + dirs.size() + " matches, should be one");
+        
         ctx.getObjGlobal().setCurrDir(dirs.get(0));
         ctx.getObjGlobal().addSystemMessage(ctx.getObjGlobal().getCurrDir());
         return new ValueObj(new ObjDir(ctx.getObjGlobal().getCurrDir(), Protection.NoProtection));
-	}
+    }
 
 
-	
+    
 
 }

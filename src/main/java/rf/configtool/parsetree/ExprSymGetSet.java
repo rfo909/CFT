@@ -1,3 +1,20 @@
+/*
+CFT - an interactive programmable shell for automation 
+Copyright (C) 2020-2023 Roar Foshaug
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>
+*/
+
 package rf.configtool.parsetree;
 
 import java.util.ArrayList;
@@ -16,16 +33,16 @@ import rf.configtool.main.runtime.ValueString;
 
 public class ExprSymGetSet extends ExprCommon {
 
-	private final String symbol;
-	private final boolean isSet;
+    private final String symbol;
+    private final boolean isSet;
     
     public ExprSymGetSet (TokenStream ts, boolean isSet) throws Exception {
         super(ts);
         this.isSet=isSet;
         String pre=(isSet ? "%%" : "%");
         
-    	ts.matchStr(pre, "expected '" + pre + "'");
-    	
+        ts.matchStr(pre, "expected '" + pre + "'");
+        
         symbol = ts.matchIdentifier("expected identifier following '" + pre + "'");
     }
     
@@ -35,16 +52,16 @@ public class ExprSymGetSet extends ExprCommon {
         
         String lambda;
         if (isSet) {
-        	lambda = propsFile.getMSymSet();
+            lambda = propsFile.getMSymSet();
         } else {
-        	lambda = propsFile.getMSymGet();
+            lambda = propsFile.getMSymGet();
         }
 
         FunctionBody codeLines=new FunctionBody(lambda, loc);
         
-    	CFTCallStackFrame caller=new CFTCallStackFrame("Lambda for SymGetSet");
+        CFTCallStackFrame caller=new CFTCallStackFrame("Lambda for SymGetSet");
 
-    	
+        
         Value ret = ctx.getObjGlobal().getRuntime().processFunction(ctx.getStdio(), caller, codeLines, new FunctionState(null,null));
         if (!(ret instanceof ValueBlock)) throw new Exception("Not a lambda: " + lambda + " ---> " + ret.synthesize());
         
@@ -60,6 +77,6 @@ public class ExprSymGetSet extends ExprCommon {
         
     
     public Value resolve (Ctx ctx) throws Exception {
-    	return callMacro(ctx);
+        return callMacro(ctx);
     }
 }

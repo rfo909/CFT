@@ -1,3 +1,20 @@
+/*
+CFT - an interactive programmable shell for automation 
+Copyright (C) 2020-2023 Roar Foshaug
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>
+*/
+
 package rf.configtool.root.shell;
 
 import java.io.File;
@@ -16,47 +33,47 @@ import rf.configtool.main.runtime.lib.Protection;
 
 public class ShellTouch extends ShellCommand {
 
-	public ShellTouch(List<String> parts) throws Exception {
-		super(parts);
-	}
+    public ShellTouch(List<String> parts) throws Exception {
+        super(parts);
+    }
 
-	public Value execute(Ctx ctx) throws Exception {
+    public Value execute(Ctx ctx) throws Exception {
 
-		String name=getName();
-		
-		String currDir = ctx.getObjGlobal().getCurrDir();
-		boolean noArgs=getArgs().isEmpty();
-		
-		if (noArgs) throw new Exception("touch: expected file(s)");
-		
-		List<ShellCommandArg> args=getArgs();
-		
-		FileSet fs=new FileSet(name,false,true);  // files only
-		
-		for (ShellCommandArg arg:args) {
-			fs.processArg(currDir, ctx, arg, false, true);  // allow unknown files
-		}
-		
-		List<String> files=fs.getFiles();
-		List<Value> results=new ArrayList<Value>();
-		
-		for (String filename:files) {
-			File file=new File(filename);
-	        if (!file.exists()) {
-	            file.createNewFile();
-	        } else {
-	            Path path=file.toPath();
-	            FileTime ft = FileTime.fromMillis(System.currentTimeMillis());
-	            Files.setLastModifiedTime(path, ft);
-	        }
-	        Value result=new ValueObj(new ObjFile(file.getCanonicalPath(), Protection.NoProtection));
-	        results.add(result);
-		}
-		if (results.size()==1) return results.get(0);
-		return new ValueList(results);
-	}
+        String name=getName();
+        
+        String currDir = ctx.getObjGlobal().getCurrDir();
+        boolean noArgs=getArgs().isEmpty();
+        
+        if (noArgs) throw new Exception("touch: expected file(s)");
+        
+        List<ShellCommandArg> args=getArgs();
+        
+        FileSet fs=new FileSet(name,false,true);  // files only
+        
+        for (ShellCommandArg arg:args) {
+            fs.processArg(currDir, ctx, arg, false, true);  // allow unknown files
+        }
+        
+        List<String> files=fs.getFiles();
+        List<Value> results=new ArrayList<Value>();
+        
+        for (String filename:files) {
+            File file=new File(filename);
+            if (!file.exists()) {
+                file.createNewFile();
+            } else {
+                Path path=file.toPath();
+                FileTime ft = FileTime.fromMillis(System.currentTimeMillis());
+                Files.setLastModifiedTime(path, ft);
+            }
+            Value result=new ValueObj(new ObjFile(file.getCanonicalPath(), Protection.NoProtection));
+            results.add(result);
+        }
+        if (results.size()==1) return results.get(0);
+        return new ValueList(results);
+    }
 
 
-	
+    
 
 }

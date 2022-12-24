@@ -1,6 +1,6 @@
 /*
 - an interactive programmable shell for automation 
-Copyright (C) 2020-2022 Roar Foshaug
+Copyright (C) 2020-2023 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -320,7 +320,7 @@ public class ObjGlobal extends Obj {
         FunctionBody onLoad = currScriptCode.getFunctionBody("onLoad");
         if (onLoad != null) {
             try {
-            	CFTCallStackFrame caller=new CFTCallStackFrame("Script " + scriptName+":onLoad");
+                CFTCallStackFrame caller=new CFTCallStackFrame("Script " + scriptName+":onLoad");
                 this.runtime.processFunction(stdio, caller, onLoad, new FunctionState("onLoad"));
             } catch (Exception ex) {
                 stdio.println("onLoad function failed with exception");
@@ -620,7 +620,7 @@ public class ObjGlobal extends Obj {
             if (params.size() != 1) throw new Exception("Expected parameter str");
             String str=getString("str",params,0);
             SourceLocation loc=new SourceLocation("<eval>", 0, 0);
-        	CFTCallStackFrame caller=new CFTCallStackFrame("eval");
+            CFTCallStackFrame caller=new CFTCallStackFrame("eval");
             return runtime.processFunction(ctx.getStdio(), caller, new FunctionBody(str, loc),new FunctionState(null,null));
         }
     }
@@ -724,8 +724,8 @@ public class ObjGlobal extends Obj {
             Stdio stdio=ctx.getStdio();
             StringBuffer sb=new StringBuffer();
             for (int i=0; i<params.size(); i++) {
-            	if (i>0) sb.append(" ");
-            	sb.append(params.get(i).getValAsString());
+                if (i>0) sb.append(" ");
+                sb.append(params.get(i).getValAsString());
             }
             String s=sb.toString();
 
@@ -1117,18 +1117,18 @@ public class ObjGlobal extends Obj {
                 "-------------------------------------",
                 "",
                 "   ls / lsd / lsf ...",
-        		"   cd <dir>",
-        		"   cat / edit / more / tail <file>",
-        		"   touch <file> ...",
-        		"   mv ...",
-        		"   cp ...",
-        		"   rm ...",
-        		"   mkdir <dir>",
-        		"   diff <file1> <file2>",
-        		"   showtree <dir>?",
-        		"   hash <file> ...",
-        		"   hex <file>",
-        		"   grep <str> <file> ...",
+                "   cd <dir>",
+                "   cat / edit / more / tail <file>",
+                "   touch <file> ...",
+                "   mv ...",
+                "   cp ...",
+                "   rm ...",
+                "   mkdir <dir>",
+                "   diff <file1> <file2>",
+                "   showtree <dir>?",
+                "   hash <file> ...",
+                "   hex <file>",
+                "   grep <str> <file> ...",
                 "",
                 "- The 'lsd' lists directories only, and 'lsf' files only.",
                 "",

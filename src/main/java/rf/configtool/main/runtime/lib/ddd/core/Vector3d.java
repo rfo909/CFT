@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2022 Roar Foshaug
+Copyright (C) 2020-2023 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -200,18 +200,18 @@ public class Vector3d {
 
 
     private String fmt (double d) {
-    	String s=""+d;
-    	StringBuffer sb=new StringBuffer();
-    	boolean foundDot=false;
-    	int decCount=2;
-    	for (int i=0; i<s.length(); i++) {
-    		char c=s.charAt(i);
-    		sb.append(c);
-    		if (foundDot) decCount--;
-    		if (decCount<=0) break;
-    		if (c=='.') foundDot=true;
-    	}
-    	return sb.toString();
+        String s=""+d;
+        StringBuffer sb=new StringBuffer();
+        boolean foundDot=false;
+        int decCount=2;
+        for (int i=0; i<s.length(); i++) {
+            char c=s.charAt(i);
+            sb.append(c);
+            if (foundDot) decCount--;
+            if (decCount<=0) break;
+            if (c=='.') foundDot=true;
+        }
+        return sb.toString();
     }
     
     

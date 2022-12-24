@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2022 Roar Foshaug
+Copyright (C) 2020-2023 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -75,7 +75,7 @@ public class ExprLookupOrCall extends ExprCommon {
         if (codeLines!= null) {
             // execute code line
             Runtime rt=new Runtime(objGlobal);
-        	CFTCallStackFrame caller=new CFTCallStackFrame(getSourceLocation(), "Calling " + ident);
+            CFTCallStackFrame caller=new CFTCallStackFrame(getSourceLocation(), "Calling " + ident);
             return rt.processFunction(ctx.getStdio(), caller, codeLines, new FunctionState(ident, values));
         }
         

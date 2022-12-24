@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2022 Roar Foshaug
+Copyright (C) 2020-2023 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -45,18 +45,18 @@ public class DottedAssign extends LexicalElement {
     
     public Value resolve (Ctx ctx, Obj obj) throws Exception {
         if (obj instanceof ValueObj) {
-        	// unwrap Obj
+            // unwrap Obj
             obj=((ValueObj) obj).getVal();
         }
         
         if (obj instanceof ObjDict) {
-        	ObjDict dict=(ObjDict) obj;
-        	
-        	Value v=expr.resolve(ctx.sub());
-        	dict.set(ident, v);
-        	return new ValueObj(dict);
+            ObjDict dict=(ObjDict) obj;
+            
+            Value v=expr.resolve(ctx.sub());
+            dict.set(ident, v);
+            return new ValueObj(dict);
         } else {
-        	throw new Exception("Expected a dictionary to set '" + ident + "' - got " + obj.getTypeName());
+            throw new Exception("Expected a dictionary to set '" + ident + "' - got " + obj.getTypeName());
         }
     }
 

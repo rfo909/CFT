@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2022 Roar Foshaug
+Copyright (C) 2020-2023 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -44,20 +44,20 @@ public class Runtime {
      */
     public Value processFunction (Stdio stdio, CFTCallStackFrame caller, FunctionBody functionBody, FunctionState functionState) throws Exception {
 
-    	stdio.pushCFTCallStackFrame(caller);
+        stdio.pushCFTCallStackFrame(caller);
 
         if (functionState == null) throw new Exception("No functionState");
 
         ClassDetails cd=functionBody.getClassDetails();
         
         if (cd != null) {
-        	String typeName=cd.getType();
-        	ObjDict self=new ObjDict(typeName);
-        	functionState.set("self", new ValueObj(self));
-        	doProcessFunction(stdio, caller, functionBody, functionState);
-        	return new ValueObj(self);
+            String typeName=cd.getType();
+            ObjDict self=new ObjDict(typeName);
+            functionState.set("self", new ValueObj(self));
+            doProcessFunction(stdio, caller, functionBody, functionState);
+            return new ValueObj(self);
         } else {
-        	return doProcessFunction(stdio,caller, functionBody, functionState);
+            return doProcessFunction(stdio,caller, functionBody, functionState);
         }
         
     }

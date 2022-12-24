@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2022 Roar Foshaug
+Copyright (C) 2020-2023 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -104,15 +104,15 @@ public class ExprBlock extends ExprCommon {
         } else if (mode==MODE_LOCAL) {
             return b.callLocalBlock(ctx);
 //        } else if (mode==MODE_CLASS) {
-//        	if (className == null) className=ctx.getFunctionState().getScriptFunctionName();
-//        	if (className == null) throw new Exception("Could not identify script function name for class name");
-//        	ObjDict self=new ObjDict(className);
-//        	List<Value> params=ctx.getFunctionState().getParams(); // inherit params from surroundings
-//        	
-//        	CFTCallStackFrame caller=new CFTCallStackFrame(getSourceLocation(),"Creating class " + className);
-//        	b.callLambda(ctx,caller,self,params);
-//        	
-//        	return new ValueObj(self);
+//          if (className == null) className=ctx.getFunctionState().getScriptFunctionName();
+//          if (className == null) throw new Exception("Could not identify script function name for class name");
+//          ObjDict self=new ObjDict(className);
+//          List<Value> params=ctx.getFunctionState().getParams(); // inherit params from surroundings
+//          
+//          CFTCallStackFrame caller=new CFTCallStackFrame(getSourceLocation(),"Creating class " + className);
+//          b.callLambda(ctx,caller,self,params);
+//          
+//          return new ValueObj(self);
         } else {
             throw new Exception("Invalid mode: " + mode);
         }

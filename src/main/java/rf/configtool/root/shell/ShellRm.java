@@ -1,3 +1,20 @@
+/*
+CFT - an interactive programmable shell for automation 
+Copyright (C) 2020-2023 Roar Foshaug
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>
+*/
+
 package rf.configtool.root.shell;
 
 import java.io.File;
@@ -22,36 +39,36 @@ import rf.configtool.main.runtime.lib.Protection;
 
 public class ShellRm extends ShellCommand {
 
-	public ShellRm(List<String> parts) throws Exception {
-		super(parts);
-	}
+    public ShellRm(List<String> parts) throws Exception {
+        super(parts);
+    }
 
-	public Value execute(Ctx ctx) throws Exception {
-		
-		final String currentDir = ctx.getObjGlobal().getCurrDir();
-		String name=getName();
-		List<ShellCommandArg> args=getArgs();
-		
-		FileSet fs=new FileSet(name,true,true); // files and directories
-		for (ShellCommandArg arg:args) {
-			fs.processArg(currentDir, ctx, arg);
-		}
-		
-		List<Value> result=new ArrayList<Value>();
-		for (String fname : fs.getFiles()) {
-			result.add(new ValueObj(new ObjFile(fname, Protection.NoProtection)));
-		}
-		for (String dname : fs.getDirectories()) {
-			result.add(new ValueObj(new ObjDir(dname, Protection.NoProtection)));
-		}
-		
-		
+    public Value execute(Ctx ctx) throws Exception {
+        
+        final String currentDir = ctx.getObjGlobal().getCurrDir();
+        String name=getName();
+        List<ShellCommandArg> args=getArgs();
+        
+        FileSet fs=new FileSet(name,true,true); // files and directories
+        for (ShellCommandArg arg:args) {
+            fs.processArg(currentDir, ctx, arg);
+        }
+        
+        List<Value> result=new ArrayList<Value>();
+        for (String fname : fs.getFiles()) {
+            result.add(new ValueObj(new ObjFile(fname, Protection.NoProtection)));
+        }
+        for (String dname : fs.getDirectories()) {
+            result.add(new ValueObj(new ObjDir(dname, Protection.NoProtection)));
+        }
+        
+        
         PropsFile propsFile=ctx.getObjGlobal().getRoot().getPropsFile();
         String lambda=propsFile.getMRm();
-		Value[] lambdaArgs= {new ValueList(result)};
+        Value[] lambdaArgs= {new ValueList(result)};
 
-		return callConfiguredLambda(getName(), ctx, lambda, lambdaArgs);
-	}
+        return callConfiguredLambda(getName(), ctx, lambda, lambdaArgs);
+    }
 
 
 }

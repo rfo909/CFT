@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2022 Roar Foshaug
+Copyright (C) 2020-2023 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -205,15 +205,15 @@ public class ObjSys extends Obj {
         @Override
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
             if (params.size() == 0) {
-            	return ctx.getObjGlobal().getRoot().getLastResult();
+                return ctx.getObjGlobal().getRoot().getLastResult();
             }
             if (params.size()==1) {
-            	int i = (int) (long) getInt("pos", params, 0);
-            	Value v=ctx.getObjGlobal().getRoot().getLastResult();
-            	if (!(v instanceof ValueList)) throw new Exception("lastResult not a list");
-            	List<Value> list=((ValueList) v).getVal();
-            	if (i<0 || i>= list.size()) throw new Exception("lastResult pos out of range");
-            	return list.get(i);
+                int i = (int) (long) getInt("pos", params, 0);
+                Value v=ctx.getObjGlobal().getRoot().getLastResult();
+                if (!(v instanceof ValueList)) throw new Exception("lastResult not a list");
+                List<Value> list=((ValueList) v).getVal();
+                if (i<0 || i>= list.size()) throw new Exception("lastResult pos out of range");
+                return list.get(i);
             }
             throw new Exception("Expected optional int pos parameter");
         }
@@ -534,7 +534,7 @@ public class ObjSys extends Obj {
                 FunctionBody code = ctx.getObjGlobal().getCurrScriptCode().getFunctionBody(name);
                 try {
                     code.getCodeSpaces(); 
-                    	// parses text but as this is "lint", we don't execute anything, only capturing exceptions
+                        // parses text but as this is "lint", we don't execute anything, only capturing exceptions
                 } catch (Exception ex) {
                     result.add(new ValueString(name + " : " + ex.getMessage()));
                 }
@@ -621,9 +621,9 @@ public class ObjSys extends Obj {
             if (params.size() != 0) throw new Exception("Expected no parameters");
             String str=ctx.getFunctionState().getScriptFunctionName();
             if (str==null) {
-            	return new ValueNull(); 
+                return new ValueNull(); 
             } else {
-            	return new ValueString(str);
+                return new ValueString(str);
             }
         }
 

@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2022 Roar Foshaug
+Copyright (C) 2020-2023 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -161,21 +161,21 @@ public class Lexer {
     }
     
     
-	public static boolean stringIsIdentifier (String name) {
-		try {
-			Lexer lexer = new Lexer();
-			ScriptSourceLine line = new ScriptSourceLine(new SourceLocation(), name);
-			lexer.processLine(line);
-			TokenStream ts = lexer.getTokenStream();
-			if (ts.getTokenCount() != 2)
-				return false; // identifier + EOF
-			if (!ts.peekType(Token.TOK_IDENTIFIER))
-				return false;
-		} catch (Exception ex) {
-			return false;
-		}
-		return true;
+    public static boolean stringIsIdentifier (String name) {
+        try {
+            Lexer lexer = new Lexer();
+            ScriptSourceLine line = new ScriptSourceLine(new SourceLocation(), name);
+            lexer.processLine(line);
+            TokenStream ts = lexer.getTokenStream();
+            if (ts.getTokenCount() != 2)
+                return false; // identifier + EOF
+            if (!ts.peekType(Token.TOK_IDENTIFIER))
+                return false;
+        } catch (Exception ex) {
+            return false;
+        }
+        return true;
 
-	}    
+    }    
 
 }

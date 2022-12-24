@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2022 Roar Foshaug
+Copyright (C) 2020-2023 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ import rf.configtool.main.runtime.lib.ddd.core.Vector3d;
  */
 public class DDDBezier extends Obj {
 
-	private List<Vector3d> points=new ArrayList<Vector3d>();
+    private List<Vector3d> points=new ArrayList<Vector3d>();
     
     public DDDBezier () {
         
@@ -81,11 +81,11 @@ public class DDDBezier extends Obj {
             Obj obj=getObj("refOrVector3d", params, 0);
             Vector3d point;
             if (obj instanceof DDDVector) {
-            	point=((DDDVector) obj).getVec();
+                point=((DDDVector) obj).getVec();
             } else if (obj instanceof DDDRef) {
-            	point=((DDDRef) obj).getRef().getPos();
+                point=((DDDRef) obj).getRef().getPos();
             } else {
-            	throw new RuntimeException("Expected parameter refOrVector3d");
+                throw new RuntimeException("Expected parameter refOrVector3d");
             }
             points.add(point);
             return new ValueObj(self());
@@ -108,30 +108,30 @@ public class DDDBezier extends Obj {
             
             List<Value> result=new ArrayList<Value>();
             for (int iter=0; iter<numSteps; iter++) {
-            	double factor=((double) iter)/(numSteps-1); // 0 to 1 inclusive
-            	Vector3d point = findPoint(points,factor);
-            	result.add(new ValueObj(new DDDVector(point)));
+                double factor=((double) iter)/(numSteps-1); // 0 to 1 inclusive
+                Vector3d point = findPoint(points,factor);
+                result.add(new ValueObj(new DDDVector(point)));
             }
             return new ValueList(result);
         }
         
         
         private Vector3d findPoint (List<Vector3d> points, double factor) {
-        	// need to reduce list of points to two (one line segment), through iterations where
-        	// each iteration cuts down one 
-        	
-        	while (points.size()>=2) {
-        		List<Vector3d> nextList=new ArrayList<Vector3d>();
-        		
-        		for (int i=0; i<points.size()-1; i++) {
-        			Vector3d a=points.get(i);
-        			Vector3d b=points.get(i+1);
-        			Vector3d dv=a.sub(b); // from a to b
-        			nextList.add(a.add(dv.mul(factor)));
-        		}
-        		points=nextList;
-        	}
-        	return points.get(0);
+            // need to reduce list of points to two (one line segment), through iterations where
+            // each iteration cuts down one 
+            
+            while (points.size()>=2) {
+                List<Vector3d> nextList=new ArrayList<Vector3d>();
+                
+                for (int i=0; i<points.size()-1; i++) {
+                    Vector3d a=points.get(i);
+                    Vector3d b=points.get(i+1);
+                    Vector3d dv=a.sub(b); // from a to b
+                    nextList.add(a.add(dv.mul(factor)));
+                }
+                points=nextList;
+            }
+            return points.get(0);
         }
     }
 

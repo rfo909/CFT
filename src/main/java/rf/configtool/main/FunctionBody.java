@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2022 Roar Foshaug
+Copyright (C) 2020-2023 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -63,7 +63,7 @@ public class FunctionBody {
     private String hashString;
 
     public FunctionBody(String singleLine, SourceLocation loc) {
-    	this(singleLine, false, loc);
+        this(singleLine, false, loc);
     }
 
     public FunctionBody(String singleLine, boolean isPrivate, SourceLocation loc) {
@@ -81,10 +81,10 @@ public class FunctionBody {
     }
 
     public SourceLocation getSourceLocation() {
-    	for (ScriptSourceLine cl:sourceLines) {
-    		if (cl.getLoc() != null) return cl.getLoc();
-    	}
-    	return null;
+        for (ScriptSourceLine cl:sourceLines) {
+            if (cl.getLoc() != null) return cl.getLoc();
+        }
+        return null;
     }
     
     /**
@@ -118,15 +118,15 @@ public class FunctionBody {
      * needed when calling the function, ensuring the creation and return of a self object.
      */
     public ClassDetails getClassDetails() {
-    	return classDetails;
+        return classDetails;
     }
     
     public boolean isClass() {
-    	return classDetails != null;
+        return classDetails != null;
     }
     
     public boolean isPrivate() {
-    	return this.isPrivate;
+        return this.isPrivate;
     }
 
     public List<String> getSaveFormat() {

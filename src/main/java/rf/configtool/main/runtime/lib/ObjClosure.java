@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2022 Roar Foshaug
+Copyright (C) 2020-2023 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -78,7 +78,7 @@ public class ObjClosure extends Obj {
             return "call(...) - call closure with parameters";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	CFTCallStackFrame caller=new CFTCallStackFrame("ObjClosure.FunctionCall()","Calling closure");
+            CFTCallStackFrame caller=new CFTCallStackFrame("ObjClosure.FunctionCall()","Calling closure");
 
             return callClosure(ctx,caller,params);
         }

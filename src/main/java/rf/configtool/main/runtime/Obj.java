@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2022 Roar Foshaug
+Copyright (C) 2020-2023 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -150,19 +150,19 @@ public abstract class Obj {
      * Match ObjClosure directly, or if lambda (ValueBlock) create Closure wrapping it
      */
     protected ObjClosure getClosure (String name, List<Value> args, int pos) throws Exception {
-    	Value v=args.get(pos);
+        Value v=args.get(pos);
 
-    	if (v instanceof ValueBlock) {
-    		return new ObjClosure(new ObjDict(), (ValueBlock) v);
-    	}
-    	
-    	if (v instanceof ValueObj) {
-    		Obj obj=((ValueObj) v).getVal();
-    		if (obj instanceof ObjClosure) {
-    			return (ObjClosure) obj; 
-    		}
-    	}
-    	throw new Exception(name + ": expected Lambda or Closure, got " + v.getTypeName());
+        if (v instanceof ValueBlock) {
+            return new ObjClosure(new ObjDict(), (ValueBlock) v);
+        }
+        
+        if (v instanceof ValueObj) {
+            Obj obj=((ValueObj) v).getVal();
+            if (obj instanceof ObjClosure) {
+                return (ObjClosure) obj; 
+            }
+        }
+        throw new Exception(name + ": expected Lambda or Closure, got " + v.getTypeName());
     }
     
     

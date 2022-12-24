@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2022 Roar Foshaug
+Copyright (C) 2020-2023 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -63,10 +63,10 @@ public abstract class Stmt extends LexicalElement {
             return new StmtTimeExpr(ts);
         }
         if (ts.peekStr("setBreakPoint")) {
-        	return new StmtSetBreakPoint(ts);
+            return new StmtSetBreakPoint(ts);
         }
         if (ts.peekStr("=>")) {
-        	return new StmtAssign(ts);
+            return new StmtAssign(ts);
         }
     
         // otherwise it must be an expression

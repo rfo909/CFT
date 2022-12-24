@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2022 Roar Foshaug
+Copyright (C) 2020-2023 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -33,11 +33,11 @@ import rf.configtool.main.runtime.Value;
  */
 public class FunctionState {
 
-	private String scriptFunctionName;  
-		// Used by Sys.currFunction
-		// Note: FunctionState objects (via parent) do not provide a full stack of calls; they are
-		// only stacked (via parent pointer) for sub-scopes within functions.
-	
+    private String scriptFunctionName;  
+        // Used by Sys.currFunction
+        // Note: FunctionState objects (via parent) do not provide a full stack of calls; they are
+        // only stacked (via parent pointer) for sub-scopes within functions.
+    
     private FunctionState parent;
     private List<Value> params;
     private HashMap<String,Value> assignedVariables=new HashMap<String,Value>();
@@ -50,15 +50,15 @@ public class FunctionState {
         this.parent=parent;
     }
     public FunctionState (String scriptFunctionName, List<Value> params) {
-    	this.scriptFunctionName=scriptFunctionName;
+        this.scriptFunctionName=scriptFunctionName;
         if (params==null) params=new ArrayList<Value>();
         this.params=params;
     }
     
     public String getScriptFunctionName() {
-    	if (scriptFunctionName != null) return scriptFunctionName;
-    	if (parent != null) return parent.getScriptFunctionName();
-    	return null;
+        if (scriptFunctionName != null) return scriptFunctionName;
+        if (parent != null) return parent.getScriptFunctionName();
+        return null;
     }
     
     public List<Value> getParams() {

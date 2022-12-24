@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2022 Roar Foshaug
+Copyright (C) 2020-2023 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -70,13 +70,13 @@ public abstract class Stdio {
       * its' source location. The method that calls CFT functionality manages pushing the
       * caller stack frame on the CFT call stack, doing the CFT function/closure/lambda invocation,
       * then popping the stack frame
-	  *
-	  * This narrows down the number of code locations where we need to match push/pop against
-	  * the CFT call stack, and lets the Java compiler aid us in locating dependencies without
-	  * adding complexity of tens of locations where we must carefully match push with pop.
+      *
+      * This narrows down the number of code locations where we need to match push/pop against
+      * the CFT call stack, and lets the Java compiler aid us in locating dependencies without
+      * adding complexity of tens of locations where we must carefully match push with pop.
       */
      public void pushCFTCallStackFrame (CFTCallStackFrame caller) {
-    	 cftCallStack.push(caller);
+         cftCallStack.push(caller);
      }
      
      /**
@@ -84,12 +84,12 @@ public abstract class Stdio {
       * the stack, to avoid call stack mis-alignment issues, which would be very hard to debug.
       */
      public void popCFTCallStackFrame (CFTCallStackFrame caller) throws Exception {
-    	 if (cftCallStack.isEmpty()) throw new RuntimeException("popCFTCallStackFrame: callStack underflow, expected to pop off " + caller.toString());
-    	 if (cftCallStack.peek() != caller) {
-    		 throw new RuntimeException("popCFTCallStackFrame: expected to pop off " + caller.toString() + " found " + 
-    				 cftCallStack.peek().toString());
-    	 }
-    	 cftCallStack.pop();
+         if (cftCallStack.isEmpty()) throw new RuntimeException("popCFTCallStackFrame: callStack underflow, expected to pop off " + caller.toString());
+         if (cftCallStack.peek() != caller) {
+             throw new RuntimeException("popCFTCallStackFrame: expected to pop off " + caller.toString() + " found " + 
+                     cftCallStack.peek().toString());
+         }
+         cftCallStack.pop();
      }
      
      /**
@@ -99,12 +99,12 @@ public abstract class Stdio {
       * whole stack is returned (and cleared).
       */
      public List<CFTCallStackFrame> getAndClearCFTCallStack (CFTCallStackFrame aboveTarget) {
-    	 List<CFTCallStackFrame> result=new ArrayList<CFTCallStackFrame>();
-    	 while (!cftCallStack.isEmpty()) {
-    		 if (aboveTarget != null && cftCallStack.peek()==aboveTarget) break;
-    		 result.add(cftCallStack.pop());
-    	 }
-    	 return result;
+         List<CFTCallStackFrame> result=new ArrayList<CFTCallStackFrame>();
+         while (!cftCallStack.isEmpty()) {
+             if (aboveTarget != null && cftCallStack.peek()==aboveTarget) break;
+             result.add(cftCallStack.pop());
+         }
+         return result;
      }
      
      /**
@@ -112,15 +112,15 @@ public abstract class Stdio {
       * stack frame, as ValueList object (of strings)
       */
      public ValueList getCFTStackTrace (CFTCallStackFrame oldTop) {
-     	List<Value> result=new ArrayList<Value>();
-     	List<CFTCallStackFrame> frames = getAndClearCFTCallStack(oldTop);
-     	for (CFTCallStackFrame frame:frames) {
-     		result.add(new ValueString(frame.toString()));
-     		for (String line:frame.getDebugLines()) {
-     			result.add(new ValueString("   debug: " + line));
-     		}
-     	}
-     	return new ValueList(result);
+      List<Value> result=new ArrayList<Value>();
+      List<CFTCallStackFrame> frames = getAndClearCFTCallStack(oldTop);
+      for (CFTCallStackFrame frame:frames) {
+        result.add(new ValueString(frame.toString()));
+        for (String line:frame.getDebugLines()) {
+            result.add(new ValueString("   debug: " + line));
+        }
+      }
+      return new ValueList(result);
      }
      
 
@@ -129,43 +129,43 @@ public abstract class Stdio {
       * stack frame, as ValueList object (of strings)
       */
      public ValueList peekFullCFTStackTrace () {
-     	List<Value> result=new ArrayList<Value>();
-     	
-     	for (CFTCallStackFrame frame : cftCallStack) {
-     		result.add(new ValueString(frame.toString()));
-     		for (String line:frame.getDebugLines()) {
-     			result.add(new ValueString("   debug: " + line));
-     		}
-     	}
-     	return new ValueList(result);
+      List<Value> result=new ArrayList<Value>();
+      
+      for (CFTCallStackFrame frame : cftCallStack) {
+        result.add(new ValueString(frame.toString()));
+        for (String line:frame.getDebugLines()) {
+            result.add(new ValueString("   debug: " + line));
+        }
+      }
+      return new ValueList(result);
      }
      
 
      public void showAndClearCFTCallStack () {
-    	 while (!cftCallStack.isEmpty()) {
-    		 CFTCallStackFrame x=cftCallStack.pop();
-    		 println("  called from: " + x.toString());
-    		 for (String line:x.getDebugLines()) {
-    			 println("      debug: " + line);
-    		 }
-    	 }
+         while (!cftCallStack.isEmpty()) {
+             CFTCallStackFrame x=cftCallStack.pop();
+             println("  called from: " + x.toString());
+             for (String line:x.getDebugLines()) {
+                 println("      debug: " + line);
+             }
+         }
      }
      
 
      public void addDebug (String line) {
-    	 if (!cftCallStack.isEmpty()) {
-    		 cftCallStack.peek().addDebugLine(line);
-    	 }
+         if (!cftCallStack.isEmpty()) {
+             cftCallStack.peek().addDebugLine(line);
+         }
      }
      
  
      public CFTCallStackFrame getTopCFTCallStackFrame () {
-    	 if (cftCallStack.isEmpty()) return null;
-    	 return cftCallStack.peek();
+         if (cftCallStack.isEmpty()) return null;
+         return cftCallStack.peek();
      }
      
      public void clearCFTCallStack() {
-    	 cftCallStack.clear();
+         cftCallStack.clear();
      }
 
      

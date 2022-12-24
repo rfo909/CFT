@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2022 Roar Foshaug
+Copyright (C) 2020-2023 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -73,10 +73,10 @@ public class ExprAmp extends ExprCommon {
         StringBuffer sb=new StringBuffer();
         int prevType=-992;
         for (int i=startPos; i<endPos; i++) {
-        	sb.append(ts.getTokenAtPos(i).getOriginalStringRep());
-        	int type=ts.getTokenAtPos(i).getType();
-        	if (type==prevType) sb.append(" ");
-        	prevType=type;
+            sb.append(ts.getTokenAtPos(i).getOriginalStringRep());
+            int type=ts.getTokenAtPos(i).getType();
+            if (type==prevType) sb.append(" ");
+            prevType=type;
         }
         stringRep=sb.toString().trim();
     }
@@ -100,7 +100,7 @@ public class ExprAmp extends ExprCommon {
             }
         }
         if (text==null) {
-        	text=this.stringRep;
+            text=this.stringRep;
         }
         
         // add to Jobs object

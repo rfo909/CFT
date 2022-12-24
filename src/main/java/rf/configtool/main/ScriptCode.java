@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2022 Roar Foshaug
+Copyright (C) 2020-2023 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -145,9 +145,9 @@ public class ScriptCode {
                 
             boolean showFull = (matchingNames.size()==1 && symbolSubStr != null);
             for (String name:matchingNames) {
-            	
-            	FunctionBody body=getFunctionBody(name);
-            	
+                
+                FunctionBody body=getFunctionBody(name);
+                
                 if ( ((body.isPrivate() || body.isClass()) && publicOnly && !showFull) ) continue;
                 
                 
@@ -166,11 +166,11 @@ public class ScriptCode {
                         stdio.println(line);
                     }
                     if (body.isPrivate()) {
-                    	stdio.println("//"+name);
+                        stdio.println("//"+name);
                     } else if (body.isClass()) {
-                    	stdio.println(body.getClassDetails().createClassDefString());
+                        stdio.println(body.getClassDetails().createClassDefString());
                     } else {
-                    	stdio.println("/"+name);
+                        stdio.println("/"+name);
                     }
                     stdio.println();
                 } else {
@@ -178,9 +178,9 @@ public class ScriptCode {
                     
                     String pre=" ";
                     if (body.isClass()) {
-                    	pre="&";
+                        pre="&";
                     } else if (body.isPrivate()) {
-                    	pre="/";
+                        pre="/";
                     }
                     
                     String s="| " + pre + label + ": " + TabUtil.substituteTabs(namedLine,1);
@@ -245,11 +245,11 @@ public class ScriptCode {
             }
 
             if (body.isClass()) {
-            	ps.println(body.getClassDetails().createClassDefString());
+                ps.println(body.getClassDetails().createClassDefString());
             } else if (body.isPrivate()) {
-            	ps.println("//"+functionName);
+                ps.println("//"+functionName);
             } else {
-            	ps.println("/"+functionName);
+                ps.println("/"+functionName);
             }
         }
         ps.close();
@@ -325,12 +325,12 @@ public class ScriptCode {
                 String functionName;
                 
                 if (trimmed.startsWith("/class") || trimmed.startsWith("//class")) { 
-                	Lexer lexer=new Lexer();
-                	lexer.processLine(new ScriptSourceLine(loc, trimmed));
-                	TokenStream ts=lexer.getTokenStream();
+                    Lexer lexer=new Lexer();
+                    lexer.processLine(new ScriptSourceLine(loc, trimmed));
+                    TokenStream ts=lexer.getTokenStream();
 
-                	cd=new ClassDetails(ts); // parse the /class ident ... string
-                	functionName=cd.getName();
+                    cd=new ClassDetails(ts); // parse the /class ident ... string
+                    functionName=cd.getName();
                 } else if (trimmed.startsWith("//")) {
                     isPrivate=true;
                     functionName=trimmed.substring(2);

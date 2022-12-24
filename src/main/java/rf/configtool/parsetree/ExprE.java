@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2022 Roar Foshaug
+Copyright (C) 2020-2023 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -34,14 +34,14 @@ public class ExprE extends ExprCommon {
         super(ts);
         firstPart=new ExprTerminal(ts);
         for (;;) {
-        	
-        	if (ts.peekStr(".") && ts.peekType(1,Token.TOK_IDENTIFIER) && ts.peekStr(2,"=")) {
-        		dottedAssign=new DottedAssign(ts);
-        		break; // terminates sequence
-        	}
-        	
-        	if (!ts.peekStr(".")) break;
-        	//
+            
+            if (ts.peekStr(".") && ts.peekType(1,Token.TOK_IDENTIFIER) && ts.peekStr(2,"=")) {
+                dottedAssign=new DottedAssign(ts);
+                break; // terminates sequence
+            }
+            
+            if (!ts.peekStr(".")) break;
+            //
             dottedLookups.add(new DottedCall(ts));
         }
     }
@@ -53,7 +53,7 @@ public class ExprE extends ExprCommon {
             v=dottedCall.resolve(ctx, v);
         }
         if (dottedAssign != null) {
-        	v=dottedAssign.resolve(ctx,v);
+            v=dottedAssign.resolve(ctx,v);
         }
         return v;
     }

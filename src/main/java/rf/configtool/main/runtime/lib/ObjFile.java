@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2022 Roar Foshaug
+Copyright (C) 2020-2023 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -1287,32 +1287,32 @@ public class ObjFile extends Obj {
             out=new FileOutputStream(target);
             
             if (modeEncrypt) {
-            	out.write(ENCRYPT_BLOCKS_MAGIC);
-            	encryptDecryptBlocks(ctx, password, salt, in, out, modeEncrypt);
+                out.write(ENCRYPT_BLOCKS_MAGIC);
+                encryptDecryptBlocks(ctx, password, salt, in, out, modeEncrypt);
             } else {
-            	// decrypt: check if file starts with magic or not
-            	byte[] data=new byte[ENCRYPT_BLOCKS_MAGIC.length];
-            	int count=in.read(data);
-            	boolean foundMagic=true;
-            	if (count!=ENCRYPT_BLOCKS_MAGIC.length) {
-            		foundMagic=false;
-            	} else {
-            		// compare bytes
-            		for (int i=0; i<ENCRYPT_BLOCKS_MAGIC.length; i++) {
-            			if (data[i] != ENCRYPT_BLOCKS_MAGIC[i]) {
-            				foundMagic=false;
-            				break;
-            			}
-            		}
-            	}
-            	if (foundMagic) {
-            		encryptDecryptBlocks(ctx,password, salt, in, out, modeEncrypt);
-            	} else {
-        			in.close();
-        			in=new FileInputStream(src);
-        			// fallback to original implementation
-        			encryptDecryptSerial(ctx, password, salt, in, out, modeEncrypt);
-            	}
+                // decrypt: check if file starts with magic or not
+                byte[] data=new byte[ENCRYPT_BLOCKS_MAGIC.length];
+                int count=in.read(data);
+                boolean foundMagic=true;
+                if (count!=ENCRYPT_BLOCKS_MAGIC.length) {
+                    foundMagic=false;
+                } else {
+                    // compare bytes
+                    for (int i=0; i<ENCRYPT_BLOCKS_MAGIC.length; i++) {
+                        if (data[i] != ENCRYPT_BLOCKS_MAGIC[i]) {
+                            foundMagic=false;
+                            break;
+                        }
+                    }
+                }
+                if (foundMagic) {
+                    encryptDecryptBlocks(ctx,password, salt, in, out, modeEncrypt);
+                } else {
+                    in.close();
+                    in=new FileInputStream(src);
+                    // fallback to original implementation
+                    encryptDecryptSerial(ctx, password, salt, in, out, modeEncrypt);
+                }
             }
         } finally {
             if (in != null) try {in.close();} catch (Exception ex) {};
@@ -1325,36 +1325,36 @@ public class ObjFile extends Obj {
      * implementation for speed.
      */
     private void encryptDecryptBlocks (Ctx ctx, ValueBinary password, String salt, FileInputStream in, FileOutputStream out, boolean modeEncrypt) throws Exception {
-    	byte[] buf = new byte[1024 * 16];
-		
-		for (int blockNo=0;true;blockNo++) {
-			int count = in.read(buf);
-			if (count <= 0) break;
-			
-			Encrypt enc = new Encrypt(password.getVal(), ("ObjFile:" + salt+"-blockNo:" + blockNo).getBytes("UTF-8"));
+        byte[] buf = new byte[1024 * 16];
+        
+        for (int blockNo=0;true;blockNo++) {
+            int count = in.read(buf);
+            if (count <= 0) break;
+            
+            Encrypt enc = new Encrypt(password.getVal(), ("ObjFile:" + salt+"-blockNo:" + blockNo).getBytes("UTF-8"));
 
-			for (int i = 0; i < count; i++) {
-				buf[i] = enc.process(modeEncrypt, buf[i]);
-			}
-			out.write(buf, 0, count);
-		}
+            for (int i = 0; i < count; i++) {
+                buf[i] = enc.process(modeEncrypt, buf[i]);
+            }
+            out.write(buf, 0, count);
+        }
     }
     
     /**
      * Original implementation, now only used for decrypt of files without magic marker at start
      */
     private void encryptDecryptSerial (Ctx ctx, ValueBinary password, String salt, FileInputStream in, FileOutputStream out, boolean modeEncrypt) throws Exception {
-		Encrypt enc = new Encrypt(password.getVal(), ("ObjFile:" + salt).getBytes("UTF-8"));
-		byte[] buf = new byte[1024 * 64];
-		for (;;) {
-			int count = in.read(buf);
-			if (count <= 0)
-				break;
-			for (int i = 0; i < count; i++) {
-				buf[i] = enc.process(modeEncrypt, buf[i]);
-			}
-			out.write(buf, 0, count);
-		}
+        Encrypt enc = new Encrypt(password.getVal(), ("ObjFile:" + salt).getBytes("UTF-8"));
+        byte[] buf = new byte[1024 * 64];
+        for (;;) {
+            int count = in.read(buf);
+            if (count <= 0)
+                break;
+            for (int i = 0; i < count; i++) {
+                buf[i] = enc.process(modeEncrypt, buf[i]);
+            }
+            out.write(buf, 0, count);
+        }
 
     }
     
@@ -1451,14 +1451,14 @@ public class ObjFile extends Obj {
             
             File x=new File(name);
             if (!x.exists()) {
-            	boolean ok = x.createNewFile();
-            	if (!ok) throw new Exception("Could not create file");
+                boolean ok = x.createNewFile();
+                if (!ok) throw new Exception("Could not create file");
             } else {
-            	// update time stamp for existing file
-	            FileTime now=FileTime.fromMillis(System.currentTimeMillis());
-	
-	            BasicFileAttributeView attributes = Files.getFileAttributeView(Paths.get(name), BasicFileAttributeView.class);
-	            attributes.setTimes(now, now, now);
+                // update time stamp for existing file
+                FileTime now=FileTime.fromMillis(System.currentTimeMillis());
+    
+                BasicFileAttributeView attributes = Files.getFileAttributeView(Paths.get(name), BasicFileAttributeView.class);
+                attributes.setTimes(now, now, now);
             }
 
             return new ValueObj(self());

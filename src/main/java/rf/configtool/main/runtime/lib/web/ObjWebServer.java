@@ -6,7 +6,7 @@ import java.io.PrintStream;
 
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2022 Roar Foshaug
+Copyright (C) 2020-2023 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -208,7 +208,7 @@ public class ObjWebServer extends ObjPersistent {
                 List<Value> params=new ArrayList<Value>();
                 params.add(new ValueObj(request));
 
-            	CFTCallStackFrame caller=new CFTCallStackFrame(getPersistenceId(),"GET: Calling closure");
+                CFTCallStackFrame caller=new CFTCallStackFrame(getPersistenceId(),"GET: Calling closure");
 
                 Value output = closure.callClosure(asyncCtx.sub(), caller, params);
                 byte[] data = createBytesFromValue(output);
@@ -233,7 +233,7 @@ public class ObjWebServer extends ObjPersistent {
                 List<Value> params=new ArrayList<Value>();
                 params.add(new ValueObj(request));
 
-            	CFTCallStackFrame caller=new CFTCallStackFrame(getPersistenceId(),"POST: Calling closure");
+                CFTCallStackFrame caller=new CFTCallStackFrame(getPersistenceId(),"POST: Calling closure");
 
                 Value output = closure.callClosure(asyncCtx.sub(), caller, params);
                 byte[] data = createBytesFromValue(output);

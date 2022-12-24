@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2022 Roar Foshaug
+Copyright (C) 2020-2023 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -121,7 +121,7 @@ public class ValueBlock extends Value {
      * Call lambda, running in an isolated Ctx
      */
     public Value callLambda (Ctx ctx, List<Value> params) throws Exception {
-    	CFTCallStackFrame caller=new CFTCallStackFrame("ValueBlock.callLambda()","Calling lambda");
+        CFTCallStackFrame caller=new CFTCallStackFrame("ValueBlock.callLambda()","Calling lambda");
 
         return callLambda(ctx, caller, new ObjDict(), params);
     }
@@ -143,7 +143,7 @@ public class ValueBlock extends Value {
         
         for (CodeSpace progLine:programLines) {
             // Note that independentCtx is created from scratch, so there is no parent 
-        	// and therefore no lookup from parent Ctx. 
+            // and therefore no lookup from parent Ctx. 
             
             Ctx sub=independentCtx.subNewData(false);
             

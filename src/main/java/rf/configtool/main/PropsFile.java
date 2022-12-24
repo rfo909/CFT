@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2022 Roar Foshaug
+Copyright (C) 2020-2023 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -161,25 +161,25 @@ public class PropsFile {
                         mMore=value;
                     } else
                     if (name.equals("mTail")) {
-                    	mTail=value;
+                        mTail=value;
                     } else
                     if (name.equals("mRm")) {
-                    	mRm=value;
+                        mRm=value;
                     } else
                     if (name.equals("mDiff")) {
-                    	mDiff=value;
+                        mDiff=value;
                     } else
                     if (name.equals("mHash")) {
-                    	mHash=value;
+                        mHash=value;
                     } else
                     if (name.equals("mHex")) {
-                    	mHex=value;
+                        mHex=value;
                     } else
                     if (name.equals("mGrep")) {
-                    	mGrep=value;
+                        mGrep=value;
                     } else
                     if (name.equals("mShowtree")) {
-                    	mShowtree=value;
+                        mShowtree=value;
                     } else
                     if (name.equals("mSymGet")) {
                         mSymGet=value;
@@ -257,39 +257,39 @@ public class PropsFile {
     }
     
     public String getMTail() {
-    	return mTail;
+        return mTail;
     }
     
     public String getMRm() {
-    	return mRm;
+        return mRm;
     }
     
     public String getMDiff() {
-    	return mDiff;
+        return mDiff;
     }
     
     public String getMShowtree () {
-    	return mShowtree;
+        return mShowtree;
     }
     
     public String getMHash () {
-    	return mHash;
+        return mHash;
     }
     
     public String getMHex () {
-    	return mHex;
+        return mHex;
     }
     
     public String getMGrep () {
-    	return mGrep;
+        return mGrep;
     }
     
     public String getMSymGet () {
-    	return mSymGet;
+        return mSymGet;
     }
     
     public String getMSymSet () {
-    	return mSymSet;
+        return mSymSet;
     }
     
     

@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2022 Roar Foshaug
+Copyright (C) 2020-2023 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -221,7 +221,7 @@ public class Root {
     
                     String pre;
                     try {
-                    	CFTCallStackFrame caller=new CFTCallStackFrame("<interactive-input>");
+                        CFTCallStackFrame caller=new CFTCallStackFrame("<interactive-input>");
 
                         Value ret = objGlobal.getRuntime().processFunction(stdio, caller, promptCodeLines, new FunctionState(null,null));
                         pre=ret.getValAsString();
@@ -290,7 +290,7 @@ public class Root {
 
                 FunctionBody codeLines = new FunctionBody(shortcutCode, loc);
 
-            	CFTCallStackFrame caller=new CFTCallStackFrame("<interactive-input>");
+                CFTCallStackFrame caller=new CFTCallStackFrame("<interactive-input>");
                 Value ret = objGlobal.getRuntime().processFunction(stdio, caller, codeLines, new FunctionState(null,null));
                 postProcessResult(ret);
                 showSystemLog();
@@ -303,9 +303,9 @@ public class Root {
             if (line.startsWith("!")) {
                 String str=line;
                 if (str.startsWith("!")) {
-                	str = line.substring(1).trim();
+                    str = line.substring(1).trim();
                 } else if (str.endsWith("!")) {
-                	str = line.substring(0,line.length()-1);
+                    str = line.substring(0,line.length()-1);
                 }
 
                 // Run the shell command parser
@@ -315,7 +315,7 @@ public class Root {
 
                 List<Value> params=new ArrayList<Value>();
                 params.add(new ValueString(str));
-            	CFTCallStackFrame caller=new CFTCallStackFrame("<bang-command>");
+                CFTCallStackFrame caller=new CFTCallStackFrame("<bang-command>");
                 objGlobal.getRuntime().processFunction(stdio, caller, codeLines, new FunctionState(null,params));
                 return;
             } 
@@ -325,15 +325,15 @@ public class Root {
             ShellCommand shellCommand = (new ShellCommandsDetector(line)).identifyShellCommand();
             
             if (shellCommand != null) {
-            	FunctionState functionState=new FunctionState("<ShellCommand>"); // no function parameters
-            	Ctx ctx=new Ctx(stdio, objGlobal, functionState);
-            	
-            	Value result = shellCommand.execute(ctx);
-            	
+                FunctionState functionState=new FunctionState("<ShellCommand>"); // no function parameters
+                Ctx ctx=new Ctx(stdio, objGlobal, functionState);
+                
+                Value result = shellCommand.execute(ctx);
+                
                 postProcessResult(result);
                 showSystemLog();
 
-            	return;
+                return;
             }
 
 
@@ -440,7 +440,7 @@ public class Root {
             if (line.trim().length() > 0) {
                 // program line
                 currScriptCode.setCurrLine(line);
-            	CFTCallStackFrame caller=new CFTCallStackFrame("<interactive-input>");
+                CFTCallStackFrame caller=new CFTCallStackFrame("<interactive-input>");
 
                 Value result = objGlobal.getRuntime().processFunction(stdio, caller, new FunctionBody(line, loc), new FunctionState(null,null));
 
@@ -655,17 +655,17 @@ public class Root {
             }
             
             if (!ts.atEOF()) {
-            	// :N.expr
-            	String str=inputLine.trim().substring(1).trim(); // points at first digit
-            	int restPos=0;
-            	while (restPos < str.length() && "0123456789".indexOf(str.charAt(restPos)) >= 0) restPos++;
-            	String command="Sys.lastResult("+pos+")" + str.substring(restPos);
-            	
+                // :N.expr
+                String str=inputLine.trim().substring(1).trim(); // points at first digit
+                int restPos=0;
+                while (restPos < str.length() && "0123456789".indexOf(str.charAt(restPos)) >= 0) restPos++;
+                String command="Sys.lastResult("+pos+")" + str.substring(restPos);
+                
                 SourceLocation loc = new SourceLocation(":N-expr", 0);
 
                 FunctionBody codeLines = new FunctionBody(command, loc);
 
-            	CFTCallStackFrame caller=new CFTCallStackFrame("<interactive-input>");
+                CFTCallStackFrame caller=new CFTCallStackFrame("<interactive-input>");
                 Value ret = objGlobal.getRuntime().processFunction(stdio, caller, codeLines, new FunctionState(null,null));
                 postProcessResult(ret);
                 showSystemLog();

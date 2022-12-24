@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2022 Roar Foshaug
+Copyright (C) 2020-2023 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -139,7 +139,7 @@ public class ObjDict extends Obj {
     
     
     public String getName() {
-    	return name;
+        return name;
     }
     
     private synchronized void verifyInnerFunctions() {

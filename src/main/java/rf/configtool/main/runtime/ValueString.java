@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2022 Roar Foshaug
+Copyright (C) 2020-2023 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -872,10 +872,10 @@ public class ValueString extends Value {
             return "times(Count) - returns string repeated Count times";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	long count=getInt("Count", params, 0);
+            long count=getInt("Count", params, 0);
             StringBuffer sb=new StringBuffer();
             for (int i=0; i<count; i++) {
-            	sb.append(val);
+                sb.append(val);
             }
             return new ValueString(sb.toString());
         }

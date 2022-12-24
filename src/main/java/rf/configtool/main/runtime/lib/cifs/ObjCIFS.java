@@ -2,7 +2,7 @@ package rf.configtool.main.runtime.lib.cifs;
 
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2022 Roar Foshaug
+Copyright (C) 2020-2023 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -39,11 +39,11 @@ import rf.configtool.main.runtime.ValueString;
 
 public class ObjCIFS extends Obj {
 
-	
+    
     public ObjCIFS () {
-    	this.add(new FunctionCIFSFile());
-    	this.add(new FunctionCIFSContext());
-    	this.add(new Function_Example());
+        this.add(new FunctionCIFSFile());
+        this.add(new FunctionCIFSContext());
+        this.add(new Function_Example());
     }
     
     private ObjCIFS self() {
@@ -76,8 +76,8 @@ public class ObjCIFS extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 2) throw new Exception("Expected parameters url, CIFSContext");
             String url=getString("url",params,0);
-        	Obj obj=getObj("CIFCContext",params,1);
-        	CIFSContext context=((ObjCIFSContext) obj).getContext();
+            Obj obj=getObj("CIFCContext",params,1);
+            CIFSContext context=((ObjCIFSContext) obj).getContext();
             
             if (!url.startsWith("smb://")) throw new Exception("Invalid url, should start with smb:// - got " + url);
             
@@ -137,40 +137,40 @@ public class ObjCIFS extends Obj {
     } 
     
     
-//	// -------------------------
-//	// First implementation: embed all information into URL and create SmbFile from it alone.
-//	//    new SmbFile(url) // deprecated
-//	// -------------------------
-//	
-//	public static String createSmbUrl (String domain, String username, String password, String hostPort, String path) {
-//		if (domain==null) domain=""; else domain=domain+";";
-//		if (username==null) username="";
-//		if (password==null) password=""; else password=":"+password;
-//		
-//		path=path.replace('\\', '/');
-//		if (!path.startsWith("/")) path="/"+path;
+//  // -------------------------
+//  // First implementation: embed all information into URL and create SmbFile from it alone.
+//  //    new SmbFile(url) // deprecated
+//  // -------------------------
+//  
+//  public static String createSmbUrl (String domain, String username, String password, String hostPort, String path) {
+//      if (domain==null) domain=""; else domain=domain+";";
+//      if (username==null) username="";
+//      if (password==null) password=""; else password=":"+password;
+//      
+//      path=path.replace('\\', '/');
+//      if (!path.startsWith("/")) path="/"+path;
 //
-//		if((username+password).length() > 0) password=password+"@";
-//		
-//		return "smb://"+domain+username+password+hostPort+path;
-//	}
-//	
+//      if((username+password).length() > 0) password=password+"@";
+//      
+//      return "smb://"+domain+username+password+hostPort+path;
+//  }
+//  
 
 
-	private CIFSContext createCIFSContext (String domain, String username, String password) throws Exception {
-		NtlmPasswordAuthenticator auth = new NtlmPasswordAuthenticator(domain, username, password);
-		Properties p=new Properties();
-		
+    private CIFSContext createCIFSContext (String domain, String username, String password) throws Exception {
+        NtlmPasswordAuthenticator auth = new NtlmPasswordAuthenticator(domain, username, password);
+        Properties p=new Properties();
+        
 //        p.setProperty("jcifs.smb.client.soTimeout", "300000");
 //        p.setProperty("jcifs.netbios.cachePolicy", "600");
 
-		PropertyConfiguration conf = new PropertyConfiguration(p);
-		CIFSContext cifsContext = new BaseContext(conf).withCredentials(auth);
-		return cifsContext;
-	}
+        PropertyConfiguration conf = new PropertyConfiguration(p);
+        CIFSContext cifsContext = new BaseContext(conf).withCredentials(auth);
+        return cifsContext;
+    }
 
-	public static SmbFile getSmbFile (String url, CIFSContext context) throws Exception {
-		return new SmbFile(url, context);
-	}    
+    public static SmbFile getSmbFile (String url, CIFSContext context) throws Exception {
+        return new SmbFile(url, context);
+    }    
 
 }

@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2022 Roar Foshaug
+Copyright (C) 2020-2023 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -202,9 +202,9 @@ public class ObjDir extends Obj {
         int pos=name.lastIndexOf(File.separator);
         if (pos > 0) name=name.substring(pos+1);
         if (!name.endsWith(File.separator)) {
-        	return name+File.separator; // to differ from files when presented in common list (presentation only)
+            return name+File.separator; // to differ from files when presented in common list (presentation only)
         } else {
-        	return name;
+            return name;
         }
     }
 
@@ -685,8 +685,8 @@ public class ObjDir extends Obj {
             ObjFile stdout = (ObjFile) getObj("stdoutFile", params, 1);
             ObjFile stderr = (ObjFile) getObj("stderrFile", params, 2);
             
-		      List<Value> cmd=new ArrayList<Value>();
-		      for (int i=3; i<params.size(); i++) cmd.add(params.get(i));
+              List<Value> cmd=new ArrayList<Value>();
+              for (int i=3; i<params.size(); i++) cmd.add(params.get(i));
             
             
             Process process = startProcess(ctx, stdin.getFile(), stdout.getFile(), stderr.getFile(), cmd);
@@ -878,13 +878,13 @@ public class ObjDir extends Obj {
             ObjGlob glob=null;
             int count=0;
             if (params.size() == 2) {
-        		glob=getObjGlob(params,1);
-            	count=(int) getInt("count",params,0);
-        	} else if (params.size()==1) {
-            	count=(int) getInt("count",params,0);
-        	} else {
-            	throw new Exception("Expected parameter count, glob?");
-        	}
+                glob=getObjGlob(params,1);
+                count=(int) getInt("count",params,0);
+            } else if (params.size()==1) {
+                count=(int) getInt("count",params,0);
+            } else {
+                throw new Exception("Expected parameter count, glob?");
+            }
             
             File f=new File(name);
             File[] content = f.listFiles();
@@ -893,7 +893,7 @@ public class ObjDir extends Obj {
             for (File x:content) {
                 try {
                     if (x.isFile()) {
-                    	if (glob == null || glob.matches(x.getName())) fileList.add(x); 
+                        if (glob == null || glob.matches(x.getName())) fileList.add(x); 
                     } 
                 } catch (Exception ex) {
                     // ignore
@@ -904,7 +904,7 @@ public class ObjDir extends Obj {
             if (count > fileList.size()) count=fileList.size();
             
             for (int i=0; i<count; i++) {
-            	File file=fileList.get(i);
+                File file=fileList.get(i);
                 try {
                     valList.add(new ValueObj(new ObjFile(file.getAbsolutePath(), Protection.NoProtection)));
                 } catch (Exception ex) {

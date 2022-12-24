@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2022 Roar Foshaug
+Copyright (C) 2020-2023 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -44,21 +44,21 @@ public class StmtSetBreakPoint extends Stmt {
         
         String functionName=ctx.getFunctionState().getScriptFunctionName();
         if (functionName==null) {
-        	functionName="";
+            functionName="";
         } else {
-        	functionName=" in function " + functionName;
+            functionName=" in function " + functionName;
         }
         ValueList stack = ctx.getStdio().peekFullCFTStackTrace();
         
         stdio.println("### setBreakPoint" + functionName + ": " + msg + " " + loc);
         for (Value line : stack.getVal()) {
-        	stdio.println(" CALL-HISTORY: " + line.getValAsString());
+            stdio.println(" CALL-HISTORY: " + line.getValAsString());
         }
         stdio.println("---");
         stdio.println("Enter 'y' to terminate");
         String line = stdio.getInputLine();
         if (line.trim().toLowerCase().equals("y")) {
-        	throw new Exception("Aborted at breakbpoint: " + msg);
+            throw new Exception("Aborted at breakbpoint: " + msg);
         }
         
     }
