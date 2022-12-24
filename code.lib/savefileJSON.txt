@@ -54,7 +54,7 @@ nicely formatted JSON.
 
 # Build root lexer Node for all known tokens in JSON
 # --
-    Lib.Text.Lexer.Node => root
+    Std.Text.Lexer.Node => root
     
     root.sub("{}:,[]()").setIsToken(1)  # specials
     root.sub(" ^n^r^t".unEsc).setIsToken(-1) # whitespace
@@ -222,7 +222,7 @@ nicely formatted JSON.
     start=currentTimeMillis
 
     RootNode => root
-    Lib.Text.Lexer => lexer
+    Std.Text.Lexer => lexer
     json->line 
         lexer.addLine(line) 
     |
@@ -279,16 +279,16 @@ nicely formatted JSON.
     indent2=indent+"  "
     NEWLINE="^n".unEsc
 
-	dictType=""
-	if (showDictTypes && object.getName != null) {
-		dictType=" # &"+object.getName
-	}
+    dictType=""
+    if (showDictTypes && object.getName != null) {
+        dictType=" # &"+object.getName
+    }
     LOut.call("{"+dictType + NEWLINE)
 
     comma=false
     object.keys->key
         value=object.get(key)
-    	reject(getType(value)=="Callable")  # when listing out XML structures for debug
+        reject(getType(value)=="Callable")  # when listing out XML structures for debug
         if (comma) LOut.call(","+NEWLINE)
         LOut.call(indent2+'"' + key.replace('"','\"') + '": ')
         PPValue(value,indent2,LOut,showDictTypes)
@@ -303,8 +303,8 @@ nicely formatted JSON.
     P(1,List)=>list
     P(2,"")=>indent
     P(3,Lambda{P(1)}) as Callable=>LOut
-	P(4,false)=>showDictTypes
-	
+    P(4,false)=>showDictTypes
+    
     indent2=indent+"  "
     NEWLINE="^n".unEsc
 
@@ -323,9 +323,9 @@ nicely formatted JSON.
 # Pretty-print data structure as formatted JSON
 # --
     P(1)=>JSONValue
-	P(2,false)=>print
-	P(3,false)=>showDictTypes
-	
+    P(2,false)=>print
+    P(3,false)=>showDictTypes
+    
     Dict
         .set("data",List)
         .set("LOut",Lambda{
@@ -336,10 +336,10 @@ nicely formatted JSON.
     PPValue(JSONValue,"",obj.get("LOut"),showDictTypes)
     NEWLINE="^n".unEsc
     result = obj.data.concat.split(NEWLINE)
-	if(print) Inner{
-		result->line println(line)
-	}
-	result
+    if(print) Inner{
+        result->line println(line)
+    }
+    result
 /PP
 
 
@@ -350,13 +350,13 @@ PP(Parse(exampleJSON))
 
 
 
-Lib.Text.Lexer help
+Std.Text.Lexer help
 //LexerHelp
 
 
-Lib.Text.Lexer.Node help
+Std.Text.Lexer.Node help
 //NodeHelp
 
 
-Lib.Text.Lexer.getTokenStream(Lib.Text.Lexer.Node) help
+Std.Text.Lexer.getTokenStream(Std.Text.Lexer.Node) help
 //TSHelp

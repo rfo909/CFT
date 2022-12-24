@@ -44,7 +44,7 @@ P(2,0)=>length
     if (length==0) {
         ""
     } else Inner {
-        Lib.Data.each(0,length-1)->x out(char) | _.concat
+        Std.Data.each(0,length-1)->x out(char) | _.concat
     }
 /Chars
 
@@ -198,35 +198,35 @@ P(1,"r---")=>s
 # Create summary object, which is controlled via two lambdas, for
 # adding data and showing (add to layout)
 # --
-	self.data=List
-	self.Lrow=Lambda{
-		P(1) as String => shortName
-		P(2) as String => longName
-		P(3) as String => value
-		self.data.add(SymDict(shortName,longName,value))
-	}
-	self.Lshow=Lambda{
-		P(1," ") as String => padChar
-		error(padChar.length != 1, "padChar must be single character")
+    self.data=List
+    self.Lrow=Lambda{
+        P(1) as String => shortName
+        P(2) as String => longName
+        P(3) as String => value
+        self.data.add(SymDict(shortName,longName,value))
+    }
+    self.Lshow=Lambda{
+        P(1," ") as String => padChar
+        error(padChar.length != 1, "padChar must be single character")
 
-		# Identify width of columns
-		sLen=0
-		lLen=0
-		vLen=0
-		self.data->x 
-			sLen=if(x.shortName.length>sLen, x.shortName.length, sLen)
-			lLen=if(x.longName.length>lLen, x.longName.length, lLen)
-			vLen=if(x.value.length>vLen, x.value.length, vLen)
-		|
-		self.data->x
-			line=AppUI:fix("| ") + 
-				AppUI:Pad(x.shortName + " ",padChar,sLen+4)
-				+ if(lLen>0, " " + AppUI:Pad(x.longName+" ",padChar,lLen+4), "")
-				+ " [" + x.value + "]"
-			println(line)
-		|
-		println(AppUI:fix("|"))
-	}
+        # Identify width of columns
+        sLen=0
+        lLen=0
+        vLen=0
+        self.data->x 
+            sLen=if(x.shortName.length>sLen, x.shortName.length, sLen)
+            lLen=if(x.longName.length>lLen, x.longName.length, lLen)
+            vLen=if(x.value.length>vLen, x.value.length, vLen)
+        |
+        self.data->x
+            line=AppUI:fix("| ") + 
+                AppUI:Pad(x.shortName + " ",padChar,sLen+4)
+                + if(lLen>0, " " + AppUI:Pad(x.longName+" ",padChar,lLen+4), "")
+                + " [" + x.value + "]"
+            println(line)
+        |
+        println(AppUI:fix("|"))
+    }
 
 /class DoSummaryObj as SummaryObj
 

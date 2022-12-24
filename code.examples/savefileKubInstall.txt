@@ -112,8 +112,8 @@ together multiple masters to form single cluster.
 # --
     lines = Dir.runCapture("curl -s https://packages.cloud.google.com/apt/dists/kubernetes-xenial/main/binary-amd64/Packages".split)
     lines -> line
-	assert(line.contains("Version"))
-	out(line)
+    assert(line.contains("Version"))
+    out(line)
 /KubShowVersions
 
 
@@ -224,7 +224,7 @@ together multiple masters to form single cluster.
         
         SSH:sudo(masterNode,'sudo kubeadm init --pod-network-cidr=10.244.0.0/16',false,debug).stdout => stdout
         File("KUB_Master_init_" + host + ".txt")=>f
-	f.create(stdout)
+    f.create(stdout)
         ShowMainInitOutput
         println("--- Stdout stored: " + f.path)
 /InitMasterNode
@@ -293,8 +293,8 @@ together multiple masters to form single cluster.
 
 # Make local host install of kube tools
 # --
-	LocalKubeConfig
-	LocalKubeTools
+    LocalKubeConfig
+    LocalKubeTools
 /LocalToolsInstall
 
 
@@ -329,19 +329,19 @@ together multiple masters to form single cluster.
 
 # Get join command for cluster
 # --
-	P(1,false) => forMasterNode
-	target=HostTarget(MasterHosts.first)
+    P(1,false) => forMasterNode
+    target=HostTarget(MasterHosts.first)
 
-	SSH:run(target,"kubeadm token create --print-join-command").stdout->line
-		assert(line.contains("join"))
-		out(line)
-		break
-	| _.first=>joinCommand
+    SSH:run(target,"kubeadm token create --print-join-command").stdout->line
+        assert(line.contains("join"))
+        out(line)
+        break
+    | _.first=>joinCommand
 
-	if (forMasterNode) {
-		joinCommand=joinCommand + " --control-plane"
-	}
-	joinCommand
+    if (forMasterNode) {
+        joinCommand=joinCommand + " --control-plane"
+    }
+    joinCommand
 //GetJoinCommand
 
 
@@ -413,7 +413,7 @@ together multiple masters to form single cluster.
 
 # File to add log from Call function below
 # --
-	Lib:DirPrivate.file("kubctl_log.txt")
+    Lib:DirPrivate.file("kubctl_log.txt")
 /KubctlLogFile
 
 
@@ -422,34 +422,34 @@ together multiple masters to form single cluster.
 # To configure kubectl for local use, install it, then copy the /etc/kubernetes/admin.conf under $HOME/.kube/config
 # and assure access with chmod +r
 # --
-	P(1,Dir) => currDir
-	
-	readLine("Enter kubectl command, blank to abort") => command
-	error(command=="","Aborting")
-	
-	if (command.startsWith("kubectl ")) command=command.after(" ")
+    P(1,Dir) => currDir
+    
+    readLine("Enter kubectl command, blank to abort") => command
+    error(command=="","Aborting")
+    
+    if (command.startsWith("kubectl ")) command=command.after(" ")
 
-	log=KubctlLogFile
+    log=KubctlLogFile
 
-	c=">>> kubectl " + command
-	s="-".times(c.length)
-	log.append(List("",s,c,s,""))
+    c=">>> kubectl " + command
+    s="-".times(c.length)
+    log.append(List("",s,c,s,""))
 
-	debug=false
-	currDir.runCapture(("kubectl " + command).split) => output
+    debug=false
+    currDir.runCapture(("kubectl " + command).split) => output
 
-	log.append(output)
-	Inner{
-	  count=Term.h-3
-	  output->line
-		 println(line)
-		 count=count-1
-		 if (count<=0) {
-		    readLine("More?")=>str
-		    break(str.toLower=="q")
-		    count=Term.h-3
-		 }
-	}
+    log.append(output)
+    Inner{
+      count=Term.h-3
+      output->line
+         println(line)
+         count=count-1
+         if (count<=0) {
+            readLine("More?")=>str
+            break(str.toLower=="q")
+            count=Term.h-3
+         }
+    }
 /kubectl
 
 
@@ -458,5 +458,5 @@ kubectl
 
 # kubectl history
 # --
-	 KubctlLogFile.read->line assert(line.startsWith(">>> ")) out(line) | _.unique->line println(line)
+     KubctlLogFile.read->line assert(line.startsWith(">>> ")) out(line) | _.unique->line println(line)
 /h

@@ -36,7 +36,7 @@ Objects can be sorted on date of last update, and located using a lambda.
 
 # Get collections
 # --
-    Lib.Db.Db2.collections.sort->name
+    Std.Db.Db2.collections.sort->name
         assert(name.startsWith(CollectionPrefix))
         out(name.sub(CollectionPrefix.length))
 /Collections
@@ -69,7 +69,7 @@ Objects can be sorted on date of last update, and located using a lambda.
     P(2)=>value
     error(value != null && getType(value) != "Dict","Value must be Dict")
     
-    uuid=Lib.Db.UUID
+    uuid=Std.Db.UUID
     data=Dict.set("id",uuid).set("date",Date).set("value",value)
     Db2:Set(FixCN(collection), uuid, data)
     data

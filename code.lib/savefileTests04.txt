@@ -83,12 +83,12 @@ Time consuming tests related to Db2 and locking
 
 # Basic verify for locks. 
 # --
-    Lib.Db.obtainLock("Tests04",1000)
-    SpawnProcess(Dict, Lib.Db.obtainLock("Tests04",1000)).wait.output => output
+    Std.Db.obtainLock("Tests04",1000)
+    SpawnProcess(Dict, Std.Db.obtainLock("Tests04",1000)).wait.output => output
     ok=Inner{
         output->line assert(line.contains("Exception")) out(line) | _.length>0
     }
-    Lib.Db.releaseLock("Tests04")
+    Std.Db.releaseLock("Tests04")
     # result
     ok
 /Test02_Verify_lock

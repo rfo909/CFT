@@ -67,7 +67,7 @@
     println("Calling APTUpdate:run for target="+target)
     distUpgrade=false
     APTUpdate:run(target,3,distUpgrade)
-    	# Danger: doing dist-upgrade on ELK and KUB may cause problems!
+        # Danger: doing dist-upgrade on ELK and KUB may cause problems!
 /AptUpdate
 
 
@@ -128,30 +128,30 @@
 
 # Show details from APT Update
 # --
-	Lib:Header("Last run output")
-	keys=Db2:Keys("Ansible.APTUpdateUpgrade")
-	Inner {
-		keys->key
-			obj=Db2:Get("Ansible.APTUpdateUpgrade",key)
-			date=obj.date.fmt
-			exitValue=obj.exitValue
-			report(key,date,exitValue)
-	} ->line 
-		println(line)
-	|
-	readLine("Enter host name or part of host name") => host
-	key = Inner {
-		keys->key
-			assert(key.contains(host)) 
-			out(key)
-		| _.first
-	}
-	Db2:Get("Ansible.APTUpdateUpgrade",key) => data
-	Lib:Header(data.date.fmt + " " + key)
-	println("exitValue=" + data.exitValue)
-	data.output->line println(line)
+    Lib:Header("Last run output")
+    keys=Db2:Keys("Ansible.APTUpdateUpgrade")
+    Inner {
+        keys->key
+            obj=Db2:Get("Ansible.APTUpdateUpgrade",key)
+            date=obj.date.fmt
+            exitValue=obj.exitValue
+            report(key,date,exitValue)
+    } ->line 
+        println(line)
+    |
+    readLine("Enter host name or part of host name") => host
+    key = Inner {
+        keys->key
+            assert(key.contains(host)) 
+            out(key)
+        | _.first
+    }
+    Db2:Get("Ansible.APTUpdateUpgrade",key) => data
+    Lib:Header(data.date.fmt + " " + key)
+    println("exitValue=" + data.exitValue)
+    data.output->line println(line)
 /UpdateDetails
-	
+    
     
 
 # Decide if debian host should be booted
@@ -446,7 +446,7 @@ DNS=10.0.0.3 10.0.0.4
     P(3,Input("Clone host name").get) => hostname
     P(4,Input("Management username").get) => username
 
-	readLine("Press ENTER to continue")
+    readLine("Press ENTER to continue")
 
     target=username + "@" + templateIp
 

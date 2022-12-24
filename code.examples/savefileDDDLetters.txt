@@ -26,7 +26,7 @@
     P(2)=>world
     P(3)=>ref
     P(4,10)=>pixelSize
-    P(5,Lib.Color(255,0,0)) => color
+    P(5,Std.Color(255,0,0)) => color
     P(6,0.8) => pixelSizeFactor
     
     thickness=pixelSize/3
@@ -40,9 +40,9 @@
 
     
     lines=Letters7x5:GetText(str)
-    Lib.Data.each(0,6)->lineNo
+    Std.Data.each(0,6)->lineNo
         line=lines.nth(lineNo)
-        Lib.Data.each(0,line.length-1)->charNo
+        Std.Data.each(0,line.length-1)->charNo
             ch=line.chars.nth(charNo)
             if (ch != " ") {
                 pos=ref.up(3.5*pixelSize)
@@ -75,29 +75,29 @@
 # Test
 # --
     P(1)=> rot  
-        Lib.DDD.World.init(35,36,24,800,600,Lib.Color(0,0,0)) => world
-        ref = Lib.DDD.Ref.setScaleFactor(1000)
+        Std.DDD.World.init(35,36,24,800,600,Std.Color(0,0,0)) => world
+        ref = Std.DDD.Ref.setScaleFactor(1000)
         ref = ref
-            .fwd(5.3-Lib.Math.sin(rot*2)*0.7)
-            .left(2+Lib.Math.sin(rot*3)*0.4)
+            .fwd(5.3-Std.Math.sin(rot*2)*0.7)
+            .left(2+Std.Math.sin(rot*3)*0.4)
             .turnRight(60)
-            .rollLeft(Lib.Math.sin(rot)*30)
+            .rollLeft(Std.Math.sin(rot)*30)
 
 
         str="CFT POWER"
         Inner {
-            Lib.Data.for(0,str.length,1)->charPos
+            Std.Data.for(0,str.length,1)->charPos
                 offset=rot+charPos*2
-                red=(Lib.Math.cos(offset*2)*127+127).i
-                green=(Lib.Math.cos(offset+180)*60+127).i
-                blue=(Lib.Math.sin(offset+90)*127+127).i
-                color=Lib.Color(red,green,blue)
+                red=(Std.Math.cos(offset*2)*127+127).i
+                green=(Std.Math.cos(offset+180)*60+127).i
+                blue=(Std.Math.sin(offset+90)*127+127).i
+                color=Std.Color(red,green,blue)
                 
                 ref=DDDLetters:Letters3d(str.chars.nth(charPos),world,ref.rollRight(rot/2),0.1,color)
         }
 
         #ref = DDDLetters:Letters3d("GNT ",world,ref,0.1,color)
-        #ref = DDDLetters:Letters3d("RULES",world,ref,0.1,Lib.Color(255,255,0))
+        #ref = DDDLetters:Letters3d("RULES",world,ref,0.1,Std.Color(255,255,0))
         
         rotStr=("0000"+rot).last(3)
         
@@ -126,7 +126,7 @@
         # 9.3 seconds / with 18 threads on 12 cpu cores
 
 
-    Lib.Data.for(0,720,1)->rot
+    Std.Data.for(0,720,1)->rot
         println("rot=" + rot)
         apm.LWait
         apm.LAdd(SpawnProcess(SymDict(rot), makeFrame(rot)))

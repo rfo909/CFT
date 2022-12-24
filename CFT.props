@@ -71,7 +71,7 @@ shortcut:term = "---- Update terminal size ----"          Lib:GetTerminalSize
 shortcut:rsh  = "---- Remote shell via ssh ----"          SSH:remoteShell
 shortcut:scr  = "---- Show all scripts ----"              Lib:Scripts
 
-shortcut:home = "---- move to script dir ----"			  Sys.savefile.dir.cd
+shortcut:home = "---- move to script dir ----"            Sys.savefile.dir.cd
 shortcut:fsel = "---- select file from current dir ----"  Util:SelectFile(Dir)
 
 shortcut:%    = "---- show current symbols ----"          Lib:Symbols
@@ -132,7 +132,7 @@ bangCommand = BangParser:Run(Dir,P(1))
 
 
 #
-# Lib.Db2
+# Std.Db.Db2 data directory
 #
 
 db2Dir = private/Db2

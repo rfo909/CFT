@@ -39,7 +39,7 @@ in v3.3.2
 
 # Build root lexer Node for tokens in XML
 # --
-    Lib.Text.Lexer.Node => root
+    Std.Text.Lexer.Node => root
     
     # WS = 1
     root.sub(" ^n^r^t".unEsc).setIsToken(1) => ws # whitespace
@@ -111,7 +111,7 @@ in v3.3.2
         @           <count>2</count>
         @               <x a="1"> xxx </x>
         @       </status>
-        @   	</item>
+        @       </item>
         @       <emptyTag a="a"/>
         @    </a:parent>
     )
@@ -136,7 +136,7 @@ exampleXML
     start=currentTimeMillis
 
     RootNode => root
-    Lib.Text.Lexer => lexer
+    Std.Text.Lexer => lexer
     
     xml->line 
         lexer.addLine(line) 
@@ -153,261 +153,261 @@ exampleXML
     
     list=List
     loop
-   		break(ts.EOF)
-    	if (ts.peek=="<") {
-    		obj=XMLNode
-    		obj.parse(ts)
-    		list.add(obj)
-    	} else {
-    		ts.next
-    	}
+        break(ts.EOF)
+        if (ts.peek=="<") {
+            obj=XMLNode
+            obj.parse(ts)
+            list.add(obj)
+        } else {
+            ts.next
+        }
     |
-	list
+    list
 /Parse
 
 
 # XML node class
 # --
-	P(1) as String? => tagName
-	P(2,Dict) as Dict => attributes
-	P(3,List) => content
-	
-	self.tagName=tagName
-	self.attributes=attributes
-	self.content=content
-	
-	# Create sub-node 
-	# --
-	self.sub=Lambda{
-		P(1) as String => tagName
-		x=XMLNode(tagName)
-		self.content.add(x)
-		x
-	}
-	
-	# Add text
-	# --
-	self.addText=Lambda{
-		P(1) as String? => text
-		if (text != null) {
-			self.content.add(text)
-		}
-	}
-	
-	# Get attribute or null if undefined
-	# --
-	self.attrGet=Lambda{
-		P(1) as String => attrName
-		if (self.attributes.has(attrName), self.attributes.get(attrName), null)
-	}
-	
-	# Get list of XMLNode from content
-	# --
-	self.subNodes=Lambda{
-		P(1) as String? => tag
-		self.content->x
-			x as? &XMLNode => isNode
-			assert(isNode)
-			assert(tag==null || x.tagName==tag)
-			out(x)
-	}
-	
-		
-	## Parse from token stream
-	## -----------------------
-	
-	self.parse=Lambda{
-		P(1) as LexerTokenStream => ts
-
-		ws=Lambda{ 
-			P(1) as LexerTokenStream => ts 
-			loop 
-				break(ts.EOF || ts.peekType != 1) 
-				ts.next
-		}
-
-		# START TAG BEGIN + TAG NAME
-		
-		error(!ts.peek=="<",ts.sourceLocation + ": expected '<' starting a tag")
-		ts.next
-    	ws.call(ts)
-
-    	error(ts.peekType != 4, ts.sourceLocation + ": expected identifier")
-    	name=ts.peek
-    	ts.next
-    	
-    	ws.call(ts)
-    	
-    	# Supporting tag names with XML name spaces: xxx:yyy
-    	
-    	if (ts.peek==":") {
-    		name=name+":"
-    		ts.next
-    		ws.call(ts)
-    		error(ts.peekType != 4, ts.sourceLocation + ": expected identifier following " + name)
-    		name=name+ts.peek
-    		ts.next
-    		ws.call(ts)
-    	}
-    	
-    	#println("STARTING tag " + name)
-    	self.tagName=name
-    	
-    	
-    	# TAG ATTRIBUTES
-    	
-    	Inner {
-    		loop
-    			ws.call(ts)
-    			break(ts.peek==">" || ts.peek=="/>")
-
-    				
-	 			error (ts.peekType != 4 && ts.peekType != 5, 
-	 				ts.sourceLocation + ": Expected identifier or string attribute name - got " + ts.peek)
-	 				
-	 			attrName=ts.peek
-	 			if (ts.peekType==5) {
-	 				# Strip quotes
-	 				attrName=attrName.sub(1,attrName.length-1)
-	 			}
-	 			ts.next
-	 			ws.call(ts)
-	 			error(ts.peek != "=", 
-	 				ts.sourceLocation + ": expected '=' for attribute " + attrName)
-
-	 			ts.next
-	 			ws.call(ts)
-	 			error(ts.peekType != 4 && ts.peekType != 5 && ts.peekType() != 3, 
-	 				ts.sourceLocation + ": Expected identifier, string or number value for attribtute " + attrName + " - got "+ ts.peek)
-	 			attrValue=ts.peek
-
-	 			if (ts.peekType==5) {
-	 				# Strip quotes
-	 				attrValue=attrValue.sub(1,attrValue.length-1)
-	 			}
-
-	 			ts.next
-	 			ws.call(ts)
-	 			
-	 			self.attributes.attrName=attrValue	
-    	}
-    	
-    	# START TAG END
-    	
-    	ws.call(ts)
-    	hasContent=true
-    	if (ts.peek==">") {
-    		ts.next
-    	} else if (ts.peek=="/>") {
-    		hasContent=false
-    		ts.next
-    	} else {
-    		error(ts.sourceLocation + ": expected '>' or '/>' closing tag " + name)
-    	}
-    	
-    	
-    	# CONTENT
-    	if (hasContent) Inner {
-    		text=""
-    		loop
-    			break(ts.peek=="</")
-    			if(ts.peek=="<") {
-    				self.content.add(UnescapeXMLString(text)) 
-    				text=""
-    				node=XMLNode
-    				node.parse(ts)
-    				self.content.add(node)
-  				}
-  				# Everything else (text)
-    			text=text+ts.peek
-    			ts.next
-    		|
-    		self.content.add(UnescapeXMLString(text))
-		}    
-		
-
-		# CLOSING TAG
-		if (hasContent) {
-			ws.call(ts)
-			error(ts.peek != "</", ts.sourceLocation + ": expected </ closing " + self.tagName)
-
-        	ts.next
-        	ws.call(ts)
-
-        	error(ts.peekType != 4, ts.sourceLocation + ": expected identifier")
-
-        	name=ts.peek
-        	ts.next
-        	ws.call(ts)
-        
-        	if (ts.peek==":") {
-            	name=name+":"
-           		ts.next
-            	ws.call(ts)
-            
-            	error(ts.peekType != 4, ts.sourceLocation + ": expected identifier")
-            	name=name+ts.peek
-            	ts.next
-            	ws.call(ts)
-        	}
-        	error(self.tagName != name, ts.sourceLocation + ": Expected </" + self.tagName + "> - got </" + name + ">")
-        	ts.match(">","expected '>' following '</"+name)
-        	
- 			#println("Got matching END-TAG to " + self.tagName)   			
+    P(1) as String? => tagName
+    P(2,Dict) as Dict => attributes
+    P(3,List) => content
+    
+    self.tagName=tagName
+    self.attributes=attributes
+    self.content=content
+    
+    # Create sub-node 
+    # --
+    self.sub=Lambda{
+        P(1) as String => tagName
+        x=XMLNode(tagName)
+        self.content.add(x)
+        x
+    }
+    
+    # Add text
+    # --
+    self.addText=Lambda{
+        P(1) as String? => text
+        if (text != null) {
+            self.content.add(text)
         }
-	
+    }
+    
+    # Get attribute or null if undefined
+    # --
+    self.attrGet=Lambda{
+        P(1) as String => attrName
+        if (self.attributes.has(attrName), self.attributes.get(attrName), null)
+    }
+    
+    # Get list of XMLNode from content
+    # --
+    self.subNodes=Lambda{
+        P(1) as String? => tag
+        self.content->x
+            x as? &XMLNode => isNode
+            assert(isNode)
+            assert(tag==null || x.tagName==tag)
+            out(x)
+    }
+    
+        
+    ## Parse from token stream
+    ## -----------------------
+    
+    self.parse=Lambda{
+        P(1) as LexerTokenStream => ts
 
-	} # self.parse
-	
-	
-	
-	## Pretty-print XML
-	## ----------------
-	self.PP=Lambda{
-		P(1,"") as String => indent
-		P(2,List) as List => result
-		
-		attributes=Inner{
-			self.attributes.keys->attrName
-				out(attrName + '="' + self.attributes.get(attrName) + '"')
-			| _.concat(" ")
-		}
-		if (attributes.length>0) attributes=" "+attributes
-		
-		result.add(indent+"<"+self.tagName + attributes + if(self.content.length==0,"/>",">"))
-		indent2=indent+"   "
-		if (self.content.length>0) {
-			Inner {
-				self.content->x
-					x as? &XMLNode => isNode
-					if (isNode) {
-						x.PP(indent2,result)
-					} else {
-						s=x.trim
-						if (s.length>0) result.add(indent2 + EscapeXMLString(s))
-					}
-			}
-			result.add(indent+"</"+self.tagName+">")
-		}
-		
-		result
-	}
-	
-	
-	# Export XML structure as single line of text
-	# --
-	self.export=Lambda{
-		self.PP->line
-			out(line.trim)
-		| _.concat(" ")
-	}
-	
+        ws=Lambda{ 
+            P(1) as LexerTokenStream => ts 
+            loop 
+                break(ts.EOF || ts.peekType != 1) 
+                ts.next
+        }
+
+        # START TAG BEGIN + TAG NAME
+        
+        error(!ts.peek=="<",ts.sourceLocation + ": expected '<' starting a tag")
+        ts.next
+        ws.call(ts)
+
+        error(ts.peekType != 4, ts.sourceLocation + ": expected identifier")
+        name=ts.peek
+        ts.next
+        
+        ws.call(ts)
+        
+        # Supporting tag names with XML name spaces: xxx:yyy
+        
+        if (ts.peek==":") {
+            name=name+":"
+            ts.next
+            ws.call(ts)
+            error(ts.peekType != 4, ts.sourceLocation + ": expected identifier following " + name)
+            name=name+ts.peek
+            ts.next
+            ws.call(ts)
+        }
+        
+        #println("STARTING tag " + name)
+        self.tagName=name
+        
+        
+        # TAG ATTRIBUTES
+        
+        Inner {
+            loop
+                ws.call(ts)
+                break(ts.peek==">" || ts.peek=="/>")
+
+                    
+            error (ts.peekType != 4 && ts.peekType != 5, 
+                ts.sourceLocation + ": Expected identifier or string attribute name - got " + ts.peek)
+                
+            attrName=ts.peek
+            if (ts.peekType==5) {
+                # Strip quotes
+                attrName=attrName.sub(1,attrName.length-1)
+            }
+            ts.next
+            ws.call(ts)
+            error(ts.peek != "=", 
+                ts.sourceLocation + ": expected '=' for attribute " + attrName)
+
+            ts.next
+            ws.call(ts)
+            error(ts.peekType != 4 && ts.peekType != 5 && ts.peekType() != 3, 
+                ts.sourceLocation + ": Expected identifier, string or number value for attribtute " + attrName + " - got "+ ts.peek)
+            attrValue=ts.peek
+
+            if (ts.peekType==5) {
+                # Strip quotes
+                attrValue=attrValue.sub(1,attrValue.length-1)
+            }
+
+            ts.next
+            ws.call(ts)
+            
+            self.attributes.attrName=attrValue  
+        }
+        
+        # START TAG END
+        
+        ws.call(ts)
+        hasContent=true
+        if (ts.peek==">") {
+            ts.next
+        } else if (ts.peek=="/>") {
+            hasContent=false
+            ts.next
+        } else {
+            error(ts.sourceLocation + ": expected '>' or '/>' closing tag " + name)
+        }
+        
+        
+        # CONTENT
+        if (hasContent) Inner {
+            text=""
+            loop
+                break(ts.peek=="</")
+                if(ts.peek=="<") {
+                    self.content.add(UnescapeXMLString(text)) 
+                    text=""
+                    node=XMLNode
+                    node.parse(ts)
+                    self.content.add(node)
+                }
+                # Everything else (text)
+                text=text+ts.peek
+                ts.next
+            |
+            self.content.add(UnescapeXMLString(text))
+        }    
+        
+
+        # CLOSING TAG
+        if (hasContent) {
+            ws.call(ts)
+            error(ts.peek != "</", ts.sourceLocation + ": expected </ closing " + self.tagName)
+
+            ts.next
+            ws.call(ts)
+
+            error(ts.peekType != 4, ts.sourceLocation + ": expected identifier")
+
+            name=ts.peek
+            ts.next
+            ws.call(ts)
+        
+            if (ts.peek==":") {
+                name=name+":"
+                ts.next
+                ws.call(ts)
+            
+                error(ts.peekType != 4, ts.sourceLocation + ": expected identifier")
+                name=name+ts.peek
+                ts.next
+                ws.call(ts)
+            }
+            error(self.tagName != name, ts.sourceLocation + ": Expected </" + self.tagName + "> - got </" + name + ">")
+            ts.match(">","expected '>' following '</"+name)
+            
+        #println("Got matching END-TAG to " + self.tagName)             
+        }
+    
+
+    } # self.parse
+    
+    
+    
+    ## Pretty-print XML
+    ## ----------------
+    self.PP=Lambda{
+        P(1,"") as String => indent
+        P(2,List) as List => result
+        
+        attributes=Inner{
+            self.attributes.keys->attrName
+                out(attrName + '="' + self.attributes.get(attrName) + '"')
+            | _.concat(" ")
+        }
+        if (attributes.length>0) attributes=" "+attributes
+        
+        result.add(indent+"<"+self.tagName + attributes + if(self.content.length==0,"/>",">"))
+        indent2=indent+"   "
+        if (self.content.length>0) {
+            Inner {
+                self.content->x
+                    x as? &XMLNode => isNode
+                    if (isNode) {
+                        x.PP(indent2,result)
+                    } else {
+                        s=x.trim
+                        if (s.length>0) result.add(indent2 + EscapeXMLString(s))
+                    }
+            }
+            result.add(indent+"</"+self.tagName+">")
+        }
+        
+        result
+    }
+    
+    
+    # Export XML structure as single line of text
+    # --
+    self.export=Lambda{
+        self.PP->line
+            out(line.trim)
+        | _.concat(" ")
+    }
+    
 /class XMLNode
 
 
 # Show XMLNode content
 # --
-	Util:ShowDict(XMLNode("ROOT"))
+    Util:ShowDict(XMLNode("ROOT"))
 /Show
 
 
@@ -433,86 +433,86 @@ exampleXML
 
 # XMLNode.PP to show result from parse
 # --
-	node = Parse(exampleXML).first
-	node.PP
+    node = Parse(exampleXML).first
+    node.PP
 /t1
 
 # JSON:PP for all details after parse
 # --
-	node = Parse(exampleXML).first
-	JSON:PP(node)
+    node = Parse(exampleXML).first
+    JSON:PP(node)
 /t2
 
 
 # Export test
 # --
-	Parse(exampleXML).first.export
+    Parse(exampleXML).first.export
 /t3
 
 
 # Construct XML structure with code
 # --
-	root = XMLNode("root")
-	root.attributes.pi="3.14"
-	root.addText("root test before A")
-	a=root.sub("A")
-	a.attributes.inner="a"
-	a.addText("a-text")
-	root.addText("root test after A")
-	b=root.sub("B")
-	root.addText("after B, special chars <>&")
-	
-	b.sub("C").addText("Inside C")
-	b.sub("D")
-	
-	root
+    root = XMLNode("root")
+    root.attributes.pi="3.14"
+    root.addText("root test before A")
+    a=root.sub("A")
+    a.attributes.inner="a"
+    a.addText("a-text")
+    root.addText("root test after A")
+    b=root.sub("B")
+    root.addText("after B, special chars <>&")
+    
+    b.sub("C").addText("Inside C")
+    b.sub("D")
+    
+    root
 /constructedObject
 
 # Show constructed object by calling its PP function
 # --
-	constructedObject.PP
+    constructedObject.PP
 /t4
 
 
 # Parse constructedObject.PP and PP it
 # --
-	Parse(constructedObject.PP).first.PP
+    Parse(constructedObject.PP).first.PP
 /t4b
 
 # Lookup test, accessing data inside constructedObject - call t4 to see it prettyprinted
 # --
-	root=constructedObject
-	println("root.attr.nonExist = " + root.attrGet("nonExist"))
-	println("A.attr.inner = " + root.subNodes("A").first.attrGet("inner"))
-	println("A.content.last = " + root.content.last) # special characters test
-/t5	
+    root=constructedObject
+    println("root.attr.nonExist = " + root.attrGet("nonExist"))
+    println("A.attr.inner = " + root.subNodes("A").first.attrGet("inner"))
+    println("A.content.last = " + root.content.last) # special characters test
+/t5   
 
 
 # Parse example, then pretty-print it. Parse the output, and pretty-print that. Compare the two outputs, 
 # should match
 # --
-	node = Parse(exampleXML).first
-	result1=node.PP
-	node = Parse(result1).first
-	result2=node.PP
-	#
-	result1.concat(" ")==result2.concat(" ")
+    node = Parse(exampleXML).first
+    result1=node.PP
+    node = Parse(result1).first
+    result2=node.PP
+    #
+    result1.concat(" ")==result2.concat(" ")
 //test01
 
 
 # Lookup test
 # --
-	node=Parse(exampleXML).first
-	node.subNodes("item").first.subNodes("title").first.content.first => str
-	str.trim=="Donald Duck & Co"
+    node=Parse(exampleXML).first
+    node.subNodes("item").first.subNodes("title").first.content.first => str
+    str.trim=="Donald Duck & Co"
 //test02
 
 
 # Lookup test
 # --
-	node=Parse(exampleXML).first
-	node.subNodes("element").first.content.first => str
-	str.trim=="2 + 3 > 5"
+    node=Parse(exampleXML).first
+    node.subNodes("element").first.content.first => str
+    str.trim=="2 + 3 > 5"
 //test03
 
 
@@ -522,14 +522,14 @@ exampleXML
     
 
 
-Lib.Text.Lexer help
+Std.Text.Lexer help
 //LexerHelp
 
 
-Lib.Text.Lexer.Node help
+Std.Text.Lexer.Node help
 //NodeHelp
 
 
-Lib.Text.Lexer.getTokenStream(Lib.Text.Lexer.Node) help
+Std.Text.Lexer.getTokenStream(Std.Text.Lexer.Node) help
 //TSHelp
 

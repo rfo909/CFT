@@ -118,7 +118,7 @@ if(ena) {
 } else {
     nl=if(Sys.isWindows,"^r^n".unEsc, "^n".unEsc)
     Inner {
-        Lib.Data.yes(Term.h,nl) | _.concat
+        Std.Data.yes(Term.h,nl) | _.concat
     }
 }
 /Cls
@@ -174,7 +174,7 @@ P(2,1)=>y
 
 P(1)=>char
 P(2)=>count
-    Lib.Data.yes(count,char) | _.concat
+    Std.Data.yes(count,char) | _.concat
 /Seq
 
 
@@ -189,7 +189,7 @@ P(4,12)=>y2
         top=Sys.uchar("2554")+Seq(Sys.uchar("2550"),w)+Sys.uchar("2557")
         mid=Sys.uchar("2551")+Seq(" ",w) + Sys.uchar("2551")
         bot=Sys.uchar("255a")+Seq(Sys.uchar("2550"),w)+Sys.uchar("255d")
-        Lib.Data.each(y1,y2)->y
+        Std.Data.each(y1,y2)->y
             pre=CurGoto(x1,y)
             if (y==y1) println(pre+top)
             else if (y==y2) println(pre+bot)

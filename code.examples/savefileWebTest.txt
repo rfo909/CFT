@@ -28,7 +28,7 @@
 # Initialize web server on port 2500 - for testing
 # --
 
-    Lib.Web.Server(2500) => server
+    Std.Web.Server(2500) => server
     if (LogFile.exists) LogFile.delete
     server.setServerLogFile(LogFile)
     
@@ -135,7 +135,7 @@
 # Close Body 
 # --
     Sequence(
-    	@ </div>
+        @ </div>
         @ </body>
         @ </html>
     )

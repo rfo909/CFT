@@ -42,21 +42,21 @@ Add, Commit and Push.
 
 # Create overview lines from Doc.md file
 # --
-	inCode=false
-	
-	HomeDir.sub("doc").file("Doc.md").protect.read->line
-		if (line.startsWith("```")) {
-			inCode=!inCode
-		}
-		reject(inCode)
-		assert(line.startsWith("#"))
-		
-		line
-			.replace("###","       ")
-			.replace("##", "  | ")
-			.replace("#",  "*")
-			=>str
-		out(str)
+    inCode=false
+    
+    HomeDir.sub("doc").file("Doc.md").protect.read->line
+        if (line.startsWith("```")) {
+            inCode=!inCode
+        }
+        reject(inCode)
+        assert(line.startsWith("#"))
+        
+        line
+            .replace("###","       ")
+            .replace("##", "  | ")
+            .replace("#",  "*")
+            =>str
+        out(str)
 /Overview
 
 
@@ -64,7 +64,7 @@ Add, Commit and Push.
 # ---
 
     HomeDir.sub("doc").file("Overview.txt").setWriteLF.create(Overview)
-	
+    
     # Run git
     HomeDir.run("git","add",".")
     GitStatus

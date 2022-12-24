@@ -155,9 +155,8 @@
 * Storing CFT data structures to file - syn() and eval()
 * The CFT database
   |  Collections
-  |  Lib.Db.Db2 vs Db2 script?
+  |  Std.Db.Db2 vs Db2 script?
   |  Synchronization
-* Lib object vs Lib scripts
 * onLoad functions
 * Multitasking in CFT
   |  Key concepts
@@ -179,7 +178,7 @@
 * CFT.props - mCat, mEdit and mMore lambdas
 * CFT.props - shortcuts
         Show all shortcuts
-* Lib.Text.Lexer
+* Std.Text.Lexer
   |  Concept
   |  Implementation
         .sub()

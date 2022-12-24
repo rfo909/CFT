@@ -43,8 +43,8 @@
 
         # progress bar
         (50*i/seconds).i => done
-        Lib.Data.yes(done,Sys.uchar("2588")).concat => bar
-        Lib.Data.yes(50-done,".").concat => remaining
+        Std.Data.yes(done,Sys.uchar("2588")).concat => bar
+        Std.Data.yes(50-done,".").concat => remaining
         
         percent=(100*i/seconds).i
         println(prefix + bar+remaining+" " + percent + " %")
@@ -55,9 +55,9 @@
         } else {
             i=i+3
         }
-	|
-	println
-	Alarm
+    |
+    println
+    Alarm
 
 /CountDown
 
@@ -65,9 +65,9 @@
 
 # Alarm
 # --
-	Lib.Data.each(1,7)->x
-		println("ALARM!!" + Sys.uchar(7))
-		Sys.sleep(2000)
+    Std.Data.each(1,7)->x
+        println("ALARM!!" + Sys.uchar(7))
+        Sys.sleep(2000)
 /Alarm
 
 
@@ -122,35 +122,35 @@
 
 # Reset minutes counter
 # --
-	Db2:Set(Sys.scriptId,"mStart",currentTimeMillis)
+    Db2:Set(Sys.scriptId,"mStart",currentTimeMillis)
 /ResetMC
 
 
 
 # Minutes counter since reset
 # --
-	if (Db2:Get(Sys.scriptId,"mStart",0)==0) {
-		ResetMC
-	}
-	ms=currentTimeMillis-Db2:Get(Sys.scriptId,"mStart")
-	ms div 60000
+    if (Db2:Get(Sys.scriptId,"mStart",0)==0) {
+        ResetMC
+    }
+    ms=currentTimeMillis-Db2:Get(Sys.scriptId,"mStart")
+    ms div 60000
 /GetMC
-	
+    
 
 
 # Count minutes since last reset
 # --
-	lastVal=-99
+    lastVal=-99
     loop
-		val=GetMC
-		if (val != lastVal) {
-			println(Curses:Clear)
-			lines=Letters7x5:GetTextX2(""+GetMC)
-			Inner {
-				lines->line println(line)
-			}
-			lastVal=val
-		}
+        val=GetMC
+        if (val != lastVal) {
+            println(Curses:Clear)
+            lines=Letters7x5:GetTextX2(""+GetMC)
+            Inner {
+                lines->line println(line)
+            }
+            lastVal=val
+        }
         Sys.sleep(3000)
 /ShowMC
 

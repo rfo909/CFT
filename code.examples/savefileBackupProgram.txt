@@ -72,10 +72,10 @@ as it contains generated content.
 
 # Report current target directory
 # --
-	Lib:Header("Target directory")
-	println(TargetDir.path)
-	println
-	println
+    Lib:Header("Target directory")
+    println(TargetDir.path)
+    println
+    println
 /onLoad
 
 
@@ -101,7 +101,7 @@ as it contains generated content.
 # Verify password by checking for signal file, then convert to Binary object
 # --
     P(1)=>password
-    Lib.Util.Encrypt(password.getBytes("UTF-8")).processString("this is a test") => hexString
+    Std.Util.Encrypt(password.getBytes("UTF-8")).processString("this is a test") => hexString
     pwdFile=TargetDir.file("pwd"+hexString)
     if (!pwdFile.exists) {
         readLine("Unknown / new password. Confirm use by typing 'yes'") => conf
@@ -122,14 +122,14 @@ as it contains generated content.
 # Create salt string
 # --
     P(1,currentTimeMillis) => x
-    Lib.Util.randomBinary(""+x).hex.first(8)
+    Std.Util.randomBinary(""+x).hex.first(8)
 //Salt
 
 
 
 # Reset current password
 # --
-	Vault:SessionSecretClear("Backup encryption password")
+    Vault:SessionSecretClear("Backup encryption password")
 /ResetPassword
 
 
@@ -164,26 +164,26 @@ as it contains generated content.
 
 # Sort list of File 
 # --
-	P(1)->f out(Str(f.name,f)) | _.sort->x out(x.data)
+    P(1)->f out(Str(f.name,f)) | _.sort->x out(x.data)
 //sortFiles
 
 # Sort list of Dir 
 # --
-	P(1)->d out(Str(d.name,d)) | _.sort->x out(x.data)
+    P(1)->d out(Str(d.name,d)) | _.sort->x out(x.data)
 //sortDirs
 
 
 # Read .nobackup content if exists
 # --
-	P(1,Dir)=>dir
-	file=dir.file(".nobackup")
-	if (file.exists) Inner {
-		file.read->line assert(line.trim.length > 0) out(line)
-	} else {
-		List
-	}
+    P(1,Dir)=>dir
+    file=dir.file(".nobackup")
+    if (file.exists) Inner {
+        file.read->line assert(line.trim.length > 0) out(line)
+    } else {
+        List
+    }
 //NoBackupDirs
-	
+    
 
 
 # Process directory doing backup
@@ -210,10 +210,10 @@ as it contains generated content.
     StatusFile(backupName).append(statusLines)
     
     sortDirs(dir.dirs)->d
-    	reject(d.name.startsWith("."))
-    	if (blockedDirs.contains(d.name)) {
-    		println("BLOCKED: " + d.path)
-    	} else tryCatch(
+        reject(d.name.startsWith("."))
+        if (blockedDirs.contains(d.name)) {
+            println("BLOCKED: " + d.path)
+        } else tryCatch(
             processDir(password,d,countDict,backupName)
         )
     |
@@ -242,8 +242,8 @@ as it contains generated content.
     backupFile=BackupFile(key.hash)
     
     salt=Salt("logLine:"+saltBase)
-    Lib.Util.Encrypt(password,"p1"+salt) => enc1
-    Lib.Util.Encrypt(password,"p2"+salt) => enc2
+    Std.Util.Encrypt(password,"p1"+salt) => enc1
+    Std.Util.Encrypt(password,"p2"+salt) => enc2
     logLine=salt + ":" + enc1.processString(file.path) + ":" + enc2.processString(backupFile.name)
         
     # write to tmp file in given directory, to avoid partially written files, if errors occur
@@ -262,13 +262,13 @@ as it contains generated content.
     }
     statusLines.add(logLine)
 
-	# Uncrypted metadata, to restore create-time and modified-time correctly,
-	# written as separate file, to avoid changing the statusLines syntax
-	
+    # Uncrypted metadata, to restore create-time and modified-time correctly,
+    # written as separate file, to avoid changing the statusLines syntax
+    
     metadataFile=File(backupFile.path+".meta")
     if (!metadataFile.exists && file.?getTimes) {
-    	data=file.getTimes  ### v3.2.4+
-    	metadataFile.create(syn(data))
+        data=file.getTimes  ### v3.2.4+
+        metadataFile.create(syn(data))
     }
 
 //processFile
@@ -298,8 +298,8 @@ as it contains generated content.
         salt=line.before(":")
         rest=line.after(":")
         
-        Lib.Util.Decrypt(password,"p1"+salt) => dec1
-        Lib.Util.Decrypt(password,"p2"+salt) => dec2
+        Std.Util.Decrypt(password,"p1"+salt) => dec1
+        Std.Util.Decrypt(password,"p2"+salt) => dec2
 
         path=dec1.processString(rest.before(":"))
         backupFileName=dec2.processString(rest.after(":"))
@@ -308,7 +308,7 @@ as it contains generated content.
             println(path)
         } else {
             # --- Restore file if matching pathPrefix ---
-			match=if(Sys.isWindows, path.toLower.startsWith(pathPrefix.toLower), path.startsWith(pathPrefix))
+            match=if(Sys.isWindows, path.toLower.startsWith(pathPrefix.toLower), path.startsWith(pathPrefix))
             if (match) {
                 backupFile=BackupFile(backupFileName)
                 
@@ -329,11 +329,11 @@ as it contains generated content.
                 
                 backupFile.decrypt(password,fileSalt,resultFile)
                 
-				metadataFile=File(backupFile.path+".meta")
-				if (metadataFile.exists) {
-					data=eval(metadataFile.read.first)
-					resultFile.setTimes(data.created, data.modified, data.accessed)
-				}
+                metadataFile=File(backupFile.path+".meta")
+                if (metadataFile.exists) {
+                    data=eval(metadataFile.read.first)
+                    resultFile.setTimes(data.created, data.modified, data.accessed)
+                }
                 
             }
         }
@@ -348,7 +348,7 @@ as it contains generated content.
 
 # Test encrypting file
 # --
-    Lib.Util.randomBinary("1") => password
+    Std.Util.randomBinary("1") => password
     salt="salt"
     
     File("x.txt") => f1
@@ -372,7 +372,7 @@ as it contains generated content.
 # visiting a list of directories under current dir
 # --
 Dir.allFiles(".nobackup")->f
-	f.read->line
-		reject(line.trim.length==0)
-		report(f.path,line)
+    f.read->line
+        reject(line.trim.length==0)
+        report(f.path,line)
 /NoBackupFiles

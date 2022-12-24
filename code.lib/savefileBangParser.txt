@@ -63,7 +63,7 @@ BangParser is a separate script.
 
 # Build root lexer Node for all known tokens
 # --
-    Lib.Text.Lexer.Node => root
+    Std.Text.Lexer.Node => root
     
     specials = "{}:;,.()/\*?=-_@!#$%&+"  # not including |<> or code space start character
     digits = "0123456789"
@@ -116,7 +116,7 @@ BangParser is a separate script.
     P(2,readLine) => line
     
     RootNode => root
-    Lib.Text.Lexer => lexer
+    Std.Text.Lexer => lexer
     lexer.addLine(line) 
     tokens=lexer.getTokens(root)
     

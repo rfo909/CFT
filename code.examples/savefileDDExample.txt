@@ -30,7 +30,7 @@
     P(3)=>radius
     
 
-    Lib.Data.for(0,361,3)->angle
+    Std.Data.for(0,361,3)->angle
         brush.penDown(ref.turnLeft(angle).fwd(radius))
     |
     brush.penUp
@@ -47,8 +47,8 @@
 
 # Wooden wheel example
 # --
-    P(1,Lib.DD.World)=>world
-    P(2,Lib.DD.Ref)=>ref
+    P(1,Std.DD.World)=>world
+    P(2,Std.DD.Ref)=>ref
     P(3,TargetDir.file("wheel.png"))=>file
     
         # ref is at the center of the wheel, with wheel extending in forward/backward and up/down plane
@@ -64,17 +64,17 @@
     println(getType(world))
 
 
-    Circle(ref, world.LineBrush.setColor(Lib.Color(200,100,0)), axleHoleRadius)
-    Circle(ref, world.LineBrush.setColor(Lib.Color(200,100,0)), axleHoleRadius+hubThickness)
-    Circle(ref, world.LineBrush.setColor(Lib.Color(0,0,255)), rimCenterRadius-rimThickness/2)
-    Circle(ref, world.LineBrush.setColor(Lib.Color(0,0,255)), rimCenterRadius+rimThickness/2)
+    Circle(ref, world.LineBrush.setColor(Std.Color(200,100,0)), axleHoleRadius)
+    Circle(ref, world.LineBrush.setColor(Std.Color(200,100,0)), axleHoleRadius+hubThickness)
+    Circle(ref, world.LineBrush.setColor(Std.Color(0,0,255)), rimCenterRadius-rimThickness/2)
+    Circle(ref, world.LineBrush.setColor(Std.Color(0,0,255)), rimCenterRadius+rimThickness/2)
     
     # spokes
-    Lib.Data.for(0,361,30) -> angle
+    Std.Data.for(0,361,30) -> angle
         # spokes
         x=ref.turnLeft(angle).fwd(axleHoleRadius+hubThickness)
         y=ref.turnLeft(angle).fwd(rimCenterRadius-rimThickness/2)
-        world.LineBrush.setColor(Lib.Color(255,0,0)) => b
+        world.LineBrush.setColor(Std.Color(255,0,0)) => b
         List(-spokeRadius, spokeRadius) -> offset
             b.penDown(x.right(offset))
             b.penDown(y.right(offset))

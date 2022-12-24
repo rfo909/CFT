@@ -6,37 +6,37 @@ up-to-date copyright information.
 >>>> EOF
 /Readme
 
-	
+    
 # Copyright updated line
 # Used when updating existing copyright texts, and when generating
 # for new files (both script and java)
 # --
-	"Copyright (C) 2020-2022 Roar Foshaug"
+    "Copyright (C) 2020-2022 Roar Foshaug"
 /UpdatedCopyrightLine
 
 
 # Check and update copyright notice
 # --
-	P(1)=>f
-	isJava=f.name.endsWith(".java")
-	found=false
-	
-	prefix=if (isJava, "", "# ")
+    P(1)=>f
+    isJava=f.name.endsWith(".java")
+    found=false
+    
+    prefix=if (isJava, "", "# ")
 
-	f.read->line
-		if (line.contains("Copyright") && line.contains("Roar Foshaug")) {
-			println(line)
-			out(prefix + UpdatedCopyrightLine)
-			found=true
-		} else {
-			out(line)
-		}
-	| => lines
-	if (found) {
-		f.create(lines)
-	}
+    f.read->line
+        if (line.contains("Copyright") && line.contains("Roar Foshaug")) {
+            println(line)
+            out(prefix + UpdatedCopyrightLine)
+            found=true
+        } else {
+            out(line)
+        }
+    | => lines
+    if (found) {
+        f.create(lines)
+    }
 
-	found
+    found
 //HasCopyrightNotice
 
 
@@ -46,25 +46,25 @@ up-to-date copyright information.
 
 
 Sys.homeDir.allFiles("*.java")->f
-	if (!HasCopyrightNotice(f)) {
-		#println(f.path)
-		AddJavaCopyrightNotice(f)
-	}
+    if (!HasCopyrightNotice(f)) {
+        #println(f.path)
+        AddJavaCopyrightNotice(f)
+    }
 /UpdateJava
 
 
 
 Sys.homeDir.allFiles("savefile*.txt")->f
-	reject(f.path==Sys.savefile.path)
-	if (!HasCopyrightNotice(f)) {
-		AddScriptCopyrightNotice(f)
-	}
+    reject(f.path==Sys.savefile.path)
+    if (!HasCopyrightNotice(f)) {
+        AddScriptCopyrightNotice(f)
+    }
 /UpdateScript
 
 
 # Create copyright in script
 # --
-	P(1)=>file
+    P(1)=>file
 <<<< XXXXXXXXXXX
 # License
 <<< EOF
@@ -88,18 +88,18 @@ Sys.homeDir.allFiles("savefile*.txt")->f
 /License
 
 >>>> XXXXXXXXXXX
-	.mergeExpr
-	=>lines
-	lines=lines+file.read
+    .mergeExpr
+    =>lines
+    lines=lines+file.read
 
-	file.create(lines)
+    file.create(lines)
 //AddScriptCopyrightNotice
 
 
 
 # Create copyright in java files
 # --
-	P(1)=>file
+    P(1)=>file
 <<<< XXXXXXXXXXX
 /*
 CFT - an interactive programmable shell for automation 
@@ -119,9 +119,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 */
 
 >>>> XXXXXXXXXXX
-	.mergeExpr
-	=>lines
-	lines=lines+file.read
+    .mergeExpr
+    =>lines
+    lines=lines+file.read
 
-	file.create(lines)
+    file.create(lines)
 //AddJavaCopyrightNotice

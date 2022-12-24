@@ -1,47 +1,47 @@
 
 # Database key
 # --
-	Sys.scriptId
+    Sys.scriptId
 //DbKey
 
 # Get copy statements
 # --
-	Db2:Get(DbKey,"CopyList",List)
+    Db2:Get(DbKey,"CopyList",List)
 /CopyList
 
 # Save copy statements
 # --
-	P(1) as List => data
-	Db2:Set(DbKey,"CopyList", data)
+    P(1) as List => data
+    Db2:Set(DbKey,"CopyList", data)
 //Save
 
 # Add copy statement
 # --
-	P(1,Dir) => src
-	P(2,readLine("Enter glob pattern, * for all")) => glob
-	P(3,readLine("Enter target dir")) => target
-	
-	
-	if (glob.trim=="") glob="*"
+    P(1,Dir) => src
+    P(2,readLine("Enter glob pattern, * for all")) => glob
+    P(3,readLine("Enter target dir")) => target
+    
+    
+    if (glob.trim=="") glob="*"
 
-	Save(CopyList.add(SymDict(src,glob,target)))
+    Save(CopyList.add(SymDict(src,glob,target)))
 /Add
 
 
 # Simulate running copy of directory
 # --
-	P(1) => virtDisk
-	P(2) => dir
-	P(3) => target
+    P(1) => virtDisk
+    P(2) => dir
+    P(3) => target
 
-	virtDisk.get(target,List) => list
+    virtDisk.get(target,List) => list
 
-	Inner {
-		dir.files->f list.add(f)
-	}
+    Inner {
+        dir.files->f list.add(f)
+    }
 
-	dir.dirs->d
-		SimulateCopyDir(virtDisk, d, target + "/" + d.name)
+    dir.dirs->d
+        SimulateCopyDir(virtDisk, d, target + "/" + d.name)
 
 //SimulateCopyDir
 
@@ -49,77 +49,77 @@
 
 # Simulate running copy statements
 # --
-	P(1,CopyList)=>statementList
+    P(1,CopyList)=>statementList
 
-	virtDisk=Dict
-	statementList->stmt
+    virtDisk=Dict
+    statementList->stmt
 
-		if (!stmt.src.exists) {
-			error("NOT FOUND: " + stmt.src)
-		}
+        if (!stmt.src.exists) {
+            error("NOT FOUND: " + stmt.src)
+        }
 
-		virtDisk.get(stmt.target,List) => list
+        virtDisk.get(stmt.target,List) => list
 
-		stmt.src.files(stmt.glob) => files
+        stmt.src.files(stmt.glob) => files
 
-		Inner{files->f list.add(f)}
+        Inner{files->f list.add(f)}
 
-		Inner{
-			stmt.src.dirs(stmt.glob)->dir
-				SimulateCopyDir(virtDisk,dir,stmt.target + "/" + dir.name)
-		}
-			
-	|
-	virtDisk
+        Inner{
+            stmt.src.dirs(stmt.glob)->dir
+                SimulateCopyDir(virtDisk,dir,stmt.target + "/" + dir.name)
+        }
+            
+    |
+    virtDisk
 /SimulateCopy
 
 
 # Show result from executing a sequence of copy statements
 # --
-	P(1,CopyList) => statementList
-	data=SimulateCopy(statementList)
+    P(1,CopyList) => statementList
+    data=SimulateCopy(statementList)
 
-	data.keys.sort->key
-		files=data.get(key)
-		reject(files.length==0)
-		Lib:Header(key)
-			
-		showFiles=files
-		if(files.length > 10) {
-			showFiles=files.first(5)
-		}
-		Inner{
-			showFiles->file
-				println("   " + file.name)  
-		}
-		if (files.length > showFiles.length) {
-			println("   (+ " + (files.length - showFiles.length) + " files)")
-		}
+    data.keys.sort->key
+        files=data.get(key)
+        reject(files.length==0)
+        Lib:Header(key)
+            
+        showFiles=files
+        if(files.length > 10) {
+            showFiles=files.first(5)
+        }
+        Inner{
+            showFiles->file
+                println("   " + file.name)  
+        }
+        if (files.length > showFiles.length) {
+            println("   (+ " + (files.length - showFiles.length) + " files)")
+        }
 /Show
 
 
 # Select copy statement
 # --
-	P(1,"Select statement") => label
-	count=0
-	table=Util:Cols
+    P(1,"Select statement") => label
+    count=0
+    table=Util:Cols
 
-	Lib:Header("Statements")
-	println
+    Lib:Header("Statements")
+    println
 
-	CopyList->stmt
-		table.add(""+count+" -","COPY", stmt.src.path + Sys.fileSeparator + stmt.glob, stmt.target)
-		count=count+1
-	|
-	table.getLines->line 
-		println(line) 
-		println
-	|
+    CopyList->stmt
+        table.add(""+count+" -","COPY", stmt.src.path + Sys.fileSeparator + stmt.glob, stmt.target)
+        count=count+1
+    |
+    table.getLines->line 
+        println(line) 
+        println
+    |
 
-	println(label)
-	readLine("Select number, or blank to abort") => x
-	error(x.trim=="","Aborting")
-	x.trim.parseInt
+    println(label)
+    readLine("Select number, or blank to abort") => x
+    error(x.trim=="","Aborting")
+    x.trim.parseInt
 //SelectStmt
 
 
@@ -127,9 +127,9 @@
 
 # Examine what is copied for individual copy statements
 # --
-	SelectStmt => i
-	List(CopyList.nth(i)) => statementList
-	Show(statementList)
+    SelectStmt => i
+    List(CopyList.nth(i)) => statementList
+    Show(statementList)
 /Examine
 
 
@@ -143,14 +143,14 @@ Examine
 
 # Show copy statements
 # --
-	SelectStmt("Select statement to delete?") => i
-	CopyList.remove(i) => newList
-	Save(newList)
-	println("Delete ok")
+    SelectStmt("Select statement to delete?") => i
+    CopyList.remove(i) => newList
+    Save(newList)
+    println("Delete ok")
 /Script
 
 
 # Clear saved data
 # --
-	Save(List)
+    Save(List)
 /ClearData

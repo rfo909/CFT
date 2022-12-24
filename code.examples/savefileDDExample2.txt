@@ -30,7 +30,7 @@
     P(3)=>radius
     
 
-    Lib.Data.for(0,361,3)->angle
+    Std.Data.for(0,361,3)->angle
         brush.penDown(ref.turnLeft(angle).left(radius))
     |
     brush.penUp
@@ -47,8 +47,8 @@
 
 # Wooden wheel example
 # --
-    P(1,Lib.DD.World)=>world
-    P(2,Lib.DD.Ref)=>ref
+    P(1,Std.DD.World)=>world
+    P(2,Std.DD.Ref)=>ref
     P(3,TargetDir.file("wheel2.png"))=>file
 
     hubThickness=50
@@ -64,23 +64,23 @@
     # Polygon brushes: x is forward, and y is left/right
 
     # draw spokes first
-    Lib.Data.for(0,361,30) -> angle
+    Std.Data.for(0,361,30) -> angle
         # spokes
         x=ref.turnLeft(angle).fwd(axleHoleRadius+hubThickness/2)
         y=ref.turnLeft(angle).fwd(rimCenterRadius)
-        world.Brush(-spokeRadius,spokeRadius).setColor(Lib.Color(250,150,50)) => b
+        world.Brush(-spokeRadius,spokeRadius).setColor(Std.Color(250,150,50)) => b
         b.penDown(x)
         b.penDown(y)
         b.penUp
     |
 
     # Hub
-    Circle(ref, world.Brush(-hubThickness/2,hubThickness/2).setColor(Lib.Color(200,100,0)), axleHoleRadius + hubThickness/2)
+    Circle(ref, world.Brush(-hubThickness/2,hubThickness/2).setColor(Std.Color(200,100,0)), axleHoleRadius + hubThickness/2)
     
     # Rim
-    left=Lib.DD.Vector(0,-rimThickness/2)
-    right=Lib.DD.Vector(0,rimThickness/2)
-    Circle(ref, world.Brush(-rimThickness/2,rimThickness/2).setColor(Lib.Color(200,100,0)), rimCenterRadius)
+    left=Std.DD.Vector(0,-rimThickness/2)
+    right=Std.DD.Vector(0,rimThickness/2)
+    Circle(ref, world.Brush(-rimThickness/2,rimThickness/2).setColor(Std.Color(200,100,0)), rimCenterRadius)
     
     world.render(file)
 

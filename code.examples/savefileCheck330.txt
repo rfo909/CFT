@@ -29,18 +29,18 @@ Dir.allFiles("savefile*.txt")
 
 # Common search function
 # --
-	P(1) as Grep => grep
+    P(1) as Grep => grep
 
-	tf->f
-		grep.file(f)->line
-			report(line.file.name, line.lineNumber, line)
+    tf->f
+        grep.file(f)->line
+            report(line.file.name, line.lineNumber, line)
 //DoSearch
 
 # Display locations which must be changed from .ident.call to .ident
 # --
-	re=Regex("[.][a-zA-Z0-9_]+[.]call")
-	grep=Grep.matchRegex(re)
-	DoSearch(grep)
+    re=Regex("[.][a-zA-Z0-9_]+[.]call")
+    grep=Grep.matchRegex(re)
+    DoSearch(grep)
 /Search1
 
 
@@ -50,7 +50,7 @@ Dir.allFiles("savefile*.txt")
 # will not be removed, as it allows storing non-identifier
 # named values.
 # --
-	DoSearch(Grep(".call"))
+    DoSearch(Grep(".call"))
 /Search2
 
 

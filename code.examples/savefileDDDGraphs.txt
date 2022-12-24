@@ -23,18 +23,18 @@
 # (note: used from DDGraphs)
 # --
     List(
-        Lib.Color(0,200,0),
-        Lib.Color(255,0,0),
-        Lib.Color(30,120,80),
-        Lib.Color(120,40,101),
-        Lib.Color(0,35,88),
-        Lib.Color(0,80,0),
-        Lib.Color(120,80,0),
-        Lib.Color(200,50,100),
-        Lib.Color(80,120,0),
-        Lib.Color(40,0,10),
-        Lib.Color(50,50,255),
-        Lib.Color(100,100,80)
+        Std.Color(0,200,0),
+        Std.Color(255,0,0),
+        Std.Color(30,120,80),
+        Std.Color(120,40,101),
+        Std.Color(0,35,88),
+        Std.Color(0,80,0),
+        Std.Color(120,80,0),
+        Std.Color(200,50,100),
+        Std.Color(80,120,0),
+        Std.Color(40,0,10),
+        Std.Color(50,50,255),
+        Std.Color(100,100,80)
     )
 //Colors
 
@@ -58,7 +58,7 @@
     P(2,List(1,1,4))=>data
     
     pos=-1
-    Lib.Data.for(0,data.length,1)->i
+    Std.Data.for(0,data.length,1)->i
         x=data.nth(i)
         value=value-x
         if (value <= 0) {
@@ -87,9 +87,9 @@
     error(values.length != labels.length, "values and labels must match")
     error(values.length > Colors.length, "max " + Colors.length + " values supported (dictated by number of colors)")
     
-    Lib.DDD.World => world
-    world.init(35,36,18,800,400,Lib.Color(255,255,255))
-    Lib.DDD.Ref.scaleUp(10) => ref
+    Std.DDD.World => world
+    world.init(35,36,18,800,400,Std.Color(255,255,255))
+    Std.DDD.Ref.scaleUp(10) => ref
     
     ref=ref.fwd(500).left(100).turnUp(30).turnLeft(torusRotateLeft) => ref
     
@@ -99,9 +99,9 @@
     brushRadius=20
     
     # Draw torus
-    world.Brush.circle(brushRadius,Lib.Color(0,0,0)) => b
+    world.Brush.circle(brushRadius,Std.Color(0,0,0)) => b
     
-    Lib.Data.for(0,361,1)->angle
+    Std.Data.for(0,361,1)->angle
         pos=GetPosInFractionsSequence(angle,angles)
         b.setColor(colors.nth(pos))
         b.penDown(ref.turnRight(angle).back(torusRadius).turnLeft(90))
@@ -116,9 +116,9 @@
     linesDist=(numLines-1)*lineSpace
     totalHeight=linesHeight+linesDist
     
-    Lib.DDD.Ref.fwd(500).right(50).up(totalHeight/2).turnRight(90) => textRef
+    Std.DDD.Ref.fwd(500).right(50).up(totalHeight/2).turnRight(90) => textRef
     
-    Lib.Data.for(0,labels.length,1)->i
+    Std.Data.for(0,labels.length,1)->i
         label=labels.nth(i)
         color=colors.nth(i)
         

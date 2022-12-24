@@ -251,7 +251,7 @@ loop
     } else if (mode==".d") {
         println
         Lib:Header("Stored paths")
-        Inner {Lib.Data.each(0,9)->i
+        Inner {Std.Data.each(0,9)->i
             str = Db2:Get("PS_sh_paths", host+"_"+i, null)
             if (str==null) str=""
             println(""+i + ": " + str)
@@ -480,6 +480,6 @@ P(1)=>path
 
 # Show installed software ... ish
 # --
-	cmd=@ (Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*).DisplayName
-	Dir.runCapture("powershell","-c",cmd)
+    cmd=@ (Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*).DisplayName
+    Dir.runCapture("powershell","-c",cmd)
 /InstalledPrograms

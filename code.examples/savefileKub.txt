@@ -7,21 +7,21 @@
 
 # Build the docker images
 # --
-	sql="docker build . -t aimvector/mysql-example"
-	wp="docker build . -t aimvector/wordpress-example"
-	Sys.savefile.dir.sub("sql").run(sql.split)
-	Sys.savefile.dir.sub("wordpress").run(wp.split)
+    sql="docker build . -t aimvector/mysql-example"
+    wp="docker build . -t aimvector/wordpress-example"
+    Sys.savefile.dir.sub("sql").run(sql.split)
+    Sys.savefile.dir.sub("wordpress").run(wp.split)
 /dockerBuild
 
 
 # Create wordpress secret
 # --
 <<< EOF
-	kubectl -n cms create secret generic wordpress
-	--from-literal WORDPRESS_DB_HOST=mysql
-	--from-literal WORDPRESS_DB_USER=exampleuser
-	--from-literal WORDPRESS_DB_PASSWORD=examplepassword
-	--from-literal WORDPRESS_DB_NAME=exampledb
+    kubectl -n cms create secret generic wordpress
+    --from-literal WORDPRESS_DB_HOST=mysql
+    --from-literal WORDPRESS_DB_USER=exampleuser
+    --from-literal WORDPRESS_DB_PASSWORD=examplepassword
+    --from-literal WORDPRESS_DB_NAME=exampledb
 >>> EOF
 => command
 run(command)
@@ -29,10 +29,10 @@ run(command)
 
 # Create mysql secret
 <<< EOF
-	kubectl -n cms create secret generic sql
-	--from-literal MYSQL_USER=exampleuser
-	--from-literal MYSQL_PASSWORD=examplepassword
-	--from-literal MYSQL_DATABASE=exampledb
+    kubectl -n cms create secret generic sql
+    --from-literal MYSQL_USER=exampleuser
+    --from-literal MYSQL_PASSWORD=examplepassword
+    --from-literal MYSQL_DATABASE=exampledb
 >>> EOF
 =>command
 run(command)
@@ -67,32 +67,32 @@ run(command)
 
 # Run command
 # -- 
-	P(1).concat(" ")=>cmd
-	list = Inner{cmd.split->part out(part.trim)}
-	Dir.run(list)
+    P(1).concat(" ")=>cmd
+    list = Inner{cmd.split->part out(part.trim)}
+    Dir.run(list)
 //run 
 
 
 # Run kubectl and log result
-# --	
+# --    
 KubInstall:kubectl(Dir)
 /k
 
 
 # Include (yaml) file into log
 # --
-	file=Sys.lastResult
-	error(getType(file) != "File", "Sys.lastResult not a file")
-	error(!file.exists,"File does not exist: " + file.path)
-	
-	log=KubInstall:KubctlLogFile
-	
-	c="/// " + file.path
-	s="-".times(c.length)
-	log.append(List("",s,c,s,""))
-	log.append(file.read)
-	
-	println("Added to log: " + file.name)
+    file=Sys.lastResult
+    error(getType(file) != "File", "Sys.lastResult not a file")
+    error(!file.exists,"File does not exist: " + file.path)
+    
+    log=KubInstall:KubctlLogFile
+    
+    c="/// " + file.path
+    s="-".times(c.length)
+    log.append(List("",s,c,s,""))
+    log.append(file.read)
+    
+    println("Added to log: " + file.name)
 //KubAppendFile
 
 
@@ -103,46 +103,46 @@ KubAppendFile
 
 # Show history
 # --
-	P(1) => showForPos
-	pos=0
-	Inner {
-		KubInstall:KubctlLogFile.read->line
-			if(line.startsWith(">>> ")) {
-				pos=pos+1
-				if (showForPos == null) report(pos,line)
-			}
-	
-			if (pos==showForPos) {
-				report(pos,line)
-			}
-	} -> reportLine
-		println(reportLine)
-	|
-	if (showForPos==null) {
-		println("Enter number to show full log, or blank to continue")
-		readLine => x
-		if (x.?parseInt) {
-			h(x.parseInt)
-		}
-	}
+    P(1) => showForPos
+    pos=0
+    Inner {
+        KubInstall:KubctlLogFile.read->line
+            if(line.startsWith(">>> ")) {
+                pos=pos+1
+                if (showForPos == null) report(pos,line)
+            }
+    
+            if (pos==showForPos) {
+                report(pos,line)
+            }
+    } -> reportLine
+        println(reportLine)
+    |
+    if (showForPos==null) {
+        println("Enter number to show full log, or blank to continue")
+        readLine => x
+        if (x.?parseInt) {
+            h(x.parseInt)
+        }
+    }
 /h
 
 # Cat log for last command
 # --
-	list=List
-	KubInstall:KubctlLogFile.read->line
-		if (line.startsWith(">>> ")) list=List
-		list.add(line)
-	|
-	list
+    list=List
+    KubInstall:KubctlLogFile.read->line
+        if (line.startsWith(">>> ")) list=List
+        list.add(line)
+    |
+    list
 /last
 
 # Add comment
 # --
-	println("Enter comment, end with '.' on separate line") 
-	readLines(".")=>lines
-	lines=List("") + Inner{lines->l out("| " + l)} + List("")
-	KubInstall:KubctlLogFile.append(lines)
+    println("Enter comment, end with '.' on separate line") 
+    readLines(".")=>lines
+    lines=List("") + Inner{lines->l out("| " + l)} + List("")
+    KubInstall:KubctlLogFile.append(lines)
 /comment
 
 

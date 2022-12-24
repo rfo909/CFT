@@ -22,139 +22,139 @@
 <<<<< TEXT
 .h CFT
 
-	Dev since May 2018, on git since 2020
+    Dev since May 2018, on git since 2020
     GNU GPL 3.0 ("open source")
 
-	https://github.com/rfo909/CFT
+    https://github.com/rfo909/CFT
 
     - Script language
-	- Shell
+    - Shell
 
-	git clone https://github.com/rfo909/CFT.git
-	cd CFT
-	mvn package
-	.\cft
+    git clone https://github.com/rfo909/CFT.git
+    cd CFT
+    mvn package
+    .\cft
 
 
 .h Shell
 
-	- ls | lsf | lsd
-	- cd
-	- cat
-	- more
-	- edit
-	- tail
-	- mkdir
-	- rm
-	- cp
-	- mv
+    - ls | lsf | lsd
+    - cd
+    - cat
+    - more
+    - edit
+    - tail
+    - mkdir
+    - rm
+    - cp
+    - mv
 
-	ls cft*
-	edit :N
+    ls cft*
+    edit :N
 
-	lsd
-	cd :N
+    lsd
+    cd :N
 
-	@cmd
-	@fm	
+    @cmd
+    @fm   
 
 
 .h Functions
 
-	1+1
-	/two
+    1+1
+    /two
 
-	Dir.files.length
-	/x
+    Dir.files.length
+    /x
 
-	cd ..
-	x
+    cd ..
+    x
 
-	cd
+    cd
 
-	:save Test
+    :save Test
 
-	@e
+    @e
 
-	3.14
-	/pi
+    3.14
+    /pi
 
-	# Parameters (with default expr)
-	# --
-		a=P(1,readLine("Enter a").parseInt)
-		b=P(2,readLine("Enter b").parseInt)
-		a+b
-	/sum
+    # Parameters (with default expr)
+    # --
+        a=P(1,readLine("Enter a").parseInt)
+        b=P(2,readLine("Enter b").parseInt)
+        a+b
+    /sum
 
-	?
+    ?
 
 
 .h Loops 
 
     # Iterate over content, filter or modify, 
-	# use out() to generate result from loop.
+    # use out() to generate result from loop.
 
-	List(1,2,3)->x out(x+10)
+    List(1,2,3)->x out(x+10)
 
-	# Loops terminate at end of function or at PIPE character
+    # Loops terminate at end of function or at PIPE character
 
-	"123".chars->c println(c) | println("done")
+    "123".chars->c println(c) | println("done")
 
-	# All Java files under current dir
-	# --
-		Dir.allFiles("*.java")
-	/JavaFiles
-	
-	# Count number of lines of java
-	# --
-		JavaFiles->f out(f.read.length) | _.sum
-	/JavaLines
+    # All Java files under current dir
+    # --
+        Dir.allFiles("*.java")
+    /JavaFiles
+    
+    # Count number of lines of java
+    # --
+        JavaFiles->f out(f.read.length) | _.sum
+    /JavaLines
 
-	# Filter data 
-	# --
-		JavaFiles->f
-			assert(f.lastModified > currentTimeMillis-(86400*1000*7))
-			out(f)
-	/RecentlyModified
-	
-	# ... Date.sub(Date.Duration.days(7))
+    # Filter data 
+    # --
+        JavaFiles->f
+            assert(f.lastModified > currentTimeMillis-(86400*1000*7))
+            out(f)
+    /RecentlyModified
+    
+    # ... Date.sub(Date.Duration.days(7))
 
 .h Help
 
-	# List functions in current script
-	?
+    # List functions in current script
+    ?
 
-	# Show function code
-	?sum
+    # Show function code
+    ?sum
 
-	# Global functions
-	help
+    # Global functions
+    help
 
-	# Object functions
-	Dir help
+    # Object functions
+    Dir help
 
-	# Internals
-	_Expr
-	_Stmt
-	_Shell
+    # Internals
+    _Expr
+    _Stmt
+    _Shell
 
-	# List colon commands and shortcuts
-	:
-	@
+    # List colon commands and shortcuts
+    :
+    @
 
-	# List scripts
-	@scr
+    # List scripts
+    @scr
 
-	# Show details of another script
-	?Lib:
-	?Lib:TmpDir
+    # Show details of another script
+    ?Lib:
+    ?Lib:TmpDir
 
 
 .h Projects 
 
     # Projects = Script for searching
     # Multiple projects, each with multiple directories etc
-	# Fast switch between projects
+    # Fast switch between projects
     # --
 
     @P
@@ -164,19 +164,19 @@
     ?
     ch
 
-	# Search
+    # Search
     
-	S, S2, S3
+    S, S2, S3
 
-	# Locate file(s) and optionally open one in editor
-	
+    # Locate file(s) and optionally open one in editor
+    
     FL
 
 
-	# Shortcuts (single directory only)
-	
-	@S
-	@FL
+    # Shortcuts (single directory only)
+    
+    @S
+    @FL
 
 
 >>>>> TEXT
@@ -186,7 +186,7 @@
 # --
     P(1) => line
     P(2) => first
-	
+    
     if (line.startsWith(".h")) {
         if (!first) {
             readLine("Enter")
@@ -194,8 +194,8 @@
         println(Curses:Clear)
         Inner {
             Letters7x5:GetText(line.sub(2).trim)->line 
-				str=line #.replace("#","O")
-				println(Curses:TxtGreen + str + Curses:Reset)
+                str=line #.replace("#","O")
+                println(Curses:TxtGreen + str + Curses:Reset)
             |
             println
         }

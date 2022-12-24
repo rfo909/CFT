@@ -42,7 +42,7 @@
     
     
         
-    Lib.Data.for(0,values.length,1)->i
+    Std.Data.for(0,values.length,1)->i
         out(Float(values.nth(i).f,labels.nth(i)))
     | _.sort.reverse => values
     
@@ -50,8 +50,8 @@
     | => labels
     
     
-    Lib.DD.World => world
-    Lib.DD.Ref => ref
+    Std.DD.World => world
+    Std.DD.Ref => ref
     
     angles=DDDGraphs:Fractions(values,720)
     colors=Colors
@@ -62,7 +62,7 @@
     b = world.Brush(torusRadius,torusRadius-torusWidth)
     
     torusRef=ref
-    Lib.Data.for(0,721,1)->angle
+    Std.Data.for(0,721,1)->angle
         pos=DDDGraphs:GetPosInFractionsSequence(angle,angles)
         b.setColor(colors.nth(pos))
         b.penDown(torusRef.turnRight(angle).setScaleFactor(900-angle))
@@ -80,7 +80,7 @@
     
     textRef=ref.scaleUp(900).fwd(torusRadius*1).scaleUp(pixelHeight).left(totalHeight*0.5)
 
-    Lib.Data.for(0,labels.length,1)->i
+    Std.Data.for(0,labels.length,1)->i
         label=labels.nth(i)
         color=colors.nth(i)
         
@@ -108,8 +108,8 @@
     error(values.length > Colors.length, "max " + Colors.length + " values supported (dictated by number of colors)")
 
         
-    Lib.DD.World => world
-    Lib.DD.Ref => ref
+    Std.DD.World => world
+    Std.DD.Ref => ref
     
     angles=DDDGraphs:Fractions(values,360)
     colors=Colors
@@ -120,7 +120,7 @@
     b = world.Brush(torusRadius,torusRadius-torusWidth)
     
     torusRef=ref.turnLeft(torusRotateLeft)
-    Lib.Data.for(0,361,1)->angle
+    Std.Data.for(0,361,1)->angle
         pos=DDDGraphs:GetPosInFractionsSequence(angle,angles)
         b.setColor(colors.nth(pos))
         b.penDown(torusRef.turnRight(angle))
@@ -138,7 +138,7 @@
     
     textRef=ref.fwd(torusRadius*1.2).scaleUp(pixelHeight).left(totalHeight*0.5)
 
-    Lib.Data.for(0,labels.length,1)->i
+    Std.Data.for(0,labels.length,1)->i
         label=labels.nth(i)
         color=colors.nth(i)
         
@@ -160,8 +160,8 @@
     error(values.length != labels.length, "values and labels must match")
     error(values.length > Colors.length, "max " + Colors.length + " values supported (dictated by number of colors)")
 
-    Lib.DD.World => world
-    Lib.DD.Ref => ref
+    Std.DD.World => world
+    Std.DD.Ref => ref
 
     diagramWidth=200
     diagramHeight=200
@@ -180,7 +180,7 @@
     xx=(colWidth/2)*0.9
     b=world.Brush(-xx,xx)
     Inner {
-        Lib.Data.for(0,values.length,1)->i
+        Std.Data.for(0,values.length,1)->i
             colors.nth(i) => color
             b.setColor(color)
             base.turnLeft(90) => p1
@@ -203,7 +203,7 @@
     
     textRef=ref.fwd(diagramWidth*1.05).left(diagramHeight/2).scaleUp(pixelHeight).left(totalHeight*0.5)
 
-    Lib.Data.for(0,labels.length,1)->i
+    Std.Data.for(0,labels.length,1)->i
         label=labels.nth(i)
         color=colors.nth(i)
         

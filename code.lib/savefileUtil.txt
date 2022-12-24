@@ -59,71 +59,71 @@ P(2,false)=>print
 # Run command list or string (must split correctly) and report it to screen
 # Works both on
 # --
-	P(1,Input("Command").get) => cmd
-	P(2,Dir) as Dir => dir
+    P(1,Input("Command").get) => cmd
+    P(2,Dir) as Dir => dir
 
-	Lib:Header("Run command")
+    Lib:Header("Run command")
 
-	if (getType(cmd)!="List") {
-		cmd=cmd.split
-	}
+    if (getType(cmd)!="List") {
+        cmd=cmd.split
+    }
 
-	# Strip "cmd /c" or "powershell -c", in order to 
-	# print a clean command to stdout. When executing, if
-	# on windows, we always prefix with "cmd /c" or "powershell -c",
-	# depending on what we detect below.
-	ps=false
-	loop
-		if (cmd.length > 2) {
-			del=false
-			if (cmd.first.toLower=="cmd" && cmd.nth(1).toLower=="/c") del=true
-			if (cmd.first.toLower=="powershell" && cmd.nth(1).toLower=="-c") {ps=true del=true}
+    # Strip "cmd /c" or "powershell -c", in order to 
+    # print a clean command to stdout. When executing, if
+    # on windows, we always prefix with "cmd /c" or "powershell -c",
+    # depending on what we detect below.
+    ps=false
+    loop
+        if (cmd.length > 2) {
+            del=false
+            if (cmd.first.toLower=="cmd" && cmd.nth(1).toLower=="/c") del=true
+            if (cmd.first.toLower=="powershell" && cmd.nth(1).toLower=="-c") {ps=true del=true}
 
-			if (del) {
-				cmd=cmd.keep(2)
-			} else {
-				break
-			}
-		} else {
-			break
-		}
-	|
+            if (del) {
+                cmd=cmd.keep(2)
+            } else {
+                break
+            }
+        } else {
+            break
+        }
+    |
 
-	if (cmd.concat(" ").length < 80) {
-		println(cmd.concat(" "))
-	} else {
-		lastLine=cmd.last
-		isFirst=true
-		cmd->line
-			println(if(isFirst,"","        ") + line + if(line != lastLine, " \", ""))
-			isFirst=false
-	}
+    if (cmd.concat(" ").length < 80) {
+        println(cmd.concat(" "))
+    } else {
+        lastLine=cmd.last
+        isFirst=true
+        cmd->line
+            println(if(isFirst,"","        ") + line + if(line != lastLine, " \", ""))
+            isFirst=false
+    }
 
-	println
-	if (Sys.isWindows) {
-		if (ps) {
-			dir.run(List("powershell","-c")+cmd)
-		} else {
-			dir.run(List("cmd","/c")+cmd)
-		}
-	} else {
-		# Sane operating systems
-		dir.run(cmd)
-	}
+    println
+    if (Sys.isWindows) {
+        if (ps) {
+            dir.run(List("powershell","-c")+cmd)
+        } else {
+            dir.run(List("cmd","/c")+cmd)
+        }
+    } else {
+        # Sane operating systems
+        dir.run(cmd)
+    }
 /Run
 
 
 # Read properties file, with lines a=b, c=d etc, and return Dict with values
 # --
-	P(1) as File => file
-	
-	settings = Dict
-	file.read->line
-		reject(line.trim.startsWith("#"))
-		reject(line.trim=="")
-		settings.setStr(line)
-	|
-	settings
+    P(1) as File => file
+    
+    settings = Dict
+    file.read->line
+        reject(line.trim.startsWith("#"))
+        reject(line.trim=="")
+        settings.setStr(line)
+    |
+    settings
 /ReadPropertiesFile
 
 
@@ -141,13 +141,13 @@ P(2,999999999999) => maxValue
         # below we have a transaction, where we read a value, update it
         # and write it back.
             
-    Lib.Db.obtainLock(TRANS,10000)
+    Std.Db.obtainLock(TRANS,10000)
     
     i = Db2:Get("Util", id, 0)
     next=(i+1) % maxValue
     Db2:Set("Util",id,next)
     
-    Lib.Db.releaseLock(TRANS)
+    Std.Db.releaseLock(TRANS)
     i
 /Counter
     
@@ -195,16 +195,16 @@ P(1) => name
 # for example via ls *.yml followed by :N to select one, or run Util:SelectFile
 # function (via shortcut @fsel)
 # --
-	P(1,"#") => commentStart
-	P(2) => file
+    P(1,"#") => commentStart
+    P(2) => file
 
-	if (file==null) {
-		file=Sys.lastResult
-		error(getType(file) != "File", "No file")
-	}
-	error(getType(file) != "File", "Expected File, got " + getType(file))
-	Lib:Header(file.name)
-	file.read->line
+    if (file==null) {
+        file=Sys.lastResult
+        error(getType(file) != "File", "No file")
+    }
+    error(getType(file) != "File", "Expected File, got " + getType(file))
+    Lib:Header(file.name)
+    file.read->line
         s=line.trim
         reject(s.startsWith(commentStart) || s=="")
         out(line)
@@ -270,60 +270,60 @@ P(3,Lambda{P(1)}) => processList
 
 # Show settings 
 # --
-	P(1) as Dict => settings
-	P(2,"Configure settings") => title
+    P(1) as Dict => settings
+    P(2,"Configure settings") => title
 
-	AppUI:DoShowTopLine(title)
-	AppUI:DoSpace
+    AppUI:DoShowTopLine(title)
+    AppUI:DoSpace
 
-	obj=AppUI:DoSummaryObj
-	settings.keys->key
-		path=settings.get(key,null)
-		if (path==null) path="-"
-		obj.Lrow(key,"", path)
-	|
-	obj.Lshow
+    obj=AppUI:DoSummaryObj
+    settings.keys->key
+        path=settings.get(key,null)
+        if (path==null) path="-"
+        obj.Lrow(key,"", path)
+    |
+    obj.Lshow
 /ShowSettings
 
 
 
 # Verify and/or change settings
 # --
-	P(1) as Dict => settings
-	P(2,"Configure settings") => title
-	
+    P(1) as Dict => settings
+    P(2,"Configure settings") => title
+    
 
-	Lib:GetTerminalSize
+    Lib:GetTerminalSize
 
-	doEdit=false
-	loop
-		if (doEdit) {
-			Inner {
-				settings.keys->key
-					ShowSettings(settings,title)
-					AppUI:DoSpace
-					AppUI:DoShowHeader("Verify or change value for")
-					AppUI:DoSpace
-					AppUI:DoInput(key,settings.get(key,null)) => newVal
-					settings.set(key,newVal)
-			}
-		} 
+    doEdit=false
+    loop
+        if (doEdit) {
+            Inner {
+                settings.keys->key
+                    ShowSettings(settings,title)
+                    AppUI:DoSpace
+                    AppUI:DoShowHeader("Verify or change value for")
+                    AppUI:DoSpace
+                    AppUI:DoInput(key,settings.get(key,null)) => newVal
+                    settings.set(key,newVal)
+            }
+        } 
 
-		ShowSettings(settings,title)
-		AppUI:DoSpace
-		
-		okay=false
-		doEdit=false
-		
-		AppUI:DoInput("Is this okay? (y/n)") => s
-		if (s != null) s=s.toLower
-		if (s=="y") {okay=true}
-		if (s=="n") {doEdit=true}
-				
-		break(okay)
-	|
-	AppUI:DoCls
-	
+        ShowSettings(settings,title)
+        AppUI:DoSpace
+        
+        okay=false
+        doEdit=false
+        
+        AppUI:DoInput("Is this okay? (y/n)") => s
+        if (s != null) s=s.toLower
+        if (s=="y") {okay=true}
+        if (s=="n") {doEdit=true}
+                
+        break(okay)
+    |
+    AppUI:DoCls
+    
 /VerifySettings
 
 
@@ -460,12 +460,12 @@ Dict.set("list",List)
     url=protocol + HostPort + path
     cmd.add(url)
     if (jsonData != null) {
-		cmd.add("-d")
-		str=if (getType(jsonData)=="String", jsonData, JSON:Export(jsonData))
-		if (Sys.isWindows) str=str.replace('"','\"')
+        cmd.add("-d")
+        str=if (getType(jsonData)=="String", jsonData, JSON:Export(jsonData))
+        if (Sys.isWindows) str=str.replace('"','\"')
         cmd.add(str)
     }
-	
+    
     if (verbose) {
         println
         Inner {
@@ -486,55 +486,55 @@ Dict.set("list",List)
 
 # Interactive CURL 
 # --
-	P(1,false) => verbose
-	P(2,Input("Enter protocol and host + port, ex. http://somehost:1234").get) => hostPort
-	P(3,Input("Enter URL, prefixed by method if not GET").get) => str
-	P(4) => jsonData
-		
-	if (jsonData == null) {
-		println("Paste JSON data terminated by '.' on separate line")
-		println("Or type just '.' if no json data")
-		readLines(".") => jsonData
-		# Filter out blank lines (if any)
-		jsonData=Inner{jsonData->line reject(line.trim=="") out(line)}
-	}
+    P(1,false) => verbose
+    P(2,Input("Enter protocol and host + port, ex. http://somehost:1234").get) => hostPort
+    P(3,Input("Enter URL, prefixed by method if not GET").get) => str
+    P(4) => jsonData
+        
+    if (jsonData == null) {
+        println("Paste JSON data terminated by '.' on separate line")
+        println("Or type just '.' if no json data")
+        readLines(".") => jsonData
+        # Filter out blank lines (if any)
+        jsonData=Inner{jsonData->line reject(line.trim=="") out(line)}
+    }
 
-	if(jsonData.length==0) {
-		jsonData=null
-	} else {
-		tryCatch(JSON:Parse(jsonData)) =>result
-		if (!result.ok) {
-			error("Invalid JSON: " + result.msg)
-		}
-	}
-	
-	if (hostPort.endsWith("/")) hostPort=hostPort.beforeLast("/")
+    if(jsonData.length==0) {
+        jsonData=null
+    } else {
+        tryCatch(JSON:Parse(jsonData)) =>result
+        if (!result.ok) {
+            error("Invalid JSON: " + result.msg)
+        }
+    }
+    
+    if (hostPort.endsWith("/")) hostPort=hostPort.beforeLast("/")
 
-	"GET PUT POST DELETE HEAD".split => methods
-	method=null
-	Inner {
-		methods->m if (str.toUpper.startsWith(m+" ")) { method=m }
-	}
-	if (method != null) str=str.sub(method.length+1).trim
-	if (method == null) method="GET"
+    "GET PUT POST DELETE HEAD".split => methods
+    method=null
+    Inner {
+        methods->m if (str.toUpper.startsWith(m+" ")) { method=m }
+    }
+    if (method != null) str=str.sub(method.length+1).trim
+    if (method == null) method="GET"
 
-	if (!str.startsWith("/")) str="/"+str
+    if (!str.startsWith("/")) str="/"+str
 
-	cmd=List("curl","-X",method)
+    cmd=List("curl","-X",method)
     if (jsonData != null) {
         cmd.add("--header")
         cmd.add("Content-Type: application/json")
     }
     cmd.add(hostPort + str)
-	Lib:Header(cmd.concat(" "))
-	if (jsonData != null) {
-		JSON:PP(JSON:Parse(jsonData),true)
-	}
+    Lib:Header(cmd.concat(" "))
+    if (jsonData != null) {
+        JSON:PP(JSON:Parse(jsonData),true)
+    }
 
     if (jsonData != null) {
-		cmd.add("-d")
-		str=if (getType(jsonData)=="String", jsonData, JSON:Export(jsonData))
-		if (Sys.isWindows) str=str.replace('"','\"')
+        cmd.add("-d")
+        str=if (getType(jsonData)=="String", jsonData, JSON:Export(jsonData))
+        if (Sys.isWindows) str=str.replace('"','\"')
         cmd.add(str)
     }
 
@@ -545,14 +545,14 @@ Dict.set("list",List)
         {result.stderr->line println("(err) " + line)}
     }
 
-	# If stdout is JSON, pretty-print it
-	tryCatch(JSON:PP(JSON:Parse(result.stdout),true)) => parseResult
-	if (!parseResult.ok) {
-		# Just list stdout to screen
-		result.stdout->line println(line)
-	}
+    # If stdout is JSON, pretty-print it
+    tryCatch(JSON:PP(JSON:Parse(result.stdout),true)) => parseResult
+    if (!parseResult.ok) {
+        # Just list stdout to screen
+        result.stdout->line println(line)
+    }
 
-	# Return the result dict, where we can grab .stdout and .exitCode etc
+    # Return the result dict, where we can grab .stdout and .exitCode etc
     result
 /iCURL
 
@@ -567,7 +567,7 @@ Dict.set("list",List)
         P(3,Dict.set("d","0123456789").set("-","-")) => mappings
         P(4,Lambda{P(1)}) => LPostProcess
 
-        Lib.Text.Lexer.Node => root
+        Std.Text.Lexer.Node => root
 
         # Must add "non-token" code on first character, since if backtracking from
         # an invalid match, we must consume one character before trying again
@@ -580,7 +580,7 @@ Dict.set("list",List)
         root.setDefault.setIsToken(-1)
 
         tryCatch({
-                Lib.Text.Lexer => lexer
+                Std.Text.Lexer => lexer
                 lexer.addLine(line)
                 lexer.getTokens(root)->token
                         out(LPostProcess.call(token.str))
@@ -594,41 +594,41 @@ Dict.set("list",List)
 # TODO: use parser to identify strings correctly, to avoid 
 # formatting blocks inside those.
 # --
-	P(1)=>text
-	if (text==null) {
-		println("Paste text, terminate with '.' on single line")
-		text=readLines(".")
-	}
-	line=""
-	indent=""
-	text->textline
-		textline.chars->c
-			if ("{[(".contains(c)) {
-				line=line+c
-				out(line)
-				indent=indent+" "
-				line=indent
-			} else if (")]}".contains(c)) {
-				out(line)
-				if (indent.length>0) {
-					indent=indent.sub(0,indent.length-1)
-				}
-				line=indent+c
-				out(line)
-				line=indent
-			} else if (c==",") {
-				line=line+c
-				out(line)
-				line=indent
-			} else {
-				line=line+c
-			}
-	| => result
-	result.add(line)
-	# remove blank lines
-	result->line assert(line.trim != "") out(line) | => result
+    P(1)=>text
+    if (text==null) {
+        println("Paste text, terminate with '.' on single line")
+        text=readLines(".")
+    }
+    line=""
+    indent=""
+    text->textline
+        textline.chars->c
+            if ("{[(".contains(c)) {
+                line=line+c
+                out(line)
+                indent=indent+" "
+                line=indent
+            } else if (")]}".contains(c)) {
+                out(line)
+                if (indent.length>0) {
+                    indent=indent.sub(0,indent.length-1)
+                }
+                line=indent+c
+                out(line)
+                line=indent
+            } else if (c==",") {
+                line=line+c
+                out(line)
+                line=indent
+            } else {
+                line=line+c
+            }
+    | => result
+    result.add(line)
+    # remove blank lines
+    result->line assert(line.trim != "") out(line) | => result
 
-	result
+    result
 /BlockFormatter
 
 
@@ -661,20 +661,20 @@ Dict.set("list",List)
 
 # Stack
 # --
-	self.data=List
-	self.push = Lambda {
-		P(1) => val
-		self.data.insert(0,val)
-	}
-	self.peek = Lambda {
-		self.data.first
-	}
-	self.pop = Lambda {
-		x=self.data.first
-		if (self.data.length > 0) self.data.remove(0)
-		x
-	}
-/class Stack	
+    self.data=List
+    self.push = Lambda {
+        P(1) => val
+        self.data.insert(0,val)
+    }
+    self.peek = Lambda {
+        self.data.first
+    }
+    self.pop = Lambda {
+        x=self.data.first
+        if (self.data.length > 0) self.data.remove(0)
+        x
+    }
+/class Stack    
 
 
 
@@ -682,31 +682,31 @@ Dict.set("list",List)
 # Either set .data or call .add with parameters, once for each row, then
 # call .show
 # --
-	self.data=List
-	self.add=Lambda{ self.data.add(P) }
-	self.getLines=Lambda{
-		widths=Dict
-		Inner {
-			self.data->line
-				i=0
-				line->element
-					key=""+i
-					e=""+element
-					if (e.length > widths.get(key,0)) widths.set(key,e.length)
-					i=i+1
-		}
-		# generate output
-		self.data->line
-			i=0
-			outLine=""
-			Inner {
-				line->element
-					key=""+i
-					e=""+element
-					pad=widths.get(key)-e.length+1
-					outLine=outLine + e + " ".times(pad)
-					i=i+1
-			}
-			out(outLine.trim) # remove added trailing space
-	}
+    self.data=List
+    self.add=Lambda{ self.data.add(P) }
+    self.getLines=Lambda{
+        widths=Dict
+        Inner {
+            self.data->line
+                i=0
+                line->element
+                    key=""+i
+                    e=""+element
+                    if (e.length > widths.get(key,0)) widths.set(key,e.length)
+                    i=i+1
+        }
+        # generate output
+        self.data->line
+            i=0
+            outLine=""
+            Inner {
+                line->element
+                    key=""+i
+                    e=""+element
+                    pad=widths.get(key)-e.length+1
+                    outLine=outLine + e + " ".times(pad)
+                    i=i+1
+            }
+            out(outLine.trim) # remove added trailing space
+    }
 /class Cols

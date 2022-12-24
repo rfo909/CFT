@@ -9,74 +9,74 @@ Configuration for logstash and beats on Windows!
 
 # Logstash hosts
 # --
-	P(1,false) => update
-	
-	h=Db2:Get(Sys.scriptId,"LogstashHosts")
-	if (h==null || update) {
-		h=Input("Enter Logstash host names, separated by space").get.split
-		Db2:Set(Sys.scriptId,"LogstashHosts", h)
-	}
-	h
+    P(1,false) => update
+    
+    h=Db2:Get(Sys.scriptId,"LogstashHosts")
+    if (h==null || update) {
+        h=Input("Enter Logstash host names, separated by space").get.split
+        Db2:Set(Sys.scriptId,"LogstashHosts", h)
+    }
+    h
 /HostsLogstash
 
 
 # Logstash install directory under \\host\...
 # --
-	P(1,false) => update
-	
-	dir=Db2:Get(Sys.scriptId,"LogstashInstallDir")
-	if (dir==null || update) {
-		Input("Enter dir following \\host\").setCurrCond("c$\Program Files").get => dir
-		Db2:Set(Sys.scriptId,"LogstashInstallDir",dir)
-	}
-	dir
+    P(1,false) => update
+    
+    dir=Db2:Get(Sys.scriptId,"LogstashInstallDir")
+    if (dir==null || update) {
+        Input("Enter dir following \\host\").setCurrCond("c$\Program Files").get => dir
+        Db2:Set(Sys.scriptId,"LogstashInstallDir",dir)
+    }
+    dir
 /LogstashInstallDir
 
 
 # Master hosts
 # --
-	P(1,false) => update
-	
-	h=Db2:Get(Sys.scriptId,"MasterHosts")
-	if (h==null || update) {
-		h=Input("Enter elasticsearch master hosts, separated by space").get.split
-		Db2:Set(Sys.scriptId,"MasterHosts",h)
-	}
-	h
+    P(1,false) => update
+    
+    h=Db2:Get(Sys.scriptId,"MasterHosts")
+    if (h==null || update) {
+        h=Input("Enter elasticsearch master hosts, separated by space").get.split
+        Db2:Set(Sys.scriptId,"MasterHosts",h)
+    }
+    h
 /HostsMaster
 
 
 # Logstash config dir for host
 # --
-	P(1,HostsLogstash.first) => host
-	Dir("\\" + host + "\" + LogstashInstallDir) => rootDir
-	error(!rootDir.exists, "Directory " + rootDir.path + " not found")
+    P(1,HostsLogstash.first) => host
+    Dir("\\" + host + "\" + LogstashInstallDir) => rootDir
+    error(!rootDir.exists, "Directory " + rootDir.path + " not found")
 
-	rootDir.dirs("logstash*")->dir
-		out(Int(dir.lastModified,dir))
-	| _.sort.last.data.sub("config")
+    rootDir.dirs("logstash*")->dir
+        out(Int(dir.lastModified,dir))
+    | _.sort.last.data.sub("config")
 /LogstashConfigDir
 
 
 # Show logstash.yml 
 # --
-	HostsLogstash->host
-		LogstashConfigDir(host).file("logstash.yml") =>f
-		Lib:Header(host)
-		foundLines=false
-		Inner {
-			f.read->line
-				reject(line.trim.startsWith("#") || line.trim.length==0)
-				println(line)
-				foundLines=true
-		}
-		if (!foundLines) println("<no lines>")
+    HostsLogstash->host
+        LogstashConfigDir(host).file("logstash.yml") =>f
+        Lib:Header(host)
+        foundLines=false
+        Inner {
+            f.read->line
+                reject(line.trim.startsWith("#") || line.trim.length==0)
+                println(line)
+                foundLines=true
+        }
+        if (!foundLines) println("<no lines>")
 /ShowLogstashYml
 
 
 # logstash.yml
 # --
-	# path.data: /var/lib/logstash
+    # path.data: /var/lib/logstash
 <<< EOF
 path.logs: /ProgramData/logstash
 >>> EOF
@@ -86,74 +86,74 @@ path.logs: /ProgramData/logstash
 
 # Pipeline skeleton for logstash beats input
 # --
-	P(1,5044) => BeatsPort
-	P(2,HostsMaster) => MasterHosts
-	P(3,"data") => IlmAlias
-	P(4,"logs30days") => IlmPolicy
-	
-	MasterHosts->h
-		out('"' + h + ":9200" + '"')
-	| _.concat(", ")
-	=> MasterHosts
-	
-	Sequence(
-		@ input {
-		@     beats {
-		@          port => << BeatsPort >>
-		@     }
-		@ }
-		@ filter {
-		@ }
-		@ output {
-		@     elasticsearch {
-		@         hosts => [ << MasterHosts >> ]
-		@         ilm_enabled => true
-		@         ilm_rollover_alias => "<< IlmAlias >>"
-		@         ilm_policy => "<< IlmPolicy >>"
-		@     }
-		@     #stdout { codec => rubydebug }
-		@ }	
-	).mergeExpr
+    P(1,5044) => BeatsPort
+    P(2,HostsMaster) => MasterHosts
+    P(3,"data") => IlmAlias
+    P(4,"logs30days") => IlmPolicy
+    
+    MasterHosts->h
+        out('"' + h + ":9200" + '"')
+    | _.concat(", ")
+    => MasterHosts
+    
+    Sequence(
+        @ input {
+        @     beats {
+        @          port => << BeatsPort >>
+        @     }
+        @ }
+        @ filter {
+        @ }
+        @ output {
+        @     elasticsearch {
+        @         hosts => [ << MasterHosts >> ]
+        @         ilm_enabled => true
+        @         ilm_rollover_alias => "<< IlmAlias >>"
+        @         ilm_policy => "<< IlmPolicy >>"
+        @     }
+        @     #stdout { codec => rubydebug }
+        @ }   
+    ).mergeExpr
 /LogstashBeatsPipeline
 
 
 # pipelines.yml logstash config
 # --
-	P(1,List("test1","test2"))=>pipelineNames
-	P(2,HostsLogstash.first)=>logstashHost
-	
-	
-	pipelineNames->pipeline
-		configFile=LogstashConfigDir(logstashHost).file(pipeline+".conf").path
-		
-		if (configFile.contains("$")) {  # \\host\c$\program files\...
-			configFile=configFile.after("$")
-		}
-		
-		configFile=configFile.replace("\","/")
-		
-		Sequence(
-			@ - pipeline.id: "<< pipeline >>"
-			@   pipeline.workers: 1
-			@   path.config: "<< configFile >>"			
-		).mergeExpr->line 
-			out(line)
+    P(1,List("test1","test2"))=>pipelineNames
+    P(2,HostsLogstash.first)=>logstashHost
+    
+    
+    pipelineNames->pipeline
+        configFile=LogstashConfigDir(logstashHost).file(pipeline+".conf").path
+        
+        if (configFile.contains("$")) {  # \\host\c$\program files\...
+            configFile=configFile.after("$")
+        }
+        
+        configFile=configFile.replace("\","/")
+        
+        Sequence(
+            @ - pipeline.id: "<< pipeline >>"
+            @   pipeline.workers: 1
+            @   path.config: "<< configFile >>"         
+        ).mergeExpr->line 
+            out(line)
 /PipelinesYml
 
 
 
 # Filebeat config skeleton - direct delivery to ElasticSearch
 # --
-	P(1,"c:\logs\*.log") => path
-	P(2,"data") => indexName
-	P(3,"logs30days") => ilmPolicy
-	P(4,HostsMaster) => MasterHosts
-	P(5,"/ProgramData/filebeat") => LogDir
+    P(1,"c:\logs\*.log") => path
+    P(2,"data") => indexName
+    P(3,"logs30days") => ilmPolicy
+    P(4,HostsMaster) => MasterHosts
+    P(5,"/ProgramData/filebeat") => LogDir
 
-	MasterHosts->h
-		out('"' + h + ":9200" + '"')
-	| _.concat(", ")
-	=> MasterHosts
+    MasterHosts->h
+        out('"' + h + ":9200" + '"')
+    | _.concat(", ")
+    => MasterHosts
 
 <<<< EOF
 filebeat.inputs:
@@ -196,14 +196,14 @@ logging.files:
 
 # Filebeat config skeleton - indirect delivery via Logstash
 # --
-	P(1,"c:\logs\*.log") => path
-	P(2,HostsLogstash) => LogstashHosts
-	P(3,"/ProgramData/filebeat") => LogDir
+    P(1,"c:\logs\*.log") => path
+    P(2,HostsLogstash) => LogstashHosts
+    P(3,"/ProgramData/filebeat") => LogDir
 
-	LogstashHosts->h
-		out('"' + h + ":9200" + '"')
-	| _.concat(", ")
-	=> LogstashHosts
+    LogstashHosts->h
+        out('"' + h + ":9200" + '"')
+    | _.concat(", ")
+    => LogstashHosts
 
 <<<< EOF
 filebeat.inputs:
@@ -232,15 +232,15 @@ logging.files:
 
 # Metricbeat config skeleton - direct delivery to ElasticSearch
 # --
-	P(1,"data") => indexName
-	P(2,"logs30days") => ilmPolicy
-	P(3,HostsMaster) => MasterHosts
-	P(4,"/ProgramData/metricbeat") => LogDir
+    P(1,"data") => indexName
+    P(2,"logs30days") => ilmPolicy
+    P(3,HostsMaster) => MasterHosts
+    P(4,"/ProgramData/metricbeat") => LogDir
 
-	MasterHosts->h
-		out('"' + h + ":9200" + '"')
-	| _.concat(", ")
-	=> MasterHosts
+    MasterHosts->h
+        out('"' + h + ":9200" + '"')
+    | _.concat(", ")
+    => MasterHosts
 
 <<<<<<<<<<<<<<<<<<<<<<<< EOF
 metricbeat.config.modules:

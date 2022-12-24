@@ -54,20 +54,20 @@ completes.
 # associated with this script. Doing this by grabbing a lock that is not
 # released again
 # --
-	sysKey=Sys.scriptId+"_system"
+    sysKey=Sys.scriptId+"_system"
 
-	Db2:Get(sysKey,"lastPurge",0) => lastPurge
+    Db2:Get(sysKey,"lastPurge",0) => lastPurge
 
-	if (currentTimeMillis - lastPurge > 86400*1000) {
-		if (Lib.Db.?obtainLock(sysKey,10)) {
-			println("Jobs:onLoad cleaning up Db2 old content")
-			addDebug("Purging Db2 collection for Jobs script: " + Sys.scriptId)
-			Db2:DeleteCollection(Sys.scriptId)
-			Db2:Set(sysKey,"lastPurge", currentTimeMillis)
-			## NOT releasing the lock
-			###Lib.Db.releaseLock(sysKey)
-		}
-	}
+    if (currentTimeMillis - lastPurge > 86400*1000) {
+        if (Std.Db.?obtainLock(sysKey,10)) {
+            println("Jobs:onLoad cleaning up Db2 old content")
+            addDebug("Purging Db2 collection for Jobs script: " + Sys.scriptId)
+            Db2:DeleteCollection(Sys.scriptId)
+            Db2:Set(sysKey,"lastPurge", currentTimeMillis)
+            ## NOT releasing the lock
+            ###Std.Db.releaseLock(sysKey)
+        }
+    }
 //onLoad
 
 
@@ -124,14 +124,14 @@ completes.
 
     Lib:Header("Selected job: " + name)
 
-	addDebug("name='" + name + "'")
+    addDebug("name='" + name + "'")
 
     println("Below follows an input loop.")
     println("Output from the job is displayed, and you may enter input to it")
     println
     println("- To detach from job, type 'q'")
     println("- To send data to job, type a space followed by content: ' xxx'")
-	println("- To refresh output from job, just press Enter")
+    println("- To refresh output from job, just press Enter")
     println
     println("Text following below the line, is output from the job.")
     println
@@ -142,35 +142,35 @@ completes.
     println("--------------------------------------------------------------------")
 
     proc=Sys.Jobs.getRunning(name)
-	
-	dbKey=name.toHexString
+    
+    dbKey=name.toHexString
 
     error(proc==null,"No running process " + name)
     loop
-		Sys.sleep(800)
-		Db2:Get(Sys.scriptId,dbKey,List) + proc.output => output
-		output.last(100) => output
-		
-		Db2:Set(Sys.scriptId,dbKey,output)
+        Sys.sleep(800)
+        Db2:Get(Sys.scriptId,dbKey,List) + proc.output => output
+        output.last(100) => output
+        
+        Db2:Set(Sys.scriptId,dbKey,output)
 
         if (proc.isDone) {
             println("(Job completed)")
             break
         }
-		Inner {
-			output->line println(line)
-		}
+        Inner {
+            output->line println(line)
+        }
 
-		println
+        println
         readLine("q to quit, <SPACE>xxx to send data, Enter to refresh") => line
-		break(line=="q")
-		if (line.startsWith(" ")) {
-			line=line.sub(1)
-			proc.sendLine(line)
-			output.add(line)
-			Db2:Set(Sys.scriptId,dbKey,output)
-		} 
-		# else repeat loop, updating output from the process
+        break(line=="q")
+        if (line.startsWith(" ")) {
+            line=line.sub(1)
+            proc.sendLine(line)
+            output.add(line)
+            Db2:Set(Sys.scriptId,dbKey,output)
+        } 
+        # else repeat loop, updating output from the process
     |
     "Done"
 /ToForeground

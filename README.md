@@ -138,18 +138,14 @@ Calls to functions defined in other scripts are always recognized from the synta
 
 ```
 Lib:DirPrivate   ## call function in Lib script
-Lib.Math.PI      ## call function in Lib object
+Std.Math.PI      ## call function in Std object
 ```
-
-Yes ... there is both a Lib script and a Lib object. The script is a text file under code.lib and
-the object is implemented in Java. A bit confusing, perhaps, but with different call syntax, it should
-be clear which is which.
 
 ```
 ?Lib:            ## List functions in Lib *script*
 :load Lib        ## Load Lib script, making it the current script
 
-Lib help         ## List functions inside the Lib *object*
+Std help         ## List functions inside the Std *object*
 ```
 
 

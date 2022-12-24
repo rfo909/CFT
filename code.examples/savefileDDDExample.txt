@@ -57,14 +57,14 @@ CFT 2.10.0
     rimCenterRadius=500
 
     ref=ref.setScaleFactor(1)  ## millimeters
-    world.Brush.box(hubWidth, hubThickness, Lib.Color(120,80,40)) => hub
-    world.Brush.box(rimWidth, rimThickness, Lib.Color(120,80,40)) => rim
-    world.Brush.circle(spokeRadius, Lib.Color(120,80,50)) => spoke
+    world.Brush.box(hubWidth, hubThickness, Std.Color(120,80,40)) => hub
+    world.Brush.box(rimWidth, rimThickness, Std.Color(120,80,40)) => rim
+    world.Brush.circle(spokeRadius, Std.Color(120,80,50)) => spoke
 
     # going to 361 to ensure 360 is included, so the circles (hub and rim)
     # get closed on themselves.
 
-    Lib.Data.for(0,361,3)->angle
+    Std.Data.for(0,361,3)->angle
         rotated=ref.turnDown(angle)
         hubPos=rotated.up(axleHoleRadius + hubThickness/2)
         rimPos=rotated.up(rimCenterRadius)
@@ -94,10 +94,10 @@ CFT 2.10.0
 
 # Main function
 # --
-    world = Lib.DDD.World
+    world = Std.DDD.World
         # by default the world scale is in millimeters
 
-    ref = Lib.DDD.Ref.setScaleFactor(1000)  # going up to meter scale
+    ref = Std.DDD.Ref.setScaleFactor(1000)  # going up to meter scale
     ref=ref.fwd(2).turnRight(30).rollLeft(30)  # create viewable position for center of wheel
     
     RenderWheel(world,ref)

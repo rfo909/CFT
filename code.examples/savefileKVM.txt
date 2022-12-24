@@ -278,7 +278,7 @@ P(1,"someTarget") =>target
 
     println("* Wait for SSH ok")
     Inner {
-        Lib.Data.yes(20,"x") -> dummy
+        Std.Data.yes(20,"x") -> dummy
             break(SSH:HostOkSSH(target))
             Sys.sleep(1000)
     }

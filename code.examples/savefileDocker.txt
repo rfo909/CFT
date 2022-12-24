@@ -13,7 +13,7 @@ CDeleteAll - remove all containers
 Bash       - run bash shell inside running container
 
 >>>> EOF
-	->line println("| " + line)
+    ->line println("| " + line)
 /Readme
 
 
@@ -22,184 +22,184 @@ Bash       - run bash shell inside running container
 # - must do this after logging on with VPN,
 #   for containers to access servers properly
 # --
-	Dir.run("powershell","restart-service","*docker*")
+    Dir.run("powershell","restart-service","*docker*")
 /RestartDocker
 
 
 
 # Report progress
 # --
-	Lib:Header(P(1))
+    Lib:Header(P(1))
 //rep
 
 
 # List docker processes
 # --
-	Util:Run("docker ps -a")
+    Util:Run("docker ps -a")
 /ps
 
 
 # List all containers
 # --
-	ps
+    ps
 /CList
 
 
 # List docker images
 # --
-	Util:Run("docker image list")
+    Util:Run("docker image list")
 /IList
 
 # Select docker image, return IMAGE ID
 # --
-	P(1,"") => searchTerm
-	P(2,"Select docker image") => header
+    P(1,"") => searchTerm
+    P(2,"Select docker image") => header
 
-	Lib:Header(header)
-	images = Inner{
-		Dir.runCapture("docker","image","list").keep(1)->line # keep(1) to strip header line
-			assert(line.contains(searchTerm)) 
-			out(line)
-	}
-	error(images.length==0, "No docker images")
+    Lib:Header(header)
+    images = Inner{
+        Dir.runCapture("docker","image","list").keep(1)->line # keep(1) to strip header line
+            assert(line.contains(searchTerm)) 
+            out(line)
+    }
+    error(images.length==0, "No docker images")
 
-	Inner{
-		i=0
-		images->img report(i,img)
-		i=i+1
-	} ->line 
-		println(line)
-	|
-	println
-	readLine("Enter pos or blank to abort").trim => x
-	error(x=="","Aborted, no docker image selected")
-	img = images.nth(x.parseInt)
+    Inner{
+        i=0
+        images->img report(i,img)
+        i=i+1
+    } ->line 
+        println(line)
+    |
+    println
+    readLine("Enter pos or blank to abort").trim => x
+    error(x=="","Aborted, no docker image selected")
+    img = images.nth(x.parseInt)
 
-	# confirm selection
-	println(img)
-	# isolate image id
-	img.split.nth(2)
+    # confirm selection
+    println(img)
+    # isolate image id
+    img.split.nth(2)
 /SelectImage
-	
+    
 
 # Get image line for id
 # --
-	P(1,SelectImage) => id
+    P(1,SelectImage) => id
 
-	images = Inner{
-		Dir.runCapture("docker","image","list").keep(1)->line # keep(1) to strip header line
-			assert(line.split.nth(2).startsWith(id))
-			out(line)
-	}
-	error(images.empty, "No image found for id '" + id + "'")
-	images.first
+    images = Inner{
+        Dir.runCapture("docker","image","list").keep(1)->line # keep(1) to strip header line
+            assert(line.split.nth(2).startsWith(id))
+            out(line)
+    }
+    error(images.empty, "No image found for id '" + id + "'")
+    images.first
 //GetImageLine
 
 
 # Get image repository / local name for id
 # --
-	P(1,SelectImage) => id
-	GetImageLine(id).split.nth(0)
+    P(1,SelectImage) => id
+    GetImageLine(id).split.nth(0)
 /GetImageRepo
 
 
 # Get image version for id
 # --
-	P(1,SelectImage) => id
-	GetImageLine(id).split.nth(1)
+    P(1,SelectImage) => id
+    GetImageLine(id).split.nth(1)
 /GetImageVersion
 
 
 # Delete specific docker image
 # --
-	id=SelectImage
-	Util:Run("docker image rm " + id)
-	IList
+    id=SelectImage
+    Util:Run("docker image rm " + id)
+    IList
 /IDelete
 
 
 
 # Delete all images (-f)
 # --
-	Dir.runCapture("docker","image","ls").keep(1)->line
-		println(line)
-		line.split.nth(2) => id
-		Dir.run("docker","image","rm","-f",id)
+    Dir.runCapture("docker","image","ls").keep(1)->line
+        println(line)
+        line.split.nth(2) => id
+        Dir.run("docker","image","rm","-f",id)
 
 /IDeleteAll
 
 
 # Delete all docker containers
 # --
-	rep("Removing all docker containers")
-	Dir.runCapture("docker", "ps", "-a")->line
-		line.split=>cols
-		reject(cols.last=="NAMES") ## skip header line
-		Util:Run("docker stop " + cols.last)
-		Util:Run("docker rm -f " + cols.last)
+    rep("Removing all docker containers")
+    Dir.runCapture("docker", "ps", "-a")->line
+        line.split=>cols
+        reject(cols.last=="NAMES") ## skip header line
+        Util:Run("docker stop " + cols.last)
+        Util:Run("docker rm -f " + cols.last)
 /CDeleteAll
 
 
 # Delete specific docker container
 # --
         rep("Removing docker container?")
-		CList
-		readLine("Enter docker container id, blank to abort") => id
-		Util:Run("docker stop " + id)
-		Util:Run("docker rm -f " + id)
+        CList
+        readLine("Enter docker container id, blank to abort") => id
+        Util:Run("docker stop " + id)
+        Util:Run("docker rm -f " + id)
 /CDelete
 
 # Attach interactive bash to running container
 # --
-	CList
-	Input("Enter container id").get => id
-	Util:Run("docker exec -it " + id + " bash")
+    CList
+    Input("Enter container id").get => id
+    Util:Run("docker exec -it " + id + " bash")
 /Bash
 
 
 
 # Check if docker image exists
 # --
-	P(1, readLine("Repository (name)")) => name
-	P(2, readLine("TAG")) => tag
-	Dir.runCapture("docker","image","list")->line
-		assert(line.split.nth(0)==name && line.split.nth(1)==tag)
-		out(line)
-	| _.length > 0
+    P(1, readLine("Repository (name)")) => name
+    P(2, readLine("TAG")) => tag
+    Dir.runCapture("docker","image","list")->line
+        assert(line.split.nth(0)==name && line.split.nth(1)==tag)
+        out(line)
+    | _.length > 0
 /HasImage
-	
+    
 
 
 # Upload docker image to Sonatype Nexus Repository Manager
 # --
-	P(1,Input("Nexus host:port").get) => hostPort
-	P(2,Docker:SelectImage) => imageId
-	P(3,Input("Tag").get) => tag
+    P(1,Input("Nexus host:port").get) => hostPort
+    P(2,Docker:SelectImage) => imageId
+    P(3,Input("Tag").get) => tag
 
-	Lib:ShowInfo("NOTE: contains confirm before pushing!!")
+    Lib:ShowInfo("NOTE: contains confirm before pushing!!")
 
-	repo=Docker:GetImageRepo(imageId)
+    repo=Docker:GetImageRepo(imageId)
 
-	if (hostPort.endsWith("/")) hostPort=hostPort.first(hostPort.length-1)
-	if (!repo.startsWith("/")) repo="/"+repo
+    if (hostPort.endsWith("/")) hostPort=hostPort.first(hostPort.length-1)
+    if (!repo.startsWith("/")) repo="/"+repo
 
-	# creating a version string
-	readLine("Version info following date").replace(" ","_") => vInfo
-	version = Date.setFormat("yyyy-MM-dd").fmt + "_" + vInfo
+    # creating a version string
+    readLine("Version info following date").replace(" ","_") => vInfo
+    version = Date.setFormat("yyyy-MM-dd").fmt + "_" + vInfo
 
-	commands=List(
-		"docker tag " + tag + " " + hostPort + repo + ":" + version,
-		"docker login " + hostPort,
-		"docker push " + hostPort + repo + ":" + version
-	)
+    commands=List(
+        "docker tag " + tag + " " + hostPort + repo + ":" + version,
+        "docker login " + hostPort,
+        "docker push " + hostPort + repo + ":" + version
+    )
 
-	Lib:Header("About to execute the following commands")
-	Inner {commands->cmd println("  " + cmd) }
-	
-	println
-	error(!Lib:Confirm,"Aborting docker push")
+    Lib:Header("About to execute the following commands")
+    Inner {commands->cmd println("  " + cmd) }
+    
+    println
+    error(!Lib:Confirm,"Aborting docker push")
 
-	commands->cmd Util:Run(cmd)
+    commands->cmd Util:Run(cmd)
 /NexusPush
 
 
@@ -208,56 +208,56 @@ Bash       - run bash shell inside running container
 # Get repository available versions for an item inside a repository
 # Returns all, in correctly sorted ascending order.
 # --
-	P(1) => protocol
-	P(2) => hostPort
-	P(3) => repo
-	P(4) => itemName
-	P(5,false) => verbose
+    P(1) => protocol
+    P(2) => hostPort
+    P(3) => repo
+    P(4) => itemName
+    P(5,false) => verbose
 
-	list=List
+    list=List
 
-	continuationToken=null
+    continuationToken=null
 
-	if (!verbose) Lib:ShowInfo("Please wait ... fetching data from " + hostPort)
-	loop
-		query="/service/rest/v1/search?repository=" + repo + "&name="+itemName
-		if (continuationToken != null) query=query + "&continuationToken="+continuationToken
+    if (!verbose) Lib:ShowInfo("Please wait ... fetching data from " + hostPort)
+    loop
+        query="/service/rest/v1/search?repository=" + repo + "&name="+itemName
+        if (continuationToken != null) query=query + "&continuationToken="+continuationToken
 
-		if (verbose) Lib:ShowInfo("Doing query: " + query)
+        if (verbose) Lib:ShowInfo("Doing query: " + query)
 
-		Util:CURL(protocol,hostPort,"GET",query) => result
-		error(result.exitCode != 0, "CURL failed")
+        Util:CURL(protocol,hostPort,"GET",query) => result
+        error(result.exitCode != 0, "CURL failed")
 
-		data = JSON:Parse(result.stdout)
-		Inner {
-			data.items->item list.add(item.version)
-		}
-		if (data.has("continuationToken") && data.continuationToken != null) {
-			continuationToken=data.continuationToken
-		} else {
-			break
-		}
-	|
-	SortVersionsList(list)
+        data = JSON:Parse(result.stdout)
+        Inner {
+            data.items->item list.add(item.version)
+        }
+        if (data.has("continuationToken") && data.continuationToken != null) {
+            continuationToken=data.continuationToken
+        } else {
+            break
+        }
+    |
+    SortVersionsList(list)
 /GetRepoItemVersions
 
 
 
 # Sort versions list by converting all number-only parts to 0-prefixed fixed length
 # --
-	P(1)=>list
+    P(1)=>list
 
-	list->v
-		sortVersion=""
-		modParts = Inner {
-			v.split(".")->part
-				if (part.?parseInt) {
-					out(("0000000000"+part).last(10))
-				} else {
-					out(part)
-				}
-		}
-		out(Str(modParts.concat("."), v))
-	| _.sort->x 
-		out(x.data)
+    list->v
+        sortVersion=""
+        modParts = Inner {
+            v.split(".")->part
+                if (part.?parseInt) {
+                    out(("0000000000"+part).last(10))
+                } else {
+                    out(part)
+                }
+        }
+        out(Str(modParts.concat("."), v))
+    | _.sort->x 
+        out(x.data)
 //SortVersionsList

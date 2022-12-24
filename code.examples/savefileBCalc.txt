@@ -85,7 +85,7 @@ Uses internal functions
     toInt(P(1)).bin(BitCount) => a
     toInt(P(2)).bin(BitCount) => b
 
-    Lib.Data.for(0,a.length,1)->i
+    Std.Data.for(0,a.length,1)->i
         a.chars.nth(i) =>ac
         b.chars.nth(i) =>bc
         out(
@@ -101,7 +101,7 @@ Uses internal functions
     toInt(P(1)).bin(BitCount) => a
     toInt(P(2)).bin(BitCount) => b
 
-    Lib.Data.for(0,a.length,1)->i
+    Std.Data.for(0,a.length,1)->i
         a.chars.nth(i) =>ac
         b.chars.nth(i) =>bc
         out(
@@ -117,7 +117,7 @@ Uses internal functions
     toInt(P(1)).bin(BitCount) => a
     toInt(P(2)).bin(BitCount) => b
 
-    Lib.Data.for(0,a.length,1)->i
+    Std.Data.for(0,a.length,1)->i
         a.chars.nth(i) =>ac
         b.chars.nth(i) =>bc
         out(
@@ -151,7 +151,7 @@ Uses internal functions
     P(4,BitCount) => bits
     
     toInt(value).bin(bits) => s
-    Lib.Data.for(0,count,1)->i
+    Std.Data.for(0,count,1)->i
         s=s.sub(1)+if(rotate,s.sub(0,1),"0")
     |
     bin(s.parseInt(2),bits)
@@ -165,7 +165,7 @@ Uses internal functions
     P(4,BitCount) => bits
     
     toInt(value).bin(bits) => s
-    Lib.Data.for(0,count,1)->i
+    Std.Data.for(0,count,1)->i
         s=
             if(rotate,s.sub(bits-1),"0") 
             + s.sub(0,bits-1)

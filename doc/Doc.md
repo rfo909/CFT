@@ -1,9 +1,9 @@
 
 # CFT ("ConfigTool")
 
-Last updated: 2022-12-14 RFO
+Last updated: 2022-12-24 RFO
 
-v3.6.2
+v3.7.0
 
 
 
@@ -576,7 +576,7 @@ the content of a file.
 0x..
 ```
 
-Check the Lib.Util object, which contains functions that create objects Encrypt and Decrypt.
+Check the Std.Util object, which contains functions that create objects Encrypt and Decrypt.
 
 # List processing
 
@@ -1403,7 +1403,7 @@ function
 also handles waiting for the external process to finish, before returning.
 
 
-Both of the Lib functions take the same four parameters, but often only the first is used, as the
+Both of these Lib functions take the same four parameters, but often only the first parameter is used, as the
 rest have useful defaults.
 
 
@@ -1870,7 +1870,7 @@ conversely, takes a Dict/List structure to JSON format again.
 
 
 The JSON library is a CFT script, which means it is written in CFT, using the
-Lib.Text.Lexer to tokenize the input, and a plain recursive-descent parser as
+Std.Text.Lexer to tokenize the input, and a plain recursive-descent parser as
 functions inside the JSON script.
 
 
@@ -1975,7 +1975,7 @@ XML:Show
 # Internal web-server
 
 
-There is a small embedded web-server in CFT, available in the Lib.Web object. It
+There is a small embedded web-server in CFT, available in the Std.Web object. It
 supports GET and POST, does parameter and form input parsing.
 
 
@@ -2019,8 +2019,8 @@ in millimeters. But we can change the scale on Ref objects, for example setting 
 Note that Ref objects are immutable, so all calls to Ref functions create new Ref objects.
 
 ```
-world = Lib.DDD.World
-ref = Lib.DDD.Ref  # at 0,0,0 and scale=1, which for default camera defs means millimeters
+world = Std.DDD.World
+ref = Std.DDD.Ref  # at 0,0,0 and scale=1, which for default camera defs means millimeters
 ref=ref.scaleUp(1000)  # now working in meters
 ref=ref.fwd(3).turnRight(30).down(0.5)
 # new ref is placed 3 meters forward, turned right 30 degrees, and lowered 0.5 meters
@@ -2033,11 +2033,11 @@ line segments, for example a square, which is then "dragged" through 3D-space in
 sequence of "pen down" operations.
 
 ```
-boxBrush = world.Brush.box(1,1,Lib.Color(255,0,0))
+boxBrush = world.Brush.box(1,1,Std.Color(255,0,0))
 # creates a brush for a box centered on origo, with a certain size and color
 # note the size here is "relative" and determined by the scale of the Ref's used
 # when painting with the brush.
-ref = Lib.DDD.Ref.setScaleFactor(1000).forward(3) # forward 3 meters
+ref = Std.DDD.Ref.setScaleFactor(1000).forward(3) # forward 3 meters
 boxBrush.penDown(ref)  # start drawing with brush
 boxBrush.penDown(ref.fwd(2))  # move 2 meter forward and do penDown here
 boxBrush.penUp
@@ -2710,7 +2710,7 @@ This can be used to save arbitrarily big structures, as long as they are synthes
 # The CFT database
 
 
-CFT implements its own primitive database, as found in Lib.Db.Db2, and which is usually
+CFT implements its own primitive database, as found in Std.Db.Db2, and which is usually
 interfaced via the Db2 script.
 
 ```
@@ -2721,7 +2721,7 @@ The Db2 persists data to file, and handles all values that can be synthesized to
 
 
 Also there is a Db2Obj script, which saves data objects identified by UUID's, which are
-made by calling the Lib.Db.UUID function.
+made by calling the Std.Db.UUID function.
 
 ## Collections
 
@@ -2736,10 +2736,10 @@ Db2:Set(Sys.scriptId,"name","value")
 Sys.scriptId is better than Sys.scriptName, since there may be multiple scripts with the
 same name (in different directories).
 
-## Lib.Db.Db2 vs Db2 script?
+## Std.Db.Db2 vs Db2 script?
 
 
-The Db2 script uses the Lib.Db.Db2 object. The difference is that an object is implemented
+The Db2 script uses the Std.Db.Db2 object. The difference is that an object is implemented
 in Java, while the script is code that runs in the interpreter. See separate section on "Objects vs Scripts".
 
 ## Synchronization
@@ -2749,55 +2749,18 @@ Calls to the Db2 database are thread safe, via a Db2 lock file per collection,
 to prevent parallel updates, or partial reads etc.
 
 
-In order to create transactions consisting of multiple Db2 calls, the Lib.Db object
+In order to create transactions consisting of multiple Db2 calls, the Std.Db object
 contains support for named locks. Example:
 
 ```
-Lib.Db.obtainLock("Unique Lock Name",5000) ## 5000 = wait max 5 seconds before failing
+Std.Db.obtainLock("Unique Lock Name",5000) ## 5000 = wait max 5 seconds before failing
 Db2:Get(Sys.scriptId,"someValue") => data
 # (modify data)
 Db2:Set(Sys.scriptId,"someValue",data)
-Lib.Db.releaseLock("Unique lock name")
+Std.Db.releaseLock("Unique lock name")
 ```
 
-# Lib object vs Lib scripts
 
-
-As for the case of two Db2 entites above, with a script and an object of the same name,
-this is also the situation for "Lib", where the (global) function "Lib" produces a Lib object,
-while there also exists a Lib script.
-
-
-The Lib object, like all CFT built-in objects, has its functions implemented in Java, while the
-Lib script is a text file with functions written in the CFT programming language, which are
-interpreted by Java when called.
-
-
-
-Getting information about functions inside objects and scripts differ as follows:
-
-```
-# Lib object content
-
-Lib help
-
-
-# Lib script content
-
-?Lib:
-
-# or
-
-:load Lib
-?
-```
-
-Calling functions inside objects and libraries differ as well.
-
-```
-Lib.Text               # call function Text inside Lib object
-Lib:Header("Hello")    # call function Header in script
-```
 # onLoad functions
 
 
@@ -3065,7 +3028,7 @@ See separate sections on closures and objects.
 # Calling Java
 
 
-CFT lets us interface Java code via the Lib.Java object. It contains functions
+CFT lets us interface Java code via the Std.Java object. It contains functions
 for identifying classes. We then look up a constructor and call it, getting a
 JavaObject in return. We can also look up methods from the class object, and call
 them with parameters.
@@ -3077,21 +3040,21 @@ Currently, for this to work, the Java code must exist in the classpath.
 Example (also available in script Tests01 as function Test17):
 
 ```
-Lib.Java.forName("java.lang.String") => String
-String.getConstructor(String).call(Lib.Java.String("test")) => obj
-String.getConstructor(String).call(Lib.Java.String("123")) => obj2
-Lib.Java.Object(obj2) => paramObj
+Std.Java.forName("java.lang.String") => String
+String.getConstructor(String).call(Std.Java.String("test")) => obj
+String.getConstructor(String).call(Std.Java.String("123")) => obj2
+Std.Java.Object(obj2) => paramObj
 String.getMethod("concat",String).call(obj,paramObj).value
 /t17
 ```
 
 This function looks up the String class, then creates two instances via
 the constructor that takes a String parameter. CFT strings values are converted to Java values
-via the Lib.Java.String() function.
+via the Std.Java.String() function.
 
 
 Then we wrap obj2, which is a CFT value (of type JavaObject), as a Java value,
-via Lib.Java.Object(), and locate the concat() method of the String class.
+via Std.Java.Object(), and locate the concat() method of the String class.
 
 
 It is invoked on
@@ -3262,10 +3225,10 @@ This is a shortcut itself, that traverses the CFT.props file and identifies and
 displays the
 shortcut definitions from it.
 
-# Lib.Text.Lexer
+# Std.Text.Lexer
 
 
-The Lib.Text.Lexer objects adds
+The Std.Text.Lexer objects adds
 capability to match complex tokens with CFT, using the same Java tokenizer implementation
 parsing CFT script code.
 
@@ -3306,10 +3269,10 @@ have been consumed, or we find a character that we can not match, which is usual
 ## Implementation
 
 
-In the CFT functions, nodes are created via the Lib.Text.Lexer.Node function.
+In the CFT functions, nodes are created via the Std.Text.Lexer.Node function.
 
 ```
-Lib.Text.Lexer help
+Std.Text.Lexer help
 # Node(firstChars?) - create empty node, possibly identifying firstChars list
 # addLine(line) - processes line, adds to internal token list - returns self
 # getTokenStream(rootNode) - get TokenStream object
@@ -3319,7 +3282,7 @@ Lib.Text.Lexer help
 The nodes in turn contain the following:
 
 ```
-Lib.Text.Lexer.Node help
+Std.Text.Lexer.Node help
 # addToken(token) - create mappings for token string, returns resulting Node
 # addTokenComplex(token, charMapDict) - create mappings for complex string, returns resulting Node
 # setDefault(targetNode?) - map all non-specified characters to node, returns target node
@@ -3330,7 +3293,7 @@ Lib.Text.Lexer.Node help
 A simple example:
 
 ```
-top=Lib.Text.Lexer.Node
+top=Std.Text.Lexer.Node
 x=top.sub("0123456789")   # new node
 x.sub("0123456789",x)  # x points to itself for digits
 x.setIsToken(1) # token type: non-negative numbers for regular tokens
@@ -3355,10 +3318,10 @@ three forms:
 (3) someNode.sub(someOtherNode)
 # When creating libraries of reusable nodes, they always must define a set of
 # characters which are called "firstChars". These are the characters that indicate
-# the start of some sort of data. For example for Lib.Text.Lexer.Identifier, the
+# the start of some sort of data. For example for Std.Text.Lexer.Identifier, the
 # "firstChars" are "a-zA-Z_". It's the letters an identifier can start
 # with. Similarly we can create our own library node functions, by supplying a
-# firstChars list as parameter to Lib.Text.Lexer.Node
+# firstChars list as parameter to Std.Text.Lexer.Node
 #
 # So what happens is that inside someNode, pointers are added to someOtherNode for
 # all characters in that node's firstChars.
@@ -3374,7 +3337,7 @@ lets those characters point at it.
 # Create reusable node for integers.
 # --
 	"0123456789"=>digits
-	Lib.Text.Lexer.Node(digits) =>x
+	Std.Text.Lexer.Node(digits) =>x
 	x.sub(digits,x)
 	x.setIsToken(1)
 	x
@@ -3382,7 +3345,7 @@ lets those characters point at it.
 
 # Now we can for example match a IP v4 address
 # --
-	Lib.Text.Lexer.Node =>top
+	Std.Text.Lexer.Node =>top
 	a=NodeInt
 	b=NodeInt
 	c=NodeInt
@@ -3419,7 +3382,7 @@ tokens a negative token type, as those get automatically ignored.
 # --
 	"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_" =>firstChars
 	firstChars+"0123456789" =>innerChars
-	ident = Lib.Text.Lexer.Node(firstChars)
+	ident = Std.Text.Lexer.Node(firstChars)
 	ident.sub(innerChars,ident)
 	ident.setIsToken(1)
 	ident
@@ -3428,7 +3391,7 @@ tokens a negative token type, as those get automatically ignored.
 # Whitespace
 # --
 	" ^t^n^r".unEsc =>chars
-	Lib.Text.Lexer.Node(chars) =>ws
+	Std.Text.Lexer.Node(chars) =>ws
 	ws.sub(chars,ws)
 	ws.setIsToken(-1)
 	ws
@@ -3436,7 +3399,7 @@ tokens a negative token type, as those get automatically ignored.
 
 # Root node
 # --
-	Lib.Text.Lexer.Node =>root
+	Std.Text.Lexer.Node =>root
 	root.sub(Identifiers)
 	root.sub(WhiteSpace)
 /Root
@@ -3451,7 +3414,7 @@ and since space is assigned a negative token type, it gets automatically ignored
 # Using getTokens(), with the Root node as parameter, which returns
 # a list of token objects.
 # --
-	Lib.Text.Lexer.addLine("this is a test").getTokens(Root)->
+	Std.Text.Lexer.addLine("this is a test").getTokens(Root)->
 	token
 	report(token.sourceLocation, token.str, token.tokenType)
 /test
@@ -3509,7 +3472,7 @@ and can employ different Node roots as we progress.
 With the normal .addToken() function, we can do something like this:
 
 ```
-Lib.Text.Node =>grade
+Std.Text.Node =>grade
 "A AA AAA B C".split->x 
 	grade.addToken(x).setIsToken
 |
@@ -3529,7 +3492,7 @@ It is meant for matching one thing only, and not for collecting all token defini
 under a shared root, as before.
 
 ```
-Lib.Text.Node =>date
+Std.Text.Node =>date
 Dict.set("i","0123456789") =>mappings
 date.setTokenComplex("iiii-ii-ii", mappings).setIsToken
 date.match("2020-09-15xxx")  # returns 10 (characters matched)
@@ -3565,7 +3528,7 @@ To read a password (no echo), call Sys.readPassword function.
 ### Encrypt / decrypt
 
 
-The Lib.Util object contains two functions, encrypt() and decrypt(), which both
+The Std.Util object contains two functions, encrypt() and decrypt(), which both
 take a password string and a salt string. These together form a complete
 password, but the salt is not necessarily secret, just a way of differently initiate
 the encryption engine with the same (secret) password.
@@ -3573,9 +3536,9 @@ the encryption engine with the same (secret) password.
 ```
 "password".getBytes("UTF-8")  # returns Binary object
 /password
-Lib.Util.Encrypt(password).processString("this is a message")
+Std.Util.Encrypt(password).processString("this is a message")
 /x
-Lib.Util.Decrypt(password).processString(x)
+Std.Util.Decrypt(password).processString(x)
 <String>
 this is a message
 ```
@@ -3610,7 +3573,7 @@ the secret values, to store for that session.
 
 # Reference: object types
 
-**Per v3.4.4**
+**Per v3.7.0**
 
 ```
 Grep("extends Obj") => g
@@ -3621,79 +3584,80 @@ Sys.homeDir.allFiles(Glob("*.java"))->f
 println(x)
 /objects
 
-DD
-DDBrush
-DDD
-DDDBezier
-DDDBrush
-DDDRef
-DDDTriangle
-DDDVector
-DDDWorld
-DDLineBrush
-DDRef
-DDVector
-DDWorld
-ObjAnnotatedValue
-ObjCIFS
-ObjCIFSContext
-ObjCIFSFile
-ObjClosure
-ObjColor
-ObjConvert
-ObjData
-ObjDataFile
-ObjDate
-ObjDateSort
-ObjDb
-ObjDb2
-ObjDict
-ObjDir
-ObjDuration
-ObjEncrypt
-ObjExtProcess
-ObjFile
-ObjFiles
-ObjFilter
-ObjFilterReader
-ObjGlob
-ObjGlobal
-ObjGrep
-ObjInput
-ObjJava
-ObjJavaClass
-ObjJavaConstructor
-ObjJavaMethod
-ObjJavaObject
-ObjJavaValue
-ObjJavaValueBoolean
-ObjJavaValueInt
-ObjJavaValueLong
-ObjJavaValueNull
-ObjJavaValueObject
-ObjJavaValueString
-ObjJobs
-ObjLexer
-ObjLexerNode
-ObjLexerToken
-ObjLexerTokenStream
-ObjLib
-ObjLineReader
-ObjMath
-ObjPersistent
-ObjPlot
-ObjProcess
-ObjRegex
-ObjSys
-ObjTerm
-ObjText
-ObjUtil
-ObjWeb
-ObjWebRequest
-ObjWebServer
-ObjWebServerContext
-Value
+ DD 
+ DDBrush 
+ DDD 
+ DDDBezier 
+ DDDBrush 
+ DDDRef 
+ DDDTriangle 
+ DDDVector 
+ DDDWorld 
+ DDLineBrush 
+ DDRef 
+ DDVector 
+ DDWorld 
+ ObjAnnotatedValue 
+ ObjCIFS 
+ ObjCIFSContext 
+ ObjCIFSFile 
+ ObjClosure 
+ ObjColor 
+ ObjConvert 
+ ObjData 
+ ObjDataFile 
+ ObjDate 
+ ObjDateSort 
+ ObjDb 
+ ObjDb2 
+ ObjDict 
+ ObjDir 
+ ObjDuration 
+ ObjEncrypt 
+ ObjExtProcess 
+ ObjFile 
+ ObjFiles 
+ ObjFilter 
+ ObjFilterReader 
+ ObjGlob 
+ ObjGlobal 
+ ObjGrep 
+ ObjInput 
+ ObjJava 
+ ObjJavaClass 
+ ObjJavaConstructor 
+ ObjJavaMethod 
+ ObjJavaObject 
+ ObjJavaValue 
+ ObjJavaValueBoolean 
+ ObjJavaValueInt 
+ ObjJavaValueLong 
+ ObjJavaValueNull 
+ ObjJavaValueObject 
+ ObjJavaValueString 
+ ObjJobs 
+ ObjLexer 
+ ObjLexerNode 
+ ObjLexerToken 
+ ObjLexerTokenStream 
+ ObjLineReader 
+ ObjMath 
+ ObjPersistent 
+ ObjPlot 
+ ObjProcess 
+ ObjRegex 
+ ObjStd 
+ ObjSys 
+ ObjTerm 
+ ObjText 
+ ObjUtil 
+ ObjWeb 
+ ObjWebRequest 
+ ObjWebServer 
+ ObjWebServerContext 
+ Value 
 ```
+
 # Reference: Value types
 
 

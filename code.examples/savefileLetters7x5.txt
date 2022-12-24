@@ -814,7 +814,7 @@ $  ###    .
 # Get text
 # --
     P(1,"TEST")=>i
-    Lib.Data.each(0,6)->lineNo
+    Std.Data.each(0,6)->lineNo
         s = Inner {
             (""+i).chars->c
                 lines = GetChar(c)

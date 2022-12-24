@@ -15,7 +15,7 @@ to create the class object. The second, B, is optional, and defaults to
 A if not present. It defines the type of the Dict object, which is recognized
 when doing
 
-	P(1) as &B => obj
+    P(1) as &B => obj
 
 
 >>>>>> EOF
@@ -33,50 +33,50 @@ when doing
 # This example deals with rendering HTML, which is all about strings, and which needs to convert int-values to and from string,
 # for the internal representation to be of the actual type. 
 # --
-	P(1) as String => type
-	P(2) as (type)? => value
-	P(3,Lib.Db.UUID) as String => name
+    P(1) as String => type
+    P(2) as (type)? => value
+    P(3,Std.Db.UUID) as String => name
 
-	self.copyFrom(SymDict(type,value,name))
+    self.copyFrom(SymDict(type,value,name))
 
-	self.isEditable=true
-	self.isDisabled=false
+    self.isEditable=true
+    self.isDisabled=false
 
-	self.set=Lambda{
-		P(1) as (self.type)? => value
-		self.value=value
-		# make chainable
-		self
-	}
-	self.setEditable=Lambda{
-		self.isEditable = {P(1) as boolean}
-		self
-	}
-	self.setDisabled=Lambda{
-		self.isDisabled = {P(1) as boolean}
-		self
-	}
-	self.toPresentationFormat=Lambda{
-		self.value
-	}
-	self.fromPresentationFormat=Lambda{
-		P(1) as String? => s
-		self.set(s)
-	}
+    self.set=Lambda{
+        P(1) as (self.type)? => value
+        self.value=value
+        # make chainable
+        self
+    }
+    self.setEditable=Lambda{
+        self.isEditable = {P(1) as boolean}
+        self
+    }
+    self.setDisabled=Lambda{
+        self.isDisabled = {P(1) as boolean}
+        self
+    }
+    self.toPresentationFormat=Lambda{
+        self.value
+    }
+    self.fromPresentationFormat=Lambda{
+        P(1) as String? => s
+        self.set(s)
+    }
 
-	self.render=Lambda{
-		P(1,self.isEditable) as boolean => isEditable
-		P(2,self.isDisabled) as boolean => isEnabled
+    self.render=Lambda{
+        P(1,self.isEditable) as boolean => isEditable
+        P(2,self.isDisabled) as boolean => isEnabled
 
-		if (isEditable) {
-			@ <input type="text" <<if(isEnabled,"","disable=disable")>> name="<<self.name>>" value="<<self.toPresentationFormat>>"/>
-			.mergeExpr
-		} else {
-			@ <<self.value>>
-			.mergeExpr
-		}
-	}
-	
+        if (isEditable) {
+            @ <input type="text" <<if(isEnabled,"","disable=disable")>> name="<<self.name>>" value="<<self.toPresentationFormat>>"/>
+            .mergeExpr
+        } else {
+            @ <<self.value>>
+            .mergeExpr
+        }
+    }
+    
 /class Val
 
 
@@ -85,60 +85,60 @@ when doing
 # Inherits most from the Val function class, but add mods in the form
 # of custom mapping to and from external string format.
 # --
-	P(1) as int? => value
-	P(2) as String? => name
+    P(1) as int? => value
+    P(2) as String? => name
 
-	self.copyFrom(Val("int", value, name))
-	
-	self.toPresentationFormat=Lambda{
-		"" + self.value
-	}
-	self.fromPresentationFormat=Lambda{
-		P(1) as String? => s
-		if (s==null) {
-			self.set(null)
-		} else {
-			self.set(s.parseInt)
-		}
-	}
-	
+    self.copyFrom(Val("int", value, name))
+    
+    self.toPresentationFormat=Lambda{
+        "" + self.value
+    }
+    self.fromPresentationFormat=Lambda{
+        P(1) as String? => s
+        if (s==null) {
+            self.set(null)
+        } else {
+            self.set(s.parseInt)
+        }
+    }
+    
 /class ValInt as Val
 
 
 
 # Page class
 # --
-	P(1,"Title") => title
+    P(1,"Title") => title
 
-	self.title=title
-	self.rows=List
-	self.addRow=Lambda{
-		P(1) as String => title
-		P(2) as &Val => val
-		self.rows.add(SymDict(title,val))
-	}
-	self.render=Lambda{
-		rows = Inner {
-			self.rows->row
-				@ <tr><td><< row.title >></td><td><< row.val.render >></td></tr>
-				.mergeExpr->line
-					out(line)
-		}
+    self.title=title
+    self.rows=List
+    self.addRow=Lambda{
+        P(1) as String => title
+        P(2) as &Val => val
+        self.rows.add(SymDict(title,val))
+    }
+    self.render=Lambda{
+        rows = Inner {
+            self.rows->row
+                @ <tr><td><< row.title >></td><td><< row.val.render >></td></tr>
+                .mergeExpr->line
+                    out(line)
+        }
 
-		pre = Sequence(
-			@ <div>
-			@ <h1><<self.title>></h1>
-			@ <table>
-		).mergeExpr
+        pre = Sequence(
+            @ <div>
+            @ <h1><<self.title>></h1>
+            @ <table>
+        ).mergeExpr
 
-		post=Sequence(
-			@ </table>
-			@ </div>
-		).mergeExpr
+        post=Sequence(
+            @ </table>
+            @ </div>
+        ).mergeExpr
 
-		# return 
-		pre + rows + post
-	}
+        # return 
+        pre + rows + post
+    }
 
 /class Page
 
@@ -146,9 +146,9 @@ when doing
 
 # Test
 # --
-	p=Page("My page")
-	p.addRow("Name", Val("String","Roar"))
-	p.addRow("Title", Val("String", "Boss man"))
-	p.addRow("Age", ValInt(55).setEditable(false))
-	p.render
+    p=Page("My page")
+    p.addRow("Name", Val("String","Roar"))
+    p.addRow("Title", Val("String", "Boss man"))
+    p.addRow("Age", ValInt(55).setEditable(false))
+    p.render
 /demo

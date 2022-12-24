@@ -37,11 +37,11 @@ passwords and other secrets for the duration of the session.
     "v"+key => verifyKey
     
     Db2:Get("Vault",verifyKey) => value
-    ok=(value != null && Lib.Util.Decrypt(Sys.secureSessionId,"verify").processString(value)=="verified")
+    ok=(value != null && Std.Util.Decrypt(Sys.secureSessionId,"verify").processString(value)=="verified")
     
     if (ok) {
         Db2:Get("Vault",key) => value
-        Lib.Util.Decrypt(Sys.secureSessionId,"value").processString(value)
+        Std.Util.Decrypt(Sys.secureSessionId,"value").processString(value)
     } else {
         if (echo) {
             readLine(label) => value
@@ -49,9 +49,9 @@ passwords and other secrets for the duration of the session.
             println(label)
             Sys.readPassword => value
         }
-        Lib.Util.Encrypt(Sys.secureSessionId,"value").processString(value) => eValue
+        Std.Util.Encrypt(Sys.secureSessionId,"value").processString(value) => eValue
         Db2:Set("Vault", key, eValue)
-        Lib.Util.Encrypt(Sys.secureSessionId,"verify").processString("verified") => eVerified
+        Std.Util.Encrypt(Sys.secureSessionId,"verify").processString("verified") => eVerified
         Db2:Set("Vault", verifyKey, eVerified)
         
         value
@@ -67,9 +67,9 @@ passwords and other secrets for the duration of the session.
     label.toHexString => key
     "v"+key =>  verifyKey
     
-    Lib.Util.Encrypt(Sys.secureSessionId,"value").processString(value) => eValue
+    Std.Util.Encrypt(Sys.secureSessionId,"value").processString(value) => eValue
     Db2:Set("Vault", key, eValue)
-    Lib.Util.Encrypt(Sys.secureSessionId,"verify").processString("verified") => eVerified
+    Std.Util.Encrypt(Sys.secureSessionId,"verify").processString("verified") => eVerified
     Db2:Set("Vault", verifyKey, eVerified)
 /SessionSecretSet
 
@@ -89,28 +89,28 @@ passwords and other secrets for the duration of the session.
 
 # Get or ask for session property (non encrypted)
 # --
-	P(1,"Label") as String => label
-	
-	dbField = Sys.scriptId + ":" + label.toHexString
-	
-	Db2:Get(Sys.sessionUUID,dbField) => s
-	if (s==null) {
-		readLine(label) => s
-		Db2:Set(Sys.sessionUUID,dbField,s)
-	}
-	s
+    P(1,"Label") as String => label
+    
+    dbField = Sys.scriptId + ":" + label.toHexString
+    
+    Db2:Get(Sys.sessionUUID,dbField) => s
+    if (s==null) {
+        readLine(label) => s
+        Db2:Set(Sys.sessionUUID,dbField,s)
+    }
+    s
 /SessionPropertyGet
 
 
 
 # Set session property non-interactivel (not encrypted)
 # --
-	P(1,"Label") as String => label
-	P(2, "") => value
-	
-	dbField = Sys.scriptId + ":" + label.toHexString
-	
-	Db2:Set(Sys.sessionUUID,dbField,value)
+    P(1,"Label") as String => label
+    P(2, "") => value
+    
+    dbField = Sys.scriptId + ":" + label.toHexString
+    
+    Db2:Set(Sys.sessionUUID,dbField,value)
 /SessionPropertySet
 
 
@@ -118,9 +118,9 @@ passwords and other secrets for the duration of the session.
 
 # Clear session property
 # --
-	P(1,"Label") as String => label
-	dbField=Sys.scriptId + ":" + label.toHexString
-	Db2:Set(Sys.sessionUUID,dbField,null)
+    P(1,"Label") as String => label
+    dbField=Sys.scriptId + ":" + label.toHexString
+    Db2:Set(Sys.sessionUUID,dbField,null)
 /SessionPropertyClear
 
 

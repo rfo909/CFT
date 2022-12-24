@@ -37,9 +37,9 @@ import rf.configtool.main.runtime.lib.math.ObjMath;
 import rf.configtool.main.runtime.lib.text.ObjText;
 import rf.configtool.main.runtime.lib.web.ObjWeb;
 
-public class ObjLib extends Obj {
+public class ObjStd extends Obj {
     
-    public ObjLib() {
+    public ObjStd() {
         this.add(new FunctionPlot());
         this.add(new FunctionData());
         this.add(new FunctionMath());

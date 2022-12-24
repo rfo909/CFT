@@ -31,37 +31,37 @@ through the REST API.
 
 # Get host+port
 # --
-	name=Db2:Get(Sys.scriptId,"HostPort")
-	
-	inp=Input("Enter elasticsearch host[:port] (port defaults to 9200)")
-	if (name != null) inp.setCurrCond(name)
-	
-	inp.get => name
-	if(!name.contains(":")) name=name+":9200"
-	Db2:Set(Sys.scriptId,"HostPort", name)
-	name
+    name=Db2:Get(Sys.scriptId,"HostPort")
+    
+    inp=Input("Enter elasticsearch host[:port] (port defaults to 9200)")
+    if (name != null) inp.setCurrCond(name)
+    
+    inp.get => name
+    if(!name.contains(":")) name=name+":9200"
+    Db2:Set(Sys.scriptId,"HostPort", name)
+    name
 //GetHostPort
 
 
 
 # List index names, according to glob pattern
 # --
-	P(1,GetHostPort) => host
-	P(2,Input("Enter name as glob expression").setCurrCond("*").get)=>globExpr
-	
-	regex=Glob(globExpr,true).regex
+    P(1,GetHostPort) => host
+    P(2,Input("Enter name as glob expression").setCurrCond("*").get)=>globExpr
+    
+    regex=Glob(globExpr,true).regex
 
     Util:CURL("http",host,"GET","/_cat/indices?format=json&pretty=true",null,false).stdout => json
-	data=JSON:Parse(json)
+    data=JSON:Parse(json)
 
-	# Filter index names and sort
-	Inner {
-		data->ix 
-			name=ix.index
-			assert(regex.match(name))
-			out(name)
-		| _.sort
-	}
+    # Filter index names and sort
+    Inner {
+        data->ix 
+            name=ix.index
+            assert(regex.match(name))
+            out(name)
+        | _.sort
+    }
 /ListIndexes
 
 
@@ -69,25 +69,25 @@ through the REST API.
 
 # Show index details, either just names if globbing with "*" or specific index by entering name (glob)
 # --
-	P(1,GetHostPort) => host
-	P(2,Input("Enter name as glob expression").setCurrCond("*").get)=>globExpr
-	
-	showNamesOnly=(globExpr=="*")
-	regex=Glob(globExpr,true).regex
+    P(1,GetHostPort) => host
+    P(2,Input("Enter name as glob expression").setCurrCond("*").get)=>globExpr
+    
+    showNamesOnly=(globExpr=="*")
+    regex=Glob(globExpr,true).regex
 
     Util:CURL("http",host,"GET","/_cat/indices?format=json&pretty=true",null,false).stdout => json
-	data=JSON:Parse(json)
+    data=JSON:Parse(json)
 
-	# Sort list of indexes by name
-	data = Inner {
-		data->ix out(Str(ix.index,ix)) | _.sort->x out(x.data)
-	}
+    # Sort list of indexes by name
+    data = Inner {
+        data->ix out(Str(ix.index,ix)) | _.sort->x out(x.data)
+    }
 
-	# generate output
-	data->ix
-		name=ix.index
-		assert(regex.match(name))
-		if (showNamesOnly) println(name) else JSON:PP(ix,true)
+    # generate output
+    data->ix
+        name=ix.index
+        assert(regex.match(name))
+        if (showNamesOnly) println(name) else JSON:PP(ix,true)
 /ShowIndexes
 
 
@@ -95,41 +95,41 @@ through the REST API.
 
 # Get documents from index
 # --
-	P(1,GetHostPort) => host
-	P(2,Input("Enter index name (including date and seqNo)").get) => indexName
-	P(3,Input("Enter document id").get) => id
+    P(1,GetHostPort) => host
+    P(2,Input("Enter index name (including date and seqNo)").get) => indexName
+    P(3,Input("Enter document id").get) => id
 
-	url="/" + indexName + "/_doc/" + id
+    url="/" + indexName + "/_doc/" + id
 
-	Util:CURL("http",host,"GET", url, null, false) => result
+    Util:CURL("http",host,"GET", url, null, false) => result
 
-	if (result.exitCode == 0) {
-		JSON:Parse(result.stdout) => data
-		JSON:PP(data,true)
-	} else {
-		result
-	}
+    if (result.exitCode == 0) {
+        JSON:Parse(result.stdout) => data
+        JSON:PP(data,true)
+    } else {
+        result
+    }
 /GetDocs
 
 
 
 # Add alias to index
 # --
-	P(1,GetHostPort) => host
-	P(2,Input("Index name").get) => indexName
-	P(3,Input("Index alias").setCurr(indexName).get) => alias
-	
-	Dict.set("actions",List(
-		Dict.set("add", Dict.set("index",indexName).set("alias",alias))
-	))
-	=> data
+    P(1,GetHostPort) => host
+    P(2,Input("Index name").get) => indexName
+    P(3,Input("Index alias").setCurr(indexName).get) => alias
+    
+    Dict.set("actions",List(
+        Dict.set("add", Dict.set("index",indexName).set("alias",alias))
+    ))
+    => data
 
-	url="/_aliases"
-	println("POST " + url)
-	JSON:PP(data,true)
-	Lib:HardConfirm
-	
-	Util:CURL("http",host,"POST", url, data, true)
+    url="/_aliases"
+    println("POST " + url)
+    JSON:PP(data,true)
+    Lib:HardConfirm
+    
+    Util:CURL("http",host,"POST", url, data, true)
 /AddIndexAlias
 
 
@@ -138,18 +138,18 @@ through the REST API.
 # Create or modify Index Lifecycle Policy
 # https://www.elastic.co/guide/en/elasticsearch/reference/7.7/getting-started-index-lifecycle-management.html#ilm-gs-create-policy
 # --
-	P(1,GetHostPort)=>host
+    P(1,GetHostPort)=>host
     P(2,Input("Index Lifecycle Policy name").get) =>ilpName
     P(3,Input("Rollover days").get.parseInt)=>rolloverDays
-	P(4,Input("Max index size (GB)").get.parseInt)=>maxSizeGb
+    P(4,Input("Max index size (GB)").get.parseInt)=>maxSizeGb
     P(5,Input("Expiration days").get.parseInt)=>expirationDays
-	
-	
-	# Seems the rollover-part is not changed when running function
-	# repeatedly, while the delete-part is.
-	#
-	# Deleting the policy from inside Kibana, then recreating it
-	# with this function, we get it correct!
+    
+    
+    # Seems the rollover-part is not changed when running function
+    # repeatedly, while the delete-part is.
+    #
+    # Deleting the policy from inside Kibana, then recreating it
+    # with this function, we get it correct!
 
 <<<<<<<< EOF
 {
@@ -173,27 +173,27 @@ through the REST API.
   }
 }
 >>>>>>>> EOF
-	=> lines
-	lines.mergeExpr->line out(line.trim) | _.concat(" ") => json
+    => lines
+    lines.mergeExpr->line out(line.trim) | _.concat(" ") => json
     url="/_ilm/policy/" + ilpName
    
-	# Show JSON
-	println("PUT " + url)
-	JSON:PP(JSON:Parse(json),true)
-	Lib:HardConfirm
+    # Show JSON
+    println("PUT " + url)
+    JSON:PP(JSON:Parse(json),true)
+    Lib:HardConfirm
 
     Util:CURL("http",host,"PUT",url,json,false).stdout => output
-	JSON:PP(JSON:Parse(output),true)
+    JSON:PP(JSON:Parse(output),true)
 /ILPCreate
 
 
 
 # Check lifecycle progress
 # --
-	P(1,GetHostPort)=>host
-	P(2,Input("Index name or pattern").setCurr("*").get) => index
+    P(1,GetHostPort)=>host
+    P(2,Input("Index name or pattern").setCurr("*").get) => index
     json = Util:CURL("http",host,"GET","/" + index + "/_ilm/explain").stdout
-	JSON:PP(JSON:Parse(json))
+    JSON:PP(JSON:Parse(json))
 /ILPProgress
 
 
@@ -201,21 +201,21 @@ through the REST API.
 
 # List ILP's
 # --
-	P(1,GetHostPort)=>host
-	P(2,Input("ILP name glob, '*' for all").setCurrCond("*").get) => name
-	
-	regex=Glob(name,false).regex 
-	
-	Util:CURL("http",host,"GET","/_ilm/policy").stdout => json
-	data = JSON:Parse(json) # object with each policy as a field
-	
-	# Delete wrongly named ILP's
-	data.keys->key
-		println(key)
-		if (!regex.match(key)) data.remove(key)
-	|
-	
-	JSON:PP(data)
+    P(1,GetHostPort)=>host
+    P(2,Input("ILP name glob, '*' for all").setCurrCond("*").get) => name
+    
+    regex=Glob(name,false).regex 
+    
+    Util:CURL("http",host,"GET","/_ilm/policy").stdout => json
+    data = JSON:Parse(json) # object with each policy as a field
+    
+    # Delete wrongly named ILP's
+    data.keys->key
+        println(key)
+        if (!regex.match(key)) data.remove(key)
+    |
+    
+    JSON:PP(data)
 /ILPList
 
 
@@ -226,28 +226,28 @@ through the REST API.
 # https://www.elastic.co/guide/en/elasticsearch/reference/7.7/getting-started-index-lifecycle-management.html#ilm-gs-create-policy
 #
 # --
-	P(1,GetHostPort)=>host
+    P(1,GetHostPort)=>host
     P(2,Input("Index pattern").get) => indexPattern
-	P(3,Input("Index template name").get) => templateName
-	P(4,Input("index.lifecycle.name").get) => lifecycleName
-	P(5,Input("index.lifecycle.rollover_alias").get) => alias
+    P(3,Input("Index template name").get) => templateName
+    P(4,Input("index.lifecycle.name").get) => lifecycleName
+    P(5,Input("index.lifecycle.rollover_alias").get) => alias
 
-	Dict.set("index_patterns",List(
-			indexPattern
-			)
-		)
-		.set("settings",Dict
-			.set("number_of_shards", 1)
-			.set("number_of_replicas", 1)
-			.set("index.lifecycle.name", lifecycleName)
-			.set("index.lifecycle.rollover_alias", alias)
-		)
-	=>data
-	url="/_template/" + templateName + "?pretty"
+    Dict.set("index_patterns",List(
+            indexPattern
+            )
+        )
+        .set("settings",Dict
+            .set("number_of_shards", 1)
+            .set("number_of_replicas", 1)
+            .set("index.lifecycle.name", lifecycleName)
+            .set("index.lifecycle.rollover_alias", alias)
+        )
+    =>data
+    url="/_template/" + templateName + "?pretty"
 
-	println("POST " + url)
-	JSON:PP(data,true)
-	Lib:HardConfirm("Continue")
+    println("POST " + url)
+    JSON:PP(data,true)
+    Lib:HardConfirm("Continue")
 
     Util:CURL("http",host,"POST",url,data,true)
         
@@ -258,51 +258,51 @@ through the REST API.
 # Helper called by DeleteIndexes - delete or display what would be deleted, based on prefix
 # Returns number of indexes that will be or was deleted
 # --
-	P(1) => host
-   	P(2)=>prefix
-	P(3,false)=>enable
-		# If false, we display what indexes would be deleted
-		# If true, they are actually deleted
-	
-	json=Util:CURL("http",host,"GET","/_cat/indices?format=json&pretty=true",null,false).stdout
-	data=JSON:Parse(json)
+    P(1) => host
+      P(2)=>prefix
+    P(3,false)=>enable
+        # If false, we display what indexes would be deleted
+        # If true, they are actually deleted
+    
+    json=Util:CURL("http",host,"GET","/_cat/indices?format=json&pretty=true",null,false).stdout
+    data=JSON:Parse(json)
 
-	# should be a list of index objects
+    # should be a list of index objects
 
-	error(getType(data) != "List", "Expected list, got " + getType(data))
+    error(getType(data) != "List", "Expected list, got " + getType(data))
 
-	# Iterate over indexes and count matches
-	matches=0
-	data->ix
-		indexName=ix.index
-		assert(indexName.startsWith(prefix))
-		matches=matches+1
-		println( if(enable,"Deleting ","Would delete index: ") + indexName)
-		if (enable) Util:CURL("http",host,"DELETE","/"+indexName,null,false)
-	|
-	
-	matches
+    # Iterate over indexes and count matches
+    matches=0
+    data->ix
+        indexName=ix.index
+        assert(indexName.startsWith(prefix))
+        matches=matches+1
+        println( if(enable,"Deleting ","Would delete index: ") + indexName)
+        if (enable) Util:CURL("http",host,"DELETE","/"+indexName,null,false)
+    |
+    
+    matches
 //DoDeleteIndexes
 
 
 # Delete indexes based on prefix
 # --
-	P(1,GetHostPort) => host
-	P(2,Input("Enter prefix for deleting indexes").get) =>prefix
-	
-	error(prefix.contains("*"), "Prefix must not be '*' expression, just string")
-	
-	count = DoDeleteIndexes(host,prefix,false)
-	
-	if (count > 0) {
-		
-		Lib:HardConfirm
-		
-		DoDeleteIndexes(host,prefix,true)
-		"ok"
-	} else {
-		"No indexes found"
-	}
+    P(1,GetHostPort) => host
+    P(2,Input("Enter prefix for deleting indexes").get) =>prefix
+    
+    error(prefix.contains("*"), "Prefix must not be '*' expression, just string")
+    
+    count = DoDeleteIndexes(host,prefix,false)
+    
+    if (count > 0) {
+        
+        Lib:HardConfirm
+        
+        DoDeleteIndexes(host,prefix,true)
+        "ok"
+    } else {
+        "No indexes found"
+    }
 /DeleteIndexes
 
 
@@ -311,42 +311,42 @@ through the REST API.
 # Add test-data WITH timestamp in index name, on format yyyy.MM.dd.HH.mm to 
 # enable testing ILP in a reasonable time (new index created every minute)
 # --
-	P(1,GetHostPort)=>host
-	P(2,Input("Index base name (adding date -yyyy.MM.dd.HH.mm)").get)=>indexBaseName
-	
-	Date.sub(Date.Duration.hours(1)).setFormat("yyyy-MM-dd'T'HH:mm:ss").fmt => timestamp
+    P(1,GetHostPort)=>host
+    P(2,Input("Index base name (adding date -yyyy.MM.dd.HH.mm)").get)=>indexBaseName
+    
+    Date.sub(Date.Duration.hours(1)).setFormat("yyyy-MM-dd'T'HH:mm:ss").fmt => timestamp
 
-	Util:Counter("customer_id") => recordId
-	value=(Lib.Math.sin(recordId)*100).i
+    Util:Counter("customer_id") => recordId
+    value=(Std.Math.sin(recordId)*100).i
 
-	data = Dict.set("name","Roar")
-		.set("timestamp", timestamp)
-		.set("value",value)
+    data = Dict.set("name","Roar")
+        .set("timestamp", timestamp)
+        .set("value",value)
 
-	Date.setFormat("yyyy.MM.dd.HH.mm").fmt => indexDate
-	
-	index=indexBaseName + "-" + indexDate
-
-
-	url="/" + index + "/_doc/" + recordId
-	println("POST " + url)
-	JSON:PP(data,true)
+    Date.setFormat("yyyy.MM.dd.HH.mm").fmt => indexDate
+    
+    index=indexBaseName + "-" + indexDate
 
 
-	Util:CURL("http",
-		host,
-		"POST",
-		url, 
-		data,
-		false
-		)
-		=> result
-		
-	if (result.exitCode != 0) {
-		Util:ShowDict(result)
-		error("Failed")
-	}
-	
+    url="/" + index + "/_doc/" + recordId
+    println("POST " + url)
+    JSON:PP(data,true)
+
+
+    Util:CURL("http",
+        host,
+        "POST",
+        url, 
+        data,
+        false
+        )
+        => result
+        
+    if (result.exitCode != 0) {
+        Util:ShowDict(result)
+        error("Failed")
+    }
+    
 /AddDatedIndexData
 
 
@@ -356,52 +356,52 @@ through the REST API.
 # Add test-data WITH timestamp and sequence number in index name, on format yyyy.MM.dd-nnnnnn,
 # to enable testing ILP in a reasonable time.
 # --
-	P(1,GetHostPort)=>host
-	P(2,Input("Index base name (adding date and seqNo)").get)=>indexBaseName
-	
-	error(indexBaseName.contains("-"),"Index base name should not '-'")
-	
-	Date.sub(Date.Duration.hours(1)).setFormat("yyyy-MM-dd'T'HH:mm:ss").fmt => timestamp
+    P(1,GetHostPort)=>host
+    P(2,Input("Index base name (adding date and seqNo)").get)=>indexBaseName
+    
+    error(indexBaseName.contains("-"),"Index base name should not '-'")
+    
+    Date.sub(Date.Duration.hours(1)).setFormat("yyyy-MM-dd'T'HH:mm:ss").fmt => timestamp
 
-	Util:Counter("customer_id") => recordId
-	value=(Lib.Math.sin(recordId)*100).i
+    Util:Counter("customer_id") => recordId
+    value=(Std.Math.sin(recordId)*100).i
 
-	data = Dict.set("name","Roar")
-		.set("timestamp", timestamp)
-		.set("value",value)
+    data = Dict.set("name","Roar")
+        .set("timestamp", timestamp)
+        .set("value",value)
 
-	Date.setFormat("yyyy.MM.dd").fmt => indexDate
-	
-	partialIndex=indexBaseName + "-" + indexDate  # still missing the seqNo
-	
-	# Locate biggest seqNo for this date
-	max=1
-	ListIndexes(host,partialIndex+"*")->ixName
-		addDebug("Isolating seqNo from " + ixName)
-		ixName.afterLast("-").parseInt => i
-		if (i>max) max=i
-	|
-	
-	# Create full index name with seqNo
-	index=partialIndex + "-" + ( ("00000"+max).last(6))
+    Date.setFormat("yyyy.MM.dd").fmt => indexDate
+    
+    partialIndex=indexBaseName + "-" + indexDate  # still missing the seqNo
+    
+    # Locate biggest seqNo for this date
+    max=1
+    ListIndexes(host,partialIndex+"*")->ixName
+        addDebug("Isolating seqNo from " + ixName)
+        ixName.afterLast("-").parseInt => i
+        if (i>max) max=i
+    |
+    
+    # Create full index name with seqNo
+    index=partialIndex + "-" + ( ("00000"+max).last(6))
 
-	url="/" + index + "/_doc/" + recordId
-	println("POST " + url)
-	#JSON:PP(data,true)
+    url="/" + index + "/_doc/" + recordId
+    println("POST " + url)
+    #JSON:PP(data,true)
 
 
-	Util:CURL("http",
-		host,
-		"POST",
-		url, 
-		data,
-		false
-		)
-		=> result
-		
-	if (result.exitCode != 0) {
-		Util:ShowDict(result)
-		error("Failed")
-	}
-	
+    Util:CURL("http",
+        host,
+        "POST",
+        url, 
+        data,
+        false
+        )
+        => result
+        
+    if (result.exitCode != 0) {
+        Util:ShowDict(result)
+        error("Failed")
+    }
+    
 /AddSeqNoIndexData

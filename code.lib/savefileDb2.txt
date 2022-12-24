@@ -23,7 +23,7 @@
 # --
 <<<<<<<<< EOF
 This script is an interface to the database implementation which exists
-under Lib.Db.Db2, which is a memory-based (hashmap-oriented) store which
+under Std.Db.Db2, which is a memory-based (hashmap-oriented) store which
 sync's data to files.
 
 It is collection-based, each consisting of a number key-value pairs. 
@@ -62,7 +62,7 @@ knowing the UUID.
     error (x.?call(value)==false, "Value " + getType(value) + " not synthesizable")
     value = syn(value)
     
-    Lib.Db.Db2.set(collection,key,value)
+    Std.Db.Db2.set(collection,key,value)
 
 /Set
 
@@ -73,26 +73,26 @@ knowing the UUID.
     P(2,Input("key").get)=>key
     P(3)=>defaultValue
     
-    value=Lib.Db.Db2.get(collection,key)
+    value=Std.Db.Db2.get(collection,key)
 
-	if (value != null) {
-		# the eval only fails if collection is corrupted, but we
-		# want to continue operating still
-		tryCatch(
-			eval(value)
-		)=>x
-		if (!x.ok) {
-			Db2:Set(collection,key,defaultValue)		
-			error("Db2 collection " + collection 
-				+ " invalid value for key=" + key + " '" + value 
-				+ "' - saved defaultValue (" + defaultValue + ") for this key!!")	
-		}
-		if (x.ok) value=x.result else value=defaultValue
-	} else {
-		value=defaultValue
-	}
-	
-	value
+    if (value != null) {
+        # the eval only fails if collection is corrupted, but we
+        # want to continue operating still
+        tryCatch(
+            eval(value)
+        )=>x
+        if (!x.ok) {
+            Db2:Set(collection,key,defaultValue)        
+            error("Db2 collection " + collection 
+                + " invalid value for key=" + key + " '" + value 
+                + "' - saved defaultValue (" + defaultValue + ") for this key!!") 
+        }
+        if (x.ok) value=x.result else value=defaultValue
+    } else {
+        value=defaultValue
+    }
+    
+    value
 /Get
 
 
@@ -100,14 +100,14 @@ knowing the UUID.
 # Get keys in collection
 # --
     P(1,inputCollection)=>collection
-    Lib.Db.Db2.keys(collection)
+    Std.Db.Db2.keys(collection)
 /Keys
 
 
 
 # Get collections
 # --
-    Lib.Db.Db2.collections.sort->name
+    Std.Db.Db2.collections.sort->name
         reject(name.startsWith("Obj."))  # prefix for Db2Obj collections
         out(name)
 /Collections
@@ -117,7 +117,7 @@ knowing the UUID.
 # Delete collection
 # --
     P(1,inputCollection)=>collection
-    Lib.Db.Db2.deleteCollection(collection)
+    Std.Db.Db2.deleteCollection(collection)
 /DeleteCollection
 
 

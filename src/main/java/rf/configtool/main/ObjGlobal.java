@@ -46,7 +46,7 @@ import rf.configtool.main.runtime.lib.ObjFile;
 import rf.configtool.main.runtime.lib.ObjGlob;
 import rf.configtool.main.runtime.lib.ObjGrep;
 import rf.configtool.main.runtime.lib.ObjInput;
-import rf.configtool.main.runtime.lib.ObjLib;
+import rf.configtool.main.runtime.lib.ObjStd;
 import rf.configtool.main.runtime.lib.ObjPersistent;
 import rf.configtool.main.runtime.lib.ObjRegex;
 import rf.configtool.main.runtime.lib.ObjSys;
@@ -147,7 +147,7 @@ public class ObjGlobal extends Obj {
 
         // name spaces
         add(new FunctionSys());
-        add(new FunctionLib());
+        add(new FunctionStd());
     }
     
     public ObjGlobal objGlobal() {
@@ -574,19 +574,18 @@ public class ObjGlobal extends Obj {
     }
     
 
-    private static ValueObj staticLib = new ValueObj(new ObjLib());
+    private static ValueObj staticLib = new ValueObj(new ObjStd());
 
-    class FunctionLib extends Function {
+    class FunctionStd extends Function {
         public String getName() {
-            return "Lib";
+            return "Std";
         }
         public String getShortDesc() {
-            return "Lib() - create Lib object";
+            return "Std() - create Std object";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
             return staticLib;
-            //return new ValueObj(new ObjLib());
         }
     }
     

@@ -23,36 +23,36 @@ control disabled!!
 
 # Get IP address of windows host
 # --
-	ip=null
-	File("/etc/resolv.conf").read->line
-		assert(line.startsWith("nameserver")) 
-		ip=line.split.last
-		break
-	|
-	error(ip==null,"No ip-address found")
-	ip
+    ip=null
+    File("/etc/resolv.conf").read->line
+        assert(line.startsWith("nameserver")) 
+        ip=line.split.last
+        break
+    |
+    error(ip==null,"No ip-address found")
+    ip
 /GetIP
 
 # Create temporary shell script
 # --
-	Sequence(
-		@ #!/bin/bash
-		@
-		@ export DISPLAY=<<GetIP>>:0.0
-		@ export LIBGL_ALWAYS_INDIRECT=1
-		@ xterm &
-		@ lxterminal &
-		@ nautilus &
-	).mergeExpr => code
+    Sequence(
+        @ #!/bin/bash
+        @
+        @ export DISPLAY=<<GetIP>>:0.0
+        @ export LIBGL_ALWAYS_INDIRECT=1
+        @ xterm &
+        @ lxterminal &
+        @ nautilus &
+    ).mergeExpr => code
 
-	Inner{
-		Readme->line println(line)
-	}
-	println
+    Inner{
+        Readme->line println(line)
+    }
+    println
 
-	scriptFile=Lib:TmpFile("RunX","sh")
-	scriptFile.create(code)
-	Dir.run("chmod","+x",scriptFile.path)
-	Dir.run(scriptFile.path)
-	scriptFile.delete
+    scriptFile=Lib:TmpFile("RunX","sh")
+    scriptFile.create(code)
+    Dir.run("chmod","+x",scriptFile.path)
+    Dir.run(scriptFile.path)
+    scriptFile.delete
 /Run

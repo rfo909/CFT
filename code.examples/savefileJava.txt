@@ -169,8 +169,8 @@ P(2,"") =>prefix
 # Install GIT if missing 
 # 2022-04: missing for a clean Ubuntu Desktop install
 # --
-	P(1,GetSSHTarget) =>target
-	P(2,"") =>prefix
+    P(1,GetSSHTarget) =>target
+    P(2,"") =>prefix
     println(prefix+"Verify GIT installed")
     SSH:run (target,"which git",true) =>result
     if(result.get("exitCode") != 0) {

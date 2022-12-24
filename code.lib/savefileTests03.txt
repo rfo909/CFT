@@ -127,11 +127,11 @@ f.convertCompressed(zip)
 /Test15_file_convert_compressed
 
 
-dir.file("f").protect.binaryCreate(Lib.Util.randomBinary("sdf"))
+dir.file("f").protect.binaryCreate(Std.Util.randomBinary("sdf"))
 /Test16_file_binaryCreate
 
 
-dir.protect.file("f").binaryCreate(Lib.Util.randomBinary("sdf"))
+dir.protect.file("f").binaryCreate(Std.Util.randomBinary("sdf"))
 /Test17_file_in_dir_binaryCreate
 
 

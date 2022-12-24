@@ -205,14 +205,14 @@ choice.
 
 # Open command shell in given directory
 # --
-	P(1) as Dir => dir
-	if (Sys.isWindows) {
-		dir.run("powershell -c start-process powershell".split)
-	} else {
-		dir.run("lxterminal") 
-	}
+    P(1) as Dir => dir
+    if (Sys.isWindows) {
+        dir.run("powershell -c start-process powershell".split)
+    } else {
+        dir.run("lxterminal") 
+    }
 /OpenCMD
-		
+        
 
 # Get the private dir
 # --
@@ -227,8 +227,8 @@ choice.
 # --
     P(1,"tmp") =>name 
     P(2,"txt") => type
-    Util:Counter("Lib.TmpFile.id") => x
-    s=name+Lib.Db.UUID+"-"+x+"."+type
+    Util:Counter("Std.TmpFile.id") => x
+    s=name+Std.Db.UUID+"-"+x+"."+type
     if (Sys.isWindows,
         Dir("c:\temp").file(s),
         Dir("/tmp").file(s) 
@@ -311,49 +311,49 @@ choice.
 
 # Print directory tree structure
 # --
-	P(1,Dir)=>dir
+    P(1,Dir)=>dir
 
-	# recursion control parameters
-	P(2,0)=>nestCount
-	P(3,List)=>output
+    # recursion control parameters
+    P(2,0)=>nestCount
+    P(3,List)=>output
 
-	indent="|  ".times(nestCount)
-	indent2="|  ".times(nestCount+1)
-	indent2="|  ".times(nestCount+1)
+    indent="|  ".times(nestCount)
+    indent2="|  ".times(nestCount+1)
+    indent2="|  ".times(nestCount+1)
 
-	output.add(indent + "+ " + dir.name)
+    output.add(indent + "+ " + dir.name)
 
-	error(output.length > 1000,"Over 1000 lines of text generated. Aborting.")
+    error(output.length > 1000,"Over 1000 lines of text generated. Aborting.")
 
-	Inner{
-		files=dir.files
-		line=indent2
-		lineCount=0
-		files->f 
-			if (line.length+1+f.name.length >= Term.w) {
-				output.add(line)
-				lineCount=lineCount+1
-				line=indent2
-			}
-			line=line + " " + f.name
-			break(lineCount >= 5)
-		|
-		if (lineCount >= 5) {
-			output.add(indent2 + " ...")
-		} else {
-			if (line.length > indent2.length) output.add(line)
-		}
-		output.add(indent2)
-	}
-	Inner{
-		dir.dirs->d 
-			reject(d.name.startsWith("."))  # ignore system directories
-			ShowTree(d,nestCount+1,output)
-	}
+    Inner{
+        files=dir.files
+        line=indent2
+        lineCount=0
+        files->f 
+            if (line.length+1+f.name.length >= Term.w) {
+                output.add(line)
+                lineCount=lineCount+1
+                line=indent2
+            }
+            line=line + " " + f.name
+            break(lineCount >= 5)
+        |
+        if (lineCount >= 5) {
+            output.add(indent2 + " ...")
+        } else {
+            if (line.length > indent2.length) output.add(line)
+        }
+        output.add(indent2)
+    }
+    Inner{
+        dir.dirs->d 
+            reject(d.name.startsWith("."))  # ignore system directories
+            ShowTree(d,nestCount+1,output)
+    }
 
-	output
+    output
 /ShowTree
-		
+        
 
 
 # Delete directory tree, asks for interactive confirm
@@ -638,8 +638,8 @@ run(null,null,null,true)
 
 # Ask user for input
 # --
-	P(1,"label") =>label 
-	P(2) =>currVal
+    P(1,"label") =>label 
+    P(2) =>currVal
     println("")
     (label + if(currVal," ["+currVal+"]","") + " : ") =>prompt
     readLine(prompt) =>line
@@ -651,8 +651,8 @@ run(null,null,null,true)
 
 # Ask user for input
 # --
-	P(1,"label") =>label 
-	P(2) =>currVal
+    P(1,"label") =>label 
+    P(2) =>currVal
     null =>gotResult
     loop
         ReadValue(label,""+currVal) =>val
@@ -667,15 +667,15 @@ run(null,null,null,true)
 
 # Ask user for input
 # --
-	P(1,"label") =>label 
-	P(2) =>currVal 
-	P(3,"yes") =>trueVal 
-	P(4,"no") =>falseVal
+    P(1,"label") =>label 
+    P(2) =>currVal 
+    P(3,"yes") =>trueVal 
+    P(4,"no") =>falseVal
 
     null =>gotResult
     loop
         if(currVal != null, if(currVal, trueVal, falseVal), null) =>currStrVal
-		
+        
         ReadValue(label+" "+trueVal + "/" + falseVal,currStrVal) =>val
         if(val==trueVal) {true =>gotResult}
         if(val==falseVal) {false =>gotResult}
@@ -694,8 +694,8 @@ run(null,null,null,true)
     P(1,"Please confirm")=>label
     P(2,"yes")=>confirmString
     P(3,"no")=>defaultValue
-	
-	options=confirmString + "/" + defaultValue
+    
+    options=confirmString + "/" + defaultValue
     readLine(label + " " + options + " ("+defaultValue+")") => inp
     if (inp.trim=="") inp=defaultValue
     
@@ -709,10 +709,10 @@ run(null,null,null,true)
     P(1,"Continue")=>label
     P(2,"yes")=>confirmString
     P(3,"no")=>defaultValue
-	
-	label="!!! " + label
-	println
-	error(!Confirm(label,confirmString,defaultValue),"Aborting")
+    
+    label="!!! " + label
+    println
+    error(!Confirm(label,confirmString,defaultValue),"Aborting")
 /HardConfirm
 
 
@@ -929,13 +929,13 @@ run(null,null,null,true)
 
 # Diff files
 # --
-	P(1) as File => a
-	P(2) as File => b
-	if (Sys.isWindows) {
-		Dir.run("powershell","-c","diff (cat " + a.path + ") (cat " + b.path + ")")
-	} else {
-		Dir.run("diff",a.path,b.path)
-	}
+    P(1) as File => a
+    P(2) as File => b
+    if (Sys.isWindows) {
+        Dir.run("powershell","-c","diff (cat " + a.path + ") (cat " + b.path + ")")
+    } else {
+        Dir.run("diff",a.path,b.path)
+    }
 /DiffFiles
 
 
@@ -943,127 +943,127 @@ run(null,null,null,true)
 # Remove files and dirs. 
 # Service function for "rm" shell command, called via mRm lambda in CFT.props
 # --
-	P(1) as List => filesAndDirs
+    P(1) as List => filesAndDirs
 
-	filesAndDirs->x
-		if (getType(x)=="File") {
-			ok = x.delete
-			report(ok,"File",x.path)
-		} else if (getType(x)=="Dir") {
-			ok = x.delete
-			if (ok) {
-				report(ok,"Dir",x.path)
-			} else {
-				if (Lib:Confirm("Confirm deleting " + x.path + " with content") ) {
-					{x.allFiles->f ok=f.delete report(ok,"File",f.path)}
-					{x.allDirs->d ok=d.delete report(ok,"Dir",d.path)}
-					{x->d ok=d.delete report(ok,"Dir",d.path)}
-				}
-			}
-		}
+    filesAndDirs->x
+        if (getType(x)=="File") {
+            ok = x.delete
+            report(ok,"File",x.path)
+        } else if (getType(x)=="Dir") {
+            ok = x.delete
+            if (ok) {
+                report(ok,"Dir",x.path)
+            } else {
+                if (Lib:Confirm("Confirm deleting " + x.path + " with content") ) {
+                    {x.allFiles->f ok=f.delete report(ok,"File",f.path)}
+                    {x.allDirs->d ok=d.delete report(ok,"Dir",d.path)}
+                    {x->d ok=d.delete report(ok,"Dir",d.path)}
+                }
+            }
+        }
 //RmFilesAndDirs
 
 
 # Symbol set
 # --
-	P(1) as String => symbol
+    P(1) as String => symbol
 
-	Sys.lastResult => value
+    Sys.lastResult => value
 
-	if (getType(value) != "Dir" && getType(value) != "File") {
-		Lib:ShowWarn("Sys.lastResult not Dir or File, type=" + getType(value))
-		error(readLine("Press y to continue, otherwise abort").toLower != "y","Aborting")
-	}
+    if (getType(value) != "Dir" && getType(value) != "File") {
+        Lib:ShowWarn("Sys.lastResult not Dir or File, type=" + getType(value))
+        error(readLine("Press y to continue, otherwise abort").toLower != "y","Aborting")
+    }
 
-	if (getType(value) == "Dir" || getType(value) == "File") {
-		Lib:Header("Protection?")
-		println("Should the " + getType(value) + " reference be protected against destructive operations?")
-		readLine("Enter non-blank string to protect it").trim => reason
-		if (reason != "") {
-			value.protect(reason)
-		}
-	}
+    if (getType(value) == "Dir" || getType(value) == "File") {
+        Lib:Header("Protection?")
+        println("Should the " + getType(value) + " reference be protected against destructive operations?")
+        readLine("Enter non-blank string to protect it").trim => reason
+        if (reason != "") {
+            value.protect(reason)
+        }
+    }
 
-	Db2:Get(Sys.scriptId,"symbolDict",Dict) => data
-	time=currentTimeMillis
-	data.set(symbol,SymDict(value,time))
-	Db2:Set(Sys.scriptId,"symbolDict",data)
-	
-	# Show all symbols
-	println
-	Inner { Lib:Symbols(false)->line println(line) }
-	println
-	value
+    Db2:Get(Sys.scriptId,"symbolDict",Dict) => data
+    time=currentTimeMillis
+    data.set(symbol,SymDict(value,time))
+    Db2:Set(Sys.scriptId,"symbolDict",data)
+    
+    # Show all symbols
+    println
+    Inner { Lib:Symbols(false)->line println(line) }
+    println
+    value
 //SymbolSet
 
 
 
 # Symbol get
 # --
-	P(1) as String => symbol
-	Db2:Get(Sys.scriptId,"symbolDict",Dict) => data
-	if (data.has(symbol)) {
-		data.get(symbol) => entryDict
-		entryDict.time=currentTimeMillis
-		Db2:Set(Sys.scriptId,"symbols",data)
-		entryDict.value
-	} else {
-		null
-	}
+    P(1) as String => symbol
+    Db2:Get(Sys.scriptId,"symbolDict",Dict) => data
+    if (data.has(symbol)) {
+        data.get(symbol) => entryDict
+        entryDict.time=currentTimeMillis
+        Db2:Set(Sys.scriptId,"symbols",data)
+        entryDict.value
+    } else {
+        null
+    }
 //SymbolGet
 
 # Show symbols (helper)
 # --
-	Db2:Get(Sys.scriptId,"symbolDict",Dict)=>data
-	data.keys.sort->key
-		data.get(key)=>entryDict
-		value=entryDict.value
-		s=""+value
-		if (getType(value)=="File" || getType(value)=="Dir") s=value.path
-		report(key,getType(value),s)
-//SymbolsReport	
+    Db2:Get(Sys.scriptId,"symbolDict",Dict)=>data
+    data.keys.sort->key
+        data.get(key)=>entryDict
+        value=entryDict.value
+        s=""+value
+        if (getType(value)=="File" || getType(value)=="Dir") s=value.path
+        report(key,getType(value),s)
+//SymbolsReport   
 
 
 # Show and optionally delete symbols
 # --
-	P(1,true)=>edit
-	loop
-		Lib:Header("Defined symbols")
-		Inner {
-			SymbolsReport->line println(line)
-		}
-		break(!edit)
-		println
-		readLine("Enter symbol to delete, Enter for none") => line
-		break(line=="")
-		Db2:Get(Sys.scriptId,"symbolDict",Dict) => data
-		data.remove(line.trim)
-		Db2:Set(Sys.scriptId,"symbolDict",data)
-		println
+    P(1,true)=>edit
+    loop
+        Lib:Header("Defined symbols")
+        Inner {
+            SymbolsReport->line println(line)
+        }
+        break(!edit)
+        println
+        readLine("Enter symbol to delete, Enter for none") => line
+        break(line=="")
+        Db2:Get(Sys.scriptId,"symbolDict",Dict) => data
+        data.remove(line.trim)
+        Db2:Set(Sys.scriptId,"symbolDict",data)
+        println
 //Symbols
 
 
 # Hash a number of files
 # Called by mHash in CFT.props
 # --
-	space=false
-	P(1) as List -> f
-		if (space) out("")
-		out(f.path)
-		out(f.hash)
-		space=true
+    space=false
+    P(1) as List -> f
+        if (space) out("")
+        out(f.path)
+        out(f.hash)
+        space=true
 //HashFiles
 
 
 # Search through a list of files
 # Called by mGrep in CFT.props
 # --
-	P(1) => str
-	P(2) => fileList
-	
-	grep=Grep(str)
-	fileList->file
-		grep.file(file)->line
-			report(line.file.name, line.lineNumber, line)
+    P(1) => str
+    P(2) => fileList
+    
+    grep=Grep(str)
+    fileList->file
+        grep.file(file)->line
+            report(line.file.name, line.lineNumber, line)
 //GrepFiles
 

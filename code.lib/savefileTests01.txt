@@ -372,15 +372,15 @@ t10.concat("-")=="1-2-3"
 
 
 
-# Lib.Java - accessing Java methods and constructors
+# Std.Java - accessing Java methods and constructors
 # 2021-09-08
 # This code exercises key functionality: class lookup, constructor lookup and call with params, 
 # method lookup and call with params, and conversion of values as parameters and return value from function
 #
-Lib.Java.forName("java.lang.String") => String
-String.getConstructor(String).call(Lib.Java.String("test")) => obj
-String.getConstructor(String).call(Lib.Java.String("123")) => obj2
-Lib.Java.Object(obj2) => paramObj
+Std.Java.forName("java.lang.String") => String
+String.getConstructor(String).call(Std.Java.String("test")) => obj
+String.getConstructor(String).call(Std.Java.String("123")) => obj2
+Std.Java.Object(obj2) => paramObj
 String.getMethod("concat",String).call(obj,paramObj).value
 /t17
 
@@ -574,11 +574,11 @@ tryCatch({33 as String}).ok==false
 # Generic function (sort of) that produces an object (Dict)
 # with a Lambda (converted to closure) for setting values of given type.
 # --
-	P(1) as String => type
-	P(2) as (List(type,"null")) => value
-	SymDict(type,value).set("update",Lambda{
-	  P(1) as (self.type)=>x self.set("value",x)  # set does not accept null
-	})
+    P(1) as String => type
+    P(2) as (List(type,"null")) => value
+    SymDict(type,value).set("update",Lambda{
+      P(1) as (self.type)=>x self.set("value",x)  # set does not accept null
+    })
 /t38_getTypedObject
 
 
@@ -588,7 +588,7 @@ tryCatch({33 as String}).ok==false
   obj.update("value")  # ok
   
   tryCatch(
-  	obj.update(23)
+    obj.update(23)
   ).ok==false # should fail
 /Test38_typechecking_with_closure
 
@@ -608,8 +608,8 @@ Dict.set("a",1).set("b",Lambda{P(1) as int=>x self.a+x})
 # if value is a Closure, then it is automatically invoked, with
 # parameters (if defined)
 # --
-	dict=t39_dict
-	dict.b(3)==4
+    dict=t39_dict
+    dict.b(3)==4
 /Test39_auto_invoke_closure_from_dict_lookup
 
 
@@ -617,33 +617,33 @@ Dict.set("a",1).set("b",Lambda{P(1) as int=>x self.a+x})
 # To simplify type checking with "as", both Lambdas and Closures
 # have type "Callable" in CFT.
 # --
-	closure = t39_dict.get("b")
-	
-	# verify that variable "closure" is not result from auto-invoke
-	getType(closure)=="Callable"  
-	
+    closure = t39_dict.get("b")
+    
+    # verify that variable "closure" is not result from auto-invoke
+    getType(closure)=="Callable"  
+    
 /Test40_non_auto_invoke_closure_when_dict_get
 
 
 
 # Verifying type of Lambda
 # --
-	getType(Lambda{})=="Callable"
+    getType(Lambda{})=="Callable"
 /Test41_verify_lambda_is_callable
   
 
 
 # Object functions calling each other - still uses self
 # --
-	Dict
-		.set("baseValue",Lambda{
-			1
-		})
-		.set("add",Lambda{
-			P(1,0) as int=>x self.baseValue+x ## identical syntax for variables and no-parameter lambda
-		})
-	=> d
-	d.add(5)==6
+    Dict
+        .set("baseValue",Lambda{
+            1
+        })
+        .set("add",Lambda{
+            P(1,0) as int=>x self.baseValue+x ## identical syntax for variables and no-parameter lambda
+        })
+    => d
+    d.add(5)==6
 /Test42_object_lambda_calling_member_lambda
 
 
@@ -654,8 +654,8 @@ Dict.set("a",1).set("b",Lambda{P(1) as int=>x self.a+x})
 # It is only in the specialized syntax where we use .ident on a Dict that
 # a closure gets automatically called.
 # --
-	Dict.set("a",2).bind(Lambda{self.a}) => closure
-	closure.call==2
+    Dict.set("a",2).bind(Lambda{self.a}) => closure
+    closure.call==2
 /Test43_closure_dot_call
 
 
@@ -663,88 +663,88 @@ Dict.set("a",1).set("b",Lambda{P(1) as int=>x self.a+x})
 # Closures can also be taken from a Dict, with .get() and must
 # then be called in the same way
 # --
-	Dict.set("a",2).set("func",Lambda{self.a}).get("func").call==2
+    Dict.set("a",2).set("func",Lambda{self.a}).get("func").call==2
 /Test44_member_closure_dot_call
 
 
 
 # The .? lookup now also applies to dictionary lookup
 # --
-	Dict.set("a",1).?a == true
+    Dict.set("a",1).?a == true
 /Test44_cond_lookup_in_dict
 
 
 # .? lookup for closures
 # --
-	Dict.set("a",Lambda{})=>x x.?a == true
+    Dict.set("a",Lambda{})=>x x.?a == true
 /Test45_cond_lookup_dict_closure
 
 
 # .? lookup for closures
 # --
-	Dict.set("a",Lambda{})=>x x.?b == false
+    Dict.set("a",Lambda{})=>x x.?b == false
 /Test45b_cond_lookup_dict_closure_inverted
 
 
 # Dict.ident=Expr
 # --
-	Dict
-		_.a=1
-		_.f=Lambda{
-			self.a=self.a+1
-		}
-	=> obj
-	
-	obj.f
-	obj.f
-	obj.a==3
+    Dict
+        _.a=1
+        _.f=Lambda{
+            self.a=self.a+1
+        }
+    => obj
+    
+    obj.f
+    obj.f
+    obj.a==3
 /Test46_Dict_dot_x_assigment
 
 
 
 # "as" Dict name
 # --
-	x=Lambda{ P(1) as &Data => value }
-	
-	tryCatch(
-		x.call(Dict("Data"))
-	).ok==true
+    x=Lambda{ P(1) as &Data => value }
+    
+    tryCatch(
+        x.call(Dict("Data"))
+    ).ok==true
 /Test47_as_dict_name
 
 
 
 # "as" Dict name
 # --
-	x=Lambda{ P(1) as &Data => value }
-	
-	tryCatch(
-		x.call(Dict("XYZ"))
-	).ok==false
+    x=Lambda{ P(1) as &Data => value }
+    
+    tryCatch(
+        x.call(Dict("XYZ"))
+    ).ok==false
 /Test47b_as_dict_name_inverse
 
 
 
 # "as" Dict name
 # --
-	x=Lambda{ P(1) as &Data => value }
-	
-	tryCatch(
-		x.call("Data")  # string
-	).ok==false
+    x=Lambda{ P(1) as &Data => value }
+    
+    tryCatch(
+        x.call("Data")  # string
+    ).ok==false
 /Test47c_as_dict_name_inverse_nondict_value
 
 
 
 # Test47d - check that lambda can not access creating context
 # --
-	a=1
-	Lambda{a}.call  # should fail
+    a=1
+    Lambda{a}.call  # should fail
 //t47d_x
 
 # tryCatch, verify error message
 # --
-	tryCatch(t47d_x) => ex
-	ex.msg.contains("unknown symbol 'a'")
+    tryCatch(t47d_x) => ex
+    ex.msg.contains("unknown symbol 'a'")
 /Test47d_verify_lambda_no_access_to_create_context
 
 
@@ -760,42 +760,42 @@ Dict.set("a",1).set("b",Lambda{P(1) as int=>x self.a+x})
 
 # test class A
 # --
-	self.a=List
-	self.b=Dict
+    self.a=List
+    self.b=Dict
 /class t48a
 
 # test class B
 # --
-	self.copyFrom(t48a)
+    self.copyFrom(t48a)
 /class t48b
 
 # Test48
 # --
-	x=t48b
-	y=t48b
-	x.a.add("aaa")
-	x.b.bbb="bbb"
-	# test
-	!x.a.empty && !x.b.keys.empty && y.a.empty && y.b.keys.empty
+    x=t48b
+    y=t48b
+    x.a.add("aaa")
+    x.b.bbb="bbb"
+    # test
+    !x.a.empty && !x.b.keys.empty && y.a.empty && y.b.keys.empty
 /Test48_class_inheritance_independence
 
 
 
 # Test 49 - verify that both lambdas and closure have type "Callable"
 # --
-	getType(Lambda{})=="Callable"
-	&&
-	getType(Dict.set("a",Lambda{}).get("a"))=="Callable"
+    getType(Lambda{})=="Callable"
+    &&
+    getType(Dict.set("a",Lambda{}).get("a"))=="Callable"
 /Test49_verify_lambda_and_closure_of_type_Callable
 
 
 # Test 50 - verify predicate version of "as"
 # --
-	1 as? int => a
-	1 as? String => b
-	1 as? String? => c
-	
-	a && !b && !c
+    1 as? int => a
+    1 as? String => b
+    1 as? String? => c
+    
+    a && !b && !c
 /Test50_as_predicate_version
 
 
@@ -806,21 +806,21 @@ Dict.set("a",1).set("b",Lambda{P(1) as int=>x self.a+x})
 
 # Test 51 - predicate version of "as" for classes
 # --
-	t51X => obj
-	
-	obj as? Dict => a
-	obj as? &t51X => b
-	obj as? &x => c
-	
-	a && b && !c
+    t51X => obj
+    
+    obj as? Dict => a
+    obj as? &t51X => b
+    obj as? &x => c
+    
+    a && b && !c
 /Test51_as_predicate_version_class_object
-	
+    
 
 
 # Test 52 - predicate call is a try-catch, must handle call stack
 # --
-	# Copied from Util:ShowDict, where the problem first manifested
-	
+    # Copied from Util:ShowDict, where the problem first manifested
+    
     LPresent=Lambda{
         P(1)=>val
         # Inner lambda to check if synthesizable via predicate call
@@ -834,19 +834,19 @@ Dict.set("a",1).set("b",Lambda{P(1) as int=>x self.a+x})
         }
     }
 
-	tryCatch({
-		Inner {
-			Dict
-				_.a=1
-				_.b=Lambda{}  # closure - can not be synthesized in "stand-alone" form, only as part of Dict
-				=> x
-				
-		    x.keys->key
-		        val=LPresent.call(x.get(key))
-		        #report(key,val)
-		    |
-		}
-	}).ok
+    tryCatch({
+        Inner {
+            Dict
+                _.a=1
+                _.b=Lambda{}  # closure - can not be synthesized in "stand-alone" form, only as part of Dict
+                => x
+                
+            x.keys->key
+                val=LPresent.call(x.get(key))
+                #report(key,val)
+            |
+        }
+    }).ok
     
     
 /Test52_predicate_call_dot_Q_messing_up_call_stack
@@ -863,19 +863,19 @@ Dict.set("a",1).set("b",Lambda{P(1) as int=>x self.a+x})
 
 # Local function
 # --
-	3
+    3
 /t53_data
 
 
 # Lambda call 
 # --
-	Lambda{t53_data}.call
+    Lambda{t53_data}.call
 /t53_call
 
 
 # Use tryCatch to verify ok
 # --
-	tryCatch(t53_call).ok
+    tryCatch(t53_call).ok
 /Test53_Lambda_script_scope
 
 
@@ -887,26 +887,26 @@ Dict.set("a",1).set("b",Lambda{P(1) as int=>x self.a+x})
 
 # Create Lambda
 # --
-	Lambda{P(1)+1}
+    Lambda{P(1)+1}
 /t54_A
 
 # Another lambda, taking A as parameter and calling it
 # with invalid argument (Dict)
 # --
-	Lambda{
-		P(1) as Callable => a
-		a.call(Dict)
-	}
+    Lambda{
+        P(1) as Callable => a
+        a.call(Dict)
+    }
 /t54_B
 
 # Function calling B with A as parameter
 # --
-	t54_B.call(t54_A)
+    t54_B.call(t54_A)
 /t54_call
 
 # Function calling the _call function
 # --
-	t54_call
+    t54_call
 /t54_outer
 
 
@@ -929,25 +929,25 @@ ERROR: [<script> Tests01:861.8] Invalid value Dict [] + 1
 
 # Test54: verify call stack
 # --
-	tryCatch(t54_outer) => ex
-	
-	# Note that interactive stack trace contains data from .msg (the actual error message)
-	List(ex.msg) + ex.stack => stack
-	
-	foundAll=true
-	
-	# Look for specific parts in stack trace
-	List("t54_outer","t54_call","Invalid value Dict")->str
-		found=false
-		{stack->line
-			if (line.contains(str)) found=true
-		}
-		if (!found) {
-			println("Missing: '" + str + "'")
-			foundAll=false
-		}
-	|
-	foundAll
+    tryCatch(t54_outer) => ex
+    
+    # Note that interactive stack trace contains data from .msg (the actual error message)
+    List(ex.msg) + ex.stack => stack
+    
+    foundAll=true
+    
+    # Look for specific parts in stack trace
+    List("t54_outer","t54_call","Invalid value Dict")->str
+        found=false
+        {stack->line
+            if (line.contains(str)) found=true
+        }
+        if (!found) {
+            println("Missing: '" + str + "'")
+            foundAll=false
+        }
+    |
+    foundAll
 /Test54_CFT_call_stack_with_lambdas
 
 
@@ -959,13 +959,13 @@ ERROR: [<script> Tests01:861.8] Invalid value Dict [] + 1
 
 # figure class
 # --
-	self.isSomething=Lambda{true}
+    self.isSomething=Lambda{true}
 /class t55_figure
 
 
 # Another figure class
 # --
-	self.isSomething=Lambda{false}
+    self.isSomething=Lambda{false}
 /class t55_secondfigure as t55_figure
 
 
@@ -974,10 +974,10 @@ ERROR: [<script> Tests01:861.8] Invalid value Dict [] + 1
 # name, adding an object type invalidates the actual class name, when doing type
 # comparisons.
 # --
-	{t55_figure as? &t55_figure}                    # actual class
-	&& {t55_secondfigure as? &t55_figure}           # object type
-	&& {t55_secondfigure as? &t55_secondfigure}==false     # actual class name irrelevant when object type defined
-	&& t55_secondfigure.getName=="t55_figure"      # verifying dict name property directly
+    {t55_figure as? &t55_figure}                    # actual class
+    && {t55_secondfigure as? &t55_figure}           # object type
+    && {t55_secondfigure as? &t55_secondfigure}==false     # actual class name irrelevant when object type defined
+    && t55_secondfigure.getName=="t55_figure"      # verifying dict name property directly
 /Test55_class_object_type_checking
 
 
@@ -985,8 +985,8 @@ ERROR: [<script> Tests01:861.8] Invalid value Dict [] + 1
 
 # Run all TestX
 # --
-	P(1,true)=>showAll
-	
+    P(1,true)=>showAll
+    
     
     allOk=true
     count=0
@@ -997,7 +997,7 @@ ERROR: [<script> Tests01:861.8] Invalid value Dict [] + 1
         allOk=allOk && result
         if(showAll || result==false) report(f,result)
     | -> line
-    	println(line)
+        println(line)
     |
     println("Ran " + count + " tests!")
 
