@@ -78,18 +78,26 @@
 /run
 
 
-# Show seconds 
+# Show clock (forever) 
 # --
-    seconds=""
+    curr=""
     loop
-        Date.setFormat("HH:mm:ss").fmt => s2
-        if (s2 != seconds) {
-            seconds=s2
+        Date.setFormat("HH:mm:ss").fmt => s
+        if (s != curr) {
+            curr=s
             println(Curses:Clear)
-            Inner {Letters7x5:GetText(seconds)->line println(line)}
+            Inner {Letters7x5:GetText(curr)->line println(line)}
         }
         Sys.sleep(50)
-//Clock
+/Clock
+
+
+# Show time 
+# --
+    Date.setFormat("HH:mm:ss").fmt => s
+    Inner {Letters7x5:GetText(s)->line println(line)}
+    s
+/Time
 
 
 
