@@ -133,7 +133,6 @@ public class ObjGlobal extends Obj {
         add(new FunctionPrintln());
         add(new FunctionFileLine());
         add(new FunctionError());
-        add(new FunctionShell());
         add(new FunctionGetType());
         add(new FunctionGetExprCount());
         add(new FunctionBinary());
@@ -805,29 +804,6 @@ public class ObjGlobal extends Obj {
     } 
 
    
-
-    class FunctionShell extends Function {
-        public String getName() {
-            return "shell";
-        }
-        public String getShortDesc() {
-            return "shell() - runs shell as configured in " + PropsFile.PROPS_FILE;
-        }
-        @Override
-        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 0) throw new Exception("Expected no parameters");
-            String shellCommand;
-            if (File.separator.equals("\\")) {
-                shellCommand=ctx.getObjGlobal().getRoot().getPropsFile().getWinShell();
-            } else {
-                shellCommand=ctx.getObjGlobal().getRoot().getPropsFile().getShell();
-            }
-            callExternalProgram(shellCommand, ctx);
-            return new ValueBoolean(true);
-        }
-    }
-    
-    
     class FunctionGetType extends Function {
         public String getName() {
             return "getType";

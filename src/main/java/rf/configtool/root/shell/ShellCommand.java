@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package rf.configtool.root.shell;
 
 import java.io.File;
+import java.lang.ProcessBuilder.Redirect;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -155,6 +156,29 @@ public abstract class ShellCommand {
         }
         
     }
+    
+    
+    protected void callExternalProgram (String cmd, Ctx ctx) throws Exception {
+        List<String> strArgs=new ArrayList<String>();
+        strArgs.add(cmd);
+
+        String program=strArgs.get(0);
+        
+        ProcessBuilder processBuilder = new ProcessBuilder(strArgs);
+        
+        processBuilder.redirectInput(Redirect.INHERIT); // connect input
+        processBuilder.redirectOutput(Redirect.INHERIT);
+        processBuilder.redirectError(Redirect.INHERIT);
+
+        // set current directory
+        processBuilder.directory(new File(ctx.getObjGlobal().getCurrDir()));
+        
+        Process process = processBuilder.start();
+        process.waitFor();
+        ctx.getObjGlobal().addSystemMessage("Running " + program + " completed");
+    }
+
+    
 
 
 }

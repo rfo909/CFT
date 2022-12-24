@@ -45,6 +45,7 @@ public class ShellCommandsDetector {
         "hex",
         "grep",
         "mkdir",
+        "shell",
             
     };
 
@@ -112,6 +113,9 @@ public class ShellCommandsDetector {
         }
         if (name.equals("mkdir")) {
             return new ShellMkdir(parts);
+        }
+        if (name.equals("shell")) {
+        	return new ShellShell(parts);
         }
         // else ...
         

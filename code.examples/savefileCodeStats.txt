@@ -68,7 +68,7 @@ ScriptFiles->f
     println("Script code:      " + ScriptLines + " lines")
     println("Java code:        " + JavaLines + " lines")
     println("Functions:        " + JavaFunctions)
-    println("Shell commands:   " + ShellCommands)
+    println("Shell commands:   " + (ShellCommands+3))  # cat, edit, more, tail implemented in single class
     println("Object types:     " + JavaObjectTypes)
     println("Value types:      " + JavaValueTypes)
 /main

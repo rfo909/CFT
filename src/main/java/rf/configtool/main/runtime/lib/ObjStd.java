@@ -28,7 +28,6 @@ import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueList;
 import rf.configtool.main.runtime.ValueObj;
-import rf.configtool.main.runtime.lib.conversions.ObjConvert;
 import rf.configtool.main.runtime.lib.db.ObjDb;
 import rf.configtool.main.runtime.lib.dd.DD;
 import rf.configtool.main.runtime.lib.ddd.DDD;
@@ -43,7 +42,6 @@ public class ObjStd extends Obj {
         this.add(new FunctionPlot());
         this.add(new FunctionData());
         this.add(new FunctionMath());
-        this.add(new FunctionConvert());
         this.add(new FunctionFiles());
         this.add(new FunctionText());
         this.add(new FunctionDb());
@@ -124,18 +122,7 @@ public class ObjStd extends Obj {
         }
     } 
 
-    class FunctionConvert extends Function {
-        public String getName() {
-            return "Convert";
-        }
-        public String getShortDesc() {
-            return "Convert() - create Convert object";
-        }
-        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 0) throw new Exception("Expected no parameters");
-            return new ValueObj(new ObjConvert());
-        }
-    } 
+
 
     class FunctionCodeDirs extends Function {
         public String getName() {
