@@ -264,7 +264,7 @@ together multiple masters to form single cluster.
     Util:Run("scp " + target + ":./kube.tar .",HOME)    
     Util:Run("tar xvf ./kube.tar",HOME)
 
-//LocalKubeConfig 
+//LocalKubeConfig
     
 
 # Install kubeadm + kubectl on local host
@@ -311,7 +311,7 @@ together multiple masters to form single cluster.
         File("KUB_Flannel_init_err.txt").create(result.stderr)
 
         result.stdout->line println(line)
-/DeployPodNetwork   
+/DeployPodNetwork
 
 
 # Verify Pod network
@@ -423,13 +423,17 @@ together multiple masters to form single cluster.
 # and assure access with chmod +r
 # --
     P(1,Dir) => currDir
-    
-    readLine("Enter kubectl command, blank to abort") => command
-    error(command=="","Aborting")
-    
-    if (command.startsWith("kubectl ")) command=command.after(" ")
+    P(2) => command
 
     log=KubctlLogFile
+    
+    if (command==null) {
+	readLine("Enter kubectl command, blank to abort") => command
+	error(command=="","Aborting")
+    }
+       
+    if (command.startsWith("kubectl ")) command=command.after(" ")
+
 
     c=">>> kubectl " + command
     s="-".times(c.length)
@@ -453,10 +457,48 @@ together multiple masters to form single cluster.
 /kubectl
 
 
-kubectl
+# Loop
+# --
+	log=KubctlLogFile
+
+	loop
+		readLine("kubectl command, blank to abort, # for comment, kf for file, h/h2 for history") => command
+		error(command.trim=="", "Aborting input loop")
+		if (command=="h") {h assert(false)}
+		else if (command=="h2") {h2 assert(false)}
+		else if (command=="kf") {kf assert(false)}
+		else if (command==".") {
+			command=Db2:Get(Sys.scriptId,"kubectl_lastCommand",null)
+			if (command==null) assert(false)
+		}
+		else if (command.startsWith("#")) {
+			log.append(List("#",command,"#"))
+			assert(false)
+		}
+
+		kubectl (Dir, command)
 /k
+
+# Include config file or any text file in log
+# --
+	P(1,readLine("Enter path"))=>path
+	P(2,Dir)=>currDir
+	currDir.file(path)=>f
+	if (f.exists) {
+		log=KubctlLogFile
+		log.append("")
+		log.append("# " + f.path)
+		log.append("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< EOF")
+		log.append(f.read)
+		log.append(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> EOF")
+	}
+/kf
+		
 
 # kubectl history
 # --
-     KubctlLogFile.read->line assert(line.startsWith(">>> ")) out(line) | _.unique->line println(line)
+     KubctlLogFile.read->line assert(line.startsWith(">>> ")) println(line)
 /h
+
+KubctlLogFile.read->line println(line)
+/h2
