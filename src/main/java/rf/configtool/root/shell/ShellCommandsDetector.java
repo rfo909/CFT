@@ -29,7 +29,7 @@ import rf.configtool.main.ScriptSourceLine;
  */
 public class ShellCommandsDetector {
     
-    private final String line;
+    private String line;
     
     public static final String[] OPS = {
         "ls","lsd","lsf",
@@ -54,15 +54,24 @@ public class ShellCommandsDetector {
     }
     
     public ShellCommand identifyShellCommand () throws Exception {
+        boolean isBang=false;
+
+        if (line.startsWith("!")) {
+        	line=line.substring(1);
+        	isBang=true;
+        }
+
         boolean found=false;
         
         // do simple string comparison to avoid running full parse for
         // all interactive commands
-        for (String op:OPS) {
-            if (line.equals(op) || line.startsWith(op+" ") || line.startsWith(op+"("))  found=true;
+        if (!isBang) {
+        	for (String op:OPS) {
+	            if (line.equals(op) || line.startsWith(op+" ") || line.startsWith(op+"("))  found=true;
+	        }
         }
         
-        if (!found) {
+        if (!isBang && !found) {
             return null;
         }
         
@@ -74,6 +83,9 @@ public class ShellCommandsDetector {
         
         String name=parts.get(0);
         
+        if (isBang) {
+        	return new ShellBang(parts);
+        }
         
         if (name.equals("ls") || name.equals("lsd") || name.equals("lsf")) {
             return new ShellLs(parts);

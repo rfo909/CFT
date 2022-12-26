@@ -22,44 +22,27 @@
 # Readme
 <<< EOF
 -----------------------------------
-v2.4.0 introduces configurable bang commands. This script is an implementation of
-a parser, for running external commands. 
+v2.4.0 introduced configurable bang commands. 
 
-Parser for bang commands, which start with '!'. The rest of the line is
-sent to the Run() function below, which parses the command into a list of parts
-which is ready to be passed to Dir.run(). 
-
-Also supports running CFT code spaces, to generate argument values via expressions. The string
-inside is eval'ed and returns a value.
-
-If the return value is a list, we iterate over it, processing each value.
-
-The values to be added to the command must be either a Dir or File, string or number.
-
-For Dir and File values, the .path() is called to produce a string. 
-
-Also understands quotes, both single and double, grouping strings with spaces in them.
-
-Does not handle script pipes. Parser will give error if trying to use the pipe outside
-of the code spaces [...]
-
-See also CFT.props, where the bangCommand code property invokes the Run function below.
-
-Example
-
-    $ !ls -la
-    $ !du [Dir.sub("..")] 
-    $ !git status
-    $ !top
-
-
-Note that the [...] (codeSpace) can not refer local functions in the caller script, as 
-BangParser is a separate script. 
+v3.7.3 moved the processing into rf.configtool.root.shell in Java, allowing for same expressions as with
+the other shell-like commands. 
 -----------------------------------
 >>> EOF
 /Readme
 
 
+# Run command
+# --
+	P(1,Dir)=>currentDir
+	P(2)=>cmdList
+	
+	if (Sys.isWindows) cmdList=List("powershell") + cmdList
+	
+	currentDir.run(cmdList)
+/Run
+
+
+<<< OLD_CODE
 
 # Build root lexer Node for all known tokens
 # --
@@ -190,26 +173,10 @@ BangParser is a separate script.
     } else {
         currDir.run(list)
     }   
-/Run
+/RunOld
 
-
-# Mainloop for testing
-# --
-    loop
-        readLine => cmd
-        break(cmd=="")
-        tryCatch(Parse(cmd)) => x
-        if (!x.ok) {
-            println("** " + x.msg)
-        } else {
-            tryCatch(Dir.run(x.result)) => y
-            if (!y.ok) {
-                println("** " + y.msg)
-            }
-        }
-//test
-
-
+>>> OLD_CODE
+//OLD_CODE
 
 
 

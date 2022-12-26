@@ -298,28 +298,7 @@ public class Root {
                 return;
             }
             
-            // Bang command
-            
-            if (line.startsWith("!")) {
-                String str=line;
-                if (str.startsWith("!")) {
-                    str = line.substring(1).trim();
-                } else if (str.endsWith("!")) {
-                    str = line.substring(0,line.length()-1);
-                }
-
-                // Run the shell command parser
-                String code = propsFile.getBangCommand();
-                SourceLocation loc = new SourceLocation("bangCommand", 0, 0);
-                FunctionBody codeLines = new FunctionBody(code, loc);
-
-                List<Value> params=new ArrayList<Value>();
-                params.add(new ValueString(str));
-                CFTCallStackFrame caller=new CFTCallStackFrame("<bang-command>");
-                objGlobal.getRuntime().processFunction(stdio, caller, codeLines, new FunctionState(null,params));
-                return;
-            } 
-            
+  
             
             // interactive-only shell commands?
             ShellCommand shellCommand = (new ShellCommandsDetector(line)).identifyShellCommand();

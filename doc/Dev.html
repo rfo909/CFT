@@ -13,6 +13,17 @@
 
 <h1>CFT Change log</h1>
 
+<h3>3.7.3 2022-12-27 - Moved "bang commands"</h3>
+<p>
+Bang commands were previously detected in Root input loop, moved
+this into the command parser for shell-like commands, which enables
+using expressions like with other shell-like commands
+</p>
+<p>
+Keeping the BangParser script for now, but may delete it later, as it only
+runs the command with Dir.run
+</p>
+
 <h3>3.7.2 2022-12-24 - Moved "shell" command</h3>
 <p>
 Instead of polluting global name space as a function in ObjGlobal, it is

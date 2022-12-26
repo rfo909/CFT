@@ -68,7 +68,6 @@ public class ShellCatEditMoreTail  extends ShellCommand {
         String name=getName();
         
         PropsFile propsFile=ctx.getObjGlobal().getRoot().getPropsFile();
-        SourceLocation loc=propsFile.getSourceLocation(name);
         
         String lambda;
 
