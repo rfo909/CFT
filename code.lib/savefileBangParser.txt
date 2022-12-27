@@ -30,11 +30,30 @@ the other shell-like commands.
 >>> EOF
 /Readme
 
+# Make argument value safe with regards to space, backslashes and apos
+# --
+	P(1) as String => arg
+	if (arg.contains(" ")) {
+		if (Sys.isWindows) {
+			# double quotes not allowed in windows directory names!!
+			# escaping single quote ' with ''
+			"'" + arg.replace("'","''") + "'"
+		} else {
+			# Linux 
+			"'" + arg.replace("'","'\'') + "'"
+		}	
+	} else {
+		arg
+	}
+//FixSpace
+
 
 # Run command
 # --
 	P(1,Dir)=>currentDir
 	P(2)=>cmdList
+
+	cmdList=Inner{ cmdList->element out(FixSpace(element)) }
 
 	println("--> " + cmdList.concat(" "))
 	
@@ -42,143 +61,4 @@ the other shell-like commands.
 	
 	currentDir.run(cmdList)
 /Run
-
-
-<<< OLD_CODE
-
-# Build root lexer Node for all known tokens
-# --
-    Std.Text.Lexer.Node => root
-    
-    specials = "{}:;,.()/\*?=-_@!#$%&+"  # not including |<> or code space start character
-    digits = "0123456789"
-    letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    
-    # all non-space characters
-    chars=specials+digits+letters
-    
-    root.sub(chars) => nonspace
-    nonspace.sub(chars,nonspace)
-    nonspace.setIsToken(1)
-    
-    List('"',"'")->c 
-        root.sub(c) => insideString
-        insideString.setDefault(insideString)
-        insideString.sub("\").setDefault(insideString)
-        insideString.sub(c).setIsToken(2)
-    |
-    
-    root.addToken("[") => codeSpace
-    codeSpace.setDefault(codeSpace)
-    codeSpace.addToken("]").setIsToken(3)
-    
-    root.sub(" ^n^r^t".unEsc) => spc
-    spc.setIsToken(-1) # whitespace
-
-
-    # return value is the root node
-    root
-//RootNode
-
-
-
-# fix code space values
-# --
-    P(1)=>val
-    if (getType(val)=="File" || getType(val)=="Dir") {
-        val.path
-    } else {
-        val
-    }
-//fixValue
-
-
-# Parse string into list to be executed in currentDir. 
-# This consists of unquoting strings (for non-windows) and performing 
-# globbing in a limited sense (not subdir/*.x, just *.x)
-# --
-    P(1,Dir) => currentDir
-    P(2,readLine) => line
-    
-    RootNode => root
-    Std.Text.Lexer => lexer
-    lexer.addLine(line) 
-    tokens=lexer.getTokens(root)
-    
-    Dict
-        .set("cmd",List)
-        .set("LAdd",Lambda{P(1)=>value
-            if (getType(value)=="File" || getType(value)=="Dir") {
-                self.cmd.add(value.path)
-            } else if (getType(value)=="int" || getType(value)=="float") {
-                self.cmd.add(""+value)
-            } else {
-                error(!value.?toUpper,"Invalid value: " + getType(value))
-                self.cmd.add(value)
-            }
-        })
-        => obj
-    
-    cmd=List
-    tokens->token
-        if (token.tokenType==2) { # string
-            value=token.str
-            # For windows, leave quotes in place
-            if (!Sys.isWindows) {
-                value=value.sub(1,value.length-1) # strip quotes
-            }
-            obj.LAdd(value)
-        } else if (token.tokenType==3) { # codeSpace
-            value=token.str
-            value=value.sub(1,value.length-1) # strip "[" and "]"
-            value=eval(value)
-            if (getType(value)=="List") {
-                value->v
-                    obj.LAdd(fixValue(v))
-            } else {
-                obj.LAdd(fixValue(value))
-            }
-        } else {
-            # token type = 1 ("nonspace")
-            if (token.str.contains("*")) {
-                # attempt Glob expansion
-                Inner {
-                    currentDir.files(token.str)->f obj.LAdd(f.name)
-                } 
-            } else {
-                obj.LAdd(token.str)
-            }
-        }
-    |
-
-    obj.cmd   
-/Parse
-
-
-# Parse and run shell command 
-# --
-    P(1,Dir) => currDir   # needs to know which directory, as current dir is stored per script
-    P(2,readLine) => cmd
-    
-    show=false
-    if (cmd.startsWith("!")) {
-        show=true
-        cmd=cmd.sub(1)
-    }
-    
-    list=Parse(currDir,cmd)
-    if (Sys.isWindows) list=List("powershell")+list
-
-    if (show) {
-        list->x 
-            println("  " + getType(x) + " : " + x)
-    } else {
-        currDir.run(list)
-    }   
-/RunOld
-
->>> OLD_CODE
-//OLD_CODE
-
-
 
