@@ -1066,3 +1066,62 @@ run(null,null,null,true)
             report(line.file.name, line.lineNumber, line)
 //GrepFiles
 
+
+
+# Append to history - defined in CFT.props 'historyCommand' called from Java 
+# --
+	P(1) as Dir => dir
+	P(2) as String => command
+	time=Date
+	
+	if (command.trim!="" && !command.startsWith("?") && !command.startsWith("cd") && !command.startsWith("ls")) {
+		data=SymDict(dir,command,time)
+		list=Db2:Get(Sys.scriptId,"History",List)
+		list.add(data)
+		list=list.last(100)
+		Db2:Set(Sys.scriptId,"History",list)
+	}
+//HistoryAppend
+
+
+
+# Helper func for HistoryShow
+# --
+	P(1) as List => lines
+	Sys.stdin(lines)
+	lines
+//HistoryExecuteLines
+
+
+
+# Show history
+# --
+	list=Db2:Get(Sys.scriptId,"History",List)
+	
+	lines = Inner{
+		count=0
+		list->dict
+			report(count, dict.dir.path, dict.command)
+			count=count+1
+	}
+	lines->line println(line)
+	|
+	println
+	readLine("Enter ':N' to repeat or 'cd N' to go to dir") => cmd
+	if (cmd.startsWith("cd")) {
+		n=cmd.sub(2).trim
+		if (n.startsWith(":")) n=n.sub(1)
+		n=n.parseInt
+		dict=list.nth(n)
+		HistoryExecuteLines(List("cd " + dict.dir.path))
+	} else if (cmd.startsWith(":")) {
+		n=cmd.sub(1).parseInt
+		dict=list.nth(n)
+		HistoryExecuteLines(List("cd " + dict.dir.path, dict.command))
+	} else {
+		true
+	}
+	
+/HistoryShow
+
+

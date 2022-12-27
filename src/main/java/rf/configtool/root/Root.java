@@ -45,7 +45,10 @@ import rf.configtool.main.Version;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueList;
 import rf.configtool.main.runtime.ValueNull;
+import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
+import rf.configtool.main.runtime.lib.ObjDir;
+import rf.configtool.main.runtime.lib.Protection;
 import rf.configtool.main.runtime.reporttool.Report;
 import rf.configtool.root.shell.ShellCommand;
 import rf.configtool.root.shell.ShellCommandsDetector;
@@ -278,6 +281,7 @@ public class Root {
         ScriptCode currScriptCode = objGlobal.getCurrScriptCode();
 
         stdio.clearCFTCallStack();
+                
         
         try {
             // Shortcuts
@@ -297,10 +301,33 @@ public class Root {
 
                 return;
             }
+
             
-  
+            
+            // History management - not bothering with shortcuts (processed above)
+            try {
+            	Value currDir=new ValueObj(new ObjDir(objGlobal.getCurrDir(),Protection.NoProtection));
+            	Value command=new ValueString(line);
+            	
+            	SourceLocation loc=new SourceLocation("history", 0, 0);
+                String code = propsFile.getHistoryCommand();
+
+                FunctionBody codeLines = new FunctionBody(code, loc);
+
+                CFTCallStackFrame caller=new CFTCallStackFrame("<interactive-input>");
+                List<Value> args=new ArrayList<Value>();
+                args.add(currDir);
+                args.add(command);
+                
+                objGlobal.getRuntime().processFunction(stdio, caller, codeLines, new FunctionState(null,args));
+            } catch (Exception ex) {
+            	stdio.addDebug("Failed calling historyCommand (CFT.props)");
+            }
+            
+            
             
             // interactive-only shell commands?
+            
             ShellCommand shellCommand = (new ShellCommandsDetector(line)).identifyShellCommand();
             
             if (shellCommand != null) {
@@ -316,6 +343,11 @@ public class Root {
             }
 
 
+            
+             
+                        
+  
+            
             // pre-processing input
 
             if (line.startsWith(".")) {
@@ -328,6 +360,11 @@ public class Root {
                 line = currLine + line.substring(1);
                 stdio.println("$ " + line);
             } 
+            
+  
+            
+            
+            
             // identify input tokens
             Lexer p = new Lexer();
             SourceLocation loc = new SourceLocation("input", 0, 0);
