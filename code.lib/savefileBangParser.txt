@@ -35,6 +35,8 @@ the other shell-like commands.
 # --
 	P(1,Dir)=>currentDir
 	P(2)=>cmdList
+
+	println("--> " + cmdList.concat(" "))
 	
 	if (Sys.isWindows) cmdList=List("powershell") + cmdList
 	

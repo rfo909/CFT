@@ -974,14 +974,14 @@ run(null,null,null,true)
         error(readLine("Press y to continue, otherwise abort").toLower != "y","Aborting")
     }
 
-    if (getType(value) == "Dir" || getType(value) == "File") {
-        Lib:Header("Protection?")
-        println("Should the " + getType(value) + " reference be protected against destructive operations?")
-        readLine("Enter non-blank string to protect it").trim => reason
-        if (reason != "") {
-            value.protect(reason)
-        }
-    }
+#    if (getType(value) == "Dir" || getType(value) == "File") {
+#        Lib:Header("Protection?")
+#        println("Should the " + getType(value) + " reference be protected against destructive operations?")
+#        readLine("Enter non-blank string to protect it").trim => reason
+#        if (reason != "") {
+#            value.protect(reason)
+#        }
+#    }
 
     Db2:Get(Sys.scriptId,"symbolDict",Dict) => data
     time=currentTimeMillis
