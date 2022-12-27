@@ -194,7 +194,35 @@ Std.Math.PI      ## call function in Std *object*
 Std help         ## List functions inside the Std *object*
 ```
 
+# Code stats
 
+The CodeStats script contains a function 'main' which filters through the code and
+presents a summary:
+
+```
+CodeStats:main
+
+Script code:      17344 lines
+Java code:        34900 lines
+Functions:        507
+Shell commands:   18
+Object types:     71
+Value types:      13
+```
+
+To look at the implementation of the CodeStats script, type the following
+
+```
+:load CodeStats
+?
+@e
+```
+
+The '?' command lists all functions in current script.
+
+The '@e' is a shortcut to open current script in an editor.
+
+Shortcuts are defined in CFT.props.
 
 
 # Integrated help
