@@ -16,13 +16,20 @@ Code can also ask the user for input, as well as present results.
 
 
 
-## Two aspects
+# Two aspects
 
-There are two major aspects to CFT: the *interactive shell*, and *programming*. 
+There are two major aspects to CFT: 
+
+- interactive shell
+- programming functions
+
+## Shell-like commands 
 
 The interactive shell offers normal shell-like functionality
 for listing files in current directory, navigating the directory tree, copying and deleting, and 
 so on. 
+
+## Programming, creating functions
 
 Second, there is programming. All code in CFT is stored as functions, which in turn are organized into "script files",
 which we usually work with using an editor. Functions can also be defined interactively.
@@ -31,7 +38,7 @@ The input loop of CFT processes both shell-like commands like "ls" and "cd", as 
 as the full CFT language, with expressions, loops, function calls.
 
 
-## Why?
+# Why?
 
 The reason for developing CFT, is mainly the horrors of PowerShell, but also a desire for a an automation
 environment and shell that works the same on both Windows and Linux. 
@@ -45,7 +52,7 @@ ever since creating a preprocessor for Ada for parallel simulation purposes at U
 :-)
 
 
-## Terminal based - shell-like
+# Terminal based - shell-like
 
 The command line interface makes CFT feel like a shell, for navigating the directory tree, and inspecting files,
 using the following commands:
@@ -90,7 +97,7 @@ Note that the call to the "Dir" function has *no parantheses*. Those are optiona
 with no parameters.
 
 
-## Script library
+# Script library
 
 A library of CFT scripts offers various utility functionality. 
 
@@ -153,7 +160,7 @@ Std help         ## List functions inside the Std *object*
 
 
 
-## Creating a function
+# Creating a function
 
 ```
 Dir("/some/path").file("log.txt").append(Date.fmt + " something happened")
@@ -185,7 +192,7 @@ LogLine("Add this line")
 ```
 
 
-## Save and load
+# Save and load
 
 Having defined a function, we can decide to save the current script to file, which means
 we can load it later to interactively call its functions. Script functions can also be
@@ -197,7 +204,7 @@ the name of the script and a colon.
 :load MyScript
 ```
 
-## Current script
+# Current script
 
 The CFT interactive loop has one "current script" at all times, which we can inspect,
 using the '?' command, listing the functions in the script. 
@@ -207,7 +214,7 @@ using the '?' command, listing the functions in the script.
 ```
 
 
-## Editing script files
+# Editing script files
 
 We normally don't enter functions interactively, but instead edit the script file, and
 use the interactive shell to call functions, by entering their name and press Enter. 
@@ -258,7 +265,7 @@ Using ()'s around an argument to the shell-like commands, allows us to run CFT e
 
 
 
-## Integrated help
+# Integrated help
 
 
 All functionality in CFT is documented via the interactive help system.
@@ -307,6 +314,35 @@ _Shell
 
 # CFT oddities
 
+- Optional parantheses if no parameters
+- No global state
+- Foreach notation
+- Pipes
+- Synthesis - create code from values
+
+## Optional parantheses if no parameters
+
+```
+Dir.files
+
+# or
+
+Dir().files()
+```
+
+## No global state
+
+CFT is all about functions, and has no global variables. There also is no script state. Scripts are
+just collections of functions (name spaces). 
+
+Constant values are easily represented as functions:
+
+```
+3.14
+/pi
+```
+
+
 ## Foreach
 
 Doing a for-each loop is done with the single arrow and an identifier, which is the current value.  
@@ -345,29 +381,6 @@ the parameter value is null (or missing).
 		| _.length
 	/ModifiedLastWeek
 ```
-
-## Optional parantheses if no parameters
-
-```
-Dir.files
-
-# or
-
-Dir().files()
-```
-
-## No global state
-
-CFT is all about functions, and has no global variables. There also is no script state. Scripts are
-just collections of functions (name spaces). 
-
-Constant values are easily represented as functions:
-
-```
-3.14
-/pi
-```
-
 
 ## Synthesis
 

@@ -2,17 +2,23 @@
 * Platform
 * Shortcuts and colon commands
 * Shell-like commands
+  |  Commands
+  |  The _Shell global function
   |  Paths with space
   |  Windows backslash
-  |  Combine CFT shell commands with CFT function results
+  |  Combine with CFT function results
   |  Use "lastResult"
+        :N notation restrictions
   |  Symbols 
-  |  CFT Shell commands not available in code
+        Diffing files example
   |  Bang commands
+        Expressions in bang commands
   |  Background jobs
+  |  Command history
 * The "protect" mechanism
-* List basics
 * Introduction to loops
+  |  List basics
+  |  Iterate over list
   |  Filtering
 * Local variables
 * Core types

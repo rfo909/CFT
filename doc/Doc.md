@@ -47,6 +47,11 @@ Shortcuts are defined in the CFT.props file.
 CFT contains a number of "shell-like" commands, with different syntax from the regular code, which is 
 all about function calls.
 
+These "shell-like" commands are parsed only when processing input, and so can not be called from function
+code, since the syntax is quite different. The shell command parser processes the whole input line, which has
+no real meaning to the CFT code parser and interpreter.
+
+## Commands
 
 - ls | lsf | lsd
 - cd
@@ -63,6 +68,8 @@ all about function calls.
 - showtree
 - hash
 - hex
+- shell
+- !...
 
 The "ls" command comes in two additional versions:
 
@@ -80,6 +87,8 @@ cd ..
 ls *.txt
 cp *.txt ../somePlace
 ```
+
+## The _Shell global function
 
 Run the global function _Shell to get up to date help on the CFT shell command interpreter.
 
@@ -108,10 +117,12 @@ Dir("c:\program files\")
 ```
 
 
-## Combine CFT shell commands with CFT function results
+## Combine with CFT function results
 
-In addition to the above syntax, such as "cd /someDir/xyz" etc, these commands
-also support using output from some CFT function. Say we have some functions:
+In addition to the above syntax, such as "cd /someDir/xyz" etc, the CFT shell-like commands
+also support using the result from some CFT function. 
+
+Say we have some functions:
 
 ```
 Dir("/SomePath/logs")
@@ -128,8 +139,7 @@ cd (LogDir)
 edit (DataFile)
 ```
 
-The expressions should return single Dir or File objects, not lists. If they return a string,
-that is used as any other path expression.
+The expressions should return single Dir or File objects.
 
 
 ## Use "lastResult"
@@ -142,47 +152,74 @@ lsd
 cd (Sys.lastResult(3))   # using ()'s to run CFT expression
 ```
 
+
 Since we frequently will need access to "lastResult" when issuing CFT shell commands, 
-there is a shorthand notation similar to the ':N' colon
-command, to obtain a value from the "lastResult" list, or a single colon ':' to return
-the "lastResult" as-is. 
+there is a shorthand notation to obtain a value from the "lastResult" list:
 
 ```
 lsd         # lists directories
 cd :3       # cd into directory 4 (prefixed by index 3 in list)
-
-or 
-
-lsd
-:3          # select index 3 element, it now becomes "lastResult"
-cd :        # cd into the directory
-
 
 Dir.allFiles("*.java")   
 cd :0.dir            # go to directory of a file in the output from previous command
 
 ```
 
+### :N notation restrictions
+
+*Note* that the :N notation only works for shell commands, and only when an argument to
+such a shell command *starts with* the :N.
+
+The following is *not* valid:
+
+```
+ls
+cd (:0)    # :N is not CFT code, just shell-command parser specific
+
+ls *.txt
+touch new_:0   # can not embed :N shortcuts inside arguments
+```
+
+That last one will create a file named 'new_:0' on Linux, but fail in Windows, as colons
+are kind of reserved for station letters.
+
+Still, that last one can be solved by writing a CFT code expressions inside parantheses, as follows:
+
+```
+ls *.txt
+touch ("new_" + Sys.lastResult(0).name)
+```
+
+:-)
+
+
+
 ## Symbols 
 
-*[this feature is experimental as of v3.6.2]*
-
-If we regularly need to go to a particular directory, or check the status of some file,
-we can store these as symbols, and use them in expressions or interactively.
+If we want to remember a file or directory, we can create a symbol, which in turn can be used
+in expressions.
 
 ```
 cd /some/dir
 pwd
-%%myDir
+%%myDir    # symbol expression '%myDir' now refers to /some/dir
+```
 
+Then later, perhaps in a different session, as symbols are persisted across sessions, we can say:
+
+```
 cd %myDir
+
+# or
+
 %myDir.cd
+
+# or access content inside that directory
 
 cat %myDir.files("*.java").first
 ```
-Symbols are persistent and shared between sessions.
 
-To see all symbols use shortcut
+To see all symbols, use shortcut
 
 ```
 @%
@@ -190,48 +227,46 @@ To see all symbols use shortcut
 
 This lists all defined symbols, and gives you the option of deleting symbols.
 
+### Diffing files example
 
-
-
-
-## CFT Shell commands not available in code
-
-The CFT shell commands are parsed only when processing input, and so can not be called from function
-code.
-
-
-Function code should instead use the Dir and File functions, etc:
+Symbols are useful when diffing two files at different locations:
 
 ```
-dirExpr.cd                 # set current dir
-dirExpr.files              # list content in directory
-dirExpr.dirs
+cd /some/long/path
+ls somefile.txt
+:0     # somefile.txt in this directory is first row (:0) of result from "ls"
+%%a    # remember this file as symbol 'a'
 
-dirExpr.create
-dirExpr.delete
-
-fileExpr.delete
-
-Lib:m(fileExpr)            # The Lib script contains function "m" for paging through a file
-Lib:e(fileExpr)            # "e" for opening file in editor
-
-fileExpr.read              # "cat"
-fileExpr.touch
-
+cd /where/the/other/file/exists
+diff somefile.txt %a
 ```
+
 
 ## Bang commands
 
-
-CFT supports "bang commands", where one can execute operating system level shell commands.
-
-
-Bang commands are commands that start with "!", and are sent to the shell for execution.
+Starting a command with an exclamation mark ("!"), what follows should be Linux or Powershell
+command. 
 
 ```
 !ls -l
 ls -l
 ```
+
+### Expressions in bang commands
+
+Bang commands are managed by the shell command parser, and so support the same notation
+as the other shell commands, for using output from expressions, looking up symbols and
+referring data from result of previous command:
+
+```
+!scp %x user@host:.
+!scp (GetThatFile) user@host:.
+
+ls
+!scp :4 user@host:.
+```
+
+
 
 
 ## Background jobs
@@ -260,6 +295,22 @@ clears completed jobs from the jobs registry.
 
 
 Note that jobs don't survive killing the CFT process.
+
+
+## Command history
+
+CFT remembers the last 100 commands (not shortcuts), and the directories where those were
+executed. 
+
+Display the history using shortcut
+
+```
+@H
+```
+
+This lists up to 100 commands, and lets you either rerun the command (in the same directory) or
+just change to the directory of one of the commands, without running the command over.
+
 
 
 # The "protect" mechanism
@@ -294,28 +345,12 @@ That's because the Dir object returned by the call to LogDir, is marked as prote
 all File objects created by calling the files() function of that object, also get protected,
 and as a consequence trying to delete these files fails.
 
-This also extends to the CFT shell commands, as long as we call that specific function ("LogDir").
-
-```
-rm (LogDir)
-ERROR: INVALID-OP rm : /home/roar/logs (PROTECTED: -)
-```
-
-Note that the protect flag is a part of the Dir and File objects as returned by this specific function,
-as well as derived from those. The physical directory and content is not protected if accessed in
-other ways:
-
-```
-cd (LogDir)
-rm *
-```
-
-As always with Linux/Unix commands, you need to know what you're doing!!
 
 
 
-# List basics
+# Introduction to loops
 
+## List basics
 
 Lists are return value from many functions, such as getting the files in a directory.
 
@@ -348,9 +383,7 @@ For details of available functions, use the help system:
 List help
 ```
 
-
-# Introduction to loops
-
+## Iterate over list
 
 Loops in CFT are mostly concerned with iterating over lists. Let's create a list:
 
@@ -593,6 +626,7 @@ splits a string on spaces. This means the following produce the same result.
 ```
 List("a","b","c")
 "a b c".split
+"a b:c d".split(":")   # two strings "a b" and "c d"
 ```
 ## Iterating over list content
 
@@ -1012,14 +1046,8 @@ The default value parameter to P() is important for several reasons.
 
 
 - Allows the function code to execute while being developed interactively
-
-
 - Allows for default values when function is called without parameters, or when called with null-values
-
-
 - May act as documentation in the source
-
-
 - Provides an elegant way of making functions interactive and non-interactive at the same time,
 as the default expression is evaluated only when parameter is not given (or is null),
 and may then ask the user to input the value.
@@ -1037,6 +1065,8 @@ f(5,10)
 <int>
 15
 ```
+
+
 # User input
 
 
