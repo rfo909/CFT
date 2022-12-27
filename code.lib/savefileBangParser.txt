@@ -33,16 +33,20 @@ the other shell-like commands.
 # Make argument value safe with regards to space, backslashes and apos
 # --
 	P(1) as String => arg
-	if (arg.contains(" ")) {
-		if (Sys.isWindows) {
+
+	if (Sys.isWindows) {
+		if (arg.contains(" ") || arg.contains("$") || arg.contains("'")) {
 			# double quotes not allowed in windows directory names!!
 			# escaping single quote ' with ''
 			"'" + arg.replace("'","''") + "'"
 		} else {
-			# Linux 
-			"'" + arg.replace("'","'\'') + "'"
-		}	
+			# leave as-is and hope for the best
+			arg
+		}
 	} else {
+		# Linux does not question values in command vector, also does not try to do globbing
+		# when called through Dir.run (that's an interactive Linux shell feature, and handled
+		# in Java for CFT when running on Linux)
 		arg
 	}
 //FixSpace
