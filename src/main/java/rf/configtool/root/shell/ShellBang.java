@@ -57,13 +57,15 @@ public class ShellBang extends ShellCommand {
         NEXT_ARG: for (ShellCommandArg arg:args) {
         	if (arg.isExpr()) {
     			FileSet fs=new FileSet("!"+commandName, true, true); // directories and files
+    			fs.setIsSafeOperation();
     			fs.processArg(currentDir, ctx, arg);
-				for (String s : fs.getDirectories()) command.add(s);
-				for (String s : fs.getFiles()) command.add(s);
+				for (String dir : fs.getDirectories()) command.add(dir);
+				for (String file : fs.getFiles()) command.add(file);
         	} else {
         		String str=arg.getString();
     			if (isLinux) {
         			FileSet fs=new FileSet("!"+commandName, true, true); // directories and files
+        			fs.setIsSafeOperation();
         			
         			boolean failed=false;
         			try {
@@ -75,15 +77,18 @@ public class ShellBang extends ShellCommand {
         			if (!failed) {
         				for (String s : fs.getDirectories()) command.add(s);
         				for (String s : fs.getFiles()) command.add(s);
-        				if (fs.getDirectories().size() + fs.getFiles().size() > 0) continue NEXT_ARG;
+        				if (fs.getDirectories().size() + fs.getFiles().size() > 0) {
+        					continue NEXT_ARG;
+        				}
+        				// else: default processing is to add string as-is to command
         			}
+        			// String failed to match files and directories: add string as-is to command 
+        			command.add(str);
     			} else {
-    				// windows
+    				// windows: always add string as-is, no glob-expansion here
     				command.add(str);
     				continue NEXT_ARG;
     			}
-        		// otherwise
-        		command.add(str);
         	}
         	
         }

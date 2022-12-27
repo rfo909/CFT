@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package rf.configtool.root.shell;
 
 import java.io.File;
+
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,6 +35,7 @@ import rf.configtool.main.runtime.ValueString;
 import rf.configtool.main.runtime.lib.ObjDir;
 import rf.configtool.main.runtime.lib.ObjFile;
 import rf.configtool.main.runtime.lib.ObjGlob;
+import rf.configtool.main.runtime.ValueList;
 
 public class FileSet {
     
@@ -91,6 +93,21 @@ public class FileSet {
         directoryList.add(path);
     }
 
+    
+    private void addFile (ObjFile file) throws Exception {
+        if (isDestructiveOperation) {
+            file.validateDestructiveOperation(opName);
+        }
+        addFilePath( file.getFile().getCanonicalPath() );    	
+    }
+    
+    private void addDir (ObjDir dir) throws Exception {
+        if (isDestructiveOperation) {
+            dir.validateDestructiveOperation(opName);
+        }
+        addDirectoryPath ( dir.getDir().getCanonicalPath() );
+    }
+    
     public List<String> getFiles() {
         return fileList;
     }
@@ -155,25 +172,33 @@ public class FileSet {
             if (v instanceof ValueString) {
                 String str=((ValueString) v).getVal();
                 processStringArg(currentDir, str, allowNewDir, allowNewFile);
+            } else if (v instanceof ValueList) {
+            	List<Value> list=((ValueList) v).getVal();
+            	NEXT_LIST_ELEMENT: for (Value listElement:list) {
+            		if (listElement instanceof ValueObj) {
+            			Obj obj=((ValueObj) listElement).getVal();
+            			if (obj instanceof ObjDir) {
+            				addDir((ObjDir) obj);
+            				continue NEXT_LIST_ELEMENT;
+            			} else if (obj instanceof ObjFile) {
+            				addFile((ObjFile) obj);
+            				continue NEXT_LIST_ELEMENT;
+            			} 
+            		}
+            		// can only handle files and directories
+            		throw new Exception("Invalid expression list value");
+            	}
             } else if (v instanceof ValueObj) {
                 Obj obj=((ValueObj) v).getVal();
                 if (obj instanceof ObjFile) {
                     ObjFile file=((ObjFile) obj);
-                    
-                    if (isDestructiveOperation) {
-                        file.validateDestructiveOperation(opName);
-                    }
-                    
-                    addFilePath( file.getFile().getCanonicalPath() );
+                    addFile(file);
                 } else if (obj instanceof ObjDir) {
                     ObjDir dir=(ObjDir) obj;
-                    
-                    if (isDestructiveOperation) {
-                        dir.validateDestructiveOperation(opName);
-                    }
-                    
-                    addDirectoryPath ( dir.getDir().getCanonicalPath() );
+                    addDir(dir);
                 }
+            } else {
+            	throw new Exception("Invalid expression value");
             }
         } else {
             processStringArg(currentDir, arg.getString(), allowNewDir, allowNewFile);
