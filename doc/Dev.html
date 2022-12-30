@@ -13,6 +13,16 @@
 
 <h1>CFT Change log</h1>
 
+
+<h3>3.7.5 2022-12-30 - Background jobs</h3>
+<p>
+Improved handling of background jobs via "& Expr". Showing "stdin" status if job is pending on input. 
+When bringing jobs to the foreground, we only select between those waiting for stdin. Also improved
+the "Jobs:ToForeground" function significantly.
+</p>
+
+
+
 <h3>3.7.4 2022-12-27 - Command history</h3>
 <p>
 Implemented a history function, where we store time + current dir + command.

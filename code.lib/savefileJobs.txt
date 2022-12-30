@@ -40,10 +40,12 @@ For jobs that require input, we use the ToForeground() function.
 This starts a simple command loop, where output from the job is
 displayed on screen, and we can send input to it. 
 
-We can detach from the job by typing .quit, or if the job 
-completes.
+If there is no significant output from the job for a while (3 seconds) and
+it is not blocked on input, we enter command mode, where we can leave the
+process (put it into background again). 
 
-/StartHeavyTasks
+This can also be done by entering TAB + q + Enter in job input
+
 >>>> EOF
 ->line println("| " + line)
 /Readme
@@ -122,6 +124,38 @@ completes.
 /Clear
 
 
+# Extend saved output
+# --
+	P(1) as List => lines
+	P(2) as String => dbKey
+	
+	Db2:Get(Sys.scriptId,dbKey,List) + lines => output
+	output = output.last(100)
+	Db2:Set(Sys.scriptId,dbKey,output)
+//AddOutputLines
+
+
+# Get output until either too long wait or blocking on input
+# --
+	P(1) as Process => proc
+	P(2) as String => dbKey
+	
+	lastOut=currentTimeMillis
+	loop
+		outLines=proc.output
+		if (outLines.length>0) {
+			AddOutputLines(outLines,dbKey)
+        	Inner{
+        		outLines->line println(line)
+        	}
+			lastOut=currentTimeMillis
+        }			
+		break(currentTimeMillis - lastOut > 3000)
+		Sys.sleep(5)
+//WaitForOutput        
+
+		
+
 # Bring running job to "foreground", to do interactive follow-up
 # --
 	# identify jobs that are waiting for input
@@ -137,53 +171,51 @@ completes.
 
     Lib:MenuSelect(names,null,"Select job") => name
 
-    Lib:Header("Selected job: " + name)
-
-    #addDebug("foreground job name='" + name + "'")
-
-    println("Below follows an input loop.")
-    println("Output from the job is displayed, and you may enter input to it")
-    println
-    println("- To refresh, enter TAB + Enter")
-	println("- To exit enter TAB + 'q' + Enter")
-	println
-    readLine("ENTER to continue")
-    println("--------------------------------------------------------------------")
-
     proc=Sys.Jobs.getRunning(name)
+    error(proc==null,"No running process " + name)
+
+    Lib:Header("Selected job: " + name)
+	println("To abort, enter TAB + q + ENTER when process asks for input")
+	println
+	println("Or wait for command mode, if no output and no blocking on input")
+	println("for 3 seconds")
+	println
+    
+    readLine("Press Enter to continue")
+    
     
     dbKey=name.toHexString
     
     TAB="^t".unEsc
 
-    error(proc==null,"No running process " + name)
     loop
-        Sys.sleep(800)
+    	output=Db2:Get(Sys.scriptId,dbKey,List)
+        println(Curses:Clear)
+        Inner {
+            output->line println(line)
+        }
         
-        Db2:Get(Sys.scriptId,dbKey,List) + proc.output => output
-        output.last(100) => output
-        
-        Db2:Set(Sys.scriptId,dbKey,output)
+    	WaitForOutput(proc,dbKey)
 
         if (proc.isDone) {
             println("(Job completed)")
             break
         }
-        println(Curses:Clear)
-        Inner {
-            output->line println(line)
-        }
-
-        println
-        readLine => line
-        if (line.startsWith(TAB)) {
-        	break(line.sub(1)=="q")
+        if (proc.isBlockedOnInput) {
+        	#println("Job input")
+        	line=readLine
+        	if (line==TAB + "q") error("Aborting Job foreground processing")
+        	
+        	AddOutputLines(List(line), dbKey)
+        	proc.sendLine(line)
         } else {
-            proc.sendLine(line)
-            output.add(line)
-            Db2:Set(Sys.scriptId,dbKey,output)
-        } 
-        # else repeat loop, updating output from the process
-    |
+        	println("--------------------------")
+        	println("No output or pending input")
+        	println("--------------------------")
+        	
+			println("Press 'q' to quit, or just Enter to wait for more") 
+			break(readLine=="q")
+		}	       		
+	|
     "Done"
 /ToForeground
