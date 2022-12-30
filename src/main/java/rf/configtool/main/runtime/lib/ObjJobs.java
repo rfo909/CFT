@@ -35,6 +35,7 @@ public class ObjJobs extends Obj {
         add(new FunctionGetCompleted());
         add(new FunctionGetRunning());
         add(new FunctionDeleteCompleted());
+        add(new FunctionGet());
     }
 
     @Override
@@ -58,15 +59,7 @@ public class ObjJobs extends Obj {
         return this;
     }
 
-    
-    /*
-     *      add(new FunctionAdd());
-        add(new FunctionNames());
-        add(new FunctionGet());
-        add(new FunctionDelete());
-
-     */
-
+ 
     class FunctionAdd extends Function {
         public String getName() {
             return "add";
@@ -148,6 +141,7 @@ public class ObjJobs extends Obj {
             if (params.size() != 1) throw new Exception("Expected parameter name");
             String name=getString("name",params,0);
             ObjProcess proc=ctx.getObjGlobal().getRoot().getBackgroundProcesses().getCompletedProcess(name);
+            if (proc==null) return new ValueNull();
             return new ValueObj(proc);
         }
 
@@ -167,6 +161,7 @@ public class ObjJobs extends Obj {
             if (params.size() != 1) throw new Exception("Expected parameter name");
             String name=getString("name",params,0);
             ObjProcess proc=ctx.getObjGlobal().getRoot().getBackgroundProcesses().getRunningProcess(name);
+            if (proc==null) return new ValueNull();
             return new ValueObj(proc);
         }
 
@@ -179,17 +174,36 @@ public class ObjJobs extends Obj {
         }
 
         public String getShortDesc() {
-            return "deleteCompleted(name) - delete all completed processes by name - returns self";
+            return "deleteCompleted(name) - delete first completed processes by name - returns self";
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 1) throw new Exception("Expected name parameter");
             String name = getString("name",params,0);
-            ctx.getObjGlobal().getRoot().getBackgroundProcesses().deleteCompletedProcesses(name);
+            ctx.getObjGlobal().getRoot().getBackgroundProcesses().deleteCompletedProcess(name);
             return new ValueObj(self());
         }
 
     }        
     
     
+    class FunctionGet extends Function {
+        public String getName() {
+            return "get";
+        }
+
+        public String getShortDesc() {
+            return "get(name) - returns first running or completed process by name";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected parameter name");
+            String name=getString("name",params,0);
+            ObjProcess proc=ctx.getObjGlobal().getRoot().getBackgroundProcesses().getRunningProcess(name);
+            if (proc==null) proc=ctx.getObjGlobal().getRoot().getBackgroundProcesses().getCompletedProcess(name);
+            if (proc==null) return new ValueNull();
+            return new ValueObj(proc);
+        }
+
+    }    
 }

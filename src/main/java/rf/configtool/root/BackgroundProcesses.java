@@ -108,11 +108,14 @@ public class BackgroundProcesses {
         return result;
     }
     
-    public synchronized void deleteCompletedProcesses (String name) {
+    public synchronized void deleteCompletedProcess (String name) {
         checkCompleted();
         List<Process> toDelete = new ArrayList<Process>();
         for (Process p:completed) {
-            if (p.getName().equals(name)) toDelete.add(p);
+            if (p.getName().equals(name)) {
+            	toDelete.add(p);
+            	break;
+            }
         }
         for (Process p:toDelete) completed.remove(p);
     }

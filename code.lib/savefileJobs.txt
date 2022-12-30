@@ -73,9 +73,13 @@ completes.
 
 # Get all jobs
 # --
-    Inner {
-        Sys.Jobs.namesCompleted->name out("COMPLETED " + name)
-    } + Sys.Jobs.namesRunning
+	names = (Sys.Jobs.namesCompleted + Sys.Jobs.namesRunning)
+	names->name
+		Sys.Jobs.get(name) => job
+		report(
+			if(job.isDone,"COMPLETED",""),
+			if(job.isBlockedOnInput,"<stdin>","-"),
+			name)
 /AllJobs
 
 
@@ -120,34 +124,42 @@ completes.
 
 # Bring running job to "foreground", to do interactive follow-up
 # --
-    Lib:MenuSelect(Sys.Jobs.namesRunning,null,"Select job") => name
+	# identify jobs that are waiting for input
+	Sys.Jobs.namesRunning=>namesRunning
+	Inner {
+		namesRunning->name
+			proc=Sys.Jobs.get(name)
+			assert(proc.isAlive && proc.isBlockedOnInput)
+			out(name)
+	} => names
+	
+	error (names.length==0, "No jobs blocked on input")
+
+    Lib:MenuSelect(names,null,"Select job") => name
 
     Lib:Header("Selected job: " + name)
 
-    addDebug("name='" + name + "'")
+    #addDebug("foreground job name='" + name + "'")
 
     println("Below follows an input loop.")
     println("Output from the job is displayed, and you may enter input to it")
     println
-    println("- To detach from job, type 'q'")
-    println("- To send data to job, type a space followed by content: ' xxx'")
-    println("- To refresh output from job, just press Enter")
-    println
-    println("Text following below the line, is output from the job.")
-    println
-    println("BEWARE: Input() contains state (last value) which may change")
-    println("between presenting the default, and pressing Enter to use it!!")
-    println
+    println("- To refresh, enter TAB + Enter")
+	println("- To exit enter TAB + 'q' + Enter")
+	println
     readLine("ENTER to continue")
     println("--------------------------------------------------------------------")
 
     proc=Sys.Jobs.getRunning(name)
     
     dbKey=name.toHexString
+    
+    TAB="^t".unEsc
 
     error(proc==null,"No running process " + name)
     loop
         Sys.sleep(800)
+        
         Db2:Get(Sys.scriptId,dbKey,List) + proc.output => output
         output.last(100) => output
         
@@ -157,15 +169,16 @@ completes.
             println("(Job completed)")
             break
         }
+        println(Curses:Clear)
         Inner {
             output->line println(line)
         }
 
         println
-        readLine("q to quit, <SPACE>xxx to send data, Enter to refresh") => line
-        break(line=="q")
-        if (line.startsWith(" ")) {
-            line=line.sub(1)
+        readLine => line
+        if (line.startsWith(TAB)) {
+        	break(line.sub(1)=="q")
+        } else {
             proc.sendLine(line)
             output.add(line)
             Db2:Set(Sys.scriptId,dbKey,output)

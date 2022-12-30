@@ -179,21 +179,23 @@ public abstract class Stdio {
      
      
     
-    /**
-     * Used by the stdin() statement
-     */
-    
-    public String getInputLine() throws Exception {
+     /**
+      * Get buffered input line, or null if no buffered input lines
+      */
+    protected String getBufferedInputLine() throws Exception {
         synchronized(bufferedInputLines) {
             if (!bufferedInputLines.isEmpty()) {
                 return bufferedInputLines.remove(0);
             }
         }
-        return readLine();
+        return null;
     }
-    
-    private String readLine() throws Exception {
+
+    public String getInputLine() throws Exception {
+    	String line=getBufferedInputLine();
+    	if (line != null) return line;
         if (stdin == null) throw new Exception("stdin disconnected - no buffered lines");
+
         return stdin.readLine();
     }
     

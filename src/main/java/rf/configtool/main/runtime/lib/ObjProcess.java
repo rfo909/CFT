@@ -73,6 +73,7 @@ public class ObjProcess extends Obj {
         this.add(new FunctionExitValue());
         this.add(new FunctionWait());
         this.add(new FunctionData());
+        this.add(new FunctionIsBlockedOnInput());
 
     }
 
@@ -147,6 +148,13 @@ public class ObjProcess extends Obj {
     
     public List<String> getAndClearOutput() {
         return stdioVirtual.getAndClearOutputBuffer();
+    }
+    
+    /**
+     * If this method returns true, the process hangs, waiting for an input line. 
+     */
+    public boolean isBlockedOnInput () {
+    	return stdioVirtual.isBlockedOnInput();
     }
     
     public void sendLine (String line) throws Exception {
@@ -384,6 +392,21 @@ public class ObjProcess extends Obj {
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
             return new ValueObj(dict);
+        }
+    }
+    
+    class FunctionIsBlockedOnInput extends Function {
+        public String getName() {
+            return "isBlockedOnInput";
+        }
+
+        public String getShortDesc() {
+            return "isBlockedOnInput() - returns true or false";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueBoolean(isBlockedOnInput());
         }
     }
     
