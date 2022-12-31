@@ -315,6 +315,17 @@ and can then interact with the Job, until one of three things happen:
 3. as the process asks for input, instead of entering actual input, we can enter a control sequence (TAB + 'q' + ENTER)
    which puts the job into the background instead of sending data to it 
    
+### Warning
+
+Do not run external interactive programs as background jobs, such as
+
+```
+& Dir.run("top")
+```
+
+This results in the *top* command taking over standard I/O, regardless of it running in the background, as external commands
+do not respect the virtualized (line-based) I/O that is used to control CFT background jobs.
+
 
 
 ## Command history

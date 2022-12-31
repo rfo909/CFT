@@ -134,11 +134,12 @@ This can also be done by entering TAB + q + Enter in job input
 
 
 # Get output until either blocking on input or too long has passed
+#
 # Note that the "blocked on input" mechanism depends on being a timestamp,
 # since sending an input line to the Job does not immediately restart it,
 # so it remains in "blocked on input" for a good while. To avoid falsely
 # re-detecting that, after sending input to the Job, we look for next
-# blocked-on-input time greater than previous value.
+# blocked-on-input time greater than previous value (milliseconds).
 # --
 	P(1) as Process => proc
 	P(2) as String => dbKey
@@ -229,7 +230,7 @@ This can also be done by entering TAB + q + Enter in job input
         	println("--------------------------")
         	
 			println("Press 'q' to quit, or just Enter to wait for more") 
-			break(readLine=="q")
+			break(readLine.trim=="q")
 		}	       		
 	|
     "Done"

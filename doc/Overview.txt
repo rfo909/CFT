@@ -16,6 +16,7 @@
   |  Background jobs
         Blocking on input?
         Bring to foreground
+        Warning
   |  Command history
 * The "protect" mechanism
 * Introduction to loops
