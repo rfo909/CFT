@@ -416,7 +416,7 @@ public class ValueList extends Value {
             return "replace";
         }
         public String getShortDesc() {
-            return "replace(str1,str2) - returns new list";
+            return "replace(str1,str2) - processes list of strings, returns new list";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             List<Value> newVal=new ArrayList<Value>();

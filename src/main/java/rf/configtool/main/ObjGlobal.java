@@ -767,7 +767,7 @@ public class ObjGlobal extends Obj {
             return "error";
         }
         public String getShortDesc() {
-            return "error(cond?, msg) - if expr is true or no expr, throw soft error exception";
+            return "error(cond?, msg) - if cond expr is true or no condition, throw soft error exception";
         }
         @Override
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {

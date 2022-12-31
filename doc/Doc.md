@@ -448,7 +448,7 @@ a list of int) to the next part, where the "_" (underscore) function picks it of
 calls the sum() function on it, returning a single int value.
 
 
-**Note:** loop variables are not regular variables, and can not be reassigned.
+*Note:* loop variables are not regular variables, and can not be reassigned.
 
 
 ## Filtering
@@ -1054,14 +1054,14 @@ then the result list is empty.
 A code space that doesn't contain loop statements, has as its result value the topmost
 element on the stack after all code has executed. If there is no value on the stack,
 the return value is 
-**null**.
+*null*.
 
 # Function parameters
 
 
 Custom functions can take parameters. This is done using the P() expression, which
 identifies the parameter by position. Note that 
-**parameter position is 1-based**.
+*parameter position is 1-based*.
 
 ```
 P(1)=>a P(2)=>b a+b
@@ -1154,7 +1154,7 @@ affecting the result of the caller.
 
 They are like calling an inline function (no parameters though), as their inner
 workings do not affect the caller, 
-**except** that they have access to, and can
+*except* that they have access to, and can
 modify local variables.
 
 ```
@@ -1230,7 +1230,8 @@ function body.
 
 
 Instead of using processing loops, filtering lists can also be done
-using .filter() function of the List object.
+using .filter() function of the List object. The lambda is called for each
+item, and returns a modified value.
 
 ```
 "12345".chars.filter(Lambda{P(1).parseInt}).sum
@@ -1242,7 +1243,7 @@ Here, the lambda is used to convert strings to int values.
 ## Removing items
 
 
-To remove items from the list, we let the Lambda return null.
+To remove items from the list, we just let the Lambda return null.
 
 ```
 "12345".chars.filter (Lambda{ P(1).parseInt=>x if(x>=3,x,null) })
@@ -1260,7 +1261,7 @@ control processing loops with assert, reject and break.
 Then there is the if-exression. It takes two forms, but is always considered an expression, not a statement.
 The difference between expressions and statements, is that expressions always return a value, which statements need not.
 
-### Inline form
+## Inline form
 
 ```
 if (condition, expr1, expr2)
@@ -1271,13 +1272,13 @@ The first selects between the two expressions, based on the condition, evaluatin
 expr1 if condition is true, otherwise expr2. The second conditionally evaluates expr1, or if
 the condition is false, returns null.
 
-### Traditional form
+## Traditional form
 
 ```
 if (condition) stmt1 else stmt2
 if (condition) stmt1
 ```
-### Example 1
+## Example 1
 
 
 Inline form. Check if some value is null, and if it is, provide a default value
@@ -1285,7 +1286,7 @@ Inline form. Check if some value is null, and if it is, provide a default value
 ```
 if (value != null, value, "defaultValue") =>value
 ```
-### Example 2
+## Example 2
 
 
 Using traditional form to call statement "break".
@@ -1296,20 +1297,21 @@ loop
 out(i)
 if (i>=10) break else i=i+1
 ```
-### Expressions are statements ...
+
+## Expressions are statements ...
 
 
 Note that all expressions are also statements, which means the first example can be
 written on traditional form:
 
 ```
-if (value != null) value else "defaultValue" =>
- value
+value = if (value != null) value else "defaultValue"
 ```
-### Blocks are expressions ...
+## Blocks are expressions ...
 
 
-Also note, that (local and Inner) blocks are expressions, which can contain statements, so we can do this:
+Also note, that (local and Inner) blocks are expressions, which can contain statements, so we can do this, as
+"break" is a statement:
 
 ```
 i=1
@@ -1459,8 +1461,8 @@ external process to finish.
 
 The complexities of creating and removing temporary files, is encapsuled in the library
 function 
-**Lib:runProcess**, which in turn is called from the simpler 
-**Lib:run** function, which
+*Lib:runProcess*, which in turn is called from the simpler 
+*Lib:run* function, which
 also handles waiting for the external process to finish, before returning.
 
 
@@ -1468,7 +1470,7 @@ Both of these Lib functions take the same four parameters, but often only the fi
 rest have useful defaults.
 
 
-**Lib:run** is the notation for calling a function in another script.
+*Lib:run* is the notation for calling a function in another script.
 
 ## Lib:runProcess utility function
 
@@ -1484,7 +1486,7 @@ The result object is a Dict with various system info, representing the running
 process. It has two closures of interest.
 
 
-A **closure** is a lambda, with a "self"-reference to a dictionary, and
+A *closure* is a lambda, with a "self"-reference to a dictionary, and
 so acts like a "member function" of that dictionary, as it has access to data and
 other closures of that dictionary object.
 
@@ -1562,7 +1564,7 @@ ssh-copy-id user@host
 
 
 The 
-**syntesis** functionality comes in three variants. Two of them are "colon commands".
+*syntesis* functionality comes in three variants. Two of them are "colon commands".
 
 
 
@@ -1715,7 +1717,7 @@ Dear Julius
 ### Example using raw strings and Sequence
 
 
-**Raw strings** are a special notation for strings, that is as follows:
+*Raw strings* are a special notation for strings, that is as follows:
 
 ```
 a = @ this is a "raw string" ...
@@ -1724,8 +1726,8 @@ a = @ this is a "raw string" ...
 The raw string starts following the "@ " prefix, and continues to the end of the line.
 
 
-**Sequence()** and 
-**CondSequence()** are built-in expressions that are similar to
+*Sequence()* and 
+*CondSequence()* are built-in expressions that are similar to
 List, in that they create list objects, but with a relaxed syntax, which means commas
 between values are optional.
 
@@ -2122,7 +2124,6 @@ world.render(file)
 The example script DDDExample contains code for rendering a spoked wooden wheel.
 
 
-**
 # 2D library
 
 
@@ -2135,11 +2136,10 @@ Similar to the 3D library, the 2D library lets us draw vector graphics using a
 Created DDExample which draws the same wheel as the 3D version, using the LineBrush of DD.World
 
 
-**
 
 Created DDExample2 which uses polygon drawing Brush of DD.World.
 
-**# Command line args
+# Command line args
 
 
 If CFT is invoked with command line arguments, the first is the name of the script,
@@ -2183,6 +2183,7 @@ script parses ok. It is mostly invoked using a shortcut:
 ```
 @lint
 ```
+
 ## addDebug()
 
 
@@ -2249,7 +2250,7 @@ false
 Example: to decide if a string is an integer, without
 resorting to either creating a built-in predicate function like .isInt, or even
 using regular expression matching, there is the 
-**predicate call** functionality,
+*predicate call* functionality,
 where one calls a function in a special way, resulting in a boolean value that tells
 if the call was ok or not.
 
@@ -2280,10 +2281,10 @@ situations:
 
 
 - CFT logical or data errors, called 
-**soft errors**
+*soft errors*
 
 - General errors, stemming from underlying Java code, network situations etc, called 
-**hard errors**
+*hard errors*
 
 
 ## Soft errors
@@ -2410,7 +2411,7 @@ data.get("f")    # returns Closure object without invoking it
 # Type checking with "as"
 
 
-**v3.2.5**
+*v3.2.5*
 
 The getType() has frequently been combined with error() to do type checking of parameters.
 
@@ -2535,9 +2536,6 @@ The closure can now be passed as an argument to some function somewhere, who use
 # Classes
 
 
-v3.5.0
-
-
 CFT supports primitive classes, which are really just dictionaries with closures for member functions,
 combined with the name attribute of all Dict objects, created by Dict(name) or Dict.setName(name), which we can check
 for in the "as" type checks with &amp;name.
@@ -2650,7 +2648,7 @@ this:
 
 The Dict.get() method takes an optional default-value which is returned if no value
 associated with the name, but in that case the default value is 
-**also stored** in the
+*also stored* in the
 dictionary.
 
 ```
@@ -2660,9 +2658,6 @@ data.keys        # returns list with "a"
 data.get("a",5)  # returns 3 as it was set above
 ```
 # Dict.ident=Expr
-
-
-**v3.3.0**
 
 Extended parser so that we don't have to use Dict.set() for values with a name that are valid identifiers:
 
@@ -2867,7 +2862,7 @@ means running that code (with eval), and get a newly created data structure.
 
 
 Logically, this corresponds to 
-**message passing**, in that the writer (sender) and reader (receiver)
+*message passing*, in that the writer (sender) and reader (receiver)
 of data are loosely coupled, and that any receivers will always create local copies of the data.
 
 
@@ -3056,7 +3051,7 @@ are caught and listed in full inside the Process.
 In some cases, the number of processes can be huge, and we may need to limit the
 number of active processes. This is done via a function in the Util script, that
 returns an 
-**object** which we use as follows. The names "Lxxx" are used to
+*object* which we use as follows. The names "Lxxx" are used to
 help indicate that they contain lambdas (though strictly they are closures).
 
 ```
@@ -3634,7 +3629,7 @@ the secret values, to store for that session.
 
 # Reference: object types
 
-**Per v3.7.0**
+*Per v3.7.0*
 
 ```
 Grep("extends Obj") => g
@@ -3722,7 +3717,7 @@ println(x)
 # Reference: Value types
 
 
-**Per v3.4.4**
+*Per v3.4.4*
 ```
 Grep("extends Value") => g
 Sys.homeDir.allFiles(Glob("*.java"))->f
@@ -3767,23 +3762,10 @@ These are the statements in CFT:
 
 
 - Looping and iteration over lists
-
-
 - assert/reject/break
-
-
 - out(), condOut() and report()
-
-
 - the addDebug() command
-
-
 - the help command
-
-
-- interactive commands "cat", "edit", "ls", "cd"
-
-
 - the "showCode" command
 
 

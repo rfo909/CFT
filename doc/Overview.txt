@@ -69,12 +69,12 @@
 * List filtering with Lambda
   |  Removing items
 * Conditionals - if expression
-        Inline form
-        Traditional form
-        Example 1
-        Example 2
-        Expressions are statements ...
-        Blocks are expressions ...
+  |  Inline form
+  |  Traditional form
+  |  Example 1
+  |  Example 2
+  |  Expressions are statements ...
+  |  Blocks are expressions ...
   |  if-ladders
 * Lazy evaluation
         Lazy if
@@ -127,6 +127,7 @@
   |  Drawing a spoked wheel
 * 2D library
   |  Spoked wheel
+* Command line args
 * Environment variables
 * Debugging
   |  @lint
