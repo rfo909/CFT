@@ -40,7 +40,7 @@ For jobs that require input, we use the ToForeground() function.
 This starts a simple command loop, where output from the job is
 displayed on screen, and we can send input to it. 
 
-If there is no significant output from the job for a while (3 seconds) and
+If there is no significant output from the job for a while and
 it is not blocked on input, we enter command mode, where we can leave the
 process (put it into background again). 
 
@@ -60,15 +60,13 @@ This can also be done by entering TAB + q + Enter in job input
 
     Db2:Get(sysKey,"lastPurge",0) => lastPurge
 
-    if (currentTimeMillis - lastPurge > 86400*1000) {
-        if (Std.Db.?obtainLock(sysKey,10)) {
-            println("Jobs:onLoad cleaning up Db2 old content")
-            addDebug("Purging Db2 collection for Jobs script: " + Sys.scriptId)
-            Db2:DeleteCollection(Sys.scriptId)
-            Db2:Set(sysKey,"lastPurge", currentTimeMillis)
-            ## NOT releasing the lock
-            ###Std.Db.releaseLock(sysKey)
-        }
+    if (Std.Db.?obtainLock(sysKey,10)) {
+        #println("Jobs:onLoad cleaning up Db2 old content")
+        addDebug("Purging Db2 collection for Jobs script: " + Sys.scriptId)
+        Db2:DeleteCollection(Sys.scriptId)
+        Db2:Set(sysKey,"lastPurge", currentTimeMillis)
+        ## NOT releasing the lock
+        ###Std.Db.releaseLock(sysKey)
     }
 //onLoad
 
@@ -80,7 +78,7 @@ This can also be done by entering TAB + q + Enter in job input
 		Sys.Jobs.get(name) => job
 		report(
 			if(job.isDone,"COMPLETED",""),
-			if(job.isBlockedOnInput,"<stdin>","-"),
+			if(job.isBlockedOnInputSince != null,"<stdin>","-"),
 			name)
 /AllJobs
 
@@ -110,7 +108,7 @@ This can also be done by entering TAB + q + Enter in job input
     output=proc.output
     if (output.length > 0) Inner {
         output->line println(line)
-    } @rel
+    } 
 
     Sys.Jobs.deleteCompleted(name)
     
@@ -135,24 +133,40 @@ This can also be done by entering TAB + q + Enter in job input
 //AddOutputLines
 
 
-# Get output until either too long wait or blocking on input
+# Get output until either blocking on input or too long has passed
+# Note that the "blocked on input" mechanism depends on being a timestamp,
+# since sending an input line to the Job does not immediately restart it,
+# so it remains in "blocked on input" for a good while. To avoid falsely
+# re-detecting that, after sending input to the Job, we look for next
+# blocked-on-input time greater than previous value.
 # --
 	P(1) as Process => proc
 	P(2) as String => dbKey
+	P(3) as int => lastBlockOnInputTime
 	
-	lastOut=currentTimeMillis
-	loop
-		outLines=proc.output
-		if (outLines.length>0) {
-			AddOutputLines(outLines,dbKey)
-        	Inner{
-        		outLines->line println(line)
-        	}
-			lastOut=currentTimeMillis
-        }			
-		break(currentTimeMillis - lastOut > 3000)
-		Sys.sleep(5)
-//WaitForOutput        
+	startTime=currentTimeMillis
+	Inner {
+		loop
+		    Sys.sleep(100)
+			outLines=proc.output
+			if (outLines.length>0) {
+				AddOutputLines(outLines,dbKey)
+		    	Inner{
+		    		outLines->line println(line)
+		    	}
+		    }
+		    if (proc.isDone) {
+		    	println("Job has terminated")
+		    	break
+		    }
+		    block=proc.isBlockedOnInputSince
+		    if (block != null && block > lastBlockOnInputTime) {
+		   		break
+		   	}
+		   	
+			break(currentTimeMillis - startTime > 3000)
+	}
+//WaitForInput       
 
 		
 
@@ -163,7 +177,7 @@ This can also be done by entering TAB + q + Enter in job input
 	Inner {
 		namesRunning->name
 			proc=Sys.Jobs.get(name)
-			assert(proc.isAlive && proc.isBlockedOnInput)
+			assert(proc.isAlive && proc.isBlockedOnInputSince != null)
 			out(name)
 	} => names
 	
@@ -177,8 +191,7 @@ This can also be done by entering TAB + q + Enter in job input
     Lib:Header("Selected job: " + name)
 	println("To abort, enter TAB + q + ENTER when process asks for input")
 	println
-	println("Or wait for command mode, if no output and no blocking on input")
-	println("for 3 seconds")
+	println("Or wait for command mode, if Job not blocking on input for 3 seconds")
 	println
     
     readLine("Press Enter to continue")
@@ -188,6 +201,7 @@ This can also be done by entering TAB + q + Enter in job input
     
     TAB="^t".unEsc
 
+	lastBlockOnInputTime=0
     loop
     	output=Db2:Get(Sys.scriptId,dbKey,List)
         println(Curses:Clear)
@@ -195,19 +209,20 @@ This can also be done by entering TAB + q + Enter in job input
             output->line println(line)
         }
         
-    	WaitForOutput(proc,dbKey)
+    	WaitForInput(proc,dbKey,lastBlockOnInputTime)
 
         if (proc.isDone) {
-            println("(Job completed)")
+            #println("(Job completed)")
             break
         }
-        if (proc.isBlockedOnInput) {
+        if (proc.isBlockedOnInputSince != null) {
+        	lastBlockOnInputTime=proc.isBlockedOnInputSince
         	#println("Job input")
         	line=readLine
         	if (line==TAB + "q") error("Aborting Job foreground processing")
+        	proc.sendLine(line)
         	
         	AddOutputLines(List(line), dbKey)
-        	proc.sendLine(line)
         } else {
         	println("--------------------------")
         	println("No output or pending input")

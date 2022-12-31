@@ -32,7 +32,7 @@ import java.util.List;
 public class StdioVirtual extends Stdio {
     
     private List<String> outputBuffer = new ArrayList<String>();
-    private long isBlockedOnInputSince = 0L;
+    private long isBlockedOnInputSince = -1L;
     
     public StdioVirtual (BufferedReader stdin) {
         super(stdin);
@@ -58,10 +58,9 @@ public class StdioVirtual extends Stdio {
 
     private static final long MIN_BLOCK_DELAY_MS = 100;
     
-    public boolean isBlockedOnInput () {
-    	if (isBlockedOnInputSince == 0L) return false;
-    	if (System.currentTimeMillis() - isBlockedOnInputSince >= MIN_BLOCK_DELAY_MS) return true;
-    	return false;
+    public Long isBlockedOnInputSince () {
+    	if (isBlockedOnInputSince <= 0L) return null;
+    	return (Long) isBlockedOnInputSince;
     }
 
    
@@ -69,7 +68,7 @@ public class StdioVirtual extends Stdio {
     public String getInputLine() throws Exception {
     	isBlockedOnInputSince = System.currentTimeMillis();
     	String line=super.getInputLine();
-    	isBlockedOnInputSince=0L;
+    	isBlockedOnInputSince=-1L;
     	return line;
     }
 

@@ -1,9 +1,9 @@
 
 # CFT ("ConfigTool")
 
-Last updated: 2022-12-24 RFO
+Last updated: 2022-12-30 RFO
 
-v3.7.0
+v3.7.5
 
 
 
@@ -293,8 +293,32 @@ of completed jobs, which means we are alerted with jobs terminate. If we do not 
 results from any of the terminated jobs, we can use the @JCL shortcut ("jobs clear") which
 clears completed jobs from the jobs registry.
 
-
 Note that jobs don't survive killing the CFT process.
+
+### Blocking on input?
+
+When listing jobs with @J, interactive jobs that block, waiting for input, will be tagged with
+
+```
+<stdin> 
+```
+
+### Bring to foreground
+
+Jobs that require input must be brought to the foreground. We do this with the @JFG shortcut,
+and can then interact with the Job, until one of three things happen:
+
+1. the job completes
+2. the job does not ask for input for 3 seconds - this enters Command mode, where
+   we can type 'q' and press Enter to put the job into the background, or just Enter to 
+   wait for more proess output or input.
+3. the process asks for input, but instead of entering actual input, we enter a control sequence (TAB + 'q' + ENTER)
+   which puts the job into the background. 
+   
+
+
+
+
 
 
 ## Command history

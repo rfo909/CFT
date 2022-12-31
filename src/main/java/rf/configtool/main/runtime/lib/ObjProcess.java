@@ -36,6 +36,7 @@ import rf.configtool.main.runtime.Function;
 import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueBoolean;
+import rf.configtool.main.runtime.ValueInt;
 import rf.configtool.main.runtime.ValueList;
 import rf.configtool.main.runtime.ValueNull;
 import rf.configtool.main.runtime.ValueObj;
@@ -73,7 +74,7 @@ public class ObjProcess extends Obj {
         this.add(new FunctionExitValue());
         this.add(new FunctionWait());
         this.add(new FunctionData());
-        this.add(new FunctionIsBlockedOnInput());
+        this.add(new FunctionIsBlockedOnInputSince());
 
     }
 
@@ -153,8 +154,8 @@ public class ObjProcess extends Obj {
     /**
      * If this method returns true, the process hangs, waiting for an input line. 
      */
-    public boolean isBlockedOnInput () {
-    	return stdioVirtual.isBlockedOnInput();
+    public Long isBlockedOnInputSince () {
+    	return stdioVirtual.isBlockedOnInputSince();
     }
     
     public void sendLine (String line) throws Exception {
@@ -395,18 +396,20 @@ public class ObjProcess extends Obj {
         }
     }
     
-    class FunctionIsBlockedOnInput extends Function {
+    class FunctionIsBlockedOnInputSince extends Function {
         public String getName() {
-            return "isBlockedOnInput";
+            return "isBlockedOnInputSince";
         }
 
         public String getShortDesc() {
-            return "isBlockedOnInput() - returns true or false";
+            return "isBlockedOnInputSince() - returns int or null";
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
-            return new ValueBoolean(isBlockedOnInput());
+            Long val=isBlockedOnInputSince();
+            if (val==null) return new ValueNull();
+            return new ValueInt(val);
         }
     }
     
