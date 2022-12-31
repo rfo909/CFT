@@ -1,7 +1,7 @@
 
 # CFT ("ConfigTool")
 
-Last updated: 2022-12-30 RFO
+Last updated: 2022-12-31 RFO
 
 v3.7.5
 
@@ -311,14 +311,10 @@ and can then interact with the Job, until one of three things happen:
 1. the job completes
 2. the job does not ask for input for 3 seconds - this enters Command mode, where
    we can type 'q' and press Enter to put the job into the background, or just Enter to 
-   wait for more proess output or input.
-3. the process asks for input, but instead of entering actual input, we enter a control sequence (TAB + 'q' + ENTER)
-   which puts the job into the background. 
+   wait for up to 3 more seconds for more input.
+3. as the process asks for input, instead of entering actual input, we can enter a control sequence (TAB + 'q' + ENTER)
+   which puts the job into the background instead of sending data to it 
    
-
-
-
-
 
 
 ## Command history
