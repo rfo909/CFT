@@ -67,6 +67,7 @@ public class ObjProcess extends Obj {
         this.onChange=onChange; 
         
         this.add(new FunctionOutput());
+        this.add(new FunctionHasOutput());
         this.add(new FunctionSendLine());
         this.add(new FunctionClose());
         this.add(new FunctionIsAlive());
@@ -271,6 +272,22 @@ public class ObjProcess extends Obj {
             return new ValueList(result);
         }
     }
+
+    
+    class FunctionHasOutput extends Function {
+        public String getName() {
+            return "hasOutput";
+        }
+
+        public String getShortDesc() {
+            return "hasOutput() - returns boolean";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+        	return new ValueBoolean(stdioVirtual.hasBufferedOutput());
+        }
+    }
+    
 
     class FunctionSendLine extends Function {
         public String getName() {
