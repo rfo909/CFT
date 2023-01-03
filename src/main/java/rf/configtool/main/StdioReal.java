@@ -39,10 +39,10 @@ public class StdioReal extends Stdio {
         stdout.println(s);
     }
 
-    public synchronized void print (String s) {
-        stdout.print(s);
-    }
-    
+//    public synchronized void print (String s) {
+//        stdout.print(s);
+//    }
+
     public String readPassword() {
         Console console=System.console();
         return new String(console.readPassword());

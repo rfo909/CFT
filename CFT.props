@@ -119,15 +119,7 @@ shortcut:     = "---- Show all shortcuts ----"            File("CFT.props").read
 # The prompt setting is a line of code, just as with the shortcuts
 # ---
 
-prompt = Prompt:CompletedJobs x=Sys.scriptName "CFT" + Prompt:Hostname + " " + if(x!=null,"<" + x + "> ", "") + Prompt:IsRootMark + Prompt:Path(Dir) + "> "
-
-#
-# The "bang command" is a configurable parser that is invoked when typing
-# '!' as first character. The rest of the line (String) becomes P(2). Must
-# put current Dir as parameter 1, as BangParser is a separate script and
-# maintains a separate current Dir :-) 
-# ---
-#
+prompt = Prompt:CompletedJobs Prompt:PromptString(Dir,Sys.scriptName)
 
 bangCommand = BangParser:Run(Dir,P(1))
 

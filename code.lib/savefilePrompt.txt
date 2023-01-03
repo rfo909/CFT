@@ -69,11 +69,9 @@
 # --
     P(1,Dir)=>dir
     s=dir.path
-    maxLen=(Term.w/2).i
-    if (maxLen < 30) maxLen=30
 
     # return value
-    GetPathColor + if (s.length > maxLen, "+"+s.last(maxLen-1), s) + Curses:Reset
+    GetPathColor + s + Curses:Reset
 /Path
 
 
@@ -89,3 +87,20 @@
 
 /CompletedJobs
     
+
+# Complete prompt
+# --
+	P(1,Dir) => currDir
+	P(2) => scriptName
+
+	hostname=Db2:Get(Sys.scriptId,"hostname",null)
+	parts=List
+	
+	parts.add(Path(currDir))
+	if (hostname != null && hostname != "") parts.add(hostname)
+	if (scriptName != null) parts.add("<" + scriptName + ">")
+	if(IsRoot) {
+		parts.add(Curses:Reversed + "#root#" + Curses:Reset)
+	}
+	"[" + parts.concat(" ") + "]"
+/PromptString

@@ -428,7 +428,7 @@ public class ObjSys extends Obj {
             Stdio stdio = ctx.getStdio();
             if (stdio instanceof StdioReal) {
                 StdioReal real=(StdioReal) stdio;
-                real.print(prompt);
+                real.println(prompt);
                 return new ValueString(real.readPassword());
             } else {
                 throw new Exception("readPassword() requires StdioReal"); 

@@ -222,23 +222,23 @@ public class Root {
                     SourceLocation loc = new SourceLocation("prompt", 0, 0);
                     FunctionBody promptCodeLines = new FunctionBody(promptCode, loc);
     
-                    String pre;
+                    String promptLine;
                     try {
                         CFTCallStackFrame caller=new CFTCallStackFrame("<interactive-input>");
 
                         Value ret = objGlobal.getRuntime().processFunction(stdio, caller, promptCodeLines, new FunctionState(null,null));
-                        pre=ret.getValAsString();
+                        promptLine=ret.getValAsString();
                     } catch (Exception ex) {
                         if (debugMode) {
-                            pre="ERROR";
+                            promptLine="ERROR";
                             ex.printStackTrace();
                         } else {
-                            pre="$";
+                            promptLine="$";
                         }
                     }
     
                     // Stdio can only do line output, so using System.out directly
-                    stdio.print(pre);
+                    stdio.println(promptLine);
                 }
                 String line = null;
                 try {

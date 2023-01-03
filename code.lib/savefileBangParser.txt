@@ -59,7 +59,7 @@ the other shell-like commands.
 
 	cmdList=Inner{ cmdList->element out(FixSpace(element)) }
 
-	println("--> " + cmdList.concat(" "))
+	#println("--> " + cmdList.concat(" "))
 	
 	if (Sys.isWindows) cmdList=List("powershell") + cmdList
 	
