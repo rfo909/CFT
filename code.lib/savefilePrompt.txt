@@ -64,6 +64,17 @@
 /GetPathColor
 
 
+# Set Prompt color
+# --
+	P(1,Curses:SelectColor)=>col
+	Db2:Set(Sys.scriptId,"prompt.color",col)
+/SetColor
+
+
+# Get Prompt color
+# --
+	if (Curses:Enabled, Db2:Get(Sys.scriptId,"prompt.color",""), "")
+/GetColor
 
 # Format current dir for prompt
 # --
@@ -77,15 +88,29 @@
 
 # List completed jobs (when changes)
 # --
-    list=Jobs:Completed
-    str=list.concat("|")
-    if (str != Db2:Get(Sys.scriptId,"CompletedJobs","")) Inner {
-        Db2:Set(Sys.scriptId,"CompletedJobs",str)
-        list -> name
-            println("COMPLETED " + name)
-    }
+	running=Jobs:Running
 
-/CompletedJobs
+	isBlocked=Inner{
+		running->job assert(Sys.Jobs.get(job).isBlockedOnInputSince != null) out(job)
+	}.length
+
+	hasOutput=Inner{
+		running->job assert(Sys.Jobs.get(job).hasOutput) out(job)
+	}.length
+
+	completed=Jobs:Completed.length
+
+	s=null
+
+	if (isBlocked > 0)           s="blocked=" + isBlocked
+	else if (hasOutput > 0)      s="has-output=" + hasOutput
+	else if (completed > 0)      s="completed=" + completed
+	else if (running.length > 0) s="running="+running.length
+
+	if (s != null) s="Jobs:" + s
+
+	s
+/JobsStatus
     
 
 # Complete prompt
@@ -93,14 +118,19 @@
 	P(1,Dir) => currDir
 	P(2) => scriptName
 
+	color=GetColor
+
 	hostname=Db2:Get(Sys.scriptId,"hostname",null)
 	parts=List
-	
-	parts.add(Path(currDir))
+
+	js=JobsStatus
+	if (js != null) parts.add(js)
+	parts.add(Path(currDir)+Curses:Reset+color)
+
 	if (hostname != null && hostname != "") parts.add(hostname)
 	if (scriptName != null) parts.add("<" + scriptName + ">")
 	if(IsRoot) {
 		parts.add(Curses:Reversed + "#root#" + Curses:Reset)
 	}
-	"[" + parts.concat(" ") + "]"
+	color + "[" + parts.concat(" ") + "]" + Curses:Reset
 /PromptString
