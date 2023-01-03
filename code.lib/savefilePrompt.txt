@@ -125,12 +125,12 @@
 
 	js=JobsStatus
 	if (js != null) parts.add(js)
-	parts.add(Path(currDir)+Curses:Reset+color)
+	parts.add(Curses:Reset + Path(currDir)+Curses:Reset+color)
 
 	if (hostname != null && hostname != "") parts.add(hostname)
 	if (scriptName != null) parts.add("<" + scriptName + ">")
 	if(IsRoot) {
-		parts.add(Curses:Reversed + "#root#" + Curses:Reset)
+		parts.add(Curses:Reversed + "#root#" + Curses:Reset + color)
 	}
 	color + "[" + parts.concat(" ") + "]" + Curses:Reset
 /PromptString
