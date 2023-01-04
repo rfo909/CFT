@@ -102,12 +102,10 @@
 
 	s=null
 
-	if (isBlocked > 0)           s="blocked=" + isBlocked
-	else if (hasOutput > 0)      s="has-output=" + hasOutput
-	else if (completed > 0)      s="completed=" + completed
-	else if (running.length > 0) s="running="+running.length
-
-	if (s != null) s="Jobs:" + s
+	if (isBlocked > 0)           s="JBLK=" + isBlocked
+	else if (hasOutput > 0)      s="JOUT=" + hasOutput
+	else if (completed > 0)      s="JCOMP=" + completed
+	else if (running.length > 0) s="JRUN="+running.length
 
 	s
 /JobsStatus
@@ -123,9 +121,9 @@
 	hostname=Db2:Get(Sys.scriptId,"hostname",null)
 	parts=List
 
+	parts.add(Curses:Reset + Path(currDir)+Curses:Reset+color)
 	js=JobsStatus
 	if (js != null) parts.add(js)
-	parts.add(Curses:Reset + Path(currDir)+Curses:Reset+color)
 
 	if (hostname != null && hostname != "") parts.add(hostname)
 	if (scriptName != null) parts.add("<" + scriptName + ">")
