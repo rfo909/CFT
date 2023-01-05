@@ -121,14 +121,14 @@
 	hostname=Db2:Get(Sys.scriptId,"hostname",null)
 	parts=List
 
+	if (hostname != null && hostname != "") parts.add("[" + hostname + "]")
 	parts.add(Curses:Reset + Path(currDir)+Curses:Reset+color)
 	js=JobsStatus
 	if (js != null) parts.add(js)
 
-	if (hostname != null && hostname != "") parts.add(hostname)
-	if (scriptName != null) parts.add("<" + scriptName + ">")
+	if (scriptName != null) parts.add("{" + scriptName + "}")
 	if(IsRoot) {
 		parts.add(Curses:Reversed + "#root#" + Curses:Reset + color)
 	}
-	color + "[" + parts.concat(" ") + "]" + Curses:Reset
+	color + "::: " + parts.concat(" ") + Curses:Reset
 /PromptString
