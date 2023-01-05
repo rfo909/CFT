@@ -76,6 +76,7 @@
 	if (Curses:Enabled, Db2:Get(Sys.scriptId,"prompt.color",""), "")
 /GetColor
 
+
 # Format current dir for prompt
 # --
     P(1,Dir)=>dir
@@ -84,6 +85,19 @@
     # return value
     GetPathColor + s + Curses:Reset
 /Path
+
+
+# Set prompt prefix string
+# --
+	readLine("Enter prompt prefix string") => str
+	Db2:Set(Sys.scriptId,"prompt.prefix",str)
+/SetPrefix
+
+
+# Get prompt prefix string
+# --
+	Db2:Get(Sys.scriptId,"prompt.prefix","--- ")
+/GetPrefix
 
 
 # List completed jobs (when changes)
@@ -130,5 +144,5 @@
 	if(IsRoot) {
 		parts.add(Curses:Reversed + "#root#" + Curses:Reset + color)
 	}
-	color + "::: " + parts.concat(" ") + Curses:Reset
+	color + GetPrefix + parts.concat(" ") + Curses:Reset
 /PromptString
