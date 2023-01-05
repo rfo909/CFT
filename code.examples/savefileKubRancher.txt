@@ -1,0 +1,67 @@
+# Readme
+# --
+<<<< EOF
+# Based on 
+#
+# https://www.youtube.com/watch?v=1j5lhDzlFUM&t=7s
+#
+>>>> EOF
+/Readme
+
+
+"k01.v k02.v k03.v".split
+/MasterHosts
+
+"k04.v k05.v k06.v".split
+/WorkerHosts
+
+"r01.v"
+/RancherHost
+
+
+# All hosts
+# --
+	(MasterHosts + WorkerHosts + RancherHost).unique
+/AllHosts
+
+# Fix ssh without passwords
+# --
+	(AllHosts)->h
+		target=GetSSHUser + "@" + h
+		SSH:sshEnable(target)
+/sshEnable
+
+# SSH user
+# --
+	"roar"
+/GetSSHUser
+
+
+# Install docker on all VM's
+# --
+	debug=true
+	AllHosts->h
+		target=GetSSHUser+"@"+h
+		DockerSwarm:Install(target)
+		SSH:sudo(target,'systemctl enable docker', false, debug)
+		SSH:sudo(target,'systemctl start docker', true, debug)
+/InstallDocker
+
+
+# Download and run Rancher on RancherHost
+# --
+	target=GetSSHUser + "@" + RancherHost
+
+	SSH:sudo(target,"mkdir -p /var/lib/rancher")
+
+	println("Log on to RancherHost and run the following")
+	println
+	@ sudo docker run -d --name rancher-server -v /var/lib/rancher:/var/lib/rancher --restart=unless-stopped -p 80:80 -p 443:443 --privileged rancher/rancher")
+	println(_)
+
+	println
+	println
+/RunRancher
+
+
+# From this point on, follow instructions in Rancher, or in the source video
