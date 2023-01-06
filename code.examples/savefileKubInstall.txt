@@ -21,6 +21,14 @@
 
 # Readme
 <<< EOF
+2023-01 RFO
+-----------
+This one kind of works, but it is much simpler using KubRancher, which
+spins up Rancher, then kubernetes
+
+Old
+---
+
 https://phoenixnap.com/kb/install-kubernetes-on-ubuntu
 
 Complete script for setting up Kubernetes cluster.
