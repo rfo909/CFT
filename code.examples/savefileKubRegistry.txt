@@ -1,0 +1,10 @@
+# Readme
+# --
+<<< EOF
+On dedicated VM
+----------------
+sudo mkdir /var/lib/registry
+sudo docker run -d -p 5000:5000 --restart=always --name registry -v /var/lib/registry:/var/lib/registry registry:2
+
+>>> EOF
+/Readme
