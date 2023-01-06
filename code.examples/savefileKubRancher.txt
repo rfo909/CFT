@@ -9,10 +9,10 @@
 /Readme
 
 
-"k01.v k02.v k03.v".split
+"k1.v k2.v k3.v".split
 /MasterHosts
 
-"k04.v k05.v k06.v".split
+"k4.v k5.v k6.v".split
 /WorkerHosts
 
 "r01.v"
@@ -36,15 +36,25 @@
 	"roar"
 /GetSSHUser
 
+# Install and start docker on one VM
+# --
+	P(1)=>target
+
+	debug=true
+
+	DockerSwarm:Install(target)
+	SSH:sudo(target,'systemctl enable docker', false, debug)
+	SSH:sudo(target,'systemctl start docker', true, debug)
+//InstallDockerOne
 
 # Install docker on all VM's
 # --
 	debug=true
 	AllHosts->h
 		target=GetSSHUser+"@"+h
-		DockerSwarm:Install(target)
-		SSH:sudo(target,'systemctl enable docker', false, debug)
-		SSH:sudo(target,'systemctl start docker', true, debug)
+		println("Starting Job for " + target)
+		proc = SpawnProcess(SymDict(target), InstallDockerOne(target))
+		Sys.Jobs.add(proc,target)
 /InstallDocker
 
 
@@ -52,16 +62,46 @@
 # --
 	target=GetSSHUser + "@" + RancherHost
 
+	# Create directory for persisting config
 	SSH:sudo(target,"mkdir -p /var/lib/rancher")
 
 	println("Log on to RancherHost and run the following")
 	println
-	@ sudo docker run -d --name rancher-server -v /var/lib/rancher:/var/lib/rancher --restart=unless-stopped -p 80:80 -p 443:443 --privileged rancher/rancher")
+	@ sudo docker run -d --name rancher-server -v /var/lib/rancher:/var/lib/rancher --restart=unless-stopped -p 80:80 -p 443:443 --privileged rancher/rancher
 	println(_)
 
 	println
 	println
 /RunRancher
 
-
+# Going forward
+# --
+<<< EOF
+Open <<RancherHost>> in browser.
+Obtain container ID 
+When asked to change password, using "bxfRIOmREJ3MRkp6"
+To log in later, use username "admin"
+Menu > Global Settings >
+	Ensure server-url on format https://ip-adress (or name?) 
+Menu > Cluster Management > Create > Custom
+	Enter name
+	Optionally define labels
+	-> Kubernetes Options: Network Provider > Flannel
+	-> Advanced Options: Nginx Ingress: Disabled (why?)
+	-> Authorized Endpoint: Leave enabled
+	-> Click Next
+	-> Configure cluster, running attach commands on the different nodes
+>>> EOF
+/Next
 # From this point on, follow instructions in Rancher, or in the source video
+
+
+# Inspecting logs
+# --
+<<< EOF
+Log in on <<RancerHost>>
+-> docker ps
+Copy docker rancher container ID
+-> docker logs ID 2>&1
+>>> EOF
+/Logs

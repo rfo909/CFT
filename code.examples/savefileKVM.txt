@@ -38,6 +38,15 @@ To get started, perform the following tasks:
 
 Install KVM
 -----------
+
+* Ubuntu 20.04
+
+> sudo apt install qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils virtinst
+> sudo systemctl enable libvirtd
+> sudo systemctl start libvirtd
+
+* Ubuntu 18.04
+
 > sudo apt-get install qemu-kvm libvirt-bin virtinst bridge-utils cpu-checker
 > sudo systemctl enable libvirtd
 > sudo systemctl start libvirtd
