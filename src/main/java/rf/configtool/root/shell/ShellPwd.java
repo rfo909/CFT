@@ -15,28 +15,40 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>
 */
 
-package rf.configtool.parsetree;
+package rf.configtool.root.shell;
 
-import rf.configtool.lexer.TokenStream;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import rf.configtool.lexer.SourceLocation;
+import rf.configtool.main.CFTCallStackFrame;
 import rf.configtool.main.Ctx;
+import rf.configtool.main.FunctionBody;
+import rf.configtool.main.FunctionState;
+import rf.configtool.main.PropsFile;
 import rf.configtool.main.runtime.Value;
+import rf.configtool.main.runtime.ValueBlock;
+import rf.configtool.main.runtime.ValueBoolean;
+import rf.configtool.main.runtime.ValueList;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.lib.ObjDir;
+import rf.configtool.main.runtime.lib.ObjFile;
 import rf.configtool.main.runtime.lib.Protection;
 
-/**
- * Return directory object for current directory
- */
-public class ExprPwd extends ExprCommon {
 
-    public ExprPwd (TokenStream ts) throws Exception {
-        super(ts);
-        ts.matchStr("pwd","expected 'pwd'");
+public class ShellPwd extends ShellCommand {
+
+    public ShellPwd(List<String> parts) throws Exception {
+        super(parts);
     }
-    
-    public Value resolve (Ctx ctx) throws Exception {
-        String currDir=ctx.getObjGlobal().getCurrDir();
-        ctx.getObjGlobal().addSystemMessage(currDir);
-        return new ValueObj(new ObjDir(currDir,Protection.NoProtection));
+
+    public Value execute(Ctx ctx) throws Exception {
+        
+        String currentDir = ctx.getObjGlobal().getCurrDir();
+        ctx.addSystemMessage(currentDir);
+        return new ValueObj(new ObjDir(currentDir, Protection.NoProtection));
     }
+
+
 }

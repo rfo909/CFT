@@ -46,6 +46,7 @@ public class ShellCommandsDetector {
         "grep",
         "mkdir",
         "shell",
+        "pwd",
             
     };
 
@@ -129,6 +130,10 @@ public class ShellCommandsDetector {
         if (name.equals("shell")) {
         	return new ShellShell(parts);
         }
+        if (name.equals("pwd")) {
+        	return new ShellPwd(parts);
+        }
+        		
         // else ...
         
         throw new Exception("Internal error: invalid ShellParser operation name=" + name);

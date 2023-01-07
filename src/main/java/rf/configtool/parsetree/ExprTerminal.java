@@ -72,10 +72,6 @@ public class ExprTerminal extends ExprCommon {
             expr=new ExprIf(ts);
             return;
         }
-        if (ts.peekStr("pwd")) {
-            expr=new ExprPwd(ts);
-            return;
-        }
         
         if (ts.matchStr("null")) {
             literalValue=new ValueNull();
