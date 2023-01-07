@@ -106,10 +106,7 @@ This can also be done by entering TAB + q + Enter in job input
     proc=Sys.Jobs.getCompleted(name)
 
     Lib:Header(name)
-    output=proc.output
-    if (output.length > 0) Inner {
-        output->line println(line)
-    } 
+    Lib:mList(proc.output)
 
     Sys.Jobs.deleteCompleted(name)
     

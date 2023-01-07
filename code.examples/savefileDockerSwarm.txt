@@ -59,7 +59,8 @@ If the swarm has more than one manager, it should be an odd number.
     println(""+target + " Installing Docker")
     
     # Remove old version if installed
-    SSH:sudo(target,"apt-get remove docker docker-engine docker.io containerd runc", true, debug)
+    SSH:sudo(target,"apt-get update",false,debug)
+    SSH:sudo(target,"apt-get remove docker docker-engine docker.io containerd runc -y", true, debug)
     
     SSH:sudo(target,"apt-get update", false, debug)
     SSH:sudo(target,"apt-get install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common",false,debug)

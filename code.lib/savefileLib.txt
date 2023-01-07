@@ -82,6 +82,23 @@ choice.
 
 
 
+# Page through list of lines
+# --
+	P(1) as List => lines
+	count=0
+	lines->line
+		if (count >= Term.h-3) {
+                        println
+			readLine("Enter to continue")=>x
+			error(x=="q","Aborting")
+			count=0
+		}
+		println(line)
+		count=count+1
+	|
+/mList
+		
+
 # Get file from lastResult if possible, otherwise error
 # --
     x = Sys.lastResult
