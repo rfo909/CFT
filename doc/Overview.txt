@@ -32,7 +32,8 @@
   |  Binary type
 * List processing
   |  Iterating over list content
-  |  Filtering with assert(), reject() and break() + out()
+  |  Filtering with assert(), reject(), continue and break() + out()
+  |  continue and break without params
   |  The condOut() statement
   |  Produce columns with report()
   |  List addition

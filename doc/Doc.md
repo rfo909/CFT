@@ -1,9 +1,9 @@
 
 # CFT ("ConfigTool")
 
-Last updated: 2022-12-31 RFO
+Last updated: 2023-01-12 RFO
 
-v3.7.5
+v3.7.6
 
 
 
@@ -675,7 +675,7 @@ to return output, we use the out() statement inside.
 
 The result is a list of strings, as displayed.
 
-## Filtering with assert(), reject() and break() + out()
+## Filtering with assert(), reject(), continue and break() + out()
 
 
 Using the assert() statement, we may abort processing for elements that do not meet a condition.
@@ -704,6 +704,25 @@ List(1,2,3,2,1)->x break(x>2) out(x)
 1
 2
 ```
+
+## continue and break without params
+
+For compatibility with other languages, CFT also supports continue and break without parameters,
+to be used with if, as follows:
+
+```
+List(1,2,3,4)->x if(x%2 != 0) continue out(x)    # 2,4
+
+List(1,2,3,4)->x if (x>=3) break out(x)          # 1,2
+```
+
+Contintue corresponds to the following two:
+
+- assert(false)
+- reject(true)
+
+
+
 ## The condOut() statement
 
 

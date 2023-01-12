@@ -982,6 +982,13 @@ ERROR: [<script> Tests01:861.8] Invalid value Dict [] + 1
 
 
 
+# Verify "continue", v3.7.6b
+# --
+	Inner{
+		List(1,2,3)->x if (x==2) continue out(x)
+	}.concat(":")=="1:3"
+/Test56_verify_continue_loop_control
+
 
 # Run all TestX
 # --

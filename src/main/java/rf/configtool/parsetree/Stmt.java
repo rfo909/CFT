@@ -35,8 +35,8 @@ public abstract class Stmt extends LexicalElement {
         if (ts.peekStr("loop")) {
             return new StmtLoop(ts);
         }
-        if (ts.peekStr("assert") || ts.peekStr("reject")) {
-            return new StmtAssertReject(ts);
+        if (ts.peekStr("assert") || ts.peekStr("reject") || ts.peekStr("continue")) {
+            return new StmtAssertRejectContinue(ts);
         }
         if (ts.peekStr("break")) {
             return new StmtBreak(ts);

@@ -21,32 +21,45 @@ import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.runtime.Value;
 
-public class StmtAssertReject extends Stmt{
+public class StmtAssertRejectContinue extends Stmt{
     
-    private boolean isAssert;
+	static final int TYPE_ASSERT = 0;
+	static final int TYPE_REJECT = 1;
+	static final int TYPE_CONTINUE = 2;
+	
+	private int type;
     private Expr expr;
 
-    public StmtAssertReject (TokenStream ts) throws Exception {
+    public StmtAssertRejectContinue (TokenStream ts) throws Exception {
         super(ts);
         
         if (ts.matchStr("assert")) {
-            isAssert=true;
+        	type = TYPE_ASSERT;
+        } else if (ts.matchStr("reject")) {
+        	type = TYPE_REJECT;
+        } else if (ts.matchStr("continue")) {
+        	type = TYPE_CONTINUE;
         } else {
-            ts.matchStr("reject","expected 'assert' or 'reject'");
-            isAssert=false;
+        	throw new Exception("Invalid token");
         }
-        ts.matchStr("(", "expected '(' following assert/reject");
-        expr=new Expr(ts);
-        ts.matchStr(")", "expected ')' closing assert/reject statement");
+
+        if (type==TYPE_ASSERT || type==TYPE_REJECT) {
+	        ts.matchStr("(", "expected '(' following assert/reject");
+	        expr=new Expr(ts);
+	        ts.matchStr(")", "expected ')' closing assert/reject statement");
+        }
     }
     
     public void execute (Ctx ctx) throws Exception {
+    	if (type==TYPE_CONTINUE) {
+    		ctx.setAbortIterationFlag();
+    		return;
+    	}
+    	
         Value v=expr.resolve(ctx);
         boolean x=v.getValAsBoolean();
         
-        
-        
-        boolean abortProcessing=(isAssert && !x) || (!isAssert && x);
+        boolean abortProcessing=(type==TYPE_ASSERT && !x) || (type==TYPE_REJECT && x);
         if (abortProcessing) {
             ctx.setAbortIterationFlag();
         }
