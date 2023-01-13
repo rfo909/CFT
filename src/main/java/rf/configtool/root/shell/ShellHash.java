@@ -24,6 +24,7 @@ import rf.configtool.main.Ctx;
 import rf.configtool.main.PropsFile;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueList;
+import rf.configtool.main.runtime.ValueNull;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.lib.ObjFile;
 import rf.configtool.main.runtime.lib.Protection;
@@ -43,7 +44,9 @@ public class ShellHash extends ShellCommand {
         String currentDir = ctx.getObjGlobal().getCurrDir();
         boolean noArgs=getArgs().isEmpty();
         
-        if (noArgs) throw new Exception(name + ": expected file(s)");
+        if (noArgs) {
+        	return callMacro(ctx, new ValueList(new ArrayList<Value>())); // empty list
+        }
         
         List<ShellCommandArg> args=getArgs();
         

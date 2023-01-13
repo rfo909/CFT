@@ -38,9 +38,9 @@ mDiff = Lambda { Lib:DiffFiles(P(1),P(2)) }
 
 mShowtree = Lambda { P(1)=>dir Lib:ShowTree(dir) }
 
-mHash = Lambda { Lib:HashFiles(P(1)) }
+mHash = Lambda { P(1) as List=>files if(files.empty, List(Lib:GetLastResultFile), files)=>files Lib:HashFiles(files) }
 
-mHex = Lambda { P(1) as File => f f.hex }
+mHex = Lambda { P(1)=>file if(file==null, Lib:GetLastResultFile, file)=>file file.hex }
 
 mGrep = Lambda { P(1)=>str P(2)=>fileList Lib:GrepFiles(str,fileList) } 
 

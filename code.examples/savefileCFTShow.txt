@@ -40,14 +40,16 @@
 
     - ls | lsf | lsd
     - cd
-    - cat
-    - more
-    - edit
-    - tail
+    - cat / more / edit / tail <file>?
     - mkdir
     - rm
     - cp
     - mv
+    - touch ...
+    - diff <file> <file>
+    - hash <file>?
+    - hex <file>?
+    - showtree <dir>?
 
     ls cft*
     edit :N

@@ -24,6 +24,7 @@ import rf.configtool.main.Ctx;
 import rf.configtool.main.PropsFile;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueList;
+import rf.configtool.main.runtime.ValueNull;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.lib.ObjFile;
 import rf.configtool.main.runtime.lib.Protection;
@@ -43,8 +44,12 @@ public class ShellHex extends ShellCommand {
         String currentDir = ctx.getObjGlobal().getCurrDir();
         boolean noArgs=getArgs().isEmpty();
         
+        if (noArgs) {
+        	return callMacro(ctx, new ValueNull());
+        }        
+        
         List<ShellCommandArg> args=getArgs();
-        if (noArgs || args.size()>1) throw new Exception(name + ": expected single file");
+        if (args.size()>1) throw new Exception(name + ": expected zero or single file");
         
         FileSet fs=new FileSet(name,false,true);  // files only
         fs.setIsSafeOperation();
