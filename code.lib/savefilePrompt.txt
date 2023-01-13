@@ -59,7 +59,7 @@
 # Get hostname
 # --
 	h=Db2:Get(Sys.scriptId,"hostname",null)
-	if (h==null) h=GuessHostName
+	if (h==null || h=="") h=GuessHostName
 	if (h==null) h=""
 	h
 /GetHostName
