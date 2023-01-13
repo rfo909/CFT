@@ -50,6 +50,7 @@
     - hash <file>?
     - hex <file>?
     - showtree <dir>?
+	- shell
 
     ls cft*
     edit :N
@@ -58,98 +59,9 @@
     cd :N
 
     @cmd
-    @fm   
-
-
-.h Functions
-
-    1+1
-    /two
-
-    Dir.files.length
-    /x
-
-    cd ..
-    x
-
-    cd
-
-    :save Test
-
-    @e
-
-    3.14
-    /pi
-
-    # Parameters (with default expr)
-    # --
-        a=P(1,readLine("Enter a").parseInt)
-        b=P(2,readLine("Enter b").parseInt)
-        a+b
-    /sum
-
-    ?
-
-
-.h Loops 
-
-    # Iterate over content, filter or modify, 
-    # use out() to generate result from loop.
-
-    List(1,2,3)->x out(x+10)
-
-    # Loops terminate at end of function or at PIPE character
-
-    "123".chars->c println(c) | println("done")
-
-    # All Java files under current dir
-    # --
-        Dir.allFiles("*.java")
-    /JavaFiles
-    
-    # Count number of lines of java
-    # --
-        JavaFiles->f out(f.read.length) | _.sum
-    /JavaLines
-
-    # Filter data 
-    # --
-        JavaFiles->f
-            assert(f.lastModified > currentTimeMillis-(86400*1000*7))
-            out(f)
-    /RecentlyModified
-    
-    # ... Date.sub(Date.Duration.days(7))
-
-.h Help
-
-    # List functions in current script
-    ?
-
-    # Show function code
-    ?sum
-
-    # Global functions
-    help
-
-    # Object functions
-    Dir help
-
-    # Internals
-    _Expr
-    _Stmt
-    _Shell
-
-    # List colon commands and shortcuts
-    :
-    @
-
-    # List scripts
-    @scr
-
-    # Show details of another script
-    ?Lib:
-    ?Lib:TmpDir
+    @fm
+	@S
+	@FL
 
 
 .h Projects 
@@ -179,6 +91,101 @@
     
     @S
     @FL
+
+
+
+.h Help
+
+    # List functions in current script
+    ?
+
+    # Show function code
+    ?sum
+
+    # Global functions
+    help
+    _Expr
+    _Stmt
+    _Shell
+
+    # Object functions
+    Dir help
+	Std help
+
+    # List colon commands and shortcuts
+    :
+    @
+
+    # List scripts
+    @scr
+
+    # Show details of another script
+    ?Lib:
+    ?Lib:TmpDir
+
+.h Functions
+
+    1+1
+    /two
+
+    Dir.files.length
+    /x
+
+    cd ..
+    x
+
+    cd
+    :save Test
+    @e
+
+    3.14
+    /pi
+
+    # Parameters (with default expr)
+    # --
+        a=P(1,readLine("Enter a").parseInt)
+        b=P(2,readLine("Enter b").parseInt)
+        a+b
+    /sum
+
+    ?
+
+	sum(1,3)
+	sum
+
+.h Loops 
+
+    # Iterate over content, filter or modify, 
+    # use out() to generate result from loop.
+
+    List(1,2,3)->x out(x+10)
+
+    # Loops terminate at end of function or at PIPE character
+
+    "123".chars->c println(c) | println("done")
+
+    # All Java files under current dir
+    # --
+        Dir.allFiles("*.java")
+    /JavaFiles
+    
+    # Count number of lines of java
+    # --
+        JavaFiles->f out(f.read.length) | _.sum
+    /JavaLines
+
+    # Filter data 
+    # --
+        JavaFiles->f
+            assert(f.lastModified > currentTimeMillis-(86400*1000*7))
+            out(f)
+    /RecentlyModified
+    
+	# or ...
+    Date.sub(Date.Duration.days(7))
+
+	Date help
+	Date.Duration help
 
 
 >>>>> TEXT
