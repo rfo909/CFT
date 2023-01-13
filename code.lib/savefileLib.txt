@@ -1150,3 +1150,12 @@ run(null,null,null,true)
 /HistoryShow
 
 
+# Platform independent "which" implementation
+# --
+	P(1) => str
+	if (Sys.isWindows) {
+		Dir.run("powershell","-c","Get-Command " + str)
+	} else {
+		Dir.run("which", str)
+	}
+/Which

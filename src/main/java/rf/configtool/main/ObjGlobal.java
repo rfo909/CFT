@@ -1105,6 +1105,7 @@ public class ObjGlobal extends Obj {
                 "   hash <file> ...",
                 "   hex <file>",
                 "   grep <str> <file> ...",
+                "   which <programname>",
                 "   shell        # run OS shell",
                 "   !ls          # run OS shell command",
                 "",

@@ -47,6 +47,7 @@ public class ShellCommandsDetector {
         "mkdir",
         "shell",
         "pwd",
+        "which",
             
     };
 
@@ -123,6 +124,9 @@ public class ShellCommandsDetector {
         }
         if (name.equals("grep")) {
             return new ShellGrep(parts);
+        }
+        if (name.equals("which")) {
+        	return new ShellWhich(parts);
         }
         if (name.equals("mkdir")) {
             return new ShellMkdir(parts);

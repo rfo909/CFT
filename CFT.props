@@ -42,7 +42,10 @@ mHash = Lambda { P(1) as List=>files if(files.empty, List(Lib:GetLastResultFile)
 
 mHex = Lambda { P(1)=>file if(file==null, Lib:GetLastResultFile, file)=>file file.hex }
 
-mGrep = Lambda { P(1)=>str P(2)=>fileList Lib:GrepFiles(str,fileList) } 
+mGrep = Lambda { P(1)=>str P(2)=>fileList Lib:GrepFiles(str,fileList) }
+
+mWhich = Lambda { P(1)=>str Lib:Which(str) }
+
 
 # Lambdas for symbol set and get
 # ----

@@ -54,6 +54,7 @@ public class PropsFile {
     private String mHash;
     private String mHex;
     private String mGrep;
+    private String mWhich;
     
     private String mSymGet;
     private String mSymSet;
@@ -112,6 +113,7 @@ public class PropsFile {
         mHash = "Lambda{error('mHash lambda undefined in " + PROPS_FILE + "') }";
         mHex = "Lambda{error('mHex lambda undefined in " + PROPS_FILE + "') }";
         mGrep = "Lambda{error('mGrep lambda undefined in " + PROPS_FILE + "') }";
+        mWhich = "Lambda{error('mWhich lambda undefined in " + PROPS_FILE + "') }";
         
         mSymGet = "Lambda{error('mSymGet lambda undefined in " + PROPS_FILE + "') }";
         mSymSet = "Lambda{error('mSymSet lambda undefined in " + PROPS_FILE + "') }";
@@ -183,6 +185,9 @@ public class PropsFile {
                     if (name.equals("mGrep")) {
                         mGrep=value;
                     } else
+                	if (name.equals("mWhich")) {
+                		mWhich=value;
+                	} else
                     if (name.equals("mShowtree")) {
                         mShowtree=value;
                     } else
@@ -291,6 +296,10 @@ public class PropsFile {
     
     public String getMGrep () {
         return mGrep;
+    }
+    
+    public String getMWhich () {
+        return mWhich;
     }
     
     public String getMSymGet () {
