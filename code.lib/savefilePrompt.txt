@@ -35,13 +35,18 @@
 /IsRootMark
 
 
-# Get hostname string if defined / for inclusion in prompt
+# Guess host name
 # --
-    h=Db2:Get(Sys.scriptId,"hostname",null)
-    if (h==null) h=""
-    if (h.length > 0) h="|"+h
-    h
-/Hostname
+	env=Sys.environment
+	if (Sys.isWindows) {
+		if (env.has("COMPUTERNAME")) env.COMPUTERNAME else null
+	} else {
+		f=File("/etc/hostname")
+		if (f.exists) f.read.first else null
+	}
+//GuessHostName
+		
+
 
 
 # Set hostname string (used in prompt)
@@ -50,6 +55,14 @@
     Db2:Set(Sys.scriptId,"hostname", hostName)
 /SetHostname
 
+
+# Get hostname
+# --
+	h=Db2:Get(Sys.scriptId,"hostname",null)
+	if (h==null) h=GuessHostName
+	if (h==null) h=""
+	h
+/GetHostName
 
 # Set text color for current path in prompt
 # --
@@ -60,7 +73,7 @@
 
 # Get text color for path (in Path function)
 # --
-    if (Curses:Enabled, Db2:Get(Sys.scriptId,"path.color",""), "")
+    if (Curses:Enabled, Db2:Get(Sys.scriptId,"path.color",Curses:TxtGreen), "")
 /GetPathColor
 
 
@@ -73,7 +86,7 @@
 
 # Get Prompt color
 # --
-	if (Curses:Enabled, Db2:Get(Sys.scriptId,"prompt.color",""), "")
+	if (Curses:Enabled, Db2:Get(Sys.scriptId,"prompt.color",Curses:TxtCyan), "")
 /GetColor
 
 
@@ -85,19 +98,6 @@
     # return value
     GetPathColor + s + Curses:Reset
 /Path
-
-
-# Set prompt prefix string
-# --
-	readLine("Enter prompt prefix string") => str
-	Db2:Set(Sys.scriptId,"prompt.prefix",str)
-/SetPrefix
-
-
-# Get prompt prefix string
-# --
-	Db2:Get(Sys.scriptId,"prompt.prefix","--- ")
-/GetPrefix
 
 
 # List completed jobs (when changes)
@@ -132,7 +132,7 @@
 
 	color=GetColor
 
-	hostname=Db2:Get(Sys.scriptId,"hostname",null)
+	hostname=GetHostName
 	parts=List
 
 	if (hostname != null && hostname != "") parts.add("[" + hostname + "]")
@@ -144,5 +144,5 @@
 	if(IsRoot) {
 		parts.add(Curses:Reversed + "#root#" + Curses:Reset + color)
 	}
-	color + GetPrefix + parts.concat(" ") + Curses:Reset
+	color + parts.concat(" ") + Curses:Reset
 /PromptString
