@@ -13,6 +13,17 @@
 
 <h1>CFT Change log</h1>
 
+<h3>3.7.7 2023-01-14 - :N is now expression</h3>
+<p>
+Implemented :N as general expression for Sys.lastResult(N).
+</p>
+<p>
+Also supports :: to mean Sys.lastResult (without position)
+</p>
+<p>
+This simplified the ShellCommand.java parsing, as :N is no longer a special case.
+</p>
+
 <h3>3.7.6c 2023-01-13 - shell command hash and hex</h3>
 <p>
 Fixed so that these use Sys.LastResult if missing args

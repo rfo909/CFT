@@ -8,7 +8,7 @@
   |  Windows backslash
   |  Combine with CFT function results
   |  Use "lastResult"
-        :N notation restrictions
+        :N notation is also a valid expression
   |  Symbols 
         Diffing files example
   |  Bang commands

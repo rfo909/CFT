@@ -1,9 +1,9 @@
 
 # CFT ("ConfigTool")
 
-Last updated: 2023-01-12 RFO
+Last updated: 2023-01-14 RFO
 
-v3.7.6
+v3.7.7
 
 
 
@@ -165,30 +165,22 @@ cd :0.dir            # go to directory of a file in the output from previous com
 
 ```
 
-### :N notation restrictions
+### :N notation is also a valid expression
 
-*Note* that the :N notation only works for shell commands, and only when an argument to
-such a shell command *starts with* the :N.
+*Note* that the :N notation not only works for shell commands. Shell commands recognized
+arguments starting with colon as expressions, without the need for parantheses, but the
+colon notation is a valid expression in the CFT language.
 
-The following is *not* valid:
+The following is thus valid:
 
 ```
 ls
-cd (:0)    # :N is not CFT code, just shell-command parser specific
+cd (:3)
 
 ls *.txt
-touch new_:0   # can not embed :N shortcuts inside arguments
+touch ("new_"+:0.name)
 ```
 
-That last one will create a file named 'new_:0' on Linux, but fail in Windows, as colons
-are kind of reserved for station letters.
-
-Still, that last one can be solved by writing a CFT code expressions inside parantheses, as follows:
-
-```
-ls *.txt
-touch ("new_" + Sys.lastResult(0).name)
-```
 
 :-)
 

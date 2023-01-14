@@ -59,23 +59,11 @@ public abstract class ShellCommand {
             if (part.startsWith("(") && part.endsWith(")")) {
                 isExpr=part.substring(1,part.length()-1); // (xxx) -> xxx
             } else if (part.startsWith("%")) {
-                // symbol lookup
+                // symbol lookup 
                 isExpr=part;
-            } else if (part.startsWith(":")) {
-                // identify optional sequence of numbers
-                int pos=1; // following the colon
-                
-                while (pos<part.length() && "0123456789".indexOf(part.charAt(pos)) >= 0) {
-                    pos++;
-                }
-                //System.out.println("---> pos=" + pos);
-                String digits=part.substring(1,pos); // may be empty
-                String rest=part.substring(pos); // first non-digit char
-                if (pos==1) {
-                    isExpr="Sys.lastResult" + rest;
-                } else {
-                    isExpr="Sys.lastResult(" + digits + ")" + rest;
-                }
+            } else if (part.startsWith("::") || part.startsWith(":")) {
+            	// Sys.lastResult or Sys.lastResult(N)
+            	isExpr=part;
             }
             if (isExpr != null) {
                 // create Expr

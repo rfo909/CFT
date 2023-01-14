@@ -81,6 +81,10 @@ public class ExprTerminal extends ExprCommon {
             expr=new ExprScriptCall(ts);
             return;
         }
+        if (ts.peekStr("::") || (ts.peekStr(":") && ts.peekType(1,Token.TOK_INT))) {
+        	expr=new ExprLastResult(ts);
+        	return;
+        }
         if (ts.peekStr("tryCatch")) {
             expr=new ExprTryCatch(ts);
             return;
