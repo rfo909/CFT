@@ -2137,7 +2137,7 @@ world.render(file)
 
 The example script DDDExample contains code for rendering a spoked wooden wheel.
 
-![Wooden wheel]{https://github.com/rfo909/CFT/blob/master/doc/wheel.png}
+![Wooden wheel](https://github.com/rfo909/CFT/blob/master/doc/wheel.png)
 
 
 # 2D library
@@ -2151,7 +2151,7 @@ Similar to the 3D library, the 2D library lets us draw vector graphics using a
 
 Created DDExample which draws the same wheel as the 3D version, using the LineBrush of DD.World
 
-![Wooden wheel]{https://github.com/rfo909/CFT/blob/master/doc/wheel2d.png}
+![Wooden wheel](https://github.com/rfo909/CFT/blob/master/doc/wheel2d.png)
 
 
 
