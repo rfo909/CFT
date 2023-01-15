@@ -40,7 +40,7 @@ public class ShellShell extends ShellCommand {
 	}
 	@Override 
 	public String getBriefExampleParams() {
-		return null;
+		return "- run bash or powershell";
 	}
 
 

@@ -36,42 +36,44 @@ import rf.configtool.main.runtime.Value;
 public class ShellCommandsManager {
     
     public static final ShellCommand[] SHELL_COMMANDS = {
+    		new ShellShell(),
     		new ShellLs("ls"),
     		new ShellLs("lsd"),
     		new ShellLs("lsf"),
     		new ShellCd(),
+    		new ShellPwd(),
     		new ShellCatEditMoreTail("cat"),
     		new ShellCatEditMoreTail("edit"),
     		new ShellCatEditMoreTail("more"),
     		new ShellCatEditMoreTail("tail"),
     		new ShellTouch(),
-    		new ShellMv(),
+    		
     		new ShellCp(),
     		new ShellRm(),
+    		new ShellMv(),
+    		new ShellMkdir(),
+    		new ShellGrep(),
+
     		new ShellDiff(),
     		new ShellShowtree(),
     		new ShellHash(),
     		new ShellHex(),
-    		new ShellGrep(),
-    		new ShellMkdir(),
-    		new ShellPwd(),
     		new ShellWhich(),
-    		new ShellShell(),
     };
 
     
     public List<String> getShellCommandDescriptions() {
     	List<String> lines=new ArrayList<String>();
     	
+    	ShellBang sb=new ShellBang();
+    	lines.add(sb.getName() + " " + sb.getBriefExampleParams());
+
     	for (ShellCommand x:SHELL_COMMANDS) {
     		String desc=x.getBriefExampleParams();
     		if (desc==null) desc=""; else desc=" " + desc;
     		lines.add(x.getName()+desc);
     	}
-    	ShellBang sb=new ShellBang();
-    	lines.add(sb.getName() + " " + sb.getBriefExampleParams());
     	
-    	rf.configtool.util.StringSort.sort(lines);
     	return lines;
     }
     

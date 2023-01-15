@@ -35,7 +35,7 @@ public class ShellMkdir extends ShellCommand {
 	}
 	@Override 
 	public String getBriefExampleParams() {
-		return "name";
+		return "<name>";
 	}
 
 

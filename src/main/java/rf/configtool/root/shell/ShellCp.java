@@ -35,7 +35,7 @@ public class ShellCp extends ShellCommand {
 	}
 	@Override 
 	public String getBriefExampleParams() {
-		return "src ... target";
+		return "<src> ... <target>";
 	}
 
 

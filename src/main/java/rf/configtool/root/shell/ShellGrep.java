@@ -39,7 +39,7 @@ public class ShellGrep extends ShellCommand {
 	}
 	@Override 
 	public String getBriefExampleParams() {
-		return "str <file> ...";
+		return "<word|str> <file> ... - ex: grep test *.txt";
 	}
 	
 
