@@ -2155,10 +2155,11 @@ Created DDExample which draws the same wheel as the 3D version, using the LineBr
 
 ## Spoked wheel (polygon fill)
 
+Created DDExample2 which uses polygon drawing Brush of DD.World.
+
 ![Wooden wheel](https://github.com/rfo909/CFT/blob/master/doc/wheel2dpoly.png)
 
 
-Created DDExample2 which uses polygon drawing Brush of DD.World.
 
 # Command line args
 
