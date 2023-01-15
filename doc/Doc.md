@@ -2137,6 +2137,8 @@ world.render(file)
 
 The example script DDDExample contains code for rendering a spoked wooden wheel.
 
+![Wooden wheel]{./wheel.png}
+
 
 # 2D library
 
@@ -2148,6 +2150,9 @@ Similar to the 3D library, the 2D library lets us draw vector graphics using a
 
 
 Created DDExample which draws the same wheel as the 3D version, using the LineBrush of DD.World
+
+![Wooden wheel]{./wheel2d.png}
+
 
 
 
