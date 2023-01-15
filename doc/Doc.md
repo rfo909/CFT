@@ -2146,14 +2146,16 @@ The example script DDDExample contains code for rendering a spoked wooden wheel.
 Similar to the 3D library, the 2D library lets us draw vector graphics using a
 2D Ref object that moves in the plane, using either lines or filled polygons.
 
-## Spoked wheel
+## Spoked wheel (lines)
 
 
 Created DDExample which draws the same wheel as the 3D version, using the LineBrush of DD.World
 
 ![Wooden wheel](https://github.com/rfo909/CFT/blob/master/doc/wheel2d.png)
 
+## Spoked wheel (polygon fill)
 
+![Wooden wheel](https://github.com/rfo909/CFT/blob/master/doc/wheel2dpoly.png)
 
 
 Created DDExample2 which uses polygon drawing Brush of DD.World.

@@ -128,7 +128,8 @@
   |  Rendering
   |  Drawing a spoked wheel
 * 2D library
-  |  Spoked wheel
+  |  Spoked wheel (lines)
+  |  Spoked wheel (polygon fill)
 * Command line args
 * Environment variables
 * Debugging
