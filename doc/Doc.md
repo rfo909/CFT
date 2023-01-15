@@ -1,7 +1,7 @@
 
 # CFT ("ConfigTool")
 
-Last updated: 2023-01-14 RFO
+Last updated: 2023-01-15 RFO
 
 v3.7.7
 
@@ -142,19 +142,18 @@ edit (DataFile)
 The expressions should return single Dir or File objects.
 
 
-## Use "lastResult"
+## Use "Sys.lastResult" 
 
-The function Sys.lastResult returns the result from the last interactive command. If that value
-is a list, we can get one of the values, by entering the position in the list:
+The function Sys.lastResult returns the result from the last interactive command. The
+Sys.lastResult function takes an optional int parameter for when the result is
+a list, to obtain value at a position in the list. 
 
 ```
 lsd 
 cd (Sys.lastResult(3))   # using ()'s to run CFT expression
 ```
 
-
-Since we frequently will need access to "lastResult" when issuing CFT shell commands, 
-there is a shorthand notation to obtain a value from the "lastResult" list:
+Since this is a frequently used feature, there is a shorthand notation:
 
 ```
 lsd         # lists directories
@@ -162,29 +161,33 @@ cd :3       # cd into directory 4 (prefixed by index 3 in list)
 
 Dir.allFiles("*.java")   
 cd :0.dir            # go to directory of a file in the output from previous command
-
 ```
 
-### :N notation is also a valid expression
+### Complex example
 
-*Note* that the :N notation not only works for shell commands. Shell commands recognized
-arguments starting with colon as expressions, without the need for parantheses, but the
-colon notation is a valid expression in the CFT language.
-
-The following is thus valid:
+The :N notation is also usable inside normal CFT expressions, so we can even 
+do this:
 
 ```
-ls
-cd (:3)
-
 ls *.txt
-touch ("new_"+:0.name)
+touch ("new_" + :0.name)
+edit
 ```
-
-
 :-)
 
+### Use Sys.lastResult without index N
 
+Sometimes we have a function that returned perhaps a single string or file or directory, that
+we in turn want to do something with, without the :N *lookup-in-list* syntax. For this
+purpose, the *::* (double colon) is defined.
+
+```
+"xxx"
+::+"yyy"   # gives xxxyyy
+
+Dir.dirs.first
+cd ::
+```
 
 ## Symbols 
 

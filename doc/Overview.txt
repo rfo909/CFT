@@ -7,8 +7,9 @@
   |  Paths with space
   |  Windows backslash
   |  Combine with CFT function results
-  |  Use "lastResult"
-        :N notation is also a valid expression
+  |  Use "Sys.lastResult" 
+        Complex example
+        Use Sys.lastResult without index N
   |  Symbols 
         Diffing files example
   |  Bang commands
