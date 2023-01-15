@@ -22,6 +22,7 @@ import java.util.List;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.runtime.ColList;
 import rf.configtool.main.runtime.Function;
+import rf.configtool.main.runtime.IsSynthesizable;
 import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueInt;
@@ -32,7 +33,7 @@ import rf.configtool.main.runtime.ValueNull;
 /**
  * int value with associated data object, for sorting etc 
  */
-public class ValueObjInt extends ValueInt {
+public class ValueObjInt extends ValueInt implements IsSynthesizable {
 
     private Value data;
     
@@ -51,7 +52,7 @@ public class ValueObjInt extends ValueInt {
     // DO NOT override eq() - need to just compare the value, not the extra data
     
     @Override
-    public String synthesize() throws Exception {
+    public String createCode() throws Exception {
         return "Int("+ super.synthesize() + "," + data.synthesize() + ")";
     }
 

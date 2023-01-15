@@ -22,12 +22,13 @@ import java.util.List;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.runtime.ColList;
 import rf.configtool.main.runtime.Function;
+import rf.configtool.main.runtime.IsSynthesizable;
 import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueBoolean;
 import rf.configtool.main.runtime.ValueString;
 
-public class ObjRegex extends Obj {
+public class ObjRegex extends Obj implements IsSynthesizable {
     
     private String regex;
 
@@ -61,7 +62,7 @@ public class ObjRegex extends Obj {
     }
 
     @Override
-    public String synthesize() throws Exception {
+    public String createCode() throws Exception {
         return "Regex(" + (new ValueString(regex)).synthesize() + ")";
     }
 

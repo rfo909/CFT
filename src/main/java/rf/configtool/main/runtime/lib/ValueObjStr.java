@@ -22,6 +22,7 @@ import java.util.List;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.runtime.ColList;
 import rf.configtool.main.runtime.Function;
+import rf.configtool.main.runtime.IsSynthesizable;
 import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueNull;
@@ -32,7 +33,7 @@ import rf.configtool.main.runtime.ValueString;
 /**
  * str value with associated data object, for sorting etc 
  */
-public class ValueObjStr extends ValueString {
+public class ValueObjStr extends ValueString implements IsSynthesizable {
 
     private Value data;
     
@@ -52,7 +53,7 @@ public class ValueObjStr extends ValueString {
     
     
     @Override
-    public String synthesize() throws Exception {
+    public String createCode() throws Exception {
         return "Str("+ super.synthesize() + "," + data.synthesize() + ")";
     }
 

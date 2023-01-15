@@ -25,6 +25,7 @@ import java.util.List;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.runtime.ColList;
 import rf.configtool.main.runtime.Function;
+import rf.configtool.main.runtime.IsSynthesizable;
 import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueBoolean;
@@ -34,7 +35,7 @@ import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
 
 
-public class ObjDate extends Obj {
+public class ObjDate extends Obj implements IsSynthesizable {
     
     private long timeValue;
     private String dateFmt="yyyy-MM-dd HH:mm:ss";
@@ -111,7 +112,7 @@ public class ObjDate extends Obj {
     }
         
     @Override
-    public String synthesize() throws Exception {
+    public String createCode() throws Exception {
         return "Date(" + timeValue + ")";
     }
 

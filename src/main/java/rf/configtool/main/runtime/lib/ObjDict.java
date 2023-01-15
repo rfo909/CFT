@@ -33,6 +33,7 @@ import rf.configtool.main.ScriptSourceLine;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.runtime.ColList;
 import rf.configtool.main.runtime.Function;
+import rf.configtool.main.runtime.IsSynthesizable;
 import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueBlock;
@@ -45,7 +46,7 @@ import rf.configtool.main.runtime.ValueString;
 /**
  * Non-persistent object to be populated with key-value pairs.
  */
-public class ObjDict extends Obj {
+public class ObjDict extends Obj implements IsSynthesizable {
     
     private String name;
     private Map<String,Value> values=new HashMap<String,Value>();
@@ -187,7 +188,7 @@ public class ObjDict extends Obj {
     
     
     @Override 
-    public String synthesize() throws Exception {
+    public String createCode() throws Exception {
         StringBuffer sb=new StringBuffer();
         sb.append("Dict");
         if (name != null) {

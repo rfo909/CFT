@@ -22,7 +22,7 @@ import java.util.List;
 import rf.configtool.main.Ctx;
 import rf.configtool.util.NumberFormat;
 
-public class ValueInt extends Value {
+public class ValueInt extends Value implements IsSynthesizable {
     
     private long val;
     
@@ -59,7 +59,7 @@ public class ValueInt extends Value {
     
     
     @Override 
-    public String synthesize() throws Exception {
+    public String createCode() throws Exception {
         return getValAsString();
     }
     

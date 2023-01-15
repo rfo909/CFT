@@ -22,7 +22,7 @@ import java.util.List;
 import rf.configtool.main.Ctx;
 import rf.configtool.util.NumberFormat;
 
-public class ValueFloat extends Value {
+public class ValueFloat extends Value implements IsSynthesizable {
     
     private double val;
     
@@ -60,7 +60,7 @@ public class ValueFloat extends Value {
     }
     
     @Override 
-    public String synthesize() throws Exception {
+    public String createCode() throws Exception {
         return getValAsString();
     }
     

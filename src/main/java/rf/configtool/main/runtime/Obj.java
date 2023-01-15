@@ -197,12 +197,10 @@ public abstract class Obj {
     public abstract ColList getContentDescription();
     public abstract boolean eq(Obj x);
     
-    /**
-     * Values and objects that support synthesizing code from inner state, should override
-     * this method, returning valid code that recreates the object. This feature is
-     * needed to decouple values from the code.
-     */
     public String synthesize() throws Exception {
+    	if (this instanceof IsSynthesizable) {
+    		return ((IsSynthesizable) this).createCode();
+    	}
         throw new Exception("Object " + getTypeName() + " can not be synthesized");
     }
     
@@ -214,8 +212,10 @@ public abstract class Obj {
      */
     public Value createClone (Ctx callCtx) throws Exception {
         Obj obj=this;
+        if (!(obj instanceof IsSynthesizable)) throw new Exception("Not synthesizable");
+        IsSynthesizable x=(IsSynthesizable) obj;
         try {
-            String s=obj.synthesize();
+            String s=x.createCode();
 
             Lexer p=new Lexer();
             p.processLine(new ScriptSourceLine(new SourceLocation(), s));

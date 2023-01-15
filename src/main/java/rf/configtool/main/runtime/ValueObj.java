@@ -17,7 +17,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.main.runtime;
 
-public class ValueObj extends Value {
+public class ValueObj extends Value implements IsSynthesizable {
     
     private Obj val;
     
@@ -40,7 +40,7 @@ public class ValueObj extends Value {
     }
     
     @Override
-    public String synthesize() throws Exception {
+    public String createCode() throws Exception {
         return val.synthesize();
     }
 

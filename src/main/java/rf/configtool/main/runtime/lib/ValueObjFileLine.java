@@ -21,13 +21,14 @@ import java.util.List;
 
 import rf.configtool.main.Ctx;
 import rf.configtool.main.runtime.Function;
+import rf.configtool.main.runtime.IsSynthesizable;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueInt;
 import rf.configtool.main.runtime.ValueNull;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
 
-public class ValueObjFileLine extends ValueString {
+public class ValueObjFileLine extends ValueString implements IsSynthesizable {
     
     private Long lineNo;
     private ObjFile file;
@@ -47,7 +48,7 @@ public class ValueObjFileLine extends ValueString {
     }
     
     @Override
-    public String synthesize() throws Exception {
+    public String createCode() throws Exception {
         return "FileLine(" + super.synthesize() + "," + lineNo + "," + file.synthesize() + ")";
     }
 

@@ -38,6 +38,7 @@ import rf.configtool.main.SoftErrorException;
 import rf.configtool.main.Stdio;
 import rf.configtool.main.runtime.ColList;
 import rf.configtool.main.runtime.Function;
+import rf.configtool.main.runtime.IsSynthesizable;
 import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueBoolean;
@@ -47,7 +48,7 @@ import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
 import rf.configtool.util.FileModifiedSort;
 
-public class ObjDir extends Obj {
+public class ObjDir extends Obj implements IsSynthesizable {
 
     private String name;
     private Protection protection;
@@ -154,7 +155,7 @@ public class ObjDir extends Obj {
     }
 
     @Override
-    public String synthesize() throws Exception {
+    public String createCode() throws Exception {
         String prot="";
         if (protection != null && protection.isActive()) {
             prot=".protect(" + (new ValueString(protection.getCode()).synthesize() + ")");

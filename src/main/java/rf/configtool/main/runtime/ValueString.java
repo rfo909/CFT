@@ -27,7 +27,7 @@ import rf.configtool.main.Ctx;
 import rf.configtool.main.runtime.lib.ObjDict;
 import rf.configtool.util.Hex;
 
-public class ValueString extends Value {
+public class ValueString extends Value implements IsSynthesizable {
     
     private String val;
     
@@ -86,7 +86,7 @@ public class ValueString extends Value {
     }
     
     @Override
-    public String synthesize() throws Exception {
+    public String createCode() throws Exception {
         
         if (val==null) return "''";
         

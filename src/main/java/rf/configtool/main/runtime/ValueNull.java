@@ -17,7 +17,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.main.runtime;
 
-public class ValueNull extends Value {
+public class ValueNull extends Value implements IsSynthesizable {
 
     @Override
     public String getTypeName() {
@@ -31,7 +31,7 @@ public class ValueNull extends Value {
     }
     
     @Override
-    public String synthesize() {
+    public String createCode() {
         return "null";
     }
     

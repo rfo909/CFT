@@ -25,7 +25,7 @@ import rf.configtool.main.CFTCallStackFrame;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.runtime.lib.ObjClosure;
 
-public class ValueList extends Value {
+public class ValueList extends Value implements IsSynthesizable {
     
     private List<Value> val;
     
@@ -85,7 +85,7 @@ public class ValueList extends Value {
     }
     
     @Override 
-    public String synthesize() throws Exception {
+    public String createCode() throws Exception {
         StringBuffer sb=new StringBuffer();
         sb.append("List(");
         boolean comma=false;

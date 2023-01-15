@@ -22,13 +22,14 @@ import java.util.List;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.runtime.ColList;
 import rf.configtool.main.runtime.Function;
+import rf.configtool.main.runtime.IsSynthesizable;
 import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueBoolean;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
 
-public class ObjGlob extends Obj {
+public class ObjGlob extends Obj implements IsSynthesizable {
     
     private String pattern;
     private boolean ignoreCase;
@@ -65,7 +66,7 @@ public class ObjGlob extends Obj {
     }
 
     @Override
-    public String synthesize() throws Exception {
+    public String createCode() throws Exception {
         return "Glob(" + (new ValueString(pattern)).synthesize() + "," + (new ValueBoolean(ignoreCase)).synthesize() + ")";
     }
 

@@ -45,6 +45,7 @@ import rf.configtool.main.SoftErrorException;
 import rf.configtool.main.Stdio;
 import rf.configtool.main.runtime.ColList;
 import rf.configtool.main.runtime.Function;
+import rf.configtool.main.runtime.IsSynthesizable;
 import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueBinary;
@@ -62,7 +63,7 @@ import rf.configtool.util.TabUtil;
 import rf.configtool.util.DateTimeDurationFormatter;
 
 
-public class ObjFile extends Obj {
+public class ObjFile extends Obj implements IsSynthesizable {
 
     static final String DefaultEncoding = "ISO_8859_1";
     
@@ -247,7 +248,7 @@ public class ObjFile extends Obj {
     }
 
     @Override
-    public String synthesize() throws Exception {
+    public String createCode() throws Exception {
         String enc="";
         String prot="";
         if (!encoding.equals(DefaultEncoding)) {
