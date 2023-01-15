@@ -39,18 +39,25 @@ import rf.configtool.main.runtime.lib.Protection;
 
 public class ShellRm extends ShellCommand {
 
-    public ShellRm(List<String> parts) throws Exception {
-        super(parts);
-    }
+	@Override
+	public String getName() {
+		return "rm";
+	}
+	@Override 
+	public String getBriefExampleParams() {
+		return "<file/dir> ...";
+	}
 
-    public Value execute(Ctx ctx) throws Exception {
+
+
+    public Value execute(Ctx ctx, Command cmd) throws Exception {
         
         final String currentDir = ctx.getObjGlobal().getCurrDir();
-        String name=getName();
-        List<ShellCommandArg> args=getArgs();
+        String name=cmd.getCommandName();
+        List<Arg> args=cmd.getArgs();
         
         FileSet fs=new FileSet(name,true,true); // files and directories
-        for (ShellCommandArg arg:args) {
+        for (Arg arg:args) {
             fs.processArg(currentDir, ctx, arg);
         }
         
@@ -67,7 +74,7 @@ public class ShellRm extends ShellCommand {
         String lambda=propsFile.getMRm();
         Value[] lambdaArgs= {new ValueList(result)};
 
-        return callConfiguredLambda(getName(), ctx, lambda, lambdaArgs);
+        return callConfiguredLambda(name, ctx, lambda, lambdaArgs);
     }
 
 

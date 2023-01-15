@@ -51,7 +51,7 @@ import rf.configtool.main.runtime.lib.ObjDir;
 import rf.configtool.main.runtime.lib.Protection;
 import rf.configtool.main.runtime.reporttool.Report;
 import rf.configtool.root.shell.ShellCommand;
-import rf.configtool.root.shell.ShellCommandsDetector;
+import rf.configtool.root.shell.ShellCommandsManager;
 
 /**
  * The Root class manages a set of parallel script contexts.
@@ -328,25 +328,12 @@ public class Root {
             
             // interactive-only shell commands?
             
-            ShellCommand shellCommand = (new ShellCommandsDetector(line)).identifyShellCommand();
-            
-            if (shellCommand != null) {
-                FunctionState functionState=new FunctionState("<ShellCommand>"); // no function parameters
-                Ctx ctx=new Ctx(stdio, objGlobal, functionState);
-                
-                Value result = shellCommand.execute(ctx);
-                
-                postProcessResult(result);
+            Value v = (new ShellCommandsManager()).execute(stdio, objGlobal, line);
+            if (v != null) {
+                postProcessResult(v);
                 showSystemLog();
-
                 return;
             }
-
-
-            
-             
-                        
-  
             
             // pre-processing input
 

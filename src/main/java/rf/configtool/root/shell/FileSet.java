@@ -158,7 +158,7 @@ public class FileSet {
 
     }
 
-    public void processArg (String currentDir, Ctx ctx, ShellCommandArg arg) throws Exception {
+    public void processArg (String currentDir, Ctx ctx, Arg arg) throws Exception {
         processArg(currentDir, ctx, arg, false, false);
     }
     
@@ -166,7 +166,7 @@ public class FileSet {
      * Processing argument to shell function, doing wildcard globbing and
      * detecting absolute paths, resolving Expr if arg.isExpr()
      */
-    public void processArg (String currentDir, Ctx ctx, ShellCommandArg arg, boolean allowNewDir, boolean allowNewFile) throws Exception {
+    public void processArg (String currentDir, Ctx ctx, Arg arg, boolean allowNewDir, boolean allowNewFile) throws Exception {
         if (arg.isExpr()) {
             Value v=arg.resolveExpr(ctx);
             if (v instanceof ValueString) {

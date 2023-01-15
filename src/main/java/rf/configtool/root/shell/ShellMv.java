@@ -26,29 +26,35 @@ import rf.configtool.main.runtime.ValueBoolean;
 
 
 public class ShellMv extends ShellCommand {
-    
-    public ShellMv(List<String> parts) throws Exception {
-        super(parts);
-    }
+  
+	@Override
+	public String getName() {
+		return "mv";
+	}
+	@Override 
+	public String getBriefExampleParams() {
+		return "src ... target";
+	}
 
-    public Value execute(Ctx ctx) throws Exception {
+
+    public Value execute(Ctx ctx, Command cmd) throws Exception {
         
-        final String name=getName(); 
+        final String name=cmd.getCommandName(); 
 
         final String currentDir = ctx.getObjGlobal().getCurrDir();
-        List<ShellCommandArg> args=getArgs();
+        List<Arg> args=cmd.getArgs();
         if (args.size() < 2) throw new Exception(name + ": requires at least two args");
         
         FileSet fsSource = new FileSet(name,true,true);
         for (int i=0; i<args.size()-1; i++) {
-            ShellCommandArg arg=args.get(i);
+            Arg arg=args.get(i);
             fsSource.processArg(currentDir, ctx, arg);
         }
         
         List<String> dirs=fsSource.getDirectories();
         List<String> files=fsSource.getFiles();
         
-        ShellCommandArg lastArg=args.get(args.size()-1);
+        Arg lastArg=args.get(args.size()-1);
 
         // special cases, where target may depend on src (two args only, with one src element)
         if (args.size() == 2) {

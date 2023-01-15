@@ -33,26 +33,34 @@ import rf.configtool.main.runtime.lib.ObjDir;
 import rf.configtool.main.runtime.lib.ObjFile;
 import rf.configtool.main.runtime.lib.Protection;
 
-public class ShellCatEditMoreTail  extends ShellCommand {
+public class ShellCatEditMoreTail extends ShellCommand {
+	
+	private final String name;
+	
+	public ShellCatEditMoreTail (String name) {
+		this.name=name;
+	}
 
-    public ShellCatEditMoreTail(List<String> parts) throws Exception {
-        super(parts);
-    }
+	@Override
+	public String getName() {
+		return name;
+	}
+	@Override 
+	public String getBriefExampleParams() {
+		return "<file>?";
+	}
 
-    public Value execute(Ctx ctx) throws Exception {
+    public Value execute(Ctx ctx, Command cmd) throws Exception {
 
         String currDir = ctx.getObjGlobal().getCurrDir();
-        boolean noArgs=getArgs().isEmpty();
         
-        String name=getName();
-        
-        if (noArgs) {
-            return callMacro(ctx,null);
+        if (cmd.noArgs()) {
+            return callMacro(ctx, name, null);
         }
         FileSet fs=new FileSet(name,false, true); // files only
         fs.setIsSafeOperation();
         
-        for (ShellCommandArg arg : getArgs()) fs.processArg(currDir, ctx, arg);
+        for (Arg arg : cmd.getArgs()) fs.processArg(currDir, ctx, arg);
         
         List<String> files=fs.getFiles();
         if (files.isEmpty()) throw new Exception(name + ": no match");
@@ -61,12 +69,10 @@ public class ShellCatEditMoreTail  extends ShellCommand {
         
         ObjFile f=new ObjFile(files.get(0), Protection.NoProtection);
         
-        return callMacro(ctx, f);
+        return callMacro(ctx, name, f);
     }
 
-    private Value callMacro (Ctx ctx, ObjFile file) throws Exception {
-        String name=getName();
-        
+    private Value callMacro (Ctx ctx, String name, ObjFile file) throws Exception {
         PropsFile propsFile=ctx.getObjGlobal().getRoot().getPropsFile();
         
         String lambda;
@@ -80,7 +86,7 @@ public class ShellCatEditMoreTail  extends ShellCommand {
         } else if (name.equals("tail")) {
             lambda=propsFile.getMTail();
         } else {
-            throw new Exception("Invalid statement name, expected cat, edit or more: " + name);
+            throw new Exception("Invalid statement name, expected cat, edit, more or tail: " + name);
         }
 
             

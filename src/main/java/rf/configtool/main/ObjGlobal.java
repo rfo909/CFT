@@ -56,6 +56,7 @@ import rf.configtool.main.runtime.lib.ValueObjFloat;
 import rf.configtool.main.runtime.lib.ValueObjInt;
 import rf.configtool.main.runtime.lib.ValueObjStr;
 import rf.configtool.root.Root;
+import rf.configtool.root.shell.ShellCommandsManager;
 import rf.configtool.util.TabUtil;
 
 /**
@@ -1087,29 +1088,13 @@ public class ObjGlobal extends Obj {
         public String getShortDesc() {
             return "_Shell() - CFT shell-like commands";
         }
-        private String[] data= {
+        private String[] data1= {
                 "CFT shell-like (interactive) commands",
                 "-------------------------------------",
                 "",
-                "   ls / lsd / lsf ...",
-                "   cd <dir>",
-                "   touch <file> ...",
-                "   cat / edit / more / tail <file>?",
-                "   pwd",
-                "   mv ...",
-                "   cp ...",
-                "   rm ...",
-                "   mkdir <dir>",
-                "   diff <file1> <file2>",
-                "   showtree <dir>?",
-                "   hash <file> ...",
-                "   hex <file>",
-                "   grep <str> <file> ...",
-                "   which <programname>",
-                "",
-                "   shell        # run OS shell",
-                "   !ls -l       # run OS shell command",
-                "",
+        };
+        private String[] data2={
+        		"",
                 "- The 'lsd' lists directories only, and 'lsf' files only.",
                 "",
                 "- The 'edit' command opens a file in editor.",
@@ -1124,11 +1109,9 @@ public class ObjGlobal extends Obj {
                 "",
                 "- The 'cp' command copies both files and directories.",
                 "",
-                "- The 'shell' command executes a shell (bash/powershell)",
-                "",
-                "- All commands allow both globbing, local and absolute paths,",
-                "  on both Windows and Linux, symbol references and CFT expressions,",
-                "  and may refer Sys.lastResult or numbered element when list:",
+                "- All commands working with files and directories allow both globbing,",
+                "  local and absolute paths, on both Windows and Linux. To reference",
+                "  values from Sys.lastResult use :: or :N (get value from list).",
                 "",
                 "   ls a*.txt                - globbing",
                 "   ls /some/path            - absolute path",
@@ -1138,18 +1121,29 @@ public class ObjGlobal extends Obj {
                 "   cd %someSymbol           - symbol resolving to dir or file",
                 "   cd (dirExpr)             - dirExpr is a CFT function",
                 "",
-                "   cat :                    - The ':' corresponds to (Sys.lastResult)",
+                "   cat ::                   - The ':' corresponds to (Sys.lastResult)",
                 "   cd :N                    - The ':N' corresponds to (Sys.lastResult(N))",
                 "",
                 "   !cp :3 /some/path",
                 "",
-                "Symbols are defined entering %%name which stores lastResult under",
-                "that name, usually some Dir or File. A warning will be issued when",
-                "storing any other type of value as a symbol.",
+                "",
+                "- Symbols are defined entering %%name which stores lastResult under",
+                "  that name, usually some Dir or File. A warning will be issued when",
+                "  storing any other type of value as a symbol.",
                 "",
         };
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            for (String line:data) {
+            for (String line:data1) {
+                ctx.getObjGlobal().addSystemMessage(line);
+            }
+            
+            ShellCommandsManager scm=new ShellCommandsManager();
+            List<String> lines=scm.getShellCommandDescriptions();
+            for (String line:lines) {
+                ctx.getObjGlobal().addSystemMessage(line);
+            }
+            
+            for (String line:data2) {
                 ctx.getObjGlobal().addSystemMessage(line);
             }
             return new ValueBoolean(true);

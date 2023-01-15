@@ -33,28 +33,35 @@ import rf.configtool.main.runtime.lib.Protection;
 
 public class ShellHex extends ShellCommand {
 
-    public ShellHex(List<String> parts) throws Exception {
-        super(parts);
-    }
+	@Override
+	public String getName() {
+		return "hex";
+	}
+	@Override 
+	public String getBriefExampleParams() {
+		return "<file>?";
+	}
 
-    public Value execute(Ctx ctx) throws Exception {
 
-        String name=getName();
+
+    public Value execute(Ctx ctx, Command cmd) throws Exception {
+
+        String name=cmd.getCommandName();
         
         String currentDir = ctx.getObjGlobal().getCurrDir();
-        boolean noArgs=getArgs().isEmpty();
+        boolean noArgs=cmd.getArgs().isEmpty();
         
         if (noArgs) {
-        	return callMacro(ctx, new ValueNull());
+        	return callMacro(ctx, name, new ValueNull());
         }        
         
-        List<ShellCommandArg> args=getArgs();
+        List<Arg> args=cmd.getArgs();
         if (args.size()>1) throw new Exception(name + ": expected zero or single file");
         
         FileSet fs=new FileSet(name,false,true);  // files only
         fs.setIsSafeOperation();
         
-        for (ShellCommandArg arg:args) {
+        for (Arg arg:args) {
             fs.processArg(currentDir, ctx, arg);  // no unknown files or dirs
         }
         
@@ -63,18 +70,17 @@ public class ShellHex extends ShellCommand {
         
         Value file=new ValueObj(new ObjFile(files.get(0), Protection.NoProtection));
         
-        return callMacro(ctx, file);
+        return callMacro(ctx, name, file);
     }
 
-    
-      private Value callMacro (Ctx ctx, Value file) throws Exception {
+	private Value callMacro(Ctx ctx, String name, Value file) throws Exception {
 
-    PropsFile propsFile=ctx.getObjGlobal().getRoot().getPropsFile();
-        String lambda=propsFile.getMHex();
-        Value[] lambdaArgs= {file};
+		PropsFile propsFile = ctx.getObjGlobal().getRoot().getPropsFile();
+		String lambda = propsFile.getMHex();
+		Value[] lambdaArgs = { file };
 
-        return callConfiguredLambda(getName(), ctx, lambda, lambdaArgs);
-    }
+		return callConfiguredLambda(name, ctx, lambda, lambdaArgs);
+	}
 
     
 

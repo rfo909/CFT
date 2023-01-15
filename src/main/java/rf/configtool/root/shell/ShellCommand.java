@@ -43,66 +43,14 @@ import rf.configtool.parsetree.Expr;
  */
 public abstract class ShellCommand {
 
-    private final List<String> parts;
-    private final String name;
-    private final List<ShellCommandArg> args;
-    
-    public ShellCommand (List<String> parts) throws Exception {
-        this.parts=parts;
-        this.name=parts.get(0);
-        this.args=new ArrayList<ShellCommandArg>();
-        
-        for (int i=1; i<parts.size(); i++) {
-            String part=parts.get(i);
-            String isExpr=null;
-            
-            if (part.startsWith("(") && part.endsWith(")")) {
-                isExpr=part.substring(1,part.length()-1); // (xxx) -> xxx
-            } else if (part.startsWith("%")) {
-                // symbol lookup 
-                isExpr=part;
-            } else if (part.startsWith("::") || part.startsWith(":")) {
-            	// Sys.lastResult or Sys.lastResult(N)
-            	isExpr=part;
-            }
-            if (isExpr != null) {
-                // create Expr
-                Lexer lex=new Lexer();
-                SourceLocation loc=new SourceLocation("<ShellCommand>",1);
-                lex.processLine(new ScriptSourceLine(loc, isExpr));
-                TokenStream ts=lex.getTokenStream();
-                Expr expr=new Expr(ts);
-                if (!ts.atEOF()) throw new Exception("Invalid expression: " + part);
-                
-                args.add(new ShellCommandArg(expr));
-                continue;
-            } else {
-                args.add(new ShellCommandArg(part));
-            }
-            
-        }
-    }
-
-    protected String getName() {
-        return name;
-    }
-    
-    protected List<ShellCommandArg> getArgs() {
-        return args;
-    }
-    
-    
-    public abstract Value execute (Ctx ctx) throws Exception ;
+	public abstract String getName();
+	public abstract String getBriefExampleParams();
+	
+    public abstract Value execute (Ctx ctx, Command cmd) throws Exception ;
     
     
     protected void sort (List<String> data) {
-        Comparator<String> c=new Comparator<String>() {
-            public int compare(String a, String b) {
-                return a.compareTo(b);
-            }
-        };
-        data.sort(c);
-
+    	rf.configtool.util.StringSort.sort(data);
     }
     
     protected Value callConfiguredLambda (String contextName, Ctx ctx, String lambda, Value[] lambdaArgs) throws Exception {

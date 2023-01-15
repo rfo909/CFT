@@ -39,11 +39,17 @@ import rf.configtool.main.runtime.lib.Protection;
 
 public class ShellPwd extends ShellCommand {
 
-    public ShellPwd(List<String> parts) throws Exception {
-        super(parts);
-    }
+	@Override
+	public String getName() {
+		return "pwd";
+	}
+	@Override 
+	public String getBriefExampleParams() {
+		return null;
+	}
 
-    public Value execute(Ctx ctx) throws Exception {
+
+    public Value execute(Ctx ctx, Command cmd) throws Exception {
         
         String currentDir = ctx.getObjGlobal().getCurrDir();
         ctx.addSystemMessage(currentDir);

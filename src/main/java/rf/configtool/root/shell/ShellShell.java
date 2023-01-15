@@ -34,11 +34,17 @@ import rf.configtool.main.runtime.lib.Protection;
 
 public class ShellShell extends ShellCommand {
 
-    public ShellShell(List<String> parts) throws Exception {
-        super(parts);
-    }
+	@Override
+	public String getName() {
+		return "shell";
+	}
+	@Override 
+	public String getBriefExampleParams() {
+		return null;
+	}
 
-    public Value execute(Ctx ctx) throws Exception {
+
+    public Value execute(Ctx ctx, Command cmd) throws Exception {
 
     	String shellCommand;
     	

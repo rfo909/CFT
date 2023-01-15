@@ -23,16 +23,16 @@ import rf.configtool.parsetree.Expr;
 import java.io.File;
 import java.util.List;
 
-public class ShellCommandArg {
+public class Arg {
     
     private String str;
     private Expr expr;
     
-    public ShellCommandArg (String str) {
+    public Arg (String str) {
         this.str=str;
     }
     
-    public ShellCommandArg (Expr expr) {
+    public Arg (Expr expr) {
         this.expr=expr;
     }
     

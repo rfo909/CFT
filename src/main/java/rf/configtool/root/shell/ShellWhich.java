@@ -34,37 +34,43 @@ import rf.configtool.main.runtime.lib.Protection;
 
 public class ShellWhich extends ShellCommand {
 
-    public ShellWhich(List<String> parts) throws Exception {
-        super(parts);
-    }
+	@Override
+	public String getName() {
+		return "which";
+	}
+	@Override 
+	public String getBriefExampleParams() {
+		return "<command>";
+	}
 
-    public Value execute(Ctx ctx) throws Exception {
 
-        String name=getName();
+    public Value execute(Ctx ctx, Command cmd) throws Exception {
+
+        String name=cmd.getCommandName();
         
-        boolean noArgs=getArgs().isEmpty();
+        boolean noArgs=cmd.getArgs().isEmpty();
         
         if (noArgs) {
         	throw new Exception(name + ": expected program name");
         }        
         
-        List<ShellCommandArg> args=getArgs();
+        List<Arg> args=cmd.getArgs();
         if (args.size()>1) throw new Exception(name + ": expected single program name");
         
-        ShellCommandArg arg=args.get(0);
+        Arg arg=args.get(0);
         if (arg.isExpr()) throw new Exception(name + ": expected single name (string)");
         
-        return callMacro(ctx, new ValueString(arg.getString()));
+        return callMacro(ctx, name, new ValueString(arg.getString()));
     }
 
     
-      private Value callMacro (Ctx ctx, ValueString str) throws Exception {
+      private Value callMacro (Ctx ctx, String name, ValueString str) throws Exception {
 
 	    PropsFile propsFile=ctx.getObjGlobal().getRoot().getPropsFile();
         String lambda=propsFile.getMWhich();
         Value[] lambdaArgs= {str};
 
-        return callConfiguredLambda(getName(), ctx, lambda, lambdaArgs);
+        return callConfiguredLambda(name, ctx, lambda, lambdaArgs);
     }
 
     

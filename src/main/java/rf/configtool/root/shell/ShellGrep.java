@@ -33,27 +33,33 @@ import rf.configtool.main.runtime.lib.Protection;
 
 public class ShellGrep extends ShellCommand {
 
-    public ShellGrep(List<String> parts) throws Exception {
-        super(parts);
-    }
+	@Override
+	public String getName() {
+		return "grep";
+	}
+	@Override 
+	public String getBriefExampleParams() {
+		return "str <file> ...";
+	}
+	
 
-    public Value execute(Ctx ctx) throws Exception {
+     public Value execute(Ctx ctx, Command cmd) throws Exception {
 
-        String name=getName();
+        String name=cmd.getCommandName();
         
         String currentDir = ctx.getObjGlobal().getCurrDir();
-        List<ShellCommandArg> args = getArgs();
+        List<Arg> args = cmd.getArgs();
         
         if (args.size() < 2) throw new Exception(name + ": expected pattern, file ...");
         
-        ShellCommandArg str=args.get(0);
+        Arg str=args.get(0);
         if (str.isExpr()) throw new Exception(name + ": invalid pattern");
         
         FileSet fs=new FileSet(name,false,true);  // files only
         fs.setIsSafeOperation();
 
         for (int i=1; i<args.size(); i++) {
-            ShellCommandArg arg=args.get(i);
+            Arg arg=args.get(i);
             fs.processArg(currentDir, ctx, arg);
         }
         
@@ -65,16 +71,17 @@ public class ShellGrep extends ShellCommand {
             fileList.add(new ValueObj(new ObjFile(f,Protection.NoProtection)));
         }
         
-        return callMacro(ctx, str.getString(), new ValueList(fileList) );
+        return callMacro(ctx, name, str.getString(), new ValueList(fileList) );
     }
 
-      private Value callMacro (Ctx ctx, String strExpr, Value fileList) throws Exception {
+     
+    private Value callMacro (Ctx ctx, String name, String strExpr, Value fileList) throws Exception {
 
-    PropsFile propsFile=ctx.getObjGlobal().getRoot().getPropsFile();
+    	PropsFile propsFile=ctx.getObjGlobal().getRoot().getPropsFile();
         String lambda=propsFile.getMGrep();
         Value[] lambdaArgs= {new ValueString(strExpr), fileList};
 
-        return callConfiguredLambda(getName(), ctx, lambda, lambdaArgs);
+        return callConfiguredLambda(name, ctx, lambda, lambdaArgs);
     }
 
     

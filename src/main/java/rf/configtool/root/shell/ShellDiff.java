@@ -39,17 +39,23 @@ import rf.configtool.main.runtime.lib.Protection;
 
 public class ShellDiff extends ShellCommand {
 
-    public ShellDiff(List<String> parts) throws Exception {
-        super(parts);
-    }
+	@Override
+	public String getName() {
+		return "diff";
+	}
+	@Override 
+	public String getBriefExampleParams() {
+		return "<file1> <file2>";
+	}
 
-    public Value execute(Ctx ctx) throws Exception {
+
+      public Value execute(Ctx ctx, Command cmd) throws Exception {
         
         final String currentDir = ctx.getObjGlobal().getCurrDir();
-        List<ShellCommandArg> args=getArgs();
-        String name=getName();
+        List<Arg> args=cmd.getArgs();
+        String name=cmd.getCommandName();
 
-        if (args.size() != 2) throw new Exception(getName() + ": expected two files");
+        if (args.size() != 2) throw new Exception(name + ": expected two files");
         
         FileSet fs1=new FileSet(name,false, true);
         fs1.setIsSafeOperation();
@@ -64,7 +70,7 @@ public class ShellDiff extends ShellCommand {
         List<String> list1=fs1.getFiles();
         List<String> list2=fs2.getFiles();
         
-        if (list1.size() != 1 || list2.size() != 1) throw new Exception(getName() + ": invalid arguments");
+        if (list1.size() != 1 || list2.size() != 1) throw new Exception(name + ": invalid arguments");
         
         Value p1 = new ValueObj(new ObjFile(list1.get(0),Protection.NoProtection));
         Value p2 = new ValueObj(new ObjFile(list2.get(0),Protection.NoProtection));
@@ -74,7 +80,7 @@ public class ShellDiff extends ShellCommand {
         String lambda=propsFile.getMDiff();
         Value[] lambdaArgs= {p1,p2};
 
-        return callConfiguredLambda(getName(), ctx, lambda, lambdaArgs);
+        return callConfiguredLambda(name, ctx, lambda, lambdaArgs);
     }
 
 

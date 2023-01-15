@@ -33,27 +33,33 @@ import rf.configtool.main.runtime.lib.Protection;
 
 public class ShellHash extends ShellCommand {
 
-    public ShellHash(List<String> parts) throws Exception {
-        super(parts);
-    }
+	@Override
+	public String getName() {
+		return "hash";
+	}
+	@Override 
+	public String getBriefExampleParams() {
+		return "<file> ...";
+	}
 
-    public Value execute(Ctx ctx) throws Exception {
 
-        String name=getName();
+    public Value execute(Ctx ctx, Command cmd) throws Exception {
+
+        String name=cmd.getCommandName();
         
         String currentDir = ctx.getObjGlobal().getCurrDir();
-        boolean noArgs=getArgs().isEmpty();
+        boolean noArgs=cmd.getArgs().isEmpty();
         
         if (noArgs) {
-        	return callMacro(ctx, new ValueList(new ArrayList<Value>())); // empty list
+        	return callMacro(ctx, name, new ValueList(new ArrayList<Value>())); // empty list
         }
         
-        List<ShellCommandArg> args=getArgs();
+        List<Arg> args=cmd.getArgs();
         
         FileSet fs=new FileSet(name,false,true);  // files only
         fs.setIsSafeOperation();
         
-        for (ShellCommandArg arg:args) {
+        for (Arg arg:args) {
             fs.processArg(currentDir, ctx, arg);  // no unknown files or dirs
         }
         
@@ -66,17 +72,17 @@ public class ShellHash extends ShellCommand {
             list.add(new ValueObj(new ObjFile(filename, Protection.NoProtection)));
         }
         
-        return callMacro(ctx, new ValueList(list));
+        return callMacro(ctx, name, new ValueList(list));
     }
 
-      private Value callMacro (Ctx ctx, Value fileList) throws Exception {
+	private Value callMacro(Ctx ctx, String name, Value fileList) throws Exception {
 
-    PropsFile propsFile=ctx.getObjGlobal().getRoot().getPropsFile();
-        String lambda=propsFile.getMHash();
-        Value[] lambdaArgs= {fileList};
+		PropsFile propsFile = ctx.getObjGlobal().getRoot().getPropsFile();
+		String lambda = propsFile.getMHash();
+		Value[] lambdaArgs = { fileList };
 
-        return callConfiguredLambda(getName(), ctx, lambda, lambdaArgs);
-    }
+		return callConfiguredLambda(name, ctx, lambda, lambdaArgs);
+	}
 
     
 

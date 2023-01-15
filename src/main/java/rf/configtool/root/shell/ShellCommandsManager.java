@@ -18,140 +18,117 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package rf.configtool.root.shell;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.StringTokenizer;
 import rf.configtool.lexer.*;
+import rf.configtool.main.Ctx;
+import rf.configtool.main.FunctionState;
+import rf.configtool.main.ObjGlobal;
 import rf.configtool.main.ScriptSourceLine;
+import rf.configtool.main.Stdio;
+import rf.configtool.main.runtime.Value;
 
 /**
  * Detecting and executing the "shell" commands: ls, cd, pwd ...
  *
  */
-public class ShellCommandsDetector {
+public class ShellCommandsManager {
     
-    private String line;
-    
-    public static final String[] OPS = {
-        "ls","lsd","lsf",
-        "cd",
-        "cat","edit","more","tail",
-        "touch",
-        "mv",
-        "cp",
-        "rm",
-        "diff",
-        "showtree",
-        "hash",
-        "hex",
-        "grep",
-        "mkdir",
-        "shell",
-        "pwd",
-        "which",
-            
+    public static final ShellCommand[] SHELL_COMMANDS = {
+    		new ShellLs("ls"),
+    		new ShellLs("lsd"),
+    		new ShellLs("lsf"),
+    		new ShellCd(),
+    		new ShellCatEditMoreTail("cat"),
+    		new ShellCatEditMoreTail("edit"),
+    		new ShellCatEditMoreTail("more"),
+    		new ShellCatEditMoreTail("tail"),
+    		new ShellTouch(),
+    		new ShellMv(),
+    		new ShellCp(),
+    		new ShellRm(),
+    		new ShellDiff(),
+    		new ShellShowtree(),
+    		new ShellHash(),
+    		new ShellHex(),
+    		new ShellGrep(),
+    		new ShellMkdir(),
+    		new ShellPwd(),
+    		new ShellWhich(),
+    		new ShellShell(),
     };
 
-    public ShellCommandsDetector (String line) throws Exception {
-        this.line=line.trim();
+    
+    public List<String> getShellCommandDescriptions() {
+    	List<String> lines=new ArrayList<String>();
+    	
+    	for (ShellCommand x:SHELL_COMMANDS) {
+    		String desc=x.getBriefExampleParams();
+    		if (desc==null) desc=""; else desc=" " + desc;
+    		lines.add(x.getName()+desc);
+    	}
+    	ShellBang sb=new ShellBang();
+    	lines.add(sb.getName() + " " + sb.getBriefExampleParams());
+    	
+    	rf.configtool.util.StringSort.sort(lines);
+    	return lines;
     }
     
-    public ShellCommand identifyShellCommand () throws Exception {
+
+    
+    
+    public Value execute (Stdio stdio, ObjGlobal objGlobal, String line) throws Exception {
+    	
+    	line=line.trim();
+    	
         boolean isBang=false;
 
         if (line.startsWith("!")) {
         	line=line.substring(1);
         	isBang=true;
         }
-
-        boolean found=false;
         
-        // do simple string comparison to avoid running full parse for
-        // all interactive commands
+        
+        ShellCommand foundCommand=null;
+        
         if (!isBang) {
-        	for (String op:OPS) {
-	            if (line.equals(op) || line.startsWith(op+" ") || line.startsWith(op+"("))  found=true;
+        	for (ShellCommand c:SHELL_COMMANDS) {
+        		String op=c.getName();
+	            if (line.equals(op) || line.startsWith(op+" ") || line.startsWith(op+"(")) {
+	            	foundCommand=c;
+	            	break;
+	            }
 	        }
         }
         
-        if (!isBang && !found) {
+        if (!isBang && foundCommand==null) {
             return null;
         }
         
-        List<String> parts=parseLineParts();
-        
-//      for (String p:parts) {
-//          System.out.println("[" + p + "]");
-//      }
-        
-        String name=parts.get(0);
+        // pre-process the command line
+        List<String> parts=parseLineParts(line);
+        Command cmd=new Command(parts);
         
         if (isBang) {
-        	return new ShellBang(parts);
+        	return executeShellCommand(stdio, objGlobal, new ShellBang(), cmd);
+        } else {
+        	return executeShellCommand(stdio, objGlobal, foundCommand, cmd);
         }
-        
-        if (name.equals("ls") || name.equals("lsd") || name.equals("lsf")) {
-            return new ShellLs(parts);
-        }
-        if (name.equals("cd")) {
-            return new ShellCd(parts);
-        }
-        if (name.equals("cat") || name.equals("edit") || name.equals("more") || name.equals("tail")) {
-            return new ShellCatEditMoreTail(parts);
-        }
-        if (name.equals("touch")) {
-            return new ShellTouch(parts);
-        }
-        if (name.equals("mv")) {
-            return new ShellMv(parts);
-        }
-        if (name.equals("cp")) {
-            return new ShellCp(parts);
-        }
-        if (name.equals("rm")) {
-            return new ShellRm(parts);
-        }
-        if (name.equals("diff")) {
-            return new ShellDiff(parts);
-        }
-        if (name.equals("showtree")) {
-            return new ShellShowtree(parts);
-        }
-        if (name.equals("hash")) {
-            return new ShellHash(parts);
-        }
-        if (name.equals("hex")) {
-            return new ShellHex(parts);
-        }
-        if (name.equals("grep")) {
-            return new ShellGrep(parts);
-        }
-        if (name.equals("which")) {
-        	return new ShellWhich(parts);
-        }
-        if (name.equals("mkdir")) {
-            return new ShellMkdir(parts);
-        }
-        if (name.equals("shell")) {
-        	return new ShellShell(parts);
-        }
-        if (name.equals("pwd")) {
-        	return new ShellPwd(parts);
-        }
-        		
-        // else ...
-        
-        throw new Exception("Internal error: invalid ShellParser operation name=" + name);
-        
-
-        
+    }
+    
+    private Value executeShellCommand (Stdio stdio, ObjGlobal objGlobal, ShellCommand sc, Command cmd) throws Exception {
+        FunctionState functionState=new FunctionState("<ShellCommand>"); // no function parameters
+        Ctx ctx=new Ctx(stdio, objGlobal, functionState);
+        return sc.execute(ctx, cmd);   
     }
     
 
     /**
      * Group line into parts, and unwrap strings outside ()'s but not inside.
-     * Separate by space (outside strings and ()'s)
+     * Separated by space (outside strings and ()'s)
      */
-    private List<String> parseLineParts () throws Exception {
+    private List<String> parseLineParts (String line) throws Exception {
         List<String> parts=new ArrayList<String>();
         
         boolean isExpr=false; // triggered by first character % or : (symbol or Sys.lastResult)

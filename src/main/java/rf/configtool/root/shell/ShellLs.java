@@ -43,34 +43,42 @@ import rf.configtool.main.runtime.lib.Protection;
 
 public class ShellLs extends ShellCommand {
 
-    private boolean showFiles;
-    private boolean showDirs;
+	private final String name;
+    private final boolean showFiles;
+    private final boolean showDirs;
 
-    public ShellLs(List<String> parts) throws Exception {
-        super(parts);
-        
-        String name=getName();
-        
-        if (name.equals("nls") || name.equals("ls")) {
+    public ShellLs(String name) {
+    	this.name=name;
+        if (name.equals("ls")) {
             showFiles = true;
             showDirs = true;
-        } else if (name.equals("nlsd") || name.equals("lsd")) {
+        } else if (name.equals("lsd")) {
             showFiles = false;
             showDirs = true;
-        } else if (name.equals("nlsf") || name.equals("lsf")) {
+        } else if (name.equals("lsf")) {
             showFiles = true;
             showDirs = false;
         } else {
-            throw new Exception("Expected ls, lsf or lsd");
+            throw new RuntimeException("Expected ls, lsf or lsd");
         }
     }
+    
+	@Override
+	public String getName() {
+		return name;
+	}
+	@Override 
+	public String getBriefExampleParams() {
+		return "...";
+	}
 
-    public Value execute(Ctx ctx) throws Exception {
+
+
+    public Value execute(Ctx ctx, Command cmd) throws Exception {
 
         String currDir = ctx.getObjGlobal().getCurrDir();
-        String name=getName();
-        boolean noArgs=getArgs().isEmpty();
-        boolean enableLimits=noArgs;
+
+        boolean noArgs=cmd.getArgs().isEmpty();
         
         FileSet fs=new FileSet(name,showDirs, showFiles);
         fs.setIsSafeOperation();
@@ -88,9 +96,9 @@ public class ShellLs extends ShellCommand {
         
         // process args, some of which may be expressions
 
-        List<ShellCommandArg> args=getArgs();
+        List<Arg> args=cmd.getArgs();
         
-        for (ShellCommandArg arg:args) {
+        for (Arg arg:args) {
             fs.processArg(currDir, ctx, arg);
         }
         

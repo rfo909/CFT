@@ -27,28 +27,32 @@ import rf.configtool.main.runtime.lib.Protection;
 
 public class ShellCd extends ShellCommand {
 
-    public ShellCd(List<String> parts) throws Exception {
-        super(parts);
-    }
+	@Override
+	public String getName() {
+		return "cd";
+	}
+	@Override 
+	public String getBriefExampleParams() {
+		return "<dir>";
+	}
 
-    public Value execute(Ctx ctx) throws Exception {
+     public Value execute(Ctx ctx, Command cmd) throws Exception {
 
         String currDir = ctx.getObjGlobal().getCurrDir();
-        boolean noArgs=getArgs().isEmpty();
         
-        if (noArgs) {
+        if (cmd.noArgs()) {
             ctx.getObjGlobal().setCurrDir(null);
             ctx.getObjGlobal().addSystemMessage(ctx.getObjGlobal().getCurrDir());
             return new ValueObj(new ObjDir(ctx.getObjGlobal().getCurrDir(), Protection.NoProtection));
         }
         
-        List<ShellCommandArg> args=getArgs();
+        List<Arg> args=cmd.getArgs();
         if (args.size() != 1) throw new Exception("cd: expected zero or one arguments");
         
-        FileSet fs=new FileSet(getName(), true, false);  // directories only
+        FileSet fs=new FileSet(cmd.getCommandName(), true, false);  // directories only
         fs.setIsSafeOperation();
         
-        ShellCommandArg arg=args.get(0);
+        Arg arg=args.get(0);
         fs.processArg(currDir, ctx, args.get(0));
         
         List<String> dirs=fs.getDirectories();

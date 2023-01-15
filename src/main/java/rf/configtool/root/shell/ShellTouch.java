@@ -33,24 +33,30 @@ import rf.configtool.main.runtime.lib.Protection;
 
 public class ShellTouch extends ShellCommand {
 
-    public ShellTouch(List<String> parts) throws Exception {
-        super(parts);
-    }
+	@Override
+	public String getName() {
+		return "touch";
+	}
+	@Override 
+	public String getBriefExampleParams() {
+		return "<file> ...";
+	}
 
-    public Value execute(Ctx ctx) throws Exception {
 
-        String name=getName();
+	public Value execute(Ctx ctx, Command cmd) throws Exception {
+
+        String name=cmd.getCommandName();
         
         String currDir = ctx.getObjGlobal().getCurrDir();
-        boolean noArgs=getArgs().isEmpty();
+        boolean noArgs=cmd.getArgs().isEmpty();
         
         if (noArgs) throw new Exception("touch: expected file(s)");
         
-        List<ShellCommandArg> args=getArgs();
+        List<Arg> args=cmd.getArgs();
         
         FileSet fs=new FileSet(name,false,true);  // files only
         
-        for (ShellCommandArg arg:args) {
+        for (Arg arg:args) {
             fs.processArg(currDir, ctx, arg, false, true);  // allow unknown files
         }
         

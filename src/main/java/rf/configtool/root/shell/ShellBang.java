@@ -36,17 +36,22 @@ import rf.configtool.main.runtime.lib.ObjDir;
 import rf.configtool.main.runtime.lib.Protection;
 
 public class ShellBang extends ShellCommand {
+	
+	@Override
+	public String getName() {
+		return "!";
+	}
+	@Override 
+	public String getBriefExampleParams() {
+		return "... - run operating system command or program";
+	}
 
-    public ShellBang(List<String> parts) throws Exception {
-        super(parts);
-    }
-
-    public Value execute(Ctx ctx) throws Exception {
+    public Value execute(Ctx ctx, Command cmd) throws Exception {
 
         String currentDir = ctx.getObjGlobal().getCurrDir();
-        List<ShellCommandArg> args=getArgs();
+        List<Arg> args=cmd.getArgs();
 
-        String commandName=getName();
+        String commandName=cmd.getCommandName();
 
         List<String> command=new ArrayList<String>();
         command.add(commandName);
@@ -54,7 +59,7 @@ public class ShellBang extends ShellCommand {
         
         boolean isLinux = File.separator.equals("/");
         
-        NEXT_ARG: for (ShellCommandArg arg:args) {
+        NEXT_ARG: for (Arg arg:args) {
         	if (arg.isExpr()) {
     			FileSet fs=new FileSet("!"+commandName, true, true); // directories and files
     			fs.setIsSafeOperation();

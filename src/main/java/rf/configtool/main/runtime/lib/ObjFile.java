@@ -55,7 +55,7 @@ import rf.configtool.main.runtime.ValueList;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
 import rf.configtool.root.shell.FileSet;
-import rf.configtool.root.shell.ShellCommandArg;
+import rf.configtool.root.shell.Arg;
 import rf.configtool.util.Encrypt;
 import rf.configtool.util.FileInfo;
 import rf.configtool.util.Hex;

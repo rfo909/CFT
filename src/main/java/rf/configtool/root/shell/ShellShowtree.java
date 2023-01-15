@@ -28,19 +28,26 @@ import rf.configtool.main.runtime.lib.Protection;
 
 public class ShellShowtree  extends ShellCommand {
 
-    public ShellShowtree(List<String> parts) throws Exception {
-        super(parts);
-    }
+	@Override
+	public String getName() {
+		return "showtree";
+	}
+	@Override 
+	public String getBriefExampleParams() {
+		return "<dir>?";
+	}
 
-    public Value execute(Ctx ctx) throws Exception {
+
+
+    public Value execute(Ctx ctx, Command cmd) throws Exception {
 
         String currentDir = ctx.getObjGlobal().getCurrDir();
-        List<ShellCommandArg> args=getArgs();
+        List<Arg> args=cmd.getArgs();
         
-        String name=getName();
+        String name=cmd.getCommandName();
         
         if (args.size()==0) {
-            return callMacro(ctx,null);
+            return callMacro(ctx,name,null);
         }
         FileSet fs=new FileSet(name,true, false); // directories only
         fs.setIsSafeOperation();
@@ -54,21 +61,21 @@ public class ShellShowtree  extends ShellCommand {
         
         ObjDir dir=new ObjDir(directories.get(0), Protection.NoProtection);
         
-        return callMacro(ctx, dir);
+        return callMacro(ctx, name, dir);
     }
 
-    private Value callMacro (Ctx ctx, ObjDir dir) throws Exception {
+	private Value callMacro(Ctx ctx, String name, ObjDir dir) throws Exception {
 
-        if (dir==null) {
-            dir=new ObjDir(ctx.getObjGlobal().getCurrDir(), Protection.NoProtection);
-        }
-        
-    PropsFile propsFile=ctx.getObjGlobal().getRoot().getPropsFile();
-        String lambda=propsFile.getMShowtree();
-        Value[] lambdaArgs= {new ValueObj(dir)};
+		if (dir == null) {
+			dir = new ObjDir(ctx.getObjGlobal().getCurrDir(), Protection.NoProtection);
+		}
 
-        return callConfiguredLambda(getName(), ctx, lambda, lambdaArgs);
-    }
+		PropsFile propsFile = ctx.getObjGlobal().getRoot().getPropsFile();
+		String lambda = propsFile.getMShowtree();
+		Value[] lambdaArgs = { new ValueObj(dir) };
+
+		return callConfiguredLambda(name, ctx, lambda, lambdaArgs);
+	}
 
 
     

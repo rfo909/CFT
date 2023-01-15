@@ -29,19 +29,25 @@ import rf.configtool.main.runtime.lib.Protection;
 
 public class ShellMkdir extends ShellCommand {
 
-    public ShellMkdir(List<String> parts) throws Exception {
-        super(parts);
-    }
+	@Override
+	public String getName() {
+		return "mkdir";
+	}
+	@Override 
+	public String getBriefExampleParams() {
+		return "name";
+	}
 
-    public Value execute(Ctx ctx) throws Exception {
+
+    public Value execute(Ctx ctx, Command cmd) throws Exception {
 
         String currentDir = ctx.getObjGlobal().getCurrDir();
-        List<ShellCommandArg> args=getArgs();
-        String name=getName();
+        List<Arg> args=cmd.getArgs();
+        String name=cmd.getCommandName();
         
         FileSet fs=new FileSet(name,true,false);
         
-        for (ShellCommandArg arg:args) {
+        for (Arg arg:args) {
             fs.processArg(currentDir, ctx, arg, true, false);
         }
         

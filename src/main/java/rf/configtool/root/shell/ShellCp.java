@@ -29,10 +29,16 @@ public class ShellCp extends ShellCommand {
 
     private boolean confirmed=false;
     
-    public ShellCp(List<String> parts) throws Exception {
-        super(parts);
-    }
-    
+	@Override
+	public String getName() {
+		return "cp";
+	}
+	@Override 
+	public String getBriefExampleParams() {
+		return "src ... target";
+	}
+
+
     private boolean copyFile (Ctx ctx, File src, File target) throws Exception {
         FileInputStream fis=null;
         FileOutputStream fos=null;
@@ -54,13 +60,13 @@ public class ShellCp extends ShellCommand {
         }
     }
     
-    private boolean copyTree (Ctx ctx, File srcDir, File targetDir) throws Exception {
+    private boolean copyTree (Ctx ctx, String name, File srcDir, File targetDir) throws Exception {
         
         if (targetDir.exists() && !targetDir.isDirectory()) {
-            throw new Exception(getName() + ": target not a directory");
+            throw new Exception(name + ": target not a directory");
         }
         
-        verifySourceTargetDirsIndependent(getName(), srcDir, targetDir);
+        verifySourceTargetDirsIndependent(name, srcDir, targetDir);
 
         if (!confirmed) {
             ctx.getStdio().println("Confirm copy " + srcDir.getCanonicalPath() + " -> " + targetDir.getCanonicalPath());
@@ -81,7 +87,7 @@ public class ShellCp extends ShellCommand {
         for (File f : srcDir.listFiles()) {
             if (f.isDirectory()) {
                 File t=new File(targetDir.getCanonicalPath() + File.separator + f.getName());
-                if (!copyTree(ctx, f, t)) allOk=false;
+                if (!copyTree(ctx, name, f, t)) allOk=false;
             } else if (f.isFile()) {
                 File t=new File(targetDir.getCanonicalPath() + File.separator + f.getName());
                 if (!copyFile(ctx, f, t)) allOk=false;
@@ -91,26 +97,26 @@ public class ShellCp extends ShellCommand {
     }
     
     
-    public Value execute(Ctx ctx) throws Exception {
+    public Value execute(Ctx ctx, Command cmd) throws Exception {
         
-        final String name=getName(); 
+        final String name=cmd.getCommandName(); 
 
         final String currentDir = ctx.getObjGlobal().getCurrDir();
-        List<ShellCommandArg> args=getArgs();
+        List<Arg> args=cmd.getArgs();
         if (args.size() < 2) throw new Exception(name + ": requires at least two args");
         
         FileSet fsSource = new FileSet(name,true,true);
         fsSource.setIsSafeOperation();  // copy source is non destructive
         
         for (int i=0; i<args.size()-1; i++) {
-            ShellCommandArg arg=args.get(i);
+            Arg arg=args.get(i);
             fsSource.processArg(currentDir, ctx, arg);
         }
         
         List<String> dirs=fsSource.getDirectories();
         List<String> files=fsSource.getFiles();
         
-        ShellCommandArg lastArg=args.get(args.size()-1);
+        Arg lastArg=args.get(args.size()-1);
 
         // special cases, where target may depend on src (two args only, with one src element)
         if (args.size() == 2) {
@@ -132,7 +138,7 @@ public class ShellCp extends ShellCommand {
                     target=new File(target.getCanonicalPath() + File.separator + src.getName());
                 } 
                 
-                boolean ok = copyTree(ctx,src,target);
+                boolean ok = copyTree(ctx,name,src,target);
                 ctx.addSystemMessage((ok?"OK   ":"FAIL ") + name + ": " + src.getCanonicalPath() + " -> " + target.getCanonicalPath());
                 return new ValueBoolean(ok);        
             }
@@ -192,7 +198,7 @@ public class ShellCp extends ShellCommand {
             for (String f:fsSource.getDirectories()) {
                 File src=new File(f);
                 File dTarget=new File(target.getCanonicalPath() + File.separator + src.getName());
-                boolean ok=copyTree(ctx,src,dTarget);
+                boolean ok=copyTree(ctx,name,src,dTarget);
                 ctx.addSystemMessage((ok?"OK   ":"FAIL ") + name + ": " + src.getCanonicalPath() + " -> " + dTarget.getCanonicalPath());
                 if (!ok) allOk=false;
             }
