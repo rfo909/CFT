@@ -1121,15 +1121,14 @@ public class ObjGlobal extends Obj {
                 "   cd %someSymbol           - symbol resolving to dir or file",
                 "   cd (dirExpr)             - dirExpr is a CFT function",
                 "",
-                "   cat ::                   - The ':' corresponds to (Sys.lastResult)",
+                "   cat ::                   - The '::' corresponds to (Sys.lastResult)",
                 "   cd :N                    - The ':N' corresponds to (Sys.lastResult(N))",
                 "",
                 "   !cp :3 /some/path",
                 "",
                 "",
                 "- Symbols are defined entering %%name which stores lastResult under",
-                "  that name, usually some Dir or File. A warning will be issued when",
-                "  storing any other type of value as a symbol.",
+                "  that name, usually some Dir or File.",
                 "",
         };
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
@@ -1140,12 +1139,13 @@ public class ObjGlobal extends Obj {
             ShellCommandsManager scm=new ShellCommandsManager();
             List<String> lines=scm.getShellCommandDescriptions();
             for (String line:lines) {
-                ctx.getObjGlobal().addSystemMessage(line);
+                ctx.getObjGlobal().addSystemMessage("  " + line);
             }
             
             for (String line:data2) {
                 ctx.getObjGlobal().addSystemMessage(line);
             }
+
             return new ValueBoolean(true);
         }        
     } 
