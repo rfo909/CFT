@@ -21,7 +21,7 @@ Code can also ask the user for input, as well as present results.
 There are two major aspects to CFT: 
 
 - interactive shell
-- programming functions
+- create functions
 
 ## Shell-like commands 
 
@@ -45,15 +45,16 @@ using the following commands:
 - touch
 - diff
 
-Run global function _Shell for information about the CFT shell-like commands.
+There exists a global function _Shell, which lists out up to date information about
+all CFT shell-like commands.
 
 
 
 
-## Programming, creating functions
+## Creating functions
 
-Second, there is programming. All code in CFT is stored as functions, which in turn are organized into "script files",
-which we usually work with using an editor. Functions can also be defined interactively.
+All code in CFT is stored as functions, which in turn are organized into "script files",
+which we usually work with using an editor, although functions can also be defined interactively.
 
 The input loop of CFT processes both shell-like commands like "ls" and "cd", as well
 as the full CFT language, with expressions, loops, function calls.
@@ -64,7 +65,7 @@ as the full CFT language, with expressions, loops, function calls.
 The reason for developing CFT, is mainly the horrors of PowerShell, but also a desire for a an automation
 environment and shell that works the same on both Windows and Linux. 
 
-Still, CFT is also inspired by PowerShell, as all values are objects, instead of just strings, like in the
+CFT is also inspired by PowerShell, as all values are objects, instead of just strings, like in the
 linux/unix shells. 
 
 Lastly it should be mentioned that parsers and intepreters, and language design is a long lasting interest,
@@ -174,8 +175,7 @@ useful examples and utilities under *code.examples*.
 ## 17k lines of CFT script
 
 In total, CFT has some 17000 lines of CFT scripts under the two code.* directories, among them
-a full JSON parser and an XML parser, as the CFT language has access to the Lexer 
-used to parse CFT itself, and writing these recursive-descent parsers was easier in CFT than in Java.
+a full recursive descent JSON parser and also an XML parser.
 
 There are also scripts for automating PowerShell use, installing and working with Docker and
 Kubernetes, and many others.
@@ -183,15 +183,17 @@ Kubernetes, and many others.
 Calls to functions defined in other scripts are always recognized from the syntax.
 
 ```
-Lib:DirPrivate   ## call function in Lib script
-Std.Math.PI      ## call function in Std *object*
+Lib:DirPrivate   ## call function in Lib script 
+Std.Math.PI      ## call function in Std object
 ```
+
+The syntax for getting information about functions also differs:
 
 ```
 ?Lib:            ## List functions in Lib *script*
 :load Lib        ## Load Lib script, making it the current script
 
-Std help         ## List functions inside the Std *object*
+Std.Math help    ## List functions inside the Std.Math *object*
 ```
 
 # Code stats
@@ -202,13 +204,14 @@ presents a summary:
 ```
 CodeStats:main
 
-Script code:      17344 lines
-Java code:        34900 lines
-Functions:        507
-Shell commands:   18
+Script code:      17087 lines
+Java code:        35255 lines
+Functions:        510
+Shell commands:   22
 Object types:     71
 Value types:      13
 ```
+
 
 To look at the implementation of the CodeStats script, type the following
 
@@ -321,7 +324,7 @@ Dir.runCapture("cmd","/c","dir")
 
 Written in Java and built with Maven, which results in a single JAR file. 
 
-Tested on both Linux and Windows. 
+Tested on both Linux and Windows, through continous use on both platforms. 
 
 
 
