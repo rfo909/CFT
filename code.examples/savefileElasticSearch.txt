@@ -202,7 +202,7 @@ Input("ssh target user@host").get
     Lib:run("nslookup",host).stdout->line
         if(line.startsWith("Name:") && line.contains(host)) {
             foundName=true
-            assert(false)
+            continue
         }
         if (foundName && line.startsWith("Address:")) {
             result=line.after(":").trim

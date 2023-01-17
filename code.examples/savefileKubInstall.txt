@@ -472,16 +472,16 @@ together multiple masters to form single cluster.
 	loop
 		readLine("kubectl command, blank to abort, # for comment, kf for file, h/h2 for history") => command
 		error(command.trim=="", "Aborting input loop")
-		if (command=="h") {h assert(false)}
-		else if (command=="h2") {h2 assert(false)}
-		else if (command=="kf") {kf assert(false)}
+		if (command=="h") {h continue}
+		else if (command=="h2") {h2 continue}
+		else if (command=="kf") {kf continue}
 		else if (command==".") {
 			command=Db2:Get(Sys.scriptId,"kubectl_lastCommand",null)
-			if (command==null) assert(false)
+			if (command==null) continue
 		}
 		else if (command.startsWith("#")) {
 			log.append(List("#",command,"#"))
-			assert(false)
+			continue
 		}
 
 		kubectl (Dir, command)

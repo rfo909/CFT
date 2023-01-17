@@ -226,7 +226,7 @@ P(5, false) => showDebug
                 @ .q to quit
                 )->line println(line)
             }
-            assert(false) # next
+            continue
         }  
         if (cmd==".t"){
             Lib:Header("Known targets")
@@ -236,7 +236,7 @@ P(5, false) => showDebug
             readLine("Enter target: user@host") =>target
             Db2:Set("SSH","Hosts",Db2:Get("SSH","Hosts",List).add(target).unique)
             currDir=Db2:Get("SSH","targetPwd",Dict).get(target,".")
-            assert(false) # next
+            continue
         }
         cmdList=List(
             "cd " + currDir,
@@ -259,7 +259,7 @@ P(5, false) => showDebug
             data.stdout->line 
                 if (line.contains(startLine)) {
                     show=true
-                    assert(false) # next
+                    continue
                 } else if (line.contains(endLine)) {
                     show=false
                     getData=true

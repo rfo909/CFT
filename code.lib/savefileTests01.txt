@@ -145,6 +145,16 @@ t7.concat("-")=="1-3"
 /Test07_ConditionalAssertFalseLocal
 
 
+List(1,2,3)->x 
+    if (x%2==0) {
+        continue
+    }
+    out(x)
+/t7b
+
+
+t7b.concat("-")=="1-3"
+/Test07b_ConditionalContinueLocal
 
 
 List(1,2,3)->x
@@ -155,7 +165,18 @@ List(1,2,3)->x
 /t8
 
 t8.concat("-")=="1-2-3"
-/Test08_OuterLoopUnaffectedByInnerBlockLoop
+/Test08_OuterLoopUnaffectedByInnerBlockAssertFalse
+
+
+List(1,2,3)->x
+    if (x%2==0) Inner {
+        List(4,5,6) -> y continue
+    }
+    out(x)
+/t8b
+
+t8b.concat("-")=="1-2-3"
+/Test08b_OuterLoopUnaffectedByInnerBlockContinue
 
 
 
@@ -982,12 +1003,6 @@ ERROR: [<script> Tests01:861.8] Invalid value Dict [] + 1
 
 
 
-# Verify "continue", v3.7.6b
-# --
-	Inner{
-		List(1,2,3)->x if (x==2) continue out(x)
-	}.concat(":")=="1:3"
-/Test56_verify_continue_loop_control
 
 
 # Run all TestX

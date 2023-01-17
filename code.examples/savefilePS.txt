@@ -182,7 +182,7 @@ P(2, Input("Enter service").get) =>service
         assert(Date.sub(Date.Duration.days(30)).before(date))
         if (!_shVerifyHost(key)) {
             Db2:Set("PS_sh",key,null)
-            assert(false)
+            continue
         }
         out(Int(date.get,key))
     | _.sort->x

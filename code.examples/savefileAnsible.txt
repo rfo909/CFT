@@ -363,7 +363,7 @@ SysStatAll("iostat")
         target=sshUser+"@"+host
         if (!SSH:HostOkSSH(target)) {
             println("- Host unreachable - skipping target " + target)
-            assert(false)
+            continue
         }
 
         SSH:copy(file, target, "./resolved_conf")

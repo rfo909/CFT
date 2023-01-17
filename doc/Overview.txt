@@ -1,230 +1,31 @@
-* CFT ("ConfigTool")
+* CFT ("ConfigTool") introduction
 * Platform
-* Shortcuts and colon commands
-* Shell-like commands
-  |  Commands
+* Shell-like command
+  |  List of commands
   |  The _Shell global function
   |  Paths with space
   |  Windows backslash
-  |  Combine with CFT function results
-  |  Use "Sys.lastResult" 
-        Complex example
-        Use Sys.lastResult without index N
-  |  Symbols 
-        Diffing files example
-  |  Bang commands
-        Expressions in bang commands
-  |  Background jobs
-        Blocking on input?
-        Bring to foreground
-        Warning
-  |  Command history
-* The "protect" mechanism
-* Introduction to loops
-  |  List basics
-  |  Iterate over list
-  |  Filtering
-* Local variables
-* Core types
+* CFT Core types
   |  String literals
-  |  Dictionaries
-        SymDict
-        Dictionary name
-  |  Binary type
-* List processing
-  |  Iterating over list content
-  |  Filtering with assert(), reject(), continue and break() + out()
-  |  continue and break without params
-  |  The condOut() statement
-  |  Produce columns with report()
-  |  List addition
-  |  List subtraction
-        Removing a single value from a list
-        Removing multiple values from a list
-        Removing duplicates from a list
-* Sorting
-  |  Int(), Str() and Float()
-  |  Converting between int and float
-* Savefiles - "scripts"
-  |  Save
-  |  Load
-  |  Create new empty script
-  |  The @e shortcut
-  |  CFT.props - codeDirs
-  |  Calling functions in other scripts
-  |  Examining non-current scripts
-* Helper functions
-* Displaying all known scripts
-* Nested loops
-* Code spaces - "pipes"
-  |  Result value from a code space
-        Code space result value
-        Otherwise ...
-* Function parameters
-* User input
-* Block expressions
-  |  Local blocks
-  |  Inner blocks
-  |  Lambdas
-  |  Block expressions summary
-  |  Local variables scope
-* List filtering with Lambda
-  |  Removing items
-* Conditionals - if expression
-  |  Inline form
-  |  Traditional form
-  |  Example 1
-  |  Example 2
-  |  Expressions are statements ...
-  |  Blocks are expressions ...
-  |  if-ladders
-* Lazy evaluation
-        Lazy if
-        Lazy AND, OR - &amp;&amp; ||
-        Lazy P(N,defaultExpr)
-* The error() function
-* Output to screen
-* Running external programs
-  |  Summary
-  |  Dir.run()
-  |  Dir.runCapture()
-  |  Dir.runDetach()
-  |  Dir.runProcess
-  |  Lib:runProcess utility function
-  |  Lib:run utility function
-  |  Work directory issues
-  |  Doing ssh
-        Side note: ssh without password
-* Synthesis
-  |  Creating code from values
-  |  Example using :syn
-  |  Example using :NN
-* Output format / Term object
-  |  The @term shortcut
-  |  Line wrapping
-* Templating
-  |  Merging text with Dict
-        Dict.mergeCodes()
-        Custom merge codes
-        Example using raw strings and Sequence
-  |  .mergeExpr
-* Text processing
-  |  Reading text files
-  |  Script file "here" documents
-  |  DataFile
-        Include blank lines
-        Allowing comments
-  |  Sequence() and raw strings
-* Processing JSON
-* Processing XML
-  |  Parsing XML
-  |  Creating structure with code
-  |  Looking up content
-* Internal web-server
-* 3D library
-  |  Ref
-  |  World
-  |  Brushes
-  |  Rendering
-  |  Drawing a spoked wheel
-* 2D library
-  |  Spoked wheel (lines)
-  |  Spoked wheel (polygon fill)
-* Command line args
-* Environment variables
-* Debugging
-  |  @lint
-  |  addDebug()
-  |  Sys.getCallHistory
-  |  setBreakPoint(str)
-* Working with pasted text lines from stdin
-* Differing between Windows and Linux
-* Predicate calls
-* The onLoad function
-* Error handling
-  |  Soft errors
-  |  Hard errors
-* Get type of value
-* Closures and dictionary-objects
-  |  Manual closure
-  |  Dictionary objects
-  |  Auto-invoke
-* Type checking with "as"
-        Null-values
-        Dict (type) names
-        Closures and Lambdas
-        Dotted lookup => auto call
-* Classes
-  |  Class object types
-  |  What a "/class" function does
-* Dict set with strings
-* Dict.get with default value
-* Dict.ident=Expr
-* List.nth() negative indexes
-* Function parameters ...
-  |  Get parameters as List
-  |  Get parameters as Dict
-* The general loop statement
-* Storing CFT data structures to file - syn() and eval()
-* The CFT database
-  |  Collections
-  |  Std.Db.Db2 vs Db2 script?
-  |  Synchronization
-* onLoad functions
-* Multitasking in CFT
-  |  Key concepts
-        Intended use
-  |  The Process
-  |  Example: pinging a list of hosts
-        Create and test regular ping function
-        Management function, with logging via Db2Obj database script
-        Checking results (in database)
-  |  Advantages
-  |  Flow control
-* Calling Java
-* String .esc() and .unEsc()
-  |  Escape codes
-        Note: CRLF / LF with text files ...
-* Automating interactive functions / Sys.stdin()
-  |  Running colon commands from script code
-* Clone any value
-* CFT.props - mCat, mEdit and mMore lambdas
-* CFT.props - shortcuts
-        Show all shortcuts
-* Std.Text.Lexer
-  |  Concept
-  |  Implementation
-        .sub()
-  |  Reusable nodes - integer sequence
-  |  Processing single lines
-  |  Limitations
-  |  Different uses
-  |  Complex tokens
-        Regular Node.addToken() example
-        Node.addTokenComplex() example
-* ANSI escape codes
-* Passwords, encryption, binary data
-  |  Passwords
-        Encrypt / decrypt
-        Binary data
-        Session data
-* Reference: object types
-* Reference: Value types
-* Reference: Expressions vs statements
-  |  Statements
-* Reference: Colon commands
-* Reference: Synthesizable types
-* Comments and digressions
-  |  Function name AFTER code?
-  |  Using Sys.stdin to run colon commands etc
-  |  Code spaces / the "pipe"
-  |  Code spaces vs Inner blocks
-  |  Script and code size
-        2020-11-13 v2.0.0
-        2021-04-01
-        2021-09-26
-        2021-10-16
-        2021-12-17 v3.0.0
-        2022-03-31 v3.2.5
-        2022-04-22 v3.5.0
-        2022-12-11 v3.5.6
+  |  Lists
+* Functions and scripts
+* First function
+  |  Current script
+  |  Show functions in current script
+  |  Opening script file in editor
+  |  Function parameters and local variables
+* Looping: iterate over list
+  |  Counting lines of java code in CFT
+  |  For-each
+  |  The PIPE
+  |  Filtering
+        assert and reject
+        break(boolean) 
+        break and continue
+* Calling functions in other scripts
+* Getting help
+  |  Global functions
+  |  Object member functions
+        All values are objects
+  |  Script functions
+* Dictionaries
