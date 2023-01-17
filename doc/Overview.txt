@@ -29,3 +29,9 @@
         All values are objects
   |  Script functions
 * Dictionaries
+* Dates
+  |  Date calculations
+* The Sys object
+  |  Environment variables
+  |  CFT start directory
+  |  Current script file

@@ -516,3 +516,61 @@ The Util script has a function to display a dictionary in a readable way. Exampl
 	Util:ShowDict(MyDict)
 /test
 ```
+
+# Dates
+
+The "Date" global function returns a Date object representing the current date. It can in turn
+be modified, by parsing a string, or via a millisecond setting.
+
+```
+Date help
+```
+
+The Date object parsing and presentation is controlled by a Java SimpleDateFormat pattern.
+
+```
+Date.getFormat
+```
+
+## Date calculations
+
+The Date object contains a function "Duration", which returns a Date.Duration object.
+
+```
+Date.Duration help
+```
+
+Example, calculate date and time one week ago:
+
+```
+Date.sub(Date.Duration.days(7))
+```
+
+# The Sys object
+
+The global function "Sys" returns the Sys object, which contains various system related
+functions, such as detecting if running on Windows or Linux, etc
+
+```
+Sys help
+```
+
+## Environment variables
+
+```
+Util:ShowDict(Sys.environment)
+```
+
+## CFT start directory
+
+```
+Sys.homeDir
+```
+
+## Current script file
+
+```
+Sys.savefile
+```
+S
+
