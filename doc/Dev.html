@@ -13,7 +13,14 @@
 
 <h1>CFT Change log</h1>
 
-<h3>3.7.8b 2023-01-15 - refactoring</h3>
+
+<h3 class="tag">3.8.0 2023-01-18</h3>
+<p>
+Completed restructring the docs, as well as the shell improvements now tested.
+</p>
+
+
+<h3>3.7.8b 2023-01-15 - refactoring shell commands</h3>
 <p>
 Restructuring the code for processing Shell commands, including automatic
 generation of content for global _Shell command and simpler maintenance
@@ -21,10 +28,12 @@ in ShellCommandManager.
 </p>
 
 
-<h3>3.7.8 2023-01-15 - refactoring</h3>
+<h3>3.7.8 2023-01-15 - refactoring: IsSynthesizable</h3>
 <p>
 Made interface IsSynthesizable, to easier manage which objects are synthesizable or not.
 </p>
+
+
 
 <h3>3.7.7 2023-01-14 - :N is now expression</h3>
 <p>
@@ -36,6 +45,7 @@ Also supports :: to mean Sys.lastResult (without position)
 <p>
 This simplified the ShellCommand.java parsing, as :N is no longer a special case.
 </p>
+
 
 <h3>3.7.6c 2023-01-13 - shell command hash and hex</h3>
 <p>
@@ -51,6 +61,7 @@ Improved the 'diff' shell command for windows powershell.
 <p>
 Added 'which' command to shell
 </p>
+
 
 <h3>3.7.6b 2023-01-12 - 'continue'</h3>
 <p>
@@ -148,7 +159,8 @@ Having both a Lib() function and a Lib script is confusing.
 	values off the top of the stack. Just an "itch" :-)
 </p>
 
-<h3>3.6.2 2022-12-15 - created interactive grep</h3>
+
+<h3>3.6.2 2022-12-15 - created interactive (shell command) grep</h3>
 <pre>
 grep "xyz" *.txt
 </pre>

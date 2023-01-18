@@ -45,7 +45,6 @@ the CFT code parser works with tokens, not lines (for the most part).
 - hash
 - hex
 - shell
-- !...
 
 The "ls" command comes in two additional versions:
 
@@ -55,7 +54,7 @@ lsd   # lists directories
 ```
 
 The syntax for these commands correspond to how they are used in Linux/Unix (where existing), minus flags,
-with support for globbing, relative and absolute paths etc.
+but with support for globbing, relative and absolue paths, on windows and Linux.
 
 ```
 pwd
@@ -86,6 +85,33 @@ cd c:\program" "files
 
 
 Note that backslash is NOT an escape character in CFT, so just use it like any other character.
+
+
+# The prompt
+
+The prompt can be configured to use colors. 
+
+First call "Enable" in the Curses script
+
+```
+Curses:Enable
+```
+
+Then there are two functions in the Prompt script which control colors:
+
+```
+Prompt:SetColor
+Prompt:SetPathColor
+```
+
+## Disabling Curses
+
+Some windows command windows struggle with ANSI escape codes formatting after running external programs
+like git, messing up the display. If this happens, just disable use of these, with:
+
+```
+Curses:Disable
+```
 
 
 

@@ -5,6 +5,8 @@
   |  The _Shell global function
   |  Paths with space
   |  Windows backslash
+* The prompt
+  |  Disabling Curses
 * CFT Core types
   |  String literals
   |  Lists
