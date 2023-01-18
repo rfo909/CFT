@@ -1,6 +1,6 @@
 * CFT ("ConfigTool") introduction
 * Platform
-* Shell-like command
+* Shell-like commands
   |  List of commands
   |  The _Shell global function
   |  Paths with space
@@ -14,6 +14,7 @@
   |  Show functions in current script
   |  Opening script file in editor
   |  Function parameters and local variables
+* Local variable assignment
 * Looping: iterate over list
   |  Counting lines of java code in CFT
   |  For-each
@@ -28,10 +29,13 @@
   |  Object member functions
         All values are objects
   |  Script functions
+  |  CFT Internals
 * Dictionaries
-* Dates
-  |  Date calculations
-* The Sys object
-  |  Environment variables
-  |  CFT start directory
-  |  Current script file
+* Various
+  |  Dates
+        Date calculations
+  |  The Sys object
+        Environment variables
+        CFT start directory
+        Current script file
+* Reference

@@ -1,7 +1,7 @@
 
 # CFT ("ConfigTool") introduction
 
-Last updated: 2023-01-17 RFO
+Last updated: 2023-01-18 RFO
 
 v3.7.7
 
@@ -18,7 +18,7 @@ Development has been going on since May 2018, and on github since version 1.0 in
 
 
 
-# Shell-like command
+# Shell-like commands
 
 
 CFT contains a number of "shell-like" commands, with syntax where arguments follow command, separated by space. 
@@ -260,6 +260,17 @@ call this function:
 Sum(1,2)
 ```
 
+# Local variable assignment
+
+In addition to traditional assignment, there is a second form, which assigns a value off the stack
+to a local variable. This is frequently used when processing function parameters, for readability.
+
+```
+a=3                      # traditional form
+3=>name                  # alternative form
+```
+
+
 # Looping: iterate over list
 
 Loops in CFT are mostly concerned with iterating over lists. We already have a function that
@@ -377,8 +388,9 @@ Here we use the MenuSelect function which is defined inside the Lib script.
 CFT has a complete system for providing help on all aspects of the language. It falls into
 two categories: 
 
-1. getting help about built-in functions and objects
+1. getting help about built-in global functions and object functions
 2. showing script function code
+3. information on internals (statements, expressions and shell-like commands)
 
 ## Global functions
 
@@ -491,6 +503,18 @@ To run this function:
 Lib:LocateFiles
 ```
 
+## CFT Internals
+
+The list of global functions, as obtained by typing "help", contains three special
+functions:
+
+```
+_Stmt        # statements in the language
+_Expr        # built-in expressions
+_Shell       # all shell-like commands
+```
+
+
 
 # Dictionaries
 
@@ -517,7 +541,9 @@ The Util script has a function to display a dictionary in a readable way. Exampl
 /test
 ```
 
-# Dates
+# Various
+
+## Dates
 
 The "Date" global function returns a Date object representing the current date. It can in turn
 be modified, by parsing a string, or via a millisecond setting.
@@ -532,7 +558,7 @@ The Date object parsing and presentation is controlled by a Java SimpleDateForma
 Date.getFormat
 ```
 
-## Date calculations
+### Date calculations
 
 The Date object contains a function "Duration", which returns a Date.Duration object.
 
@@ -546,7 +572,7 @@ Example, calculate date and time one week ago:
 Date.sub(Date.Duration.days(7))
 ```
 
-# The Sys object
+## The Sys object
 
 The global function "Sys" returns the Sys object, which contains various system related
 functions, such as detecting if running on Windows or Linux, etc
@@ -555,22 +581,26 @@ functions, such as detecting if running on Windows or Linux, etc
 Sys help
 ```
 
-## Environment variables
+### Environment variables
 
 ```
 Util:ShowDict(Sys.environment)
 ```
 
-## CFT start directory
+### CFT start directory
 
 ```
 Sys.homeDir
 ```
 
-## Current script file
+### Current script file
 
 ```
 Sys.savefile
 ```
-S
+
+
+# Reference
+
+[Reference](Reference.md).
 

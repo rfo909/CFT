@@ -343,7 +343,9 @@ $ 2+3
 
 # References
 
-[Full documentation](doc/Doc.md).
+[Introduction](doc/Doc.md).
+
+[Reference](doc/Reference.md).
 
 [Full Youtube tutorial](https://www.youtube.com/playlist?list=PLj58HwpT4Qy80WhDBycFKxIhWFzv5WkwO).
 

@@ -1,125 +1,19 @@
 
-# CFT ("ConfigTool")
+# CFT Reference
 
-Last updated: 2023-01-15 RFO
+Last updated: 2023-01-18 RFO
 
 v3.7.7
 
 
 
-# Platform
+# Shell-like commands II
 
-
-CFT is written in Java. It has been continously tested on both Linux
-and Windows, and easily integrates with running external programs on
-both platforms, including PowerShell on Windows.
-
-
-Development has been going on since May 2018, and on github since version 1.0 in July 2020.
-
-
-
-# Shortcuts and colon commands
-
-Shortcuts are ways of running CFT code, while colon commands are system commands that run completely
-outside the language interpreter (written in Java).
-
-
-View all colon commands:
-
-```
-:
-```
-
-View all shortcuts:
-
-```
-@
-```
-
-Shortcuts are defined in the CFT.props file.
-
-
-
-# Shell-like commands
-
-
-CFT contains a number of "shell-like" commands, with different syntax from the regular code, which is 
-all about function calls.
-
-These "shell-like" commands are parsed only when processing input, and so can not be called from function
-code, since the syntax is quite different. The shell command parser processes the whole input line, which has
-no real meaning to the CFT code parser and interpreter.
-
-## Commands
-
-- ls | lsf | lsd
-- cd
-- cat
-- more
-- edit
-- tail
-- mkdir
-- rm
-- cp
-- mv
-- touch
-- diff
-- showtree
-- hash
-- hex
-- shell
-- !...
-
-The "ls" command comes in two additional versions:
-
-```
-lsf   # lists files
-lsd   # lists directories
-```
-
-The syntax for these commands correspond to how they are used in Linux/Unix (where existing), minus flags,
-with support for globbing ("*.txt" etc)
-
-```
-pwd
-cd ..
-ls *.txt
-cp *.txt ../somePlace
-```
-
-## The _Shell global function
-
-Run the global function _Shell to get up to date help on the CFT shell command interpreter.
-
-
-## Paths with space
-
-
-To access directories of files with space in them, we use quotes, single or double.
-
-```
-cd "c:\program files"
-
-or
-
-cd c:\program" "files
-```
-
-## Windows backslash
-
-
-Note that backslash is NOT an escape character in CFT, so just use it like any other character.
-
-```
-Dir("c:\program files\")
-/ProgramFilesDir
-```
 
 
 ## Combine with CFT function results
 
-In addition to the above syntax, such as "cd /someDir/xyz" etc, the CFT shell-like commands
+In addition to the standard syntax, such as "cd /someDir/xyz" etc, the CFT shell commands
 also support using the result from some CFT function. 
 
 Say we have some functions:
@@ -142,9 +36,9 @@ edit (DataFile)
 The expressions should return single Dir or File objects.
 
 
-## Use "Sys.lastResult" 
+## The ":N" syntax
 
-The function Sys.lastResult returns the result from the last interactive command. The
+The function Sys.lastResult returns the result from the previous interactive command. The
 Sys.lastResult function takes an optional int parameter for when the result is
 a list, to obtain value at a position in the list. 
 
@@ -173,9 +67,10 @@ ls *.txt
 touch ("new_" + :0.name)
 edit
 ```
-:-)
 
-### Use Sys.lastResult without index N
+
+
+## The "::" syntax
 
 Sometimes we have a function that returned perhaps a single string or file or directory, that
 we in turn want to do something with, without the :N *lookup-in-list* syntax. For this
@@ -191,9 +86,9 @@ cd ::
 
 ## Symbols 
 
-If we want to remember a file or directory, we can create a symbol, which in turn can be used
-in expressions.
-
+Symbols let us define persistent names for files and directories. These can be used
+in expressions, and are also detected when used directly in shell commands.
+ 
 ```
 cd /some/dir
 pwd
@@ -222,6 +117,7 @@ To see all symbols, use shortcut
 
 This lists all defined symbols, and gives you the option of deleting symbols.
 
+
 ### Diffing files example
 
 Symbols are useful when diffing two files at different locations:
@@ -236,6 +132,12 @@ cd /where/the/other/file/exists
 diff somefile.txt %a
 ```
 
+## Note on specials
+
+Shell command parameters starting with ":" or "%" are considered CFT expressions even without
+being embedded inside parantheses. 
+
+
 
 ## Bang commands
 
@@ -247,7 +149,7 @@ command.
 ls -l
 ```
 
-### Expressions in bang commands
+## Bang command parameters
 
 Bang commands are managed by the shell command parser, and so support the same notation
 as the other shell commands, for using output from expressions, looking up symbols and
@@ -339,6 +241,61 @@ just change to the directory of one of the commands, without running the command
 
 
 
+## The "shell" command
+
+This command starts an operating system shell, defaults to bash on Linux and PowerShell on windows.
+
+When exiting that shell, we are returned to the CFT prompt.
+
+
+
+
+
+# Shortcuts and colon commands
+
+Shortcuts are ways of running CFT code, while colon commands are system commands that run completely
+outside the language interpreter (written in Java).
+
+
+View all colon commands:
+
+```
+:
+```
+
+View all shortcuts:
+
+```
+@
+```
+
+Shortcuts are defined in the CFT.props file.
+
+
+
+
+# List concatenation
+
+Lists can be added with "+"
+
+```
+List(1,2,3) + List(4,5)
+```
+
+We can also add single values to a list
+
+```
+List(1,2,3)+4
+```
+
+# List subtraction
+
+```
+List(1,2,3,4)-List(1,4)  # results in List(2,3)
+```
+
+
+
 # The "protect" mechanism
 
 Working in production environments, there will be directories and files that *must not* be changed
@@ -374,223 +331,44 @@ and as a consequence trying to delete these files fails.
 
 
 
-# Introduction to loops
 
-## List basics
+# Dictionary dotted syntax
 
-Lists are return value from many functions, such as getting the files in a directory.
+In addition to the .set() and get() functions of dictionary objects, CFT also allows dotted assignment, and
+dotted lookup (for identifier names).
+
+Storing a value in a dictionary, either via set() or using dotted assignment, always returns the dictionary
+object, which lets us use the single underscore expression to pick it up and do further assignments.
 
 
-Lists can also be created with the global List() function, which takes any number of 
-parameters, and creates a List object from those values.
+# SymDict
+
+This is a special built-in expression, which takes a list of names of local variables, and
+returns a dictionary with those.
+
 
 ```
-List                 # empty list
-List(1,2,3,4)
-Dir.files
-"abcdef".chars
-"one two three".split
-"one:two:three".split(":")
+# SymDict example
+# --
+	P(1)=>user
+	P(2)=>host
+	SymDict(user,host)
+/GetDict
 ```
 
-Many functions are available on a List object. One frequently used is "nth", which
-gets a specific element, defaulting to 0 if no argument, but there also exist "first" and "last"
-and a few others.
+This corresponds to the following:
 
 ```
-List("a","b","c").first
-<String>
-a
-```
-
-For details of available functions, use the help system:
-
-```
-List help
-```
-
-## Iterate over list
-
-Loops in CFT are mostly concerned with iterating over lists. Let's create a list:
-
-```
-Dir.allFiles("*.java")
-```
-
-This line of code generates a list of all java files under the current directory or sub-directories.
-When we see that the code works, we give it a name.
-
-```
-/JavaFiles
-```
-
-We now want iterate over the list of files returned, and count the number of lines in each, then
-sum it all up, creating the "linecount" function.
-
-```
-JavaFiles->f out(f.read.length) | _.sum
-<int>
-18946
-/linecount
-```
-
-The "single arrow" followed by an identifier is the "for each" construct, with the identifier becoming
-the "loop variable".  The out() statement is used to generate output from the loop.
-
-
-The "PIPE" character ("|") terminates the loop, and delivers the result from the loop (in this case 
-a list of int) to the next part, where the "_" (underscore) function picks it off the stack, then 
-calls the sum() function on it, returning a single int value.
-
-
-*Note:* loop variables are not regular variables, and can not be reassigned.
-
-
-## Filtering
-
-
-Filtering list data is an essential function in CFT. Here is a simple example:
-
-```
-List(1,2,3,4,3,2,1)-> x assert(x>2) out(x)
-<List>
-3
-4
-3
-```
-
-The assert() works like "if condition not satisfied, continue with next value"
-
-# Local variables
-
-
-Function code may use local variables for simplifying expressions.
-
-```
-a=3 b=2 a+b
-<int>
-5
-```
-
-Assignment can also be done "stack based", where the assignment picks the current value
-off the stack and stores it into a variable:
-
-```
-3=>a 2=>b a+b
-5
-```
-
-Example:
-
-```
-List("java","txt")
-/types
-
-Dir.allFiles->f type=f.name.afterLast(".") assert(types.contains(type)) out(f)
-/textfiles
-```
-
-This function lists all files of type .java and .txt under current directory.
-
-
-
-# Core types
-
-
-
-- String
-- int - (Java long)
-- float - (Java double)
-- boolean
-- List
-- Dict
-- Binary
-- Lambda
-- Closure
-
-All values in CFT are objects, which may contain functions. Strings can be written using double
-or single quotes.
-
-## String literals
-
-
-Strings are written in 
-*single or double quotes*, and can be concatenated with '+', which allows
-for all kinds of combinations.
-
-```
-"double quotes"
-'single quotes'
-"'a'"
-'a'
-'"' + "'a'" + '"'
-"'a'"
-```
-
-Also, backslash is not used as escape character, simplifying Windows paths.
-
-In script code, there is an additional way of creating strings:
-
-```
-@ this is a raw string, extending to the end of the line
-```
-
-Since '@' is the shortcut character, you can not enter a raw string directly in the
-command line interface, but you can do this:
-
-```
-"" + @ something ...
+# SymDict example
+# --
+	P(1)=>user
+	P(2)=>host
+	Dict.user=user _.host=host
+/GetDict
 ```
 
 
-## Dictionaries
-
-
-Dictionaries are maps that store any value identified by names (strings).
-
-```
-x=Dict x.set("a",1) x.get("a")
-1
-```
-
-Note: We will often store values by names that are valid identifiers. For these we can use dotted notation
-both when setting and fetching the values:
-
-```
-x=Dict x.a=1 x.a=x.a+1 x.a  # returns 2
-```
-### SymDict
-
-
-A special global expression, SymDict is used to create a dictionary from a list of
-symbols (identifiers), which must be present as local variables, or parameterless functions. This
-saves some typing. Example code:
-
-```
-# Without SymDict()
-a=1
-b=2
-dict=Dict
-dict.a=a
-dict.b=b
-
-# With SymDict
-a=1
-b=2
-dict=SymDict(a,b)
-```
-
-Note that assigning a value to a dict, using dotted notation, returns the Dict object, and
-using the underscore function, which refers to the value on the data stack, we can
-initialize dictionaries as follows:
-
-```
-Dict
-_.a=1
-_.b=2
-=> dict
-```
-### Dictionary name
+# Dictionary name
 
 
 Dictionary objects support a simple string name, in addition to named properties.
@@ -601,7 +379,6 @@ Dict("name")
 
 The name can be accessed via Dict.getName() and modified/set via Dict.setName(). To
 clear, do Dict.setName(null)
-
 
 This name property of dictionaries is used to convey type information for dictionaries,
 together with "as" type checking. This is discussed in more detail elsewhere. A simple
@@ -623,7 +400,8 @@ P(1) as &amp;Point => point
 The '&amp;' in front of the type is to indicate that we are interested in the name of a Dict. Omitting it
 we can check for regular types, such as int, String, List, Dict and a whole lot of others.
 
-## Binary type
+
+# Binary type
 
 
 Used in connection with encryption etc. Can be created from strings, or represent
@@ -637,111 +415,8 @@ the content of a file.
 
 Check the Std.Util object, which contains functions that create objects Encrypt and Decrypt.
 
-# List processing
 
-Lists can be created manually using the global List() function.
-
-```
-List(1,2,3)
-List("a","b","c")
-```
-
-A much used way for creating lists of strings, is to use the string function split(), which by default
-splits a string on spaces. This means the following produce the same result.
-
-```
-List("a","b","c")
-"a b c".split
-"a b:c d".split(":")   # two strings "a b" and "c d"
-```
-## Iterating over list content
-
-
-The iterator in CFT takes the form of an arrow followed by a loop variable. For a loop construct
-to return output, we use the out() statement inside.
-
-```
-"1 2 3".split->x out("a"+x)
-<List>
-0: a1
-1: a2
-2: a3
-```
-
-The result is a list of strings, as displayed.
-
-## Filtering with assert(), reject(), continue and break() + out()
-
-
-Using the assert() statement, we may abort processing for elements that do not meet a condition.
-
-```
-Dir.allFiles->f assert(f.name.endsWith(".java")) out(f)
-```
-
-The reject() statement is the inverse of assert(), and aborts processing for elements that meet
-a certain condition.
-
-```
-List(1,2,3,2,1)->x reject(x>2) out(x)
-<List>
-1
-2
-2
-1
-```
-
-The break() statement terminates ALL LOOPS if the condition is true.
-
-```
-List(1,2,3,2,1)->x break(x>2) out(x)
-<List>
-1
-2
-```
-
-## continue and break without params
-
-For compatibility with other languages, CFT also supports continue and break without parameters,
-to be used with if, as follows:
-
-```
-List(1,2,3,4)->x if(x%2 != 0) continue out(x)    # 2,4
-
-List(1,2,3,4)->x if (x>=3) break out(x)          # 1,2
-```
-
-Contintue corresponds to the following two:
-
-- assert(false)
-- reject(true)
-
-
-
-## The condOut() statement
-
-
-In addition to controlling loops with assert/reject and break, there is the condOut()
-statement, which takes a boolean condition as first parameter, and the value to
-be sent out as second parameter. Can be useful some times.
-
-```
-List(1,2,3,2,1)->x condOut(x<2,"(") out("b") condOut(x<2,")") | _.concat
-<String>
-(b)bbb(b)
-```
-
-Alternatively one can use "if". Using a multi-line example here:
-
-```
-List(1,2,3,2,1)->x
-if (x<2) out("(")
-out("b")
-if (x<2) out(")")
-| _.concat
-/f
-```
-## Produce columns with report()
+# Produce columns with report()
 
 
 Using report() instead of out() lets us produce as output a list of strings,
@@ -750,8 +425,10 @@ where multiple parameters to report() is formatted into columns. Example:
 ```
 Dir.files->f report(f.name, f.length)
 ```
-## List addition
 
+# List operations
+
+## Addition
 
 Two lists can be added together with "+".
 
@@ -772,21 +449,10 @@ List(1,2)+3
 2
 3
 ```
-## List subtraction
+## Subtraction
 
 
 Using "-", we can remove one or more elements from a list.
-
-### Removing a single value from a list
-
-```
-List(1,2,3,2,1)-2
-<List>
-1
-3
-1
-```
-### Removing multiple values from a list
 
 ```
 List(1,2,3,2,1)-List(2,3)
@@ -795,7 +461,17 @@ List(1,2,3,2,1)-List(2,3)
 1
 ```
 
-### Removing duplicates from a list
+Can also remove a single value from a list:
+
+```
+List(1,2,3,2,1)-2
+<List>
+1
+3
+1
+```
+
+## Removing duplicates from a list
 
 ```
 List(1,1,2,2).unique
@@ -804,12 +480,11 @@ List(1,1,2,2).unique
 2
 ```
 
+
 # Sorting
 
 
 The List object has a single .sort() member function, which does the following:
-
-
 
 - if all values are int, sort ascending on int value
 - if all values are float, sort ascending on float value
@@ -818,7 +493,7 @@ The List object has a single .sort() member function, which does the following:
 
 
 Now, to sort other types of values, we use a "trick", which consists of wrapping each
-value inside a special wrapper object, masking the original values as either int, float
+value inside a special *wrapper object*, masking the original values as either int, float
 or STring, then sort, and finally extract the actual value from the wrappers.
 
 
@@ -945,12 +620,14 @@ another script, as well as listing the code of particular function.
 ```
 
 
-# Helper functions
+
+# Hiding helper functions  
 
 
 In many cases, we need to create helper functions, which should not be visible as part
-of the script interface, as seen from other scripts. This is done by defining the function
-as follows:
+of the script interface, as seen from other scripts, or when just entering '?'.
+
+This is done by defining the function as follows:
 
 ```
 23
@@ -970,6 +647,8 @@ also not displayed, while using "??ScriptName:" includes them.
 Also note, that "local" functions are not private in the Java sense, and are fulle callable
 from the outside. Marking functions as local is all about filtering what is shown on the
 single "?" command.
+
+
 
 # Displaying all known scripts
 
@@ -1077,23 +756,24 @@ Custom functions can take parameters. This is done using the P() expression, whi
 identifies the parameter by position. Note that 
 *parameter position is 1-based*.
 
+
 ```
 P(1)=>a P(2)=>b a+b
 ```
 
-This is a valid function, but entering it interactively fails, because it is immediately
-parsed and executed, and there are no parameter values. To overcome this, the P() expressions
-take a second parameter, which is a default value.
+This is a valid function, but entering it *interactively* fails, because it is immediately
+parsed and executed, and there are no corresponding parameter values. To overcome this, 
+the P() expressions take an optional second parameter, which is a default value (or any
+expression). 
 
 
 The default value parameter to P() is important for several reasons.
 
 
-
-- Allows the function code to execute while being developed interactively
-- Allows for default values when function is called without parameters, or when called with null-values
-- May act as documentation in the source
-- Provides an elegant way of making functions interactive and non-interactive at the same time,
+1. Allows the function code to execute while being developed interactively
+2. Allows for default values when function is called without parameters, or when called with null-values
+3. May act as documentation in the source
+4, Provides an elegant way of making functions interactive and non-interactive at the same time,
 as the default expression is evaluated only when parameter is not given (or is null),
 and may then ask the user to input the value.
 
@@ -1110,6 +790,7 @@ f(5,10)
 <int>
 15
 ```
+
 
 
 # User input
@@ -1138,6 +819,9 @@ functions, can be used to produce functions that ask for missing values.
 ```
 P(1,Input("Enter value").get) =>value ...
 ```
+
+
+
 # Block expressions
 
 
@@ -1240,6 +924,8 @@ function body.
 {x=3} x
 3
 ```
+
+
 # List filtering with Lambda
 
 
@@ -1264,6 +950,8 @@ To remove items from the list, we just let the Lambda return null.
 ```
 
 This returns a list of 3,4,5
+
+
 
 # Conditionals - if expression
 
@@ -1370,6 +1058,9 @@ code = if (x=="a") 1 else if (x=="b") 2 else if (x=="c") 3 else 4
 Note: the above is not very elegant. It might be better populating a
 dictionary or something.
 
+
+
+
 # Lazy evaluation
 
 ### Lazy if
@@ -1391,6 +1082,10 @@ every other language.
 The P() expression to access function parameters only evaluates the default
 expression if function parameter N has no value or null-value.
 
+
+
+
+
 # The error() function
 
 
@@ -1404,12 +1099,18 @@ if (1+1 != 2) {
 	error("oops again")
 }
 ```
+
+
+
+
 # Output to screen
 
 ```
 println("a")
 println("a",a,"b=",b)
 ```
+
+
 # Running external programs
 
 ## Summary
@@ -1562,6 +1263,7 @@ If you need to run SSH commands on remote targets, use the SSH library script, w
 contains two major functions: run() and sudo(), These call Lib:run then filter the output
 to stdout using a marker to eliminate the welcome text when logging in etc.
 
+
 ### Side note: ssh without password
 
 
@@ -1572,21 +1274,22 @@ copy it to the target host, as follows (in Linux shell).
 ssh-keygen -t rsa
 ssh-copy-id user@host
 ```
+
+
+
 # Synthesis
 
 ## Creating code from values
 
 
-The 
-*syntesis* functionality comes in three variants. Two of them are "colon commands".
+The *syntesis* functionality comes in three variants. Two of them are "colon commands".
 
 
 
-- The :syn command syntesizes code from the last result.
-
-
-- The :NN  (where NN is an integer) syntesizes the indicated element of the last result list. If
+1. The :syn command syntesizes code from the last result.
+2. The :NN  (where NN is an integer) syntesizes the indicated element of the last result list. If
 last result is not a list, you get an error.
+3. The global function "syn()" 
 
 
 ## Example using :syn
@@ -1647,7 +1350,24 @@ Assign to name by /xxx as usual
 
 If the last value was not a list, the ":NN" command will fail with an error.
 
-# Output format / Term object
+## Using syn()
+
+Synthesis is frequently employed in code, where we want to "serialize" data. To de-serialize 
+those data we use the global eval() function.
+
+Example:
+
+```
+syn(Dir.files)  # returns long string
+/s
+
+eval(s)    # returns the Dir.files list
+```
+
+
+
+
+# Terminal dimensions - the Term object
 
 
 Output to screen is regulated via a Term object. It is a session object, remembering the
@@ -1670,6 +1390,9 @@ This works on Linux (using stty command) and on Windows (powershell).
 By default, ouput line wrapping is off, which means that lines longer than the Cfg.w gets truncated
 with a '+' to indicate there is more. It can be switched on/off via the Cfg object, but there is also a
 colon command ":wrap" which toggles wrapping on or off.
+
+
+
 
 # Templating
 
@@ -1807,6 +1530,8 @@ Sequence(
 @ Dear [name] ...
 ).mergeExpr("[","]")
 ```
+
+
 # Text processing
 
 
@@ -1939,6 +1664,8 @@ indentation, for greatly improved readability in script code, and that it's easy
 add conditional blocks, while the "here"-document means we can paste original text
 directly into the script code.
 
+
+
 # Processing JSON
 
 
@@ -1996,6 +1723,9 @@ fields in the corresponding dictionaries.
 The "XML" script handles parsing and pretty-printing XML. It also has functions for constructing
 an XML object with code.
 
+
+
+
 ## Parsing XML
 
 
@@ -2049,7 +1779,10 @@ Show available data and functions for the XMLNode object:
 ```
 XML:Show
 ```
-# Internal web-server
+
+
+
+# Internal web-server (experimental)
 
 
 There is a small embedded web-server in CFT, available in the Std.Web object. It
@@ -2066,6 +1799,9 @@ content.
 
 
 A bit of a work in progress, not terribly useful, bit it sort of works.
+
+
+
 
 # 3D library
 
@@ -2161,6 +1897,7 @@ Created DDExample2 which uses polygon drawing Brush of DD.World.
 
 
 
+
 # Command line args
 
 
@@ -2185,10 +1922,14 @@ This loads script Projects, then calls the Curr function inside.
 ./cft -help
 ./cft -d scriptDir [scriptName [commandLines]*]?
 ```
+
+
 # Environment variables
 
 
 Available via Sys.environment() function.
+
+
 
 # Debugging
 
@@ -2229,6 +1970,8 @@ not (Enter).
 
 
 
+
+
 # Working with pasted text lines from stdin
 
 
@@ -2266,6 +2009,9 @@ Sys.isWindows
 <boolean>
 false
 ```
+
+
+
 # Predicate calls
 
 
@@ -2288,11 +2034,21 @@ false
 <boolean>
 true
 ```
+
+Beware of typing errors. Mis-spelling a function still just causes a predicate call to
+return false.
+
+
+
+
 # The onLoad function
 
 
 In order for scripts to run code as the script is loaded, we can define a function
 called onLoad, which is called every time the script file is loaded or reloaded.
+
+
+
 
 # Error handling
 
@@ -2302,11 +2058,9 @@ situations:
 
 
 
-- CFT logical or data errors, called 
-*soft errors*
+- CFT logical or data errors, called *soft errors*
 
-- General errors, stemming from underlying Java code, network situations etc, called 
-*hard errors*
+- General errors, stemming from underlying Java code, network situations etc, called *hard errors*
 
 
 ## Soft errors
@@ -2321,7 +2075,7 @@ caught with tryCatchSoft(), which returns a Dict containing either:
 ```
 ok: true
 result: ANY
-or
+--- or ---
 ok: false
 msg: string
 ```
@@ -2339,7 +2093,7 @@ The tryCatch() expression catches both hard and soft errors, and returns a Dict 
 ```
 ok: true
 result: ANY
-or
+--- or --
 ok: false
 msg: string
 stack: List of string
@@ -2347,6 +2101,8 @@ stack: List of string
 
 An example of a hard error is trying to access a variable or function that doesn't
 exist.
+
+
 
 # Get type of value
 
@@ -2363,6 +2119,9 @@ getType(Dict)
 <String>
 Dict
 ```
+
+
+
 # Closures and dictionary-objects
 
 ## Manual closure
@@ -2430,16 +2189,16 @@ data.get("f")    # returns Closure object without invoking it
 ```
 
 
+
+
 # Type checking with "as"
 
-
-*v3.2.5*
 
 The getType() has frequently been combined with error() to do type checking of parameters.
 
 ```
 P(1)=>x
-error(getType(x) != "String")
+error(getType(x) != "String","Invalid value")
 ```
 
 The problem, is that it is easy to mistype, like getType("x") which of course always is "String".
@@ -2467,6 +2226,7 @@ P(1) as ("String int".split) ...
 ```
 
 If an "as" fails, a hard error is thrown, with details about what was expected, and what was found.
+
 
 ### Null-values
 
@@ -2555,6 +2315,44 @@ f2=d.get("f")  # returns lambda (closure)
 
 The closure can now be passed as an argument to some function somewhere, who uses .call() to invoke it.
 
+
+## Note: "as XXX" is separate expression
+
+The "as something" is an expression working with a value from the stack. This means it can be used
+to type check any value, such as return value from a function. 
+
+```
+a=add(1,2) as int
+```
+
+What happens here, however, is *not* that the function result is type checked before being assigned, but
+instead that the assignment is an expression, which returns the assigned value, which is then
+type checked. The outcome is the same in this case, but this distinction may cause troubles.
+
+Example:
+
+```
+a=(3 as int)
+```
+
+The parser will fail this, complaining it expects right parantesis after 3, since it does not know how
+to process 
+
+```
+a=(expr expr)
+```
+
+To fix this, we remember that blocks in CFT are expressions, and they contain a sequence of statements,
+and expressions are also statements.
+
+```
+a={3 as int}
+```
+
+:-)
+
+
+
 # Classes
 
 
@@ -2634,6 +2432,8 @@ There is no problem creating dictionary objects without using /class functions.
 # Test it
 IntContainer.set("test")  # Fails with error, expects int
 ```
+
+
 # Dict set with strings
 
 
@@ -2705,6 +2505,8 @@ last element, -2 the second last, and so on.
 List(1,2,3,4).nth(-1)
 <int>
 ```
+
+
 # Function parameters ...
 
 
@@ -2724,6 +2526,7 @@ P => paramList
 	...
 /example
 ```
+
 ## Get parameters as Dict
 
 
@@ -2738,12 +2541,14 @@ in the dictionary.
 	...
 /example
 ```
+
+
 # The general loop statement
 
 
 In addition to looping over lists, there is a general loop construct. It identifies no
-loop variable, and loops forever, until break() is called. It also obeys assert()
-and reject() as with list iteration.
+loop variable, and loops forever, until break() is called. It also obeys assert(),
+reject() and continue( as with list iteration.
 
 ```
 a=0 loop break(a>3) out(a) a=a+1
@@ -2756,6 +2561,8 @@ a=0 loop break(a>3) out(a) a=a+1
 
 If you forget to increment the variable a, or forget or create a valid break(), then
 the loop may never terminate, and CFT has to be killed with CTRL-C 
+
+
 
 # Storing CFT data structures to file - syn() and eval()
 
@@ -2783,7 +2590,10 @@ To restore the structure, we use the global eval() function.
 /restoreData
 ```
 
-This can be used to save arbitrarily big structures, as long as they are synthesizable.
+This can be used to save arbitrarily complex structures, as long as they are synthesizable.
+
+
+
 
 # The CFT database
 
@@ -2839,6 +2649,8 @@ Std.Db.releaseLock("Unique lock name")
 ```
 
 
+
+
 # onLoad functions
 
 
@@ -2848,6 +2660,8 @@ and (automatically) reloaded in GNT. Nice for clearing defaults, when new sessio
 
 Each individual session is identified by a session UUID, which may be stored in the
 database, so the onLoad can detect this and reset state in the database.
+
+
 
 # Multitasking in CFT
 
@@ -3067,6 +2881,7 @@ the code easy to test separately.
 Processes also offer full protection from exceptions of all kinds, as they
 are caught and listed in full inside the Process.
 
+
 ## Flow control
 
 
@@ -3103,7 +2918,9 @@ before returning.
 
 See separate sections on closures and objects.
 
-# Calling Java
+
+
+# Calling Java (experimental)
 
 
 CFT lets us interface Java code via the Std.Java object. It contains functions
@@ -3140,12 +2957,15 @@ obj, with obj2 as parameter. The method call returns a JavaValue object,
 which has a function value() that returns a CFT value, in this case the
 concatenated string "test123".
 
+
+
 # String .esc() and .unEsc()
 
 
-As was mentioned initially, CFT doesn't use backslash as an escape character.
-However, we still require a way of converting "difficult" strings to code,
-via synthesis. For this purpose, the two functions String.esc() and String.unEsc() was
+CFT does not use backslash as an escape character, instead it used the "^" ("hat") character.
+
+Synthesis required a way of converting "difficult" strings to code.
+For this purpose, the two functions String.esc() and String.unEsc() was
 created.
 
 
@@ -3163,20 +2983,10 @@ For an escaped string, the escape character is the ^ symbol.
 
 
 - "Double quotes" ^q
-
-
 - 'Single quotes' / Apostrophe ^a
-
-
 - Newline ^n
-
-
 - Carriage Return ^r
-
-
 - Tab ^t
-
-
 - The ^ symbol ^^
 
 
@@ -3190,7 +3000,9 @@ this
 is
 a test
 ```
-### Note: CRLF / LF with text files ...
+
+
+# CRLF / LF with text files ...
 
 
 Note that when creating a text file using global function File(...) or via Dir.file(...),
@@ -3201,6 +3013,8 @@ the File object has two functions:
 someFile.setWriteCRLF
 someFile.setWriteLF
 ```
+
+
 # Automating interactive functions / Sys.stdin()
 
 
@@ -3217,6 +3031,7 @@ read-this
 Note that both Input.get() and readLine() detect if there is buffered input, and
 if so, do not display the prompt or other info. Particularly useful for Input.get(),
 since buffering the empty string "" with Sys.stdin() means repeating the last value.
+
 
 ## Running colon commands from script code
 
@@ -3238,6 +3053,8 @@ frequently with shortcuts.
 ```
 stdin(":load SomeScript","?")
 ```
+
+
 # Clone any value
 
 
@@ -3255,13 +3072,8 @@ The clone can also be done manually:
 a=List(1,2,3)
 b=eval(syn(a))
 ```
-# CFT.props - mCat, mEdit and mMore lambdas
 
 
-The configuration fields mCat, mEdit and mMore ("m" for macro) define lambdas
-that are called for interactive commands cat/edit/more. This means it is possible
-to redefine what edit means. Currently, mEdit calls either "Lib:e". The
-mMore lambda calls "Lib:m", while the mCat macro just calls .read on file parameter.
 
 # CFT.props - shortcuts
 
@@ -3302,6 +3114,9 @@ To list defined shortcut, just type
 This is a shortcut itself, that traverses the CFT.props file and identifies and
 displays the
 shortcut definitions from it.
+
+
+
 
 # Std.Text.Lexer
 
@@ -3579,6 +3394,9 @@ date.match("2020-009-15xxx") # returns 0 (no match)
 
 Feels like Regex character classes, no?
 
+
+
+
 # ANSI escape codes
 
 
@@ -3596,12 +3414,20 @@ Curses:Enable(true)
 ```
 This changes all the functions inside Curses from returning empty strings, to return ANSI escape sequences.
 
+
+
+
 # Passwords, encryption, binary data
 
 ## Passwords
 
 
 To read a password (no echo), call Sys.readPassword function.
+
+```
+password = Sys.password("Enter password")
+error(Sys.password("Repeat password") != password, "no match")
+```
 
 ### Encrypt / decrypt
 
@@ -3648,6 +3474,10 @@ The Vault script uses this to persist session secrets, in a secure way, stored
 in Db2 encrypted with the secure session id. By encrypting a second static value,
 it detects whenever there is a new session, prompting the user to enter the
 the secret values, to store for that session.
+
+
+
+
 
 # Reference: object types
 
@@ -3832,6 +3662,8 @@ code, and are defined in the CFT.props file. So far all good.
 
 
 The "problem" is that CFT code (and so shortcuts) can run colon commands via "abusing" the Sys.stdin() command.
+
+
 
 # Reference: Synthesizable types
 
