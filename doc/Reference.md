@@ -554,6 +554,19 @@ To remove items from the list, we just let the Lambda return null.
 This returns a list of 3,4,5
 
 
+## nth() negative indexes
+
+
+Using negative indexes to List.nth() counts from the end of the list. Using value -1 returns the
+last element, -2 the second last, and so on.
+
+```
+List(1,2,3,4).nth(-1)
+<int>
+```
+
+
+
 
 
 # Dictionaries
@@ -625,266 +638,52 @@ The '&amp;' in front of the type is to indicate that we are interested in the na
 we can check for regular types, such as int, String, List, Dict and a whole lot of others.
 
 
+## Dict set with strings
 
 
-
-
-# The "protect" mechanism
-
-Working in production environments, there will be directories and files that *must not* be changed
-or deleted. 
-
-Dir and File objects in CFT can have a "protect" mark set, which blocks destructive operations
-such as appending data to files, delete, rename, move etc.
-
-The protect mark is inherited by all Dir and File objects derived from a protected Dir or File. 
-
-Example:
+Reading name-value assignments from a property file or similar, is best done via the .setStr()
+function on the Dict object. It strips whitespace and accepts both colon and '='.
 
 ```
-# Our log dir
-# We want to process files in this directory, but they MUST NOT
-# be modified or deleted, so we add .protect to the Dir()-expression
+Dict.setStr("a : b").setStr("c=d")
+/d
+d.get("a")
+<String>
+b
+```
+
+To process a property file, assuming commented lines start with '#', we can do
+this:
+
+```
+# Read property file
 # --
-	Dir("/home/roar/logs").protect
-/LogDir
+	P(1) =>propFile
+	Dict =>d
+		propFile.read->line
+		reject(line.trim.startsWith("#"))
+		assert(line.contains(":") || line.contains("="))
+		d.setStr(line)
+	|
+	d
+/GetProps
 ```
 
-Now, if we either interactively or via another function do something like this, then it 
-fails with an error:
+## Dict.get with default value
+
+
+The Dict.get() method takes an optional default-value which is returned if no value
+associated with the name, but in that case the default value is 
+*also stored* in the
+dictionary.
 
 ```
-LogDir.files->f f.delete
+data=Dict
+data.get("a",3)  # returns 3
+data.keys        # returns list with "a"
+data.get("a",5)  # returns 3 as it was set above
 ```
 
-That's because the Dir object returned by the call to LogDir, is marked as protected, and
-all File objects created by calling the files() function of that object, also get protected,
-and as a consequence trying to delete these files fails.
-
-
-
-
-
-
-
-
-
-
-# Binary type
-
-
-Used in connection with encryption etc. Can be created from strings, or represent
-the content of a file.
-
-```
-"password".getBytes("UTF-8")
-<Binary>
-0x..
-```
-
-Check the Std.Util object, which contains functions that create objects Encrypt and Decrypt.
-
-
-# Produce columns with report()
-
-
-Using report() instead of out() lets us produce as output a list of strings,
-where multiple parameters to report() is formatted into columns. Example:
-
-```
-Dir.files->f report(f.name, f.length)
-```
-
-
-# Hiding helper functions  
-
-
-In many cases, we need to create helper functions, which should not be visible as part
-of the script interface, as seen from other scripts, or when just entering '?'.
-
-This is done by defining the function as follows:
-
-```
-23
-//SomeConstant
-```
-
-The '?' command omits these local functions, for a cleaner summary of the main functions
-of a script. To see all functions, type '??'. The local functions are
-then prefixed by a single '/' slash.
-
-
-When inspecting
-script from outside via the "?ScriptName:" functionality, the local functions are
-also not displayed, while using "??ScriptName:" includes them.
-
-
-Also note, that "local" functions are not private in the Java sense, and are fulle callable
-from the outside. Marking functions as local is all about filtering what is shown on the
-single "?" command.
-
-
-
-
-
-# Nested loops
-
-
-Loops are implemented using the "for each" functionality of "-> var". Loops may well be nested.
-
-```
-List(1,2,3)->x List(1,2,3)->y  out(x*y)
-<List>
-0: 1
-1: 2
-2: 3
-3: 2
-4: 4
-5: 6
-6: 3
-7: 6
-8: 9
-```
-
-In this case, the body of each loop is all code following the "-> var"
-construct. But this can be changed using the "pipe" symbol, which "closes" all loops.
-
-
-
-# Code spaces - "pipes"
-
-
-The body of any loop is the rest of the code of the function, or until a "pipe" symbol
-is found. The pipe symbol ("|") partitions code into a sequence of
-*code spaces*. Loops are limited within single code spaces, so the "pipe"
-effectively is an end marker for all current loops.
-
-
-The way a "pipe" works, is to wait for any current loops to terminate, then take the
-return value from that code space and putting it onto the stack for the next loop
-space to work with (or do something else). Example:
-
-```
-Dir.files->f out(f.length) | =>sizes sizes.sum
-```
-
-This single line of code first contains a loop, which outputs a list of integers for
-the sizes of all files in the current directory. Then the "pipe" symbol terminates that
-code space, and creates a new one, where we pick the result from the previous loop
-space off the stack and assigns it to a local variable. We then apply the sum() function to it.
-
-
-To save us some typing, the special expression "_" (underscore) pops the topmost value off
-the stack.
-
-```
-Dir.files->f out(f.length) | _.sum
-```
-
-As we see from the above code, code spaces don't 
-*need* to contain loops. The
-following is perfectly legal, although a little silly.
-
-```
-2+3 | | | | =>x x | =>y y | _ _ _ |
-```
-
-It returns 5.
-
-## Result value from a code space
-
-
-All function bodies in CFT consist of one or more 
-*code spaces*. The return value
-from the function is the result from the last code space.
-
-
-### Code space result value
-
-
-If a code space contains loop statements, the result value is a list of data generated
-via calls to out() or report() statements. If no actual iterations take place, or
-filtering with assert(), reject() or break() means no data is generated via out() or report(),
-then the result list is empty.
-
-### Otherwise ...
-
-
-A code space that doesn't contain loop statements, has as its result value the topmost
-element on the stack after all code has executed. If there is no value on the stack,
-the return value is 
-*null*.
-
-# Function parameters
-
-
-Custom functions can take parameters. This is done using the P() expression, which
-identifies the parameter by position. Note that 
-*parameter position is 1-based*.
-
-
-```
-P(1)=>a P(2)=>b a+b
-```
-
-This is a valid function, but entering it *interactively* fails, because it is immediately
-parsed and executed, and there are no corresponding parameter values. To overcome this, 
-the P() expressions take an optional second parameter, which is a default value (or any
-expression). 
-
-
-The default value parameter to P() is important for several reasons.
-
-
-1. Allows the function code to execute while being developed interactively
-2. Allows for default values when function is called without parameters, or when called with null-values
-3. May act as documentation in the source
-4, Provides an elegant way of making functions interactive and non-interactive at the same time,
-as the default expression is evaluated only when parameter is not given (or is null),
-and may then ask the user to input the value.
-
-
-
-Above example again, now with default values for parameters:
-
-```
-P(1,1)=>a P(2,2)=>b a+b
-<int>
-3
-/f
-f(5,10)
-<int>
-15
-```
-
-
-
-# User input
-
-
-CFT contains the following for asking the user to enter input:
-
-```
-value = Input("Enter value").get
-value = readLine("Enter value")
-```
-
-The difference is that Input remembers unique input values, and lets the user
-press enter to use the last (current) value, or enter colon to select between previous
-(history) values. It also has functions to manipulate the history and the "current" value, or
-press colon ":" to select a previous value.
-
-
-The readLine() is much simpler, and allows for empty input, as Enter
-doesn't mean "last value" as it does for Input.
-
-
-The optional default value parameter to the P() expression for grabbing parameters to
-functions, can be used to produce functions that ask for missing values.
-
-```
-P(1,Input("Enter value").get) =>value ...
-```
 
 
 
@@ -1102,26 +901,246 @@ dictionary or something.
 
 
 
-# Lazy evaluation
-
-### Lazy if
+# Code spaces - "pipes"
 
 
-The if-expression uses lazy evaluation, which means that only the selected
-value expression (if any) gets evaluated. This is the same as every other
-language.
-
-### Lazy AND, OR - &amp;&amp; ||
-
-
-Boolean expressions with logical AND and OR, are lazy, again as in
-every other language.
-
-### Lazy P(N,defaultExpr)
+The body of any loop is the rest of the code of the function, or until a "pipe" symbol
+is found. The pipe symbol ("|") partitions code into a sequence of
+*code spaces*. Loops are limited within single code spaces, so the "pipe"
+effectively is an end marker for all current loops.
 
 
-The P() expression to access function parameters only evaluates the default
-expression if function parameter N has no value or null-value.
+The way a "pipe" works, is to wait for any current loops to terminate, then take the
+return value from that code space and putting it onto the stack for the next loop
+space to work with (or do something else). Example:
+
+```
+Dir.files->f out(f.length) | =>sizes sizes.sum
+```
+
+This single line of code first contains a loop, which outputs a list of integers for
+the sizes of all files in the current directory. Then the "pipe" symbol terminates that
+code space, and creates a new one, where we pick the result from the previous loop
+space off the stack and assigns it to a local variable. We then apply the sum() function to it.
+
+
+To save us some typing, the special expression "_" (underscore) pops the topmost value off
+the stack.
+
+```
+Dir.files->f out(f.length) | _.sum
+```
+
+As we see from the above code, code spaces don't 
+*need* to contain loops. The
+following is perfectly legal, although a little silly.
+
+```
+2+3 | | | | =>x x | =>y y | _ _ _ |
+```
+
+It returns 5.
+
+## Result value from a code space
+
+
+All function bodies in CFT consist of one or more 
+*code spaces*. The return value
+from the function is the result from the last code space.
+
+
+### Code space result value
+
+
+If a code space contains loop statements, the result value is a list of data generated
+via calls to out() or report() statements. If no actual iterations take place, or
+filtering with assert(), reject() or break() means no data is generated via out() or report(),
+then the result list is empty.
+
+### Otherwise ...
+
+
+A code space that doesn't contain loop statements, has as its result value the topmost
+element on the stack after all code has executed. If there is no value on the stack,
+the return value is 
+*null*.
+
+
+## Nested loops
+
+
+Loops are implemented using the "for each" functionality of "-> var". Loops may well be nested.
+
+```
+List(1,2,3)->x List(1,2,3)->y  out(x*y)
+<List>
+0: 1
+1: 2
+2: 3
+3: 2
+4: 4
+5: 6
+6: 3
+7: 6
+8: 9
+```
+
+In this case, the body of each loop is all code following the "-> var"
+construct. But this can be changed using the "pipe" symbol, which "closes" all loops.
+
+
+The only thing that terminates loops are end-of-scope, which includes the PIPE symbol.
+
+
+
+
+# Function parameters
+
+
+Custom functions can take parameters. This is done using the P() expression, which
+identifies the parameter by position. Note that 
+*parameter position is 1-based*.
+
+
+```
+P(1)=>a P(2)=>b a+b
+```
+
+This is a valid function, but entering it *interactively* fails, because it is immediately
+parsed and executed, and there are no corresponding parameter values. To overcome this, 
+the P() expressions take an optional second parameter, which is a default value (or any
+expression). 
+
+
+The default value parameter to P() is important for several reasons.
+
+
+1. Allows the function code to execute while being developed interactively
+2. Allows for default values when function is called without parameters, or when called with null-values
+3. May act as documentation in the source
+4, Provides an elegant way of making functions interactive and non-interactive at the same time,
+as the default expression is evaluated only when parameter is not given (or is null),
+and may then ask the user to input the value.
+
+
+
+Above example again, now with default values for parameters:
+
+```
+P(1,1)=>a P(2,2)=>b a+b
+<int>
+3
+/f
+f(5,10)
+<int>
+15
+```
+
+
+
+# User input
+
+
+CFT contains the following for asking the user to enter input:
+
+```
+value = Input("Enter value").get
+value = readLine("Enter value")
+```
+
+The difference is that Input remembers unique input values, and lets the user
+press enter to use the last (current) value, or enter colon to select between previous
+(history) values. It also has functions to manipulate the history and the "current" value, or
+press colon ":" to select a previous value.
+
+
+The readLine() is much simpler, and allows for empty input, as Enter
+doesn't mean "last value" as it does for Input.
+
+
+The optional default value parameter to the P() expression for grabbing parameters to
+functions, can be used to produce functions that ask for missing values.
+
+```
+P(1,Input("Enter value").get) =>value ...
+```
+
+
+
+## Paste multiple liens
+
+
+If you've got some text in the copy-paste buffer that you want to work with, the
+readLines() global functions can be used. It takes one parameter, which is an end-marker, which must
+occur alone on a line, to mark the end.
+
+
+The readLines() function returns a list of strings, which you can turn into code and save under
+some function name, using synthesis.
+
+```
+readLines(".")
+(paste or enter text, then enter end-marker manually)
+.
+<List>
+0: ...
+1: ...
+:syn
+/Data
+...
+```
+
+The ":syn" command synthesizes the List object, which means it generates code for it. We can then assign
+a name, now  for it, which when run, reproduces the list of lines that were pasted.
+
+
+
+
+
+
+# The "protect" mechanism
+
+Working in production environments, there will be directories and files that *must not* be changed
+or deleted. 
+
+Dir and File objects in CFT can have a "protect" mark set, which blocks destructive operations
+such as appending data to files, delete, rename, move etc.
+
+The protect mark is inherited by all Dir and File objects derived from a protected Dir or File. 
+
+Example:
+
+```
+# Our log dir
+# We want to process files in this directory, but they MUST NOT
+# be modified or deleted, so we add .protect to the Dir()-expression
+# --
+	Dir("/home/roar/logs").protect
+/LogDir
+```
+
+Now, if we either interactively or via another function do something like this, then it 
+fails with an error:
+
+```
+LogDir.files->f f.delete
+```
+
+That's because the Dir object returned by the call to LogDir, is marked as protected, and
+all File objects created by calling the files() function of that object, also get protected,
+and as a consequence trying to delete these files fails.
+
+
+
+# Produce columns with report()
+
+
+Using report() instead of out() lets us produce as output a list of strings,
+where multiple parameters to report() is formatted into columns. Example:
+
+```
+Dir.files->f report(f.name, f.length)
+```
 
 
 
@@ -1315,6 +1334,51 @@ copy it to the target host, as follows (in Linux shell).
 ssh-keygen -t rsa
 ssh-copy-id user@host
 ```
+
+
+# Environment variables
+
+
+Available via Sys.environment() function.
+
+```
+env=Sys.environment
+Util:ShowDict(env)
+```
+
+
+
+
+# Hiding helper functions  
+
+
+In many cases, we need to create helper functions, which should not be visible as part
+of the script interface, as seen from other scripts, or when just entering '?'.
+
+This is done by defining the function as follows:
+
+```
+23
+//SomeConstant
+```
+
+The '?' command omits these local functions, for a cleaner summary of the main functions
+of a script. To see all functions, type '??'. The local functions are
+then prefixed by a single '/' slash.
+
+
+When inspecting
+script from outside via the "?ScriptName:" functionality, the local functions are
+also not displayed, while using "??ScriptName:" includes them.
+
+
+Also note, that "local" functions are not private in the Java sense, and are fulle callable
+from the outside. Marking functions as local is all about filtering what is shown on the
+single "?" command.
+
+
+
+
 
 
 
@@ -1545,6 +1609,7 @@ Sequence(
 ```
 
 
+
 # Text processing
 
 
@@ -1676,6 +1741,363 @@ The advantage of this notation over that of "here"-documents, is that it allows 
 indentation, for greatly improved readability in script code, and that it's easy to
 add conditional blocks, while the "here"-document means we can paste original text
 directly into the script code.
+
+
+
+
+# The CFT database
+
+
+CFT implements its own primitive database, as found in Std.Db.Db2, and which is usually
+interfaced via the Db2 script.
+
+```
+Db2:Set("myCollection", "field", "test")
+```
+
+The Db2 persists data to file, and handles all values that can be synthesized to code.
+
+
+Also there is a Db2Obj script, which saves data objects identified by UUID's, which are
+made by calling the Std.Db.UUID function.
+
+## Collections
+
+
+Apart from using static strings as collection names, another common practice is
+to use the scriptId, which is a function of the Sys object:
+
+```
+Db2:Set(Sys.scriptId,"name","value")
+```
+
+Sys.scriptId is better than Sys.scriptName, since there may be multiple scripts with the
+same name (in different directories).
+
+## Std.Db.Db2 vs Db2 script?
+
+
+The Db2 script uses the Std.Db.Db2 object. The difference is that an object is implemented
+in Java, while the script is code that runs in the interpreter. See separate section on "Objects vs Scripts".
+
+## Synchronization
+
+
+Calls to the Db2 database are thread safe, via a Db2 lock file per collection,
+to prevent parallel updates, or partial reads etc.
+
+
+In order to create transactions consisting of multiple Db2 calls, the Std.Db object
+contains support for named locks. Example:
+
+```
+Std.Db.obtainLock("Unique Lock Name",5000) ## 5000 = wait max 5 seconds before failing
+Db2:Get(Sys.scriptId,"someValue") => data
+# (modify data)
+Db2:Set(Sys.scriptId,"someValue",data)
+Std.Db.releaseLock("Unique lock name")
+```
+
+
+
+
+# Error handling
+
+
+Exception handling in CFT is split into two parts, reflecting two types of
+situations:
+
+
+
+- CFT logical or data errors, called *soft errors*
+
+- General errors, stemming from underlying Java code, network situations etc, called *hard errors*
+
+
+## Soft errors
+
+
+Soft errors are created by calling the error() function.
+
+
+They can be specifically
+caught with tryCatchSoft(), which returns a Dict containing either:
+
+```
+ok: true
+result: ANY
+--- or ---
+ok: false
+msg: string
+```
+
+Hard errors propagate right through tryCatchSoft().
+
+## Hard errors
+
+
+Hard errors are all kind of error situations arising from the Java code running CFT.
+
+
+The tryCatch() expression catches both hard and soft errors, and returns a Dict containing
+
+```
+ok: true
+result: ANY
+--- or --
+ok: false
+msg: string
+stack: List of string
+```
+
+An example of a hard error is trying to access a variable or function that doesn't
+exist.
+
+## Predicate calls
+
+
+Example: to decide if a string is an integer, without
+resorting to either creating a built-in predicate function like .isInt, or even
+using regular expression matching, there is the 
+*predicate call* functionality,
+where one calls a function in a special way, resulting in a boolean value that tells
+if the call was ok or not.
+
+
+All dotted calls are made into predicate calls, by adding a '?' questionmark between the dot
+and the function name.
+```
+"sdf".?parseInt
+<boolean>
+false
+
+"123".?parseInt
+<boolean>
+true
+```
+
+Beware of typing errors. Mis-spelling a function still just causes a predicate call to
+return false.
+
+
+
+
+
+
+
+# Debugging
+
+
+After editing a script, normally you need to test all functions even for basic syntax
+errors, as CFT functions are parsed only when run.
+
+## @lint
+
+
+A simple lint function is available in Sys.lint. It checks that all functions in current
+script parses ok. It is mostly invoked using a shortcut:
+
+```
+@lint
+```
+
+## addDebug()
+
+
+The global addDebug() function takes some string, and creates a log line that also contains
+the source location, and adds this to the current stack frame of the CFT call stack.
+
+
+This means no output is displayed until something goes wrong, and the CFT stack trace
+is displayed.
+
+
+## Sys.getCallHistory
+
+This function returns the call history as a list of text lines, which can be logged or displayed.
+
+
+## setBreakPoint(str)
+
+This statement stops execution, and shows call history, and asks if we want to abort ("y") or
+not (Enter).
+
+
+
+
+# Multitasking in CFT
+
+
+CFT offers the ability to run multiple processes of CFT code, via the SpawnProcess() expression.
+
+(The shell syntax "& expr" uses the same mechanism)
+
+
+It takes two or three parameters, a context dictionary and an expression, with
+an optional lambda or closure, which if defined gets called with the Process object as parameter
+whenever there is new output or the process has terminated.
+
+
+The named values from the
+context dictionary become local variables when the expression is executed, which takes
+place in a separate process.
+
+
+The code runs in a virtualized environment. Output is buffered inside the Process object, and
+if the code requires input, it will block, until we supply input lines via the Process
+object.
+
+## Key concepts
+
+
+CFT objects (as implemented in Java) are generally not thread-safe, but it turns out that they don't
+need to be, as a running CFT thread has no global state. There are no global variables, only in-function
+local variables.
+
+
+The only way a CFT thread can maintain persistent (global) state, is using external storage,
+usually via synthesis and eval, such as implemented by the Db2 internal data storage. What this means
+is that data written to Db2 is converted to code. Reading the data back from the database
+means running that code (with eval), and get a newly created data structure.
+
+
+Logically, this corresponds to 
+*message passing*, in that the writer (sender) and reader (receiver)
+of data are loosely coupled, and that any receivers will always create local copies of the data.
+
+
+Race conditions is still possible with regards to external elements such
+as the file system, FTP servers, other databases, etc.
+
+### Intended use
+
+
+It should be added that the intended use of spawning processes in CFT is for parallelizing
+multiple possibly time consuming jobs, each operating invididually, then collecting the
+results. Typical examples are mass updating tens of virtual machines, as well as getting
+various stats from sets of hosts.
+
+
+The optional third parameter (lambdaOrClosure) is a way of processing both output via
+the process stdio object (which is virtual), and capturing the result value when
+the process has terminated.
+
+## The Process
+
+
+The Process object represents a separately running thread, executing some CFT expression, in a
+separate environment. Its standard I/O is virtualized by the Process object.
+
+
+Listing Process functions:
+
+```
+SpawnProcess(Dict,1) help
+# close() - close stdin for process
+# data() - returns the (original) context dictionary
+# exitValue() - returns exit value or null if still running
+# isAlive() - true if process running
+# isDone() - true if process completed running
+# output() - get buffered output lines
+# sendLine(line) - send input line to process
+# wait() - wait for process to terminate - returns self
+```
+
+## Flow control
+
+If the potential number of processes may become very big, we may need to limit
+the number of running processes at any time. 
+
+This is done via a function in the Util script, that returns a dictionary
+*object* which we use as follows. It is a dictionary, from before when CFT
+had *classes*. 
+
+The names "Lxxx" are used to help indicate that they contain lambdas (though 
+strictly they are converted to closures as they are stored in the dictionary).
+
+```
+# -- Create monitor, decide max parallel processes
+mon=Util:ProcessMonitor
+limit=4
+someData->data
+
+	# About to spawn new process using data
+	mon.Lwait (limit)
+	proc=SpawnProcess(SymDict(data), ...)
+	mon.Ladd(proc)
+|
+
+# Wait for all processes to complete
+mon.Lwait
+
+# Inspect result from the processes
+mon.list->process
+	...
+|
+```
+
+The mon.Lwait lambda waits until number of running processes comes below the limit,
+before returning.
+
+
+See separate sections on closures and objects.
+
+
+
+
+
+
+
+
+
+
+
+
+# Binary type
+
+
+Used in connection with encryption etc. Can be created from strings, or represent
+the content of a file.
+
+```
+"password".getBytes("UTF-8")
+<Binary>
+0x..
+```
+
+Check the Std.Util object, which contains functions that create objects Encrypt and Decrypt.
+
+
+
+
+
+# Lazy evaluation
+
+### Lazy if
+
+
+The if-expression uses lazy evaluation, which means that only the selected
+value expression (if any) gets evaluated. This is the same as every other
+language.
+
+### Lazy AND, OR - &amp;&amp; ||
+
+
+Boolean expressions with logical AND and OR, are lazy, again as in
+every other language.
+
+### Lazy P(N,defaultExpr)
+
+
+The P() expression to access function parameters only evaluates the default
+expression if function parameter N has no value or null-value.
+
+
+
+
+
+
+
 
 
 
@@ -1912,80 +2334,6 @@ Created DDExample2 which uses polygon drawing Brush of DD.World.
 
 
 
-# Environment variables
-
-
-Available via Sys.environment() function.
-
-
-
-# Debugging
-
-
-After editing a script, normally you need to test all functions even for basic syntax
-errors, as CFT functions are parsed only when run.
-
-## @lint
-
-
-A simple lint function is available in Sys.lint. It checks that all functions in current
-script parses ok. It is mostly invoked using a shortcut:
-
-```
-@lint
-```
-
-## addDebug()
-
-
-The global addDebug() function takes some string, and creates a log line that also contains
-the source location, and adds this to the current stack frame of the CFT call stack.
-
-
-This means no output is displayed until something goes wrong, and the CFT stack trace
-is displayed.
-
-
-## Sys.getCallHistory
-
-This function returns the call history as a list of text lines, which can be logged or displayed.
-
-
-## setBreakPoint(str)
-
-This statement stops execution, and shows call history, and asks if we want to abort ("y") or
-not (Enter).
-
-
-
-
-
-# Working with pasted text lines from stdin
-
-
-If you've got some text in the copy-paste buffer that you want to work with, the
-readLines() global functions can be used. It takes one parameter, which is an end-marker, which must
-occur alone on a line, to mark the end.
-
-
-The readLines() function returns a list of strings, which you can turn into code and save under
-some function name, using synthesis.
-
-```
-readLines("XXX")
-(paste or enter text, then enter end-marker manually)
-XXX
-<List>
-0: ...
-1: ...
-:syn
-/someName
-...
-```
-
-The ":syn" command synthesizes the List object, and we then create a function "SomeName" for it. If we save the
-script, we can now run SomeName to produce the list of lines pasted or entered.
-
 # Differing between Windows and Linux
 
 
@@ -2000,33 +2348,6 @@ false
 
 
 
-# Predicate calls
-
-
-Example: to decide if a string is an integer, without
-resorting to either creating a built-in predicate function like .isInt, or even
-using regular expression matching, there is the 
-*predicate call* functionality,
-where one calls a function in a special way, resulting in a boolean value that tells
-if the call was ok or not.
-
-
-All dotted calls are made into predicate calls, by adding a '?' questionmark between the dot
-and the function name.
-```
-"sdf".?parseInt
-<boolean>
-false
-
-"123".?parseInt
-<boolean>
-true
-```
-
-Beware of typing errors. Mis-spelling a function still just causes a predicate call to
-return false.
-
-
 
 
 # The onLoad function
@@ -2037,58 +2358,6 @@ called onLoad, which is called every time the script file is loaded or reloaded.
 
 
 
-
-# Error handling
-
-
-Exception handling in CFT is split into two parts, reflecting two types of
-situations:
-
-
-
-- CFT logical or data errors, called *soft errors*
-
-- General errors, stemming from underlying Java code, network situations etc, called *hard errors*
-
-
-## Soft errors
-
-
-Soft errors are created by calling the error() function.
-
-
-They can be specifically
-caught with tryCatchSoft(), which returns a Dict containing either:
-
-```
-ok: true
-result: ANY
---- or ---
-ok: false
-msg: string
-```
-
-Hard errors propagate right through tryCatchSoft().
-
-## Hard errors
-
-
-Hard errors are all kind of error situations arising from the Java code running CFT.
-
-
-The tryCatch() expression catches both hard and soft errors, and returns a Dict containing
-
-```
-ok: true
-result: ANY
---- or --
-ok: false
-msg: string
-stack: List of string
-```
-
-An example of a hard error is trying to access a variable or function that doesn't
-exist.
 
 
 
@@ -2422,77 +2691,9 @@ IntContainer.set("test")  # Fails with error, expects int
 ```
 
 
-# Dict set with strings
 
 
-Reading name-value assignments from a property file or similar, is best done via the .setStr()
-function on the Dict object. It strips whitespace and accepts both colon and '='.
 
-```
-Dict.setStr("a : b").setStr("c=d")
-/d
-d.get("a")
-<String>
-b
-```
-
-To process a property file, assuming commented lines start with '#', we can do
-this:
-
-```
-# Read property file
-# --
-	P(1) =>propFile
-	Dict =>d
-		propFile.read->line
-		reject(line.trim.startsWith("#"))
-		assert(line.contains(":") || line.contains("="))
-		d.setStr(line)
-	|
-	d
-/GetProps
-```
-
-# Dict.get with default value
-
-
-The Dict.get() method takes an optional default-value which is returned if no value
-associated with the name, but in that case the default value is 
-*also stored* in the
-dictionary.
-
-```
-data=Dict
-data.get("a",3)  # returns 3
-data.keys        # returns list with "a"
-data.get("a",5)  # returns 3 as it was set above
-```
-# Dict.ident=Expr
-
-Extended parser so that we don't have to use Dict.set() for values with a name that are valid identifiers:
-
-```
-data=Dict
-data.name="test"
-```
-
-The return value from this assignment is the Dict object. Multiple assignments can be chained using
-the underscore ("_") global function, which returns the value on the data stack:
-
-```
-Dict.name="test" _.role="manager" _.age=40 =>
- data
-```
-# List.nth() negative indexes
-
-
-Using negative indexes to List.nth() counts from the end of the list. Using value -1 returns the
-last element, -2 the second last, and so on.
-
-```
-List(1,2,3,4).nth(-1)
-<int>
-```
 
 
 # Function parameters ...
@@ -2583,62 +2784,6 @@ This can be used to save arbitrarily complex structures, as long as they are syn
 
 
 
-# The CFT database
-
-
-CFT implements its own primitive database, as found in Std.Db.Db2, and which is usually
-interfaced via the Db2 script.
-
-```
-Db2:Set("myCollection", "field", "test")
-```
-
-The Db2 persists data to file, and handles all values that can be synthesized to code.
-
-
-Also there is a Db2Obj script, which saves data objects identified by UUID's, which are
-made by calling the Std.Db.UUID function.
-
-## Collections
-
-
-Apart from using static strings as collection names, another common practice is
-to use the scriptId, which is a function of the Sys object:
-
-```
-Db2:Set(Sys.scriptId,"name","value")
-```
-
-Sys.scriptId is better than Sys.scriptName, since there may be multiple scripts with the
-same name (in different directories).
-
-## Std.Db.Db2 vs Db2 script?
-
-
-The Db2 script uses the Std.Db.Db2 object. The difference is that an object is implemented
-in Java, while the script is code that runs in the interpreter. See separate section on "Objects vs Scripts".
-
-## Synchronization
-
-
-Calls to the Db2 database are thread safe, via a Db2 lock file per collection,
-to prevent parallel updates, or partial reads etc.
-
-
-In order to create transactions consisting of multiple Db2 calls, the Std.Db object
-contains support for named locks. Example:
-
-```
-Std.Db.obtainLock("Unique Lock Name",5000) ## 5000 = wait max 5 seconds before failing
-Db2:Get(Sys.scriptId,"someValue") => data
-# (modify data)
-Db2:Set(Sys.scriptId,"someValue",data)
-Std.Db.releaseLock("Unique lock name")
-```
-
-
-
-
 # onLoad functions
 
 
@@ -2648,263 +2793,6 @@ and (automatically) reloaded in GNT. Nice for clearing defaults, when new sessio
 
 Each individual session is identified by a session UUID, which may be stored in the
 database, so the onLoad can detect this and reset state in the database.
-
-
-
-# Multitasking in CFT
-
-
-CFT offers the ability to run multiple processes of CFT code, via the SpawnProcess() expression.
-
-
-It takes two or three parameters, a context dictionary and an expression, with
-an optional lambda or closure, which if defined gets called with the Process object as parameter
-whenever there is new output or the process has terminated.
-
-
-The named values from the
-context dictionary become local variables when the expression is executed, which takes
-place in a separate process.
-
-
-The code runs in a virtualized environment. Output is buffered inside the Process object, and
-if the code requires input, it will block, until we supply input lines via the Process
-object.
-
-## Key concepts
-
-
-CFT objects (as implemented in Java) are generally not thread-safe, but it turns out that they don't
-need to be, as a running CFT thread has no global state. There are no global variables, only in-function
-local variables.
-
-
-The only way a CFT thread can maintain persistent (global) state, is using external storage,
-usually via synthesis and eval, such as implemented by the Db2 internal data storage. What this means
-is that data written to Db2 is converted to code. Reading the data back from the database
-means running that code (with eval), and get a newly created data structure.
-
-
-Logically, this corresponds to 
-*message passing*, in that the writer (sender) and reader (receiver)
-of data are loosely coupled, and that any receivers will always create local copies of the data.
-
-
-Race conditions is still possible with regards to external elements such
-as the file system, FTP servers, other databases, etc.
-
-### Intended use
-
-
-It should be added that the intended use of spawning processes in CFT is for parallelizing
-multiple possibly time consuming jobs, each operating invididually, then collecting the
-results. Typical examples are mass updating tens of virtual machines, as well as getting
-various stats from sets of hosts.
-
-
-The optional third parameter (lambdaOrClosure) is a way of processing both output via
-the process stdio object (which is virtual), and capturing the result value when
-the process has terminated.
-
-## The Process
-
-
-The Process object represents a separately running thread, executing some CFT expression, in a
-separate environment. Its standard I/O is virtualized by the Process object.
-
-
-Listing Process functions:
-
-```
-SpawnProcess(Dict,1) help
-# close() - close stdin for process
-# data() - returns the (original) context dictionary
-# exitValue() - returns exit value or null if still running
-# isAlive() - true if process running
-# isDone() - true if process completed running
-# output() - get buffered output lines
-# sendLine(line) - send input line to process
-# wait() - wait for process to terminate - returns self
-```
-## Example: pinging a list of hosts
-
-
-The following example show how we can perform system monitoring efficiently using
-SpawnProcess.
-
-
-This example is about pinging a set of servers, to see which are up. We start by creating
-a function for this, and testing it manually.
-
-### Create and test regular ping function
-
-
-It is okay to print out a lot of stuff, as all of that will be collected when
-calling function inside a Process. We will log that to the database if
-function returns false.
-
-```
-# Ping host, return boolean (true if ok)
-# --
-P(1)=>host
-	println("Pinging host " + host)
-	Lib:run(List("ping","-c","1",host), List, true) => res
-	if (res.exitCode==0) {
-		true
-	} else {
-		println("FAILED with exitCode=" + res.exitCode)
-		Inner {
-			res.stdout->line println(line) |
-			res.stderr->line println("#ERR# " + line) |
-		}
-		false
-	}
-/ping
-```
-
-After testing the function, we go on to create the function that manages the processes.
-
-### Management function, with logging via Db2Obj database script
-
-
-We now create a function Hosts, which returns a list of the hosts to check, and then
-the function CheckPing, which iterates over these.
-
-```
-"s01.s s02.s s03.s s04.s s05.s s06.s s07.s".split
-/Hosts
-
-# Delete previous ping stats from database, then run ping on all
-# hosts in parallel, collecting results and store in database.
-# --
-	COLLECTION="stats"  ## Database collection name
-
-	# Clear out results from earlier runs, if any
-	# --
-	Db2Obj:DeleteObjects(COLLECTION, Lambda{P(1).value.op=="ping"})
-
-	# Iterate over hosts
-	# --
-	Hosts->host
-		# Start individual processes, each calling the ping function with a host
-		# --
-		data=Dict.set("host",host)
-		proc=SpawnProcess(data,ping(host))
-		out(proc)
-	| _->proc
-
-		# Wait for each process in turn, and collect results
-		# --
-		proc.wait
-		dbObj=Dict
-			.set("op","ping")
-			.set("host", proc.data.host)  # the data dict from SpawnProcess
-			.set("ok",proc.exitValue)
-		if (proc.exitValue==false) {
-			# failed
-			dbObj.set("output", proc.output)
-		}
-
-		# Log everything to database
-		# --
-		Db2Obj:AddObject(COLLECTION, dbObj)
-/CheckPing
-```
-
-The CheckPing function iterates over the hosts, and for each calls SpawnProcess, with the
-host stored in the context data Dict object. This generates a Process object, which is
-is sent on with the out() statement.
-
-
-After the PIPE we now are working with a list of Process objects, which we iterate over,
-and for each, first wait for it finish, then pick values from it, building a dbObj Dict
-with relevant information. THe field "op"="ping" is what is used to identify these
-data, for the initial call to DbObj:DeleteObjects() where we delete any previous stats,
-from earlier runs.
-
-### Checking results (in database)
-
-
-After this has run, we look at the data in the "stats" collection:
-
-```
-Db2Obj:ShowFields("stats",List("host","ok"))
-<List>
-0: 2020-11-05 22:48:44 | s01.s | true
-1: 2020-11-05 22:48:44 | s02.s | true
-2: 2020-11-05 22:48:44 | s03.s | true
-3: 2020-11-05 22:48:47 | s04.s | false
-4: 2020-11-05 22:48:47 | s05.s | true
-5: 2020-11-05 22:48:47 | s06.s | true
-6: 2020-11-05 22:48:47 | s07.s | false
-```
-
-Here we list fields "host" and "ok" from the objects. We see that hosts "s04.s" and "s07.s"
-failed. We now check the output log for "s04.s".
-
-```
-Db2Obj:FindObjects("stats",Lambda{P(1).value.host=="s04.s"}).first.value.output
-<List>
-0: Pinging host s04.s
-1: FAILED with exitCode=1
-2: PING s04.s (10.0.11.41) 56(84) bytes of data.
-3: From 10.0.0.84 (10.0.0.84) icmp_seq=1 Destination Host Unreachable
-4:
-5: --- s04.s ping statistics ---
-6: 1 packets transmitted, 0 received, +1 errors, 100% packet loss, time 0ms
-7:
-```
-## Advantages
-
-
-The run time of this code should be that of the host that takes the longest
-time to ping (or fail to ping).
-
-
-Collecting stdout from the Process means that the code that does the work (like
-our ping() function) can just print progress and status data via println(), which makes
-the code easy to test separately.
-
-
-Processes also offer full protection from exceptions of all kinds, as they
-are caught and listed in full inside the Process.
-
-
-## Flow control
-
-
-In some cases, the number of processes can be huge, and we may need to limit the
-number of active processes. This is done via a function in the Util script, that
-returns an 
-*object* which we use as follows. The names "Lxxx" are used to
-help indicate that they contain lambdas (though strictly they are closures).
-
-```
-# -- Create monitor, decide max parallel processes
-mon=Util:ProcessMonitor
-limit=4
-someData->data
-
-	# About to spawn new process using data
-	mon.Lwait (limit)
-	proc=SpawnProcess(SymDict(data), ...)
-	mon.Ladd(proc)
-|
-
-# Wait for all processes to complete
-mon.Lwait
-
-# Inspect result from the processes
-mon.list->process
-	...
-|
-```
-
-The mon.Lwait lambda waits until number of running processes comes below the limit,
-before returning.
-
-
-See separate sections on closures and objects.
 
 
 

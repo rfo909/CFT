@@ -37,21 +37,13 @@
         Int(), Str() and Float()
   |  List filtering with Lambda
   |  Removing items
+  |  nth() negative indexes
 * Dictionaries
   |  Dictionary dotted syntax
   |  SymDict
   |  Dictionary name
-* The "protect" mechanism
-* Binary type
-* Produce columns with report()
-* Hiding helper functions  
-* Nested loops
-* Code spaces - "pipes"
-  |  Result value from a code space
-        Code space result value
-        Otherwise ...
-* Function parameters
-* User input
+  |  Dict set with strings
+  |  Dict.get with default value
 * Block expressions
   |  Local blocks
   |  Inner blocks
@@ -66,10 +58,16 @@
   |  Expressions are statements ...
   |  Blocks are expressions ...
   |  if-ladders
-* Lazy evaluation
-        Lazy if
-        Lazy AND, OR - &amp;&amp; ||
-        Lazy P(N,defaultExpr)
+* Code spaces - "pipes"
+  |  Result value from a code space
+        Code space result value
+        Otherwise ...
+  |  Nested loops
+* Function parameters
+* User input
+  |  Paste multiple liens
+* The "protect" mechanism
+* Produce columns with report()
 * The error() function
 * Output to screen
 * Running external programs
@@ -83,6 +81,8 @@
   |  Work directory issues
   |  Doing ssh
         Side note: ssh without password
+* Environment variables
+* Hiding helper functions  
 * Synthesis
   |  Creating code from values
   |  Example using :syn
@@ -101,6 +101,29 @@
         Include blank lines
         Allowing comments
   |  Sequence() and raw strings
+* The CFT database
+  |  Collections
+  |  Std.Db.Db2 vs Db2 script?
+  |  Synchronization
+* Error handling
+  |  Soft errors
+  |  Hard errors
+  |  Predicate calls
+* Debugging
+  |  @lint
+  |  addDebug()
+  |  Sys.getCallHistory
+  |  setBreakPoint(str)
+* Multitasking in CFT
+  |  Key concepts
+        Intended use
+  |  The Process
+  |  Flow control
+* Binary type
+* Lazy evaluation
+        Lazy if
+        Lazy AND, OR - &amp;&amp; ||
+        Lazy P(N,defaultExpr)
 * Processing JSON
 * Processing XML
   |  Parsing XML
@@ -116,19 +139,8 @@
 * 2D library
   |  Spoked wheel (lines)
   |  Spoked wheel (polygon fill)
-* Environment variables
-* Debugging
-  |  @lint
-  |  addDebug()
-  |  Sys.getCallHistory
-  |  setBreakPoint(str)
-* Working with pasted text lines from stdin
 * Differing between Windows and Linux
-* Predicate calls
 * The onLoad function
-* Error handling
-  |  Soft errors
-  |  Hard errors
 * Get type of value
 * Closures and dictionary-objects
   |  Manual closure
@@ -143,30 +155,12 @@
 * Classes
   |  Class object types
   |  What a "/class" function does
-* Dict set with strings
-* Dict.get with default value
-* Dict.ident=Expr
-* List.nth() negative indexes
 * Function parameters ...
   |  Get parameters as List
   |  Get parameters as Dict
 * The general loop statement
 * Storing CFT data structures to file - syn() and eval()
-* The CFT database
-  |  Collections
-  |  Std.Db.Db2 vs Db2 script?
-  |  Synchronization
 * onLoad functions
-* Multitasking in CFT
-  |  Key concepts
-        Intended use
-  |  The Process
-  |  Example: pinging a list of hosts
-        Create and test regular ping function
-        Management function, with logging via Db2Obj database script
-        Checking results (in database)
-  |  Advantages
-  |  Flow control
 * Calling Java (experimental)
 * String .esc() and .unEsc()
   |  Escape codes
