@@ -40,11 +40,13 @@ Add, Commit and Push.
 /HomeDir
 
 
-# Create overview lines from Doc.md file
+# Create overview lines from *.md file
 # --
+	P(1) as File => file
+
     inCode=false
-    
-    HomeDir.sub("doc").file("Doc.md").protect.read->line
+   
+    file.read->line
         if (line.startsWith("```")) {
             inCode=!inCode
         }
@@ -57,13 +59,30 @@ Add, Commit and Push.
             .replace("#",  "*")
             =>str
         out(str)
-/Overview
+//Overview
+
+
+# Create summaries for *.md
+# --
+	Inner{
+		HomeDir.sub("doc").files("*.md")->file
+			result = file.dir.file(file.name.before(".")+".txt")
+			lines=Overview(file)
+			result.setWriteLF.create(lines)
+	}
+/CreateSummaries
+
+
+
+CreateSummaries
+/cs
+
 
 
 # Run git add
 # ---
 
-    HomeDir.sub("doc").file("Overview.txt").setWriteLF.create(Overview)
+	CreateSummaries
     
     # Run git
     HomeDir.run("git","add",".")

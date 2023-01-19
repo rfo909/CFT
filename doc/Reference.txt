@@ -1,0 +1,215 @@
+* CFT Reference
+* Using CFT as a shell
+  |  Combine with CFT function results
+  |  The ":N" syntax
+        Complex example
+  |  The "::" syntax
+  |  Symbols 
+        Diffing files example
+  |  Note on specials
+  |  Bang commands
+  |  Bang command parameters
+  |  Background jobs
+        Blocking on input?
+        Bring to foreground
+        Warning
+  |  Command history
+  |  The "shell" command
+  |  Terminal dimensions - the Term object
+        The @term shortcut
+        Line wrapping
+* Script files
+  |  Save
+  |  Load
+  |  Create new empty script
+  |  The @e shortcut
+  |  CFT.props - codeDirs
+  |  Calling functions in other scripts
+  |  Examining non-current scripts
+  |  Show all known scripts
+* Command line args
+* Shortcuts and colon commands
+* Lists
+  |  Addition
+  |  Subtraction
+  |  Removing duplicates from a list
+  |  List sorting
+        Int(), Str() and Float()
+  |  List filtering with Lambda
+  |  Removing items
+* Dictionaries
+  |  Dictionary dotted syntax
+  |  SymDict
+  |  Dictionary name
+* The "protect" mechanism
+* Binary type
+* Produce columns with report()
+* Hiding helper functions  
+* Nested loops
+* Code spaces - "pipes"
+  |  Result value from a code space
+        Code space result value
+        Otherwise ...
+* Function parameters
+* User input
+* Block expressions
+  |  Local blocks
+  |  Inner blocks
+  |  Lambdas
+  |  Block expressions summary
+  |  Local variables scope
+* Conditionals - if expression
+  |  Inline form
+  |  Traditional form
+  |  Example 1
+  |  Example 2
+  |  Expressions are statements ...
+  |  Blocks are expressions ...
+  |  if-ladders
+* Lazy evaluation
+        Lazy if
+        Lazy AND, OR - &amp;&amp; ||
+        Lazy P(N,defaultExpr)
+* The error() function
+* Output to screen
+* Running external programs
+  |  Summary
+  |  Dir.run()
+  |  Dir.runCapture()
+  |  Dir.runDetach()
+  |  Dir.runProcess
+  |  Lib:runProcess utility function
+  |  Lib:run utility function
+  |  Work directory issues
+  |  Doing ssh
+        Side note: ssh without password
+* Synthesis
+  |  Creating code from values
+  |  Example using :syn
+  |  Example using :NN
+  |  Using syn()
+* Templating
+  |  Merging text with Dict
+        Dict.mergeCodes()
+        Custom merge codes
+        Example using raw strings and Sequence
+  |  .mergeExpr
+* Text processing
+  |  Reading text files
+  |  Script file "here" documents
+  |  DataFile
+        Include blank lines
+        Allowing comments
+  |  Sequence() and raw strings
+* Processing JSON
+* Processing XML
+  |  Parsing XML
+  |  Creating structure with code
+  |  Looking up content
+* Internal web-server (experimental)
+* 3D library
+  |  Ref
+  |  World
+  |  Brushes
+  |  Rendering
+  |  Drawing a spoked wheel
+* 2D library
+  |  Spoked wheel (lines)
+  |  Spoked wheel (polygon fill)
+* Environment variables
+* Debugging
+  |  @lint
+  |  addDebug()
+  |  Sys.getCallHistory
+  |  setBreakPoint(str)
+* Working with pasted text lines from stdin
+* Differing between Windows and Linux
+* Predicate calls
+* The onLoad function
+* Error handling
+  |  Soft errors
+  |  Hard errors
+* Get type of value
+* Closures and dictionary-objects
+  |  Manual closure
+  |  Dictionary objects
+  |  Auto-invoke
+* Type checking with "as"
+        Null-values
+        Dict (type) names
+        Closures and Lambdas
+        Dotted lookup => auto call
+  |  Note: "as XXX" is separate expression
+* Classes
+  |  Class object types
+  |  What a "/class" function does
+* Dict set with strings
+* Dict.get with default value
+* Dict.ident=Expr
+* List.nth() negative indexes
+* Function parameters ...
+  |  Get parameters as List
+  |  Get parameters as Dict
+* The general loop statement
+* Storing CFT data structures to file - syn() and eval()
+* The CFT database
+  |  Collections
+  |  Std.Db.Db2 vs Db2 script?
+  |  Synchronization
+* onLoad functions
+* Multitasking in CFT
+  |  Key concepts
+        Intended use
+  |  The Process
+  |  Example: pinging a list of hosts
+        Create and test regular ping function
+        Management function, with logging via Db2Obj database script
+        Checking results (in database)
+  |  Advantages
+  |  Flow control
+* Calling Java (experimental)
+* String .esc() and .unEsc()
+  |  Escape codes
+* CRLF / LF with text files ...
+* Automating interactive functions / Sys.stdin()
+  |  Running colon commands from script code
+* Clone any value
+* CFT.props - shortcuts
+* Show all shortcuts
+* Std.Text.Lexer
+  |  Concept
+  |  Implementation
+        .sub()
+  |  Reusable nodes - integer sequence
+  |  Processing single lines
+  |  Limitations
+  |  Different uses
+  |  Complex tokens
+        Regular Node.addToken() example
+        Node.addTokenComplex() example
+* ANSI escape codes
+* Passwords, encryption, binary data
+  |  Passwords
+        Encrypt / decrypt
+        Binary data
+        Session data
+* Reference: object types
+* Reference: Value types
+* Reference: Expressions vs statements
+  |  Statements
+* Reference: Colon commands
+* Reference: Synthesizable types
+* Comments and digressions
+  |  Function name AFTER code?
+  |  Using Sys.stdin to run colon commands etc
+  |  Code spaces / the "pipe"
+  |  Code spaces vs Inner blocks
+  |  Script and code size
+        2020-11-13 v2.0.0
+        2021-04-01
+        2021-09-26
+        2021-10-16
+        2021-12-17 v3.0.0
+        2022-03-31 v3.2.5
+        2022-04-22 v3.5.0
+        2023-01-15 v3.7.8b

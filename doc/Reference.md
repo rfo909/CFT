@@ -7,7 +7,8 @@ v3.7.7
 
 
 
-# Shell-like commands II
+
+# Using CFT as a shell
 
 
 
@@ -250,292 +251,37 @@ When exiting that shell, we are returned to the CFT prompt.
 
 
 
-
-# Shortcuts and colon commands
-
-Shortcuts are ways of running CFT code, while colon commands are system commands that run completely
-outside the language interpreter (written in Java).
+## Terminal dimensions - the Term object
 
 
-View all colon commands:
+Output to screen is regulated via a Term object. It is a session object, remembering the
+current size of the terminal window.
 
-```
-:
-```
+### The @term shortcut
 
-View all shortcuts:
+
+After resizing the terminal, we need to update the Term object.
 
 ```
-@
+@term
 ```
 
-Shortcuts are defined in the CFT.props file.
+This works on Linux (using stty command) and on Windows (powershell).
 
+### Line wrapping
 
 
+By default, ouput line wrapping is off, which means that lines longer than the Cfg.w gets truncated
+with a '+' to indicate there is more. It can be switched on/off via the Cfg object, but there is also a
+colon command ":wrap" which toggles wrapping on or off.
 
-# List concatenation
 
-Lists can be added with "+"
 
-```
-List(1,2,3) + List(4,5)
-```
 
-We can also add single values to a list
 
-```
-List(1,2,3)+4
-```
 
-# List subtraction
 
-```
-List(1,2,3,4)-List(1,4)  # results in List(2,3)
-```
-
-
-
-# The "protect" mechanism
-
-Working in production environments, there will be directories and files that *must not* be changed
-or deleted. 
-
-Dir and File objects in CFT can have a "protect" mark set, which blocks destructive operations
-such as appending data to files, delete, rename, move etc.
-
-The protect mark is inherited by all Dir and File objects derived from a protected Dir or File. 
-
-Example:
-
-```
-# Our log dir
-# We want to process files in this directory, but they MUST NOT
-# be modified or deleted, so we add .protect to the Dir()-expression
-# --
-	Dir("/home/roar/logs").protect
-/LogDir
-```
-
-Now, if we either interactively or via another function do something like this, then it 
-fails with an error:
-
-```
-LogDir.files->f f.delete
-```
-
-That's because the Dir object returned by the call to LogDir, is marked as protected, and
-all File objects created by calling the files() function of that object, also get protected,
-and as a consequence trying to delete these files fails.
-
-
-
-
-
-# Dictionary dotted syntax
-
-In addition to the .set() and get() functions of dictionary objects, CFT also allows dotted assignment, and
-dotted lookup (for identifier names).
-
-Storing a value in a dictionary, either via set() or using dotted assignment, always returns the dictionary
-object, which lets us use the single underscore expression to pick it up and do further assignments.
-
-
-# SymDict
-
-This is a special built-in expression, which takes a list of names of local variables, and
-returns a dictionary with those.
-
-
-```
-# SymDict example
-# --
-	P(1)=>user
-	P(2)=>host
-	SymDict(user,host)
-/GetDict
-```
-
-This corresponds to the following:
-
-```
-# SymDict example
-# --
-	P(1)=>user
-	P(2)=>host
-	Dict.user=user _.host=host
-/GetDict
-```
-
-
-# Dictionary name
-
-
-Dictionary objects support a simple string name, in addition to named properties.
-
-```
-Dict("name")
-```
-
-The name can be accessed via Dict.getName() and modified/set via Dict.setName(). To
-clear, do Dict.setName(null)
-
-This name property of dictionaries is used to convey type information for dictionaries,
-together with "as" type checking. This is discussed in more detail elsewhere. A simple
-example:
-
-```
-Dict("Point")
-_.x=1
-_.y=2
-=> point
-
-# Some function expecting a Point dictionary as parameter
-# --
-P(1) as &amp;Point => point
-...
-/f
-```
-
-The '&amp;' in front of the type is to indicate that we are interested in the name of a Dict. Omitting it
-we can check for regular types, such as int, String, List, Dict and a whole lot of others.
-
-
-# Binary type
-
-
-Used in connection with encryption etc. Can be created from strings, or represent
-the content of a file.
-
-```
-"password".getBytes("UTF-8")
-<Binary>
-0x..
-```
-
-Check the Std.Util object, which contains functions that create objects Encrypt and Decrypt.
-
-
-# Produce columns with report()
-
-
-Using report() instead of out() lets us produce as output a list of strings,
-where multiple parameters to report() is formatted into columns. Example:
-
-```
-Dir.files->f report(f.name, f.length)
-```
-
-# List operations
-
-## Addition
-
-Two lists can be added together with "+".
-
-```
-List(1,2) + List(3)
-<List>
-1
-2
-3
-```
-
-Also, elements can be added to a list with "+" as long as the list comes first.
-
-```
-List(1,2)+3
-<List>
-1
-2
-3
-```
-## Subtraction
-
-
-Using "-", we can remove one or more elements from a list.
-
-```
-List(1,2,3,2,1)-List(2,3)
-<List>
-1
-1
-```
-
-Can also remove a single value from a list:
-
-```
-List(1,2,3,2,1)-2
-<List>
-1
-3
-1
-```
-
-## Removing duplicates from a list
-
-```
-List(1,1,2,2).unique
-<List>
-1
-2
-```
-
-
-# Sorting
-
-
-The List object has a single .sort() member function, which does the following:
-
-- if all values are int, sort ascending on int value
-- if all values are float, sort ascending on float value
-- otherwise sort ascending on "string representation" of all values
-
-
-
-Now, to sort other types of values, we use a "trick", which consists of wrapping each
-value inside a special *wrapper object*, masking the original values as either int, float
-or STring, then sort, and finally extract the actual value from the wrappers.
-
-
-To sort a list of files on their size, biggest first, we do the following:
-
-```
-Dir.files->f
-	out(Int(f.lastModified,f))
-| _.sort.reverse->x
-	out(x.data)
-```
-
-The first loop wraps each File object inside an Int object, which is created by
-supplying two values to global function Int: the value to sort on, and the object itself.
-
-
-Then the resulting list is "piped" to code that picks it off the stack, sorts and
-reverses it, before iterating over the result, and for each object (now the Int objects),
-outputs the original File object, available via the .data() function.
-
-## Int(), Str() and Float()
-
-
-Similarly there is a global Str() function for sorting on strings, and Float() for
-sorting on floats. Together with Int() function, these produce Str, Float and Int objects,
-which are actually subclasses of the regular "String", "float" and "int" value types, with
-the additional function .data() to retrieve the original value.
-
-## Converting between int and float
-
-
-Both the "int" and "float" type contain two functions for converting to int and float:
-
-```
-2.f     becomes float 2.0
-2.i     remains int   2
-3.14.f  remains float 3.14
-3.14.i  becomes int   3
-```
-
-
-# Savefiles - "scripts"
+# Script files
 
 ## Save
 
@@ -619,6 +365,335 @@ another script, as well as listing the code of particular function.
 ?Lib:m                 # displays code of function 'm' (to page through a text file)
 ```
 
+## Show all known scripts
+
+
+The function Lib:Scripts displays all available scripts, sorted by the directories given
+in the CFT.props file.
+
+
+The shortcut @scr calls this function.
+
+```
+@scr
+```
+
+
+# Command line args
+
+
+If CFT is invoked with command line arguments, the first is the name of the script,
+that is, a savefile minus the "savefile" prefix and ".txt" ending.
+
+
+Then follows zero
+or more command lines, on string format. For values containing space or otherwise
+have meaning to the shell, use quotes. Example:
+
+```
+./cft Projects Curr
+```
+
+This loads script Projects, then calls the Curr function inside.
+
+```
+./cft
+./cft scriptName [commandLines]*
+./cft -version
+./cft -help
+./cft -d scriptDir [scriptName [commandLines]*]?
+```
+
+
+
+
+
+# Shortcuts and colon commands
+
+Shortcuts are ways of running CFT code, while colon commands are system commands that run completely
+outside the language interpreter (written in Java).
+
+
+View all colon commands:
+
+```
+:
+```
+
+View all shortcuts:
+
+```
+@
+```
+
+Shortcuts are defined in the CFT.props file.
+
+
+
+
+# Lists
+
+## Addition
+
+Two lists can be added together with "+".
+
+```
+List(1,2) + List(3)
+<List>
+1
+2
+3
+```
+
+Also, elements can be added to a list with "+" as long as the list comes first.
+
+```
+List(1,2)+3
+<List>
+1
+2
+3
+```
+## Subtraction
+
+
+Using "-", we can remove one or more elements from a list.
+
+```
+List(1,2,3,2,1)-List(2,3)
+<List>
+1
+1
+```
+
+Can also remove a single value from a list:
+
+```
+List(1,2,3,2,1)-2
+<List>
+1
+3
+1
+```
+
+## Removing duplicates from a list
+
+```
+List(1,1,2,2).unique
+<List>
+1
+2
+```
+
+
+## List sorting
+
+
+The List object has a single .sort() member function, which does the following:
+
+- if all values are int, sort ascending on int value
+- if all values are float, sort ascending on float value
+- otherwise sort ascending on "string representation" of all values
+
+
+
+Now, to sort other types of values, we use a "trick", which consists of wrapping each
+value inside a special *wrapper object*, masking the original values as either int, float
+or STring, then sort, and finally extract the actual value from the wrappers.
+
+
+To sort a list of files on their size, biggest first, we do the following:
+
+```
+Dir.files->f
+	out(Int(f.lastModified,f))
+| _.sort.reverse->x
+	out(x.data)
+```
+
+The first loop wraps each File object inside an Int object, which is created by
+supplying two values to global function Int: the value to sort on, and the object itself.
+
+
+Then the resulting list is "piped" to code that picks it off the stack, sorts and
+reverses it, before iterating over the result, and for each object (now the Int objects),
+outputs the original File object, available via the .data() function.
+
+### Int(), Str() and Float()
+
+
+Similarly there is a global Str() function for sorting on strings, and Float() for
+sorting on floats. Together with Int() function, these produce Str, Float and Int objects,
+which are actually subclasses of the regular "String", "float" and "int" value types, with
+the additional function .data() to retrieve the original value.
+
+
+## List filtering with Lambda
+
+
+Instead of using processing loops, filtering lists can also be done
+using .filter() function of the List object. The lambda is called for each
+item, and returns a modified value.
+
+```
+"12345".chars.filter(Lambda{P(1).parseInt}).sum
+/t
+```
+
+Here, the lambda is used to convert strings to int values.
+
+## Removing items
+
+
+To remove items from the list, we just let the Lambda return null.
+
+```
+"12345".chars.filter (Lambda{ P(1).parseInt=>x if(x>=3,x,null) })
+```
+
+This returns a list of 3,4,5
+
+
+
+
+# Dictionaries
+
+## Dictionary dotted syntax
+
+In addition to the .set() and .get() functions of dictionary objects, CFT also allows dotted assignment, and
+dotted lookup (for identifier names).
+
+Storing a value in a dictionary, either via set() or using dotted assignment, always returns the dictionary
+object, which lets us use the single underscore expression to pick it up and do further assignments.
+
+
+## SymDict
+
+This is a special built-in expression, which takes a list of names of local variables, and
+returns a dictionary with those.
+
+
+```
+# SymDict example
+# --
+	P(1)=>user
+	P(2)=>host
+	SymDict(user,host)
+/GetDict
+```
+
+This corresponds to the following:
+
+```
+# SymDict example
+# --
+	P(1)=>user
+	P(2)=>host
+	Dict.user=user _.host=host
+/GetDict
+```
+## Dictionary name
+
+
+Dictionary objects support a simple string name, in addition to named properties.
+
+```
+Dict("name")
+```
+
+The name can be accessed via Dict.getName() and modified/set via Dict.setName(). To
+clear, do Dict.setName(null)
+
+This name property of dictionaries is used to convey type information for dictionaries,
+together with "as" type checking. This is discussed in more detail elsewhere. A simple
+example:
+
+```
+Dict("Point")
+_.x=1
+_.y=2
+=> point
+
+# Some function expecting a Point dictionary as parameter
+# --
+P(1) as &amp;Point => point
+...
+/f
+```
+
+The '&amp;' in front of the type is to indicate that we are interested in the name of a Dict. Omitting it
+we can check for regular types, such as int, String, List, Dict and a whole lot of others.
+
+
+
+
+
+
+# The "protect" mechanism
+
+Working in production environments, there will be directories and files that *must not* be changed
+or deleted. 
+
+Dir and File objects in CFT can have a "protect" mark set, which blocks destructive operations
+such as appending data to files, delete, rename, move etc.
+
+The protect mark is inherited by all Dir and File objects derived from a protected Dir or File. 
+
+Example:
+
+```
+# Our log dir
+# We want to process files in this directory, but they MUST NOT
+# be modified or deleted, so we add .protect to the Dir()-expression
+# --
+	Dir("/home/roar/logs").protect
+/LogDir
+```
+
+Now, if we either interactively or via another function do something like this, then it 
+fails with an error:
+
+```
+LogDir.files->f f.delete
+```
+
+That's because the Dir object returned by the call to LogDir, is marked as protected, and
+all File objects created by calling the files() function of that object, also get protected,
+and as a consequence trying to delete these files fails.
+
+
+
+
+
+
+
+
+
+
+# Binary type
+
+
+Used in connection with encryption etc. Can be created from strings, or represent
+the content of a file.
+
+```
+"password".getBytes("UTF-8")
+<Binary>
+0x..
+```
+
+Check the Std.Util object, which contains functions that create objects Encrypt and Decrypt.
+
+
+# Produce columns with report()
+
+
+Using report() instead of out() lets us produce as output a list of strings,
+where multiple parameters to report() is formatted into columns. Example:
+
+```
+Dir.files->f report(f.name, f.length)
+```
 
 
 # Hiding helper functions  
@@ -649,15 +724,6 @@ from the outside. Marking functions as local is all about filtering what is show
 single "?" command.
 
 
-
-# Displaying all known scripts
-
-
-The function Lib:Scripts displays all available scripts, sorted by the directories given
-in the CFT.props file.
-
-
-The shortcut @scr calls this function.
 
 
 
@@ -925,31 +991,6 @@ function body.
 3
 ```
 
-
-# List filtering with Lambda
-
-
-Instead of using processing loops, filtering lists can also be done
-using .filter() function of the List object. The lambda is called for each
-item, and returns a modified value.
-
-```
-"12345".chars.filter(Lambda{P(1).parseInt}).sum
-/t
-```
-
-Here, the lambda is used to convert strings to int values.
-
-## Removing items
-
-
-To remove items from the list, we just let the Lambda return null.
-
-```
-"12345".chars.filter (Lambda{ P(1).parseInt=>x if(x>=3,x,null) })
-```
-
-This returns a list of 3,4,5
 
 
 
@@ -1363,34 +1404,6 @@ syn(Dir.files)  # returns long string
 
 eval(s)    # returns the Dir.files list
 ```
-
-
-
-
-# Terminal dimensions - the Term object
-
-
-Output to screen is regulated via a Term object. It is a session object, remembering the
-current size of the terminal window.
-
-## The @term shortcut
-
-
-After resizing the terminal, we need to update the Term object.
-
-```
-@term
-```
-
-This works on Linux (using stty command) and on Windows (powershell).
-
-## Line wrapping
-
-
-By default, ouput line wrapping is off, which means that lines longer than the Cfg.w gets truncated
-with a '+' to indicate there is more. It can be switched on/off via the Cfg object, but there is also a
-colon command ":wrap" which toggles wrapping on or off.
-
 
 
 
@@ -1897,31 +1910,6 @@ Created DDExample2 which uses polygon drawing Brush of DD.World.
 
 
 
-
-# Command line args
-
-
-If CFT is invoked with command line arguments, the first is the name of the script,
-that is, a savefile minus the "savefile" prefix and ".txt" ending.
-
-
-Then follows zero
-or more command lines, on string format. For values containing space or otherwise
-have meaning to the shell, use quotes. Example:
-
-```
-./cft Projects Curr
-```
-
-This loads script Projects, then calls the Curr function inside.
-
-```
-./cft
-./cft scriptName [commandLines]*
-./cft -version
-./cft -help
-./cft -d scriptDir [scriptName [commandLines]*]?
-```
 
 
 # Environment variables
@@ -3091,6 +3079,7 @@ The CFT.props text is self explanatory.
 # Note that shortcuts only work when the prefix is at the start of the interactive
 # input line.
 # ---
+
 shortcutPrefix = @
 shortcut:r = Sys.stdin(":load Release","?")
 shortcut:p = Sys.stdin(":load Projects","?")
@@ -3102,7 +3091,7 @@ shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) ou
 This means that typing @r loads the Release script, then executes the '?' command, which
 lists its content.
 
-### Show all shortcuts
+# Show all shortcuts
 
 
 To list defined shortcut, just type
@@ -3112,8 +3101,7 @@ To list defined shortcut, just type
 ```
 
 This is a shortcut itself, that traverses the CFT.props file and identifies and
-displays the
-shortcut definitions from it.
+displays the shortcut definitions from it.
 
 
 
