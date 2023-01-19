@@ -8,7 +8,7 @@ v3.7.7
 
 
 
-# Using CFT as a shell
+# ---- Using CFT as a shell
 
 
 
@@ -281,7 +281,7 @@ colon command ":wrap" which toggles wrapping on or off.
 
 
 
-# Script files
+# ---- Script files
 
 ## Save
 
@@ -379,7 +379,7 @@ The shortcut @scr calls this function.
 ```
 
 
-# Command line args
+# ---- Command line args
 
 
 If CFT is invoked with command line arguments, the first is the name of the script,
@@ -408,7 +408,7 @@ This loads script Projects, then calls the Curr function inside.
 
 
 
-# Shortcuts and colon commands
+# ---- Shortcuts and colon commands
 
 Shortcuts are ways of running CFT code, while colon commands are system commands that run completely
 outside the language interpreter (written in Java).
@@ -431,7 +431,7 @@ Shortcuts are defined in the CFT.props file.
 
 
 
-# Lists
+# ---- Lists
 
 ## Addition
 
@@ -569,7 +569,7 @@ List(1,2,3,4).nth(-1)
 
 
 
-# Dictionaries
+# ---- Dictionaries
 
 ## Dictionary dotted syntax
 
@@ -687,7 +687,54 @@ data.get("a",5)  # returns 3 as it was set above
 
 
 
-# Block expressions
+
+# ---- String escape char
+
+
+CFT does not use backslash as an escape character, instead it used the "^" ("hat") character.
+
+Synthesis required a way of converting "difficult" strings to code.
+For this purpose, the two functions String.esc() and String.unEsc() was
+created.
+
+
+One rarely needs to call these manually, but they are worth mentioning, as sometimes synthesis
+of a string may result in code such as this:
+
+```
+"^q^aa^a^q".unEsc
+```
+## Escape codes
+
+
+For an escaped string, the escape character is the ^ symbol.
+
+
+
+- "Double quotes" ^q
+- 'Single quotes' / Apostrophe ^a
+- Newline ^n
+- Carriage Return ^r
+- Tab ^t
+- The ^ symbol ^^
+
+
+
+This gives a way of creating strings with newlines inside.
+
+```
+"this^nis^na test".unEsc
+<String>
+this
+is
+a test
+```
+
+
+
+
+
+# ---- Block expressions
 
 
 The traditional blocks inside curly braces come in three variants in CFT.
@@ -793,7 +840,7 @@ function body.
 
 
 
-# Conditionals - if expression
+# ---- Conditionals - if expression
 
 
 Conditional execution of code is done in two ways in CFT, with the first being how we
@@ -901,7 +948,7 @@ dictionary or something.
 
 
 
-# Code spaces - "pipes"
+# ---- Code spaces - "pipes"
 
 
 The body of any loop is the rest of the code of the function, or until a "pipe" symbol
@@ -994,7 +1041,7 @@ The only thing that terminates loops are end-of-scope, which includes the PIPE s
 
 
 
-# Function parameters
+# ---- Function parameters
 
 
 Custom functions can take parameters. This is done using the P() expression, which
@@ -1038,7 +1085,7 @@ f(5,10)
 
 
 
-# User input
+# ---- User input
 
 
 CFT contains the following for asking the user to enter input:
@@ -1067,7 +1114,7 @@ P(1,Input("Enter value").get) =>value ...
 
 
 
-## Paste multiple liens
+## Paste multiple lines
 
 
 If you've got some text in the copy-paste buffer that you want to work with, the
@@ -1096,9 +1143,91 @@ a name, now  for it, which when run, reproduces the list of lines that were past
 
 
 
+# ---- Output to screen
+
+```
+println("a")
+println("a",a,"b=",b)
+```
 
 
-# The "protect" mechanism
+
+# ---- Produce columns with report()
+
+
+Using report() instead of out() lets us produce as output a list of strings,
+where multiple parameters to report() is formatted into columns. Example:
+
+```
+Dir.files->f report(f.name, f.length)
+```
+
+
+
+
+# ---- ANSI escape codes
+
+The Curses script contains code for producing ANSI escape sequences to set text color,
+bold and underline, as well as clearing the screen, and moving the cursor, which
+enables drawing boxes, for example.
+
+Since curses may not be supported on every device, the ANSI support is disabled
+by default, but can be enabled via a call to
+
+```
+Curses:Enable(true)
+```
+
+This changes all the functions inside Curses from returning empty strings, to return
+ANSI escape sequences.
+
+
+
+
+
+# ---- Sys.stdin()
+
+Functions may query the user with Input("prompt").get and readLine("prompt"). If we want
+to automate such functions, we can use function Sys.stdin() to buffer up any number of
+input lines.
+
+```
+Sys.stdin("read-this") Input("Enter data").get
+<String>
+read-this
+```
+
+Both Input.get() and readLine() detect if there is buffered input, and
+if so, do not display the prompt or other info. Particularly useful for Input.get(),
+since buffering the empty string "" with Sys.stdin() means repeating the last value.
+
+
+## Running colon commands from script code
+
+
+Using the Sys.stdin() statement without being followed by Input.get() or readLine(), is just
+another way of entering commands. This means colon commands are available from CFT code.
+
+```
+stdin("2+3")
+<int>
+5
+```
+
+This can be exploited to let a script modify itself, by redefining
+functions, although that will be troublesome if those functions read input. A better
+use is that of running colon commands, particularly loading scripts. This is used
+frequently with shortcuts.
+
+```
+stdin(":load SomeScript","?")
+```
+
+
+
+
+
+# ---- The "protect" mechanism
 
 Working in production environments, there will be directories and files that *must not* be changed
 or deleted. 
@@ -1132,21 +1261,10 @@ and as a consequence trying to delete these files fails.
 
 
 
-# Produce columns with report()
-
-
-Using report() instead of out() lets us produce as output a list of strings,
-where multiple parameters to report() is formatted into columns. Example:
-
-```
-Dir.files->f report(f.name, f.length)
-```
 
 
 
-
-
-# The error() function
+# ---- The error() global function
 
 
 The error() global function contains a conditional part, and if true, throws
@@ -1163,15 +1281,82 @@ if (1+1 != 2) {
 
 
 
-# Output to screen
+# ---- The onLoad function
+
+
+In order for scripts to run code as the script is loaded, we can define a function
+called onLoad, which is called every time the script file is loaded or reloaded.
+
+
+
+
+
+
+
+# ---- Function parameters ...
+
+
+In addition to grabbing one parameter at a time, using P(pos), we can also process the
+parameter values as a list and as a dictionary.
+
+## Get parameters as List
+
+
+The function parameter expression P() when used with no parameters, returns a list of
+the parameter values as passed to the function.
 
 ```
-println("a")
-println("a",a,"b=",b)
+# Some function
+# --
+P => paramList
+	...
+/example
+```
+
+## Get parameters as Dict
+
+
+The PDict() expression takes a sequence of names to be mapped to parameters by position,
+resulting in a Dict object. Missing values lead to the special value null being stored
+in the dictionary.
+
+```
+# Some function with three parameters
+# --
+	PDict("a","b","c") => paramsDict
+	...
+/example
 ```
 
 
-# Running external programs
+# ---- The general loop statement
+
+
+In addition to looping over lists, there is a general loop construct. It identifies no
+loop variable, and loops forever, until break() is called. It also obeys assert(),
+reject() and continue( as with list iteration.
+
+```
+a=0 loop break(a>3) out(a) a=a+1
+<List>
+0
+1
+2
+3
+```
+
+If you forget to increment the variable a, or forget or create a valid break(), then
+the loop may never terminate, and CFT has to be killed with CTRL-C 
+
+
+
+
+
+
+
+
+
+# ---- Running external programs
 
 ## Summary
 
@@ -1336,7 +1521,7 @@ ssh-copy-id user@host
 ```
 
 
-# Environment variables
+# ---- Environment variables
 
 
 Available via Sys.environment() function.
@@ -1349,7 +1534,7 @@ Util:ShowDict(env)
 
 
 
-# Hiding helper functions  
+# ---- Hiding helper functions  
 
 
 In many cases, we need to create helper functions, which should not be visible as part
@@ -1379,10 +1564,163 @@ single "?" command.
 
 
 
+# ---- Value types
+
+## Get type of value
+
+The global function getType() takes one parameter, and returns
+the type name of that value, as a string
+
+```
+getType(3)
+<String>
+int
+
+getType(Dict)
+<String>
+Dict
+```
 
 
 
-# Synthesis
+## Type checking with "as"
+
+
+The getType() has frequently been combined with error() to do type checking of parameters.
+
+```
+P(1)=>x
+error(getType(x) != "String","Invalid value")
+```
+
+The problem, is that it is easy to mistype, like getType("x") which of course always is "String".
+
+
+The "as" syntax simplifies this to the following:
+
+```
+P(1) as String => x
+```
+
+A secondary form exists, where instead of an identifier type, such as String in the example, we take allowed type name(s) from
+an expression. It must be written inside ()'s. If it returns a list, then it's assumed to be a list of valid type names.
+
+```
+type="String"
+P(1) as (type) => x
+
+# or
+types="String int".split
+P(1) as (types) ...
+
+# or even
+P(1) as ("String int".split) ...
+```
+
+If an "as" fails, a hard error is thrown, with details about what was expected, and what was found.
+
+
+### Null-values
+
+
+The type of null-value is "null". To allow a value to be optional is to allow it to be of type "null". Since
+this is a common thing to do, we can add a '?' after the type (identifier or expression inside parantheses), which
+simply means "or null":
+
+```
+P(1) as ("String null".split) => optionalStringValue
+
+P(1) as String? > optionalStringValue  # The '?' means "or null"
+P(1) as ("String int".split)?    # String, int or null
+```
+### Dict (type) names
+
+
+The Dict object has an optional name property, either set at creation by Dict("something") or via Dict.setName("something").
+
+This name can be filtered in the "as" expression, prefixing the type identifier or type expression inside ()'s with
+an & (ampersand) as follows:
+
+```
+# Accept dictionary named as MyData only, or null
+# --
+	P(1) as &MyData? => data
+	...
+/f
+
+# Create such data
+# --
+	Dict("MyData")
+		_.a=1
+		_.b=2
+		=> myData
+		
+	# Call f with this object
+	f(myData) # should match "as" type of "f"
+/test
+```
+### Closures and Lambdas
+
+
+Both lambdas and closures are assigned the type "Callable", which simplifies type checking, as they have identical
+.call() functions to invoke.
+
+
+Mostly a function does not need to know if an assumed Lambda is in fact a Closure.
+
+
+Still, if one needs to detect if a value is a lambda or a closure, it's easiest done by checking for the presence of
+one of the functions that closures implement, and lambdas do not, for example the .lambda function of closures,
+to obtain the lambda component.
+
+```
+P(1) as Callable => callable
+isClosure = callable.?lambda  # returns true if value has function lambda, which means it is a closure
+```
+
+
+
+## Note: "as XXX" is separate expression
+
+The "as something" is an expression working with a value from the stack. This means it can be used
+to type check any value, such as return value from a function. 
+
+```
+a=add(1,2) as int
+```
+
+What happens here, however, is *not* that the function result is type checked before being assigned, but
+instead that the assignment is an expression, which returns the assigned value, which is then
+type checked. The outcome is the same in this case, but this distinction may cause troubles.
+
+Example:
+
+```
+a=(3 as int)
+```
+
+The parser will fail this, complaining it expects right parantesis after 3, since it does not know how
+to process 
+
+```
+a=(expr expr)
+```
+
+To fix this, we remember that blocks in CFT are expressions, and they contain a sequence of statements,
+and expressions are also statements.
+
+```
+a={3 as int}
+```
+
+:-)
+
+
+
+
+
+
+# ---- Synthesis
 
 ## Creating code from values
 
@@ -1470,8 +1808,28 @@ eval(s)    # returns the Dir.files list
 ```
 
 
+## Clone any value
 
-# Templating
+
+The function Sys.clone() returns a copy of any value, as long as it is
+synthesizable. If not, an error is returned.
+
+```
+a=List(1,2,3)
+b=Sys.clone(a).add(4)  # "b" contains 1,2,3,4 while "a" remains unchanged
+```
+
+The clone can also be done manually:
+
+```
+a=List(1,2,3)
+b=eval(syn(a))
+```
+
+
+
+
+# ---- Templating
 
 
 Templating is the task of merging data into text, or alternatively of selecting
@@ -1610,7 +1968,7 @@ Sequence(
 
 
 
-# Text processing
+# ---- Text processing
 
 
 In the section on templating, we used the Sequence() and raw strings, to represent text. This
@@ -1745,7 +2103,7 @@ directly into the script code.
 
 
 
-# The CFT database
+# ---- The CFT database (Db2)
 
 
 CFT implements its own primitive database, as found in Std.Db.Db2, and which is usually
@@ -1765,7 +2123,7 @@ made by calling the Std.Db.UUID function.
 
 
 Apart from using static strings as collection names, another common practice is
-to use the scriptId, which is a function of the Sys object:
+to use the *Sys.scriptId*:
 
 ```
 Db2:Set(Sys.scriptId,"name","value")
@@ -1801,7 +2159,7 @@ Std.Db.releaseLock("Unique lock name")
 
 
 
-# Error handling
+# ---- Error handling
 
 
 Exception handling in CFT is split into two parts, reflecting two types of
@@ -1885,7 +2243,7 @@ return false.
 
 
 
-# Debugging
+# ---- Debugging
 
 
 After editing a script, normally you need to test all functions even for basic syntax
@@ -1925,7 +2283,159 @@ not (Enter).
 
 
 
-# Multitasking in CFT
+
+# ---- Lambdas and closures
+
+## Manual closure
+
+
+A closure is a Lambda that is bound together with a dictionary object. The dictionary object is
+available via the automatic variable "self" inside the lambda (now closure).
+
+```
+data=Dict
+closure = data.bind(Lambda{
+	P(1) => value
+	self.value=value
+})
+closure.call("x")
+data.value   # returns "x"
+```
+
+Here we create a dictionary. We then call .bind with a lambda, which produces a closure.
+
+
+If we now pass the generated closure as a parameter to some function that expects a lambda or closure,
+commonly type-identified as "Callable", when it is called with a single parameter value, that value
+gets stored inside the data dictionary, which means we can access it after the function we called has returned.
+
+## Dictionary objects
+
+Another way of creating closures, is by storing lambdas into dictionaries. The lambda gets automatically
+converted to a closure, which refers the dictionary.
+
+```
+data=Dict
+data.value=null
+data.f = Lambda{
+	P(1) => value
+	self.value=value
+}
+closure=data.get("f")
+
+callSomeFunctionWithIt(closure)
+
+# get value passed when that function called the closure
+data.value
+```
+
+The "data" dictionary now is a simple object, which contains both a value and a closure.
+
+
+## Calling lambda/closure
+
+Lambdas and Closures, when stored in a variable, are invoked with .call(...).
+
+Obtaining a Closure from a dictionary with dotted notation, however, implies an automatic invocation,
+with or without parameters.
+
+```
+data=Dict
+data.f=Lambda{println("called f")}
+data.f   # prints "called f" to the screen.
+
+# To get a reference to the closure, we use the .get() function of Dict
+data.get("f")    # returns Closure object without invoking it
+```
+
+
+
+# ---- Classes
+
+
+CFT supports primitive classes, which are really just dictionaries with closures for member functions,
+combined with the name attribute of all Dict objects, created by Dict(name) or Dict.setName(name), which we can check
+for in the "as" type checks with &amp;name.
+
+Inheritance is supported using the Dict.copyFrom function, or any other means of copying
+data and lambdas from one Dict to another. as there is no "class definition", only a
+block of code (class function) that sets up the class object.
+
+
+Classes are functions, and are defined similarly to functions, by code followed by
+slash something. Defining a simple class MyClass:
+
+```
+# my class
+# --
+	P(1) as int => x
+	self.x=x
+/class MyClass
+```
+## Class object types
+
+
+There is no differentiation between classes and objects. 
+
+A class function returns an object.
+Inheritance is possible by some class function instantiating a class object of some other type,
+and incorporating elements from it into itself, possibly using the Dict.copyFrom(anotherDict)
+function, as the "self" object inside an object is a Dict.
+
+
+The OODemo script examplifies this, and also employs the second version of the /class line,
+where we supply the type explicitly.
+
+```
+# Common Val class
+# --
+	P(1) as String => type
+	P(2) as (type) => value
+	...
+/class Val
+
+# Val class for processing int
+# --
+	P(1) as int => value
+	self.copyFrom(Val("int",value)) # "inheritance"
+	...
+/class ValInt as Val
+```
+
+## What a "/class" function does
+
+
+There is no problem creating dictionary objects without using /class functions.
+
+```
+# TypedContainer class (using /class)
+# --
+	P(1) as String => type
+	self.type=type
+	self.value=null
+	self.set=Lambda{
+		P(1) as (self.type) => value
+		self.value=value
+	}
+/class TypedContainer
+
+# Create custom subclass of TypedContainer inside normal function (without using /class)
+# --
+	self=Dict("TypedContainer")
+	self.copyFrom(TypedContainer("int"))
+	self
+/IntContainer
+
+# Test it
+IntContainer.set("test")  # Fails with error, expects int
+```
+
+
+
+
+
+
+# ---- Multitasking in CFT
 
 
 CFT offers the ability to run multiple processes of CFT code, via the SpawnProcess() expression.
@@ -2045,63 +2555,7 @@ See separate sections on closures and objects.
 
 
 
-
-
-
-
-
-
-
-
-# Binary type
-
-
-Used in connection with encryption etc. Can be created from strings, or represent
-the content of a file.
-
-```
-"password".getBytes("UTF-8")
-<Binary>
-0x..
-```
-
-Check the Std.Util object, which contains functions that create objects Encrypt and Decrypt.
-
-
-
-
-
-# Lazy evaluation
-
-### Lazy if
-
-
-The if-expression uses lazy evaluation, which means that only the selected
-value expression (if any) gets evaluated. This is the same as every other
-language.
-
-### Lazy AND, OR - &amp;&amp; ||
-
-
-Boolean expressions with logical AND and OR, are lazy, again as in
-every other language.
-
-### Lazy P(N,defaultExpr)
-
-
-The P() expression to access function parameters only evaluates the default
-expression if function parameter N has no value or null-value.
-
-
-
-
-
-
-
-
-
-
-# Processing JSON
+# ---- Processing JSON
 
 
 The JSON script handles parsing JSON into a Dict/List structure, and
@@ -2152,7 +2606,9 @@ that the order of fields added to dictionary, is the order of fields when genera
 Vice versa, the order of fields inside objects in a JSON string, when parsed, becomes the order of
 fields in the corresponding dictionaries.
 
-# Processing XML
+
+
+# ---- Processing XML
 
 
 The "XML" script handles parsing and pretty-printing XML. It also has functions for constructing
@@ -2217,784 +2673,130 @@ XML:Show
 
 
 
-# Internal web-server (experimental)
-
-
-There is a small embedded web-server in CFT, available in the Std.Web object. It
-supports GET and POST, does parameter and form input parsing.
-
-
-See WebTest script. Running the Init function sets up a very simple web "site" on
-port 2500 on localhost.
-
-
-Remember to re-run Init after changing the code, as the
-web-server runs as a Java background thread, and needs to be updated, in order to serve new
-content.
-
-
-A bit of a work in progress, not terribly useful, bit it sort of works.
 
 
 
 
-# 3D library
+# ---- Passwords, encryption, binary data
 
+## Binary type
 
-Included and adapted an old 3d-library written by me, over 20 years ago, for rendering 3D scenes,
-working purely in Java, without any acceleration. It is slow, but gets the job done.
-
-
-It is non-interactive, code only, and fits well into CFT.
-
-## Ref
-
-
-The key object is the Ref, which
-is a complete coordinate system living in global 3D space. It has functions for moving
-in different directions, as well as rotating around its three axes, and scaling.
-
-## World
-
-
-Then there is the World object, which represents the camera and renderer. By default, the
-"film plane" of the camera lives at position (0,0,0) in the global coordinate system, and is defined using
-millimeters. This means that using a Ref object without setting scale, means it operates
-in millimeters. But we can change the scale on Ref objects, for example setting it to
-1000, which means that the units are now meters.
-
-
-Note that Ref objects are immutable, so all calls to Ref functions create new Ref objects.
+Used in connection with encryption etc. Can be created from strings, or represent
+the content of a file.
 
 ```
-world = Std.DDD.World
-ref = Std.DDD.Ref  # at 0,0,0 and scale=1, which for default camera defs means millimeters
-ref=ref.scaleUp(1000)  # now working in meters
-ref=ref.fwd(3).turnRight(30).down(0.5)
-# new ref is placed 3 meters forward, turned right 30 degrees, and lowered 0.5 meters
-```
-## Brushes
-
-
-The DDD library uses 3D brushes to generate content. A brush is defined as a sequence of
-line segments, for example a square, which is then "dragged" through 3D-space in a
-sequence of "pen down" operations.
-
-```
-boxBrush = world.Brush.box(1,1,Std.Color(255,0,0))
-# creates a brush for a box centered on origo, with a certain size and color
-# note the size here is "relative" and determined by the scale of the Ref's used
-# when painting with the brush.
-ref = Std.DDD.Ref.setScaleFactor(1000).forward(3) # forward 3 meters
-boxBrush.penDown(ref)  # start drawing with brush
-boxBrush.penDown(ref.fwd(2))  # move 2 meter forward and do penDown here
-boxBrush.penUp
+"password".getBytes("UTF-8")
+<Binary>
+0x..
 ```
 
-The above code generates a red box 1 x 1 meter in cross-section and 2 meters long.
-
-## Rendering
-
-
-After doing some number of brush operations, it is time to create a PNG file
-with the image, as seen by the camera.
+The Binary objects has member functions for converting the binary value to hex string, etc.
+It can also be created from a hex string:
 
 ```
-file=Dir.file("test.png")
-world.render(file)
-```
-## Drawing a spoked wheel
-
-
-The example script DDDExample contains code for rendering a spoked wooden wheel.
-
-![Wooden wheel](https://github.com/rfo909/CFT/blob/master/doc/wheel.png)
-
-
-# 2D library
-
-
-Similar to the 3D library, the 2D library lets us draw vector graphics using a
-2D Ref object that moves in the plane, using either lines or filled polygons.
-
-## Spoked wheel (lines)
-
-
-Created DDExample which draws the same wheel as the 3D version, using the LineBrush of DD.World
-
-![Wooden wheel](https://github.com/rfo909/CFT/blob/master/doc/wheel2d.png)
-
-## Spoked wheel (polygon fill)
-
-Created DDExample2 which uses polygon drawing Brush of DD.World.
-
-![Wooden wheel](https://github.com/rfo909/CFT/blob/master/doc/wheel2dpoly.png)
-
-
-
-
-
-# Differing between Windows and Linux
-
-
-Calling function Sys.isWindows() is used to differ between the two in code. It does this
-by checking if (Java) File.separator is a backslash.
-
-```
-Sys.isWindows
-<boolean>
-false
+b=Binary("526F6172")
 ```
 
 
+## Passwords
 
 
-
-# The onLoad function
-
-
-In order for scripts to run code as the script is loaded, we can define a function
-called onLoad, which is called every time the script file is loaded or reloaded.
-
-
-
-
-
-
-# Get type of value
-
-
-The global function getType() takes one parameter, and returns
-the type name of that value, as a string
+To read a password (no echo), call Sys.readPassword function.
 
 ```
-getType(3)
+password = Sys.password("Enter password")
+error(Sys.password("Repeat password") != password, "no match")
+```
+
+## Encrypt / decrypt
+
+
+The Std.Util object contains two functions, encrypt() and decrypt(), which both
+take a password string and a salt string. These together form a complete
+password, but the salt is not necessarily secret, just a way of differently initiate
+the encryption engine with the same (secret) password.
+
+```
+"password".getBytes("UTF-8")  # returns Binary object
+/password
+
+Std.Util.Encrypt(password).processString("this is a message")
+/x
+
+Std.Util.Decrypt(password).processString(x)
 <String>
-int
-
-getType(Dict)
-<String>
-Dict
+this is a message
 ```
 
+## Binary data
 
 
-# Closures and dictionary-objects
+The processString() function of the Encrypt and Decrypt objects, is nice when
+storing encrypted strings in a database that only handles strings, such as Db2.
 
-## Manual closure
 
+The more generic function process() operates on binary data, and lets us
+save encrypted versions of files.
 
-A closure is a Lambda that is bound together with a dictionary object. The dictionary object is
-available via the automatic variable "self" inside the lambda (now closure).
-
-```
-data=Dict
-closure = data.bind(Lambda{
-	P(1) => value
-	self.value=value
-})
-closure.call("x")
-data.value   # returns "x"
-```
-
-Here we create a dictionary. We then call .bind with a lambda, which produces a closure.
-
-
-If we now pass the generated closure as a parameter to some function that expects a lambda or closure,
-commonly type-identified as "Callable", when it is called with a single parameter value, that value
-gets stored inside the data dictionary, which means we can access it after the function we called has returned.
-
-## Dictionary objects
-
-
-Another way of creating closures, is by storing lambdas into dictionaries. The lambda gets automatically
-converted to a closure, which refers the dictionary.
-
-```
-data=Dict
-data.value=null
-data.f = Lambda{
-	P(1) => value
-	self.value=value
-}
-closure=data.get("f")
-
-callSomeFunctionWithIt(closure)
-
-# get value passed when that function called the closure
-data.value
-```
-
-The "data" dictionary now is a simple object, which contains both a value and a closure.
-
-## Auto-invoke
-
-
-Lambdas and Closures, when stored in a variable, are invoked with .call(...).
-
-
-Obtaining a Closure from a dictionary with dotted notation, however, implies an automatic invocation,
-with or without parameters.
-
-```
-data=Dict
-data.f=Lambda{println("called f")}
-data.f   # prints "called f" to the screen.
-
-# To get a reference to the closure, we use the .get() function of Dict
-data.get("f")    # returns Closure object without invoking it
-```
-
-
-
-
-# Type checking with "as"
-
-
-The getType() has frequently been combined with error() to do type checking of parameters.
-
-```
-P(1)=>x
-error(getType(x) != "String","Invalid value")
-```
-
-The problem, is that it is easy to mistype, like getType("x") which of course always is "String".
-
-
-The "as" syntax simplifies this to the following:
-
-```
-P(1) as String => x
-```
-
-A secondary form exists, where instead of an identifier type, such as String in the example, we take allowed type name(s) from
-an expression. It must be written inside ()'s. If it returns a list, then it's assumed to be a list of valid type names.
-
-```
-type="String"
-P(1) as (type) => x
-
-# or
-types="String int".split
-P(1) as (types) ...
-
-# or even
-P(1) as ("String int".split) ...
-```
-
-If an "as" fails, a hard error is thrown, with details about what was expected, and what was found.
-
-
-### Null-values
-
-
-The type of null-value is "null". To allow a value to be optional is to allow it to be of type "null". Since
-this is a common thing to do, we can add a '?' after the type (identifier or expression inside parantheses), which
-simply means "or null":
-
-```
-P(1) as ("String null".split) => optionalStringValue
-
-P(1) as String? > optionalStringValue  # The '?' means "or null"
-P(1) as ("String int".split)?    # String, int or null
-```
-### Dict (type) names
-
-
-The Dict object has an optional name property, either set at creation by Dict("something") or via Dict.setName("something").
-
-This name can be filtered in the "as" expression, prefixing the type identifier or type expression inside ()'s with
-an & (ampersand) as follows:
-
-```
-# Accept dictionary named as MyData only, or null
-# --
-	P(1) as &MyData? => data
-	...
-/f
-
-# Create such data
-# --
-	Dict("MyData")
-		_.a=1
-		_.b=2
-		=> myData
-		
-	# Call f with this object
-	f(myData) # should match "as" type of "f"
-/test
-```
-### Closures and Lambdas
-
-
-Both lambdas and closures are assigned the type "Callable", which simplifies type checking, as they have identical
-.call() functions to invoke.
-
-
-Mostly a function does not need to know if an assumed Lambda is in fact a Closure.
-
-
-Still, if one needs to detect if a value is a lambda or a closure, it's easiest done by checking for the presence of
-one of the functions that closures implement, and lambdas do not, for example the .lambda function of closures,
-to obtain the lambda component.
-
-```
-P(1) as Callable => callable
-isClosure = callable.?lambda  # returns true if value has function lambda, which means it is a closure
-```
-
-
-### Dotted lookup => auto call
-
-When referring a lambda or closure as part of something else, that is, using "." in front of it, it is
-invoked directly with or without parameters, so no ".call" then. Referring a lambda or closure via a parameter or
-local variable, and wanting to invoke it, use ".call" with or without params.
-
-Also note that ALL lambdas stored in dictionaries are converted to closures.
-
-```
-d=Dict
-f=Lambda{
-	P(1) as String => name
-	"hello " + name
-}
-d.f=f
-
-f.call("Bob")  # no dotted lookup of lambda, so use .call() to invoke it
-d.f("Bob")  # dotted lookup (".f") means we invoke closure without ".call"
-```
-
-To access a closure from within a dictionary, without calling it, use instead the .get() function
-
-```
-f2=d.get("f")  # returns lambda (closure)
-```
-
-The closure can now be passed as an argument to some function somewhere, who uses .call() to invoke it.
-
-
-## Note: "as XXX" is separate expression
-
-The "as something" is an expression working with a value from the stack. This means it can be used
-to type check any value, such as return value from a function. 
-
-```
-a=add(1,2) as int
-```
-
-What happens here, however, is *not* that the function result is type checked before being assigned, but
-instead that the assignment is an expression, which returns the assigned value, which is then
-type checked. The outcome is the same in this case, but this distinction may cause troubles.
-
-Example:
-
-```
-a=(3 as int)
-```
-
-The parser will fail this, complaining it expects right parantesis after 3, since it does not know how
-to process 
-
-```
-a=(expr expr)
-```
-
-To fix this, we remember that blocks in CFT are expressions, and they contain a sequence of statements,
-and expressions are also statements.
-
-```
-a={3 as int}
-```
-
-:-)
-
-
-
-# Classes
-
-
-CFT supports primitive classes, which are really just dictionaries with closures for member functions,
-combined with the name attribute of all Dict objects, created by Dict(name) or Dict.setName(name), which we can check
-for in the "as" type checks with &amp;name.
-
-Inheritance is supported using the Dict.copyFrom function, or any other means of copying
-data and lambdas from one Dict to another. as there is no "class definition", only a
-block of code (class function) that sets up the class object.
-
-
-Classes are functions, and are defined similarly to functions, by code followed by
-slash something. Defining a simple class MyClass:
-
-```
-# my class
-# --
-	P(1) as int => x
-	self.x=x
-/class MyClass
-```
-## Class object types
-
-
-There is no differentiation between classes and objects. 
-
-A class function returns an object.
-Inheritance is possible by some class function instantiating a class object of some other type,
-and incorporating elements from it into itself, possibly using the Dict.copyFrom(anotherDict)
-function, as the "self" object inside an object is a Dict.
-
-
-The OODemo script examplifies this, and also employs the second version of the /class line,
-where we supply the type explicitly.
-
-```
-# Common Val class
-# --
-	P(1) as String => type
-	P(2) as (type) => value
-	...
-/class Val
-
-# Val class for processing int
-# --
-	P(1) as int => value
-	self.copyFrom(Val("int",value)) # "inheritance"
-	...
-/class ValInt as Val
-```
-
-## What a "/class" function does
-
-
-There is no problem creating dictionary objects without using /class functions.
-
-```
-# TypedContainer class (using /class)
-# --
-	P(1) as String => type
-	self.type=type
-	self.value=null
-	self.set=Lambda{
-		P(1) as (self.type) => value
-		self.value=value
-	}
-/class TypedContainer
-
-# Create custom subclass of TypedContainer inside normal function (without using /class)
-# --
-	self=Dict("TypedContainer")
-	self.copyFrom(TypedContainer("int"))
-	self
-/IntContainer
-
-# Test it
-IntContainer.set("test")  # Fails with error, expects int
-```
-
-
-
-
-
-
-
-# Function parameters ...
-
-
-In addition to grabbing one parameter at a time, using P(pos), we can also process the
-parameter values as a list and as a dictionary.
-
-## Get parameters as List
-
-
-The function parameter expression P() when used with no parameters, returns a list of
-the parameter values as passed to the function.
-
-```
-# Some function
-# --
-P => paramList
-	...
-/example
-```
-
-## Get parameters as Dict
-
-
-The PDict() expression takes a sequence of names to be mapped to parameters by position,
-resulting in a Dict object. Missing values lead to the special value null being stored
-in the dictionary.
-
-```
-# Some function with three parameters
-# --
-	PDict("a","b","c") => paramsDict
-	...
-/example
-```
-
-
-# The general loop statement
-
-
-In addition to looping over lists, there is a general loop construct. It identifies no
-loop variable, and loops forever, until break() is called. It also obeys assert(),
-reject() and continue( as with list iteration.
-
-```
-a=0 loop break(a>3) out(a) a=a+1
-<List>
-0
-1
-2
-3
-```
-
-If you forget to increment the variable a, or forget or create a valid break(), then
-the loop may never terminate, and CFT has to be killed with CTRL-C 
-
-
-
-# Storing CFT data structures to file - syn() and eval()
-
-
-A  persistent solution for storing data is to store a data structure to file. This is done using
-the synthesis functionality, which is made available as a global function as well as the
-"colon command" used before. This means we can write huge lists and sets of files and
-directory objects to file, and restore it later, without going through possibly time
-consuming computations.
-
-
-To restore the structure, we use the global eval() function.
-
-```
-# Save data to file
-# --
-	P(1)=>file
-	P(2,"data") =>data
-	file.create(syn(data))
-/saveData
-
-# Restore synthesized data
-	P(1)=>file
-	eval(file.read.nth)
-/restoreData
-```
-
-This can be used to save arbitrarily complex structures, as long as they are synthesizable.
-
-
-
-
-# onLoad functions
-
-
-Calling a function onLoad results in it being called every time the script is loaded
-and (automatically) reloaded in GNT. Nice for clearing defaults, when new session.
-
-
-Each individual session is identified by a session UUID, which may be stored in the
-database, so the onLoad can detect this and reset state in the database.
-
-
-
-# Calling Java (experimental)
-
-
-CFT lets us interface Java code via the Std.Java object. It contains functions
-for identifying classes. We then look up a constructor and call it, getting a
-JavaObject in return. We can also look up methods from the class object, and call
-them with parameters.
-
-
-Currently, for this to work, the Java code must exist in the classpath.
-
-
-Example (also available in script Tests01 as function Test17):
-
-```
-Std.Java.forName("java.lang.String") => String
-String.getConstructor(String).call(Std.Java.String("test")) => obj
-String.getConstructor(String).call(Std.Java.String("123")) => obj2
-Std.Java.Object(obj2) => paramObj
-String.getMethod("concat",String).call(obj,paramObj).value
-/t17
-```
-
-This function looks up the String class, then creates two instances via
-the constructor that takes a String parameter. CFT strings values are converted to Java values
-via the Std.Java.String() function.
-
-
-Then we wrap obj2, which is a CFT value (of type JavaObject), as a Java value,
-via Std.Java.Object(), and locate the concat() method of the String class.
-
-
-It is invoked on
-obj, with obj2 as parameter. The method call returns a JavaValue object,
-which has a function value() that returns a CFT value, in this case the
-concatenated string "test123".
-
-
-
-# String .esc() and .unEsc()
-
-
-CFT does not use backslash as an escape character, instead it used the "^" ("hat") character.
-
-Synthesis required a way of converting "difficult" strings to code.
-For this purpose, the two functions String.esc() and String.unEsc() was
-created.
-
-
-One rarely needs to call these manually, but they are worth mentioning, as sometimes synthesis
-of a string may result in code such as this:
-
-```
-"^q^aa^a^q".unEsc
-```
-## Escape codes
-
-
-For an escaped string, the escape character is the ^ symbol.
-
-
-
-- "Double quotes" ^q
-- 'Single quotes' / Apostrophe ^a
-- Newline ^n
-- Carriage Return ^r
-- Tab ^t
-- The ^ symbol ^^
-
-
-
-This gives a way of creating strings with newlines inside.
-
-```
-"this^nis^na test".unEsc
-<String>
-this
-is
-a test
-```
-
-
-# CRLF / LF with text files ...
-
-
-Note that when creating a text file using global function File(...) or via Dir.file(...),
-the default end-of-line mark is used (CRLF for windows, LF for Linux). To overrule this,
-the File object has two functions:
-
-```
-someFile.setWriteCRLF
-someFile.setWriteLF
-```
-
-
-# Automating interactive functions / Sys.stdin()
-
-
-Functions may query the user with Input("prompt").get and readLine("prompt"). If we want
-to automate such functions, we use function Sys.stdin() to buffer up any number of
-input lines.
-
 ```
-Sys.stdin("read-this") Input("Enter data").get
-<String>
-read-this
+File("x.txt").readBinary             # returns Binary
+"some string".getBytes("UTF-8")      # returns Binary
+File("x.txt").binaryCreate(binary)
+<someBinary>.toString("UTF-8")
 ```
 
-Note that both Input.get() and readLine() detect if there is buffered input, and
-if so, do not display the prompt or other info. Particularly useful for Input.get(),
-since buffering the empty string "" with Sys.stdin() means repeating the last value.
+### Sys.sessionId
 
+When starting CFT, it allocates a session UUID, which is available via
 
-## Running colon commands from script code
-
-
-Using the Sys.stdin() statement without being followed by Input.get() or readLine(), is just
-another way of entering commands. This means colon commands are available from CFT code.
-
-```
-stdin("2+3")
-<int>
-5
-```
-
-This can be exploited to let a script modify itself, by redefining
-functions, although that will be troublesome if those functions read input. A better
-use is that of running colon commands, particularly loading scripts. This is used
-frequently with shortcuts.
-
 ```
-stdin(":load SomeScript","?")
+Sys.sessionUUID
 ```
 
+This can be used if a function needs to decide if settings in Db2 were defined in
+current or previous session, for example.
 
-# Clone any value
 
+### Sys.secureSessionId
 
-The function Sys.clone() returns a copy of any value, as long as it is
-synthesizable. If not, an error is returned.
+The secure session id is a Binary object, which is internally tagged, so that 
+all CFT member functions are suppressed.
 
-```
-a=List(1,2,3)
-b=Sys.clone(a).add(4)  # "b" contains 1,2,3,4 while "a" remains unchanged
-```
+### The "Vault" script
 
-The clone can also be done manually:
+The Vault script uses the above to persist session secrets, such as passwords, 
+in a secure way. Data is stored in Db2 encrypted with the secure session id, 
+which means values can only be decrypted while in current session. 
 
-```
-a=List(1,2,3)
-b=eval(syn(a))
-```
+Great for caching passwords in-session in a secure way.
 
 
 
-# CFT.props - shortcuts
+# ---- Lazy evaluation
 
+### Lazy if
 
-The CFT.props text is self explanatory.
 
-```
-# Shortcuts
-#
-# The shortcuts are lines of code. If that code results in a macro, it is invoked with
-# no parameters. Since we don't need parameters, there is really no need for macros
-# here. The return value from a shortcut becomes the "last value", available
-# via Sys.lastResult, as well as used by :syn etc
-#
-# Note that shortcuts only work when the prefix is at the start of the interactive
-# input line.
-# ---
-
-shortcutPrefix = @
-shortcut:r = Sys.stdin(":load Release","?")
-shortcut:p = Sys.stdin(":load Projects","?")
-# List available shortcuts when typing '@' only
-# ---
-shortcut: = File("CFT.props").read-gt;line assert(line.contains("shortcut:")) out(line)
-```
+The if-expression uses lazy evaluation, which means that only the selected
+value expression (if any) gets evaluated. This is the same as every other
+language.
 
-This means that typing @r loads the Release script, then executes the '?' command, which
-lists its content.
+### Lazy AND, OR - &amp;&amp; ||
 
-# Show all shortcuts
 
+Boolean expressions with logical AND and OR, are lazy, again as in
+every other language.
 
-To list defined shortcut, just type
+### Lazy P(N,defaultExpr)
 
-```
-@
-```
 
-This is a shortcut itself, that traverses the CFT.props file and identifies and
-displays the shortcut definitions from it.
+The P() expression to access function parameters only evaluates the default
+expression if function parameter N has no value or null-value.
 
 
 
 
-# Std.Text.Lexer
+# ---- Std.Text.Lexer
 
 
 The Std.Text.Lexer objects adds
@@ -3273,299 +3075,168 @@ Feels like Regex character classes, no?
 
 
 
-# ANSI escape codes
+
+# ---- 3D library
 
 
-The Curses script contains code for producing ANSI escape sequences to set text color,
-bold and underline, as well as clearing the screen, and moving the cursor, which
-enables drawing boxes, for example.
+Included and adapted an old 3d-library written by me, over 20 years ago, for rendering 3D scenes,
+working purely in Java, without any acceleration. It is slow, but gets the job done.
 
 
-Since curses may not be supported on every device, the ANSI support is disabled
-by default, but can be enabled
-via a call to
+It is non-interactive, code only, and fits well into CFT.
 
-```
-Curses:Enable(true)
-```
-This changes all the functions inside Curses from returning empty strings, to return ANSI escape sequences.
+## Ref
 
 
+The key object is the Ref, which
+is a complete coordinate system living in global 3D space. It has functions for moving
+in different directions, as well as rotating around its three axes, and scaling.
+
+## World
 
 
-# Passwords, encryption, binary data
-
-## Passwords
-
-
-To read a password (no echo), call Sys.readPassword function.
-
-```
-password = Sys.password("Enter password")
-error(Sys.password("Repeat password") != password, "no match")
-```
-
-### Encrypt / decrypt
+Then there is the World object, which represents the camera and renderer. By default, the
+"film plane" of the camera lives at position (0,0,0) in the global coordinate system, and is defined using
+millimeters. This means that using a Ref object without setting scale, means it operates
+in millimeters. But we can change the scale on Ref objects, for example setting it to
+1000, which means that the units are now meters.
 
 
-The Std.Util object contains two functions, encrypt() and decrypt(), which both
-take a password string and a salt string. These together form a complete
-password, but the salt is not necessarily secret, just a way of differently initiate
-the encryption engine with the same (secret) password.
+Note that Ref objects are immutable, so all calls to Ref functions create new Ref objects.
 
 ```
-"password".getBytes("UTF-8")  # returns Binary object
-/password
-Std.Util.Encrypt(password).processString("this is a message")
-/x
-Std.Util.Decrypt(password).processString(x)
-<String>
-this is a message
+world = Std.DDD.World
+ref = Std.DDD.Ref  # at 0,0,0 and scale=1, which for default camera defs means millimeters
+ref=ref.scaleUp(1000)  # now working in meters
+ref=ref.fwd(3).turnRight(30).down(0.5)
+# new ref is placed 3 meters forward, turned right 30 degrees, and lowered 0.5 meters
 ```
-### Binary data
+## Brushes
 
 
-The processString() function of the Encrypt and Decrypt objects, is nice when
-storing encrypted strings in a database that only handles strings, such as Db2.
-
-
-The more generic function process() operates on binary data, and lets us
-save encrypted versions of files.
+The DDD library uses 3D brushes to generate content. A brush is defined as a sequence of
+line segments, for example a square, which is then "dragged" through 3D-space in a
+sequence of "pen down" operations.
 
 ```
-File("x.txt").readBinary             # returns Binary
-"some string".getBytes("UTF-8")      # returns Binary
-File("x.txt").binaryCreate(binary)
-<someBinary>.toString("UTF-8")
-```
-### Session data
-
-
-In addition to the public Sys.getSessionUUID, there is a secure value returned by
-Sys.getSecureSessionID(). It is a secure Binary object, which means it has no
-functions, and can only be passed as parameter to system functions, like encryption.
-
-
-The Vault script uses this to persist session secrets, in a secure way, stored
-in Db2 encrypted with the secure session id. By encrypting a second static value,
-it detects whenever there is a new session, prompting the user to enter the
-the secret values, to store for that session.
-
-
-
-
-
-# Reference: object types
-
-*Per v3.7.0*
-
-```
-Grep("extends Obj") => g
-Sys.homeDir.allFiles(Glob("*.java"))->f
-	g.file(f)-> line
-		out(line.after("class").before("extends"))
-| _.sort->x
-println(x)
-/objects
-
- DD 
- DDBrush 
- DDD 
- DDDBezier 
- DDDBrush 
- DDDRef 
- DDDTriangle 
- DDDVector 
- DDDWorld 
- DDLineBrush 
- DDRef 
- DDVector 
- DDWorld 
- ObjAnnotatedValue 
- ObjCIFS 
- ObjCIFSContext 
- ObjCIFSFile 
- ObjClosure 
- ObjColor 
- ObjConvert 
- ObjData 
- ObjDataFile 
- ObjDate 
- ObjDateSort 
- ObjDb 
- ObjDb2 
- ObjDict 
- ObjDir 
- ObjDuration 
- ObjEncrypt 
- ObjExtProcess 
- ObjFile 
- ObjFiles 
- ObjFilter 
- ObjFilterReader 
- ObjGlob 
- ObjGlobal 
- ObjGrep 
- ObjInput 
- ObjJava 
- ObjJavaClass 
- ObjJavaConstructor 
- ObjJavaMethod 
- ObjJavaObject 
- ObjJavaValue 
- ObjJavaValueBoolean 
- ObjJavaValueInt 
- ObjJavaValueLong 
- ObjJavaValueNull 
- ObjJavaValueObject 
- ObjJavaValueString 
- ObjJobs 
- ObjLexer 
- ObjLexerNode 
- ObjLexerToken 
- ObjLexerTokenStream 
- ObjLineReader 
- ObjMath 
- ObjPersistent 
- ObjPlot 
- ObjProcess 
- ObjRegex 
- ObjStd 
- ObjSys 
- ObjTerm 
- ObjText 
- ObjUtil 
- ObjWeb 
- ObjWebRequest 
- ObjWebServer 
- ObjWebServerContext 
- Value 
+boxBrush = world.Brush.box(1,1,Std.Color(255,0,0))
+# creates a brush for a box centered on origo, with a certain size and color
+# note the size here is "relative" and determined by the scale of the Ref's used
+# when painting with the brush.
+ref = Std.DDD.Ref.setScaleFactor(1000).forward(3) # forward 3 meters
+boxBrush.penDown(ref)  # start drawing with brush
+boxBrush.penDown(ref.fwd(2))  # move 2 meter forward and do penDown here
+boxBrush.penUp
 ```
 
-# Reference: Value types
+The above code generates a red box 1 x 1 meter in cross-section and 2 meters long.
+
+## Rendering
 
 
-*Per v3.4.4*
-```
-Grep("extends Value") => g
-Sys.homeDir.allFiles(Glob("*.java"))->f
-	g.file(f)->line
-		out(line.after("class").before("extends"))
-| _.sort->
-x
-println(x)
-
-
-/values
-ValueBinary
-ValueBlock
-ValueBoolean
-ValueFloat
-ValueInt
-ValueList
-ValueNull
-ValueObj
-ValueObjFileLine
-ValueObjFloat
-ValueObjInt
-ValueObjStr
-ValueString
-```
-# Reference: Expressions vs statements
-
-
-Almost all code in CFT are expressions. Function calls are of course expressions, and so are assignments.
-
-
-Even blocks, both local and Inner, are expressions.
-
-
-Instead of describing all expressions, it is easier to list the statements.
-
-## Statements
-
-
-These are the statements in CFT:
-
-
-
-- Looping and iteration over lists
-- assert/reject/break
-- out(), condOut() and report()
-- the addDebug() command
-- the help command
-- the "showCode" command
-
-
-
-As of version 2.8.2 there are two global functions that list out
-details about built-in syntax for expressions and statements:
+After doing some number of brush operations, it is time to create a PNG file
+with the image, as seen by the camera.
 
 ```
-_Stmt
-_Expr
+file=Dir.file("test.png")
+world.render(file)
+```
+## Drawing a spoked wheel
+
+
+The example script DDDExample contains code for rendering a spoked wooden wheel.
+
+![Wooden wheel](https://github.com/rfo909/CFT/blob/master/doc/wheel.png)
+
+
+# ---- 2D library
+
+
+Similar to the 3D library, the 2D library lets us draw vector graphics using a
+2D Ref object that moves in the plane, using either lines or filled polygons.
+
+## Spoked wheel (lines)
+
+
+Created DDExample which draws the same wheel as the 3D version, using the LineBrush of DD.World
+
+![Wooden wheel](https://github.com/rfo909/CFT/blob/master/doc/wheel2d.png)
+
+## Spoked wheel (polygon fill)
+
+Created DDExample2 which uses polygon drawing Brush of DD.World.
+
+![Wooden wheel](https://github.com/rfo909/CFT/blob/master/doc/wheel2dpoly.png)
+
+
+
+
+# ---- Internal web-server (experimental)
+
+
+There is a small embedded web-server in CFT, available in the Std.Web object. It
+supports GET and POST, does parameter and form input parsing.
+
+
+See WebTest script. Running the Init function sets up a very simple web "site" on
+port 2500 on localhost.
+
+
+Remember to re-run Init after changing the code, as the
+web-server runs as a Java background thread, and needs to be updated, in order to serve new
+content.
+
+
+A bit of a work in progress, not terribly useful, bit it sort of works.
+
+
+
+
+
+
+# ---- Calling Java (experimental)
+
+
+CFT lets us interface Java code via the Std.Java object. It contains functions
+for identifying classes. We then look up a constructor and call it, getting a
+JavaObject in return. We can also look up methods from the class object, and call
+them with parameters.
+
+
+Currently, for this to work, the Java code must exist in the classpath.
+
+
+Example (also available in script Tests01 as function Test17):
+
+```
+Std.Java.forName("java.lang.String") => String
+String.getConstructor(String).call(Std.Java.String("test")) => obj
+String.getConstructor(String).call(Std.Java.String("123")) => obj2
+Std.Java.Object(obj2) => paramObj
+String.getMethod("concat",String).call(obj,paramObj).value
+/t17
 ```
 
-These are listed at the top when typing help to show global functions.
-
-# Reference: Colon commands
-
-
-Colon commands are best described by entering a single colon at the CFT prompt.
-
-```
-:
-Colon commands
---------------
-:save [ident]?           - save script
-:load [ident]?           - load script
-:new                     - create new empty script
-:sw [ident]?             - switch between loaded scripts
-:delete ident [, ident]* - delete function(s)
-:copy ident ident        - copy function
-:wrap                    - line wrap on/off
-:debug                   - enter or leave debug mode
-:syn                     - synthesize last result
-:<int>                   - synthesize a row from last result (must be list)
-:quit                    - terminate CFT
-```
-
-Confusing colon commands with shortcuts?
+This function looks up the String class, then creates two instances via
+the constructor that takes a String parameter. CFT strings values are converted to Java values
+via the Std.Java.String() function.
 
 
-Colon commands exist outside the language, and are fixed (written in Java), while shortcuts run CFT program
-code, and are defined in the CFT.props file. So far all good.
+Then we wrap obj2, which is a CFT value (of type JavaObject), as a Java value,
+via Std.Java.Object(), and locate the concat() method of the String class.
 
 
-The "problem" is that CFT code (and so shortcuts) can run colon commands via "abusing" the Sys.stdin() command.
+It is invoked on
+obj, with obj2 as parameter. The method call returns a JavaValue object,
+which has a function value() that returns a CFT value, in this case the
+concatenated string "test123".
 
 
 
-# Reference: Synthesizable types
 
 
 
-- boolean
-- int
-- float
-- string
-- null
-- AValue
-- Date
-- Date.Duration
-- Dict
-- Dir
-- File
-- FileLine
-- Float
-- Glob
-- Int
-- List
-- Regex
-- Str
-
-
-# Comments and digressions
+# ---- Comments and digressions
 
 ## Function name AFTER code?
 
@@ -3643,7 +3314,7 @@ sub {...}
 ```
 
 
-## Script and code size
+# ---- Script and code size
 
 ### 2020-11-13 v2.0.0
 
@@ -3722,7 +3393,7 @@ Object types:     72
 Value types:      13
 ```
 
-### 2023-01-15 v3.7.8b
+### 2023-01-18 v3.8.0
 
 Added counter for the shell-like command, such as "ls" and "cd", which were previously 
 distributed as statements and built-in expressions.
@@ -3730,7 +3401,7 @@ distributed as statements and built-in expressions.
 Running CodeStats:main
 
 ```
-Script code:      17087 lines
+Script code:      17121 lines
 Java code:        35255 lines
 Functions:        510
 Shell commands:   22

@@ -1,5 +1,5 @@
 * CFT Reference
-* Using CFT as a shell
+* ---- Using CFT as a shell
   |  Combine with CFT function results
   |  The ":N" syntax
         Complex example
@@ -18,7 +18,7 @@
   |  Terminal dimensions - the Term object
         The @term shortcut
         Line wrapping
-* Script files
+* ---- Script files
   |  Save
   |  Load
   |  Create new empty script
@@ -27,9 +27,9 @@
   |  Calling functions in other scripts
   |  Examining non-current scripts
   |  Show all known scripts
-* Command line args
-* Shortcuts and colon commands
-* Lists
+* ---- Command line args
+* ---- Shortcuts and colon commands
+* ---- Lists
   |  Addition
   |  Subtraction
   |  Removing duplicates from a list
@@ -38,19 +38,21 @@
   |  List filtering with Lambda
   |  Removing items
   |  nth() negative indexes
-* Dictionaries
+* ---- Dictionaries
   |  Dictionary dotted syntax
   |  SymDict
   |  Dictionary name
   |  Dict set with strings
   |  Dict.get with default value
-* Block expressions
+* ---- String escape char
+  |  Escape codes
+* ---- Block expressions
   |  Local blocks
   |  Inner blocks
   |  Lambdas
   |  Block expressions summary
   |  Local variables scope
-* Conditionals - if expression
+* ---- Conditionals - if expression
   |  Inline form
   |  Traditional form
   |  Example 1
@@ -58,19 +60,27 @@
   |  Expressions are statements ...
   |  Blocks are expressions ...
   |  if-ladders
-* Code spaces - "pipes"
+* ---- Code spaces - "pipes"
   |  Result value from a code space
         Code space result value
         Otherwise ...
   |  Nested loops
-* Function parameters
-* User input
-  |  Paste multiple liens
-* The "protect" mechanism
-* Produce columns with report()
-* The error() function
-* Output to screen
-* Running external programs
+* ---- Function parameters
+* ---- User input
+  |  Paste multiple lines
+* ---- Output to screen
+* ---- Produce columns with report()
+* ---- ANSI escape codes
+* ---- Sys.stdin()
+  |  Running colon commands from script code
+* ---- The "protect" mechanism
+* ---- The error() global function
+* ---- The onLoad function
+* ---- Function parameters ...
+  |  Get parameters as List
+  |  Get parameters as Dict
+* ---- The general loop statement
+* ---- Running external programs
   |  Summary
   |  Dir.run()
   |  Dir.runCapture()
@@ -81,96 +91,77 @@
   |  Work directory issues
   |  Doing ssh
         Side note: ssh without password
-* Environment variables
-* Hiding helper functions  
-* Synthesis
+* ---- Environment variables
+* ---- Hiding helper functions  
+* ---- Value types
+  |  Get type of value
+  |  Type checking with "as"
+        Null-values
+        Dict (type) names
+        Closures and Lambdas
+  |  Note: "as XXX" is separate expression
+* ---- Synthesis
   |  Creating code from values
   |  Example using :syn
   |  Example using :NN
   |  Using syn()
-* Templating
+  |  Clone any value
+* ---- Templating
   |  Merging text with Dict
         Dict.mergeCodes()
         Custom merge codes
         Example using raw strings and Sequence
   |  .mergeExpr
-* Text processing
+* ---- Text processing
   |  Reading text files
   |  Script file "here" documents
   |  DataFile
         Include blank lines
         Allowing comments
   |  Sequence() and raw strings
-* The CFT database
+* ---- The CFT database (Db2)
   |  Collections
   |  Std.Db.Db2 vs Db2 script?
   |  Synchronization
-* Error handling
+* ---- Error handling
   |  Soft errors
   |  Hard errors
   |  Predicate calls
-* Debugging
+* ---- Debugging
   |  @lint
   |  addDebug()
   |  Sys.getCallHistory
   |  setBreakPoint(str)
-* Multitasking in CFT
+* ---- Lambdas and closures
+  |  Manual closure
+  |  Dictionary objects
+  |  Calling lambda/closure
+* ---- Classes
+  |  Class object types
+  |  What a "/class" function does
+* ---- Multitasking in CFT
   |  Key concepts
         Intended use
   |  The Process
   |  Flow control
-* Binary type
-* Lazy evaluation
-        Lazy if
-        Lazy AND, OR - &amp;&amp; ||
-        Lazy P(N,defaultExpr)
-* Processing JSON
-* Processing XML
+* ---- Processing JSON
+* ---- Processing XML
   |  Parsing XML
   |  Creating structure with code
   |  Looking up content
-* Internal web-server (experimental)
-* 3D library
-  |  Ref
-  |  World
-  |  Brushes
-  |  Rendering
-  |  Drawing a spoked wheel
-* 2D library
-  |  Spoked wheel (lines)
-  |  Spoked wheel (polygon fill)
-* Differing between Windows and Linux
-* The onLoad function
-* Get type of value
-* Closures and dictionary-objects
-  |  Manual closure
-  |  Dictionary objects
-  |  Auto-invoke
-* Type checking with "as"
-        Null-values
-        Dict (type) names
-        Closures and Lambdas
-        Dotted lookup => auto call
-  |  Note: "as XXX" is separate expression
-* Classes
-  |  Class object types
-  |  What a "/class" function does
-* Function parameters ...
-  |  Get parameters as List
-  |  Get parameters as Dict
-* The general loop statement
-* Storing CFT data structures to file - syn() and eval()
-* onLoad functions
-* Calling Java (experimental)
-* String .esc() and .unEsc()
-  |  Escape codes
-* CRLF / LF with text files ...
-* Automating interactive functions / Sys.stdin()
-  |  Running colon commands from script code
-* Clone any value
-* CFT.props - shortcuts
-* Show all shortcuts
-* Std.Text.Lexer
+* ---- Passwords, encryption, binary data
+  |  Binary type
+  |  Passwords
+  |  Encrypt / decrypt
+  |  Binary data
+        Sys.sessionId
+        Sys.secureSessionId
+        The "Vault" script
+* ---- Lazy evaluation
+        Lazy if
+        Lazy AND, OR - &amp;&amp; ||
+        Lazy P(N,defaultExpr)
+* ---- Std.Text.Lexer
   |  Concept
   |  Implementation
         .sub()
@@ -181,24 +172,23 @@
   |  Complex tokens
         Regular Node.addToken() example
         Node.addTokenComplex() example
-* ANSI escape codes
-* Passwords, encryption, binary data
-  |  Passwords
-        Encrypt / decrypt
-        Binary data
-        Session data
-* Reference: object types
-* Reference: Value types
-* Reference: Expressions vs statements
-  |  Statements
-* Reference: Colon commands
-* Reference: Synthesizable types
-* Comments and digressions
+* ---- 3D library
+  |  Ref
+  |  World
+  |  Brushes
+  |  Rendering
+  |  Drawing a spoked wheel
+* ---- 2D library
+  |  Spoked wheel (lines)
+  |  Spoked wheel (polygon fill)
+* ---- Internal web-server (experimental)
+* ---- Calling Java (experimental)
+* ---- Comments and digressions
   |  Function name AFTER code?
   |  Using Sys.stdin to run colon commands etc
   |  Code spaces / the "pipe"
   |  Code spaces vs Inner blocks
-  |  Script and code size
+* ---- Script and code size
         2020-11-13 v2.0.0
         2021-04-01
         2021-09-26
@@ -206,4 +196,4 @@
         2021-12-17 v3.0.0
         2022-03-31 v3.2.5
         2022-04-22 v3.5.0
-        2023-01-15 v3.7.8b
+        2023-01-18 v3.8.0
