@@ -242,7 +242,7 @@ public class Root {
                 }
                 String line = null;
                 try {
-                    line = stdio.getInputLine().trim();
+                    line = stdio.getInputLine();
                 } catch (Exception ex) {
                     stdio.println("inputLoop(): read failed");
                     break INPUT_LOOP;
@@ -275,7 +275,6 @@ public class Root {
      * Moved here from Runtime
      */
     public void processInteractiveInput(String line) throws Exception {
-        line = line.trim();
         TokenStream ts = null;
         ObjGlobal objGlobal = currScript.getObjGlobal();
         ScriptCode currScriptCode = objGlobal.getCurrScriptCode();

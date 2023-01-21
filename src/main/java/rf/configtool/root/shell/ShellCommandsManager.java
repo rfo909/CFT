@@ -82,8 +82,6 @@ public class ShellCommandsManager {
     
     public Value execute (Stdio stdio, ObjGlobal objGlobal, String line) throws Exception {
     	
-    	line=line.trim();
-    	
         boolean isBang=false;
 
         if (line.startsWith("!")) {
@@ -108,8 +106,13 @@ public class ShellCommandsManager {
             return null;
         }
         
-        // pre-process the command line
+        // replace TAB character with '*'
+        line=line.replace('\t', '*');
+        
+        // split the command line
         List<String> parts=parseLineParts(line);
+        
+        // create Command object from parts
         Command cmd=new Command(parts);
         
         if (isBang) {
