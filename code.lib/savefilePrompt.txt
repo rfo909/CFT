@@ -94,6 +94,14 @@
 # --
     P(1,Dir)=>dir
     s=dir.path
+    
+    if (s.length > Term.w-30) {
+    	fs=Sys.fileSeparator
+    	available=Term.w-40
+    	s=s.last(available)
+    	if (s.after(fs).length > 0) s=fs+(s.after(fs))
+    	s="..."+s
+    }
 
     # return value
     GetPathColor + s + Curses:Reset
