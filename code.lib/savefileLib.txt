@@ -789,8 +789,23 @@ run(null,null,null,true)
     P(3,Input("Enter partial file name, or glob pattern with '*'").get) => fname
     P(4,Input("Include sub-dirs y/n").setCurrCond("y")).get.toLower=="y" => subDirs
     
+	if (subDirs) {
+		proc=SpawnProcess(SymDict(dir,st,fname,subDirs), DoSearchTextFiles(dir,st,fname,subDirs))
+		Sys.Jobs.add(proc,'Searching for "'+st+'" "'+fname+'" '+dir.path)
+	} else {
+		DoSearchTextFiles(dir,st,fname,subDirs)
+	}
+/SearchTextFiles
+
+# DoSearchTextFiles
+# --
+	P(1) => dir
+	P(2) => st
+	P(3) => fname
+	P(4) => subDirs
+
     glob=if(fname.contains("*"),Glob(fname),Glob("*"+fname+"*"))
-    
+
     grep=Grep(st)
 
     totalCount=0
@@ -798,7 +813,7 @@ run(null,null,null,true)
         out(Int(file.lastModified,file)) 
     | _.sort-> x
         f=x.data
-        match=grep.file(f).length
+        match=grep.fileCount(f)
         totalCount=totalCount+match
         if (match>0) out(f)
     | => files
@@ -814,7 +829,9 @@ run(null,null,null,true)
         Inner{
             files->f
                     grep.file(f)->line
-                        report(line.file.name, line.lineNumber, line)
+                        println(Curses:TxtGreen + line.file.path + Curses:Reset)
+						println("" + line.lineNumber + ": " + line)
+						println
         }
     } else {
         # Show drilldown
@@ -838,9 +855,10 @@ run(null,null,null,true)
         
     }
 
-/SearchTextFiles
+//DoSearchTextFiles
 
-    
+   
+ 
 
 # Locate files under current directory
 # --
@@ -873,6 +891,14 @@ run(null,null,null,true)
     }
 /LocateFiles
 
+
+
+# Identify all file types under current dir
+# --
+	P(1,Dir) => dir
+	Dir.allFiles->f out(f.name.afterLast("."))
+	| _.unique.sort
+/GetFileTypes
     
     
 
