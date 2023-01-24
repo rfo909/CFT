@@ -1144,17 +1144,16 @@ run(null,null,null,true)
 //HistoryExecuteLines
 
 
-# Show history
+# Format history data as lines
 # --
 	P(1) as List => list
 	
-	lines = Inner{
-		count=0
-		list->dict
-			report(count, dict.dir.path, dict.command)
-			count=count+1
-	}
-//ShowHistoryFiltered
+	count=0
+	list->dict
+		out(("   "+count).last(3) + " " + Curses:TxtGreen+dict.dir.path+Curses:Reset)
+		out("       " + dict.command)
+		count=count+1
+//ShowHistoryData
 
 # Show history
 # --
@@ -1171,7 +1170,7 @@ run(null,null,null,true)
 			}
 		}
 
-		lines=ShowHistoryFiltered(list)
+		lines=ShowHistoryData(list)
 		Lib:Header("History")
 		Inner {
 			lines->line println(line)
