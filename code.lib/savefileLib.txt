@@ -1144,10 +1144,9 @@ run(null,null,null,true)
 //HistoryExecuteLines
 
 
-
 # Show history
 # --
-	list=Db2:Get(Sys.scriptId,"History",List)
+	P(1) as List => list
 	
 	lines = Inner{
 		count=0
@@ -1155,23 +1154,47 @@ run(null,null,null,true)
 			report(count, dict.dir.path, dict.command)
 			count=count+1
 	}
-	lines->line println(line)
+//ShowHistoryFiltered
+
+# Show history
+# --
+	list=Db2:Get(Sys.scriptId,"History",List).last(100)
+
+	filterStr=null
+	loop
+		if (filterStr != null) {
+			list=Inner{
+				list->dict
+					include=dict.dir.path.contains(filterStr) || dict.command.contains(filterStr)
+					assert(include)
+					out(dict)
+			}
+		}
+
+		lines=ShowHistoryFiltered(list)
+		Lib:Header("History")
+		Inner {
+			lines->line println(line)
+		}
+		println
+		readLine("!N to repeat or N to go to dir, Enter to abort, any to narrow") => cmd
+		if (cmd.trim=="") {
+			break
+		} else if (cmd.?parseInt) {
+			n=cmd.parseInt
+			dict=list.nth(n)
+			HistoryExecuteLines(List("cd " + dict.dir.path))
+			break
+		} else if (cmd.startsWith("!") && cmd.sub(1).?parseInt) {
+			n=cmd.sub(1).parseInt
+			dict=list.nth(n)
+			HistoryExecuteLines(List("cd " + dict.dir.path, dict.command))
+			break
+		} else {
+			filterStr=cmd
+		}
 	|
-	println
-	readLine("Enter ':N' to repeat or 'cd N' to go to dir") => cmd
-	if (cmd.startsWith("cd")) {
-		n=cmd.sub(2).trim
-		if (n.startsWith(":")) n=n.sub(1)
-		n=n.parseInt
-		dict=list.nth(n)
-		HistoryExecuteLines(List("cd " + dict.dir.path))
-	} else if (cmd.startsWith(":")) {
-		n=cmd.sub(1).parseInt
-		dict=list.nth(n)
-		HistoryExecuteLines(List("cd " + dict.dir.path, dict.command))
-	} else {
-		true
-	}
+	true
 	
 /HistoryShow
 
