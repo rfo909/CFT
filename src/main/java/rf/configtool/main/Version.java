@@ -23,6 +23,6 @@ public class Version {
     private Version() {}
 
     public static String getVersion() {
-        return "v3.8.1";
+        return "v3.8.2";
     }
 }

@@ -13,6 +13,33 @@
 
 <h1>CFT Change log</h1>
 
+<h3>3.8.2 2023-01-24 - shell path lookup syntax</h3>
+<p>
+Added "Path lookup" syntax, where if a shell argument starts with "-", then
+the following term is used to match path of current directory, entering a
+complete of partial name of parent directory.
+</p>
+<pre>
+cd /some/long/path/down/a/deep/tree
+cd -down/different/path
+pwd
+/some/long/path/down/different/path
+</pre>
+
+<p>
+Works with all the shell functions
+</p>
+
+<pre>
+cd /some/long/path/again
+touch -pa/test.txt
+</pre>
+
+<p>
+Here 'pa' matches 'path' and we touch file /home/long/path/test.txt
+</p>
+
+
 <h3>3.8.1 2023-01-21 - shell command TAB == '*'</h3>
 <p>
 Being used to autocomplete with TAB in shell, when detecting a shell command, we replace TAB with '*'

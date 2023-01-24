@@ -207,7 +207,47 @@ public class FileSet {
     
     
     private void processStringArg (String currentDir, String arg, boolean allowNewDir, boolean allowNewFile) throws Exception {
-        boolean isAbsolute;
+
+        // Pre-processing arg: the path lookup operator
+        
+        if (arg.startsWith("-")) {
+        	String remainingArg=arg.substring(1);
+        	String lookupTerm;
+        	
+        	int firstSepPos=remainingArg.indexOf(File.separatorChar);
+        	if (firstSepPos >= 0) {
+        		lookupTerm=remainingArg.substring(0,firstSepPos);
+        		remainingArg=remainingArg.substring(firstSepPos);
+        	} else {
+        		lookupTerm=remainingArg;
+        		remainingArg="";
+        	}
+        	
+        	if (lookupTerm.length()==0) throw new Exception("Path lookup: empty lookup term: " + arg);
+        	
+        	//System.out.println("Path lookup: lookupTerm=" + lookupTerm + " remainingArg=" + remainingArg);
+        	
+        	int pathMatchPos=currentDir.lastIndexOf(lookupTerm);
+        	if (pathMatchPos < 0) {
+        		throw new Exception("Path lookup: no match: " + arg);
+        	}
+        	
+        	int pathNextSepPos=currentDir.indexOf(File.separator,pathMatchPos);
+        	if (pathNextSepPos > 0) {
+        		// complete rewrite of arg
+        		arg=currentDir.substring(0,pathNextSepPos)+remainingArg;
+        	} else {
+        		// No file.separator following lookup match pos - must have matched current directory
+        		arg=currentDir+remainingArg;
+        	}
+        	
+        	//throw new Exception("Stopping");		
+        }
+        
+    	
+    	
+    	
+    	boolean isAbsolute;
 
         if (isWindows()) {
             isAbsolute=arg.startsWith("\\") || (arg.length() >= 3 && arg.charAt(1)==':' && arg.charAt(2)=='\\');
