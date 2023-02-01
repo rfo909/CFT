@@ -13,6 +13,28 @@
 
 <h1>CFT Change log</h1>
 
+<h3>3.8.3 2023-02-01 - run OS commands without bang</h3>
+<p>
+Implemented a hackish solution to the annoying bang ("!") to run external
+commands, in Root.java, doing some exception message string comparison, but
+it seems to work. 
+</p>
+<p>
+For names of external programs that overlap with internal commands, either
+in the script or the CFT shell, we can still use "!" as prefix to force
+running the external program.
+</p>
+<p>
+Implemented by prefixing the input line with a bang if certain conditions met,
+and attempting running it through the ShellCommand code, after failing to
+run as regular CFT.
+</p>
+<p>
+A somewhat important feature, but the code is shaky still, so not v3.9
+material just yet.
+</p>
+
+
 <h3>3.8.2 2023-01-24 - shell path lookup syntax</h3>
 <p>
 Added "Path lookup" syntax, where if a shell argument starts with "-", then

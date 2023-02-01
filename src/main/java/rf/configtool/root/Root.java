@@ -274,13 +274,14 @@ public class Root {
     /**
      * Moved here from Runtime
      */
-    public void processInteractiveInput(String line) throws Exception {
+    public void processInteractiveInput(final String inputLine) throws Exception {
         TokenStream ts = null;
         ObjGlobal objGlobal = currScript.getObjGlobal();
         ScriptCode currScriptCode = objGlobal.getCurrScriptCode();
 
         stdio.clearCFTCallStack();
-                
+               
+        String line=inputLine;
         
         try {
             // Shortcuts
@@ -443,19 +444,45 @@ public class Root {
                 // program line
                 currScriptCode.setCurrLine(line);
                 CFTCallStackFrame caller=new CFTCallStackFrame("<interactive-input>");
+                
+                // ## Note: ugly hack to differentiate between valid CFT input, CFT errors
+                // in script code, and OS functionality without the bang ("!")
+                //
+            
+                
+                FunctionBody fbody=new FunctionBody(line,loc);
+                boolean isCFTInput = true;
+                try {
+                	fbody.getCodeSpaces();
+                } catch (Exception ex) {
+                	isCFTInput=false;
+                }
+                
+                if (isCFTInput) try {
+                	Value result = objGlobal.getRuntime().processFunction(stdio, caller, new FunctionBody(line, loc), new FunctionState(null,null));
+                	postProcessResult(result);
+                	showSystemLog();
+                } catch (Exception ex) {
+                	System.out.println("---> " + ex.getMessage());
+                	if (ex.getMessage().contains("<script>")) throw ex; // CFT script code error, log below
+                	isCFTInput=false;
+                }
+                
+                if (!isCFTInput) {
+		        	final String shellCommandLine="!"+line;
+		        	System.out.println(shellCommandLine);
 
-                Value result = objGlobal.getRuntime().processFunction(stdio, caller, new FunctionBody(line, loc), new FunctionState(null,null));
-
-                postProcessResult(result);
-                showSystemLog();
+		            Value x = (new ShellCommandsManager()).execute(stdio, objGlobal, shellCommandLine);
+		            if (x != null) {
+		                postProcessResult(x);
+		                showSystemLog();
+		                return;
+		            }
+	        	}
+        	
             }
 
         } catch (Throwable t) {
-            try {
-                showSystemLog(); 
-            } catch (Exception ex) {
-                // ignore
-            }
             stdio.println("ERROR: " + t.getMessage());
             stdio.showAndClearCFTCallStack();
             if (debugMode) {
