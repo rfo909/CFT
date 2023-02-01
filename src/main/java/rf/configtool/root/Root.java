@@ -464,7 +464,11 @@ public class Root {
                 	showSystemLog();
                 } catch (Exception ex) {
                 	System.out.println("---> " + ex.getMessage());
-                	if (ex.getMessage().contains("<script>")) throw ex; // CFT script code error, log below
+                	if (ex.getMessage().contains("<script>") 
+                			|| ex.getMessage().contains("[eof]"))  // parse problem in called code 
+                	{
+                		throw ex; // CFT script code error, log below
+                	}
                 	isCFTInput=false;
                 }
                 
