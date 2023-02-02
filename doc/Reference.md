@@ -322,7 +322,7 @@ cd priv*
 ```
 
 If there is a single directory matching this glob expression, this works as expected, otherwise
-there will be an error, reportnig incorrect match count.
+there will be an error, reporting incorrect match count.
 
 
 ## Terminal dimensions - the Term object
@@ -345,8 +345,8 @@ This works on Linux (using stty command) and on Windows (powershell).
 ## Line wrapping
 
 
-By default, ouput line wrapping is off, which means that lines longer than the Cfg.w gets truncated
-with a '+' to indicate there is more. It can be switched on/off via the Cfg object, but there is also a
+By default, ouput line wrapping is off, which means that lines longer than the Term.w gets truncated
+with a '+' to indicate there is more. It can be switched on/off via the Term object, but there is also a
 colon command ":wrap" which toggles wrapping on or off.
 
 
