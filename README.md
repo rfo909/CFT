@@ -31,7 +31,8 @@ When entering commands at the CFT prompt, it falls into one of the *three* follo
 2. CFT code
 3. External program
 
-### "Shell-like" internal commands
+
+### (1) "Shell-like" internal commands
 
 The CFT "shell-like" commands, are implemented in CFT using a separate parser from the regular CFT
 language parser, which allows shell-like syntax, while being integrated with the CFT language.
@@ -54,23 +55,92 @@ and "cd", which maintains the CFT *current directory*.
 - mv
 
 
-There exists a global function _Shell, which lists out up to date information about
+There exists a global function "_Shell", which lists out up to date information about
 all CFT shell-like commands.
 
+```
+_Shell
+  <boolean>
+  true
+  # CFT shell-like (interactive) commands
+  # -------------------------------------
+  # 
+  #   ! ... - run operating system command or program
+  #   shell - run bash or powershell
+  #   ls ...
+  #   lsd ...
+  #   lsf ...
+  #   cd <dir>
+  #   pwd
+  #   cat <file>?
+  #   edit <file>?
+  #   more <file>?
+  #   tail <file>?
+  #   touch <file> ...
+  #   cp <src> ... <target>
+  #   rm <file/dir> ...
+  #   mv <src> ... <target>
+  #   mkdir <name>
+  #   grep <word|str> <file> ... - ex: grep test *.txt
+  #   diff <file1> <file2>
+  #   showtree <dir>?
+  #   hash <file> ...
+  #   hex <file>?
+  #   which <command>
+  # 
+  # - The 'lsd' lists directories only, and 'lsf' files only.
+  # 
+  # - The 'edit' command opens a file in editor.
+  # 
+  # - Note that the cat/edit/more/tail commands, if given no file argument,
+  #   will attempt working with with Sys.lastResult. Example:
+  #       touch someNewFile.txt
+  #       edit
+  # 
+  # - Note that 'rm' deletes both files and directories, and asks
+  #   for confirm when non-empty directories.
+  # 
+  # - The 'cp' command copies both files and directories.
+  # 
+  # - All commands working with files and directories allow both globbing,
+  #   local and absolute paths, on both Windows and Linux. To reference
+  #   values from Sys.lastResult use :: or :N (get value from list).
+  # 
+  #    ls a*.txt                - globbing
+  #    ls /some/path            - absolute path
+  #    ls c:\someDir            - absolute path (windows)
+  #    ls \\some-server\d$\xxx  - absolute network path (Windows)
+  # 
+  #    cd %someSymbol           - symbol resolving to dir or file
+  #    cd (dirExpr)             - dirExpr is a CFT function
+  # 
+  #    cat ::                   - The '::' corresponds to (Sys.lastResult)
+  #    cd :N                    - The ':N' corresponds to (Sys.lastResult(N))
+  # 
+  #    !cp :3 /some/path
+  # 
+  # 
+  # - Symbols are defined entering %%name which stores lastResult under
+  #   that name, usually some Dir or File.
+  # 
+```
 
-### CFT code
 
-CFT allows us to create functions, which in turn are organized into "script files", so we
+### (2) CFT code
+
+Entering CFT code on the command line is usually to call a function in the current script, 
+but it also allows us to create functions, as at its most basic a function is just a name
+for a line of code.
+
+Functions are in turn organized into "script files", so we
 can work with the code in regular text editors.
 
-Functions can also be defined interactively, as simple as this:
+Below an example of interactively creating a function:
 
 ```
 Date(Dir.newestFile.lastModified)
 /LM
 ```
-
-Parantheses are optional when calling a function without any parameters.
 
 The first line, when we press Enter, is executed immediately, and returns a Date object for
 when the newest file in current directory. Then the second line defines a name for the
@@ -90,10 +160,24 @@ Notepad++ if found, otherwise the ever-present regular Notepad.
 
 Use the '?' command to list functions in current script. 
 
+To call a function in the current script, just enter its name, and optionally parameters,
+then press Enter.
+
+```
+LM
+```
+
+CFT may then display something like this:
+
+```
+<obj: Date>
+2023-02-02 23:54:22
+```
 
 
 
-### External programs
+
+### (3) External programs
 
 The third option, after CFT has decided the input is neither one of the "shell-like" commands
 implemented internally, nor CFT code, the command is instead passed to the underlying
@@ -135,9 +219,9 @@ ever since creating a preprocessor for Ada for parallel simulation purposes at U
 
 
 
-# System library
+# Built-in functions
 
-The system library consists of a small set of about 30 global functions. These return values of
+CFT consists of a small set of about 30 global functions. These return values of
 various types, like directory or file objects, which in turn contain member functions like getting the
 files in a directory, or getting the directory of a file.
 
