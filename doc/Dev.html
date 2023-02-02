@@ -13,6 +13,98 @@
 
 <h1>CFT Change log</h1>
 
+<h2 class="tag">4.0.0 2023-02-02</h2>
+<p>
+And there, it felt like version four, with interactive OS commands integrated into CFT without
+special syntax. Looking through the list of what has been done since 3.0.0 and roughly comparing
+to the work between v2 and v3, it is clear that it is time for version 4. 
+</p>
+<p>
+Even as the 3.8.3 change of running OS commands is a bit hack-like, it works well. May at some point
+decide to formalize the detection of where errors come from, to differentiate between an input line
+meant for the OS, and an input line with bad but attempted CFT syntax.
+</p>
+
+<p>
+So ... will there be a version 5??
+</p>
+
+<p>
+My private TODO list has shrunk quite a bit lately. Some of the remaining (big) ideas follow.
+</p>
+
+<h4>Pluggable functionality</h4> 
+<p>
+Formalizing an interface or a way of adding pluggable functionality,
+using CFT as control script for external and specialized processes that do not naturally fall into
+the CFT code tree.
+</p>
+<p>
+Have even considered writing terminal games ...
+</p>
+
+<h4>I/O and terminal handling</h4>
+<p>
+Another advanced issue is improved I/O and terminal handling, so that we can create some rule set for 
+automatic submitting commands not only to a regular external program, but also to ssh,
+so that CFT can login automatically with username + password over ssh, if needed. This is a
+big "can of worms" compared to the simplistic one-line-at-a-time I/O model, which has
+worked very well so far.
+</p>
+
+<h4>Avoid blocking or hanging commands</h4>
+<p>
+One application of the above would be a long-dreamed solution to the problem of how both CFT code and
+in particular external commands sometimes will take way too long, even hanging. The idea here is that
+all commands issued at the command line are run in a separate process, and the REPL remains
+attached to the most recent, interacting with it normally, until we press Esc or something, at
+which point we disconnect, leaving it running in the background, and returns us to prompt. 
+</p>
+
+<h4>Sub-languages</h4>
+<p>
+The original plans, before deciding on functions, was that every (or some) objects could support their own
+mini language, parsed separately, perhaps only depending on respecting the use of curly braces. One such
+language could be multiline OS native scripts, corresponding to how we use OS commands directly from
+the interactive command line ...
+</p>
+
+<pre>
+	Std.Ext {
+		cd (WorkDir)
+        mvn clean package
+        cp target/*packages*.jar (TargetDir)
+	}
+</pre>
+      
+<h4>OS commands inline in code</h4>
+<p>
+Could also let the "bang" notation be supported inline in CFT code.
+</p>  
+<pre>
+	WorkDir.cd
+	!mvn clean package
+	!cp target/*packages*.jar (TargetDir)
+</pre>
+
+
+<h4>Networking</h4>
+<p>
+A long-time concept has been that of letting instances of CFT communicate with each other, so that
+they could form a network, allowing us to manage hosts only available indirectly, via jump hosts,
+from the local PC. This would also really require running CFT as services, but the main reason it has
+never surfaced for real, are the security concerns. I mean, bypassing ssh or windows logins? Not likely
+to be accepted in any real world environments. 
+</p>
+
+<p>
+I did a test on invoking CFT commands remotely in a separate CFT process some time during 2021. It worked, 
+but had no real use by itself, and was deleted from the code base. The java class StdioVirtual is a remnant
+from this test, which later has seen use for managing I/O for background jobs and processes.
+</p>
+
+
+
 <h3>3.8.3 2023-02-01 - run OS commands without bang</h3>
 <p>
 Implemented a hackish solution to the annoying bang ("!") needed to prefix
