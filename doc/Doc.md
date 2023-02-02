@@ -1,9 +1,9 @@
 
 # CFT ("ConfigTool") introduction
 
-Last updated: 2023-01-18 RFO
+Last updated: 2023-02-01 RFO
 
-v3.7.7
+v3.8.3
 
 
 
@@ -63,6 +63,16 @@ ls *.txt
 cp *.txt ../somePlace
 ```
 
+## External programs
+
+CFT lets us run external programs from the interactive command line, by just typing and press
+Enter. 
+
+```
+git status .
+Get-Service *tomcat*
+```
+
 ## The _Shell global function
 
 Run the global function _Shell to get up to date help on the CFT shell command interpreter.
@@ -87,7 +97,7 @@ cd c:\program" "files
 Note that backslash is NOT an escape character in CFT, so just use it like any other character.
 
 
-# The prompt
+# Prompt colors
 
 The prompt can be configured to use colors. 
 

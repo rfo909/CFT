@@ -15,8 +15,8 @@
 
 <h3>3.8.3 2023-02-01 - run OS commands without bang</h3>
 <p>
-Implemented a hackish solution to the annoying bang ("!") to run external
-commands, in Root.java, doing some exception message string comparison, but
+Implemented a hackish solution to the annoying bang ("!") needed to prefix
+external commands, in Root.java, doing some exception message string comparison, but
 it seems to work. 
 </p>
 <p>
@@ -30,8 +30,15 @@ and attempting running it through the ShellCommand code, after failing to
 run as regular CFT.
 </p>
 <p>
-A somewhat important feature, but the code is shaky still, so not v3.9
+This is an mportant feature, but the code is shaky still, so not v3.9
 material just yet.
+</p>
+<p>
+Also modified the "." syntax (repeat last command) so that "." + File.separator
+is attempted run as a a bang command.
+</p>
+<p>
+Updated docs.
 </p>
 
 

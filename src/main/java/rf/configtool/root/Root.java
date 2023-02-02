@@ -446,9 +446,10 @@ public class Root {
                 currScriptCode.setCurrLine(line);
                 CFTCallStackFrame caller=new CFTCallStackFrame("<interactive-input>");
                 
-                // ## Note: ugly hack to differentiate between valid CFT input, CFT errors
-                // in script code, and OS functionality without the bang ("!")
-                //
+                // ## Note: (v3.8.3) somewhat of a hack to differentiate between valid CFT input, 
+                // CFT errors in script code, and OS functionality without the bang ("!")
+                // Also modified the "." command so that "." + File.separator is NOT seen as
+                // an attempt to repeat last
             
                 boolean isCFTInput = true;
 
@@ -509,11 +510,6 @@ public class Root {
                     }
                 }
                 t.printStackTrace();
-//              try {
-//                  objGlobal.outln("INPUT: " + ts.showNextTokens(10));
-//              } catch (Exception ex) {
-//                  // ignore
-//              }
             }
         }
     }

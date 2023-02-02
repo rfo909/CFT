@@ -7,17 +7,22 @@
   |  Symbols 
         Diffing files example
   |  Note on specials
-  |  Bang commands
-  |  Bang command parameters
+  |  Repeat last line
+  |  External commands
+        Force 
+        Parameters
+        External program in current dir
   |  Background jobs
         Blocking on input?
         Bring to foreground
         Warning
   |  Command history
   |  The "shell" command
+  |  Path parent lookups
+  |  TAB "autocompletion"
   |  Terminal dimensions - the Term object
         The @term shortcut
-        Line wrapping
+  |  Line wrapping
 * ---- Script files
   |  Save
   |  Load

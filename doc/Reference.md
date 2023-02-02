@@ -1,9 +1,9 @@
 
 # CFT Reference
 
-Last updated: 2023-01-18 RFO
+Last updated: 2023-02-01 RFO
 
-v3.7.7
+v3.8.3
 
 
 
@@ -139,32 +139,61 @@ Shell command parameters starting with ":" or "%" are considered CFT expressions
 being embedded inside parantheses. 
 
 
+## Repeat last line
 
-## Bang commands
-
-Starting a command with an exclamation mark ("!"), what follows should be Linux or Powershell
-command. 
+The single dot "." is used to rerun the last line of interactive input to CFT. Note also that
+it can be followed by additional text, which is literally appended to previous command. Example:
 
 ```
-!ls -l
-ls -l
+Dir.files    # returns a list of files
+.            # rerun it
+..length     # run command Dir.files.length 
 ```
 
-## Bang command parameters
 
-Bang commands are managed by the shell command parser, and so support the same notation
+## External commands
+
+To run external programs, we just type the commands and press Enter. As long as the external
+program is not parseable and executable as a CFT script command or CFT shell-like command, it will
+be passed to the external shell. For windows that defaults to Powershell, and on Linux to Bash.
+
+```
+git status .
+Get-Service *tomcat* 
+```
+
+
+Default shells are configured in CFT.props.
+
+### Force 
+
+For commands that are confused with CFT script or shell-like commands, we can *force* into running
+as external programs, by prefixing the line with an exclamation mark ("!"), so that that what follows 
+should be Linux or Powershell command. 
+
+```
+ls          # CFT shell-command "ls"
+!ls         # Underlying OS "ls" command
+```
+
+### Parameters
+
+External commands are managed by the internal CFT shell command parser, and so support the same notation
 as the other shell commands, for using output from expressions, looking up symbols and
 referring data from result of previous command:
 
 ```
-!scp %x user@host:.
-!scp (GetThatFile) user@host:.
+scp %x user@host:.
+scp (GetThatFile) user@host:.
 
 ls
-!scp :4 user@host:.
+scp :4 user@host:.
 ```
 
+### External program in current dir
 
+The syntax ./xxx or .\xxx is reserved to mean running an external program, and not, as with other
+commands starting with a dot, to repeat the previous interactive command.
 
 
 ## Background jobs
@@ -249,6 +278,51 @@ This command starts an operating system shell, defaults to bash on Linux and Pow
 When exiting that shell, we are returned to the CFT prompt.
 
 
+## Path parent lookups
+
+If we are working down a deep path, and want to access a directory somewhere down that path,
+we can use the *parent lookup* notation, which looks for an element in the path,
+by exact match or substring, starting at the bottom (current directory), moving up towards
+the root.
+
+Example:
+
+```
+cd /some/long/path/down/a/deep/tree
+cd -down/different/path
+pwd
+/some/long/path/down/different/path
+```
+
+
+This works with all the shell functions, not just "cd":
+
+
+```
+cd /some/long/path/again
+touch -pa/test.txt
+```
+
+Here 'pa' matches 'path' and we touch file /home/long/path/test.txt
+
+
+## TAB "autocompletion"
+
+CFT (Java) does not support reading single characters of interactive input, only complete
+lines. This means autocomplete as we are used to in Bash, does not work. 
+
+To remedy this somewhat, when entering commands, the TAB character gets replaced so that:
+
+```
+cd priv<TAB>
+
+becomes
+
+cd priv*
+```
+
+If there is a single directory matching this glob expression, this works as expected, otherwise
+there will be an error, reportnig incorrect match count.
 
 
 ## Terminal dimensions - the Term object
@@ -268,16 +342,12 @@ After resizing the terminal, we need to update the Term object.
 
 This works on Linux (using stty command) and on Windows (powershell).
 
-### Line wrapping
+## Line wrapping
 
 
 By default, ouput line wrapping is off, which means that lines longer than the Cfg.w gets truncated
 with a '+' to indicate there is more. It can be switched on/off via the Cfg object, but there is also a
 colon command ":wrap" which toggles wrapping on or off.
-
-
-
-
 
 
 
@@ -3312,7 +3382,6 @@ do {...}
 Compute {...}
 sub {...}
 ```
-
 
 # ---- Script and code size
 

@@ -2,10 +2,11 @@
 * Platform
 * Shell-like commands
   |  List of commands
+  |  External programs
   |  The _Shell global function
   |  Paths with space
   |  Windows backslash
-* The prompt
+* Prompt colors
   |  Disabling Curses
 * CFT Core types
   |  String literals
