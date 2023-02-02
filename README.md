@@ -23,14 +23,24 @@ There are two major aspects to CFT:
 - interactive shell
 - create functions
 
-## Shell-like commands 
+## As interactive shell
 
-The interactive shell offers normal shell-like functionality
-for listing files in current directory, navigating the directory tree, copying and deleting, and 
-so on. 
+When entering commands at the CFT prompt, it falls into one of the *three* following categories:
 
-The command line interface makes CFT feel like a shell, for navigating the directory tree, and inspecting files,
-such as:
+1. CFT shell-like commands
+2. CFT code
+3. External program
+
+### "Shell-like" internal commands
+
+The CFT "shell-like" commands, are implemented in CFT using a separate parser from the regular CFT
+language parser, which allows shell-like syntax, while being integrated with the CFT language.
+
+So while we could for example run the external command "touch" to create a new file, by implementing
+it in CFT, we get a File object back, which we can then do something with, like open in the editor.
+
+The most used "shell-like" commands in CFT are those for navigating the directory tree, such as "ls"
+and "cd", which maintains the CFT *current directory*.
 
 - ls
 - cd
@@ -43,19 +53,70 @@ such as:
 - cp
 - mv
 
+
 There exists a global function _Shell, which lists out up to date information about
 all CFT shell-like commands.
 
 
+### CFT code
+
+CFT allows us to create functions, which in turn are organized into "script files", so we
+can work with the code in regular text editors.
+
+Functions can also be defined interactively, as simple as this:
+
+```
+Date(Dir.newestFile.lastModified)
+/LM
+```
+
+Parantheses are optional when calling a function without any parameters.
+
+The first line, when we press Enter, is executed immediately, and returns a Date object for
+when the newest file in current directory. Then the second line defines a name for the
+previous line, creating the "LM" (last modified) function in current script.
+
+To work with this script file in an editor, we first need to save it, then open in 
+an editor. This is done with the two following commands:
+
+```
+:save Test
+@e
+```
+
+The '@e' is a shortcut, which runs CFT library code opening the current script (if saved) in
+a text editor. On Linux you will be asked to select which editor, while on Windows it uses
+Notepad++ if found, otherwise the ever-present regular Notepad.
+
+Use the '?' command to list functions in current script. 
 
 
-## Creating functions
 
-All code in CFT is stored as functions, which in turn are organized into "script files",
-which we usually work with using an editor, although functions can also be defined interactively.
 
-The input loop of CFT processes both shell-like commands like "ls" and "cd", as well
-as the full CFT language, with expressions, loops, function calls.
+### External programs
+
+The third option, after CFT has decided the input is neither one of the "shell-like" commands
+implemented internally, nor CFT code, the command is instead passed to the underlying
+shell.
+
+Example:
+
+```
+git pull origin master
+```
+
+*NOTE:* The above example, where we enter a command line for an external program directly, is
+only supported interactively. It is *not valid CFT program code*.
+
+To create a function "Pull" to do the same (so we can automate it):
+
+```
+Dir.run("git","pull","origin","master")
+/Pull
+```
+
+
+
 
 
 # Why a new script language?
@@ -63,7 +124,7 @@ as the full CFT language, with expressions, loops, function calls.
 The reason for developing CFT, is mainly the horrors of PowerShell, but also a desire for a an automation
 environment and shell that works the same on both Windows and Linux. 
 
-CFT is also inspired by PowerShell, as all values are objects, instead of just strings, like in the
+CFT is still inspired by PowerShell, as all values are objects, instead of just strings, like in the
 linux/unix shells. 
 
 Lastly it should be mentioned that parsers and intepreters, and language design is a long lasting interest,
@@ -86,12 +147,12 @@ Show global functions by typing 'help':
 help
   <obj: <GLOBAL>>
   <GLOBAL>
-  # v3.7.4
-  # 
+  # v3.8.3
+  #
   # _Expr() - information about expressions in CFT
   # _Shell() - CFT shell-like commands
   # _Stmt() - information about Statements in CFT
-  # 
+  #
   # AValue(str,any,metaDict?) - created AValue (annotated value) object
   # Binary(hexString) - convert hex string to Binary value
   # DataFile(file,prefix) - create DataFile object
@@ -101,7 +162,7 @@ help
   # File(str) - creates File object
   # FileLine(str, lineNo, File) - create FileLine object
   # Float(value,data) - create Float object - for sorting
-  # Glob(pattern,ignoreCase?) - creates Glob object for file name matching, such as '*.txt' - ignoreCase defaults to true on win+
+  # Glob(pattern,ignoreCase?) - creates Glob object for file name matching, such as '*.txt' - ignoreCase defa+
   # Grep() or Grep(a,b,...) or Grep(list) - create Grep object
   # Input(label) - create Input object
   # Int(value,data) - create Int object - for sorting
@@ -112,7 +173,7 @@ help
   # Sys() - create Sys object
   # Term - get terminal config object
   # currentTimeMillis() - return current time as millis
-  # error(cond?, msg) - if expr is true or no expr, throw soft error exception
+  # error(cond?, msg) - if cond expr is true or no condition, throw soft error exception
   # eval(str) - execute program line and return result
   # getExprCount() - get number of expressions resolved
   # getType(any) - get value or object type
@@ -138,7 +199,7 @@ Dir.run("git","status")
 *Note* when calling a function without any parameters, the ()'s are optional, so "Dir" above calls the global
 function, which creates a Dir object (for current directory), and then we call the .run() member function of that object. 
 
-So even with only some 30 global functions, the system library consists of 500+ functions, spread out across
+So even with only some *30 global* functions, the system library consists of *500+ member functions*, spread out across
 80+ object types. 
 
 
@@ -202,8 +263,8 @@ presents a summary:
 ```
 CodeStats:main
 
-Script code:      17087 lines
-Java code:        35255 lines
+Script code:      17178 lines
+Java code:        35335 lines
 Functions:        510
 Shell commands:   22
 Object types:     71
@@ -211,23 +272,9 @@ Value types:      13
 ```
 
 
-To look at the implementation of the CodeStats script, type the following
-
-```
-:load CodeStats
-?
-@e
-```
-
-The '?' command lists all functions in current script.
-
-The '@e' is a shortcut to open current script in an editor.
-
-Shortcuts are defined in CFT.props.
 
 
 # Integrated help
-
 
 All functionality in CFT is documented via the interactive help system.
 
@@ -251,6 +298,11 @@ List help
 ```
 
 The exampel above also illustrates that String and int are also objects.
+
+```
+"test".length
+```
+
 
 
 ## Special help functions
@@ -276,9 +328,9 @@ _Shell
 
 CFT is a *programming language* with an interactive command interface.
 
-The reason it should not be considered a script language, is that it does not allow calling external 
-programs just by entering their name and parameters, but instead require calls to external programs 
-to be written as code:
+The reason it should not be considered a script language, is that the CFT language does not allow 
+calling external programs just by entering their name and parameters, even if it is supported 
+interactively. CFT instead requires calls to external programs to be written as code:
 
 ```
   # If CFT were a scripting language, the following might be a valid
@@ -306,16 +358,15 @@ Dir.runCapture("cmd","/c","dir")
 ```
 
 
-
 # Frequent CFT uses
 
+- daily shell for working with files and directories
 - check out + run build + distribute files + cleanup
 - search project trees
 - collect and search log files 
-- various install and deployment tasks
+- generate configuration files on various formats
+- install, deployment, restart, cleanup tasks
 - automate powershell command sequences
-- built-in JSON and XML parsers (written in CFT)
-
 
 
 # Download and compile
@@ -331,7 +382,8 @@ git clone https://github.com/rfo909/CFT.git
 cd CFT
 mvn package
 ./cft
-$ 2+3
+
+2+3
 5
 ```
 
@@ -341,13 +393,15 @@ $ 2+3
 
 # References
 
-[Introduction](doc/Doc.md).
+[CFT Introduction](doc/Doc.md).
 
-[Reference](doc/Reference.md).
+[Full Reference](doc/Reference.md).
 
-[Full Youtube tutorial](https://www.youtube.com/playlist?list=PLj58HwpT4Qy80WhDBycFKxIhWFzv5WkwO).
+# Youtube
 
-[Youtube HOWTO-videos](https://www.youtube.com/playlist?list=PLj58HwpT4Qy-12WjM16ALnLGEyy3kxX9r).
+[Full Tutorial](https://www.youtube.com/playlist?list=PLj58HwpT4Qy80WhDBycFKxIhWFzv5WkwO).
+
+[HOWTO-videos](https://www.youtube.com/playlist?list=PLj58HwpT4Qy-12WjM16ALnLGEyy3kxX9r).
 
 
 # Appendix
