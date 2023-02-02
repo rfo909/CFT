@@ -163,7 +163,7 @@ public class ObjTerm extends Obj {
             return "isTerminal";
         }
         public String getShortDesc() {
-            return "isTerminal() - false if noTerminal flag to CFT, which means not safe to check dimensions";
+            return "isTerminal() - false if -noterm flag to CFT, which means not safe to check dimensions";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
