@@ -337,8 +337,9 @@ public class Root {
             
             // pre-processing input
 
-            if (line.startsWith(".")) {
+            if (line.startsWith(".") && !line.startsWith("."+File.separatorChar)) {
                 // repeat previous command
+            	// ("./xxx" and ".\xxx" is assumed to be local programs to be run, see below)
                 String currLine = currScriptCode.getCurrLine();
                 if (currLine == null) {
                     stdio.println("ERROR: no current line");
@@ -449,21 +450,30 @@ public class Root {
                 // in script code, and OS functionality without the bang ("!")
                 //
             
-                
-                FunctionBody fbody=new FunctionBody(line,loc);
                 boolean isCFTInput = true;
-                try {
-                	fbody.getCodeSpaces();
-                } catch (Exception ex) {
+
+                // detect ./command syntax directly?
+                if (line.trim().startsWith("."+File.separator)) {
                 	isCFTInput=false;
                 }
                 
+                // try parsing command line?
+                if (isCFTInput) {
+	                FunctionBody fbody=new FunctionBody(line,loc);
+	                try {
+	                	fbody.getCodeSpaces();
+	                } catch (Exception ex) {
+	                	isCFTInput=false;
+	                }
+                }
+                
+                // try executing CFT command?
                 if (isCFTInput) try {
                 	Value result = objGlobal.getRuntime().processFunction(stdio, caller, new FunctionBody(line, loc), new FunctionState(null,null));
                 	postProcessResult(result);
                 	showSystemLog();
                 } catch (Exception ex) {
-                	System.out.println("---> " + ex.getMessage());
+                	//System.out.println("---> " + ex.getMessage());
                 	if (ex.getMessage().contains("<script>") 
                 			|| ex.getMessage().contains("[eof]"))  // parse problem in called code 
                 	{
@@ -472,9 +482,10 @@ public class Root {
                 	isCFTInput=false;
                 }
                 
+                // try process as CFT bang command?
                 if (!isCFTInput) {
 		        	final String shellCommandLine="!"+line;
-		        	System.out.println(shellCommandLine);
+		        	//System.out.println(shellCommandLine);
 
 		            Value x = (new ShellCommandsManager()).execute(stdio, objGlobal, shellCommandLine);
 		            if (x != null) {
