@@ -105,10 +105,10 @@ Example:
 git pull origin master
 ```
 
-*NOTE:* The above example, where we enter a command line for an external program directly, is
-only supported interactively. It is *not valid CFT program code*.
+*NOTE:* entering a command line for an external program like this, is
+only supported interactively. It is *not valid CFT function code*.
 
-To create a function "Pull" to do the same (so we can automate it):
+To create a function "Pull" to do the same:
 
 ```
 Dir.run("git","pull","origin","master")
