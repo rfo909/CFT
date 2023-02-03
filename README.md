@@ -25,7 +25,7 @@ There are two major aspects to CFT:
 
 ## As interactive shell
 
-When entering commands at the CFT prompt, it falls into one of the *three* following categories:
+When entering commands at the CFT prompt, these fall into one of the *three* following categories:
 
 1. CFT shell-like commands
 2. CFT code
@@ -128,14 +128,15 @@ _Shell
 
 ### (2) CFT code
 
-Entering CFT code on the command line is usually to call a function in the current script, 
+Entering CFT code on the command line is *usually to call a function* in the current script, 
 but it also allows us to create functions, as at its most basic a function is just a name
 for a line of code.
 
-Functions are in turn organized into "script files", so we
-can work with the code in regular text editors.
+Functions are in turn organized into collections which we call "scripts", and which are saved
+as text files, which we can then use regular text editors to develop further.
 
-Below an example of interactively creating a function:
+Below an example of interactively creating a function, although these two lines also 
+represent the form which functions are defined in the script files.
 
 ```
 Date(Dir.newestFile.lastModified)
@@ -190,7 +191,7 @@ git pull origin master
 ```
 
 *NOTE:* entering a command line for an external program like this, is
-only supported interactively. It is *not valid CFT function code*.
+only supported interactively. It is currently *not valid CFT function code*.
 
 To create a function "Pull" to do the same:
 
@@ -407,39 +408,6 @@ A third special help function summarizes the shell-like commands of CFT.
 _Shell
 ```
 
-
-# Script language or programming language?
-
-CFT is a *programming language* with an interactive command interface.
-
-The reason it should not be considered a script language, is that the CFT language does not allow 
-calling external programs just by entering their name and parameters, even if it is supported 
-interactively. CFT instead requires calls to external programs to be written as code:
-
-```
-  # If CFT were a scripting language, the following might be a valid
-  # line of code in the language.
-
-  git pull origin master
-
-  # However, this is not valid in CFT, as we require a bit of code, such as
-
-  Dir.run("git","pull","origin","master")
-  
-  # or ...
-  
-  Dir.run("git pull origin master".split)
-```
-
-The disadvantage of having to write code instead of just running a program
-is believed to be out-weighed by a richer "vocabulary", as there are 4 different
-functions inside the Dir object for running external programs, with varying functionality,
-return value and complexity, for example
-
-```
-# Run external program and return stdout as List of String
-Dir.runCapture("cmd","/c","dir")  
-```
 
 
 # Frequent CFT uses
