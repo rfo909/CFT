@@ -1,0 +1,127 @@
+# Readme
+# --
+<<<<<< EOF
+
+Table data parser, creates List of Dict objects. 
+See ExampleData.
+
+The rules are lines that start with '$' followed by field
+name, colon, and then code which executes inside a Lambda, 
+as follows:
+
+	Lambda{P(1) <rule>}
+
+This means the rule code can use the underscore "_" to refer
+to the value, but for complex expressions, it will need to 
+use P(1) instead.
+
+>>>>>> EOF
+
+
+# Example data
+# --
+<<<<<<<<<<<<<<<<<<<<<<<< EOF
+Name        Age         Codes
+-----       ----        -----
+Santa Claus 99          1,a,2,test
+Helper      56          -
+
+$Age:    _.parseInt
+$Codes:  if(P(1)=="-",List,P(1).split(","))
+>>>>>>>>>>>>>>>>>>>>>>>> EOF
+/ExampleData
+
+
+# Is line made up of '-' only?
+# --
+	P(1)=>s
+	s.chars->c reject(c=='-') out(c) | _.length == 0
+//IsSeparatorLine
+
+
+# Process data - returns list of dictionaries
+# --
+	P(1) as List => data
+	
+	rules=Dict
+	
+	# Verify no TAB's in data.
+	# Remove empty lines and lines containing only "---"
+	# Also identify rule lines, and store the rules
+	lines = Inner{
+		data->line 
+			error(line.contains("^t".unEsc),"TAB found in data")
+			s=line.split.concat.trim
+			reject(s=="" || IsSeparatorLine(s))
+			if (line.startsWith("$")) {
+				name=line.after("$").before(":").trim
+				expr=line.after(":").trim
+				rules.set(name,eval("Lambda{P(1) " + expr + "}"))
+				continue
+			}
+			out(line)
+	}
+
+	names=List
+	positions=List
+
+
+	# First line identifies column names, and also defines where values start
+	# The next column effectively defines where previous column ends
+	headers = lines.first
+	lines.remove(0)
+		
+	Inner{
+		headers.split->name
+			pos=headers.indexOf(name)
+			names.add(name)
+			positions.add(pos)
+			#println(name,"->",pos)
+	}
+	
+	# Process data lines
+	result=List
+	Inner {
+		lines->line
+			#println(line)
+			#println("0123456789".times(5))
+			object=Dict
+
+			Inner {
+				colNo=0
+				loop
+					#println("colNo=",colNo,"names.length",names.length)
+					isLast=(colNo==names.length-1)
+					val=if(isLast) {
+						line.sub(positions.nth(colNo))
+					} else {
+						line.sub(positions.nth(colNo), positions.nth(colNo+1))
+					} 
+					val=val.trim
+					name=names.nth(colNo)
+					rule=rules.get(name,Lambda{P(1)})
+
+					tryCatch(rule.call(val)) => x
+					if (x.ok) {
+						val=x.result
+					} else {
+						Inner{x.stack->line println(line)}
+						error("Rule failed for '" + name + "'")
+					}
+					object.set(name,val)
+					colNo=colNo+1
+					break(colNo >= names.length)
+			}
+			result.add(object)
+	}
+
+	# Return value
+	result
+
+/Parse
+
+# Test
+# --
+	result = Parse(ExampleData)
+	JSON:PP(result)
+/Test
