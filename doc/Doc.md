@@ -3,7 +3,7 @@
 
 Last updated: 2023-02-01 RFO
 
-v3.8.3
+v4.0.0
 
 
 
@@ -123,6 +123,12 @@ like git, messing up the display. If this happens, just disable use of these, wi
 Curses:Disable
 ```
 
+# State management
+
+CFT has *no global state*, which means there are no global variables, no script states. This reduces
+risk of unwanted side effects. 
+
+Scripts in CFT are only collections of functions, in reality *name spaces*.
 
 
 # CFT Core types

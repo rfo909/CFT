@@ -3,7 +3,7 @@
 
 Last updated: 2023-02-01 RFO
 
-v3.8.3
+v4.0.0
 
 
 
@@ -141,7 +141,7 @@ being embedded inside parantheses.
 
 ## Repeat last line
 
-The single dot "." is used to rerun the last line of interactive input to CFT. Note also that
+The single dot "." is used to rerun the last command given via interactive input to CFT. Note also that
 it can be followed by additional text, which is literally appended to previous command. Example:
 
 ```
@@ -149,6 +149,14 @@ Dir.files    # returns a list of files
 .            # rerun it
 ..length     # run command Dir.files.length 
 ```
+
+Note that after that last line, the last command is now changed into
+
+```
+Dir.files.length
+```
+
+
 
 
 ## External commands
@@ -165,9 +173,9 @@ Get-Service *tomcat*
 
 Default shells are configured in CFT.props.
 
-### Force 
+### Force as external
 
-For commands that are confused with CFT script or shell-like commands, we can *force* into running
+For commands that are confused with CFT script or shell-like commands, we can *force* them into running
 as external programs, by prefixing the line with an exclamation mark ("!"), so that that what follows 
 should be Linux or Powershell command. 
 

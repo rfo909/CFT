@@ -9,7 +9,7 @@
   |  Note on specials
   |  Repeat last line
   |  External commands
-        Force 
+        Force as external
         Parameters
         External program in current dir
   |  Background jobs

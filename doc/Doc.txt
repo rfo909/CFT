@@ -8,6 +8,7 @@
   |  Windows backslash
 * Prompt colors
   |  Disabling Curses
+* State management
 * CFT Core types
   |  String literals
   |  Lists
