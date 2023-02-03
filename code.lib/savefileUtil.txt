@@ -710,3 +710,31 @@ Dict.set("list",List)
             out(outLine.trim) # remove added trailing space
     }
 /class Cols
+
+
+
+# Check for updates
+# --
+	jarFile=Sys.homeDir.sub("target").file("cft-jar-with-dependencies.jar")
+	lastBuild=Date(jarFile.lastModified)
+	daysAgo=Date.diff(lastBuild).asDays
+
+	if (daysAgo > 60) {
+		# give up nagging after a while
+		jarFile.touch
+	} else if (daysAgo >= 30)
+		Sequence(
+			@
+			@ ------------------------------------------------
+			@ Last build: <<daysAgo>> days ago
+			@ ------------------------------------------------
+			@
+			@ To check for updates:
+			@ ---------------------
+			@    git pull origin master
+			@    mvn clean package
+            @
+			@
+		).mergeExpr->line println(line)
+	}
+/CheckForUpdates
