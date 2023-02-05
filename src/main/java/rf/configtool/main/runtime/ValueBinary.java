@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package rf.configtool.main.runtime;
 
 import java.security.MessageDigest;
+import java.util.ArrayList;
 import java.util.List;
 
 import rf.configtool.main.Ctx;
@@ -41,6 +42,7 @@ public class ValueBinary extends Value {
             add (new FunctionToString());
             add (new FunctionPrintableChars());
             add (new FunctionHash());
+            add (new FunctionGetList());
         }
     }
     
@@ -206,6 +208,36 @@ public class ValueBinary extends Value {
             return new ValueString(sb.toString());
         }
     }
-    
-    
+
+   
+    class FunctionGetList extends Function {
+        public String getName() {
+            return "getList";
+        }
+        public String getShortDesc() {
+            return "getList(from,to?) - returns list of int";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	final int from;
+        	final int to;
+        	if (params.size()==1) {
+        		from=(int) getInt("from", params, 0);
+        		to=val.length;
+        	} else if (params.size()==2) {
+        		from=(int) getInt("from", params, 0);
+        		to=(int) getInt("to",params,1);
+        	} else if (params.size()==0) {
+        		from=0;
+        		to=val.length;
+        	} else {
+        		throw new Exception("Expected optional parameters from, to?");
+        	}
+        	List<Value> list=new ArrayList<Value>();
+        	for (int i=from; i<to; i++) {
+        		list.add(new ValueInt(val[i]));
+        	}
+        	return new ValueList(list);
+        }
+
+    }    
 }
