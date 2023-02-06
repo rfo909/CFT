@@ -142,5 +142,5 @@ db2Dir = private/Db2
 # Global onLoad - when CFT is started
 # 
 
-globalOnLoad = Lib:GetTerminalSize Util:CheckForUpdates
+globalOnLoad = Lib:GetTerminalSize Lib:EncryptSanityCheck Util:CheckForUpdates
 

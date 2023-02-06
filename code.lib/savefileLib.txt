@@ -1208,3 +1208,14 @@ run(null,null,null,true)
 		Dir.run("which", str)
 	}
 /Which
+
+
+# Verify Encrypt sanity
+# --
+	pass="this is a test".getBytes("UTF-8")
+	data="some data 1234.55 CAPS"
+	hex="4B183266C7A7747F3C112DA23B24E54F21252139953E"
+	error(Std.Util.Encrypt(pass).process(data.getBytes("UTF-8")).hex != hex,
+		"Std.Util.Encrypt produces INVALID RESULT")
+	"ok"
+//EncryptSanityCheck

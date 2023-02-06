@@ -37,48 +37,37 @@ public class Encrypt {
         //
 
     /*
-    To break this algorithm, given access to the code, and without guessing the
-    passoword + salt, AND assuming that the code breaker knows or guesses
-    some plain-text for encrypted data, one then has to guess a combination 
-    of N start points.
-    
-    For each, call process() on the first plain byte. This will most likely fail, and so
-    one must try a new start position, until one gets a match. When this happens, on average
-    every  1/256 attempts, one advances to the next byte, and calls process(). This will
-    match every 1/256, and so on. When a sufficient number of bytes match, one has
-    found the encryption key. If the same password + salt is used on other data, these
-    can be decrypted as well.
-    
-    But the number of starting positions is described above. With N=8 we have 10^32
-    different start positions.
-
-    My laptop CPU (Ryzen 5 5300) manages more than 100 MBytes per second (single thread),
-    which means 10^8 bytes per second. A top CPU may do ten times that, but let's assume
-    hundred times, and also assume 1000 CPU's. 10^8 x 100 x 1000 = 10^13 combinations
-    checked per second.
-
-    10^32 / 10^13 = 10^19 seconds = 3x10^11 years. 
-
-    On average one would find the key in half that time, though .... :-)
-
-    Safe enough for a while. Increasing to 10 pointers, of course increases the
-    start space by factor 10^8.
-
-    Also note, that if the known sequence of plain-text is not at the start of the data,
-    then the same method applies, for finding the key, but in order to find the start
-    condition, one have to calculate backwards. 
-
-    This would have been simple, if it weren't for the occasional "jump" of two pointers,
-    based on a (to the code breaker) unknown original location of those two pointers.
-
-    -
-
-    In addition to proper use of salt, if the application starts by 
-    encrypting a number of random or unknown bytes, such as the hash of the salt, 
-    before adding data, breaking becomes factor (X+1) times harder, where X is the number 
-    of (unknown or secret) bytes prefixing the secret data.
-
-    */  
+     * To break this encryption, given full access to the code, and assuming the
+     * code breaker knows some of the original content of a file, the task becomes
+     * guessing the matrix content and N pointers, which for N=10 is 10^40 possibilities.
+     * 
+     * As the matrix isn't known, an intruder can not know if the conditions of some 
+     * imaginary current position leads to a "pointer jump" or not. These should be
+     * happening roughly every 10 bytes, modifying two random pointers each time. This means
+     * that on average every 25 bytes, one of the two pointers used to trigger the jump
+     * condition, are themselves modified.  
+     * 
+     * The "pointer jump" was originally added to prevent back-tracking, should an intruder
+     * come to know how to decode a file somewhere in the middle, but that was when the
+     * matrix was thought of as static.
+	 *
+	 * Even if the matrix was known, locating a start position out of 10^40, will
+	 * take a while ...
+	 * 
+     * My laptop CPU (Ryzen 5 5300) manages more than 100 MBytes per second (single thread),
+     * which means 10^8 bytes per second. A top CPU may do ten times that, but let's assume
+     * hundred times, and also assume 1000 CPU's. 10^8 x 100 x 1000 = 10^13 combinations
+     * checked per second.
+     *
+     * 10^32 / 10^13 = 10^19 seconds = 3x10^11 years.
+     * 
+     * Even with a billion cpu's we have 3x10^5 years
+     * 
+     * And SHOULD an intruder decode one file, it only means identifying a matrix and start
+     * positions that work, but NOT knowing the password, which when combined with a new
+     * salt for the next file completely rewires the internals of the Encrypt class.
+     * 
+     */  
     
     private int[] matrix;
     private int[] readPos=new int[N];
