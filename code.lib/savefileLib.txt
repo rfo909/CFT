@@ -1214,8 +1214,15 @@ run(null,null,null,true)
 # --
 	pass="this is a test".getBytes("UTF-8")
 	data="some data 1234.55 CAPS"
-	hex="4B183266C7A7747F3C112DA23B24E54F21252139953E"
-	error(Std.Util.Encrypt(pass).process(data.getBytes("UTF-8")).hex != hex,
+	result="62236921515F2A063CF8EE31051AEDEE53EC4B36620B"
+	Std.Util.Encrypt(pass) => enc
+	
+	dataBytes=data.getBytes("UTF-8")
+	
+	Std.Data.for(0,100,1)->i
+		enc.process(dataBytes)
+	|
+	error(enc.process(dataBytes).hex != result,
 		"Std.Util.Encrypt produces INVALID RESULT")
 	"ok"
 //EncryptSanityCheck
