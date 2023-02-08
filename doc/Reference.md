@@ -3470,17 +3470,14 @@ Object types:     72
 Value types:      13
 ```
 
-### 2023-01-18 v3.8.0
-
-Added counter for the shell-like command, such as "ls" and "cd", which were previously 
-distributed as statements and built-in expressions.
+### 2023-02-03 v4.0.1
 
 Running CodeStats:main
 
 ```
-Script code:      17121 lines
-Java code:        35255 lines
-Functions:        510
+Script code:      17351 lines
+Java code:        35356 lines
+Functions:        511
 Shell commands:   22
 Object types:     71
 Value types:      13
