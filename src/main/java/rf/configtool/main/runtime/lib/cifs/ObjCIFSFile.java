@@ -27,6 +27,7 @@ import jcifs.SmbResource;
 import jcifs.smb.SmbFile;
 import jcifs.smb.SmbFileInputStream;
 import jcifs.smb.SmbFileOutputStream;
+import jcifs.smb.SmbRandomAccessFile;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.runtime.*;
 import rf.configtool.main.runtime.lib.ObjFile;
@@ -189,35 +190,87 @@ public class ObjCIFSFile extends Obj {
     }
 
     
+    
     class FunctionCopyTo extends Function {
         public String getName() {
             return "copyTo";
         }
         public String getShortDesc() {
-            return "copyTo(targetFile) - returns number of bytes copied";
+            return "copyTo(targetFile[,startPos,count?]?) - returns number of bytes copied";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 1) throw new Exception("Expected targetFile parameter");
-            Obj obj=getObj("targetFile",params,0);
-            if (obj instanceof ObjFile) {
-                ObjFile file=(ObjFile) obj;
-                file.validateDestructiveOperation("copyTo");
-                File f=file.getFile();
-                    InputStream in=null;
-                    OutputStream out=null;
-                try {
-                    in=new SmbFileInputStream(smbFile);
-                    out=new FileOutputStream(f);
-                    long count=copy(in,out);
-                    return new ValueInt(count);
-                } finally {
-                    if (in != null) try {in.close();} catch (Exception ex) {};
-                    if (out != null) try {out.close();} catch (Exception ex) {};
-                }
+        	final long startPos;
+        	final long count;
+        	
+        	if (params.size() < 1 || params.size() > 3) throw new Exception("Expected parameters targetFile[,startPos,count?]?");
+            
+        	Obj obj=getObj("targetFile",params,0);
+
+            if (!(obj instanceof ObjFile)) {
+            	throw new Exception("Invalid targetFile, must be File");
+            }
+            
+            if (params.size() >= 2) {
+            	startPos=getInt("startPos",params,1);
             } else {
-                throw new Exception("Expected targetFile parameter");
+            	startPos=0;
+            }
+            if (params.size() >= 3) {
+            	count=getInt("count",params,2);
+            } else {
+            	count=-1;
+            }
+            
+            
+            ObjFile file=(ObjFile) obj;
+            file.validateDestructiveOperation("copyTo");
+            File f=file.getFile();
+            OutputStream out=null;
+            try {
+        		SmbRandomAccessFile raf=new SmbRandomAccessFile(smbFile, "r");
+        		long skipCount=startPos;
+        		while (skipCount > 0) {
+        			if (skipCount > Integer.MAX_VALUE) {
+        				raf.skipBytes(Integer.MAX_VALUE);
+        				skipCount -= Integer.MAX_VALUE;
+        			} else {
+        				raf.skipBytes((int) startPos);
+        				skipCount=0;
+        			}
+        		}
+                out=new FileOutputStream(f);
+        		long copied = copy (raf,out,count);
+                return new ValueInt(copied);
+            } finally {
+                if (out != null) try {out.close();} catch (Exception ex) {};
             }
         }
+    }
+    
+    
+    
+    private long copy (SmbRandomAccessFile f, OutputStream out, long count) throws Exception {
+    	byte[] buf=new byte[64*1024];
+        long copied=0L;
+        
+        if (count==-1) count=Long.MAX_VALUE;
+        
+    	while (count > buf.length) {
+    		int i=f.read(buf);
+    		if (i<=0) break;
+    		out.write(buf,0,i);
+    		count -= i;
+    		copied += i;
+    	}
+    	for (;;) {
+        	int i=f.read(buf, 0, (int) count);
+        	if (i<=0) break;
+        	out.write(buf,0,i);
+        	count -= i;
+        	copied += i;
+        	if (count<=0) break;
+        }
+        return copied;
     }
 
     private long copy (InputStream in, OutputStream out) throws Exception {
