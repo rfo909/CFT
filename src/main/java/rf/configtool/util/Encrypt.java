@@ -19,6 +19,37 @@ package rf.configtool.util;
 
 import java.security.MessageDigest;
 
+/**
+ * This class implements a "stream cipher", in the form of a state machine, which essentially creates
+ * a pseudo-random stream of bytes.
+ * 
+ * When encrypting, these are added to the plain-text bytes, and when decrypting, they are subtracted
+ * from the encrypted value (modulo positive 256). The period of the stream is over 10^40 bytes.
+ * 
+ * To use it as a random-number generator, just call the process() method in encrypt or decrypt
+ * mode, and some fixed value, for example 0. 
+ * 
+ * What this class DOES NOT do, is include mechanisms for obtaining lost synchronization in the
+ * case of lost bytes, or even verify that decryption is valid. Entering the wrong password or
+ * salt, when decrypting data, will result in a totally invalid result, but this code has no way of
+ * knowing if that is the case, as it adds no initial sanity check bytes. 
+ * 
+ * The idea of password + salt, is that the password is secret, while the salt is publicly associated
+ * with each encrypted block of data (ex. file). The salt varies the initialization of the
+ * state machine, both the content of the matrix, which is a buffer of 11000 pseudo random bytes, and the 
+ * start position for N pointers, which point into the matrix.
+ * 
+ * The algorithm
+ * -------------
+ * To generate one pseudo-random number, we add the values referred to by all pointers into the matrix, then
+ * advance each pointer by one. Each pointer has a different max value, all being primes just above 10.000,
+ * for maximum period. 
+ * 
+ * In addition, there is a "jump" mechanism, which for certain values of two of the pointers, jumps two random
+ * pointers, to break the regularity. Not knowing the matrix and the positions, there is no way to know if
+ * the jump criteria are met, nor to know which pointers are modified, and how. 
+ */
+
 public class Encrypt {
 
     // Number of counters moving independently inside the matrix buffer
@@ -38,40 +69,17 @@ public class Encrypt {
 
     /*
      * To break this encryption, given full access to the code, and assuming the
-     * code breaker knows some of the original content of a file, the task becomes
+     * code breaker knows (some of) the original content of a file, the task becomes
      * guessing the matrix content and N pointers, which for N=10 is 10^40 possibilities.
      * 
-     * As the matrix isn't known, an intruder can not know if the conditions of some 
+     * Also, as the matrix isn't known, an intruder can not know if the conditions of some 
      * imaginary current position leads to a "pointer jump" or not. These should be
-     * happening roughly every 10 bytes, modifying two random pointers each time. This means
-     * that on average every 25 bytes, one of the two pointers used to trigger the jump
-     * condition, are themselves modified.  
-     * 
-     * The "pointer jump" was originally added to prevent back-tracking, should an intruder
-     * come to know how to decode a file somewhere in the middle, but that was when the
-     * matrix was thought of as static.
-	 *
-	 * Even if the matrix was known, locating a start position out of 10^40, will
-	 * take a while ...
-	 * 
-     * My laptop CPU (Ryzen 5 5300) manages more than 100 MBytes per second (single thread),
-     * which means 10^8 bytes per second. A top CPU may do ten times that, but let's assume
-     * hundred times, and also assume 1000 CPU's. 10^8 x 100 x 1000 = 10^13 combinations
-     * checked per second.
-     *
-     * 10^32 / 10^13 = 10^19 seconds = 3x10^11 years.
-     * 
-     * Even with a billion cpu's we have 3x10^5 years
-     * 
-     * And SHOULD an intruder decode one file, it only means identifying a matrix and start
-     * positions that work, but NOT knowing the password, which when combined with a new
-     * salt for the next file completely rewires the internals of the Encrypt class.
+     * happening roughly every 10 bytes, modifying two random pointers each time.
      * 
      */  
     
     private int[] matrix;
-    private int[] readPos=new int[N];
-    private int[] maxPos=new int[N];  // different length for maximum period
+    private int[] pointerPositions=new int[N];
 
     
     private byte[] makeKey (byte[] password, byte[] salt, byte[] post) throws Exception {
@@ -107,6 +115,7 @@ public class Encrypt {
         int pos3=0;
         int pos4=0;
         
+        // Populate matrix with data
         for (int i=0; i<matrix.length; i++) {
             int sum=key1[pos1] + key2[pos2] + key3[pos3] + key4[pos4];
 
@@ -118,11 +127,10 @@ public class Encrypt {
             if (sum<0) sum=-sum;
             matrix[i]=sum%50; 
                 // Collapsing many values on to each other
-                // creates a less "crispy" result, which means longer
-                // sequences of known characters will match output before failing - harder to crack
+                // creates a less "crisp" result
         }
         
-        // Initialize counters
+        // Initialize pointer positions into the matrix
         MessageDigest md1 = MessageDigest.getInstance("SHA1"); // 160 bits = 20 bytes
         md1.update(password);
         md1.update(salt);
@@ -139,19 +147,18 @@ public class Encrypt {
         final byte[] secretHash2=md1.digest(); // used to decide start positions for N counters
 
         for (int i=0;i<N;i++) {
-            maxPos[i]=COUNTER_MAX[i];
-
-            readPos[i]=(secretHash[i*2])+(secretHash[i*2+1]<<8) + (secretHash2[i*2]<<16) + secretHash2[i*2+1];
-            if (readPos[i]<0) readPos[i] = -readPos[i];
-            readPos[i]=readPos[i] % maxPos[i];
-            //System.out.println(readPos[i]);
+            pointerPositions[i]=(secretHash[i*2])+(secretHash[i*2+1]<<8) + (secretHash2[i*2]<<16) + secretHash2[i*2+1];
+            
+            if (pointerPositions[i]<0) pointerPositions[i] = -pointerPositions[i];
+            
+            pointerPositions[i]=pointerPositions[i] % MAX_POINTER_POS[i];
         }
 
     }
 
 
 
-    final int[] COUNTER_MAX= {
+    final int[] MAX_POINTER_POS= {
             10357,  10369,  10391,  10399,  10427,  10429,  10433,  10453,  10457,  10459 
     };
 
@@ -168,18 +175,18 @@ public class Encrypt {
         int a=value;
         for (int j=0; j<N; j++) {
             if (encrypt) {
-                a=a+matrix[readPos[j]];
+                a=a+matrix[pointerPositions[j]];
             } else {
-                a=a+256-matrix[readPos[j]];
+                a=a+256-matrix[pointerPositions[j]];
             }
-            readPos[j]=(readPos[j]+1)%maxPos[j];
+            pointerPositions[j]=(pointerPositions[j]+1)%MAX_POINTER_POS[j];
         }
         // occasionally jump two pointers 
-        if (matrix[readPos[0]]>=45 && matrix[readPos[1]]<=5) {
-            int x=readPos[2]%N;
-            int y=readPos[3]%N;
-            readPos[x]=(readPos[x]+readPos[y]) % maxPos[x];
-            readPos[y]=(readPos[y]+readPos[4] + 1) % maxPos[y];
+        if (matrix[pointerPositions[0]]>=45 && matrix[pointerPositions[1]]<=5) {
+            int x=pointerPositions[2]%N;
+            int y=pointerPositions[3]%N;
+            pointerPositions[x]=(pointerPositions[x]+pointerPositions[y]) % MAX_POINTER_POS[x];
+            pointerPositions[y]=(pointerPositions[y]+pointerPositions[4] + 1) % MAX_POINTER_POS[y];
         }
         return (byte) (a%256);
     }
