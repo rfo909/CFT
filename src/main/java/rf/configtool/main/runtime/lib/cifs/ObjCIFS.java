@@ -161,6 +161,8 @@ public class ObjCIFS extends Obj {
         NtlmPasswordAuthenticator auth = new NtlmPasswordAuthenticator(domain, username, password);
         Properties p=new Properties();
         
+        //p.setProperty("jcifs.smb.client.ipcSigningEnforced", "false");
+        
 //        p.setProperty("jcifs.smb.client.soTimeout", "300000");
 //        p.setProperty("jcifs.netbios.cachePolicy", "600");
 

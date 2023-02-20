@@ -250,7 +250,7 @@ public class ObjCIFSFile extends Obj {
     
     
     private long copy (SmbRandomAccessFile f, OutputStream out, long count) throws Exception {
-    	byte[] buf=new byte[64*1024];
+    	byte[] buf=new byte[512*1024];
         long copied=0L;
         
         if (count==-1) count=Long.MAX_VALUE;
