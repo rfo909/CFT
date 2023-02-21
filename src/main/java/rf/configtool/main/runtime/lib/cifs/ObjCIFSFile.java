@@ -28,6 +28,7 @@ import jcifs.smb.SmbFile;
 import jcifs.smb.SmbFileInputStream;
 import jcifs.smb.SmbFileOutputStream;
 import jcifs.smb.SmbRandomAccessFile;
+import jcifs.smb.SmbRenewableCredentials;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.runtime.*;
 import rf.configtool.main.runtime.lib.ObjFile;
@@ -176,7 +177,7 @@ public class ObjCIFSFile extends Obj {
                     OutputStream out=null;
                 try {
                     in=new FileInputStream(f);
-                    out=new SmbFileOutputStream(smbFile);
+                    out=new BufferedOutputStream(new SmbFileOutputStream(smbFile));
                     long count=copy(in,out);
                     return new ValueInt(count);
                 } finally {
@@ -238,7 +239,7 @@ public class ObjCIFSFile extends Obj {
         				skipCount=0;
         			}
         		}
-                out=new FileOutputStream(f);
+                out=new BufferedOutputStream(new FileOutputStream(f));
         		long copied = copy (raf,out,count);
                 return new ValueInt(copied);
             } finally {
