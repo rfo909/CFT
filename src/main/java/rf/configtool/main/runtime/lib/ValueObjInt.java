@@ -53,7 +53,7 @@ public class ValueObjInt extends ValueInt implements IsSynthesizable {
     
     @Override
     public String createCode() throws Exception {
-        return "Int("+ super.synthesize() + "," + data.synthesize() + ")";
+        return "Int("+ super.createCode() + "," + data.synthesize() + ")";
     }
 
 

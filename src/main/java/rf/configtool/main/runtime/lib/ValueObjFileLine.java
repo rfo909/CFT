@@ -49,8 +49,9 @@ public class ValueObjFileLine extends ValueString implements IsSynthesizable {
     
     @Override
     public String createCode() throws Exception {
-        return "FileLine(" + super.synthesize() + "," + lineNo + "," + file.synthesize() + ")";
+        return "FileLine(" + super.createCode() + "," + lineNo + "," + file.synthesize() + ")";
     }
+    
 
     public ObjFile getFile() {
         return file;

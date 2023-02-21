@@ -53,7 +53,7 @@ public class ValueObjFloat extends ValueFloat implements IsSynthesizable {
     
     @Override
     public String createCode() throws Exception {
-        return "Float("+ super.synthesize() + "," + data.synthesize() + ")";
+        return "Float("+ super.createCode() + "," + data.synthesize() + ")";
     }
 
 

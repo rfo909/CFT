@@ -14,6 +14,17 @@
 <h1>CFT Change log</h1>
 
 
+<h3>4.0.2 2023-02-21 - bug fix / synthesize</h3>
+<p>
+After rewriting synthesize, FileLine, Int, Float and Str resulted in stack overflow when
+synthesizing, as they called super.synthesize(), which in turn called the createCode() function,
+resulting in endless callstack. Changed super.synthesize() to super.createCode().
+</p>
+<p>
+Also fixed bug in Util:CURL where verbose=true changed return value to List, due to
+forgetting to run a couple of loops inside Inner (when verbose).
+</p>
+
 
 <h3>4.0.1 2023-02-03 - not a sub-language but ...</h3>
 <p>

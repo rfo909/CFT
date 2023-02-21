@@ -54,7 +54,7 @@ public class ValueObjStr extends ValueString implements IsSynthesizable {
     
     @Override
     public String createCode() throws Exception {
-        return "Str("+ super.synthesize() + "," + data.synthesize() + ")";
+        return "Str("+ super.createCode() + "," + data.synthesize() + ")";
     }
 
 
