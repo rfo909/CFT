@@ -1,4 +1,4 @@
-## [Full Youtube tutorial](https://www.youtube.com/playlist?list=PLj58HwpT4Qy80WhDBycFKxIhWFzv5WkwO).
+## [CFT Introduction](https://www.youtube.com/playlist?list=PLj58HwpT4Qy80zdSV-AlWJILS0KlPHhfS7)
 
 
 # Introduction
@@ -451,10 +451,7 @@ mvn package
 
 # Youtube
 
-[Tutorial](https://www.youtube.com/playlist?list=PLj58HwpT4Qy80WhDBycFKxIhWFzv5WkwO).
-
-(being reworked)
-
+[CFT Introduction](https://www.youtube.com/playlist?list=PLj58HwpT4Qy80zdSV-AlWJILS0KlPHhfS7)
 
 # Appendix
 
