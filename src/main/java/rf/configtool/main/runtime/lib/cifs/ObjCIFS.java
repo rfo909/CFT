@@ -76,7 +76,7 @@ public class ObjCIFS extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 2) throw new Exception("Expected parameters url, CIFSContext");
             String url=getString("url",params,0);
-            Obj obj=getObj("CIFCContext",params,1);
+            Obj obj=getObj("CIFSContext",params,1);
             CIFSContext context=((ObjCIFSContext) obj).getContext();
             
             if (!url.startsWith("smb://")) throw new Exception("Invalid url, should start with smb:// - got " + url);

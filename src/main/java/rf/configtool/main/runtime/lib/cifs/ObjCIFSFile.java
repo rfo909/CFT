@@ -53,6 +53,7 @@ public class ObjCIFSFile extends Obj {
         this.add(new FunctionList());
         this.add(new FunctionCopyFrom());
         this.add(new FunctionCopyTo());
+        this.add(new FunctionGetUrl());
 
     }
     
@@ -250,6 +251,22 @@ public class ObjCIFSFile extends Obj {
     
     
     
+    class FunctionGetUrl extends Function {
+        public String getName() {
+            return "getUrl";
+        }
+        public String getShortDesc() {
+            return "getUrl() - returns smb url";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueString(url);
+        }
+    }
+    
+    
+    // ------ private ------
+    
     private long copy (SmbRandomAccessFile f, OutputStream out, long count) throws Exception {
     	byte[] buf=new byte[512*1024];
         long copied=0L;
@@ -286,4 +303,6 @@ public class ObjCIFSFile extends Obj {
         return count;
     }
     
+    
+
 }
