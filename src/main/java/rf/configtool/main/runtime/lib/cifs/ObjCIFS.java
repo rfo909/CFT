@@ -122,8 +122,8 @@ public class ObjCIFS extends Obj {
             "user='xxx'",
             "password='yyy'",
             "url='smb://host/share/path/file.txt'",
-            "context=Lib.Util.CIFS.CIFSContext(domain,user,password)",
-            "file=Lib.Util.CIFS.CIFSFile(url,context)",
+            "context=Std.Util.CIFS.CIFSContext(domain,user,password)",
+            "file=Std.Util.CIFS.CIFSFile(url,context)",
             "",
         };
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
