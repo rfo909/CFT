@@ -1,4 +1,4 @@
-## [CFT Introduction]([CFT Introduction](https://www.youtube.com/playlist?list=PLj58HwpT4Qy80zdSV-AlWJILS0KlPHhfS)
+## [CFT Introduction](https://www.youtube.com/playlist?list=PLj58HwpT4Qy80zdSV-AlWJILS0KlPHhfS)
 
 
 # Introduction
