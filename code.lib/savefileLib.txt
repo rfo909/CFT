@@ -71,7 +71,7 @@ choice.
 
 
 
-# Page through file
+# "more" through file
 # --
     P(1,Sys.savefile) =>file
     if(Sys.isWindows)
@@ -82,7 +82,7 @@ choice.
 
 
 
-# Page through list of lines
+# "more" through list of lines
 # --
 	P(1) as List => lines
 	count=0
@@ -90,7 +90,7 @@ choice.
 		if (count >= Term.h-3) {
                         println
 			readLine("Enter to continue, 'q' to abort")=>x
-			error(x=="q","Aborting")
+			break(x=="q")
 			count=0
 		}
 		println(line)
@@ -1152,7 +1152,7 @@ run(null,null,null,true)
 	count=0
 	list->dict
 		out(("   "+count).last(3) + " " + Curses:TxtGreen+dict.dir.path+Curses:Reset)
-		out("       " + dict.command)
+		out("       " + (dict.command.replace("^t".unEsc,"<TAB>")))
 		count=count+1
 //ShowHistoryData
 
