@@ -844,7 +844,7 @@ public class ObjFile extends Obj implements IsSynthesizable {
             return "hex";
         }
         public String getShortDesc() {
-            return "hex - page through file content in hex";
+            return "hex() - page through file content in hex";
         }
         
         private String toHex (int i) {
@@ -1443,7 +1443,7 @@ public class ObjFile extends Obj implements IsSynthesizable {
             return "touch";
         }
         public String getShortDesc() {
-            return "touch - create if not found, then update times to now";
+            return "touch() - create if not found, then update times to now";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
