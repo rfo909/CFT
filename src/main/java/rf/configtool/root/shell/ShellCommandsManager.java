@@ -34,6 +34,8 @@ import rf.configtool.main.runtime.Value;
  *
  */
 public class ShellCommandsManager {
+	
+	public static final String FORCE_EXTERNAL_COMMAND_PREFIX = "\t";
     
     public static final ShellCommand[] SHELL_COMMANDS = {
     		new ShellShell(),
@@ -65,7 +67,7 @@ public class ShellCommandsManager {
     public List<String> getShellCommandDescriptions() {
     	List<String> lines=new ArrayList<String>();
     	
-    	ShellBang sb=new ShellBang();
+    	ShellExternalCommand sb=new ShellExternalCommand();
     	lines.add(sb.getName() + " " + sb.getBriefExampleParams());
 
     	for (ShellCommand x:SHELL_COMMANDS) {
@@ -79,20 +81,27 @@ public class ShellCommandsManager {
     
 
     
-    
+    /**
+     * Execute shell command and return Value, or if the "line" is not a shell command,
+     * return null.
+     */
     public Value execute (Stdio stdio, ObjGlobal objGlobal, String line) throws Exception {
     	
-        boolean isBang=false;
+        boolean forceExternalCommand=false;
 
-        if (line.startsWith("!")) {
-        	line=line.substring(1);
-        	isBang=true;
+        // forcing external command?
+        if (line.startsWith(FORCE_EXTERNAL_COMMAND_PREFIX)) {
+        	forceExternalCommand=true;
         }
+        
+        // Strip prefixing space and TAB
+        // Can not use trim, as line may well end with TAB (to be replaced with '*') for globbing
+        while (line.startsWith(" ") || line.startsWith("\t")) line=line.substring(1);
         
         
         ShellCommand foundCommand=null;
         
-        if (!isBang) {
+        if (!forceExternalCommand) {
         	for (ShellCommand c:SHELL_COMMANDS) {
         		String op=c.getName();
 	            if (line.equals(op) || line.startsWith(op+" ") || line.startsWith(op+"(")) {
@@ -102,7 +111,7 @@ public class ShellCommandsManager {
 	        }
         }
         
-        if (!isBang && foundCommand==null) {
+        if (!forceExternalCommand && foundCommand==null) {
             return null;
         }
         
@@ -115,8 +124,8 @@ public class ShellCommandsManager {
         // create Command object from parts
         Command cmd=new Command(parts);
         
-        if (isBang) {
-        	return executeShellCommand(stdio, objGlobal, new ShellBang(), cmd);
+        if (forceExternalCommand) {
+        	return executeShellCommand(stdio, objGlobal, new ShellExternalCommand(), cmd);
         } else {
         	return executeShellCommand(stdio, objGlobal, foundCommand, cmd);
         }

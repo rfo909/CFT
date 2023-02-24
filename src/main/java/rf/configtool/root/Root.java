@@ -485,7 +485,7 @@ public class Root {
                 
                 // try process as CFT bang command?
                 if (!isCFTInput) {
-		        	final String shellCommandLine="!"+line;
+		        	final String shellCommandLine=ShellCommandsManager.FORCE_EXTERNAL_COMMAND_PREFIX+line;
 		        	//System.out.println(shellCommandLine);
 
 		            Value x = (new ShellCommandsManager()).execute(stdio, objGlobal, shellCommandLine);

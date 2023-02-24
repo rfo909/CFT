@@ -35,11 +35,12 @@ import rf.configtool.main.runtime.ValueString;
 import rf.configtool.main.runtime.lib.ObjDir;
 import rf.configtool.main.runtime.lib.Protection;
 
-public class ShellBang extends ShellCommand {
+public class ShellExternalCommand extends ShellCommand {
 	
 	@Override
 	public String getName() {
-		return "!";
+		// Must correspond to ShellCommandsManager.FORCE_EXTERNAL_COMMAND_PREFIX
+		return "<TAB>";
 	}
 	@Override 
 	public String getBriefExampleParams() {
