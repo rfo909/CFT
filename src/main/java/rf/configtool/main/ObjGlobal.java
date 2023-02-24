@@ -1124,7 +1124,7 @@ public class ObjGlobal extends Obj {
                 "   cat ::                   - The '::' corresponds to (Sys.lastResult)",
                 "   cd :N                    - The ':N' corresponds to (Sys.lastResult(N))",
                 "",
-                "   !cp :3 /some/path",
+                "   <TAB>cp :3 /some/path    - run external program, combining with value :N",
                 "",
                 "",
                 "- Symbols are defined entering %%name which stores lastResult under",

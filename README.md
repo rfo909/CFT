@@ -64,8 +64,8 @@ _Shell
   true
   # CFT shell-like (interactive) commands
   # -------------------------------------
-  # 
-  #   ! ... - run operating system command or program
+  #
+  #   <TAB> ... - run operating system command or program
   #   shell - run bash or powershell
   #   ls ...
   #   lsd ...
@@ -87,43 +87,42 @@ _Shell
   #   hash <file> ...
   #   hex <file>?
   #   which <command>
-  # 
+  #
   # - The 'lsd' lists directories only, and 'lsf' files only.
-  # 
+  #
   # - The 'edit' command opens a file in editor.
-  # 
+  #
   # - Note that the cat/edit/more/tail commands, if given no file argument,
   #   will attempt working with with Sys.lastResult. Example:
   #       touch someNewFile.txt
   #       edit
-  # 
+  #
   # - Note that 'rm' deletes both files and directories, and asks
   #   for confirm when non-empty directories.
-  # 
+  #
   # - The 'cp' command copies both files and directories.
-  # 
+  #
   # - All commands working with files and directories allow both globbing,
   #   local and absolute paths, on both Windows and Linux. To reference
   #   values from Sys.lastResult use :: or :N (get value from list).
-  # 
+  #
   #    ls a*.txt                - globbing
   #    ls /some/path            - absolute path
   #    ls c:\someDir            - absolute path (windows)
   #    ls \\some-server\d$\xxx  - absolute network path (Windows)
-  # 
+  #
   #    cd %someSymbol           - symbol resolving to dir or file
   #    cd (dirExpr)             - dirExpr is a CFT function
-  # 
+  #
   #    cat ::                   - The '::' corresponds to (Sys.lastResult)
   #    cd :N                    - The ':N' corresponds to (Sys.lastResult(N))
-  # 
-  #    !cp :3 /some/path
-  # 
-  # 
+  #
+  #    <TAB>cp :3 /some/path    - run external program, combining with value :N
+  #
+  #
   # - Symbols are defined entering %%name which stores lastResult under
   #   that name, usually some Dir or File.
-  # 
-```
+  #```
 
 
 ### (2) CFT code
@@ -453,7 +452,7 @@ mvn package
 
 # Appendix
 
-Expressions, statements and shell commands per v3.8.0
+Expressions, statements and shell commands per v4.0.4
 
 ```
 _Expr

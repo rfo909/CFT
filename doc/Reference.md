@@ -1,9 +1,9 @@
 
 # CFT Reference
 
-Last updated: 2023-02-01 RFO
+Last updated: 2023-02-24 RFO
 
-v4.0.0
+v4.0.4
 
 
 
@@ -176,12 +176,12 @@ Default shells are configured in CFT.props.
 ### Force as external
 
 For commands that are confused with CFT script or shell-like commands, we can *force* them into running
-as external programs, by prefixing the line with an exclamation mark ("!"), so that that what follows 
+as external programs, by prefixing the line with a <TAB>, so that that what follows 
 should be Linux or Powershell command. 
 
 ```
 ls          # CFT shell-command "ls"
-!ls         # Underlying OS "ls" command
+<TAB>ls         # Underlying OS "ls" command
 ```
 
 ### Parameters
