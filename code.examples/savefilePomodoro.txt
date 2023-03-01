@@ -61,13 +61,18 @@
 
 /CountDown
 
+# Pomodoro, countdown 45 minutes
+# --
+	CountDown(45)
+/Pomodoro
+
 
 
 # Alarm
 # --
-    Std.Data.each(1,7)->x
+    Std.Data.each(1,4)->x
         println("ALARM!!" + Sys.uchar(7))
-        Sys.sleep(2000)
+        Sys.sleep(1000)
 /Alarm
 
 
