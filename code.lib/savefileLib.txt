@@ -1088,9 +1088,16 @@ run(null,null,null,true)
         readLine("Enter symbol to delete, Enter for none") => line
         break(line=="")
         Db2:Get(Sys.scriptId,"symbolDict",Dict) => data
-        data.remove(line.trim)
-        Db2:Set(Sys.scriptId,"symbolDict",data)
-        println
+		key=line.trim
+		if (data.has(key)) {
+			data.remove(key)
+			Db2:Set(Sys.scriptId,"symbolDict",data)
+			println
+		} else {
+			# No match, presumably a command
+			Sys.stdin(line)
+			break
+		}
 //Symbols
 
 
