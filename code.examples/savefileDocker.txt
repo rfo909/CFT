@@ -97,7 +97,7 @@ Bash       - run bash shell inside running container
     img = images.nth(x.parseInt)
 
     # confirm selection
-    println(img)
+    println("Selected:",img)
     # isolate image id
     img.split.nth(2)
 /SelectImage
