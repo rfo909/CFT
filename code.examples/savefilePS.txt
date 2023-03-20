@@ -70,7 +70,7 @@ P(2,"get-service") =>code
 # --
     P(1, Input("Enter remote host").get) =>host 
     P(2, List("cd c:\temp","dir")) => scriptCode
-    P(2, false) => asAdmin
+    P(3, true) => asAdmin
 
     # The Invoke-Command can run command from local ps1-file on remote server!
 
