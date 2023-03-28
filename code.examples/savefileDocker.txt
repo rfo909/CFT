@@ -82,7 +82,7 @@ Bash       - run bash shell inside running container
             assert(line.contains(searchTerm)) 
             out(line)
     }
-    error(images.length==0, "No docker images")
+    error(images.length==0, "No docker images (" + searchTerm + ")")
 
     Inner{
         i=0

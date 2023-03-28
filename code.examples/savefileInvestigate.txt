@@ -193,7 +193,6 @@ loop
             @ t/topic           - change topic
             @ T/topics          - list all topics
             @ todo              - show *TODO* lines
-            @ todone              - show *TODONE* lines
             @ c/cat             - display recent entries
             @ m/more          
             @ e/edit            - edit current file
@@ -212,8 +211,6 @@ loop
         ShowTopics
     } else if (cmd=="todo") {
         ShowLines("*todo*")
-    } else if (cmd=="todone") {
-        ShowLines("*todone*")
     } else if(cmd==".c" || cmd=='c' || cmd=="cat") { ## cat
         Show
     } else if(cmd==".m" || cmd=='m' || cmd=="more") { ## more
