@@ -33,7 +33,7 @@ public class ShellCd extends ShellCommand {
 	}
 	@Override 
 	public String getBriefExampleParams() {
-		return "<dir>";
+		return "<dir>?";
 	}
 
      public Value execute(Ctx ctx, Command cmd) throws Exception {
