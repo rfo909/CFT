@@ -1129,7 +1129,9 @@ public class ObjGlobal extends Obj {
                 "",
                 "",
                 "- Symbols are defined entering %%name which stores lastResult under",
-                "  that name, usually some Dir or File.",
+                "  that name, usually some Dir or File. They can be used together with",
+                "  all shell commands, both those implemented internally and when running",
+                "  external programs.",
                 "",
         };
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
