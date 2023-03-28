@@ -122,7 +122,8 @@ _Shell
   #
   # - Symbols are defined entering %%name which stores lastResult under
   #   that name, usually some Dir or File.
-  #```
+  #
+```
 
 
 ### (2) CFT code
