@@ -190,7 +190,7 @@ loop
             @ ?                 - get help (this page9
             @ h/header          - insert header
             @ d/date            - insert date/time
-            @ t/topic           - change topic
+            @ t/topic/ch        - change topic
             @ T/topics          - list all topics
             @ todo              - show *TODO* lines
             @ c/cat             - display recent entries
@@ -205,7 +205,7 @@ loop
         LogHeader
     } else if (cmd==".d" || cmd=='d' || cmd=="date") { ## date/time stamp
         LogFile.append(List("",Date.fmt))
-    } else if (cmd==".t" || cmd=='t' || cmd=="topic") { ## change topic
+    } else if (cmd==".t" || cmd=='t' || cmd=="topic" || cmd=="ch") { ## change topic
         SetTopic
     } else if (cmd==".T" || cmd=='T' || cmd=="topics") { ## show topics
         ShowTopics
