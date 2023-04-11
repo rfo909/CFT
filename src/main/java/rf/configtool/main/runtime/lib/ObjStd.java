@@ -61,7 +61,7 @@ public class ObjStd extends Obj {
 
 
     public String getTypeName() {
-        return "Lib";
+        return "Std";
     }
     
 
@@ -71,7 +71,7 @@ public class ObjStd extends Obj {
 
     
     private String getDesc() {
-        return "Lib";
+        return "Std";
     }
     
     private Obj theObj () {
