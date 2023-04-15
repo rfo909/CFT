@@ -1,0 +1,14 @@
+# Inches to millimetres
+# --
+	P(1,Input("Enter inches on format 'X Y/Z' or 'Y/Z'").get) => str
+	total=0.0
+	str.split->part
+		if (part.contains("/")) {
+			part.split("/") => x
+			total = total + (x.first.parseInt / x.last.parseInt)
+		} else {
+			total=total+(part.parseFloat)
+		}
+	| 
+	total*25.4
+/InchesToMm
