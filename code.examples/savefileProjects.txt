@@ -169,10 +169,10 @@ just add a second "Dir:" line.
 //CurrProject
 
 
-# State string 
+# State string - see CFT.props prompt setting
 # --
 	CurrProjectName
-/StateString
+//StateString
 
 
 # Produce list of files to search
@@ -393,7 +393,7 @@ just add a second "Dir:" line.
     true
 /sfc
 
-# FileLocator, interactive, sorted presentation, newest first
+# FileLocator, sorted presentation, newest last
 # --
     P(1,Input("Enter part of file name").get) => fn
 
@@ -401,31 +401,6 @@ just add a second "Dir:" line.
         out(Int(file.lastModified, file))
     | _.sort->x 
         out(x.data)
-    | => fileList
-    
-    fileList->file 
-        report(file.path, file.length, Date(file.lastModified).fmt)
-    | =>lines  # the report(...) outputs
-    
-
-    # Display report lines, and create line numbers
-    0 =>lineNo
-    lines->line
-        # Pad lineNo to 3 characters
-        Inner{s="   "+lineNo loop break(s.length>=3) s=" "+s | s} =>lineNoStr
-        
-        println(lineNoStr + ": " + line)
-        lineNo+1 =>lineNo
-    |
-    println
-    readLine("Enter number to edit, or blank to skip") =>inp
-    if(inp != "", Inner{
-        num=inp.parseInt
-        println("Editing file " + fileList.nth(num).path)
-        Lib:e (fileList.nth(num))
-    })
-
-    fileList->f out(f.path)
 /FL
 
 
