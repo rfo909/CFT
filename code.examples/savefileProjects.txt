@@ -169,7 +169,10 @@ just add a second "Dir:" line.
 //CurrProject
 
 
-
+# State string 
+# --
+	CurrProjectName
+/StateString
 
 
 # Produce list of files to search

@@ -123,7 +123,7 @@ shortcut:     = "---- Show all shortcuts ----"            File("CFT.props").read
 # The prompt setting is a line of code, just as with the shortcuts
 # ---
 
-prompt = Prompt:PromptString(Dir,Sys.scriptName)
+prompt = Prompt:PromptString(Dir,Sys.scriptName,if(Sys.functions.contains("StateString"),StateString,null))
 
 bangCommand = BangParser:Run(Dir,P(1))
 

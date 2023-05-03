@@ -137,6 +137,7 @@
 # --
 	P(1,Dir) => currDir
 	P(2) => scriptName
+	P(3) => stateString
 
 	color=GetColor
 
@@ -148,7 +149,7 @@
 	js=JobsStatus
 	if (js != null) parts.add(js)
 
-	if (scriptName != null) parts.add("{" + scriptName + "}")
+	if (scriptName != null) parts.add("{" + scriptName + if (stateString != null, ": "+stateString,"") + "}")
 	if(IsRoot) {
 		parts.add(Curses:Reversed + "#root#" + Curses:Reset + color)
 	}
