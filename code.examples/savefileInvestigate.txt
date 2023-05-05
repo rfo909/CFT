@@ -52,76 +52,68 @@ in an editor.
 # Current topic
 # --
     if(Db2:Get("Investigate","topic")==null) {
-        ShowTopics
-        readLine("Enter topic to use, ENTER for 'default'").trim => topic
-        if (topic=="") {topic="default"}
-        Db2:Set("Investigate","topic",topic)
+		error("No current topic")
     }
     Db2:Get("Investigate","topic")
 /GetCurrentTopic
 
 # Change topic
 # --
-    if (Db2:Get("Investigate","topic")==null) {
-        GetCurrentTopic  # asks for current
-    } else {
-        ShowTopics
-        readLine("[" + GetCurrentTopic + "] Change topic (full name) or ENTER to keep current").trim => newTopic
+	curr=Db2:Get("Investigate","topic")
+	
+	list = GetTopics
+	count=0
+	Inner {
+		list->t
+		file=LogFile(t)
+		age=Date.diff(Date(file.lastModified))
+		if (age.asDays > 90) age="" else age=age.fmt
+		name=(t+" ".times(80)).first(40)
+		println( ("   "+count).last(3)+": " + name + age)
+		count=count+1
+	}
 
-        if (newTopic != "") {
-            Db2:Set("Investigate","topic",newTopic)
-        }
+	if (list.empty) {
+		readLine("Enter name of first topic").trim => name
+		error(name=="","Invalid topic name")
+		Db2:Set("Investigate","topic",name)
+	} else {
+		x = if (curr==null) {
+			readLine("Enter number, or enter name of new topic")
+		} else {
+			readLine("Enter number, or new topic (Enter for current: " + curr + ")")
+		}
+		x=x.trim.replace(" ","_")
+		name=x
+		if (x.?parseInt) {
+			name=list.nth(x.parseInt)
+		}
+		if (name.length==0 && curr != null) {
+			name=curr
+		}
+		error(name=="", "Invalid topic name")
+		Db2:Set("Investigate","topic",name)
     }
 /SetTopic
 
-# List topics
+
+
+# List topics alphabetically
 # --
-    Lib:Header("Known topics")
-    
-    latest=Dict
     InvDir.files(Glob("*.txt"))->f
-        out(Int(f.lastModified,f))
-    | _.sort->x
-        file=x.data
-        date=Date(x).fmt
-        name=file.name.before(".").beforeLast("_")
-        latest.set(name,date)
-    |
-        latest.keys->key
-            date=latest.get(key)
-            out(date + "  " + key)
-    | _.sort->line
-        println(line)
-    | println
-/ShowTopics
+		out(Str(f.name,f))
+	| _.sort->x
+		out(x.data.name.beforeLast("."))
+/GetTopics
 
 
-
-# Convert from old model of time stamped files to single files
-# --
-	P(1,readLine("Topic"))=>topic
-	lines=Inner{
-		InvDir.files(topic+"_*.txt")->file
-			out(Int(file.lastModified, file))
-		| _.sort->x
-			x.data.read->line
-				out(line)
-	}
-
-	InvDir.files(topic+"_*.txt")->f f.delete |
-	InvDir.file(topic+".txt").create(lines)
-	lines
-/ConvertFromOldModel
 
 
 # Get file for current topic
 # --
-    GetCurrentTopic => topic
+	P(1,GetCurrentTopic) => topic
 	glob=topic +"*.txt"
-	
-	if (InvDir.files(topic+"_*.txt").length>0) {
-		ConvertFromOldModel(topic)
-	}
+
 	topicFile=InvDir.file(topic + ".txt")
 	if (!topicFile.exists) {
 		dateString = Date.setFormat("yyyy-MM-dd").fmt
@@ -129,18 +121,6 @@ in an editor.
 	}
 	topicFile
 /LogFile
-
-
-    
-
-
-# Get all files for current topic, sorted 
-    GetCurrentTopic => topic
-    InvDir.files->f
-        assert(f.name.contains(topic))
-        out(Str(f.name,f))
-    | _.sort->x out(x.data)
-/GetTopicLogFiles
 
 
 
@@ -191,7 +171,6 @@ loop
             @ h/header          - insert header
             @ d/date            - insert date/time
             @ t/topic/ch        - change topic
-            @ T/topics          - list all topics
             @ todo              - show *TODO* lines
             @ c/cat             - display recent entries
             @ m/more          
@@ -207,8 +186,6 @@ loop
         LogFile.append(List("",Date.fmt))
     } else if (cmd==".t" || cmd=='t' || cmd=="topic" || cmd=="ch") { ## change topic
         SetTopic
-    } else if (cmd==".T" || cmd=='T' || cmd=="topics") { ## show topics
-        ShowTopics
     } else if (cmd=="todo") {
         ShowLines("*todo*")
     } else if(cmd==".c" || cmd=='c' || cmd=="cat") { ## cat
@@ -276,12 +253,9 @@ loop
 /LogHeader
 
 
-# Show lines for 3 newest files for current topic
-    println
-    files = GetTopicLogFiles #.last(3)
-    files->f
-        f.read->line
-            println("| " + line)
+# Show lines 
+# --
+	LogFile.read->line println("| " + line)
     |
     println
 /Show
