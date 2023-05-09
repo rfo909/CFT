@@ -20,6 +20,12 @@
 /License
 
 
+# Extending prompt
+# --
+	Date.fmt
+/StateString
+
+
 # Count down seconds
 # --
     P(1,10) => minutes
