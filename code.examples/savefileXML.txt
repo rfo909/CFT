@@ -79,11 +79,12 @@ in v3.3.2
     root.addToken("<!--").setDefault => x
     x.setDefault(x)
     x.addToken("-->").setIsToken(10)  # comment
-    
 
 
     # Everything else = 99  
     root.setDefault.setIsToken(99)
+	root.addToken(">").setIsToken(99)
+	root.addToken("/").setIsToken(99)
 
 
     # return value is the root node
@@ -104,6 +105,7 @@ in v3.3.2
         @   <? this is a test ?>
         @       <item>first item line
         @            second item line
+        @            a>b / c>d
         @       <title>Donald Duck &amp; Co</title>
         @       <emptyTag a=5/>
         @           <status>
@@ -166,6 +168,19 @@ exampleXML
 /Parse
 
 
+# Create synthetic root object with output from Parse as content. which 
+# allows us to use .subNodes("xxx") to locate specifically named content
+# --
+    P(1)=>xml
+	content=Parse(xml)
+
+	obj=XMLNode
+	obj.content=content
+	obj
+/ParseObject
+
+
+
 # XML node class
 # --
     P(1) as String? => tagName
@@ -211,6 +226,24 @@ exampleXML
             assert(tag==null || x.tagName==tag)
             out(x)
     }
+
+	# Get list of String from context
+	# --
+	self.getText=Lambda{
+		self.content->x
+			x as? String => isString
+			assert(isString)
+			out(x)
+	}
+
+	# Get single (first) String value
+	# --
+	self.getString=Lambda{
+		P(1,null) => default
+		list=self.getText
+		if (list.empty, default, list.first)
+	}
+
     
         
     ## Parse from token stream
