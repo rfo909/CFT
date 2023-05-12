@@ -24,17 +24,10 @@ import rf.configtool.lexer.SourceLocation;
  * operations that may fail inside Java runtime / libs, should capture these and repackage them into
  * SourceExceptions at the earliest convenient time, ensuring proper reporting to user.
  */
-public class SourceException extends Exception {
-    
-    private SourceLocation loc;
-    private String msg;
-    private Exception originalException;
+public class SourceException extends CodeException {
     
     public SourceException (SourceLocation loc, String msg, Exception originalException ) {
-        super(msg);
-        this.loc=loc;
-        this.msg=msg;
-        this.originalException=originalException;
+        super(loc, msg, originalException);
     }
     
     public SourceException (SourceLocation loc, String msg) {
@@ -44,27 +37,6 @@ public class SourceException extends Exception {
     public SourceException (SourceLocation loc, Exception originalException) {
         this(loc,originalException.getMessage(),originalException);
     }
-
-    public SourceLocation getLoc() {
-        return loc;
-    }
-
-    @Override
-    public String getMessage() {
-        String s=loc.toString() + " " + msg;
-        if (originalException != null) s+=" (" + originalException.getClass().getName() + ")";
-        return s;
-    }
-
-    public Exception getOriginalException() {
-        return originalException;
-    }
-    
-    
-    public String toString() {
-        return getMessage();
-    }
-    
     
 
 }

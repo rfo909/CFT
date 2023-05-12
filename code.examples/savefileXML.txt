@@ -46,7 +46,7 @@ in v3.3.2
     ws.sub(" ^n^r^t".unEsc,ws)  # loop back
     
     # Specials = 2
-    List("<",">","</","/>","=",":")->t root.addToken(t).setIsToken(2) |
+    List("<",">","</","/>","=",":","<![CDATA[","]]>")->t root.addToken(t).setIsToken(2) |
     
     # Numbers = 3
     digits = "0123456789"
@@ -70,7 +70,7 @@ in v3.3.2
         insideString.sub("\").setDefault(insideString)
         insideString.sub(c).setIsToken(5)
     |
-    
+
     # XML specials = 10
     root.addToken("<?").setDefault => x
     x.setDefault(x)

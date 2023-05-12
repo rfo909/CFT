@@ -13,6 +13,29 @@
 
 <h1>CFT Change log</h1>
 
+<h3>4.0.6 2023-05-12 - Exceptions hierarchy + shell changes</h3>
+<p>
+Tried creating a cleaner custom exception hierarchy, for safer detection of CFT runtime errors that
+should NOT result in trying to run the command as an external program. Not quite ready.
+</p>
+<p>
+Also added a line modifier to FORCE input to be run ONLY as CFT code, in order to see error
+messages, using the '$' character. So now we have the following cases for input:
+</p>
+<pre>
+xyz       # fails in CFT, tries to run as external command, shows PowerShell error message
+$xyz      # fails in CFT, shows CFT exception!
+&lt;TAB&gt;xyz  # forces input to run as external program only!
+
+# Defineed here:
+
+ShellCommandsManager.FORCE_CFT_CODE_PREFIX = "$"
+ShellCommandsManager.FORCE_EXTERNAL_COMMAND_PREFIX = "\t"
+
+See Root.processInteractiveInput()
+</pre>	
+
+
 <h3>4.0.5 2023-03-28 - _Shell function improvements</h3>
 <p>
 Modified global _Shell function

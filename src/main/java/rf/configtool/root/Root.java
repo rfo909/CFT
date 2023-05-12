@@ -326,17 +326,24 @@ public class Root {
             
             
             
-            // interactive-only shell commands?
+            // pre-processing input
+            final boolean forceCftCode = line.startsWith(ShellCommandsManager.FORCE_CFT_CODE_PREFIX);
+            if (forceCftCode) {
+            	line=line.substring(ShellCommandsManager.FORCE_CFT_CODE_PREFIX.length()).trim();
+            } 
             
-            Value v = (new ShellCommandsManager()).execute(stdio, objGlobal, line);
-            if (v != null) {
-                postProcessResult(v);
-                showSystemLog();
-                return;
+            
+            if (!forceCftCode) {
+                // check for interactive shell commands?
+                
+                Value v = (new ShellCommandsManager()).execute(stdio, objGlobal, line);
+                if (v != null) {
+                    postProcessResult(v);
+                    showSystemLog();
+                    return;
+                }
             }
             
-            // pre-processing input
-
             if (line.startsWith(".") && !line.startsWith("."+File.separatorChar)) {
                 // repeat previous command
             	// ("./xxx" and ".\xxx" is assumed to be local programs to be run, see below)
@@ -346,7 +353,7 @@ public class Root {
                     return;
                 }
                 line = currLine + line.substring(1);
-                stdio.println("$ " + line);
+                stdio.println(line);
             } 
             
   
@@ -474,6 +481,9 @@ public class Root {
                 	postProcessResult(result);
                 	showSystemLog();
                 } catch (Exception ex) {
+                	if (forceCftCode) throw ex;
+                		// log below
+                	
                 	//System.out.println("---> " + ex.getMessage());
                 	if (ex.getMessage().contains("<script>") 
                 			|| ex.getMessage().contains("[eof]"))  // parse problem in called code 
@@ -484,7 +494,7 @@ public class Root {
                 }
                 
                 // try process as CFT bang command?
-                if (!isCFTInput) {
+                if (!forceCftCode && !isCFTInput) {
 		        	final String shellCommandLine=ShellCommandsManager.FORCE_EXTERNAL_COMMAND_PREFIX+line;
 		        	//System.out.println(shellCommandLine);
 

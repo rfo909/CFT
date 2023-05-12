@@ -22,6 +22,7 @@ import java.util.List;
 
 import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.CFTCallStackFrame;
+import rf.configtool.main.CodeException;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.SourceException;
 import rf.configtool.main.Stdio;
@@ -76,8 +77,8 @@ public class ExprTryCatch extends ExprCommon {
     
     private ValueList getStackTrace(Exception ex) {
         List<Value> data=new ArrayList<Value>();
-        if (ex instanceof SourceException) {
-            Exception x=((SourceException) ex).getOriginalException();
+        if (ex instanceof CodeException) {
+            Exception x=((CodeException) ex).getOriginalException();
             if (x != null) ex=x;
         }
         StackTraceElement[] st = ex.getStackTrace();

@@ -23,6 +23,7 @@ import java.util.List;
 import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.CFTCallStackFrame;
 import rf.configtool.main.Ctx;
+import rf.configtool.main.CustomException;
 import rf.configtool.main.SourceException;
 import rf.configtool.main.runtime.Function;
 import rf.configtool.main.runtime.Obj;
@@ -123,7 +124,7 @@ public class DottedCall extends LexicalElement {
                 if (checkMode) {
                     return new ValueBoolean(false);
                 } else {
-                    if (!(ex instanceof SourceException)) {
+                    if (!(ex instanceof CustomException)) {
                         throw new SourceException(getSourceLocation(), ex);
                     } else {
                         throw ex;

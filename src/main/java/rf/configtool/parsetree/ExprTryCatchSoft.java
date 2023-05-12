@@ -22,6 +22,7 @@ import java.util.List;
 
 import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.CFTCallStackFrame;
+import rf.configtool.main.CodeException;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.SoftErrorException;
 import rf.configtool.main.SourceException;
@@ -62,14 +63,16 @@ public class ExprTryCatchSoft extends ExprCommon {
             //
             if (ex instanceof SoftErrorException) {
                 softEx=(SoftErrorException) ex;
-            } else if (ex instanceof SourceException) {
-                Exception inner=((SourceException) ex).getOriginalException();
+            } else if (ex instanceof CodeException) {
+                Exception inner=((CodeException) ex).getOriginalException();
                 if (inner != null && (inner instanceof SoftErrorException)) {
                     softEx=(SoftErrorException) inner;
                 }
             }
             if (softEx==null) throw ex;  
         }
+        
+        // found soft exception, returning dictionary
         
         ObjDict x=new ObjDict();
         x.set("ok", new ValueBoolean(result != null));

@@ -21,6 +21,7 @@ import java.util.*;
 
 import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.Ctx;
+import rf.configtool.main.CustomException;
 import rf.configtool.main.SourceException;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueBoolean;
@@ -76,7 +77,7 @@ public class Expr extends ExprCommon {
             
             return new ValueBoolean(false);
         } catch (Exception ex) {
-            if (ex instanceof SourceException) {
+            if (ex instanceof CustomException) {
                 throw ex;
             } else {
                 throw new SourceException(getSourceLocation(), ex);

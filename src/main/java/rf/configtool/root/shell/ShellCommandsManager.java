@@ -36,6 +36,8 @@ import rf.configtool.main.runtime.Value;
 public class ShellCommandsManager {
 	
 	public static final String FORCE_EXTERNAL_COMMAND_PREFIX = "\t";
+	public static final String FORCE_CFT_CODE_PREFIX = "$";
+	
     
     public static final ShellCommand[] SHELL_COMMANDS = {
     		new ShellShell(),
@@ -88,11 +90,15 @@ public class ShellCommandsManager {
     public Value execute (Stdio stdio, ObjGlobal objGlobal, String line) throws Exception {
     	
         boolean forceExternalCommand=false;
-
+        
+        if (line.startsWith(FORCE_CFT_CODE_PREFIX)) {
+        	return null;
+        }
+        
         // forcing external command?
         if (line.startsWith(FORCE_EXTERNAL_COMMAND_PREFIX)) {
         	forceExternalCommand=true;
-        }
+        } 
         
         // Strip prefixing space and TAB
         // Can not use trim, as line may well end with TAB (to be replaced with '*') for globbing

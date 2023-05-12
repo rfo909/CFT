@@ -24,8 +24,10 @@ import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.CFTCallStackFrame;
 import rf.configtool.main.FunctionBody;
 import rf.configtool.main.Ctx;
+import rf.configtool.main.CustomException;
 import rf.configtool.main.FunctionState;
 import rf.configtool.main.ObjGlobal;
+import rf.configtool.main.ParseException;
 import rf.configtool.main.Runtime;
 import rf.configtool.main.SourceException;
 import rf.configtool.main.runtime.*;
@@ -86,7 +88,7 @@ public class ExprLookupOrCall extends ExprCommon {
         try {
             return f.callFunction(ctx, values);
         } catch (Exception ex) {
-            if (!(ex instanceof SourceException)) {
+            if (!(ex instanceof CustomException)) {
                 throw new SourceException(getSourceLocation(), ex);
             } else {
                 throw ex;

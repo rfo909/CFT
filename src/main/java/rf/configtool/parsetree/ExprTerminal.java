@@ -20,6 +20,7 @@ package rf.configtool.parsetree;
 import rf.configtool.lexer.Token;
 import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.Ctx;
+import rf.configtool.main.CustomException;
 import rf.configtool.main.SourceException;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueBoolean;
@@ -185,7 +186,7 @@ public class ExprTerminal extends ExprCommon {
 
             throw new RuntimeException("Internal error");
         } catch (Exception ex) {
-            if (ex instanceof SourceException) {
+            if (ex instanceof CustomException) {
                 throw ex;
             } else {
                 throw new SourceException(getSourceLocation(), ex);
