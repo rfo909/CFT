@@ -46,7 +46,7 @@ in v3.3.2
     ws.sub(" ^n^r^t".unEsc,ws)  # loop back
     
     # Specials = 2
-    List("<",">","</","/>","=",":","<![CDATA[","]]>")->t root.addToken(t).setIsToken(2) |
+    List("<",">","</","/>","=",":")->t root.addToken(t).setIsToken(2) |
     
     # Numbers = 3
     digits = "0123456789"
@@ -111,9 +111,10 @@ in v3.3.2
         @           <status>
         @             on-hold
         @           <count>2</count>
-        @               <x a="1"> xxx </x>
-        @       </status>
+        @               <x a="1">xxx</x>
+        @           </status>
         @       </item>
+		#@       <xx><yy></yy></xx>  # <-- does not work, only if space before </xx> ...
         @       <emptyTag a="a"/>
         @    </a:parent>
     )
@@ -122,6 +123,29 @@ in v3.3.2
 
 exampleXML
 //ex
+
+
+# Test tokenize only
+# --
+	P(1)=>xml
+	
+    if (xml==null) {
+        println("Paste or enter XML, then terminate by '.' on single line")
+        readLines(".") => xml
+    }
+
+	RootNode => root
+	Std.Text.Lexer => lexer
+
+	xml->line lexer.addLine(line) |
+	lexer.getTokenStream(root) => ts
+	loop
+		break(ts.EOF)
+		out(ts.peek)
+		ts.next
+	|
+/GetTokens
+
 
 
 # Tokenize XML, then parse.
