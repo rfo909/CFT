@@ -173,9 +173,12 @@ loop
             @ h/header          - insert header
             @ d/date            - insert date/time
             @ t/topic/ch        - change topic
+			@
+			@ aloop             - enter Activity loop mode
+			@ aset              - set Activity loop delay in minutes
+			@
             @ todo              - show *TODO* lines
             @ c/cat             - display recent entries
-			@ a/aloop           - enter Activity loop mode
             @ m/more          
             @ e/edit            - edit current file
             @ q/quit            - quit
@@ -193,8 +196,10 @@ loop
         ShowLines("*todo*")
     } else if(cmd==".c" || cmd=='c' || cmd=="cat") { ## cat
         Show
-	} else if (cmd=="a" || cmd=="aloop") { ## activity loop
+	} else if (cmd=="aloop") { ## activity loop
 		ALoop
+	} else if (cmd=="aset") { # Change activity loop delay
+		ALoopSet
     } else if(cmd==".m" || cmd=='m' || cmd=="more") { ## more
         Lib:m (LogFile)
     } else if(cmd==".e" || cmd=='e' || cmd=="edit") { ## edit
@@ -202,7 +207,7 @@ loop
     } else if (cmd==".q" || cmd=='q' || cmd=="quit") { ## quit
         break(true)
     } else {
-        LogFile.append(cmd)
+		LogText(cmd)
     }
     
 /InputMode
@@ -229,14 +234,16 @@ loop
 /LogData
 
 
-# Log text
-    readLine("[" + GetCurrentTopic +"] Comment") =>line
-    #Date.setFormat("HH:MM:ss").fmt =>time
-    LogFile.append(line)
+# Add line to LogFile
+# --
+	P(1,readLine("Enter comment")) => line
+	"> " + Date.setFormat("yyyy-MM-dd HH:mm").fmt + " " + line => line
+	LogFile.append(line)
 /LogText
 
 
 # Log pasted text
+# --
     readLine("Type end marker, or just press Enter to use '.'").trim =>endMarker
     if(endMarker=="",".",endMarker) =>endMarker
     println("End-marker: '" + endMarker + "'")
@@ -253,6 +260,7 @@ loop
 
 
 # Create header
+# --
     header = readLine("Enter header")
     LogFile.append(Header(Date.fmt + "  " + header))
 /LogHeader
@@ -271,16 +279,19 @@ Lib:e (LogFile)
 
 # Alarm
 # --
-    Std.Data.each(1,3)->x
+	P(1,3)=>count
+    Std.Data.each(1,count)->x
         println("ALARM!!" + Sys.uchar(7))
         Sys.sleep(1500)
 //Alarm
 
 
+
+
 # Activity loop
 # --
-	P(1,5) => minutes
-	P(2,false) => minuteBeep
+	P(1,false) => minuteBeep
+	Db2:Get(Sys.scriptId,"ALoop_minutes",5) => minutes
 
 	start=curr=currentTimeMillis
 	Date.setFormat("yyyy-MM-dd").fmt + "_log" => key
@@ -296,12 +307,11 @@ Lib:e (LogFile)
 	
 	loop
 		if (currentTimeMillis - start >= minutes*60000) {
-			Alarm 
+			Alarm(1)
 
 			readLine("Activity / blank to quit") => line
 			break(line.trim=="")
-			line="> " + Date.setFormat("yyyy-MM-dd HH:mm").fmt + " " + line
-			LogFile.append(line)
+			LogText(line)
 
 			Inner{
 				LogFile.read.last(100)->line println("| " + line)
@@ -317,4 +327,12 @@ Lib:e (LogFile)
 			Sys.sleep(3000)
 		}
 /ALoop
+
 	
+# Change ALoop delay in minutes
+# --
+	currVal=""+Db2:Get(Sys.scriptId,"ALoop_minutes",5)
+	Input("Enter ALoop number of minutes").setCurr(currVal).get.parseInt => minutes
+	Db2:Set(Sys.scriptId,"ALoop_minutes",minutes)
+/ALoopSet
+
