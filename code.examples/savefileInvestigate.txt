@@ -202,7 +202,9 @@ loop
 		ALoopSet
     } else if(cmd==".m" || cmd=='m' || cmd=="more") { ## more
         Lib:m (LogFile)
-    } else if(cmd==".e" || cmd=='e' || cmd=="edit") { ## edit
+    } else if(cmd==".e" || cmd=='e' || cmd=="edit") { ## edit 
+    	s=Date.fmt   
+    	LogFile.append(List("",s,"-".times(s.length)))
         Edit
     } else if (cmd==".q" || cmd=='q' || cmd=="quit") { ## quit
         break(true)
