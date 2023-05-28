@@ -1233,3 +1233,14 @@ run(null,null,null,true)
 		"Std.Util.Encrypt produces INVALID RESULT")
 	"ok"
 //EncryptSanityCheck
+
+
+
+# List files sorted for change date, newest last
+# --
+	P(1,Dir) => dir
+	Dir.newestFiles(100).reverse
+/ListNewestFiles
+
+
+	
