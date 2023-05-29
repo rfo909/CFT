@@ -873,23 +873,6 @@ run(null,null,null,true)
         out(Int(f.lastModified, f))
     | _.sort->x
         out(x.data)
-    | => files
-
-    if (files.length > 0) Inner {
-        Inner {
-            pos=0
-            files -> f
-                report(pos, f.path, Date.diff(Date(f.lastModified)).fmt)
-                pos=pos+1
-        } -> line
-            println(line)
-        |
-        println
-        readLine("Edit file (pos), ENTER to cancel").trim=>pos
-        if (pos != "") {
-            Lib:e(files.nth(pos.parseInt))
-        }
-    }
 /LocateFiles
 
 

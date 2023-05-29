@@ -169,6 +169,7 @@ loop
             @ ---
             @ .                 - read pasted input lines, with end-marker '.'
             @ ..xxx             - read pasted input lines, with end-marker 'xxx'
+			@ -                 - insert blank line
             @ ?                 - get help (this page9
             @ h/header          - insert header
             @ d/date            - insert date/time
@@ -186,15 +187,15 @@ loop
             @
         )->line 
             println(line.trim)
-    } else if(cmd==".h" || cmd=="h" || cmd=="header") { ## Header
+    } else if(cmd=="h" || cmd=="header") { ## Header
         LogHeader
-    } else if (cmd==".d" || cmd=='d' || cmd=="date") { ## date/time stamp
+    } else if (cmd=='d' || cmd=="date") { ## date/time stamp
         LogFile.append(List("",Date.fmt))
-    } else if (cmd==".t" || cmd=='t' || cmd=="topic" || cmd=="ch") { ## change topic
+    } else if (cmd=='t' || cmd=="topic" || cmd=="ch") { ## change topic
         SetTopic
     } else if (cmd=="todo") {
         ShowLines("*todo*")
-    } else if(cmd==".c" || cmd=='c' || cmd=="cat") { ## cat
+    } else if(cmd=='c' || cmd=="cat") { ## cat
         Show
 	} else if (cmd=="aloop") { ## activity loop
 		ALoop
@@ -202,12 +203,14 @@ loop
 		ALoopSet
     } else if(cmd==".m" || cmd=='m' || cmd=="more") { ## more
         Lib:m (LogFile)
-    } else if(cmd==".e" || cmd=='e' || cmd=="edit") { ## edit 
+    } else if(cmd=="@e" || cmd=='e' || cmd=="edit") { ## edit 
     	s=Date.fmt   
     	LogFile.append(List("",s,"-".times(s.length)))
         Edit
-    } else if (cmd==".q" || cmd=='q' || cmd=="quit") { ## quit
+    } else if (cmd=='q' || cmd=="quit") { ## quit
         break(true)
+	} else if (cmd=='-') {
+		LogFile.append("")
     } else {
 		LogText(cmd)
     }
