@@ -112,9 +112,8 @@ in an editor.
 # Get file for current topic
 # --
 	P(1,GetCurrentTopic) => topic
-	glob=topic +"*.txt"
-
-	topicFile=InvDir.file(topic + ".txt")
+	
+	topicFile=InvDir.file(topic.replace(" ","_") + ".txt")
 	if (!topicFile.exists) {
 		dateString = Date.setFormat("yyyy-MM-dd").fmt
 		topicFile.create(Header(topic + " " + dateString))
@@ -135,13 +134,22 @@ in an editor.
 //ShowLines
 
 
+# Get prompt color
+# --
+	Db2:Get(Sys.scriptId, "prompt_color", Curses:TxtCyan)
+//PromptColor
 
 
+# Select prompt color
+# --
+	error (!Curses:Enabled, "Colors not enabled. Run Curses:Enable")
+	Db2:Set(Sys.scriptId, "prompt_color", Curses:SelectColor)
+//SetPromptColor
 
 
 # Input mode
 loop
-    readLine("[" + GetCurrentTopic + "] Enter text, 'c' to cat, Enter to quit or '?' for help").trim =>cmd
+    readLine(PromptColor + "[" + GetCurrentTopic + "] Enter text, 'c' to cat, Enter to quit or '?' for help" + Curses:Reset).trim =>cmd
 
 	break(cmd=="")
 
@@ -166,11 +174,11 @@ loop
         Sequence(
             @
             @
-            @ ---
             @ .                 - read pasted input lines, with end-marker '.'
             @ ..xxx             - read pasted input lines, with end-marker 'xxx'
 			@ -                 - insert blank line
-            @ ?                 - get help (this page9
+            @ ?                 - get help (this page)
+			@
             @ h/header          - insert header
             @ d/date            - insert date/time
             @ t/topic/ch        - change topic
@@ -183,7 +191,8 @@ loop
             @ m/more          
             @ e/edit            - edit current file
             @ q/quit            - quit
-            @ ---
+			@
+			@ col               - set prompt color
             @
         )->line 
             println(line.trim)
@@ -211,6 +220,8 @@ loop
         break(true)
 	} else if (cmd=='-') {
 		LogFile.append("")
+	} else if (cmd=='col') {
+		SetPromptColor
     } else {
 		LogText(cmd)
     }
