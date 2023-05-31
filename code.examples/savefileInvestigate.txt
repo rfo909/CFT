@@ -147,11 +147,24 @@ in an editor.
 //SetPromptColor
 
 
-# Input mode
-loop
-    readLine(PromptColor + "[" + GetCurrentTopic + "] Enter text, 'c' to cat, Enter to quit or '?' for help" + Curses:Reset).trim =>cmd
 
-	break(cmd=="")
+# Create date header if new day
+# --
+	Date.setFormat("yyyy-MM-dd").fmt => today
+	Db2:Get(Sys.scriptId,"date","") => date
+	if (date != today) {
+		LogFile.append(List("",today,"-".times(today.length)))
+		Db2:Set(Sys.scriptId,"date",today)
+	}
+//DateHeader
+
+
+# Input mode
+# --
+loop
+	DateHeader
+    readLine(PromptColor + "[" + GetCurrentTopic + "] Enter text, 'c' to cat, Enter to quit or '?' for help" + Curses:Reset).trim =>cmd
+	break(cmd=="" || cmd=="q" || cmd=="quit")
 
     if (cmd=="." || cmd.startsWith("..")) {
         # paste
@@ -195,7 +208,7 @@ loop
 			@ col               - set prompt color
             @
         )->line 
-            println(line.trim)
+            println("| " + line.trim)
     } else if(cmd=="h" || cmd=="header") { ## Header
         LogHeader
     } else if (cmd=='d' || cmd=="date") { ## date/time stamp
@@ -213,11 +226,7 @@ loop
     } else if(cmd==".m" || cmd=='m' || cmd=="more") { ## more
         Lib:m (LogFile)
     } else if(cmd=="@e" || cmd=='e' || cmd=="edit") { ## edit 
-    	s=Date.fmt   
-    	LogFile.append(List("",s,"-".times(s.length)))
         Edit
-    } else if (cmd=='q' || cmd=="quit") { ## quit
-        break(true)
 	} else if (cmd=='-') {
 		LogFile.append("")
 	} else if (cmd=='col') {
@@ -284,7 +293,8 @@ loop
 
 # Show lines 
 # --
-	LogFile.read->line println("| " + line)
+	LogFile.read->line 
+		println("| " + line)
     |
     println
 /Show
