@@ -159,11 +159,21 @@ in an editor.
 //DateHeader
 
 
+
+
+# Add prompt color to string
+# --
+	P(1,"?") => str
+	PromptColor + str + Curses:Reset
+//Prompt
+
+
+
 # Input mode
 # --
 loop
 	DateHeader
-    readLine(PromptColor + "[" + GetCurrentTopic + "] Enter text, 'c' to cat, Enter to quit or '?' for help" + Curses:Reset).trim =>cmd
+    readLine(Prompt("[" + GetCurrentTopic + "] Enter text, 'c' to cat, Enter to quit or '?' for help")).trim =>cmd
 	break(cmd=="" || cmd=="q" || cmd=="quit")
 
     if (cmd=="." || cmd.startsWith("..")) {
@@ -361,4 +371,6 @@ Lib:e (LogFile)
 	Input("Enter ALoop number of minutes").setCurr(currVal).get.parseInt => minutes
 	Db2:Set(Sys.scriptId,"ALoop_minutes",minutes)
 /ALoopSet
+
+
 

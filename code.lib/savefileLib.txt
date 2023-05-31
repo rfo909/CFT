@@ -789,14 +789,23 @@ run(null,null,null,true)
     P(3,Input("Enter partial file name, or glob pattern with '*'").get) => fname
     P(4,Input("Include sub-dirs y/n").setCurrCond("y")).get.toLower=="y" => subDirs
     
-	if (subDirs) {
-		Lib:Header("Note: Running as background job")
-		proc=SpawnProcess(SymDict(dir,st,fname,subDirs), DoSearchTextFiles(dir,st,fname,subDirs))
-		Sys.Jobs.add(proc,'Searching for "'+st+'" "'+fname+'" '+dir.path)
-	} else {
-		DoSearchTextFiles(dir,st,fname,subDirs)
+	proc=SpawnProcess(SymDict(dir,st,fname,subDirs), DoSearchTextFiles(dir,st,fname,subDirs))
+	Inner {
+		Std.Data.each(0,100)->i
+			break(proc.isDone)
+			Sys.sleep(50)  # waiting at most 5 seconds
+		|
+		if (proc.isDone) Inner{
+			Lib:Header("Results")
+			proc.output->line println(line)
+		} else {
+			Lib:Header("Note: Search takes too long, running as background job")
+			Sys.Jobs.add(proc,'Searching for "'+st+'" "'+fname+'" '+dir.path)
+		}
 	}
 /SearchTextFiles
+
+
 
 # DoSearchTextFiles
 # --
