@@ -172,9 +172,10 @@ in an editor.
 # Input mode
 # --
 loop
-	DateHeader
     readLine(Prompt("[" + GetCurrentTopic + "] Enter text, 'c' to cat, Enter to quit or '?' for help")).trim =>cmd
 	break(cmd=="" || cmd=="q" || cmd=="quit")
+
+	DateHeader
 
     if (cmd=="." || cmd.startsWith("..")) {
         # paste
