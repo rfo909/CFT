@@ -67,7 +67,7 @@ in an editor.
 		list->t
 		file=LogFile(t)
 		age=Date.diff(Date(file.lastModified))
-		if (age.asDays > 90) age="" else age=age.fmt
+		if (age.asDays > 15) age="" else age=age.fmt
 		name=(t+" ".times(80)).first(40)
 		println( ("   "+count).last(3)+": " + name + age)
 		count=count+1
@@ -205,7 +205,7 @@ loop
 			@
             @ h/header          - insert header
             @ d/date            - insert date/time
-            @ t/topic/ch        - change topic
+            @ t/topic/ch        - view / change topic
 			@
 			@ aloop             - enter Activity loop mode
 			@ aset              - set Activity loop delay in minutes

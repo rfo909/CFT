@@ -102,6 +102,7 @@ public class ObjDir extends Obj implements IsSynthesizable {
                 new FunctionNewestFiles(),
                 new FunctionStats(),
                 new FunctionLastModified(),
+                new FunctionOldFiles(),
         };
         setFunctions(arr);
 
@@ -962,6 +963,39 @@ public class ObjDir extends Obj implements IsSynthesizable {
             if (params.size() != 0) throw new Exception("Expected no parameters");
             File f=new File(name);
             return new ValueInt(f.lastModified());
+        }
+    }
+
+    
+    class FunctionOldFiles extends Function {
+        public String getName() {
+            return "oldFiles";
+        }
+        public String getShortDesc() {
+            return "oldFiles(seconds) - returns list of File objects older than indicated time";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            long seconds;
+            if (params.size()==1) {
+                seconds=getInt("seconds", params, 0);
+            } else {
+                throw new Exception("Expected seconds integer parameter");
+            }
+
+            long limit=System.currentTimeMillis() - seconds*1000;
+
+            File f=new File(name);
+            List<Value> result=new ArrayList<Value>();
+            for (String s:f.list()) {
+                File x=new File(name + File.separator + s);
+                if (x.isFile()) {
+                	long lastModified = x.lastModified();
+                	if (lastModified < limit) {
+                		result.add(new ValueObj(new ObjFile(x.getCanonicalPath(), protection)));
+                	}
+                }
+            }
+            return new ValueList(result);
         }
     }
 
