@@ -13,6 +13,27 @@
 
 <h1>CFT Change log</h1>
 
+<h3>4.0.7 2023-06-13 - Working on the Lexer</h3>
+<p>
+The XML parser simply does not work, and certainly can not handle
+CDATA. Experimenting with the Lexer, and initiated the Tests05 script
+to both test and document its operation, as it is quite complex.
+</p>
+
+<p>
+Also changed the "force internal command" prefix from the cumbersome '$'
+to the much simpler SPACE. This is necessary when testing code, as the
+auto-switch to assuming its an external command follows when internal code
+fails with certain conditions. 
+<p>
+
+</p>
+See previous point, on trying to express CFT failures that should not
+result in trying input as external command.
+</p>
+
+
+
 <h3>4.0.6 2023-05-12 - Exceptions hierarchy + shell changes</h3>
 <p>
 Tried creating a cleaner custom exception hierarchy, for safer detection of CFT runtime errors that

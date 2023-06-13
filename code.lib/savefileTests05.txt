@@ -1,0 +1,117 @@
+# Detailed testing of the Std.Text.Lexer objects
+# --
+
+# Global verbose flag
+# --
+	P(1,false)=>value
+	Db2:Set(Sys.scriptId, "verbose", value)
+/SetVerbose
+
+# Fetch verbose value
+# --
+	Db2:Get(Sys.scriptId,"verbose",false)
+//Verbose
+
+
+# Util func
+# --
+	P(1) => root
+	P(2) => s
+	P(3,true) => shouldSucceed
+	
+	tryCatch({
+		Std.Text.Lexer => lexer
+		lexer.addLine(s)
+		
+		lexer.getTokenStream(root) => ts
+		if (Verbose) Inner{
+			Lib:Header("Tokens")
+			loop
+				break(ts.EOF)
+				println(ts.peek)
+				ts.next
+		}
+	}) => result
+	
+	if (Verbose) {
+		Lib:Header("Result")
+		Util:ShowDict(result,true)
+		if (result.has("javastack")) {
+			Lib:Header("javastack")
+			Inner{result.javastack->line println(line)}
+		}
+		if (result.has("stack")) {
+			Lib:Header("stack")
+			Inner{result.stack->line println(line)}
+		}
+		
+		if (result.has("msg")) {
+			println
+			println(result.msg)
+		}
+	}
+		
+	if (shouldSucceed, result.ok, !result.ok)
+//runTest
+
+
+# Basic tokenizing root node
+# --
+	Std.Text.Lexer.Node => root
+	root.sub(" ^n^r^t".unEsc).setIsToken(-1)
+	root.addToken("begin").setIsToken(1)
+	
+	identFirstChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"
+    identInnerChars = identFirstChars + "0123456789"
+    
+    root.sub(identFirstChars).setIsToken(2) => ident
+    ident.sub(identInnerChars, ident) # loop back
+    
+    root
+/t01_root
+
+
+
+
+# Test01
+# --
+	runTest(t01_root,"a b c")
+/Test01
+
+# Test02
+# --
+	runTest(t01_root,"a b 23 c", false) 
+		# should fail, as numbers not included
+/Test02
+
+# Test03 
+# --
+	runTest(t01_root,"a b begin c")
+/Test03
+
+
+
+
+
+# Run all TestX
+# --
+
+    SetVerbose(false)
+    
+    allOk=true
+    count=0
+    Sys.functions.sort->f
+        assert(f.startsWith("Test"))
+        count=count+1
+        result=eval(f)
+        allOk=allOk && result
+        report(f,result)
+    | -> line
+        println(line)
+    |
+    println("Ran " + count + " tests!")
+
+    allOk
+/RunAll
+
+

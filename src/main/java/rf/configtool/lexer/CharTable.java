@@ -49,6 +49,10 @@ public class CharTable {
         defaultMapping=ct;
     }
     
+    public boolean hasDefaultMapping () {
+    	return defaultMapping != null;
+    }
+    
     public CharTable getMapping (char c) {
         return map.get(c);
     }
@@ -108,7 +112,7 @@ public class CharTable {
             CharTable next=map.get(nextChar);
             if (next==null) next=defaultMapping;
     
-            if (next==null) {
+            if (next==null || next==StopRule.STOP) {
                 // no more possible solutions
                 source.ungetChar(); // unget nextChar
                 if (tokenType == null) {

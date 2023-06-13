@@ -36,7 +36,7 @@ import rf.configtool.main.runtime.Value;
 public class ShellCommandsManager {
 	
 	public static final String FORCE_EXTERNAL_COMMAND_PREFIX = "\t";
-	public static final String FORCE_CFT_CODE_PREFIX = "$";
+	public static final String FORCE_CFT_CODE_PREFIX = " ";
 	
     
     public static final ShellCommand[] SHELL_COMMANDS = {

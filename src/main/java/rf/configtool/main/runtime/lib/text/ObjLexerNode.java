@@ -20,6 +20,7 @@ package rf.configtool.main.runtime.lib.text;
 import java.util.List;
 
 import rf.configtool.lexer.CharTable;
+import rf.configtool.lexer.StopRule;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.runtime.ColList;
 import rf.configtool.main.runtime.Function;
@@ -30,7 +31,7 @@ import rf.configtool.main.runtime.ValueString;
 import rf.configtool.main.runtime.lib.ObjDict;
 
 /**
- * Result object from functions inside Lexer,
+ * Result object from functions inside Lexer. Basically a wrapper around the CharTable object.
  */
 public class ObjLexerNode extends Obj {
 
@@ -39,7 +40,6 @@ public class ObjLexerNode extends Obj {
     private String firstChars;
     private CharTable charTable;
     
-
     private ObjLexerNode() {
         this.add(new FunctionSub());
         this.add(new FunctionAddToken());
@@ -47,6 +47,7 @@ public class ObjLexerNode extends Obj {
         this.add(new FunctionSetIsToken());
 //      this.add(new FunctionMatch());
         this.add(new FunctionAddTokenComplex());
+        this.add(new FunctionStop());
     }
 
     public ObjLexerNode(String firstChars) {
@@ -299,6 +300,21 @@ public class ObjLexerNode extends Obj {
             }
             ObjDict charMap=(ObjDict) obj;
             return new ValueObj(addTokenComplex(token, charMap));
+        }
+    }
+
+    class FunctionStop extends Function {
+        public String getName() {
+            return "STOP";
+        }
+
+        public String getShortDesc() {
+            return "STOP() - returns STOP Node";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+        	ObjLexerNode node = new ObjLexerNode(StopRule.STOP);
+            return new ValueObj(node);
         }
     }
 
