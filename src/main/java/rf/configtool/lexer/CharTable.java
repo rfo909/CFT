@@ -16,7 +16,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 */
 
 package rf.configtool.lexer;
-import java.util.HashMap;
+import java.util.*;
 
 
 
@@ -27,18 +27,54 @@ import java.util.HashMap;
  */
 public class CharTable {
 
+	private final int id;
+    private static int nextId=0;
+
     private Integer tokenType;  // getting here via a CharTable mapping identifies a token type
     private HashMap<Character, CharTable> map=new HashMap<Character, CharTable>();
     private CharTable defaultMapping;
 
+    public CharTable() {
+    	this.id=nextId++;
+    }
+    
     public void setTokenType (Integer tokenType) {
         this.tokenType=tokenType;
     }
+    
     public void setMapping (String chars, CharTable ct) {
         for (int i=0; i<chars.length(); i++) {
             char c=chars.charAt(i);
             map.put(c, ct);
         }
+    }
+    
+    
+    public void show (String indent, List<String> output) {
+    	output.add(indent+"["+id+"]");
+    	if (tokenType != null) {
+    		output.add(indent+"tokenType:" + tokenType);
+    	}
+    	if (defaultMapping != null) {
+    		output.add(indent+"defaultMapping: [" + defaultMapping.id + "]");
+    	}
+    	String nextIndent=indent+"| ";
+    	
+    	Set<Character> keys=map.keySet();
+    	List<Character> keyList=new ArrayList<Character>();
+    	for (Character c:keys) {
+    		keyList.add(c);
+    	}
+    	Collections.sort(keyList);
+    	for (Character c:keyList) {
+    		CharTable sub=map.get(c);
+    		if (sub==StopRule.STOP) {
+    			output.add(indent+c+": STOP");
+    		} else {
+    			output.add(indent+c);
+    			sub.show(nextIndent, output);
+    		}
+    	}
     }
 
     public void setMapping (char ch, CharTable ct) {

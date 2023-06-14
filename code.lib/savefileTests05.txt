@@ -3,7 +3,7 @@
 
 # Global verbose flag
 # --
-	P(1,false)=>value
+	P(1,true)=>value
 	Db2:Set(Sys.scriptId, "verbose", value)
 /SetVerbose
 
@@ -55,6 +55,48 @@
 //runTest
 
 
+
+# Basic tokenizing root node
+# --
+	Std.Text.Lexer.Node => root
+	root.sub(" ^n^r^t".unEsc).setIsToken(-1)
+	root.addToken("keyword").setIsToken(1)
+
+	# Two tokens, both starting with 'b' - order of def matters
+	# WHY?
+	# Because root.sub("abc") maps abc to same sub-node
+	# And the sub() replaces other mappings, overwriting bxxx if first
+	root.addToken("bxxx").setIsToken(1)
+	root.sub("abc").setIsToken(2)
+    
+    root
+/t01_root
+
+# Inspect root
+# --
+	t01_root.dump
+/dump
+
+
+# Basic matching of tokens a b c keyword
+# --
+	runTest(t01_root,"  a b c keyword")
+/Test01a
+
+# Verify matching token bx
+# --
+	runTest(t01_root,"axxx")
+/Test01b
+
+# Incomplete 'begin' token
+# --
+	runTest(t01_root,"a b begi c", false) 
+/Test01c
+
+
+
+#################
+
 # Basic tokenizing root node
 # --
 	Std.Text.Lexer.Node => root
@@ -68,26 +110,7 @@
     ident.sub(identInnerChars, ident) # loop back
     
     root
-/t01_root
-
-
-
-
-# Test01
-# --
-	runTest(t01_root,"a b c")
-/Test01
-
-# Test02
-# --
-	runTest(t01_root,"a b 23 c", false) 
-		# should fail, as numbers not included
-/Test02
-
-# Test03 
-# --
-	runTest(t01_root,"a b begin c")
-/Test03
+/t02_root
 
 
 

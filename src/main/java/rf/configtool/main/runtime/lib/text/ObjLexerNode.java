@@ -17,6 +17,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.main.runtime.lib.text;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import rf.configtool.lexer.CharTable;
@@ -26,6 +27,7 @@ import rf.configtool.main.runtime.ColList;
 import rf.configtool.main.runtime.Function;
 import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
+import rf.configtool.main.runtime.ValueList;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
 import rf.configtool.main.runtime.lib.ObjDict;
@@ -45,9 +47,9 @@ public class ObjLexerNode extends Obj {
         this.add(new FunctionAddToken());
         this.add(new FunctionSetDefault());
         this.add(new FunctionSetIsToken());
-//      this.add(new FunctionMatch());
         this.add(new FunctionAddTokenComplex());
         this.add(new FunctionStop());
+        this.add(new FunctionDump());
     }
 
     public ObjLexerNode(String firstChars) {
@@ -102,6 +104,15 @@ public class ObjLexerNode extends Obj {
             curr = sub;
         }
         return new ObjLexerNode(curr);
+    }
+    
+    protected List<Value> show () {
+    	List<String> lines=new ArrayList<String>();
+    	charTable.show("", lines);
+    	
+    	List<Value> result=new ArrayList<Value>();
+    	for (String x:lines) result.add(new ValueString(x));
+    	return result;
     }
 
     /**
@@ -255,31 +266,6 @@ public class ObjLexerNode extends Obj {
             return new ValueObj(self());
         }
     }
-
-//  class FunctionMatch extends Function {
-//      public String getName() {
-//          return "match";
-//      }
-//
-//      public String getShortDesc() {
-//          return "match(Str) - returns number of characters matched";
-//      }
-//
-//      public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-//          if (params.size() != 1)
-//              throw new Exception("Expected Str parameter");
-//          String str = getString("Str", params, 0);
-//          CharSource cs = new CharSource();
-//          cs.add(str, "single-line");
-//
-//          Integer tokenType = charTable.parse(cs);
-//          if (tokenType == null) {
-//              return new ValueInt(0);
-//          } else {
-//              return new ValueInt(cs.getPos());
-//          }
-//      }
-//  }
     
     class FunctionAddTokenComplex extends Function {
         public String getName() {
@@ -318,6 +304,21 @@ public class ObjLexerNode extends Obj {
         }
     }
 
+    
+    class FunctionDump extends Function {
+        public String getName() {
+            return "dump";
+        }
+
+        public String getShortDesc() {
+            return "dump() - returns list of strings, showing tree under node";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+        	List<Value> lines=show();
+        	return new ValueList(lines);
+        }
+    }
 
 
 }

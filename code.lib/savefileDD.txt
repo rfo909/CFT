@@ -1,0 +1,61 @@
+# Search files using drilldown
+# --
+	P(1,Dir) => dir
+	P(2,Input("File type (default for '*')").get) => glob
+	
+	if (glob=="") glob="*"
+	files=dir.allFiles(glob)
+	
+	DrillDownLoop(files)
+//DrillDown
+
+DrillDown
+/DD
+
+
+# Drilldown loop on a continuously narrower set of files
+# --
+	P(1) => files
+	P(2,1) => level
+
+	readLine("[" + level + "] Enter search term, or blank to abort") => st
+	if (st != "") {
+		
+		grep=Grep(st)
+		foundFiles = Inner{
+			prevFile=null
+			files->f
+				grep.file(f)->line
+					if (f != prevFile) {
+						println
+						println(Curses:Bold+line.file.name+Curses:Reset)
+						println
+					}
+					prevFile=f
+					println("    " + line.lineNumber + "   " + line)
+					out(line.file)
+		}
+		foundFiles=foundFiles.unique
+		SaveFiles(foundFiles)
+		println
+		println("#files=" + foundFiles.length)
+		
+		DrillDownLoop(foundFiles,level+1)
+	}
+//DrillDownLoop
+		
+
+# Save last set of files
+# --
+	P(1)=>files
+	Db2:Set(Sys.scriptId,"files",files)
+//SaveFiles
+
+# Show last set of files
+# --
+	Db2:Get(Sys.scriptId,"files",List)
+//GetFiles
+
+GetFiles
+/F
+
