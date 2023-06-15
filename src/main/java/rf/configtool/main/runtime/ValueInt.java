@@ -35,6 +35,7 @@ public class ValueInt extends Value implements IsSynthesizable {
                 new FunctionPow(),
                 new FunctionHex(),
                 new FunctionFmt(),
+                new FunctionStr(),
             };
         setFunctions(arr);
     }
@@ -202,5 +203,17 @@ public class ValueInt extends Value implements IsSynthesizable {
 
     }
     
+    class FunctionStr extends Function {
+        public String getName() {
+            return "str";
+        }
+        public String getShortDesc() {
+            return "str - returns as string";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            return new ValueString(""+val);
+        }
+
+    }
 
 }

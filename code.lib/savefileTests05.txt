@@ -28,7 +28,8 @@
 			Lib:Header("Tokens")
 			loop
 				break(ts.EOF)
-				println(ts.peek)
+				println(ts.peekType.str + " " + ts.peek)
+				
 				ts.next
 		}
 	}) => result
@@ -62,12 +63,16 @@
 	root.sub(" ^n^r^t".unEsc).setIsToken(-1)
 	root.addToken("keyword").setIsToken(1)
 
-	# Two tokens, both starting with 'b' - order of def matters
-	# WHY?
-	# Because root.sub("abc") maps abc to same sub-node
-	# And the sub() replaces other mappings, overwriting bxxx if first
+	# Note: sub("...") creates single new Node that all characters
+	# point to, and it does this without regard for previous mappings
+	# for (some of) the characters.
+	#
+	# This is great for creating patterns for identifiers and numbers,
+	# but conflicts with simultaneously matching specific identifiers etc
+	
 	root.addToken("bxxx").setIsToken(1)
-	root.sub("abc").setIsToken(2)
+	#root.sub("abc").setIsToken(2)
+	"abc".chars->c root.addToken(c).setIsToken(2) |
     
     root
 /t01_root
@@ -85,7 +90,7 @@
 
 # Verify matching token bx
 # --
-	runTest(t01_root,"axxx")
+	runTest(t01_root,"bxxx")
 /Test01b
 
 # Incomplete 'begin' token
@@ -95,25 +100,36 @@
 
 
 
-#################
 
-# Basic tokenizing root node
+# matching identifiers and extended identifiers xxx:yyy
 # --
 	Std.Text.Lexer.Node => root
 	root.sub(" ^n^r^t".unEsc).setIsToken(-1)
-	root.addToken("begin").setIsToken(1)
 	
 	identFirstChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"
     identInnerChars = identFirstChars + "0123456789"
-    
-    root.sub(identFirstChars).setIsToken(2) => ident
-    ident.sub(identInnerChars, ident) # loop back
-    
+
+	root.sub(identFirstChars) => insideToken
+	insideToken.setIsToken(2)
+	insideToken.sub(identInnerChars,insideToken)
+	
+	insideToken.sub(":") => afterColon
+	afterColon.sub(identFirstChars).setIsToken(3) => insideAfterColon
+	insideAfterColon.sub(identInnerChars,insideAfterColon)
+
     root
 /t02_root
 
 
+# Match identifiers and extended identifiers
+# --
+	runTest(t02_root, "a b:c d")
+/Test02
 
+# Match identifier and invalid extended identifier
+# --
+	runTest(t02_root, "a b: d", false)
+/Test02b
 
 
 # Run all TestX
