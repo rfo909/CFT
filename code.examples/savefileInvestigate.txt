@@ -186,13 +186,15 @@ loop
         println("End-marker: '" + marker + "'")
         println("---")
         readLines(marker) =>lines
-        LogFile.append("")
-        LogFile.append("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< xxxxx")
-        Inner {
-            lines->line LogFile.append(line) 
-        }
-        LogFile.append(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> xxxxx")
-        LogFile.append("")
+		if (lines.length>0) {
+			LogFile.append("")
+			LogFile.append("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< xxxxx")
+			Inner {
+				lines->line LogFile.append(line) 
+			}
+			LogFile.append(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> xxxxx")
+			LogFile.append("")
+		}
         
     } else if (cmd=="?") { 
         Sequence(

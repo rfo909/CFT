@@ -63,6 +63,10 @@ in v3.3.2
     root.sub(identFirstChars).setIsToken(4) => ident
     ident.sub(identInnerChars, ident) # loop back
 
+    ident.sub(":") => colon
+	colon.sub(identFirstChars).setIsToken(4) => secondIdent
+	secondIdent.sub(identInnerChars, secondIdent)
+
     # Strings = 5
     List('"',"'")->c 
         root.sub(c) => insideString
@@ -79,6 +83,10 @@ in v3.3.2
     root.addToken("<!--").setDefault => x
     x.setDefault(x)
     x.addToken("-->").setIsToken(10)  # comment
+
+	root.addToken("<[CDATA[") => cdata
+	cdata.setDefault(cdata)
+	cdata.addToken("]]>").setIsToken(11)  # CDATA
 
 
     # Everything else = 99  
@@ -103,18 +111,20 @@ in v3.3.2
         @  
         @       <element "a"=5 b="test" c=ident d=23.5 e=+18 f=-9>2 + 3 &gt; 5</element>
         @   <? this is a test ?>
-        @       <item>first item line
+        @       <content:item>first item line
         @            second item line
         @            a>b / c>d
-        @       <title>Donald Duck &amp; Co</title>
+        @       <title><[CDATA[
+		@			Donald Duck &amp; Co
+		@		]]></title>
         @       <emptyTag a=5/>
         @           <status>
         @             on-hold
         @           <count>2</count>
         @               <x a="1">xxx</x>
         @           </status>
-        @       </item>
-		#@       <xx><yy></yy></xx>  # <-- does not work, only if space before </xx> ...
+        @       </content:item>
+		@       <xx><yy></yy></xx>
         @       <emptyTag a="a"/>
         @    </a:parent>
     )
@@ -127,7 +137,7 @@ exampleXML
 
 # Test tokenize only
 # --
-	P(1)=>xml
+	P(1,exampleXML)=>xml
 	
     if (xml==null) {
         println("Paste or enter XML, then terminate by '.' on single line")
@@ -141,7 +151,7 @@ exampleXML
 	lexer.getTokenStream(root) => ts
 	loop
 		break(ts.EOF)
-		out(ts.peek)
+		report(ts.peekType, ts.peek)
 		ts.next
 	|
 /GetTokens
@@ -224,14 +234,18 @@ exampleXML
         x
     }
     
-    # Add text
+    # Add text or CDATA
     # --
     self.addText=Lambda{
         P(1) as String? => text
-        if (text != null) {
+		if (text != null) {
+			if (text.startsWith("<[CDATA[")) {
+				text=text.sub(8, text.length-3) # ]]>
+			}
             self.content.add(text)
         }
     }
+
     
     # Get attribute or null if undefined
     # --
@@ -285,6 +299,7 @@ exampleXML
 
         # START TAG BEGIN + TAG NAME
         
+		ws.call(ts)
         error(!ts.peek=="<",ts.sourceLocation + ": expected '<' starting a tag")
         ts.next
         ws.call(ts)
@@ -295,58 +310,47 @@ exampleXML
         
         ws.call(ts)
         
-        # Supporting tag names with XML name spaces: xxx:yyy
-        
-        if (ts.peek==":") {
-            name=name+":"
-            ts.next
-            ws.call(ts)
-            error(ts.peekType != 4, ts.sourceLocation + ": expected identifier following " + name)
-            name=name+ts.peek
-            ts.next
-            ws.call(ts)
-        }
-        
         #println("STARTING tag " + name)
         self.tagName=name
-        
+
         
         # TAG ATTRIBUTES
         
         Inner {
             loop
                 ws.call(ts)
+
                 break(ts.peek==">" || ts.peek=="/>")
-
-                    
-            error (ts.peekType != 4 && ts.peekType != 5, 
-                ts.sourceLocation + ": Expected identifier or string attribute name - got " + ts.peek)
                 
-            attrName=ts.peek
-            if (ts.peekType==5) {
-                # Strip quotes
-                attrName=attrName.sub(1,attrName.length-1)
-            }
-            ts.next
-            ws.call(ts)
-            error(ts.peek != "=", 
-                ts.sourceLocation + ": expected '=' for attribute " + attrName)
+				error (ts.peekType != 4 && ts.peekType != 5, 
+					ts.sourceLocation + ": Expected identifier or string attribute name - got " + ts.peek)
+                
+				attrName=ts.peek
+				if (ts.peekType==5) {
+					# Strip quotes
+					attrName=attrName.sub(1,attrName.length-1)
+				}
+				ts.next
+				ws.call(ts)
+				error(ts.peek != "=", 
+					ts.sourceLocation + ": expected '=' for attribute " + attrName)
 
-            ts.next
-            ws.call(ts)
-            error(ts.peekType != 4 && ts.peekType != 5 && ts.peekType() != 3, 
-                ts.sourceLocation + ": Expected identifier, string or number value for attribtute " + attrName + " - got "+ ts.peek)
-            attrValue=ts.peek
+				ts.next
+				ws.call(ts)
 
-            if (ts.peekType==5) {
-                # Strip quotes
-                attrValue=attrValue.sub(1,attrValue.length-1)
-            }
+				error(ts.peekType != 4 && ts.peekType != 5 && ts.peekType() != 3, 
+					ts.sourceLocation + ": Expected identifier, string or number value for attribtute " + attrName + " - got "+ ts.peek)
 
-            ts.next
-            ws.call(ts)
-            
-            self.attributes.attrName=attrValue  
+				attrValue=ts.peek
+				if (ts.peekType==5) {
+					# Strip quotes
+					attrValue=attrValue.sub(1,attrValue.length-1)
+				} 
+
+				ts.next
+				ws.call(ts)
+				
+				self.attributes.attrName=attrValue  
         }
         
         # START TAG END
@@ -364,22 +368,27 @@ exampleXML
         
         
         # CONTENT
+
         if (hasContent) Inner {
             text=""
             loop
                 break(ts.peek=="</")
                 if(ts.peek=="<") {
-                    self.content.add(UnescapeXMLString(text)) 
+                    self.addText(UnescapeXMLString(text)) 
                     text=""
+
+					# parse sub-node
                     node=XMLNode
                     node.parse(ts)
+
                     self.content.add(node)
-                }
-                # Everything else (text)
-                text=text+ts.peek
-                ts.next
+                } else {
+					# Everything else (text)
+					text=text+ts.peek
+					ts.next
+				}
             |
-            self.content.add(UnescapeXMLString(text))
+            self.addText(UnescapeXMLString(text))
         }    
         
 
@@ -397,20 +406,9 @@ exampleXML
             ts.next
             ws.call(ts)
         
-            if (ts.peek==":") {
-                name=name+":"
-                ts.next
-                ws.call(ts)
-            
-                error(ts.peekType != 4, ts.sourceLocation + ": expected identifier")
-                name=name+ts.peek
-                ts.next
-                ws.call(ts)
-            }
             error(self.tagName != name, ts.sourceLocation + ": Expected </" + self.tagName + "> - got </" + name + ">")
             ts.match(">","expected '>' following '</"+name)
             
-        #println("Got matching END-TAG to " + self.tagName)             
         }
     
 
