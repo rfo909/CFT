@@ -1003,6 +1003,16 @@ ERROR: [<script> Tests01:861.8] Invalid value Dict [] + 1
 
 
 
+# Base64 encode and decode
+# 2023-06-18 RFO
+# --
+	s="this is a test"
+	s.getBytes("UTF-8").base64 => text
+	text.base64 => binary
+	binary.toString("UTF-8") => s2
+	s==s2
+/Test56_Base64
+
 
 
 # Run all TestX

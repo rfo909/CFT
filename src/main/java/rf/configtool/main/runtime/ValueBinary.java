@@ -19,6 +19,7 @@ package rf.configtool.main.runtime;
 
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 import rf.configtool.main.Ctx;
@@ -43,6 +44,7 @@ public class ValueBinary extends Value {
             add (new FunctionPrintableChars());
             add (new FunctionHash());
             add (new FunctionGetList());
+            add (new FunctionBase64());
         }
     }
     
@@ -237,6 +239,21 @@ public class ValueBinary extends Value {
         		list.add(new ValueInt(val[i]));
         	}
         	return new ValueList(list);
+        }
+
+    }   
+    
+    
+    
+    class FunctionBase64 extends Function {
+        public String getName() {
+            return "base64";
+        }
+        public String getShortDesc() {
+            return "base64() - generate base 64 string for binary value";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	return new ValueString(Base64.getEncoder().encodeToString(val));
         }
 
     }    

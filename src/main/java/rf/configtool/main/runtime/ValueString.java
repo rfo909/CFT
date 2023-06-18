@@ -19,6 +19,7 @@ package rf.configtool.main.runtime;
 
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -66,6 +67,7 @@ public class ValueString extends Value implements IsSynthesizable {
                 new FunctionPrintable(),
                 new FunctionMergeExpr(),
                 new FunctionTimes(),
+                new FunctionBase64(),
             };
             setFunctions(arr);
         
@@ -900,5 +902,19 @@ public class ValueString extends Value implements IsSynthesizable {
         } 
     }
 
+    
+    
+    class FunctionBase64 extends Function {
+        public String getName() {
+            return "base64";
+        }
+        public String getShortDesc() {
+            return "base64() - generate Binary value from base64 string";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        	return new ValueBinary(Base64.getDecoder().decode(val));
+        }
+
+    }    
 
 }
