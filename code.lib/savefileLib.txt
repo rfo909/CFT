@@ -631,12 +631,12 @@ run(null,null,null,true)
     } else Inner {
         selectedElement=null
         loop
-            println("")
+            println
             if(title != null) Header(title)
             if (emptyMeansNone) println("(Enter blank for none)")
 
             ShowOptions(options, LLabel)
-            println("")
+            println
             SelectOptions(options, LLabel, emptyMeansNone, LValue) =>result
             
             if(result.length==1) {
@@ -650,6 +650,34 @@ run(null,null,null,true)
         | selectedElement
     }
 /MenuSelect
+
+
+
+# Select single value from numbered list of options. Using lambda to extract name for each element.
+# --
+    P(1,List)=>options 
+    P(2,Lambda {P(1)}) =>LLabel   ## display value
+    P(3,"Enter number to select value") =>title 
+
+    error(getType(options) != "List", "Options must be a list (" + title + ")")
+    error(options.length==0,"No elements in options list (" + title + ")")
+    
+    if(options.length==1) {
+        options.first
+    } else Inner {
+		println
+		if(title != null) Header(title)
+
+		Inner{i=0 options->opt println(("  " + i).last(2),"-",opt) i=i+1}
+		println
+		readLine("Enter position").trim.parseInt => pos
+
+		options.get(pos)
+	}
+/MenuSelectNumbered
+
+
+
 
 
 # Ask user for input
@@ -734,6 +762,7 @@ run(null,null,null,true)
 
 
 # If value is Dict, for each key found, return corresponding value (as list). Otherwise true if value found, false if not found
+# --
     P(1,List) =>lines
     P(2) =>value
     if(getType(value)=="Dict") Inner{
@@ -754,7 +783,6 @@ run(null,null,null,true)
 
 
 # List available save files across all code directories
-#
 # --
     Sys.codeDirs.reverse->d
         Lib:Header(d.path)

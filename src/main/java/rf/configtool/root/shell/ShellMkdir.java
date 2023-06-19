@@ -59,7 +59,7 @@ public class ShellMkdir extends ShellCommand {
             if (f.exists()) {
                 ctx.addSystemMessage("Directory exists: " + f.getCanonicalPath());
             } else {
-                boolean ok = f.mkdir();
+                boolean ok = f.mkdirs();
                 if (!ok) {
                     ctx.addSystemMessage("Failed to create: " + f.getCanonicalPath());
                     allOk=false;
