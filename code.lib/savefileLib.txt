@@ -421,6 +421,7 @@ choice.
     if (getType(stdinLines) != "List") {
         stdinLines=List(stdinLines) # wrap as List
     }
+
     Lib:TmpFile("in") =>inFile
     Lib:TmpFile("out") =>outFile
     Lib:TmpFile("err") =>errFile

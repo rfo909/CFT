@@ -325,6 +325,10 @@ nicely formatted JSON.
     P(1)=>JSONValue
     P(2,false)=>print
     P(3,false)=>showDictTypes
+
+	if (getType(JSONValue)=="String") {
+		JSONValue=Parse(JSONValue)
+	}
     
     Dict
         .set("data",List)
