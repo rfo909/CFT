@@ -1,9 +1,9 @@
 
 # CFT Reference
 
-Last updated: 2023-02-24 RFO
+Last updated: 2023-06-21 RFO
 
-v4.0.4
+v4.0.7
 
 
 
@@ -825,13 +825,28 @@ as the code around it. Technically they are considered expressions.
 
 ```
 if (a>b) {
-...
+  ...
 }
 ```
 
 Local blocks can contain loops, but can not be split into multiple code spaces using the PIPE ("|")
 symbol, as they execute in the same run-context as the code around them. Any calls to out() or report()
 add to the result list of the environment.
+
+```
+# Example
+# --
+	List(1,2,3,4,5,6)->i
+		if (i%2==0) {
+			out(i*10)
+		}
+/ex
+```
+
+Returns List(20,40,60), because out() inside a local block are executed on the parent code space,
+which is the "ex" function. For this reason it makes no sense partitioning the insides of a
+local block into separate code spaces with the PIPE character, so this is forbidden.
+
 
 ## Inner blocks
 
@@ -852,21 +867,21 @@ modify local variables.
 	Dir.files->f
 		count=Inner{
 				f.read->line
-				assert(line.contains(pattern))
-				out(line)
-			| _.length
+					assert(line.contains(pattern))
+					out(line)
+				| _.length
 		}
 		report(f.name, count)
 /CountMatches
 ```
 
-Apart from how this example could have been implemented much better with Grep.fileCount(), this
+Apart from how this example could have been better implemented using Grep.fileCount(), this
 is an illustration of how Inner blocks are more general and powerful than using
 the PIPE to split function bodies into code spaces.
 
+Partitioning an Inner block with PIPE does not affect the code outside the Inner block. 
 
-Of course, inner blocs can themselves be partitioned into code spaces, as we see
-in the above example, and in turn contain blocks ...
+
 
 ## Lambdas
 
@@ -1708,7 +1723,7 @@ simply means "or null":
 ```
 P(1) as ("String null".split) => optionalStringValue
 
-P(1) as String? > optionalStringValue  # The '?' means "or null"
+P(1) as String? => optionalStringValue  # The '?' means "or null"
 P(1) as ("String int".split)?    # String, int or null
 ```
 ### Dict (type) names
@@ -1737,6 +1752,8 @@ an & (ampersand) as follows:
 	f(myData) # should match "as" type of "f"
 /test
 ```
+
+
 ### Closures and Lambdas
 
 
@@ -1764,10 +1781,10 @@ The "as something" is an expression working with a value from the stack. This me
 to type check any value, such as return value from a function. 
 
 ```
-a=add(1,2) as int
+a=3 as int
 ```
 
-What happens here, however, is *not* that the function result is type checked before being assigned, but
+What happens here, however, is *not* that the value (3) is type checked before being assigned, but
 instead that the assignment is an expression, which returns the assigned value, which is then
 type checked. The outcome is the same in this case, but this distinction may cause troubles.
 
@@ -1784,7 +1801,7 @@ to process
 a=(expr expr)
 ```
 
-To fix this, we remember that blocks in CFT are expressions, and they contain a sequence of statements,
+To fix this, we remember that *blocks* in CFT are expressions, and they contain a sequence of statements,
 and expressions are also statements.
 
 ```

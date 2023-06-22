@@ -1,9 +1,9 @@
 
 # CFT ("ConfigTool") introduction
 
-Last updated: 2023-02-01 RFO
+Last updated: 2023-06-21 RFO
 
-v4.0.0
+v4.0.7
 
 
 
@@ -95,6 +95,23 @@ cd c:\program" "files
 
 
 Note that backslash is NOT an escape character in CFT, so just use it like any other character.
+
+## External / Internal forcing ...
+
+The default behaviour when entering a command, is trying to execute a command as an internal function, and if that
+fails, trying to run it as an external command. This means that if there is a bug in a
+CFT function, often it will produce an error message from the external shell (PowerShell or Bash). 
+
+To solve this, commands can be prefixed with the following:
+
+<SPACE>...   # force running as internal command only 
+<TAB>...     # force as external command only
+
+The latter is useful when we have internal commands with same name as external programs,
+for example if we wish to run "ls" in Bash (or PowerShell).
+
+Alternatively we can run the "shell" command, which starts PowerShell or Bash, and then do
+whatever we want, followed by "exit" to return to CFT.
 
 
 # Prompt colors
@@ -359,7 +376,7 @@ the "loop variable".  The out() statement is used to generate output from the lo
 
 ## The PIPE
 
-The "PIPE" character ("|") terminates the loop, and delivers the result from the loop (in this case 
+The "PIPE" character ("|") terminates all current loops, and delivers the result from these (in this case 
 a list of int) to the next part, where the "_" (underscore) function picks it off the stack, then 
 calls the sum() function on it, returning a single int value.
 
@@ -582,6 +599,17 @@ The Util script has a function to display a dictionary in a readable way. Exampl
 	Util:ShowDict(MyDict)
 /test
 ```
+
+
+# Debugging
+
+## Breakpoints
+
+CFT has a statement to set break points, which pauses execution and presents whatever information
+we want, letting us press Enter to continue.
+
+		setBreakPoint("a=" + a)
+
 
 # Various
 

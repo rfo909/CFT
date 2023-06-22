@@ -326,8 +326,15 @@ nicely formatted JSON.
     P(2,false)=>print
     P(3,false)=>showDictTypes
 
-	if (getType(JSONValue)=="String") {
-		JSONValue=Parse(JSONValue)
+	Lib:Header("JSONValue=" + getType(JSONValue))
+
+	if (JSONValue==null) {
+		Lib:Header("Paste JSON, terminate with '.' on separate line")
+		readLines(".") => JSONValue
+	}
+	if (getType(JSONValue)=="String" || getType(JSONValue)=="List" && getType(JSONValue.first)=="String") {  # string or list of string
+		println("Parsing string")
+		JSONValue=JSON:Parse(JSONValue)
 	}
     
     Dict

@@ -6,6 +6,7 @@
   |  The _Shell global function
   |  Paths with space
   |  Windows backslash
+  |  External / Internal forcing ...
 * Prompt colors
   |  Disabling Curses
 * State management
@@ -35,6 +36,8 @@
   |  Script functions
   |  CFT Internals
 * Dictionaries
+* Debugging
+  |  Breakpoints
 * Various
   |  Dates
         Date calculations
