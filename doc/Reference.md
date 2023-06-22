@@ -181,7 +181,7 @@ should be Linux or Powershell command.
 
 ```
 ls          # CFT shell-command "ls"
-<TAB>ls         # Underlying OS "ls" command
+(TAB)ls         # Underlying OS "ls" command
 ```
 
 ### Parameters

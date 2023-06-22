@@ -104,8 +104,10 @@ CFT function, often it will produce an error message from the external shell (Po
 
 To solve this, commands can be prefixed with the following:
 
+```
 <SPACE>...   # force running as internal command only 
 <TAB>...     # force as external command only
+```
 
 The latter is useful when we have internal commands with same name as external programs,
 for example if we wish to run "ls" in Bash (or PowerShell).
