@@ -150,11 +150,13 @@ in an editor.
 
 # Create date header if new day
 # --
+	dbKey="date:" + GetCurrentTopic
+
 	Date.setFormat("yyyy-MM-dd").fmt => today
-	Db2:Get(Sys.scriptId,"date","") => date
+	Db2:Get(Sys.scriptId,dbKey,"") => date
 	if (date != today) {
 		LogFile.append(List("",today,"-".times(today.length)))
-		Db2:Set(Sys.scriptId,"date",today)
+		Db2:Set(Sys.scriptId,dbKey,today)
 	}
 //DateHeader
 
