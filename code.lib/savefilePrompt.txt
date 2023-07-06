@@ -153,5 +153,12 @@
 	if(IsRoot) {
 		parts.add(Curses:Reversed + "#root#" + Curses:Reset + color)
 	}
-	color + parts.concat(" ") + Curses:Reset
+
+	# Add newline before prompt if colors are off
+	# --
+	newline=""
+	if (!Curses:Enabled) {
+		newline=(if(Sys.isWindows) "^r^n" else "^n").unEsc
+	}
+	newline + color + parts.concat(" ") + Curses:Reset
 /PromptString
