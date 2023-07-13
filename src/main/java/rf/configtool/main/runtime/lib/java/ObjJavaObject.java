@@ -77,7 +77,6 @@ public class ObjJavaObject extends Obj {
             
             Class theClass=obj.getClass();
             Field f = theClass.getDeclaredField(name);
-            if (!f.canAccess(obj)) throw new Exception("No access to field '" + name + "'");
             return new ValueObj(ObjJavaValue.getInstance(f.get(obj)));
         }
     }

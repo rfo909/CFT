@@ -5,6 +5,7 @@ target/
 src/ebuild/
 src/.classpath
 src/.project
+.idea/
 investigate.d/
 Db/
 anim/
