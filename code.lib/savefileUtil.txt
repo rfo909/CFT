@@ -129,10 +129,8 @@ P(2,false)=>print
 
 # Create / access counter
 # --
-P(1) => name
-P(2,999999999999) => maxValue
-    
-    error(name==null,"P(1) name missing")
+	P(1) as String => name
+	P(2,999999999999) as int => maxValue
     
     id="counter:"+(name.replace(" ","_"))
     
@@ -156,7 +154,7 @@ P(2,999999999999) => maxValue
 
 # Set time mark - used with HasTimedOut below
 # --
-P(1) => name
+	P(1) => name
     id="timemark:"+(name.replace(" ","_"))
     Db2:Set("Util", id, Date)
 /SetTimeMark
@@ -165,8 +163,9 @@ P(1) => name
 
 # Check time mark 
 # --
-P(1) => name
-P(2,3600) => seconds
+	P(1) => name
+	P(2,3600) => seconds
+
     Date.sub(Date.Duration.seconds(seconds)) => limit
 
     id="timemark:"+((""+name).replace(" ","_"))
@@ -179,7 +178,8 @@ P(2,3600) => seconds
 
 # Get time mark
 # --
-P(1) => name
+	P(1) => name
+
     id="timemark:"+((""+name).replace(" ","_"))
     val = Db2:Get("Util",id)
     if (val==null) val=Date
@@ -218,9 +218,10 @@ P(1) => name
 #   files=Dir.files
 #   Lib:MenuSelect(files, Lambda{P(1).name}, "Select file")
 # --
-P(1) => dir
-P(2,"*") => globPattern
-P(3,Lambda{P(1)}) => processList 
+	P(1) => dir
+	P(2,"*") => globPattern
+	P(3,Lambda{P(1)}) => processList 
+
     filterString=null
     loop
         i=0
