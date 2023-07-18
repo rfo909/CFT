@@ -1260,7 +1260,7 @@ run(null,null,null,true)
 # List files sorted for change date, newest last
 # --
 	P(1,Dir) => dir
-	Dir.newestFiles(100).reverse
+	dir.newestFiles(100).reverse
 /ListNewestFiles
 
 
