@@ -1,0 +1,86 @@
+# Readme
+# --
+<<<<<< EOF
+
+Analysis of single logfile by searching for multiple patterns, showing those lines
+that match one or more of the patterns. Can also insert newlines before lines matching
+certain pattern(s), in order to group output.
+
+>>>>>> EOF
+/Readme
+
+# Select file
+# --
+	Util:SelectFile(Dir) => file
+	Db2:Set(Sys.scriptId,"file",file)
+	Lib:e(file)
+	file
+/SelectFile
+
+# Get file
+# --
+	Db2:Get(Sys.scriptId,"file",null) => file
+	if (file==null || !file.exists) file=SelectFile
+	file
+//GetFile
+
+# Format int
+# --
+	P(1) as int => x
+	("    "+x).last(4)
+//fmt
+
+# Edit search patterns
+# --
+	P(1,"search-patterns") => key
+	P(2,"search pattern") => label
+
+	Db2:Get(Sys.scriptId,key,List) => patterns
+	Inner {
+		i=0
+		patterns->p
+			println(fmt(i), p)
+			i=i+1
+	}
+	input = if (i>0) {
+		readLine("Enter number to delete, or text to add new " + label)
+	} else {
+		readLine("Enter " + label)
+	}
+	if (input.?parseInt) {
+		patterns.remove(input.parseInt)
+	} else if (input != "") {
+		patterns.add(input)
+	}
+	Db2:Set(Sys.scriptId,key,patterns)
+/e
+	
+
+# Create newlines for certain patterns
+# --
+	e("newline-patterns", "newline patterns")
+/n	
+
+
+# Create newline before line?
+# --
+	P(1) => line
+	Db2:Get(Sys.scriptId,"newline-patterns",List) => list
+	list->s if(line.contains(s)) out(line)
+	| _.length>0
+//CreateNewline
+
+
+# Search file
+# --
+	P(1,GetFile(Dir)) as File => file
+	Db2:Get(Sys.scriptId,"search-patterns",List) => patterns
+	
+	patterns -> p
+		Grep(p).file(file)->line
+			out(Int(line.lineNumber, line))
+	| _.sort->x
+		line = x.data
+		if (CreateNewline(line)) println
+		println(fmt(line.lineNumber), line)
+/s
