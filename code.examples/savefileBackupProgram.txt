@@ -73,7 +73,11 @@ as it contains generated content.
 # Report current target directory
 # --
     Lib:Header("Target directory")
-    println(TargetDir.path)
+    found=TargetDir.exists
+    println(TargetDir.path,if(found,"","NOT FOUND"))
+    println
+    if (!found) println("--> Navigate to target directory, then run SetTargetDir")
+    
     println
     println
 /onLoad
