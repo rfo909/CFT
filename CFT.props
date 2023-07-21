@@ -67,7 +67,8 @@ shortcutPrefix = @
 
 shortcut:e    = "---- open script in editor ----"         if(Sys.savefile != null, Lib:e(Sys.savefile),"No savefile")
 shortcut:ee   = "---- clear editor selection ----"        Lib:ClearEditor "Editor cleared"
-shortcut:lsn  = "---- list newest files last ----"        Lib:ListNewestFiles(Dir)
+shortcut:n    = "---- list newest files last ----"        Lib:ListNewestFiles(Dir)
+shortcut:nr   = "---- new files recursively ----"         Lib:ListNewFilesRecursively(Dir)
 shortcut:lint = "---- check curr script ----"             Sys.lint
 shortcut:fm   = "---- open file manager (curr dir) ---"   Lib:fileManager(Dir)
 shortcut:cmd  = "---- open cmd in curr dir ----"          Lib:OpenCMD(Dir)
