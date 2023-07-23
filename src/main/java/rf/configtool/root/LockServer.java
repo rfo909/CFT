@@ -69,7 +69,7 @@ public class LockServer {
         String selfId="" + Runtime.getRuntime().hashCode() + "XX" + Thread.currentThread().getId();
         Socket sock=null;
         try {
-            sock=new Socket("localhost",PORT);
+            sock=new Socket("127.0.0.1",PORT);
 
             BufferedReader br=new BufferedReader(new InputStreamReader(sock.getInputStream()));
             PrintStream ps=new PrintStream(sock.getOutputStream());
