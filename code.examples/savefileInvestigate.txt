@@ -177,9 +177,7 @@ loop
     readLine(Prompt("[" + GetCurrentTopic + "] Enter text, 'c' to cat, Enter to quit or '?' for help")).trim =>cmd
 	break(cmd=="" || cmd=="q" || cmd=="quit")
 
-	DateHeader
-
-    if (cmd=="." || cmd.startsWith("..")) {
+	if (cmd=="." || cmd.startsWith("..")) {
         # paste
         marker="."
         if (cmd.startsWith("..")) {
@@ -189,6 +187,7 @@ loop
         println("---")
         readLines(marker) =>lines
 		if (lines.length>0) {
+			DateHeader
 			LogFile.append("")
 			LogFile.append("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< xxxxx")
 			Inner {
@@ -225,8 +224,10 @@ loop
         )->line 
             println("| " + line.trim)
     } else if(cmd=="h" || cmd=="header") { ## Header
+		DateHeader
         LogHeader
     } else if (cmd=='d' || cmd=="date") { ## date/time stamp
+		DateHeader
         LogFile.append(List("",Date.fmt))
     } else if (cmd=='t' || cmd=="topic" || cmd=="ch") { ## change topic
         SetTopic
@@ -235,18 +236,22 @@ loop
     } else if(cmd=='c' || cmd=="cat") { ## cat
         Show
 	} else if (cmd=="aloop") { ## activity loop
+		DateHeader
 		ALoop
 	} else if (cmd=="aset") { # Change activity loop delay
 		ALoopSet
     } else if(cmd==".m" || cmd=='m' || cmd=="more") { ## more
+		DateHeader
         Lib:m (LogFile)
     } else if(cmd=="@e" || cmd=='e' || cmd=="edit") { ## edit 
         Edit
 	} else if (cmd=='-') {
+		DateHeader
 		LogFile.append("")
 	} else if (cmd=='col') {
 		SetPromptColor
     } else {
+		DateHeader
 		LogText(cmd)
     }
     
