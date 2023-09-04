@@ -51,10 +51,14 @@ in an editor.
 
 # Current topic
 # --
-    if(Db2:Get("Investigate","topic")==null) {
-		error("No current topic")
-    }
-    Db2:Get("Investigate","topic")
+	t=Db2:Get("Investigate","topic:" + Sys.sessionUUID)
+	if (t==null) {
+		if(Db2:Get("Investigate","topic")==null) {
+			error("No current topic")
+		}
+		t = Db2:Get("Investigate","topic")
+	}
+	t
 /GetCurrentTopic
 
 # Change topic
@@ -77,6 +81,7 @@ in an editor.
 		readLine("Enter name of first topic").trim => name
 		error(name=="","Invalid topic name")
 		Db2:Set("Investigate","topic",name)
+		Db2:Set("Investigate","topic:"+Sys.sessionUUID,name)
 	} else {
 		x = if (curr==null) {
 			readLine("Enter number, or enter name of new topic")
@@ -93,6 +98,7 @@ in an editor.
 		}
 		error(name=="", "Invalid topic name")
 		Db2:Set("Investigate","topic",name)
+		Db2:Set("Investigate","topic:"+Sys.sessionUUID,name)
     }
 /SetTopic
 
