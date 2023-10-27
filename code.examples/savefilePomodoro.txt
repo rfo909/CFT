@@ -64,12 +64,13 @@
     |
     println
     Alarm
-
 /CountDown
+
 
 # Pomodoro, countdown 45 minutes
 # --
-	CountDown(45)
+	P(1,45) => minutes
+	CountDown(minutes)
 /Pomodoro
 
 

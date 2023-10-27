@@ -871,6 +871,8 @@ run(null,null,null,true)
                         println(Curses:TxtGreen + line.file.path + Curses:Reset)
 						println("" + line.lineNumber + ": " + line)
 						println
+			|
+			println("#Count="+totalCount)
         }
     } else {
         # Show drilldown
