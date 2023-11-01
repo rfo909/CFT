@@ -71,9 +71,9 @@ in an editor.
 		list->t
 		file=LogFile(t)
 		age=Date.diff(Date(file.lastModified))
-		if (age.asDays > 15) age="" else age=age.fmt
+		age = if (age.asDays <= 30, "* " + age, "  " + age)
 		name=(t+" ".times(80)).first(40)
-		println( ("   "+count).last(3)+": " + name + age)
+		println( ("   "+count).last(3)+": " + name + " " + age)
 		count=count+1
 	}
 

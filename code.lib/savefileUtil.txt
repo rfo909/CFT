@@ -312,8 +312,7 @@ P(2,false)=>print
 
 
 
-# Search through recently updated files under current
-# directory
+# Search through recently updated files under current directory
 # --
 	P(1,Dir) => currDir
 	P(2,Input("Glob pattern").setCurrCond("*.java").get) => glob
@@ -330,6 +329,35 @@ P(2,false)=>print
 			println(line.lineNumber,line)
 /SearchRecentFiles
 
+
+
+
+# Do search/replace on single text file, return true if match, overwrite only if overwrite parameter true.
+# --
+	P(1) as File => file
+	P(2) as String => from
+	P(3) as String => to
+	P(4, "UTF-8") as String => encoding
+	P(5, false) as boolean => overwrite
+
+
+	modified=false
+
+	file.read->line
+		s=line.replace("javax","jakarta")
+		if (s != line) {
+			modified=true
+		}
+		out(s)
+	| => lines
+
+	if (modified && overwrite) {
+		file.encoding(encoding).create(lines)
+	}
+
+	# return value
+	modified
+/SearchReplace
 
 
 # Show settings 
