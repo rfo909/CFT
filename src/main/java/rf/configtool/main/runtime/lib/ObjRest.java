@@ -200,22 +200,18 @@ public class ObjRest extends Obj {
             dict.set("responseCode", new ValueInt(responseCode));
             log(ctx,"Got responseCode=" + responseCode);
 
-            //if (responseCode.toString().startsWith("2")) {
-                // Read the response body
-                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                StringBuilder response = new StringBuilder();
+            // Read the response body
+            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            StringBuilder response = new StringBuilder();
 
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    log(ctx,line);
-                    response.append(line);
-                }
+            String line;
+            while ((line = reader.readLine()) != null) {
+                log(ctx,line);
+                response.append(line);
+            }
+            dict.set("result", new ValueString(response.toString()));
+            log(ctx,"Got result: " + response.toString());
 
-                // reader.close();
-
-                dict.set("result", new ValueString(response.toString()));
-                log(ctx,"Got result: " + response.toString());
-            //}
             return dict;
         } finally {
             if (connection != null) try {connection.disconnect();} catch (Exception ex)  {};
