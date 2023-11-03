@@ -755,15 +755,17 @@ Dict.set("list",List)
 # --
 	P(1) => url
 	P(2,"GET") => method
-	P(3) => jsonData
-	P(4, true) => basicAuth
+	P(3) => basicAuth
+	P(4) => jsonData
+	P(5,false) => verbose
 
 	rest = Sys.Rest
 
 	rest.url(url)
 	rest.method(method)
 	if (jsonData != null) rest.jsonData(jsonData)
-	if (basicAuth) rest.basicAuth(AuthString)
+	if (basicAuth != null) rest.basicAuth(basicAuth)
+	if (verbose) rest.verbose
 	
 	# return string
 	rest.execute
