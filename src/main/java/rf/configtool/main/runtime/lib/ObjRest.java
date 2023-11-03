@@ -174,7 +174,7 @@ public class ObjRest extends Obj {
             connection.setRequestMethod(method);
 
             if (basicAuthString != null) {
-                log(ctx, "Setting authorization to basic: " + basicAuthString);
+                log(ctx, "Setting Authorization: Basic " + basicAuthString);
                 connection.setRequestProperty("Authorization", "Basic " + basicAuthString);
             }
             if (jsonData != null) {
