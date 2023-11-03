@@ -72,6 +72,7 @@ public class ObjSys extends Obj {
                 new FunctionJobs(),
                 new FunctionCurrFunction(),
                 new FunctionGetCallHistory(),
+                new FunctionRest(),
         };
         setFunctions(arr);
         
@@ -428,7 +429,7 @@ public class ObjSys extends Obj {
             Stdio stdio = ctx.getStdio();
             if (stdio instanceof StdioReal) {
                 StdioReal real=(StdioReal) stdio;
-                real.println(prompt);
+                real.println("(*) " + prompt);
                 return new ValueString(real.readPassword());
             } else {
                 throw new Exception("readPassword() requires StdioReal"); 
@@ -644,5 +645,20 @@ public class ObjSys extends Obj {
             return ctx.getStdio().peekFullCFTStackTrace();
         }
     }
-  
+
+    class FunctionRest extends Function {
+        public String getName() {
+            return "Rest";
+        }
+
+        public String getShortDesc() {
+            return "Rest() - create REST object";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueObj(new ObjRest());
+        }
+    }
+
 }

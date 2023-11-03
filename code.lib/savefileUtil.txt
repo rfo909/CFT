@@ -751,6 +751,25 @@ Dict.set("list",List)
 
 
 
+# Run rest request, using Sys.Rest object, returning output as string
+# --
+	P(1) => url
+	P(2,"GET") => method
+	P(3) => jsonData
+	P(4, true) => basicAuth
+
+	rest = Sys.Rest
+
+	rest.url(url)
+	rest.method(method)
+	if (jsonData != null) rest.jsonData(jsonData)
+	if (basicAuth) rest.basicAuth(AuthString)
+	
+	# return string
+	rest.execute
+/Rest
+
+
 # Stack
 # --
     self.data=List
