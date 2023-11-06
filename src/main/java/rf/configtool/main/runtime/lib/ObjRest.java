@@ -7,12 +7,14 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.http.HttpRequest;
 import java.util.List;
 import java.net.URL;
 
 public class ObjRest extends Obj {
 
-    private URL url;
+    private String url;
     private String method="POST";
     private String basicAuthString;
     private String jsonData;
@@ -62,7 +64,7 @@ public class ObjRest extends Obj {
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 1) throw new Exception("Expected string parameter");
-            url=new URL(getString("string", params, 0));
+            url=getString("string", params, 0);
             return new ValueObj(self());
         }
     }
@@ -90,7 +92,7 @@ public class ObjRest extends Obj {
         }
 
         public String getShortDesc() {
-            return "basicAuth(string) - set basic auth string, returns self";
+            return "basicAuth(string) - set basic auth string (user:pass) as base64, returns self";
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
@@ -158,7 +160,6 @@ public class ObjRest extends Obj {
     public ObjDict executeCall (Ctx ctx) throws Exception {
         ObjDict dict=new ObjDict();
 
-        HttpURLConnection connection=null;
         if (url==null) throw new Exception("No url");
         if (method==null) throw new Exception("No method");
 
@@ -166,9 +167,10 @@ public class ObjRest extends Obj {
 
         final String JSON = "application/json";
 
+        HttpURLConnection connection=null;
         try {
             log(ctx,"Creating connection to " + url.toString());
-            connection = (HttpURLConnection) url.openConnection();
+            connection = (HttpURLConnection) (new URL(url)).openConnection();
 
             log(ctx,"Setting method=" + method);
             connection.setRequestMethod(method);
@@ -181,18 +183,17 @@ public class ObjRest extends Obj {
                 log(ctx,"Setting Content-Type: " + JSON);
                 connection.setRequestProperty("Content-Type", JSON);
             }
-            log(ctx,"Setting Accepts: " + JSON);
-            connection.setRequestProperty("Accepts", JSON);
-
-            connection.setDoOutput(true);
-            connection.setDoInput(true);
+            log(ctx,"Setting Accept: " + JSON);
+            connection.setRequestProperty("Accept", JSON);
 
             if (jsonData != null) {
+                connection.setDoOutput(true);
                 log(ctx,"Writing jsonData: " + jsonData);
                 // Write the JSON data to the request body
                 OutputStream outputStream = connection.getOutputStream();
                 outputStream.write(jsonData.getBytes("UTF-8"));
-                //outputStream.close();
+                outputStream.flush();
+                outputStream.close();
             }
 
             // Get the response code
@@ -202,15 +203,14 @@ public class ObjRest extends Obj {
 
             // Read the response body
             BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            StringBuilder response = new StringBuilder();
+            StringBuffer sb = new StringBuffer();
 
             String line;
             while ((line = reader.readLine()) != null) {
-                log(ctx,line);
-                response.append(line);
+                sb.append(line);
             }
-            dict.set("result", new ValueString(response.toString()));
-            log(ctx,"Got result: " + response.toString());
+            dict.set("result", new ValueString(sb.toString()));
+            log(ctx,"Got result: " + sb.toString());
 
             return dict;
         } finally {

@@ -751,7 +751,7 @@ Dict.set("list",List)
 
 
 
-# Run rest request, using Sys.Rest object, returning output as string
+# Run rest request, using Sys.Rest object, returnings dictionary
 # --
 	P(1) => url
 	P(2,"GET") => method
@@ -767,7 +767,7 @@ Dict.set("list",List)
 	if (basicAuth != null) rest.basicAuth(basicAuth)
 	if (verbose) rest.verbose
 	
-	# return string
+	# return dict object
 	rest.execute
 /Rest
 
