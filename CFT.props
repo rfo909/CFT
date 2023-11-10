@@ -85,9 +85,10 @@ shortcut:%    = "---- show current symbols ----"          Lib:Symbols
 
 # copy / paste files
 
-shortcut:c    = "---- copy files to clipboard ----"       Lib:ClipboardCopy(Dir)
-shortcut:x    = "---- move files to clipboard ----"       Lib:ClipboardCopy(Dir,true)
-shortcut:v    = "---- paste files from clipboard ----"    Lib:ClipboardPaste(Dir)
+shortcut:c    = "---- copy files/dirs to clipboard ----"        Lib:ClipboardCopy(Dir)
+shortcut:v    = "---- paste from clipboard ----"                Lib:ClipboardPaste(Dir)
+shortcut:clip = "---- list content of clipboard ----"           Lib:ClipboardList()
+shortcut:cliprm  = "---- delete files/dirs in clipboard ----"   Lib:ClipboardDelete()
 
 # Search files under current dir
 shortcut:S    = "---- search files under curr dir ----"   Lib:SearchTextFiles(Dir)

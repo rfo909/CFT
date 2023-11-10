@@ -926,38 +926,30 @@ run(null,null,null,true)
     
     
 
-# Copy file into "clipboard"
+# Copy files and directories into "clipboard"
 # --
     P(1,Dir)=>currentDir
-    P(2,false)=>deleteOnPaste
 
     data=Sys.lastResult
     files=List
-    
-    if (getType(data)=="File") {
+
+    if (getType(data)=="File" || getType(data)=="Dir") {
          files.add(data)
     } else if (getType(data)=="List") Inner {
         data->x
-            if (getType(x)=="File") {
+            if (getType(x)=="File" || getType(x)=="Dir") {
                 files.add(x)
             }
     }
-    println("XXX=" + files.length)
+    
     if (files.empty) {
         Db2:Set("Lib","ClipboardFiles",null)
-        error("Can only copy single File or list of File to clipboard")
+        error("Can only copy files and directories to clipboard")
     }
 
     Db2:Set("Lib","ClipboardFiles",files)
-    Db2:Set("Lib","ClipboardFilesDeleteOnPaste", deleteOnPaste)
-    Inner {
-        Lib:Header("Files stored to clipboard")
-        files->f println(f.path)
-        if (deleteOnPaste) {
-            println println("** NOTE: originals are deleted on paste")
-        }
-    }
-    "Copied " + files.length + " " + if(files.length==1,"file","files")
+
+    "Copied " + files.length + " " + if(files.length==1,"entry","entries") + " to clipboard"
 /ClipboardCopy
 
 
@@ -965,32 +957,37 @@ run(null,null,null,true)
 # Paste file from "clipboard"
 # --
     P(1,Dir) => currentDir
-    
-    Db2:Get("Lib","ClipboardFiles", null) => files
-    error(files==null, "No files found")
 
-    Lib:Header("Files in clipboard")
-    Inner{
-        files->file println(file.path)
-    }
-
-    deleteOnPaste=Db2:Get("Lib","ClipboardFilesDeleteOnPaste",false)
-
-    yesToAll=false
-    files->file
-        if (!yesToAll) {
-            readLine(if(deleteOnPaste,"Move ","Copy ") + file.path + " to " + currentDir.path + "? (yes/no/y/n/all/none)").toLower => confirm
-
-            error(confirm=="none", "Aborting paste!")
-            assert(confirm=="yes" || confirm=="y" || confirm=="all")
-            if (confirm=="all") yesToAll=true
-        }
-        println(if(deleteOnPaste,"Moving ","Copying ") + file.path)
-        currentDir.copy(file)
-        if (deleteOnPaste) file.delete
-    |
-    
+	Sys.stdin('cp (Db2:Get("Lib","ClipboardFiles", null)) .')
 /ClipboardPaste
+
+
+# Delete files from "clipboard"
+# --
+	files=Db2:Get("Lib","ClipboardFiles",List)
+	error(files.empty,"No content in clipboard")
+	fCount=dCount=0
+	Lib:Header("Clipboard content")
+	Inner{files->f 
+		if (getType(f)=="File") fCount=fCount+1 else dCount=dCount+1
+		println(f.path.last(50) + if(getType(f)=="Dir", Sys.fileSeparator, ""))
+	}
+	println
+	confirmed = Lib:Confirm("Confirm delete")
+	error(!confirmed, "Aborting")
+
+	println
+	println
+	
+	Sys.stdin('rm (Db2:Get("Lib","ClipboardFiles", null))')
+/ClipboardDelete
+
+
+# Show content of clipboard
+# --
+	Db2:Get("Lib","ClipboardFiles",List)->f
+		println(f.path.last(50) + if(getType(f)=="Dir", Sys.fileSeparator, "") + " " + if (!f.exists,"DOES-NOT-EXIST",""))
+/ClipboardList
 
 
 # Diff files
