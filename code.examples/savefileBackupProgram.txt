@@ -285,14 +285,21 @@ as it contains generated content.
     
     Inner {TargetDir.files->f println(f.name)}
     
-    Input("Backup log file path").get => fPath
+    Input("Enter backup file name").get => fPath
     
     file=TargetDir.file(fPath)
     error(!file.exists,"No such file: " + fPath)
     
     pathPrefix=null
     if (!showContentOnly) {
-        Input("Path prefix - should end with file separator").get => pathPrefix
+        Input("Path prefix - should end with file separator, and not contain globbing").get => pathPrefix
+        println
+        Lib:Header("Summary")
+        println("- Restoring content: " + pathPrefix + "*")
+        println("- To current dir   : " + Dir.path)
+        println
+        ok=Lib:Confirm
+        error(!ok,"Aborting")
     }
     
     password=Vault:SessionSecretGet("Backup encryption password")
@@ -309,7 +316,7 @@ as it contains generated content.
         backupFileName=dec2.processString(rest.after(":"))
         #
         if (showContentOnly) {
-            println(path)
+            out(path)
         } else {
             # --- Restore file if matching pathPrefix ---
             match=if(Sys.isWindows, path.toLower.startsWith(pathPrefix.toLower), path.startsWith(pathPrefix))
