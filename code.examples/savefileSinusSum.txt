@@ -1,0 +1,54 @@
+# Data dir
+# --
+	Dir("c:\xxx\anim").create
+/DataDir
+
+# Create test data
+# --
+	P(1) => offset
+	Std.Data.each(0,720) -> i
+		a=Std.Math.sin(i)
+		b=Std.Math.sin(i+offset)
+		a=(a*100).i
+		b=(b*200).i
+		c=a+b
+		
+		out("" +a + ", " + b + ", " + c)
+/Data
+
+# Create test plot
+# --
+	P(1)=>offset
+
+	DataDir.file("data.txt") => dataFile
+	dataFile.create(Data(offset))
+
+	plot=Std.Plot.typeTimeline
+	plot.readCSVFile(dataFile)
+
+	s=("000"+offset).last(3)
+	pngFile=DataDir.file(s+".png")
+	plot.plot(pngFile)
+/OnePlot
+
+
+
+# Create mp4 movie (requires ffmpeg)
+# --
+    DataDir.run("ffmpeg -i %3d.png result.mp4".split)
+    DataDir.run("ffmpeg -i %3d.png result.avi".split)
+/MakeMovie
+
+
+
+# Create sequence and animation (requires ffmpeg)
+# --
+	DataDir.files("*.png")->f 
+		f.delete
+	|
+	Std.Data.for(5,360,10)->offset
+		println(offset)
+		OnePlot(offset)
+	|
+	MakeMovie
+/RunAll
