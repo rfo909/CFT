@@ -68,6 +68,8 @@ public class ValueString extends Value implements IsSynthesizable {
                 new FunctionMergeExpr(),
                 new FunctionTimes(),
                 new FunctionBase64(),
+                new FunctionLeft(),
+                new FunctionRight(),
             };
             setFunctions(arr);
         
@@ -915,6 +917,47 @@ public class ValueString extends Value implements IsSynthesizable {
         	return new ValueBinary(Base64.getDecoder().decode(val));
         }
 
-    }    
+    }
+
+
+    class FunctionLeft extends Function {
+        public String getName() {
+            return "left";
+        }
+        public String getShortDesc() {
+            return "left(width) - left aligned padded to given width";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            int n=(int) getInt("width", params, 0);
+            if (val.length() > n) {
+                return new ValueString(val.substring(0,n));
+            }
+            String s=val;
+            while (s.length() < n) s=s+" ";
+            return new ValueString(s);
+        }
+
+    }
+
+    class FunctionRight extends Function {
+        public String getName() {
+            return "right";
+        }
+        public String getShortDesc() {
+            return "right(width) - right aligned padded to given width";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            int n=(int) getInt("width", params, 0);
+            if (val.length() > n) {
+                int fromPos=val.length()-n;
+                return new ValueString(val.substring(fromPos));
+            }
+            String s=val;
+            while (s.length() < n) s=" " + s;
+            return new ValueString(s);
+        }
+
+    }
+
 
 }
