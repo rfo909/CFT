@@ -868,9 +868,9 @@ run(null,null,null,true)
         Inner{
             files->f
                     grep.file(f)->line
-                        println(Curses:TxtGreen + line.file.path + Curses:Reset)
-						println("" + line.lineNumber + ": " + line)
-						println
+						report(f.name, line.lineNumber, line)
+			| ->line 
+				println(line) 
 			|
 			println("#Count="+totalCount)
         }
