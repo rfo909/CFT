@@ -431,3 +431,54 @@ just add a second "Dir:" line.
     SelectProjectName
     curr
 /ch
+
+
+# Search interactively
+# --
+	terms=Db2:Get(Sys.scriptId,"SI",List)
+
+
+	loop
+		println
+		println(">>> " + if(terms.empty,"(none)", terms.concat(" ")))
+		readLine("Enter [+]term or -term, '.' to refresh, '..' to undo, 'Enter' to end") => term
+		break(term.trim=="")
+
+		if (term=='..') Inner {
+			if (!terms.empty) {
+				terms=terms.keep(0,terms.length-2)
+				Db2:Set(Sys.scriptId,"SI",terms)
+			}
+		} else if (term.length > 0 && term != '.') {
+			# Add to terms list
+			if (term.startsWith("-") || term.startsWith("+")) terms.add(term)
+			else terms.add("+" + term)
+			Db2:Set(Sys.scriptId,"SI",terms)
+		}
+
+		plus=List
+		minus=List
+		Inner{
+			terms->term
+				if (term.startsWith("-")) minus.add(term.sub(1))
+				else if (term.startsWith("+")) plus.add(term.sub(1))
+		}
+		if (plus.empty && minus.empty) continue
+	
+		g=Grep
+		g.match(plus)
+		g.reject(minus)
+		tryCatch(Search(g)) => result
+
+		if (result.ok) {
+			Inner{result.result->line println(line)}
+			println("[" + result.result.length + " hits]")
+		} else { 
+			println
+			println(result.msg)
+		}
+		
+
+/SI
+
+
