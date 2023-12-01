@@ -1014,6 +1014,33 @@ ERROR: [<script> Tests01:861.8] Invalid value Dict [] + 1
 /Test56_Base64
 
 
+# 2023-11-30 Strange bug 
+# --
+# Oddest bug so far!!!
+# unknown symbol "delta" in last line ...
+# --
+	min=999
+	max=0
+	currentPrice=999
+	
+	delta=max-min  
+		# If we say either
+		#   delta=4
+		# or we 
+		#   remove the () around the expression below
+		# or we say
+		#    y=(...) 
+		# then the 'delta' variable becomes visible again.
+		#
+
+	(currentPrice < min + delta)
+/t57
+
+# Test 57 - odd symbol lookup bug, see t57 above
+# --
+	tryCatch(t57).ok
+/Test57_SymbolLookupBug
+
 
 # Run all TestX
 # --
