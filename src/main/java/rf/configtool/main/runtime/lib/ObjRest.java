@@ -1,5 +1,12 @@
 package rf.configtool.main.runtime.lib;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.SourceException;
 import rf.configtool.main.runtime.*;
@@ -8,6 +15,7 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.http.HttpRequest;
+import java.nio.charset.StandardCharsets;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -39,10 +47,12 @@ public class ObjRest extends Obj {
         return x == this;
     }
 
+    @Override
     public String getTypeName() {
         return "Rest";
     }
 
+    @Override
     public ColList getContentDescription() {
         return ColList.list().regular(getDesc());
     }
@@ -60,6 +70,7 @@ public class ObjRest extends Obj {
         this.add(new FunctionVerbose());
         this.add(new FunctionExecute());
         this.add(new FunctionMultipartFile());
+        this.add(new FunctionApache());
 
     }
 
@@ -73,7 +84,7 @@ public class ObjRest extends Obj {
         }
 
         public String getShortDesc() {
-            return "url(string) - set url, default is POST, returns self";
+            return "url(string) - set url, returns self";
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
@@ -319,6 +330,22 @@ public class ObjRest extends Obj {
             if (connection != null) try {connection.disconnect();} catch (Exception ex)  {};
         }
 
+    }
+
+
+    class FunctionApache extends Function {
+        public String getName() {
+            return "Apache";
+        }
+
+        public String getShortDesc() {
+            return "Apache() - returns Rest.Apache object";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueObj(new ObjRestApache());
+        }
     }
 
     private static String hashMd5 (File file) throws Exception {
