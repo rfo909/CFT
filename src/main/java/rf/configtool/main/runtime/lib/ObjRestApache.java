@@ -61,7 +61,7 @@ public class ObjRestApache extends Obj {
         }
 
         public String getShortDesc() {
-            return "_Readme() - display info";
+            return "_README() - display info";
         }
 
         private String[] data= {

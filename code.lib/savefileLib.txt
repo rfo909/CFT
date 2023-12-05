@@ -143,6 +143,18 @@ choice.
 
 
 
+# Show image viewer
+# --
+	P(1) as File => imgFile
+	if (Sys.isWindows) {
+		Dir.run("explorer.exe", imgFile.path)
+	} else {
+		error("Not implemented for linux yet")
+	}
+/imageViewer
+
+
+
 # Update terminal size (if possible)
 # --
     false =>updated
