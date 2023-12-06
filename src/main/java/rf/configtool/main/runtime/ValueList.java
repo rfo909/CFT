@@ -52,6 +52,8 @@ public class ValueList extends Value implements IsSynthesizable {
                 new FunctionFirst(),
                 new FunctionFilter(),
                 new FunctionMergeExpr(),
+                new FunctionMax(),
+                new FunctionMin(),
         };
         setFunctions(arr);
     }
@@ -655,6 +657,51 @@ public class ValueList extends Value implements IsSynthesizable {
             
         }
         
+    }
+
+
+    class FunctionMax extends Function {
+        public String getName() {
+            return "max";
+        }
+        public String getShortDesc() {
+            return "max() - returns max from list of numbers";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) {
+                throw new Exception("Expected no parameters");
+            }
+            Long max=null;
+            for (Value v:val) {
+                if (!(v instanceof ValueInt)) throw new Exception("Can only work with integers");
+                long i=((ValueInt) v).getVal();
+                if (max==null || i>max) max=i;
+            }
+            if (max==null) return new ValueNull();
+            return new ValueInt(max);
+        }
+    }
+
+    class FunctionMin extends Function {
+        public String getName() {
+            return "min";
+        }
+        public String getShortDesc() {
+            return "min() - returns min from list of numbers";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) {
+                throw new Exception("Expected no parameters");
+            }
+            Long min=null;
+            for (Value v:val) {
+                if (!(v instanceof ValueInt)) throw new Exception("Can only work with integers");
+                long i=((ValueInt) v).getVal();
+                if (min==null || i < min) min=i;
+            }
+            if (min==null) return new ValueNull();
+            return new ValueInt(min);
+        }
     }
 
 }
