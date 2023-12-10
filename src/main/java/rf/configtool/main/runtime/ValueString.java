@@ -306,7 +306,11 @@ public class ValueString extends Value implements IsSynthesizable {
                 radix=10;
             }
             String s=val.replace("_","");
-            return new ValueInt(Long.parseLong(s, radix));
+            try {
+                return new ValueInt(Long.parseLong(s, radix));
+            } catch (Exception ex) {
+                throw new Exception("Invalid number format: " + val);
+            }
         }
     }
 
