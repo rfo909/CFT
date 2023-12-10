@@ -36,6 +36,11 @@ public class ValueInt extends Value implements IsSynthesizable {
                 new FunctionHex(),
                 new FunctionFmt(),
                 new FunctionStr(),
+                new FunctionShiftLeft(),
+                new FunctionShiftRight(),
+                new FunctionBitwiseAnd(),
+                new FunctionBitwiseOr(),
+                new FunctionBitwiseNot(),
             };
         setFunctions(arr);
     }
@@ -215,5 +220,77 @@ public class ValueInt extends Value implements IsSynthesizable {
         }
 
     }
+
+    class FunctionShiftLeft extends Function {
+        public String getName() {
+            return "shiftLeft";
+        }
+        public String getShortDesc() {
+            return "shiftLeft(n) - returns int";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            int n=(int) getInt("n",params,0);
+            return new ValueInt(val << n);
+        }
+
+    }
+
+    class FunctionShiftRight extends Function {
+        public String getName() {
+            return "shiftRight";
+        }
+        public String getShortDesc() {
+            return "shiftRight(n) - returns int";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            int n=(int) getInt("n",params,0);
+            return new ValueInt(val >> n);
+        }
+
+    }
+
+    class FunctionBitwiseAnd extends Function {
+        public String getName() {
+            return "bitwiseAnd";
+        }
+        public String getShortDesc() {
+            return "bitwiseAnd(n) - returns int";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            int n=(int) getInt("n",params,0);
+            return new ValueInt(val & n);
+        }
+
+    }
+
+
+    class FunctionBitwiseOr extends Function {
+        public String getName() {
+            return "bitwiseOr";
+        }
+        public String getShortDesc() {
+            return "bitwiseOr(n) - returns int";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            int n=(int) getInt("n",params,0);
+            return new ValueInt(val | n);
+        }
+
+    }
+
+
+    class FunctionBitwiseNot extends Function {
+        public String getName() {
+            return "bitwiseNot";
+        }
+        public String getShortDesc() {
+            return "bitwiseNot() - returns int";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            return new ValueInt(~val);
+        }
+
+    }
+
 
 }

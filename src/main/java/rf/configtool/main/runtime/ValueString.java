@@ -305,7 +305,8 @@ public class ValueString extends Value implements IsSynthesizable {
             } else {
                 radix=10;
             }
-            return new ValueInt(Long.parseLong(val, radix));
+            String s=val.replace("_","");
+            return new ValueInt(Long.parseLong(s, radix));
         }
     }
 
