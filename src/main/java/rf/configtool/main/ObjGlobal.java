@@ -81,6 +81,7 @@ public class ObjGlobal extends Obj {
     private HashMap<String,ObjPersistent> sessionObjects=new HashMap<String,ObjPersistent>();
     private HashMap<String,Value> sessionValues=new HashMap<String,Value>();
     private final Runtime runtime;
+    private final CodeDirs codeDirs;
     private List<String> systemMessages=new ArrayList<String>();
     
     private long exprCount=0L;
@@ -108,9 +109,9 @@ public class ObjGlobal extends Obj {
         
         
         // initialize with empty script
-        currScriptCode=new ScriptCode(root.getPropsFile(), root.getObjTerm());
+        currScriptCode=new ScriptCode(this, root.getObjTerm());
         this.runtime=new Runtime(this);
-        
+        this.codeDirs=new CodeDirs(stdio, runtime, root.getPropsFile());
         
         add(new FunctionList());
         add(new FunctionDir());
@@ -166,7 +167,9 @@ public class ObjGlobal extends Obj {
     public Runtime getRuntime() {
         return runtime;
     }
-    
+
+    public CodeDirs getCodeDirs() { return codeDirs; }
+
     public void addSystemMessage (String line) {
         systemMessages.add(line);
     }
@@ -315,6 +318,7 @@ public class ObjGlobal extends Obj {
         scriptName=name;
         currScriptCode.load(scriptName, new File(currentDir));
 
+
         updateSavefileState();
  
         FunctionBody onLoad = currScriptCode.getFunctionBody("onLoad");
@@ -337,7 +341,35 @@ public class ObjGlobal extends Obj {
         if (scriptName==null) throw new Exception("No save name defined");
         return currScriptCode.getSaveFile(scriptName, new File(currentDir));
     }
-    
+
+    private void createDir (String path) throws Exception {
+        File f=new File(path);
+        if (!f.exists()) {
+            boolean ok = f.mkdir();
+            if (!ok) throw new Exception("Could not create directory " + f.getCanonicalPath());
+        }
+        if (!f.isDirectory()) {
+            throw new Exception("Invalid directory: " + f.getCanonicalPath());
+        }
+    }
+
+
+    public File getScriptSavefile (String name, File currDir) throws Exception {
+        {
+            File f=new File(currDir.getCanonicalPath() + File.separator + name);
+            if (f.exists()) return f;
+        }
+
+        for (String s:codeDirs.getCodeDirList()) {
+            createDir(s);
+            File f = new File(s + File.separator + name);
+            if (f.exists()) return f;
+        }
+
+        throw new Exception("No such file: " + name);
+    }
+
+
     
     // -----------------------------------------------------------------
     // Functions

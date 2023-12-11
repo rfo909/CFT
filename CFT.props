@@ -9,7 +9,10 @@
 # and may later manually move it to the target directory, when it's ok.
 # ----
 
-codeDirs = . ; code.examples ; code.lib
+codeDirs = { (  List(Dir.path, Sys.homeDir.path, Sys.homeDir.sub("code.examples").path, Sys.homeDir.sub("code.lib").path) ).unique  }
+
+# Stack overflow when booting with this part included!
+#+ if(Sys.savefile.?dir, Sys.savefile.dir.path, List)
 
 
 # Favourite shell, for the shell() global function

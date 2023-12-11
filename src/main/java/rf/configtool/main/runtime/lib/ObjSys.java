@@ -167,7 +167,7 @@ public class ObjSys extends Obj {
             if (params.size() != 0)
                 throw new Exception("Expected no parameters");
             List<Value> list = new ArrayList<Value>();
-            for (String s : ctx.getObjGlobal().getRoot().getPropsFile().getCodeDirs()) {
+            for (String s : ctx.getObjGlobal().getCodeDirs().getCodeDirList()) {
                 ObjDir dir = new ObjDir(s, Protection.NoProtection);
                 list.add(new ValueObj(dir));
             }
