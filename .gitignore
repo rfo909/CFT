@@ -7,6 +7,7 @@ src/.classpath
 src/.project
 .idea/
 investigate.d/
+.settings/
 Db/
 anim/
 
