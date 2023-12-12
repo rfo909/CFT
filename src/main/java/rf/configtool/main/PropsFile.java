@@ -94,7 +94,7 @@ public class PropsFile {
         fileInfo=newFileInfo;
         
         // Set defaults
-        codeDirs="{ error('codeDirs lambda undefined in " + PROPS_FILE + "') }";
+        codeDirs=".";
         prompt="'$ '";  // code
         bangCommand="println('bangCommand not defined')"; // code
         historyCommand="println('historyCommand not defined')";
@@ -228,8 +228,14 @@ public class PropsFile {
     /**
      * Return parsed list of code dirs 
      */
-    public String getCodeDirs() {
-        return codeDirs;
+    public List<String> getCodeDirs() {
+        List<String> list=new ArrayList<String>();
+        if (customScriptDir != null) list.add(customScriptDir);
+        StringTokenizer st=new StringTokenizer(codeDirs,";",false);
+        while (st.hasMoreElements()) {
+            list.add(st.nextToken().trim());
+        }
+        return list;
     }
     
     public String getPromptCode() {
@@ -319,19 +325,40 @@ public class PropsFile {
     /**
      * Current working directory is first directory in codeDirs
      */
-    /*
     private String getSaveDir() {
         List<String> list=getCodeDirs();
         return list.get(0); 
     }
-
-     */
     
     public void report (Stdio stdio) {
         stdio.println("[PropsFile] codeDirs: " + codeDirs);
     }
     
-
+    private void createDir (String path) throws Exception {
+        File f=new File(path);
+        if (!f.exists()) {
+            boolean ok = f.mkdir();
+            if (!ok) throw new Exception("Could not create directory " + f.getCanonicalPath());
+        }
+        if (!f.isDirectory()) {
+            throw new Exception("Invalid directory: " + f.getCanonicalPath());
+        }
+    }
+    
+    public File getScriptSavefile (String name, File currDir) throws Exception {
+        {
+            File f=new File(currDir.getCanonicalPath() + File.separator + name);
+            if (f.exists()) return f;
+        }
+        
+        for (String s:getCodeDirs()) {
+            createDir(s);
+            File f = new File(s + File.separator + name);
+            if (f.exists()) return f;
+        }
+        
+        throw new Exception("No such file: " + name);
+    }
     
     public String getDb2Dir() {
         return db2Dir;

@@ -38,7 +38,8 @@ import rf.configtool.util.TabUtil;
 
 public class ScriptCode {
     
-    private ObjGlobal objGlobal;
+     
+    private PropsFile props;
     private File savefile;
     private Map<String, FunctionBody> namedFunctions=new HashMap<String,FunctionBody>();
     private List<String> namesInSequence=new ArrayList<String>();
@@ -46,8 +47,8 @@ public class ScriptCode {
     
     private String currLine;
     
-    public ScriptCode (ObjGlobal objGlobal, ObjTerm cfg) {
-        this.objGlobal=objGlobal;
+    public ScriptCode (PropsFile props, ObjTerm cfg) {
+        this.props=props;
         this.term=cfg;
     }
     
@@ -215,8 +216,7 @@ public class ScriptCode {
      */
     public File getSaveFile (String saveName, File currentDir) throws Exception {
         if (savefile==null) {
-
-            savefile=objGlobal.getScriptSavefile(createSavefileName(saveName),currentDir);
+            savefile=props.getScriptSavefile(createSavefileName(saveName),currentDir);
         }
         return savefile;
     }
@@ -269,7 +269,7 @@ public class ScriptCode {
         
         if (savefile==null) {
             String sfn=createSavefileName(scriptName);
-            savefile=objGlobal.getScriptSavefile(sfn, currentDir);
+            savefile=props.getScriptSavefile(sfn, currentDir);
         }
         BufferedReader reader=new BufferedReader(new FileReader(savefile));
         
