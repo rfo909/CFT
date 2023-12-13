@@ -1163,78 +1163,20 @@ run(null,null,null,true)
 # --
 	P(1) as Dir => dir
 	P(2) as String => command
-	time=Date
-	
-	if (command.trim!="" && !command.startsWith("?") && !command.startsWith("cd") && !command.startsWith("ls")) {
-		data=SymDict(dir,command,time)
-		list=Db2:Get(Sys.scriptId,"History",List)
-		list.add(data)
-		list=list.last(100)
+
+	currDir=dir.path
+	list=Db2:Get(Sys.scriptId,"History",List)
+
+	if (list.last != currDir) {
+		list=list.add(currDir).last(40)
 		Db2:Set(Sys.scriptId,"History",list)
 	}
 //HistoryAppend
 
 
-
-# Helper func for HistoryShow
-# --
-	P(1) as List => lines
-	Sys.stdin(lines)
-	lines
-//HistoryExecuteLines
-
-
-# Format history data as lines
-# --
-	P(1) as List => list
-	
-	count=0
-	list->dict
-		out(("   "+count).last(3) + " " + Curses:TxtGreen+dict.dir.path+Curses:Reset)
-		out("       " + (dict.command.replace("^t".unEsc,"<TAB>")))
-		count=count+1
-//ShowHistoryData
-
 # Show history
 # --
-	list=Db2:Get(Sys.scriptId,"History",List).last(100)
-
-	filterStr=null
-	loop
-		if (filterStr != null) {
-			list=Inner{
-				list->dict
-					include=dict.dir.path.contains(filterStr) || dict.command.contains(filterStr)
-					assert(include)
-					out(dict)
-			}
-		}
-
-		lines=ShowHistoryData(list)
-		Lib:Header("History")
-		Inner {
-			lines->line println(line)
-		}
-		println
-		readLine("!N to repeat or N to go to dir, Enter to abort, any to narrow") => cmd
-		if (cmd.trim=="") {
-			break
-		} else if (cmd.?parseInt) {
-			n=cmd.parseInt
-			dict=list.nth(n)
-			HistoryExecuteLines(List("cd " + dict.dir.path))
-			break
-		} else if (cmd.startsWith("!") && cmd.sub(1).?parseInt) {
-			n=cmd.sub(1).parseInt
-			dict=list.nth(n)
-			HistoryExecuteLines(List("cd " + dict.dir.path, dict.command))
-			break
-		} else {
-			filterStr=cmd
-		}
-	|
-	true
-	
+	Db2:Get(Sys.scriptId,"History",List).last(20)
 /HistoryShow
 
 
