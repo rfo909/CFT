@@ -103,6 +103,12 @@ P(2, Input("Enter service").get) =>service
 /StartService
 
 
+P(1, Input("Enter remote host").get) =>host 
+P(2, Input("Enter service").get) =>service
+	StopService(host,service)
+	StartService(host,service)
+/RestartService
+
 
 P(1, Input("Enter remote host").get) =>host 
 P(2, Input("Enter service").get) =>service
