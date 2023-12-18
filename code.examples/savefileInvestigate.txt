@@ -29,6 +29,9 @@ data.
 
 To start new log or save existing, just open the LogFile
 in an editor.
+
+(2023-12-18 RFO changed to be Markdown compatible, for cut and
+paste into JIRA etc)
 -------------------------------------------------------------------
 >>> EOF
 /Readme
@@ -38,8 +41,8 @@ in an editor.
 # --
     P(1,"Header") => header
     P(2,"-") => lineChar
-    Std.Data.yes(header.length,"-").concat =>line
-    List("",line,header,line,"")
+    "-".times(header.length) =>line
+    List("",header,line,"")
 /Header   
 
 # The investigation logs are stored in text filed under this directory
@@ -161,7 +164,7 @@ in an editor.
 	Date.setFormat("yyyy-MM-dd").fmt => today
 	Db2:Get(Sys.scriptId,dbKey,"") => date
 	if (date != today) {
-		LogFile.append(List("",today,"-".times(today.length)))
+		LogFile.append(List("",today,"=".times(today.length)))   # Markdown === under text gives Header1
 		Db2:Set(Sys.scriptId,dbKey,today)
 	}
 //DateHeader
@@ -195,11 +198,13 @@ loop
 		if (lines.length>0) {
 			DateHeader
 			LogFile.append("")
-			LogFile.append("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< xxxxx")
+
+			LogFile.append("```")			# Markdown
 			Inner {
 				lines->line LogFile.append(line) 
 			}
-			LogFile.append(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> xxxxx")
+			LogFile.append("```")
+
 			LogFile.append("")
 		}
         
@@ -276,11 +281,12 @@ loop
     }
 
     List =>list
-    list.add("")    
+    list.add("```")      # Markdown
     res->x 
         list.add("# " +x) 
     |
-    list.add("")
+    list.add("```")
+
     LogFile.append(list)
 /LogData
 
@@ -288,7 +294,7 @@ loop
 # Add line to LogFile
 # --
 	P(1,readLine("Enter comment")) => line
-	"> " + Date.setFormat("yyyy-MM-dd HH:mm").fmt + " " + line => line
+	Date.setFormat("HH:mm").fmt + " " + line + "  " => line   ## two spaces at end of line produces breaks in Markdown paragraphs
 	LogFile.append(line)
 /LogText
 
@@ -302,10 +308,11 @@ loop
     readLines(endMarker) =>lines
 
     LogFile.append("")
-    LogFile.append("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< xxxxx")
 
+    LogFile.append("```")	# Markdown
     lines->line LogFile.append(line) |
-    LogFile.append(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> xxxxx")
+    LogFile.append("```")
+
     LogFile.append("")
 /LogPastedText
 
@@ -313,14 +320,14 @@ loop
 # Create header
 # --
     header = readLine("Enter header")
-    LogFile.append(Header(Date.fmt + "  " + header))
+    LogFile.append(Header(header))
 /LogHeader
 
 
 # Show lines 
 # --
 	LogFile.read->line 
-		println("| " + line)
+		println(line)
     |
     println
 /Show
