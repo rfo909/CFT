@@ -827,7 +827,7 @@ run(null,null,null,true)
 # --
     P(1,Dir) => dir
     P(2,Input("Search term").get) => st
-    P(3,Input("Enter partial file name, or glob pattern with '*'").get) => fname
+    P(3,Input("Search files: enter partial file name, or glob pattern with '*'").get) => fname
     P(4,Input("Include sub-dirs y/n").setCurrCond("y")).get.toLower=="y" => subDirs
     
 	proc=SpawnProcess(SymDict(dir,st,fname,subDirs), DoSearchTextFiles(dir,st,fname,subDirs))
@@ -916,7 +916,7 @@ run(null,null,null,true)
 # Locate files under current directory
 # --
     P(1,Dir) => dir
-    P(2,Input("Enter partial file name, or glob pattern with '*'").get) => fname
+    P(2,Input("Locate files: enter partial file name, or glob pattern with '*'").get) => fname
 
     if (fname=="") fname="*"
     glob=if(fname.contains("*"),Glob(fname,true),Glob("*"+fname+"*",true))
