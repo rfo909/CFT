@@ -38,11 +38,7 @@ public class CFTCallStackFrame {
     }
     
     public void addDebugLine (String debugLine) {
-        if (debugLines.size()==0) {
-            debugLines.add(debugLine);
-        } else {
-            debugLines.add(0, debugLine); // newest first
-        }
+    	debugLines.add(debugLine);
     }
     
     public List<String> getDebugLines() {
