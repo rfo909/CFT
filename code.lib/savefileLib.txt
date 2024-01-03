@@ -1271,15 +1271,12 @@ run(null,null,null,true)
 //EncryptedFileEnding
 
 
-# Back date file
+# Back date file 
 # --
 	P(1) as File => f
-	P(2,0) => seconds
 
-	if (seconds==0) {
-		seconds=currentTimeMillis % 181181 + 86400*3 
-	}
-	
+	seconds=currentTimeMillis % 5281181 + 86400*3 
+
 	created=currentTimeMillis - seconds*1000
 	modified=created + (currentTimeMillis % 301)*1000
 	accessed=modified + (currentTimeMillis % 991)
