@@ -929,6 +929,18 @@ run(null,null,null,true)
 
 
 
+# Locate dirs under current dir
+# --
+	P(1,Dir)=>dir
+	P(2,Input("Locate dirs: enter partial name, or glob pattern with '*'").get) => dname
+	if (dname=="") dname="*"
+	glob=if(dname.contains("*"), Glob(dname, true), Glob("*"+dname+"*",true))
+	dir.allDirs(glob)->f
+		out(f.path)
+/LocateDirs
+
+
+
 # Identify all file types under current dir
 # --
 	P(1,Dir) => dir

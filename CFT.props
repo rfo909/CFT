@@ -96,6 +96,7 @@ shortcut:SR   = "---- search recent files curr dir ----"  Util:SearchRecentFiles
 shortcut:DD   = "---- drilldown from curr dir ----"       DD:DD(Dir)
 shortcut:DF   = "---- drilldown file list ----"           DD:F
 shortcut:FL   = "---- File Locate under curr Dir ----"    Lib:LocateFiles(Dir)
+shortcut:DL   = "---- Dir Locate under curr Dir ----"     Lib:LocateDirs(Dir)
 shortcut:tree = "---- Show directory tree curr dir ----"  Lib:ShowTree(Dir)
 
 # Projects script 
