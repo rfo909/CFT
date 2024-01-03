@@ -47,12 +47,12 @@ passwords and other secrets for the duration of the session.
             readLine(label) => value
         } else {
             Sys.readPassword(label) => value
+			Sys.readPassword(label+" (again)") => value2
+			error(value != value2, "Passwords don't match")
         }
-        Std.Util.Encrypt(Sys.secureSessionId,"value").processString(value) => eValue
-        Db2:Set("Vault", key, eValue)
-        Std.Util.Encrypt(Sys.secureSessionId,"verify").processString("verified") => eVerified
-        Db2:Set("Vault", verifyKey, eVerified)
-        
+
+		SessionSecretSet(label, value)
+
         value
     }
 /SessionSecretGet
@@ -66,10 +66,10 @@ passwords and other secrets for the duration of the session.
     label.toHexString => key
     "v"+key =>  verifyKey
     
-    Std.Util.Encrypt(Sys.secureSessionId,"value").processString(value) => eValue
-    Db2:Set("Vault", key, eValue)
-    Std.Util.Encrypt(Sys.secureSessionId,"verify").processString("verified") => eVerified
-    Db2:Set("Vault", verifyKey, eVerified)
+	Std.Util.Encrypt(Sys.secureSessionId,"value").processString(value) => eValue
+	Db2:Set("Vault", key, eValue)
+	Std.Util.Encrypt(Sys.secureSessionId,"verify").processString("verified") => eVerified
+	Db2:Set("Vault", verifyKey, eVerified)
 /SessionSecretSet
 
 

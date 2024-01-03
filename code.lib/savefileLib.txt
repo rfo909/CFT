@@ -1241,3 +1241,52 @@ run(null,null,null,true)
 		out(f)
 /ListNewFilesRecursively
 		
+
+
+# Encrypt single file
+# --
+	P(1) as File => f
+	password = Vault:SessionSecretGet("Single File Encryption password")
+	binPassword=password.getBytes("UTF-8")
+	encryptedFile=File(f.path + EncryptedFileEnding)
+	f.encrypt(binPassword,"",encryptedFile)
+/EncryptFile
+
+
+# Decrypt single file
+# --
+	P(1) as File => f
+	password = Vault:SessionSecretGet("Single File Encryption password")
+	binPassword=password.getBytes("UTF-8")
+	error(!f.name.endsWith(EncryptedFileEnding), "Invalid file, encrypted files end with " + EncryptedFileEnding)
+
+	decryptedFile=File(f.path.sub(0, f.path.length - EncryptedFileEnding.length))
+	f.decrypt(binPassword,"",decryptedFile)
+/DecryptFile
+
+
+# Ending for encrypted files
+# --
+	".r"
+//EncryptedFileEnding
+
+
+# Back date file
+# --
+	P(1) as File => f
+	P(2,0) => seconds
+
+	if (seconds==0) {
+		seconds=currentTimeMillis % 181181 + 86400*3 
+	}
+	
+	created=currentTimeMillis - seconds*1000
+	modified=created + (currentTimeMillis % 301)*1000
+	accessed=modified + (currentTimeMillis % 991)
+
+
+	f.setTimes(created, modified, accessed)
+/BackDateFile
+
+	
+
