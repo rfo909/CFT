@@ -82,11 +82,13 @@ public class ObjDir extends Obj implements IsSynthesizable {
                 new FunctionExists(),
                 new FunctionSub(),
                 new FunctionFiles(),
+                new FunctionFilesCount(),
                 new FunctionDirs(),
                 new FunctionCreate(),
                 new FunctionDelete(),
                 new FunctionAllFiles(),
                 new FunctionAllDirs(),
+                new FunctionAllFilesCount(),
                 new FunctionFile(),
                 new FunctionCopy(),
                 new FunctionRun(),
@@ -294,7 +296,6 @@ public class ObjDir extends Obj implements IsSynthesizable {
         if (!(obj instanceof ObjGlob)) throw new Exception("Expected String or Glob parameter");
         return (ObjGlob) obj;
     }
-    
 
     class FunctionFiles extends Function {
         public String getName() {
@@ -322,6 +323,35 @@ public class ObjDir extends Obj implements IsSynthesizable {
                 }
             }
             return new ValueList(result);
+        }
+    }
+
+    class FunctionFilesCount extends Function {
+        public String getName() {
+            return "filesCount";
+        }
+        public String getShortDesc() {
+            return "filesCount(Glob?) - returns number of files";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            ObjGlob glob=null;
+            if (params.size()==1) {
+                glob=getObjGlob(params,0);
+            } else if (params.size() != 0) {
+                throw new Exception("Expected optional Glob parameter only");
+            }
+
+
+            File f=new File(name);
+            long count=0;
+            for (String s:f.list()) {
+                File x=new File(name + File.separator + s);
+                if (x.isFile()) {
+                    if (glob != null && !glob.matches(s)) continue;
+                    count++;
+                }
+            }
+            return new ValueInt(count);
         }
     }
 
@@ -528,6 +558,47 @@ public class ObjDir extends Obj implements IsSynthesizable {
             }
         }
         
+    }
+
+
+    private long traverseCount (Stdio stdio, File currDir, ObjGlob glob) throws Exception {
+        File[] list=currDir.listFiles();
+        long count=0;
+        for (File f:list) {
+            if (f.getName().equals(".") || f.getName().equals("..")) continue;
+            if (f.isDirectory()) {
+                // search for sub-dirs before adding dir, this makes it safe
+                // to delete dioutTextrectories in the order presented
+                try {
+                    count += traverseCount(stdio, f, glob);
+                } catch(Exception ex) {
+                    stdio.println("Traversing dir " + f + " " + ex.getMessage());
+                }
+            } else {
+                if (glob==null || glob.matches(f.getName())) count++;
+            }
+        }
+        return count;
+
+    }
+
+    class FunctionAllFilesCount extends Function {
+        public String getName() {
+            return "allFilesCount";
+        }
+        public String getShortDesc() {
+            return "allFilesCount(Glob?) - returns number of files matching glob, under this directory";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            OutText outText=ctx.getOutText();
+            ObjGlob glob=null;
+            if (params.size()==1) {
+                glob=getObjGlob(params,0);
+            } else if (params.size() != 0) {
+                throw new Exception("Expected optional Glob parameter only");
+            }
+            return new ValueInt(traverseCount(ctx.getStdio(), new File(name), glob));
+        }
     }
     
    private void callExternalProgram (Ctx ctx, boolean foreground, Stdio stdio, OutText outText, RunCaptureOutput capture, List<Value> params) throws Exception {

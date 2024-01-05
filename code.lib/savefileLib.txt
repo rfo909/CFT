@@ -880,7 +880,9 @@ run(null,null,null,true)
         Inner{
             files->f
                     grep.file(f)->line
-						report(f.name, line.lineNumber, line)
+						fpath=f.path
+						if (fpath.toLower.startsWith(dir.path.toLower)) fpath="."+fpath.sub(dir.path.length)
+						report(fpath, line.lineNumber, line)
 			| ->line 
 				println(line) 
 			|
