@@ -195,6 +195,7 @@ d
 
 
 # Run virsh to display status for all defined VM's
+# --
     Dir.runCapture("whoami").nth=="root" =>ok
     error(!ok, "Must be logged in as root")
 
@@ -204,27 +205,31 @@ d
 /status
 
 
-# Short for status
-    status
+status
 /s
 
 
-
-P(1,"someTarget") =>target
+# Start VM
+# --
+	P(1) =>target
     println("STARTING " + target)
     Lib:run(List("virsh","start","--domain",target),List,true)
     status
 /Start
 
 
-P(1,"someTarget") =>target
+# Stop VM
+# --
+	P(1) =>target
     println("STOPPING " + target)
     Lib:run(List("virsh","destroy","--domain", target),List,true)
     status
 /Stop
 
 
-P(1,"someTarget") =>target
+# Delete VM
+# --
+	P(1) =>target
     println("DELETING " + target)
     error(DoNotDelete.contains(target),
         "Can not delete target " + target + ": remove from DoNotDelete list first")
@@ -237,7 +242,7 @@ P(1,"someTarget") =>target
 
 
 
-# Automatic (and manual) cloning of existing VM (which will be stopped if running)
+# Automatic cloning of existing VM (which will be stopped if running)
 # --
     P(1) => original           # original VM ("kubsXX")
     P(2) => cloneName          # new VM name
@@ -316,11 +321,32 @@ P(1,"someTarget") =>target
  /Clone
 
 
+# Example of calling Clone
+# --
+<<<<< EOF
+
+# Create kub62 and kub65
+# --
+template="ubs20_s06"
+initialAddr="ubs20s06.v"
+nic="enp1s0"
+
+KVM:Clone(template,"kub62",initialAddr,"10.0.8.25/16","roar", nic)
+KVM:Clone(template,"kub65",initialAddr,"10.0.8.28/16","roar", nic)
+/Create
+
+
+>>>>> EOF
+	->line 
+		println(line)
+/Example
+
 
 
 
 
 # Create new VM from scratch - fully interactive
+# --
     Dir.runCapture("whoami").nth=="root" =>ok
     error(!ok, "Must be logged in as root")
 
@@ -402,13 +428,15 @@ P(1,"someTarget") =>target
     
     
 
-# Run virt-manager (required X-windows)
+# Run virt-manager (requires X-windows)
+# --
     Dir.run("virt-manager")
 /mgr
 
 
 
 # Info on using VNC for installation
+# --
     status
     readLine("VM name") =>vm
 
@@ -447,50 +475,4 @@ ${portInfo}
         out(line.merge(data))
 /VNCHelp
 
-
-
-
-# Example using AutoClone 
-# --
-<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< EOF
-# Utility
-    PDict("host","ip")
-/H
-
-
-Sequence(
-    H("elastic01.v","10.0.5.11")
-    H("elastic02.v","10.0.5.12")
-    H("elastic03.v","10.0.5.13")
-    H("elastic04.v","10.0.5.14")
-    H("elastic05.v","10.0.5.15")
-)
-/Hosts
-
-Hosts->x out(x.host)
-/hosts
-
-
-# Create one clone
-# --
-P(1) => host
-P(2) => ip
-    original="kubs05"  # k-series Ubuntu Server
-    cloneName=host
-    originalIp="10.0.5.254"   # original VM ip
-    sshUser="roar"
-    nic="ens3"  ## run "ip addr"  on original VM to decide
-    
-    KVM:AutoClone(original, host, originalIp, ip+"/16", sshUser, nic)
-/CreateClone
-
-# Main function - creates all nodes
-# --
-    Hosts -> x
-    CreateClone(x.host, x.ip)
-/CreateAll
-
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> EOF
-->line println(line)
-/ExampleAutoClone
 
