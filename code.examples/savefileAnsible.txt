@@ -82,6 +82,23 @@
 /UpdateEtcHosts
 
 
+# Update /etc/hosts in all linux targets  
+# --
+    data=Hosts:Parse
+    data.LallHosts->host
+        sshUser=data.Lget(host,"SSHUser")
+        assert(sshUser != null)
+        target=sshUser+"@"+host
+        println("------ " + target)
+        if (SSH:HostOkSSH(target)) {        
+    	    UpdateEtcHosts(target)
+    	} else {
+    		println("    Not responding to SSH")
+    	}
+/UpdateEtcHostsAll
+
+
+
 
 
 # Test SSH (and dns)
