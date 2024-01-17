@@ -168,18 +168,33 @@ P(4,false) => showDebug
 
 
 # Copy local file via scp (secure copy over SSH) to remote target, returns Dict object
-#
-P(1) => localFile
-P(2) => target
-P(3) => remoteName
-P(4, false) => acceptErrors
-P(5, false) => showDebug
+# --
+	P(1) => localFile
+	P(2) => target
+	P(3) => remoteName
+	P(4, false) => acceptErrors
+	P(5, false) => showDebug
+
     if (getType(localFile)=="File") {
         localFile=localFile.path
     }
     Lib:run (List("scp", localFile, target+":"+remoteName), List, acceptErrors, showDebug)
 /copy
 
+
+# Get remote file via scp
+# --
+	P(1) => localFile
+	P(2) => target
+	P(3) => remoteName
+	P(4, false) => acceptErrors
+	P(5, false) => showDebug
+	
+    if (getType(localFile)=="File") {
+        localFile=localFile.path
+    }
+    Lib:run (List("scp", target+":"+remoteName, localFile), List, acceptErrors, showDebug)
+/getFile
 
 
 # Shell

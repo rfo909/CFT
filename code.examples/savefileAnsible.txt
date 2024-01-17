@@ -32,6 +32,56 @@
 /CheckSSHKeys
 
 
+# Marker in /etc/hosts for custom content
+# --
+        "# CFT"
+//EtcHostsMarker
+
+# Get lines from /etc/hosts that should be distributed
+# --
+        found=false
+        
+        File("/etc/hosts").read->line
+                if (line.startsWith(EtcHostsMarker)) found=true
+                assert(found)
+                out(line)
+//EtcHostsLines
+
+
+# Update /etc/hosts on target (user@host) 
+# --
+	P(1, Input("Enter user@host").get) => target
+
+	# Get /etc/hosts from target
+	Lib:TmpFile("hosts") => localCopy 
+    SSH:getFile(localCopy, target, "/etc/hosts")
+    
+    # Isolate the lines up to the "marker"
+    keepLines=Inner{
+    	found=false
+    	localCopy.read->line
+    		if (line.startsWith(EtcHostsMarker)) found=true
+    		reject(found)
+    		out(line)
+    }
+    if (keepLines.last.trim.length > 0) {
+    	keepLines.add("")
+    }
+    
+    # Create updated version 
+    localCopy.create(keepLines + EtcHostsLines)
+    
+    # Send it to the home directory of the target
+    SSH:copy(localCopy, target, "./hosts.txt")
+
+	# Update the target using sudo command
+	SSH:sudo(target,"cp ./hosts.txt /etc/hosts")
+	
+	# Remove temp file
+	localCopy.delete
+/UpdateEtcHosts
+
+
 
 
 # Test SSH (and dns)
