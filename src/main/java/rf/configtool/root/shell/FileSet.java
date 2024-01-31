@@ -120,16 +120,28 @@ public class FileSet {
      * Default processing for ls, when no args. Contains checks on duration and number of files, to
      * avoid hanging forever. To override, supply arg, for ex '*' or some path.
      */
-    public String addDirContent(String dir, ObjGlob glob) throws Exception {
+    public String addDirContent(String dir, ObjGlob glob, boolean enforceLimits) throws Exception {
         File f = new File(dir);
 
         long startTime = System.currentTimeMillis();
 
-        DirectoryStream<Path> stream = Files.newDirectoryStream(f.toPath());
-        Iterator<Path> iter = stream.iterator();
 
+        DirectoryStream<Path> stream = Files.newDirectoryStream(f.toPath());
+
+        Iterator<Path> iter = stream.iterator();
         int totalCount = 0;
         while (iter.hasNext()) {
+            long duration = System.currentTimeMillis() - startTime;
+
+            if (enforceLimits) {
+                if (duration > LS_DEFAULT_TIMEOUT_MS) {
+                    return "--- directory listing timed out after " + LS_DEFAULT_TIMEOUT_MS + ", use '*' to override";
+                }
+                if (totalCount >= LS_DEFAULT_MAX_ENTRIES) {
+                    return "--- directory entry count > " + LS_DEFAULT_MAX_ENTRIES + ", use '*' to override";
+                }
+            }
+
             Path p = iter.next();
 
             File x = p.toFile();
@@ -144,16 +156,7 @@ public class FileSet {
 
             totalCount++;
 
-            long duration = System.currentTimeMillis() - startTime;
-
-            if (duration > LS_DEFAULT_TIMEOUT_MS) {
-                return "--- directory listing timed out after " + LS_DEFAULT_TIMEOUT_MS + ", use '*' to override";
-            }
-            if (totalCount >= LS_DEFAULT_MAX_ENTRIES) {
-                return "--- directory entry count > " + LS_DEFAULT_MAX_ENTRIES + ", use '*' to override";
-            }
         }
-        
         return null;
 
     }
@@ -314,7 +317,7 @@ public class FileSet {
             }
         }
         
-        this.addDirContent(theDir, glob);
+        this.addDirContent(theDir, glob, true);
     }
 
     

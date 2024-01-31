@@ -82,16 +82,18 @@ public class ShellLs extends ShellCommand {
         
         FileSet fs=new FileSet(name,showDirs, showFiles);
         fs.setIsSafeOperation();
+        boolean enforceLimits=false;  // to avoid hanging forever on remote directories
         
         if (noArgs) {
+            enforceLimits=true;
             ObjGlob glob=new ObjGlob("*");
-            String errMsg = fs.addDirContent(currDir, glob);
+            String errMsg = fs.addDirContent(currDir, glob,enforceLimits);
             if (errMsg != null) {
                 ctx.addSystemMessage(errMsg);
                 return new ValueNull();
             }
             
-            return generateResultList(fs);
+            return generateResultList(fs, enforceLimits);
         } 
         
         // process args, some of which may be expressions
@@ -109,29 +111,44 @@ public class ShellLs extends ShellCommand {
             fs=new FileSet(name,showDirs,showFiles);
             fs.setIsSafeOperation();
             
-            fs.addDirContent(singleDir, new ObjGlob("*"));
+            fs.addDirContent(singleDir, new ObjGlob("*"), enforceLimits);
         }
 
-        return generateResultList(fs);
+        return generateResultList(fs, enforceLimits);
 
     }
 
 
     
-    private Value generateResultList(FileSet fs) throws Exception {
+    private Value generateResultList(FileSet fs, boolean enforceLimits) throws Exception {
         List<Value> result = new ArrayList<Value>();
-        
+
+        long startTime=System.currentTimeMillis();
+
         if (showDirs) {
             List<String> dirList=fs.getDirectories();
             sort(dirList);
+            //System.out.println("dir sort ok after " + (System.currentTimeMillis()-startTime) + "ms");
             for (String x : dirList) {
+                if (enforceLimits) {
+                    long duration=System.currentTimeMillis()-startTime;
+                    if (duration > FileSet.LS_DEFAULT_TIMEOUT_MS) throw new Exception("directory listing timed out, use 'ls *' to override");
+                }
                 result.add(new ValueObj(new ObjDir(x, Protection.NoProtection)));
             }
         }
+        //System.out.println("dirs ok after " + (System.currentTimeMillis()-startTime) + "ms");
+
         if (showFiles) {
             List<String> fileList=fs.getFiles();
             sort(fileList);
+            //System.out.println("file sort ok after " + (System.currentTimeMillis()-startTime) + "ms");
+
             for (String x : fileList) {
+                if (enforceLimits) {
+                    long duration=System.currentTimeMillis()-startTime;
+                    if (duration > FileSet.LS_DEFAULT_TIMEOUT_MS) throw new Exception("directory listing with " + fileList.size() + " files timed out, use 'ls *' to override");
+                }
                 result.add(new ValueObj(new ObjFile(x, Protection.NoProtection)));
             }
 

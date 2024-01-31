@@ -38,14 +38,23 @@ Bash       - run bash shell inside running container
 /Readme
 
 
+# Current directory may have become invalid
+# if this script was invoked first time in a
+# temporary directory, such as logs dir
+# --
+	if(Dir.exists, Dir, Sys.savefile.dir)
+//CurrDir	
+
+
+
+
 # Restart docker service (on windows)
 # 
 # - must do this after logging on with VPN,
 #   for containers to access servers properly
 # --
-    Dir.run("powershell","restart-service","*docker*")
+    CurrDir.run("powershell","restart-service","*docker*")
 /RestartDocker
-
 
 
 # Report progress
@@ -78,7 +87,7 @@ Bash       - run bash shell inside running container
 
     Lib:Header(header)
     images = Inner{
-        Dir.runCapture("docker","image","list").keep(1)->line # keep(1) to strip header line
+        CurrDir.runCapture("docker","image","list").keep(1)->line # keep(1) to strip header line
             assert(line.contains(searchTerm)) 
             out(line)
     }
@@ -108,7 +117,7 @@ Bash       - run bash shell inside running container
     P(1,SelectImage) => id
 
     images = Inner{
-        Dir.runCapture("docker","image","list").keep(1)->line # keep(1) to strip header line
+        CurrDir.runCapture("docker","image","list").keep(1)->line # keep(1) to strip header line
             assert(line.split.nth(2).startsWith(id))
             out(line)
     }
@@ -142,10 +151,10 @@ Bash       - run bash shell inside running container
 
 # Delete all images (-f)
 # --
-    Dir.runCapture("docker","image","ls").keep(1)->line
+    CurrDir.runCapture("docker","image","ls").keep(1)->line
         println(line)
         line.split.nth(2) => id
-        Dir.run("docker","image","rm","-f",id)
+        CurrDir.run("docker","image","rm","-f",id)
 
 /IDeleteAll
 
@@ -153,7 +162,7 @@ Bash       - run bash shell inside running container
 # Delete all docker containers
 # --
     rep("Removing all docker containers")
-    Dir.runCapture("docker", "ps", "-a")->line
+    CurrDir.runCapture("docker", "ps", "-a")->line
         line.split=>cols
         reject(cols.last=="NAMES") ## skip header line
         Util:Run("docker stop " + cols.last)
@@ -183,7 +192,7 @@ Bash       - run bash shell inside running container
 # --
     P(1, readLine("Repository (name)")) => name
     P(2, readLine("TAG")) => tag
-    Dir.runCapture("docker","image","list")->line
+    CurrDir.runCapture("docker","image","list")->line
         assert(line.split.nth(0)==name && line.split.nth(1)==tag)
         out(line)
     | _.length > 0
