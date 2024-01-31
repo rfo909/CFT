@@ -69,7 +69,7 @@ public class ObjFile extends Obj implements IsSynthesizable {
     
     private String name;
     private Protection protection;
-    private String encoding=DefaultEncoding;
+    private String assignedEncoding=null;
     private String customEOL; // for overriding CRLF / LF
 
     public ObjFile(String name, Protection protection) throws Exception {
@@ -85,7 +85,6 @@ public class ObjFile extends Obj implements IsSynthesizable {
                 File f=new File(name);
                 if (f.exists()) {
                     this.name=f.getCanonicalPath();
-                    encoding=getFileEncoding(f, encoding);
                 }
             } catch (Exception ex) {
                 this.name=name;
@@ -138,41 +137,46 @@ public class ObjFile extends Obj implements IsSynthesizable {
     
     
     
-    private String getFileEncoding (File f, String defaultEncoding) {
-        try {
-            FileInputStream fis=null;
-            try {   
-                fis = new FileInputStream(f);
-                
-                byte[] bom=new byte[4];
-                int count=fis.read(bom);
-                if (count != 4) return defaultEncoding;
-                
-                String str=Hex.toHex(bom,4);
-                
-                // https://en.wikipedia.org/wiki/Byte_order_mark
-                
-                if (str.equals("0000FEFF")) return "UTF-32BE";
-                if (str.equals("FFFE0000")) return "UTF-32LE";
+    public String getEncoding () {
+        if (assignedEncoding != null) return assignedEncoding;
+        File f=getFile();
+        if (f.exists() && f.isFile()) {
+            try {
+                FileInputStream fis=null;
+                try {
+                    fis = new FileInputStream(f);
 
-                if (str.startsWith("FEFF")) return "UTF-16BE";
-                if (str.startsWith("FFFE")) return "UTF-16LE";
+                    byte[] bom=new byte[4];
+                    int count=fis.read(bom);
+                    if (count != 4) return DefaultEncoding;
 
-                if (str.startsWith("EFBBBF")) return "UTF-8";
-                
-            } finally {
-                if (fis != null) try {fis.close();} catch (Exception ex) {};
+                    String str=Hex.toHex(bom,4);
+
+                    // https://en.wikipedia.org/wiki/Byte_order_mark
+
+                    if (str.equals("0000FEFF")) return "UTF-32BE";
+                    if (str.equals("FFFE0000")) return "UTF-32LE";
+
+                    if (str.startsWith("FEFF")) return "UTF-16BE";
+                    if (str.startsWith("FFFE")) return "UTF-16LE";
+
+                    if (str.startsWith("EFBBBF")) return "UTF-8";
+
+                } finally {
+                    if (fis != null) try {fis.close();} catch (Exception ex) {};
+                }
+            } catch (Exception ex) {
+                // ignore
             }
-        } catch (Exception ex) {
-            // ignore
         }
-        return defaultEncoding;
+        return DefaultEncoding;
     }
     
     /**
      * Get BOM byte sequence for encoding by (Java) name
      */
-    private byte[] getBOM (String encoding) {
+    private byte[] getBOM () {
+        String encoding=getEncoding();
         String s;
         
         if (encoding.equals("UTF-32BE")) s="0000FEFF";
@@ -197,13 +201,13 @@ public class ObjFile extends Obj implements IsSynthesizable {
         FileInputStream fis=new FileInputStream(f);
         
         // read past BOM if there is one
-        int bomBytes = getBOM(encoding).length;
+        int bomBytes = getBOM().length;
         while (bomBytes>0) {
             fis.read();
             bomBytes--;
         }
 
-        return new BufferedReader(new InputStreamReader(fis, encoding));
+        return new BufferedReader(new InputStreamReader(fis, getEncoding()));
 
     }
     
@@ -233,11 +237,7 @@ public class ObjFile extends Obj implements IsSynthesizable {
     public File getFile() {
         return new File(name);
     }
-    
-    public String getEncoding() {
-        return encoding;
-    }
-    
+
     @Override
     public boolean eq(Obj x) {
         if (x instanceof ObjFile) {
@@ -251,6 +251,7 @@ public class ObjFile extends Obj implements IsSynthesizable {
     public String createCode() throws Exception {
         String enc="";
         String prot="";
+        String encoding=getEncoding();
         if (!encoding.equals(DefaultEncoding)) {
             // setEncoding returns self!
             enc=".encoding(" + (new ValueString(encoding)).synthesize() + ")";
@@ -423,9 +424,9 @@ public class ObjFile extends Obj implements IsSynthesizable {
             PrintStream ps=null;
             try {
                 FileOutputStream fos=new FileOutputStream(f);
-                fos.write(getBOM(encoding));
+                fos.write(getBOM());
                 
-                ps=new PrintStream(fos,false, encoding);
+                ps=new PrintStream(fos,false, getEncoding());
                 Value content=params.get(0);
                 if (content instanceof ValueList) {
                     List<Value> lines=((ValueList)content).getVal();
@@ -464,10 +465,10 @@ public class ObjFile extends Obj implements IsSynthesizable {
                     fos=new FileOutputStream(f, true);
                 } else {
                     fos=new FileOutputStream(f);
-                    fos.write(getBOM(encoding));
+                    fos.write(getBOM());
                 }
                 
-                ps=new PrintStream(fos, false, encoding);
+                ps=new PrintStream(fos, false, getEncoding());
                 Value content=params.get(0);
                 if (content instanceof ValueList) {
                     List<Value> lines=((ValueList)content).getVal();
@@ -983,12 +984,12 @@ public class ObjFile extends Obj implements IsSynthesizable {
             if (params.size() == 1) {
                 String targetEncoding=getString("encoding", params, 0);
                 if (!Charset.isSupported(targetEncoding)) throw new Exception("Charset '" + targetEncoding + "' not supported");
-                encoding=targetEncoding;
+                assignedEncoding=targetEncoding;
                 return new ValueObj(self()); // important for synthesis
             } else if (params.size() != 0) {
                 throw new Exception("Expected single optional parameter encoding");
             }
-            return new ValueString(encoding);
+            return new ValueString(getEncoding());
         }
     }
     
@@ -1058,6 +1059,7 @@ public class ObjFile extends Obj implements IsSynthesizable {
             BufferedReader br=null;
             RandomAccessFile raf=new RandomAccessFile(f,"r");
             int readLines=0;
+            String encoding=getEncoding();
             try {
                 //System.out.println("Seeking to " + seekPos);
                 raf.seek(seekPos);
