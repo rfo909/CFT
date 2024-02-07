@@ -118,6 +118,42 @@ just add a second "Dir:" line.
 /EditConfig
 
 
+# Update sessionProject
+# --
+	P(1)=>name
+
+	# Load sessions dictionary from base
+	Db2:Get("Projects","Sessions",Dict) => sessions
+
+	uuid=Sys.sessionUUID
+	time=currentTimeMillis
+
+	sessions.set(uuid,SymDict(name,time))
+	
+	# clean up old sessions, to avoid data entry growing indefinitely
+	{sessions.keys->key
+		if(sessions.get(key).time < currentTimeMillis - 86400*1000*14) {
+			sessions.remove(key)
+		}
+	}
+
+	# Save
+	Db2:Set("Projects","Sessions",sessions)
+//UpdateSessionProject
+
+
+# Get session project or null if undefined
+# --
+	Db2:Get("Projects","Sessions",Dict) => sessions
+	uuid=Sys.sessionUUID
+
+	if (sessions.has(uuid)) {
+		sessions.get(uuid).name
+	} else {
+		null
+	}
+//GetSessionProject
+
 
 # List projects and select 
 # --
@@ -136,14 +172,20 @@ just add a second "Dir:" line.
         break(result != null)
     |
     Db2:Set("Projects","Project", result)
+	UpdateSessionProject(result)
     result
 //SelectProjectName
 
 
 # Current project name
 # --
-    pName=Db2:Get("Projects","Project")
+	pName=GetSessionProject
+	if (pName==null) {
+		# use last selected
+		pName=Db2:Get("Projects","Project")
+	}
     if (pName==null) pName=SelectProjectName
+	UpdateSessionProject(pName)
     pName
 //CurrProjectName
 
