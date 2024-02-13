@@ -83,20 +83,29 @@
 
 # Main loop
 # --
+	filter=null
 	loop
 		list=SortedList
 		{
 			i=0
 			list->row
-				println(fmt(i) + " - " + row.expirationDate.fmt + " " + row.description)
+				if (filter == null || row.description.toLower.contains(filter.toLower)) {
+					println(fmt(i) + " - " + row.expirationDate.fmt + " " + row.description)
+				}
 				i=i+1
 		}
-		prompt="Enter " + if(!list.empty,"number to edit or delete, ","") + "'a' to add, 'x' ENTER to quit" 
+		filter=null
+
+		prompt="Enter " + if(!list.empty,"number to edit or delete, ","") + "'a' to add, 's' to search, ENTER to quit" 
 		readLine(prompt) => cmd
 		break(cmd=="")
+
 		if (cmd=='a') {
 			list.add(EditOrCreate(null))
+		} else if (cmd=='s') {
+			Input("Enter search term").get => filter
 		} else {
+			# Edit entry
 			pos=cmd.parseInt
 			x = EditOrCreate(list.nth(pos))
 			if (x==null) {
