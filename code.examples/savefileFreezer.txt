@@ -102,12 +102,12 @@
 		}
 		filter=null
 
-		prompt="Enter " + if(!list.empty,"number to edit or delete, ","") + "'...' to add, '/' to search, ENTER to quit" 
+		prompt="Enter " + if(!list.empty,"number to edit or delete, ","") + "'...' to add, '/...' to search, ENTER to quit" 
 		readLine(prompt) => cmd
 		break(cmd=="")
 
-		if (cmd=='/') {
-			Input("Enter search term").get => filter
+		if (cmd.startsWith('/')) {
+			filter = cmd.sub(1)
 		} else if (cmd.?parseInt) {
 			# Edit entry
 			pos=cmd.parseInt
