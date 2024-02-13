@@ -87,8 +87,21 @@
 		out(x.data)
 //SortedList
 
+
+# Check that newest version of CFT
+# --
+	# Needed to fix bug, saving Date format when synthesizing
+
+	if (eval(syn(FDate)).getFormat!=FDate.getFormat) {
+		ERROR("Please update and recompile CFT")
+	}
+//SanityCheck
+
+
 # Main loop
 # --
+	SanityCheck
+
 	filter=null
 	loop
 		list=SortedList
