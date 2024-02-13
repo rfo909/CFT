@@ -26,6 +26,7 @@
 # Create or modify info about article
 # --
 	P(1) => data
+	P(2) => description
 
 	delete=false
 	if (data != null) {
@@ -44,12 +45,14 @@
 		# Edit existing or create new, return object
 		if (data==null) data=Dict
 
-		Input("Description") => inp
-		if (data.has("description")) {
-			inp.setCurr(data.get("description"))
+		if (description==null) {
+			Input("Description") => inp
+			if (data.has("description")) {
+				inp.setCurr(data.get("description"))
+			}
+				
+			inp.get => description
 		}
-			
-		inp.get => description
 
 		d=data.get("expirationDate",FDate)
 		GetExpirationDate(d) => expirationDate
@@ -72,12 +75,12 @@
 	s=("    "+i).last(4)
 //fmt
 
-# Get data as sorted list, with shortest expiration last
+# Get data as sorted list, with shortest expiration first
 # --
 	Db2:Get(DbId,"data",List) => data
 	data -> row
 		out(Int(row.expirationDate.get, row))
-	| _.sort.reverse->x
+	| _.sort->x
 		out(x.data)
 //SortedList
 
@@ -96,15 +99,13 @@
 		}
 		filter=null
 
-		prompt="Enter " + if(!list.empty,"number to edit or delete, ","") + "'a' to add, 's' to search, ENTER to quit" 
+		prompt="Enter " + if(!list.empty,"number to edit or delete, ","") + "'...' to add, '/' to search, ENTER to quit" 
 		readLine(prompt) => cmd
 		break(cmd=="")
 
-		if (cmd=='a') {
-			list.add(EditOrCreate(null))
-		} else if (cmd=='s') {
+		if (cmd=='/') {
 			Input("Enter search term").get => filter
-		} else {
+		} else if (cmd.?parseInt) {
 			# Edit entry
 			pos=cmd.parseInt
 			x = EditOrCreate(list.nth(pos))
@@ -112,7 +113,10 @@
 				# entry deleted
 				list.remove(pos)
 			}
+		} else if (cmd.trim.length > 1) {
+			list.add(EditOrCreate(null, cmd))
 		}
+
 		# Save list
 		Db2:Set(DbId,"data", list)
 /Main
