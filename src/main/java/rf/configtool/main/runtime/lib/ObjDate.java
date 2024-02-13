@@ -36,9 +36,9 @@ import rf.configtool.main.runtime.ValueString;
 
 
 public class ObjDate extends Obj implements IsSynthesizable {
-    
+    public static final String DEFAULT_FORMAT = "yyyy-MM-dd HH:mm:ss";
     private long timeValue;
-    private String dateFmt="yyyy-MM-dd HH:mm:ss";
+    private String dateFmt=DEFAULT_FORMAT;
 
     
     public ObjDate() {
@@ -113,7 +113,11 @@ public class ObjDate extends Obj implements IsSynthesizable {
         
     @Override
     public String createCode() throws Exception {
-        return "Date(" + timeValue + ")";
+        if (this.dateFmt.equals(DEFAULT_FORMAT)) {
+            return "Date(" + timeValue + ")";
+        } else {
+            return "Date(" + timeValue + ").setFormat('" + dateFmt + "')";
+        }
     }
 
     
