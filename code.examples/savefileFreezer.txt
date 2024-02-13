@@ -33,9 +33,10 @@
 		println
 		println("Expiration date : " + data.expirationDate.fmt)
 		println("Description     : " + data.description)
+		println("Count           : " + data.get("count",1))
 		println
-		readLine("Enter 'd' to delete, or ENTER to edit") => cmd
-		if (cmd=='d') delete=true
+		readLine("Enter 'x' to delete, or ENTER to edit") => cmd
+		if (cmd=='x') delete=true
 	}
 
 	if (delete) {
@@ -57,7 +58,9 @@
 		d=data.get("expirationDate",FDate)
 		GetExpirationDate(d) => expirationDate
 
-		data.copyFrom(SymDict(description,expirationDate))
+		Input("Count").setCurr("" + data.get("count",1)).get.parseInt => count
+
+		data.copyFrom(SymDict(description,expirationDate, count))
 		data
 	}
 //EditOrCreate
@@ -93,7 +96,7 @@
 			i=0
 			list->row
 				if (filter == null || row.description.toLower.contains(filter.toLower)) {
-					println(fmt(i) + " - " + row.expirationDate.fmt + " " + row.description)
+					println(fmt(i) + " - "  + row.get("count",1) + "x " + row.expirationDate.fmt + " " + row.description)
 				}
 				i=i+1
 		}
