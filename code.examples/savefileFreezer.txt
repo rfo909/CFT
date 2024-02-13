@@ -93,7 +93,7 @@
 	# Needed to fix bug, saving Date format when synthesizing
 
 	if (eval(syn(FDate)).getFormat!=FDate.getFormat) {
-		ERROR("Please update and recompile CFT")
+		error("Please update and recompile CFT")
 	}
 //SanityCheck
 
