@@ -421,30 +421,6 @@ public class ObjDict extends Obj implements IsSynthesizable {
     }
 
 
-    /**
-     * Identifier-named fields are available as functions, for dotted lookup, see init()
-     *
-     */
-    class FunctionGetDynamic extends Function {
-        private String propertyName;
-        
-        public FunctionGetDynamic(String varName) {
-            this.propertyName=varName;
-        }
-        
-        public String getName() {
-            return propertyName;
-        }
-        public String getShortDesc() {
-            return propertyName + "()  - get property value";
-        }
-        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 0) throw new Exception("Expected no parameters");
-            return values.get(propertyName);
-        }
-    }
-
-
      class FunctionHasNullValue extends Function {
          public String getName() {
             return "hasNullValue";

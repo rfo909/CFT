@@ -1036,10 +1036,17 @@ ERROR: [<script> Tests01:861.8] Invalid value Dict [] + 1
 	(currentPrice < min + delta)
 /t57
 
+
 # Test 57 - odd symbol lookup bug, see t57 above
 # --
 	tryCatch(t57).ok
 /Test57_SymbolLookupBug
+
+
+# Test 58 - version 4.0.14 bugfix: Dict value dotted lookup must not hide Dict functions
+# --
+	d=Dict d.set("keys", 3) getType(d.keys)=="List"
+/Test58_dotted_lookup_value_vs_functions
 
 
 # Run all TestX

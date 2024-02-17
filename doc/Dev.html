@@ -13,6 +13,29 @@
 
 <h1>CFT Change log</h1>
 
+<h3>4.0.14 2024-02-17 - Dict bug</h3>
+<pre>
+Dict.set("keys",1).keys returned 1, but should return list of keys: [ "keys" ]
+
+Fixed in DottedCall.java, so that dotted lookup of value only ok when no Function of
+that same name.
+
+Can even say 
+
+d=Dict d.keys=1 d.keys   
+
+# runs the keys function
+
+# To get the value 1:
+
+d.get("keys")
+
+</pre>
+<p>
+Also removed a dead function from ObjDict
+</p>
+
+
 <h3>4.0.13 2024-01-05 - Dir.filesCount() and Dir.allFilesCount()</h3>
 <p>
 Plus mod of @S (Lib:SearchTextFiles which calls DoSearchTextFiles)

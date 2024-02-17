@@ -81,40 +81,45 @@ public class DottedCall extends LexicalElement {
                 // unwrap Obj
                 obj=((ValueObj) obj).getVal();
             }
-            
+
             if (obj instanceof ObjDict) {
                 ObjDict dict=(ObjDict) obj;
-                Value v=dict.getValue(ident);
-                if (v != null) {
-                    // as a funny side effect from moving Dict.ident lookup of values here from Dict, is that
-                    // Dict.?xxx supports same functionality as Dict.has("xxx") :-)
-                    
-                    if (checkMode) return new ValueBoolean(true);
-                    
-                    //System.out.println("DottedCall: found dict value for '" + ident + "' " + v.getDescription());
-                    // Check if closure
-                    if (v instanceof ValueObj) {
-                        Obj x=((ValueObj) v).getVal();
-                        if (x instanceof ObjClosure) {
-                            CFTCallStackFrame caller=new CFTCallStackFrame(getSourceLocation(),"Calling Dict.closure " + ident);
-    
-                            Value result = ((ObjClosure) x).callClosure(ctx, caller, values);
-                            return result;
+
+                if (dict.getFunction(ident) == null) {
+                    // allowing dotted lookup of values only when not named the same as dictionary member functions
+                    Value v = dict.getValue(ident);
+                    if (v != null) {
+                        // as a funny side effect from moving Dict.ident lookup of values here from Dict, is that
+                        // Dict.?xxx supports same functionality as Dict.has("xxx") :-)
+
+                        if (checkMode) return new ValueBoolean(true);
+
+                        //System.out.println("DottedCall: found dict value for '" + ident + "' " + v.getDescription());
+                        // Check if closure
+                        if (v instanceof ValueObj) {
+                            Obj x = ((ValueObj) v).getVal();
+                            if (x instanceof ObjClosure) {
+                                CFTCallStackFrame caller = new CFTCallStackFrame(getSourceLocation(), "Calling Dict.closure " + ident);
+
+                                Value result = ((ObjClosure) x).callClosure(ctx, caller, values);
+                                return result;
+                            }
                         }
+                        // not closure, just return value
+                        return v;
                     }
-                    // not closure, just return value
-                    return v;
                 }
             }
-            
+
             Function f=obj.getFunction(ident);
             if (f==null) {
                 if (checkMode) return new ValueBoolean(false);
-                
+
                 String msg=getSourceLocation() + " " + obj.getDescription() + " no function '" + ident + "'";
                 throw new Exception(msg);
             }
-            
+
+
             try {
                 Value result=f.callFunction(ctx, values);
                 //System.out.println("DottedCall result=" + result.getClass().getName());
