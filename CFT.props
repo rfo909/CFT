@@ -80,6 +80,7 @@ shortcut:scr  = "---- Show all scripts ----"              Lib:Scripts
 shortcut:home = "---- move to script dir ----"            Sys.savefile.dir.cd
 shortcut:fsel = "---- select file from current dir ----"  Util:SelectFile(Dir)
 
+shortcut:P    = "---- file/dir objects in :: to paths ----" Lib:Paths
 shortcut:%    = "---- show current symbols ----"          Lib:Symbols
 
 

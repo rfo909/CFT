@@ -211,13 +211,57 @@ just add a second "Dir:" line.
 //CurrProject
 
 
-# State string - see CFT.props prompt setting
+# State string, reported as part of the prompt - see CFT.props prompt setting
 # --
-	CurrProjectName
+	s=""
+	x=FSGet
+	if (x.length>0) s=" FSet=" + x.length
+	CurrProjectName+s
 //StateString
 
 
-# Produce list of files to search
+
+
+# Create file set by searching through TextFiles for pattern
+# --
+	P(1,Grep) => grep
+
+    TextFiles -> tf
+		if (grep.fileCount(tf) > 0) out(tf)
+	| => files
+	Db2:Set("Projects","FileSet",files)
+//CreateFileSet
+
+
+
+# Get file set
+# --
+	Db2:Get("Projects","FileSet",List)
+/FSGet
+
+
+# Show file set
+# --
+	FSGet->f
+		out(f.path)
+/FS
+
+# Clear file set
+# --
+	Db2:Set("Projects","FileSet",List)
+/FSClear
+
+
+# Show file set info
+# --
+	fs=FSGet
+	if (fs.length>0) {
+		println("FileSet=" + fs.length + " files (FS to see, FSClear to remove)")	
+	}
+//ShowFSetInfo
+
+
+# Produce list of all possible files to search (from project config)
 # --
     CurrProject =>pr
     
@@ -281,20 +325,31 @@ just add a second "Dir:" line.
 //TextFiles
 
 
+# Searchable files: if FSGet non empty, return it, otherwise return TextFiles
+# --
+	FSGet => list
+	if (list.empty) {
+		TextFiles
+	} else {
+		list
+	}
+/SearchableFiles
+
+
+SearchableFiles
+/SF
 
 
 
-# Search through TextFiles for pattern - delivers lines
+
+# Search through SearchableFiles for pattern - delivers lines
 # --
     P(1,Grep) =>grep
     
-    filter=Db2:Get("Projects","FileFilter",null)
-
-    TextFiles => textFiles
+    SearchableFiles => textFiles
     
     # Count matches first
     textFiles->tf 
-        assert(filter==null || file.name.contains(filter))
         out(grep.fileCount(tf)) 
     | _.sum =>count
     
@@ -302,14 +357,13 @@ just add a second "Dir:" line.
     error(count>10000, "Search matches " + count + " lines - not shown")
 
     textFiles->tf
-        assert(filter==null || file.name.contains(filter))
         grep.file(tf)->line 
             out(line)
 //DoSearch
 
 
 
-# Search through TextFiles for pattern
+# Search through SearchableFiles for pattern
 # Returns formatted report
 # -- 
     P(1,Grep) =>grep
@@ -319,50 +373,24 @@ just add a second "Dir:" line.
 
 
 
-
-
-# Limit search to file names containing a certain string
-# --
-    readLine("Enter file filter string").trim =>str
-    if(str=="",null,str) =>val
-    Db2:Set("Projects","FileFilter",val)
-/SetFileFilter
-
-
-# Show info on current FileFilter (if defined)
-# --
-    Db2:Get("Projects","FileFilter") =>filter
-    if(filter!=null, Inner{
-        println
-        println("** Filtering file names on: " + '"' + filter + '"')
-        println
-    })
-
-/ShowFileFilter
-
-
-# Clear file filter
-# --
-    Db2:Set("Projects","FileFilter",null)
-/ClearFileFilter
-
-
-
-
-
-
-
 # Search with one parameter
 # --
-    ShowFileFilter
+	ShowFSetInfo
     Input("Search1").get =>a
     Search(Grep(a))
 /S
 
 
+# Search with one parameter, to create file set of files containing match
+# --
+    Input("Search1 to create file set").get =>a
+    CreateFileSet(Grep(a))
+	FSGet->f out(f.path)
+/SFS
+
 # Search with two parameters
 # --
-    ShowFileFilter
+	ShowFSetInfo
     Input("Search2a ... ").get =>a
     Input("... AND Search2b").get =>b
     Search(Grep.match(a).match(b))
@@ -371,7 +399,7 @@ just add a second "Dir:" line.
 
 # Search with three parameters
 # --
-    ShowFileFilter
+	ShowFSetInfo
     Input("Search3a ... ").get =>a
     Input("... AND Search3b").get =>b
     Input("... AND Search3c").get =>c
@@ -380,7 +408,7 @@ just add a second "Dir:" line.
 
 # Search with one positive and one negative parameter
 # --
-    ShowFileFilter
+	ShowFSetInfo
     Input("Search1").get =>a
     Input("Search1n (reject)").get =>b
     Search(Grep(a).reject(b))
@@ -448,7 +476,7 @@ just add a second "Dir:" line.
 
 # Show text files (that are being searched)
 # --
-    TextFiles
+    SearchableFiles
 /TF
 
 
@@ -460,10 +488,16 @@ just add a second "Dir:" line.
     println(CurrProjectName)
     println
     pr.keys->key
-        str=Inner{pr.get(key,List).concat(" ")}
-        println(key+": " + str)
+        Inner{
+			pr.get(key,List)->str
+				println(key+": " + str)
+		}
     |
     println
+	fSet=FSGet
+	if (!fSet.empty) {
+		println("FileSet = " + fSet.length + " files  (FS to show, FSClear to clear)")
+	}
     true
 /curr
 

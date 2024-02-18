@@ -1216,3 +1216,12 @@ run(null,null,null,true)
 
 	
 
+# Convert previous return value of a file, dir or list of these into
+# path strings
+# --
+	val=Sys.lastResult
+	if (!getType(val)=="List") val=List(val)
+	val->x
+		if (getType(x)=="File" || getType(x)=="Dir") out(x.path) 
+/Paths
+
