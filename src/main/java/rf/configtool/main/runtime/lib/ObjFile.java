@@ -40,7 +40,7 @@ import java.util.Date;
 import java.util.List;
 
 import rf.configtool.main.Ctx;
-import rf.configtool.main.OutText;
+import rf.configtool.main.ReportData;
 import rf.configtool.main.SoftErrorException;
 import rf.configtool.main.Stdio;
 import rf.configtool.main.runtime.ColList;
@@ -385,7 +385,6 @@ public class ObjFile extends Obj implements IsSynthesizable {
             
             validateDestructiveOperation("delete");
 
-            OutText outText=ctx.getOutText();
             File f=new File(name);
             if (f.exists()) {
                 if (f.isFile()) {
@@ -418,7 +417,6 @@ public class ObjFile extends Obj implements IsSynthesizable {
             
             validateDestructiveOperation("create");
 
-            OutText outText=ctx.getOutText();
             File f=new File(name);
 
             PrintStream ps=null;
@@ -723,8 +721,6 @@ public class ObjFile extends Obj implements IsSynthesizable {
             if (params.size() != 1) throw new Exception("Expected File parameter");
 
 
-            OutText outText=ctx.getOutText();
-
             Obj obj=getObj("File", params, 0);
             if (!(obj instanceof ObjFile)) throw new Exception("Expected File parameter");
 
@@ -770,7 +766,6 @@ public class ObjFile extends Obj implements IsSynthesizable {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 1) throw new Exception("Expected File parameter");
-            OutText outText=ctx.getOutText();
 
             Obj obj=getObj("File", params, 0);
             if (!(obj instanceof ObjFile)) throw new Exception("Expected File parameter");
@@ -814,7 +809,6 @@ public class ObjFile extends Obj implements IsSynthesizable {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 1) throw new Exception("Expected toFile parameter");
-            OutText outText=ctx.getOutText();
 
             Obj obj=getObj("toFile", params, 0);
             if (!(obj instanceof ObjFile)) throw new Exception("Expected File parameter");

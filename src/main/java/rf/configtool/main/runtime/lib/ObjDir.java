@@ -33,7 +33,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import rf.configtool.main.Ctx;
-import rf.configtool.main.OutText;
+import rf.configtool.main.ReportData;
 import rf.configtool.main.SoftErrorException;
 import rf.configtool.main.Stdio;
 import rf.configtool.main.runtime.ColList;
@@ -396,7 +396,6 @@ public class ObjDir extends Obj implements IsSynthesizable {
             
             validateDestructiveOperation("create");
 
-            OutText outText=ctx.getOutText();
             File f=new File(name);
             if (!f.exists()) {
                 boolean ok = f.mkdirs();
@@ -421,7 +420,6 @@ public class ObjDir extends Obj implements IsSynthesizable {
             
             validateDestructiveOperation("delete");
 
-            OutText outText=ctx.getOutText();
             File f=new File(name);
             if (f.exists()) {
                 if (f.isDirectory()) {
@@ -489,7 +487,6 @@ public class ObjDir extends Obj implements IsSynthesizable {
             return "allFiles(Glob?) - returns list of all File objects under this directory";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            OutText outText=ctx.getOutText();
             ObjGlob glob=null;
             if (params.size()==1) {
                 glob=getObjGlob(params,0);
@@ -542,7 +539,7 @@ public class ObjDir extends Obj implements IsSynthesizable {
             if (f.getName().equals(".") || f.getName().equals("..")) continue;
             if (f.isDirectory()) {
                 // search for sub-dirs before adding dir, this makes it safe
-                // to delete dioutTextrectories in the order presented
+                // to delete directories in the order presented
                 try {
                     traverse(stdio, f, glob, dirs, files);
                 } catch(Exception ex) {
@@ -568,7 +565,7 @@ public class ObjDir extends Obj implements IsSynthesizable {
             if (f.getName().equals(".") || f.getName().equals("..")) continue;
             if (f.isDirectory()) {
                 // search for sub-dirs before adding dir, this makes it safe
-                // to delete dioutTextrectories in the order presented
+                // to delete directories in the order presented
                 try {
                     count += traverseCount(stdio, f, glob);
                 } catch(Exception ex) {
@@ -590,7 +587,6 @@ public class ObjDir extends Obj implements IsSynthesizable {
             return "allFilesCount(Glob?) - returns number of files matching glob, under this directory";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            OutText outText=ctx.getOutText();
             ObjGlob glob=null;
             if (params.size()==1) {
                 glob=getObjGlob(params,0);
@@ -601,7 +597,7 @@ public class ObjDir extends Obj implements IsSynthesizable {
         }
     }
     
-   private void callExternalProgram (Ctx ctx, boolean foreground, Stdio stdio, OutText outText, RunCaptureOutput capture, List<Value> params) throws Exception {
+   private void callExternalProgram (Ctx ctx, boolean foreground, Stdio stdio, ReportData reportData, RunCaptureOutput capture, List<Value> params) throws Exception {
         List<Value> args;
         if (params.size()==1) {
             if (params.get(0) instanceof ValueString) {
@@ -667,7 +663,7 @@ public class ObjDir extends Obj implements IsSynthesizable {
             return "run(list|...) - execute external program in foreground, waits for it to terminate";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            callExternalProgram(ctx, true, ctx.getStdio(), ctx.getOutText(), null, params);
+            callExternalProgram(ctx, true, ctx.getStdio(), ctx.getReportData(), null, params);
             return new ValueObj(self());
 
         }
@@ -682,7 +678,7 @@ public class ObjDir extends Obj implements IsSynthesizable {
             return "runDetach(list|...) - execute external program in background";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            callExternalProgram(ctx, false, ctx.getStdio(), ctx.getOutText(), null, params);
+            callExternalProgram(ctx, false, ctx.getStdio(), ctx.getReportData(), null, params);
             return new ValueObj(self());
 
         }
@@ -697,7 +693,7 @@ public class ObjDir extends Obj implements IsSynthesizable {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             RunCaptureOutput capt=new RunCaptureOutput();
-            callExternalProgram(ctx, true, ctx.getStdio(), ctx.getOutText(), capt, params);
+            callExternalProgram(ctx, true, ctx.getStdio(), ctx.getReportData(), capt, params);
             return capt.getCapturedLines();
         }
     }
@@ -911,7 +907,6 @@ public class ObjDir extends Obj implements IsSynthesizable {
             return "newestFile(Glob?) - return file last modified";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            OutText outText=ctx.getOutText();
             ObjGlob glob=null;
             if (params.size()==1) {
                 glob = getObjGlob(params,0);

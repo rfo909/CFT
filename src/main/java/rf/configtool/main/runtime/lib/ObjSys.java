@@ -189,7 +189,7 @@ public class ObjSys extends Obj {
             if (params.size() != 0)
                 throw new Exception("Expected no parameters");
             int out = ctx.getOutData().getOutDataLength();
-            int report = ctx.getOutText().getData().size();
+            int report = ctx.getReportData().getReportPresentationValues().size();
             return new ValueInt(out + report);
         }
     }

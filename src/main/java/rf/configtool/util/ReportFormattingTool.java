@@ -15,7 +15,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>
 */
 
-package rf.configtool.main.runtime.reporttool;
+package rf.configtool.util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +24,7 @@ import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueList;
 import rf.configtool.main.runtime.ValueObj;
 
-public class Report {
+public class ReportFormattingTool {
     
     private String fmt(String val, int len) {
         StringBuffer sb=new StringBuffer();

@@ -42,9 +42,11 @@ public class StmtReportList extends Stmt {
         Value v=listValue.resolve(ctx);
         if (!(v instanceof ValueList)) throw new Exception("Expected parameter for reportList() to be list");
 
-        List<Value> result=((ValueList) v).getVal();
+        List<Value> data=null;
+        List<Value> presentation=((ValueList) v).getVal();
+        
 
-        ctx.getOutText().addReportData(result);
+        ctx.getReportData().addReportData(null,presentation);
     }
 
 }

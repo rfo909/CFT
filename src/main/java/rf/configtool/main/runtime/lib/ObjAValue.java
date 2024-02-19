@@ -28,13 +28,13 @@ import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
 
-public class ObjAnnotatedValue extends Obj implements IsSynthesizable {
+public class ObjAValue extends Obj implements IsSynthesizable {
     
     private String annotation;
     private Value value;
     private ObjDict metadata;
 
-    public ObjAnnotatedValue (String annotation, Value value, ObjDict metadata) {
+    public ObjAValue (String annotation, Value value, ObjDict metadata) {
         this.annotation=annotation;
         this.value=value;
         if (metadata==null) metadata=new ObjDict();
@@ -45,7 +45,7 @@ public class ObjAnnotatedValue extends Obj implements IsSynthesizable {
         this.add(new FunctionMeta());
     }
 
-    private ObjAnnotatedValue self() {
+    private ObjAValue self() {
         return this;
     }
     

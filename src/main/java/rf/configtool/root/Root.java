@@ -49,9 +49,9 @@ import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
 import rf.configtool.main.runtime.lib.ObjDir;
 import rf.configtool.main.runtime.lib.Protection;
-import rf.configtool.main.runtime.reporttool.Report;
 import rf.configtool.root.shell.ShellCommand;
 import rf.configtool.root.shell.ShellCommandsManager;
+import rf.configtool.util.ReportFormattingTool;
 
 /**
  * The Root class manages a set of parallel script contexts.
@@ -534,7 +534,7 @@ public class Root {
         lastResult = result;
 
         // present result
-        Report report = new Report();
+        ReportFormattingTool report = new ReportFormattingTool();
         List<String> lines = report.displayValueLines(result);
         int width = objTerm.getScreenWidth();
 

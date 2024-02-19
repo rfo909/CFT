@@ -37,7 +37,7 @@ import rf.configtool.main.runtime.ValueList;
 import rf.configtool.main.runtime.ValueNull;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
-import rf.configtool.main.runtime.lib.ObjAnnotatedValue;
+import rf.configtool.main.runtime.lib.ObjAValue;
 import rf.configtool.main.runtime.lib.ObjDataFile;
 import rf.configtool.main.runtime.lib.ObjDate;
 import rf.configtool.main.runtime.lib.ObjDict;
@@ -868,7 +868,7 @@ public class ObjGlobal extends Obj {
                     }
                 }
                 if (dict==null) dict=new ObjDict();
-                return new ValueObj(new ObjAnnotatedValue(str,v,dict));
+                return new ValueObj(new ObjAValue(str,v,dict));
             }
             throw new Exception("Expected parameters typeStr,value,metaDict?");
         }

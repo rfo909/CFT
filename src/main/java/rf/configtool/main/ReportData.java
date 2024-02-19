@@ -26,24 +26,25 @@ import rf.configtool.main.runtime.ValueString;
 /**
  * This object buffers data for creating formatted reports
  */
-public class OutText {
+public class ReportData {
     
     
     private List<List<Value>> data=new ArrayList<List<Value>>();
+	private List<List<Value>> presentation=new ArrayList<List<Value>>();
 
-    public void addReportData (List<Value> values) {
-        data.add(values);
+    public void addReportData (List<Value> data, List<Value> presentation) {
+        this.data.add(data);
+        this.presentation.add(presentation);
     }
     
-    public void addReportData (String... values) {
-        List<Value> vList=new ArrayList<Value>();
-        for (String s:values) vList.add(new ValueString(s));
-        addReportData(vList);
-    }
-    
-    
-    public List<List<Value>> getData() {
+
+    public List<List<Value>> getReportDataValues() {
         return data;
+    }
+
+   
+    public List<List<Value>> getReportPresentationValues() {
+        return presentation;
     }
 
    

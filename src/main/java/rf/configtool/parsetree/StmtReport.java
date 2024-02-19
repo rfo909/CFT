@@ -26,30 +26,49 @@ import rf.configtool.main.runtime.ValueList;
 
 public class StmtReport extends Stmt {
 
-    private List<Expr> values=new ArrayList<Expr>();
+	private List<Expr> dataValues;
+    private List<Expr> presentationValues=new ArrayList<Expr>();
     
     public StmtReport (TokenStream ts) throws Exception {
         super(ts);
         ts.matchStr("report","expected 'report'");
         ts.matchStr("(", "expected '(' following report");
-        boolean comma=false;
+        
+        //boolean comma=false;
+        boolean first=true;
         while (!ts.matchStr(")")) {
-            if (comma) ts.matchStr(",", "expected comma separating values, or ')' closing arglist");
-            values.add(new Expr(ts));
-            comma=true;
+        	if (!first) {
+        		if (ts.matchStr("|")) {
+        			dataValues=presentationValues;
+        			presentationValues=new ArrayList<Expr>();
+        		} else {
+        			ts.matchStr(",", "expected comma separating values, or ')' closing arglist");
+        		}
+        	}
+            presentationValues.add(new Expr(ts));
+            first=false;
         }
     }
 
     public void execute (Ctx ctx) throws Exception {
-        List<Value> result=new ArrayList<Value>();
-        for (Expr expr:values) {
-            result.add(expr.resolve(ctx));
+    	List<Value> data=new ArrayList<Value>();
+        List<Value> presentation=new ArrayList<Value>();
+        
+        if (dataValues != null) {
+        	for(Expr expr:dataValues) {
+        		data.add(expr.resolve(ctx));
+        	}
         }
-        if (result.size()==1 && (result.get(0) instanceof ValueList)) {
-            result=((ValueList) result.get(0)).getVal();
+        
+        for (Expr expr:presentationValues) {
+            presentation.add(expr.resolve(ctx));
+        }
+        
+        if (presentation.size()==1 && (presentation.get(0) instanceof ValueList)) {
+        	presentation=((ValueList) presentation.get(0)).getVal();
         }
 
-        ctx.getOutText().addReportData(result);
+        ctx.getReportData().addReportData(data, presentation);
     }
 
 }

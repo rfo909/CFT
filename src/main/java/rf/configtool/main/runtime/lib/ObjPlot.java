@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import rf.configtool.main.Ctx;
-import rf.configtool.main.OutText;
+import rf.configtool.main.ReportData;
 import rf.configtool.main.runtime.ColList;
 import rf.configtool.main.runtime.Function;
 import rf.configtool.main.runtime.Obj;
@@ -132,7 +132,6 @@ public class ObjPlot extends Obj {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 1) throw new Exception("Expected file parameter");
-            OutText outText=ctx.getOutText();
 
             Value value=params.get(0);
             if (!(value instanceof ValueObj)) throw new Exception("Expected file parameter");

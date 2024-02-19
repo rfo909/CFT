@@ -25,9 +25,9 @@ import rf.configtool.lexer.SourceLocation;
 import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueString;
-import rf.configtool.main.runtime.reporttool.Report;
 import rf.configtool.parsetree.CodeSpace;
 import rf.configtool.util.Hash;
+import rf.configtool.util.ReportFormattingTool;
 
 /**
  * This class is a container for a list of ScriptSourceLine objects, which represent

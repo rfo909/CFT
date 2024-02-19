@@ -23,10 +23,10 @@ import java.util.List;
 import rf.configtool.main.CFTCallStackFrame;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.FunctionState;
-import rf.configtool.main.OutText;
+import rf.configtool.main.ReportData;
 import rf.configtool.main.runtime.lib.ObjDict;
-import rf.configtool.main.runtime.reporttool.Report;
 import rf.configtool.parsetree.CodeSpace;
+import rf.configtool.util.ReportFormattingTool;
 
 /**
  * Block of code - takes three different forms, but only one is available as
@@ -90,11 +90,11 @@ public class ValueBlock extends Value {
             
             progLine.execute(sub);
             
-            OutText outText=sub.getOutText();
+            ReportData reportData=sub.getReportData();
 
             // Column data is formatted to text and added to outData as String objects
-            List<List<Value>> outData=outText.getData();
-            Report report=new Report();
+            List<List<Value>> outData=reportData.getReportPresentationValues();
+            ReportFormattingTool report=new ReportFormattingTool();
             List<String> formattedText=report.formatDataValues(outData);
             for (String s:formattedText) {
                 sub.getOutData().out(new ValueString(s));
@@ -151,11 +151,11 @@ public class ValueBlock extends Value {
             
             progLine.execute(sub);
             
-            OutText outText=sub.getOutText();
+            ReportData reportData=sub.getReportData();
 
             // Column data is formatted to text and added to outData as String objects
-            List<List<Value>> outData=outText.getData();
-            Report report=new Report();
+            List<List<Value>> outData=reportData.getReportPresentationValues();
+            ReportFormattingTool report=new ReportFormattingTool();
             List<String> formattedText=report.formatDataValues(outData);
             for (String s:formattedText) {
                 sub.getOutData().out(new ValueString(s));
