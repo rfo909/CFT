@@ -27,7 +27,6 @@ import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueString;
 import rf.configtool.parsetree.CodeSpace;
 import rf.configtool.util.Hash;
-import rf.configtool.util.ReportFormattingTool;
 
 /**
  * This class is a container for a list of ScriptSourceLine objects, which represent

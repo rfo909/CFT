@@ -22,6 +22,7 @@ import java.util.List;
 
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueString;
+import rf.configtool.util.ReportFormattingTool;
 
 /**
  * This object buffers data for creating formatted reports
@@ -29,22 +30,25 @@ import rf.configtool.main.runtime.ValueString;
 public class ReportData {
     
     
-    private List<List<Value>> data=new ArrayList<List<Value>>();
 	private List<List<Value>> presentation=new ArrayList<List<Value>>();
 
-    public void addReportData (List<Value> data, List<Value> presentation) {
-        this.data.add(data);
+    public void addReportData (List<Value> presentation) {
         this.presentation.add(presentation);
     }
     
-
-    public List<List<Value>> getReportDataValues() {
-        return data;
+    public int getRowCount() {
+    	return presentation.size();
     }
-
+    
    
     public List<List<Value>> getReportPresentationValues() {
         return presentation;
+    }
+    
+    public List<String> getPresentation() {
+        ReportFormattingTool report=new ReportFormattingTool();
+        List<String> formattedText=report.formatDataValues(presentation);
+        return formattedText;
     }
 
    

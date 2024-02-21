@@ -26,7 +26,6 @@ import rf.configtool.main.runtime.ValueList;
 
 public class StmtReport extends Stmt {
 
-	private List<Expr> dataValues;
     private List<Expr> presentationValues=new ArrayList<Expr>();
     
     public StmtReport (TokenStream ts) throws Exception {
@@ -38,12 +37,7 @@ public class StmtReport extends Stmt {
         boolean first=true;
         while (!ts.matchStr(")")) {
         	if (!first) {
-        		if (ts.matchStr("|")) {
-        			dataValues=presentationValues;
-        			presentationValues=new ArrayList<Expr>();
-        		} else {
-        			ts.matchStr(",", "expected comma separating values, or ')' closing arglist");
-        		}
+    			ts.matchStr(",", "expected comma separating values, or ')' closing arglist");
         	}
             presentationValues.add(new Expr(ts));
             first=false;
@@ -54,12 +48,6 @@ public class StmtReport extends Stmt {
     	List<Value> data=new ArrayList<Value>();
         List<Value> presentation=new ArrayList<Value>();
         
-        if (dataValues != null) {
-        	for(Expr expr:dataValues) {
-        		data.add(expr.resolve(ctx));
-        	}
-        }
-        
         for (Expr expr:presentationValues) {
             presentation.add(expr.resolve(ctx));
         }
@@ -68,7 +56,7 @@ public class StmtReport extends Stmt {
         	presentation=((ValueList) presentation.get(0)).getVal();
         }
 
-        ctx.getReportData().addReportData(data, presentation);
+        ctx.getReportData().addReportData(presentation);
     }
 
 }

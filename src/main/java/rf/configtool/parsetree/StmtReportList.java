@@ -46,7 +46,7 @@ public class StmtReportList extends Stmt {
         List<Value> presentation=((ValueList) v).getVal();
         
 
-        ctx.getReportData().addReportData(null,presentation);
+        ctx.getReportData().addReportData(presentation);
     }
 
 }

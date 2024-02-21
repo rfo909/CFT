@@ -93,9 +93,9 @@ public class ValueBlock extends Value {
             ReportData reportData=sub.getReportData();
 
             // Column data is formatted to text and added to outData as String objects
-            List<List<Value>> outData=reportData.getReportPresentationValues();
+            List<List<Value>> presentationValues=reportData.getReportPresentationValues();
             ReportFormattingTool report=new ReportFormattingTool();
-            List<String> formattedText=report.formatDataValues(outData);
+            List<String> formattedText=report.formatDataValues(presentationValues);
             for (String s:formattedText) {
                 sub.getOutData().out(new ValueString(s));
             }

@@ -20,6 +20,7 @@ package rf.configtool.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueList;
 import rf.configtool.main.runtime.ValueObj;
@@ -96,6 +97,7 @@ public class ReportFormattingTool {
         List<String> list=new ArrayList<String>();
         if (!(value instanceof ValueList)) {
             if (value instanceof ValueObj) {
+            	Obj obj=((ValueObj) value).getVal();
                 list.add("  <obj: " + ((ValueObj) value).getVal().getTypeName() + ">");
                 list.add("  " + ((ValueObj) value).getVal().getContentDescription().getCompactDisplay());
             } else {
