@@ -1271,3 +1271,11 @@ run(null,null,null,true)
 		if (getType(x)=="File" || getType(x)=="Dir") out(x.path) 
 /Paths
 
+
+
+# Global onload-code, when starting CFT, see CFT.props
+# --
+	Lib:GetTerminalSize 
+	Lib:EncryptSanityCheck 
+	Util:CheckForUpdates
+/GlobalOnLoad
