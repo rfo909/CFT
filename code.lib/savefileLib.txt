@@ -1107,13 +1107,13 @@ run(null,null,null,true)
 
 	currDir=dir.path
 
-	if (command.trim != "" && command.trim != "." && !command=='Db2:Get("Lib","GetCommandHistory:GotoDir").cd')) {
+	if (command.trim != "" && command.trim != "." && command!='Db2:Get("Lib","GetCommandHistory:GotoDir").cd') {
 			# That last part matches the code generated in GetCommandHistory when repeating a command !!
 
 		data=SymDict(command,currDir)
 		list=Db2:Get(Sys.scriptId,"CommandHistory",List)
-		list=list.add(data).last(60)
-		Db2:Set(Sys.scriptId,"CommandHistory", list)
+		list.add(data)
+		Db2:Set(Sys.scriptId,"CommandHistory", list.last(60))
 	}
 
 //HistoryAppend
@@ -1143,20 +1143,25 @@ run(null,null,null,true)
 	}
 	readLine("Enter index, or Enter to continue") => s
 	if (s != "") {
-		dict=data.nth(s.parseInt)
+		if (s.?parseInt) {
+			dict=data.nth(s.parseInt)
 
-		# Note: can not just do this:
-		#
-		# Dir(dict.currDir).cd 
-		#
-		# That does not affect the caller, because each script has 
-		# their own current dir
+			# Note: can not just do this:
+			#
+			# Dir(dict.currDir).cd 
+			#
+			# That does not affect the caller, because each script has 
+			# their own current dir
 
-		# Solution:
+			# Solution:
 
-		Db2:Set("Lib","GetCommandHistory:GotoDir", Dir(dict.currDir))
-		Sys.stdin('Db2:Get("Lib","GetCommandHistory:GotoDir").cd')
-		Sys.stdin(dict.command)
+			Db2:Set("Lib","GetCommandHistory:GotoDir", Dir(dict.currDir))
+			Sys.stdin('Db2:Get("Lib","GetCommandHistory:GotoDir").cd')
+			Sys.stdin(dict.command)
+		} else {
+			# Not a number, treat as a command
+			Sys.stdin(s)
+		}
 	}
 	
 /GetCommandHistory
