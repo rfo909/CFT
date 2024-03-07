@@ -72,7 +72,8 @@ shortcut:nr   = "---- new files recursively ----"         Lib:ListNewFilesRecurs
 shortcut:lint = "---- check curr script ----"             Sys.lint
 shortcut:fm   = "---- open file manager (curr dir) ---"   Lib:fileManager(Dir)
 shortcut:cmd  = "---- open cmd in curr dir ----"          Lib:OpenCMD(Dir)
-shortcut:H    = "---- command history ----"               Lib:HistoryShow
+shortcut:H    = "---- directory history ----"             Lib:GetDirHistory
+shortcut:CH   = "---- commands history ----"              Lib:GetCommandHistory 
 shortcut:term = "---- Update terminal size ----"          Lib:GetTerminalSize
 shortcut:rsh  = "---- Remote shell via ssh ----"          SSH:remoteShell
 shortcut:scr  = "---- Show all scripts ----"              Lib:Scripts
@@ -135,7 +136,7 @@ prompt = Prompt:PromptString(Dir,Sys.scriptName,if(Sys.functions.contains("State
 bangCommand = BangParser:Run(Dir,P(1))
 
 #
-# The historyCommand is executed to maintain history of commands (in Db2)
+# The historyCommand is executed to maintain history of commands and directories (in Db2)
 #
 
 historyCommand = Lib:HistoryAppend(P(1),P(2))
