@@ -1112,7 +1112,7 @@ run(null,null,null,true)
 
 		data=SymDict(command,currDir)
 		list=Db2:Get(Sys.scriptId,"CommandHistory",List)
-		list=list.add(data).last(40)
+		list=list.add(data).last(60)
 		Db2:Set(Sys.scriptId,"CommandHistory", list)
 	}
 
@@ -1121,9 +1121,10 @@ run(null,null,null,true)
 
 # Get directories history
 # --
+	Lib:Header("Previous directories. Use 'cd :N' to go to dir")
 	Db2:Get(Sys.scriptId,"CommandHistory",List)->dict
 		out(dict.currDir)
-	| _.unique
+	| _.unique.last(30)
 /GetDirHistory
 
 
