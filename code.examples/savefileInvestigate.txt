@@ -272,6 +272,7 @@ loop
 
 
 # Log data
+# --
     Sys.lastResult =>res
     getType(res)=="List" =>isList
 
@@ -286,7 +287,8 @@ loop
         list.add("# " +x) 
     |
     list.add("```")
-
+	
+	DateHeader
     LogFile.append(list)
 /LogData
 

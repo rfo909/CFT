@@ -107,6 +107,7 @@ shortcut:P    = "---- Projects ----"                      Sys.stdin(":load Proje
 # Investigate script
 shortcut:i    = "---- Investigate log text ----"          Investigate:LogText
 shortcut:id   = "---- Investigate log with data ----"     Investigate:LogData
+shortcut:ic   = "---- Show (cat) inv data ----"           Investigate:Show
 shortcut:ii   = "---- Investigate log input loop ----"    Investigate:InputMode
 
 # Job control
