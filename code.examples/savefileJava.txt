@@ -26,49 +26,48 @@
 Java install or upgrade
 -----------------------
 This script detects existing version of 
-OpenJDK Java, and if obsolete version, 
-uninstalls it, before installing target
-version, which is 
+OpenJDK Java, and if obsolete version,
+older than
+
+    ${min}
+
+then java is uninstalled, before the
+current target version gets installed:
 
     ${target}
 
-
-Identification
---------------
-Script has been tested with the following
-OpenJDK installs:
-
-openjdk-8-jre-headless
-openjdk-11-jre-headless
-openjdk-13-jre-headless
-openjdk-14-jre-headless
-
-openjdk-8-jdk-headless
-openjdk-11-jdk-headless
-openjdk-13-jdk-headless
-openjdk-14-jdk-headless
-
+Script has been verified for versions
+from 11 up.
 >>>>>>>>>>>>>>>>>>>>>>>>> EOF
  =>lines
-Dict.set("${target}",targetPackage) =>data
+Dict
+	.set("${target}",targetPackage) 
+	.set("${min}",minVersionPackage)
+	=>data
 lines->line out(line.merge(data))
 /Readme
 
 
-11
+17
 /MinimumVersion
 
-11
+17
 /InstallVersion
+
+
+
+
+"openjdk-"+MinimumVersion+"-jdk-headless"
+/minVersionPackage
+
 
 "openjdk-"+InstallVersion+"-jdk-headless"
 /targetPackage
 
 
-
-
 Input("Enter ssh target on format user@host").get
 /GetSSHTarget
+
 
 # Install or upgrade Java
 P(1,GetSSHTarget) =>target
@@ -102,10 +101,17 @@ P(3,false) =>showDebug
         # There probably are better ways of determining which
         # version package is installed, but this works.
         Dict
-            .set('version "1.8.', 8)
             .set('version "11.', 11)
             .set('version "13.', 13)
             .set('version "14.', 14)
+            .set('version "14.', 14)
+            .set('version "15.', 15)
+            .set('version "16.', 16)
+            .set('version "17.', 17)
+            .set('version "18.', 18)
+            .set('version "19.', 19)
+            .set('version "20.', 20)
+            .set('version "21.', 21)
             =>codes
             
         Lib:LinesContain (lines, codes) =>result
