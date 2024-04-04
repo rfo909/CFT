@@ -17,25 +17,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.root.shell;
 
-import java.io.File;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
-import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.Ctx;
-import rf.configtool.main.FunctionBody;
-import rf.configtool.main.FunctionState;
-import rf.configtool.main.ObjGlobal;
-import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueList;
 import rf.configtool.main.runtime.ValueNull;
 import rf.configtool.main.runtime.ValueObj;
-import rf.configtool.main.runtime.ValueString;
 import rf.configtool.main.runtime.lib.ObjDir;
 import rf.configtool.main.runtime.lib.ObjFile;
 import rf.configtool.main.runtime.lib.ObjGlob;
@@ -43,12 +32,12 @@ import rf.configtool.main.runtime.lib.Protection;
 
 public class ShellLs extends ShellCommand {
 
-	private final String name;
+	private final String commandName;
     private final boolean showFiles;
     private final boolean showDirs;
 
     public ShellLs(String name) {
-    	this.name=name;
+    	this.commandName = name;
         if (name.equals("ls")) {
             showFiles = true;
             showDirs = true;
@@ -65,7 +54,7 @@ public class ShellLs extends ShellCommand {
     
 	@Override
 	public String getName() {
-		return name;
+		return commandName;
 	}
 	@Override 
 	public String getBriefExampleParams() {
@@ -80,12 +69,11 @@ public class ShellLs extends ShellCommand {
 
         boolean noArgs=cmd.getArgs().isEmpty();
         
-        FileSet fs=new FileSet(name,showDirs, showFiles);
+        FileSet fs=new FileSet(commandName,showDirs, showFiles);
         fs.setIsSafeOperation();
-        boolean enforceLimits=false;  // to avoid hanging forever on remote directories
-        
+
         if (noArgs) {
-            enforceLimits=true;
+            boolean enforceLimits=true;
             ObjGlob glob=new ObjGlob("*");
             String errMsg = fs.addDirContent(currDir, glob,enforceLimits);
             if (errMsg != null) {
@@ -99,6 +87,7 @@ public class ShellLs extends ShellCommand {
         // process args, some of which may be expressions
 
         List<Arg> args=cmd.getArgs();
+        boolean enforceLimits=false;
         
         for (Arg arg:args) {
             fs.processArg(currDir, ctx, arg);
@@ -108,7 +97,7 @@ public class ShellLs extends ShellCommand {
             // ls someDir ---> list content inside that dir
             String singleDir=fs.getDirectories().get(0);
             
-            fs=new FileSet(name,showDirs,showFiles);
+            fs=new FileSet(commandName,showDirs,showFiles);
             fs.setIsSafeOperation();
             
             fs.addDirContent(singleDir, new ObjGlob("*"), enforceLimits);

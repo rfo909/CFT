@@ -131,14 +131,15 @@ public class FileSet {
         Iterator<Path> iter = stream.iterator();
         int totalCount = 0;
         while (iter.hasNext()) {
-            long duration = System.currentTimeMillis() - startTime;
 
             if (enforceLimits) {
+                long duration = System.currentTimeMillis() - startTime;
+
                 if (duration > LS_DEFAULT_TIMEOUT_MS) {
-                    return "--- directory listing timed out after " + LS_DEFAULT_TIMEOUT_MS + ", use '*' to override";
+                    return "--- directory listing timed out after " + LS_DEFAULT_TIMEOUT_MS + ", use '" + opName + " .' to override";
                 }
                 if (totalCount >= LS_DEFAULT_MAX_ENTRIES) {
-                    return "--- directory entry count > " + LS_DEFAULT_MAX_ENTRIES + ", use '*' to override";
+                    return "--- directory entry count > " + LS_DEFAULT_MAX_ENTRIES + ", use '" + opName + " .' to override";
                 }
             }
 
