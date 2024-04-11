@@ -1,0 +1,143 @@
+# Readme
+# --
+<<<< EOF
+# Numerically calculate solution to complex problems in 2D
+#
+# This example calculates the angle of a beam from a ground position, so that
+# the top of the beam, which is 100 long and 10 wide, hits a certain height. 
+# 
+# When the angle is determined, we render the beam.
+# 
+# The Find function does the heavy lifting, calculating a Callable, which in this
+# case is a Closure (a Lambda part of a dictionary becomes a Closure). The interval
+# refined through a number of iterations. 
+#
+# The result is a PNG file, where each height value is marked as red lines, and
+# the beams painted in black, pivoting about the lower left corner (at height=0).
+>>>> EOF
+/Readme
+
+
+# Search numeric range for minimum outcome. This needs not approach zero,
+# as long as there is one minimum value and no local minimums. Typically 
+# used for rotations.
+# 
+# The implementation runs at a fixed time, doing the same work for every
+# range, which on my laptop corresponds to about 2ms with iterations=10.
+#
+# Note that writing the PNG takes about 45-50ms, so it must be uncommented,
+# to time the computation.
+# --
+	P(1) as Callable => func
+	P(2) as float => a
+	P(3) as float => b
+	P(4,10) as int => iterations
+
+	if (a>b) {
+		# swap a and b
+		tmp=b
+		b=a
+		a=tmp
+	}
+
+	lowest=null
+	forValue=null
+
+	# First traverse over range, look for closest match
+	step=(b-a)/10
+	Std.Data.for(a,b+step,step) -> i
+		x=func.call(i)
+		if (lowest==null || x<lowest) {
+			lowest=x
+			forValue=i
+		}
+	|
+	# Second, doing a number passes of repeatedly narrowing in the range
+	Std.Data.for(0,iterations,1)->outerCount
+		left=forValue-step
+		right=forValue+step
+		step=(right-left)/10.0
+		#println("delta=",(right-left))
+
+		prevLowest=lowest
+		Inner{
+			Std.Data.for(left,right+step,step)->i
+				x=func.call(i)
+				if (x<lowest) {
+					lowest=x
+					forValue=i
+				}
+		}
+		
+	|
+
+	# Return value
+
+	forValue
+/Find
+
+
+# Abs
+# --
+	P(1) => val
+	if (val < 0, -val, val)
+/Abs
+
+
+# Example: Angled beam
+# Calculate angle so that top of bean is at given height. 
+# Then render beam + red line at height, for visual recognition of result.
+# --
+	P(1) => world
+	P(2) => height
+	P(3,Std.DD.Ref) => ref
+
+	# Note: default ref points along x-axis, so .left() translates up, and turnLeft rotates up etc
+
+	data=Dict
+	data.height=height
+	data.ref=ref
+
+	data.calc = Lambda{
+		P(1) => angle
+		ref=self.ref.turnLeft(angle)
+		ref=ref.fwd(100).turnLeft(90).fwd(10)
+		# return value
+		Abs(self.height-ref.getPosVector.y)
+	}
+	angle=Find(data.get("calc"), -90.0, 90.0)
+		# Using data.get("calc") to return the closure, as data.calc assumes we are calling it
+
+	println("Got angle =",angle)
+		
+	# Draw the height marker as red line
+	marker=world.LineBrush.setColor(Std.Color(255,0,0))
+	marker.penDown(ref.left(height))
+	marker.penDown(ref.left(height).fwd(150))
+	marker.penUp
+
+	# Draw the beam as a box
+	ref=ref.turnLeft(angle)
+	beam=world.LineBrush.setColor(Std.Color(0,0,0))
+	beam.penDown(ref)
+	beam.penDown(ref.fwd(100))
+	beam.penDown(ref.fwd(100).left(10))
+	beam.penDown(ref.left(10))
+	beam.penDown(ref)
+	beam.penUp
+/Beam
+
+
+# Test
+# --
+	Std.DD.World => world
+
+	Std.Data.for(20,90,20) ->h Beam(world, h) |
+
+	targetFile=Lib:DirPrivate.file("test.png")
+	world.render(targetFile)
+	println("--> Wrote",targetFile.path)
+	targetFile
+
+/t
+
