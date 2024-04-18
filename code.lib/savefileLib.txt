@@ -1246,19 +1246,52 @@ run(null,null,null,true)
 //EncryptedFileEnding
 
 
-# Back date file 
+
+# Random integers
+# --
+	P(1,1000)=>range
+
+	number=DB2:Get(Sys.scriptId,"randomNumber",100)
+	Db2:Set(Sys.scriptId,"randomNumber",number+1)
+	value=(10000005 % number)/number
+	value=value*range
+	# return 
+	value.i
+/RandomInt
+	
+
+
+# Back date file within last 30 days
 # --
 	P(1) as File => f
+	P(2, 30) => rangeDays
+	
+	range=rangeDays*86400*1000
 
-	seconds=currentTimeMillis % 5281181 + 86400*3 
+	created=currentTimeMillis-RandomInt(range)
+	diff=currentTimeMillis-created
 
-	created=currentTimeMillis - seconds*1000
-	modified=created + (currentTimeMillis % 301)*1000
-	accessed=modified + (currentTimeMillis % 991)
-
+	modified=created+RandomInt(diff/10)
+	accessed=modified+RandomInt(diff/5)
 
 	f.setTimes(created, modified, accessed)
 /BackDateFile
+
+
+# Back date files in LastResult
+# --
+	files=Sys.lastResult
+	if (getType(files) != "List") files=List(files)
+	files->f
+		assert(getType(f)=="File")
+		out(f)
+		BackDateFile(f)
+/BackDateLastResultFiles
+
+
+
+BackDateLastResultFiles
+/BDLRF
 
 	
 
