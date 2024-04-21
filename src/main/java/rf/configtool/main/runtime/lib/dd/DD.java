@@ -25,6 +25,7 @@ import rf.configtool.main.runtime.Function;
 import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueObj;
+import rf.configtool.main.runtime.ValueNull;
 
 public class DD extends Obj {
     
@@ -84,11 +85,16 @@ public class DD extends Obj {
             return "Ref";
         }
         public String getShortDesc() {
-            return "Ref() - return Ref2d object";
+            return "Ref(world?) - return Ref2d object";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 0) throw new Exception("Expected no parameters");
-            return new ValueObj(new DDRef(new Ref()));
+        	DDWorld world=null;
+        	if (params.size()==1) {
+        		world=(DDWorld) getObj("world",params,0);
+        	} else if (params.size() != 0) {
+        		throw new Exception("Expected optional parameter world");
+        	}
+            return new ValueObj(new DDRef(new Ref(), world));
         }
     }
     

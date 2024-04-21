@@ -1,0 +1,224 @@
+# Dot indicating object start position
+# --
+	P(1)=>ref
+
+	DDLib:FBox(ref,2,2,Std.Color(255,0,0))
+/Dot
+
+# Draw filled box, centered on current pos
+# --
+	P(1) => ref
+	P(2) => width
+	P(3) => height
+	P(4,Std.Color(0,0,0)) => color
+
+	ref.world.Brush(-width/2,width/2).setColor(color) => b
+	b.penDown(ref.back(height/2))
+	b.penDown(ref.fwd(height/2))
+	b.penUp
+/FBox
+
+
+
+# Box drawn with lines
+# --
+	P(1)=>ref
+	P(2,80)=>width
+	P(3,120)=>height
+	P(4,Std.Color(0,0,0)) => color
+	
+	
+	ref.world.LineBrush.setColor(color) =>b
+	b.penDown(ref.left(width/2))
+	b.penDown(ref.left(width/2).fwd(height))
+	b.penDown(ref.right(width/2).fwd(height))
+	b.penDown(ref.right(width/2))
+	b.penDown(ref.left(width/2))
+	b.penUp	
+/Box
+
+
+
+# Draw circle
+# --
+	P(1) => ref
+	P(2) => radius
+	P(3,Std.Color(0,0,0)) => color
+
+	ref.world.LineBrush.setColor(color) => b
+	Std.Data.each(0,360)->angle
+		b.penDown(ref.turnRight(angle).left(radius))
+	|
+	b.penUp
+/Circle
+
+
+
+
+# 2D letters
+# --
+	P(1)=>baseRef
+	P(2)=>text
+	P(3,1)=>dotSize
+	P(4,Std.Color(0,0,0))=>color
+
+	dotSize = dotSize/2
+
+	Letters7x5:GetText(text)=>lines
+	Std.Data.for(0,lines.length,1)->y
+		lines.nth(y)=>line
+		Std.Data.for(0,line.length,1)->x
+			line.chars.nth(x)=>dot
+			if(dot=="#") {
+				pos = baseRef.fwd(x*dotSize).left((7-y)*dotSize)
+				FBox(pos, dotSize, dotSize, color)
+			}
+/ShowText			
+
+
+# Save to file
+# --
+	P(1) => world
+	P(2,"test")=>name
+	
+	targetFile=Lib:DirPrivate.file(name + ".png")
+	world.render(targetFile)
+	targetFile
+/SaveImage
+
+
+# Test primitives
+# --
+	Std.DD.Ref(Std.DD.World) => ref
+	
+	Dot(ref)
+	ShowText(ref.fwd(3), "<- Dot")
+	Circle(ref,10)
+	Box(ref.turnLeft(90),80,120)
+
+	SaveImage(ref.world)
+/t
+
+
+
+# Search numeric range for minimum outcome. This needs not approach zero,
+# as long as there is one minimum value and no local minimums. Typically 
+# used for rotations.
+# 
+# The implementation runs at a fixed time, doing the same work for every
+# range, which on my laptop corresponds to about 2ms with iterations=10.
+#
+# Note that writing the PNG takes about 45-50ms, so it must be uncommented,
+# to time the computation.
+# --
+	P(1) as Callable => func
+	P(2) as float => a
+	P(3) as float => b
+	P(4,10) as int => iterations
+
+	if (a>b) {
+		# swap a and b
+		tmp=b
+		b=a
+		a=tmp
+	}
+
+	lowest=null
+	forValue=null
+
+	# First traverse over range, look for closest match
+	step=(b-a)/10
+	Std.Data.for(a,b+step,step) -> i
+		x=func.call(i)
+		if (lowest==null || x<lowest) {
+			lowest=x
+			forValue=i
+		}
+	|
+	# Second, doing a number passes of repeatedly narrowing in the range
+	Std.Data.for(0,iterations,1)->outerCount
+		left=forValue-step
+		right=forValue+step
+		step=(right-left)/10.0
+		#println("delta=",(right-left))
+
+		prevLowest=lowest
+		Inner{
+			Std.Data.for(left,right+step,step)->i
+				x=func.call(i)
+				if (x<lowest) {
+					lowest=x
+					forValue=i
+				}
+		}
+		
+	|
+
+	# Return value
+
+	forValue
+/Find
+
+
+# Abs
+# --
+	P(1) => val
+	if (val < 0, -val, val)
+/Abs
+
+
+# Example: Angled beam
+# Calculate angle so that top of bean is at given height. 
+# Then render beam + red line at height, for visual recognition of result.
+# --
+	P(1) => world
+	P(2) => height
+	ref=Std.DD.Ref(world)
+	
+	# Note: default ref points along x-axis, so .left() translates up, and turnLeft rotates up etc
+
+	data=Dict
+	data.height=height
+	data.ref=ref
+
+	data.calc = Lambda{
+		P(1) => angle
+		ref=self.ref.turnLeft(angle)
+		ref=ref.fwd(100).turnLeft(90).fwd(10)
+		# return value
+		Abs(self.height-ref.getPosVector.y)
+	}
+	angle=Find(data.get("calc"), -90.0, 90.0)
+		# Using data.get("calc") to return the closure, as data.calc assumes we are calling it
+
+	println("Got angle =",angle)
+		
+	# Draw the height marker as red line
+	marker=world.LineBrush.setColor(Std.Color(255,0,0))
+	marker.penDown(ref.left(height))
+	marker.penDown(ref.left(height).fwd(150))
+	marker.penUp
+
+	# Draw the beam as a box
+	ref=ref.turnLeft(angle)
+	beam=world.LineBrush.setColor(Std.Color(0,0,0))
+	beam.penDown(ref)
+	beam.penDown(ref.fwd(100))
+	beam.penDown(ref.fwd(100).left(10))
+	beam.penDown(ref.left(10))
+	beam.penDown(ref)
+	beam.penUp
+//Beam
+
+
+# Test
+# --
+	Std.DD.World => world
+
+	Std.Data.for(20,90,20)->height 
+		Beam(world, height) 
+	|
+	SaveImage(world, "test")
+/tCalc
+
+

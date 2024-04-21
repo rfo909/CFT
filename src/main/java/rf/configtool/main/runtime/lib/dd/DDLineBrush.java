@@ -77,7 +77,7 @@ public class DDLineBrush extends Obj {
             }
 
             public String getShortDesc() {
-                return "penDown(Ref|Vector) - draw line since last penDown";
+                return "penDown(Ref|Vector) - draw line since last penDown, returns self";
             }
 
             public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
@@ -113,7 +113,7 @@ public class DDLineBrush extends Obj {
             }
 
             public String getShortDesc() {
-                return "penUp() - stop drawing";
+                return "penUp() - stop drawing, returns self";
             }
 
             public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
@@ -130,7 +130,7 @@ public class DDLineBrush extends Obj {
             }
 
             public String getShortDesc() {
-                return "setColor(Color) - set color";
+                return "setColor(Color) - set color, returns self";
             }
 
             public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
