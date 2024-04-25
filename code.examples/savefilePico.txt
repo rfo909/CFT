@@ -1,0 +1,48 @@
+# Pico directory
+# --
+	Dir("/home/roar/pico")
+/PicoDir
+
+# Make new project
+# --
+	PicoDir.sub("pico-project-generator").run("./pico_project.py","--gui")
+/NewProject
+
+# Check that we are in a project directory
+# --
+	if (!Dir.sub("build").exists) {
+		Lib:Header("Project directory?")
+		println("Move to project directory, which contains 'build' sub directory")
+		println
+		false
+	} else {
+		true
+	}
+//InProjectDir
+	
+
+# Build
+# --
+	if (InProjectDir) {
+		Dir.sub("build") => buildDir
+		buildDir.run("cmake","..")
+		buildDir.run("make")
+		true
+	}
+/Build
+
+
+# Deploy to RPI PICO in disk modus
+# --
+	if (InProjectDir) {
+		Dir.sub("build").files("*.uf2").first => imageFile
+		Dir("/media/roar/RPI-RP2") => target
+		target.copy(imageFile)
+	}
+/Deploy
+
+
+# Communicate serially
+# --
+	Dir.run("screen","/dev/ttyACM0","115200")
+/Comm
