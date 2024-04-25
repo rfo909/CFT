@@ -8,7 +8,7 @@
 	P(1,Date) => defaultValue
 	defaultValue.setFormat(FDate.getFormat)
 	loop
-		Input("Expiration date on format YYYY-MM-DD or YYYY-MM").setCurrCond(defaultValue.fmt).get => str
+		Input("Expiration date on format YYYY-MM-DD or YYYY-MM").setCurr(defaultValue.fmt).get => str
 		if (str.length==7) {
 			str=str+"-01"
 		}
