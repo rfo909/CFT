@@ -1733,7 +1733,7 @@ q ###    ### .
 q ###    ### .
 q  ######### .
 q   ######## .
-q        ### .
+q         ## .
 q         ## .
 q         ## .
 q         ## .
@@ -2270,7 +2270,6 @@ $   ######   .
 /GetText
     
 
-
 # Get text x2
 # --
     P(1,"TESTabcd")=>i
@@ -2280,16 +2279,17 @@ $   ######   .
             (""+i).chars->c
                 lines = GetChar14x10(c)
                 if (lines.length<14) lines=GetChar("?")
-                #break(lines.length<7)
                 out(lines.nth(lineNo))
             | _.concat("   ")
         } 
         out(s)
+		
 /GetTextX2
 
 
 
-# Code for scaling up and rounding 
+# INACTIVE CODE for scaling up and rounding 
+###################################################################
 # --
 <<<<< SCALE_CODE
 
