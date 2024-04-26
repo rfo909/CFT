@@ -124,7 +124,7 @@
 # --
     loop
         println(Curses:Clear)
-        lines=Letters7x5:GetTextX2(""+MinutesSinceMidnight)
+        lines=Letters7x5:T18(""+MinutesSinceMidnight)
         Inner {
             lines->line println(line)
         }
@@ -157,7 +157,7 @@
         val=GetMC
         if (val != lastVal) {
             println(Curses:Clear)
-            lines=Letters7x5:GetTextX2(""+GetMC)
+            lines=Letters7x5:T18(""+GetMC)
             Inner {
                 lines->line println(line)
             }
