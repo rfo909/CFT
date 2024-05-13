@@ -2788,3 +2788,13 @@ $            .
 		println(char + " " + line + " .")
 //t
 
+
+
+# Reducing 18x10 to 9x10 - better suited for console use
+# --
+	P(1,"AaGYy35") => str
+	f=true
+	T18x10(str)->line
+		if (f) out(line)
+		f=!f
+/T9x10
