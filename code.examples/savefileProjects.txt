@@ -416,10 +416,15 @@ SearchableFiles
 
 # Locate file by partial name
 # --
-    P(1,"java") =>fn
+    P(1,"java")=>fn
+
+	# if linux, conv does nothing, but on windows it converts to lower case
+	conv=if(Sys.isWindows, Lambda{P(1).toLower}, Lambda{P(1)})
+
+	fn=conv.call(fn)
 
     TextFiles->tf
-        assert(tf.name.contains(fn))
+        assert(conv.call(tf.name).contains(fn))
         out(tf)
 //FileLocator
 
