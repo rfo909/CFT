@@ -830,24 +830,43 @@ Dict.set("list",List)
 # --
 	jarFile=Sys.homeDir.sub("target").file("cft-jar-with-dependencies.jar")
 	lastBuild=Date(jarFile.lastModified)
+
 	daysAgo=Date.diff(lastBuild).asDays
 
-	if (daysAgo > 60) {
-		# give up nagging after a while
-		jarFile.touch
-	} else if (daysAgo >= 30)
-		Sequence(
-			@
-			@ ------------------------------------------------
-			@ Last build: <<daysAgo>> days ago
-			@ ------------------------------------------------
-			@
-			@ To check for updates:
-			@ ---------------------
-			@    git pull origin master
-			@    mvn clean package
-            @
-			@
-		).mergeExpr->line println(line)
+	if (daysAgo >= 30) {
+
+		Db2:Get(Sys.scriptId,"RebuildNag",Dict) => data
+
+		if(data.get("lastBuild", lastBuild)==lastBuild) {
+			dateStr=Date.setFormat("yyyyMMdd").fmt
+
+			if (data.get("lastNag","") != dateStr && data.get("nags",0)<5) {
+				Inner {
+					Sequence(
+						@
+						@ ------------------------------------------------
+						@ Last build: <<daysAgo>> days ago
+						@ ------------------------------------------------
+						@
+						@ To check for updates:
+						@ ---------------------
+						@    git pull origin master
+						@    mvn clean package
+						@
+						@
+					).mergeExpr->line println(line)
+				}
+
+				data.lastNag=dateStr
+				data.nags=data.nags+1
+				Db2:Set(Sys.scriptId,"RebuildNag",data)
+			}
+		} else {
+			# Not corresponding file date
+			nags=0
+			data=Dict.set("lastBuild",lastBuild).set("nags",0)
+			Db2:Set(Sys.scriptId,"RebuildNag",SymDict(lastBuild, nags))
+		}
+			
 	}
 /CheckForUpdates

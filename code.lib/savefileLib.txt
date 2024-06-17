@@ -1308,7 +1308,7 @@ BackDateLastResultFiles
 
 # Global onload-code, when starting CFT, see CFT.props
 # --
-	Lib:GetTerminalSize 
 	Lib:EncryptSanityCheck 
 	Util:CheckForUpdates
+	Lib:GetTerminalSize 
 /GlobalOnLoad
