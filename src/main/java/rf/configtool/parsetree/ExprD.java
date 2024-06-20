@@ -27,7 +27,7 @@ import rf.configtool.main.runtime.ValueFloat;
 import rf.configtool.main.runtime.ValueInt;
 
 public class ExprD extends ExprCommon {
-    private String[] sep= {"*","/","%","div"};
+    private String[] sep= {"*","/","%","div","^"};
 
     private List<ExprE> parts=new ArrayList<ExprE>();
     private List<String> separators=new ArrayList<String>();
@@ -102,6 +102,7 @@ public class ExprD extends ExprCommon {
         if (sep.equals("/")) return new ValueFloat((double)a/(double)b);
         if (sep.equals("%")) return new ValueInt(a%b);
         if (sep.equals("div")) return new ValueInt(a/b);
+        if (sep.equals("^")) return new ValueFloat(Math.pow(a,b));
         throw ex("Internal error: invalid separator");
     }
     private Value calcFloat (double a, String sep, double b) throws Exception {
@@ -109,6 +110,7 @@ public class ExprD extends ExprCommon {
         if (sep.equals("/")) return new ValueFloat(a/b);
         if (sep.equals("%")) return new ValueFloat(a%b);
         if (sep.equals("div")) throw ex("'div' only applies to integer operands");
+        if (sep.equals("^")) return new ValueFloat(Math.pow(a,b));
         throw ex("Internal error: invalid separator");
     }
 
