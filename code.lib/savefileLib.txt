@@ -1306,6 +1306,26 @@ BackDateLastResultFiles
 
 
 
+# Identify duplicates in list of strings or files (Sys.lastResult if no parameter given)
+# --
+	P(1,Sys.lastResult) => data
+
+	dict=Dict
+	data->x
+		val=x
+		if (getType(val)=="File") val=val.name
+		dict.set(val,dict.get(val,0)+1)
+	|
+	# duplicates returned as simple list, no count included
+	dict.keys->key
+		assert(dict.get(key) > 1)
+		out(key)
+/Duplicates
+
+
+
+
+
 # Global onload-code, when starting CFT, see CFT.props
 # --
 	Lib:EncryptSanityCheck 
