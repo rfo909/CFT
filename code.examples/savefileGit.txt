@@ -31,3 +31,40 @@
 # --
 	Run("git branch")
 /ShowBranches
+
+
+
+# Create and run git commands for adding submodules from another project's .gitmodules or from a text file on same format
+# (an edited version)
+# --
+	P(1) as File => file
+	P(2, true) => showOnly
+
+	enabled=false
+	path=null
+	url=null
+
+	file.read->line
+		reject(line.trim=="" || line.trim.startsWith("#"))
+
+		if (line.startsWith("[submodule")) {
+			enabled=true
+		} else if (line.trim.startsWith("path =")) {
+			if (enabled) path=line.after("=").trim
+		} else if (line.trim.startsWith("url =")) {
+			if (enabled) url=line.after("=").trim
+		} else {
+			error("Invalid line: " + line)
+		}
+		if (enabled && path != null && url != null) {
+			command="git submodule add <<url>> <<path>>".mergeExpr.first
+			println(command)
+			if (!showOnly) {
+				Dir.run(command.split)
+			}
+			enabled=false
+			path=url=null
+		}
+/CreateSubmodules
+		
+	

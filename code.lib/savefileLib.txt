@@ -1323,6 +1323,17 @@ BackDateLastResultFiles
 /Duplicates
 
 
+# Search through list of files, return single list of hits only
+# --
+	P(1,Sys.lastResult) => list
+	P(2,Input("Enter search term").get) => term
+	P(3,Lambda{P(1)}) => postProcess
+
+	grep=Grep(term)
+	list->f
+		grep.file(f)->line
+			out(postProcess.call(line))
+/Search
 
 
 
