@@ -56,7 +56,7 @@ up-to-date copyright information.
         }
     | => lines
     if (found) {
-        f.create(lines)
+        f.setWriteLF.create(lines)
     }
 
     found
@@ -115,7 +115,7 @@ Sys.homeDir.allFiles("savefile*.txt")->f
     =>lines
     lines=lines+file.read
 
-    file.create(lines)
+    file.setWriteLF.create(lines)
 //AddScriptCopyrightNotice
 
 
@@ -146,5 +146,5 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
     =>lines
     lines=lines+file.read
 
-    file.create(lines)
+    file.setWriteLF.create(lines)
 //AddJavaCopyrightNotice
