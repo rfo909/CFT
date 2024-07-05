@@ -1,48 +1,69 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2024 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 # Pico directory
 # --
-	Dir("/home/roar/pico")
+    Dir("/home/roar/pico")
 /PicoDir
 
 # Make new project
 # --
-	PicoDir.sub("pico-project-generator").run("./pico_project.py","--gui")
+    PicoDir.sub("pico-project-generator").run("./pico_project.py","--gui")
 /NewProject
 
 # Check that we are in a project directory
 # --
-	if (!Dir.sub("build").exists) {
-		Lib:Header("Project directory?")
-		println("Move to project directory, which contains 'build' sub directory")
-		println
-		false
-	} else {
-		true
-	}
+    if (!Dir.sub("build").exists) {
+        Lib:Header("Project directory?")
+        println("Move to project directory, which contains 'build' sub directory")
+        println
+        false
+    } else {
+        true
+    }
 //InProjectDir
-	
+    
 
 # Build
 # --
-	if (InProjectDir) {
-		Dir.sub("build") => buildDir
-		buildDir.run("cmake","..")
-		buildDir.run("make")
-		true
-	}
+    if (InProjectDir) {
+        Dir.sub("build") => buildDir
+        buildDir.run("cmake","..")
+        buildDir.run("make")
+        true
+    }
 /Build
 
 
 # Deploy to RPI PICO in disk modus
 # --
-	if (InProjectDir) {
-		Dir.sub("build").files("*.uf2").first => imageFile
-		Dir("/media/roar/RPI-RP2") => target
-		target.copy(imageFile)
-	}
+    if (InProjectDir) {
+        Dir.sub("build").files("*.uf2").first => imageFile
+        Dir("/media/roar/RPI-RP2") => target
+        target.copy(imageFile)
+    }
 /Deploy
 
 
 # Communicate serially
 # --
-	Dir.run("screen","/dev/ttyACM0","115200")
+    Dir.run("screen","/dev/ttyACM0","115200")
 /Comm

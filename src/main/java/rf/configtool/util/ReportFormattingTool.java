@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2023 Roar Foshaug
+Copyright (C) 2020-2024 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -97,7 +97,7 @@ public class ReportFormattingTool {
         List<String> list=new ArrayList<String>();
         if (!(value instanceof ValueList)) {
             if (value instanceof ValueObj) {
-            	Obj obj=((ValueObj) value).getVal();
+                Obj obj=((ValueObj) value).getVal();
                 list.add("  <obj: " + ((ValueObj) value).getVal().getTypeName() + ">");
                 list.add("  " + ((ValueObj) value).getVal().getContentDescription().getCompactDisplay());
             } else {

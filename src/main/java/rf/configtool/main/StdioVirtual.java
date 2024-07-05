@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2023 Roar Foshaug
+Copyright (C) 2020-2024 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -59,17 +59,17 @@ public class StdioVirtual extends Stdio {
     private static final long MIN_BLOCK_DELAY_MS = 100;
     
     public Long isBlockedOnInputSince () {
-    	if (isBlockedOnInputSince <= 0L) return null;
-    	return (Long) isBlockedOnInputSince;
+        if (isBlockedOnInputSince <= 0L) return null;
+        return (Long) isBlockedOnInputSince;
     }
 
    
     @Override
     public String getInputLine() throws Exception {
-    	isBlockedOnInputSince = System.currentTimeMillis();
-    	String line=super.getInputLine();
-    	isBlockedOnInputSince=-1L;
-    	return line;
+        isBlockedOnInputSince = System.currentTimeMillis();
+        String line=super.getInputLine();
+        isBlockedOnInputSince=-1L;
+        return line;
     }
 
     

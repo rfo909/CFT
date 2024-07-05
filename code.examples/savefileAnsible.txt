@@ -2,7 +2,7 @@
 <<< EOF
 #
 # CFT - an interactive programmable shell for automation 
-# Copyright (C) 2020-2023 Roar Foshaug
+# Copyright (C) 2020-2024 Roar Foshaug
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -50,22 +50,22 @@
 
 # Update /etc/hosts on target (user@host) 
 # --
-	P(1, Input("Enter user@host").get) => target
+    P(1, Input("Enter user@host").get) => target
 
-	# Get /etc/hosts from target
-	Lib:TmpFile("hosts") => localCopy 
+    # Get /etc/hosts from target
+    Lib:TmpFile("hosts") => localCopy 
     SSH:getFile(localCopy, target, "/etc/hosts")
     
     # Isolate the lines up to the "marker"
     keepLines=Inner{
-    	found=false
-    	localCopy.read->line
-    		if (line.startsWith(EtcHostsMarker)) found=true
-    		reject(found)
-    		out(line)
+        found=false
+        localCopy.read->line
+            if (line.startsWith(EtcHostsMarker)) found=true
+            reject(found)
+            out(line)
     }
     if (keepLines.last.trim.length > 0) {
-    	keepLines.add("")
+        keepLines.add("")
     }
     
     # Create updated version 
@@ -74,11 +74,11 @@
     # Send it to the home directory of the target
     SSH:copy(localCopy, target, "./hosts.txt")
 
-	# Update the target using sudo command
-	SSH:sudo(target,"cp ./hosts.txt /etc/hosts")
-	
-	# Remove temp file
-	localCopy.delete
+    # Update the target using sudo command
+    SSH:sudo(target,"cp ./hosts.txt /etc/hosts")
+    
+    # Remove temp file
+    localCopy.delete
 /UpdateEtcHosts
 
 
@@ -91,10 +91,10 @@
         target=sshUser+"@"+host
         println("------ " + target)
         if (SSH:HostOkSSH(target)) {        
-    	    UpdateEtcHosts(target)
-    	} else {
-    		println("    Not responding to SSH")
-    	}
+            UpdateEtcHosts(target)
+        } else {
+            println("    Not responding to SSH")
+        }
 /UpdateEtcHostsAll
 
 

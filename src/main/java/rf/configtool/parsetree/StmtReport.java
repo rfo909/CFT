@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2023 Roar Foshaug
+Copyright (C) 2020-2024 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -36,16 +36,16 @@ public class StmtReport extends Stmt {
         //boolean comma=false;
         boolean first=true;
         while (!ts.matchStr(")")) {
-        	if (!first) {
-    			ts.matchStr(",", "expected comma separating values, or ')' closing arglist");
-        	}
+            if (!first) {
+                ts.matchStr(",", "expected comma separating values, or ')' closing arglist");
+            }
             presentationValues.add(new Expr(ts));
             first=false;
         }
     }
 
     public void execute (Ctx ctx) throws Exception {
-    	List<Value> data=new ArrayList<Value>();
+        List<Value> data=new ArrayList<Value>();
         List<Value> presentation=new ArrayList<Value>();
         
         for (Expr expr:presentationValues) {
@@ -53,7 +53,7 @@ public class StmtReport extends Stmt {
         }
         
         if (presentation.size()==1 && (presentation.get(0) instanceof ValueList)) {
-        	presentation=((ValueList) presentation.get(0)).getVal();
+            presentation=((ValueList) presentation.get(0)).getVal();
         }
 
         ctx.getReportData().addReportData(presentation);

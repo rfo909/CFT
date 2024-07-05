@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2023 Roar Foshaug
+Copyright (C) 2020-2024 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -33,15 +33,15 @@ import rf.configtool.main.runtime.lib.Protection;
 
 public class ShellGrep extends ShellCommand {
 
-	@Override
-	public String getName() {
-		return "grep";
-	}
-	@Override 
-	public String getBriefExampleParams() {
-		return "<word|str> <file> ... - ex: grep test *.txt";
-	}
-	
+    @Override
+    public String getName() {
+        return "grep";
+    }
+    @Override 
+    public String getBriefExampleParams() {
+        return "<word|str> <file> ... - ex: grep test *.txt";
+    }
+    
 
      public Value execute(Ctx ctx, Command cmd) throws Exception {
 
@@ -77,7 +77,7 @@ public class ShellGrep extends ShellCommand {
      
     private Value callMacro (Ctx ctx, String name, String strExpr, Value fileList) throws Exception {
 
-    	PropsFile propsFile=ctx.getObjGlobal().getRoot().getPropsFile();
+        PropsFile propsFile=ctx.getObjGlobal().getRoot().getPropsFile();
         String lambda=propsFile.getMGrep();
         Value[] lambdaArgs= {new ValueString(strExpr), fileList};
 

@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2023 Roar Foshaug
+Copyright (C) 2020-2024 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -198,9 +198,9 @@ public abstract class Obj {
     public abstract boolean eq(Obj x);
     
     public String synthesize() throws Exception {
-    	if (this instanceof IsSynthesizable) {
-    		return ((IsSynthesizable) this).createCode();
-    	}
+        if (this instanceof IsSynthesizable) {
+            return ((IsSynthesizable) this).createCode();
+        }
         throw new Exception("Object " + getTypeName() + " can not be synthesized");
     }
     

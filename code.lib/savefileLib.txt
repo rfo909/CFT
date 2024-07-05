@@ -2,7 +2,7 @@
 <<< EOF
 #
 # CFT - an interactive programmable shell for automation 
-# Copyright (C) 2020-2023 Roar Foshaug
+# Copyright (C) 2020-2024 Roar Foshaug
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -84,20 +84,20 @@ choice.
 
 # "more" through list of lines
 # --
-	P(1) as List => lines
-	count=0
-	lines->line
-		if (count >= Term.h-3) {
+    P(1) as List => lines
+    count=0
+    lines->line
+        if (count >= Term.h-3) {
                         println
-			readLine("Enter to continue, 'q' to abort")=>x
-			break(x=="q")
-			count=0
-		}
-		println(line)
-		count=count+1
-	|
+            readLine("Enter to continue, 'q' to abort")=>x
+            break(x=="q")
+            count=0
+        }
+        println(line)
+        count=count+1
+    |
 /mList
-		
+        
 
 # Get file from lastResult if possible, otherwise error
 # --
@@ -145,12 +145,12 @@ choice.
 
 # Show image viewer
 # --
-	P(1) as File => imgFile
-	if (Sys.isWindows) {
-		Dir.run("explorer.exe", imgFile.path)
-	} else {
-		error("Not implemented for linux yet")
-	}
+    P(1) as File => imgFile
+    if (Sys.isWindows) {
+        Dir.run("explorer.exe", imgFile.path)
+    } else {
+        error("Not implemented for linux yet")
+    }
 /imageViewer
 
 
@@ -678,15 +678,15 @@ run(null,null,null,true)
     if(options.length==1) {
         options.first
     } else Inner {
-		println
-		if(title != null) Header(title)
+        println
+        if(title != null) Header(title)
 
-		Inner{i=0 options->opt println(("  " + i).last(2),"-",opt) i=i+1}
-		println
-		readLine("Enter position").trim.parseInt => pos
+        Inner{i=0 options->opt println(("  " + i).last(2),"-",opt) i=i+1}
+        println
+        readLine("Enter position").trim.parseInt => pos
 
-		options.get(pos)
-	}
+        options.get(pos)
+    }
 /MenuSelectNumbered
 
 
@@ -835,8 +835,8 @@ run(null,null,null,true)
     grep=Grep(st)
 
     if(subDirs,dir.allFiles(glob), dir.files(glob))->file 
-		grep.file(file)->line
-			report(file.name, line.lineNumber, line)
+        grep.file(file)->line
+            report(file.name, line.lineNumber, line)
 /SearchTextFiles
 
    
@@ -860,21 +860,21 @@ run(null,null,null,true)
 
 # Locate dirs under current dir
 # --
-	P(1,Dir)=>dir
-	P(2,Input("Locate dirs: enter partial name, or glob pattern with '*'").get) => dname
-	if (dname=="") dname="*"
-	glob=if(dname.contains("*"), Glob(dname, true), Glob("*"+dname+"*",true))
-	dir.allDirs(glob)->f
-		out(f.path)
+    P(1,Dir)=>dir
+    P(2,Input("Locate dirs: enter partial name, or glob pattern with '*'").get) => dname
+    if (dname=="") dname="*"
+    glob=if(dname.contains("*"), Glob(dname, true), Glob("*"+dname+"*",true))
+    dir.allDirs(glob)->f
+        out(f.path)
 /LocateDirs
 
 
 
 # Identify all file types under current dir
 # --
-	P(1,Dir) => dir
-	Dir.allFiles->f out(f.name.afterLast("."))
-	| _.unique.sort
+    P(1,Dir) => dir
+    Dir.allFiles->f out(f.name.afterLast("."))
+    | _.unique.sort
 /GetFileTypes
     
     
@@ -911,35 +911,35 @@ run(null,null,null,true)
 # --
     P(1,Dir) => currentDir
 
-	Sys.stdin('cp (Db2:Get("Lib","ClipboardFiles", null)) .')
+    Sys.stdin('cp (Db2:Get("Lib","ClipboardFiles", null)) .')
 /ClipboardPaste
 
 
 # Delete files from "clipboard"
 # --
-	files=Db2:Get("Lib","ClipboardFiles",List)
-	error(files.empty,"No content in clipboard")
-	fCount=dCount=0
-	Lib:Header("Clipboard content")
-	Inner{files->f 
-		if (getType(f)=="File") fCount=fCount+1 else dCount=dCount+1
-		println(f.path.last(50) + if(getType(f)=="Dir", Sys.fileSeparator, ""))
-	}
-	println
-	confirmed = Lib:Confirm("Confirm delete")
-	error(!confirmed, "Aborting")
+    files=Db2:Get("Lib","ClipboardFiles",List)
+    error(files.empty,"No content in clipboard")
+    fCount=dCount=0
+    Lib:Header("Clipboard content")
+    Inner{files->f 
+        if (getType(f)=="File") fCount=fCount+1 else dCount=dCount+1
+        println(f.path.last(50) + if(getType(f)=="Dir", Sys.fileSeparator, ""))
+    }
+    println
+    confirmed = Lib:Confirm("Confirm delete")
+    error(!confirmed, "Aborting")
 
-	println
-	println
-	
-	Sys.stdin('rm (Db2:Get("Lib","ClipboardFiles", null))')
+    println
+    println
+    
+    Sys.stdin('rm (Db2:Get("Lib","ClipboardFiles", null))')
 /ClipboardDelete
 
 
 # Show content of clipboard
 # --
-	Db2:Get("Lib","ClipboardFiles",List)->f
-		println(f.path.last(50) + if(getType(f)=="Dir", Sys.fileSeparator, "") + " " + if (!f.exists,"DOES-NOT-EXIST",""))
+    Db2:Get("Lib","ClipboardFiles",List)->f
+        println(f.path.last(50) + if(getType(f)=="Dir", Sys.fileSeparator, "") + " " + if (!f.exists,"DOES-NOT-EXIST",""))
 /ClipboardList
 
 
@@ -948,15 +948,15 @@ run(null,null,null,true)
     P(1) as File => a
     P(2) as File => b
     if (Sys.isWindows) {
-		Lib:TmpFile("tmp","ps1") => script
-		script.create(Sequence(
-			@ $file1 = '<<a.path>>'
-			@ $file2 = '<<b.path>>'
-			@ Compare-Object -ReferenceObject $(Get-Content $file1) -DifferenceObject $(Get-Content $file2) -CaseSensitive
-		).mergeExpr)
+        Lib:TmpFile("tmp","ps1") => script
+        script.create(Sequence(
+            @ $file1 = '<<a.path>>'
+            @ $file2 = '<<b.path>>'
+            @ Compare-Object -ReferenceObject $(Get-Content $file1) -DifferenceObject $(Get-Content $file2) -CaseSensitive
+        ).mergeExpr)
         Dir.runCapture("powershell",script.path) => result
-		script.delete
-		result
+        script.delete
+        result
     } else {
         Dir.run("diff",a.path,b.path)
     }
@@ -1061,16 +1061,16 @@ run(null,null,null,true)
         readLine("Enter symbol to delete, Enter for none") => line
         break(line=="")
         Db2:Get(Sys.scriptId,"symbolDict",Dict) => data
-		key=line.trim
-		if (data.has(key)) {
-			data.remove(key)
-			Db2:Set(Sys.scriptId,"symbolDict",data)
-			println
-		} else {
-			# No match, presumably a command
-			Sys.stdin(line)
-			break
-		}
+        key=line.trim
+        if (data.has(key)) {
+            data.remove(key)
+            Db2:Set(Sys.scriptId,"symbolDict",data)
+            println
+        } else {
+            # No match, presumably a command
+            Sys.stdin(line)
+            break
+        }
 //Symbols
 
 
@@ -1102,190 +1102,190 @@ run(null,null,null,true)
 
 # Append to history - defined in CFT.props 'historyCommand' called from Java 
 # --
-	P(1) as Dir => dir
-	P(2) as String => command
+    P(1) as Dir => dir
+    P(2) as String => command
 
-	currDir=dir.path
+    currDir=dir.path
 
-	if (command.trim != "" && command.trim != "." && command!='Db2:Get("Lib","GetCommandHistory:GotoDir").cd') {
-			# That last part matches the code generated in GetCommandHistory when repeating a command !!
+    if (command.trim != "" && command.trim != "." && command!='Db2:Get("Lib","GetCommandHistory:GotoDir").cd') {
+            # That last part matches the code generated in GetCommandHistory when repeating a command !!
 
-		data=SymDict(command,currDir)
-		list=Db2:Get(Sys.scriptId,"CommandHistory",List)
-		list.add(data)
-		Db2:Set(Sys.scriptId,"CommandHistory", list.last(60))
-	}
+        data=SymDict(command,currDir)
+        list=Db2:Get(Sys.scriptId,"CommandHistory",List)
+        list.add(data)
+        Db2:Set(Sys.scriptId,"CommandHistory", list.last(60))
+    }
 
 //HistoryAppend
 
 
 # Get directories history
 # --
-	Lib:Header("Previous directories. Use 'cd :N' to go to dir")
-	Db2:Get(Sys.scriptId,"CommandHistory",List)->dict
-		out(dict.currDir)
-	| _.unique.last(30)
+    Lib:Header("Previous directories. Use 'cd :N' to go to dir")
+    Db2:Get(Sys.scriptId,"CommandHistory",List)->dict
+        out(dict.currDir)
+    | _.unique.last(30)
 /GetDirHistory
 
 
 # Get command history
 # --
-	data=Db2:Get(Sys.scriptId,"CommandHistory",List).last(40)
+    data=Db2:Get(Sys.scriptId,"CommandHistory",List).last(40)
 
-	Lib:Header("Command history")
-	pos=0
-	Inner {
-		data->dict
-			report(pos,dict.command.replace("^t".unEsc," <TAB> "), dict.currDir)
-			pos=pos+1
-		| ->line
-			println(line)
-	}
-	readLine("Enter index, or Enter to continue") => s
-	if (s != "") {
-		if (s.?parseInt) {
-			dict=data.nth(s.parseInt)
+    Lib:Header("Command history")
+    pos=0
+    Inner {
+        data->dict
+            report(pos,dict.command.replace("^t".unEsc," <TAB> "), dict.currDir)
+            pos=pos+1
+        | ->line
+            println(line)
+    }
+    readLine("Enter index, or Enter to continue") => s
+    if (s != "") {
+        if (s.?parseInt) {
+            dict=data.nth(s.parseInt)
 
-			# Note: can not just do this:
-			#
-			# Dir(dict.currDir).cd 
-			#
-			# That does not affect the caller, because each script has 
-			# their own current dir
+            # Note: can not just do this:
+            #
+            # Dir(dict.currDir).cd 
+            #
+            # That does not affect the caller, because each script has 
+            # their own current dir
 
-			# Solution:
+            # Solution:
 
-			Db2:Set("Lib","GetCommandHistory:GotoDir", Dir(dict.currDir))
-			Sys.stdin('Db2:Get("Lib","GetCommandHistory:GotoDir").cd')
-			Sys.stdin(dict.command)
-		} else {
-			# Not a number, treat as a command
-			Sys.stdin(s)
-		}
-	}
-	
+            Db2:Set("Lib","GetCommandHistory:GotoDir", Dir(dict.currDir))
+            Sys.stdin('Db2:Get("Lib","GetCommandHistory:GotoDir").cd')
+            Sys.stdin(dict.command)
+        } else {
+            # Not a number, treat as a command
+            Sys.stdin(s)
+        }
+    }
+    
 /GetCommandHistory
 
 
 # Platform independent "which" implementation
 # --
-	P(1) => str
-	if (Sys.isWindows) {
-		Dir.run("powershell","-c","Get-Command " + str)
-	} else {
-		Dir.run("which", str)
-	}
+    P(1) => str
+    if (Sys.isWindows) {
+        Dir.run("powershell","-c","Get-Command " + str)
+    } else {
+        Dir.run("which", str)
+    }
 /Which
 
 
 # Verify Encrypt sanity
 # --
-	pass="this is a test".getBytes("UTF-8")
-	data="some data 1234.55 CAPS"
-	result="62236921515F2A063CF8EE31051AEDEE53EC4B36620B"
-	Std.Util.Encrypt(pass) => enc
-	
-	dataBytes=data.getBytes("UTF-8")
-	
-	Std.Data.for(0,100,1)->i
-		enc.process(dataBytes)
-	|
-	error(enc.process(dataBytes).hex != result,
-		"Std.Util.Encrypt produces INVALID RESULT")
-	"ok"
+    pass="this is a test".getBytes("UTF-8")
+    data="some data 1234.55 CAPS"
+    result="62236921515F2A063CF8EE31051AEDEE53EC4B36620B"
+    Std.Util.Encrypt(pass) => enc
+    
+    dataBytes=data.getBytes("UTF-8")
+    
+    Std.Data.for(0,100,1)->i
+        enc.process(dataBytes)
+    |
+    error(enc.process(dataBytes).hex != result,
+        "Std.Util.Encrypt produces INVALID RESULT")
+    "ok"
 //EncryptSanityCheck
 
 
 
 # List files sorted for change date, newest last
 # --
-	P(1,Dir) => dir
-	dir.newestFiles(100).reverse
+    P(1,Dir) => dir
+    dir.newestFiles(100).reverse
 /ListNewestFiles
 
 
 # List files newer than some limit, recursively
 # --
-	P(1,Dir) => dir
-	P(2,Input("Number of hours").setCurrCond("24").get.parseInt) => hours
-	P(3,Input("Glob pattern").setCurrCond("*").get) => glob
+    P(1,Dir) => dir
+    P(2,Input("Number of hours").setCurrCond("24").get.parseInt) => hours
+    P(3,Input("Glob pattern").setCurrCond("*").get) => glob
 
-	limit=Date.sub(Date.Duration.hours(hours)).get
-	dir.allFiles(glob)->f
-		reject(f.lastModified < limit)
-		out(f)
+    limit=Date.sub(Date.Duration.hours(hours)).get
+    dir.allFiles(glob)->f
+        reject(f.lastModified < limit)
+        out(f)
 /ListNewFilesRecursively
-		
+        
 
 
 # Encrypt single file
 # --
-	P(1) as File => f
-	password = Vault:SessionSecretGet("Single File Encryption password")
-	binPassword=password.getBytes("UTF-8")
-	encryptedFile=File(f.path + EncryptedFileEnding)
-	f.encrypt(binPassword,"",encryptedFile)
+    P(1) as File => f
+    password = Vault:SessionSecretGet("Single File Encryption password")
+    binPassword=password.getBytes("UTF-8")
+    encryptedFile=File(f.path + EncryptedFileEnding)
+    f.encrypt(binPassword,"",encryptedFile)
 /EncryptFile
 
 
 # Decrypt single file
 # --
-	P(1) as File => f
-	password = Vault:SessionSecretGet("Single File Encryption password")
-	binPassword=password.getBytes("UTF-8")
-	error(!f.name.endsWith(EncryptedFileEnding), "Invalid file, encrypted files end with " + EncryptedFileEnding)
+    P(1) as File => f
+    password = Vault:SessionSecretGet("Single File Encryption password")
+    binPassword=password.getBytes("UTF-8")
+    error(!f.name.endsWith(EncryptedFileEnding), "Invalid file, encrypted files end with " + EncryptedFileEnding)
 
-	decryptedFile=File(f.path.sub(0, f.path.length - EncryptedFileEnding.length))
-	f.decrypt(binPassword,"",decryptedFile)
+    decryptedFile=File(f.path.sub(0, f.path.length - EncryptedFileEnding.length))
+    f.decrypt(binPassword,"",decryptedFile)
 /DecryptFile
 
 
 # Ending for encrypted files
 # --
-	".r"
+    ".r"
 //EncryptedFileEnding
 
 
 
 # Random integers
 # --
-	P(1,1000)=>range
+    P(1,1000)=>range
 
-	number=DB2:Get(Sys.scriptId,"randomNumber",100)
-	Db2:Set(Sys.scriptId,"randomNumber",number+1)
-	value=(10000005 % number)/number
-	value=value*range
-	# return 
-	value.i
+    number=DB2:Get(Sys.scriptId,"randomNumber",100)
+    Db2:Set(Sys.scriptId,"randomNumber",number+1)
+    value=(10000005 % number)/number
+    value=value*range
+    # return 
+    value.i
 /RandomInt
-	
+    
 
 
 # Back date file within last 30 days
 # --
-	P(1) as File => f
-	P(2, 30) => rangeDays
-	
-	range=rangeDays*86400*1000
+    P(1) as File => f
+    P(2, 30) => rangeDays
+    
+    range=rangeDays*86400*1000
 
-	created=currentTimeMillis-RandomInt(range)
-	diff=currentTimeMillis-created
+    created=currentTimeMillis-RandomInt(range)
+    diff=currentTimeMillis-created
 
-	modified=created+RandomInt(diff/10)
-	accessed=modified+RandomInt(diff/5)
+    modified=created+RandomInt(diff/10)
+    accessed=modified+RandomInt(diff/5)
 
-	f.setTimes(created, modified, accessed)
+    f.setTimes(created, modified, accessed)
 /BackDateFile
 
 
 # Back date files in LastResult
 # --
-	files=Sys.lastResult
-	if (getType(files) != "List") files=List(files)
-	files->f
-		assert(getType(f)=="File")
-		out(f)
-		BackDateFile(f)
+    files=Sys.lastResult
+    if (getType(files) != "List") files=List(files)
+    files->f
+        assert(getType(f)=="File")
+        out(f)
+        BackDateFile(f)
 /BackDateLastResultFiles
 
 
@@ -1293,53 +1293,53 @@ run(null,null,null,true)
 BackDateLastResultFiles
 /BDLRF
 
-	
+    
 
 # Convert previous return value of a file, dir or list of these into
 # path strings
 # --
-	val=Sys.lastResult
-	if (!getType(val)=="List") val=List(val)
-	val->x
-		if (getType(x)=="File" || getType(x)=="Dir") out(x.path) 
+    val=Sys.lastResult
+    if (!getType(val)=="List") val=List(val)
+    val->x
+        if (getType(x)=="File" || getType(x)=="Dir") out(x.path) 
 /Paths
 
 
 
 # Identify duplicates in list of strings or files (Sys.lastResult if no parameter given)
 # --
-	P(1,Sys.lastResult) => data
+    P(1,Sys.lastResult) => data
 
-	dict=Dict
-	data->x
-		val=x
-		if (getType(val)=="File") val=val.name
-		dict.set(val,dict.get(val,0)+1)
-	|
-	# duplicates returned as simple list, no count included
-	dict.keys->key
-		assert(dict.get(key) > 1)
-		out(key)
+    dict=Dict
+    data->x
+        val=x
+        if (getType(val)=="File") val=val.name
+        dict.set(val,dict.get(val,0)+1)
+    |
+    # duplicates returned as simple list, no count included
+    dict.keys->key
+        assert(dict.get(key) > 1)
+        out(key)
 /Duplicates
 
 
 # Search through list of files, return single list of hits only
 # --
-	P(1,Sys.lastResult) => list
-	P(2,Input("Enter search term").get) => term
-	P(3,Lambda{P(1)}) => postProcess
+    P(1,Sys.lastResult) => list
+    P(2,Input("Enter search term").get) => term
+    P(3,Lambda{P(1)}) => postProcess
 
-	grep=Grep(term)
-	list->f
-		grep.file(f)->line
-			out(postProcess.call(line))
+    grep=Grep(term)
+    list->f
+        grep.file(f)->line
+            out(postProcess.call(line))
 /Search
 
 
 
 # Global onload-code, when starting CFT, see CFT.props
 # --
-	Lib:EncryptSanityCheck 
-	Util:CheckForUpdates
-	Lib:GetTerminalSize 
+    Lib:EncryptSanityCheck 
+    Util:CheckForUpdates
+    Lib:GetTerminalSize 
 /GlobalOnLoad

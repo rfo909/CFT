@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2023 Roar Foshaug
+Copyright (C) 2020-2024 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -43,14 +43,14 @@ import rf.configtool.parsetree.Expr;
  */
 public abstract class ShellCommand {
 
-	public abstract String getName();
-	public abstract String getBriefExampleParams();
-	
+    public abstract String getName();
+    public abstract String getBriefExampleParams();
+    
     public abstract Value execute (Ctx ctx, Command cmd) throws Exception ;
     
     
     protected void sort (List<String> data) {
-    	rf.configtool.util.StringSort.sort(data);
+        rf.configtool.util.StringSort.sort(data);
     }
     
     protected Value callConfiguredLambda (String contextName, Ctx ctx, String lambda, Value[] lambdaArgs) throws Exception {

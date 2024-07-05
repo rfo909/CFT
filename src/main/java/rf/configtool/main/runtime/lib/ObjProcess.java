@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2023 Roar Foshaug
+Copyright (C) 2020-2024 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -156,7 +156,7 @@ public class ObjProcess extends Obj {
      * If this method returns true, the process hangs, waiting for an input line. 
      */
     public Long isBlockedOnInputSince () {
-    	return stdioVirtual.isBlockedOnInputSince();
+        return stdioVirtual.isBlockedOnInputSince();
     }
     
     public void sendLine (String line) throws Exception {
@@ -284,7 +284,7 @@ public class ObjProcess extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	return new ValueBoolean(stdioVirtual.hasBufferedOutput());
+            return new ValueBoolean(stdioVirtual.hasBufferedOutput());
         }
     }
     

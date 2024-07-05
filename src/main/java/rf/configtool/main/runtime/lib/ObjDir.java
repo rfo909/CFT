@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2023 Roar Foshaug
+Copyright (C) 2020-2024 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -1055,10 +1055,10 @@ public class ObjDir extends Obj implements IsSynthesizable {
             for (String s:f.list()) {
                 File x=new File(name + File.separator + s);
                 if (x.isFile()) {
-                	long lastModified = x.lastModified();
-                	if (lastModified < limit) {
-                		result.add(new ValueObj(new ObjFile(x.getCanonicalPath(), protection)));
-                	}
+                    long lastModified = x.lastModified();
+                    if (lastModified < limit) {
+                        result.add(new ValueObj(new ObjFile(x.getCanonicalPath(), protection)));
+                    }
                 }
             }
             return new ValueList(result);

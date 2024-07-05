@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2023 Roar Foshaug
+Copyright (C) 2020-2024 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -28,14 +28,14 @@ import rf.configtool.main.runtime.lib.Protection;
 
 public class ShellShowtree  extends ShellCommand {
 
-	@Override
-	public String getName() {
-		return "showtree";
-	}
-	@Override 
-	public String getBriefExampleParams() {
-		return "<dir>?";
-	}
+    @Override
+    public String getName() {
+        return "showtree";
+    }
+    @Override 
+    public String getBriefExampleParams() {
+        return "<dir>?";
+    }
 
 
 
@@ -64,18 +64,18 @@ public class ShellShowtree  extends ShellCommand {
         return callMacro(ctx, name, dir);
     }
 
-	private Value callMacro(Ctx ctx, String name, ObjDir dir) throws Exception {
+    private Value callMacro(Ctx ctx, String name, ObjDir dir) throws Exception {
 
-		if (dir == null) {
-			dir = new ObjDir(ctx.getObjGlobal().getCurrDir(), Protection.NoProtection);
-		}
+        if (dir == null) {
+            dir = new ObjDir(ctx.getObjGlobal().getCurrDir(), Protection.NoProtection);
+        }
 
-		PropsFile propsFile = ctx.getObjGlobal().getRoot().getPropsFile();
-		String lambda = propsFile.getMShowtree();
-		Value[] lambdaArgs = { new ValueObj(dir) };
+        PropsFile propsFile = ctx.getObjGlobal().getRoot().getPropsFile();
+        String lambda = propsFile.getMShowtree();
+        Value[] lambdaArgs = { new ValueObj(dir) };
 
-		return callConfiguredLambda(name, ctx, lambda, lambdaArgs);
-	}
+        return callConfiguredLambda(name, ctx, lambda, lambdaArgs);
+    }
 
 
     

@@ -1,12 +1,33 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2024 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 # Search files using drilldown
 # --
-	P(1,Dir) => dir
-	P(2,Input("File type (default for '*')").get) => glob
-	
-	if (glob=="") glob="*"
-	files=dir.allFiles(glob)
-	
-	DrillDownLoop(files)
+    P(1,Dir) => dir
+    P(2,Input("File type (default for '*')").get) => glob
+    
+    if (glob=="") glob="*"
+    files=dir.allFiles(glob)
+    
+    DrillDownLoop(files)
 //DrillDown
 
 DrillDown
@@ -15,45 +36,45 @@ DrillDown
 
 # Drilldown loop on a continuously narrower set of files
 # --
-	P(1) => files
-	P(2,1) => level
+    P(1) => files
+    P(2,1) => level
 
-	readLine("[" + level + "] Enter search term, or blank to abort") => st
-	if (st != "") {
-		
-		grep=Grep(st)
-		foundFiles = Inner{
-			prevFile=null
-			files->f
-				grep.file(f)->line
-					if (f != prevFile) {
-						println
-						println(Curses:Bold+line.file.name+Curses:Reset)
-						println
-					}
-					prevFile=f
-					println("    " + line.lineNumber + "   " + line)
-					out(line.file)
-		}
-		foundFiles=foundFiles.unique
-		SaveFiles(foundFiles)
-		println
-		println("#files=" + foundFiles.length)
-		
-		DrillDownLoop(foundFiles,level+1)
-	}
+    readLine("[" + level + "] Enter search term, or blank to abort") => st
+    if (st != "") {
+        
+        grep=Grep(st)
+        foundFiles = Inner{
+            prevFile=null
+            files->f
+                grep.file(f)->line
+                    if (f != prevFile) {
+                        println
+                        println(Curses:Bold+line.file.name+Curses:Reset)
+                        println
+                    }
+                    prevFile=f
+                    println("    " + line.lineNumber + "   " + line)
+                    out(line.file)
+        }
+        foundFiles=foundFiles.unique
+        SaveFiles(foundFiles)
+        println
+        println("#files=" + foundFiles.length)
+        
+        DrillDownLoop(foundFiles,level+1)
+    }
 //DrillDownLoop
-		
+        
 
 # Save last set of files
 # --
-	P(1)=>files
-	Db2:Set(Sys.scriptId,"files",files)
+    P(1)=>files
+    Db2:Set(Sys.scriptId,"files",files)
 //SaveFiles
 
 # Show last set of files
 # --
-	Db2:Get(Sys.scriptId,"files",List)
+    Db2:Get(Sys.scriptId,"files",List)
 //GetFiles
 
 GetFiles

@@ -2,7 +2,7 @@
 <<< EOF
 #
 # CFT - an interactive programmable shell for automation 
-# Copyright (C) 2020-2023 Roar Foshaug
+# Copyright (C) 2020-2024 Roar Foshaug
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -436,8 +436,8 @@ together multiple masters to form single cluster.
     log=KubctlLogFile
     
     if (command==null) {
-	readLine("Enter kubectl command, blank to abort") => command
-	error(command=="","Aborting")
+    readLine("Enter kubectl command, blank to abort") => command
+    error(command=="","Aborting")
     }
        
     if (command.startsWith("kubectl ")) command=command.after(" ")
@@ -467,41 +467,41 @@ together multiple masters to form single cluster.
 
 # Loop
 # --
-	log=KubctlLogFile
+    log=KubctlLogFile
 
-	loop
-		readLine("kubectl command, blank to abort, # for comment, kf for file, h/h2 for history") => command
-		error(command.trim=="", "Aborting input loop")
-		if (command=="h") {h continue}
-		else if (command=="h2") {h2 continue}
-		else if (command=="kf") {kf continue}
-		else if (command==".") {
-			command=Db2:Get(Sys.scriptId,"kubectl_lastCommand",null)
-			if (command==null) continue
-		}
-		else if (command.startsWith("#")) {
-			log.append(List("#",command,"#"))
-			continue
-		}
+    loop
+        readLine("kubectl command, blank to abort, # for comment, kf for file, h/h2 for history") => command
+        error(command.trim=="", "Aborting input loop")
+        if (command=="h") {h continue}
+        else if (command=="h2") {h2 continue}
+        else if (command=="kf") {kf continue}
+        else if (command==".") {
+            command=Db2:Get(Sys.scriptId,"kubectl_lastCommand",null)
+            if (command==null) continue
+        }
+        else if (command.startsWith("#")) {
+            log.append(List("#",command,"#"))
+            continue
+        }
 
-		kubectl (Dir, command)
+        kubectl (Dir, command)
 /k
 
 # Include config file or any text file in log
 # --
-	P(1,readLine("Enter path"))=>path
-	P(2,Dir)=>currDir
-	currDir.file(path)=>f
-	if (f.exists) {
-		log=KubctlLogFile
-		log.append("")
-		log.append("# " + f.path)
-		log.append("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< EOF")
-		log.append(f.read)
-		log.append(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> EOF")
-	}
+    P(1,readLine("Enter path"))=>path
+    P(2,Dir)=>currDir
+    currDir.file(path)=>f
+    if (f.exists) {
+        log=KubctlLogFile
+        log.append("")
+        log.append("# " + f.path)
+        log.append("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< EOF")
+        log.append(f.read)
+        log.append(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> EOF")
+    }
 /kf
-		
+        
 
 # kubectl history
 # --

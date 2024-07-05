@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2023 Roar Foshaug
+Copyright (C) 2020-2024 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -201,26 +201,26 @@ public class ObjCIFSFile extends Obj {
             return "copyTo(targetFile[,startPos,count?]?) - returns number of bytes copied";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	final long startPos;
-        	final long count;
-        	
-        	if (params.size() < 1 || params.size() > 3) throw new Exception("Expected parameters targetFile[,startPos,count?]?");
+            final long startPos;
+            final long count;
             
-        	Obj obj=getObj("targetFile",params,0);
+            if (params.size() < 1 || params.size() > 3) throw new Exception("Expected parameters targetFile[,startPos,count?]?");
+            
+            Obj obj=getObj("targetFile",params,0);
 
             if (!(obj instanceof ObjFile)) {
-            	throw new Exception("Invalid targetFile, must be File");
+                throw new Exception("Invalid targetFile, must be File");
             }
             
             if (params.size() >= 2) {
-            	startPos=getInt("startPos",params,1);
+                startPos=getInt("startPos",params,1);
             } else {
-            	startPos=0;
+                startPos=0;
             }
             if (params.size() >= 3) {
-            	count=getInt("count",params,2);
+                count=getInt("count",params,2);
             } else {
-            	count=-1;
+                count=-1;
             }
             
             
@@ -229,19 +229,19 @@ public class ObjCIFSFile extends Obj {
             File f=file.getFile();
             OutputStream out=null;
             try {
-        		SmbRandomAccessFile raf=new SmbRandomAccessFile(smbFile, "r");
-        		long skipCount=startPos;
-        		while (skipCount > 0) {
-        			if (skipCount > Integer.MAX_VALUE) {
-        				raf.skipBytes(Integer.MAX_VALUE);
-        				skipCount -= Integer.MAX_VALUE;
-        			} else {
-        				raf.skipBytes((int) startPos);
-        				skipCount=0;
-        			}
-        		}
+                SmbRandomAccessFile raf=new SmbRandomAccessFile(smbFile, "r");
+                long skipCount=startPos;
+                while (skipCount > 0) {
+                    if (skipCount > Integer.MAX_VALUE) {
+                        raf.skipBytes(Integer.MAX_VALUE);
+                        skipCount -= Integer.MAX_VALUE;
+                    } else {
+                        raf.skipBytes((int) startPos);
+                        skipCount=0;
+                    }
+                }
                 out=new BufferedOutputStream(new FileOutputStream(f));
-        		long copied = copy (raf,out,count);
+                long copied = copy (raf,out,count);
                 return new ValueInt(copied);
             } finally {
                 if (out != null) try {out.close();} catch (Exception ex) {};
@@ -268,25 +268,25 @@ public class ObjCIFSFile extends Obj {
     // ------ private ------
     
     private long copy (SmbRandomAccessFile f, OutputStream out, long count) throws Exception {
-    	byte[] buf=new byte[512*1024];
+        byte[] buf=new byte[512*1024];
         long copied=0L;
         
         if (count==-1) count=Long.MAX_VALUE;
         
-    	while (count > buf.length) {
-    		int i=f.read(buf);
-    		if (i<=0) break;
-    		out.write(buf,0,i);
-    		count -= i;
-    		copied += i;
-    	}
-    	for (;;) {
-        	int i=f.read(buf, 0, (int) count);
-        	if (i<=0) break;
-        	out.write(buf,0,i);
-        	count -= i;
-        	copied += i;
-        	if (count<=0) break;
+        while (count > buf.length) {
+            int i=f.read(buf);
+            if (i<=0) break;
+            out.write(buf,0,i);
+            count -= i;
+            copied += i;
+        }
+        for (;;) {
+            int i=f.read(buf, 0, (int) count);
+            if (i<=0) break;
+            out.write(buf,0,i);
+            count -= i;
+            copied += i;
+            if (count<=0) break;
         }
         return copied;
     }

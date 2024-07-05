@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2023 Roar Foshaug
+Copyright (C) 2020-2024 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -34,20 +34,20 @@ import rf.configtool.main.runtime.lib.Protection;
 
 public class ShellShell extends ShellCommand {
 
-	@Override
-	public String getName() {
-		return "shell";
-	}
-	@Override 
-	public String getBriefExampleParams() {
-		return "- run bash or powershell";
-	}
+    @Override
+    public String getName() {
+        return "shell";
+    }
+    @Override 
+    public String getBriefExampleParams() {
+        return "- run bash or powershell";
+    }
 
 
     public Value execute(Ctx ctx, Command cmd) throws Exception {
 
-    	String shellCommand;
-    	
+        String shellCommand;
+        
         if (File.separator.equals("\\")) {
             shellCommand=ctx.getObjGlobal().getRoot().getPropsFile().getWinShell();
         } else {

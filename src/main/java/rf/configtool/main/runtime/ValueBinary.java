@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2023 Roar Foshaug
+Copyright (C) 2020-2024 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -220,25 +220,25 @@ public class ValueBinary extends Value {
             return "getList(from,to?) - returns list of int";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	final int from;
-        	final int to;
-        	if (params.size()==1) {
-        		from=(int) getInt("from", params, 0);
-        		to=val.length;
-        	} else if (params.size()==2) {
-        		from=(int) getInt("from", params, 0);
-        		to=(int) getInt("to",params,1);
-        	} else if (params.size()==0) {
-        		from=0;
-        		to=val.length;
-        	} else {
-        		throw new Exception("Expected optional parameters from, to?");
-        	}
-        	List<Value> list=new ArrayList<Value>();
-        	for (int i=from; i<to; i++) {
-        		list.add(new ValueInt(val[i]));
-        	}
-        	return new ValueList(list);
+            final int from;
+            final int to;
+            if (params.size()==1) {
+                from=(int) getInt("from", params, 0);
+                to=val.length;
+            } else if (params.size()==2) {
+                from=(int) getInt("from", params, 0);
+                to=(int) getInt("to",params,1);
+            } else if (params.size()==0) {
+                from=0;
+                to=val.length;
+            } else {
+                throw new Exception("Expected optional parameters from, to?");
+            }
+            List<Value> list=new ArrayList<Value>();
+            for (int i=from; i<to; i++) {
+                list.add(new ValueInt(val[i]));
+            }
+            return new ValueList(list);
         }
 
     }   
@@ -253,7 +253,7 @@ public class ValueBinary extends Value {
             return "base64() - generate base 64 string for binary value";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	return new ValueString(Base64.getEncoder().encodeToString(val));
+            return new ValueString(Base64.getEncoder().encodeToString(val));
         }
 
     }    

@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2023 Roar Foshaug
+Copyright (C) 2020-2024 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -37,12 +37,12 @@ public class ParseException extends CodeException {
     } 
     
     public ParseException (String msg) {
-    	this(null, msg);
+        this(null, msg);
     }
     
     @Override
     public String getMessage() {
-    	return "ParseException: " + super.getMessage();
+        return "ParseException: " + super.getMessage();
     }
 
 }

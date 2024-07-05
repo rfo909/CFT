@@ -1,101 +1,122 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2024 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 # Detailed testing of the Std.Text.Lexer objects
 # --
 
 # Global verbose flag
 # --
-	P(1,true)=>value
-	Db2:Set(Sys.scriptId, "verbose", value)
+    P(1,true)=>value
+    Db2:Set(Sys.scriptId, "verbose", value)
 /SetVerbose
 
 # Fetch verbose value
 # --
-	Db2:Get(Sys.scriptId,"verbose",false)
+    Db2:Get(Sys.scriptId,"verbose",false)
 //Verbose
 
 
 # Util func
 # --
-	P(1) => root
-	P(2) => s
-	P(3,true) => shouldSucceed
-	
-	tryCatch({
-		Std.Text.Lexer => lexer
-		lexer.addLine(s)
-		
-		lexer.getTokenStream(root) => ts
-		if (Verbose) Inner{
-			Lib:Header("Tokens")
-			loop
-				break(ts.EOF)
-				println(ts.peekType.str + " " + ts.peek)
-				
-				ts.next
-		}
-	}) => result
-	
-	if (Verbose) {
-		Lib:Header("Result")
-		Util:ShowDict(result,true)
-		if (result.has("javastack")) {
-			Lib:Header("javastack")
-			Inner{result.javastack->line println(line)}
-		}
-		if (result.has("stack")) {
-			Lib:Header("stack")
-			Inner{result.stack->line println(line)}
-		}
-		
-		if (result.has("msg")) {
-			println
-			println(result.msg)
-		}
-	}
-		
-	if (shouldSucceed, result.ok, !result.ok)
+    P(1) => root
+    P(2) => s
+    P(3,true) => shouldSucceed
+    
+    tryCatch({
+        Std.Text.Lexer => lexer
+        lexer.addLine(s)
+        
+        lexer.getTokenStream(root) => ts
+        if (Verbose) Inner{
+            Lib:Header("Tokens")
+            loop
+                break(ts.EOF)
+                println(ts.peekType.str + " " + ts.peek)
+                
+                ts.next
+        }
+    }) => result
+    
+    if (Verbose) {
+        Lib:Header("Result")
+        Util:ShowDict(result,true)
+        if (result.has("javastack")) {
+            Lib:Header("javastack")
+            Inner{result.javastack->line println(line)}
+        }
+        if (result.has("stack")) {
+            Lib:Header("stack")
+            Inner{result.stack->line println(line)}
+        }
+        
+        if (result.has("msg")) {
+            println
+            println(result.msg)
+        }
+    }
+        
+    if (shouldSucceed, result.ok, !result.ok)
 //runTest
 
 
 
 # Basic tokenizing root node
 # --
-	Std.Text.Lexer.Node => root
-	root.sub(" ^n^r^t".unEsc).setIsToken(-1)
-	root.addToken("keyword").setIsToken(1)
+    Std.Text.Lexer.Node => root
+    root.sub(" ^n^r^t".unEsc).setIsToken(-1)
+    root.addToken("keyword").setIsToken(1)
 
-	# Note: sub("...") creates single new Node that all characters
-	# point to, and it does this without regard for previous mappings
-	# for (some of) the characters.
-	#
-	# This is great for creating patterns for identifiers and numbers,
-	# but conflicts with simultaneously matching specific identifiers etc
-	
-	root.addToken("bxxx").setIsToken(1)
-	#root.sub("abc").setIsToken(2)
-	"abc".chars->c root.addToken(c).setIsToken(2) |
+    # Note: sub("...") creates single new Node that all characters
+    # point to, and it does this without regard for previous mappings
+    # for (some of) the characters.
+    #
+    # This is great for creating patterns for identifiers and numbers,
+    # but conflicts with simultaneously matching specific identifiers etc
+    
+    root.addToken("bxxx").setIsToken(1)
+    #root.sub("abc").setIsToken(2)
+    "abc".chars->c root.addToken(c).setIsToken(2) |
     
     root
 /t01_root
 
 # Inspect root
 # --
-	t01_root.dump
+    t01_root.dump
 /dump
 
 
 # Basic matching of tokens a b c keyword
 # --
-	runTest(t01_root,"  a b c keyword")
+    runTest(t01_root,"  a b c keyword")
 /Test01a
 
 # Verify matching token bx
 # --
-	runTest(t01_root,"bxxx")
+    runTest(t01_root,"bxxx")
 /Test01b
 
 # Incomplete 'begin' token
 # --
-	runTest(t01_root,"a b begi c", false) 
+    runTest(t01_root,"a b begi c", false) 
 /Test01c
 
 
@@ -103,19 +124,19 @@
 
 # matching identifiers and extended identifiers xxx:yyy
 # --
-	Std.Text.Lexer.Node => root
-	root.sub(" ^n^r^t".unEsc).setIsToken(-1)
-	
-	identFirstChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"
+    Std.Text.Lexer.Node => root
+    root.sub(" ^n^r^t".unEsc).setIsToken(-1)
+    
+    identFirstChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"
     identInnerChars = identFirstChars + "0123456789"
 
-	root.sub(identFirstChars) => insideToken
-	insideToken.setIsToken(2)
-	insideToken.sub(identInnerChars,insideToken)
-	
-	insideToken.sub(":") => afterColon
-	afterColon.sub(identFirstChars).setIsToken(3) => insideAfterColon
-	insideAfterColon.sub(identInnerChars,insideAfterColon)
+    root.sub(identFirstChars) => insideToken
+    insideToken.setIsToken(2)
+    insideToken.sub(identInnerChars,insideToken)
+    
+    insideToken.sub(":") => afterColon
+    afterColon.sub(identFirstChars).setIsToken(3) => insideAfterColon
+    insideAfterColon.sub(identInnerChars,insideAfterColon)
 
     root
 /t02_root
@@ -123,12 +144,12 @@
 
 # Match identifiers and extended identifiers
 # --
-	runTest(t02_root, "a b:c d")
+    runTest(t02_root, "a b:c d")
 /Test02
 
 # Match identifier and invalid extended identifier
 # --
-	runTest(t02_root, "a b: d", false)
+    runTest(t02_root, "a b: d", false)
 /Test02b
 
 

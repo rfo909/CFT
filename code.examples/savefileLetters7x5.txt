@@ -2,7 +2,7 @@
 <<< EOF
 #
 # CFT - an interactive programmable shell for automation 
-# Copyright (C) 2020-2023 Roar Foshaug
+# Copyright (C) 2020-2024 Roar Foshaug
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -2615,10 +2615,10 @@ $            .
 
 # Get characters mask (18x10)
 # --
-	P(1)=>char
-	Letters18x10->line
-		assert(line.startsWith(char))
-		out(line.sub(2,12))
+    P(1)=>char
+    Letters18x10->line
+        assert(line.startsWith(char))
+        out(line.sub(2,12))
 /GetChar18x10
 
 
@@ -2641,7 +2641,7 @@ $            .
 
 # Get text (7x5)
 # --
-	GetText(P(1))
+    GetText(P(1))
 /T7x5
 
 
@@ -2658,7 +2658,7 @@ $            .
             | _.concat("   ")
         } 
         out(s)
-	
+    
 /T18x10
 
 
@@ -2676,7 +2676,7 @@ $            .
 ..#
 ##?
 >>> EOF
-	->line out(line.trim.replace("."," "))
+    ->line out(line.trim.replace("."," "))
 //Pattern1a
 
 # Pattern1b for inserting pixel
@@ -2686,7 +2686,7 @@ $            .
 #..
 ?##
 >>> EOF
-	->line out(line.trim.replace("."," "))
+    ->line out(line.trim.replace("."," "))
 //Pattern1b
 
 # Pattern2a for inserting pixel
@@ -2696,7 +2696,7 @@ $            .
 #..
 #..
 >>> EOF
-	->line out(line.trim.replace("."," "))
+    ->line out(line.trim.replace("."," "))
 //Pattern2a
 
 # Pattern2b for inserting pixel
@@ -2706,95 +2706,95 @@ $            .
 ..#
 ..#
 >>> EOF
-	->line out(line.trim.replace("."," "))
+    ->line out(line.trim.replace("."," "))
 //Pattern2b
 
 
 
 # Check if current position matches 
 # --
-	P(1) => lines
-	P(2) => patternLines
-	P(3) => yPos
-	P(4) => xPos
-	match=true
-	Std.Data.each(-1,1)->y
-		Std.Data.each(-1,1)->x
-				pchar=patternLines.nth(y+1).chars.nth(x+1)
-				lchar=lines.nth(yPos+y).chars.nth(xPos+x)
-				if (pchar != "?" && pchar != lchar) {
-					match=false
-				}
-	|
-	match
+    P(1) => lines
+    P(2) => patternLines
+    P(3) => yPos
+    P(4) => xPos
+    match=true
+    Std.Data.each(-1,1)->y
+        Std.Data.each(-1,1)->x
+                pchar=patternLines.nth(y+1).chars.nth(x+1)
+                lchar=lines.nth(yPos+y).chars.nth(xPos+x)
+                if (pchar != "?" && pchar != lchar) {
+                    match=false
+                }
+    |
+    match
 //CheckMatch
 
 # Get text x2 rounded
 # --
-	P(1,"TESTabcdefghijklmn")=>s
-	GetTextX2(s) => lines
-	modified=Sys.clone(lines)
-	
-	Std.Data.each(1,12)->y
-		line=lines.nth(y)
-		resultLine=""
-		Inner{
-			Std.Data.each(1,line.length-2)->x
-				if (CheckMatch(lines, Pattern1a, y, x) 
-					|| CheckMatch(lines, Pattern1b, y, x)
-					|| CheckMatch(lines, Pattern2a, y, x)
-					|| CheckMatch(lines, Pattern2b, y, x)
-				) {
-					s=modified.nth(y)
-					s.chars.remove(x).insert(x,"#").concat => s
-					modified.remove(y).insert(y,s)
-				}
-		}
-	|
-	modified
+    P(1,"TESTabcdefghijklmn")=>s
+    GetTextX2(s) => lines
+    modified=Sys.clone(lines)
+    
+    Std.Data.each(1,12)->y
+        line=lines.nth(y)
+        resultLine=""
+        Inner{
+            Std.Data.each(1,line.length-2)->x
+                if (CheckMatch(lines, Pattern1a, y, x) 
+                    || CheckMatch(lines, Pattern1b, y, x)
+                    || CheckMatch(lines, Pattern2a, y, x)
+                    || CheckMatch(lines, Pattern2b, y, x)
+                ) {
+                    s=modified.nth(y)
+                    s.chars.remove(x).insert(x,"#").concat => s
+                    modified.remove(y).insert(y,s)
+                }
+        }
+    |
+    modified
 //T2rounded
 
 
 # List of all letters in font
 # --
-	Letters->line			
-		reject(line.trim=="")
-		out(line.chars.first)
-	| _.unique
+    Letters->line       
+        reject(line.trim=="")
+        out(line.chars.first)
+    | _.unique
 /AllLetters
 
 # Create x2 rounded font
 # --
-	Dir.file("bigFont.txt") => f
-	if (f.exists) f.delete
-	AllLetters->letter
-		println("letter=" + letter)
-		{T2rounded(letter)->line	
-			f.append(letter + " " + line + " .")
-		}
-		f.append("")
+    Dir.file("bigFont.txt") => f
+    if (f.exists) f.delete
+    AllLetters->letter
+        println("letter=" + letter)
+        {T2rounded(letter)->line    
+            f.append(letter + " " + line + " .")
+        }
+        f.append("")
 //T2roundedFont
-	
+    
 
 >>>>>>> SCALE_CODE
 //InactiveCode
-	
+    
 
 # Test 
 # --
     P(1,Input("Enter char").get.chars.first)=>char
-	println
+    println
     GetCharX2(char)->line 
-		println(char + " " + line + " .")
+        println(char + " " + line + " .")
 //t
 
 
 
 # Reducing 18x10 to 9x10 - better suited for console use
 # --
-	P(1,"AaGYy35") => str
-	f=true
-	T18x10(str)->line
-		if (f) out(line)
-		f=!f
+    P(1,"AaGYy35") => str
+    f=true
+    T18x10(str)->line
+        if (f) out(line)
+        f=!f
 /T9x10

@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2023 Roar Foshaug
+Copyright (C) 2020-2024 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -33,14 +33,14 @@ import rf.configtool.main.runtime.lib.Protection;
 
 public class ShellHex extends ShellCommand {
 
-	@Override
-	public String getName() {
-		return "hex";
-	}
-	@Override 
-	public String getBriefExampleParams() {
-		return "<file>?";
-	}
+    @Override
+    public String getName() {
+        return "hex";
+    }
+    @Override 
+    public String getBriefExampleParams() {
+        return "<file>?";
+    }
 
 
 
@@ -52,7 +52,7 @@ public class ShellHex extends ShellCommand {
         boolean noArgs=cmd.getArgs().isEmpty();
         
         if (noArgs) {
-        	return callMacro(ctx, name, new ValueNull());
+            return callMacro(ctx, name, new ValueNull());
         }        
         
         List<Arg> args=cmd.getArgs();
@@ -73,14 +73,14 @@ public class ShellHex extends ShellCommand {
         return callMacro(ctx, name, file);
     }
 
-	private Value callMacro(Ctx ctx, String name, Value file) throws Exception {
+    private Value callMacro(Ctx ctx, String name, Value file) throws Exception {
 
-		PropsFile propsFile = ctx.getObjGlobal().getRoot().getPropsFile();
-		String lambda = propsFile.getMHex();
-		Value[] lambdaArgs = { file };
+        PropsFile propsFile = ctx.getObjGlobal().getRoot().getPropsFile();
+        String lambda = propsFile.getMHex();
+        Value[] lambdaArgs = { file };
 
-		return callConfiguredLambda(name, ctx, lambda, lambdaArgs);
-	}
+        return callConfiguredLambda(name, ctx, lambda, lambdaArgs);
+    }
 
     
 

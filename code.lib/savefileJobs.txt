@@ -2,7 +2,7 @@
 <<< EOF
 #
 # CFT - an interactive programmable shell for automation 
-# Copyright (C) 2020-2023 Roar Foshaug
+# Copyright (C) 2020-2024 Roar Foshaug
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -73,14 +73,14 @@ This can also be done by entering TAB + q + Enter in job input
 
 # Get all jobs
 # --
-	names = (Sys.Jobs.namesCompleted + Sys.Jobs.namesRunning)
-	names->name
-		Sys.Jobs.get(name) => job
-		report(
-			if(job.isDone,"COMPLETED","Running"),
-			if(job.isBlockedOnInputSince != null,"<stdin>","-"),
-			if(job.hasOutput,"(output)","-"),
-			name)
+    names = (Sys.Jobs.namesCompleted + Sys.Jobs.namesRunning)
+    names->name
+        Sys.Jobs.get(name) => job
+        report(
+            if(job.isDone,"COMPLETED","Running"),
+            if(job.isBlockedOnInputSince != null,"<stdin>","-"),
+            if(job.hasOutput,"(output)","-"),
+            name)
 /AllJobs
 
 
@@ -122,12 +122,12 @@ This can also be done by entering TAB + q + Enter in job input
 
 # Extend saved output with additional lines of text
 # --
-	P(1) as List => lines
-	P(2) as String => dbKey
-	
-	Db2:Get(Sys.scriptId,dbKey,List) + lines => output
-	output = output.last(Term.h*4)
-	Db2:Set(Sys.scriptId,dbKey,output)
+    P(1) as List => lines
+    P(2) as String => dbKey
+    
+    Db2:Get(Sys.scriptId,dbKey,List) + lines => output
+    output = output.last(Term.h*4)
+    Db2:Set(Sys.scriptId,dbKey,output)
 //AddOutputLines
 
 
@@ -139,52 +139,52 @@ This can also be done by entering TAB + q + Enter in job input
 # re-detecting that, after sending input to the Job, we look for next
 # blocked-on-input time greater than previous value (milliseconds).
 # --
-	P(1) as Process => proc
-	P(2) as String => dbKey
-	P(3) as int => lastBlockOnInputTime
-	P(4,3000) as int => timeoutDelayMs
-	
-	startTime=currentTimeMillis
-	Inner {
-		loop
-		    Sys.sleep(100)
-			outLines=proc.output
-			if (outLines.length>0) {
-				AddOutputLines(outLines,dbKey)
-		    	Inner{
-		    		outLines->line println(line)
-		    	}
-		    }
-		    if (proc.isDone) {
-		    	println("Job has terminated")
-		    	break
-		    }
-		    block=proc.isBlockedOnInputSince
-		    if (block != null && block > lastBlockOnInputTime) {
-		   		break
-		   	}
-		   	
-			break(currentTimeMillis - startTime > timeoutDelayMs)
-	}
+    P(1) as Process => proc
+    P(2) as String => dbKey
+    P(3) as int => lastBlockOnInputTime
+    P(4,3000) as int => timeoutDelayMs
+    
+    startTime=currentTimeMillis
+    Inner {
+        loop
+            Sys.sleep(100)
+            outLines=proc.output
+            if (outLines.length>0) {
+                AddOutputLines(outLines,dbKey)
+                Inner{
+                    outLines->line println(line)
+                }
+            }
+            if (proc.isDone) {
+                println("Job has terminated")
+                break
+            }
+            block=proc.isBlockedOnInputSince
+            if (block != null && block > lastBlockOnInputTime) {
+                break
+              }
+              
+            break(currentTimeMillis - startTime > timeoutDelayMs)
+    }
 //WaitForInput       
 
-		
+        
 
 # Bring running job to "foreground", to do interactive follow-up
 # --
-	# Select between running jobs
-	Sys.Jobs.namesRunning => runningJobs
-	error(runningJobs.empty,"No running jobs")
-	
-	Lib:MenuSelect(Sys.Jobs.namesRunning,null,"Select job") => name
+    # Select between running jobs
+    Sys.Jobs.namesRunning => runningJobs
+    error(runningJobs.empty,"No running jobs")
+    
+    Lib:MenuSelect(Sys.Jobs.namesRunning,null,"Select job") => name
 
-	println(Curses:Bold)
+    println(Curses:Bold)
     Lib:Header(">>> Selected job: " + name)
-	println(">>> To abort, enter TAB + q + ENTER when process asks for input")
-	println(">>>")
-	println(">>> Or wait for command mode, if Job not blocking on input for 3 seconds")
-	println(">>>")
-	println(">>> Press Enter to continue"+Curses:Reset)
+    println(">>> To abort, enter TAB + q + ENTER when process asks for input")
+    println(">>>")
+    println(">>> Or wait for command mode, if Job not blocking on input for 3 seconds")
+    println(">>>")
+    println(">>> Press Enter to continue"+Curses:Reset)
     readLine
     
     proc=Sys.Jobs.get(name)
@@ -193,38 +193,38 @@ This can also be done by entering TAB + q + Enter in job input
     
     TAB="^t".unEsc
 
-	lastBlockOnInputTime=0
+    lastBlockOnInputTime=0
     loop
-    	output=Db2:Get(Sys.scriptId,dbKey,List)
+        output=Db2:Get(Sys.scriptId,dbKey,List)
         println(Curses:Clear)
         Inner {
             output->line println(line)
         }
         
-    	WaitForInput(proc,dbKey,lastBlockOnInputTime)
+        WaitForInput(proc,dbKey,lastBlockOnInputTime)
 
         if (proc.isDone) {
             #println("(Job completed)")
             break
         }
         if (proc.isBlockedOnInputSince != null) {
-        	lastBlockOnInputTime=proc.isBlockedOnInputSince
-        	#println("Job input")
-        	line=readLine
-        	if (line==TAB + "q") error("Aborting Job foreground processing")
-        	proc.sendLine(line)
-        	
-        	AddOutputLines(List(line), dbKey)
+            lastBlockOnInputTime=proc.isBlockedOnInputSince
+            #println("Job input")
+            line=readLine
+            if (line==TAB + "q") error("Aborting Job foreground processing")
+            proc.sendLine(line)
+            
+            AddOutputLines(List(line), dbKey)
         } else {
-        	println(Curses:Bold + ">>> Entering command mode")
-        	println(">>> ---------------------")
-        	println(">>>")
-        	println(">>> Job has not blocked on waiting for input")
-        	println(">>>")
-			println(">>> Type 'q' + Enter to leave job running in background,")
-			println(">>> or just Enter to continue monitoring the job."+Curses:Reset)
-			break(readLine.trim=="q")
-		}	       		
-	|
+            println(Curses:Bold + ">>> Entering command mode")
+            println(">>> ---------------------")
+            println(">>>")
+            println(">>> Job has not blocked on waiting for input")
+            println(">>>")
+            println(">>> Type 'q' + Enter to leave job running in background,")
+            println(">>> or just Enter to continue monitoring the job."+Curses:Reset)
+            break(readLine.trim=="q")
+        }           
+    |
     "Done"
 /ToForeground

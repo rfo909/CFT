@@ -1,3 +1,24 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2024 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 # Readme
 # --
 <<<< EOF
@@ -21,57 +42,57 @@
 
 # All hosts
 # --
-	(MasterHosts + WorkerHosts + RancherHost).unique
+    (MasterHosts + WorkerHosts + RancherHost).unique
 /AllHosts
 
 # Fix ssh without passwords
 # --
-	(AllHosts)->h
-		target=GetSSHUser + "@" + h
-		SSH:sshEnable(target)
+    (AllHosts)->h
+        target=GetSSHUser + "@" + h
+        SSH:sshEnable(target)
 /sshEnable
 
 # SSH user
 # --
-	"roar"
+    "roar"
 /GetSSHUser
 
 # Install and start docker on one VM
 # --
-	P(1)=>target
+    P(1)=>target
 
-	debug=true
+    debug=true
 
-	DockerSwarm:Install(target)
-	SSH:sudo(target,'systemctl enable docker', false, debug)
-	SSH:sudo(target,'systemctl start docker', true, debug)
+    DockerSwarm:Install(target)
+    SSH:sudo(target,'systemctl enable docker', false, debug)
+    SSH:sudo(target,'systemctl start docker', true, debug)
 //InstallDockerOne
 
 # Install docker on all VM's
 # --
-	debug=true
-	AllHosts->h
-		target=GetSSHUser+"@"+h
-		println("Starting Job for " + target)
-		proc = SpawnProcess(SymDict(target), InstallDockerOne(target))
-		Sys.Jobs.add(proc,target)
+    debug=true
+    AllHosts->h
+        target=GetSSHUser+"@"+h
+        println("Starting Job for " + target)
+        proc = SpawnProcess(SymDict(target), InstallDockerOne(target))
+        Sys.Jobs.add(proc,target)
 /InstallDocker
 
 
 # Download and run Rancher on RancherHost
 # --
-	target=GetSSHUser + "@" + RancherHost
+    target=GetSSHUser + "@" + RancherHost
 
-	# Create directory for persisting config
-	SSH:sudo(target,"mkdir -p /var/lib/rancher")
+    # Create directory for persisting config
+    SSH:sudo(target,"mkdir -p /var/lib/rancher")
 
-	println("Log on to RancherHost and run the following")
-	println
-	@ sudo docker run -d --name rancher-server -v /var/lib/rancher:/var/lib/rancher --restart=unless-stopped -p 80:80 -p 443:443 --privileged rancher/rancher
-	println(_)
+    println("Log on to RancherHost and run the following")
+    println
+    @ sudo docker run -d --name rancher-server -v /var/lib/rancher:/var/lib/rancher --restart=unless-stopped -p 80:80 -p 443:443 --privileged rancher/rancher
+    println(_)
 
-	println
-	println
+    println
+    println
 /RunRancher
 
 # Going forward
@@ -82,15 +103,15 @@ Obtain container ID
 When asked to change password, using "bxfRIOmREJ3MRkp6"
 To log in later, use username "admin"
 Menu > Global Settings >
-	Ensure server-url on format https://ip-adress (or name?) 
+    Ensure server-url on format https://ip-adress (or name?) 
 Menu > Cluster Management > Create > Custom
-	Enter name
-	Optionally define labels
-	-> Kubernetes Options: Network Provider > Flannel
-	-> Advanced Options: Nginx Ingress: Disabled (why?)
-	-> Authorized Endpoint: Leave enabled
-	-> Click Next
-	-> Configure cluster, running attach commands on the different nodes
+    Enter name
+    Optionally define labels
+    -> Kubernetes Options: Network Provider > Flannel
+    -> Advanced Options: Nginx Ingress: Disabled (why?)
+    -> Authorized Endpoint: Leave enabled
+    -> Click Next
+    -> Configure cluster, running attach commands on the different nodes
 >>> EOF
 /Next
 # From this point on, follow instructions in Rancher, or in the source video

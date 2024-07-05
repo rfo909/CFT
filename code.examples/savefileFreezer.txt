@@ -1,140 +1,161 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2024 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 # Date object for today
 # --
-	Date.setFormat("yyyy-MM-dd")
+    Date.setFormat("yyyy-MM-dd")
 //FDate
 
 # Get expiration date
 # --
-	P(1,Date) => defaultValue
-	defaultValue.setFormat(FDate.getFormat)
-	loop
-		Input("Expiration date on format YYYY-MM-DD or YYYY-MM").setCurr(defaultValue.fmt).get => str
-		if (str.length==7) {
-			str=str+"-01"
-		}
-		
-		if (FDate.parse(str,null) != null) {
-			out(FDate.parse(str))
-			break
-		}
-		println("Invalid date, must be on format " + FDate.getFormat)
-	|
-	_.first
+    P(1,Date) => defaultValue
+    defaultValue.setFormat(FDate.getFormat)
+    loop
+        Input("Expiration date on format YYYY-MM-DD or YYYY-MM").setCurr(defaultValue.fmt).get => str
+        if (str.length==7) {
+            str=str+"-01"
+        }
+        
+        if (FDate.parse(str,null) != null) {
+            out(FDate.parse(str))
+            break
+        }
+        println("Invalid date, must be on format " + FDate.getFormat)
+    |
+    _.first
 //GetExpirationDate
-		
+        
 
 # Create or modify info about article
 # --
-	P(1) => data
-	P(2) => description
+    P(1) => data
+    P(2) => description
 
-	delete=false
-	if (data != null) {
-		println
-		println("Expiration date : " + data.expirationDate.fmt)
-		println("Description     : " + data.description)
-		println("Count           : " + data.get("count",1))
-		println
-		readLine("Enter 'x' to delete, or ENTER to edit") => cmd
-		if (cmd=='x') delete=true
-	}
+    delete=false
+    if (data != null) {
+        println
+        println("Expiration date : " + data.expirationDate.fmt)
+        println("Description     : " + data.description)
+        println("Count           : " + data.get("count",1))
+        println
+        readLine("Enter 'x' to delete, or ENTER to edit") => cmd
+        if (cmd=='x') delete=true
+    }
 
-	if (delete) {
-		# return null
-		null
-	} else {
-		# Edit existing or create new, return object
-		if (data==null) data=Dict
+    if (delete) {
+        # return null
+        null
+    } else {
+        # Edit existing or create new, return object
+        if (data==null) data=Dict
 
-		if (description==null) {
-			Input("Description") => inp
-			if (data.has("description")) {
-				inp.setCurr(data.get("description"))
-			}
-				
-			inp.get => description
-		}
+        if (description==null) {
+            Input("Description") => inp
+            if (data.has("description")) {
+                inp.setCurr(data.get("description"))
+            }
+                
+            inp.get => description
+        }
 
-		d=data.get("expirationDate",FDate)
-		GetExpirationDate(d) => expirationDate
+        d=data.get("expirationDate",FDate)
+        GetExpirationDate(d) => expirationDate
 
-		Input("Count").setCurr("" + data.get("count",1)).get.parseInt => count
+        Input("Count").setCurr("" + data.get("count",1)).get.parseInt => count
 
-		data.copyFrom(SymDict(description,expirationDate, count))
-		data
-	}
+        data.copyFrom(SymDict(description,expirationDate, count))
+        data
+    }
 //EditOrCreate
 
 
 # Database id
 # --
-	"Freezer"
+    "Freezer"
 //DbId
 
 
 # Format int
 # --
-	P(1,0) => i
-	s=("    "+i).last(4)
+    P(1,0) => i
+    s=("    "+i).last(4)
 //fmt
 
 # Get data as sorted list, with shortest expiration first
 # --
-	Db2:Get(DbId,"data",List) => data
-	data -> row
-		out(Int(row.expirationDate.get, row))
-	| _.sort->x
-		out(x.data)
+    Db2:Get(DbId,"data",List) => data
+    data -> row
+        out(Int(row.expirationDate.get, row))
+    | _.sort->x
+        out(x.data)
 //SortedList
 
 
 # Check that newest version of CFT
 # --
-	# Needed to fix bug, saving Date format when synthesizing
+    # Needed to fix bug, saving Date format when synthesizing
 
-	if (eval(syn(FDate)).getFormat!=FDate.getFormat) {
-		error("Please update and recompile CFT")
-	}
+    if (eval(syn(FDate)).getFormat!=FDate.getFormat) {
+        error("Please update and recompile CFT")
+    }
 //SanityCheck
 
 
 # Main loop
 # --
-	SanityCheck
+    SanityCheck
 
-	filter=null
-	loop
-		list=SortedList
-		{
-			i=0
-			list->row
-				if (filter == null || row.description.toLower.contains(filter.toLower)) {
-					println(fmt(i) + " - "  + row.get("count",1) + "x " + row.expirationDate.fmt + " " + row.description)
-				}
-				i=i+1
-		}
-		filter=null
+    filter=null
+    loop
+        list=SortedList
+        {
+            i=0
+            list->row
+                if (filter == null || row.description.toLower.contains(filter.toLower)) {
+                    println(fmt(i) + " - "  + row.get("count",1) + "x " + row.expirationDate.fmt + " " + row.description)
+                }
+                i=i+1
+        }
+        filter=null
 
-		prompt="Enter " + if(!list.empty,"number to edit or delete, ","") + "'...' to add, '/...' to search, ENTER to quit" 
-		readLine(prompt) => cmd
-		break(cmd=="")
+        prompt="Enter " + if(!list.empty,"number to edit or delete, ","") + "'...' to add, '/...' to search, ENTER to quit" 
+        readLine(prompt) => cmd
+        break(cmd=="")
 
-		if (cmd.startsWith('/')) {
-			filter = cmd.sub(1)
-		} else if (cmd.?parseInt) {
-			# Edit entry
-			pos=cmd.parseInt
-			x = EditOrCreate(list.nth(pos))
-			if (x==null) {
-				# entry deleted
-				list.remove(pos)
-			}
-		} else if (cmd.trim.length > 1) {
-			list.add(EditOrCreate(null, cmd))
-		}
+        if (cmd.startsWith('/')) {
+            filter = cmd.sub(1)
+        } else if (cmd.?parseInt) {
+            # Edit entry
+            pos=cmd.parseInt
+            x = EditOrCreate(list.nth(pos))
+            if (x==null) {
+                # entry deleted
+                list.remove(pos)
+            }
+        } else if (cmd.trim.length > 1) {
+            list.add(EditOrCreate(null, cmd))
+        }
 
-		# Save list
-		Db2:Set(DbId,"data", list)
+        # Save list
+        Db2:Set(DbId,"data", list)
 /Main
 
-	
+    

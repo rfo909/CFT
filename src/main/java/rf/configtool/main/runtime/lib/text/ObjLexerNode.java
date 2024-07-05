@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2023 Roar Foshaug
+Copyright (C) 2020-2024 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -107,12 +107,12 @@ public class ObjLexerNode extends Obj {
     }
     
     protected List<Value> show () {
-    	List<String> lines=new ArrayList<String>();
-    	charTable.show("", lines);
-    	
-    	List<Value> result=new ArrayList<Value>();
-    	for (String x:lines) result.add(new ValueString(x));
-    	return result;
+        List<String> lines=new ArrayList<String>();
+        charTable.show("", lines);
+        
+        List<Value> result=new ArrayList<Value>();
+        for (String x:lines) result.add(new ValueString(x));
+        return result;
     }
 
     /**
@@ -299,7 +299,7 @@ public class ObjLexerNode extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	ObjLexerNode node = new ObjLexerNode(StopRule.STOP);
+            ObjLexerNode node = new ObjLexerNode(StopRule.STOP);
             return new ValueObj(node);
         }
     }
@@ -315,8 +315,8 @@ public class ObjLexerNode extends Obj {
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-        	List<Value> lines=show();
-        	return new ValueList(lines);
+            List<Value> lines=show();
+            return new ValueList(lines);
         }
     }
 

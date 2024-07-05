@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2023 Roar Foshaug
+Copyright (C) 2020-2024 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -29,14 +29,14 @@ public class ShellCp extends ShellCommand {
 
     private boolean confirmed=false;
     
-	@Override
-	public String getName() {
-		return "cp";
-	}
-	@Override 
-	public String getBriefExampleParams() {
-		return "<src> ... <target>";
-	}
+    @Override
+    public String getName() {
+        return "cp";
+    }
+    @Override 
+    public String getBriefExampleParams() {
+        return "<src> ... <target>";
+    }
 
 
     private boolean copyFile (Ctx ctx, File src, File target) throws Exception {

@@ -2,7 +2,7 @@
 <<< EOF
 #
 # CFT - an interactive programmable shell for automation 
-# Copyright (C) 2020-2023 Roar Foshaug
+# Copyright (C) 2020-2024 Roar Foshaug
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -129,8 +129,8 @@ P(2,false)=>print
 
 # Create / access counter
 # --
-	P(1) as String => name
-	P(2,999999999999) as int => maxValue
+    P(1) as String => name
+    P(2,999999999999) as int => maxValue
     
     id="counter:"+(name.replace(" ","_"))
     
@@ -154,7 +154,7 @@ P(2,false)=>print
 
 # Set time mark - used with HasTimedOut below
 # --
-	P(1) => name
+    P(1) => name
     id="timemark:"+(name.replace(" ","_"))
     Db2:Set("Util", id, Date)
 /SetTimeMark
@@ -163,8 +163,8 @@ P(2,false)=>print
 
 # Check time mark 
 # --
-	P(1) => name
-	P(2,3600) => seconds
+    P(1) => name
+    P(2,3600) => seconds
 
     Date.sub(Date.Duration.seconds(seconds)) => limit
 
@@ -178,7 +178,7 @@ P(2,false)=>print
 
 # Get time mark
 # --
-	P(1) => name
+    P(1) => name
 
     id="timemark:"+((""+name).replace(" ","_"))
     val = Db2:Get("Util",id)
@@ -218,9 +218,9 @@ P(2,false)=>print
 #   files=Dir.files
 #   Lib:MenuSelect(files, Lambda{P(1).name}, "Select file")
 # --
-	P(1) => dir
-	P(2,"*") => globPattern
-	P(3,Lambda{P(1)}) => processList 
+    P(1) => dir
+    P(2,"*") => globPattern
+    P(3,Lambda{P(1)}) => processList 
 
     filterString=null
     loop
@@ -271,42 +271,42 @@ P(2,false)=>print
 
 # Select date/time relative to now
 # --
-	P(1,"Select date and time") => label
-	
-	Lib:Header(label)
-	Input("Enter string on format +/- N [smhd] to indicate seconds/minutes/hours/days").get=>val
+    P(1,"Select date and time") => label
+    
+    Lib:Header(label)
+    Input("Enter string on format +/- N [smhd] to indicate seconds/minutes/hours/days").get=>val
 
-	plusMinus="+"
-	if (val.startsWith("+")) {
-		val=val.sub(1)
-	} else if (val.startsWith("-")) {
-		plusMinus="-"
-		val=val.sub(1)
-	}
+    plusMinus="+"
+    if (val.startsWith("+")) {
+        val=val.sub(1)
+    } else if (val.startsWith("-")) {
+        plusMinus="-"
+        val=val.sub(1)
+    }
 
-	code=val.chars.last.toLower
-	val=val.sub(0,val.length-1).trim
+    code=val.chars.last.toLower
+    val=val.sub(0,val.length-1).trim
 
-	value=val.parseFloat
-	millis=0
+    value=val.parseFloat
+    millis=0
 
-	if (code=="s") {
-		millis=value*1000
-	} else if (code=="m") {
-		millis=value*1000*60
-	} else if (code=="h") {
-		millis=value*1000*60*60
-	} else if (code=="d") {
-		millis=value*1000*60*60*24
-	} else {
-		error("Invalid format")
-	}
+    if (code=="s") {
+        millis=value*1000
+    } else if (code=="m") {
+        millis=value*1000*60
+    } else if (code=="h") {
+        millis=value*1000*60*60
+    } else if (code=="d") {
+        millis=value*1000*60*60*24
+    } else {
+        error("Invalid format")
+    }
 
-	if (plusMinus=="+") {
-		Date(currentTimeMillis+millis.i)
-	} else {
-		Date(currentTimeMillis-millis.i)
-	}
+    if (plusMinus=="+") {
+        Date(currentTimeMillis+millis.i)
+    } else {
+        Date(currentTimeMillis-millis.i)
+    }
 /SelectRelativeDateTime
 
 
@@ -314,19 +314,19 @@ P(2,false)=>print
 
 # Search through recently updated files under current directory
 # --
-	P(1,Dir) => currDir
-	P(2,Input("Glob pattern").setCurrCond("*.java").get) => glob
-	P(3,Util:SelectRelativeDateTime) => limit
-	P(4,Input("Search for string").get) => pattern
+    P(1,Dir) => currDir
+    P(2,Input("Glob pattern").setCurrCond("*.java").get) => glob
+    P(3,Util:SelectRelativeDateTime) => limit
+    P(4,Input("Search for string").get) => pattern
 
-	currDir.allFiles(glob)->f
-		assert(f.lastModified>limit.get)
-		hits=Grep(pattern).file(f)
-		reject(hits.empty)
+    currDir.allFiles(glob)->f
+        assert(f.lastModified>limit.get)
+        hits=Grep(pattern).file(f)
+        reject(hits.empty)
 
-		Lib:Header(f.path)
-		hits->line 
-			println(line.lineNumber,line)
+        Lib:Header(f.path)
+        hits->line 
+            println(line.lineNumber,line)
 /SearchRecentFiles
 
 
@@ -334,29 +334,29 @@ P(2,false)=>print
 
 # Do search/replace on single text file, return true if match, overwrite only if overwrite parameter true.
 # --
-	P(1) as File => file
-	P(2) as String => from
-	P(3) as String => to
-	P(4, "UTF-8") as String => encoding
-	P(5, false) as boolean => overwrite
+    P(1) as File => file
+    P(2) as String => from
+    P(3) as String => to
+    P(4, "UTF-8") as String => encoding
+    P(5, false) as boolean => overwrite
 
 
-	modified=false
+    modified=false
 
-	file.read->line
-		s=line.replace("javax","jakarta")
-		if (s != line) {
-			modified=true
-		}
-		out(s)
-	| => lines
+    file.read->line
+        s=line.replace("javax","jakarta")
+        if (s != line) {
+            modified=true
+        }
+        out(s)
+    | => lines
 
-	if (modified && overwrite) {
-		file.encoding(encoding).create(lines)
-	}
+    if (modified && overwrite) {
+        file.encoding(encoding).create(lines)
+    }
 
-	# return value
-	modified
+    # return value
+    modified
 /SearchReplace
 
 
@@ -753,22 +753,22 @@ Dict.set("list",List)
 
 # Run rest request, using Sys.Rest object, returnings dictionary
 # --
-	P(1) => url
-	P(2,"GET") => method
-	P(3) => basicAuth
-	P(4) => jsonData
-	P(5,false) => verbose
+    P(1) => url
+    P(2,"GET") => method
+    P(3) => basicAuth
+    P(4) => jsonData
+    P(5,false) => verbose
 
-	rest = Sys.Rest
+    rest = Sys.Rest
 
-	rest.url(url)
-	rest.method(method)
-	if (jsonData != null) rest.jsonData(jsonData)
-	if (basicAuth != null) rest.basicAuth(basicAuth)
-	if (verbose) rest.verbose
-	
-	# return dict object
-	rest.execute
+    rest.url(url)
+    rest.method(method)
+    if (jsonData != null) rest.jsonData(jsonData)
+    if (basicAuth != null) rest.basicAuth(basicAuth)
+    if (verbose) rest.verbose
+    
+    # return dict object
+    rest.execute
 /Rest
 
 
@@ -828,45 +828,45 @@ Dict.set("list",List)
 
 # Check for updates
 # --
-	jarFile=Sys.homeDir.sub("target").file("cft-jar-with-dependencies.jar")
-	lastBuild=Date(jarFile.lastModified)
+    jarFile=Sys.homeDir.sub("target").file("cft-jar-with-dependencies.jar")
+    lastBuild=Date(jarFile.lastModified)
 
-	daysAgo=Date.diff(lastBuild).asDays
+    daysAgo=Date.diff(lastBuild).asDays
 
-	if (daysAgo >= 30) {
+    if (daysAgo >= 30) {
 
-		Db2:Get(Sys.scriptId,"RebuildNag",Dict) => data
+        Db2:Get(Sys.scriptId,"RebuildNag",Dict) => data
 
-		if(data.get("lastBuild", lastBuild)==lastBuild) {
-			dateStr=Date.setFormat("yyyyMMdd").fmt
+        if(data.get("lastBuild", lastBuild)==lastBuild) {
+            dateStr=Date.setFormat("yyyyMMdd").fmt
 
-			if (data.get("lastNag","") != dateStr && data.get("nags",0)<5) {
-				Inner {
-					Sequence(
-						@
-						@ ------------------------------------------------
-						@ Last build: <<daysAgo>> days ago
-						@ ------------------------------------------------
-						@
-						@ To check for updates:
-						@ ---------------------
-						@    git pull origin master
-						@    mvn clean package
-						@
-						@
-					).mergeExpr->line println(line)
-				}
+            if (data.get("lastNag","") != dateStr && data.get("nags",0)<5) {
+                Inner {
+                    Sequence(
+                        @
+                        @ ------------------------------------------------
+                        @ Last build: <<daysAgo>> days ago
+                        @ ------------------------------------------------
+                        @
+                        @ To check for updates:
+                        @ ---------------------
+                        @    git pull origin master
+                        @    mvn clean package
+                        @
+                        @
+                    ).mergeExpr->line println(line)
+                }
 
-				data.lastNag=dateStr
-				data.nags=data.nags+1
-				Db2:Set(Sys.scriptId,"RebuildNag",data)
-			}
-		} else {
-			# Not corresponding file date
-			nags=0
-			data=Dict.set("lastBuild",lastBuild).set("nags",0)
-			Db2:Set(Sys.scriptId,"RebuildNag",SymDict(lastBuild, nags))
-		}
-			
-	}
+                data.lastNag=dateStr
+                data.nags=data.nags+1
+                Db2:Set(Sys.scriptId,"RebuildNag",data)
+            }
+        } else {
+            # Not corresponding file date
+            nags=0
+            data=Dict.set("lastBuild",lastBuild).set("nags",0)
+            Db2:Set(Sys.scriptId,"RebuildNag",SymDict(lastBuild, nags))
+        }
+            
+    }
 /CheckForUpdates

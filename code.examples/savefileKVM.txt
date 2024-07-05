@@ -2,7 +2,7 @@
 <<< EOF
 #
 # CFT - an interactive programmable shell for automation 
-# Copyright (C) 2020-2023 Roar Foshaug
+# Copyright (C) 2020-2024 Roar Foshaug
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -211,7 +211,7 @@ status
 
 # Start VM
 # --
-	P(1) =>target
+    P(1) =>target
     println("STARTING " + target)
     Lib:run(List("virsh","start","--domain",target),List,true)
     status
@@ -220,7 +220,7 @@ status
 
 # Stop VM
 # --
-	P(1) =>target
+    P(1) =>target
     println("STOPPING " + target)
     Lib:run(List("virsh","destroy","--domain", target),List,true)
     status
@@ -229,7 +229,7 @@ status
 
 # Delete VM
 # --
-	P(1) =>target
+    P(1) =>target
     println("DELETING " + target)
     error(DoNotDelete.contains(target),
         "Can not delete target " + target + ": remove from DoNotDelete list first")
@@ -337,8 +337,8 @@ KVM:Clone(template,"kub65",initialAddr,"10.0.8.28/16","roar", nic)
 
 
 >>>>> EOF
-	->line 
-		println(line)
+    ->line 
+        println(line)
 /Example
 
 

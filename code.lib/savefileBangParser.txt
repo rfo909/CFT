@@ -2,7 +2,7 @@
 <<< EOF
 #
 # CFT - an interactive programmable shell for automation 
-# Copyright (C) 2020-2023 Roar Foshaug
+# Copyright (C) 2020-2024 Roar Foshaug
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -32,37 +32,37 @@ the other shell-like commands.
 
 # Make argument value safe with regards to space, backslashes and apos
 # --
-	P(1) as String => arg
+    P(1) as String => arg
 
-	if (Sys.isWindows) {
-		if (arg.contains(" ") || arg.contains("$") || arg.contains("'")) {
-			# double quotes not allowed in windows directory names!!
-			# escaping single quote ' with ''
-			"'" + arg.replace("'","''") + "'"
-		} else {
-			# leave as-is and hope for the best
-			arg
-		}
-	} else {
-		# Linux does not question values in command vector, also does not try to do globbing
-		# when called through Dir.run (that's an interactive Linux shell feature, and handled
-		# in Java for CFT when running on Linux)
-		arg
-	}
+    if (Sys.isWindows) {
+        if (arg.contains(" ") || arg.contains("$") || arg.contains("'")) {
+            # double quotes not allowed in windows directory names!!
+            # escaping single quote ' with ''
+            "'" + arg.replace("'","''") + "'"
+        } else {
+            # leave as-is and hope for the best
+            arg
+        }
+    } else {
+        # Linux does not question values in command vector, also does not try to do globbing
+        # when called through Dir.run (that's an interactive Linux shell feature, and handled
+        # in Java for CFT when running on Linux)
+        arg
+    }
 //FixSpace
 
 
 # Run command
 # --
-	P(1,Dir)=>currentDir
-	P(2)=>cmdList
+    P(1,Dir)=>currentDir
+    P(2)=>cmdList
 
-	cmdList=Inner{ cmdList->element out(FixSpace(element)) }
+    cmdList=Inner{ cmdList->element out(FixSpace(element)) }
 
-	#println("--> " + cmdList.concat(" "))
-	
-	if (Sys.isWindows) cmdList=List("powershell") + cmdList
-	
-	currentDir.run(cmdList)
+    #println("--> " + cmdList.concat(" "))
+    
+    if (Sys.isWindows) cmdList=List("powershell") + cmdList
+    
+    currentDir.run(cmdList)
 /Run
 

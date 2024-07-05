@@ -1,35 +1,56 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2024 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 # Helper
 # --
-	P(1) => cmd
-	Util:Run(cmd,Dir)
+    P(1) => cmd
+    Util:Run(cmd,Dir)
 //Run
 
 
 # Create branch
 # --
-	P(1,Input("Branch FROM").setCurrCond("master").get.trim) => fromBranch
-	P(2,readLine("New branch name").trim) => newBranch
+    P(1,Input("Branch FROM").setCurrCond("master").get.trim) => fromBranch
+    P(2,readLine("New branch name").trim) => newBranch
 
-	Run("git checkout " + fromBranch)
-	Run("git pull origin " + fromBranch)
-	Run("git branch " + newBranch)
-	Run("git checkout " + newBranch)
+    Run("git checkout " + fromBranch)
+    Run("git pull origin " + fromBranch)
+    Run("git branch " + newBranch)
+    Run("git checkout " + newBranch)
 /CreateBranch
 
 
 # Delete local branch
 # --
-	P(1,readLine("Local branch to delete").trim) => branch
-	error(branch=="master","Can not delete master")
-	Run("git checkout master")
-	Run("git branch --delete " + branch)
+    P(1,readLine("Local branch to delete").trim) => branch
+    error(branch=="master","Can not delete master")
+    Run("git checkout master")
+    Run("git branch --delete " + branch)
 /DeleteLocalBranch
 
 
 
 # List branches
 # --
-	Run("git branch")
+    Run("git branch")
 /ShowBranches
 
 
@@ -37,48 +58,48 @@
 # Create and run git commands for adding submodules from another project's .gitmodules or from a text file on same format
 # (an edited version)
 # --
-	P(1) as File => file
-	P(2, true) => showOnly
+    P(1) as File => file
+    P(2, true) => showOnly
 
-	enabled=false
-	path=null
-	url=null
+    enabled=false
+    path=null
+    url=null
 
-	file.read->line
-		reject(line.trim=="" || line.trim.startsWith("#"))
+    file.read->line
+        reject(line.trim=="" || line.trim.startsWith("#"))
 
-		if (line.startsWith("[submodule")) {
-			enabled=true
-		} else if (line.trim.startsWith("path =")) {
-			if (enabled) path=line.after("=").trim
-		} else if (line.trim.startsWith("url =")) {
-			if (enabled) url=line.after("=").trim
-		} else {
-			error("Invalid line: " + line)
-		}
-		if (enabled && path != null && url != null) {
-			command="git submodule add <<url>> <<path>>".mergeExpr.first
-			println(command)
-			if (!showOnly) {
-				Dir.run(command.split)
-			}
-			enabled=false
-			path=url=null
-		}
+        if (line.startsWith("[submodule")) {
+            enabled=true
+        } else if (line.trim.startsWith("path =")) {
+            if (enabled) path=line.after("=").trim
+        } else if (line.trim.startsWith("url =")) {
+            if (enabled) url=line.after("=").trim
+        } else {
+            error("Invalid line: " + line)
+        }
+        if (enabled && path != null && url != null) {
+            command="git submodule add <<url>> <<path>>".mergeExpr.first
+            println(command)
+            if (!showOnly) {
+                Dir.run(command.split)
+            }
+            enabled=false
+            path=url=null
+        }
 /CreateSubmodules
-		
-	
+        
+    
 # Update submodules according to .gitmodules in current dir
 # --
-	P(1,Dir.file(".gitmodules")) => file
-	P(2,Input("Enter glob pattern to match submodule(s)").setCurrCond("*").get) => modulePattern
+    P(1,Dir.file(".gitmodules")) => file
+    P(2,Input("Enter glob pattern to match submodule(s)").setCurrCond("*").get) => modulePattern
 
-	file.read->line
-		assert(line.trim.startsWith("path ="))
-		path=line.after("=").trim
-		if (Glob(modulePattern).regex.match(path)) {
-			command="git submodule update --remote " +  path
-			println(command)
-			Dir.run(command.split)
-		}
+    file.read->line
+        assert(line.trim.startsWith("path ="))
+        path=line.after("=").trim
+        if (Glob(modulePattern).regex.match(path)) {
+            command="git submodule update --remote " +  path
+            println(command)
+            Dir.run(command.split)
+        }
 /UpdateSubmodules

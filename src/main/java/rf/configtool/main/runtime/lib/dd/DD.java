@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2023 Roar Foshaug
+Copyright (C) 2020-2024 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -88,12 +88,12 @@ public class DD extends Obj {
             return "Ref(world?) - return Ref2d object";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-        	DDWorld world=null;
-        	if (params.size()==1) {
-        		world=(DDWorld) getObj("world",params,0);
-        	} else if (params.size() != 0) {
-        		throw new Exception("Expected optional parameter world");
-        	}
+            DDWorld world=null;
+            if (params.size()==1) {
+                world=(DDWorld) getObj("world",params,0);
+            } else if (params.size() != 0) {
+                throw new Exception("Expected optional parameter world");
+            }
             return new ValueObj(new DDRef(new Ref(), world));
         }
     }

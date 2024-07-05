@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2023 Roar Foshaug
+Copyright (C) 2020-2024 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -34,14 +34,14 @@ import rf.configtool.main.runtime.lib.Protection;
 
 public class ShellWhich extends ShellCommand {
 
-	@Override
-	public String getName() {
-		return "which";
-	}
-	@Override 
-	public String getBriefExampleParams() {
-		return "<command>";
-	}
+    @Override
+    public String getName() {
+        return "which";
+    }
+    @Override 
+    public String getBriefExampleParams() {
+        return "<command>";
+    }
 
 
     public Value execute(Ctx ctx, Command cmd) throws Exception {
@@ -51,7 +51,7 @@ public class ShellWhich extends ShellCommand {
         boolean noArgs=cmd.getArgs().isEmpty();
         
         if (noArgs) {
-        	throw new Exception(name + ": expected program name");
+            throw new Exception(name + ": expected program name");
         }        
         
         List<Arg> args=cmd.getArgs();
@@ -66,7 +66,7 @@ public class ShellWhich extends ShellCommand {
     
       private Value callMacro (Ctx ctx, String name, ValueString str) throws Exception {
 
-	    PropsFile propsFile=ctx.getObjGlobal().getRoot().getPropsFile();
+        PropsFile propsFile=ctx.getObjGlobal().getRoot().getPropsFile();
         String lambda=propsFile.getMWhich();
         Value[] lambdaArgs= {str};
 

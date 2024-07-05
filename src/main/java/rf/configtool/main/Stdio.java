@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2023 Roar Foshaug
+Copyright (C) 2020-2024 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -192,8 +192,8 @@ public abstract class Stdio {
     }
 
     public String getInputLine() throws Exception {
-    	String line=getBufferedInputLine();
-    	if (line != null) return line;
+        String line=getBufferedInputLine();
+        if (line != null) return line;
         if (stdin == null) throw new Exception("stdin disconnected - no buffered lines");
 
         return stdin.readLine();

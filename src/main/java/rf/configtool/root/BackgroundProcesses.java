@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2023 Roar Foshaug
+Copyright (C) 2020-2024 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -113,8 +113,8 @@ public class BackgroundProcesses {
         List<Process> toDelete = new ArrayList<Process>();
         for (Process p:completed) {
             if (p.getName().equals(name)) {
-            	toDelete.add(p);
-            	break;
+                toDelete.add(p);
+                break;
             }
         }
         for (Process p:toDelete) completed.remove(p);

@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2023 Roar Foshaug
+Copyright (C) 2020-2024 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -34,51 +34,51 @@ import rf.configtool.main.runtime.Value;
  *
  */
 public class ShellCommandsManager {
-	
-	public static final String FORCE_EXTERNAL_COMMAND_PREFIX = "\t";
-	public static final String FORCE_CFT_CODE_PREFIX = " ";
-	
+    
+    public static final String FORCE_EXTERNAL_COMMAND_PREFIX = "\t";
+    public static final String FORCE_CFT_CODE_PREFIX = " ";
+    
     
     public static final ShellCommand[] SHELL_COMMANDS = {
-    		new ShellShell(),
-    		new ShellLs("ls"),
-    		new ShellLs("lsd"),
-    		new ShellLs("lsf"),
-    		new ShellCd(),
-    		new ShellPwd(),
-    		new ShellCatEditMoreTail("cat"),
-    		new ShellCatEditMoreTail("edit"),
-    		new ShellCatEditMoreTail("more"),
-    		new ShellCatEditMoreTail("tail"),
-    		new ShellTouch(),
-    		
-    		new ShellCp(),
-    		new ShellRm(),
-    		new ShellMv(),
-    		new ShellMkdir(),
-    		new ShellGrep(),
+            new ShellShell(),
+            new ShellLs("ls"),
+            new ShellLs("lsd"),
+            new ShellLs("lsf"),
+            new ShellCd(),
+            new ShellPwd(),
+            new ShellCatEditMoreTail("cat"),
+            new ShellCatEditMoreTail("edit"),
+            new ShellCatEditMoreTail("more"),
+            new ShellCatEditMoreTail("tail"),
+            new ShellTouch(),
+            
+            new ShellCp(),
+            new ShellRm(),
+            new ShellMv(),
+            new ShellMkdir(),
+            new ShellGrep(),
 
-    		new ShellDiff(),
-    		new ShellShowtree(),
-    		new ShellHash(),
-    		new ShellHex(),
-    		new ShellWhich(),
+            new ShellDiff(),
+            new ShellShowtree(),
+            new ShellHash(),
+            new ShellHex(),
+            new ShellWhich(),
     };
 
     
     public List<String> getShellCommandDescriptions() {
-    	List<String> lines=new ArrayList<String>();
-    	
-    	ShellExternalCommand sb=new ShellExternalCommand();
-    	lines.add(sb.getName() + " " + sb.getBriefExampleParams());
+        List<String> lines=new ArrayList<String>();
+        
+        ShellExternalCommand sb=new ShellExternalCommand();
+        lines.add(sb.getName() + " " + sb.getBriefExampleParams());
 
-    	for (ShellCommand x:SHELL_COMMANDS) {
-    		String desc=x.getBriefExampleParams();
-    		if (desc==null) desc=""; else desc=" " + desc;
-    		lines.add(x.getName()+desc);
-    	}
-    	
-    	return lines;
+        for (ShellCommand x:SHELL_COMMANDS) {
+            String desc=x.getBriefExampleParams();
+            if (desc==null) desc=""; else desc=" " + desc;
+            lines.add(x.getName()+desc);
+        }
+        
+        return lines;
     }
     
 
@@ -88,16 +88,16 @@ public class ShellCommandsManager {
      * return null.
      */
     public Value execute (Stdio stdio, ObjGlobal objGlobal, String line) throws Exception {
-    	
+        
         boolean forceExternalCommand=false;
         
         if (line.startsWith(FORCE_CFT_CODE_PREFIX)) {
-        	return null;
+            return null;
         }
         
         // forcing external command?
         if (line.startsWith(FORCE_EXTERNAL_COMMAND_PREFIX)) {
-        	forceExternalCommand=true;
+            forceExternalCommand=true;
         } 
         
         // Strip prefixing space and TAB
@@ -108,13 +108,13 @@ public class ShellCommandsManager {
         ShellCommand foundCommand=null;
         
         if (!forceExternalCommand) {
-        	for (ShellCommand c:SHELL_COMMANDS) {
-        		String op=c.getName();
-	            if (line.equals(op) || line.startsWith(op+" ") || line.startsWith(op+"(")) {
-	            	foundCommand=c;
-	            	break;
-	            }
-	        }
+            for (ShellCommand c:SHELL_COMMANDS) {
+                String op=c.getName();
+                if (line.equals(op) || line.startsWith(op+" ") || line.startsWith(op+"(")) {
+                    foundCommand=c;
+                    break;
+                }
+            }
         }
         
         if (!forceExternalCommand && foundCommand==null) {
@@ -131,9 +131,9 @@ public class ShellCommandsManager {
         Command cmd=new Command(parts);
         
         if (forceExternalCommand) {
-        	return executeShellCommand(stdio, objGlobal, new ShellExternalCommand(), cmd);
+            return executeShellCommand(stdio, objGlobal, new ShellExternalCommand(), cmd);
         } else {
-        	return executeShellCommand(stdio, objGlobal, foundCommand, cmd);
+            return executeShellCommand(stdio, objGlobal, foundCommand, cmd);
         }
     }
     

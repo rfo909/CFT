@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2023 Roar Foshaug
+Copyright (C) 2020-2024 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -98,7 +98,7 @@ public class FileSet {
         if (isDestructiveOperation) {
             file.validateDestructiveOperation(opName);
         }
-        addFilePath( file.getFile().getCanonicalPath() );    	
+        addFilePath( file.getFile().getCanonicalPath() );     
     }
     
     private void addDir (ObjDir dir) throws Exception {
@@ -177,21 +177,21 @@ public class FileSet {
                 String str=((ValueString) v).getVal();
                 processStringArg(currentDir, str, allowNewDir, allowNewFile);
             } else if (v instanceof ValueList) {
-            	List<Value> list=((ValueList) v).getVal();
-            	NEXT_LIST_ELEMENT: for (Value listElement:list) {
-            		if (listElement instanceof ValueObj) {
-            			Obj obj=((ValueObj) listElement).getVal();
-            			if (obj instanceof ObjDir) {
-            				addDir((ObjDir) obj);
-            				continue NEXT_LIST_ELEMENT;
-            			} else if (obj instanceof ObjFile) {
-            				addFile((ObjFile) obj);
-            				continue NEXT_LIST_ELEMENT;
-            			} 
-            		}
-            		// can only handle files and directories
-            		throw new Exception("Invalid expression list value");
-            	}
+                List<Value> list=((ValueList) v).getVal();
+                NEXT_LIST_ELEMENT: for (Value listElement:list) {
+                    if (listElement instanceof ValueObj) {
+                        Obj obj=((ValueObj) listElement).getVal();
+                        if (obj instanceof ObjDir) {
+                            addDir((ObjDir) obj);
+                            continue NEXT_LIST_ELEMENT;
+                        } else if (obj instanceof ObjFile) {
+                            addFile((ObjFile) obj);
+                            continue NEXT_LIST_ELEMENT;
+                        } 
+                    }
+                    // can only handle files and directories
+                    throw new Exception("Invalid expression list value");
+                }
             } else if (v instanceof ValueObj) {
                 Obj obj=((ValueObj) v).getVal();
                 if (obj instanceof ObjFile) {
@@ -202,7 +202,7 @@ public class FileSet {
                     addDir(dir);
                 }
             } else {
-            	throw new Exception("Invalid expression value");
+                throw new Exception("Invalid expression value");
             }
         } else {
             processStringArg(currentDir, arg.getString(), allowNewDir, allowNewFile);
@@ -215,43 +215,43 @@ public class FileSet {
         // Pre-processing arg: the path lookup operator
         
         if (arg.startsWith("-")) {
-        	String remainingArg=arg.substring(1);
-        	String lookupTerm;
-        	
-        	int firstSepPos=remainingArg.indexOf(File.separatorChar);
-        	if (firstSepPos >= 0) {
-        		lookupTerm=remainingArg.substring(0,firstSepPos);
-        		remainingArg=remainingArg.substring(firstSepPos);
-        	} else {
-        		lookupTerm=remainingArg;
-        		remainingArg="";
-        	}
-        	
-        	if (lookupTerm.length()==0) throw new Exception("Path lookup: empty lookup term: " + arg);
-        	
-        	//System.out.println("Path lookup: lookupTerm=" + lookupTerm + " remainingArg=" + remainingArg);
-        	
-        	int pathMatchPos=currentDir.lastIndexOf(lookupTerm);
-        	if (pathMatchPos < 0) {
-        		throw new Exception("Path lookup: no match: " + arg);
-        	}
-        	
-        	int pathNextSepPos=currentDir.indexOf(File.separator,pathMatchPos);
-        	if (pathNextSepPos > 0) {
-        		// complete rewrite of arg
-        		arg=currentDir.substring(0,pathNextSepPos)+remainingArg;
-        	} else {
-        		// No file.separator following lookup match pos - must have matched current directory
-        		arg=currentDir+remainingArg;
-        	}
-        	
-        	//throw new Exception("Stopping");		
+            String remainingArg=arg.substring(1);
+            String lookupTerm;
+            
+            int firstSepPos=remainingArg.indexOf(File.separatorChar);
+            if (firstSepPos >= 0) {
+                lookupTerm=remainingArg.substring(0,firstSepPos);
+                remainingArg=remainingArg.substring(firstSepPos);
+            } else {
+                lookupTerm=remainingArg;
+                remainingArg="";
+            }
+            
+            if (lookupTerm.length()==0) throw new Exception("Path lookup: empty lookup term: " + arg);
+            
+            //System.out.println("Path lookup: lookupTerm=" + lookupTerm + " remainingArg=" + remainingArg);
+            
+            int pathMatchPos=currentDir.lastIndexOf(lookupTerm);
+            if (pathMatchPos < 0) {
+                throw new Exception("Path lookup: no match: " + arg);
+            }
+            
+            int pathNextSepPos=currentDir.indexOf(File.separator,pathMatchPos);
+            if (pathNextSepPos > 0) {
+                // complete rewrite of arg
+                arg=currentDir.substring(0,pathNextSepPos)+remainingArg;
+            } else {
+                // No file.separator following lookup match pos - must have matched current directory
+                arg=currentDir+remainingArg;
+            }
+            
+            //throw new Exception("Stopping");      
         }
         
-    	
-    	
-    	
-    	boolean isAbsolute;
+        
+        
+        
+        boolean isAbsolute;
 
         if (isWindows()) {
             isAbsolute=arg.startsWith("\\") || (arg.length() >= 3 && arg.charAt(1)==':' && arg.charAt(2)=='\\');

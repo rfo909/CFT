@@ -2,7 +2,7 @@
 <<< EOF
 #
 # CFT - an interactive programmable shell for automation 
-# Copyright (C) 2020-2023 Roar Foshaug
+# Copyright (C) 2020-2024 Roar Foshaug
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -169,11 +169,11 @@ P(4,false) => showDebug
 
 # Copy local file via scp (secure copy over SSH) to remote target, returns Dict object
 # --
-	P(1) => localFile
-	P(2) => target
-	P(3) => remoteName
-	P(4, false) => acceptErrors
-	P(5, false) => showDebug
+    P(1) => localFile
+    P(2) => target
+    P(3) => remoteName
+    P(4, false) => acceptErrors
+    P(5, false) => showDebug
 
     if (getType(localFile)=="File") {
         localFile=localFile.path
@@ -184,12 +184,12 @@ P(4,false) => showDebug
 
 # Get remote file via scp
 # --
-	P(1) => localFile
-	P(2) => target
-	P(3) => remoteName
-	P(4, false) => acceptErrors
-	P(5, false) => showDebug
-	
+    P(1) => localFile
+    P(2) => target
+    P(3) => remoteName
+    P(4, false) => acceptErrors
+    P(5, false) => showDebug
+    
     if (getType(localFile)=="File") {
         localFile=localFile.path
     }

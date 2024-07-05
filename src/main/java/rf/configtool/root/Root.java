@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2023 Roar Foshaug
+Copyright (C) 2020-2024 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -306,10 +306,10 @@ public class Root {
             
             // History management - not bothering with shortcuts (processed above)
             try {
-            	Value currDir=new ValueObj(new ObjDir(objGlobal.getCurrDir(),Protection.NoProtection));
-            	Value command=new ValueString(line);
-            	
-            	SourceLocation loc=new SourceLocation("history", 0, 0);
+                Value currDir=new ValueObj(new ObjDir(objGlobal.getCurrDir(),Protection.NoProtection));
+                Value command=new ValueString(line);
+                
+                SourceLocation loc=new SourceLocation("history", 0, 0);
                 String code = propsFile.getHistoryCommand();
 
                 FunctionBody codeLines = new FunctionBody(code, loc);
@@ -321,7 +321,7 @@ public class Root {
                 
                 objGlobal.getRuntime().processFunction(stdio, caller, codeLines, new FunctionState(null,args));
             } catch (Exception ex) {
-            	stdio.addDebug("Failed calling historyCommand (CFT.props)");
+                stdio.addDebug("Failed calling historyCommand (CFT.props)");
             }
             
             
@@ -329,7 +329,7 @@ public class Root {
             // pre-processing input
             final boolean forceCftCode = line.startsWith(ShellCommandsManager.FORCE_CFT_CODE_PREFIX);
             if (forceCftCode) {
-            	line=line.substring(ShellCommandsManager.FORCE_CFT_CODE_PREFIX.length()).trim();
+                line=line.substring(ShellCommandsManager.FORCE_CFT_CODE_PREFIX.length()).trim();
             } 
             
             
@@ -346,7 +346,7 @@ public class Root {
             
             if (line.startsWith(".") && !line.startsWith("."+File.separatorChar)) {
                 // repeat previous command
-            	// ("./xxx" and ".\xxx" is assumed to be local programs to be run, see below)
+                // ("./xxx" and ".\xxx" is assumed to be local programs to be run, see below)
                 String currLine = currScriptCode.getCurrLine();
                 if (currLine == null) {
                     stdio.println("ERROR: no current line");
@@ -462,50 +462,50 @@ public class Root {
 
                 // detect ./command syntax directly?
                 if (line.trim().startsWith("."+File.separator)) {
-                	isCFTInput=false;
+                    isCFTInput=false;
                 }
                 
                 // try parsing command line?
                 if (isCFTInput) {
-	                FunctionBody fbody=new FunctionBody(line,loc);
-	                try {
-	                	fbody.getCodeSpaces();
-	                } catch (Exception ex) {
-	                	isCFTInput=false;
-	                }
+                    FunctionBody fbody=new FunctionBody(line,loc);
+                    try {
+                        fbody.getCodeSpaces();
+                    } catch (Exception ex) {
+                        isCFTInput=false;
+                    }
                 }
                 
                 // try executing CFT command?
                 if (isCFTInput) try {
-                	Value result = objGlobal.getRuntime().processFunction(stdio, caller, new FunctionBody(line, loc), new FunctionState(null,null));
-                	postProcessResult(result);
-                	showSystemLog();
+                    Value result = objGlobal.getRuntime().processFunction(stdio, caller, new FunctionBody(line, loc), new FunctionState(null,null));
+                    postProcessResult(result);
+                    showSystemLog();
                 } catch (Exception ex) {
-                	if (forceCftCode) throw ex;
-                		// log below
-                	
-                	//System.out.println("---> " + ex.getMessage());
-                	if (ex.getMessage().contains("<script>") 
-                			|| ex.getMessage().contains("[eof]"))  // parse problem in called code 
-                	{
-                		throw ex; // CFT script code error, log below
-                	}
-                	isCFTInput=false;
+                    if (forceCftCode) throw ex;
+                        // log below
+                    
+                    //System.out.println("---> " + ex.getMessage());
+                    if (ex.getMessage().contains("<script>") 
+                            || ex.getMessage().contains("[eof]"))  // parse problem in called code 
+                    {
+                        throw ex; // CFT script code error, log below
+                    }
+                    isCFTInput=false;
                 }
                 
                 // try process as CFT bang command?
                 if (!forceCftCode && !isCFTInput) {
-		        	final String shellCommandLine=ShellCommandsManager.FORCE_EXTERNAL_COMMAND_PREFIX+line;
-		        	//System.out.println(shellCommandLine);
+                    final String shellCommandLine=ShellCommandsManager.FORCE_EXTERNAL_COMMAND_PREFIX+line;
+                    //System.out.println(shellCommandLine);
 
-		            Value x = (new ShellCommandsManager()).execute(stdio, objGlobal, shellCommandLine);
-		            if (x != null) {
-		                postProcessResult(x);
-		                showSystemLog();
-		                return;
-		            }
-	        	}
-        	
+                    Value x = (new ShellCommandsManager()).execute(stdio, objGlobal, shellCommandLine);
+                    if (x != null) {
+                        postProcessResult(x);
+                        showSystemLog();
+                        return;
+                    }
+                }
+            
             }
 
         } catch (Throwable t) {

@@ -2,7 +2,7 @@
 <<< EOF
 #
 # CFT - an interactive programmable shell for automation 
-# Copyright (C) 2020-2023 Roar Foshaug
+# Copyright (C) 2020-2024 Roar Foshaug
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -105,8 +105,8 @@ P(2, Input("Enter service").get) =>service
 
 P(1, Input("Enter remote host").get) =>host 
 P(2, Input("Enter service").get) =>service
-	StopService(host,service)
-	StartService(host,service)
+    StopService(host,service)
+    StartService(host,service)
 /RestartService
 
 

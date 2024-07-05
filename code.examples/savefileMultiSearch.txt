@@ -1,3 +1,24 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2024 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 # Readme
 # --
 <<<<<< EOF
@@ -11,76 +32,76 @@ certain pattern(s), in order to group output.
 
 # Select file
 # --
-	Util:SelectFile(Dir) => file
-	Db2:Set(Sys.scriptId,"file",file)
-	Lib:e(file)
-	file
+    Util:SelectFile(Dir) => file
+    Db2:Set(Sys.scriptId,"file",file)
+    Lib:e(file)
+    file
 /SelectFile
 
 # Get file
 # --
-	Db2:Get(Sys.scriptId,"file",null) => file
-	if (file==null || !file.exists) file=SelectFile
-	file
+    Db2:Get(Sys.scriptId,"file",null) => file
+    if (file==null || !file.exists) file=SelectFile
+    file
 //GetFile
 
 # Format int
 # --
-	P(1) as int => x
-	("    "+x).last(4)
+    P(1) as int => x
+    ("    "+x).last(4)
 //fmt
 
 # Edit search patterns
 # --
-	P(1,"search-patterns") => key
-	P(2,"search pattern") => label
+    P(1,"search-patterns") => key
+    P(2,"search pattern") => label
 
-	Db2:Get(Sys.scriptId,key,List) => patterns
-	Inner {
-		i=0
-		patterns->p
-			println(fmt(i), p)
-			i=i+1
-	}
-	input = if (i>0) {
-		readLine("Enter number to delete, or text to add new " + label)
-	} else {
-		readLine("Enter " + label)
-	}
-	if (input.?parseInt) {
-		patterns.remove(input.parseInt)
-	} else if (input != "") {
-		patterns.add(input)
-	}
-	Db2:Set(Sys.scriptId,key,patterns)
+    Db2:Get(Sys.scriptId,key,List) => patterns
+    Inner {
+        i=0
+        patterns->p
+            println(fmt(i), p)
+            i=i+1
+    }
+    input = if (i>0) {
+        readLine("Enter number to delete, or text to add new " + label)
+    } else {
+        readLine("Enter " + label)
+    }
+    if (input.?parseInt) {
+        patterns.remove(input.parseInt)
+    } else if (input != "") {
+        patterns.add(input)
+    }
+    Db2:Set(Sys.scriptId,key,patterns)
 /e
-	
+    
 
 # Create newlines for certain patterns
 # --
-	e("newline-patterns", "newline patterns")
-/n	
+    e("newline-patterns", "newline patterns")
+/n  
 
 
 # Create newline before line?
 # --
-	P(1) => line
-	Db2:Get(Sys.scriptId,"newline-patterns",List) => list
-	list->s if(line.contains(s)) out(line)
-	| _.length>0
+    P(1) => line
+    Db2:Get(Sys.scriptId,"newline-patterns",List) => list
+    list->s if(line.contains(s)) out(line)
+    | _.length>0
 //CreateNewline
 
 
 # Search file
 # --
-	P(1,GetFile(Dir)) as File => file
-	Db2:Get(Sys.scriptId,"search-patterns",List) => patterns
-	
-	patterns -> p
-		Grep(p).file(file)->line
-			out(Int(line.lineNumber, line))
-	| _.sort->x
-		line = x.data
-		if (CreateNewline(line)) println
-		println(fmt(line.lineNumber), line)
+    P(1,GetFile(Dir)) as File => file
+    Db2:Get(Sys.scriptId,"search-patterns",List) => patterns
+    
+    patterns -> p
+        Grep(p).file(file)->line
+            out(Int(line.lineNumber, line))
+    | _.sort->x
+        line = x.data
+        if (CreateNewline(line)) println
+        println(fmt(line.lineNumber), line)
 /s

@@ -2,7 +2,7 @@
 <<< EOF
 #
 # CFT - an interactive programmable shell for automation 
-# Copyright (C) 2020-2023 Roar Foshaug
+# Copyright (C) 2020-2024 Roar Foshaug
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -149,28 +149,28 @@ nicely formatted JSON.
         null
     } else if (ts.peekType()==4) {  # identifier
         func=ts.peek
-			# Originally only f(...) allowed (MongoDb style), but extended it
-			# to support single identifiers to be processed as strings
+            # Originally only f(...) allowed (MongoDb style), but extended it
+            # to support single identifiers to be processed as strings
 
         ts.next
         if (ts.match("(")) {
-			func=func+"("
-			Inner {
-				comma=false
-				loop
-					break(ts.match(")"))
-					if (comma) {
-						ts.match(",","Expected comma or ')' closing function call MongoDB style")
-						func=func+","
-					}
-					func=func+MatchValue(ts)
-					comma=true
-					
-				|
-				func=func+")"
-				#println("FUNCTION COMPLETE: " + func)
-			}
-		}
+            func=func+"("
+            Inner {
+                comma=false
+                loop
+                    break(ts.match(")"))
+                    if (comma) {
+                        ts.match(",","Expected comma or ')' closing function call MongoDB style")
+                        func=func+","
+                    }
+                    func=func+MatchValue(ts)
+                    comma=true
+                    
+                |
+                func=func+")"
+                #println("FUNCTION COMPLETE: " + func)
+            }
+        }
         func
         #error(""+ts.sourceLocation + " Invalid value: (identifier) " + ts.peek)
     } else if (ts.peekType()==2) { # int
@@ -329,16 +329,16 @@ nicely formatted JSON.
     P(2,false)=>print
     P(3,false)=>showDictTypes
 
-	Lib:Header("JSONValue=" + getType(JSONValue))
+    Lib:Header("JSONValue=" + getType(JSONValue))
 
-	if (JSONValue==null) {
-		Lib:Header("Paste JSON, terminate with '.' on separate line")
-		readLines(".") => JSONValue
-	}
-	if (getType(JSONValue)=="String" || getType(JSONValue)=="List" && getType(JSONValue.first)=="String") {  # string or list of string
-		println("Parsing string")
-		JSONValue=JSON:Parse(JSONValue)
-	}
+    if (JSONValue==null) {
+        Lib:Header("Paste JSON, terminate with '.' on separate line")
+        readLines(".") => JSONValue
+    }
+    if (getType(JSONValue)=="String" || getType(JSONValue)=="List" && getType(JSONValue.first)=="String") {  # string or list of string
+        println("Parsing string")
+        JSONValue=JSON:Parse(JSONValue)
+    }
     
     Dict
         .set("data",List)

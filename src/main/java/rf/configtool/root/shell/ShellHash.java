@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2023 Roar Foshaug
+Copyright (C) 2020-2024 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -33,14 +33,14 @@ import rf.configtool.main.runtime.lib.Protection;
 
 public class ShellHash extends ShellCommand {
 
-	@Override
-	public String getName() {
-		return "hash";
-	}
-	@Override 
-	public String getBriefExampleParams() {
-		return "<file> ...";
-	}
+    @Override
+    public String getName() {
+        return "hash";
+    }
+    @Override 
+    public String getBriefExampleParams() {
+        return "<file> ...";
+    }
 
 
     public Value execute(Ctx ctx, Command cmd) throws Exception {
@@ -51,7 +51,7 @@ public class ShellHash extends ShellCommand {
         boolean noArgs=cmd.getArgs().isEmpty();
         
         if (noArgs) {
-        	return callMacro(ctx, name, new ValueList(new ArrayList<Value>())); // empty list
+            return callMacro(ctx, name, new ValueList(new ArrayList<Value>())); // empty list
         }
         
         List<Arg> args=cmd.getArgs();
@@ -75,14 +75,14 @@ public class ShellHash extends ShellCommand {
         return callMacro(ctx, name, new ValueList(list));
     }
 
-	private Value callMacro(Ctx ctx, String name, Value fileList) throws Exception {
+    private Value callMacro(Ctx ctx, String name, Value fileList) throws Exception {
 
-		PropsFile propsFile = ctx.getObjGlobal().getRoot().getPropsFile();
-		String lambda = propsFile.getMHash();
-		Value[] lambdaArgs = { fileList };
+        PropsFile propsFile = ctx.getObjGlobal().getRoot().getPropsFile();
+        String lambda = propsFile.getMHash();
+        Value[] lambdaArgs = { fileList };
 
-		return callConfiguredLambda(name, ctx, lambda, lambdaArgs);
-	}
+        return callConfiguredLambda(name, ctx, lambda, lambdaArgs);
+    }
 
     
 

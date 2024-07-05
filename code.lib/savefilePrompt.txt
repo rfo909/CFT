@@ -2,7 +2,7 @@
 <<< EOF
 #
 # CFT - an interactive programmable shell for automation 
-# Copyright (C) 2020-2023 Roar Foshaug
+# Copyright (C) 2020-2024 Roar Foshaug
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -37,15 +37,15 @@
 
 # Guess host name
 # --
-	env=Sys.environment
-	if (Sys.isWindows) {
-		if (env.has("COMPUTERNAME")) env.COMPUTERNAME else null
-	} else {
-		f=File("/etc/hostname")
-		if (f.exists) f.read.first else null
-	}
+    env=Sys.environment
+    if (Sys.isWindows) {
+        if (env.has("COMPUTERNAME")) env.COMPUTERNAME else null
+    } else {
+        f=File("/etc/hostname")
+        if (f.exists) f.read.first else null
+    }
 //GuessHostName
-		
+        
 
 
 
@@ -58,10 +58,10 @@
 
 # Get hostname
 # --
-	h=Db2:Get(Sys.scriptId,"hostname",null)
-	if (h==null || h=="") h=GuessHostName
-	if (h==null) h=""
-	h
+    h=Db2:Get(Sys.scriptId,"hostname",null)
+    if (h==null || h=="") h=GuessHostName
+    if (h==null) h=""
+    h
 /GetHostName
 
 # Set text color for current path in prompt
@@ -79,14 +79,14 @@
 
 # Set Prompt color
 # --
-	P(1,Curses:SelectColor)=>col
-	Db2:Set(Sys.scriptId,"prompt.color",col)
+    P(1,Curses:SelectColor)=>col
+    Db2:Set(Sys.scriptId,"prompt.color",col)
 /SetColor
 
 
 # Get Prompt color
 # --
-	if (Curses:Enabled, Db2:Get(Sys.scriptId,"prompt.color",Curses:TxtCyan), "")
+    if (Curses:Enabled, Db2:Get(Sys.scriptId,"prompt.color",Curses:TxtCyan), "")
 /GetColor
 
 
@@ -96,11 +96,11 @@
     s=dir.path
     
     if (s.length > Term.w-30) {
-    	fs=Sys.fileSeparator
-    	available=Term.w-40
-    	s=s.last(available)
-    	if (s.after(fs).length > 0) s=fs+(s.after(fs))
-    	s="..."+s
+        fs=Sys.fileSeparator
+        available=Term.w-40
+        s=s.last(available)
+        if (s.after(fs).length > 0) s=fs+(s.after(fs))
+        s="..."+s
     }
 
     # return value
@@ -110,55 +110,55 @@
 
 # List completed jobs (when changes)
 # --
-	running=Jobs:Running
+    running=Jobs:Running
 
-	isBlocked=Inner{
-		running->job assert(Sys.Jobs.get(job).isBlockedOnInputSince != null) out(job)
-	}.length
+    isBlocked=Inner{
+        running->job assert(Sys.Jobs.get(job).isBlockedOnInputSince != null) out(job)
+    }.length
 
-	hasOutput=Inner{
-		running->job assert(Sys.Jobs.get(job).hasOutput) out(job)
-	}.length
+    hasOutput=Inner{
+        running->job assert(Sys.Jobs.get(job).hasOutput) out(job)
+    }.length
 
-	completed=Jobs:Completed.length
+    completed=Jobs:Completed.length
 
-	s=null
+    s=null
 
-	if (isBlocked > 0)           s="JBLK=" + isBlocked
-	else if (hasOutput > 0)      s="JOUT=" + hasOutput
-	else if (completed > 0)      s="JCOMP=" + completed
-	else if (running.length > 0) s="JRUN="+running.length
+    if (isBlocked > 0)           s="JBLK=" + isBlocked
+    else if (hasOutput > 0)      s="JOUT=" + hasOutput
+    else if (completed > 0)      s="JCOMP=" + completed
+    else if (running.length > 0) s="JRUN="+running.length
 
-	s
+    s
 /JobsStatus
     
 
 # Complete prompt
 # --
-	P(1,Dir) => currDir
-	P(2) => scriptName
-	P(3) => stateString
+    P(1,Dir) => currDir
+    P(2) => scriptName
+    P(3) => stateString
 
-	color=GetColor
+    color=GetColor
 
-	hostname=GetHostName
-	parts=List
+    hostname=GetHostName
+    parts=List
 
-	if (hostname != null && hostname != "") parts.add("[" + hostname + "]")
-	parts.add(Curses:Reset + Path(currDir)+Curses:Reset+color)
-	js=JobsStatus
-	if (js != null) parts.add(js)
+    if (hostname != null && hostname != "") parts.add("[" + hostname + "]")
+    parts.add(Curses:Reset + Path(currDir)+Curses:Reset+color)
+    js=JobsStatus
+    if (js != null) parts.add(js)
 
-	if (scriptName != null) parts.add("{" + scriptName + if (stateString != null, ": "+stateString,"") + "}")
-	if(IsRoot) {
-		parts.add(Curses:Reversed + "#root#" + Curses:Reset + color)
-	}
+    if (scriptName != null) parts.add("{" + scriptName + if (stateString != null, ": "+stateString,"") + "}")
+    if(IsRoot) {
+        parts.add(Curses:Reversed + "#root#" + Curses:Reset + color)
+    }
 
-	# Add newline before prompt if colors are off
-	# --
-	newline=""
-	if (!Curses:Enabled) {
-		newline=(if(Sys.isWindows) "^r^n" else "^n").unEsc
-	}
-	newline + color + parts.concat(" ") + Curses:Reset
+    # Add newline before prompt if colors are off
+    # --
+    newline=""
+    if (!Curses:Enabled) {
+        newline=(if(Sys.isWindows) "^r^n" else "^n").unEsc
+    }
+    newline + color + parts.concat(" ") + Curses:Reset
 /PromptString

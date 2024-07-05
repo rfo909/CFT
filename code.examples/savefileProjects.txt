@@ -2,7 +2,7 @@
 <<< EOF
 #
 # CFT - an interactive programmable shell for automation 
-# Copyright (C) 2020-2023 Roar Foshaug
+# Copyright (C) 2020-2024 Roar Foshaug
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -120,38 +120,38 @@ just add a second "Dir:" line.
 
 # Update sessionProject
 # --
-	P(1)=>name
+    P(1)=>name
 
-	# Load sessions dictionary from base
-	Db2:Get("Projects","Sessions",Dict) => sessions
+    # Load sessions dictionary from base
+    Db2:Get("Projects","Sessions",Dict) => sessions
 
-	uuid=Sys.sessionUUID
-	time=currentTimeMillis
+    uuid=Sys.sessionUUID
+    time=currentTimeMillis
 
-	sessions.set(uuid,SymDict(name,time))
-	
-	# clean up old sessions, to avoid data entry growing indefinitely
-	{sessions.keys->key
-		if(sessions.get(key).time < currentTimeMillis - 86400*1000*14) {
-			sessions.remove(key)
-		}
-	}
+    sessions.set(uuid,SymDict(name,time))
+    
+    # clean up old sessions, to avoid data entry growing indefinitely
+    {sessions.keys->key
+        if(sessions.get(key).time < currentTimeMillis - 86400*1000*14) {
+            sessions.remove(key)
+        }
+    }
 
-	# Save
-	Db2:Set("Projects","Sessions",sessions)
+    # Save
+    Db2:Set("Projects","Sessions",sessions)
 //UpdateSessionProject
 
 
 # Get session project or null if undefined
 # --
-	Db2:Get("Projects","Sessions",Dict) => sessions
-	uuid=Sys.sessionUUID
+    Db2:Get("Projects","Sessions",Dict) => sessions
+    uuid=Sys.sessionUUID
 
-	if (sessions.has(uuid)) {
-		sessions.get(uuid).name
-	} else {
-		null
-	}
+    if (sessions.has(uuid)) {
+        sessions.get(uuid).name
+    } else {
+        null
+    }
 //GetSessionProject
 
 
@@ -172,20 +172,20 @@ just add a second "Dir:" line.
         break(result != null)
     |
     Db2:Set("Projects","Project", result)
-	UpdateSessionProject(result)
+    UpdateSessionProject(result)
     result
 //SelectProjectName
 
 
 # Current project name
 # --
-	pName=GetSessionProject
-	if (pName==null) {
-		# use last selected
-		pName=Db2:Get("Projects","Project")
-	}
+    pName=GetSessionProject
+    if (pName==null) {
+        # use last selected
+        pName=Db2:Get("Projects","Project")
+    }
     if (pName==null) pName=SelectProjectName
-	UpdateSessionProject(pName)
+    UpdateSessionProject(pName)
     pName
 //CurrProjectName
 
@@ -213,10 +213,10 @@ just add a second "Dir:" line.
 
 # State string, reported as part of the prompt - see CFT.props prompt setting
 # --
-	s=""
-	x=FSGet
-	if (x.length>0) s=" FSet=" + x.length
-	CurrProjectName+s
+    s=""
+    x=FSGet
+    if (x.length>0) s=" FSet=" + x.length
+    CurrProjectName+s
 //StateString
 
 
@@ -224,40 +224,40 @@ just add a second "Dir:" line.
 
 # Create file set by searching through TextFiles for pattern
 # --
-	P(1,Grep) => grep
+    P(1,Grep) => grep
 
     TextFiles -> tf
-		if (grep.fileCount(tf) > 0) out(tf)
-	| => files
-	Db2:Set("Projects","FileSet",files)
+        if (grep.fileCount(tf) > 0) out(tf)
+    | => files
+    Db2:Set("Projects","FileSet",files)
 //CreateFileSet
 
 
 
 # Get file set
 # --
-	Db2:Get("Projects","FileSet",List)
+    Db2:Get("Projects","FileSet",List)
 /FSGet
 
 
 # Show file set
 # --
-	FSGet->f
-		out(f.path)
+    FSGet->f
+        out(f.path)
 /FS
 
 # Clear file set
 # --
-	Db2:Set("Projects","FileSet",List)
+    Db2:Set("Projects","FileSet",List)
 /FSClear
 
 
 # Show file set info
 # --
-	fs=FSGet
-	if (fs.length>0) {
-		println("FileSet=" + fs.length + " files (FS to see, FSClear to remove)")	
-	}
+    fs=FSGet
+    if (fs.length>0) {
+        println("FileSet=" + fs.length + " files (FS to see, FSClear to remove)") 
+    }
 //ShowFSetInfo
 
 
@@ -327,12 +327,12 @@ just add a second "Dir:" line.
 
 # Searchable files: if FSGet non empty, return it, otherwise return TextFiles
 # --
-	FSGet => list
-	if (list.empty) {
-		TextFiles
-	} else {
-		list
-	}
+    FSGet => list
+    if (list.empty) {
+        TextFiles
+    } else {
+        list
+    }
 /SearchableFiles
 
 
@@ -375,7 +375,7 @@ SearchableFiles
 
 # Search with one parameter
 # --
-	ShowFSetInfo
+    ShowFSetInfo
     Input("Search1").get =>a
     Search(Grep(a))
 /S
@@ -385,12 +385,12 @@ SearchableFiles
 # --
     Input("Search1 to create file set").get =>a
     CreateFileSet(Grep(a))
-	FSGet->f out(f.path)
+    FSGet->f out(f.path)
 /SFS
 
 # Search with two parameters
 # --
-	ShowFSetInfo
+    ShowFSetInfo
     Input("Search2a ... ").get =>a
     Input("... AND Search2b").get =>b
     Search(Grep.match(a).match(b))
@@ -399,7 +399,7 @@ SearchableFiles
 
 # Search with three parameters
 # --
-	ShowFSetInfo
+    ShowFSetInfo
     Input("Search3a ... ").get =>a
     Input("... AND Search3b").get =>b
     Input("... AND Search3c").get =>c
@@ -408,7 +408,7 @@ SearchableFiles
 
 # Search with one positive and one negative parameter
 # --
-	ShowFSetInfo
+    ShowFSetInfo
     Input("Search1").get =>a
     Input("Search1n (reject)").get =>b
     Search(Grep(a).reject(b))
@@ -418,10 +418,10 @@ SearchableFiles
 # --
     P(1,"java")=>fn
 
-	# if linux, conv does nothing, but on windows it converts to lower case
-	conv=if(Sys.isWindows, Lambda{P(1).toLower}, Lambda{P(1)})
+    # if linux, conv does nothing, but on windows it converts to lower case
+    conv=if(Sys.isWindows, Lambda{P(1).toLower}, Lambda{P(1)})
 
-	fn=conv.call(fn)
+    fn=conv.call(fn)
 
     TextFiles->tf
         assert(conv.call(tf.name).contains(fn))
@@ -494,15 +494,15 @@ SearchableFiles
     println
     pr.keys->key
         Inner{
-			pr.get(key,List)->str
-				println(key+": " + str)
-		}
+            pr.get(key,List)->str
+                println(key+": " + str)
+        }
     |
     println
-	fSet=FSGet
-	if (!fSet.empty) {
-		println("FileSet = " + fSet.length + " files  (FS to show, FSClear to clear)")
-	}
+    fSet=FSGet
+    if (!fSet.empty) {
+        println("FileSet = " + fSet.length + " files  (FS to show, FSClear to clear)")
+    }
     true
 /curr
 
@@ -516,49 +516,49 @@ SearchableFiles
 
 # Search interactively
 # --
-	terms=Db2:Get(Sys.scriptId,"SI",List)
+    terms=Db2:Get(Sys.scriptId,"SI",List)
 
 
-	loop
-		println
-		println(">>> " + if(terms.empty,"(none)", terms.concat(" ")))
-		readLine("Enter [+]term or -term, '.' to refresh, '..' to undo, 'Enter' to end") => term
-		break(term.trim=="")
+    loop
+        println
+        println(">>> " + if(terms.empty,"(none)", terms.concat(" ")))
+        readLine("Enter [+]term or -term, '.' to refresh, '..' to undo, 'Enter' to end") => term
+        break(term.trim=="")
 
-		if (term=='..') Inner {
-			if (!terms.empty) {
-				terms=terms.keep(0,terms.length-2)
-				Db2:Set(Sys.scriptId,"SI",terms)
-			}
-		} else if (term.length > 0 && term != '.') {
-			# Add to terms list
-			if (term.startsWith("-") || term.startsWith("+")) terms.add(term)
-			else terms.add("+" + term)
-			Db2:Set(Sys.scriptId,"SI",terms)
-		}
+        if (term=='..') Inner {
+            if (!terms.empty) {
+                terms=terms.keep(0,terms.length-2)
+                Db2:Set(Sys.scriptId,"SI",terms)
+            }
+        } else if (term.length > 0 && term != '.') {
+            # Add to terms list
+            if (term.startsWith("-") || term.startsWith("+")) terms.add(term)
+            else terms.add("+" + term)
+            Db2:Set(Sys.scriptId,"SI",terms)
+        }
 
-		plus=List
-		minus=List
-		Inner{
-			terms->term
-				if (term.startsWith("-")) minus.add(term.sub(1))
-				else if (term.startsWith("+")) plus.add(term.sub(1))
-		}
-		if (plus.empty && minus.empty) continue
-	
-		g=Grep
-		g.match(plus)
-		g.reject(minus)
-		tryCatch(Search(g)) => result
+        plus=List
+        minus=List
+        Inner{
+            terms->term
+                if (term.startsWith("-")) minus.add(term.sub(1))
+                else if (term.startsWith("+")) plus.add(term.sub(1))
+        }
+        if (plus.empty && minus.empty) continue
+    
+        g=Grep
+        g.match(plus)
+        g.reject(minus)
+        tryCatch(Search(g)) => result
 
-		if (result.ok) {
-			Inner{result.result->line println(line)}
-			println("[" + result.result.length + " hits]")
-		} else { 
-			println
-			println(result.msg)
-		}
-		
+        if (result.ok) {
+            Inner{result.result->line println(line)}
+            println("[" + result.result.length + " hits]")
+        } else { 
+            println
+            println(result.msg)
+        }
+        
 
 /SI
 

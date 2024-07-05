@@ -2,7 +2,7 @@
 <<< EOF
 #
 # CFT - an interactive programmable shell for automation 
-# Copyright (C) 2020-2023 Roar Foshaug
+# Copyright (C) 2020-2024 Roar Foshaug
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -47,11 +47,11 @@ passwords and other secrets for the duration of the session.
             readLine(label) => value
         } else {
             Sys.readPassword(label) => value
-			Sys.readPassword(label+" (again)") => value2
-			error(value != value2, "Passwords don't match")
+            Sys.readPassword(label+" (again)") => value2
+            error(value != value2, "Passwords don't match")
         }
 
-		SessionSecretSet(label, value)
+        SessionSecretSet(label, value)
 
         value
     }
@@ -66,10 +66,10 @@ passwords and other secrets for the duration of the session.
     label.toHexString => key
     "v"+key =>  verifyKey
     
-	Std.Util.Encrypt(Sys.secureSessionId,"value").processString(value) => eValue
-	Db2:Set("Vault", key, eValue)
-	Std.Util.Encrypt(Sys.secureSessionId,"verify").processString("verified") => eVerified
-	Db2:Set("Vault", verifyKey, eVerified)
+    Std.Util.Encrypt(Sys.secureSessionId,"value").processString(value) => eValue
+    Db2:Set("Vault", key, eValue)
+    Std.Util.Encrypt(Sys.secureSessionId,"verify").processString("verified") => eVerified
+    Db2:Set("Vault", verifyKey, eVerified)
 /SessionSecretSet
 
 
@@ -127,48 +127,48 @@ passwords and other secrets for the duration of the session.
 # Create persistent secret, protected by password (session secret)
 # Overwrites old value
 # --
-	P(1, readLine("Persistent secret name")) as String => name
-	P(2, readLine("Persistent secret value")) as String => value
+    P(1, readLine("Persistent secret name")) as String => name
+    P(2, readLine("Persistent secret value")) as String => value
 
-	name.toHexString => key
+    name.toHexString => key
 
-	Vault:SessionSecretGet("Persistent secret password for '" + name + "'?") => password
+    Vault:SessionSecretGet("Persistent secret password for '" + name + "'?") => password
 
-	enc=Std.Util.Encrypt(password.getBytes("UTF-8"))
+    enc=Std.Util.Encrypt(password.getBytes("UTF-8"))
 
-	Db2:Set(Sys.scriptId, key, enc.processString(value))
+    Db2:Set(Sys.scriptId, key, enc.processString(value))
 
-	enc=Std.Util.Encrypt(password.getBytes("UTF-8"))
-	Db2:Set(Sys.scriptId, key + ".check", enc.processString("knownstring"))
+    enc=Std.Util.Encrypt(password.getBytes("UTF-8"))
+    Db2:Set(Sys.scriptId, key + ".check", enc.processString("knownstring"))
 /CreatePersistentSecret
 
 
 # Get or create persistent secret, password protected (remembered as session secret)
 # --
-	P(1, readLine("Persistent secret name")) as String => name
+    P(1, readLine("Persistent secret name")) as String => name
 
-	name.toHexString => key
+    name.toHexString => key
 
-	encodedCheck = Db2:Get(Sys.scriptId, key + ".check")
-	if (encodedCheck==null) {
-		println("No such secret: '" + name + "'")
-		CreatePersistentSecret(name)
-		encodedCheck = Db2:Get(Sys.scriptId, key + ".check")
-	}
+    encodedCheck = Db2:Get(Sys.scriptId, key + ".check")
+    if (encodedCheck==null) {
+        println("No such secret: '" + name + "'")
+        CreatePersistentSecret(name)
+        encodedCheck = Db2:Get(Sys.scriptId, key + ".check")
+    }
 
-	Vault:SessionSecretGet("Persistent secret password for '" + name + "'?") => password
+    Vault:SessionSecretGet("Persistent secret password for '" + name + "'?") => password
 
-	dec=Std.Util.Decrypt(password.getBytes("UTF-8"))
-	knownstring = dec.processString(encodedCheck)
-	error(knownstring != "knownstring", "Invalid password")
+    dec=Std.Util.Decrypt(password.getBytes("UTF-8"))
+    knownstring = dec.processString(encodedCheck)
+    error(knownstring != "knownstring", "Invalid password")
 
-	dec=Std.Util.Decrypt(password.getBytes("UTF-8"))
-	dec.processString(Db2:Get(Sys.scriptId, key))
+    dec=Std.Util.Decrypt(password.getBytes("UTF-8"))
+    dec.processString(Db2:Get(Sys.scriptId, key))
 /GetPersistentSecret
 
-	
+    
 
 
 
-	
-	
+    
+    

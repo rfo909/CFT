@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2023 Roar Foshaug
+Copyright (C) 2020-2024 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -36,16 +36,16 @@ import rf.configtool.main.runtime.lib.ObjDir;
 import rf.configtool.main.runtime.lib.Protection;
 
 public class ShellExternalCommand extends ShellCommand {
-	
-	@Override
-	public String getName() {
-		// Must correspond to ShellCommandsManager.FORCE_EXTERNAL_COMMAND_PREFIX
-		return "<TAB>";
-	}
-	@Override 
-	public String getBriefExampleParams() {
-		return "... - run operating system command or program";
-	}
+    
+    @Override
+    public String getName() {
+        // Must correspond to ShellCommandsManager.FORCE_EXTERNAL_COMMAND_PREFIX
+        return "<TAB>";
+    }
+    @Override 
+    public String getBriefExampleParams() {
+        return "... - run operating system command or program";
+    }
 
     public Value execute(Ctx ctx, Command cmd) throws Exception {
 
@@ -61,52 +61,52 @@ public class ShellExternalCommand extends ShellCommand {
         boolean isLinux = File.separator.equals("/");
         
         NEXT_ARG: for (Arg arg:args) {
-        	if (arg.isExpr()) {
-    			FileSet fs=new FileSet("!"+commandName, true, true); // directories and files
-    			fs.setIsSafeOperation();
-    			fs.processArg(currentDir, ctx, arg);
-				for (String dir : fs.getDirectories()) command.add(dir);
-				for (String file : fs.getFiles()) command.add(file);
-        	} else {
-        		String str=arg.getString();
-    			if (isLinux) {
-        			FileSet fs=new FileSet("!"+commandName, true, true); // directories and files
-        			fs.setIsSafeOperation();
-        			
-        			boolean failed=false;
-        			try {
-        				fs.processArg(currentDir, ctx, arg);
-        			} catch (Exception ex) {
-        				failed=true;
-        				// ignore this here
-        			}
-        			if (!failed) {
-        				for (String s : fs.getDirectories()) command.add(s);
-        				for (String s : fs.getFiles()) command.add(s);
-        				if (fs.getDirectories().size() + fs.getFiles().size() > 0) {
-        					continue NEXT_ARG;
-        				}
-        				// else: default processing is to add string as-is to command
-        			}
-        			// String failed to match files and directories: add string as-is to command 
-        			command.add(str);
-    			} else {
-    				// windows: always add string as-is, no glob-expansion here
-    				command.add(str);
-    				continue NEXT_ARG;
-    			}
-        	}
-        	
+            if (arg.isExpr()) {
+                FileSet fs=new FileSet("!"+commandName, true, true); // directories and files
+                fs.setIsSafeOperation();
+                fs.processArg(currentDir, ctx, arg);
+                for (String dir : fs.getDirectories()) command.add(dir);
+                for (String file : fs.getFiles()) command.add(file);
+            } else {
+                String str=arg.getString();
+                if (isLinux) {
+                    FileSet fs=new FileSet("!"+commandName, true, true); // directories and files
+                    fs.setIsSafeOperation();
+                    
+                    boolean failed=false;
+                    try {
+                        fs.processArg(currentDir, ctx, arg);
+                    } catch (Exception ex) {
+                        failed=true;
+                        // ignore this here
+                    }
+                    if (!failed) {
+                        for (String s : fs.getDirectories()) command.add(s);
+                        for (String s : fs.getFiles()) command.add(s);
+                        if (fs.getDirectories().size() + fs.getFiles().size() > 0) {
+                            continue NEXT_ARG;
+                        }
+                        // else: default processing is to add string as-is to command
+                    }
+                    // String failed to match files and directories: add string as-is to command 
+                    command.add(str);
+                } else {
+                    // windows: always add string as-is, no glob-expansion here
+                    command.add(str);
+                    continue NEXT_ARG;
+                }
+            }
+            
         }
-    	return callLambda (ctx, command);
+        return callLambda (ctx, command);
     }
     
     private Value callLambda (Ctx ctx, List<String> command) throws Exception {
-    	List<Value> valueList=new ArrayList<Value>();
-    	for (String s:command) valueList.add(new ValueString(s));
-    	
+        List<Value> valueList=new ArrayList<Value>();
+        for (String s:command) valueList.add(new ValueString(s));
+        
         PropsFile propsFile=ctx.getObjGlobal().getRoot().getPropsFile();
-    	
+        
         String code = propsFile.getBangCommand();
         SourceLocation loc = new SourceLocation("bangCommand", 0, 0);
         FunctionBody codeLines = new FunctionBody(code, loc);

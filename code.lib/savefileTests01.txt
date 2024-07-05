@@ -2,7 +2,7 @@
 <<< EOF
 #
 # CFT - an interactive programmable shell for automation 
-# Copyright (C) 2020-2023 Roar Foshaug
+# Copyright (C) 2020-2024 Roar Foshaug
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -1006,11 +1006,11 @@ ERROR: [<script> Tests01:861.8] Invalid value Dict [] + 1
 # Base64 encode and decode
 # 2023-06-18 RFO
 # --
-	s="this is a test"
-	s.getBytes("UTF-8").base64 => text
-	text.base64 => binary
-	binary.toString("UTF-8") => s2
-	s==s2
+    s="this is a test"
+    s.getBytes("UTF-8").base64 => text
+    text.base64 => binary
+    binary.toString("UTF-8") => s2
+    s==s2
 /Test56_Base64
 
 
@@ -1019,33 +1019,33 @@ ERROR: [<script> Tests01:861.8] Invalid value Dict [] + 1
 # Oddest bug so far!!!
 # unknown symbol "delta" in last line ...
 # --
-	min=999
-	max=0
-	currentPrice=999
-	
-	delta=max-min  
-		# If we say either
-		#   delta=4
-		# or we 
-		#   remove the () around the expression below
-		# or we say
-		#    y=(...) 
-		# then the 'delta' variable becomes visible again.
-		#
+    min=999
+    max=0
+    currentPrice=999
+    
+    delta=max-min  
+        # If we say either
+        #   delta=4
+        # or we 
+        #   remove the () around the expression below
+        # or we say
+        #    y=(...) 
+        # then the 'delta' variable becomes visible again.
+        #
 
-	(currentPrice < min + delta)
+    (currentPrice < min + delta)
 /t57
 
 
 # Test 57 - odd symbol lookup bug, see t57 above
 # --
-	tryCatch(t57).ok
+    tryCatch(t57).ok
 /Test57_SymbolLookupBug
 
 
 # Test 58 - version 4.0.14 bugfix: Dict value dotted lookup must not hide Dict functions
 # --
-	d=Dict d.set("keys", 3) getType(d.keys)=="List"
+    d=Dict d.set("keys", 3) getType(d.keys)=="List"
 /Test58_dotted_lookup_value_vs_functions
 
 

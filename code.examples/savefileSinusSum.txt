@@ -1,34 +1,55 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2024 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 # Data dir
 # --
-	Dir("c:\xxx\anim").create
+    Dir("c:\xxx\anim").create
 /DataDir
 
 # Create test data
 # --
-	P(1) => offset
-	Std.Data.each(0,720) -> i
-		a=Std.Math.sin(i)
-		b=Std.Math.sin(i+offset)
-		a=(a*100).i
-		b=(b*200).i
-		c=a+b
-		
-		out("" +a + ", " + b + ", " + c)
+    P(1) => offset
+    Std.Data.each(0,720) -> i
+        a=Std.Math.sin(i)
+        b=Std.Math.sin(i+offset)
+        a=(a*100).i
+        b=(b*200).i
+        c=a+b
+        
+        out("" +a + ", " + b + ", " + c)
 /Data
 
 # Create test plot
 # --
-	P(1)=>offset
+    P(1)=>offset
 
-	DataDir.file("data.txt") => dataFile
-	dataFile.create(Data(offset))
+    DataDir.file("data.txt") => dataFile
+    dataFile.create(Data(offset))
 
-	plot=Std.Plot.typeTimeline
-	plot.readCSVFile(dataFile)
+    plot=Std.Plot.typeTimeline
+    plot.readCSVFile(dataFile)
 
-	s=("000"+offset).last(3)
-	pngFile=DataDir.file(s+".png")
-	plot.plot(pngFile)
+    s=("000"+offset).last(3)
+    pngFile=DataDir.file(s+".png")
+    plot.plot(pngFile)
 /OnePlot
 
 
@@ -43,12 +64,12 @@
 
 # Create sequence and animation (requires ffmpeg)
 # --
-	DataDir.files("*.png")->f 
-		f.delete
-	|
-	Std.Data.for(5,360,10)->offset
-		println(offset)
-		OnePlot(offset)
-	|
-	MakeMovie
+    DataDir.files("*.png")->f 
+        f.delete
+    |
+    Std.Data.for(5,360,10)->offset
+        println(offset)
+        OnePlot(offset)
+    |
+    MakeMovie
 /RunAll

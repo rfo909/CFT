@@ -2,7 +2,7 @@
 <<< EOF
 #
 # CFT - an interactive programmable shell for automation 
-# Copyright (C) 2020-2023 Roar Foshaug
+# Copyright (C) 2020-2024 Roar Foshaug
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -64,8 +64,8 @@ in v3.3.2
     ident.sub(identInnerChars, ident) # loop back
 
     ident.sub(":") => colon
-	colon.sub(identFirstChars).setIsToken(4) => secondIdent
-	secondIdent.sub(identInnerChars, secondIdent)
+    colon.sub(identFirstChars).setIsToken(4) => secondIdent
+    secondIdent.sub(identInnerChars, secondIdent)
 
     # Strings = 5
     List('"',"'")->c 
@@ -84,15 +84,15 @@ in v3.3.2
     x.setDefault(x)
     x.addToken("-->").setIsToken(10)  # comment
 
-	root.addToken("<[CDATA[") => cdata
-	cdata.setDefault(cdata)
-	cdata.addToken("]]>").setIsToken(11)  # CDATA
+    root.addToken("<[CDATA[") => cdata
+    cdata.setDefault(cdata)
+    cdata.addToken("]]>").setIsToken(11)  # CDATA
 
 
     # Everything else = 99  
     root.setDefault.setIsToken(99)
-	root.addToken(">").setIsToken(99)
-	root.addToken("/").setIsToken(99)
+    root.addToken(">").setIsToken(99)
+    root.addToken("/").setIsToken(99)
 
 
     # return value is the root node
@@ -115,8 +115,8 @@ in v3.3.2
         @            second item line
         @            a>b / c>d
         @       <title><[CDATA[
-		@			Donald Duck &amp; Co
-		@		]]></title>
+        @       Donald Duck &amp; Co
+        @   ]]></title>
         @       <emptyTag a=5/>
         @           <status>
         @             on-hold
@@ -124,7 +124,7 @@ in v3.3.2
         @               <x a="1">xxx</x>
         @           </status>
         @       </content:item>
-		@       <xx><yy></yy></xx>
+        @       <xx><yy></yy></xx>
         @       <emptyTag a="a"/>
         @    </a:parent>
     )
@@ -137,23 +137,23 @@ exampleXML
 
 # Test tokenize only
 # --
-	P(1,exampleXML)=>xml
-	
+    P(1,exampleXML)=>xml
+    
     if (xml==null) {
         println("Paste or enter XML, then terminate by '.' on single line")
         readLines(".") => xml
     }
 
-	RootNode => root
-	Std.Text.Lexer => lexer
+    RootNode => root
+    Std.Text.Lexer => lexer
 
-	xml->line lexer.addLine(line) |
-	lexer.getTokenStream(root) => ts
-	loop
-		break(ts.EOF)
-		report(ts.peekType, ts.peek)
-		ts.next
-	|
+    xml->line lexer.addLine(line) |
+    lexer.getTokenStream(root) => ts
+    loop
+        break(ts.EOF)
+        report(ts.peekType, ts.peek)
+        ts.next
+    |
 /GetTokens
 
 
@@ -206,11 +206,11 @@ exampleXML
 # allows us to use .subNodes("xxx") to locate specifically named content
 # --
     P(1)=>xml
-	content=Parse(xml)
+    content=Parse(xml)
 
-	obj=XMLNode
-	obj.content=content
-	obj
+    obj=XMLNode
+    obj.content=content
+    obj
 /ParseObject
 
 
@@ -238,10 +238,10 @@ exampleXML
     # --
     self.addText=Lambda{
         P(1) as String? => text
-		if (text != null) {
-			if (text.startsWith("<[CDATA[")) {
-				text=text.sub(8, text.length-3) # ]]>
-			}
+        if (text != null) {
+            if (text.startsWith("<[CDATA[")) {
+                text=text.sub(8, text.length-3) # ]]>
+            }
             self.content.add(text)
         }
     }
@@ -265,22 +265,22 @@ exampleXML
             out(x)
     }
 
-	# Get list of String from context
-	# --
-	self.getText=Lambda{
-		self.content->x
-			x as? String => isString
-			assert(isString)
-			out(x)
-	}
+    # Get list of String from context
+    # --
+    self.getText=Lambda{
+        self.content->x
+            x as? String => isString
+            assert(isString)
+            out(x)
+    }
 
-	# Get single (first) String value
-	# --
-	self.getString=Lambda{
-		P(1,null) => default
-		list=self.getText
-		if (list.empty, default, list.first)
-	}
+    # Get single (first) String value
+    # --
+    self.getString=Lambda{
+        P(1,null) => default
+        list=self.getText
+        if (list.empty, default, list.first)
+    }
 
     
         
@@ -299,7 +299,7 @@ exampleXML
 
         # START TAG BEGIN + TAG NAME
         
-		ws.call(ts)
+        ws.call(ts)
         error(!ts.peek=="<",ts.sourceLocation + ": expected '<' starting a tag")
         ts.next
         ws.call(ts)
@@ -322,35 +322,35 @@ exampleXML
 
                 break(ts.peek==">" || ts.peek=="/>")
                 
-				error (ts.peekType != 4 && ts.peekType != 5, 
-					ts.sourceLocation + ": Expected identifier or string attribute name - got " + ts.peek)
+                error (ts.peekType != 4 && ts.peekType != 5, 
+                    ts.sourceLocation + ": Expected identifier or string attribute name - got " + ts.peek)
                 
-				attrName=ts.peek
-				if (ts.peekType==5) {
-					# Strip quotes
-					attrName=attrName.sub(1,attrName.length-1)
-				}
-				ts.next
-				ws.call(ts)
-				error(ts.peek != "=", 
-					ts.sourceLocation + ": expected '=' for attribute " + attrName)
+                attrName=ts.peek
+                if (ts.peekType==5) {
+                    # Strip quotes
+                    attrName=attrName.sub(1,attrName.length-1)
+                }
+                ts.next
+                ws.call(ts)
+                error(ts.peek != "=", 
+                    ts.sourceLocation + ": expected '=' for attribute " + attrName)
 
-				ts.next
-				ws.call(ts)
+                ts.next
+                ws.call(ts)
 
-				error(ts.peekType != 4 && ts.peekType != 5 && ts.peekType() != 3, 
-					ts.sourceLocation + ": Expected identifier, string or number value for attribtute " + attrName + " - got "+ ts.peek)
+                error(ts.peekType != 4 && ts.peekType != 5 && ts.peekType() != 3, 
+                    ts.sourceLocation + ": Expected identifier, string or number value for attribtute " + attrName + " - got "+ ts.peek)
 
-				attrValue=ts.peek
-				if (ts.peekType==5) {
-					# Strip quotes
-					attrValue=attrValue.sub(1,attrValue.length-1)
-				} 
+                attrValue=ts.peek
+                if (ts.peekType==5) {
+                    # Strip quotes
+                    attrValue=attrValue.sub(1,attrValue.length-1)
+                } 
 
-				ts.next
-				ws.call(ts)
-				
-				self.attributes.attrName=attrValue  
+                ts.next
+                ws.call(ts)
+                
+                self.attributes.attrName=attrValue  
         }
         
         # START TAG END
@@ -377,16 +377,16 @@ exampleXML
                     self.addText(UnescapeXMLString(text)) 
                     text=""
 
-					# parse sub-node
+                    # parse sub-node
                     node=XMLNode
                     node.parse(ts)
 
                     self.content.add(node)
                 } else {
-					# Everything else (text)
-					text=text+ts.peek
-					ts.next
-				}
+                    # Everything else (text)
+                    text=text+ts.peek
+                    ts.next
+                }
             |
             self.addText(UnescapeXMLString(text))
         }    

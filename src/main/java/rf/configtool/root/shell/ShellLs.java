@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2023 Roar Foshaug
+Copyright (C) 2020-2024 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -32,12 +32,12 @@ import rf.configtool.main.runtime.lib.Protection;
 
 public class ShellLs extends ShellCommand {
 
-	private final String commandName;
+    private final String commandName;
     private final boolean showFiles;
     private final boolean showDirs;
 
     public ShellLs(String name) {
-    	this.commandName = name;
+        this.commandName = name;
         if (name.equals("ls")) {
             showFiles = true;
             showDirs = true;
@@ -52,14 +52,14 @@ public class ShellLs extends ShellCommand {
         }
     }
     
-	@Override
-	public String getName() {
-		return commandName;
-	}
-	@Override 
-	public String getBriefExampleParams() {
-		return "...";
-	}
+    @Override
+    public String getName() {
+        return commandName;
+    }
+    @Override 
+    public String getBriefExampleParams() {
+        return "...";
+    }
 
 
 

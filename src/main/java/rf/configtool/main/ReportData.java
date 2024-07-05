@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2023 Roar Foshaug
+Copyright (C) 2020-2024 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -30,14 +30,14 @@ import rf.configtool.util.ReportFormattingTool;
 public class ReportData {
     
     
-	private List<List<Value>> presentation=new ArrayList<List<Value>>();
+    private List<List<Value>> presentation=new ArrayList<List<Value>>();
 
     public void addReportData (List<Value> presentation) {
         this.presentation.add(presentation);
     }
     
     public int getRowCount() {
-    	return presentation.size();
+        return presentation.size();
     }
     
    

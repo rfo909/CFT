@@ -2,7 +2,7 @@
 <<< EOF
 #
 # CFT - an interactive programmable shell for automation 
-# Copyright (C) 2020-2023 Roar Foshaug
+# Copyright (C) 2020-2024 Roar Foshaug
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 
 # Extending prompt
 # --
-	Date.fmt
+    Date.fmt
 /StateString
 
 
@@ -69,8 +69,8 @@
 
 # Pomodoro, countdown 45 minutes
 # --
-	P(1,45) => minutes
-	CountDown(minutes)
+    P(1,45) => minutes
+    CountDown(minutes)
 /Pomodoro
 
 
@@ -167,4 +167,4 @@
 /ShowMC
 
 
-	
+    

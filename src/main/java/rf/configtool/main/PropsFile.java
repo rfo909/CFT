@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2023 Roar Foshaug
+Copyright (C) 2020-2024 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -149,7 +149,7 @@ public class PropsFile {
                         bangCommand=value;
                     } else 
                     if (name.equals("historyCommand")) {
-                    	historyCommand=value;
+                        historyCommand=value;
                     } else
                     if (name.equals("shell")) {
                         shell=value;
@@ -185,9 +185,9 @@ public class PropsFile {
                     if (name.equals("mGrep")) {
                         mGrep=value;
                     } else
-                	if (name.equals("mWhich")) {
-                		mWhich=value;
-                	} else
+                    if (name.equals("mWhich")) {
+                        mWhich=value;
+                    } else
                     if (name.equals("mShowtree")) {
                         mShowtree=value;
                     } else
@@ -247,7 +247,7 @@ public class PropsFile {
     }
     
     public String getHistoryCommand() {
-    	return historyCommand;
+        return historyCommand;
     }
     
     public String getShell() {

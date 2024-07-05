@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2023 Roar Foshaug
+Copyright (C) 2020-2024 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ import java.util.*;
  */
 public class CharTable {
 
-	private final int id;
+    private final int id;
     private static int nextId=0;
 
     private Integer tokenType;  // getting here via a CharTable mapping identifies a token type
@@ -35,7 +35,7 @@ public class CharTable {
     private CharTable defaultMapping;
 
     public CharTable() {
-    	this.id=nextId++;
+        this.id=nextId++;
     }
     
     public void setTokenType (Integer tokenType) {
@@ -51,30 +51,30 @@ public class CharTable {
     
     
     public void show (String indent, List<String> output) {
-    	output.add(indent+"["+id+"]");
-    	if (tokenType != null) {
-    		output.add(indent+"tokenType:" + tokenType);
-    	}
-    	if (defaultMapping != null) {
-    		output.add(indent+"defaultMapping: [" + defaultMapping.id + "]");
-    	}
-    	String nextIndent=indent+"| ";
-    	
-    	Set<Character> keys=map.keySet();
-    	List<Character> keyList=new ArrayList<Character>();
-    	for (Character c:keys) {
-    		keyList.add(c);
-    	}
-    	Collections.sort(keyList);
-    	for (Character c:keyList) {
-    		CharTable sub=map.get(c);
-    		if (sub==StopRule.STOP) {
-    			output.add(indent+c+": STOP");
-    		} else {
-    			output.add(indent+c);
-    			sub.show(nextIndent, output);
-    		}
-    	}
+        output.add(indent+"["+id+"]");
+        if (tokenType != null) {
+            output.add(indent+"tokenType:" + tokenType);
+        }
+        if (defaultMapping != null) {
+            output.add(indent+"defaultMapping: [" + defaultMapping.id + "]");
+        }
+        String nextIndent=indent+"| ";
+        
+        Set<Character> keys=map.keySet();
+        List<Character> keyList=new ArrayList<Character>();
+        for (Character c:keys) {
+            keyList.add(c);
+        }
+        Collections.sort(keyList);
+        for (Character c:keyList) {
+            CharTable sub=map.get(c);
+            if (sub==StopRule.STOP) {
+                output.add(indent+c+": STOP");
+            } else {
+                output.add(indent+c);
+                sub.show(nextIndent, output);
+            }
+        }
     }
 
     public void setMapping (char ch, CharTable ct) {
@@ -86,7 +86,7 @@ public class CharTable {
     }
     
     public boolean hasDefaultMapping () {
-    	return defaultMapping != null;
+        return defaultMapping != null;
     }
     
     public CharTable getMapping (char c) {

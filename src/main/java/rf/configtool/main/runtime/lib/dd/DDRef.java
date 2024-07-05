@@ -1,6 +1,6 @@
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2023 Roar Foshaug
+Copyright (C) 2020-2024 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -46,10 +46,10 @@ public class DDRef extends Obj {
     }
     public DDRef(Ref ref, DDWorld world) {
         this.ref=ref;
-		this.world=world;
-		
-		this.add(new FunctionWorld());
-		        
+        this.world=world;
+        
+        this.add(new FunctionWorld());
+                
         this.add(new FunctionScaleUp());
         this.add(new FunctionScaleDown());
         
@@ -104,9 +104,9 @@ public class DDRef extends Obj {
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new RuntimeException("Expected no parameters");
             if (world != null) {
-            	return new ValueObj(world);
+                return new ValueObj(world);
             } else {
-            	return new ValueNull();
+                return new ValueNull();
             }
         }
     }

@@ -2,7 +2,7 @@
 <<< EOF
 #
 # CFT - an interactive programmable shell for automation 
-# Copyright (C) 2020-2023 Roar Foshaug
+# Copyright (C) 2020-2024 Roar Foshaug
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -54,54 +54,54 @@ paste into JIRA etc)
 
 # Current topic
 # --
-	t=Db2:Get("Investigate","topic:" + Sys.sessionUUID)
-	if (t==null) {
-		if(Db2:Get("Investigate","topic")==null) {
-			error("No current topic")
-		}
-		t = Db2:Get("Investigate","topic")
-	}
-	t
+    t=Db2:Get("Investigate","topic:" + Sys.sessionUUID)
+    if (t==null) {
+        if(Db2:Get("Investigate","topic")==null) {
+            error("No current topic")
+        }
+        t = Db2:Get("Investigate","topic")
+    }
+    t
 /GetCurrentTopic
 
 # Change topic
 # --
-	curr=Db2:Get("Investigate","topic")
-	
-	list = GetTopics
-	count=0
-	Inner {
-		list->t
-		file=LogFile(t)
-		age=Date.diff(Date(file.lastModified))
-		age = if (age.asDays <= 30, "* " + age, "  " + age)
-		name=(t+" ".times(80)).first(40)
-		println( ("   "+count).last(3)+": " + name + " " + age)
-		count=count+1
-	}
+    curr=Db2:Get("Investigate","topic")
+    
+    list = GetTopics
+    count=0
+    Inner {
+        list->t
+        file=LogFile(t)
+        age=Date.diff(Date(file.lastModified))
+        age = if (age.asDays <= 30, "* " + age, "  " + age)
+        name=(t+" ".times(80)).first(40)
+        println( ("   "+count).last(3)+": " + name + " " + age)
+        count=count+1
+    }
 
-	if (list.empty) {
-		readLine("Enter name of first topic").trim => name
-		error(name=="","Invalid topic name")
-		Db2:Set("Investigate","topic",name)
-		Db2:Set("Investigate","topic:"+Sys.sessionUUID,name)
-	} else {
-		x = if (curr==null) {
-			readLine("Enter number, or enter name of new topic")
-		} else {
-			readLine("Enter number, or new topic (Enter for current: " + curr + ")")
-		}
-		x=x.trim.replace(" ","_")
-		name=x
-		if (x.?parseInt) {
-			name=list.nth(x.parseInt)
-		}
-		if (name.length==0 && curr != null) {
-			name=curr
-		}
-		error(name=="", "Invalid topic name")
-		Db2:Set("Investigate","topic",name)
-		Db2:Set("Investigate","topic:"+Sys.sessionUUID,name)
+    if (list.empty) {
+        readLine("Enter name of first topic").trim => name
+        error(name=="","Invalid topic name")
+        Db2:Set("Investigate","topic",name)
+        Db2:Set("Investigate","topic:"+Sys.sessionUUID,name)
+    } else {
+        x = if (curr==null) {
+            readLine("Enter number, or enter name of new topic")
+        } else {
+            readLine("Enter number, or new topic (Enter for current: " + curr + ")")
+        }
+        x=x.trim.replace(" ","_")
+        name=x
+        if (x.?parseInt) {
+            name=list.nth(x.parseInt)
+        }
+        if (name.length==0 && curr != null) {
+            name=curr
+        }
+        error(name=="", "Invalid topic name")
+        Db2:Set("Investigate","topic",name)
+        Db2:Set("Investigate","topic:"+Sys.sessionUUID,name)
     }
 /SetTopic
 
@@ -110,9 +110,9 @@ paste into JIRA etc)
 # List topics alphabetically
 # --
     InvDir.files(Glob("*.txt"))->f
-		out(Str(f.name,f))
-	| _.sort->x
-		out(x.data.name.beforeLast("."))
+        out(Str(f.name,f))
+    | _.sort->x
+        out(x.data.name.beforeLast("."))
 /GetTopics
 
 
@@ -120,14 +120,14 @@ paste into JIRA etc)
 
 # Get file for current topic
 # --
-	P(1,GetCurrentTopic) => topic
-	
-	topicFile=InvDir.file(topic.replace(" ","_") + ".txt")
-	if (!topicFile.exists) {
-		dateString = Date.setFormat("yyyy-MM-dd").fmt
-		topicFile.create(Header(topic + " " + dateString))
-	}
-	topicFile
+    P(1,GetCurrentTopic) => topic
+    
+    topicFile=InvDir.file(topic.replace(" ","_") + ".txt")
+    if (!topicFile.exists) {
+        dateString = Date.setFormat("yyyy-MM-dd").fmt
+        topicFile.create(Header(topic + " " + dateString))
+    }
+    topicFile
 /LogFile
 
 
@@ -136,37 +136,37 @@ paste into JIRA etc)
 
 # Show todo list
 # --
-	P(1,"*todo*") => pattern
-	LogFile.read->line
-		assert(line.trim.toLower.contains(pattern))
-		println(line.trim)
+    P(1,"*todo*") => pattern
+    LogFile.read->line
+        assert(line.trim.toLower.contains(pattern))
+        println(line.trim)
 //ShowLines
 
 
 # Get prompt color
 # --
-	Db2:Get(Sys.scriptId, "prompt_color", Curses:TxtCyan)
+    Db2:Get(Sys.scriptId, "prompt_color", Curses:TxtCyan)
 //PromptColor
 
 
 # Select prompt color
 # --
-	error (!Curses:Enabled, "Colors not enabled. Run Curses:Enable")
-	Db2:Set(Sys.scriptId, "prompt_color", Curses:SelectColor)
+    error (!Curses:Enabled, "Colors not enabled. Run Curses:Enable")
+    Db2:Set(Sys.scriptId, "prompt_color", Curses:SelectColor)
 //SetPromptColor
 
 
 
 # Create date header if new day
 # --
-	dbKey="date:" + GetCurrentTopic
+    dbKey="date:" + GetCurrentTopic
 
-	Date.setFormat("yyyy-MM-dd").fmt => today
-	Db2:Get(Sys.scriptId,dbKey,"") => date
-	if (date != today) {
-		LogFile.append(List("",today,"=".times(today.length)))   # Markdown === under text gives Header1
-		Db2:Set(Sys.scriptId,dbKey,today)
-	}
+    Date.setFormat("yyyy-MM-dd").fmt => today
+    Db2:Get(Sys.scriptId,dbKey,"") => date
+    if (date != today) {
+        LogFile.append(List("",today,"=".times(today.length)))   # Markdown === under text gives Header1
+        Db2:Set(Sys.scriptId,dbKey,today)
+    }
 //DateHeader
 
 
@@ -174,8 +174,8 @@ paste into JIRA etc)
 
 # Add prompt color to string
 # --
-	P(1,"?") => str
-	PromptColor + str + Curses:Reset
+    P(1,"?") => str
+    PromptColor + str + Curses:Reset
 //Prompt
 
 
@@ -184,9 +184,9 @@ paste into JIRA etc)
 # --
 loop
     readLine(Prompt("[" + GetCurrentTopic + "] Enter text, 'c' to cat, Enter to quit or '?' for help")).trim =>cmd
-	break(cmd=="" || cmd=="q" || cmd=="quit")
+    break(cmd=="" || cmd=="q" || cmd=="quit")
 
-	if (cmd=="." || cmd.startsWith("..")) {
+    if (cmd=="." || cmd.startsWith("..")) {
         # paste
         marker="."
         if (cmd.startsWith("..")) {
@@ -195,18 +195,18 @@ loop
         println("End-marker: '" + marker + "'")
         println("---")
         readLines(marker) =>lines
-		if (lines.length>0) {
-			DateHeader
-			LogFile.append("")
+        if (lines.length>0) {
+            DateHeader
+            LogFile.append("")
 
-			LogFile.append("```")			# Markdown
-			Inner {
-				lines->line LogFile.append(line) 
-			}
-			LogFile.append("```")
+            LogFile.append("```")       # Markdown
+            Inner {
+                lines->line LogFile.append(line) 
+            }
+            LogFile.append("```")
 
-			LogFile.append("")
-		}
+            LogFile.append("")
+        }
         
     } else if (cmd=="?") { 
         Sequence(
@@ -214,31 +214,31 @@ loop
             @
             @ .                 - read pasted input lines, with end-marker '.'
             @ ..xxx             - read pasted input lines, with end-marker 'xxx'
-			@ -                 - insert blank line
+            @ -                 - insert blank line
             @ ?                 - get help (this page)
-			@
+            @
             @ h/header          - insert header
             @ d/date            - insert date/time
             @ t/topic/ch        - view / change topic
-			@
-			@ aloop             - enter Activity loop mode
-			@ aset              - set Activity loop delay in minutes
-			@
+            @
+            @ aloop             - enter Activity loop mode
+            @ aset              - set Activity loop delay in minutes
+            @
             @ todo              - show *TODO* lines
             @ c/cat             - display recent entries
             @ m/more          
             @ e/edit            - edit current file
             @ q/quit            - quit
-			@
-			@ col               - set prompt color
+            @
+            @ col               - set prompt color
             @
         )->line 
             println("| " + line.trim)
     } else if(cmd=="h" || cmd=="header") { ## Header
-		DateHeader
+        DateHeader
         LogHeader
     } else if (cmd=='d' || cmd=="date") { ## date/time stamp
-		DateHeader
+        DateHeader
         LogFile.append(List("",Date.fmt))
     } else if (cmd=='t' || cmd=="topic" || cmd=="ch") { ## change topic
         SetTopic
@@ -246,24 +246,24 @@ loop
         ShowLines("*todo*")
     } else if(cmd=='c' || cmd=="cat") { ## cat
         Show
-	} else if (cmd=="aloop") { ## activity loop
-		DateHeader
-		ALoop
-	} else if (cmd=="aset") { # Change activity loop delay
-		ALoopSet
+    } else if (cmd=="aloop") { ## activity loop
+        DateHeader
+        ALoop
+    } else if (cmd=="aset") { # Change activity loop delay
+        ALoopSet
     } else if(cmd==".m" || cmd=='m' || cmd=="more") { ## more
-		DateHeader
+        DateHeader
         Lib:m (LogFile)
     } else if(cmd=="@e" || cmd=='e' || cmd=="edit") { ## edit 
         Edit
-	} else if (cmd=='-') {
-		DateHeader
-		LogFile.append("")
-	} else if (cmd=='col') {
-		SetPromptColor
+    } else if (cmd=='-') {
+        DateHeader
+        LogFile.append("")
+    } else if (cmd=='col') {
+        SetPromptColor
     } else {
-		DateHeader
-		LogText(cmd)
+        DateHeader
+        LogText(cmd)
     }
     
 /InputMode
@@ -287,17 +287,17 @@ loop
         list.add("# " +x) 
     |
     list.add("```")
-	
-	DateHeader
+    
+    DateHeader
     LogFile.append(list)
 /LogData
 
 
 # Add line to LogFile
 # --
-	P(1,readLine("Enter comment")) => line
-	Date.setFormat("HH:mm").fmt + " " + line + "  " => line   ## two spaces at end of line produces breaks in Markdown paragraphs
-	LogFile.append(line)
+    P(1,readLine("Enter comment")) => line
+    Date.setFormat("HH:mm").fmt + " " + line + "  " => line   ## two spaces at end of line produces breaks in Markdown paragraphs
+    LogFile.append(line)
 /LogText
 
 
@@ -311,7 +311,7 @@ loop
 
     LogFile.append("")
 
-    LogFile.append("```")	# Markdown
+    LogFile.append("```") # Markdown
     lines->line LogFile.append(line) |
     LogFile.append("```")
 
@@ -328,8 +328,8 @@ loop
 
 # Show lines 
 # --
-	LogFile.read->line 
-		println(line)
+    LogFile.read->line 
+        println(line)
     |
     println
 /Show
@@ -340,7 +340,7 @@ Lib:e (LogFile)
 
 # Alarm
 # --
-	P(1,3)=>count
+    P(1,3)=>count
     Std.Data.each(1,count)->x
         println("ALARM!!" + Sys.uchar(7))
         Sys.sleep(1500)
@@ -351,50 +351,50 @@ Lib:e (LogFile)
 
 # Activity loop
 # --
-	P(1,false) => minuteBeep
-	Db2:Get(Sys.scriptId,"ALoop_minutes",5) => minutes
+    P(1,false) => minuteBeep
+    Db2:Get(Sys.scriptId,"ALoop_minutes",5) => minutes
 
-	start=curr=currentTimeMillis
-	Date.setFormat("yyyy-MM-dd").fmt + "_log" => key
+    start=curr=currentTimeMillis
+    Date.setFormat("yyyy-MM-dd").fmt + "_log" => key
 
     LogFile.append("")
 
-	
-	Inner{
-		LogFile.read.last(100)->line println("| " + line)
-	}
-	println("---")
-	println("[Interval: " + minutes + " minutes]")
-	
-	loop
-		if (currentTimeMillis - start >= minutes*60000) {
-			Alarm(1)
+    
+    Inner{
+        LogFile.read.last(100)->line println("| " + line)
+    }
+    println("---")
+    println("[Interval: " + minutes + " minutes]")
+    
+    loop
+        if (currentTimeMillis - start >= minutes*60000) {
+            Alarm(1)
 
-			readLine("Activity / blank to quit") => line
-			break(line.trim=="")
-			LogText(line)
+            readLine("Activity / blank to quit") => line
+            break(line.trim=="")
+            LogText(line)
 
-			Inner{
-				LogFile.read.last(100)->line println("| " + line)
-			}
-			println("---")
+            Inner{
+                LogFile.read.last(100)->line println("| " + line)
+            }
+            println("---")
 
-			start=curr=currentTimeMillis
-		} else {
-			if (currentTimeMillis > curr+60000) {
-				curr=curr+60000
-				println("" + if(minuteBeep,Sys.uchar(7),"") + ((curr-start)/60000) + "/" + minutes)
-			}
-			Sys.sleep(3000)
-		}
+            start=curr=currentTimeMillis
+        } else {
+            if (currentTimeMillis > curr+60000) {
+                curr=curr+60000
+                println("" + if(minuteBeep,Sys.uchar(7),"") + ((curr-start)/60000) + "/" + minutes)
+            }
+            Sys.sleep(3000)
+        }
 /ALoop
 
-	
+    
 # Change ALoop delay in minutes
 # --
-	currVal=""+Db2:Get(Sys.scriptId,"ALoop_minutes",5)
-	Input("Enter ALoop number of minutes").setCurr(currVal).get.parseInt => minutes
-	Db2:Set(Sys.scriptId,"ALoop_minutes",minutes)
+    currVal=""+Db2:Get(Sys.scriptId,"ALoop_minutes",5)
+    Input("Enter ALoop number of minutes").setCurr(currVal).get.parseInt => minutes
+    Db2:Set(Sys.scriptId,"ALoop_minutes",minutes)
 /ALoopSet
 
 
