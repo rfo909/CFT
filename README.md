@@ -1,5 +1,3 @@
-## [Youtube CFT Introduction](https://www.youtube.com/playlist?list=PLj58HwpT4Qy80zdSV-AlWJILS0KlPHhfS)
-
 
 # Introduction
 
@@ -448,8 +446,6 @@ mvn package
 [CFT Introduction](doc/Doc.md).
 
 [Full Reference](doc/Reference.md).
-
-[Youtube CFT Introduction](https://www.youtube.com/playlist?list=PLj58HwpT4Qy80zdSV-AlWJILS0KlPHhfS)
 
 # Appendix
 
