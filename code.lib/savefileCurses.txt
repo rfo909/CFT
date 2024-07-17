@@ -170,6 +170,11 @@ P(2,1)=>y
 /CurGoto
 
 
+# Echo off - Reset to undo
+# --
+	if(ena,Esc+"[8m","")
+/EchoOff
+
 
 
 P(1,10)=>x1
