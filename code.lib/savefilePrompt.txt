@@ -108,7 +108,7 @@
 /Path
 
 
-# List completed jobs (when changes)
+# Jobs summary
 # --
     running=Jobs:Running
 
@@ -133,7 +133,7 @@
 /JobsStatus
     
 
-# Show status + background jobs
+# Show status + background jobs  - only when Curses enabled
 # --
 
 	# Clear top line (1 because it scrolls down one line after prompt)
@@ -190,7 +190,7 @@
     
     
     # Show various status
-    ShowStatus
+    if(Curses:Enabled) ShowStatus
 
     # Add newline before prompt if colors are off
     # --
