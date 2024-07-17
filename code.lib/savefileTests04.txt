@@ -56,6 +56,10 @@ Time consuming tests related to Db2 and locking
 //t01_GetCounters
 
 
+# Newline
+# --
+	if (Sys.isWindows,"^r^n","^n").unEsc
+//Newline
 
 # Create separate threads, each calling GetCounters()
 # The idea is that we check that each counter value is obtained
@@ -72,7 +76,7 @@ Time consuming tests related to Db2 and locking
         out(SpawnProcess(SymDict(i),t01_GetCounters(10)))
     | -> proc
         proc.wait
-        proc.output->line out(line)
+        proc.output.split(Newline)->line out(line)
     | => allLines
     
     # result

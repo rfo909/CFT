@@ -132,6 +132,7 @@ public class ObjGlobal extends Obj {
         add(new FunctionReadLine());
         add(new FunctionTerm());
         add(new FunctionPrintln());
+        add(new FunctionPrint());
         add(new FunctionFileLine());
         add(new FunctionError());
         add(new FunctionGetType());
@@ -739,6 +740,33 @@ public class ObjGlobal extends Obj {
         }
     }
     
+    class FunctionPrint extends Function {
+        public String getName() {
+            return "print";
+        }
+        public String getShortDesc() {
+            return "print([str[,...]]?) - print string";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            Stdio stdio=ctx.getStdio();
+            StringBuffer sb=new StringBuffer();
+            for (int i=0; i<params.size(); i++) {
+                if (i>0) sb.append(" ");
+                sb.append(params.get(i).getValAsString());
+            }
+            String s=sb.toString();
+
+            s=TabUtil.substituteTabs(s, 4);
+            int w=ctx.getObjGlobal().getRoot().getObjTerm().getScreenWidth();
+            if (s.length() >= w-1) {
+                s=s.substring(0, w-2)+"+";
+            }
+            stdio.print(s);
+            return new ValueString(s);
+        }
+    }
+    
+
     class FunctionFileLine extends Function {
         public String getName() {
             return "FileLine";

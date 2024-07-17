@@ -138,6 +138,12 @@
 /AptUpdate
 
 
+
+# Newline
+# --
+	if (Sys.isWindows,"^r^n","^n").unEsc
+//Newline
+
 # Run APT Update / upgrade on hosts
 # --
     data=Hosts:Parse
@@ -183,7 +189,7 @@
         
         target=process.data.target
         exitValue=process.exitValue
-        output=process.output
+        output=process.output.split(Newline)
         date=Date
         
         obj=SymDict(date,target,exitValue,output)
@@ -338,7 +344,7 @@
     processes _->process
         Lib:Header(""+process.data.host)
         process.wait
-        Inner {process.output->line println(line)}
+        Inner {process.output.split(Newline)->line println(line)}
         readLine("ENTER to continue")
 /UpdateCFTAll
 
@@ -395,7 +401,7 @@ P(4)=>lineFilter
     procList -> proc
         proc.wait
         Inner {
-            #proc.output->line println(line) |
+            #proc.output.split(Newline)->line println(line) |
             proc.exitValue->line println(line)
         }   
 /SysStatAll
