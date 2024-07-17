@@ -56,10 +56,7 @@ paste into JIRA etc)
 # --
     t=Db2:Get("Investigate","topic:" + Sys.sessionUUID)
     if (t==null) {
-        if(Db2:Get("Investigate","topic")==null) {
-            error("No current topic")
-        }
-        t = Db2:Get("Investigate","topic")
+        t = Db2:Get("Investigate","topic","Default")
     }
     t
 /GetCurrentTopic

@@ -133,6 +133,40 @@
 /JobsStatus
     
 
+# Show status + background jobs
+# --
+
+	# Clear top line (1 because it scrolls down one line after prompt)
+	
+	print(Curses:CurGoto(0,1)+" ".times(Term.w-20))
+	print(Curses:CurGoto(Term.w-20,1)+" ".times(21))
+
+	# Show date and time
+	print(Curses:CurGoto(0,1) + GetColor)
+	print("[--- " + Date.fmt + "---]   ")
+    
+
+	line=1
+	
+	(Jobs:Completed + Jobs:Running).unique->name
+		job=Sys.Jobs.get(name)
+		status="   "
+		if(job.isBlockedOnInputSince != null) {
+			status="BLK"
+		} else if(job.hasOutput) {
+			status="OUT"
+		} else if(job.isDone) {
+			status=" OK"
+		}
+		s="[" + name + " ".times(20) 
+		s=s.first(20)+" " + status + "]"  # 25 chars
+		
+		print(Curses:CurGoto(Term.w-26, line)+GetColor+s)
+		line=line+1
+/ShowStatus
+		
+		
+	
 # Complete prompt
 # --
     P(1,Dir) => currDir
@@ -153,6 +187,10 @@
     if(IsRoot) {
         parts.add(Curses:Reversed + "#root#" + Curses:Reset + color)
     }
+    
+    
+    # Show various status
+    ShowStatus
 
     # Add newline before prompt if colors are off
     # --
@@ -160,5 +198,7 @@
     if (!Curses:Enabled) {
         newline=(if(Sys.isWindows) "^r^n" else "^n").unEsc
     }
-    newline + color + parts.concat(" ") + Curses:Reset
+    # Position of prompt at bottom
+    gotoLine=Curses:CurGoto(0,Term.h)
+    newline + gotoLine + color + parts.concat(" ") + Curses:Reset
 /PromptString
