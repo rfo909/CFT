@@ -73,6 +73,7 @@ public class ObjSys extends Obj {
                 new FunctionCurrFunction(),
                 new FunctionGetCallHistory(),
                 new FunctionRest(),
+                new FunctionNewline(),
         };
         setFunctions(arr);
         
@@ -658,6 +659,20 @@ public class ObjSys extends Obj {
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
             return new ValueObj(new ObjRest());
+        }
+    }
+
+    class FunctionNewline extends Function {
+        public String getName() {
+            return "newline";
+        }
+
+        public String getShortDesc() {
+            return "newline() - create newline string (\\r\\n for windows or \\n for linux)";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+            return new ValueString(java.io.File.separatorChar=='/' ? "\n": "\r\n");
         }
     }
 
