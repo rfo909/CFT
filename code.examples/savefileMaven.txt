@@ -1,0 +1,39 @@
+# All pom files under current dir
+# --
+	Dir.allFiles("pom*xml")
+/Pom
+
+# Get first line with a certain pattern
+# --
+	P(1) => pomFile
+	P(2, readLine("Enter pattern")) => pattern
+	pomFile.read->line
+		if (line.contains(pattern)) {
+			out(line)
+			break
+		}
+//GetFirst
+
+# Select Pom file
+# --
+	files=Pom
+	files->f
+		println(f.path)
+	|
+	Lib:SelectOptions(files, Lambda{P(1).path}, Lambda{P(1)})
+//SelectFile
+
+# Get build version for pom file
+# --
+	GetFirst(P(1),"<version>")
+/BV
+
+# Get groupId for pom file
+# --
+	GetFirst(P(1),"<groupId>")
+/GI
+
+# Get artifactId for pom file
+# --
+	GetFirst(P(1),"<artifactId>")
+/AI
