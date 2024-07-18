@@ -192,9 +192,9 @@
     # --
     newline=""
     if (!Curses:Enabled) {
-        newline=(if(Sys.isWindows) "^r^n" else "^n").unEsc
+        newline=Sys.newline
     }
     # Position of prompt at bottom
-    gotoLine=Curses:CurGoto(0,Term.h-1)
+    gotoLine=Curses:CurGoto(0,Term.h)
     newline + gotoLine + color + parts.concat(" ") + Curses:Reset
 /PromptString
