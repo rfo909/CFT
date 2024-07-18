@@ -40,7 +40,6 @@ import java.util.Date;
 import java.util.List;
 
 import rf.configtool.main.Ctx;
-import rf.configtool.main.ReportData;
 import rf.configtool.main.SoftErrorException;
 import rf.configtool.main.Stdio;
 import rf.configtool.main.runtime.ColList;

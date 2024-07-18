@@ -21,7 +21,8 @@ import java.util.*;
 
 import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.Ctx;
-import rf.configtool.main.runtime.Value;
+import rf.configtool.main.runtime.*;
+import rf.configtool.main.runtime.lib.ObjRow;
 import rf.configtool.main.runtime.ValueList;
 
 public class StmtReport extends Stmt {
@@ -46,17 +47,16 @@ public class StmtReport extends Stmt {
 
     public void execute (Ctx ctx) throws Exception {
         List<Value> data=new ArrayList<Value>();
-        List<Value> presentation=new ArrayList<Value>();
         
         for (Expr expr:presentationValues) {
-            presentation.add(expr.resolve(ctx));
+            data.add(expr.resolve(ctx));
         }
         
-        if (presentation.size()==1 && (presentation.get(0) instanceof ValueList)) {
-            presentation=((ValueList) presentation.get(0)).getVal();
+        if (data.size()==1 && (data.get(0) instanceof ValueList)) {
+            data=((ValueList) data.get(0)).getVal();
         }
 
-        ctx.getReportData().addReportData(presentation);
+        ctx.getOutData().out(new ValueObj(new ObjRow(data)));
     }
 
 }

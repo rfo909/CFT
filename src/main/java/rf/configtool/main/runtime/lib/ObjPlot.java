@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import rf.configtool.main.Ctx;
-import rf.configtool.main.ReportData;
 import rf.configtool.main.runtime.ColList;
 import rf.configtool.main.runtime.Function;
 import rf.configtool.main.runtime.Obj;

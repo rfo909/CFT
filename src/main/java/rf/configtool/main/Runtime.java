@@ -73,9 +73,10 @@ public class Runtime {
             if (retVal != null) ctx.push(retVal);
             
             codeSpace.execute(ctx);
-            
-            ReportData reportData=ctx.getReportData();
-    
+
+            /*
+            //ReportData reportData=ctx.getReportData();
+
              // Column data is formatted to text and added to outData as String objects
             List<List<Value>> outData=reportData.getReportPresentationValues();
             ReportFormattingTool report=new ReportFormattingTool();
@@ -83,6 +84,7 @@ public class Runtime {
             for (String s:formattedText) {
                 ctx.getOutData().out(new ValueString(s));
             }
+             */
             
             retVal=ctx.getResult();
         }

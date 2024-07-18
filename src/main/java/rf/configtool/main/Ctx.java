@@ -44,8 +44,7 @@ public class Ctx {
     private FunctionState functionState;
 
     private OutData outData;
-    private ReportData reportData;
-    
+
     private boolean programContainsLooping = false;
     private boolean isInnerBlock=false;
 
@@ -61,15 +60,14 @@ public class Ctx {
     
 
     public Ctx(Stdio stdio, ObjGlobal objGlobal, FunctionState functionState) {
-        this(null, new OutData(), new ReportData(), stdio, objGlobal, functionState);
+        this(null, new OutData(), stdio, objGlobal, functionState);
     }
     
-    private Ctx (Ctx parent, OutData outData,  ReportData reportData, Stdio stdio, ObjGlobal objGlobal, FunctionState functionState) {
+    private Ctx (Ctx parent, OutData outData,  Stdio stdio, ObjGlobal objGlobal, FunctionState functionState) {
         if (functionState==null) functionState=new FunctionState(null,null);
         
         this.parent=parent;
         this.outData=outData;
-        this.reportData=reportData;
         this.stdio=stdio;
         this.objGlobal=objGlobal;
         this.functionState=functionState;
@@ -81,11 +79,11 @@ public class Ctx {
     }
 
     public Ctx sub() {
-        return new Ctx(this,outData,reportData,stdio,objGlobal,functionState);
+        return new Ctx(this,outData,stdio,objGlobal,functionState);
     }
               
     public Ctx subNewData(boolean isInnerBlock) {
-        Ctx ctx = new Ctx(this,new OutData(),reportData,stdio,objGlobal,functionState);
+        Ctx ctx = new Ctx(this,new OutData(),stdio,objGlobal,functionState);
         ctx.isInnerBlock=isInnerBlock;
         return ctx;
     }
@@ -245,10 +243,7 @@ public class Ctx {
         return outData;
     }
         
-    public ReportData getReportData() {
-        return reportData;
-    }
-    
+
     public ObjGlobal getObjGlobal() {
         return objGlobal;
     }

@@ -23,7 +23,6 @@ import java.util.List;
 import rf.configtool.main.CFTCallStackFrame;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.FunctionState;
-import rf.configtool.main.ReportData;
 import rf.configtool.main.runtime.lib.ObjDict;
 import rf.configtool.parsetree.CodeSpace;
 import rf.configtool.util.ReportFormattingTool;
@@ -89,8 +88,9 @@ public class ValueBlock extends Value {
             if (retVal != null) sub.push(retVal);
             
             progLine.execute(sub);
-            
-            ReportData reportData=sub.getReportData();
+
+            /*
+            //ReportData reportData=sub.getReportData();
 
             // Column data is formatted to text and added to outData as String objects
             List<List<Value>> presentationValues=reportData.getReportPresentationValues();
@@ -99,7 +99,7 @@ public class ValueBlock extends Value {
             for (String s:formattedText) {
                 sub.getOutData().out(new ValueString(s));
             }
-
+            */
             
             
             retVal=sub.getResult();
@@ -150,8 +150,9 @@ public class ValueBlock extends Value {
             if (retVal != null) sub.push(retVal);
             
             progLine.execute(sub);
-            
-            ReportData reportData=sub.getReportData();
+
+            /*
+            //ReportData reportData=sub.getReportData();
 
             // Column data is formatted to text and added to outData as String objects
             List<List<Value>> outData=reportData.getReportPresentationValues();
@@ -161,6 +162,7 @@ public class ValueBlock extends Value {
                 sub.getOutData().out(new ValueString(s));
             }
             retVal=sub.getResult();
+             */
         }
 
         ctx.getStdio().popCFTCallStackFrame(caller);
