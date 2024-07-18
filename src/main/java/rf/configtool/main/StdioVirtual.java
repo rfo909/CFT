@@ -30,29 +30,37 @@ import java.util.List;
  * 
  */
 public class StdioVirtual extends Stdio {
-    
-    private List<String> outputBuffer = new ArrayList<String>();
+
+    private final String newline;
+    private StringBuffer outputBuffer = new StringBuffer();
     private long isBlockedOnInputSince = -1L;
-    
+
     public StdioVirtual (BufferedReader stdin) {
         super(stdin);
+        newline=(java.io.File.separatorChar=='/' ? "\n" : "\r\n");
     }
    
     @Override
     public synchronized void println (String s) {
         //System.out.println("StdioVirtual.println -> " + s);
-        outputBuffer.add(s);
+        outputBuffer.append(s);
+        outputBuffer.append(newline);
+
     }
     
+    @Override
+    public synchronized void print (String s) {
+        outputBuffer.append(s);
+    }
     
-    public synchronized List<String> getAndClearOutputBuffer() {
-        List<String> x=outputBuffer;
-        outputBuffer=new ArrayList<String>();
-        return x;
+    public synchronized String getAndClearOutputBuffer() {
+        String str=outputBuffer.toString();
+        outputBuffer=new StringBuffer();
+        return str;
     }
     
     public synchronized boolean hasBufferedOutput() {
-        return outputBuffer.size() > 0;
+        return outputBuffer.length() > 0;
     }
     
 

@@ -188,12 +188,10 @@ P(4,12)=>y2
         bot=Sys.uchar("255a")+Sys.uchar("2550").times(w)+Sys.uchar("255d")
         Std.Data.each(y1,y2)->y
             pre=CurGoto(x1,y)
-            if (y==y1) println(pre+top)
-            else if (y==y2) println(pre+bot)
-            else println(pre+mid)
-    } else {
-        println
-    }
+            if (y==y1) print(pre+top)
+            else if (y==y2) print(pre+bot)
+            else print(pre+mid)
+    } 
 /Box
         
 
@@ -201,10 +199,12 @@ P(4,12)=>y2
 
 # Test
 # --
-    println(Clear)
+    print(Clear)
     List(TxtRed,TxtGreen,TxtBlue,TxtYellow,TxtMagenta,TxtCyan,TxtWhite,TxtBlack,Reversed)->x
         println(x+"Curses using ANSI escape sequences" + Bold + " ENABLED" + Reset)
     |
     Box(10,5,32,12)
+    print(CurGoto(1,14))
+    true
 /test
 

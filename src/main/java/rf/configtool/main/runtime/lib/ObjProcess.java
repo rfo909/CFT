@@ -148,7 +148,7 @@ public class ObjProcess extends Obj {
         return "Process";
     }
     
-    public List<String> getAndClearOutput() {
+    public String getAndClearOutput() {
         return stdioVirtual.getAndClearOutputBuffer();
     }
     
@@ -261,15 +261,12 @@ public class ObjProcess extends Obj {
         }
 
         public String getShortDesc() {
-            return "output() - get buffered output lines";
+            return "output() - get buffered output string";
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-            List<String> output = stdioVirtual.getAndClearOutputBuffer();
-            List<Value> result = new ArrayList<Value>();
-            for (String s : output)
-                result.add(new ValueString(s));
-            return new ValueList(result);
+            String output = stdioVirtual.getAndClearOutputBuffer();
+            return new ValueString(output);
         }
     }
 

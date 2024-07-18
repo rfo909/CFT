@@ -232,6 +232,8 @@ public abstract class Stdio {
      */
    
     public abstract void println (String s);
+
+    public abstract void print (String s);
     
     public void println () {
         println("");

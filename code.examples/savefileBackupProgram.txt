@@ -96,7 +96,7 @@ as it contains generated content.
 # Get target directory
 # --
     Db2:Get("Backup","targetDir", null) => d
-    error(d==null,"No target dir defined")
+    if(d==null,d=Dir)
     d
 /TargetDir
 

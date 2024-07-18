@@ -71,6 +71,12 @@ This can also be done by entering TAB + q + Enter in job input
 //onLoad
 
 
+# Newline character(s)
+# --
+	if (Sys.isWindows, "^r^n", "^n").unEsc
+//Newline
+
+
 # Get all jobs
 # --
     names = (Sys.Jobs.namesCompleted + Sys.Jobs.namesRunning)
@@ -106,7 +112,7 @@ This can also be done by entering TAB + q + Enter in job input
     proc=Sys.Jobs.getCompleted(name)
 
     Lib:Header(name)
-    Lib:mList(proc.output)
+    Lib:mList(proc.output.split(Newline))
 
     Sys.Jobs.deleteCompleted(name)
     
@@ -122,10 +128,10 @@ This can also be done by entering TAB + q + Enter in job input
 
 # Extend saved output with additional lines of text
 # --
-    P(1) as List => lines
+    P(1) as String => lines
     P(2) as String => dbKey
     
-    Db2:Get(Sys.scriptId,dbKey,List) + lines => output
+    Db2:Get(Sys.scriptId,dbKey,List) + (lines.split(Newline)) => output
     output = output.last(Term.h*4)
     Db2:Set(Sys.scriptId,dbKey,output)
 //AddOutputLines
@@ -147,12 +153,12 @@ This can also be done by entering TAB + q + Enter in job input
     startTime=currentTimeMillis
     Inner {
         loop
-            Sys.sleep(100)
-            outLines=proc.output
-            if (outLines.length>0) {
-                AddOutputLines(outLines,dbKey)
+            Sys.sleep(10)
+            outText=proc.output
+            if (outText.length>0) {
+                AddOutputLines(outText,dbKey)
                 Inner{
-                    outLines->line println(line)
+                    outText.split(Newline)->line println(line)
                 }
             }
             if (proc.isDone) {
@@ -214,7 +220,7 @@ This can also be done by entering TAB + q + Enter in job input
             if (line==TAB + "q") error("Aborting Job foreground processing")
             proc.sendLine(line)
             
-            AddOutputLines(List(line), dbKey)
+            AddOutputLines(line+Newline, dbKey)
         } else {
             println(Curses:Bold + ">>> Entering command mode")
             println(">>> ---------------------")
