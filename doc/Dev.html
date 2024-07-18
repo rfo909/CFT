@@ -13,6 +13,35 @@
 
 <h1>CFT Change log</h1>
 
+<h3>4.1.0 2024-07-18 report()</h3>
+<p>
+Changed report() so that it adds a normal out() value being an instance of new
+object type Row. This in turn has an implementation of getContentDescription() which
+returns columns for all values that are of the following types:
+</p>
+<pre>
+    static final String reportTypes = "String|FileLine|int|float|boolean|null|Date";
+</pre>
+<p>
+Other values are not included, but the Row objects have a get() function.
+</p>
+<pre>
+Example:
+
+Dir.files->f report(f, f.name, f.length)
+/test
+
+# Running this we get a report, but we can then say
+
+:N.get(0) - returns the file
+:N.get(1) - returns file name
+:N.get(2) - returns file length
+</pre>
+<p>
+This means we can use data created by report()
+</p>
+
+
 <h3>4.0.16 2024-07-05 updating file headers</h3>
 <p>
 Java and script

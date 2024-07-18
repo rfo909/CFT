@@ -80,7 +80,8 @@ public class ObjClosure extends Obj {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             CFTCallStackFrame caller=new CFTCallStackFrame("ObjClosure.FunctionCall()","Calling closure");
 
-            return callClosure(ctx,caller,params);
+            Value retval =  callClosure(ctx,caller,params);
+            return retval;
         }
     }
     

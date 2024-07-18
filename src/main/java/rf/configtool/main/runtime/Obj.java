@@ -29,7 +29,6 @@ import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.ScriptSourceLine;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.ObjGlobal;
-import rf.configtool.main.ReportData;
 import rf.configtool.main.Version;
 import rf.configtool.main.runtime.lib.ObjClosure;
 import rf.configtool.main.runtime.lib.ObjDict;

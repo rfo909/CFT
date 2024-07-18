@@ -23,7 +23,6 @@ import java.util.List;
 import rf.configtool.main.CFTCallStackFrame;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.FunctionState;
-import rf.configtool.main.ReportData;
 import rf.configtool.main.runtime.lib.ObjDict;
 import rf.configtool.parsetree.CodeSpace;
 import rf.configtool.util.ReportFormattingTool;
@@ -90,18 +89,6 @@ public class ValueBlock extends Value {
             
             progLine.execute(sub);
             
-            ReportData reportData=sub.getReportData();
-
-            // Column data is formatted to text and added to outData as String objects
-            List<List<Value>> presentationValues=reportData.getReportPresentationValues();
-            ReportFormattingTool report=new ReportFormattingTool();
-            List<String> formattedText=report.formatDataValues(presentationValues);
-            for (String s:formattedText) {
-                sub.getOutData().out(new ValueString(s));
-            }
-
-            
-            
             retVal=sub.getResult();
         }
         return retVal;
@@ -151,15 +138,6 @@ public class ValueBlock extends Value {
             
             progLine.execute(sub);
             
-            ReportData reportData=sub.getReportData();
-
-            // Column data is formatted to text and added to outData as String objects
-            List<List<Value>> outData=reportData.getReportPresentationValues();
-            ReportFormattingTool report=new ReportFormattingTool();
-            List<String> formattedText=report.formatDataValues(outData);
-            for (String s:formattedText) {
-                sub.getOutData().out(new ValueString(s));
-            }
             retVal=sub.getResult();
         }
 
