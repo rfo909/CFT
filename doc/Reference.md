@@ -1,9 +1,9 @@
 
 # CFT Reference
 
-Last updated: 2023-06-21 RFO
+Last updated: 2024-07-18 RFO
 
-v4.0.7
+v4.1.0
 
 
 
@@ -1252,9 +1252,22 @@ Using report() instead of out() lets us produce as output a list of strings,
 where multiple parameters to report() is formatted into columns. Example:
 
 ```
-Dir.files->f report(f.name, f.length)
+Dir.files->f report(f, f.name, f.length)
 ```
 
+NOTE: report(a,b,c) is really a convenience function, as it corresponds to
+out(Row(a,b,c))
+
+The Row object renders columns for values of the following types only: 
+
+```
+String, FileLine, int, float, boolean, null, Date. 
+```
+
+However, all values of each Row is available via the .get(n) function of Row
+
+The Row object has a function .show() to list out info about all columns, with type and value if "showable" according to type
+list, corresponding to the presentation.
 
 
 
@@ -3080,9 +3093,8 @@ and since space is assigned a negative token type, it gets automatically ignored
 # Using getTokens(), with the Root node as parameter, which returns
 # a list of token objects.
 # --
-	Std.Text.Lexer.addLine("this is a test").getTokens(Root)->
-	token
-	report(token.sourceLocation, token.str, token.tokenType)
+	Std.Text.Lexer.addLine("this is a test").getTokens(Root)->token
+		report(token.sourceLocation, token.str, token.tokenType)
 /test
 ```
 

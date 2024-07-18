@@ -25,6 +25,7 @@ import rf.configtool.main.Ctx;
 import rf.configtool.main.FunctionState;
 import rf.configtool.main.runtime.lib.ObjDict;
 import rf.configtool.parsetree.CodeSpace;
+import rf.configtool.util.ReportFormattingTool;
 
 /**
  * Block of code - takes three different forms, but only one is available as
@@ -87,10 +88,9 @@ public class ValueBlock extends Value {
             if (retVal != null) sub.push(retVal);
             
             progLine.execute(sub);
-
+            
             retVal=sub.getResult();
         }
-
         return retVal;
     }
     
@@ -137,7 +137,8 @@ public class ValueBlock extends Value {
             if (retVal != null) sub.push(retVal);
             
             progLine.execute(sub);
-
+            
+            retVal=sub.getResult();
         }
 
         ctx.getStdio().popCFTCallStackFrame(caller);
@@ -154,9 +155,7 @@ public class ValueBlock extends Value {
             return "call(...) - call lambda with parameters";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            Value retval = callLambda(ctx,params);
-            System.out.println("ValueBlock.call returns " + retval.getValAsString());
-            return retval;
+            return callLambda(ctx,params);
         }
     }
 

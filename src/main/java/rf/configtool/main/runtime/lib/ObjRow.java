@@ -29,6 +29,7 @@ import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueInt;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
+import rf.configtool.main.runtime.ValueList;
 
 import rf.configtool.util.DateTimeDurationFormatter;
 
@@ -45,6 +46,7 @@ public class ObjRow extends Obj implements IsSynthesizable {
     public ObjRow(List<Value> rowData) {
         this.rowData=rowData;
         add(new FunctionGet());
+        add(new FunctionShow());
     }
 
     public ObjRow () {
@@ -110,6 +112,43 @@ public class ObjRow extends Obj implements IsSynthesizable {
             if (params.size() != 1) throw new Exception("Expected int parameter");
             int n= (int) getInt("n", params, 0);
             return rowData.get(n);
+        }
+    }
+
+
+    class FunctionShow extends Function {
+        public String getName() {
+            return "show";
+        }
+        public String getShortDesc() {
+            return "show() - display all columns";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            List<Value> rows=new ArrayList<Value>();
+
+            for (Value v:rowData) {
+                String type;
+                String value="";
+                if (v instanceof ValueObj) {
+                    Obj obj=((ValueObj) v).getVal();
+                    type="<obj: " + obj.getTypeName() + ">";
+                } else {
+                    type="<"+v.getTypeName()+">";
+                }
+                if(reportTypes.contains(v.getTypeName())) {
+                    value=v.getValAsString();
+                }
+
+                // Using Row to return data, as it gets properly formatted
+                List<Value> rowData=new ArrayList<Value>();
+                rowData.add(new ValueString(type));
+                rowData.add(new ValueString(value));
+
+                ObjRow row=new ObjRow(rowData);
+                rows.add(new ValueObj(row));
+            }
+            return new ValueList(rows);
         }
     }
 

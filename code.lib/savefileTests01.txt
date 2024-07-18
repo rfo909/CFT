@@ -1056,6 +1056,7 @@ ERROR: [<script> Tests01:861.8] Invalid value Dict [] + 1
 # Run all TestX
 # --
     count=0
+    allOk=true
     Sys.functions.sort->f
         assert(f.startsWith("Test"))
         count=count+1
@@ -1065,10 +1066,12 @@ ERROR: [<script> Tests01:861.8] Invalid value Dict [] + 1
 				println("ok  ", f)
 			} else {
 				println("FAIL", f)
+				allOk=false
 			}
 
 		} else {
 			println("Ex  ", f)
+			allOk=false
 		}
         #if(showAll || result==false) report(f,result)
     | #-> line

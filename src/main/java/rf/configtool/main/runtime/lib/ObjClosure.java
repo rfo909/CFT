@@ -81,7 +81,6 @@ public class ObjClosure extends Obj {
             CFTCallStackFrame caller=new CFTCallStackFrame("ObjClosure.FunctionCall()","Calling closure");
 
             Value retval =  callClosure(ctx,caller,params);
-            System.out.println("ObjClosure.call returns " + retval.getValAsString());
             return retval;
         }
     }

@@ -103,16 +103,6 @@ public class ExprBlock extends ExprCommon {
             return b.callInnerBlock(ctx);
         } else if (mode==MODE_LOCAL) {
             return b.callLocalBlock(ctx);
-//        } else if (mode==MODE_CLASS) {
-//          if (className == null) className=ctx.getFunctionState().getScriptFunctionName();
-//          if (className == null) throw new Exception("Could not identify script function name for class name");
-//          ObjDict self=new ObjDict(className);
-//          List<Value> params=ctx.getFunctionState().getParams(); // inherit params from surroundings
-//          
-//          CFTCallStackFrame caller=new CFTCallStackFrame(getSourceLocation(),"Creating class " + className);
-//          b.callLambda(ctx,caller,self,params);
-//          
-//          return new ValueObj(self);
         } else {
             throw new Exception("Invalid mode: " + mode);
         }
