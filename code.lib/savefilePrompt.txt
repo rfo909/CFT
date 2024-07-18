@@ -19,6 +19,9 @@
 >>> EOF
 /License
 
+
+		
+
 # Is root on linux?
 # --
     if (!Sys.isWindows) {
@@ -136,33 +139,26 @@
 # Show status + background jobs  - only when Curses enabled
 # --
 
-	# Clear top line (1 because it scrolls down one line after prompt)
-	
-	print(Curses:CurGoto(0,1)+" ".times(Term.w-20))
-	print(Curses:CurGoto(Term.w-20,1)+" ".times(21))
+	if (Term.w > 120) Inner {
 
-	# Show date and time
-	print(Curses:CurGoto(0,1) + GetColor)
-	print("[--- " + Date.fmt + "---]   ")
-    
-
-	line=1
-	
-	(Jobs:Completed + Jobs:Running).unique->name
-		job=Sys.Jobs.get(name)
-		status="   "
-		if(job.isBlockedOnInputSince != null) {
-			status="BLK"
-		} else if(job.hasOutput) {
-			status="OUT"
-		} else if(job.isDone) {
-			status=" OK"
-		}
-		s="[" + name + " ".times(20) 
-		s=s.first(20)+" " + status + "]"  # 25 chars
+		line=1
 		
-		print(Curses:CurGoto(Term.w-26, line)+GetColor+s)
-		line=line+1
+		(Jobs:Completed + Jobs:Running).unique->name
+			job=Sys.Jobs.get(name)
+			status="   "
+			if(job.isBlockedOnInputSince != null) {
+				status="BLK"
+			} else if(job.hasOutput) {
+				status="OUT"
+			} else if(job.isDone) {
+				status=" OK"
+			}
+			s="[" + name + " ".times(20) 
+			s=s.first(20)+" " + status + "]"  # 25 chars
+			
+			print(Curses:CurGoto(Term.w-26, line)+GetColor+s)
+			line=line+1
+	}
 /ShowStatus
 		
 		
