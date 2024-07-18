@@ -24,7 +24,6 @@ import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
 import rf.configtool.main.runtime.lib.ObjDict;
 import rf.configtool.parsetree.CodeSpace;
-import rf.configtool.util.ReportFormattingTool;
 
 /**
  * Executing function body one CodeSpace at a time, managing transfer of result from one
@@ -74,18 +73,6 @@ public class Runtime {
             
             codeSpace.execute(ctx);
 
-            /*
-            //ReportData reportData=ctx.getReportData();
-
-             // Column data is formatted to text and added to outData as String objects
-            List<List<Value>> outData=reportData.getReportPresentationValues();
-            ReportFormattingTool report=new ReportFormattingTool();
-            List<String> formattedText=report.formatDataValues(outData);
-            for (String s:formattedText) {
-                ctx.getOutData().out(new ValueString(s));
-            }
-             */
-            
             retVal=ctx.getResult();
         }
         
