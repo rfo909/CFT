@@ -90,6 +90,7 @@ public class ValueBlock extends Value {
 
             retVal=sub.getResult();
         }
+
         return retVal;
     }
     
@@ -153,7 +154,9 @@ public class ValueBlock extends Value {
             return "call(...) - call lambda with parameters";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            return callLambda(ctx,params);
+            Value retval = callLambda(ctx,params);
+            System.out.println("ValueBlock.call returns " + retval.getValAsString());
+            return retval;
         }
     }
 
