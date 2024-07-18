@@ -722,15 +722,19 @@ Dict.set("a",1).set("b",Lambda{P(1) as int=>x self.a+x})
 /Test46_Dict_dot_x_assigment
 
 
-
-# "as" Dict name
+# "as" Dict name 
 # --
-    x=Lambda{ P(1) as &Data => value }
-    
-    tryCatch(
-        x.call(Dict("Data"))
-    ).ok==true
-/Test47_as_dict_name
+	dict=Dict("Data") 
+	{dict as &Data}==dict
+/Test47a_as_dict_name
+
+# "as" Dict name 
+# --
+    x=Lambda{ P(1) as &Data }
+
+	tryCatch(x.call(Dict("Data"))).ok
+
+/Test47b_as_dict_name_lambda_param
 
 
 
@@ -1051,20 +1055,28 @@ ERROR: [<script> Tests01:861.8] Invalid value Dict [] + 1
 
 # Run all TestX
 # --
-    P(1,true)=>showAll
-    
-    
-    allOk=true
     count=0
+    allOk=true
     Sys.functions.sort->f
         assert(f.startsWith("Test"))
         count=count+1
-        result=eval(f)
-        allOk=allOk && result
-        if(showAll || result==false) report(f,result)
-    | -> line
-        println(line)
-    |
+        result=tryCatch(eval(f))
+		if (result.ok) {
+			if (result.result) {
+				println("ok  ", f)
+			} else {
+				println("FAIL", f)
+				allOk=false
+			}
+
+		} else {
+			println("Ex  ", f)
+			allOk=false
+		}
+        #if(showAll || result==false) report(f,result)
+    | #-> line
+    #    println(line)
+    #|
     println("Ran " + count + " tests!")
 
     allOk

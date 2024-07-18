@@ -23,6 +23,8 @@ import rf.configtool.lexer.TokenStream;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueList;
+import rf.configtool.main.runtime.ValueObj;
+import rf.configtool.main.runtime.lib.ObjRow;
 
 public class StmtReportList extends Stmt {
 
@@ -45,8 +47,7 @@ public class StmtReportList extends Stmt {
         List<Value> data=null;
         List<Value> presentation=((ValueList) v).getVal();
         
-
-        ctx.getReportData().addReportData(presentation);
+        ctx.getOutData().out(new ValueObj(new ObjRow(presentation)));
     }
 
 }

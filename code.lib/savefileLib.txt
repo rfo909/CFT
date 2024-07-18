@@ -836,7 +836,7 @@ run(null,null,null,true)
 
     if(subDirs,dir.allFiles(glob), dir.files(glob))->file 
         grep.file(file)->line
-            report(file.name, line.lineNumber, line)
+            report(file, file.name, line.lineNumber, line)
 /SearchTextFiles
 
    

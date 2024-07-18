@@ -33,7 +33,6 @@ import java.util.Comparator;
 import java.util.List;
 
 import rf.configtool.main.Ctx;
-import rf.configtool.main.ReportData;
 import rf.configtool.main.SoftErrorException;
 import rf.configtool.main.Stdio;
 import rf.configtool.main.runtime.ColList;
@@ -597,7 +596,7 @@ public class ObjDir extends Obj implements IsSynthesizable {
         }
     }
     
-   private void callExternalProgram (Ctx ctx, boolean foreground, Stdio stdio, ReportData reportData, RunCaptureOutput capture, List<Value> params) throws Exception {
+   private void callExternalProgram (Ctx ctx, boolean foreground, Stdio stdio, RunCaptureOutput capture, List<Value> params) throws Exception {
         List<Value> args;
         if (params.size()==1) {
             if (params.get(0) instanceof ValueString) {
@@ -663,7 +662,7 @@ public class ObjDir extends Obj implements IsSynthesizable {
             return "run(list|...) - execute external program in foreground, waits for it to terminate";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            callExternalProgram(ctx, true, ctx.getStdio(), ctx.getReportData(), null, params);
+            callExternalProgram(ctx, true, ctx.getStdio(), null, params);
             return new ValueObj(self());
 
         }
@@ -678,7 +677,7 @@ public class ObjDir extends Obj implements IsSynthesizable {
             return "runDetach(list|...) - execute external program in background";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            callExternalProgram(ctx, false, ctx.getStdio(), ctx.getReportData(), null, params);
+            callExternalProgram(ctx, false, ctx.getStdio(), null, params);
             return new ValueObj(self());
 
         }
@@ -693,7 +692,7 @@ public class ObjDir extends Obj implements IsSynthesizable {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             RunCaptureOutput capt=new RunCaptureOutput();
-            callExternalProgram(ctx, true, ctx.getStdio(), ctx.getReportData(), capt, params);
+            callExternalProgram(ctx, true, ctx.getStdio(), capt, params);
             return capt.getCapturedLines();
         }
     }

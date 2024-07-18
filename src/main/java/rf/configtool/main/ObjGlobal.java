@@ -37,31 +37,14 @@ import rf.configtool.main.runtime.ValueList;
 import rf.configtool.main.runtime.ValueNull;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
-import rf.configtool.main.runtime.lib.ObjAValue;
-import rf.configtool.main.runtime.lib.ObjDataFile;
-import rf.configtool.main.runtime.lib.ObjDate;
-import rf.configtool.main.runtime.lib.ObjDict;
-import rf.configtool.main.runtime.lib.ObjDir;
-import rf.configtool.main.runtime.lib.ObjFile;
-import rf.configtool.main.runtime.lib.ObjGlob;
-import rf.configtool.main.runtime.lib.ObjGrep;
-import rf.configtool.main.runtime.lib.ObjInput;
-import rf.configtool.main.runtime.lib.ObjStd;
-import rf.configtool.main.runtime.lib.ObjPersistent;
-import rf.configtool.main.runtime.lib.ObjRegex;
-import rf.configtool.main.runtime.lib.ObjSys;
-import rf.configtool.main.runtime.lib.Protection;
-import rf.configtool.main.runtime.lib.ValueObjFileLine;
-import rf.configtool.main.runtime.lib.ValueObjFloat;
-import rf.configtool.main.runtime.lib.ValueObjInt;
-import rf.configtool.main.runtime.lib.ValueObjStr;
+import rf.configtool.main.runtime.lib.*;
 import rf.configtool.root.Root;
 import rf.configtool.root.shell.ShellCommandsManager;
 import rf.configtool.util.TabUtil;
 
 /**
  * ObjGlobal is a global store of state ... per script in memory. The global object managing
- * these is the Root class.
+ * these, is the Root class.
  * 
  * ObjGlobal contains all the global functions.
  * 
@@ -139,6 +122,7 @@ public class ObjGlobal extends Obj {
         add(new FunctionGetExprCount());
         add(new FunctionBinary());
         add(new FunctionAValue());
+        add(new FunctionRow());
 
 
         // help
@@ -952,9 +936,24 @@ public class ObjGlobal extends Obj {
             return new ValueBinary(data);
         }
         
-    } 
+    }
 
-    
+
+    class FunctionRow extends Function {
+        public String getName() {
+            return "Row";
+        }
+        public String getShortDesc() {
+            return "Row(...) - create Row object with zero or more value";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            return new ValueObj(new ObjRow(params));
+        }
+
+    }
+
+
+
     class Function_Stmt extends Function {
         public String getName() {
             return "_Stmt";

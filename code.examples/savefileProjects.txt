@@ -368,7 +368,7 @@ SearchableFiles
 # -- 
     P(1,Grep) =>grep
     DoSearch(grep)->line
-            report(line.file.name, line.lineNumber, line)
+            report(line.file, line.file.name, line.lineNumber, line)
 //Search
 
 

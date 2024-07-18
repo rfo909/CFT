@@ -56,7 +56,7 @@ Dict.set("a",1).set("23",2).set("x",3).keys.concat=="a23x"
 Lambda{
     PDict("a","b","2")
 }.call(1,2).keys.concat=="ab2"
-/Test05_PDict
+/Test05_PDict_lambda
 
 
 
@@ -157,7 +157,16 @@ c
 # --
     Sys.functions.sort->f
         assert(f.startsWith("Test"))
-        report(f,eval(f))
+		tryCatch(eval(f)) => result
+		if (result.ok) {
+			if (result.result) {
+				println("ok  ", f)
+			} else {
+				println("Ex  ", f)
+			}
+		} else {
+			println("FAIL", f)
+		}
 /RunAll
 
 
