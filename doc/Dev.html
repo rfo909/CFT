@@ -13,6 +13,24 @@
 
 <h1>CFT Change log</h1>
 
+<h3>4.2.1 2024-07-19 All tests ok</h3>
+<p>
+The report() cleanup fixed the notorious Tests01:Test13* which have been unresolved
+since 2021. 
+</p>
+<p>
+These concerned
+Inner block report() output propagation. Since out() was correct, and
+report() now is a glorified out(), doing essentially out(Sys.Row(...)), this issue went away, and now
+all tests run OK.
+</p>
+
+<h3>4.2.1 2024-07-19 moved Row to Sys.Row</h3>
+<p>
+Don't want to pollute global name space with such a generic name
+</p>
+
+
 <h3>4.2.0 2024-07-15 Stdio / Jobs</h3>
 <p>
 Changed output via Stdio/StdioReal/StdioVirtual to support both
@@ -53,9 +71,11 @@ Dir.files->f report(f, f.name, f.length)
 :N.get(0) - returns the file
 :N.get(1) - returns file name
 :N.get(2) - returns file length
+
+:N.get    - with no parameter, defaults to .get(0)
 </pre>
 <p>
-This means we can use data created by report()
+This means we can use all data created by report()
 </p>
 
 

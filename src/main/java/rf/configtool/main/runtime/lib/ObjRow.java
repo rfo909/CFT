@@ -67,7 +67,7 @@ public class ObjRow extends Obj implements IsSynthesizable {
     @Override
     public String createCode() throws Exception {
         StringBuffer sb=new StringBuffer();
-        sb.append("Row(");
+        sb.append("Sys.Row(");
         boolean comma=false;
         for (Value v:rowData) {
             if(comma) sb.append(",");
@@ -106,11 +106,13 @@ public class ObjRow extends Obj implements IsSynthesizable {
             return "get";
         }
         public String getShortDesc() {
-            return "get(n) - return value of column n";
+            return "get(n=) - return value of column n, defaults to 0";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 1) throw new Exception("Expected int parameter");
-            int n= (int) getInt("n", params, 0);
+            int n=0;
+            if (params.size() == 1) {
+                n = (int) getInt("n", params, 0);
+            }
             return rowData.get(n);
         }
     }

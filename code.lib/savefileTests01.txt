@@ -277,6 +277,7 @@ t10.concat("-")=="1-2-3"
 # spilling over to outer scope
 #
 # Not a problem when replacing report() with out() - (See Test13b)
+# 2024-07-19 FIXED v4.1.0, with report() becoming short for out(Sys.Row(...))
 # -----------------------
 
 # Function
@@ -302,6 +303,7 @@ t10.concat("-")=="1-2-3"
 
 # Same as Test13 but with "out" instead of "report".
 # report() should work like out(), but it doesn't
+# 2024-07-19 FIXED v4.1.0, with report() becoming short for out(Sys.Row(...))
 # ---
 
 # Function
@@ -1022,12 +1024,30 @@ ERROR: [<script> Tests01:861.8] Invalid value Dict [] + 1
 # --
 # Oddest bug so far!!!
 # unknown symbol "delta" in last line ...
+#
+# 2024-07-19: the parser thinks the expression is
+#   delta=max-min(currentPrice > min + delta)
+#
+# The error message tells us that delta not defined inside the
+# expression, which is correct, as it will only get assigned
+# after the expression has resolved. 
+#
+# But the core error isn't an error, just that we are trying
+# to apply parameters to a variable!!
+#
+# See t57b, which at least produces the correct message
+#
+# Adding a breakbpoint between the expression and the return value
+# fixed the problem, syntactically! Inserting the pointless
+# expression "1" does the same.
+#
+# So IT IS NOT A BUG
 # --
     min=999
     max=0
     currentPrice=999
     
-    delta=max-min  
+    delta=max-min 
         # If we say either
         #   delta=4
         # or we 
@@ -1037,15 +1057,30 @@ ERROR: [<script> Tests01:861.8] Invalid value Dict [] + 1
         # then the 'delta' variable becomes visible again.
         #
 
-    (currentPrice < min + delta)
+	1  # this pointless expression fixes the problem! :-)
+    (currentPrice > min + delta)
 /t57
+
 
 
 # Test 57 - odd symbol lookup bug, see t57 above
 # --
     tryCatch(t57).ok
-/Test57_SymbolLookupBug
+/Test57_SymbolLookupBug_Solved
 
+
+# Experimenting
+# -> variable lookup 'bbb' can not take params
+# This is the actual problem from t57 and is about syntax, not a bug
+# --
+    aaa=999
+    bbb=0
+    currentPrice=999
+    
+    delta=aaa+bbb
+
+    (currentPrice)
+/t57b
 
 # Test 58 - version 4.0.14 bugfix: Dict value dotted lookup must not hide Dict functions
 # --

@@ -69,6 +69,12 @@ IgnoreDir: /.git        ### substring matching against path
 There can be multiples of every line, so if we want to scan different directories in one go,
 just add a second "Dir:" line.
 
+Note that directories can also be local relative to current directory. 
+
+./xxx
+
+Missing directories are logged to screen following 
+
 >>> EOF
 //ReadmeLines
 
@@ -316,8 +322,16 @@ just add a second "Dir:" line.
     # 
     dirs->dirName
         fileGlobs->glob
-            assert(Dir(dirName).exists)
-            Dir(dirName).allFiles(glob)->f 
+			dir = if (dirName.startsWith("."+Sys.fileSeparator)) {
+				Dir.sub(dirName.sub(2))
+			} else {
+				Dir(dirName)
+			}
+			if (!dir.exists) {
+				Sys.log("Dir not found: " + dir.path)
+			}
+            assert(dir.exists)
+            dir.allFiles(glob)->f 
                 assert(pathOk.call(f.path, dirIgnores))
                 assert(fileOk.call(f,fileIgnores))
                 out(f)

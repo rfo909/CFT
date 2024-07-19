@@ -122,7 +122,6 @@ public class ObjGlobal extends Obj {
         add(new FunctionGetExprCount());
         add(new FunctionBinary());
         add(new FunctionAValue());
-        add(new FunctionRow());
 
 
         // help
@@ -936,20 +935,6 @@ public class ObjGlobal extends Obj {
             return new ValueBinary(data);
         }
         
-    }
-
-
-    class FunctionRow extends Function {
-        public String getName() {
-            return "Row";
-        }
-        public String getShortDesc() {
-            return "Row(...) - create Row object with zero or more value";
-        }
-        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            return new ValueObj(new ObjRow(params));
-        }
-
     }
 
 

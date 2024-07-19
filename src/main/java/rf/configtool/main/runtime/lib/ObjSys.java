@@ -74,6 +74,7 @@ public class ObjSys extends Obj {
                 new FunctionGetCallHistory(),
                 new FunctionRest(),
                 new FunctionNewline(),
+                new FunctionRow(),
         };
         setFunctions(arr);
         
@@ -673,5 +674,18 @@ public class ObjSys extends Obj {
             return new ValueString(java.io.File.separatorChar=='/' ? "\n": "\r\n");
         }
     }
+
+    class FunctionRow extends Function {
+        public String getName() {
+            return "Row";
+        }
+        public String getShortDesc() {
+            return "Row(...) - create Row object with zero or more value";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            return new ValueObj(new ObjRow(params));
+        }
+    }
+
 
 }
