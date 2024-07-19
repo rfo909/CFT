@@ -172,7 +172,7 @@ P(2,1)=>y
 
 # Echo off - Reset to undo
 # --
-	if(ena,Esc+"[8m","")
+    if(ena,Esc+"[8m","")
 /EchoOff
 
 

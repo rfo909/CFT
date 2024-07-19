@@ -726,15 +726,15 @@ Dict.set("a",1).set("b",Lambda{P(1) as int=>x self.a+x})
 
 # "as" Dict name 
 # --
-	dict=Dict("Data") 
-	{dict as &Data}==dict
+    dict=Dict("Data") 
+    {dict as &Data}==dict
 /Test47a_as_dict_name
 
 # "as" Dict name 
 # --
     x=Lambda{ P(1) as &Data }
 
-	tryCatch(x.call(Dict("Data"))).ok
+    tryCatch(x.call(Dict("Data"))).ok
 
 /Test47b_as_dict_name_lambda_param
 
@@ -1057,7 +1057,7 @@ ERROR: [<script> Tests01:861.8] Invalid value Dict [] + 1
         # then the 'delta' variable becomes visible again.
         #
 
-	1  # this pointless expression fixes the problem! :-)
+    1  # this pointless expression fixes the problem! :-)
     (currentPrice > min + delta)
 /t57
 
@@ -1096,18 +1096,18 @@ ERROR: [<script> Tests01:861.8] Invalid value Dict [] + 1
         assert(f.startsWith("Test"))
         count=count+1
         result=tryCatch(eval(f))
-		if (result.ok) {
-			if (result.result) {
-				println("ok  ", f)
-			} else {
-				println("FAIL", f)
-				allOk=false
-			}
+        if (result.ok) {
+            if (result.result) {
+                println("ok  ", f)
+            } else {
+                println("FAIL", f)
+                allOk=false
+            }
 
-		} else {
-			println("Ex  ", f)
-			allOk=false
-		}
+        } else {
+            println("Ex  ", f)
+            allOk=false
+        }
         #if(showAll || result==false) report(f,result)
     | #-> line
     #    println(line)

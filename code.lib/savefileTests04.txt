@@ -58,7 +58,7 @@ Time consuming tests related to Db2 and locking
 
 # Newline
 # --
-	if (Sys.isWindows,"^r^n","^n").unEsc
+    if (Sys.isWindows,"^r^n","^n").unEsc
 //Newline
 
 # Create separate threads, each calling GetCounters()

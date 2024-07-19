@@ -157,16 +157,16 @@ c
 # --
     Sys.functions.sort->f
         assert(f.startsWith("Test"))
-		tryCatch(eval(f)) => result
-		if (result.ok) {
-			if (result.result) {
-				println("ok  ", f)
-			} else {
-				println("Ex  ", f)
-			}
-		} else {
-			println("FAIL", f)
-		}
+        tryCatch(eval(f)) => result
+        if (result.ok) {
+            if (result.result) {
+                println("ok  ", f)
+            } else {
+                println("Ex  ", f)
+            }
+        } else {
+            println("FAIL", f)
+        }
 /RunAll
 
 

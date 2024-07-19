@@ -20,7 +20,7 @@
 /License
 
 
-		
+        
 
 # Is root on linux?
 # --
@@ -139,30 +139,30 @@
 # Show status + background jobs  - only when Curses enabled
 # --
 
-	if (Term.w > 120) Inner {
+    if (Term.w > 120) Inner {
 
-		line=1
-		
-		(Jobs:Completed + Jobs:Running).unique->name
-			job=Sys.Jobs.get(name)
-			status="   "
-			if(job.isBlockedOnInputSince != null) {
-				status="BLK"
-			} else if(job.hasOutput) {
-				status="OUT"
-			} else if(job.isDone) {
-				status=" OK"
-			}
-			s="[" + name + " ".times(20) 
-			s=s.first(20)+" " + status + "]"  # 25 chars
-			
-			print(Curses:CurGoto(Term.w-26, line)+GetColor+s)
-			line=line+1
-	}
+        line=1
+        
+        (Jobs:Completed + Jobs:Running).unique->name
+            job=Sys.Jobs.get(name)
+            status="   "
+            if(job.isBlockedOnInputSince != null) {
+                status="BLK"
+            } else if(job.hasOutput) {
+                status="OUT"
+            } else if(job.isDone) {
+                status=" OK"
+            }
+            s="[" + name + " ".times(20) 
+            s=s.first(20)+" " + status + "]"  # 25 chars
+            
+            print(Curses:CurGoto(Term.w-26, line)+GetColor+s)
+            line=line+1
+    }
 /ShowStatus
-		
-		
-	
+        
+        
+    
 # Complete prompt
 # --
     P(1,Dir) => currDir

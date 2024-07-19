@@ -73,7 +73,7 @@ This can also be done by entering TAB + q + Enter in job input
 
 # Newline character(s)
 # --
-	if (Sys.isWindows, "^r^n", "^n").unEsc
+    if (Sys.isWindows, "^r^n", "^n").unEsc
 //Newline
 
 

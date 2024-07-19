@@ -1,39 +1,60 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2024 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
 # All pom files under current dir
 # --
-	Dir.allFiles("pom*xml")
+    Dir.allFiles("pom*xml")
 /Pom
 
 # Get first line with a certain pattern
 # --
-	P(1) => pomFile
-	P(2, readLine("Enter pattern")) => pattern
-	pomFile.read->line
-		if (line.contains(pattern)) {
-			out(line)
-			break
-		}
+    P(1) => pomFile
+    P(2, readLine("Enter pattern")) => pattern
+    pomFile.read->line
+        if (line.contains(pattern)) {
+            out(line)
+            break
+        }
 //GetFirst
 
 # Select Pom file
 # --
-	files=Pom
-	files->f
-		println(f.path)
-	|
-	Lib:SelectOptions(files, Lambda{P(1).path}, Lambda{P(1)})
+    files=Pom
+    files->f
+        println(f.path)
+    |
+    Lib:SelectOptions(files, Lambda{P(1).path}, Lambda{P(1)})
 //SelectFile
 
 # Get build version for pom file
 # --
-	GetFirst(P(1),"<version>")
+    GetFirst(P(1),"<version>")
 /BV
 
 # Get groupId for pom file
 # --
-	GetFirst(P(1),"<groupId>")
+    GetFirst(P(1),"<groupId>")
 /GI
 
 # Get artifactId for pom file
 # --
-	GetFirst(P(1),"<artifactId>")
+    GetFirst(P(1),"<artifactId>")
 /AI

@@ -322,14 +322,14 @@ Missing directories are logged to screen following
     # 
     dirs->dirName
         fileGlobs->glob
-			dir = if (dirName.startsWith("."+Sys.fileSeparator)) {
-				Dir.sub(dirName.sub(2))
-			} else {
-				Dir(dirName)
-			}
-			if (!dir.exists) {
-				Sys.log("Dir not found: " + dir.path)
-			}
+            dir = if (dirName.startsWith("."+Sys.fileSeparator)) {
+                Dir.sub(dirName.sub(2))
+            } else {
+                Dir(dirName)
+            }
+            if (!dir.exists) {
+                Sys.log("Dir not found: " + dir.path)
+            }
             assert(dir.exists)
             dir.allFiles(glob)->f 
                 assert(pathOk.call(f.path, dirIgnores))
