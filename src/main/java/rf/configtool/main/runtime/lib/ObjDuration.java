@@ -95,7 +95,7 @@ public class ObjDuration extends Obj implements IsSynthesizable {
     
     @Override
     public ColList getContentDescription() {
-        return ColList.list().regular("Duration: " + (new DateTimeDurationFormatter(timeValue)).fmt());
+        return ColList.list().regular(new DateTimeDurationFormatter(timeValue).fmt());
     }
     
 

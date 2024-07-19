@@ -38,7 +38,7 @@ import rf.configtool.util.DateTimeDurationFormatter;
  */
 public class ObjRow extends Obj implements IsSynthesizable {
 
-    static final String reportTypes = "String|FileLine|int|float|boolean|null|Date";
+    static final String reportTypes = "|String|FileLine|int|float|boolean|null|Date|Duration|";
 
     private List<Value> rowData;
 
@@ -93,7 +93,14 @@ public class ObjRow extends Obj implements IsSynthesizable {
     public ColList getContentDescription() {
         ColList list = ColList.list();
         for (Value v:rowData) {
-            if(reportTypes.contains(v.getTypeName())) {
+            String type;
+            if (v instanceof ValueObj) {
+                type=((ValueObj) v).getVal().getTypeName();
+                System.out.println("objType: " + type);
+            } else {
+                type=v.getTypeName();
+            }
+            if(reportTypes.contains("|" + type + "|")) {
                 list.regular(v.getValAsString());
             }
         }
