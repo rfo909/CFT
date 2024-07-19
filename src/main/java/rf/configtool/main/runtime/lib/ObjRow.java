@@ -96,7 +96,7 @@ public class ObjRow extends Obj implements IsSynthesizable {
             String type;
             if (v instanceof ValueObj) {
                 type=((ValueObj) v).getVal().getTypeName();
-                System.out.println("objType: " + type);
+                //System.out.println("objType: " + type);
             } else {
                 type=v.getTypeName();
             }
