@@ -1,5 +1,6 @@
 * CFT Reference
 * ---- Using CFT as a shell
+  |  NOTE: the @term shortcut
   |  Combine with CFT function results
   |  The ":N" syntax
         Complex example
@@ -17,6 +18,7 @@
         Bring to foreground
         Warning
   |  Command history
+  |  Recent directories history
   |  The "shell" command
   |  Path parent lookups
   |  TAB "autocompletion"

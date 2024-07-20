@@ -168,6 +168,11 @@
     P(1,Dir) => currDir
     P(2) => scriptName
     P(3) => stateString
+    
+    if (!Sys.isWindows) {
+    	# terminal info on windows is slow
+    	Lib:GetTerminalSize
+    }
 
     color=GetColor
 
@@ -186,7 +191,7 @@
     
     
     # Show various status
-    if(Curses:Enabled) ShowStatus
+    if(Curses:Enabled && !Sys.isWindows) ShowStatus
 
     # Add newline before prompt if colors are off
     # --
@@ -194,7 +199,7 @@
     if (!Curses:Enabled) {
         newline=Sys.newline
     }
-    # Position of prompt at bottom
-    gotoLine=Curses:CurGoto(0,Term.h)
+    # Position of prompt at bottom of terminal
+    gotoLine=if(!Sys.isWindows, Curses:CurGoto(0,Term.h), "")
     newline + gotoLine + color + parts.concat(" ") + Curses:Reset
 /PromptString

@@ -1,16 +1,31 @@
 
 # CFT Reference
 
-Last updated: 2024-07-18 RFO
+Last updated: 2024-07-20 RFO
 
-v4.1.0
+v4.2.1
 
 
 
 
 # ---- Using CFT as a shell
 
+## NOTE: the @term shortcut
 
+If the terminal windows is resized, and when running in windows, note that the CFT terminal information
+is not readily available, because the query to get that information takes up to 500 millis.
+
+To update the terminal information on Windows, use shortcut
+
+```
+@term
+```
+
+This updates an internal object, which is available through global function "Term".
+
+For Linux, the Term is updated as part of drawing the prompt.
+
+The consequences of running with outdated Term info is related to truncating lines correctly.
 
 ## Combine with CFT function results
 
@@ -23,7 +38,7 @@ Say we have some functions:
 Dir("/SomePath/logs")
 /LogDir
 
-Dir("/SomewhereElse/xyz").file("data.txt")
+File("/SomewhereElse/xyz/data.txt")
 /DataFile
 ```
 
@@ -33,8 +48,6 @@ Dir("/SomewhereElse/xyz").file("data.txt")
 cd (LogDir)
 edit (DataFile)
 ```
-
-The expressions should return single Dir or File objects.
 
 
 ## The ":N" syntax
@@ -56,11 +69,15 @@ cd :3       # cd into directory 4 (prefixed by index 3 in list)
 
 Dir.allFiles("*.java")   
 cd :0.dir            # go to directory of a file in the output from previous command
+
+# alternatively
+Dir.allFiles("*.java")
+:0.dir.cd            # same as above
 ```
 
 ### Complex example
 
-The :N notation is also usable inside normal CFT expressions, so we can even 
+The :N notation is also usable inside CFT expressions, so we can even 
 do this:
 
 ```
@@ -88,7 +105,7 @@ cd ::
 ## Symbols 
 
 Symbols let us define persistent names for files and directories. These can be used
-in expressions, and are also detected when used directly in shell commands.
+in expressions, and when executing external programs from the command line.
  
 ```
 cd /some/dir
@@ -105,9 +122,14 @@ cd %myDir
 
 %myDir.cd
 
-# or access content inside that directory
+# or access content inside that directory. When an expression such as this starts with
+# a symbol lookup (the "%") the expression doesn't need be inside parantheses.
 
 cat %myDir.files("*.java").first
+
+# or even
+
+
 ```
 
 To see all symbols, use shortcut
@@ -136,7 +158,8 @@ diff somefile.txt %a
 ## Note on specials
 
 Shell command parameters starting with ":" or "%" are considered CFT expressions even without
-being embedded inside parantheses. 
+being embedded inside parantheses. Such parameter strings can not contain free spaces, outside of strings.
+ 
 
 
 ## Repeat last line
@@ -188,20 +211,23 @@ ls          # CFT shell-command "ls"
 
 External commands are managed by the internal CFT shell command parser, and so support the same notation
 as the other shell commands, for using output from expressions, looking up symbols and
-referring data from result of previous command:
+referring data from result of previous command. Here we use the external command "scp" (secure copy)
+to illustrate
 
 ```
-scp %x user@host:.
-scp (GetThatFile) user@host:.
+scp %x user@host:.               # symbol lookup
+scp (GetThatFile) user@host:.    # CFT expression
 
 ls
-scp :4 user@host:.
+scp :4 user@host:.               # last-value indexed reference
 ```
 
 ### External program in current dir
 
-The syntax ./xxx or .\xxx is reserved to mean running an external program, and not, as with other
-commands starting with a dot, to repeat the previous interactive command.
+If a command starts with .\x or ./x depending on OS, this is taken to mean running a program ("x") found
+at some path, starting in current directory, instead of interpreting the dot to mean repeat last command.
+
+The same goes for ..\something or ../something.
 
 
 ## Background jobs
@@ -265,18 +291,23 @@ do not respect the virtualized (line-based) I/O that is used to control CFT back
 
 ## Command history
 
-CFT remembers the last 100 commands (not shortcuts), and the directories where those were
-executed. 
-
-Display the history using shortcut
+CFT remembers the last 40 commands. Display the command history using shortcut
 
 ```
-@H
+@CH
 ```
 
 This lists up to 100 commands, and lets you either rerun the command (in the same directory) or
 just change to the directory of one of the commands, without running the command over.
 
+
+## Recent directories history
+
+A unique list of recent directories is available with
+
+```
+@H
+```
 
 
 ## The "shell" command

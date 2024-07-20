@@ -304,8 +304,6 @@ This produces the following list:
 
 
 ```
-  <obj: Dir>
-  CFT/
   # allDirs(Glob?) - returns list of Dir objects under this directory
   # allFiles(Glob?) - returns list of all File objects under this directory
   # allFilesCount(Glob?) - returns number of files matching glob, under this directory
@@ -340,7 +338,11 @@ This produces the following list:
 So even with only some 30 global functions, the system library consists of *500+ member functions*, spread out across
 80+ object types.
 
+(Note: these are Java class names, and are included only to give an idea of the types of objects in CFT) 
+
 ```
+CodeStats:AllObjects
+
 ObjDate
 DDWorld
 DDLineBrush
@@ -425,17 +427,6 @@ ValueInt
 ValueNull
 ValueList
 ValueBinary
-```
-
-This list is produced by running the "AllObjects" function in the script "CodeStats"
-
-```
-CodeStats:main
-
-# or
-
-:load CodeStats
-main
 ```
 
 

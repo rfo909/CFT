@@ -1,9 +1,9 @@
 
 # CFT ("ConfigTool") introduction
 
-Last updated: 2023-06-21 RFO
+Last updated: 2024-07-20 RFO
 
-v4.0.7
+v4.2.1
 
 
 
@@ -444,6 +444,102 @@ script and a colon, as follows:
 Here we use the MenuSelect function which is defined inside the Lib script. 
 
 
+# Loop output
+
+A loop in CFT generates a List of data that consist of all values for which we
+call out() or report().
+
+Examples of out() are shown above, like when filtering data etc. 
+
+## Using report()
+
+The report() statement takes a list of values, separated by comma, and generates a
+nicely formatted report for values that print easily, like String, int, Date and
+Duration. 
+
+```
+Dir.allFiles("*.java")->f
+	report(f.name, Date(f.lastModified), f.read.length)
+/JavaInfo
+```
+
+Running the JavaInfo function produces a list of file names, a nicely formatted date and time for when it was
+last modified, and the number of lines.
+
+### Behind the scenes
+
+The report(...) statement is really a glorified out(), which generates a list of single objects
+of type Sys.Row
+
+```
+report(a, b, c)
+	
+# is really just short hand for
+
+Out(Sys.Row(a, b, c))
+```
+
+
+### Non-visible report() data
+
+In addition to the values that are displayed easily, and therefore are presented in
+the output, the report() statement also lets us carry additional information into the rows,
+such as File objects etc, that are not visually shown, but can be accessed with a bit of code.
+
+The idea is that having created a function that
+was primarily intended for interactive use, can be extended, so it is usable
+for code as well.
+
+Here we will extend the above code to include the File object ("f")
+
+```
+Dir.allFiles("*.java")->f
+	report(f, f.name, Date(f.lastModified), f.read.length)
+/JavaInfo
+```
+
+Now, running JavaInfo, the output is the same, but the result contains a hidden column of
+File objects. 
+
+To get to one of those File objects, interactively we now may say:
+
+```
+JavaInfo
+  :
+  :
+  
+:200.get(0)       ## or just .get, as it defaults to 0
+  <obj: File>
+  StmtHelp.java 1k 1709 2d18h 2024-07-17 21:14:48
+```
+
+### Show available columns
+
+All the visible data are also available to get(), and to see what is available, the rows have another function,
+the show():
+
+```
+JavaInfo
+  :
+  :
+:200.show
+  <List>
+   0: <obj: File> | 
+   1: <String>    | StmtHelp.java
+   2: <obj: Date> | 
+   3: <int>       | 58
+```
+
+
+### Use in code
+
+```
+JavaInfo->row out(row.get(0).path)
+```
+
+This code uses the JavaInfo to grab the File objects, and output a list of full paths.
+
+
 # Getting help
 
 CFT has a complete system for providing help on all aspects of the language. It falls into
@@ -643,6 +739,52 @@ Example, calculate date and time one week ago:
 ```
 Date.sub(Date.Duration.days(7))
 ```
+
+
+## The Std object
+
+The Std object, which is created with global function "Std", functions as a name space for java library
+functions, via other objects, such as Math, Db2 and others. For some of the functionality, there will
+exist CFT code under code.examples. 
+
+To search all the script code, use the @S shortcut. It asks what to search for, and a file pattern. Example:
+
+(The "[pc01] /home/roar..." string is the prompt.
+
+```
+[pc01] /home/roar/CFT/doc
+cd
+  <obj: Dir>
+  CFT/
+  # /home/roar/CFT
+
+[pc01] /home/roar/CFT
+@S
+(?) Search term
+Db2.
+(?) Search files: enter partial file name, or glob pattern with '*'
+savefile*
+(?) Include sub-dirs y/n
+    Enter for 'y'
+
+y
+
+  <List>
+   0: savefileDb2Obj.txt | 39  |     Std.Db.Db2.collections.sort->name
+   1: savefileDb2.txt    | 65  |     Std.Db.Db2.set(collection,key,value)
+   2: savefileDb2.txt    | 76  |     value=Std.Db.Db2.get(collection,key)
+   3: savefileDb2.txt    | 103 |     Std.Db.Db2.keys(collection)
+   4: savefileDb2.txt    | 110 |     Std.Db.Db2.collections.sort->name
+   5: savefileDb2.txt    | 120 |     Std.Db.Db2.deleteCollection(collection)
+```
+
+This shows us there is a CFT script called "Db2", which we can now load and examine.
+
+```
+:load Db2
+@e
+```
+
 
 ## The Sys object
 

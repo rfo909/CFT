@@ -29,6 +29,12 @@
         break(boolean) 
         break and continue
 * Calling functions in other scripts
+* Loop output
+  |  Using report()
+        Behind the scenes
+        Non-visible report() data
+        Show available columns
+        Use in code
 * Getting help
   |  Global functions
   |  Object member functions
@@ -41,6 +47,7 @@
 * Various
   |  Dates
         Date calculations
+  |  The Std object
   |  The Sys object
         Environment variables
         CFT start directory

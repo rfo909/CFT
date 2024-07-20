@@ -344,7 +344,7 @@ public class Root {
                 }
             }
             
-            if (line.startsWith(".") && !line.startsWith("."+File.separatorChar)) {
+            if (line.startsWith(".") && !(line.startsWith("."+File.separatorChar) || line.startsWith(".."+File.separatorChar))) {
                 // repeat previous command
                 // ("./xxx" and ".\xxx" is assumed to be local programs to be run, see below)
                 String currLine = currScriptCode.getCurrLine();
@@ -455,8 +455,8 @@ public class Root {
                 
                 // ## Note: (v3.8.3) somewhat of a hack to differentiate between valid CFT input, 
                 // CFT errors in script code, and OS functionality without the bang ("!")
-                // Also modified the "." command so that "." + File.separator is NOT seen as
-                // an attempt to repeat last
+                // Also modified the "." command so that "." + File.separator and ".." + File.spearator 
+                // is NOT seen as an attempt to repeat last
             
                 boolean isCFTInput = true;
 
