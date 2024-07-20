@@ -2,24 +2,24 @@
 # Introduction
 
 
-CFT is an interpreted script language, and an interactive command shell. The aim is to provide a
+CFT ("Configtool") is an interpreted script language, and an interactive command shell. The aim is to provide a
 rich library of functions and objects, to easily automate tasks involving directories and files, 
 be it collecting logs, searching source code or creating and deploying templated configuration
 files.
 
-There are different ways of running external programs, and display or collect their output, 
-even running them in background threads. 
+Solving automation issues is done by a combination of programming in the CFT language, and running external
+programs. There are different ways of running external programs, and display or collect their output.
 
-Code can also ask the user for input, as well as present results.
+Code can ask the user for input, as well as present results.
 
 
 
-# Two aspects
+# Two major aspects
 
 There are two major aspects to CFT: 
 
-- interactive shell
-- create functions
+- use as interactive shell
+- writing code, creating *scripts* (collections of functions)
 
 ## As interactive shell
 
@@ -32,11 +32,29 @@ When entering commands at the CFT prompt, these fall into one of the *three* fol
 
 ### (1) "Shell-like" internal commands
 
-The CFT "shell-like" commands, are implemented in CFT using a separate parser from the regular CFT
-language parser, which allows shell-like syntax, while being integrated with the CFT language.
+CFT implements support for commands like listing files, navigating directories, copying, moving and
+deleting files. plus a few others. The syntax for these commands is similar to corresponding commands in
+Linux or Windows CMD, such as:
 
-So while we could for example run the external command "touch" to create a new file, by implementing
-it in CFT, we get a File object back, which we can then do something with, like open in the editor.
+```
+ls
+cd ..\somewhere
+cat someFile
+```
+
+This implementation (in Java) means the commands are the same under Linux and Windows. It also means
+that they can return CFT objects, which can be useful:
+
+```
+touch someFile.txt
+edit
+```
+
+The "touch" command creates new file, or updates the lastModified property of an existing file,
+and then returns a File object for that file. 
+
+This is utilized by the "edit" command, which when issued without a file name, checks if the 
+"last value" is a file, and when it is, opens it in the editor.
 
 The most used "shell-like" commands in CFT are those for navigating the directory tree, such as "ls"
 and "cd", which maintains the CFT *current directory*.
@@ -53,22 +71,20 @@ and "cd", which maintains the CFT *current directory*.
 - mv
 
 
-There exists a global function "_Shell", which lists out up to date information about
-all CFT shell-like commands.
+To get a list of all CFT shell commands, call global function _Shell:
+
 
 ```
 _Shell
-  <boolean>
-  true
-  # CFT shell-like (interactive) commands
+   # CFT shell-like (interactive) commands
   # -------------------------------------
-  #
+  # 
   #   <TAB> ... - run operating system command or program
   #   shell - run bash or powershell
   #   ls ...
   #   lsd ...
   #   lsf ...
-  #   cd <dir>
+  #   cd <dir>?
   #   pwd
   #   cat <file>?
   #   edit <file>?
@@ -85,76 +101,80 @@ _Shell
   #   hash <file> ...
   #   hex <file>?
   #   which <command>
-  #
-  # - The 'lsd' lists directories only, and 'lsf' files only.
-  #
-  # - The 'edit' command opens a file in editor.
-  #
-  # - Note that the cat/edit/more/tail commands, if given no file argument,
-  #   will attempt working with with Sys.lastResult. Example:
-  #       touch someNewFile.txt
-  #       edit
-  #
-  # - Note that 'rm' deletes both files and directories, and asks
-  #   for confirm when non-empty directories.
-  #
-  # - The 'cp' command copies both files and directories.
-  #
-  # - All commands working with files and directories allow both globbing,
-  #   local and absolute paths, on both Windows and Linux. To reference
-  #   values from Sys.lastResult use :: or :N (get value from list).
-  #
+  # 
+  # - & <expr>                  - run expression as background job
+  # 
+  # - lsd                       - lists directories only
+  # - lsf                       - lists files only
+  # 
+  # - edit                      - open a file in editor
+  # 
+  # Note that the cat/edit/more/tail commands, if given no file argument,
+  # will attempt working with with Sys.lastResult. Example:
+  #     touch someNewFile.txt
+  #     edit
+  # 
+  # The 'rm' and 'cp' commands delete/copy both files and directories,
+  # and ask for confirm when deleting or copying non-empty directories.
+  # 
+  # All commands working with files and directories allow both globbing,
+  # local and absolute paths, on both Windows and Linux. To reference
+  # values from Sys.lastResult use :: or :N (get value from list).
+  # 
   #    ls a*.txt                - globbing
   #    ls /some/path            - absolute path
   #    ls c:\someDir            - absolute path (windows)
   #    ls \\some-server\d$\xxx  - absolute network path (Windows)
-  #
+  # 
   #    cd %someSymbol           - symbol resolving to dir or file
   #    cd (dirExpr)             - dirExpr is a CFT function
-  #
+  # 
   #    cat ::                   - The '::' corresponds to (Sys.lastResult)
   #    cd :N                    - The ':N' corresponds to (Sys.lastResult(N))
-  #
-  #    <TAB>cp :3 /some/path    - run external program, combining with value :N
-  #
-  #
+  # 
+  #    <TAB>cp :3 /some/path    - force external program, combining with value :N
+  #    <SPACE>...               - force internal command
+  # 
+  # 
   # - Symbols are defined entering %%name which stores lastResult under
-  #   that name, usually some Dir or File.
-  #
+  #   that name, usually some Dir or File. They can be used together with
+  #   all shell commands, both those implemented internally and when running
+  #   external programs.
+  # 
 ```
 
 
 ### (2) CFT code
 
-Entering CFT code on the command line is *usually to call a function* in the current script, 
-but it also allows us to create functions, as at its most basic a function is just a name
-for a line of code.
-
-Functions are in turn organized into collections which we call "scripts", and which are saved
-as text files, which we can then use regular text editors to develop further.
-
-Below an example of interactively creating a function, although these two lines also 
-represent the form which functions are defined in the script files.
+Entering CFT code on the command line is usually to *call a function* in the current script,
+or in another script, but it also allows us to create functions. Example:
 
 ```
 Date(Dir.newestFile.lastModified)
-/LM
+/LastModified
 ```
 
 The first line, when we press Enter, is executed immediately, and returns a Date object for
 when the newest file in current directory. Then the second line defines a name for the
-previous line, creating the "LM" (last modified) function in current script.
+previous line, creating the LastModified function in current script.
 
-To work with this script file in an editor, we first need to save it, then open in 
-an editor. This is done with the two following commands:
+A CFT script is a collection of functions. By default, CFT starts with an empty script
+without a name. When we create a function like LastModified above, it gets added to the script,
+although, which still exists in memory only.
+
+We can then save the script to a text file, and in turn open it in an editor, to modify it,
+with additional functions.
 
 ```
 :save Test
 @e
 ```
 
-The '@e' is a shortcut, which runs CFT library code opening the current script (if saved) in
-a text editor. On Linux you will be asked to select which editor, while on Windows it uses
+First we save the script under the name "Test", which results it savefileTest.txt in the current
+directory. Then follows "@e", which is a shortcut. It opens the file associated with the current
+script in an editor. 
+
+On Linux you will be asked to select which editor, while on Windows it uses
 Notepad++ if found, otherwise the ever-present regular Notepad.
 
 Use the '?' command to list functions in current script. 
@@ -163,7 +183,7 @@ To call a function in the current script, just enter its name, and optionally pa
 then press Enter.
 
 ```
-LM
+LastModified
 ```
 
 CFT may then display something like this:
@@ -179,7 +199,7 @@ CFT may then display something like this:
 ### (3) External programs
 
 The third option, after CFT has decided the input is neither one of the "shell-like" commands
-implemented internally, nor CFT code, the command is instead passed to the underlying
+implemented internally, nor valid CFT code, the command is instead passed to the underlying
 shell.
 
 Example:
@@ -188,16 +208,12 @@ Example:
 git pull origin master
 ```
 
-*NOTE:* entering a command line for an external program like this, is
-only supported interactively. It is currently *not valid CFT function code*.
-
-To create a function "Pull" to do the same:
+Now note that using CFT shell commands as well as executing external programs from the
+command line of CFT, is NOT valid CFT code syntax. To do the above from program code:
 
 ```
 Dir.run("git","pull","origin","master")
-/Pull
 ```
-
 
 
 
@@ -230,12 +246,12 @@ Show global functions by typing 'help':
 help
   <obj: <GLOBAL>>
   <GLOBAL>
-  # v3.8.3
-  #
+  # v4.2.1
+  # 
   # _Expr() - information about expressions in CFT
   # _Shell() - CFT shell-like commands
   # _Stmt() - information about Statements in CFT
-  #
+  # 
   # AValue(str,any,metaDict?) - created AValue (annotated value) object
   # Binary(hexString) - convert hex string to Binary value
   # DataFile(file,prefix) - create DataFile object
@@ -245,7 +261,7 @@ help
   # File(str) - creates File object
   # FileLine(str, lineNo, File) - create FileLine object
   # Float(value,data) - create Float object - for sorting
-  # Glob(pattern,ignoreCase?) - creates Glob object for file name matching, such as '*.txt' - ignoreCase defa+
+  # Glob(pattern,ignoreCase?) - creates Glob object for file name matching, such as '*.txt' +
   # Grep() or Grep(a,b,...) or Grep(list) - create Grep object
   # Input(label) - create Input object
   # Int(value,data) - create Int object - for sorting
@@ -260,6 +276,7 @@ help
   # eval(str) - execute program line and return result
   # getExprCount() - get number of expressions resolved
   # getType(any) - get value or object type
+  # print([str[,...]]?) - print string
   # println([str[,...]]?) - print string
   # readLine(prompt?) - read single input line
   # readLines(endmarker) - read input until label on separate line, returns list of strings
@@ -267,30 +284,171 @@ help
 ```
 
 
-The CFT language interpreter supports function calling, local variables inside functions, looping over lists, 
-conditionals with "if" and various loop control mechanisms, and some block expressions. And that's about it.
 
 ## Member functions
 
-Most functionality is implemented as member functions of objects, such as the Dir object, which is created
-via the global "Dir" function, and among others contains a function to run an external program:
+Most functionality in CFT is implemented as member functions inside objects, such as Dir and File, but also
+the basic data types (String, int, float).
+
+
+*Note* when calling a function without any parameter values, the ()'s are optional. Running the "Dir" function without
+parameters, returns a Dir object for the current directory. 
+
+To list all member functions of an object, create an instance of the object, then add "help":
 
 ```
-Dir.run("git","status")
+Dir help
 ```
 
-*Note* when calling a function without any parameters, the ()'s are optional, so "Dir" above calls the global
-function, which creates a Dir object (for current directory), and then we call the .run() member function of that object. 
+This produces the following list:
 
-So even with only some *30 global* functions, the system library consists of *500+ member functions*, spread out across
-80+ object types. 
 
+```
+  <obj: Dir>
+  CFT/
+  # allDirs(Glob?) - returns list of Dir objects under this directory
+  # allFiles(Glob?) - returns list of all File objects under this directory
+  # allFilesCount(Glob?) - returns number of files matching glob, under this directory
+  # cd() - use this Dir as current work dir - returns self
+  # copy(File) - copy file to directory, ok if copied ok, otherwise false
+  # create() - returns self
+  # delete() - return boolean true deleted ok, otherwise false
+  # dirs(Glob?) - returns list of Dir objects
+  # exists() - returns true or false
+  # file(name) - create File object relative to directory
+  # files(Glob?) - returns list of File objects
+  # filesCount(Glob?) - returns number of files
+  # lastModified() - return time of last modification as int
+  # name() - returns name (last part)
+  # newestFile(Glob?) - return file last modified
+  # newestFiles(count,Glob?) - return sorted list (newest first) of newest files
+  # oldFiles(seconds) - returns list of File objects older than indicated time
+  # path() - returns full path
+  # protect(desc?) - set protection status, returns self
+  # run(list|...) - execute external program in foreground, waits for it to terminate
+  # runCapture(list|...) - execute external program in foreground, but capture output, and return list of stdout lines
+  # runDetach(list|...) - execute external program in background
+  # runProcess(stdinFile, stdoutFile, stdErrFile, list|...) - start external program - returns Process object
+  # showTree(limit?) - returns list of directories where the sum of file sizes > 0 / limit
+  # stats() - return dictionary with stats for directory
+  # sub(str) - returns Dir object for sub directory
+  # unprotect() - unprotect protected directory - error if not protected - returns self
+  # verify(str) - verify exists, and return self, or throw soft error with str
+```
+
+
+So even with only some 30 global functions, the system library consists of *500+ member functions*, spread out across
+80+ object types.
+
+```
+ObjDate
+DDWorld
+DDLineBrush
+DD
+DDVector
+DDRef
+DDBrush
+ObjDb2
+ObjDb
+ObjMath
+ObjData
+ObjDir
+ObjRegex
+ObjUtil
+ObjLexerToken
+ObjLexerNode
+ObjLexer
+ObjLexerTokenStream
+ObjFilter
+ObjText
+ObjRestApache
+ObjStd
+ObjInput
+ObjJobs
+ObjAValue
+ObjDict
+ObjPlot
+ObjSys
+ObjColor
+ObjCIFS
+ObjCIFSFile
+ObjCIFSContext
+ObjRest
+ObjRow
+ObjExtProcess
+ObjDuration
+ObjDataFile
+ObjGlob
+DDDBezier
+DDDTriangle
+DDDBrush
+DDD
+DDDVector
+DDDRef
+DDDWorld
+ObjJavaClass
+ObjJavaValueInt
+ObjJavaMethod
+ObjJavaValueNull
+ObjJavaObject
+ObjJavaValueObject
+ObjJava
+ObjJavaConstructor
+ObjJavaValueBoolean
+ObjJavaValueString
+ObjJavaValueLong
+ObjLineReader
+ObjGrep
+ObjFiles
+ObjWebServerContext
+ObjWebRequest
+ObjWeb
+ObjWebServer
+ObjProcess
+ObjFilterReader
+ObjEncrypt
+ObjDateSort
+ObjFile
+ObjClosure
+ObjGlobal
+ObjTerm
+ValueFloat
+ValueObjFloat
+ValueObjStr
+ValueObjInt
+ValueObjFileLine
+ValueString
+ValueBoolean
+ValueObj
+ValueBlock
+ValueInt
+ValueNull
+ValueList
+ValueBinary
+```
+
+This list is produced by running the "AllObjects" function in the script "CodeStats"
+
+```
+CodeStats:main
+
+# or
+
+:load CodeStats
+main
+```
 
 
 # Script library
 
-A library of CFT scripts offers various utility functionality. Much of the "built-in" functionality is ultimately
-implemented in CFT, by having the Java code invoke CFT code.
+CFT comes with a number of scripts, organized in two directories under the CFT home directory:
+
+```
+code.lib
+code.examples
+```
+
+Much of the "built-in" functionality is ultimately implemented in CFT, by having the Java code invoke CFT code.
 
 An example of this is the edit command
 
@@ -314,13 +472,13 @@ The script library files are stored primarily under the *code.lib* directory, wi
 useful examples and utilities under *code.examples*.
 
 
-## 17k lines of CFT script
+## 21k lines of CFT script
 
-In total, CFT has some 17000 lines of CFT scripts under the two code.* directories, among them
+In total, CFT has some 21000 lines of CFT scripts under the two code.* directories, among them
 a full recursive descent JSON parser and also an XML parser.
 
 There are also scripts for automating PowerShell use, installing and working with Docker and
-Kubernetes, and many others.
+Kubernetes, and many others. 
 
 Calls to functions defined in other scripts are always recognized from the syntax.
 
@@ -346,11 +504,11 @@ presents a summary:
 ```
 CodeStats:main
 
-Script code:      17178 lines
-Java code:        35335 lines
-Functions:        510
+Script code:      21165 lines
+Java code:        36898 lines
+Functions:        549
 Shell commands:   22
-Object types:     71
+Object types:     74
 Value types:      13
 ```
 
@@ -380,7 +538,7 @@ List help
 1 help
 ```
 
-The exampel above also illustrates that String and int are also objects.
+The exampel above illustrates that String and int are also objects.
 
 ```
 "test".length

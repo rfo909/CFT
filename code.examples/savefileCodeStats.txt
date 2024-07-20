@@ -72,3 +72,27 @@ ScriptFiles->f
     println("Object types:     " + JavaObjectTypes)
     println("Value types:      " + JavaValueTypes)
 /main
+
+# List object types
+# --
+	JavaFiles->f 
+		Grep("extends Obj").file(f)->line 
+			reject(line.contains("abstract"))
+			out(line.after("class").before("extends").trim)
+/ObjectTypes
+
+# List value types
+# --
+	JavaFiles->f 
+		Grep("extends Value").file(f)->line 
+			reject(line.contains("abstract"))
+			out(line.after("class").before("extends").trim)
+/ValueTypes
+
+# All object and value types
+# --
+	(ObjectTypes + ValueTypes) -> t
+		println(t)
+/AllObjects
+
+
