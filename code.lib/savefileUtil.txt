@@ -825,6 +825,42 @@ Dict.set("list",List)
 /class Cols
 
 
+# Permutate list of lists. 
+#
+# Example:
+# x=List( List(1,2), List(3,4), 5)
+# Permutate(x)
+#
+#   [1, 3, 5]
+#   [1, 4, 5]
+#   [2, 3, 5]
+#   [2, 4, 5]
+#
+# --
+	P(1)=>data		# List of lists
+
+	if (data.empty) {
+		data
+	} else if (data.length==1) {
+		data.first->value
+			out(List(value))
+	} else {
+		firstElement=data.first
+		rest=data.keep(1)
+		
+		firstElement->value
+			perm=Permutate(rest)->x
+				out(List(value)+x)
+	}
+/Permutate
+
+
+# Test for Permutate function
+# --
+	Permutate( List( List(1,2,3), "XXX", List(4,5) ) )
+//tp
+
+
 
 # Check for updates
 # --
