@@ -209,6 +209,17 @@ status
 /s
 
 
+# Stop all running VM's
+# --
+	Lib:run(List("virsh","list","--all")).stdout->line
+		parts=line.split
+		assert(parts.length==3)
+		assert(parts.nth(2)=="running")
+		Stop(parts.nth(1))
+
+/StopAll
+
+
 # Start VM
 # --
     P(1) =>target
