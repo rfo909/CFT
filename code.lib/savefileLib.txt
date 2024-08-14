@@ -895,6 +895,21 @@ run(null,null,null,true)
 /SearchTextFiles
 
    
+# Search text files from result set, or list of files given as parameter
+# --
+	P(1) => list
+    P(2,Input("Search term").get) => st
+
+	if (list==null) list=Sys.lastResult
+	error(getType(list) != "List", "Expected list of files as last result")
+	
+    grep=Grep(st)
+	list->file
+        grep.file(file)->line
+            report(file, file.name, line.lineNumber, line)
+/SearchResultFiles
+
+   
  
 
 # Locate files under current directory
