@@ -326,7 +326,7 @@ loop
 # Show lines 
 # --
     LogFile.read->line 
-        println(line)
+		if (line.trim=="") println else Lib:ShowText(line,false)
     |
     println
 /Show

@@ -625,6 +625,61 @@ run(null,null,null,true)
     println
 /ShowWarn
 
+ 
+# Show single paragraph of words formatted within terminal width.
+# --
+	P(1)=>line
+	w=0
+	line.split -> word
+		if (w==0) {
+			print(word)
+			w=word.length
+		} else if (w+word.length+2 < Term.w) {
+			print(" ")
+			print(word)
+			w=w+word.length+1
+		} else {
+			println
+			print(word)
+			w=word.length
+		}
+	|
+	println
+//ShowSingleParagraph
+
+		
+
+
+# Format paragraphs of text to terminal width, or
+# if text is a list, it is considered a list of paragraphs, and also
+# if individual lines contains newlines, these are also seen as
+# breaking the line into paragraphs. Also eliminates TAB, converting
+# to space.
+# --
+	P(1)=>text
+	P(2,true) => newlinesBetweenParagraphs
+
+	newline=false
+	text->rawLine
+		rawLine.replace("^t"," ").replace("^r".unEsc,"").split("^n".unEsc)->line
+	
+			if (newline) {
+				println
+				newline=false
+			}
+
+			if (line.trim=="") {
+				println
+			} else {
+				ShowSingleParagraph(line)
+			}
+
+			if (newlinesBetweenParagraphs) {
+				newline=true
+			}
+
+	|
+/ShowText
 
 
 
@@ -1343,3 +1398,24 @@ BackDateLastResultFiles
     Util:CheckForUpdates
     Lib:GetTerminalSize 
 /GlobalOnLoad
+
+
+# Smart diff
+# --
+	P(1) as File => a
+	P(2) as File => b
+
+	aLines = {a.read->line out(line.trim)}
+	bLines = {b.read->line out(line.trim)}
+	
+	ta = Lib:TmpFile("a").create(aLines)
+	tb = Lib:TmpFile("b").create(bLines)
+
+	result = Lib:DiffFiles(ta,tb)
+	ta.delete
+	tb.delete
+	result
+/SmartDiff
+	
+
+	
