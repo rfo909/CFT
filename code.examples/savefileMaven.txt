@@ -66,7 +66,6 @@
 	XML:Parse(f.read).first => node
 
 	out("file " + f.path)
-
 	s="create " + node.subNode("groupId").getContent + ":" + node.subNode("artifactId").getContent + ":" + node.subNode("version").getContent
 	out(s)
 	node.subNode("dependencies").subNodes("dependency")->dep

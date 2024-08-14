@@ -85,10 +85,6 @@ To access directories of files with space in them, we use quotes, single or doub
 
 ```
 cd "c:\program files"
-
-or
-
-cd c:\program" "files
 ```
 
 ## Windows backslash
@@ -135,7 +131,7 @@ Prompt:SetPathColor
 
 ## Disabling Curses
 
-Some windows command windows struggle with ANSI escape codes formatting after running external programs
+In windows some command windows struggle with ANSI escape codes formatting after running external programs
 like git, messing up the display. If this happens, just disable use of these, with:
 
 ```
