@@ -57,15 +57,19 @@ in v3.3.2
     
 
     # Identifiers = 4
-    identFirstChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"
+    identFirstChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_:."
     identInnerChars = identFirstChars + "0123456789"
     
     root.sub(identFirstChars).setIsToken(4) => ident
-    ident.sub(identInnerChars, ident) # loop back
+    ident.sub(identInnerChars) => insideIdent 
+	insideIdent.sub(identInnerChars, insideIdent) # loop back
+	insideIdent.setIsToken(4)
 
-    ident.sub(":") => colon
-    colon.sub(identFirstChars).setIsToken(4) => secondIdent
-    secondIdent.sub(identInnerChars, secondIdent)
+    #insideIdent.sub(":") => colon
+    #colon.sub(identFirstChars, ident)  # back to main ident parser
+
+    #insideIdent.sub(".") => dot
+	#dot.sub(identFirstChars, ident) # back to main ident parser
 
     # Strings = 5
     List('"',"'")->c 
@@ -75,17 +79,28 @@ in v3.3.2
         insideString.sub(c).setIsToken(5)
     |
 
-    # XML specials = 10
+    # Processing instructions 
+
     root.addToken("<?").setDefault => x
     x.setDefault(x)
-    x.addToken("?>").setIsToken(10)  # processing instruction
+	x.sub("?").setDefault(x)
+    x.addToken("?>").setIsToken(10)  # terminates processing instruction
     
+	# Comments
+
     root.addToken("<!--").setDefault => x
     x.setDefault(x)
-    x.addToken("-->").setIsToken(10)  # comment
+
+	# prevent error on partial end-marker
+	x.addToken("-").setDefault(x)
+    x.addToken("--").setDefault(x)  
+	x.addToken("-->").setIsToken(10)  # terminates comment
+
+	# CDATA = 11
 
     root.addToken("<[CDATA[") => cdata
     cdata.setDefault(cdata)
+	cdata.sub("]").setDefault(cdata)
     cdata.addToken("]]>").setIsToken(11)  # CDATA
 
 
@@ -110,21 +125,26 @@ in v3.3.2
         @    --><a:parent a="test" b=42 >
         @  
         @       <element "a"=5 b="test" c=ident d=23.5 e=+18 f=-9>2 + 3 &gt; 5</element>
-        @   <? this is a test ?>
-        @       <content:item>first item line
+        @   <? this is a test? right? ?>
+		@   <!-- single line comment -->
+        @       < content:item:details >    first item line
         @            second item line
         @            a>b / c>d
         @       <title><[CDATA[
         @       Donald Duck &amp; Co
         @   ]]></title>
-        @       <emptyTag a=5/>
+        @       <   	emptyTag a = 5 />
         @           <status>
         @             on-hold
-        @           <count>2</count>
+        @           <count.x>2</count.x>
         @               <x a="1">xxx</x>
         @           </status>
-        @       </content:item>
-        @       <xx><yy></yy></xx>
+        @       </content:item:details>
+        @       <xx>
+		@	<!-- Should not trigger on partial terminators:  -- -> -->
+		@			<yy>
+		@           </yy>
+		@       </xx>
         @       <emptyTag a="a"/>
         @    </a:parent>
     )
@@ -138,6 +158,7 @@ exampleXML
 # Test tokenize only
 # --
     P(1,exampleXML)=>xml
+	P(2, null) => tokenType  # null for all
     
     if (xml==null) {
         println("Paste or enter XML, then terminate by '.' on single line")
@@ -151,7 +172,9 @@ exampleXML
     lexer.getTokenStream(root) => ts
     loop
         break(ts.EOF)
-        report(ts.peekType, ts.peek)
+		if (tokenType == null || ts.peekType==tokenType) {
+			report(ts.peekType, ts.peek)
+		}
         ts.next
     |
 /GetTokens
@@ -161,7 +184,7 @@ exampleXML
 # Tokenize XML, then parse.
 # Returns list of top-level objects (XMLNode) skipping text at outer level
 # --
-    P(1)=>xml
+    P(1, exampleXML)=>xml
     P(2,false)=>debug
 
     if (xml==null) {
@@ -265,7 +288,14 @@ exampleXML
             out(x)
     }
 
-    # Get list of String from context
+	# Get first XMLNode from content
+	# --
+	self.subNode=Lambda{
+        P(1) as String? => tag
+		self.subNodes(tag).first
+    }
+
+    # Get list of String from content
     # --
     self.getText=Lambda{
         self.content->x
@@ -282,6 +312,12 @@ exampleXML
         if (list.empty, default, list.first)
     }
 
+	# Get all strings from content (trimmed)
+	self.getContent=Lambda{
+        P(1,null) => default
+        list=self.getText
+        if (list.empty, default, list.concat(" ").trim)
+	}
     
         
     ## Parse from token stream
@@ -290,25 +326,24 @@ exampleXML
     self.parse=Lambda{
         P(1) as LexerTokenStream => ts
 
-        ws=Lambda{ 
-            P(1) as LexerTokenStream => ts 
-            loop 
-                break(ts.EOF || ts.peekType != 1) 
-                ts.next
-        }
+		ws=Lambda{
+			P(1) as LexerTokenStream => ts
+			loop
+				break(ts.EOF || ts.peekType != 1)
+				ts.next
+		} 
 
         # START TAG BEGIN + TAG NAME
         
-        ws.call(ts)
+		ws.call(ts)
         error(!ts.peek=="<",ts.sourceLocation + ": expected '<' starting a tag")
         ts.next
-        ws.call(ts)
 
+		ws.call(ts)
         error(ts.peekType != 4, ts.sourceLocation + ": expected identifier")
         name=ts.peek
         ts.next
         
-        ws.call(ts)
         
         #println("STARTING tag " + name)
         self.tagName=name
@@ -318,8 +353,7 @@ exampleXML
         
         Inner {
             loop
-                ws.call(ts)
-
+				ws.call(ts)
                 break(ts.peek==">" || ts.peek=="/>")
                 
                 error (ts.peekType != 4 && ts.peekType != 5, 
@@ -331,13 +365,14 @@ exampleXML
                     attrName=attrName.sub(1,attrName.length-1)
                 }
                 ts.next
-                ws.call(ts)
+
+				ws.call(ts)
                 error(ts.peek != "=", 
                     ts.sourceLocation + ": expected '=' for attribute " + attrName)
 
                 ts.next
-                ws.call(ts)
 
+				ws.call(ts)
                 error(ts.peekType != 4 && ts.peekType != 5 && ts.peekType() != 3, 
                     ts.sourceLocation + ": Expected identifier, string or number value for attribtute " + attrName + " - got "+ ts.peek)
 
@@ -348,14 +383,14 @@ exampleXML
                 } 
 
                 ts.next
-                ws.call(ts)
                 
                 self.attributes.attrName=attrValue  
         }
         
         # START TAG END
+
+		ws.call(ts)
         
-        ws.call(ts)
         hasContent=true
         if (ts.peek==">") {
             ts.next
@@ -394,18 +429,19 @@ exampleXML
 
         # CLOSING TAG
         if (hasContent) {
-            ws.call(ts)
+			ws.call(ts)
+
             error(ts.peek != "</", ts.sourceLocation + ": expected </ closing " + self.tagName)
 
             ts.next
-            ws.call(ts)
 
+			ws.call(ts)
             error(ts.peekType != 4, ts.sourceLocation + ": expected identifier")
 
             name=ts.peek
             ts.next
-            ws.call(ts)
         
+			ws.call(ts)
             error(self.tagName != name, ts.sourceLocation + ": Expected </" + self.tagName + "> - got </" + name + ">")
             ts.match(">","expected '>' following '</"+name)
             
@@ -439,7 +475,7 @@ exampleXML
                         x.PP(indent2,result)
                     } else {
                         s=x.trim
-                        if (s.length>0) result.add(indent2 + EscapeXMLString(s))
+                        if (s.length>0) result.add(indent2 + Util:EscapeXMLString(s))
                     }
             }
             result.add(indent+"</"+self.tagName+">")
@@ -477,11 +513,6 @@ exampleXML
 
 
 
-# Escape special characters in string
-# --
-    P(1)=>s
-    Util:EscapeXMLString(s)
-//EscapeXMLString
 
 
 

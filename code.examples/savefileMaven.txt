@@ -58,3 +58,22 @@
 # --
     GetFirst(P(1),"<artifactId>")
 /AI
+
+
+# Create summary of pom file detailing what artifact it creates, and dependencies
+# --
+	P(1, Pom.first) as File=>f
+	XML:Parse(f.read).first => node
+
+	out("file " + f.path)
+
+	s="create " + node.subNode("groupId").getContent + ":" + node.subNode("artifactId").getContent + ":" + node.subNode("version").getContent
+	out(s)
+	node.subNode("dependencies").subNodes("dependency")->dep
+		s=dep.subNode("groupId").getContent 
+			+ ":" + dep.subNode("artifactId").getContent
+			+ ":" + dep.subNode("version").getContent
+		out("dep " + s)
+
+/CreateSummary
+	
