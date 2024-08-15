@@ -99,8 +99,10 @@
 # For all pom files under current directory, create summaries of dependencies
 # and mark local dependencies between pom files
 # --
+	P(1,Dir) => dir
+
 	println
-	println("Summarizing all pom*.xml found under current directory", Date.fmt)
+	Lib:Header("Summarizing all pom*.xml found under " + dir.path + "  " + Date.fmt)
 	println
 	println("Dependencies:")
 	println("  '*' means created by local pom file")
