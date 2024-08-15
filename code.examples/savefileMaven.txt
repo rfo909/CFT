@@ -68,12 +68,12 @@
 	out("file " + f.path)
 	s=node.subNode("groupId").getContent 
 		+ ":" + node.subNode("artifactId").getContent 
-		+ ":" + node.subNode("version").getContent
+		+ ":" + if(node.subNode("version") != null, node.subNode("version").getContent, "0.0.1-SNAPSHOT")
 	out("create " + s)
 	node.subNode("dependencies").subNodes("dependency")->dep
 		s=dep.subNode("groupId").getContent 
 			+ ":" + dep.subNode("artifactId").getContent
-			+ ":" + dep.subNode("version").getContent
+			+ ":" + if(dep.subNode("version") != null, dep.subNode("version").getContent, "LATEST")
 		out("dep " + s)
 
 /CreateSummary

@@ -65,8 +65,8 @@ structures. See Maven:CreateSummary for example of traversing tree.
 
 
 	# Identifiers = 4
-	identFirstChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_:."
-	identInnerChars = identFirstChars + "0123456789"
+	identFirstChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"
+	identInnerChars = identFirstChars + "0123456789:.-"
 
 	root.sub(identFirstChars).setIsToken(4) => ident
 	ident.sub(identInnerChars) => insideIdent 
