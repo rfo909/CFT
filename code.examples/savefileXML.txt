@@ -28,90 +28,98 @@ XML parser written in CFT.
 XML nodes. Rewritten using a single class (XMLNode), after introducing classes
 in v3.3.2
 
+
+2023-08-14 
+----------
+Extended identifiers to allow both a:b:c and a.b.c, in order to process POM files etc.
+
+Also made sure that we don't fail on partial terminators, like <!-- ... --> containing
+strings "-" or "--", or <? ... ?> containing "?"
+
+Added a few utility functions to the XMLNode class, for easier dissect of XML document
+structures. See Maven:CreateSummary for example of traversing tree.
+
 >>>> EOF
 /Readme
 
 
 
 
-
-
-
 # Build root lexer Node for tokens in XML
 # --
-    Std.Text.Lexer.Node => root
-    
-    # WS = 1
-    root.sub(" ^n^r^t".unEsc).setIsToken(1) => ws # whitespace
-    ws.sub(" ^n^r^t".unEsc,ws)  # loop back
-    
-    # Specials = 2
-    List("<",">","</","/>","=",":")->t root.addToken(t).setIsToken(2) |
-    
-    # Numbers = 3
-    digits = "0123456789"
-    root.sub(digits+"-"+"+").setIsToken(3) => integer
-    integer.sub(digits,integer) # loop back
-    integer.sub(".").sub(digits).setIsToken(3) => float 
-    float.sub(digits,float) # loop back
-    
+	Std.Text.Lexer.Node => root
 
-    # Identifiers = 4
-    identFirstChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_:."
-    identInnerChars = identFirstChars + "0123456789"
-    
-    root.sub(identFirstChars).setIsToken(4) => ident
-    ident.sub(identInnerChars) => insideIdent 
+	# WS = 1
+	root.sub(" ^n^r^t".unEsc).setIsToken(1) => ws # whitespace
+	ws.sub(" ^n^r^t".unEsc,ws)  # loop back
+
+	# Specials = 2
+	List("<",">","</","/>","=",":")->t root.addToken(t).setIsToken(2) |
+
+	# Numbers = 3
+	digits = "0123456789"
+	root.sub(digits+"-"+"+").setIsToken(3) => integer
+	integer.sub(digits,integer) # loop back
+	integer.sub(".").sub(digits).setIsToken(3) => float 
+	float.sub(digits,float) # loop back
+
+
+	# Identifiers = 4
+	identFirstChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_:."
+	identInnerChars = identFirstChars + "0123456789"
+
+	root.sub(identFirstChars).setIsToken(4) => ident
+	ident.sub(identInnerChars) => insideIdent 
 	insideIdent.sub(identInnerChars, insideIdent) # loop back
 	insideIdent.setIsToken(4)
 
-    #insideIdent.sub(":") => colon
-    #colon.sub(identFirstChars, ident)  # back to main ident parser
+	#insideIdent.sub(":") => colon
+	#colon.sub(identFirstChars, ident)  # back to main ident parser
 
-    #insideIdent.sub(".") => dot
+	#insideIdent.sub(".") => dot
 	#dot.sub(identFirstChars, ident) # back to main ident parser
 
-    # Strings = 5
-    List('"',"'")->c 
-        root.sub(c) => insideString
-        insideString.setDefault(insideString)
-        insideString.sub("\").setDefault(insideString)
-        insideString.sub(c).setIsToken(5)
-    |
+	# Strings = 5
+	List('"',"'")->c 
+		root.sub(c) => insideString
+		insideString.setDefault(insideString)
+		insideString.sub("\").setDefault(insideString)
+		insideString.sub(c).setIsToken(5)
+	|
 
-    # Processing instructions 
+	# Processing instructions <? ... ?> (-1 = don't include token in token stream)
 
-    root.addToken("<?").setDefault => x
-    x.setDefault(x)
+	root.addToken("<?").setDefault => x
+	x.setDefault(x)
 	x.sub("?").setDefault(x)
-    x.addToken("?>").setIsToken(10)  # terminates processing instruction
+	x.addToken("?>").setIsToken(-1)  # terminates processing instruction, 
     
-	# Comments
+	# Comments <!-- ... -->
 
-    root.addToken("<!--").setDefault => x
-    x.setDefault(x)
+	root.addToken("<!--").setDefault => x
+	x.setDefault(x)
 
 	# prevent error on partial end-marker
 	x.addToken("-").setDefault(x)
-    x.addToken("--").setDefault(x)  
-	x.addToken("-->").setIsToken(10)  # terminates comment
+	x.addToken("--").setDefault(x)  
+	x.addToken("-->").setIsToken(-1)  # terminates comment
 
 	# CDATA = 11
 
-    root.addToken("<[CDATA[") => cdata
-    cdata.setDefault(cdata)
+	root.addToken("<[CDATA[") => cdata
+	cdata.setDefault(cdata)
 	cdata.sub("]").setDefault(cdata)
-    cdata.addToken("]]>").setIsToken(11)  # CDATA
+	cdata.addToken("]]>").setIsToken(11)  # CDATA
 
 
-    # Everything else = 99  
-    root.setDefault.setIsToken(99)
-    root.addToken(">").setIsToken(99)
-    root.addToken("/").setIsToken(99)
+	# Everything else = 99  
+	root.setDefault.setIsToken(99)
+	root.addToken(">").setIsToken(99)
+	root.addToken("/").setIsToken(99)
 
 
-    # return value is the root node
-    root
+	# return value is the root node
+	root
 //RootNode
 
 
@@ -119,34 +127,35 @@ in v3.3.2
 # Example XML code
 # ---
     Sequence(
-        @    <!-- this is 
-        @         a comment 
-        @           2021/01/01 12:00:55 
-        @    --><a:parent a="test" b=42 >
-        @  
-        @       <element "a"=5 b="test" c=ident d=23.5 e=+18 f=-9>2 + 3 &gt; 5</element>
-        @   <? this is a test? right? ?>
-		@   <!-- single line comment -->
-        @       < content:item:details >    first item line
-        @            second item line
-        @            a>b / c>d
-        @       <title><[CDATA[
-        @       Donald Duck &amp; Co
-        @   ]]></title>
-        @       <   	emptyTag a = 5 />
-        @           <status>
-        @             on-hold
-        @           <count.x>2</count.x>
-        @               <x a="1">xxx</x>
-        @           </status>
-        @       </content:item:details>
-        @       <xx>
-		@	<!-- Should not trigger on partial terminators:  -- -> -->
-		@			<yy>
-		@           </yy>
-		@       </xx>
-        @       <emptyTag a="a"/>
-        @    </a:parent>
+	@    <!-- this is 
+	@         a comment 
+	@           2021/01/01 12:00:55 
+	@    --><a:parent a="test" b=42 >
+	@  
+	@       <element "a"=5 b="test" c=ident d=23.5 e=+18 f=-9>2 + 3 &gt; 5</element>
+	@   <? this is a test? right? ?>
+	@   <!-- single line comment -->
+	@       < content:item:details >first item line
+	@        second item line
+	@	         third item line
+	@           a>b / c>d
+	@       <title><[CDATA[
+	@       Donald Duck &amp; Co
+	@   ]]></title>
+	@       <   	emptyTag a = 5 />
+	@           <status>
+	@             on-hold
+	@           <count.x>2</count.x>
+	@               <x a="1">xxx</x>
+	@           </status>
+	@       </content:item:details>
+	@       <xx>
+	@	<!-- Should not trigger on partial terminators:  -- -> -->
+	@			<yy>
+	@           </yy>
+	@       </xx>
+	@       <emptyTag a="a"/>
+	@    </a:parent>
     )
 /exampleXML
 
@@ -326,12 +335,12 @@ exampleXML
     self.parse=Lambda{
         P(1) as LexerTokenStream => ts
 
-		ws=Lambda{
-			P(1) as LexerTokenStream => ts
-			loop
-				break(ts.EOF || ts.peekType != 1)
-				ts.next
-		} 
+	ws=Lambda{
+		P(1) as LexerTokenStream => ts
+		loop
+			break(ts.EOF || ts.peekType != 1)
+			ts.next
+	} 
 
         # START TAG BEGIN + TAG NAME
         
@@ -501,6 +510,14 @@ exampleXML
     Util:ShowDict(XMLNode("ROOT"))
 /Show
 
+
+# Pretty-print is implemented inside XMLNode
+# Example: PP(Parse.first)
+# --
+	P(1) as &XMLNode => node
+	node.PP
+/PP
+	
 
 
 
