@@ -23,8 +23,8 @@
 # Show content of dictionary
 # Note: can also use JSON:PP
 # --
-P(1)=>dict
-P(2,false)=>print
+	P(1) as Dict => dict
+	P(2, false)  => show
 
     # Inner lambda to convert value to synthesized form, 
     # if synthesizable, for more relevant information
@@ -41,18 +41,20 @@ P(2,false)=>print
         }
     }
 
-    Inner {
-        dict.keys->key
-            val=LPresent.call(dict.get(key))
-            report(key,val)
-    } => reportLines
-    
-    if (print) {
-        reportLines->line println(line)
-    }
-    reportLines
+	result = Inner {
+		dict.keys->key
+			val=LPresent.call(dict.get(key))
+			report(key,val)
+	}
+
+	if (show) Inner{
+		Lib:ShowRows(result)->line println(line)
+	}
+
+	result
         
 /ShowDict
+
 
 
 

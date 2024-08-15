@@ -21,7 +21,7 @@
 
 # All pom files under current dir
 # --
-    Dir.allFiles("pom*xml")
+    Dir.allFiles("pom*.xml")
 /Pom
 
 # Get first line with a certain pattern
@@ -66,8 +66,10 @@
 	XML:Parse(f.read).first => node
 
 	out("file " + f.path)
-	s="create " + node.subNode("groupId").getContent + ":" + node.subNode("artifactId").getContent + ":" + node.subNode("version").getContent
-	out(s)
+	s=node.subNode("groupId").getContent 
+		+ ":" + node.subNode("artifactId").getContent 
+		+ ":" + node.subNode("version").getContent
+	out("create " + s)
 	node.subNode("dependencies").subNodes("dependency")->dep
 		s=dep.subNode("groupId").getContent 
 			+ ":" + dep.subNode("artifactId").getContent
@@ -76,3 +78,72 @@
 
 /CreateSummary
 	
+
+# Create pom summary as dictionary
+# --
+	P(1,Pom.first) as File => f
+	dict=Dict
+	dict.dep=List
+	dict.file=f
+	CreateSummary(f)->line
+		if (line.startsWith("create ")) {
+			dict.set("create",line.after(" "))
+		} else if (line.startsWith("dep ")) {
+			dict.dep.add(line.after(" "))
+		}
+	|
+	dict
+/CreateSummaryDict
+
+
+# For all pom files under current directory, create summaries of dependencies
+# and mark local dependencies between pom files
+# --
+	println
+	println("Summarizing all pom*.xml found under current directory", Date.fmt)
+	println
+	println("Dependencies:")
+	println("  '*' means created by local pom file")
+	println("  'E' means inconsistent versions between dependency and local pom file")
+	println("  '-' means external dependency")
+	println
+
+
+	list=List
+	allDep=List
+	Pom->f
+		list.add(CreateSummaryDict(f))
+	|
+	list->summary
+		# for each dependency, search through the summaries, to see if 
+		# any of them create that dependency
+		Lib:Header(summary.create)
+		println(summary.file.path)
+
+		summary.dep->dep
+			allDep.add(dep)
+			prefix=" - "
+			
+			Inner{
+				list->x
+					reject(x==summary)
+					if (x.create.beforeLast(":")==dep.beforeLast(":")) {
+						# artifact match (independent of version)
+						prefix=" * "
+						if (x.create.afterLast(":") != dep.afterLast(":")) {
+							# versions differ
+							prefix=" E "
+						}
+					}
+			}
+			println(prefix + dep)
+	|
+	println
+	
+	# List all dependecies, sorted and unique, to reveal differing versions
+	Lib:Header("All dependencies from the POM files")
+	allDep.sort.unique->dep
+		println("   " + dep)
+	|
+	println
+/ShowSummaryAll

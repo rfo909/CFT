@@ -683,6 +683,49 @@ run(null,null,null,true)
 
 
 
+# Show a list of Row objects formatted into a list of strings
+# --
+	P(1) as List => data
+
+	# Conver to rows of strings for printable columns only
+	data -> row
+		error(getType(row) != "Row", "Expected list of Row objects")
+		out(row.asStringsRow)
+	| _=> stringRows
+
+	# Calculate column widths
+	colWidths=Dict
+	stringRows->row
+		i=0
+		row.asList->value
+			key=""+i
+			w=colWidths.get(key,0)
+			if (value.length > w) colWidths.set(key,value.length)
+			i=i+1
+	|
+
+	# Present formatted
+	rowNumber=0
+	stringRows->row
+		i=0
+		sep=""
+		Inner{
+			row.asList->value
+				key=""+i
+				w=colWidths.get(key)
+				s=(value+" ".times(w)).first(w)
+				out(sep+s)
+				sep=" | "
+				i=i+1
+
+		} _.concat => line
+		x=("    "+rowNumber).last(4)
+		out(x+": "+line)
+		rowNumber=rowNumber+1
+/ShowRows
+
+
+
 # Select single value from list of options. Using lambda to extract name for each element.
 # --
     P(1,List)=>options 

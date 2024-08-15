@@ -47,6 +47,8 @@ public class ObjRow extends Obj implements IsSynthesizable {
         this.rowData=rowData;
         add(new FunctionGet());
         add(new FunctionShow());
+        add(new FunctionAsStringsRow());
+        add(new FunctionAsList());
     }
 
     public ObjRow () {
@@ -112,7 +114,7 @@ public class ObjRow extends Obj implements IsSynthesizable {
             return "get";
         }
         public String getShortDesc() {
-            return "get(n=) - return value of column n, defaults to 0";
+            return "get(n) - return value of column n, defaults to 0";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             int n=0;
@@ -161,5 +163,44 @@ public class ObjRow extends Obj implements IsSynthesizable {
     }
 
 
+    class FunctionAsStringsRow extends Function {
+        public String getName() {
+            return "asStringsRow";
+        }
+        public String getShortDesc() {
+            return "asStringsRow() - returns Row with printable columns as strings";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+
+            List<Value> newRowData=new ArrayList<Value>();
+            for (Value v:rowData) {
+
+                String type;
+                if (v instanceof ValueObj) {
+                    type=((ValueObj) v).getVal().getTypeName();
+                } else {
+                    type=v.getTypeName();
+                }
+                if(reportTypes.contains("|" + type + "|")) {
+                    newRowData.add(new ValueString(v.getValAsString()));
+                }
+            }
+            return new ValueObj(new ObjRow(newRowData));
+        }
+    }
+
+
+    class FunctionAsList extends Function {
+        public String getName() {
+            return "asList";
+        }
+        public String getShortDesc() {
+            return "asList() - return column values as List";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            return new ValueList(rowData);
+        }
+    }
 
 }
