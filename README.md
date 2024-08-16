@@ -139,6 +139,13 @@ Example:
 git pull origin master
 ```
 
+Also note, that one can *force* running an external program from the command line, by prefixing 
+it by a TAB. This lets us run the "ls" program of the underlying OS
+
+```
+<TAB>ls
+```
+
 
 
 # Why a new script language?
