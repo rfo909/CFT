@@ -1,18 +1,18 @@
 * CFT Reference
 * ---- Using CFT as a shell
-  |  NOTE: the @term shortcut
   |  Combine with CFT function results
-  |  The ":N" syntax
+  |  The ":N"
         Complex example
-  |  The "::" syntax
+  |  The "::"
+  |  Colon commands and shortcuts
   |  Symbols 
         Diffing files example
-  |  Note on specials
+  |  :N, :: and %x initiate expressions
   |  Repeat last line
-  |  External commands
+  |  External programs
         Force as external
         Parameters
-        External program in current dir
+        External program in current or parent dir
   |  Background jobs
         Blocking on input?
         Bring to foreground
@@ -34,9 +34,18 @@
   |  Calling functions in other scripts
   |  Examining non-current scripts
   |  Show all known scripts
-* ---- Command line args
-* ---- Shortcuts and colon commands
-* ---- Lists
+* ---- Lists and loops
+  |  For each
+        For each on non-lists
+  |  General loops
+  |  Controlling loops
+  |  Loop scope
+  |  Loop result
+        Example, using PIPE 
+        Example using Inner block
+        Avoid loops inside local blocks
+        So what are local blocks for?
+  |  Nested loops
   |  Addition
   |  Subtraction
   |  Removing duplicates from a list
@@ -46,11 +55,11 @@
   |  Removing items
   |  nth() negative indexes
 * ---- Dictionaries
-  |  Dictionary dotted syntax
   |  SymDict
   |  Dictionary name
-  |  Dict set with strings
-  |  Dict.get with default value
+  |  setStr()
+  |  get() with default value
+  |  When value name is valid identifier
 * ---- String escape char
   |  Escape codes
 * ---- Block expressions
@@ -72,8 +81,11 @@
         Code space result value
         Otherwise ...
   |  Nested loops
-* ---- Function parameters
+  |  Out count
+* ---- Function parameter default values
 * ---- User input
+  |  Ask for secrets
+  |  Ask for missing function parameter
   |  Paste multiple lines
 * ---- Output to screen
 * ---- Produce columns with report()
@@ -86,7 +98,6 @@
 * ---- Function parameters ...
   |  Get parameters as List
   |  Get parameters as Dict
-* ---- The general loop statement
 * ---- Running external programs
   |  Summary
   |  Dir.run()
@@ -98,6 +109,7 @@
   |  Work directory issues
   |  Doing ssh
         Side note: ssh without password
+* ---- CFT command line args
 * ---- Environment variables
 * ---- Hiding helper functions  
 * ---- Value types
@@ -126,10 +138,11 @@
         Include blank lines
         Allowing comments
   |  Sequence() and raw strings
-* ---- The CFT database (Db2)
+* ---- The CFT datastore (Db2)
   |  Collections
   |  Std.Db.Db2 vs Db2 script?
   |  Synchronization
+  |  The Vault
 * ---- Error handling
   |  Soft errors
   |  Hard errors
@@ -204,3 +217,4 @@
         2022-03-31 v3.2.5
         2022-04-22 v3.5.0
         2023-02-03 v4.0.1
+        2024-08-16 v4.2.2

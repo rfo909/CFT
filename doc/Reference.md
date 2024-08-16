@@ -32,7 +32,7 @@ edit (DataFile)
 ```
 
 
-## The ":N" syntax
+## The ":N"
 
 The function Sys.lastResult returns the result from the previous interactive command. The
 Sys.lastResult function takes an optional int parameter for when the result is
@@ -70,7 +70,7 @@ edit
 
 
 
-## The "::" syntax
+## The "::"
 
 Sometimes we have a function that returned perhaps a single string or file or directory, that
 we in turn want to do something with, without the :N *lookup-in-list* syntax. For this
@@ -84,7 +84,36 @@ Dir.dirs.first
 cd ::
 ```
 
+## Colon commands and shortcuts
+
+Shortcuts are ways of running CFT code, and are defined in CFT.props. 
+
+Colon commands on the other hand,
+are system commands that run completely outside the language interpreter (written in Java), such as
+loading and saving scripts.
+
+
+View all colon commands by typing a colon and press Enter
+
+```
+:
+```
+
+View all shortcuts by typing the '@' and press Enter
+
+```
+@
+```
+
+Shortcuts are defined in the CFT.props file.
+
+
+
+
+
+
 ## Symbols 
+
 
 Symbols let us define persistent names for files and directories. These can be used
 in expressions, and when executing external programs from the command line.
@@ -137,9 +166,9 @@ cd /where/the/other/file/exists
 diff somefile.txt %a
 ```
 
-## Note on specials 
+## :N, :: and %x initiate expressions
 
-Shell command parameters starting with ":" or "%" are considered CFT expressions even without
+Parameters to shell commands (and external programs) starting with ":" or "%" are considered CFT expressions even without
 being embedded inside parantheses. Those expressions can not contain free spaces, outside of strings.
  
 
@@ -485,59 +514,188 @@ The shortcut @scr calls this function.
 ```
 
 
-# ---- Command line args
 
 
-If CFT is invoked with command line arguments, the first is the name of the script,
-that is, a savefile minus the "savefile" prefix and ".txt" ending.
+# ---- Lists and loops
 
+The List is the most important data structure in CFT. Lists are created with the global function List, which
+creates a List object from the values given as parameters, or if given no parameters, returns an empty list.
 
-Then follows zero
-or more command lines, on string format. For values containing space or otherwise
-have meaning to the shell, use quotes. Example:
+Lists are also returned from many member functions, such as Dir.files or Std.Data.for(0,10,1).
 
-```
-./cft Projects Curr
-```
+## For each
 
-This loads script Projects, then calls the Curr function inside.
+Looping is primarily about iterating over lists, with the single arrow and loop variable. 
 
 ```
-./cft
-./cft scriptName [commandLines]*
-./cft -version
-./cft -help
-./cft -d scriptDir [scriptName [commandLines]*]?
+Dir.files->f ...
+Std.Data.for(0,10,1)->i ...   # iterates over values 0-9 inclusive
 ```
 
+Note that the loop variable is not a normal variable. It can not be modified inside the loop. 
 
+### For each on non-lists
 
+In CFT it is valid to loop over anything, not just lists. If a function takes a parameter
+which may be a list of strings or a string, we can safely iterate over it, doing exactly one
+iteration if the value is just a string.
 
-
-# ---- Shortcuts and colon commands
-
-Shortcuts are ways of running CFT code, while colon commands are system commands that run completely
-outside the language interpreter (written in Java).
-
-
-View all colon commands:
+The only two values that are not iterated over are boolean *false* and the *null* value.
 
 ```
-:
+"test"->x out(x)
 ```
 
-View all shortcuts:
+This returns List("test").
+
+To iterate over the characters of a string, use the .chars() function of Strings
+to produce a List of the characters
 
 ```
-@
+"test".chars
 ```
 
-Shortcuts are defined in the CFT.props file.
+This returns List("t","e","s","t").
 
 
 
 
-# ---- Lists
+## General loops
+
+The loop statement initiates a loop that is not related to a List. This means it must be explicitly terminated
+with break.
+
+```
+i=10 loop break(i<=0) println(i) i=i-1
+```
+
+## Controlling loops
+
+Inside a loop, we use the following to control execution of code inside
+
+```
+assert(expr)   # continue with next iteration if expr is false or null
+reject(expr)   # continue with next iteration if expr is not false and not null (inverse of assert) 
+break(expr?)   # if expr is true or if no expr, then terminate the loop
+```
+
+Note that these apply to nested loops as well as non-nested loops, unless using Inner blocks. More about
+that in a bit.
+
+
+## Loop scope
+
+Loops extend to one of three things:
+
+- the end of the function
+- a PIPE character, or
+- when reaching the end of block, marked by the right curly brace
+
+## Loop result
+
+The result from a loop is always a List, which may be populated using out() to add single values to it,
+or report(), which is used to add multiple values, usually to be presented interactively as neat columns.
+
+If there are no calls to out() or report() inside a loop, the result is an empty List.
+
+### Example, using PIPE 
+
+```
+Dir.files->f assert(f.name.endsWith(".java")) out(f) | _=>javaFiles 
+```
+
+Using the PIPE, we terminate the loop, and add code that picks up the result from the data stack, storing
+it into a local variable, javaFiles. The "underscore" expression returns the last value, in this case the
+list from the previous loop.
+
+### Example using Inner block
+
+Alternatively, we may use an Inner block, which is a piece of code that runs isolated from the outer
+context.
+
+```
+javaFiles = Inner{ Dir.files->f assert(f.name.endsWith(".jaca") out(f) }
+```
+
+Loops are also terminated in local blocks, but using loops inside local blocks (not preceded by the Inner keyword)
+behaves differently and sometimes unexpectedly. 
+
+### Avoid loops inside local blocks
+
+In a local block, the out() and report() statements affect the result list of the surrounding context. CFT detects
+when code contains loops, and returns that list, and local blocks are not isolated from the outer context
+as with Inner blocks.
+
+This may work, and may produce unexpected results. First off, a local block does not have a return value, like
+Inner blocks do. 
+
+```
+x={List(1,2,3)->x out(x+10)} x->i report("The number is",i)
+```
+
+This returns a List(11,12,13), not the report of "The number is" lines. The reason is that the variable x
+is assigned the *null* value, and that is why the second iteration over x does nothing.
+
+```
+x=Inner{List(1,2,3)->x out(x+10)} x->i report("The number is",i)
+```
+
+Adding the Inner keyword to the block where we iterate over 1,2,3 means x becomes a list of (11,12,13), and in turn
+that the second loop, where we call report() gets run as we expect it to.
+
+### So what are local blocks for?
+
+Local blocks are used for normal decision making, both inside loops and elsewhere. As they are not separate from the
+context they exist in, they work as expected when we want to decide between adding this or that value with out()
+or report(). 
+
+```
+Std.Data.each(0,10)->i if(i%2==0) { if (i>5) break else out(i) }
+```
+
+Returns list of (0,2,4)
+
+
+## Nested loops
+
+Loops can be nested, just remember that the PIPE symbol terminate ALL current loops. To have finer control, 
+use Inner blocks.
+
+```
+List(1,2,3)->x "abc".chars->y out(""+x+y) | _=>result result->line out("prefix " + line)
+```
+
+Inner blocks gives us detailed control, like breaking off an inner loop without
+affecting the outer loop, or producing a temporary list of data to be summarized and output through
+the outer loop.
+
+Below follows a somewhat complex example, where we are searching for a string and want to display only the first matching 
+line from each file.
+
+```
+# Show first matching line from each file
+# --
+	P(1,readLine("search term")) => term
+	Dir.allFiles("savefile*.txt")->f
+		# using break to terminate Inner loop, while continuing the 
+		# iteration over the files
+		matches=Inner{
+			f.read->line
+				if (line.contains(term)) {
+					out(line)
+					break
+				}
+			
+		}
+		matches->line
+			report(f.name,line)
+/FirstMatch
+```
+
+At some point it will be easier to create helper functions ...
+
+
+
 
 ## Addition
 
@@ -677,14 +835,12 @@ List(1,2,3,4).nth(-1)
 
 # ---- Dictionaries
 
-## Dictionary dotted syntax
+A dictionary object associates string names with values. The most basic way to set a value and retrieve it
+again is
 
-In addition to the .set() and .get() functions of dictionary objects, CFT also allows dotted assignment, and
-dotted lookup (for identifier names).
-
-Storing a value in a dictionary, either via set() or using dotted assignment, always returns the dictionary
-object, which lets us use the single underscore expression to pick it up and do further assignments.
-
+```
+dict=Dict dict.set("a",5) dict.get("a")  # returns 5
+```
 
 ## SymDict
 
@@ -704,13 +860,16 @@ returns a dictionary with those.
 This corresponds to the following:
 
 ```
-# SymDict example
+# Without SymDict
 # --
 	P(1)=>user
 	P(2)=>host
-	Dict.user=user _.host=host
+	dict=Dict
+	dict.user=user 
+	dict.host=host
 /GetDict
 ```
+
 ## Dictionary name
 
 
@@ -744,7 +903,7 @@ The '&amp;' in front of the type is to indicate that we are interested in the na
 we can check for regular types, such as int, String, List, Dict and a whole lot of others.
 
 
-## Dict set with strings
+## setStr()
 
 
 Reading name-value assignments from a property file or similar, is best done via the .setStr()
@@ -775,24 +934,43 @@ this:
 /GetProps
 ```
 
-## Dict.get with default value
+## get() with default value
 
 
 The Dict.get() method takes an optional default-value which is returned if no value
 associated with the name, but in that case the default value is 
-*also stored* in the
-dictionary.
+*also stored* in the dictionary.
 
 ```
-data=Dict
-data.get("a",3)  # returns 3
-data.keys        # returns list with "a"
-data.get("a",5)  # returns 3 as it was set above
+data=Dict data.get("a",3)  # returns 3
+data=Dict data.get("a",3) data.keys  # returns List("a")
 ```
 
 
+## When value name is valid identifier
 
+When storing a value in a dictionary, and the name that it is stored under is a valid identifier, and does not
+crash with built-in member functions of the Dict object, we can use dotted notation, for improved readability.
 
+```
+dict=Dict dict.set("a",5)
+dict.a   # returns 5
+```
+
+We can also use dotted notation when storing data inside a dictionary.
+
+```
+dict=Dict dict.a=5
+dict.a   # returns 5
+```
+
+Note that we can even use dotted notation to store values with names that correspond to member functions,
+such as "keys", but need to use .get() with the name as string, to get such values back.
+
+```
+dict=Dict dict.a=1 dict.keys=4 dict.keys # returns List("a","keys") which is return value from keys() member function
+dict=Dict dict.keys=4 dict.get("keys")   # returns value 4
+```
 
 # ---- String escape char
 
@@ -845,6 +1023,7 @@ a test
 
 The traditional blocks inside curly braces come in three variants in CFT.
 
+
 ## Local blocks
 
 
@@ -876,6 +1055,7 @@ which is the "ex" function. For this reason it makes no sense partitioning the i
 local block into separate code spaces with the PIPE character, so this is forbidden.
 
 
+
 ## Inner blocks
 
 
@@ -884,9 +1064,17 @@ affecting the result of the caller.
 
 
 They are like calling an inline function (no parameters though), as their inner
-workings do not affect the caller, 
-*except* that they have access to, and can
+workings do not affect the caller, *except* that they have access to, and can
 modify local variables.
+
+This means the Inner block has a *return value* which can be picked up and stored in
+a local variable, or be further processed in the outer context.
+
+(Local blocks do not have return values). 
+
+Below is an example, where we sum up the number of matches of a search term across
+a number of files. Note that the Grep object implements this much more efficiently
+with its fileCount() function.
 
 ```
 # List number of lines containing a pattern, in files under current dir
@@ -903,8 +1091,7 @@ modify local variables.
 /CountMatches
 ```
 
-Apart from how this example could have been better implemented using Grep.fileCount(), this
-is an illustration of how Inner blocks are more general and powerful than using
+This illustrates how Inner blocks are more general and powerful than using
 the PIPE to split function bodies into code spaces.
 
 Partitioning an Inner block with PIPE does not affect the code outside the Inner block. 
@@ -930,17 +1117,20 @@ closures and/or Dict objects / classes.
 The above vode defines a regular function, MyLambda, that returns a Lambda object, which can
 then be called with the .call().
 
+
 ## Block expressions summary
 
 
-Local (plain) blocks for non-PIPE-separated blocks of code, typically used with "if". Running in
-the same code space as outside the block, which means it can contain calls to break() and out() as well as
-assert() and reject() and affect the (innermost) loop of those outside the block.
+Local (plain) blocks for non-PIPE-separated blocks of code, typically used with "if". The code
+inside executes in the same code space as outside the block, which means it can contain calls to
+break() and out() as well as assert() and reject() and affect the outside loops. Local blocks have
+no return value.
 
 
 Inner blocks for isolated processing loops inside other code. This means that calling
-out(), assert(), reject() and break() inside, has no effect on loops outside the block. They
-can be split into parts with PIPE, just like functions.
+out(), assert(), reject() and break() inside, has no effect on loops outside the block, only
+for loops inside. The code inside an Inner block can be split into parts using the PIPE. Inner blocks
+have a return value, just like functions.
 
 
 Lambdas are callable functions as values. There is a lot more to say about Lambdas and their
@@ -1062,9 +1252,6 @@ Decoding some value x into a numeric code, we can enter the following
 ```
 code = if (x=="a") 1 else if (x=="b") 2 else if (x=="c") 3 else 4
 ```
-
-Note: the above is not very elegant. It might be better populating a
-dictionary or something.
 
 
 
@@ -1193,7 +1380,7 @@ The *default value* expression inside P() is important for several reasons.
 1. Allows the function code to execute while being developed interactively
 2. Allows for default values when function is called without parameters, or when called with null-values
 3. May act as documentation in the source
-4, Provides an elegant way of making functions interactive and non-interactive at the same time,
+4. Provides an elegant way of making functions interactive and non-interactive at the same time,
 as the default expression is evaluated only when parameter is not given (or is null),
 and may then ask the user to input the value.
 
@@ -1484,34 +1671,6 @@ in the dictionary.
 /example
 ```
 
-
-# ---- The general loop statement
-
-
-In addition to looping over lists, there is a general loop construct. It identifies no
-loop variable, and loops forever, until break() is called. It also obeys assert(),
-reject() and continue( as with list iteration.
-
-```
-a=0 loop break(a>3) out(a) a=a+1
-<List>
-0
-1
-2
-3
-```
-
-If you forget to increment the variable a, or forget or create a valid break(), then
-the loop may never terminate, and CFT has to be killed with CTRL-C 
-
-
-
-
-
-
-
-
-
 # ---- Running external programs
 
 ## Summary
@@ -1680,6 +1839,37 @@ copy it to the target host, as follows (in Linux shell).
 ssh-keygen -t rsa
 ssh-copy-id user@host
 ```
+
+
+
+# ---- CFT command line args
+
+
+If CFT is invoked with command line arguments, the first is the name of the script to load and use as "current script", 
+and it is named in the same way as for the ":load" command, that is, a savefile minus the "savefile" prefix and ".txt" ending.
+
+
+Then follows zero
+or more command lines, on string format. For values containing space or otherwise
+have meaning to the shell, use quotes. Example:
+
+```
+./cft Projects Curr
+```
+
+This loads script Projects, then calls the Curr function inside.
+
+```
+./cft
+./cft scriptName [commandLines]*
+./cft -version
+./cft -help
+./cft -d scriptDir [scriptName [commandLines]*]?
+```
+
+
+
+
 
 
 # ---- Environment variables
@@ -3576,6 +3766,19 @@ Java code:        35356 lines
 Functions:        511
 Shell commands:   22
 Object types:     71
+Value types:      13
+```
+
+### 2024-08-16 v4.2.2
+
+Running CodeStats:main
+
+```
+Script code:      21491 lines
+Java code:        36921 lines
+Functions:        551
+Shell commands:   22
+Object types:     74
 Value types:      13
 ```
 
