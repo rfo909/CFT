@@ -642,23 +642,8 @@ public class Root {
             }
             return;
 
-        } else if (ts.matchStr("delete")) {
-            for (;;) {
-                String ident = ts.matchIdentifier("expected identifier to be cleared");
-                codeHistory.clear(ident);
-
-                if (!ts.matchStr(",")) {
-                    break;
-                }
-            }
-            return;
         } else if (ts.matchStr("new")) {
             createNewScript();
-            return;
-        } else if (ts.matchStr("copy")) {
-            String ident1 = ts.matchIdentifier("expected name of codeline to be copied");
-            String ident2 = ts.matchIdentifier("expected target name");
-            codeHistory.copy(ident1, ident2);
             return;
         } else if (ts.matchStr("debug")) {
             debugMode = !debugMode;
@@ -753,8 +738,6 @@ public class Root {
             stdio.println(":load [ident]?           - load script");
             stdio.println(":new                     - create new empty script");
             stdio.println(":sw [ident]?             - switch between loaded scripts");
-            stdio.println(":delete ident [, ident]* - delete function(s)");
-            stdio.println(":copy ident ident        - copy function");
             stdio.println(":wrap                    - line wrap on/off");
             stdio.println(":debug                   - enter or leave debug mode");
             stdio.println(":syn                     - synthesize last result");
