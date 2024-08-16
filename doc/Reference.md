@@ -1,31 +1,13 @@
 
 # CFT Reference
 
-Last updated: 2024-07-20 RFO
+Last updated: 2024-08-16 RFO
 
-v4.2.1
-
-
+v4.2.2
 
 
 # ---- Using CFT as a shell
 
-## NOTE: the @term shortcut
-
-If the terminal windows is resized, and when running in windows, note that the CFT terminal information
-is not readily available, because the query to get that information takes up to 500 millis.
-
-To update the terminal information on Windows, use shortcut
-
-```
-@term
-```
-
-This updates an internal object, which is available through global function "Term".
-
-For Linux, the Term is updated as part of drawing the prompt.
-
-The consequences of running with outdated Term info is related to truncating lines correctly.
 
 ## Combine with CFT function results
 
@@ -155,10 +137,10 @@ cd /where/the/other/file/exists
 diff somefile.txt %a
 ```
 
-## Note on specials
+## Note on specials 
 
 Shell command parameters starting with ":" or "%" are considered CFT expressions even without
-being embedded inside parantheses. Such parameter strings can not contain free spaces, outside of strings.
+being embedded inside parantheses. Those expressions can not contain free spaces, outside of strings.
  
 
 
@@ -182,7 +164,7 @@ Dir.files.length
 
 
 
-## External commands
+## External programs
 
 To run external programs, we just type the commands and press Enter. As long as the external
 program is not parseable and executable as a CFT script command or CFT shell-like command, it will
@@ -222,7 +204,7 @@ ls
 scp :4 user@host:.               # last-value indexed reference
 ```
 
-### External program in current dir
+### External program in current or parent dir
 
 If a command starts with .\x or ./x depending on OS, this is taken to mean running a program ("x") found
 at some path, starting in current directory, instead of interpreting the dot to mean repeat last command.
@@ -380,6 +362,21 @@ After resizing the terminal, we need to update the Term object.
 ```
 
 This works on Linux (using stty command) and on Windows (powershell).
+
+On Linux, the code that renders the prompt (Prompt script) checks terminal dimensions, so
+that pressing Enter once after resizing the window, updates the Term object. This does
+not work on Windows, because the command used takes up to half a second, which would slow
+down the UI.
+
+To access the terminal info in code, use the Term global function, which returns the Term
+object, and has functions for accessing the width and height.
+
+```
+Term.w
+Term.h
+```
+
+
 
 ## Line wrapping
 
@@ -1162,10 +1159,17 @@ construct. But this can be changed using the "pipe" symbol, which "closes" all l
 
 The only thing that terminates loops are end-of-scope, which includes the PIPE symbol.
 
+## Out count
+
+The Sys.outCount function returns the number of values added to the resulting list
+from the current loop or nested loops. 
+
+```
+List(1,2,3)->x if(Sys.outCount>0) out(",") out(x) | _.concat
+```
 
 
-
-# ---- Function parameters
+# ---- Function parameter default values
 
 
 Custom functions can take parameters. This is done using the P() expression, which
@@ -1183,7 +1187,7 @@ the P() expressions take an optional second parameter, which is a default value 
 expression). 
 
 
-The default value parameter to P() is important for several reasons.
+The *default value* expression inside P() is important for several reasons.
 
 
 1. Allows the function code to execute while being developed interactively
@@ -1192,6 +1196,8 @@ The default value parameter to P() is important for several reasons.
 4, Provides an elegant way of making functions interactive and non-interactive at the same time,
 as the default expression is evaluated only when parameter is not given (or is null),
 and may then ask the user to input the value.
+
+
 
 
 
@@ -1212,7 +1218,7 @@ f(5,10)
 # ---- User input
 
 
-CFT contains the following for asking the user to enter input:
+CFT contains the following for asking the user to enter regular input:
 
 ```
 value = Input("Enter value").get
@@ -1224,12 +1230,23 @@ press enter to use the last (current) value, or enter colon to select between pr
 (history) values. It also has functions to manipulate the history and the "current" value, or
 press colon ":" to select a previous value.
 
-
 The readLine() is much simpler, and allows for empty input, as Enter
 doesn't mean "last value" as it does for Input.
 
+## Ask for secrets
 
-The optional default value parameter to the P() expression for grabbing parameters to
+This function asks for input that is not echoed to screen. It is usually wise
+to ask twice, and verify the values matching.
+
+```
+password = Sys.readPassword("Enter password")
+password2 = Sys.readPassword("Enter password (again)")
+error(password != password2, "No match")
+```
+
+## Ask for missing function parameter
+
+The optional default value part to the P() expression for grabbing parameters to
 functions, can be used to produce functions that ask for missing values.
 
 ```
@@ -1237,9 +1254,7 @@ P(1,Input("Enter value").get) =>value ...
 ```
 
 
-
 ## Paste multiple lines
-
 
 If you've got some text in the copy-paste buffer that you want to work with, the
 readLines() global functions can be used. It takes one parameter, which is an end-marker, which must
@@ -1272,6 +1287,10 @@ a name, now  for it, which when run, reproduces the list of lines that were past
 ```
 println("a")
 println("a",a,"b=",b)
+
+print("a")
+print("a",a,"b=",b)
+
 ```
 
 
@@ -1502,10 +1521,15 @@ The functions for running external programs are part of the Dir object, which de
 working directory for the program.
 
 ```
+# Built-in functions via Dir object
 Dir.run ( list|...)
 Dir.runCapture ( list | ...)
 Dir.runDetach ( list|...)
 Dir.runProcess ( stdinFile, stdoutFile, stdErrFile, list|... )
+
+# Lib script functions
+Lib:runProcess(...)
+Lib:run(...)
 ```
 
 The parameters written as "list|..." means either a List object, or a list of
@@ -1773,7 +1797,8 @@ P(1) as ("String int".split)?    # String, int or null
 ### Dict (type) names
 
 
-The Dict object has an optional name property, either set at creation by Dict("something") or via Dict.setName("something").
+The Dict object has an optional name property, either set at creation by Dict("something") or via Dict.setName("something"), and
+is also the way *classes* are implemented in CFT, containing the class name.
 
 This name can be filtered in the "as" expression, prefixing the type identifier or type expression inside ()'s with
 an & (ampersand) as follows:
@@ -1864,14 +1889,14 @@ a={3 as int}
 ## Creating code from values
 
 
-The *syntesis* functionality comes in three variants. Two of them are "colon commands".
+The *syntesis* functionality comes in the following variants. 
 
 
 
-1. The :syn command syntesizes code from the last result.
+1. The :syn command syntesizes code from the last result
 2. The :NN  (where NN is an integer) syntesizes the indicated element of the last result list. If
 last result is not a list, you get an error.
-3. The global function "syn()" 
+3. The global function syn() 
 
 
 ## Example using :syn
@@ -2242,7 +2267,7 @@ directly into the script code.
 
 
 
-# ---- The CFT database (Db2)
+# ---- The CFT datastore (Db2)
 
 
 CFT implements its own primitive database, as found in Std.Db.Db2, and which is usually
@@ -2295,7 +2320,18 @@ Db2:Set(Sys.scriptId,"someValue",data)
 Std.Db.releaseLock("Unique lock name")
 ```
 
+## The Vault
 
+The Vault is a script which handles session secrets, encrypting them with Sys.secureSessionId.
+
+```
+Vault:SessionSecretGet("That password")
+```
+
+The first time, you will be asked to enter the password twice (no echo). The next time you call this
+function with the same label, the password will be returned. 
+
+Restarting CFT invalidates the old session, and you must enter the password again once. 
 
 
 # ---- Error handling
