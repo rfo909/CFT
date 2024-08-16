@@ -4,6 +4,8 @@
 
 CFT ("Configtool") is an interpreted script language, and an interactive command shell. 
 
+It is written 100% in Java, and so can be compiled on both Windows and Linux.
+
 The aim is to provide a
 rich library of functions and objects, to easily automate tasks involving directories and files, 
 be it collecting logs, searching source code or creating and deploying templated configuration
@@ -12,14 +14,12 @@ files.
 Solving automation issues is done by a combination of programming in the CFT language, and running external
 programs. There are different ways of running external programs, and display or collect their output.
 
+
 Code can ask the user for input, as well as present results.
 
-# Two major aspects
+# Daily use
 
-There are two major aspects to CFT: 
-
-- use as interactive shell
-- writing code, creating *scripts* (collections of functions)
+CFT is an interactive shell, which is extended with functions collected into *script files*.
 
 When entering commands at the CFT prompt, these fall into one of the *three* following categories:
 
@@ -82,7 +82,7 @@ and "cd", which maintains the CFT *current directory*.
 ### (2) CFT code
 
 Entering CFT code on the command line is usually to *call a function* in the current script,
-or in another script, but it also allows us to create functions. Example:
+or in another script, but it also allows us to create simple functions. Example:
 
 ```
 Date(Dir.newestFile.lastModified)
@@ -282,8 +282,6 @@ Util:ShowDict(Sys.environment)
 This produces a list of all environment values, nicely formatted into columns. To access and use a value, as long
 as the value name is a valid identifier, we say:
 
-# to use a value
-
 ```
 Sys.environment.Path
 ```
@@ -349,22 +347,6 @@ The syntax for getting information about functions also differs:
 Std.Math help    ## List functions inside the Std.Math *object*
 ```
 
-# Code stats
-
-The CodeStats script contains a function 'main' which filters through the code and
-presents a summary:
-
-```
-CodeStats:main
-
-Script code:      21165 lines
-Java code:        36898 lines
-Functions:        549
-Shell commands:   22
-Object types:     74
-Value types:      13
-```
-
 
 
 
@@ -419,10 +401,10 @@ _Shell
 
 - daily shell for working with files and directories
 - check out + run build + distribute files + cleanup
+- manager docker
 - search project trees
 - collect and search log files 
 - generate configuration files on various formats
-- install, deployment, restart, cleanup tasks
 - automate powershell command sequences
 
 
