@@ -1246,13 +1246,12 @@ run(null,null,null,true)
     data=Db2:Get(Sys.scriptId,"CommandHistory",List).last(40)
 
     Lib:Header("Command history")
-    pos=0
     Inner {
         data->dict
-            report(pos,dict.command.replace("^t".unEsc," <TAB> "), dict.currDir)
-            pos=pos+1
-        | ->line
-            println(line)
+            report(dict.command.replace("^t".unEsc," <TAB> "), dict.currDir)
+        | _=>lines
+		
+		Lib:ShowRows(lines)->line println(line)
     }
     readLine("Enter index, or Enter to continue") => s
     if (s != "") {
@@ -1266,7 +1265,7 @@ run(null,null,null,true)
             # That does not affect the caller, because each script has 
             # their own current dir
 
-            # Solution:
+            # Solution: using Sys.stdin() 
 
             Db2:Set("Lib","GetCommandHistory:GotoDir", Dir(dict.currDir))
             Sys.stdin('Db2:Get("Lib","GetCommandHistory:GotoDir").cd')
