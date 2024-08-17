@@ -1,7 +1,7 @@
 
 # CFT ("ConfigTool") introduction
 
-Last updated: 2024-07-20 RFO
+Last updated: 2024-08-17 RFO
 
 v4.2.1
 
@@ -695,19 +695,7 @@ The Util script has a function to display a dictionary in a readable way. Exampl
 ```
 
 
-# Debugging
-
-## Breakpoints
-
-CFT has a statement to set break points, which pauses execution and presents whatever information
-we want, letting us press Enter to continue.
-
-		setBreakPoint("a=" + a)
-
-
-# Various
-
-## Dates
+# Dates
 
 The "Date" global function returns a Date object representing the current date. It can in turn
 be modified, by parsing a string, or via a millisecond setting.
@@ -722,7 +710,7 @@ The Date object parsing and presentation is controlled by a Java SimpleDateForma
 Date.getFormat
 ```
 
-### Date calculations
+## Date calculations
 
 The Date object contains a function "Duration", which returns a Date.Duration object.
 
@@ -737,52 +725,8 @@ Date.sub(Date.Duration.days(7))
 ```
 
 
-## The Std object
 
-The Std object, which is created with global function "Std", functions as a name space for java library
-functions, via other objects, such as Math, Db2 and others. For some of the functionality, there will
-exist CFT code under code.examples. 
-
-To search all the script code, use the @S shortcut. It asks what to search for, and a file pattern. Example:
-
-(The "[pc01] /home/roar..." string is the prompt.
-
-```
-[pc01] /home/roar/CFT/doc
-cd
-  <obj: Dir>
-  CFT/
-  # /home/roar/CFT
-
-[pc01] /home/roar/CFT
-@S
-(?) Search term
-Db2.
-(?) Search files: enter partial file name, or glob pattern with '*'
-savefile*
-(?) Include sub-dirs y/n
-    Enter for 'y'
-
-y
-
-  <List>
-   0: savefileDb2Obj.txt | 39  |     Std.Db.Db2.collections.sort->name
-   1: savefileDb2.txt    | 65  |     Std.Db.Db2.set(collection,key,value)
-   2: savefileDb2.txt    | 76  |     value=Std.Db.Db2.get(collection,key)
-   3: savefileDb2.txt    | 103 |     Std.Db.Db2.keys(collection)
-   4: savefileDb2.txt    | 110 |     Std.Db.Db2.collections.sort->name
-   5: savefileDb2.txt    | 120 |     Std.Db.Db2.deleteCollection(collection)
-```
-
-This shows us there is a CFT script called "Db2", which we can now load and examine.
-
-```
-:load Db2
-@e
-```
-
-
-## The Sys object
+# The Sys object
 
 The global function "Sys" returns the Sys object, which contains various system related
 functions, such as detecting if running on Windows or Linux, etc
@@ -791,23 +735,91 @@ functions, such as detecting if running on Windows or Linux, etc
 Sys help
 ```
 
-### Environment variables
+## Environment variables
 
 ```
 Util:ShowDict(Sys.environment)
 ```
 
-### CFT start directory
+## CFT start directory
 
 ```
 Sys.homeDir
 ```
 
-### Current script file
+## Current script file
 
 ```
 Sys.savefile
 ```
+
+# The Projects script
+
+This is a library script for searching source code across multiple directories, for multiple file types, and
+multiple projects. 
+
+To use, either load the Projects script manually, or use the shortcut
+
+```
+@P
+```
+
+The first time the Projects script is loaded, it creates an initial projects file, with
+a single project, called "CFT Java". It asks to select project, and to do this, enter
+either the full name, or part of it.
+
+## Adding projects
+
+All project definitions are found in a single file, which is stored under the "private"
+directory under CFT. To add projects, run the following script function:
+
+```
+EditConfig
+```
+
+This opens the configuration file in an editor. The file contains an extensive comment block
+detailing how to add project definitions. 
+
+After saving the configuration file, we can change the current project
+
+```
+ch
+```
+
+This is the change command. It displays the list of defined projects, and lets us
+select one.
+
+The most used function in the Projects script is "S", which searches for a simple string.
+
+
+## Separate windows
+
+To search different projects at the same time, run CFT in two terminal windows. Each remembers
+its own current project. 
+
+
+# The Investigate script
+
+This is for investigating and taking notes, and is usually invoked with a shortcut
+
+```
+@ii
+```
+
+It produces a simple loop where one enter text, or paste text. 
+
+It is a very simple script, and the files are stored under the "investigate.d" directory under CFT
+home dir.
+
+## @id shortcut
+
+To log data from previous command into the current investigation topic, we use the @id shortcut. If
+the previous result is a list, we can choose one element, or the whole list. 
+
+## @ic shortcut
+
+Displays the current investigation log ("investigation cat").
+
 
 
 # Reference

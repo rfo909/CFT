@@ -89,12 +89,18 @@
   |  Paste multiple lines
 * ---- Output to screen
 * ---- Produce columns with report()
+  |  Hidden columns
+        Example
+        Interactive use
+        Function reuse
 * ---- ANSI escape codes
+  |  Enable/disable
 * ---- Sys.stdin()
   |  Running colon commands from script code
 * ---- The "protect" mechanism
 * ---- The error() global function
 * ---- The onLoad function
+* ---- The StateString function
 * ---- Function parameters ...
   |  Get parameters as List
   |  Get parameters as Dict
@@ -119,6 +125,7 @@
         Dict (type) names
         Closures and Lambdas
   |  Note: "as XXX" is separate expression
+        What about ... ?
 * ---- Synthesis
   |  Creating code from values
   |  Example using :syn

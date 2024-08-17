@@ -24,20 +24,31 @@
 XML parser written in CFT.
 --------------------------
 
-2022-04-13 Somewhat stable, good enough for now. Parses and pretty-prints
-XML nodes. Rewritten using a single class (XMLNode), after introducing classes
-in v3.3.2
+To parse an XML document, use the Parse function. It expects a single string or a list of strings.
+To read from a file, just do
+
+	rootNode = XML:Parse(SomeFile.read).first
+
+Note that this returns a list of XML objects, so usually we add a ".first" to get the first (and
+usually only) XML object.
 
 
-2023-08-14 
-----------
-Extended identifiers to allow both a:b:c and a.b.c, in order to process POM files etc.
+To traverse an XML structure:
 
-Also made sure that we don't fail on partial terminators, like <!-- ... --> containing
-strings "-" or "--", or <? ... ?> containing "?"
+	someNode.attrGet("attrName")
+	someNode.subNodes("tagName")    # returs list of &XMLNode objects with tag name
+	someNode.subNode("tagName")     # first subnode with given tag
+	someNode.getText                # get list of String from content inside node
+	someNode.getString("default")   # get first String content value
+	someNode.getContent             # get all content strings added together, separated by space
+	
+Pretty-printing
 
-Added a few utility functions to the XMLNode class, for easier dissect of XML document
-structures. See Maven:CreateSummary for example of traversing tree.
+	someNode.PP           # returns List of strings properly formatted
+	
+Export as string
+
+	someNode.export       # return single string for XML structure
 
 >>>> EOF
 /Readme

@@ -42,14 +42,16 @@
   |  Script functions
   |  CFT Internals
 * Dictionaries
-* Debugging
-  |  Breakpoints
-* Various
-  |  Dates
-        Date calculations
-  |  The Std object
-  |  The Sys object
-        Environment variables
-        CFT start directory
-        Current script file
+* Dates
+  |  Date calculations
+* The Sys object
+  |  Environment variables
+  |  CFT start directory
+  |  Current script file
+* The Projects script
+  |  Adding projects
+  |  Separate windows
+* The Investigate script
+  |  @id shortcut
+  |  @ic shortcut
 * Reference
