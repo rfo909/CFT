@@ -3135,7 +3135,9 @@ Show available data and functions for the XMLNode object:
 XML:Show
 ```
 
+## XML:Readme
 
+The XML script has a Readme function which details traversal of XML documents, after Parse().
 
 
 

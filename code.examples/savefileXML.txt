@@ -42,7 +42,21 @@ To traverse an XML structure:
 	someNode.getString("default")   # get first String content value
 	someNode.getContent             # get all content strings added together, separated by space
 	
-Pretty-printing
+To create an XML structure from scratch:
+
+	See test function constructedObject
+	To see the result from this function, type
+	
+		constructedObject.PP
+	
+	To see full details on the XML structure, type
+	
+		JSON:PP(constructedObject)
+		
+	The JSON pretty-printer displays the whole dictionary data structure
+	
+	
+Pretty-printing 
 
 	someNode.PP           # returns List of strings properly formatted
 	
@@ -516,14 +530,8 @@ exampleXML
 /class XMLNode
 
 
-# Show XMLNode content
-# --
-    Util:ShowDict(XMLNode("ROOT"))
-/Show
-
 
 # Pretty-print is implemented inside XMLNode
-# Example: PP(Parse.first)
 # --
 	P(1) as &XMLNode => node
 	node.PP
@@ -538,9 +546,6 @@ exampleXML
     P(1)=>s
     Util:UnescapeXMLString(s)
 //UnescapeXMLString
-
-
-
 
 
 
@@ -588,7 +593,7 @@ exampleXML
 /t4
 
 
-# Parse constructedObject.PP and PP it
+# Parse the pretty-printed version of constructedObject, and pretty-print it
 # --
     Parse(constructedObject.PP).first.PP
 /t4b
@@ -617,7 +622,7 @@ exampleXML
 # Lookup test
 # --
     node=Parse(exampleXML).first
-    node.subNodes("item").first.subNodes("title").first.content.first => str
+    node.subNodes("content:item:details").first.subNode("title").content.first => str
     str.trim=="Donald Duck & Co"
 //test02
 

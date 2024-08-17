@@ -133,19 +133,19 @@ c
 # Testing XML parser
 # --
     XML:test01
-/Paused_Test12_XML_test01_parse_pp_output
+/Test12_XML_test01_parse_pp_output
     
 
 # Testing XML parser
 # --
     XML:test02
-/Paused_Test13_XML_test02_lookup_test1
+/Test13_XML_test02_lookup_test1
     
 
 # Testing XML parser
 # --
     XML:test03
-/Paused_Test14_XML_test03_lookup_test2
+/Test14_XML_test03_lookup_test2
     
 
 

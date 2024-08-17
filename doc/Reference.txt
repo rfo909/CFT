@@ -176,6 +176,7 @@
   |  Parsing XML
   |  Creating structure with code
   |  Looking up content
+  |  XML:Readme
 * ---- Passwords, encryption, binary data
   |  Binary type
   |  Passwords
