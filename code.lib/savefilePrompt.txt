@@ -199,7 +199,5 @@
     if (!Curses:Enabled) {
         newline=Sys.newline
     }
-    # Position of prompt at bottom of terminal
-    gotoLine=if(!Sys.isWindows, Curses:CurGoto(0,Term.h), "")
-    newline + gotoLine + color + parts.concat(" ") + Curses:Reset
+    newline + color + parts.concat(" ") + Curses:Reset
 /PromptString

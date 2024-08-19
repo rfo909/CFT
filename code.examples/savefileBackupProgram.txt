@@ -141,7 +141,8 @@ as it contains generated content.
 # Run full backup
 # --
     P(1,Dir) => rootDir
-    P(2,"Backup"+"_"+rootDir.name) => backupName
+	host=Prompt:GetHostName.before(".")
+    P(2,"Backup"+"_"+rootDir.name + "_" + host) => backupName
     
     Lib:Header("Target directory")
     println(TargetDir.path)
