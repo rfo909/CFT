@@ -282,7 +282,12 @@ loop
 	isRow=false
 	if (getType(res)=="List") {
 		isRow=true
-		Inner{res->x if(getType(x)!="Row") {isRow=false break } }
+		Inner{
+			res->x 
+			if(getType(x)!="Row") {
+				isRow=false break 
+			} 
+		}
 		if (isRow) {
 			res=Lib:ShowRows(res)
 		}
