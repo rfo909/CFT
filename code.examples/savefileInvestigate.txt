@@ -278,6 +278,18 @@ loop
         if(num.?parseInt) {res.nth(num.parseInt) =>res}
     }
 
+	# if list of Sys.Row, create nice formatting
+	isRow=false
+	if (getType(res)=="List") {
+		isRow=true
+		Inner{res->x if(getType(x)!="Row") {isRow=false break } }
+		if (isRow) {
+			res=Lib:ShowRows(res)
+		}
+
+	}
+		
+
     List =>list
     list.add("```")      # Markdown
     res->x 
@@ -326,7 +338,10 @@ loop
 # Show lines 
 # --
     LogFile.read.last(500)->line 
-		if (line.trim=="") println else Lib:ShowText(line,false)
+		if (line.trim=="" || line.contains("  ") || line.contains("|")) 
+			println(line) 
+		else 
+			Lib:ShowText(line,false)
     |
     println
 /Show
