@@ -72,16 +72,20 @@ edit
 
 ## The "::"
 
-Sometimes we have a function that returned perhaps a single string or file or directory, that
+Sometimes we have a function that returned perhaps a single string or file or directory, or a list that
 we in turn want to do something with, without the :N *lookup-in-list* syntax. For this
 purpose, the *::* (double colon) is defined.
 
 ```
 "xxx"
-::+"yyy"   # gives xxxyyy
+::+"yyy" 
 
-Dir.dirs.first
+
+FunctionThatReturnsDirObject
 cd ::
+
+# can also do
+FunctionThatReturnsDirObject.cd
 ```
 
 ## Colon commands and shortcuts

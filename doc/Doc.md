@@ -148,8 +148,9 @@ Prompt:SetPathColor
 
 ## Disabling Curses
 
-In windows some command windows struggle with ANSI escape codes formatting after running external programs
-like git, messing up the display. If this happens, just disable use of these, with:
+In Windows some command windows struggle with ANSI escape codes formatting after running external programs
+like git, messing up the display. If this happens, the short term solution is restarting CFT. If it is
+too annoying, Curses can be disabled::
 
 ```
 Curses:Disable
@@ -649,7 +650,7 @@ From this we see that the "int" objects have a function .bin():
   00001101
 ```
 
-## Script functions
+## Show script functions
 
 The obvious way of listing the functions inside a script, is to load it, then type '?'.
 
@@ -664,13 +665,13 @@ This gives the usual list of functions. To see the code of a function inside Lib
 type:
 
 ```
-?Lib:LocateFiles
+?Lib:Confirm
 ```
 
 To run this function:
 
 ```
-Lib:LocateFiles
+Lib:Confirm
 ```
 
 ## CFT Internals
@@ -729,7 +730,7 @@ Date.getFormat
 
 ## Date calculations
 
-The Date object contains a function "Duration", which returns a Date.Duration object.
+The Date object contains a function "Duration", which returns a Duration object.
 
 ```
 Date.Duration help

@@ -1,0 +1,12 @@
+TODO
+----
+
+- Make terminal program configurable (@cmd)
+
+- Make file manager program configurable (@fm)
+
+- Create support for additional configuration file that modifies and adds to the
+  default CFT.props, and which is not checked in, to avoid overwriting local 
+  settings on git pull
+
+
