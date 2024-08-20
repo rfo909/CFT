@@ -29,6 +29,7 @@ import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueInt;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
+import rf.configtool.main.runtime.ValueBoolean;
 import rf.configtool.main.runtime.ValueList;
 
 import rf.configtool.util.DateTimeDurationFormatter;
@@ -49,6 +50,7 @@ public class ObjRow extends Obj implements IsSynthesizable {
         add(new FunctionShow());
         add(new FunctionAsStringsRow());
         add(new FunctionAsList());
+        add(new FunctionContains());
     }
 
     public ObjRow () {
@@ -200,6 +202,34 @@ public class ObjRow extends Obj implements IsSynthesizable {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             return new ValueList(rowData);
+        }
+    }
+
+
+
+    class FunctionContains extends Function {
+        public String getName() {
+            return "contains";
+        }
+        public String getShortDesc() {
+            return "contains(String) - checks against printable columns, returns boolean";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected search string parameter");
+            String str = getString("String", params, 0);
+
+            for (Value v : rowData) {
+                String type;
+                if (v instanceof ValueObj) {
+                    type = ((ValueObj) v).getVal().getTypeName();
+                } else {
+                    type = v.getTypeName();
+                }
+                if (reportTypes.contains("|" + type + "|")) {
+                    if (v.getValAsString().contains(str)) return new ValueBoolean(true);
+                }
+            }
+            return new ValueBoolean(false);
         }
     }
 
