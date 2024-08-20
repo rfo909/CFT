@@ -37,7 +37,7 @@ public class ObjAValue extends Obj implements IsSynthesizable {
     public ObjAValue (String annotation, Value value, ObjDict metadata) {
         this.annotation=annotation;
         this.value=value;
-        if (metadata==null) metadata=new ObjDict();
+        //if (metadata==null) metadata=new ObjDict();  -- to costly if used in great numbers, modify .meta function instead
         this.metadata=metadata;
         
         this.add(new FunctionA());
@@ -67,7 +67,13 @@ public class ObjAValue extends Obj implements IsSynthesizable {
     
     @Override
     public String createCode() throws Exception {
-        return "AValue(" + (new ValueString(annotation)).synthesize() + ","+value.synthesize()+","+metadata.synthesize() + ")";
+        String str = "AValue(" + (new ValueString(annotation)).synthesize()
+                + ","+value.synthesize();
+        if (metadata != null) {
+            return str + "," + metadata.synthesize() + ")";
+        } else {
+            return str + ")";
+        }
     }
     
    
@@ -107,6 +113,8 @@ public class ObjAValue extends Obj implements IsSynthesizable {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
+            // creating empty dictionary on demand, if no dictionary given initially
+            if (metadata==null) metadata = new ObjDict();
             return new ValueObj(metadata);
         }
     } 

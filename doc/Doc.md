@@ -1,9 +1,9 @@
 
 # CFT ("ConfigTool") introduction
 
-Last updated: 2024-08-17 RFO
+Last updated: 2024-08-20 RFO
 
-v4.2.1
+v4.2.3
 
 
 
@@ -29,29 +29,46 @@ the CFT code parser works with tokens, not lines (for the most part).
 
 ## List of commands
 
-- ls | lsf | lsd
-- cd
-- cat
-- more
-- edit
-- tail
-- mkdir
-- rm
-- cp
-- mv
-- touch
-- diff
-- showtree
-- hash
-- hex
-- shell
-
-The "ls" command comes in two additional versions:
+Run global function to list the shell-like commands that are implemented in CFT (written in Java):
 
 ```
-lsf   # lists files
-lsd   # lists directories
+_Shell
+
+  # CFT shell-like (interactive) commands
+  # -------------------------------------
+  #
+  #   <TAB> ... - run operating system command or program
+  #   shell - run bash or powershell
+  #   ls ...
+  #   lsd ...
+  #   lsf ...
+  #   cd <dir>?
+  #   pwd
+  #   cat <file>?
+  #   edit <file>?
+  #   more <file>?
+  #   tail <file>?
+  #   touch <file> ...
+  #   cp <src> ... <target>
+  #   rm <file/dir> ...
+  #   mv <src> ... <target>
+  #   mkdir <name>
+  #   grep <word|str> <file|list> ... - ex: grep test *.txt
+  #   diff <file1> <file2>
+  #   showtree <dir>?
+  #   hash <file> ...
+  #   hex <file>?
+  #   which <command>
+  #
+  #   & <expr>                  - run expression as background job
+  #
+  #   lsd                       - lists directories only
+  #   lsf                       - lists files only
+  #
+  #   edit                      - open a file in editor    
+    :
 ```
+
 
 The syntax for these commands correspond to how they are used in Linux/Unix (where existing), minus flags,
 but with support for globbing, relative and absolue paths, on windows and Linux.

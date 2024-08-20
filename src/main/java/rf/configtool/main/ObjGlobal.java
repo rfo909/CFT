@@ -878,7 +878,6 @@ public class ObjGlobal extends Obj {
                         throw new Exception("Expected parameters typeStr,value,metaDict?");
                     }
                 }
-                if (dict==null) dict=new ObjDict();
                 return new ValueObj(new ObjAValue(str,v,dict));
             }
             throw new Exception("Expected parameters typeStr,value,metaDict?");
@@ -1107,12 +1106,12 @@ public class ObjGlobal extends Obj {
         };
         private String[] data2={
                 "",
-                "- & <expr>                  - run expression as background job",
+                "  & <expr>                  - run expression as background job",
                 "",
-                "- lsd                       - lists directories only",
-                "- lsf                       - lists files only",
+                "  lsd                       - lists directories only",
+                "  lsf                       - lists files only",
                 "",
-                "- edit                      - open a file in editor",
+                "  edit                      - open a file in editor",
                 "",
                 "Note that the cat/edit/more/tail commands, if given no file argument,",
                 "will attempt working with with Sys.lastResult. Example:",

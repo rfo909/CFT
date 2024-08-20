@@ -1200,16 +1200,33 @@ run(null,null,null,true)
 
 
 # Search through a list of files
-# Called by mGrep in CFT.props
+# Called by mGrep in CFT.props, see also ShellGrep.java 
 # --
     P(1) => str
-    P(2) => fileList
+    P(2) => data
     
     grep=Grep(str)
-    fileList->file
-        grep.file(file)->line
-            report(line.file.name, line.lineNumber, line)
-//GrepFiles
+
+	data -> element
+		if (getType(element)=="File") {
+			grep.file(element)->line
+				report(element, line.file.name, line.lineNumber, line)
+		} else {
+			list=element
+			if (getType(list) != "List") list=List(list)
+
+			list -> element
+				if (getType(element)=="File") {
+					grep.file(element)->line report(element, line.file.name, line.lineNumber, line)
+				} else {
+					line=""+element
+					if(grep.line(line)) {
+						report(line)
+					}
+				}
+		}
+			
+//InteractiveGrep
 
 
 

@@ -24,14 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import rf.configtool.main.Ctx;
-import rf.configtool.main.runtime.ColList;
-import rf.configtool.main.runtime.Function;
-import rf.configtool.main.runtime.Obj;
-import rf.configtool.main.runtime.Value;
-import rf.configtool.main.runtime.ValueBoolean;
-import rf.configtool.main.runtime.ValueInt;
-import rf.configtool.main.runtime.ValueList;
-import rf.configtool.main.runtime.ValueObj;
+import rf.configtool.main.runtime.*;
 import rf.configtool.util.TabUtil;
 
 
@@ -183,7 +176,7 @@ public class ObjGrep extends Obj {
             return "file";
         }
         public String getShortDesc() {
-            return "file(File) - search file for lines which match the Grep object";
+            return "file(File) - search file for lines which match the Grep object, returns list of FileLine";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 1 || !(params.get(0) instanceof ValueObj)) {
@@ -363,7 +356,7 @@ public class ObjGrep extends Obj {
             return "line";
         }
         public String getShortDesc() {
-            return "line(str) - return true or false";
+            return "line(str) - returns true or false if the Grep object matches the given line";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 1) throw new Exception("Expected parameter str");
@@ -371,6 +364,7 @@ public class ObjGrep extends Obj {
             return new ValueBoolean(keepLine(str));
         }
     }
+
 
 
 }

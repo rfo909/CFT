@@ -1,9 +1,9 @@
 
 # CFT Reference
 
-Last updated: 2024-08-16 RFO
+Last updated: 2024-08-20 RFO
 
-v4.2.2
+v4.2.3
 
 
 # ---- Using CFT as a shell
@@ -1013,6 +1013,54 @@ this
 is
 a test
 ```
+
+
+
+# ---- Searching - Grep
+
+## Global function Grep()
+
+CFT has a global function Grep() which creates a Grep object. It in turn has member functions for
+adding search criteria, as string or regex. 
+
+Mostly we don't use the Grep object directly. Instead it is used in script code, particularly the
+@S shortcut to perform ad-hoc search of all files under current directory (recursive), and the @P (Projects)
+shortcut, which uses Grep to look through files of multiple types across multiple directories, for
+different projects. 
+
+## As shell command
+
+The CFT shell also implements a command line version. Running the global helper function that lists
+out these commands, we get:
+
+```
+_Shell
+ 
+   : 
+   :
+ #   grep <word|str> <file|list> ... - ex: grep test *.txt
+   :
+```
+
+This command is used to search for a simple string in files, but can also be employed to filter output
+from commands, or output from any function, using the regular functionality as for the other shell-like
+commands.
+
+```
+grep test savefile*
+	# (produces listing)
+grep Spawn ::
+	# (narrows list down to matches with the string Spawn)
+
+
+grep test (Sys.homeDir.files("savefile*"))
+```
+
+The implementation of the shell command "grep", is actually done in CFT, using the Grep() object.
+
+It starts with ShellGrep.java which retrieves the mGrep value from CFT.props, which points at
+the Lib:InteractiveGrep function, which handles the logic, using the Grep system object.
+
 
 
 

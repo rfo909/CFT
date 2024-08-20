@@ -39,7 +39,7 @@ public class ShellGrep extends ShellCommand {
     }
     @Override 
     public String getBriefExampleParams() {
-        return "<word|str> <file> ... - ex: grep test *.txt";
+        return "<word|str> <file|list> ... - ex: grep test *.txt";
     }
     
 
@@ -53,33 +53,41 @@ public class ShellGrep extends ShellCommand {
         if (args.size() < 2) throw new Exception(name + ": expected pattern, file ...");
         
         Arg str=args.get(0);
-        if (str.isExpr()) throw new Exception(name + ": invalid pattern");
+        String searchString;
+        if (str.isExpr()) {
+            searchString=str.resolveExpr(ctx).getValAsString();
+        } else {
+            searchString=str.getString();
+        }
         
-        FileSet fs=new FileSet(name,false,true);  // files only
-        fs.setIsSafeOperation();
 
+        List<Value> data=new ArrayList<Value>();
         for (int i=1; i<args.size(); i++) {
             Arg arg=args.get(i);
-            fs.processArg(currentDir, ctx, arg);
+            if (arg.isExpr()) {
+                data.add(arg.resolveExpr(ctx));
+            } else {
+                FileSet fs = new FileSet(name, false, true);  // files only
+                fs.setIsSafeOperation();
+                fs.processArg(currentDir, ctx, arg);
+
+                List<String> files = fs.getFiles();
+                for (String f : files) {
+                    data.add(new ValueObj(new ObjFile(f, Protection.NoProtection)));
+                }
+            }
         }
-        
-        List<String> files=fs.getFiles();
-        if (files.size()==0) throw new Exception("Expected one or more files");
-        
-        List<Value> fileList=new ArrayList<Value>();
-        for (String f:files) {
-            fileList.add(new ValueObj(new ObjFile(f,Protection.NoProtection)));
-        }
-        
-        return callMacro(ctx, name, str.getString(), new ValueList(fileList) );
+
+        return callMacro( ctx, name, searchString, new ValueList(data) );
     }
 
      
-    private Value callMacro (Ctx ctx, String name, String strExpr, Value fileList) throws Exception {
+    private Value callMacro (Ctx ctx, String name, String strExpr, Value data) throws Exception {
 
         PropsFile propsFile=ctx.getObjGlobal().getRoot().getPropsFile();
         String lambda=propsFile.getMGrep();
-        Value[] lambdaArgs= {new ValueString(strExpr), fileList};
+
+        Value[] lambdaArgs= {new ValueString(strExpr), data};
 
         return callConfiguredLambda(name, ctx, lambda, lambdaArgs);
     }
