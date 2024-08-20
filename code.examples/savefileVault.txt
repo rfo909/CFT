@@ -124,7 +124,7 @@ passwords and other secrets for the duration of the session.
 
 
 
-# Create persistent secret, protected by password (session secret)
+# Create persistent secret, protected by password (remembered as session secret in each session)
 # Overwrites old value
 # --
     P(1, readLine("Persistent secret name")) as String => name
@@ -143,7 +143,7 @@ passwords and other secrets for the duration of the session.
 /CreatePersistentSecret
 
 
-# Get or create persistent secret, password protected (remembered as session secret)
+# Get or create persistent secret, password protected (remembered as session secret within each session)
 # --
     P(1, readLine("Persistent secret name")) as String => name
 

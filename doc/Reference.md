@@ -214,12 +214,12 @@ Default shells are configured in CFT.props.
 ### Force as external
 
 For commands that are confused with CFT script or shell-like commands, we can *force* them into running
-as external programs, by prefixing the line with a <TAB>, so that that what follows 
+as external programs, by prefixing the line with a TAB, so that that what follows 
 should be Linux or Powershell command. 
 
 ```
-ls          # CFT shell-command "ls"
-(TAB)ls         # Underlying OS "ls" command
+ls              # CFT shell-command "ls"
+<TAB>ls         # Underlying OS "ls" command
 ```
 
 ### Parameters
@@ -418,6 +418,9 @@ By default, ouput line wrapping is off, which means that lines longer than the T
 with a '+' to indicate there is more. It can be switched on/off via the Term object, but there is also a
 colon command ":wrap" which toggles wrapping on or off.
 
+```
+:wrap
+```
 
 
 # ---- Script files
@@ -774,7 +777,7 @@ To sort a list of files on their size, biggest first, we do the following:
 
 ```
 Dir.files->f
-	out(Int(f.lastModified,f))
+	out(Int(f.length,f))
 | _.sort.reverse->x
 	out(x.data)
 ```
@@ -810,7 +813,7 @@ item, and returns a modified value.
 
 Here, the lambda is used to convert strings to int values.
 
-## Removing items
+### Use Lambda to also remove some items
 
 
 To remove items from the list, we just let the Lambda return null.
@@ -2040,7 +2043,7 @@ Util:ShowDict(env)
 
 
 In many cases, we need to create helper functions, which should not be visible as part
-of the script interface, as seen from other scripts, or when just entering '?'.
+of the script interface, when entering '?'.
 
 This is done by defining the function as follows:
 
@@ -2059,10 +2062,14 @@ script from outside via the "?ScriptName:" functionality, the local functions ar
 also not displayed, while using "??ScriptName:" includes them.
 
 
-Also note, that "local" functions are not private in the Java sense, and are fulle callable
-from the outside. Marking functions as local is all about filtering what is shown on the
-single "?" command.
+```
+?Lib:                # hides helper functions
+??Lib:               # includes helper functions (and classes)
+```
 
+
+Also note, that "helper" functions are not really private in the Java sense, and are fulle callable
+from the outside. Marking functions as local is only about default visibility with the "?" command.
 
 
 
@@ -2204,14 +2211,14 @@ type checked. The outcome is the same in this case, but this distinction may cau
 a=(3 as int)
 ```
 
-The parser will fail here, complaining it expects right parantesis after 3, since it does not know how
+The parser will fail here, complaining it expects right paranthesis after 3, since it does not know how
 to process 
 
 ```
-a=(expr expr)
+(expr expr)
 ```
 
-To fix this, we remember that *blocks* in CFT are expressions, and they contain a sequence of statements,
+To fix this, remember that *blocks* in CFT are expressions, and they contain a sequence of statements,
 and finally that expressions are also statements.
 
 ```
@@ -2221,8 +2228,12 @@ a={3 as int}
 :-)
 
 
+It will always be easier using the second form of assignment:
 
 
+```
+3 as int => a
+```
 
 
 # ---- Synthesis
@@ -2298,6 +2309,14 @@ Assign to name by /xxx as usual
 
 If the last value was not a list, the ":NN" command will fail with an error.
 
+### Two different situations
+
+When entering :N at the very start of the command line, it means "synthesize N'th from previous list".
+
+When used *inside* a command, it instead just means "use the N'th value from the previous list". 
+
+
+
 ## Using syn()
 
 Synthesis is frequently employed in code, where we want to "serialize" data. To de-serialize 
@@ -2312,6 +2331,24 @@ syn(Dir.files)  # returns long string
 eval(s)    # returns the Dir.files list
 ```
 
+### The underscore function?
+
+Note that the underscore function ("_") only refers to the top-of-the-stack value inside code, not the value from the 
+previous interactive command. In other words:
+
+```
+syn(Dir.files)
+eval(_)
+ERROR: Invalid expression value
+```
+
+If used in the same command line, however, it will work as expected.
+
+```
+syn(Dir.files) eval(_)
+```
+
+:-)
 
 ## Clone any value
 
@@ -2510,7 +2547,7 @@ some text
 /myTemplate
 ```
 
-Calling the myTemplate function from the interactive shell, produces the following result
+Calling the myTemplate function from the command line, produces the following result
 
 ```
 myTemplate
@@ -2569,6 +2606,13 @@ DataFile(someFile,"###").comment("//")
 
 Now all lines starting with "//" are automatically stripped from any output.
 
+
+### Projects script
+
+The Projects script (shortcut @P) configuration file uses DataFile to locate the configuration
+for the current project.
+
+
 ## Sequence() and raw strings
 
 
@@ -2611,14 +2655,14 @@ directly into the script code.
 # ---- The CFT datastore (Db2)
 
 
-CFT implements its own primitive database, as found in Std.Db.Db2, and which is usually
-interfaced via the Db2 script.
+CFT implements its own primitive database, or more correctly, a data store. It is found in 
+Std.Db.Db2, but is usually interfaced via the Db2 script.
 
 ```
 Db2:Set("myCollection", "field", "test")
 ```
 
-The Db2 persists data to file, and handles all values that can be synthesized to code.
+The Db2 persists data to file, and handles all values that can be *synthesized* to code.
 
 
 Also there is a Db2Obj script, which saves data objects identified by UUID's, which are
@@ -2635,13 +2679,8 @@ Db2:Set(Sys.scriptId,"name","value")
 ```
 
 Sys.scriptId is better than Sys.scriptName, since there may be multiple scripts with the
-same name (in different directories).
+same name (in different directories). Plus it is faster to type.
 
-## Std.Db.Db2 vs Db2 script?
-
-
-The Db2 script uses the Std.Db.Db2 object. The difference is that an object is implemented
-in Java, while the script is code that runs in the interpreter. See separate section on "Objects vs Scripts".
 
 ## Synchronization
 
@@ -2649,9 +2688,8 @@ in Java, while the script is code that runs in the interpreter. See separate sec
 Calls to the Db2 database are thread safe, via a Db2 lock file per collection,
 to prevent parallel updates, or partial reads etc.
 
-
 In order to create transactions consisting of multiple Db2 calls, the Std.Db object
-contains support for named locks. Example:
+also has support for named locks. Example:
 
 ```
 Std.Db.obtainLock("Unique Lock Name",5000) ## 5000 = wait max 5 seconds before failing
@@ -2660,6 +2698,29 @@ Db2:Get(Sys.scriptId,"someValue") => data
 Db2:Set(Sys.scriptId,"someValue",data)
 Std.Db.releaseLock("Unique lock name")
 ```
+
+### Implementation
+
+The locks are implemented as a network daemon. It only applies to "localhost", and by
+occupying a single port number, only one can exist at a time. 
+
+The first CFT instance to need the lock deamon will find no response on the port, and
+go on to create the daemon. 
+
+Other CFT instances will find that daemon. 
+
+When the owner of the daemon terminates, the first that needs it, will create a new
+instance. Even if two CFT sessions try to create the daemon at the same time, only
+one will succeed, because the port number can only be used by a single process.
+
+The locks also handle multiple threads on a singe CFT instance / session, which are
+initiated in two ways:
+
+```
+& SomeJob                # from the command line
+SpawnProcess(....)       # from command line or code
+```
+
 
 ## The Vault
 
@@ -2850,36 +2911,80 @@ The "data" dictionary now is a simple object, which contains both a value and a 
 
 ## Calling lambda/closure
 
-Lambdas and Closures, when stored in a variable, are invoked with .call(...).
+Lambdas and Closures, when stored in variables, are invoked with .call(...).
+
+```
+data=Dict
+f=Lambda{println("called f")}
+f.call   # prints "called f" to the screen
+
+closure=Dict.bind(f)
+closure.call   # again prints "called f" 
+```
+
+### Dotted lookup from dictionary
 
 Obtaining a Closure from a dictionary with dotted notation, however, implies an automatic invocation,
-with or without parameters.
+with or without parameters, so no ".call()"
 
 ```
 data=Dict
 data.f=Lambda{println("called f")}
 data.f   # prints "called f" to the screen.
-
-# To get a reference to the closure, we use the .get() function of Dict
-data.get("f")    # returns Closure object without invoking it
 ```
 
+### Fun with closures
+
+A closure is a lambda associated with a dictionary. When storing a Lambda as a value inside a
+dictionary, it gets wrapped into a Closure, which provides the Lambda with a "self" reference
+which is that dictionary.
+
+To get a reference to the closure, for example to send it as parameter to a function, we must now 
+use the .get() function of Dict. 
+
+However, let is first assume there exists a function somewhere;
+
+```
+# someFunction
+# --
+	P(1) as Callable => f
+	f.call("xxx")
+/someFunction
+```
+ 
+It expects one parameter of type Callable. Both lambdas and closures are of type Callable, and both
+implement a .call(...) function, as we see  someFunction call above.
+
+Here is the caller code
+
+```
+data=Dict
+   _.set("name",null)
+data.f=Lambda{P(1)=>name self.name=name}
+someFunction(data.get("f"))
+
+println(data.name) # shows xxx
+```
+
+Here we create a dictionary, then stores a lambda into it, which converts (wraps) it into a closure.
+
+We then get a reference to the (now) closure, using data.get() and pass this as argument to the
+someFunction above, which calls the closure with the value "xxx". It gets stored into "self.name"
+of the dictionary via the closure dictionary pointer ("self"), and when someFunction has returned,
+and we print data.name, it is "xxx".
 
 
 # ---- Classes
 
 
 CFT supports primitive classes, which are really just dictionaries with closures for member functions,
-combined with the name attribute of all Dict objects, created by Dict(name) or Dict.setName(name), which we can check
+combined with the name attribute of Dict objects, created by Dict(name) or Dict.setName(name), which we can check
 for in the "as" type checks with &amp;name.
 
-Inheritance is supported using the Dict.copyFrom function, or any other means of copying
-data and lambdas from one Dict to another. as there is no "class definition", only a
-block of code (class function) that sets up the class object.
-
-
 Classes are functions, and are defined similarly to functions, by code followed by
-slash something. Defining a simple class MyClass:
+"/class" and then the class name. 
+
+Here we define a simple class MyClass:
 
 ```
 # my class
@@ -2888,19 +2993,20 @@ slash something. Defining a simple class MyClass:
 	self.x=x
 /class MyClass
 ```
-## Class object types
 
+## Class object types
 
 There is no differentiation between classes and objects. 
 
-A class function returns an object.
+A class is a function that returns the "self" dictionary object. Its name property is the class name.
+
 Inheritance is possible by some class function instantiating a class object of some other type,
 and incorporating elements from it into itself, possibly using the Dict.copyFrom(anotherDict)
 function, as the "self" object inside an object is a Dict.
 
-
 The OODemo script examplifies this, and also employs the second version of the /class line,
-where we supply the type explicitly.
+where we supply the type explicitly, so that different "class" functions, which must have different
+names, can return objects of the same "type". 
 
 ```
 # Common Val class
@@ -2918,37 +3024,39 @@ where we supply the type explicitly.
 /class ValInt as Val
 ```
 
+
+
 ## What a "/class" function does
 
-
-There is no problem creating dictionary objects without using /class functions.
+Example:
 
 ```
-# TypedContainer class (using /class)
+# TypedContainer class
 # --
-	P(1) as String => type
-	self.type=type
 	self.value=null
 	self.set=Lambda{
-		P(1) as (self.type) => value
+		P(1) as String => value
 		self.value=value
 	}
 /class TypedContainer
-
-# Create custom subclass of TypedContainer inside normal function (without using /class)
-# --
-	self=Dict("TypedContainer")
-	self.copyFrom(TypedContainer("int"))
-	self
-/IntContainer
-
-# Test it
-IntContainer.set("test")  # Fails with error, expects int
 ```
 
+Now we will create the same "class" manually:
 
+```
+# TypedContainer class as regular function
+# --
+	# create the self dictionary with the correct type
+	self=Dict("TypedContainer")
 
+	# same as above
+	self.value=null
+	self.set=Lambda{...}
 
+	# return the self dictionary ("class")
+	self
+/TypedContainer
+```
 
 
 # ---- Multitasking in CFT
@@ -2959,19 +3067,15 @@ CFT offers the ability to run multiple processes of CFT code, via the SpawnProce
 (The shell syntax "& expr" uses the same mechanism)
 
 
-It takes two or three parameters, a context dictionary and an expression, with
+The SpawnProcess expression takes two or three parameters, a context dictionary and an expression, with
 an optional lambda or closure, which if defined gets called with the Process object as parameter
 whenever there is new output or the process has terminated.
 
 
-The named values from the
-context dictionary become local variables when the expression is executed, which takes
-place in a separate process.
+```
+SpawnProcess(Dict,expr[,notificationLambda])
+```
 
-
-The code runs in a virtualized environment. Output is buffered inside the Process object, and
-if the code requires input, it will block, until we supply input lines via the Process
-object.
 
 ## Key concepts
 
@@ -3019,6 +3123,7 @@ Listing Process functions:
 
 ```
 SpawnProcess(Dict,1) help
+
 # close() - close stdin for process
 # data() - returns the (original) context dictionary
 # exitValue() - returns exit value or null if still running
@@ -3029,14 +3134,13 @@ SpawnProcess(Dict,1) help
 # wait() - wait for process to terminate - returns self
 ```
 
-## Flow control
+## Util:ProcessMonitor
 
-If the potential number of processes may become very big, we may need to limit
+If the potential number of processes may become very big, we will need to limit
 the number of running processes at any time. 
 
-This is done via a function in the Util script, that returns a dictionary
-*object* which we use as follows. It is a dictionary, from before when CFT
-had *classes*. 
+This is done via a function *ProcessMonitor* in the Util script. It returns
+an object similar to a class, except it was written before classes were formalized.
 
 The names "Lxxx" are used to help indicate that they contain lambdas (though 
 strictly they are converted to closures as they are stored in the dictionary).
@@ -3045,6 +3149,7 @@ strictly they are converted to closures as they are stored in the dictionary).
 # -- Create monitor, decide max parallel processes
 mon=Util:ProcessMonitor
 limit=4
+
 someData->data
 
 	# About to spawn new process using data
@@ -3063,11 +3168,7 @@ mon.list->process
 ```
 
 The mon.Lwait lambda waits until number of running processes comes below the limit,
-before returning.
-
-
-See separate sections on closures and objects.
-
+before returning. This way, no more than 4 processes will run at a time.
 
 
 
@@ -3762,28 +3863,37 @@ Dir.files
 /showFiles
 ```
 
-This stems back to the time of entering code line by line. Having to decide the name of a function before
-seeing how much functionality you got crammed into one line, or if it at all worked,
-made little sense. Instead you write some code
-that does something useful, then decides what to call it.
+Originally, the plan was to program one line at a time. This is the reason for the compact notation of
+the for-each, with the single arrow and loop variable. 
 
+Defining the function name *after* the code follows from that original intent, whereby entering a line,
+and only assign a (function) name to it after verifying that it works.
 
 An "advantage" of this is that functions don't need to be parsed when loading a script. Functions are
-defined as all lines of text since top of file or since last "/xxx" line. Now, searching for the first
-non-blank line of a function, to present in the "?" list of functions, and letting that be a comment,
-makes sense.
+defined as all lines of text since top of file or since last "/xxx" line. The first
+non-blank line of a function is the one presented when we type "?" to list script functions.
+
 
 While pondering how to integrate classes as top-level elements along with functions, I decided
-to keep the /something notation, because it lets the code dealing with both loading and saving
-source files deal with lines of text, not parsing.
+to keep the /something notation, because it lets the code deal with both loading and saving
+source files as just lines of text. 
 
+A more traditional way of defining functions would require the parser to check all code on load, in order
+to correctly match the terminating token, as in the example below, the curly right brace corresponding to
+the opening one at the top.
 
-The syntax with the slash and an identifier was inspired by PostScript.
+```
+def fn (...) {
+	...
+}
+```
 
+The current choice both saves time, by not having to parse code just to identify the different
+functions in a script, but allowing incomplete functions while developing code, is actually
+quite practical. It makes the language feel truly interpreted.
 
-I also am very pleased with parameter handling in CFT functions, so even if we were to move to
-a more mainstream notation, I would want to keep the P() function and now also the "as" type
-checks.
+By the way: the syntax with the slash and an identifier was inspired by PostScript.
+
 
 ## Using Sys.stdin to run colon commands etc
 
@@ -3796,39 +3906,25 @@ by those interactive functions.
 ## Code spaces / the "pipe"
 
 
-This stems from the "one-line-at-a-time" period, where scripts were entered from
-the command line, at a time long before introducing block expressions. Being a fairly compact
+This stems from the "one-line-at-a-time" initial intent, where scripts were entered from
+the command line. This was long before introducing block expressions. Being a fairly compact
 and efficient notation, and frequently used, code spaces and the "pipe" symbol will
 remain in the language.
 
-
-The nice thing with the PIPE is that it is global within the function body, but this
+The nice thing about the PIPE is that it is global within the function body, but this
 may also be a weakness when one is used to nesting stuff with braces, like in Java.
 
-## Code spaces vs Inner blocks
-
-
-Code spaces were invented long before any blocks. Splitting the function body into
-spaces with the PIPE is enough for most tasks.
-
+### Code blocks (local / Inner and Lambda)
 
 The need for code blocks only really arised after the "if" was added. The first implementation
 shared the "local" block syntax, but functionally worked like an "Inner" block.
 
-
 It took a while back and forth deciding we needed two different non-lambda block expressions,
 and defining them in terms of code spaces.
 
-
 The Inner blocks should possibly have a better name. I have considered many, but not
-decided on one that gives a more intuitive feel.
+decided on one that gives a more intuitive feel. 
 
-```
-# Any of these?
-do {...}
-Compute {...}
-sub {...}
-```
 
 # ---- Script and code size
 

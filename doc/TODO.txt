@@ -10,3 +10,6 @@ TODO
   settings on git pull
 
 
+
+- better terminal I/O handling, like not losing control over the UI if
+  running a command like "top" in the background ... 
