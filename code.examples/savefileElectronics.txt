@@ -1,0 +1,13 @@
+# Calculate duration that a capacitor can power someting
+# given an acceptable voltage drop, capacitance and load
+# --
+	P(1,Input("Capacitance in millifarads").get.parseFloat) =>mF
+	P(2,Input("Load in milliamps").get.parseFloat) => mA
+	P(3,Input("Allowed voltage drop in volts").get.parseFloat) => dV
+
+	ms = 1000 * mF * (dV/mA)
+	
+	Date.Duration.millis(ms.i)
+/CapSupply
+
+
