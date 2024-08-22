@@ -39,7 +39,7 @@
   |  Global functions
   |  Object member functions
         All values are objects
-  |  Script functions
+  |  Show script functions
   |  CFT Internals
 * Dictionaries
 * Dates

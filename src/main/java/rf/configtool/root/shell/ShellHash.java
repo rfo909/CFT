@@ -39,7 +39,7 @@ public class ShellHash extends ShellCommand {
     }
     @Override 
     public String getBriefExampleParams() {
-        return "<file> ...";
+        return "<file>? ...";
     }
 
 

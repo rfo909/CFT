@@ -52,7 +52,7 @@
   |  List sorting
         Int(), Str() and Float()
   |  List filtering with Lambda
-  |  Removing items
+        Use Lambda to also remove some items
   |  nth() negative indexes
 * ---- Dictionaries
   |  SymDict
@@ -133,7 +133,9 @@
   |  Creating code from values
   |  Example using :syn
   |  Example using :NN
+        Two different situations
   |  Using syn()
+        The underscore function?
   |  Clone any value
 * ---- Templating
   |  Merging text with Dict
@@ -147,11 +149,12 @@
   |  DataFile
         Include blank lines
         Allowing comments
+        Projects script
   |  Sequence() and raw strings
 * ---- The CFT datastore (Db2)
   |  Collections
-  |  Std.Db.Db2 vs Db2 script?
   |  Synchronization
+        Implementation
   |  The Vault
 * ---- Error handling
   |  Soft errors
@@ -166,6 +169,8 @@
   |  Manual closure
   |  Dictionary objects
   |  Calling lambda/closure
+        Dotted lookup from dictionary
+        Fun with closures
 * ---- Classes
   |  Class object types
   |  What a "/class" function does
@@ -173,7 +178,7 @@
   |  Key concepts
         Intended use
   |  The Process
-  |  Flow control
+  |  Util:ProcessMonitor
 * ---- Processing JSON
 * ---- Processing XML
   |  Parsing XML
@@ -218,7 +223,7 @@
   |  Function name AFTER code?
   |  Using Sys.stdin to run colon commands etc
   |  Code spaces / the "pipe"
-  |  Code spaces vs Inner blocks
+        Code blocks (local / Inner and Lambda)
 * ---- Script and code size
         2020-11-13 v2.0.0
         2021-04-01

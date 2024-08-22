@@ -1,0 +1,70 @@
+# Readme
+# --
+<<<<<< EOF
+Last value store
+----------------
+In order to not have to repeat searches all the time, this 
+script handles storing and retreiving ("get") Sys.lastResult
+to Db2
+>>>>>> EOF
+/Readme
+
+
+# Store with name
+# --
+	P(1,Input("Enter store name").get) => name
+	
+	Db2:Get(Sys.scriptId, "data", Dict) => dict
+	dict.set(name,Sys.lastResult)
+	Db2:Set(Sys.scriptId, "data", dict)
+	
+	Db2:Get(Sys.scriptId, "time", Dict) => dict
+	dict.set(name, Date)
+	Db2:Set(Sys.scriptId, "time", dict)
+/Store
+
+
+
+# Get stored value
+# --
+	P(1,Input("Enter store name").get) => name
+	
+	Db2:Get(Sys.scriptId, "data", Dict) => dict
+	if (dict.has(name)) dict.get(name) else null
+/Get
+
+
+
+# Show keys in time sorted order
+# --
+	Db2:Get(Sys.scriptId, "data", Dict).keys -> key
+		millis=Db2:Get(Sys.scriptId,"time",Dict).get(key,Date).get
+		out(Int(millis, key))
+	| _.sort->x
+		report(x.data, Date(x))
+/Keys
+
+
+# Purge old data
+# --
+	P(1,Input("Number of days").get.parseInt) => days
+
+	cutoff = Date.sub(Date.Duration.days(days))
+	
+	Db2:Get(Sys.scriptId,"data",Dict) => data
+	Db2:Get(Sys.scriptId,"time",Dict) => time
+
+	data.keys->key
+		date=time.get(key,Date)
+		#println(key,date)
+		if (date.before(cutoff)) {
+			#println("Removing '" + key + "' stored at " + time.get(key))
+			data.remove(key)
+			time.remove(key)
+		}
+	|
+	Db2:Set(Sys.scriptId,"data",data)
+	Db2:Set(Sys.scriptId,"time",time)
+/Purge
+
+
