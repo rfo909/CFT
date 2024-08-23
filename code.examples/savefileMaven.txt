@@ -19,9 +19,34 @@
 >>> EOF
 /License
 
-# All pom files under current dir
+
+# Get all git submodule directories
 # --
-    Dir.allFiles("pom*.xml")
+	dict=Dict
+	Dir.file(".gitmodules").read->line
+		assert(line.contains("path ="))
+		s=line.after("=").trim
+		s="\" + s.replace("/","\") + "\"
+		out(s)
+//GitSubmodules
+
+		
+
+# All pom files under current dir (except those of git submodules)
+# --
+	P(1,false)=>includeSubmodules
+
+    Dir.allFiles("pom*.xml")->pom
+		path=pom.path
+		if (!includeSubmodules) {
+			foundList = Inner{
+				GitSubmodules->m
+					if (path.contains(m)) out(1)
+			}
+			if (foundList.empty) out(pom)
+		} else {
+			out(pom)
+		}
 /Pom
 
 # Get first line with a certain pattern
@@ -34,6 +59,7 @@
             break
         }
 //GetFirst
+
 
 # Select Pom file
 # --
@@ -96,7 +122,7 @@
 /CreateSummaryDict
 
 
-# For all pom files under current directory, create summaries of dependencies
+# For all pom files under current directory, including submodules, create summaries of dependencies
 # and mark local dependencies between pom files
 # --
 	P(1,Dir) => dir
@@ -113,7 +139,7 @@
 
 	list=List
 	allDep=List
-	Pom->f
+	Pom(true)->f
 		list.add(CreateSummaryDict(f))
 	|
 	list->summary
@@ -149,3 +175,13 @@
 	|
 	println
 /ShowSummaryAll
+
+
+
+# test-compile all pom files (except git submodules)
+# --
+	Pom->f
+		println(f.path)
+		result = Lib:run(List("cmd","/c","mvn","-f", f.path, "clean","package"), null, true)
+		if(result.exitCode==0) println("   OK") else println("   ERROR")
+/CompileAll
