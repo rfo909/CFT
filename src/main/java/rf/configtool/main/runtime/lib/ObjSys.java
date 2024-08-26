@@ -52,6 +52,7 @@ public class ObjSys extends Obj {
                 new FunctionCodeDirs(),
                 new FunctionOutCount(),
                 new FunctionLastResult(),
+                new FunctionLastResultList(),
                 new FunctionSleep(),
                 new FunctionStdin(),
                 new FunctionIsWindows(),
@@ -215,6 +216,31 @@ public class ObjSys extends Obj {
                 if (!(v instanceof ValueList)) throw new Exception("lastResult not a list");
                 List<Value> list=((ValueList) v).getVal();
                 if (i<0 || i>= list.size()) throw new Exception("lastResult pos out of range");
+                return list.get(i);
+            }
+            throw new Exception("Expected optional int pos parameter");
+        }
+    }
+    
+    class FunctionLastResultList extends Function {
+        public String getName() {
+            return "lastResultList";
+        }
+
+        public String getShortDesc() {
+            return "lastResultList(pos?) - returns last interactive list result, or element if pos";
+        }
+
+        @Override
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() == 0) {
+                return ctx.getObjGlobal().getRoot().getLastResultList();
+            }
+            if (params.size()==1) {
+                int i = (int) (long) getInt("pos", params, 0);
+                ValueList v=ctx.getObjGlobal().getRoot().getLastResultList();
+                List<Value> list=v.getVal();
+                if (i<0 || i>= list.size()) throw new Exception("lastResultList pos out of range");
                 return list.get(i);
             }
             throw new Exception("Expected optional int pos parameter");

@@ -39,11 +39,34 @@ choice.
 
 
 
+# File from Row?
+# --
+	P(1) => x
+	file=null
+	
+	if (getType(x)=="Row") {
+	    	Inner {
+	    		x.asList->element
+	    			if (getType(element)=="File") {
+	    				file=element
+	    				break
+	    			}
+	    	}
+	} 
+	
+	if (file==null) file=x
+	
+	file
+//FileFromRow
+	
+
 
 # Edit file
 # --
     P(1,Sys.savefile) => file
     P(2,true) => detach
+    
+    file=FileFromRow(file)
     
     if (!detach) {
         # Need to run editor that we can wait for
@@ -73,11 +96,14 @@ choice.
 
 # "more" through file
 # --
-    P(1,Sys.savefile) =>file
-    if(Sys.isWindows)
-        Dir.run("cmd", "/c", "more", file.path)
-    else
-        Dir.run("more", file.path)
+	P(1,Sys.savefile) =>file
+    
+	file=FileFromRow(file)
+
+	if(Sys.isWindows)
+		Dir.run("cmd", "/c", "more", file.path)
+	else
+		Dir.run("more", file.path)
 /m
 
 
@@ -938,18 +964,18 @@ run(null,null,null,true)
 /SearchTextFiles
 
    
-# Search text files from result set, or list of files given as parameter
+# Search text files from Sys.lastResultList, list of files as parameter
 # --
 	P(1) => list
-    P(2,Input("Search term").get) => st
+	P(2,Input("Search term").get) => st
 
-	if (list==null) list=Sys.lastResult
+	if (list==null) list=Sys.lastResultList
 	error(getType(list) != "List", "Expected list of files as last result")
 	
-    grep=Grep(st)
+	grep=Grep(st)
 	list->file
-        grep.file(file)->line
-            report(file, file.name, line.lineNumber, line)
+	        grep.file(file)->line
+	            report(file, file.name, line.lineNumber, line)
 /SearchResultFiles
 
    
@@ -1199,33 +1225,70 @@ run(null,null,null,true)
 //HashFiles
 
 
+# Search a Row
+# --
+	P(1) as String => str
+	P(2) as Row => row
+	
+	# Check if row contains File object
+	file=null
+	Inner{row.asList->x if(getType(x)=="File") {file=x break}}
+	if (file != null) {
+		InteractiveGrepFile(str,file)
+	} else {
+		# string match
+		row.asStringsRow.asList.concat(" ")->asLine
+			if(asLine.contains(str)) out(row)
+	}
+//InteractiveGrepRow
+
+
+# Search a File
+# --
+	P(1) as String => str
+	P(2) as File => file
+	
+	Grep(str).file(file)->line
+		report(file,line.file.name, line.lineNumber, line)
+//InteractiveGrepFile
+
+
+# Search a list
+# --
+	P(1) as String => str
+	P(2) as List => list
+	
+	list->element
+		if (getType(element)=="File") {
+			InteractiveGrepFile(str,element)->x out(x)
+		} else if (getType(element)=="Row") {
+			InteractiveGrepRow(str,element)->x out(x)
+		} else if(getType(element)=="List") {
+			InteractiveGrepList(str,element)->x out(x)
+		} else {
+			InteractiveGrepList(str,List(element))->x out(x)
+		}
+//InteractiveGrepList		
+
+
 # Search through a list of files
 # Called by mGrep in CFT.props, see also ShellGrep.java 
 # --
-    P(1) => str
-    P(2) => data
-    
-    grep=Grep(str)
+	P(1) => str
+	P(2) => data
+
+	grep=Grep(str)
 
 	data -> element
 		if (getType(element)=="File") {
-			grep.file(element)->line
-				report(element, line.file.name, line.lineNumber, line)
+			InteractiveGrepFile(str,element)->x out(x)
+		} else if (getType(element)=="Row") {
+			InteractiveGrepRow(str,element)->x out(x)
+		} else if (getType(element)=="List") {
+			InteractiveGrepList(str,element)->x out(x)
 		} else {
-			list=element
-			if (getType(list) != "List") list=List(list)
-
-			list -> element
-				if (getType(element)=="File") {
-					grep.file(element)->line report(element, line.file.name, line.lineNumber, line)
-				} else {
-					line=""+element
-					if(grep.line(line)) {
-						report(line)
-					}
-				}
+			InteractiveGrepList(List(element))->x out(x)
 		}
-			
 //InteractiveGrep
 
 
@@ -1468,7 +1531,6 @@ BackDateLastResultFiles
 
 # Global onload-code, when starting CFT, see CFT.props
 # --
-	LVStore:Purge(2)
     Lib:EncryptSanityCheck 
     Util:CheckForUpdates
     Lib:GetTerminalSize 

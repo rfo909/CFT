@@ -52,9 +52,6 @@ public class ShellCommandsManager {
             new ShellCatEditMoreTail("tail"),
             new ShellTouch(),
 
-            new ShellStore(),
-            new ShellGet(),
-
             new ShellCp(),
             new ShellRm(),
             new ShellMv(),
@@ -66,7 +63,6 @@ public class ShellCommandsManager {
             new ShellHash(),
             new ShellHex(),
             new ShellWhich(),
-
     };
 
     

@@ -70,6 +70,7 @@ public class Root {
     private ScriptState currScript;
     private boolean debugMode;
     private Value lastResult;
+    private ValueList lastResultList;
     private final long startTime;
     private boolean terminationFlag = false;
     
@@ -199,6 +200,12 @@ public class Root {
         if (lastResult == null)
             return new ValueNull();
         return lastResult;
+    }
+
+    public ValueList getLastResultList() {
+        if (lastResultList == null)
+            return new ValueList(new ArrayList<Value>());
+        return lastResultList;
     }
 
     // Interactive input loop
@@ -532,6 +539,9 @@ public class Root {
 
         // update lastResult
         lastResult = result;
+        if (result instanceof ValueList) {
+            lastResultList=(ValueList) result;
+        }
 
         // present result
         ReportFormattingTool report = new ReportFormattingTool();
@@ -680,21 +690,17 @@ public class Root {
             return; // do not modify codeHistory
         } else if (ts.peekType(Token.TOK_INT)) {
             int pos = Integer.parseInt(ts.matchType(Token.TOK_INT).getStr());
-            if (lastResult == null) {
-                stdio.println("No current value");
+            if (lastResultList == null) {
+                stdio.println("No current list value");
                 return;
             }
-            if (!(lastResult instanceof ValueList)) {
-                stdio.println("Current value not a list");
-                return;
-            }
-            
             if (!ts.atEOF()) {
                 // :N.expr
                 String str=inputLine.trim().substring(1).trim(); // points at first digit
                 int restPos=0;
                 while (restPos < str.length() && "0123456789".indexOf(str.charAt(restPos)) >= 0) restPos++;
-                String command="Sys.lastResult("+pos+")" + str.substring(restPos);
+
+                String command="Sys.lastResultList("+pos+")" + str.substring(restPos);
                 
                 SourceLocation loc = new SourceLocation(":N-expr", 0);
 
@@ -708,7 +714,7 @@ public class Root {
 
             }
 
-            List<Value> values = ((ValueList) lastResult).getVal();
+            List<Value> values = lastResultList.getVal();
 
             if (pos < 0 || pos >= values.size()) {
                 stdio.println("Invalid index: " + pos);
@@ -717,6 +723,9 @@ public class Root {
 
             Value theValue=values.get(pos);
             lastResult=theValue;
+            if (theValue instanceof ValueList) {
+                lastResultList=(ValueList) theValue;
+            }
             
             String s = theValue.synthesize();
             codeHistory.setCurrLine(s);

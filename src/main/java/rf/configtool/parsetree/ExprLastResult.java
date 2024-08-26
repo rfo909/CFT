@@ -28,6 +28,7 @@ import rf.configtool.main.FunctionBody;
 import rf.configtool.main.FunctionState;
 import rf.configtool.main.PropsFile;
 import rf.configtool.main.runtime.Value;
+import rf.configtool.main.runtime.ValueNull;
 import rf.configtool.main.runtime.ValueBlock;
 import rf.configtool.main.runtime.ValueList;
 import rf.configtool.main.runtime.ValueString;
@@ -48,11 +49,17 @@ public class ExprLastResult extends ExprCommon {
     
     
     public Value resolve (Ctx ctx) throws Exception {
-        Value v=ctx.getObjGlobal().getRoot().getLastResult();
-        if (pos==null) return v;
-        if (!(v instanceof ValueList)) throw new Exception("LastResult not list");
-        List<Value> list=((ValueList) v).getVal();
-        return list.get(pos.intValue());
-        
+        if (pos==null) {
+            Value v = ctx.getObjGlobal().getRoot().getLastResult();
+            if (v==null) return new ValueNull();
+            return v;
+        } else {
+            ValueList v = ctx.getObjGlobal().getRoot().getLastResultList();
+            if (v==null) return new ValueNull();
+            List<Value> list=v.getVal();
+            if (pos<0 || pos>=list.size()) throw new Exception("ExprLastResult: invalid pos value");
+            long x=pos;
+            return list.get((int) x);
+        }
     }
 }

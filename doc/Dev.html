@@ -13,16 +13,26 @@
 
 <h1>CFT Change log</h1>
 
-<h3>4.2.4 2024-08-22 store and get</h3>
+<h3>4.2.4 2024-08-26 Sys.lastResultList</h3>
 <p>
-Added two shell commands, to store lastResult in the base and get it back.
+Remembering last result that was a list separate from Sys.lastResult, which behaves as before.
 </p>
 
-<pre>
-ls
-store x
-get x
-</pre>
+<p>
+Rewritten :N in expressions to fetch data from Sys.lastResultList, as it is a problem when typing
+something involving :N and doing something wrong, that we have to recreate the list, possibly
+using several steps.
+</p>
+
+<p>
+Created shortcut @: to show the last result list, simply calling Sys.lastResultList
+</p>
+
+<p>
+Also gave the interactive grep an overhaul. 
+</p>
+
+
 
 <h3>4.2.3 2024-08-20 interactive grep</h3>
 <p>

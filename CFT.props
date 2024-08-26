@@ -24,11 +24,11 @@ winShell = powershell
 # Macros invoked for various "shell" commands, 
 # ----
 
-mCat = Lambda { P(1)=>file if(file==null, Lib:GetLastResultFile, file) => file file.read->line println(line) }
+mCat = Lambda { P(1)=>file if(file==null, Lib:GetLastResultFile, file) => file file.read->line println(line) | true}
 
-mEdit = Lambda { P(1)=>file if(file==null, Lib:GetLastResultFile, file) => file Lib:e(file) }
+mEdit = Lambda { P(1)=>x if(x==null, Lib:GetLastResultFile, x) => x Lib:e(x) }
 
-mMore = Lambda { P(1)=>file if(file==null, Lib:GetLastResultFile, file) => file Lib:m(file) }
+mMore = Lambda { P(1)=>x if(x==null, Lib:GetLastResultFile, x) => x Lib:m(x) }
 
 mTail = Lambda { P(1)=>file file.tail(500) }
 
@@ -85,7 +85,7 @@ shortcut:home = "---- move to script dir ----"            Sys.savefile.dir.cd
 shortcut:fp   = "---- lastResult file/dir object paths ----" Lib:Paths
 
 shortcut:%    = "---- show current symbols ----"          Lib:Symbols
-
+shortcut::    = "---- Sys.lastResultList ----"            Sys.lastResultList
 
 # copy / paste files
 
@@ -122,7 +122,7 @@ shortcut:rel  = "---- Release ----"                       Sys.stdin(":load Relea
 
 # List available shortcuts when typing '@' only
 # ---
-shortcut:     = "---- Show all shortcuts ----"            File("CFT.props").read->line assert(line.startsWith("shortcut:")) out(line)
+shortcut:     = "---- Show all shortcuts ----"            File("CFT.props").read->line assert(line.startsWith("shortcut:")) println(line) | true
 
 
 
