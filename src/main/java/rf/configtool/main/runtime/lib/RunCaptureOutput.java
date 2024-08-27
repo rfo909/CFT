@@ -44,6 +44,9 @@ public class RunCaptureOutput {
     public void addLine (String line) {
         lines.add(line);
         if (stdio != null) stdio.println(line);
+        while(lines.size()>5000) {
+            lines.remove(0);
+        }
     }
     
     public Value getCapturedLines() {

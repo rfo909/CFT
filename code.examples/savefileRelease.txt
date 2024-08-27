@@ -85,7 +85,7 @@ CreateSummaries
     CreateSummaries
     
     # Run git
-    HomeDir.run("git","add",".")
+    HomeDir.runCapture("git","add",".")
     GitStatus
 
 /Add
@@ -93,14 +93,17 @@ CreateSummaries
 
 
 # Commit changes
+# --
     GitStatus
     Lib:ReadValue ("Commit message?", Sys.version) =>msg
-    HomeDir.run("git","commit","-m",msg)
+    HomeDir.runCapture("git","commit","-m",msg)
 /Commit
 
 
 # Push latest commits
-    HomeDir.run("git","push","origin","master")
+# --
+    HomeDir.runCaptureShow("git","push","origin","master") 
+	true
 /Push
 
 
@@ -108,14 +111,17 @@ CreateSummaries
 
 
 # Git status
-    HomeDir.run("git","status")
+# ..
+    HomeDir.runCaptureShow("git","status")
+	true
 /GitStatus
 
 
 
 
 # Git diff
-    HomeDir.run("git","diff")
+    HomeDir.runCaptureShow("git","diff")
+	true
 /Diff
 
 
