@@ -82,6 +82,7 @@ shortcut:scr  = "---- Show all scripts ----"              Lib:Scripts
 
 shortcut:home = "---- move to script dir ----"            Sys.savefile.dir.cd
 
+shortcut:f    = "---- get files from search rows ----"    Sys.lastResultList.filter( Lambda{x=P(1) if(getType(x)=="Row",x.get(0),x)}).unique
 shortcut:fp   = "---- lastResult file/dir object paths ----" Lib:Paths
 
 shortcut:%    = "---- show current symbols ----"          Lib:Symbols

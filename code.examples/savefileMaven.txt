@@ -20,7 +20,7 @@
 /License
 
 
-# Get all git submodule directories
+# Get all git submodule directories on form \x\y\ so that we can use .contains on path string
 # --
 	dict=Dict
 	Dir.file(".gitmodules").read->line
@@ -31,8 +31,17 @@
 //GitSubmodules
 
 		
+# Path depth of file
+# --
+	P(1) as File => f
+	f.path.chars->c
+		assert(c==Sys.fileSeparator)
+		out(1)
+	| _.length
+//PathDepth
 
-# All pom files under current dir (except those of git submodules)
+# All pom files under current dir
+# Sorted so that deepest path files come first
 # --
 	P(1,false)=>includeSubmodules
 
@@ -47,6 +56,10 @@
 		} else {
 			out(pom)
 		}
+	| -> pom
+		out(Int(PathDepth(pom), pom))
+	| _.sort.reverse->x 
+		out(x.data)
 /Pom
 
 # Get first line with a certain pattern
@@ -86,7 +99,7 @@
 /AI
 
 
-# Create summary of pom file detailing what artifact it creates, and dependencies
+# Create summary of pom file detailing what artifact it creates, and dependencies, on simple line format
 # --
 	P(1, Pom.first) as File=>f
 	XML:Parse(f.read).first => node
@@ -119,13 +132,21 @@
 		}
 	|
 	dict
-/CreateSummaryDict
+//CreateSummaryDict
+
+
+# Update all git modules
+# --
+	Git:UpdateSubmodules
+/UpdateGitSubmodules
+
 
 
 # For all pom files under current directory, including submodules, create summaries of dependencies
 # and mark local dependencies between pom files
 # --
-	P(1,Dir) => dir
+	P(1,true) => includeSubmodules
+	P(2,Dir) => dir
 
 	println
 	Lib:Header("Summarizing all pom*.xml found under " + dir.path + "  " + Date.fmt)
@@ -139,7 +160,7 @@
 
 	list=List
 	allDep=List
-	Pom(true)->f
+	Pom(includeSubmodules)->f
 		list.add(CreateSummaryDict(f))
 	|
 	list->summary
@@ -180,8 +201,32 @@
 
 # test-compile all pom files (except git submodules)
 # --
+	P(1,false) => showErrors
 	Pom->f
-		println(f.path)
+		Lib:Header(f.path)
 		result = Lib:run(List("cmd","/c","mvn","-f", f.path, "clean","package"), null, true)
+
 		if(result.exitCode==0) println("   OK") else println("   ERROR")
+
+		if (showErrors) {
+			lines = result.stdout + result.stderr
+			lines->line
+				if (line.contains("[ERROR]")) Lib:ShowText(line)
+		}
+
 /CompileAll
+
+
+# Run deploy on all pom files (except git submodules), to update repo
+# --
+	Pom->f
+		Lib:Header(f.path)
+		result = Lib:run(List("cmd","/c","mvn","-f", f.path, "deploy"), null, true) 
+
+		if(result.exitCode==0) println("   OK")
+
+		lines = result.stdout + result.stderr
+		lines->line
+			if (line.contains("[ERROR]")) Lib:ShowText(line)
+
+/DeployAll
