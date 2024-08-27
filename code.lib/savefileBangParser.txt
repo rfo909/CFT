@@ -63,6 +63,9 @@ the other shell-like commands.
     
     if (Sys.isWindows) cmdList=List("powershell") + cmdList
     
-    currentDir.run(cmdList)
+    currentDir.runCaptureShow(cmdList) => list
+	Db2:Set(Sys.scriptId,"runOutput",list)
+	true
+	#list
 /Run
 

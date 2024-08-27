@@ -1266,7 +1266,7 @@ run(null,null,null,true)
 		} else if(getType(element)=="List") {
 			InteractiveGrepList(str,element)->x out(x)
 		} else {
-			InteractiveGrepList(str,List(element))->x out(x)
+			if ((""+element).contains(str)) out(element)
 		}
 //InteractiveGrepList		
 

@@ -24,14 +24,26 @@ import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueList;
 import rf.configtool.main.runtime.ValueString;
 
+import rf.configtool.main.Stdio;
+
 /**
  * Used by Dir.runCapture() function
  */
 public class RunCaptureOutput {
     private List<String> lines=new ArrayList<String>();
-    
+
+    private Stdio stdio;
+
+    public RunCaptureOutput() {
+        // default constructor
+    }
+
+    public RunCaptureOutput (Stdio stdio) {
+        this.stdio=stdio;
+    }
     public void addLine (String line) {
         lines.add(line);
+        if (stdio != null) stdio.println(line);
     }
     
     public Value getCapturedLines() {

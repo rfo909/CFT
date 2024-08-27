@@ -94,6 +94,7 @@ public class ObjDir extends Obj implements IsSynthesizable {
                 new FunctionRunDetach(),
                 new FunctionRunProcess(),
                 new FunctionRunCapture(),
+                new FunctionRunCaptureShow(),
                 new FunctionShowTree(),
                 new FunctionProtect(),
                 new FunctionUnprotect(),
@@ -682,7 +683,7 @@ public class ObjDir extends Obj implements IsSynthesizable {
 
         }
     }
-    
+
     class FunctionRunCapture extends Function {
         public String getName() {
             return "runCapture";
@@ -696,7 +697,21 @@ public class ObjDir extends Obj implements IsSynthesizable {
             return capt.getCapturedLines();
         }
     }
-    
+
+    class FunctionRunCaptureShow extends Function {
+        public String getName() {
+            return "runCaptureShow";
+        }
+        public String getShortDesc() {
+            return "runCaptureShow(list|...) - execute external program in foreground, show and also capture output, and return list of stdout lines";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            RunCaptureOutput capt=new RunCaptureOutput(ctx.getStdio());
+            callExternalProgram(ctx, true, ctx.getStdio(), capt, params);
+            return capt.getCapturedLines();
+        }
+    }
+
 
     private Process startProcess (Ctx ctx, File input, File output, File stderr, List<Value> params) throws Exception {
 

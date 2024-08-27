@@ -204,7 +204,7 @@
 	P(1,false) => showErrors
 	Pom->f
 		Lib:Header(f.path)
-		result = Lib:run(List("cmd","/c","mvn","-f", f.path, "clean","package"), null, true)
+		result = Lib:run(List("cmd","/c","mvn","-f", f.path, "clean","package","-U"), null, true)
 
 		if(result.exitCode==0) println("   OK") else println("   ERROR")
 

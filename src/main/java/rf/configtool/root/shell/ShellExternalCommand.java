@@ -70,6 +70,7 @@ public class ShellExternalCommand extends ShellCommand {
             } else {
                 String str=arg.getString();
                 if (isLinux) {
+                    // linux shells perform globbing expansion
                     FileSet fs=new FileSet("!"+commandName, true, true); // directories and files
                     fs.setIsSafeOperation();
                     
@@ -98,9 +99,19 @@ public class ShellExternalCommand extends ShellCommand {
             }
             
         }
+
+
+        //StringBuffer sb=new StringBuffer();
+        //for (String s:command) sb.append(s+" ");
+        //System.out.println("*** ShellExternalCommand: " + sb.toString().trim());
+
         return callLambda (ctx, command);
     }
-    
+
+    /**
+     * Call the bangCommand from the properties file, with parameters as single
+     * List parameter.
+     */
     private Value callLambda (Ctx ctx, List<String> command) throws Exception {
         List<Value> valueList=new ArrayList<Value>();
         for (String s:command) valueList.add(new ValueString(s));
