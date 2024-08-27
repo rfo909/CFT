@@ -87,6 +87,7 @@ shortcut:fp   = "---- lastResult file/dir object paths ----" Lib:Paths
 
 shortcut:%    = "---- show current symbols ----"          Lib:Symbols
 shortcut::    = "---- Sys.lastResultList ----"            Sys.lastResultList
+shortcut:!    = "---- output last ext. command ----"      BangParser:OutputData
 
 # copy / paste files
 

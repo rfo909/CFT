@@ -53,6 +53,7 @@ public class RunCaptureOutput {
     public void addLine (String line) {
         buffer.append(line);
         buffer.append("\n");
+        if (stdio != null) stdio.println(line);
     }
     
     public Value getCapturedLines() {

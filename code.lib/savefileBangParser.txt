@@ -52,6 +52,17 @@ the other shell-like commands.
 //FixSpace
 
 
+# Enable/disable using runCaptureShow and the @! shortcut
+# --
+	P(1,true)=>enable
+	Db2:Set(Sys.scriptId,"enable",enable)
+//EnableRunCapt
+
+# Is enabled?
+# --
+	Db2:Get(Sys.scriptId,"enable",false)
+//RunCaptEnabled
+
 # Run command
 # --
     P(1,Dir)=>currentDir
@@ -63,11 +74,13 @@ the other shell-like commands.
     
     if (Sys.isWindows) cmdList=List("powershell") + cmdList
 
-	currentDir.run(cmdList)
-
-    #currentDir.runCaptureShow(cmdList) => list
-	#Db2:Set(Sys.scriptId,"runOutput", list)
-	#list
+	if (RunCaptEnabled) {
+		currentDir.runCaptureShow(cmdList) => list
+		Db2:Set(Sys.scriptId,"runOutput", list)
+		true
+	} else {
+		currentDir.run(cmdList)
+	}
 /Run
 
 
