@@ -632,12 +632,24 @@ public class ObjDir extends Obj implements IsSynthesizable {
         Process process = processBuilder.start();
         
         if (capture != null) {
-            try (InputStreamReader reader = new InputStreamReader(process.getInputStream())) {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                 for (;;) {
+                    String line=reader.readLine();
+                    if (line==null) break;
+                    capture.addLine(line);
+
+
+                    /*
+                    // This works a little too good, capturing control characters, which
+                    // fucks up Dir.runCapture, as used by the system to get terminal size
+                    // and others
+
                     int i=reader.read();
                     if (i<0) break;
                     char c=(char) i;
                     capture.addChar(c);
+
+                     */
                 }
             }
         }

@@ -42,11 +42,17 @@ public class RunCaptureOutput {
         this.stdio=stdio;
     }
     public void addChar (char c) {
+        if (" \r\t\n".indexOf(c) < 0 && Character.isISOControl(c)) return;  // eliminate control characters
         buffer.append(c);
         if (stdio != null) stdio.print(""+c);
         while(buffer.length()>50000) {
             buffer.deleteCharAt(0);
         }
+    }
+
+    public void addLine (String line) {
+        buffer.append(line);
+        buffer.append("\n");
     }
     
     public Value getCapturedLines() {
