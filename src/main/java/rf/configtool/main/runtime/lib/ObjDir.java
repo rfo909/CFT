@@ -632,17 +632,13 @@ public class ObjDir extends Obj implements IsSynthesizable {
         Process process = processBuilder.start();
         
         if (capture != null) {
-            BufferedReader br=null;
-            try {
-                br=new BufferedReader(new InputStreamReader(process.getInputStream()));
+            try (InputStreamReader reader = new InputStreamReader(process.getInputStream())) {
                 for (;;) {
-                    String line=br.readLine();
-                    if (line==null) break;
-                    capture.addLine(line);
-                    //stdio.println(line);
+                    int i=reader.read();
+                    if (i<0) break;
+                    char c=(char) i;
+                    capture.addChar(c);
                 }
-            } finally {
-                if (br != null) br.close();
             }
         }
         

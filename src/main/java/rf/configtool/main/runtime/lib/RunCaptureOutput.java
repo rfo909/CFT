@@ -30,7 +30,7 @@ import rf.configtool.main.Stdio;
  * Used by Dir.runCapture() function
  */
 public class RunCaptureOutput {
-    private List<String> lines=new ArrayList<String>();
+    private StringBuffer buffer = new StringBuffer();
 
     private Stdio stdio;
 
@@ -41,18 +41,32 @@ public class RunCaptureOutput {
     public RunCaptureOutput (Stdio stdio) {
         this.stdio=stdio;
     }
-    public void addLine (String line) {
-        lines.add(line);
-        if (stdio != null) stdio.println(line);
-        while(lines.size()>5000) {
-            lines.remove(0);
+    public void addChar (char c) {
+        buffer.append(c);
+        if (stdio != null) stdio.print(""+c);
+        while(buffer.length()>50000) {
+            buffer.deleteCharAt(0);
         }
     }
     
     public Value getCapturedLines() {
         List<Value> stdoutLines=new ArrayList<Value>();
-        for (String s:lines) stdoutLines.add(new ValueString(s));
-        
+        String s=buffer.toString();
+
+        StringBuffer line=new StringBuffer();
+        for (int i=0; i<s.length(); i++) {
+            char c=s.charAt(i);
+            if (c=='\n') {
+                stdoutLines.add(new ValueString(line.toString()));
+                line=new StringBuffer();
+            } else {
+                line.append(c);
+            }
+        }
+        if (line.length()>0) {
+            stdoutLines.add(new ValueString(line.toString()));
+        }
+
         return new ValueList(stdoutLines);
     }
 }
