@@ -110,7 +110,9 @@ choice.
 
 # "more" through list of lines
 # --
-    P(1) as List => lines
+    P(1) as List? => lines
+	if (lines==null) lines=Sys.lastResultList
+
     count=0
     lines->line
         if (count >= Term.h-3) {
@@ -751,6 +753,12 @@ run(null,null,null,true)
 /ShowRows
 
 
+# Print rows
+# --
+	P(1) => rows
+	ShowRows(rows)->line println(line)
+/PrintRows
+
 
 # Select single value from list of options. Using lambda to extract name for each element.
 # --
@@ -1133,19 +1141,11 @@ run(null,null,null,true)
 
     Sys.lastResult => value
 
-    if (getType(value) != "Dir" && getType(value) != "File") {
-        Lib:ShowWarn("Sys.lastResult not Dir or File, type=" + getType(value))
-        error(readLine("Press y to continue, otherwise abort").toLower != "y","Aborting")
-    }
+    #if (getType(value) != "Dir" && getType(value) != "File") {
+    #    Lib:ShowWarn("Sys.lastResult not Dir or File, type=" + getType(value))
+    #    error(readLine("Press y to continue, otherwise abort").toLower != "y","Aborting")
+    #}
 
-#    if (getType(value) == "Dir" || getType(value) == "File") {
-#        Lib:Header("Protection?")
-#        println("Should the " + getType(value) + " reference be protected against destructive operations?")
-#        readLine("Enter non-blank string to protect it").trim => reason
-#        if (reason != "") {
-#            value.protect(reason)
-#        }
-#    }
 
     Db2:Get(Sys.scriptId,"symbolDict",Dict) => data
     time=currentTimeMillis
@@ -1154,9 +1154,8 @@ run(null,null,null,true)
     
     # Show all symbols
     println
-    Inner { Lib:Symbols(false)->line println(line) }
+	Lib:PrintRows(Lib:SymbolsReport)
     println
-    value
 //SymbolSet
 
 
@@ -1175,6 +1174,7 @@ run(null,null,null,true)
     }
 //SymbolGet
 
+
 # Show symbols (helper)
 # --
     Db2:Get(Sys.scriptId,"symbolDict",Dict)=>data
@@ -1192,9 +1192,8 @@ run(null,null,null,true)
     P(1,true)=>edit
     loop
         Lib:Header("Defined symbols")
-        Inner {
-            SymbolsReport->line println(line)
-        }
+		Lib:PrintRows(Lib:SymbolsReport)
+
         break(!edit)
         println
         readLine("Enter symbol to delete, Enter for none") => line

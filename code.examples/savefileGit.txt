@@ -103,3 +103,21 @@
             Dir.run(command.split)
         }
 /UpdateSubmodules
+
+
+
+# Fetch git log
+# --
+	Dir.run("git","log")
+/GetLog
+
+
+# Check out previous commit in new branch
+# --
+	P(1,readLine("Enter branch name")) => branchName
+	P(2,readLine("Enter commit hex code")) => commit
+
+	command=List("git","checkout","-b",branchName,commit)
+	println(command.concat(" "))
+	Dir.run(command)
+/GetPreviousCommit

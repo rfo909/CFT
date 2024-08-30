@@ -634,6 +634,11 @@ public class ObjDir extends Obj implements IsSynthesizable {
         if (capture != null) {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                 for (;;) {
+                    // somehow readLine strips control characters from PowerShell, but NOT
+                    // from "top" on Linux. Why does PowerShell generate control characters
+                    // at all??
+                    //
+                    // is this an OS specific difference of Java?
                     String line=reader.readLine();
                     if (line==null) break;
                     capture.addLine(line);
