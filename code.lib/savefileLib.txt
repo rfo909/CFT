@@ -687,6 +687,11 @@ run(null,null,null,true)
 	P(1)=>text
 	P(2,true) => newlinesBetweenParagraphs
 
+	if (text==null) {
+		println("Enter or paste text, terminate with single dot '.' on separate line")
+		readLines(".").concat(" ") => text
+	}
+
 	newline=false
 	text->rawLine
 		rawLine.replace("^t"," ").replace("^r".unEsc,"").split("^n".unEsc)->line
@@ -1316,7 +1321,7 @@ run(null,null,null,true)
     Lib:Header("Previous directories. Use 'cd :N' to go to dir")
     Db2:Get(Sys.scriptId,"CommandHistory",List)->dict
         out(dict.currDir)
-    | _.unique.last(30)
+    | _.unique.last(30).sort
 /GetDirHistory
 
 

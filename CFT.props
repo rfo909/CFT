@@ -30,7 +30,7 @@ mEdit = Lambda { P(1)=>x if(x==null, Lib:GetLastResultFile, x) => x Lib:e(x) }
 
 mMore = Lambda { P(1)=>x if(x==null, Lib:GetLastResultFile, x) => x Lib:m(x) }
 
-mTail = Lambda { P(1)=>file file.tail(500) }
+mTail = Lambda { P(1)=>file file.tail(500)->line println(line) | true }
 
 mRm = Lambda { P(1) as List => x Lib:RmFilesAndDirs(x) }
 
