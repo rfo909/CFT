@@ -672,6 +672,11 @@ run(null,null,null,true)
 	P(1)=>text
 	P(2,true) => newlinesBetweenParagraphs
 
+	if (text==null) {
+		println("Enter or paste text, terminate with single dot '.' on separate line")
+		readLines(".").concat(" ") => text
+	}
+
 	newline=false
 	text->rawLine
 		rawLine.replace("^t"," ").replace("^r".unEsc,"").split("^n".unEsc)->line
