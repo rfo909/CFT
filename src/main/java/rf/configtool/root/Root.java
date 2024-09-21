@@ -309,15 +309,34 @@ public class Root {
                 return;
             }
 
+            // Process bang command (starting with "!") - for history lookup
+            if (line.startsWith("!")) {
+                Value currDir=new ValueObj(new ObjDir(objGlobal.getCurrDir(),Protection.NoProtection));
+                Value command=new ValueString(line);
+                
+                SourceLocation loc=new SourceLocation("bang", 0, 0);
+                String code = propsFile.getBangCommand();
+
+                FunctionBody codeLines = new FunctionBody(code, loc);
+
+                CFTCallStackFrame caller=new CFTCallStackFrame("<interactive-input>");
+                List<Value> args=new ArrayList<Value>();
+                args.add(currDir);
+                args.add(command);
+                
+                objGlobal.getRuntime().processFunction(stdio, caller, codeLines, new FunctionState(null,args));
+                return;
+            }
             
             
-            // History management - not bothering with shortcuts (processed above)
+            
+            // Add to command history
             try {
                 Value currDir=new ValueObj(new ObjDir(objGlobal.getCurrDir(),Protection.NoProtection));
                 Value command=new ValueString(line);
                 
-                SourceLocation loc=new SourceLocation("history", 0, 0);
-                String code = propsFile.getHistoryCommand();
+                SourceLocation loc=new SourceLocation("historyAppend", 0, 0);
+                String code = propsFile.getHistoryAppendCommand();
 
                 FunctionBody codeLines = new FunctionBody(code, loc);
 
@@ -328,7 +347,7 @@ public class Root {
                 
                 objGlobal.getRuntime().processFunction(stdio, caller, codeLines, new FunctionState(null,args));
             } catch (Exception ex) {
-                stdio.addDebug("Failed calling historyCommand (CFT.props)");
+                stdio.addDebug("Failed calling historyAppendCommand (CFT.props)");
             }
             
             

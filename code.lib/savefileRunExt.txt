@@ -1,0 +1,74 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2024 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+/License
+
+# Readme
+<<< EOF
+-----------------------------------
+This file handles running operating system commands and external
+programs from the command line.
+
+Called from rf.configtool.root.shell.ShellExternalCommand, which
+processes globbing, which differs between linux and windows. For windows,
+each command handles globbing, while on linux, the shell is supposed
+to do glob expansion, delivering a sequence of files and/or directories
+to the command.
+-----------------------------------
+>>> EOF
+/Readme
+
+# Make argument value safe with regards to space, backslashes and apos
+# --
+    P(1) as String => arg
+
+    if (Sys.isWindows) {
+        if (arg.contains(" ") || arg.contains("$") || arg.contains("'")) {
+            # double quotes not allowed in windows directory names!!
+            # escaping single quote ' with ''
+            "'" + arg.replace("'","''") + "'"
+        } else {
+            # leave as-is and hope for the best
+            arg
+        }
+    } else {
+        # Linux does not question values in command vector, also does not try to do globbing
+        # when called through Dir.run (that's an interactive Linux shell feature, and handled
+        # in Java for CFT when running on Linux)
+        arg
+    }
+//FixSpace
+
+
+# Run command
+# --
+	P(1,Dir)=>currentDir
+	P(2)=>cmdList
+	
+	cmdList=Inner{ cmdList->element out(FixSpace(element)) }
+
+	#println("--> " + cmdList.concat(" "))
+
+	if (Sys.isWindows) cmdList=List("powershell") + cmdList
+
+	currentDir.run(cmdList)
+/Run
+
+
+

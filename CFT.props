@@ -73,8 +73,7 @@ shortcut:lint = "---- check curr script ----"             Sys.lint
 shortcut:fm   = "---- open file manager (curr dir) ---"   Lib:fileManager(Dir)
 shortcut:cmd  = "---- open cmd in curr dir ----"          Lib:OpenCMD(Dir)
 
-shortcut:H    = "---- directory history ----"             Lib:GetDirHistory
-shortcut:CH   = "---- commands history ----"              Lib:GetCommandHistory 
+shortcut:H    = "---- directory history ----"             BangParser:GetDirHistory
 
 shortcut:term = "---- Update terminal size ----"          Lib:GetTerminalSize
 shortcut:rsh  = "---- Remote shell via ssh ----"          SSH:remoteShell
@@ -87,7 +86,6 @@ shortcut:fp   = "---- lastResult file/dir object paths ----" Lib:Paths
 
 shortcut:%    = "---- show current symbols ----"          Lib:Symbols
 shortcut::    = "---- Sys.lastResultList ----"            Sys.lastResultList
-shortcut:!    = "---- output last ext. command ----"      BangParser:OutputData
 
 # copy / paste files
 
@@ -135,13 +133,23 @@ shortcut:     = "---- Show all shortcuts ----"            File("CFT.props").read
 
 prompt = Prompt:PromptString(Dir,Sys.scriptName,if(Sys.functions.contains("StateString"),StateString,null))
 
-bangCommand = BangParser:Run(Dir,P(1))
-
 #
-# The historyCommand is executed to maintain history of commands and directories (in Db2)
+# Running external programs after glob expansion in Java
 #
 
-historyCommand = Lib:HistoryAppend(P(1),P(2))
+runExtCommand = RunExt:Run(Dir,P(1))
+
+#
+# History lookup command parser
+#
+
+bangCommand = BangParser:Process(P(1),P(2))
+
+#
+# The historyAppendCommand is executed to maintain history of commands and directories (in Db2)
+#
+
+historyAppendCommand = BangParser:HistoryAppend(P(1),P(2))
 
 #
 # Std.Db.Db2 data directory

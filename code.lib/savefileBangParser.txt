@@ -1,91 +1,145 @@
-# License
-<<< EOF
-#
-# CFT - an interactive programmable shell for automation 
-# Copyright (C) 2020-2024 Roar Foshaug
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, version 3 of the License.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>
-#
->>> EOF
-/License
-
 # Readme
+# --
 <<< EOF
------------------------------------
-v2.4.0 introduced configurable bang commands. 
+New version of the BangParser, introduced in version 4.3.0. The previous
+impementation had morphed into running external commands only, as the
+original "bang commands" (starting with "!") were removed some time ago.
 
-v3.7.3 moved the processing into rf.configtool.root.shell in Java, allowing for same expressions as with
-the other shell-like commands. 
------------------------------------
+Isolated running external programs into script RunExt.
+
+The new BangParser is meant for history lookup, as in Linux shells.
+
 >>> EOF
 /Readme
 
-# Make argument value safe with regards to space, backslashes and apos
+# Help text
 # --
-    P(1) as String => arg
+<<<< EOF
+The command history lets you repeat recent commands
 
-    if (Sys.isWindows) {
-        if (arg.contains(" ") || arg.contains("$") || arg.contains("'")) {
-            # double quotes not allowed in windows directory names!!
-            # escaping single quote ' with ''
-            "'" + arg.replace("'","''") + "'"
-        } else {
-            # leave as-is and hope for the best
-            arg
-        }
-    } else {
-        # Linux does not question values in command vector, also does not try to do globbing
-        # when called through Dir.run (that's an interactive Linux shell feature, and handled
-        # in Java for CFT when running on Linux)
-        arg
-    }
-//FixSpace
+	"!" displays the command history
+	"!!" repeats last command
+	"!xxx" repeats last command starting with xxx
 
+Type "!?" to display help (this text)
+>>>> EOF
+	->line println(line)
+/Help
 
-# Enable/disable using runCaptureShow and the @! shortcut
+# Process command line starting with "!" - bangCommand in CFT.props
 # --
-	P(1,true)=>enable
-	Db2:Set(Sys.scriptId,"enable",enable)
-//EnableRunCapt
-
-# Is enabled?
-# --
-	Db2:Get(Sys.scriptId,"enable",false)
-//RunCaptEnabled
-
-# Run command
-# --
-    P(1,Dir)=>currentDir
-    P(2)=>cmdList
-
-    cmdList=Inner{ cmdList->element out(FixSpace(element)) }
-
-    #println("--> " + cmdList.concat(" "))
-    
-    if (Sys.isWindows) cmdList=List("powershell") + cmdList
-
-	if (RunCaptEnabled) {
-		currentDir.runCaptureShow(cmdList) => list
-		Db2:Set(Sys.scriptId,"runOutput", list)
-		true
+	P(1)=>dir
+	P(2)=>commandLine
+	
+	if (commandLine=="!?") {
+		Help
+	} else if (commandLine=="!") {
+		GetCommandHistory(dir)
 	} else {
-		currentDir.run(cmdList)
+		RunHistoryCommand(dir,commandLine)
 	}
-/Run
-
-
-# Get last command output as List
+/Process
+ 
+ 
+ 
+# Parse bang expression and execute matching history element
 # --
-	Db2:Get(Sys.scriptId,"runOutput", List)
-/OutputData
+	P(1) as Dir => currentDir
+	P(2) as String => command
+	
+	prefix=command.sub(1)
+	data=Db2:Get(Sys.scriptId,"CommandHistory",List).last(40).reverse
 
+	dict=null
+	
+	if (command=="!!") {
+		dict=data.first  # last command (reversed)
+	} else Inner{
+		data->d
+			if (d.command.trim.startsWith(prefix)) {
+				dict=d
+				break
+			}
+	} 
+	if (dict != null) {
+		dir=Dir(dict.currDir) # stored as string
+		if (dir.path != currentDir.path) Sys.stdin(syn(dir)+'.cd')
+		Sys.stdin(dict.command)
+	} else {
+		println("No match")
+		null
+	}
+ /RunHistoryCommand
+ 
+ 
+ 
+ 
+# Append to history - defined in CFT.props 'historyAppendCommand' called from Java 
+# --
+    P(1) as Dir => dir
+    P(2) as String => command
+
+    currDir=dir.path
+
+    if (command.trim != "" && command.trim != "." && command!='Db2:Get("Lib","GetCommandHistory:GotoDir").cd') {
+            # That last part matches the code generated in GetCommandHistory when repeating a command !!
+
+        data=SymDict(command,currDir)
+        list=Db2:Get(Sys.scriptId,"CommandHistory",List)
+        list.add(data)
+        Db2:Set(Sys.scriptId,"CommandHistory", list.last(60))
+    }
+
+//HistoryAppend
+
+
+
+# Get directories history
+# --
+    Lib:Header("Previous directories. Use 'cd :N' to go to dir")
+    Db2:Get(Sys.scriptId,"CommandHistory",List)->dict
+        out(dict.currDir)
+    | _.unique.last(30)
+/GetDirHistory
+
+
+# Get command history and execute from it
+# --
+    P(1) as Dir => currentDir
+    
+    data=Db2:Get(Sys.scriptId,"CommandHistory",List).last(40)
+
+    Lib:Header("Command history")
+    Inner {
+        data->dict
+            report(dict.command.replace("^t".unEsc," <TAB> "), dict.currDir)
+        | _=>lines
+		
+	Lib:ShowRows(lines)->line println(line)
+    }
+    readLine("Enter index, or blank to cancel") => s
+    if (s != "") {
+    	if (s.startsWith("!")) {
+    		RunHistoryCommand(currentDir, s)
+    	} else if (s.?parseInt) {
+            dict=data.nth(s.parseInt)
+
+            # Note: can not just do this:
+            #
+            # Dir(dict.currDir).cd 
+            #
+            # That does not affect the caller, because each script has 
+            # their own current dir
+
+            # Solution: using Sys.stdin() 
+
+            Db2:Set("Lib","GetCommandHistory:GotoDir", Dir(dict.currDir))
+            Sys.stdin('Db2:Get("Lib","GetCommandHistory:GotoDir").cd')
+            Sys.stdin(dict.command)
+        } else {
+            # Not a number, treat as a command
+            Sys.stdin(s)
+        }
+    }
+    
+/GetCommandHistory

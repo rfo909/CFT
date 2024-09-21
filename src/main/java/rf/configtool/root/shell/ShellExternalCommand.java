@@ -62,7 +62,7 @@ public class ShellExternalCommand extends ShellCommand {
         
         NEXT_ARG: for (Arg arg:args) {
             if (arg.isExpr()) {
-                FileSet fs=new FileSet("!"+commandName, true, true); // directories and files
+                FileSet fs=new FileSet(commandName, true, true); // directories and files
                 fs.setIsSafeOperation();
                 fs.processArg(currentDir, ctx, arg);
                 for (String dir : fs.getDirectories()) command.add(dir);
@@ -71,7 +71,7 @@ public class ShellExternalCommand extends ShellCommand {
                 String str=arg.getString();
                 if (isLinux) {
                     // linux shells perform globbing expansion
-                    FileSet fs=new FileSet("!"+commandName, true, true); // directories and files
+                    FileSet fs=new FileSet(commandName, true, true); // directories and files
                     fs.setIsSafeOperation();
                     
                     boolean failed=false;
@@ -118,45 +118,16 @@ public class ShellExternalCommand extends ShellCommand {
         
         PropsFile propsFile=ctx.getObjGlobal().getRoot().getPropsFile();
         
-        String code = propsFile.getBangCommand();
-        SourceLocation loc = new SourceLocation("bangCommand", 0, 0);
+        String code = propsFile.getRunExtCommand();
+        SourceLocation loc = new SourceLocation("runExtCommand", 0, 0);
         FunctionBody codeLines = new FunctionBody(code, loc);
 
         List<Value> params=new ArrayList<Value>();
         params.add(new ValueList(valueList));
-        CFTCallStackFrame caller=new CFTCallStackFrame("<bang-command>");
+        CFTCallStackFrame caller=new CFTCallStackFrame("<runExtCommand>");
         return ctx.getObjGlobal().getRuntime().processFunction(ctx.getStdio(), caller, codeLines, new FunctionState(null,params));
         
-        
-//        String lambda=propsFile.getBangCommand();
-//        
-//        Value[] lambdaArgs= { new ValueObj(new ValueList(valueList)) };
-//        return callConfiguredLambda("bangCommand", ctx, lambda, lambdaArgs);
     }            
 
-    /*
-    // Bang command
-    
-    if (line.startsWith("!")) {
-        String str=line;
-        if (str.startsWith("!")) {
-            str = line.substring(1).trim();
-        } else if (str.endsWith("!")) {
-            str = line.substring(0,line.length()-1);
-        }
-
-        // Run the shell command parser
-        String code = propsFile.getBangCommand();
-        SourceLocation loc = new SourceLocation("bangCommand", 0, 0);
-        FunctionBody codeLines = new FunctionBody(code, loc);
-
-        List<Value> params=new ArrayList<Value>();
-        params.add(new ValueString(str));
-        CFTCallStackFrame caller=new CFTCallStackFrame("<bang-command>");
-        objGlobal.getRuntime().processFunction(stdio, caller, codeLines, new FunctionState(null,params));
-        return;
-    } 
-    */
-    
 
 }

@@ -38,8 +38,10 @@ public class PropsFile {
     
     private String codeDirs;
     private String prompt;   // line of code
+    
     private String bangCommand; // line of code
-    private String historyCommand; // line of code
+    private String runExtCommand; // line of code
+    private String historyAppendCommand; // line of code
     
     private String shell;
     private String winShell;
@@ -97,7 +99,8 @@ public class PropsFile {
         codeDirs=".";
         prompt="'$ '";  // code
         bangCommand="println('bangCommand not defined')"; // code
-        historyCommand="println('historyCommand not defined')";
+        runExtCommand="println('runExtCommand not defined')";
+        historyAppendCommand="println('historyCommand not defined')";
         
         shell = "/usr/bin/bash";
         winShell = "powershell";
@@ -148,8 +151,11 @@ public class PropsFile {
                     if (name.equals("bangCommand")) {
                         bangCommand=value;
                     } else 
-                    if (name.equals("historyCommand")) {
-                        historyCommand=value;
+                    if (name.equals("runExtCommand")) {
+                        runExtCommand=value;
+                    } else
+                    if (name.equals("historyAppendCommand")) {
+                        historyAppendCommand=value;
                     } else
                     if (name.equals("shell")) {
                         shell=value;
@@ -246,8 +252,12 @@ public class PropsFile {
         return bangCommand;
     }
     
-    public String getHistoryCommand() {
-        return historyCommand;
+    public String getRunExtCommand() {
+        return runExtCommand;
+    }
+    
+    public String getHistoryAppendCommand() {
+        return historyAppendCommand;
     }
     
     public String getShell() {

@@ -1145,6 +1145,10 @@ public class ObjGlobal extends Obj {
                 "  all shell commands, both those implemented internally and when running",
                 "  external programs.",
                 "",
+                "- History is available via '!'. Type '!?' to show help.",
+                "",
+                "To repeat last command type a dot ('.') or use the '!!' history command",
+                "",
         };
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             for (String line:data1) {
