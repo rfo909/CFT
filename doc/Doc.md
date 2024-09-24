@@ -1,9 +1,9 @@
 
 # CFT ("ConfigTool") introduction
 
-Last updated: 2024-08-20 RFO
+Last updated: 2024-09-24 RFO
 
-v4.2.3
+v4.3.0
 
 
 
@@ -127,6 +127,28 @@ for example if we wish to run "ls" in Bash (or PowerShell).
 
 Alternatively we can run the "shell" command, which starts PowerShell or Bash, and then do
 whatever we want, followed by "exit" to return to CFT.
+
+
+## Command history
+
+Display previous commands with typeing single exclamation mark ("!"). 
+
+Get help by type "!?".
+
+```
+!?
+
+Command history
+---------------
+
+  !            show full history
+  !?           help (this text)
+  !N           execute command by position in history
+  !!           repeat last command
+  !xxx         repeat last command starting with xxx
+  !xxx*yyy     repeat last command starting with xxx and containing yyy
+
+```
 
 
 # Prompt colors
