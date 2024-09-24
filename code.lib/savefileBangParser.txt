@@ -23,10 +23,15 @@ Command history
 
   !            show full history
   !?           help (this text)
-  !N           execute command by position in history 
   !!           repeat last command
+
+  !N           execute command by position in history
   !xxx         repeat last command starting with xxx
   !xxx*yyy     repeat last command starting with xxx and containing yyy
+
+  !:N          as above, but changes to original directory
+  !:xxx 
+  !:xxx*yyy
 
 >>>> EOF
 	->line println(line)
@@ -113,8 +118,13 @@ Command history
 # --
 	P(1) as Dir => currentDir
 	P(2) as String => command
-	
+
+	gotoDir=false
 	prefix=command.sub(1)
+	if (prefix.startsWith(":")) {
+		gotoDir=true
+		prefix=prefix.sub(1)
+	}
 	pattern=""
 	if (prefix.contains("*")) {
 		pattern=prefix.after("*")
@@ -140,7 +150,8 @@ Command history
 	} 
 	if (dict != null) {
 		dir=Dir(dict.currDir) # stored as string
-		if (dir.path != currentDir.path) Sys.stdin('"BangParser" ' + syn(dir)+'.cd')
+		if (gotoDir && dir.path != currentDir.path) Sys.stdin('"BangParser" ' + syn(dir)+'.cd')
+		println(dict.command)
 		Sys.stdin(dict.command)
 	} else {
 		println("No match")
