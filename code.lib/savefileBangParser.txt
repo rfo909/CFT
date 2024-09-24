@@ -12,19 +12,27 @@ The new BangParser is meant for history lookup, as in Linux shells.
 >>> EOF
 /Readme
 
+
+
 # Help text
 # --
 <<<< EOF
-The command history lets you repeat recent commands
 
-	"!" displays the command history
-	"!!" repeats last command
-	"!xxx" repeats last command starting with xxx
+Command history
+---------------
 
-Type "!?" to display help (this text)
+  !            show full history
+  !?           help (this text)
+  !N           execute command by position in history 
+  !!           repeat last command
+  !xxx         repeat last command starting with xxx
+  !xxx*yyy     repeat last command starting with xxx and containing yyy
+
 >>>> EOF
 	->line println(line)
 /Help
+
+
 
 # Process command line starting with "!" - bangCommand in CFT.props
 # --
@@ -40,106 +48,134 @@ Type "!?" to display help (this text)
 	}
 /Process
  
+
+
+# Get command history (session)
+# --
+	P(1) as Dict? => appendData
+
+	Db2:Get(Sys.scriptId,"CH",Dict) => data
+	sid=Sys.sessionUUID
+
+	sdata=null
+	if (data.has(sid)) {
+		sdata=data.get(sid)
+	} else {
+		sdata=Dict
+		data.set(sid,sdata)
+	}
+
+	# update last access time
+	sdata.lastAccess=currentTimeMillis
+
+	# append history data?
+	if (appendData != null) {
+		sdata.get("history",List).add(appendData)
+	} else {
+		sdata.get("history",List) # create history if not defined
+	}
+
+	# clean out old data
+	limit=currentTimeMillis-86400*1000*20
+	Inner{
+		data.keys->sid
+			if (data.get(sid).lastAccess<limit) data.remove(sid)
+	}
+
+	# save updates
+	Db2:Set(Sys.scriptId,"CH",data)
+
+	# return value
+	sdata
+//DbGetCommandHistory
  
+
+
+
+# Append to history - defined in CFT.props 'historyAppendCommand' called from Java 
+# --
+    P(1) as Dir => dir
+    P(2) as String => command
+
+	if (command.trim != "" && !command.startsWith('"BangParser"')) {
+		# saving string paths, not Dir objects, because recreating Dir objects for 
+		# remote servers may take time
+		
+		currDir=dir.path
+		DbGetCommandHistory(SymDict(currDir,command))
+	}
+/HistoryAppend
+
  
+
+
 # Parse bang expression and execute matching history element
 # --
 	P(1) as Dir => currentDir
 	P(2) as String => command
 	
 	prefix=command.sub(1)
-	data=Db2:Get(Sys.scriptId,"CommandHistory",List).last(40).reverse
+	pattern=""
+	if (prefix.contains("*")) {
+		pattern=prefix.after("*")
+		prefix=prefix.before("*")
+	}
 
 	dict=null
-	
-	if (command=="!!") {
-		dict=data.first  # last command (reversed)
+
+	if (pattern=="" && prefix.?parseInt) {
+		# numbered lookup in history
+		data=DbGetCommandHistory.history
+		dict=data.nth(prefix.parseInt)
+	} else if (command=="!!") {
+		data=DbGetCommandHistory.history.reverse
+		dict=data.first
 	} else Inner{
+		data=DbGetCommandHistory.history.reverse
 		data->d
-			if (d.command.trim.startsWith(prefix)) {
+			if (d.command.trim.startsWith(prefix) && d.command.contains(pattern) ) {
 				dict=d
 				break
 			}
 	} 
 	if (dict != null) {
 		dir=Dir(dict.currDir) # stored as string
-		if (dir.path != currentDir.path) Sys.stdin(syn(dir)+'.cd')
+		if (dir.path != currentDir.path) Sys.stdin('"BangParser" ' + syn(dir)+'.cd')
 		Sys.stdin(dict.command)
 	} else {
 		println("No match")
 		null
 	}
- /RunHistoryCommand
+ //RunHistoryCommand
  
  
  
- 
-# Append to history - defined in CFT.props 'historyAppendCommand' called from Java 
-# --
-    P(1) as Dir => dir
-    P(2) as String => command
-
-    currDir=dir.path
-
-    if (command.trim != "" && command.trim != "." && command!='Db2:Get("Lib","GetCommandHistory:GotoDir").cd') {
-            # That last part matches the code generated in GetCommandHistory when repeating a command !!
-
-        data=SymDict(command,currDir)
-        list=Db2:Get(Sys.scriptId,"CommandHistory",List)
-        list.add(data)
-        Db2:Set(Sys.scriptId,"CommandHistory", list.last(60))
-    }
-
-//HistoryAppend
-
-
 
 # Get directories history
 # --
     Lib:Header("Previous directories. Use 'cd :N' to go to dir")
-    Db2:Get(Sys.scriptId,"CommandHistory",List)->dict
+	DbGetCommandHistory.get("history",List)->dict
         out(dict.currDir)
     | _.unique.last(30)
-/GetDirHistory
+//GetDirHistory
 
 
-# Get command history and execute from it
+# Get command history
 # --
     P(1) as Dir => currentDir
     
-    data=Db2:Get(Sys.scriptId,"CommandHistory",List).last(40)
+    data=DbGetCommandHistory.history
 
-    Lib:Header("Command history")
+
     Inner {
         data->dict
-            report(dict.command.replace("^t".unEsc," <TAB> "), dict.currDir)
+            report(dict.command.replace("^t".unEsc,"<TAB> "), dict.currDir)
         | _=>lines
 		
-	Lib:ShowRows(lines)->line println(line)
+		Lib:ShowRows(lines)->line println(line)
     }
-    readLine("Enter index, or blank to cancel") => s
-    if (s != "") {
-    	if (s.startsWith("!")) {
-    		RunHistoryCommand(currentDir, s)
-    	} else if (s.?parseInt) {
-            dict=data.nth(s.parseInt)
 
-            # Note: can not just do this:
-            #
-            # Dir(dict.currDir).cd 
-            #
-            # That does not affect the caller, because each script has 
-            # their own current dir
-
-            # Solution: using Sys.stdin() 
-
-            Db2:Set("Lib","GetCommandHistory:GotoDir", Dir(dict.currDir))
-            Sys.stdin('Db2:Get("Lib","GetCommandHistory:GotoDir").cd')
-            Sys.stdin(dict.command)
-        } else {
-            # Not a number, treat as a command
-            Sys.stdin(s)
-        }
-    }
+	println
+	println('Type "!?" for help')
     
-/GetCommandHistory
+//GetCommandHistory
