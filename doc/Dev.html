@@ -13,6 +13,33 @@
 
 <h1>CFT Change log</h1>
 
+<h3>4.3.1 2024-09-24 history commands with "!"</h3>
+<p>
+Improved the history command handling, and included the directory history into it. Deleted shortcut @H from CFT.props
+<pre>
+!?
+
+Command history
+---------------
+
+  !            show full history
+  !?           help (this text)
+  !!           repeat last command
+
+  !N           execute command by position in history
+  !xxx         repeat last command starting with xxx
+  !xxx*yyy     repeat last command starting with xxx and containing yyy
+
+  !:N          as above, but changes to original directory
+  !:xxx
+  !:xxx*yyy
+
+  !/           show unique list of directories from history
+  !/N          go to directory by position in list
+
+</pre>
+
+
 <h3>4.3.0 2024-09-21 history commands with "!"</h3>
 <pre>
 Type "!?" for help:

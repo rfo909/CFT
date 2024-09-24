@@ -73,8 +73,6 @@ shortcut:lint = "---- check curr script ----"             Sys.lint
 shortcut:fm   = "---- open file manager (curr dir) ---"   Lib:fileManager(Dir)
 shortcut:cmd  = "---- open cmd in curr dir ----"          Lib:OpenCMD(Dir)
 
-shortcut:H    = "---- directory history ----"             BangParser:GetDirHistory
-
 shortcut:term = "---- Update terminal size ----"          Lib:GetTerminalSize
 shortcut:rsh  = "---- Remote shell via ssh ----"          SSH:remoteShell
 shortcut:scr  = "---- Show all scripts ----"              Lib:Scripts

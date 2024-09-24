@@ -7,6 +7,7 @@
   |  Paths with space
   |  Windows backslash
   |  External / Internal forcing ...
+  |  Command history
 * Prompt colors
   |  Disabling Curses
 * State management

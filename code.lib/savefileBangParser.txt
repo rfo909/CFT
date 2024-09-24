@@ -33,6 +33,10 @@ Command history
   !:xxx 
   !:xxx*yyy
 
+  !/           show unique list of directories from history
+  !/N          go to directory by position in list
+   
+
 >>>> EOF
 	->line println(line)
 /Help
@@ -48,6 +52,8 @@ Command history
 		Help
 	} else if (commandLine=="!") {
 		GetCommandHistory(dir)
+	} else if (commandLine.startsWith("!/")) {
+		RunDirCommand(commandLine)
 	} else {
 		RunHistoryCommand(dir,commandLine)
 	}
@@ -81,7 +87,7 @@ Command history
 	}
 
 	# clean out old data
-	limit=currentTimeMillis-86400*1000*20
+	limit=currentTimeMillis-86400*1000
 	Inner{
 		data.keys->sid
 			if (data.get(sid).lastAccess<limit) data.remove(sid)
@@ -164,11 +170,34 @@ Command history
 
 # Get directories history
 # --
-    Lib:Header("Previous directories. Use 'cd :N' to go to dir")
+   
 	DbGetCommandHistory.get("history",List)->dict
         out(dict.currDir)
     | _.unique.last(30)
 //GetDirHistory
+
+# Show directory history
+# --
+	GetDirHistory->d  # strings
+		report(d)
+	| _=>lines
+	Lib:ShowRows(lines)->line println(line)
+//ShowDirHistory
+
+
+
+# Handle !/ commands
+# --
+	P(1)=>command
+	if (command=="!/") {
+		ShowDirHistory
+	} else {
+		n=command.after("/").parseInt
+		dir=GetDirHistory.nth(n)
+		Sys.stdin('"BangParser" ' + syn(Dir(dir))+'.cd')
+	}
+//RunDirCommand
+
 
 
 # Get command history
