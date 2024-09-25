@@ -135,6 +135,40 @@
 //CreateSummaryDict
 
 
+# Update dependency version for all pom files
+# NOTE: XML:PP does not preserve comments and specials like <?xml ...> header from original file!!!
+#
+# --
+	P(1,Input("Enter <groupId>:<artifactId>:<version>").get) => s
+
+	groupId=s.before(":")
+	s=s.after(":")
+	artifactId=s.before(":")
+	version=s.after(":")
+
+	Pom->f
+		Inner {
+			updated=false
+			XML:Parse(f.read).first => obj
+			obj.subNode("dependencies").subNodes("dependency")->dep
+				assert(dep.subNode("groupId").getContent.trim==groupId)
+				assert(dep.subNode("artifactId").getContent.trim==artifactId)
+				assert(dep.subNode("version").getContent.trim != version)
+				updated=true
+				dep.subNode("version").setText(version)
+			|
+			if (updated) {
+				println("*** Updating " + f.path)
+				List(
+					'<?xml version="1.0" encoding="UTF-8"?>'
+				) + XML:PP(obj)
+				#XML:PP(obj) => lines
+				f.setWriteLF.create(lines)
+			}
+		}
+/UpdateDependency
+		
+
 # Update all git modules
 # --
 	Git:UpdateSubmodules
