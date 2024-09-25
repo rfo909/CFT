@@ -142,20 +142,32 @@
 
 
 
+# File header
+# --
+	P(1) as File=>file
+	P(2) as String=>s
+
+	file.append("")
+	file.append(s)
+	file.append("-".times(s.length))
+//FileHeader
+
 # For all pom files under current directory, including submodules, create summaries of dependencies
 # and mark local dependencies between pom files
 # --
 	P(1,true) => includeSubmodules
 	P(2,Dir) => dir
 
-	println
-	Lib:Header("Summarizing all pom*.xml found under " + dir.path + "  " + Date.fmt)
-	println
-	println("Dependencies:")
-	println("  '*' means created by local pom file")
-	println("  'E' means inconsistent versions between dependency and local pom file")
-	println("  '-' means external dependency")
-	println
+	P(3,Dir.file("summaryAll.txt")) => resultFile
+	if(resultFile.exists) resultFile.delete
+
+	FileHeader(resultFile,"Summarizing all pom*.xml found under " + dir.path + "  " + Date.fmt)
+	resultFile.append("")
+	resultFile.append("Dependencies:")
+	resultFile.append("  '*' means created by local pom file")
+	resultFile.append("  'E' means inconsistent versions between dependency and local pom file")
+	resultFile.append("  '-' means external dependency")
+	resultFile.append("")
 
 
 	list=List
@@ -166,8 +178,8 @@
 	list->summary
 		# for each dependency, search through the summaries, to see if 
 		# any of them create that dependency
-		Lib:Header(summary.create)
-		println(summary.file.path)
+		FileHeader(resultFile,summary.create)
+		resultFile.append(summary.file.path)
 
 		summary.dep->dep
 			allDep.add(dep)
@@ -185,16 +197,18 @@
 						}
 					}
 			}
-			println(prefix + dep)
+			resultFile.append(prefix + dep)
 	|
-	println
+	resultFile.append("")
 	
 	# List all dependecies, sorted and unique, to reveal differing versions
-	Lib:Header("All dependencies from the POM files")
+	FileHeader(resultFile,"All dependencies from the POM files")
 	allDep.sort.unique->dep
-		println("   " + dep)
+		resultFile.append("   " + dep)
 	|
-	println
+	resultFile.append("")
+
+	Lib:e(resultFile)
 /ShowSummaryAll
 
 
