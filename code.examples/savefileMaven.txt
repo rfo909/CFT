@@ -167,7 +167,7 @@
 		}
 	|
 	dict
-//CreateSummaryDict
+/CreateSummaryDict
 
 
 # Update dependency version for all pom files
@@ -338,4 +338,38 @@
 		report(f, f.path, count)
 /NoJava
 
+
+# Create search structure for all jar files under current dir
+# --
+	P(1,Dir) => currentDir
+	P(2,false) => includeInnerClasses
+
+	println("Processing jar files")
+	data=List
+
+	currentDir.allFiles("*.jar") -> f
+		println(f.path)
+		data.add(Java:JarContent(f, includeInnerClasses))
+	|
+
+	loop
+		println
+		readLine("Search for class, blank to abort") => str
+		break(str=="")
+		Inner{
+			data->jc  # JarContent Dict
+				header=false
+				{
+					jc.classes->class
+						if (class.contains(str)) {
+							if (!header) {
+								Lib:Header(jc.jarFile.path)
+								header=true
+							}
+							println(class)
+						}
+				}
+		}
+
+/MissingClassesSearch
 

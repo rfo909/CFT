@@ -274,3 +274,33 @@ P(2,"") => prefix
     SSH:run(target,"chmod +x ./RunCFT")
 //CreateRunCFT
 
+
+
+# Collect information about content in jar-file, returns Dict with .classes and .files
+# where .files contain non *.java files, with path, while .classes contains the
+# files ending with .java, and replacing path separators with dots
+# --
+	P(1) as File => jarFile
+	P(2, true) => includeInnerClasses
+
+	dict=Dict
+	dict.files=List
+	dict.classes=List
+	dict.jarFile=jarFile
+
+	Dir.runCapture("jar","tf",jarFile.path)->line
+		reject(line.endsWith("/"))
+		if (line.endsWith(".class")) {
+			if (includeInnerClasses || !line.contains("$")) {
+				class=line.beforeLast(".").replace("/",".")
+				dict.classes.add(class)
+			}
+		} else {
+			dict.files.add(line)
+		}
+	|
+
+	dict
+		
+/JarContent
+

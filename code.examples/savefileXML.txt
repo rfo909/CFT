@@ -112,12 +112,12 @@ Export as string
 		insideString.sub(c).setIsToken(5)
 	|
 
-	# Processing instructions <? ... ?> (-1 = don't include token in token stream)
+	# Processing instructions <? ... ?> 
 
 	root.addToken("<?").setDefault => x
 	x.setDefault(x)
 	x.sub("?").setDefault(x)
-	x.addToken("?>").setIsToken(-1)  # terminates processing instruction, 
+	x.addToken("?>").setIsToken(6)  # terminates processing instruction, 
     
 	# Comments <!-- ... -->
 
@@ -127,7 +127,7 @@ Export as string
 	# prevent error on partial end-marker
 	x.addToken("-").setDefault(x)
 	x.addToken("--").setDefault(x)  
-	x.addToken("-->").setIsToken(-1)  # terminates comment
+	x.addToken("-->").setIsToken(7)  # terminates comment
 
 	# CDATA = 11
 
@@ -152,6 +152,7 @@ Export as string
 # Example XML code
 # ---
     Sequence(
+	@    <?xml version="1.0" encoding="UTF-8"?>
 	@    <!-- this is 
 	@         a comment 
 	@           2021/01/01 12:00:55 
@@ -382,12 +383,12 @@ exampleXML
     self.parse=Lambda{
         P(1) as LexerTokenStream => ts
 
-	ws=Lambda{
-		P(1) as LexerTokenStream => ts
-		loop
-			break(ts.EOF || ts.peekType != 1)
-			ts.next
-	} 
+		ws=Lambda{
+			P(1) as LexerTokenStream => ts
+			loop
+				break(ts.EOF || ts.peekType != 1)
+				ts.next
+		} 
 
         # START TAG BEGIN + TAG NAME
         

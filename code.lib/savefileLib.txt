@@ -578,14 +578,14 @@ run(null,null,null,true)
     P(2,Lambda { "name"}) =>LLabel
         options->x
             println("- " + LLabel.call(x))
-/ShowOptions
+//ShowOptions
 
 
 
-# Select zero or more from list of options
+# Select zero or more from list of options (used from MenuSelect)
 # --
     P(1,List) =>options
-    P(2,Lambda { "name"}) =>LLabel
+    P(2,Lambda{P(1)}) =>LLabel
     P(3,false) =>emptyMeansNone
     P(4,LLabel) => LValue
     
@@ -607,7 +607,7 @@ run(null,null,null,true)
             }
         }
         result
-/SelectOptions
+//SelectOptions
 
 
 
