@@ -1423,6 +1423,10 @@ BackDateLastResultFiles
     if (!getType(val)=="List") val=List(val)
     val->x
         if (getType(x)=="File" || getType(x)=="Dir") out(x.path) 
+		else if (getType(x)=="Row") {
+			f=x.get(0)
+			if (getType(f)=="File" || getType(f)=="Dir") out(f.path)
+		}
 /Paths
 
 

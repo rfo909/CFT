@@ -20,18 +20,43 @@
 /License
 
 
+# Set group id as used by git for this project
+# --
+	Db2:Set(Sys.scriptId,"git-group-id",readLine("Enter group id"))
+/SetGroupId
+
+
+
+# Group id for git
+# --
+	Db2:Get(Sys.scriptId,"git-group-id",null) => gid
+	if (gid==null) {
+		readLine("Enter group id for project") => gid
+		Db2:Set(Sys.scriptId,"git-group-id", gid)
+	}
+	gid
+/GetGroupId
+		
+	
+
+
 # Get all git submodule directories on form \x\y\ so that we can use .contains on path string
 # --
 	dict=Dict
-	Dir.file(".gitmodules").read->line
-		assert(line.contains("path ="))
-		s=line.after("=").trim
-		s="\" + s.replace("/","\") + "\"
-		out(s)
+	f=Dir.file(".gitmodules")
+	if (f.exists) {
+		f.read->line
+			assert(line.contains("path ="))
+			s=line.after("=").trim
+			s="\" + s.replace("/","\") + "\"
+			out(s)
+	} else {
+		List
+	}
 //GitSubmodules
 
 		
-# Path depth of file
+# Path depth of file (helper)
 # --
 	P(1) as File => f
 	f.path.chars->c
@@ -39,6 +64,8 @@
 		out(1)
 	| _.length
 //PathDepth
+
+
 
 # All pom files under current dir
 # Sorted so that deepest path files come first
@@ -116,6 +143,14 @@
 		out("dep " + s)
 
 /CreateSummary
+
+
+# Show artifact and version from all pom files
+# --
+	Pom->f
+		XML:Parse(f.read).first => node
+		report(f, node.subNode("groupId").getContent + ":" + node.subNode("artifactId").getContent + ":" + node.subNode("version").getContent, f.path)
+/Versions
 	
 
 # Create pom summary as dictionary
@@ -186,13 +221,15 @@
 	file.append("-".times(s.length))
 //FileHeader
 
+
+
 # For all pom files under current directory, including submodules, create summaries of dependencies
 # and mark local dependencies between pom files
 # --
-	P(1,true) => includeSubmodules
+	P(1,false) => includeSubmodules
 	P(2,Dir) => dir
 
-	P(3,Dir.file("summaryAll.txt")) => resultFile
+	Lib:TmpFile("summaryAll","txt") => resultFile
 	if(resultFile.exists) resultFile.delete
 
 	FileHeader(resultFile,"Summarizing all pom*.xml found under " + dir.path + "  " + Date.fmt)
@@ -200,12 +237,11 @@
 	resultFile.append("Dependencies:")
 	resultFile.append("  '*' means created by local pom file")
 	resultFile.append("  'E' means inconsistent versions between dependency and local pom file")
-	resultFile.append("  '-' means external dependency")
+	resultFile.append("  'X' means starts with GetGroupId but not to with local pom")
 	resultFile.append("")
 
 
 	list=List
-	allDep=List
 	Pom(includeSubmodules)->f
 		list.add(CreateSummaryDict(f))
 	|
@@ -216,8 +252,9 @@
 		resultFile.append(summary.file.path)
 
 		summary.dep->dep
-			allDep.add(dep)
-			prefix=" - "
+			prefix="   "
+			if (dep.startsWith(GetGroupId)) prefix=" X "
+			extra=""
 			
 			Inner{
 				list->x
@@ -228,15 +265,23 @@
 						if (x.create.afterLast(":") != dep.afterLast(":")) {
 							# versions differ
 							prefix=" E "
+							extra="  --  should be " + x.create.afterLast(":")
 						}
 					}
 			}
-			resultFile.append(prefix + dep)
+			resultFile.append(prefix + dep + extra)
 	|
 	resultFile.append("")
-	
-	# List all dependecies, sorted and unique, to reveal differing versions
-	FileHeader(resultFile,"All dependencies from the POM files")
+
+
+	# List all dependecies (not including submodules), sorted and unique, to reveal differing versions
+	allDep=List
+	Pom(false)->f
+		CreateSummaryDict(f).dep->dep
+			allDep.add(dep)
+	|
+
+	FileHeader(resultFile,"All dependencies from the POM files (not submodules)")
 	allDep.sort.unique->dep
 		resultFile.append("   " + dep)
 	|
@@ -278,3 +323,19 @@
 			if (line.contains("[ERROR]")) Lib:ShowText(line)
 
 /DeployAll
+
+
+# Show pom files which have no java source files under the pom directory 
+# --
+	fsep=Sys.fileSeparator
+	Pom->f
+		count=Inner{
+			f.dir.allFiles("*.java")->javaFile
+				reject(javaFile.path.contains(fsep+"target"+fsep))
+				out(1)
+			| _.length
+		}
+		report(f, f.path, count)
+/NoJava
+
+
