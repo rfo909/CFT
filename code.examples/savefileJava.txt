@@ -304,3 +304,42 @@ P(2,"") => prefix
 		
 /JarContent
 
+
+
+# Create search structure for all jar files under current dir, to search for classes or other files (properties-files etc)
+# --
+	P(1,Dir) as Dir => currentDir
+	P(2,false) as boolean => includeInnerClasses
+
+	println("Processing jar files")
+	data=List
+
+	currentDir.allFiles("*.jar") -> f
+		println(f.path)
+		data.add(JarContent(f, includeInnerClasses))
+	|
+
+	loop
+		println
+		readLine("Search for class, or type '/...' to search for other file, blank to abort") => str
+		break(str=="")
+
+		if (str.startsWith("/")) Inner {
+			# Search for other files
+			str=str.sub(1)
+			data->jc
+				jc.files->file
+					if (file.contains(str)) report(file)
+		} else Inner{
+			# search for jar
+			data->jc  # JarContent Dict
+					jc.classes->class
+						if (class.contains(str)) {
+							report(jc.jarFile, jc.jarFile.name, class)
+						}
+		} _=>rows
+		Lib:ShowRows(rows)
+
+/SearchJarFiles
+
+

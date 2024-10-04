@@ -48,7 +48,7 @@
 	}
 
 	if (show) Inner{
-		Lib:ShowRows(result)->line println(line)
+		Lib:ShowRows(result)
 	}
 
 	result

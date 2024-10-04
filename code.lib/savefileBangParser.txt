@@ -181,7 +181,7 @@ Command history
 	GetDirHistory->d  # strings
 		report(d)
 	| _=>lines
-	Lib:ShowRows(lines)->line println(line)
+	Lib:ShowRows(lines)
 //ShowDirHistory
 
 
@@ -212,7 +212,7 @@ Command history
             report(dict.command.replace("^t".unEsc,"<TAB> "), dict.currDir)
         | _=>lines
 		
-		Lib:ShowRows(lines)->line println(line)
+		Lib:ShowRows(lines)
     }
 
 	println

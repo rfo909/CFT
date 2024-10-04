@@ -701,7 +701,7 @@ run(null,null,null,true)
 
 
 
-# Show a list of Row objects formatted into a list of strings
+# Process a list of Row objects into a list of strings
 # --
 	P(1) as List => data
 
@@ -740,6 +740,13 @@ run(null,null,null,true)
 		x=("    "+rowNumber).last(4)
 		out(x+": "+line)
 		rowNumber=rowNumber+1
+/FormatRows
+
+
+# Show list of Row 
+# --
+	P(1) as List => data
+	FormatRows(data)->line println(line)
 /ShowRows
 
 

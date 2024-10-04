@@ -289,7 +289,7 @@ loop
 			} 
 		}
 		if (isRow) {
-			res=Lib:ShowRows(res)
+			res=Lib:FormatRows(res)
 		}
 
 	}

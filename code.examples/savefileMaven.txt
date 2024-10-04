@@ -297,42 +297,6 @@
 /NoJava
 
 
-# Create search structure for all jar files under current dir
-# --
-	P(1,Dir) as Dir => currentDir
-	P(2,false) as boolean => includeInnerClasses
-
-	println("Processing jar files")
-	data=List
-
-	currentDir.allFiles("*.jar") -> f
-		println(f.path)
-		data.add(Java:JarContent(f, includeInnerClasses))
-	|
-
-	loop
-		println
-		readLine("Search for class, blank to abort") => str
-		break(str=="")
-		Inner{
-			data->jc  # JarContent Dict
-				header=false
-				{
-					jc.classes->class
-						if (class.contains(str)) {
-							if (!header) {
-								Lib:Header(jc.jarFile.path)
-								header=true
-							}
-							println(class)
-						}
-				}
-		}
-
-/MissingClassesSearch
-
-
-
 
 # Version edit pom file
 # 
