@@ -488,10 +488,15 @@ public class ObjFile extends Obj implements IsSynthesizable {
             return "read";
         }
         public String getShortDesc() {
-            return "read() - read text file, returns list of lines";
+            return "read(deTab?) - read text file, returns list of lines (deTab defaults to true, converting TAB to spaces)";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 0) throw new Exception("Expected no parameters");
+            boolean detab=true;
+            if (params.size()==1) {
+                detab=getBoolean("deTab", params, 0);
+            } else if (params.size() != 0) {
+                throw new Exception("Expected optional parameter deTab to control TAB handling");
+            }
             List<Value> result=new ArrayList<Value>();
             BufferedReader br=null;
             long lineNo=0;
@@ -502,10 +507,14 @@ public class ObjFile extends Obj implements IsSynthesizable {
                     String line=br.readLine();
                     lineNo++;
                     if (line==null) break;
-                    
-                    String deTabbed=TabUtil.substituteTabs(line,4);
-                    result.add(new ValueObjFileLine(deTabbed, lineNo, self()));  
+
+                    if (detab) {
+                        String deTabbed = TabUtil.substituteTabs(line, 4);
+                        result.add(new ValueObjFileLine(deTabbed, lineNo, self()));
                         // ObjFileLine is subclass of ValueString
+                    } else {
+                        result.add(new ValueObjFileLine(line, lineNo, self()));
+                    }
                 }
             } finally {
                 if (br != null) try {br.close();} catch (Exception ex) {};

@@ -69,6 +69,7 @@
 
 # All pom files under current dir
 # Sorted so that deepest path files come first
+# If not including submodules, filter out those.
 # --
 	P(1,false)=>includeSubmodules
 
@@ -310,6 +311,24 @@
 /CompileAll
 
 
+# test-compile all pom files in current dir
+# --
+	P(1,true) => showErrors
+	Dir.files("pom*.xml")->f
+		Lib:Header(f.path)
+		result = Lib:run(List("cmd","/c","mvn","-f", f.path, "clean","package","-U"), null, true)
+
+		if(result.exitCode==0) println("   OK") else println("   ERROR")
+
+		if (showErrors) {
+			lines = result.stdout + result.stderr
+			lines->line
+				if (line.contains("[ERROR]")) Lib:ShowText(line)
+		}
+
+/CurrDirCompileAll
+
+
 # Run deploy on all pom files (except git submodules), to update repo
 # --
 	Pom->f
@@ -372,4 +391,58 @@
 		}
 
 /MissingClassesSearch
+
+
+
+
+# Version edit pom file
+# 
+# Modify artifact version for pom files where groupId and optional artifactId matches.
+# Also modify dependencies to that same version, where groupId and artifactId (if defined), matches
+# Returns modified list of lines
+# --
+	P(1) as File => pomFile
+	P(2) as String => groupId
+	P(3) as String? => artifactId
+	P(4) as String => VERSION
+ 
+	buf=AutoEdit:EditBuffer(pomFile.read(false))
+
+	buf.match("<groupId>",10)
+	if (buf.line.contains(">"+groupId+"<")) {
+		ok=true
+		if (artifactId != null) {
+			buf.match("<artifactId>",3)
+			ok = buf.line.contains(">" + artifactId + "<")
+		}
+		if (ok) {
+			buf.match("<version>",3)
+			line=buf.line
+			line=line.before("<version>") + "<version>" + VERSION + "</version>" + line.after("</version>")
+			buf.update(line)
+			buf.next
+		}
+	}
+
+	buf.match("<dependencies>")
+	loop
+		break(!buf.matchOptional("<groupId>" + groupId + "</groupId>")) 
+		ok=true
+		if (artifactId != null) {
+			buf.match("<artifactId>",3)
+			ok = buf.line.contains(">"+artifactId+"<")
+		}
+		if (ok) {
+			buf.match("<version>", 3)
+			line=buf.line
+			line=line.before("<version>") + "<version>" + VERSION + "</version>" + line.after("</version>")
+			buf.update(line)
+		}
+	|
+
+	# Verify still valid XML
+	XML:Parse(buf.out)
+	# return modified file content
+	buf.out
+/VersionEditPom
 

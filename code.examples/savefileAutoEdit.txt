@@ -1,0 +1,87 @@
+
+# EditBuffer class
+# See Maven:VersionEditPom
+# --
+	P(1)=>lines
+	self.lines=lines
+
+	self.pos=0
+
+	self.atEOF=Lambda{
+		self.pos >= self.lines.length
+	}
+
+	self.line=Lambda{
+		self.lines.nth(self.pos)
+	}
+
+	self.next=Lambda{
+		self.pos=self.pos+1
+	}
+
+
+	self.matchOptional=Lambda{
+		P(1) as String => str
+		P(2,true) as boolean => matchCase
+		pos=self.pos
+		loop
+			if (self.atEOF) {
+				# restore start search position and return false
+				self.pos=pos
+				out(false)
+				break
+				
+			}
+			if(matchCase && self.line.contains(str)) {
+				# return true
+				out(true)
+				break
+			}
+			if (!matchCase && self.line.toLower.contains(str.toLower)) {
+				# return true
+				out(true)
+				break
+			}
+			self.next
+
+		| _.first
+	}
+
+	self.match=Lambda{
+		P(1) as String => str
+		P(2,9999) as int => maxIncr
+		P(3,true) as boolean => matchCase
+		startPos=self.pos
+		
+		loop
+			break(matchCase && self.line.contains(str))
+			break(!matchCase && self.line.toLower.contains(str.toLower))
+
+			
+			error(self.pos-startPos >= maxIncr, "match '" + str + "' maxIncr=" + maxIncr + " FAIL")
+			self.next
+	}
+
+
+	self.modifications=Dict
+
+	self.update=Lambda{
+		P(1)=>line
+		self.modifications.set(""+self.pos, line)
+	}
+
+	self.out = Lambda{
+		Std.Data.each(0,self.lines.length-1)->i
+			s=self.modifications.get(""+i, null) => s
+			if (s==null) s=self.lines.nth(i)
+			out(s)
+	}
+
+/class EditBuffer		
+	
+
+		
+
+
+
+
