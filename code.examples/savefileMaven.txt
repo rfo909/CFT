@@ -37,26 +37,9 @@
 	gid
 /GetGroupId
 		
-	
 
 
-# Get all git submodule directories on form \x\y\ so that we can use .contains on path string
-# --
-	dict=Dict
-	f=Dir.file(".gitmodules")
-	if (f.exists) {
-		f.read->line
-			assert(line.contains("path ="))
-			s=line.after("=").trim
-			s="\" + s.replace("/","\") + "\"
-			out(s)
-	} else {
-		List
-	}
-//GitSubmodules
-
-		
-# Path depth of file (helper)
+# Path depth for file
 # --
 	P(1) as File => f
 	f.path.chars->c
@@ -71,16 +54,26 @@
 # Sorted so that deepest path files come first
 # If not including submodules, filter out those.
 # --
-	P(1,false)=>includeSubmodules
+	P(1,Dir) as Dir => currentDir
+	P(2,false) as boolean =>includeSubmodules
 
-    Dir.allFiles("pom*.xml")->pom
+	submodules=Inner{
+		# modify paths for proper matching against POM file path
+		Git:Submodules(currentDir)->path out(Sys.fileSeparator + path + Sys.fileSeparator)
+	}
+
+    currentDir.allFiles("pom*.xml")->pom
 		path=pom.path
 		if (!includeSubmodules) {
-			foundList = Inner{
-				GitSubmodules->m
-					if (path.contains(m)) out(1)
+			found = false
+			Inner{
+				submodules->subModulePath   # /x/y/ format
+					if (path.contains(subModulePath)) {
+						found=true
+						break
+					}
 			}
-			if (foundList.empty) out(pom)
+			if (!found) out(pom)
 		} else {
 			out(pom)
 		}
@@ -90,41 +83,7 @@
 		out(x.data)
 /Pom
 
-# Get first line with a certain pattern
-# --
-    P(1) => pomFile
-    P(2, readLine("Enter pattern")) => pattern
-    pomFile.read->line
-        if (line.contains(pattern)) {
-            out(line)
-            break
-        }
-//GetFirst
 
-
-# Select Pom file
-# --
-    files=Pom
-    files->f
-        println(f.path)
-    |
-    Lib:SelectOptions(files, Lambda{P(1).path}, Lambda{P(1)})
-//SelectFile
-
-# Get build version for pom file
-# --
-    GetFirst(P(1),"<version>")
-/BV
-
-# Get groupId for pom file
-# --
-    GetFirst(P(1),"<groupId>")
-/GI
-
-# Get artifactId for pom file
-# --
-    GetFirst(P(1),"<artifactId>")
-/AI
 
 
 # Create summary of pom file detailing what artifact it creates, and dependencies, on simple line format
@@ -146,9 +105,11 @@
 /CreateSummary
 
 
-# Show artifact and version from all pom files
+# Show artifact and version from all pom files (including submodules)
 # --
-	Pom->f
+	P(1,Dir) => currentDir
+
+	Pom(currentDir,true)->f
 		XML:Parse(f.read).first => node
 		report(f, node.subNode("groupId").getContent + ":" + node.subNode("artifactId").getContent + ":" + node.subNode("version").getContent, f.path)
 /Versions
@@ -157,6 +118,7 @@
 # Create pom summary as dictionary
 # --
 	P(1,Pom.first) as File => f
+
 	dict=Dict
 	dict.dep=List
 	dict.file=f
@@ -171,44 +133,12 @@
 /CreateSummaryDict
 
 
-# Update dependency version for all pom files
-# NOTE: XML:PP does not preserve comments and specials like <?xml ...> header from original file!!!
-#
-# --
-	P(1,Input("Enter <groupId>:<artifactId>:<version>").get) => s
-
-	groupId=s.before(":")
-	s=s.after(":")
-	artifactId=s.before(":")
-	version=s.after(":")
-
-	Pom->f
-		Inner {
-			updated=false
-			XML:Parse(f.read).first => obj
-			obj.subNode("dependencies").subNodes("dependency")->dep
-				assert(dep.subNode("groupId").getContent.trim==groupId)
-				assert(dep.subNode("artifactId").getContent.trim==artifactId)
-				assert(dep.subNode("version").getContent.trim != version)
-				updated=true
-				dep.subNode("version").setText(version)
-			|
-			if (updated) {
-				println("*** Updating " + f.path)
-				List(
-					'<?xml version="1.0" encoding="UTF-8"?>'
-				) + XML:PP(obj)
-				#XML:PP(obj) => lines
-				f.setWriteLF.create(lines)
-			}
-		}
-/UpdateDependency
-		
 
 # Update all git modules
 # --
-	Git:UpdateSubmodules
-/UpdateGitSubmodules
+	P(1,Dir)=>currentDir
+	Git:UpdateSubmodules(currentDir)
+/UpdateSubmodules
 
 
 
@@ -227,13 +157,13 @@
 # For all pom files under current directory, including submodules, create summaries of dependencies
 # and mark local dependencies between pom files
 # --
-	P(1,false) => includeSubmodules
-	P(2,Dir) => dir
+	P(1,Dir) as Dir => currentDir
+	P(2,false) as boolean => includeSubmodules
 
 	Lib:TmpFile("summaryAll","txt") => resultFile
 	if(resultFile.exists) resultFile.delete
 
-	FileHeader(resultFile,"Summarizing all pom*.xml found under " + dir.path + "  " + Date.fmt)
+	FileHeader(resultFile,"Summarizing all pom*.xml found under " + currentDir.path + "  " + Date.fmt)
 	resultFile.append("")
 	resultFile.append("Dependencies:")
 	resultFile.append("  '*' means created by local pom file")
@@ -243,7 +173,7 @@
 
 
 	list=List
-	Pom(includeSubmodules)->f
+	Pom(currentDir, includeSubmodules)->f
 		list.add(CreateSummaryDict(f))
 	|
 	list->summary
@@ -277,7 +207,7 @@
 
 	# List all dependecies (not including submodules), sorted and unique, to reveal differing versions
 	allDep=List
-	Pom(false)->f
+	Pom(currentDir,false)->f
 		CreateSummaryDict(f).dep->dep
 			allDep.add(dep)
 	|
@@ -295,8 +225,10 @@
 
 # test-compile all pom files (except git submodules)
 # --
-	P(1,false) => showErrors
-	Pom->f
+	P(1,Dir) as Dir => currentDir
+	P(2,true) as boolean => showErrors
+
+	Pom(currentDir,false)->f
 		Lib:Header(f.path)
 		result = Lib:run(List("cmd","/c","mvn","-f", f.path, "clean","package","-U"), null, true)
 
@@ -313,8 +245,10 @@
 
 # test-compile all pom files in current dir
 # --
-	P(1,true) => showErrors
-	Dir.files("pom*.xml")->f
+	P(1,Dir) as Dir => currentDir
+	P(2,true) as boolean => showErrors
+
+	currentDir.files("pom*.xml")->f
 		Lib:Header(f.path)
 		result = Lib:run(List("cmd","/c","mvn","-f", f.path, "clean","package","-U"), null, true)
 
@@ -331,7 +265,9 @@
 
 # Run deploy on all pom files (except git submodules), to update repo
 # --
-	Pom->f
+	P(1,Dir) as Dir => currentDir
+
+	Pom(currentDir,false)->f
 		Lib:Header(f.path)
 		result = Lib:run(List("cmd","/c","mvn","-f", f.path, "deploy"), null, true) 
 
@@ -346,8 +282,11 @@
 
 # Show pom files which have no java source files under the pom directory 
 # --
+	P(1,Dir) as Dir => currentDir
+
 	fsep=Sys.fileSeparator
-	Pom->f
+
+	Pom(currentDir,false)->f
 		count=Inner{
 			f.dir.allFiles("*.java")->javaFile
 				reject(javaFile.path.contains(fsep+"target"+fsep))
@@ -360,8 +299,8 @@
 
 # Create search structure for all jar files under current dir
 # --
-	P(1,Dir) => currentDir
-	P(2,false) => includeInnerClasses
+	P(1,Dir) as Dir => currentDir
+	P(2,false) as boolean => includeInnerClasses
 
 	println("Processing jar files")
 	data=List
@@ -446,3 +385,23 @@
 	buf.out
 /VersionEditPom
 
+
+
+# Update version for all pom*.xml under current directory
+# --
+	P(1,Dir) as Dir => currentDir
+	P(2) as String => groupId
+	P(3) as String? => artifactId
+	P(4) as String => version
+	P(5,false) as boolean => crlf
+
+	Maven:Pom(currentDir,false)->f
+		println(f.path)
+		lines=Maven:VersionEditPom(f, groupId, artifactId, version)
+		if (crlf) {
+			f.setWriteCRLF
+		} else {
+			f.setWriteLF
+		}
+		f.create(lines)
+/VersionEditAllPom

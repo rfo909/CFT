@@ -26,11 +26,45 @@
 //Run
 
 
+
+# Get all git submodule directories 
+# --
+	P(1,Dir) as Dir => currentDir
+
+	dict=Dict
+	f=currentDir.file(".gitmodules")
+	if (f.exists) {
+		f.read->line
+			assert(line.contains("path ="))
+			s=line.after("=").trim 
+			if (Sys.isWindows) {
+				s=s.replace("/","\")
+			}
+			out(s)
+	} else {
+		println("WARNING: no .gitmodules file")
+		List
+	}
+/Submodules
+
+
+# Git submodule directories
+# --
+	P(1,Dir) as Dir => currentDir
+
+	Submodules(currentDir)->path
+		dir=currentDir.sub(path)
+		out(dir)
+/SubmoduleDirs
+
+
+
 # Create branch
 # --
     P(1,Input("Branch FROM").setCurrCond("master").get.trim) => fromBranch
     P(2,readLine("New branch name").trim) => newBranch
 
+	Run("git pull origin")
     Run("git checkout " + fromBranch)
     Run("git pull origin " + fromBranch)
     Run("git branch " + newBranch)
@@ -41,6 +75,7 @@
 # Delete local branch
 # --
     P(1,readLine("Local branch to delete").trim) => branch
+
     error(branch=="master","Can not delete master")
     Run("git checkout master")
     Run("git branch --delete " + branch)
@@ -55,69 +90,64 @@
 
 
 
-# Create and run git commands for adding submodules from another project's .gitmodules or from a text file on same format
-# (an edited version)
+# Initialize submodules in current project
 # --
-    P(1) as File => file
-    P(2, true) => showOnly
+	P(1,Dir) as Dir => currentDir
 
-    enabled=false
-    path=null
-    url=null
+	command="git submodule update --init"
+	println(command)
+	currentDir.run(command.split)
+/InitSubmodules
 
-    file.read->line
-        reject(line.trim=="" || line.trim.startsWith("#"))
-
-        if (line.startsWith("[submodule")) {
-            enabled=true
-        } else if (line.trim.startsWith("path =")) {
-            if (enabled) path=line.after("=").trim
-        } else if (line.trim.startsWith("url =")) {
-            if (enabled) url=line.after("=").trim
-        } else {
-            error("Invalid line: " + line)
-        }
-        if (enabled && path != null && url != null) {
-            command="git submodule add <<url>> <<path>>".mergeExpr.first
-            println(command)
-            if (!showOnly) {
-                Dir.run(command.split)
-            }
-            enabled=false
-            path=url=null
-        }
-/CreateSubmodules
         
     
 # Update submodules according to .gitmodules in current dir
 # --
-    P(1,Dir.file(".gitmodules")) => file
+	P(1,Dir) as Dir => currentDir
     P(2,Input("Enter glob pattern to match submodule(s)").setCurrCond("*").get) => modulePattern
 
-    file.read->line
-        assert(line.trim.startsWith("path ="))
-        path=line.after("=").trim
+	Submodules(currentDir)->path
         if (Glob(modulePattern).regex.match(path)) {
             command="git submodule update --remote " +  path
             println(command)
-            Dir.run(command.split)
+            currentDir.run(command.split)
         }
 /UpdateSubmodules
 
 
+# Restore changes in submodules
+# --
+	P(1,Dir) as Dir => currentDir
+    P(2,Input("Enter glob pattern to match submodule(s)").setCurrCond("*").get) => modulePattern
+
+	Submodules(currentDir)->path
+        if (Glob(modulePattern).regex.match(path)) {
+			targetDir=currentDir.sub(path)
+            command="git restore ."
+			println("Running", "'" + command + "'", "inside", targetDir.path)
+			targetDir.run(command.split)
+        }
+/RestoreSubmoduleChanges
+
 
 # Fetch git log
 # --
-	Dir.run("git","log")
+	P(1,Dir) as Dir => currentDir
+
+	currentDir.run("git","log")
 /GetLog
 
 
-# Check out previous commit in new branch
+# Check out some earlier commit in new branch
 # --
-	P(1,readLine("Enter branch name")) => branchName
-	P(2,readLine("Enter commit hex code")) => commit
+	P(1,Dir) as Dir => currentDir
+	P(2,readLine("Enter branch name")) as String => branchName
+	P(3,readLine("Enter commit hex code")) as String => commit
 
 	command=List("git","checkout","-b",branchName,commit)
 	println(command.concat(" "))
-	Dir.run(command)
+	currentDir.run(command)
 /GetPreviousCommit
+
+
+
