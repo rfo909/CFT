@@ -1379,7 +1379,7 @@ run(null,null,null,true)
 # --
     P(1,1000)=>range
 
-    number=DB2:Get(Sys.scriptId,"randomNumber",100)
+    number=Db2:Get(Sys.scriptId,"randomNumber",100)
     Db2:Set(Sys.scriptId,"randomNumber",number+1)
     value=(10000005 % number)/number
     value=value*range
