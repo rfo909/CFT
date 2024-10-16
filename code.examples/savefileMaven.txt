@@ -23,11 +23,13 @@
 # Set group id as used by git for this project
 # --
 	Db2:Set(Sys.scriptId,"git-group-id",readLine("Enter group id"))
-/SetGroupId
+//SetGroupId
 
 
 
-# Group id for git
+# Group id for git / ShowSummaryAll
+# Used in ShowSummaryAll, to tag dependencies with code "?" for references that 
+# should be local but are not built by a pom 
 # --
 	Db2:Get(Sys.scriptId,"git-group-id",null) => gid
 	if (gid==null) {
@@ -102,7 +104,7 @@
 			+ ":" + if(dep.subNode("version") != null, dep.subNode("version").getContent, "UNKNOWN")
 		out("dep " + s)
 
-/CreateSummary
+//CreateSummary
 
 
 # Show artifact and version from all pom files (including submodules)
@@ -130,7 +132,7 @@
 		}
 	|
 	dict
-/CreateSummaryDict
+//CreateSummaryDict
 
 
 
@@ -226,7 +228,7 @@
 # test-compile all pom files (except git submodules)
 # --
 	P(1,Dir) as Dir => currentDir
-	P(2,true) as boolean => showErrors
+	P(2,false) as boolean => showErrors
 
 	Pom(currentDir,false)->f
 		Lib:Header(f.path)
@@ -246,7 +248,7 @@
 # test-compile all pom files in current dir
 # --
 	P(1,Dir) as Dir => currentDir
-	P(2,true) as boolean => showErrors
+	P(2,false) as boolean => showErrors
 
 	currentDir.files("pom*.xml")->f
 		Lib:Header(f.path)

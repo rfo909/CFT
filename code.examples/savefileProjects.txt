@@ -249,13 +249,22 @@ Missing directories are logged to screen following
 # Show file set
 # --
     FSGet->f
-        out(f.path)
+        report(f, f.path)
 /FS
 
 # Clear file set
 # --
     Db2:Set("Projects","FileSet",List)
 /FSClear
+
+
+# Store files from last search result into FS (FileSet)
+# --
+	Sys.lastResultList->x
+		out(x.get(0))
+	| _.unique => files
+	DB2:Set("Projects", "FileSet", files)
+/FSSet
 
 
 # Show file set info
@@ -350,10 +359,6 @@ Missing directories are logged to screen following
 /SearchableFiles
 
 
-SearchableFiles
-/SF
-
-
 
 
 # Search through SearchableFiles for pattern - delivers lines
@@ -395,12 +400,6 @@ SearchableFiles
 /S
 
 
-# Search with one parameter, to create file set of files containing match
-# --
-    Input("Search1 to create file set").get =>a
-    CreateFileSet(Grep(a))
-    FSGet->f out(f.path)
-/SFS
 
 # Search with two parameters
 # --
@@ -445,42 +444,28 @@ SearchableFiles
 
 # Get file content around a given line number as List of lines
 # --
-    P(1,Input("File name or glob pattern").get) => globPattern
-    P(2,Input("File line number").get.parseInt) => lineNo
-    P(3,Input("Number of lines").get.parseInt) => numLines
+	P(1, Input("Enter match index").get.parseInt) => matchIndex
+    P(2,20) => numLines
 
-    glob=Glob(globPattern)
+	Sys.lastResultList.nth(matchIndex) => matchLine
 
-    TextFiles->tf
-        assert(glob.match(tf))
-        out(tf)
-    | => files
+	matchLine.get(0) => file
+	matchLine.get(2) => lineNo
 
-    error(files.length==0, "No matching files found")
-    if (files.length == 1) {
-        file=files.first
-    } else {
-        Lib:MenuSelect(files,Lambda{P(1).path},"Select file", true) => file
-        error(file==null,"Aborting: no file selected")
-    }
+	Lib:Header("Line " + lineNo + " of " + file.name + " -- " + file.path)
+
     file.read => lines
 
     delta=(numLines/2).i  # division always returns float!!
-    lines.keep(lineNo-delta, lineNo+delta)
+    lines.keep(lineNo-delta, lineNo+delta)->line
+		s = if (line.lineNumber==lineNo,"-->","   ")+line
+		println(s)
+	|
+	true
     
-/gfc
+/fc
 
 
-# Show file content around a given line number, report style
-# --
-    Inner {
-        gfc->line
-            report(line.lineNumber, line)
-    }->line 
-        println(line)
-    |
-    true
-/sfc
 
 # FileLocator, sorted presentation, newest last
 # --
@@ -577,3 +562,15 @@ SearchableFiles
 /SI
 
 
+# Find duplicate files by name
+# --
+        data=Dict
+        SearchableFiles->f
+                if (data.has(f.name)) {
+                        out(f.path)
+                        out(data.get(f.name).path)
+                } else {
+                        data.set(f.name,f)
+                }
+
+/Dup

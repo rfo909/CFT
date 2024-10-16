@@ -1191,9 +1191,7 @@ run(null,null,null,true)
     P(1,true)=>edit
     loop
         Lib:Header("Defined symbols")
-        Inner {
-            SymbolsReport->line println(line)
-        }
+		ShowRows(SymbolsReport)
         break(!edit)
         println
         readLine("Enter symbol to delete, Enter for none") => line

@@ -22,9 +22,32 @@
 # Helper
 # --
     P(1) => cmd
-    Util:Run(cmd,Dir)
+	P(2,Dir) => currentDir
+    Util:Run(cmd,currentDir)
 //Run
 
+
+
+# Adding a submodule
+# --
+	P(1,Dir) as Dir => currentDir
+
+	if (!currentDir.file(".gitmodules").exists) {
+		println("Must run in project root directory, where the .gitmodules file will be created!")
+		println
+		println(currentDir.path)
+		println
+		Lib:Confirm("Is this correct?") => ok
+		error(!ok,"Aborting")
+		currentDir.file(".gitmodules").touch  # must exist
+	}
+	Input("Enter sub-directory for submodules").setCurrCond("submodules").get => subDir
+	currentDir.sub(subDir) => targetDir
+
+	Input("Enter git clone URL for new submodule").get => moduleUrl
+	
+	Run("git submodule add " + moduleUrl)
+/AddSubmodule	
 
 
 # Get all git submodule directories 
