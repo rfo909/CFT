@@ -170,7 +170,7 @@
 	resultFile.append("Dependencies:")
 	resultFile.append("  '*' means created by local pom file")
 	resultFile.append("  'E' means inconsistent versions between dependency and local pom file")
-	resultFile.append("  'X' means starts with GetGroupId but not to with local pom")
+	resultFile.append("  'X' means starts with GetGroupId but not matching local pom")
 	resultFile.append("")
 
 
@@ -271,7 +271,7 @@
 
 	Pom(currentDir,false)->f
 		Lib:Header(f.path)
-		result = Lib:run(List("cmd","/c","mvn","-f", f.path, "deploy"), null, true) 
+		result = Lib:run(List("cmd","/c","mvn","-f", f.path, "clean", "deploy"), null, true) 
 
 		if(result.exitCode==0) println("   OK")
 
