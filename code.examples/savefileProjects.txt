@@ -452,15 +452,20 @@ Missing directories are logged to screen following
 	matchLine.get(0) => file
 	matchLine.get(2) => lineNo
 
-	Lib:Header("Line " + lineNo + " of " + file.name + " -- " + file.path)
+	Lib:Header("Line " + lineNo + " of " + file.name)
 
     file.read => lines
 
     delta=(numLines/2).i  # division always returns float!!
+
+	println("```")
+	println(file.path)
+	println
     lines.keep(lineNo-delta, lineNo+delta)->line
 		s = if (line.lineNumber==lineNo,"-->","   ")+line
 		println(s)
 	|
+	println("```")
 	true
     
 /fc

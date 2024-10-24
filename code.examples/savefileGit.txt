@@ -43,10 +43,11 @@
 	}
 	Input("Enter sub-directory for submodules").setCurrCond("submodules").get => subDir
 	currentDir.sub(subDir) => targetDir
+	if (!targetDir.exists) targetDir.create
 
 	Input("Enter git clone URL for new submodule").get => moduleUrl
 	
-	Run("git submodule add " + moduleUrl)
+	Run("git submodule add " + moduleUrl, targetDir)
 /AddSubmodule	
 
 
