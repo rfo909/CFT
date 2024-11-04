@@ -54,6 +54,7 @@ public class ValueList extends Value implements IsSynthesizable {
                 new FunctionMergeExpr(),
                 new FunctionMax(),
                 new FunctionMin(),
+                new FunctionPrint(),
         };
         setFunctions(arr);
     }
@@ -703,5 +704,21 @@ public class ValueList extends Value implements IsSynthesizable {
             return new ValueInt(min);
         }
     }
+
+    class FunctionPrint extends Function {
+        public String getName() {
+            return "print";
+        }
+        public String getShortDesc() {
+            return "print() - display list on stdout as separate lines";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            for (Value v:val) {
+                ctx.getStdio().println(v.getValAsString());
+            }
+            return new ValueBoolean(true);
+        }
+    }
+
 
 }
