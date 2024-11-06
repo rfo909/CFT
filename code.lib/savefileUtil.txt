@@ -346,7 +346,7 @@
     modified=false
 
     file.read->line
-        s=line.replace("javax","jakarta")
+        s=line.replace(from,to)
         if (s != line) {
             modified=true
         }

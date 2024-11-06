@@ -1126,6 +1126,21 @@ run(null,null,null,true)
 //RmFilesAndDirs
 
 
+
+# Detect line separator in text file (CRLF or LF)
+# --
+	P(1) as File => f
+	cr=false
+	f.readBinary(0,1000).getList(0) -> val
+		if (val==13) cr=true
+	|
+	cr
+		
+/UsesCRLF
+		
+	
+
+
 # Symbol set
 # --
     P(1) as String => symbol

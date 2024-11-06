@@ -579,3 +579,41 @@ Missing directories are logged to screen following
                 }
 
 /Dup
+
+
+# Replace string in files under current directory
+# --
+	P(1,Input("Enter file pattern, like *.txt").setCurrCond("*.txt").get) => pattern
+	P(2,readLine("Replace this")) => a
+	P(3,readLine("With this")) => b
+
+
+	Dir.allFiles(pattern)->f
+		crlf = Lib:UsesCRLF(f)
+		change=false
+
+		Inner{
+			f.read(false)->line 
+				s=line.replace(a,b)
+				if (s != line) {
+					change=true
+					println(line)
+					println(s)
+					println
+					out(s)
+				} else {
+					out(line)
+				}
+		} => newLines
+
+		if (change) {
+			println(f.path)
+			if (crlf) {
+				f.setWriteCRLF
+			} else {
+				f.setWriteLF
+			}
+			f.create(newLines)
+		}
+/Replace
+	
