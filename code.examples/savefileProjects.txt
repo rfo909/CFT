@@ -586,9 +586,10 @@ Missing directories are logged to screen following
 	P(1,Input("Enter file pattern, like *.txt").setCurrCond("*.txt").get) => pattern
 	P(2,readLine("Replace this")) => a
 	P(3,readLine("With this")) => b
+	P(4,Dir) => currDir
 
 
-	Dir.allFiles(pattern)->f
+	currDir.allFiles(pattern)->f
 		crlf = Lib:UsesCRLF(f)
 		change=false
 
@@ -597,8 +598,8 @@ Missing directories are logged to screen following
 				s=line.replace(a,b)
 				if (s != line) {
 					change=true
-					println(line)
-					println(s)
+					println("|< " + line)
+					println("|> " + s)
 					println
 					out(s)
 				} else {
@@ -607,7 +608,7 @@ Missing directories are logged to screen following
 		} => newLines
 
 		if (change) {
-			println(f.path)
+			println("UPDATING: " + f.path)
 			if (crlf) {
 				f.setWriteCRLF
 			} else {
