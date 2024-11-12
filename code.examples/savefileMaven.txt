@@ -318,7 +318,7 @@
 			buf.match("<version>",3)
 			line=buf.line
 			line=line.before("<version>") + "<version>" + VERSION + "</version>" + line.after("</version>")
-			buf.update(line)
+			buf.write(line)
 			buf.next
 		}
 	}
@@ -335,7 +335,7 @@
 			buf.match("<version>", 3)
 			line=buf.line
 			line=line.before("<version>") + "<version>" + VERSION + "</version>" + line.after("</version>")
-			buf.update(line)
+			buf.write(line)
 		}
 	|
 

@@ -1147,12 +1147,13 @@ run(null,null,null,true)
 /UsesCRLF
 		
 
-# Preserve line separator from one file to another to be written (defaults to the same)
+# Preserve line separator from one file to another to be written (defaults to the same) - returns targetFile
 # --
 	P(1) as File => originalFile
 	P(2,originalFile) as File => targetFile
 
 	if (UsesCRLF(originalFile)) targetFile.setWriteCRLF else targetFile.setWriteLF
+	targetFile
 /PreserveFileLineSeparator
 
 	
@@ -1526,13 +1527,16 @@ BackDateLastResultFiles
 	
 
 	
-# Search all known scripts function names
+# Search all known scripts names, function names, and full line comments
 # --
-	P(1,Input("Searching all scripts for function names").get) => st
+	P(1,Input("Searching all scripts for function names / comments").get) => st
 
     Sys.codeDirs.reverse->d
 		d.files(Glob("savefile*.txt"))->f
+			if (f.name.contains(st)) report(f, f.name, "", "<--- Script")
 			f.read->line
-				assert (line.trim.startsWith("/") && line.toLower.contains(st.toLower))
+				t=line.trim
+				assert (t.startsWith("/") || t.startsWith("#"))
+				assert (t.contains(st.toLower))
 				report(f, f.name, line.lineNumber, line)
 /SearchScripts

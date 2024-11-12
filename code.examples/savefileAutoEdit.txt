@@ -1,11 +1,15 @@
 
-# EditBuffer class
-# See Maven:VersionEditPom
+# EditBuffer class for programmatic editing
+# See Maven:VersionEditPom for example, or test function below
 # --
 	P(1)=>lines
 	self.lines=lines
 
 	self.pos=0
+
+	self.reset=Lambda{
+		self.pos=0
+	}
 
 	self.atEOF=Lambda{
 		self.pos >= self.lines.length
@@ -62,25 +66,137 @@
 			self.next
 	}
 
+	self.progMatchFirst=Lambda{
+		P(1) as Callable => trigger  # takes line as input, returns true if a match
+		P(2) as Callable? => modifier # takes line as input, returns null to delete, or string or list of strings to replace
+										# (empty list also means delete)
+
+		P(3,9999) as int => maxIncr
+
+		startPos=self.pos
+
+		loop
+			if (trigger.call(self.line)) {
+				if (modifier != null) {
+					result = modifier.call(self.line)
+					if (result==null) self.delete
+					else Inner {
+						self.delete
+						result->s self.write(s)
+					}
+				}
+				break
+			}
+				
+			break(self.pos-startPos >= maxIncr)
+			self.next	
+	}
+
 
 	self.modifications=Dict
 
-	self.update=Lambda{
+	# Delete current line and any modifications made for it, with self.write below
+	self.delete=Lambda{
+		self.modifications.set(""+self.pos, List)  # empty list
+	}
+
+	self.write=Lambda{
 		P(1)=>line
-		self.modifications.set(""+self.pos, line)
+		self.modifications.get(""+self.pos, List).add(line)
 	}
 
 	self.out = Lambda{
 		Std.Data.each(0,self.lines.length-1)->i
-			s=self.modifications.get(""+i, null) => s
-			if (s==null) s=self.lines.nth(i)
-			out(s)
+			s=self.modifications.get(""+i, null) => list
+			if (list == null) {
+				out(self.lines.nth(i))  # original 
+			} else {
+				list->s out(s)  # mods
+			}
 	}
 
 /class EditBuffer		
 	
 
-		
+# Testdata
+# --
+	<<<< EOF
+package some.thing;
+
+import java.util.regex.*;
+import java.util.Vector;
+import org.apache.log4j.Logger;
+
+/**
+ * @author xyz
+ */
+
+public class CheckPattern extends MyPatternStuff {
+	private Pattern pattern=null;
+	private String[] placeholder = null;
+
+	public CheckPattern (String s) throws Exception {
+		this.pattern=s;
+	}
+}
+	>>>> EOF
+/TestData
+
+
+# Test
+# --
+	buf=EditBuffer(TestData)
+	buf.progMatchFirst(
+		Lambda{
+			P(1).trim => s
+			s.startsWith("import") && s.contains("apache.log4j")
+		},
+		Lambda{
+			<<<< EOF
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+			>>>> EOF
+		}
+	)
+
+
+	# Create a helper object to capture the name of the class
+	obj=Dict
+	obj.matcher=Lambda{
+		P(1).trim =>s
+		if (s.startsWith("public") || s.startsWith("private")) {
+			s=s.after(" ").trim
+			error(!s.startsWith("class"), "expected 'class' keyword")
+			s=s.after(" ").trim
+			self.className=s.before(" ")
+			true
+		} else {
+			false
+		}
+	}
+
+	buf.progMatchFirst(obj.get("matcher"))
+	className=obj.get("className",null)
+
+	error(className==null, "No classname found")
+	println("# Class name = " + className)
+
+	buf.reset
+	buf.match("{")
+	println("# " + buf.line)
+
+	buf.next
+	Sequence(
+		"	private static Logger logger = LoggerFactory.getLogger(<<className>>.class);".mergeExpr.first
+		buf.line  # preserve the original next line
+		""
+	)->line
+		buf.write(line)
+
+	|	
+
+	buf.out
+/test
 
 
 
