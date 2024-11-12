@@ -564,6 +564,14 @@ choice.
 /run
 
 
+# Interactively run external command and collect output, using Dir.runCapture.
+# Requires the command to be splittable
+# --
+	P(1,Dir) => currDir
+	P(2,Input("Enter external command").get) => cmd
+	list=List("cmd","/c") + cmd.split
+	currDir.runCapture(list)
+/runCapt
 
 
 
@@ -1138,6 +1146,15 @@ run(null,null,null,true)
 		
 /UsesCRLF
 		
+
+# Preserve line separator from one file to another to be written (defaults to the same)
+# --
+	P(1) as File => originalFile
+	P(2,originalFile) as File => targetFile
+
+	if (UsesCRLF(originalFile)) targetFile.setWriteCRLF else targetFile.setWriteLF
+/PreserveFileLineSeparator
+
 	
 
 
@@ -1490,7 +1507,7 @@ BackDateLastResultFiles
 /GlobalOnLoad
 
 
-# Smart diff
+# Smart diff (trimming lines)
 # --
 	P(1) as File => a
 	P(2) as File => b
@@ -1509,3 +1526,13 @@ BackDateLastResultFiles
 	
 
 	
+# Search all known scripts function names
+# --
+	P(1,Input("Searching all scripts for function names").get) => st
+
+    Sys.codeDirs.reverse->d
+		d.files(Glob("savefile*.txt"))->f
+			f.read->line
+				assert (line.trim.startsWith("/") && line.toLower.contains(st.toLower))
+				report(f, f.name, line.lineNumber, line)
+/SearchScripts
