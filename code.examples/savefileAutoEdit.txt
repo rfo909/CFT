@@ -1,6 +1,22 @@
 
 # EditBuffer class for programmatic editing
-# See Maven:VersionEditPom for example, or test function below
+# See Maven:VersionEditPom for example, or test function below.
+# Also see Java:FixFileLog4j function
+#
+# Note that the search always relates to the original file content, not
+# to generated content. Search starts with the current line, so for instance
+# if we want to enter a java method 'render' and don't know that it is always
+# defined with the '{' at the same line as "public render ...", then this is
+# easy:
+#
+# buf=AutoEdit:EditBuffer(...)
+# buf.match("public render")
+# buf.match("{")
+# buf.next
+# buf.write("   // custom code to be inserted at start")
+# buf.write(buf.line) # preserve the first line after opening brace
+#
+# This code is still very much a work in progress
 # --
 	P(1)=>lines
 	self.lines=lines
@@ -71,12 +87,12 @@
 		P(2) as Callable? => modifier # takes line as input, returns null to delete, or string or list of strings to replace
 										# (empty list also means delete)
 
-		P(3,9999) as int => maxIncr
-
 		startPos=self.pos
-
+		found=false
 		loop
+			break(self.atEOF)
 			if (trigger.call(self.line)) {
+				found=true
 				if (modifier != null) {
 					result = modifier.call(self.line)
 					if (result==null) self.delete
@@ -87,9 +103,15 @@
 				}
 				break
 			}
-				
-			break(self.pos-startPos >= maxIncr)
+	
 			self.next	
+		|
+		if (!found) {
+			self.pos=startPos  # reset to start pos
+			false
+		} else {
+			true
+		}
 	}
 
 
@@ -103,6 +125,10 @@
 	self.write=Lambda{
 		P(1)=>line
 		self.modifications.get(""+self.pos, List).add(line)
+	}
+
+	self.isModified = Lambda{
+		self.modifications.keys.length > 0
 	}
 
 	self.out = Lambda{

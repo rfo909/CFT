@@ -175,3 +175,15 @@
 
 
 
+# Show list of modified files under current directory, newest last
+# --
+	P(1,Dir) => currentDir
+	P(2,Input("Glob").setCurrCond("*").get) => glob
+	currentDir.runCapture("git","status",".")->line
+		assert(line.trim.startsWith("modified:"))
+		fname=line.after(":").trim
+		file=Dir.file(fname)
+		if (Glob(glob).match(file)) out(Int(file.lastModified, file))
+	| _.sort->x 
+		out(x.data)
+/Modified

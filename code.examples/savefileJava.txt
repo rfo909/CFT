@@ -343,3 +343,109 @@ P(2,"") => prefix
 /SearchJarFiles
 
 
+
+
+
+# Fix single java file containing log4j refererence(s) on the form, replacing log4j with Simple Logging Facade (SLF4J) to enable logback
+#
+#  package something;
+#  ...
+#  import org.apache.log4j.Logger;
+#  ... 
+#  public class Something {
+#     ...
+#     private Logger logger=null;
+#     ...
+#     public Something (...) {
+#        logger=Logger.getLogger(this.getClass());
+#        ...
+#     }
+#  }
+#
+# Returns true or false indicating if the file has been modified
+#
+# --
+	P(1) as File => javaFile
+
+	buf=AutoEdit:EditBuffer(javaFile.read(false))
+
+	# replace import statement
+	buf.progMatchFirst(
+		Lambda{
+			P(1).trim => s
+			s.startsWith("import") && s.contains("apache.log4j")
+		},
+		Lambda{
+			<<<< EOF
+import org.slf4j.Logger;
+			>>>> EOF
+		}
+	)
+
+	# Create a helper object to capture the name of the class
+	obj=Dict
+	obj.matcher=Lambda{
+		P(1).trim =>s
+		if (s.startsWith("public") || s.startsWith("private")) {
+			s=s.after(" ").trim
+			error(!s.startsWith("class"), "expected 'class' keyword")
+			s=s.after(" ").trim
+			self.className=s.before(" ")
+			true
+		} else {
+			false
+		}
+	}
+
+	buf.progMatchFirst(obj.get("matcher"))
+	className=obj.get("className",null)
+
+	error(className==null, "No classname found")
+
+	# Remove old 'logger' variable
+	buf.reset
+	buf.match("{")
+	buf.progMatchFirst(
+		Lambda{
+			P(1).trim=>s
+			s.startsWith("private") && s.contains("Logger logger") && s.contains("=")
+		}, Lambda{
+			null
+		}
+	)
+
+	# remove old call to initiate 'logger' in constructor
+	buf.reset
+	buf.progMatchFirst(
+		Lambda{
+			P(1)=>s
+			s.contains("logger") && s.contains("=") && s.contains("Logger.getLogger") 
+		},Lambda{
+			null
+		}
+	)
+
+	# insert static variable 'logger' into class def
+	buf.reset
+
+	buf.match("{") # enter body of class
+
+	buf.next
+	Sequence(
+		"    private static Logger logger = org.slf4j.LoggerFactory.getLogger(<<className>>.class);".mergeExpr.first
+		buf.line  # preserve the original next line
+	)->line
+		buf.write(line)
+
+	|	
+
+	# update file?
+	if (buf.isModified) {
+		Lib:PreserveFileLineSeparator(javaFile).create(buf.out)
+		true
+	} else {
+		false
+	}
+/FixFileLog4j		
+	
+	
