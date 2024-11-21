@@ -148,6 +148,10 @@ Command history
 		newList.add(SymDict(time,dir))
 		changed=true
 	}
+	if (newList.length>100) {
+		newList=newList.last(100)
+		changed=true
+	}
 	if (changed) {
 		Db2:Set(Sys.scriptId,"GD",newList)
 		list=newList
