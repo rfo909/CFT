@@ -58,11 +58,11 @@ lines->line out(line.merge(data))
 
 
 "openjdk-"+MinimumVersion+"-jdk-headless"
-/minVersionPackage
+//minVersionPackage
 
 
 "openjdk-"+InstallVersion+"-jdk-headless"
-/targetPackage
+//targetPackage
 
 
 Input("Enter ssh target on format user@host").get
@@ -449,3 +449,22 @@ import org.slf4j.Logger;
 /FixFileLog4j		
 	
 	
+
+# Convert package a.b.c to Dir. If last element is a class (exists as a Java file) then return Dir for a.b only.
+# --
+	P(1) as String => p
+	P(2,Dir) as currentDir
+
+	if(p.contains("$")) {
+		# inner classes
+		p=p.before("$")
+	}
+
+	str=p.replace(".",Sys.fileSeparator)
+	f=File(currentDir.path + Sys.fileSeparator + str + ".java")
+	if (f.exists) {
+		f.dir
+	} else {
+		Dir(currentDir.path + Sys.fileSeparator + str)
+	}
+/PDir

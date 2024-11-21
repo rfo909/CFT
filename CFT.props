@@ -96,6 +96,7 @@ shortcut:cliprm  = "---- delete files/dirs ----"                Lib:ClipboardDel
 
 # Search files under current dir
 shortcut:S    = "---- search files under curr dir ----"   Lib:SearchTextFiles(Dir)
+shortcut:S2   = "---- search files under curr dir ----"   Lib:SearchTextFiles2(Dir)
 shortcut:SR   = "---- search recent files curr dir ----"  Util:SearchRecentFiles(Dir)
 shortcut:SLR  = "---- search files from lastResult ----"  Lib:SearchResultFiles
 shortcut:FL   = "---- File Locate under curr Dir ----"    Lib:LocateFiles(Dir)

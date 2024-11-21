@@ -971,6 +971,24 @@ run(null,null,null,true)
 /SearchTextFiles
 
    
+# Search text files under current directory, with 2 search strings (in same line)
+# --
+    P(1,Dir) => dir
+    P(2,Input("Search term 1").get) => st
+	P(3,Input("Search term 2").get) => st2
+    P(4,Input("Search files: enter partial file name, or glob pattern with '*'").get) => fname
+    P(5,Input("Include sub-dirs y/n").setCurrCond("y")).get.toLower=="y" => subDirs
+    
+    glob=if(fname.contains("*"),Glob(fname),Glob("*"+fname+"*"))
+
+    grep=Grep.match(st).match(st2)
+
+    if(subDirs,dir.allFiles(glob), dir.files(glob))->file 
+        grep.file(file)->line
+            report(file, file.name, line.lineNumber, line)
+/SearchTextFiles2
+
+   
 # Search text files from Sys.lastResultList, list of files as parameter
 # --
 	P(1) => list

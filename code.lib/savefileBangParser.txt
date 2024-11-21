@@ -33,10 +33,8 @@ Command history
   !:xxx 
   !:xxx*yyy
 
-  !/           show unique list of directories from history
-  !/N          go to directory by position in list
-   
-
+  !/           show recent directories within session
+  !//          show directories last week, global
 >>>> EOF
 	->line println(line)
 /Help
@@ -52,8 +50,10 @@ Command history
 		Help
 	} else if (commandLine=="!") {
 		GetCommandHistory(dir)
+	} else if (commandLine.startsWith("!//")) {
+		Sys.stdin("BangParser:GlobalDirList")
 	} else if (commandLine.startsWith("!/")) {
-		RunDirCommand(commandLine)
+		Sys.stdin("BangParser:GetDirHistory")
 	} else {
 		RunHistoryCommand(dir,commandLine)
 	}
@@ -114,10 +114,49 @@ Command history
 		
 		currDir=dir.path
 		DbGetCommandHistory(SymDict(currDir,command))
+
+		GlobalDirList(currDir)
 	}
 /HistoryAppend
 
- 
+
+# Global dir expiration
+# --
+	7*24*3600*1000
+//GlobalDirExpiration
+
+
+# Get global list or recent directories visited
+# --
+	P(1) as String? => addDir  # null to just get list
+	
+	list = Db2:Get(Sys.scriptId,"GD",List)
+
+	# remove expired data (and duplicates of addDir if defined)
+	Inner{
+		exp=currentTimeMillis - GlobalDirExpiration
+		list->data
+			assert(data.time >= exp && getType(data.dir)=="String")
+			reject(addDir != null && data.dir == addDir)
+			out(data)
+		| => newList
+	}
+	changed=newList.length != list.length
+	if (addDir != null) {
+		time=currentTimeMillis
+		dir=addDir
+		newList.add(SymDict(time,dir))
+		changed=true
+	}
+	if (changed) {
+		Db2:Set(Sys.scriptId,"GD",newList)
+		list=newList
+	}
+	# return list of paths
+	list->data out(data.dir) | _.sort
+/GlobalDirList
+
+
 
 
 # Parse bang expression and execute matching history element
@@ -175,28 +214,6 @@ Command history
         out(dict.currDir)
     | _.unique.last(30)
 //GetDirHistory
-
-# Show directory history
-# --
-	GetDirHistory->d  # strings
-		report(d)
-	| _=>lines
-	Lib:ShowRows(lines)
-//ShowDirHistory
-
-
-
-# Handle !/ commands
-# --
-	P(1)=>command
-	if (command=="!/") {
-		ShowDirHistory
-	} else {
-		n=command.after("/").parseInt
-		dir=GetDirHistory.nth(n)
-		Sys.stdin('"BangParser" ' + syn(Dir(dir))+'.cd')
-	}
-//RunDirCommand
 
 
 
