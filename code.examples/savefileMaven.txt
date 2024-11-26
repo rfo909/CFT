@@ -350,13 +350,16 @@
 # Update version for all pom*.xml under current directory
 # --
 	P(1,Dir) as Dir => currentDir
-	P(2) as String => groupId
-	P(3) as String? => artifactId
-	P(4) as String => version
-	P(5,false) as boolean => crlf
+	P(2, readLine("groupId")) as String => groupId
+	P(3, readLine("artifactId (blank for all)")) as String? => artifactId
+	P(4, readLine("new version")) as String => version
+
+	if (artifactId=="") artifactId=null
 
 	Maven:Pom(currentDir,false)->f
+		crlf=Lib:UsesCRLF(f)
 		println(f.path)
+		
 		lines=Maven:VersionEditPom(f, groupId, artifactId, version)
 		if (crlf) {
 			f.setWriteCRLF
