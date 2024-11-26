@@ -138,6 +138,7 @@ Command history
 		list->data
 			assert(data.time >= exp && getType(data.dir)=="String")
 			reject(addDir != null && data.dir == addDir)
+			reject(addDir != null && addDir.startsWith(data.dir))
 			out(data)
 		| => newList
 	}
@@ -161,6 +162,12 @@ Command history
 /GlobalDirList
 
 
+# Global dir list, raw format
+# --
+	list = Db2:Get(Sys.scriptId,"GD",List)
+	list->x
+		report(Date(x.time), x.dir)
+//GDRaw
 
 
 # Parse bang expression and execute matching history element

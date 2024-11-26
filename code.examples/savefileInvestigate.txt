@@ -310,7 +310,10 @@ loop
 # Add line to LogFile
 # --
     P(1,readLine("Enter comment")) => line
-    Date.setFormat("HH:mm").fmt + " " + line + "  " => line   ## two spaces at end of line produces breaks in Markdown paragraphs
+
+    #Date.setFormat("HH:mm").fmt + " " + line  => line   
+
+	line=line+"  "  ## two spaces at end of line produces breaks in Markdown paragraphs
     LogFile.append(line)
 /LogText
 
