@@ -129,7 +129,7 @@ public class ObjRaster extends Obj {
             int x=(int) getInt("x",params,0);
             int y=(int) getInt("y",params,1);
 
-            img.setPixel(x,y,color);
+            img.setPixel(x,img.getHeight()-y,color);
 
             return new ValueObj(theObj());            
         }
