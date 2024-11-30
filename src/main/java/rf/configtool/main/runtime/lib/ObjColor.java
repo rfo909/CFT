@@ -82,6 +82,11 @@ public class ObjColor extends Obj {
         return "Term";
     }
     
+
+    public Color getColor() {
+        return new Color(r,g,b);
+    }
+    
     class FunctionR extends Function {
         public String getName() {
             return "r";

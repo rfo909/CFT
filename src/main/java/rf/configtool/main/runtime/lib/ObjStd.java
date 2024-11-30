@@ -51,6 +51,7 @@ public class ObjStd extends Obj {
         this.add(new FunctionDD());
         this.add(new FunctionDDD());
         this.add(new FunctionColor());
+        this.add(new FunctionRaster());
         
     }
     
@@ -274,6 +275,20 @@ public class ObjStd extends Obj {
             int b=(int) getInt("b", params, 2);
             
             return new ValueObj(new ObjColor(r,g,b));
+        }
+    }
+
+    class FunctionRaster extends Function {
+        public String getName() {
+            return "Raster";
+        }
+
+        public String getShortDesc() {
+            return "Raster() - create Raster image object";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+            return new ValueObj(new ObjRaster());
         }
     }
 
