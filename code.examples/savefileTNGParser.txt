@@ -7,7 +7,7 @@
 # --
     Std.Text.Lexer.Node => root
     
-    root.sub("$(){}[]=:").setIsToken(1)  # specials
+    root.sub("$(){}[]=:.").setIsToken(1)  # specials
     root.sub(" ^n^r^t".unEsc).setIsToken(-1) # whitespace
 	
 	comment=root.sub("#")	# comments
@@ -21,7 +21,7 @@
     float.sub(digits,float) # loop back
     
     identFirstChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"
-    identInnerChars = identFirstChars + "0123456789"+"."
+    identInnerChars = identFirstChars + "0123456789"
     
     root.sub(identFirstChars).setIsToken(4) => ident
     ident.sub(identInnerChars, ident) # loop back
@@ -46,12 +46,13 @@
 
 	ts.match("def","expected 'def'")
 	reference=ObjectReference(ts,context)
+
 	assignmentsBlock=null
-	if (ts.peek=="{") {
-		assignmentsBlock=AssignmentsBlock(ts, context)
-	}
+	assignmentsBlock=AssignmentsBlock(ts, context)
 
 	# object state
+	# --
+
 	self.reference=reference
 	self.assignmentsBlock=assignmentsBlock
 
@@ -87,8 +88,23 @@
 
 		ts.match("=","expected '=' following $" + ident + " assignment")
 		value=Value(ts,context)
-		assignments.set("$"+ident,value)
+
+		var="$"+ident
+			
+		if(assignments.has(var)) {
+			existingVal=assignments.get(var)
+			if ({existingVal as? &ValueList} && {value as? &ValueList}) {
+				existingVal.add(value)
+			} else {
+				println(ts.sourceLocation, "Repeat assignment of non-list", var)
+			}
+		} else {
+			assignments.set("$"+ident,value)
+		}
 	|
+
+	# object state
+	# --
 
 	self.assignments=assignments
 
@@ -101,7 +117,10 @@
 
 			if ( {value as? &ObjectDef} ) {
 				value.getDefsList->x out(x)
-			} 
+			} else if ( {value as? &ValueList} ) {
+				value.getDefsList->x out(x)
+			}
+				
 	}
 
 	self.getReferences = Lambda{
@@ -112,6 +131,8 @@
 				value.getReferences->x out(x)
 			} else if ( {value as? &ObjectReference} ) {
 				out(value)
+			} else if ( {value as? &ValueList} ) {
+				value.getReferences->x out(x)
 			}
 	}
 /class AssignmentsBlock
@@ -119,7 +140,7 @@
 	
 
 
-# Object reference
+# Parse object reference
 # --
 	P(1) => ts
 	P(2) => context
@@ -145,6 +166,8 @@
 	}
 
 	# object state
+	# --
+
 	self.objType=objType
 	self.objId=objId
 /class ObjectReference
@@ -152,7 +175,7 @@
 
 
 
-# Value
+# Parse value (function only)
 # --
 	P(1) => ts
 	P(2) => context
@@ -207,11 +230,36 @@
 	|
 
 	self.list=list
+
+	# functions
+	# --
+
+	self.add = Lambda{
+		P(1) as &ValueList => otherList
+		self.list=self.list + otherList.list
+	}
+
+	self.getDefsList = Lambda{
+		self.list->v
+			if ( {v as? &ObjectDef} ) {
+				v.getDefsList->x out(x)
+			}
+	}
+
+	self.getReferences = Lambda{
+		self.list->v
+			if ( {v as? &ObjectReference} ) {
+				out(v)
+			}
+	}
+
+	
+
 /class ValueList
 
 
 
-# Pre-process TNG file
+# Parse TNG code
 # --
 	P(1) as List => lines
 	P(2) as String? => defaultContext
@@ -286,8 +334,17 @@
 //Test
 
 
-# Example config
+# Test traversal
 # --
+	Parse(ExampleCode,"Example")->objDef
+		objDef.getDefsList->x
+			out(x.reference.objType + " - " + x.reference.objId)
+//AllDefs
+
+
+
+# Example config
+# -------------------------------------------------------------------
 <<<< EOF
 
 #context Example
@@ -301,6 +358,17 @@ def (Page _) {
 
     $subPages=[
         def (SubPageRef) {$subPage=(ClientSubPage _x)}
+		def (SubPageRef) {
+			$subPage=def (RoarSubPage) {
+				$msg=def (MsgList) {
+					$token=def (MsgToken _tok.x) {
+						$id=def (TokenId _tid) {
+							$text="Roar"
+						}
+					}
+				}
+			}
+		}
     ]
 
     $layout="[1]"
@@ -325,6 +393,9 @@ def (ClientSubPage _x) {
 
     $preInitCode="var _cons=new CSP2Console();"
     $initCode="_cons.init('_cons',$DIV,$ARGS,$CONFIG);"
+
+	# test
+	$x=def (Elephant) { $a=0 }
 
 }
 >>>> EOF
