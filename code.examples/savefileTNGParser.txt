@@ -1,0 +1,312 @@
+# Parser for the TNG configuration language
+# --
+/Readme
+
+
+# Build root lexer Node for all known tokens 
+# --
+    Std.Text.Lexer.Node => root
+    
+    root.sub("$(){}[]=:").setIsToken(1)  # specials
+    root.sub(" ^n^r^t".unEsc).setIsToken(-1) # whitespace
+	
+	comment=root.sub("#")	# comments
+	comment.setDefault(comment)
+	comment.sub("^n".unEsc).setIsToken(-1)
+
+    digits = "0123456789"
+    root.sub(digits+"-").setIsToken(2) => integer
+    integer.sub(digits,integer) # loop back
+    integer.sub(".").sub(digits).setIsToken(3) => float 
+    float.sub(digits,float) # loop back
+    
+    identFirstChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"
+    identInnerChars = identFirstChars + "0123456789"+"."
+    
+    root.sub(identFirstChars).setIsToken(4) => ident
+    ident.sub(identInnerChars, ident) # loop back
+    
+    List('"')->c 
+        root.sub(c) => insideString
+        insideString.setDefault(insideString)
+        insideString.sub("\").setDefault(insideString)
+        insideString.sub(c).setIsToken(5)
+    |
+    
+    # return value is the root node
+    root
+//RootNode
+
+
+
+# Object def
+# --
+	P(1) => ts
+	P(2) => context
+
+	ts.match("def","expected 'def'")
+	reference=ObjectReference(ts,context)
+	assignments=null
+	if (ts.peek=="{") {
+		assignments=AssignmentsBlock(ts, context)
+	}
+
+	self.reference=reference
+	self.assignments=assignments
+
+/class ObjectDef
+
+
+
+# Object reference
+# --
+	P(1) => ts
+	P(2) => context
+
+	ts.match("(","expected '('")
+
+	error(ts.peekType!=4,"inside def (...) - expected object type identifier")
+	objType=ts.peek
+	ts.next
+
+	objId="" # anonymous
+	loop
+		break(ts.match(")"))
+		
+		objId=objId + ts.peek
+		ts.next
+	|
+
+	if (objId=="_") {
+		objId=context
+	} else if (objId.startsWith("_")) {
+		objId=context + "." + objId.sub(1)
+	}
+
+
+	self.objType=objType
+	self.objId=objId
+/class ObjectReference
+
+
+
+
+# Assignments block
+# --
+	P(1) => ts
+	P(2) => context
+	
+	assignments=Dict
+	assignments.set("content","AssignmentsBlock")
+
+	ts.match("{","expected '{'")
+	loop
+		break(ts.match("}"))
+		ts.match("$", "expected '$'")
+		ident=ts.peek
+		error(ts.peekType != 4, "expected '$' + identifier for assignment")
+		ts.next
+
+		ts.match("=","expected '=' following $" + ident + " assignment")
+		value=Value(ts,context)
+		assignments.set("$"+ident,value)
+	|
+
+	self.assignments=assignments
+/class AssignmentsBlock
+	
+	
+# Value
+# --
+	P(1) => ts
+	P(2) => context
+
+	if (ts.peek=="(") {  # object reference
+		ObjectReference(ts,context)
+	} else if (ts.peek=="def") { # object def
+		ObjectDef(ts,context)
+	} else if (ts.peek=="[") {  # value list
+		ValueList(ts,context)
+	} else if (ts.peekType==5) { # string
+		str=ts.peek
+		ts.next
+		str.sub(1,str.length-1)  
+			# minus quotes
+	} else if (ts.peekType==2) {  # int
+		i=ts.peek.parseInt
+		ts.next
+		i
+	} else if (ts.peekType==3) { # float
+		f=ts.peek.parseFloat
+		ts.next
+		f
+	} else if (ts.peek=="true") { # bool
+		ts.next
+		true
+	} else if (ts.peek=="false") { # bool
+		ts.next
+		false
+	} else if (ts.peek=="null") { # null
+		ts.next
+		null
+	} else {
+		error(ts.sourceLocation + " INVALID Value: " + ts.peek)
+	}
+
+	=>value
+
+	self.value=value
+/class Value
+
+
+
+# Value list
+# --
+	P(1) => ts
+	P(2) => context
+
+	list=List
+
+	ts.match("[","expected '[' initiating value list")
+	loop
+		break(ts.match("]"))
+		list.add(Value(ts,context))
+	|
+
+	self.list=list
+/class ValueList
+
+
+
+# Pre-process TNG file
+# --
+	P(1) as List => lines
+	P(2) as String? => defaultContext
+
+	RootNode => root
+    Std.Text.Lexer => lexer
+
+	context=defaultContext
+	lines->line
+		if (line.startsWith("#context")) 
+			context=line.after(" ").trim
+			lexer.addLine(line)
+	|
+
+	ts=lexer.getTokenStream(root)
+	
+	loop
+		break(ts.EOF)
+		out(ObjectDef(ts,context))
+/Parse
+
+
+
+
+# Parse file
+# --
+	P(1) as File => file
+	defaultContext=file.name.beforeLast(".")
+	Parse(file.read, defaultContext)
+/ParseFile
+
+
+
+
+
+
+# Show tokens for ExampleCode (for debugging)
+# --
+	P(1,30) => count
+	
+	RootNode => root
+    Std.Text.Lexer => lexer
+
+	context=null
+	ExampleCode->line
+			lexer.addLine(line)
+	|
+
+	ts=lexer.getTokenStream(root)
+
+	loop
+		break(ts.EOF)
+		break(count <= 0)
+		report(ts.peek, ts.peekType, ts.sourceLocation)
+		ts.next
+		count=count-1
+		
+//Tokens
+
+
+
+# Test
+# --
+   P(1,ExampleCode)=>code
+
+	if (code==null) {
+		println("Paste or enter TNG code lines, then terminate by '.' on single line")
+		readLines(".") => code
+	}
+
+	Parse(code,"Example")
+//Test
+
+
+# Example config
+# --
+<<<< EOF
+
+#context Example
+
+def (Page _) {
+    $visibleBeforeLogin=false
+    $hiddenAfterLogin=false
+    $accessId="PAGE_DEBUG_##"
+    $skipAccessCheck=false
+		# this is a comment
+
+    $subPages=[
+        def (SubPageRef) {$subPage=(ClientSubPage _x)}
+    ]
+
+    $layout="[1]"
+
+    $javascriptIncludes=[
+        def (JavascriptInclude) { $src="/js/csp2/csp2.js" }
+        def (JavascriptInclude) { $src="/js/csp2/wg2.js" }
+
+        def (JavascriptInclude) { $src="/js/csp2/console.js" }
+    ]
+    $cssIncludes = [
+        "/js/csp2/wg2.css"
+        "/js2/csp/MyStyle.css"
+    ]
+
+    #$javascriptPreInitCode="alert('javascriptPreInitCode');"
+    #$javascriptInitCode="alert('javascriptInitCode');"
+}
+
+
+def (ClientSubPage _x) {
+
+    $preInitCode="var _cons=new CSP2Console();"
+    $initCode="_cons.init('_cons',$DIV,$ARGS,$CONFIG);"
+
+}
+>>>> EOF
+/ExampleCode
+	
+
+
+
+Std.Text.Lexer help
+//LexerHelp
+
+
+Std.Text.Lexer.Node help
+//NodeHelp
+
+
+Std.Text.Lexer.getTokenStream(Std.Text.Lexer.Node) help
+//TSHelp

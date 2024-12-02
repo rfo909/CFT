@@ -58,6 +58,10 @@ nicely formatted JSON.
     
     root.sub("{}:,[]()").setIsToken(1)  # specials
     root.sub(" ^n^r^t".unEsc).setIsToken(-1) # whitespace
+	
+	comment = root.sub("#")
+	comment.setDefault(comment)
+	comment.setIsToken(-1)
 
     digits = "0123456789"
     root.sub(digits+"-").setIsToken(2) => integer
