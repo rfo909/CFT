@@ -1558,3 +1558,23 @@ BackDateLastResultFiles
 				assert (t.contains(st.toLower))
 				report(f, f.name, line.lineNumber, line)
 /SearchScripts
+
+
+# Duplicates in list of strings
+# --
+	P(1,Sys.lastResultList) as List => list
+
+	prev=null
+	list.sort->x
+		if (x==prev) {
+			out(x)
+		}
+		prev=x
+	| _.unique
+/DuplicatesInList
+
+
+# Sort list of strings
+# --
+	Sys.lastResultList.sort
+/SortList

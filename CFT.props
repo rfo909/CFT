@@ -81,6 +81,8 @@ shortcut:home = "---- move to script dir ----"            Sys.savefile.dir.cd
 
 shortcut:f    = "---- get files from search rows ----"    Sys.lastResultList.filter( Lambda{x=P(1) if(getType(x)=="Row",x.get(0),x)}).unique
 shortcut:fp   = "---- lastResult file/dir object paths ----" Lib:Paths
+shortcut:dup  = "---- duplicates in list of strings ----" Lib:DuplicatesInList
+shortcut:sort = "---- sort list of strings ----"          Lib:SortList
 
 shortcut:gs   = "---- git status -----"                   Dir.run("git","status")
 
