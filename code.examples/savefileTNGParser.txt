@@ -46,16 +46,73 @@
 
 	ts.match("def","expected 'def'")
 	reference=ObjectReference(ts,context)
-	assignments=null
+	assignmentsBlock=null
 	if (ts.peek=="{") {
-		assignments=AssignmentsBlock(ts, context)
+		assignmentsBlock=AssignmentsBlock(ts, context)
 	}
 
+	# object state
 	self.reference=reference
-	self.assignments=assignments
+	self.assignmentsBlock=assignmentsBlock
+
+	# functions
+	self.getDefsList = Lambda{
+		List(self) + self.assignmentsBlock.getDefsList
+	}
+
+	self.getReferences = Lambda{
+		self.assignmentsBlock.getReferences
+	}
 
 /class ObjectDef
 
+
+
+# Assignments block
+# --
+	P(1) => ts
+	P(2) => context
+	
+	assignments=Dict
+
+	ts.match("{","expected '{'")
+	loop
+		break(ts.match("}"))
+		ts.match("$", "expected '$'")
+		ident=ts.peek
+		error(ts.peekType != 4, "expected '$' + identifier for assignment")
+		ts.next
+
+		ts.match("=","expected '=' following $" + ident + " assignment")
+		value=Value(ts,context)
+		assignments.set("$"+ident,value)
+	|
+
+	self.assignments=assignments
+
+	# functions
+	self.getDefsList = Lambda{
+		self.assignments.keys->key
+			value=self.assignments.get(key)
+			
+			if ( {value as? &ObjectDef} ) {
+				value.getDefsList->x out(x)
+			} 
+	}
+
+	self.getReferences = Lambda{
+		self.assignments.keys->key
+			value=self.assignments.get(key)
+			
+			if ( {value as? &ObjectDef} ) {
+				value.getReferences->x out(x)
+			} else if ( {value as? &ObjectReference} ) {
+				out(value)
+			}
+	}
+/class AssignmentsBlock
+	
+	
 
 
 # Object reference
@@ -83,7 +140,7 @@
 		objId=context + "." + objId.sub(1)
 	}
 
-
+	# object state
 	self.objType=objType
 	self.objId=objId
 /class ObjectReference
@@ -91,40 +148,15 @@
 
 
 
-# Assignments block
-# --
-	P(1) => ts
-	P(2) => context
-	
-	assignments=Dict
-	assignments.set("content","AssignmentsBlock")
-
-	ts.match("{","expected '{'")
-	loop
-		break(ts.match("}"))
-		ts.match("$", "expected '$'")
-		ident=ts.peek
-		error(ts.peekType != 4, "expected '$' + identifier for assignment")
-		ts.next
-
-		ts.match("=","expected '=' following $" + ident + " assignment")
-		value=Value(ts,context)
-		assignments.set("$"+ident,value)
-	|
-
-	self.assignments=assignments
-/class AssignmentsBlock
-	
-	
 # Value
 # --
 	P(1) => ts
 	P(2) => context
 
-	if (ts.peek=="(") {  # object reference
-		ObjectReference(ts,context)
-	} else if (ts.peek=="def") { # object def
+	if (ts.peek=="def") { # object def
 		ObjectDef(ts,context)
+	} else if (ts.peek=="(") {  # object reference
+		ObjectReference(ts,context)
 	} else if (ts.peek=="[") {  # value list
 		ValueList(ts,context)
 	} else if (ts.peekType==5) { # string
@@ -153,10 +185,7 @@
 		error(ts.sourceLocation + " INVALID Value: " + ts.peek)
 	}
 
-	=>value
-
-	self.value=value
-/class Value
+/Value
 
 
 
@@ -249,7 +278,7 @@
 		readLines(".") => code
 	}
 
-	Parse(code,"Example")
+	JSON:PP(Parse(code,"Example"))
 //Test
 
 
