@@ -345,11 +345,16 @@ loop
 
 # Show lines 
 # --
-    LogFile.read.last(500)->line 
-		if (line.trim=="" || line.contains("  ") || line.contains("|")) 
-			println(line) 
-		else 
+    LogFile.read.last(500)->line
+		if (line.trim=="" || line.contains("|")) {
+			println
+		} else {
 			Lib:ShowText(line,false)
+		}
+		#if (line.trim=="" || line.contains("  ") || line.contains("|")) 
+		#	println(line) 
+		#else 
+		#	Lib:ShowText(line,false)
     |
     println
 /Show
