@@ -34,7 +34,10 @@ public class ObjMath extends Obj {
         this.add(new FunctionCos());
         this.add(new FunctionSin());
         this.add(new FunctionPI());
+        this.add(new FunctionE());
         this.add(new FunctionSqrt());
+        this.add(new FunctionLog());
+        this.add(new FunctionLog10());
     }
     
     @Override
@@ -107,6 +110,20 @@ public class ObjMath extends Obj {
             return new ValueFloat(Math.PI);
         }
     }
+
+
+    class FunctionE extends Function {
+        public String getName() {
+            return "e";
+        }
+        public String getShortDesc() {
+            return "e() - return e";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueFloat(Math.E);
+        }
+    }
     
     class FunctionSqrt extends Function {
         public String getName() {
@@ -116,9 +133,37 @@ public class ObjMath extends Obj {
             return "sqrt(value) - return square root";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 1) throw new Exception("Expected value parameters");
+            if (params.size() != 1) throw new Exception("Expected value parameter");
             double value=getFloat("value", params, 0);
             return new ValueFloat(Math.sqrt(value));
+        }
+    }
+    
+    class FunctionLog extends Function {
+        public String getName() {
+            return "log";
+        }
+        public String getShortDesc() {
+            return "log(value) - return log of value";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected value parameter");
+            double value=getFloat("value", params, 0);
+            return new ValueFloat(Math.log(value));
+        }
+    }
+    
+    class FunctionLog10 extends Function {
+        public String getName() {
+            return "log10";
+        }
+        public String getShortDesc() {
+            return "log10(value) - return log10 of value";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected value parameter");
+            double value=getFloat("value", params, 0);
+            return new ValueFloat(Math.log10(value));
         }
     }
     
