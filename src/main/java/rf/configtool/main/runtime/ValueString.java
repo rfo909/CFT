@@ -53,6 +53,8 @@ public class ValueString extends Value implements IsSynthesizable {
                 new FunctionBetween(),
                 new FunctionBefore(),
                 new FunctionAfter(),
+                new FunctionFrom(),
+                new FunctionTo(),
                 new FunctionBeforeLast(),
                 new FunctionAfterLast(),
                 new FunctionChars(),
@@ -504,6 +506,45 @@ public class ValueString extends Value implements IsSynthesizable {
             return new ValueString(val.substring(pos+a.length()));
         }
     }
+
+    class FunctionFrom extends Function {
+        public String getName() {
+            return "from";
+        }
+        public String getShortDesc() {
+            return "from(str) - return string starting with string";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) {
+                throw new Exception("Expected parameter str");
+            }
+            String a=params.get(0).getValAsString();
+
+            int pos=val.indexOf(a);
+            if (pos < 0) return new ValueString("");
+            return new ValueString(val.substring(pos));
+        }
+    }
+
+    class FunctionTo extends Function {
+        public String getName() {
+            return "to";
+        }
+        public String getShortDesc() {
+            return "to(str) - return string up to and including the str";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) {
+                throw new Exception("Expected parameter str");
+            }
+            String a=params.get(0).getValAsString();
+
+            int pos=val.indexOf(a);
+            if (pos < 0) return new ValueString(val);
+            return new ValueString(val.substring(0,pos+a.length()));
+        }
+    }
+
 
 
     class FunctionBeforeLast extends Function {
