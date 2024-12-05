@@ -137,7 +137,7 @@ public class ValueString extends Value implements IsSynthesizable {
             return "sub";
         }
         public String getShortDesc() {
-            return "sub(start,end) or sub(start) - returns substring";
+            return "sub(start,end) or sub(start) - returns substring (negatives index from end)";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size()==2) {
@@ -146,7 +146,9 @@ public class ValueString extends Value implements IsSynthesizable {
                 }
                 int a=(int) getInt("startPos", params, 0);
                 int b=(int) getInt("endPos", params, 1);
-                
+                if (a<0) a=a+val.length();
+                if (b<0) b=b+val.length();
+
                 if (a < 0) a=0;
                 if (b > val.length()) b=val.length();
                 if (a > b || a > val.length()) return new ValueString(""); 
@@ -158,6 +160,7 @@ public class ValueString extends Value implements IsSynthesizable {
                     throw new Exception("Expected parameter: startPos");
                 }
                 int a=(int) getInt("startPos", params, 0);
+                if (a<0) a=a+val.length();
                 return new ValueString(val.substring(a));
                 
             } else {

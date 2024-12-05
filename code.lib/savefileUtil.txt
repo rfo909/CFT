@@ -827,6 +827,95 @@ Dict.set("list",List)
 /class Cols
 
 
+# The TAB character
+# --
+	"^t".unEsc
+/TAB
+
+
+
+# Structure for generating nested output, typically code
+# --
+	self.dict=Dict
+	self.list=List
+	self.parent=null
+
+	# Register a key for lookup from sub-contexts, in order to know what to render
+	# --
+	self.setKey = Lambda{
+		P(1) as String => key
+		P(2) => value
+		self.dict.set(key,value)
+	}
+
+	# Register a key in parent context, in order to know what to render
+	# --
+	self.setParentKey = Lambda{
+		P(1) as String => key
+		P(2) => value
+		error(self.parent==null, "setParentKey: no parent")
+		self.parent.setKey(key,value)
+	}
+
+	# Search for key
+	# --
+	self.lookupKey = Lambda{
+		P(1) as String => key
+		curr=self
+		loop
+			break(curr.dict.has(key))
+			curr=curr.parent
+			break(curr==null)
+		|
+		if (curr != null) curr.dict.get(key) else null
+	}
+
+	# Output single lines or list of lines, with local indent
+	# --
+	self.add = Lambda{
+		P(1,"") => text
+		if (getType(text)=="List") {
+			text->line self.list.add(line)
+		} else {
+			self.list.add(text)
+		}
+	}
+
+	# Can also manually add sub-contexts created and used in parallel
+	# --
+	self.addSub = Lambda{
+		P(1) as &OutContext => ctx
+		self.list.add(ctx)
+	}
+
+	# Create sub-context
+	# --
+	self.sub=Lambda{
+		subContext=Util:OutContext
+		subContext.parent=self
+
+		self.list.add(subContext)
+		# return the sub context
+		subContext
+	}
+
+	# Render output
+	self.render=Lambda{
+		P(1,"") as String => indent
+		
+		self.list->x
+			if (getType(x)=="String") {
+				out(indent + x)
+			} else {
+				x as &OutContext
+				x.render(indent+TAB)->line out(line)
+			}
+	}		
+
+/class OutContext
+
+
+
 # Permutate list of lists. 
 #
 # Example:

@@ -45,10 +45,10 @@
 	P(2) => context
 
 	ts.match("def","expected 'def'")
-	reference=ObjectReference(ts,context)
+	reference=ObjectReference(ts,context,false)
 
 	assignmentsBlock=null
-	assignmentsBlock=AssignmentsBlock(ts, context)
+	assignmentsBlock=AssignmentsBlock(ts, context, false)
 
 	# object state
 	# --
@@ -144,6 +144,7 @@
 # --
 	P(1) => ts
 	P(2) => context
+	P(3,true) => requireObjId  # false only when part of ObjectDef
 
 	ts.match("(","expected '('")
 
@@ -164,6 +165,8 @@
 	} else if (objId.startsWith("_")) {
 		objId=context + "." + objId.sub(1)
 	}
+
+	error(objId=="" && requireObjId, ts.sourceLocation + " object id required")
 
 	# object state
 	# --
@@ -342,6 +345,20 @@
 //AllDefs
 
 
+# Show any object
+# --
+	P(1) => obj
+	JSON:PP(obj,true,true)
+	true
+/Show
+
+# Parse and show example code
+# --
+	Parse(ExampleCode,"Example") => x
+	Show(x)
+/ShowEx
+
+
 
 # Example config
 # -------------------------------------------------------------------
@@ -355,6 +372,9 @@ def (Page _) {
     $accessId="PAGE_DEBUG_##"
     $skipAccessCheck=false
 		# this is a comment
+
+	$msgList=[ def (AppMsg) {$lang=1 $msg="Velkommen"} ]
+	$msgList=[ def (AppMsg) {$lang=2 $msg="Welcome"} ]
 
     $subPages=[
         def (SubPageRef) {$subPage=(ClientSubPage _x)}
@@ -414,3 +434,5 @@ Std.Text.Lexer.Node help
 
 Std.Text.Lexer.getTokenStream(Std.Text.Lexer.Node) help
 //TSHelp
+
+
