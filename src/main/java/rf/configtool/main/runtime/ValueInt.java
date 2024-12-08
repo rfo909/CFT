@@ -41,6 +41,7 @@ public class ValueInt extends Value implements IsSynthesizable {
                 new FunctionBitwiseAnd(),
                 new FunctionBitwiseOr(),
                 new FunctionBitwiseNot(),
+                new FunctionAbs(),
             };
         setFunctions(arr);
     }
@@ -292,5 +293,20 @@ public class ValueInt extends Value implements IsSynthesizable {
 
     }
 
+
+    class FunctionAbs extends Function {
+        public String getName() {
+            return "abs";
+        }
+        public String getShortDesc() {
+            return "abs() - returns absolute value";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size()!=0) throw new Exception("Expected no parameters");
+            if (val<0) return new ValueInt(-val);
+            return new ValueInt(val);
+        }
+
+    }
 
 }
