@@ -1,0 +1,165 @@
+# Zey are ze zame :-) 
+# --
+	P(1)=>a
+	P(2)=>b
+		Std.Math.sqrt(a*b) => r
+		println("a/r",a/r)
+		println("r/b",r/b)
+//t
+
+
+
+
+# GlobalStart
+# --
+	2.1
+/GlobalStart
+
+# GlobalEnd
+# --
+	1000.0
+/GlobalEnd
+
+# PlotWidth
+# --
+	1000
+/PlotWidth
+
+
+# Show markers?
+# --
+	false
+/ShowMarkers
+
+# t3
+# --
+	P(1,2)=>start
+	P(2,1000)=>end
+	
+	if (start < GlobalStart) start=GlobalStart
+	if (end > GlobalEnd) end=GlobalEnd
+	
+	increase=(end-start)/PlotWidth
+	divisor=GlobalEnd
+		
+	x=start
+	loop
+		break(x>=end)
+		break(Sys.outCount > PlotWidth)
+		a=divisor/x
+		out(a-a.floor)
+		
+		x=x+increase
+	|
+//t3
+
+
+
+# Data dir
+# --
+	Dir("/home/roar/xxx/fact").create
+/DDir
+
+# Delete pictures
+# --
+	DDir.files(".png")->f f.delete
+/Purge
+
+# Plot point
+# --
+	P(1)=>x
+	P(2)=>y
+	P(3)=>img
+	
+	img.setPixel(x,y)
+	img.setPixel(x-1,y)
+	img.setPixel(x+1,y)
+	img.setPixel(x,y-1)
+	img.setPixel(x,y+1)
+/SetPoint
+
+# Plot
+# --
+	P(1) => data
+	P(2) => fName
+	
+	width=PlotWidth
+	height=200
+	
+	img=Std.Raster.init(width,height,Std.Color(255,255,255))
+	img.setColor(Std.Color(0,0,0))
+	
+	x=0
+	data->val
+		y=(val*height).i
+		SetPoint(x,y,img)
+		x=x+1
+	|
+	
+	# create markers?
+	if (ShowMarkers) {
+		img.setColor(Std.Color(255,0,0))
+		Std.Data.for(0.0, width-1, width/10) -> pos
+			x=pos.i
+			Std.Data.each(20,height-20)->y
+				img.setPixel(x,y)
+	 }
+		
+			
+	img.save(DDir.file(fName + ".png"))
+/Plot
+
+# Main
+# --
+	generation=0
+	start=GlobalStart
+	end=GlobalEnd
+
+	loop
+		data=t3(start,end)
+
+		fname=("00000"+generation).last(5)
+		println(start.fmt("", ".", 5) + " - " + end.fmt("", ".", 5))
+
+		Plot(data,fname)
+		println(fname)
+
+		range=end-start
+		println("Range=" + range)			
+		Input("Enter range X-Y").get => input
+		break(input=="q")
+		input.split("-") => parts
+		offsetA=parts.first.trim.parseInt/10
+		offsetB=parts.last.trim.parseInt/10
+		
+		
+
+		start=start+range*offsetA
+		end=start+range*offsetB
+		
+		generation=generation+1
+		
+
+		
+/main
+
+# Oddities
+# --
+<<<< EOF
+
+(N*P)/X != N(P/X) ?
+-------------------
+
+When rendering P/X for P=1000 we need to zoom in to X in the range 2.10000 - 2.13045 (0.03045)
+to see a pattern of lines at 45 degree angle going down towards the right. We are rendering the
+value after the decimal comma, so with increasing N, the decimals of course will be shifted, but
+the pattern requires a closer zoom.
+
+Possibly there are variations in the data, which are not visible until we effectively transpose the
+decimals up?
+
+Doing the same for P=1000000, we need to zoom into a range of 2.10000 - 2.10002 (0.000029) to 
+see the same pattern
+
+>>>> EOF
+/Observations
