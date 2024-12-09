@@ -57,12 +57,12 @@
 
 # Data dir
 # --
-	Dir("/home/roar/xxx/fact").create
+	Sys.savefile.dir.sub("temp").sub("fact").create
 /DDir
 
 # Delete pictures
 # --
-	DDir.files(".png")->f f.delete
+	DDir.files("*.png")->f f.delete
 /Purge
 
 # Plot point
