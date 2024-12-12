@@ -12,12 +12,12 @@
 
 # GlobalStart
 # --
-	2.1
+	1000.0
 /GlobalStart
 
 # GlobalEnd
 # --
-	1000.0
+	1000000.0
 /GlobalEnd
 
 # PlotWidth
@@ -119,7 +119,7 @@
 		data=t3(start,end)
 
 		fname=("00000"+generation).last(5)
-		println(start.fmt("", ".", 5) + " - " + end.fmt("", ".", 5))
+		println(start.fmt(",", ".", 5) + " - " + end.fmt(",", ".", 5))
 
 		Plot(data,fname)
 		println(fname)

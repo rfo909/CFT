@@ -54,7 +54,7 @@ public class ValueString extends Value implements IsSynthesizable {
                 new FunctionBefore(),
                 new FunctionAfter(),
                 new FunctionFrom(),
-                new FunctionTo(),
+                new FunctionPast(),
                 new FunctionBeforeLast(),
                 new FunctionAfterLast(),
                 new FunctionChars(),
@@ -526,12 +526,12 @@ public class ValueString extends Value implements IsSynthesizable {
         }
     }
 
-    class FunctionTo extends Function {
+    class FunctionPast extends Function {
         public String getName() {
-            return "to";
+            return "past";
         }
         public String getShortDesc() {
-            return "to(str) - return string up to and including the str";
+            return "past(str) - return string up to and past the str";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 1) {
