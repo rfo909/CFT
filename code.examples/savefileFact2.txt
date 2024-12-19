@@ -1,0 +1,234 @@
+
+
+# PlotWidth
+# --
+	1000
+/PlotWidth
+
+
+# Show markers?
+# --
+	true
+/ShowMarkers
+
+# Create data as sequence of number in range 0-1
+# --
+	P(1) as int =>start
+	P(2) as int =>end
+	P(3) as int => bigNumber
+	P(4) as int? => reductionFactor		
+	
+	step=(end-start)/PlotWidth
+	step=step.i
+	if (step<1) step=1
+	
+	#println("step=" + step)
+
+
+	x=start
+	loop
+		break(x>=end)
+		break(Sys.outCount > PlotWidth)
+		
+		a=bigNumber % x
+		
+		# need to normalize the sample
+		
+		rf=if(reductionFactor, reductionFactor,x)
+		
+		fract=(a % rf) / rf
+		out(fract)
+		
+		x=x+step
+	|
+/CreateData
+
+
+
+# Data dir
+# --
+	Sys.savefile.dir.sub("temp").sub("fact").create
+/DDir
+
+# Delete pictures
+# --
+	DDir.files("*.png")->f f.delete
+/Purge
+
+# Plot point
+# --
+	P(1)=>x
+	P(2)=>y
+	P(3)=>img
+	
+	img.setPixel(x,y)
+	img.setPixel(x-1,y)
+	img.setPixel(x+1,y)
+	img.setPixel(x,y-1)
+	img.setPixel(x,y+1)
+/SetPoint
+
+# Plot
+# --
+	P(1) => data
+	P(2) => fName
+	
+	width=PlotWidth
+	height=400
+	
+	img=Std.Raster.init(width,height,Std.Color(255,255,255))
+	img.setColor(Std.Color(0,0,0))
+	
+	x=0
+	data->val
+		y=(val*(height-3)).i+3
+		SetPoint(x,y,img)
+		x=x+1
+	|
+	
+	# create markers?
+	if (ShowMarkers) {
+		img.setColor(Std.Color(255,0,0))
+		Std.Data.for(0.0, width-1, width/10) -> pos
+			x=pos.i
+			Std.Data.each(20,height-20)->y
+				img.setPixel(x,y)
+	 }
+		
+			
+	img.save(DDir.file(fName + ".png"))
+/Plot
+
+
+# Calculate a critical score of the data
+# --
+	P(1)=>data
+	
+	total=0
+	
+	Std.Data.for(1,data.length,1)->i
+	
+		val=data.nth(i)
+		if (val<0.01) total=total+1
+		else {
+			prev=data.nth(i-1)
+			if (prev > val*1.8) total=total+1
+		}
+	|
+	total
+/CalcCriticals
+
+
+
+# Search for most effective presentation (the one with least number of close-to-zero values)
+# --
+	P(1) as int => bigNumber
+	P(2) as int => start
+	P(3) as int => end
+	
+	#start=2
+	#end=Std.Math.sqrt(bigNumber).i
+	
+	reductionFactor=start
+	
+	smallestCritical=9999999
+	smallestCriticalReductionFactor=0
+	smallestCriticalData=null
+	
+	loop
+		data=CreateData(start,end,bigNumber, reductionFactor)
+
+		criticalPoints=CalcCriticals(data)
+		if (criticalPoints < smallestCritical) {
+			smallestCritical=criticalPoints
+			smallestCriticalReductionFactor=reductionFactor
+			smallestCriticalData=SymDict(start,end,bigNumber,reductionFactor,criticalPoints)
+		}
+		
+		reductionFactor=reductionFactor - 2
+			# different factors give different presentations
+
+		break(reductionFactor < 100)	
+
+	|
+	println("Smallest critical points", smallestCritical)
+	println("For reductionFactor", smallestCriticalReductionFactor)
+	smallestCriticalData
+/Search
+
+
+# Big number
+# --
+	2441*2357
+/BigNumber
+
+
+# Show factors of BigNumber
+# --
+	P(1,BigNumber) => bn
+	
+	limit=Std.Math.sqrt(bn).i
+	i=2
+	bn=BigNumber
+	loop
+		if (bn%i==0) out(i)
+		i=i+1
+		break(i>limit)
+/Factors
+
+# Main
+# --	
+	bigNumber=BigNumber
+	start=Std.Math.sqrt(bigNumber).i
+	end=5000 # (bigNumber/10).i  # factors up to 10 can be checked one by one
+	
+	count=0
+	loop
+		result=Search(bigNumber, start, end)
+		
+	
+		x=result
+		data=CreateData(x.start,x.end,x.bigNumber,x.reductionFactor)
+
+		fname=("00000"+count).last(5) + "_rf" + x.reductionFactor + "_" + x.start + "-" + x.end
+		Plot(data,fname)
+		
+		end=(end*0.99).i
+		count=count+1
+		
+		break(count>10)
+	|
+/f2
+
+
+# Generate primes
+# --
+	P(1,1000000)=>max
+	list=List(2)
+	n=3
+	loop
+		#println("n",n)
+		lim=Std.Math.sqrt(n)
+		foundFactor=false
+		
+		Inner{
+			list->factor
+				break(factor>lim)
+				foundFactor=(n % factor == 0)
+				break(foundFactor)
+		}
+		if (!foundFactor) {
+			list.add(n)
+		}
+		n=n+1
+		break(n>max)
+	|
+	list
+/Primes
+
+Primes(101)
+/FirstPrimes
+
+
+
+

@@ -997,3 +997,31 @@ Dict.set("list",List)
             
     }
 /CheckForUpdates
+
+
+
+# Generate primes
+# --
+	P(1,1000000)=>max
+	list=List(2)
+	n=3
+	loop
+		#println("n",n)
+		lim=Std.Math.sqrt(n)
+		foundFactor=false
+		
+		Inner{
+			list->factor
+				break(factor>lim)
+				foundFactor=(n % factor == 0)
+				break(foundFactor)
+		}
+		if (!foundFactor) {
+			list.add(n)
+		}
+		n=n+1
+		break(n>max)
+	|
+	list
+/Primes
+
