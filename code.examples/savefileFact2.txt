@@ -13,13 +13,12 @@
 
 # Create data as sequence of number in range 0-1
 # --
-	P(1) as int =>start
-	P(2) as int =>end
+	P(1) =>start
+	P(2) =>end
 	P(3) as int => bigNumber
 	P(4) as int? => reductionFactor		
 	
 	step=(end-start)/PlotWidth
-	step=step.i
 	if (step<1) step=1
 	
 	#println("step=" + step)
@@ -106,7 +105,7 @@
 	
 	total=0
 	
-	Std.Data.for(1,data.length,1)->i
+	Std.Data.for(1,data.length-1,1)->i
 	
 		val=data.nth(i)
 		if (val<0.01) total=total+1
@@ -117,44 +116,6 @@
 	|
 	total
 /CalcCriticals
-
-
-
-# Search for most effective presentation (the one with least number of close-to-zero values)
-# --
-	P(1) as int => bigNumber
-	P(2) as int => start
-	P(3) as int => end
-	
-	#start=2
-	#end=Std.Math.sqrt(bigNumber).i
-	
-	reductionFactor=start
-	
-	smallestCritical=9999999
-	smallestCriticalReductionFactor=0
-	smallestCriticalData=null
-	
-	loop
-		data=CreateData(start,end,bigNumber, reductionFactor)
-
-		criticalPoints=CalcCriticals(data)
-		if (criticalPoints < smallestCritical) {
-			smallestCritical=criticalPoints
-			smallestCriticalReductionFactor=reductionFactor
-			smallestCriticalData=SymDict(start,end,bigNumber,reductionFactor,criticalPoints)
-		}
-		
-		reductionFactor=reductionFactor - 2
-			# different factors give different presentations
-
-		break(reductionFactor < 100)	
-
-	|
-	println("Smallest critical points", smallestCritical)
-	println("For reductionFactor", smallestCriticalReductionFactor)
-	smallestCriticalData
-/Search
 
 
 # Big number
@@ -178,57 +139,27 @@
 
 # Main
 # --	
+	Purge
+
 	bigNumber=BigNumber
 	start=Std.Math.sqrt(bigNumber).i
-	end=5000 # (bigNumber/10).i  # factors up to 10 can be checked one by one
+	end=(bigNumber/2).i # (bigNumber/10).i  # factors up to 10 can be checked one by one
 	
+	reductionFactor=null
+
 	count=0
 	loop
-		result=Search(bigNumber, start, end)
-		
 	
-		x=result
-		data=CreateData(x.start,x.end,x.bigNumber,x.reductionFactor)
+		data=CreateData(start,end,bigNumber,reductionFactor)
 
-		fname=("00000"+count).last(5) + "_rf" + x.reductionFactor + "_" + x.start + "-" + x.end
+		crit=CalcCriticals(data)
+
+		fname=("00000"+count).last(5) + "_crit" + crit + "_" + start + "-" + end
 		Plot(data,fname)
 		
-		end=(end*0.99).i
+		end=(end*0.95).i
+		break(end-start < 1000)
 		count=count+1
 		
-		break(count>10)
 	|
 /f2
-
-
-# Generate primes
-# --
-	P(1,1000000)=>max
-	list=List(2)
-	n=3
-	loop
-		#println("n",n)
-		lim=Std.Math.sqrt(n)
-		foundFactor=false
-		
-		Inner{
-			list->factor
-				break(factor>lim)
-				foundFactor=(n % factor == 0)
-				break(foundFactor)
-		}
-		if (!foundFactor) {
-			list.add(n)
-		}
-		n=n+1
-		break(n>max)
-	|
-	list
-/Primes
-
-Primes(101)
-/FirstPrimes
-
-
-
-
