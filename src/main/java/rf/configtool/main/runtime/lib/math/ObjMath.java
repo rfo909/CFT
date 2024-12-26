@@ -38,6 +38,7 @@ public class ObjMath extends Obj {
         this.add(new FunctionSqrt());
         this.add(new FunctionLog());
         this.add(new FunctionLog10());
+        this.add(new FunctionComplex());
     }
     
     @Override
@@ -166,6 +167,21 @@ public class ObjMath extends Obj {
             return new ValueFloat(Math.log10(value));
         }
     }
+
+    class FunctionComplex extends Function {
+        public String getName() {
+            return "Complex";
+        }
+        public String getShortDesc() {
+            return "Complex(real,imag) - creates Complex number";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 2) throw new Exception("Expected real, imag parameters");
+            double real=getFloat("real", params, 0);
+            double imag=getFloat("imag", params, 1);
+            return new ValueObj(new ObjComplex(real,imag));
+        }
+    }   
     
     // private helpers
     
