@@ -19,6 +19,7 @@ package rf.configtool.main.runtime.lib;
 
 import java.awt.Color;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ import rf.configtool.main.runtime.Function;
 import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueFloat;
+import rf.configtool.main.runtime.ValueInt;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.lib.ObjColor;
 import rf.configtool.main.runtime.lib.ObjFile;
@@ -42,12 +44,15 @@ public class ObjRaster extends Obj {
     private Color color;
 
     public ObjRaster() {
+        this.add(new FunctionLoad());
         this.add(new FunctionInit());
+        this.add(new FunctionWidth());
+        this.add(new FunctionHeight());
         this.add(new FunctionSetColor());
         this.add(new FunctionSetPixel());
         this.add(new FunctionSave());
     }
-    
+
     @Override
     public boolean eq(Obj x) {
         return x==this;
@@ -71,6 +76,27 @@ public class ObjRaster extends Obj {
     private Obj theObj () {
         return this;
     }
+
+    class FunctionLoad extends Function {
+        public String getName() {
+            return "load";
+        }
+        public String getShortDesc() {
+            return "load(imgFile) - initialize with image file, returns self";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            final String err = "Expected parameter imgFile parameter";
+            if (params.size() != 1) throw new Exception(err);
+            Obj obj=getObj("imgFile",params,0);
+            if (!(obj instanceof ObjFile)) {
+                throw new Exception(err);
+            }
+            File f=((ObjFile) obj).getFile();
+            img=new RasterImage(f.getAbsolutePath());
+
+            return new ValueObj(theObj());            
+        }
+    }
     
 
     class FunctionInit extends Function {
@@ -78,13 +104,13 @@ public class ObjRaster extends Obj {
             return "init";
         }
         public String getShortDesc() {
-            return "init(x,y,color) - create new image with given size and background color, returns self";
+            return "init(width,height,color) - create new image with given size and background color, returns self";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             final String err = "Expected parameters x,y,color";
             if (params.size() != 3) throw new Exception(err);
-            int x=(int) getInt("x", params, 0);
-            int y=(int) getInt("y",params,1);
+            int x=(int) getInt("width", params, 0);
+            int y=(int) getInt("height",params,1);
             Obj obj=getObj("color",params,2);
             if (!(obj instanceof ObjColor)) throw new Exception(err);
             ObjColor color=(ObjColor) obj;
@@ -95,6 +121,34 @@ public class ObjRaster extends Obj {
             return new ValueObj(theObj());            
         }
     }
+
+    class FunctionWidth extends Function {
+        public String getName() {
+            return "width";
+        }
+        public String getShortDesc() {
+            return "width() - returns width (after init or load)";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueInt(img.getWidth());
+        }
+    }
+    
+    
+    class FunctionHeight extends Function {
+        public String getName() {
+            return "height";
+        }
+        public String getShortDesc() {
+            return "height() - returns height (after init or load)";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueInt(img.getHeight());
+        }
+    }
+    
     
     
     class FunctionSetColor extends Function {
