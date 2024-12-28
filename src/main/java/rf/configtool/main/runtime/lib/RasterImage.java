@@ -21,6 +21,8 @@ import java.awt.Color;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.PixelGrabber;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.io.File;
 
 import javax.imageio.ImageIO;
@@ -249,6 +251,17 @@ public class RasterImage {
         img.flush();
     }
 
+
+    public RasterImage scaleTo (int width, int height) throws Exception {
+        BufferedImage src=getImage();
+
+        BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+
+        Graphics2D g2d = (Graphics2D) newImage.createGraphics();
+        g2d.addRenderingHints(new RenderingHints(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY));
+        g2d.drawImage(src, 0, 0, width, height, null);
+        return new RasterImage(newImage);
+    }
 
 
 

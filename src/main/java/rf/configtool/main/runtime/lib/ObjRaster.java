@@ -51,6 +51,14 @@ public class ObjRaster extends Obj {
         this.add(new FunctionSetColor());
         this.add(new FunctionSetPixel());
         this.add(new FunctionSave());
+        this.add(new FunctionPixel());
+        this.add(new FunctionGray());
+        this.add(new FunctionScaleTo());
+    }
+
+    private ObjRaster (RasterImage img) {
+        this();
+        this.img=img;
     }
 
     @Override
@@ -195,7 +203,7 @@ public class ObjRaster extends Obj {
             return "save";
         }
         public String getShortDesc() {
-            return "savel(file) - save on PNG format, returns self";
+            return "save(file) - save on PNG format, returns self";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             final String err="Expected file parameter";
@@ -209,5 +217,73 @@ public class ObjRaster extends Obj {
             return new ValueObj(theObj());            
         }
     }
-    
+
+
+    class FunctionPixel extends Function {
+        public String getName() {
+            return "pixel";
+        }
+        public String getShortDesc() {
+            return "pixel(x,y) - return Color for pixel";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            final String err="Expected parameters x,y";
+
+            if (params.size() != 2) throw new Exception(err);
+            int x=(int) getInt("x",params,0);
+            int y=(int) getInt("y",params,1);
+
+            int red=img.getRed(x,y);
+            int green=img.getGreen(x,y);
+            int blue=img.getBlue(x,y);
+
+            return new ValueObj(new ObjColor(red,green,blue));
+        }
+    }
+ 
+
+    class FunctionGray extends Function {
+        public String getName() {
+            return "gray";
+        }
+        public String getShortDesc() {
+            return "gray(x,y) - get gray level for pixel in range 0-1 (float)";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            final String err="Expected parameters x,y";
+
+            if (params.size() != 2) throw new Exception(err);
+            int x=(int) getInt("x",params,0);
+            int y=(int) getInt("y",params,1);
+
+            int red=img.getRed(x,y);
+            int green=img.getGreen(x,y);
+            int blue=img.getBlue(x,y);
+
+            return new ValueFloat((red+green+blue)/3.0/256.0);
+        }
+    }
+
+
+    class FunctionScaleTo extends Function {
+        public String getName() {
+            return "scaleTo";
+        }
+        public String getShortDesc() {
+            return "scaleTo(width,height) - return new image";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            final String err="Expected parameters width, height";
+
+            if (params.size() != 2) throw new Exception(err);
+            int width=(int) getInt("width",params,0);
+            int height=(int) getInt("height",params,1);
+
+            RasterImage newImage=img.scaleTo(width,height);
+            return new ValueObj(new ObjRaster(newImage));
+
+        }
+    }
+ 
+ 
 }
