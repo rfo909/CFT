@@ -54,6 +54,7 @@ public class ObjRaster extends Obj {
         this.add(new FunctionPixel());
         this.add(new FunctionGray());
         this.add(new FunctionScaleTo());
+        this.add(new FunctionApplyConvolution3());
     }
 
     private ObjRaster (RasterImage img) {
@@ -284,6 +285,32 @@ public class ObjRaster extends Obj {
 
         }
     }
- 
- 
+
+
+
+    class FunctionApplyConvolution3 extends Function {
+        public String getName() {
+            return "applyConvolution3";
+        }
+        public String getShortDesc() {
+            return "applyConvolution3(multFactor, bias, k1,k2,k3,...k9) - return new Raster object";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            final String err="Expected parameters multFactor, bias, k1,k2,k3,...k9";
+
+            if (params.size() != 11) throw new Exception(err);
+            double multFactor=getFloat("multFactor", params, 0);
+            double bias=getFloat("bias",params,1);
+            double[] kernel=new double[9];
+            for (int i=0; i<9; i++) {
+                kernel[i]=getFloat("kernel",params,i+2);
+            }
+
+            int order=3;
+            ImageConvolutionMatrix m=new ImageConvolutionMatrix(order, multFactor, bias, kernel);
+            RasterImage newImg=m.apply(img);
+            return new ValueObj(new ObjRaster(newImg));
+        }
+    }
+
 }
