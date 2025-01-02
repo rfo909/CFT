@@ -18,9 +18,14 @@
 #
 # This code is still very much a work in progress
 # --
-	P(1)=>lines
-	self.lines=lines
-
+	P(1)=>linesOrFile
+	
+	if (getType(linesOrFile)=="File") {
+		self.lines=linesOrFile.read(false)
+	} else {
+		self.lines=linesOrFile
+	}
+	
 	self.pos=0
 
 	self.reset=Lambda{

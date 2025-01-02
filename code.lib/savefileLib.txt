@@ -1555,7 +1555,7 @@ BackDateLastResultFiles
 			f.read->line
 				t=line.trim
 				assert (t.startsWith("/") || t.startsWith("#"))
-				assert (t.contains(st.toLower))
+				assert (t.toLower.contains(st.toLower))
 				report(f, f.name, line.lineNumber, line)
 /SearchScripts
 
@@ -1578,3 +1578,22 @@ BackDateLastResultFiles
 # --
 	Sys.lastResultList.sort
 /SortList
+
+
+# UTF BOM bytes
+# --
+	dict=Dict
+
+	Sequence(
+		@ UTF-32BE   0000FEFF
+		@ UTF-32LE   FFFF0000
+		@ UTF-16BE   FEFF
+		@ UTF-16LE   FFFE
+		@ UTF-8      EFBBBF
+	)->line
+		parts=line.split
+		dict.set(parts.first,Util:HexToChars(parts.last))
+	|
+	dict
+/UtfBom
+
