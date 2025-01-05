@@ -25,6 +25,10 @@ import rf.configtool.main.runtime.Function;
 import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueObj;
+import rf.configtool.main.runtime.ValueBoolean;
+
+import rf.configtool.main.runtime.lib.dd.DD.FunctionRef;
+import rf.configtool.main.runtime.lib.dd.DD.FunctionVec;
 import rf.configtool.main.runtime.ValueNull;
 
 public class DD extends Obj {
@@ -33,6 +37,7 @@ public class DD extends Obj {
         this.add(new FunctionVec());
         this.add(new FunctionRef());
         this.add(new FunctionWorld());
+        this.add(new FunctionIntersect());
     }
     
     @Override
@@ -111,5 +116,45 @@ public class DD extends Obj {
          return new ValueObj(new DDWorld());
      }
  }
-    
+
+
+ 
+ class FunctionIntersect extends Function {
+    public String getName() {
+        return "intersect";
+    }
+    public String getShortDesc() {
+        return "intersect(pos1,vec1,pos2,vec2) - returns boolean";
+    }
+    private DDVector get (String name, List<Value> params, int pos, String err) throws Exception {
+        Obj obj=getObj(name,params,pos);
+        if (!(obj instanceof DDVector)) throw new Exception(err);
+        return ((DDVector) obj);
+    }
+
+    public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+        String err="Expected params vpos1, vec1, vpos2, vec2";
+        if (params.size() != 4) throw new Exception(err);
+        DDVector pos1=get("vpos1",params,0,err);
+        DDVector vec1=get("vec1",params,1,err);
+        DDVector pos2=get("vpos2",params,2,err);
+        DDVector vec2=get("vec2",params,3,err);
+
+        double ax1=pos1.getVec().getX();
+        double ay1=pos1.getVec().getY();
+
+        double ax2=ax1+vec1.getVec().getX();
+        double ay2=ay1+vec1.getVec().getY();
+
+        double bx1=pos2.getVec().getX();
+        double by1=pos2.getVec().getY();
+
+        double bx2=bx1+vec2.getVec().getX();
+        double by2=by1+vec2.getVec().getY();
+
+        return new ValueBoolean(LineSegmentIntersection.doSegmentsIntersect(ax1, ay1, ax2, ay2, bx1, by1, bx2, by2));
+    }
+ }
+   
+
 }
