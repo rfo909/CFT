@@ -104,6 +104,7 @@ shortcut:SR   = "---- search recent files curr dir ----"  Util:SearchRecentFiles
 shortcut:SLR  = "---- search files from lastResult ----"  Lib:SearchResultFiles
 shortcut:FL   = "---- File Locate under curr Dir ----"    Lib:LocateFiles(Dir)
 shortcut:DL   = "---- Dir Locate under curr Dir ----"     Lib:LocateDirs(Dir)
+shortcut:PURG = "---- Purge old files in curr Dir ----"   Util:PurgeOldFiles(Dir)
 
 # Projects script 
 shortcut:P    = "---- Projects ----"                      Sys.stdin(":load Projects","curr")

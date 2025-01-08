@@ -1048,3 +1048,35 @@ Dict.set("list",List)
 	list
 /Primes
 
+
+
+# Purge log files etc older than 30 days
+# --
+	P(1,Dir) => currDir
+	P(2,Input("Glob pattern").get)=>globPattern
+	error(globPattern=="", "Invalid glob, try *.txt or similar")
+
+	P(3,Input("Number of days").get.parseInt) => days
+
+	limit=Date.sub(Date.Duration.days(days)).get
+	println("Limit:", Date(limit).fmt)
+
+	currDir.files(globPattern)->f
+		#println("***",f.name, Date(f.lastModified).fmt)
+		assert(f.lastModified < limit)
+		report(f,f.name,Date(f.lastModified).fmt)
+	|
+	_=>rows
+
+	Lib:FormatRows(rows).print
+
+	if (rows.length>0 && Lib:Confirm("Delete these files?")) {
+		rows->row
+			f=row.get(0)
+			println("Deleting " + f.name)
+			f.delete
+		}
+	}
+		
+/PurgeOldFiles
+		

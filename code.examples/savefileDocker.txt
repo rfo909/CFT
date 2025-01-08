@@ -291,3 +291,43 @@ Bash       - run bash shell inside running container
     | _.sort->x 
         out(x.data)
 //SortVersionsList
+
+
+# Timed cleanup job
+# After starting containers with compose or individually, call this function to stop and remove them after a certain time
+# (Trying to avoid docker desktop hangs on windows)
+# --
+	P(1,900) => secondsTimeout
+	
+    images = Inner{
+        CurrDir.runCapture("docker","container","list").keep(1)->line # keep(1) to strip header line
+			line.split.nth(0) => id
+			out(id)
+    } _ => idList
+
+	#idList.print
+
+	if (!idList.empty) SpawnProcess(SymDict(secondsTimeout, idList), _TimedCleanup(secondsTimeout, idList))
+/TimedCleanup
+
+
+
+# The timed cleanup job
+# --
+	P(1) => secondsTimeout
+	P(2) => idList
+
+	end=currentTimeMillis + secondsTimeout*1000
+	Sys.sleep(end-currentTimeMillis)
+	
+	# iterate over containers, and kill those that match id's in idList
+    images = Inner{
+        CurrDir.runCapture("docker","container","list").keep(1)->line # keep(1) to strip header line
+			line.split.nth(0) => id
+			if (idList.contains(id)) {
+				Util:Run("docker stop " + id)
+				Util:Run("docker rm -f " + id)
+			}
+    }
+		
+//_TimedCleanup
