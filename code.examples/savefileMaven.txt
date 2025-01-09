@@ -107,15 +107,42 @@
 //CreateSummary
 
 
-# Show artifact and version from all pom files (including submodules)
+# Show artifact and version from all pom files
 # --
 	P(1,Dir) => currentDir
+	P(2,true) => includeSub
 
-	Pom(currentDir,true)->f
+	Pom(currentDir,includeSub)->f
 		XML:Parse(f.read).first => node
 		report(f, node.subNode("groupId").getContent + ":" + node.subNode("artifactId").getContent + ":" + node.subNode("version").getContent, f.path)
 /Versions
 	
+
+
+# Show artifacts as dependencies from pom files under current dir 
+# --
+	P(1,Dir)=>currentDir
+	P(2,false) => includeSub
+
+	Versions(currentDir, includeSub)->row
+		println(row)
+		parts=row.get(1).split(":")
+		groupId=parts.first
+		artifactId=parts.nth(1)
+		version=parts.last
+		Sequence(
+			@ <dependency>
+			@ 	<groupId><<groupId>></groupId>
+			@ 	<artifactId><<artifactId>></artifactId>
+			@ 	<version><<version>></version>
+			@ </dependency>
+			@
+		).mergeExpr->line 
+			out(line)
+	|
+	_.print
+/VersionsAsDependencies
+
 
 # Create pom summary as dictionary
 # --
@@ -368,3 +395,5 @@
 		}
 		f.create(lines)
 /VersionEditAllPom
+
+

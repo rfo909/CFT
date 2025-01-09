@@ -345,8 +345,23 @@ loop
 
 # Show lines 
 # --
-    LogFile.read.last(500)->line
-		if (line.trim=="" || line.contains("|")) {
+	inPastedText=false
+    LogFile.read => allLines
+	if (allLines.length>800) Inner{
+		pos=0
+		allLines->line
+			break(line.startsWith("==="))  # locate header, to avoid starting inside pasted text (formatted differently)
+			pos=pos+1
+		|
+		if (pos > 0) pos=pos-1
+		allLines=allLines.keep(pos)
+	}
+						
+	allLines->line
+		if (line=="```") {
+			inPastedText = !inPastedText
+		}
+		if (line.trim=="" || line.contains("|") || inPastedText) {
 			println(line)
 		} else {
 			Lib:ShowText(line,false)
