@@ -23,7 +23,7 @@
 # Set group id as used by git for this project
 # --
 	Db2:Set(Sys.scriptId,"git-group-id",readLine("Enter group id"))
-//SetGroupId
+/SetGroupId
 
 
 
@@ -66,6 +66,7 @@
 
     currentDir.allFiles("pom*.xml")->pom
 		path=pom.path
+		reject(pom.path.contains(Sys.fileSeparator+"old"))
 		if (!includeSubmodules) {
 			found = false
 			Inner{
@@ -110,26 +111,58 @@
 # Show artifact and version from all pom files
 # --
 	P(1,Dir) => currentDir
-	P(2,true) => includeSub
+	P(2,true) => includeSubmodules
 
-	Pom(currentDir,includeSub)->f
+	Pom(currentDir,includeSubmodules)->f
 		XML:Parse(f.read).first => node
 		report(f, node.subNode("groupId").getContent + ":" + node.subNode("artifactId").getContent + ":" + node.subNode("version").getContent, f.path)
 /Versions
 	
 
 
-# Show artifacts as dependencies from pom files under current dir 
+# Compare dependencies of single pom.xml in current directory
+# with artifacts created by other pom files in project
 # --
-	P(1,Dir)=>currentDir
-	P(2,false) => includeSub
+	Dir.file("pom.xml") => masterPom
+	error(!masterPom.exists, "No such file: " + masterPom.path)
 
-	Versions(currentDir, includeSub)->row
-		println(row)
-		parts=row.get(1).split(":")
-		groupId=parts.first
-		artifactId=parts.nth(1)
-		version=parts.last
+	# List of dependencies present in masterPom
+	CreateSummary(masterPom)->line
+		assert(line.startsWith("dep"))
+		out(line.after("dep").trim)
+	| _=> masterDep
+
+	Lib:Header("pom.xml dependencies")
+	masterDep.sort.print
+
+
+	# List of artifacts produced by other pom files (not including masterPom)
+	Pom->f
+		reject(f.path==masterPom.path)  # don't compare to itself
+		XML:Parse(f.read).first => node
+		out(node.subNode("groupId").getContent + ":" + node.subNode("artifactId").getContent + ":" + node.subNode("version").getContent)
+	| _=> artifacts
+
+	Lib:Header("Artifacts created by other pom-files")
+	artifacts.sort.print
+
+	# Check that all artifacts are present in masterDep
+	artifacts->art
+		reject(masterDep.contains(art))
+		out(art)
+	| _=>missing
+
+	# Generate pom dependencies for missing artifacts
+	if (!missing.empty) {
+		Lib:Header("Missing includes")
+	} else {
+		Lib:Header(masterPom.name + " COMPLETE")
+	}
+
+	missing->art
+		groupId=art.before(":")
+		artifactId=art.after(":").before(":")
+		version=art.after(":").after(":")
 		Sequence(
 			@ <dependency>
 			@ 	<groupId><<groupId>></groupId>
@@ -138,10 +171,10 @@
 			@ </dependency>
 			@
 		).mergeExpr->line 
-			out(line)
-	|
-	_.print
-/VersionsAsDependencies
+			println(line)
+/CheckMasterPom		
+	
+		
 
 
 # Create pom summary as dictionary
@@ -183,7 +216,7 @@
 
 
 
-# For all pom files under current directory, including submodules, create summaries of dependencies
+# For all pom files under current directory, create summaries of dependencies
 # and mark local dependencies between pom files
 # --
 	P(1,Dir) as Dir => currentDir

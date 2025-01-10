@@ -779,7 +779,7 @@ public class Root {
     private void copyrightNotice() {
         // avoid replacement by Copyright script
         String cop="Copyright" 
-                    + " (C) 2020-2024"
+                    + " (C) 2020-2025"
                     + " Roar Foshaug";
         
         stdio.println("");
