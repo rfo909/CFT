@@ -119,11 +119,28 @@
 /Versions
 	
 
+# Create dependency
+# --
+	P(1) => groupId
+	P(2) => artifactId
+	P(3) => version
+
+	Sequence(
+		@ <dependency>
+		@ 	<groupId><<groupId>></groupId>
+		@ 	<artifactId><<artifactId>></artifactId>
+		@ 	<version><<version>></version>
+		@ </dependency>
+		@
+	).mergeExpr
+//CreateDependency
+
+
 
 # Compare dependencies of single pom.xml in current directory
 # with artifacts created by other pom files in project
 # --
-	Dir.file("pom.xml") => masterPom
+	P(1,Dir.file("pom.xml")) => masterPom
 	error(!masterPom.exists, "No such file: " + masterPom.path)
 
 	# List of dependencies present in masterPom
@@ -163,18 +180,54 @@
 		groupId=art.before(":")
 		artifactId=art.after(":").before(":")
 		version=art.after(":").after(":")
-		Sequence(
-			@ <dependency>
-			@ 	<groupId><<groupId>></groupId>
-			@ 	<artifactId><<artifactId>></artifactId>
-			@ 	<version><<version>></version>
-			@ </dependency>
-			@
-		).mergeExpr->line 
+		CreateDependency(groupId, artifactId, version)->line 
 			println(line)
 /CheckMasterPom		
 	
-		
+
+# Compare two pom-files, and produce dependencies 
+# --
+	P(1) as File => src
+	P(2) as File => target
+
+	CreateSummary(src)->line
+		assert(line.startsWith("dep"))
+		out(line.after("dep").trim)
+	| _.sort => srcDep
+
+	Lib:Header(src.path)
+	srcDep.sort.print
+
+	CreateSummary(target)->line
+		assert(line.startsWith("dep"))
+		out(line.after("dep").trim)
+	| _.sort => targetDep
+
+	Lib:Header(target.path)
+	targetDep.sort.print
+
+	Lib:Header("Missing dep in " + src.path)
+	targetDep->x
+		if (!srcDep.contains(x)) {
+			groupId=x.before(":")
+			artifactId=x.after(":").before(":")
+			version=x.after(":").after(":")
+			CreateDependency(groupId, artifactId, version)->line println(line)
+		}
+	|
+
+	Lib:Header("Missing dep in " + target.path)
+	srcDep->x
+		if (!targetDep.contains(x)) {
+			groupId=x.before(":")
+			artifactId=x.after(":").before(":")
+			version=x.after(":").after(":")
+			CreateDependency(groupId, artifactId, version)->line println(line)
+		}
+	|
+
+/DiffPoms			
+
 
 
 # Create pom summary as dictionary
@@ -358,7 +411,7 @@
 # 
 # Modify artifact version for pom files where groupId and optional artifactId matches.
 # Also modify dependencies to that same version, where groupId and artifactId (if defined), matches
-# Returns modified list of lines
+# Returns modified list of lines, or null if no changes
 # --
 	P(1) as File => pomFile
 	P(2) as String => groupId
@@ -371,7 +424,7 @@
 	if (buf.line.contains(">"+groupId+"<")) {
 		ok=true
 		if (artifactId != null) {
-			buf.match("<artifactId>",3)
+			buf.match("<artifactId>",3) 
 			ok = buf.line.contains(">" + artifactId + "<")
 		}
 		if (ok) {
@@ -399,10 +452,14 @@
 		}
 	|
 
-	# Verify still valid XML
-	XML:Parse(buf.out)
-	# return modified file content
-	buf.out
+	if (buf.isModified) {
+		# Verify still valid XML
+		XML:Parse(buf.out)
+		# return modified file content
+		buf.out
+	} else {
+		null
+	}
 /VersionEditPom
 
 
@@ -410,23 +467,23 @@
 # Update version for all pom*.xml under current directory
 # --
 	P(1,Dir) as Dir => currentDir
-	P(2, readLine("groupId")) as String => groupId
+	P(2, Input("groupId").get) as String => groupId
 	P(3, readLine("artifactId (blank for all)")) as String? => artifactId
 	P(4, readLine("new version")) as String => version
 
 	if (artifactId=="") artifactId=null
 
 	Maven:Pom(currentDir,false)->f
-		crlf=Lib:UsesCRLF(f)
 		println(f.path)
 		
 		lines=Maven:VersionEditPom(f, groupId, artifactId, version)
-		if (crlf) {
-			f.setWriteCRLF
-		} else {
-			f.setWriteLF
+		if (lines==null) {
+			println("   No change")
+			assert(false)
 		}
-		f.create(lines)
+		
+		println("   UPDATED")
+		Lib:PreserveFileLineSeparator(f).create(lines)
 /VersionEditAllPom
 
 

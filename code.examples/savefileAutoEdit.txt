@@ -71,7 +71,7 @@
 		P(2,true) as boolean => matchCase
 
 		# after rewrite of self.match these do basically the same
-		self.match != null
+		self.match(str) != null
 	}
 
 	# Search for string. If there is a match, return the line (which is now current line). If no match,
