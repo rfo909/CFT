@@ -2,7 +2,7 @@ package rf.configtool.main.runtime.lib.java;
 
 /*
 CFT - an interactive programmable shell for automation 
-Copyright (C) 2020-2024 Roar Foshaug
+Copyright (C) 2020-2025 Roar Foshaug
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

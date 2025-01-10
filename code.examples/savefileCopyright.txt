@@ -34,7 +34,7 @@ up-to-date copyright information.
 # Used when updating existing copyright texts, and when generating
 # for new files (both script and java)
 # --
-    "Copyright (C) 2020-2024 Roar Foshaug"
+    "Copyright (C) 2020-2025 Roar Foshaug"
 /UpdatedCopyrightLine
 
 
@@ -46,7 +46,7 @@ up-to-date copyright information.
     
     prefix=if (isJava, "", "# ")
 
-    f.read->line
+    f.read(false)->line
         if (line.contains("Copyright") && line.contains("Roar Foshaug")) {
             println(line)
             out(prefix + UpdatedCopyrightLine)
@@ -113,7 +113,7 @@ Sys.homeDir.allFiles("savefile*.txt")->f
 >>>> XXXXXXXXXXX
     .mergeExpr
     =>lines
-    lines=lines+file.read
+    lines=lines+file.read(false)
 
     file.setWriteLF.create(lines)
 //AddScriptCopyrightNotice
@@ -144,7 +144,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 >>>> XXXXXXXXXXX
     .mergeExpr
     =>lines
-    lines=lines+file.read
+    lines=lines+file.read(false)
 
     file.setWriteLF.create(lines)
 //AddJavaCopyrightNotice
