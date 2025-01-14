@@ -45,38 +45,44 @@ Input("SSH target on format username@server").get
 /ReadSSHTarget
 
 
-P(1,ReadSSHTarget) =>target
-P(2,readLine("Command")) =>command
-P(3,Dict) =>codes
-P(4,false) =>showDebug
+# Helper, calls SSH:run
+# --
+	P(1,ReadSSHTarget) =>target
+	P(2,readLine("Command")) =>command
+	P(3,Dict) =>codes
+	P(4,false) =>showDebug
     SSH:run (target,command,codes,showDebug)
-/run
+//run
 
 
+# Wait until a VM responds to ping
+# --
+	P(1,Input("IP address to wait for").get) =>ip 
+	100 => retries
+	loop
+		error(retries<=0,"No Ping response from " + ip)
+		retries = retries-1
+		ok = true
+		Lib:run(List("ping","-c","1",ip),List,true) => x
 
-P(1,Input("IP address to wait for").get) =>ip 
-100 => retries
-loop
-    error(retries<=0,"No Ping response from " + ip)
-    retries = retries-1
-    ok = true
-    Lib:run(List("ping","-c","1",ip),List,true) => x
-
-    println("Retries left: " + retries)
-    #Inner {
-    # println("--- Waiting for PING")
-    # Util:ShowDict(x)->line println(line)
-    #}
-    break(x.exitCode==0)
-    Sys.sleep(3000)
-|
-true
+		println("Retries left: " + retries)
+		#Inner {
+		# println("--- Waiting for PING")
+		# Util:ShowDict(x)->line println(line)
+		#}
+		break(x.exitCode==0)
+		Sys.sleep(3000)
+	|
+	true
 /WaitForPing
 
 
 
-P(1,Input("SSH target user@host").get) =>target
-P(2,Input("Host name").get) =>hostname
+# Fix hostname of a VM
+# --
+	P(1,Input("SSH target user@host").get) =>target
+	P(2,Input("Host name").get) =>hostname
+
     TmpFile("hn") =>f 
     f.create(hostname)
     
@@ -94,9 +100,12 @@ P(2,Input("Host name").get) =>hostname
 
 
 
-P(1,Input("SSH target user@host").get) =>target
-P(2,Input("IP address xx.xx.xx.xx/MM").get) =>ip
-P(3) => nic
+# Fix netplan configuration for a VM
+# --
+	P(1,Input("SSH target user@host").get) =>target
+	P(2,Input("IP address xx.xx.xx.xx/MM").get) =>ip
+	P(3) => nic
+	P(4,Input("Gateway IP address").get) => gateway
 
     error(!ip.contains("/"), "IP address missing mask? xx.xx.xx.xx/MM")
 
@@ -112,7 +121,7 @@ P(3) => nic
     }
     
     TmpFile("np") =>f
-    f.create(VMNetplan(ip,nic))
+    f.create(VMNetplan(ip,nic,gateway))
     
     println("* Copying netplan to target")
     SSH:copy (f, target, "./netplan.txt")
@@ -124,24 +133,26 @@ P(3) => nic
     run(target, List("sudo bash","mv ./netplan.txt /etc/netplan/50-cloud-init.yaml"))
 /VMConfigureNetplan
 
-    
-PDict("ip","nic").mergeCodes =>data
-error(data.hasNullValue,"Expected parameter for IP address and mask on format xx.xx.xx.xx/MM")
-<<< EOF
+
+# Netplan template merge
+# --		
+	PDict("ip","nic","gateway").mergeCodes =>data
+	error(data.hasNullValue,"Expected parameter for IP address and mask on format xx.xx.xx.xx/MM")
+	<<< EOF
 network:
   version: 2
   renderer: networkd
   ethernets:
     ${nic}:
       dhcp4: no
-      gateway4: 10.0.0.138
+      gateway4: ${gateway}
       addresses: [${ip}]
       nameservers:
-        addresses: [10.0.0.3, 10.0.0.4]
+        addresses: [${gateway}]
 >>> EOF
-->line
-    out(line.merge(data))
-/VMNetplan
+	->line
+		out(line.merge(data))
+//VMNetplan
 
 
 
