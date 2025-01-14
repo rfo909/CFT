@@ -343,9 +343,10 @@ status
 template="ubs20_s06"
 initialAddr="ubs20s06.v"
 nic="enp1s0"
+gw="10.0.0.138"
 
-KVM:Clone(template,"kub62",initialAddr,"10.0.8.25/16","roar", nic)
-KVM:Clone(template,"kub65",initialAddr,"10.0.8.28/16","roar", nic)
+KVM:Clone(template,"kub62",initialAddr,"10.0.8.25/16","roar", nic, gw)
+KVM:Clone(template,"kub65",initialAddr,"10.0.8.28/16","roar", nic, gw)
 /Create
 
 
