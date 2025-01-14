@@ -1,0 +1,55 @@
+# TODO list to set up environment
+# --
+	List("ansible","sshpass")->prog
+		found=false
+		Inner{
+			Dir.runCapture("which",prog)->line
+				if (line.contains(Sys.fileSeparator+prog)) found=true
+		}
+		if (!found) out("apt-get install " + prog)
+	| _=>todo
+
+	if (!todo.empty) todo=List("apt-get update") + todo
+	todo
+/TODO
+
+# First test
+# --
+	cmd="ansible -i ./hosts ubuntu -m ping --user roar"  ## --ask-pass
+	Dir.run(cmd.split)
+		# Note: not smart enough to answer yes when asked the following:
+		#
+		# The authenticity of host '10.0.8.40 (10.0.8.40)' can't be established.
+		# ECDSA key fingerprint is SHA256:FOnNRj459w2HPoYwHxuc8ujVpuxuFcWtFYQ3sFLAb70.
+		# Are you sure you want to continue connecting (yes/no/[fingerprint])?
+
+/PingServers
+
+
+# Run apt playbook
+# --
+	cmd="ansible-playbook ./playbooks/apt.yml --user roar -i ./hosts" ## --ask-pass --ask-become-pass
+	Dir.run(cmd.split)
+/RunApt
+
+
+# Run java playbook
+# --
+	cmd="ansible-playbook ./playbooks/java.yml --user roar -i ./hosts" ## --ask-pass --ask-become-pass
+	Dir.run(cmd.split)
+/RunJava
+
+
+# Run any playbook
+# --
+	P(1) => playbook
+	if (playbook==null) Inner{
+		Dir.sub("playbooks").files->f println("   " + f.name.beforeLast(".")) |
+		Input("Enter name of playbook").get => playbook
+	}
+
+	cmd="ansible-playbook ./playbooks/" + playbook + ".yml --user roar -i ./hosts"
+	Dir.run(cmd.split)
+/RunPlaybook
+
+
