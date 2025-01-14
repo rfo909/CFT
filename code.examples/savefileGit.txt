@@ -187,3 +187,91 @@
 	| _.sort->x 
 		out(x.data)
 /Modified
+
+
+# Create tag and push it
+# --
+	P(1,Dir)=>currDir
+	P(2,readLine("Enter tag"))=>tag
+	error(tag.contains(" "), "Invalid tag")
+
+	currDir.cd
+
+	#println("** Creating tag " + tag)
+	Run("git tag " + tag)
+
+	#println("** Pushing tag to origin")
+	Run("git push origin " + tag)
+
+	#println("** Displaying tags")
+	ShowTags
+/CreateTag
+	
+
+# Show tags
+# --
+	Run("git tag")
+/ShowTags
+
+# Are there uncommitted changes?
+# --
+	P(1,Dir) => currDir
+	hasChanges=true
+	currDir.runCapture("git","status")->line
+		if (line.contains("nothing to commit, working tree clean")) hasChanges=false
+	|
+	hasChanges
+/HasChanges
+
+		
+# Merge branch into master (or other branch)
+# --
+	P(1,Dir) => currDir
+	P(2,readLine("Branch to merge")) => branch
+	P(3,"master") => targetBranch
+
+	currDir.cd
+
+	Run("git checkout " + targetBranch)
+	Run("git pull origin " + targetBranch)
+	UpdateSubmodules(currDir,"*")
+	error(HasChanges,"There are changes to be committed before merge")
+
+	Lib:Header("Merging " + branch + " into " + targetBranch)
+	ShowTags
+	println
+	println("Setting a tag on master")
+	
+	CreateTag(currDir)
+
+	println
+	Run("git merge origin/" + branch)
+	
+
+/Merge
+
+
+# Locate all files with conflict markers
+# --
+	P(1,Input("File glob").setCurrCond("*.java").get) => glob
+	grep=Grep.match("<<<<<",">>>>>")
+	Dir.allFiles(glob)->f
+		assert(grep.fileCount(f)>0)
+		report(f,f.path)
+/Conflicts
+
+
+# Search through output from merge for CONFLICT lines
+# --
+	println("Paste merge output lines, terminate with '.' on separate line")
+	fileTypes=Dict
+	readLines(".")->line
+		assert(line.contains("CONFLICT"))
+		fileTypes.set(line.afterLast("."),1)
+		println(line)
+	|
+	fileTypes.keys->type
+		println("*." + type)
+	|
+	
+/SC
