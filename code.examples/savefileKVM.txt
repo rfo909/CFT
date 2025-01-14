@@ -258,9 +258,10 @@ status
     P(1) => original           # original VM ("kubsXX")
     P(2) => cloneName          # new VM name
     P(3) => originalIp         # ip of the VM that got cloned
-    P(4) => newIp          # ip/NN
+    P(4) => newIp              # ip/NN
     P(5) => sshUser            # for config
     P(6) => nic                # VM network card to configure ("ens3" etc) - run "ip addr" on original VM
+	P(7) => gatewayIp		   # used to configure netplan
 
     Dir.runCapture("whoami").nth=="root" =>ok
     error(!ok, "Must be logged in as root")
@@ -275,6 +276,7 @@ status
             Lib:ReadValue("New VM IP address (including /NN netmask)", newIp) => newIp
             Lib:ReadValue("SSH user", sshUser) => sshUser
             Lib:ReadValue("Network card (nic) to configure, ex. ens3", nic) => nic
+			Lib:ReadValue("Gateway IP address", gatewayIp) => gatewayIp
             break(Lib:ReadValueBoolean("Confirm", false))
     }
     error(!newIp.contains("/"), "Invalid newIp - must contain /NN netmask")
@@ -313,7 +315,7 @@ status
     ServersMaintenance:VMSetHostname (target, cloneName)
 
     println("* Configuring netplan")
-    ServersMaintenance:VMConfigureNetplan (target, newIp, nic)
+    ServersMaintenance:VMConfigureNetplan (target, newIp, nic, gatewayIp)
 
     println("* Rebooting new VM: " + cloneName)
     SSH:sudo (target, "reboot", true)
