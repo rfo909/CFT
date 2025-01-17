@@ -25,28 +25,31 @@ Parsing "Ansible" text format looking like this:
 
 # This is a comment
 
+[OS=ubuntu]
+10.0.8.200
+
 [Auto.reboot=yes]
 *.v 
 s*.s   [no]
+	# override the "yes" value from the header
 
 
 
 >>>>>> EOF
 /Readme
 
-# Parse text lines. Returns dictionary with 'data' pointing at the
-# actual data structure, and then the following lambdas, which are
-# used as follows:
-#
-#    LallHosts.call
-#    LallFields.call
-#    Lget.call(elementName,fieldName,defaultValue?)
-#    Ldump.call
-#
-# The data dictionary has keys for all elements, and under each
-# is a Dict with the settings for that element.
+
+# Default hosts file
 # --
-    file = Lib:DirPrivate.file("Hosts.txt") 
+	Lib:DirPrivate.file("Hosts.txt")
+/DefaultHostsFile
+
+
+# Parse text lines. Returns object with 'data' pointing at the
+# actual data structure, and a set of lambda's 
+# --
+    P(1, DefaultHostsFile) as File => file
+    
     data = Dict
         
     currProp=null
@@ -101,24 +104,30 @@ s*.s   [no]
                                         
         }
     |
-
-    # Create return value with lambdas for analyzing the data
-    # --
-    Dict
-        .set("data",data)
-        .set("LallHosts",Lambda{
-            self.data.keys.sort
-        })
-        .set("LallFields", Lambda{
-            self.data.keys->key 
-                self.data.get(key).keys->field
-                    out (field)
-            | _.unique.sort
-        })
-        .set("Lget", Lambda{
+    
+    
+    
+	# Class member data and functions
+	# --------------------------------
+    
+	self.data=data
+    
+	self.AllHosts=Lambda{
+		self.data.keys.sort
+	}
+    
+	self.AllProperties=Lambda{
+		self.data.keys->key 
+			self.data.get(key).keys->field
+			out (field)
+		| _.unique.sort
+	}
+    
+	self.GetProperty=Lambda{
             P(1) as String =>host
             P(2) as String =>field
-            P(3)=>defaultValue
+            P(3) as String? =>defaultValue
+            P(4, false) as boolean => optional
 
             result=defaultValue
 
@@ -130,27 +139,117 @@ s*.s   [no]
                 }
             }
 
+	    error(result==null && !optional,"No property " + field + " for host " + host + " (and no default value)")
             result
-        })
-        .set("Ldump",Lambda{
+	}
+    
+	self.Dump=Lambda{
             self.data.keys.sort->host
                 self.data.get(host).keys->field
                     value=self.data.get(host).get(field)
-                    out(List(host,field,value))
-        })
-        .set("Lhas", Lambda{
+                    report(host,field,value)
+	}
+    
+	self.HasProperty=Lambda{
             P(1) as String => host
             P(2) as String => field
-            P(3)=>value
+            P(3) as String? =>value
             ok=false
             if (self.data.has(host)) {
                 e=self.data.get(host)
                 if (e.has(field)) {
-                    if (e.get(field)==value) ok=true
+                    if (value==null || e.get(field)==value) ok=true
                 }
             }
             ok
-        })
-/Parse
+	}
+    
+	# Filtering and examining data
+	# -----------------------------
+    
+	self.hosts=self.AllHosts
+    
+	self.Keep = Lambda{
+		P(1) as String => propertyName
+		P(2) as String => value
+		P(3, false) as boolean => invert
+		
+		self.hosts = Inner{
+			self.hosts->host
+				match=self.GetProperty(host,propertyName)==value
+				ok=if(invert,!match,match)
+				assert(ok)
+				out(host)
+		}
+		self
+	}
+	   
+	self.Reject = Lambda {
+		P(1) as String => propertyName
+		P(2) as String => value
+		
+		self.Keep(propertyName, value, true)
+	}    
+	
+	self.ShowHost = Lambda{
+		P(1) as String => host
+		
+		self.AllProperties->field
+			value=self.GetProperty(host,field,null)
+			assert(value != null)
+			report(host,field,value)
+	}		
+    
+    
+    	self.ShowProperty = Lambda{
+		P(1) as String => propertyName
+		self.AllHosts->host
+			if (self.HasProperty(host,propertyName)) 
+				report(host,propertyName,self.GetProperty(host,propertyName))
+	}
+/class HostsFile
+
+
+# Test
+# --
+	HostsFile.Keep("OS","ubuntu").hosts
+/t1
+
+# Test
+# --
+	HostsFile.GetProperty("10.0.8.37","OS")
+/t2
+
+# Test
+# --
+	HostsFile.ShowHost("10.0.8.37")
+/t3
+
+# Test
+# --
+	HostsFile.ShowProperty("ssh.user")
+/t4
+
+
+# Test
+# --
+	HostsFile.Keep("OS","ubuntu").Keep("ssh.askpassword","true").hosts
+/t5
+
+# Demo of selecting hosts for apt update, upgrade, dist-upgrade
+# --
+	P(1,Hosts2:DefaultHostsFile) as File => hostsFile
+	config=Hosts2:HostsFile
+	
+	config.Keep("OS","ubuntu")
+	config.hosts->host
+		sshUser=config.GetProperty(host,"ssh.user")
+		askPassword=config.HasProperty(host,"ssh.askpassword","true")
+		update=true
+		upgrade=true
+		distUpgrade=config.HasProperty(host,"apt.dist-upgrade","true")
+		report(host, sshUser, askPassword, update, upgrade, distUpgrade)
+/DemoUpdate
+
 
 
