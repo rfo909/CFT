@@ -20,6 +20,15 @@
 /License
 
 
+# Obsolete
+# --
+	println("*** Ansible script is OBSOLETE, switching to Ans ***")
+	println
+	
+	Sys.stdin(":load Ans")
+/onLoad
+
+
 # Verify all hosts have copy of SSH key
 # --
     data=Hosts:Parse
