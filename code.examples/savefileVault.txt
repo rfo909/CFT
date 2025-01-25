@@ -1,4 +1,4 @@
-# License
+ License
 <<< EOF
 #
 # CFT - an interactive programmable shell for automation 
@@ -89,10 +89,14 @@ passwords and other secrets for the duration of the session.
 # Get or ask for session property (non encrypted)
 # --
     P(1,"Label") as String => label
-    
+    P(2) => defaultValue
+
     dbField = Sys.scriptId + ":" + label.toHexString
-    
+
     Db2:Get(Sys.sessionUUID,dbField) => s
+    if (s==null) {
+        s=defaultValue
+    }
     if (s==null) {
         readLine(label) => s
         Db2:Set(Sys.sessionUUID,dbField,s)

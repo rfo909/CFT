@@ -51,6 +51,37 @@ Log in as root, then add the following line to
 Input("SSH target on format username@server").get
 /ReadSSHTarget
 
+# SSH password is session secret
+# --
+	Vault:SessionSecretGet("SSH password")
+	SetUsingPassword(true)
+	Dir.runCapture("which","sshpass").first.contains("/sshpass") => ok
+	error(!ok,"Using SSH passwords requires sshpass")
+/SetSSHPassword
+
+
+# Set session property to indicate if using ssh password
+# --
+	P(1,true) => usePassword
+	Vault:SessionPropertySet("Using SSH password", usePassword)
+//SetUsingPassword
+
+
+# Using ssh password?
+# To disable a password, call SetUsingPassword(false), and to enable
+# it again, call SetUsingPassword(true)
+# --
+	Vault:SessionPropertyGet("Using SSH password", false)
+//UsingSSHPassword
+
+
+# Get SSH password or null of not using password
+# --
+	if (UsingSSHPassword) {
+		Vault:SessionSecretGet("SSH password")
+	} else null
+/GetSSHPassword
+
 
 # Open ssh connection to target
 # Called via @rsh shortcut
@@ -97,7 +128,7 @@ P(1) =>name
 
 
 # Run single or multiple commands (string or list) on remote target via SSH, returns Dict object
-#
+# --
 P(1) => target 
 P(2) => commands
 P(3,false) => acceptErrors
@@ -112,12 +143,29 @@ P(4,false) => showDebug
     }
 
 
-    # Add echo command with string to check for later, to strip away login messages etc
+    # Add echo command with string to check for later, to strip away login messages etc when presenting output
     "--- Output-mark: " + Date + " - " + Sys.scriptName + ".run ---" => mark
     List('echo "' + mark + '"') + commands => cmd
-        
-    result = Lib:run (List("ssh","-o","StrictHostKeyChecking=false",target), cmd, acceptErrors, false)
 
+    sshPassword = GetSSHPassword
+
+    sshCommand = null
+
+    passwordFile=null
+    if (sshPassword == null) {
+	sshCommand = List("ssh","-o","StrictHostKeyChecking=false",target)
+    } else {
+	passwordFile=Lib:TmpFile
+	passwordFile.create(sshPassword)
+	sshCommand=List("sshpass", "-f"+passwordFile.path, "ssh", target)
+    }
+
+    result = Lib:run (sshCommand, cmd, acceptErrors, false)
+
+    if (passwordFile != null) {
+	passwordFile.delete
+    }
+	
     # Modify stdout, by only including lines following the mark
 
     found = false
