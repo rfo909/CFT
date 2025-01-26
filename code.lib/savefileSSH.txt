@@ -275,16 +275,14 @@ P(1,ReadSSHTarget) =>sshTarget
 
 
 # Run single or multiple commands (string or list) as root on remote target via SSH, returns Dict object
-#
-P(1) => target 
-P(2) => commands
-P(3,false) => acceptErrors
-P(4,false) => showDebug
+# --
+	P(1) => target 
+	P(2) => commands
+	P(3,false) => acceptErrors
+	P(4,false) => showDebug
+
 	# Decide if password-less sudo on remote host
-	noPassword = SSH:run(target,Sequence(
-		@ sudo -n true 2>/dev/null
-		@ echo $?
-	)).stdout.first=="0"
+	noPassword = VerifySudoNoPassword(target)
 
 	# ensure commands is a list
 	if(getType(commands)!="List") {
@@ -298,10 +296,13 @@ P(4,false) => showDebug
 	} else {
 		if (showDebug) println(target,"requires sudo password")
 		## THIS DOES NOT WORK!!
-		error(!UsingSudoPassword,"NOT SET UP TO USE SUDO PASSWORD")
-		commands = List(
-			'echo "' + GetSudoPassword + '" | sudo -S bash'
-		) + commands
+		error(!UsingSudoPassword,"NOT SET UP TO USE SUDO PASSWORD, run SetUsingSudoPassword")
+		commands = Sequence(
+			@ export HISTFILESIZE=0
+			@ echo "<<GetSudoPassword>>" | sudo -S true >/dev/null 2>&1
+			@ sudo bash
+			@ sudo -k
+		).mergeExpr + commands
 
 	}
 	
@@ -311,8 +312,13 @@ P(4,false) => showDebug
 
 # test
 # --
-	sudo("roar@10.0.11.61","cat /etc/sudoers",false,true).stdout
+	sudo("roar@10.0.11.61","cat /etc/sudoers",false,false).stdout
 /t
+
+# test
+# --
+	run("roar@10.0.11.61","ls",false,false).stdout
+/t2
 
 # Copy local file via scp (secure copy over SSH) to remote target, returns Dict object
 # --
