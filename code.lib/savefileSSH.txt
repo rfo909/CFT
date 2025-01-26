@@ -54,7 +54,7 @@ Input("SSH target on format username@server").get
 # SSH password is session secret
 # --
 	Vault:SessionSecretGet("SSH password")
-	SetUsingPassword(true)
+	SetUsingSSHPassword(true)
 	Dir.runCapture("which","sshpass").first.contains("/sshpass") => ok
 	error(!ok,"Using SSH passwords requires sshpass")
 /SetSSHPassword
@@ -64,28 +64,64 @@ Input("SSH target on format username@server").get
 # --
 	P(1,true) => usePassword
 	Vault:SessionPropertySet("Using SSH password", usePassword)
-//SetUsingPassword
+/SetUsingSSHPassword
 
 
 # Using ssh password?
-# To disable a password, call SetUsingPassword(false), and to enable
-# it again, call SetUsingPassword(true)
+# To disable a password, call SetUsingSSHPassword(false), and to enable call SetUsingSSHPassword(true)
 # --
 	Vault:SessionPropertyGet("Using SSH password", false)
-//UsingSSHPassword
+/UsingSSHPassword
 
 
 # Get SSH password or null of not using password
 # --
 	if (UsingSSHPassword) {
 		Vault:SessionSecretGet("SSH password")
-	} else null
+	} else {
+		null
+	}
 /GetSSHPassword
 
 
+# Sudo password is session secret
+# --
+	Vault:SessionSecretGet("sudo password")
+	SetUsingSudoPassword(true)
+/SetSudoPassword
+
+
+# Set session property to indicate if using sudo password
+# --
+	P(1,true)=>useSudoPassword
+	Vault:SessionPropertySet("Using sudo password", useSudoPassword)
+/SetUsingSudoPassword
+
+
+# Are we using sudo password?
+# To disable call SetUsingSudoPassword(false), and to enable, use true
+# --
+	Vault:SessionPropertyGet("Using sudo password",false)
+/UsingSudoPassword
+
+
+# Get sudo password or null if not using sudo password
+# --
+	if (UsingSudoPassword) {
+		Vault:SessionSecretGet("sudo password")
+	} else {
+		null
+	}
+/GetSudoPassword
+
+
+
+
+
+
 # Open ssh connection to target
-# Called via @rsh shortcut
-#
+# Called via @rsh shortcut, and automatically adds to knownhosts if missing
+# --
 P(1,ReadSSHTarget) =>sshTarget
     Dir.run("ssh", "-o", "StrictHostKeyChecking=false", sshTarget)
 /remoteShell
@@ -94,17 +130,13 @@ P(1,ReadSSHTarget) =>sshTarget
 # Copy ssh key to remote target host. If password defined, it uses sshpass to automate this process.
 # --
 	P(1,ReadSSHTarget) =>sshTarget
-	pass=GetSSHPassword
-	if (pass==null) Dir.run("ssh-copy-id",sshTarget) else {
-		passFile=Lib:TmpFile
-		passFile.create(pass)
-		Dir.run("sshpass","-f"+passFile.path,"ssh-copy-id",sshTarget)
-		passFile.delete
-	}
+	cmd=List("ssh-copy-id",sshTarget)
+	RunSecureCommand(cmd)
 /sshEnable
 
 
 # Check if server responds on ping
+# --
 P(1) =>target
     if(target.contains("@"), target.after("@"), target) =>host
     Lib:run(List("ping","-c","1",host),List,true).exitCode => ex
@@ -114,111 +146,131 @@ P(1) =>target
 
 
 # Check if ok with SSH
+# --
 P(1) =>target
     run(target,"ls",true).get("exitCode")==0
 /HostOkSSH
 
 
-# Returns boolean indicating if sudo without password ok
+# Returns boolean indicating if sudo without password ok on remote ssh target
+# --
 P(1,ReadSSHTarget) =>sshTarget
-    sudo(sshTarget,"ls",true).get("exitCode")==0
-/VerifySudo
+	script=Sequence(
+		@ sudo -n true >/dev/null 2>&1
+		@ echo $?
+	)
+    run(sshTarget,script,true).stdout => lines
+    #lines->line println("output",line) |
+    lines.first=="0"
+/VerifySudoNoPassword
 
 
 
+# Run ssh, ssh-copy-id, scp and perhaps other remote ssh based commands, prefixing with
+# sshpass if using password
+# --
+	P(1) as List => localCommand  # List("ssh","user@host")
+	P(2,List) as List => stdin    # for ssh only
+	P(3,false) => acceptErrors
+	P(4,false) => showDebug
+	
+	sshPassword = GetSSHPassword
 
-# Create name of temp file under /tmp
-P(1) =>name 
-    Dir("/tmp").file(name + currentTimeMillis)  
-/TmpFile
+	passwordFile=null
+	isPipe=false
+	
+	if (sshPassword != null) {
+		passwordFile=Lib:TmpFile
+		if (Sys.isWindows) {
+			passwordFile.create(sshPassword)
+		} else {
+			# On linux we use a named pipe to avoid storing the password on disk
+			Dir.run("mkfifo",passwordFile.path)
+			isPipe=true
+			SpawnProcess(SymDict(passwordFile,sshPassword), {
+				passwordFile.append(sshPassword)
+			})
+		}
+		localCommand=List("sshpass", "-f"+passwordFile.path) + localCommand
+	}
+	
+	if (showDebug) Inner {
+		localCommand->s println("localCommand:",s) |
+		stdin->s println("stdin:",s) |
+	}
+
+	result = Lib:run (localCommand, stdin, acceptErrors, false)
 
 
+	if (passwordFile != null) {
+		if (isPipe) {
+			Dir.run("rm",passwordFile.path) # File.delete does not work for pipe
+		} else {
+			passwordFile.delete
+		}
+	}
+	
+	# return dictionary
+	result
+//RunSecureCommand
+	
 
 # Run single or multiple commands (string or list) on remote target via SSH, returns Dict object
 # --
-P(1) => target 
-P(2) => commands
-P(3,false) => acceptErrors
-P(4,false) => showDebug
+	P(1,ReadSSHTarget) => target 
+	P(2,Input("Remote command").get) => commands
+	P(3,false) => acceptErrors
+	P(4,false) => showDebug
     
-    error(target==null || !target.contains("@"), "Invalid target: '" + target + "'")
-    error(commands==null, "Invalid commands: can not be null")
+	error(target==null || !target.contains("@"), "Invalid target: '" + target + "'")
+	error(commands==null, "Invalid commands: can not be null")
 
-    # ensure commands is a list
-    if(getType(commands) != "List") {
-        commands = List(commands)
-    }
-
-
-    # Add echo command with string to check for later, to strip away login messages etc when presenting output
-    "--- Output-mark: " + Date + " - " + Sys.scriptName + ".run ---" => mark
-    List('echo "' + mark + '"') + commands => cmd
-
-    sshPassword = GetSSHPassword
-
-    sshCommand = null
-
-    passwordFile=null
-    isPipe=false
-    if (sshPassword == null) {
-	sshCommand = List("ssh","-o","StrictHostKeyChecking=false",target)
-    } else {
-	passwordFile=Lib:TmpFile
-	if (Sys.isWindows) {
-		passwordFile.create(sshPassword)
-	} else {
-		# On linux we use a named pipe to avoid storing the password on disk
-		isPipe=true
-		Dir.run("mkfifo",passwordFile.path)
-		SpawnProcess(SymDict(passwordFile,sshPassword), {
-			passwordFile.append(sshPassword)
-		})
+	# ensure commands is a list
+	if(getType(commands) != "List") {
+		commands = List(commands)
 	}
-	sshCommand=List("sshpass", "-f"+passwordFile.path, "ssh", "-o", "StrictHostKeyChecking=false", target)
-		# StrictHostKeyChecking=false automatically adds to knownhosts if missing
-		
-    }
 
-    result = Lib:run (sshCommand, cmd, acceptErrors, false)
 
-    if (passwordFile != null) {
-    	if (isPipe) {
-    		Dir.run("rm",passwordFile.path) # in case it is a pipe, File.delete does not work
-    	} else {
-    		passwordFile.delete
-    	}
-    }
+	# Add echo command with string to check for later, to strip away login messages etc when presenting output
+	"--- Output-mark: " + Date + " - " + Sys.scriptName + ".run ---" => mark
+	List('echo "' + mark + '"') + commands => cmd
+
+	sshCommand = List("ssh","-o","StrictHostKeyChecking=false",target)
+
+	result = RunSecureCommand(sshCommand, cmd, acceptErrors, showDebug)
+
 	
-    # Modify stdout, by only including lines following the mark
+	# Modify stdout, by only including lines following the mark
 
-    found = false
-    result.get("stdout")->line
-        condOut(found, line)
-        if (line.contains(mark)) {
-            found=true
-        }
-    | _ =>outLines
-    result.set("stdout",outLines) # overwrite
+	found = false
+	result.get("stdout")->line
+		condOut(found, line)
+		if (line.contains(mark)) {
+			found=true
+		}
+	| _ =>outLines
+	
+	result.set("stdout",outLines) # overwrite
 
-    if (showDebug) Inner {
-        println("- cmd:")
-        result.get("cmd")->line println("    " + line) |
+	if (showDebug) Inner {
+		println("- cmd:")
+		result.get("cmd")->line println("    " + line) |
 
-        println("- exitCode = " + result.get("exitCode"))
+		println("- exitCode = " + result.get("exitCode"))
 
-        println("- stdin:")
-        result.get("stdin")->line println("   # " + line) |
+		println("- stdin:")
+		result.get("stdin")->line println("   # " + line) |
 
-        println("- stdout:")
-        result.get("stdout")->line println("   # " + line) |
+		println("- stdout:")
+		result.get("stdout")->line println("   # " + line) |
 
-        println("- stderr:")
-        result.get("stderr")->line println("   # " + line) |
-        println
-    }
+		println("- stderr:")
+		result.get("stderr")->line println("   # " + line) |
+		println
+	    }
 
-    # return value
-    result
+	# return value
+	result
 /run
 
 
@@ -228,15 +280,39 @@ P(1) => target
 P(2) => commands
 P(3,false) => acceptErrors
 P(4,false) => showDebug
-    # ensure commands is a list
-    if(getType(commands)!="List") {
-        List(commands) =>commands
-    }
-    
-    List("sudo bash")+commands =>commands
-    run(target,commands,acceptErrors,showDebug)
+	# Decide if password-less sudo on remote host
+	noPassword = SSH:run(target,Sequence(
+		@ sudo -n true 2>/dev/null
+		@ echo $?
+	)).stdout.first=="0"
+
+	# ensure commands is a list
+	if(getType(commands)!="List") {
+		List(commands) =>commands
+	}
+
+
+	if (noPassword) {
+		if (showDebug) println(target,"supports sudo without password")
+		commands = List("sudo bash")+commands
+	} else {
+		if (showDebug) println(target,"requires sudo password")
+		## THIS DOES NOT WORK!!
+		error(!UsingSudoPassword,"NOT SET UP TO USE SUDO PASSWORD")
+		commands = List(
+			'echo "' + GetSudoPassword + '" | sudo -S bash'
+		) + commands
+
+	}
+	
+	run(target,commands,acceptErrors,showDebug)
 /sudo
 
+
+# test
+# --
+	sudo("roar@10.0.11.61","cat /etc/sudoers",false,true).stdout
+/t
 
 # Copy local file via scp (secure copy over SSH) to remote target, returns Dict object
 # --
@@ -249,7 +325,9 @@ P(4,false) => showDebug
     if (getType(localFile)=="File") {
         localFile=localFile.path
     }
-    Lib:run (List("scp", localFile, target+":"+remoteName), List, acceptErrors, showDebug)
+    
+    cmd=List("scp", localFile, target+":"+remoteName)
+    RunSecureCommand(cmd,null,acceptErrors,showDebug)
 /copy
 
 
@@ -264,7 +342,9 @@ P(4,false) => showDebug
     if (getType(localFile)=="File") {
         localFile=localFile.path
     }
-    Lib:run (List("scp", target+":"+remoteName, localFile), List, acceptErrors, showDebug)
+    cmd=List("scp", target+":"+remoteName, localFile)
+    RunSecureCommand(cmd,null,acceptErrors,showDebug)
+    
 /getFile
 
 
@@ -333,7 +413,7 @@ P(4,false) => showDebug
             'echo "pwd=`pwd`"',
             'echo "result=$__result"'
         )
-        SSH:sudo(target,cmdList,true)=>data
+        SSH:run(target,cmdList,true)=>data
 
         showStderr=false
 
