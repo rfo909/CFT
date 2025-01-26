@@ -91,9 +91,16 @@ P(1,ReadSSHTarget) =>sshTarget
 /remoteShell
 
 
-# Copy ssh key to remote target host
-P(1,ReadSSHTarget) =>sshTarget
-    Dir.run("ssh-copy-id",sshTarget)
+# Copy ssh key to remote target host. If password defined, it uses sshpass to automate this process.
+# --
+	P(1,ReadSSHTarget) =>sshTarget
+	pass=GetSSHPassword
+	if (pass==null) Dir.run("ssh-copy-id",sshTarget) else {
+		passFile=Lib:TmpFile
+		passFile.create(pass)
+		Dir.run("sshpass","-f"+passFile.path,"ssh-copy-id",sshTarget)
+		passFile.delete
+	}
 /sshEnable
 
 
@@ -152,18 +159,34 @@ P(4,false) => showDebug
     sshCommand = null
 
     passwordFile=null
+    isPipe=false
     if (sshPassword == null) {
 	sshCommand = List("ssh","-o","StrictHostKeyChecking=false",target)
     } else {
 	passwordFile=Lib:TmpFile
-	passwordFile.create(sshPassword)
-	sshCommand=List("sshpass", "-f"+passwordFile.path, "ssh", target)
+	if (Sys.isWindows) {
+		passwordFile.create(sshPassword)
+	} else {
+		# On linux we use a named pipe to avoid storing the password on disk
+		isPipe=true
+		Dir.run("mkfifo",passwordFile.path)
+		SpawnProcess(SymDict(passwordFile,sshPassword), {
+			passwordFile.append(sshPassword)
+		})
+	}
+	sshCommand=List("sshpass", "-f"+passwordFile.path, "ssh", "-o", "StrictHostKeyChecking=false", target)
+		# StrictHostKeyChecking=false automatically adds to knownhosts if missing
+		
     }
 
     result = Lib:run (sshCommand, cmd, acceptErrors, false)
 
     if (passwordFile != null) {
-	passwordFile.delete
+    	if (isPipe) {
+    		Dir.run("rm",passwordFile.path) # in case it is a pipe, File.delete does not work
+    	} else {
+    		passwordFile.delete
+    	}
     }
 	
     # Modify stdout, by only including lines following the mark
