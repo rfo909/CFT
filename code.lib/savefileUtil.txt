@@ -754,10 +754,16 @@ Dict.set("list",List)
 # Should really also parse tokens.
 # --
 	P(1) as List => lines
+	P(2,false) as boolean => skipInlineText
+
 	indent=0
 	inlineText=false
 	lines->line
 		s=line.trim
+		if (line.startsWith("#")) {
+			out(TAB.times(indent)+s)
+			continue
+		}
 
 		if (s.endsWith('@"') || s.endsWith("@'")) {
 			inlineText=true
@@ -768,25 +774,32 @@ Dict.set("list",List)
 			out(line)
 			continue
 		}
+
 		if (inlineText) {
-			out(line)
+			if (!skipInlineText) out(line)
 			continue
 		}
 
+		gen=false
 		if (s.endsWith("{")) {
 			out(TAB.times(indent)+s)
+			gen=true
 			indent=indent + 1
-		} else if (s.startsWith("}")) {
+		}
+		
+		if (s.startsWith("}")) {
 			indent=indent-1
 			if (indent < 0) indent=0
-			out(TAB.times(indent)+s)
+			condOut(!gen,TAB.times(indent)+s)
+			gen=true
 		} else if (s.endsWith("}")) {
 			indent=indent-1
 			if (indent<0) indent=0
-			out(TAB.times(indent)+s)
+			condOut(!gen,TAB.times(indent)+s)
+			gen=true
 			continue
 		} else {
-			out(TAB.times(indent)+s)
+			condOut(!gen,TAB.times(indent)+s)
 		}
 /FormatPowershell
 		
