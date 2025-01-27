@@ -750,6 +750,49 @@ Dict.set("list",List)
 
 
 
+# Quick and ditry formatting for Powershell code. Respects "here" text.
+# Should really also parse tokens.
+# --
+	P(1) as List => lines
+	indent=0
+	inlineText=false
+	lines->line
+		s=line.trim
+
+		if (s.endsWith('@"') || s.endsWith("@'")) {
+			inlineText=true
+			out(TAB.times(indent)+s)
+			continue
+		} else if (s.startsWith("'@") || s.startsWith('"@')) {
+			inlineText=false
+			out(line)
+			continue
+		}
+		if (inlineText) {
+			out(line)
+			continue
+		}
+
+		if (s.endsWith("{")) {
+			out(TAB.times(indent)+s)
+			indent=indent + 1
+		} else if (s.startsWith("}")) {
+			indent=indent-1
+			if (indent < 0) indent=0
+			out(TAB.times(indent)+s)
+		} else if (s.endsWith("}")) {
+			indent=indent-1
+			if (indent<0) indent=0
+			out(TAB.times(indent)+s)
+			continue
+		} else {
+			out(TAB.times(indent)+s)
+		}
+/FormatPowershell
+		
+	
+
+
 # Escape special character in XML / HTML string
 # --
     P(1,readLine("XML string")) as String =>s
@@ -1051,6 +1094,7 @@ Dict.set("list",List)
 
 
 # Purge log files etc older than 30 days
+# Use @PURG shortcut, as running Util:PurgeOldFiles is dangerous, depending on current directory inside Util script of loaded before
 # --
 	P(1,Dir) => currDir
 	P(2,Input("Glob pattern").get)=>globPattern
