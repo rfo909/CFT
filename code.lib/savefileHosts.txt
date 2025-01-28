@@ -177,13 +177,18 @@ r03.s
 	}
     
 	self.Dump=Lambda{
-			P(1,null) => searchTerm  # optional
+			P(1,null) => forHost  # optional glob pattern
+			regex=null
+			if (forHost != null) {
+				regex = Glob(forHost,false).regex
+			}
+
             self.data.keys.sort->host
                 self.data.get(host).keys->field
                     value=self.data.get(host).get(field)
 					show=true
-					if (searchTerm != null) {
-						show = host.contains(searchTerm) || field.contains(searchTerm) || value.contains(searchTerm)
+					if (regex != null) {
+						show = regex.match(host)
 					}
                     if (show) report(host,field,value)
 	}
