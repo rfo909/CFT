@@ -19,117 +19,58 @@
 >>> EOF
 /License
 
+
+CodeStats:main->line out("^t".unEsc+line)
+//Stats
+
 <<<<< TEXT
-.h <<Date.setFormat("yyyy-MM-dd").fmt>>
-
-
-
-
-
-
-
-
-
-
-.h CFT <<Sys.version>>
-
+.h CFT
 
     https://github.com/rfo909/CFT
+
+	"ConfigTool"
 
     - Script language
     - Shell
 	- GNU GPL 3.0 ("open source")
+	- Java
 
-    git clone https://github.com/rfo909/CFT.git
-    cd CFT
-    mvn package
-    .\cft
 
 
 .h Shell
-
-    - ls
-    - cd
-    - cat / more / edit / tail
-    - mkdir
-    - rm / cp / mv / touch
-
-	_Shell
-
-	!
-	!//
-	!!
-
-.h Shortcuts
-
-	@e
-	@
-
-	CFT.props
-
-
-
-.h Coding
-
-	Dir.allFiles("savefile*.txt")
-	/ScriptFiles
-
-	:save Test
-	@e
+    - ls / cd 
+    - cat / more / tail
+	- cp / mv / rm / mkdir
+	- touch / edit
+	- hex / hash / grep / which / showtree
+	
+	!         <- show history
+	@         <- list shortcuts
+	:         <- list colon commands
+    ?         <- list functions in script
+	@%        <- list symbols
 		
-	# Count number of lines of 
-	# --
-		ScriptFiles->f out(f.read.length) | _.sum
-	/ScriptLines
+	@S        <- search
+	@FL       <- file locate
+	@fp       <- file paths
+
+    help
+	<value> help
 
 
-.h Coding II
 
-    Date help
-    Date.Duration help
-
-	# Filter data 
-	# --
-		limit=Date.sub(Date.Duration.days(7))
-		ScriptFiles->f
-			assert(f.lastModified > limit.get)
-			out(f)
-	/RecentlyModified
-
-.h Search 
+.h @P
 
 	# Projects script
-    @P
 
     EditConfig
+
     ch
 	curr
 
-    S, S2, S3
-    
+    S
     FL
 
-    # Outside of "Projects"
-    
-    @S
-    @FL
-
-
-
-.h Help
-
-    ?
-
-    help
-    _Expr
-    _Stmt
-    _Shell
-
-    Dir help
-	5 help
-
-    :
-    @
 
 
 
@@ -137,26 +78,26 @@
 	.mergeExpr
 //text
 
-# Process line
+# Process line, return number of lines printed
 # --
     P(1) => line
     P(2) => first
     
     if (line.startsWith(".h")) {
         if (!first) {
-            readLine("Enter")
+            readLine("Enter")=>x error(x != "","Aborting")
         }
         println(Curses:Clear)
         Inner {
             Letters7x5:T9x10(line.sub(2).trim)->line 
                 str=line #.replace("#","O")
                 println(Curses:TxtGreen + str + Curses:Reset)
-            |
+			|
             println
         }
     } else {
         println(line)
-        #Sys.sleep(10)
+        if (line.trim!="") Sys.sleep(line.trim.length*80+800)
     }
 //ProcessLine
 
