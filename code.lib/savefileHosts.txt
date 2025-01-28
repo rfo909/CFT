@@ -262,13 +262,34 @@ r03.s
 		break(host=="")
 
 		Lib:ShowRows(HostsFile.Dump(host))
-/Examine
+/ExamineHosts
 
 
 # Full report
 # --
-	h=HostsFile
-	keys=h.AllProperties.sort
+	P(1,"*") as String => hostsFilter
+	P(2,"*") as String => propsFilter
+
+	data=HostsFile
+	allHosts=data.AllHosts
+	allKeys=data.AllProperties
+
+	regHosts=Glob(hostsFilter,false).regex
+	regProps=Glob(propsFilter,false).regex
+
+
+	hosts = Inner{ allHosts->x if(regHosts.match(x)) out(x) }
+	keys =  Inner{ allKeys->x if(regProps.match(x)) out(x) }
+
+	#allKeys->x 
+	#	if(regProps.match(x)) out(x) 
+	#| _=>keys
+
+	println(regHosts, hosts)
+	println(regProps, keys)
+
+	# render
+
 	headers=List("")+keys
 	reportList(headers)
 
@@ -278,19 +299,19 @@ r03.s
 	}
 	reportList(lineRow)
 
-	h.AllHosts.sort->host
+	hosts->host
 		row=List(host)
 		Inner {
 			keys->key
-				row.add(h.GetProperty(host,key,""))
+				row.add(data.GetProperty(host,key,""))
 		}
 		reportList(row)
 	| _=>rowList
 
 	println
-	Lib:ShowRows(rowList," ", false)
+	Lib:ShowRows(rowList,"  ", false)
 
-/FullGrid
+/Grid
 
 
 # Test
