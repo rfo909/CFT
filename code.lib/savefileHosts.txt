@@ -267,8 +267,8 @@ r03.s
 
 # Full report
 # --
-	P(1,"*") as String => hostsFilter
-	P(2,"*") as String => propsFilter
+	P(1,Input("Hosts filter, '*' for all").setCurrCond("*").get) as String => hostsFilter
+	P(2,Input("Properties filter, '*' for all").setCurrCond("*").get) as String => propsFilter
 
 	data=HostsFile
 	allHosts=data.AllHosts
