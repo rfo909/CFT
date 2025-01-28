@@ -17,26 +17,39 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>
 #
 >>> EOF
-/License
+//License
 
 # Readme
 <<<<<< EOF
-Parsing "Ansible" text format looking like this:
+[Group=test] 
+10.0.0.37
+10.0.0.38
+10.0.0.39
+10.0.0.40
 
-# This is a comment
+[Group=rpi]
+r01.s
+r02.s
+r03.s
+
+# Using group lookups 
+[Group=All]
+	(Group=test)
+	(	Group 	= 		rpi)
+
+
+[Reboot=true]
+*
+(Group=test) [false]  # value override
+*.s  [false]    # .s are real servers
+
 
 [OS=ubuntu]
-10.0.8.200
-
-[Auto.reboot=yes]
-*.v 
-s*.s   [no]
-	# override the "yes" value from the header
-
-
+*
 
 >>>>>> EOF
-/Readme
+/ExampleConfig
+
 
 
 # Default hosts file
@@ -70,17 +83,38 @@ s*.s   [no]
             #println(e + "." + name + "=" + value)
             data.get(e,Dict).set(name,value)
     }
+	LGroup = Lambda{
+		P(1) as Dict => data
+		P(2) as String => key
+		P(3) as String => value
 
-    file.read->line
-        reject(line.trim.startsWith("#"))
-        reject(line.trim=="")
-        if (line.trim.startsWith("[")) {
+		# return hosts which have this setting
+		data.keys->host
+			hostDict=data.get(host)
+			assert(hostDict.has(key) && hostDict.get(key)==value)
+			out(host)
+	}
+
+    file.read->rawLine
+		line=rawLine.before("#").trim
+        reject(line=="")
+        if (line.startsWith("[")) {
             # property definition with default value
             line.after("[").before("]").split("=")=>x
             x.nth(0)=>currProp 
             x.nth(1)=>currPropValue 
+			continue
+		} 
+		entities=List
+		if (line.startsWith("(")) {
+			# group reference, optionally followed by override value
+			line.after("(").before(")").split("=") => parts
+			key=parts.first.trim
+			value=parts.last.trim
+			hostList=LGroup.call(data,key,value)
+			entities=hostList
         } else {
-            # data line with optional exception
+            # data line with optional override
             line.before("[").trim => entity
             if (entity.contains("*")) {
                 regex=Glob(entity,false).regex
@@ -93,16 +127,15 @@ s*.s   [no]
             } else {
                 entities=List(entity)
             }
+		}
 
-            # is there an exception?
-            redef=line.after("[").before("]").trim
-            if(redef != "") {
-                LApply.call(data, entities,currProp, redef)
-            } else {
-                LApply.call(data, entities,currProp, currPropValue)
-            }
-                                        
-        }
+		# check for override value
+		redef=line.after("[").before("]").trim
+		if(redef != "") {
+			LApply.call(data, entities,currProp, redef)
+		} else {
+			LApply.call(data, entities,currProp, currPropValue)
+		}
     |
     
     
