@@ -712,6 +712,8 @@ run(null,null,null,true)
 # Process a list of Row objects into a list of strings
 # --
 	P(1) as List => data
+	P(2, " | ") as String => separator
+	P(3, true) as boolean => fakeRowNumbers
 
 	# Conver to rows of strings for printable columns only
 	data -> row
@@ -741,21 +743,33 @@ run(null,null,null,true)
 				w=colWidths.get(key)
 				s=(value+" ".times(w)).first(w)
 				out(sep+s)
-				sep=" | "
+				sep=separator
 				i=i+1
 
 		} _.concat => line
-		x=("    "+rowNumber).last(4)
-		out(x+": "+line)
-		rowNumber=rowNumber+1
+
+		# These row numbers are fake, can not be used with :N
+		if (fakeRowNumbers) {
+			x=("    "+rowNumber).last(4)
+			out(x+": "+line)
+			rowNumber=rowNumber+1
+		} else {
+			out(line)
+		}
 /FormatRows
 
 
 # Show list of Row 
 # --
 	P(1) as List => data
-	FormatRows(data)->line println(line)
+	P(2, " | ") => separator
+	P(3, true) => fakeRowNumbers
+
+	FormatRows(data,separator,fakeRowNumbers)->line println(line)
 /ShowRows
+
+
+
 
 
 

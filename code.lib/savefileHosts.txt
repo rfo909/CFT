@@ -244,13 +244,53 @@ r03.s
 	}		
     
     
-    	self.ShowProperty = Lambda{
+    self.ShowProperty = Lambda{
 		P(1) as String => propertyName
 		self.AllHosts->host
 			if (self.HasProperty(host,propertyName)) 
 				report(host,propertyName,self.GetProperty(host,propertyName))
 	}
 /class HostsFile
+
+
+# Examine different hosts 
+# --
+	HostsFile.AllHosts.print
+	println
+	loop
+		readLine("Enter host name (or glob), or blank to quit") => host
+		break(host=="")
+
+		Lib:ShowRows(HostsFile.Dump(host))
+/Examine
+
+
+# Full report
+# --
+	h=HostsFile
+	keys=h.AllProperties.sort
+	headers=List("")+keys
+	reportList(headers)
+
+	lineRow=List("")
+	Inner{
+		keys->key lineRow.add("-".times(key.length))
+	}
+	reportList(lineRow)
+
+	h.AllHosts.sort->host
+		row=List(host)
+		Inner {
+			keys->key
+				row.add(h.GetProperty(host,key,""))
+		}
+		reportList(row)
+	| _=>rowList
+
+	println
+	Lib:ShowRows(rowList," ", false)
+
+/FullGrid
 
 
 # Test
