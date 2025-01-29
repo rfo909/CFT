@@ -317,7 +317,7 @@ loop
         if (file != null) {
             println("--------------")
             Inner{
-                Util:UncommentFile (comment, file)->line println(line) 
+                Util:UncommentFile (file,comment)->line println(line) 
             }
             println("--------------")
         }

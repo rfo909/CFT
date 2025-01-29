@@ -167,12 +167,11 @@ Missing directories are logged to screen following
     
     ProjectsFile.keys => names
 
-    Lambda { P(1) } =>showName
     loop
         println
         Lib:Header ("Select project (" + result + ")")
-        Lib:ShowOptions (names, showName)
-        Lib:SelectOptions (names, showName, true) =>resultList
+        Lib:ShowOptions (names)
+        Lib:SelectOptions (names, null, true) =>resultList
         if(resultList.length>1, Inner{println("** not unique **") null =>result} )
         if(resultList.length==1, Inner{resultList.nth =>result} )
         break(result != null)

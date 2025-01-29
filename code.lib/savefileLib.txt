@@ -583,10 +583,10 @@ run(null,null,null,true)
 # Show a list of options
 # --
     P(1,List) =>options
-    P(2,Lambda { "name"}) =>LLabel
+    P(2,Lambda {P(1)}) =>LLabel
         options->x
             println("- " + LLabel.call(x))
-//ShowOptions
+/ShowOptions
 
 
 
@@ -615,7 +615,7 @@ run(null,null,null,true)
             }
         }
         result
-//SelectOptions
+/SelectOptions
 
 
 
@@ -1449,42 +1449,8 @@ run(null,null,null,true)
     # return 
     value.i
 /RandomInt
-    
 
 
-# Back date file within last 30 days
-# --
-    P(1) as File => f
-    P(2, 30) => rangeDays
-    
-    range=rangeDays*86400*1000
-
-    created=currentTimeMillis-RandomInt(range)
-    diff=currentTimeMillis-created
-
-    modified=created+RandomInt(diff/10)
-    accessed=modified+RandomInt(diff/5)
-
-    f.setTimes(created, modified, accessed)
-/BackDateFile
-
-
-# Back date files in LastResult
-# --
-    files=Sys.lastResult
-    if (getType(files) != "List") files=List(files)
-    files->f
-        assert(getType(f)=="File")
-        out(f)
-        BackDateFile(f)
-/BackDateLastResultFiles
-
-
-
-BackDateLastResultFiles
-/BDLRF
-
-    
 
 # Convert previous return value of a file, dir or list of these into
 # path strings

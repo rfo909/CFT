@@ -59,9 +59,29 @@ CodeStats:main->line out("^t".unEsc+line)
 
 
 
-.h @P
+.h Demo
 
-	# Projects script
+	Fra loggfil, linjer på følgende format
+
+	2686 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  [390ms] Timing save of 12 attributes
+	2687 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  [390ms] Adding attrTypeId=23200 attrValueString=r attrValueNum=null attrValueDate=null
+	2688 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  [390ms] Adding attrTypeId=23201 attrValueString=d attrValueNum=null attrValueDate=null
+	2689 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  [390ms] Adding attrTypeId=23202 attrValueString=7029 attrValueNum=null attrValueDate=null
+      :
+      :
+
+	Trenger å sende til CAE på Teams, rydder opp først:
+
+	readLines(".")->line println(line.after("]").trim)
+	/fix
+
+
+	(LogLines)
+
+
+.h Search
+
+	@P
 
     EditConfig
 
@@ -78,11 +98,12 @@ CodeStats:main->line out("^t".unEsc+line)
 	.mergeExpr
 //text
 
-# Process line, return number of lines printed
+# Process line
 # --
     P(1) => line
     P(2) => first
     
+	
     if (line.startsWith(".h")) {
         if (!first) {
             readLine("Enter")=>x error(x != "","Aborting")
@@ -97,7 +118,7 @@ CodeStats:main->line out("^t".unEsc+line)
         }
     } else {
         println(line)
-        if (line.trim!="") Sys.sleep(line.trim.length*80+800)
+		if (line.trim != "") Sys.sleep(300)
     }
 //ProcessLine
 
@@ -122,3 +143,33 @@ CodeStats:main->line out("^t".unEsc+line)
 
 
 
+# Logglinjer
+# --
+	Term.wrap(true)
+<<< EOF
+2686 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  [390ms] Timing save of 12 attributes
+2687 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  [390ms] Adding attrTypeId=23200 attrValueString=r attrValueNum=null attrValueDate=null
+2688 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  [390ms] Adding attrTypeId=23201 attrValueString=d attrValueNum=null attrValueDate=null
+2689 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  [390ms] Adding attrTypeId=23202 attrValueString=7029 attrValueNum=null attrValueDate=null
+2690 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  [390ms] Adding attrTypeId=23203 attrValueString=29-11-1966 attrValueNum=null attrValueDate=null
+2691 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  [390ms] Adding attrTypeId=23204 attrValueString=2 attrValueNum=null attrValueDate=null
+2692 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  [390ms] Adding attrTypeId=23205 attrValueString=d attrValueNum=null attrValueDate=null
+2693 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  [390ms] Adding attrTypeId=23206 attrValueString=f attrValueNum=null attrValueDate=null
+2694 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  [390ms] Adding attrTypeId=23207 attrValueString=roar@systor attrValueNum=null attrValueDate=null
+2695 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  [390ms] Adding attrTypeId=23209 attrValueString=null attrValueNum=1 attrValueDate=null
+2696 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  [390ms] Adding attrTypeId=23210 attrValueString=3993 attrValueNum=null attrValueDate=null
+2697 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  [390ms] Adding attrTypeId=23211 attrValueString=null attrValueNum=null attrValueDate=2025-03-01 12:00:00.0
+2698 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  [390ms] Adding attrTypeId=23214 attrValueString=987 attrValueNum=null attrValueDate=null
+2699 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  [390ms] Doing batch call to ssp_tng_eventattrib_set
+2700 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  [412ms] Calling procedure: ssp_tng_eventstatus_set 14740247, 23, 51377, 2, null, 0, null, 5, 0, 0
+2701 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  [429ms] ssp_tng_eventstatus_set session_id=14740247, module_id=23, object_id=51377, objectstatus_id=2, parent_object_id=null, resultset=0, message=null, errorlevel_id=5, errorcode_id=0, returncode_id=0
+2702 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  [429ms] ssp_tng_eventstatus_set 14740247, 23, 51377, 2, null, 0, null, 5, 0, 0
+2703 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  [429ms] Output parameter message=Ugyldig fødselsdato eller org.nr.
+2704 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  [429ms] Output parameter errorlevel_id=1
+2705 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  [429ms] Output parameter errorcode_id=0
+>>> EOF 
+	-> line
+		println(line)
+	|
+	Term.wrap(false)
+//LogLines
