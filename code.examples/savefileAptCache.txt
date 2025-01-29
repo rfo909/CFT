@@ -1,0 +1,62 @@
+# Get installed packaged
+# --
+	Dir.runCapture("apt-cache","pkgnames")->line
+		reject(line.startsWith("lib"))
+		out(line)
+/AllPackages
+
+
+# Installed packages as Dict
+# --
+	dict=Dict
+	AllPackages->p
+		dict.set(p,true)
+	|
+	dict
+/APDict
+
+
+# rdepends
+# --
+	P(1,Input("package").get) => p
+	Dir.run("apt-cache","rdepends",p)				
+/rdep
+					
+
+
+# Locate packages on which no other depend
+# --
+	count=0
+	found=0
+	resultFile=File("out.txt")
+	
+
+	AllPackages->p
+		count=count+1
+		break(count>5000)
+		
+		lines = Dir.runCapture("apt-cache","rdepends",p)
+		foundSuper=false
+		Inner{
+			start=false
+			lines->line
+				if(line.contains("Reverse Depends:")) {
+					start=true
+					continue
+				}
+				assert(start)
+				# at least one line following start marker
+				foundSuper=true
+				break
+		}
+		println("count=" + count, "found="+found,if(!foundSuper,p,""))
+		if (!foundSuper) {
+			found=found+1
+			resultFile.append(p)
+			#out(p)
+		}
+	| _=>result
+	File("out.txt").create(result)
+/Top
+			
+		
