@@ -416,6 +416,8 @@ P(1) =>target
     RunSecureCommand(target,cmd,null,acceptErrors,showDebug)
 /copy
 
+copy
+/putFile
 
 # Get remote file via scp
 # --
@@ -433,110 +435,6 @@ P(1) =>target
     
 /getFile
 
-
-# Shell
-# --
-    # Purge non-pingable hosts
-    Inner {
-        Db2:Get("SSH","Hosts",List).unique->t
-            assert(SSH:HostOk(t))
-            out(t)
-        | => targets
-        Db2:Set("SSH","Hosts",targets)
-    }
-
-    Lib:Header("Known targets")
-                
-    targets->t println("-> " + t) 
-    |
-    println
-    Input("Enter target: user@host").get => target
-
-    startLine="-------- SSH.start-line ----"
-    endLine="------ SSH.end-line ----"
-
-    currDir=Db2:Get("SSH","targetPwd",Dict).get(target,".")
-    
-    lastLine=""
-
-    loop
-        s="["+target+"] CFT [" + currDir + "]"
-        readLine(s + " ? for help, .q to quit") => cmd
-        if (cmd==".") {
-            cmd=lastLine
-            println(cmd)
-        } else {
-            lastLine=cmd
-        }
-
-        break(cmd==".q")
-        if (cmd=="?") {
-            {
-                Sequence(
-                @ .t to select other target
-                @ .  to repeat last command
-                @ .q to quit
-                )->line println(line)
-            }
-            continue
-        }  
-        if (cmd==".t"){
-            Lib:Header("Known targets")
-            Db2:Get("SSH","Hosts",List).unique => targets
-            { targets->t println("-> " + t) }
-            println
-            readLine("Enter target: user@host") =>target
-            Db2:Set("SSH","Hosts",Db2:Get("SSH","Hosts",List).add(target).unique)
-            currDir=Db2:Get("SSH","targetPwd",Dict).get(target,".")
-            continue
-        }
-        cmdList=List(
-            "cd " + currDir,
-            "echo '"+startLine+"'",
-            cmd,
-            "__result=$?",
-            "echo '"+endLine+"'",
-            'echo "pwd=`pwd`"',
-            'echo "result=$__result"'
-        )
-        SSH:run(target,cmdList,true)=>data
-
-        showStderr=false
-
-        Inner {
-            show=false
-            getData=false
-
-            # process stdout
-            data.stdout->line 
-                if (line.contains(startLine)) {
-                    show=true
-                    continue
-                } else if (line.contains(endLine)) {
-                    show=false
-                    getData=true
-                }
-                if (show) println(line)
-                if (getData) {
-                    if (line.startsWith("pwd=")) {
-                        xx=line.after("=")
-                        if (xx != currDir) {
-                            currDir=xx
-                            Db2:Set("SSH","targetPwd",Db2:Get("SSH","targetPwd",Dict).set(target,currDir))
-                        }
-                    } else if (line.startsWith("result=")) {
-                        resultcode=line.after("=")
-                        if (resultcode != "0") {
-                            println("*** Failed with code " + resultcode)
-                            showStderr=true
-                        }
-                    }
-                }
-        }
-        if (showStderr) Inner {
-            data.stderr->line println("ERR " + line)
-        }
-/sh
 
     
 
