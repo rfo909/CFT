@@ -48,6 +48,13 @@ Log in as root, then add the following line to
 /Readme
 
 
+# onLoad
+# --
+	ResetDetectSudoPassword
+	ResetDetectSSHPassword
+/onLoad
+
+
 Input("SSH target on format username@server").get
 /ReadSSHTarget
 
@@ -62,7 +69,7 @@ Input("SSH target on format username@server").get
 
 # Set session property to indicate if using ssh password
 # --
-	P(1,true) => usePassword
+	P(1,true) as boolean => usePassword
 	Vault:SessionPropertySet("Using SSH password", usePassword)
 /SetUsingSSHPassword
 
@@ -93,7 +100,7 @@ Input("SSH target on format username@server").get
 
 # Set session property to indicate if using sudo password
 # --
-	P(1,true)=>useSudoPassword
+	P(1,true) as boolean => useSudoPassword
 	Vault:SessionPropertySet("Using sudo password", useSudoPassword)
 /SetUsingSudoPassword
 
@@ -131,7 +138,7 @@ P(1,ReadSSHTarget) =>sshTarget
 # --
 	P(1,ReadSSHTarget) =>sshTarget
 	cmd=List("ssh-copy-id",sshTarget)
-	RunSecureCommand(cmd)
+	RunSecureCommand(sshTarget,cmd)
 /sshEnable
 
 
@@ -152,34 +159,99 @@ P(1) =>target
 /HostOkSSH
 
 
-# Returns boolean indicating if sudo without password ok on remote ssh target
+# Clear the cached data
+# Called onload!
 # --
-P(1,ReadSSHTarget) =>sshTarget
-	script=Sequence(
-		@ sudo -n true >/dev/null 2>&1
-		@ echo $?
-	)
-    run(sshTarget,script,true).stdout => lines
-    #lines->line println("output",line) |
-    lines.first=="0"
-/VerifySudoNoPassword
+	Db2:Set(Sys.scriptId,"sudopassword",Dict)
+/ResetDetectSudoPassword
+
+
+# Clear the cached data
+# Called onload!
+# --
+	Db2:Set(Sys.scriptId,"sshpassword",Dict)
+/ResetDetectSSHPassword
+
+
+# Decide if sudo password required for remote target, calling SetUsingSudoPassword accordingly, returns true for needs password
+# Caching results in Db2
+# --
+	P(1,ReadSSHTarget) =>sshTarget
+	
+	Db2:Get(Sys.scriptId,"sudopassword",Dict) => dict
+	if (dict.has(sshTarget)) {
+		needsPassword = dict.get(sshTarget)
+		SetUsingSudoPassword(needsPassword)
+		needsPassword
+	} else {
+		script=Sequence(
+			@ sudo -n true >/dev/null 2>&1
+			@ echo $?
+		)
+		run(sshTarget,script,true).stdout => lines
+		#lines->line println("output",line) |
+		needsPassword = (lines.first != "0")
+		
+		dict.set(sshTarget,needsPassword)
+		Db2:Set(Sys.scriptId,"sudopassword",dict)
+
+		SetUsingSudoPassword(needsPassword)
+		needsPassword
+	}
+/DetectUsingSudoPassword
+
+
+
+# Check if ssh requires password or not, calling SetUsingSSHPassword accordingly, returns true for needs password
+# Caching results in Db2
+# --
+	P(1,ReadSSHTarget) => target
+	
+	Db2:Get(Sys.scriptId,"sshpassword",Dict) => dict
+	if (dict.has(target)) {
+		needsPassword = dict.get(target)
+		SetUsingSSHPassword(needsPassword)
+		needsPassword
+	} else {
+		command=List("sshpass","-px","ssh",target,"exit")
+		needsPassword = (Lib:run(command,List,true,false).exitCode != 0)
+		
+		dict.set(target,needsPassword)
+		Db2:Set(Sys.scriptId,"sshpassword",dict)
+		
+		SetUsingSSHPassword(needsPassword)
+		needsPassword
+	}
+/DetectUsingSSHPassword	
+
+
 
 
 
 # Run ssh, ssh-copy-id, scp and perhaps other remote ssh based commands, prefixing with
 # sshpass if using password
 # --
-	P(1) as List => localCommand  # List("ssh","user@host")
-	P(2,List) as List => stdin    # for ssh only
-	P(3,false) => acceptErrors
-	P(4,false) => showDebug
+	P(1) as String => target
+	P(2) as List => localCommand  # List("ssh","user@host")
+	P(3,List) as List => stdin    # for ssh only
+	P(4,false) => acceptErrors
+	P(5,false) => showDebug
 	
-	sshPassword = GetSSHPassword
+	error(!target.contains("@"), "Invalid target: " + target)
+	
+	# Decide if SSH password required
+	DetectUsingSSHPassword(target)
+	passwordRequired = UsingSSHPassword
+	
+	if (showDebug) {
+		println("** UsingSSHPassword=" + passwordRequired)
+	}
 
 	passwordFile=null
 	isPipe=false
 	
-	if (sshPassword != null) {
+	if (passwordRequired) {
+		sshPassword=GetSSHPassword
 		passwordFile=Lib:TmpFile
 		if (Sys.isWindows) {
 			passwordFile.create(sshPassword)
@@ -211,7 +283,8 @@ P(1,ReadSSHTarget) =>sshTarget
 	# return dictionary
 	result
 //RunSecureCommand
-	
+
+
 
 # Run single or multiple commands (string or list) on remote target via SSH, returns Dict object
 # --
@@ -227,15 +300,15 @@ P(1,ReadSSHTarget) =>sshTarget
 	if(getType(commands) != "List") {
 		commands = List(commands)
 	}
-
-
+	
+	
 	# Add echo command with string to check for later, to strip away login messages etc when presenting output
 	"--- Output-mark: " + Date + " - " + Sys.scriptName + ".run ---" => mark
 	List('echo "' + mark + '"') + commands => cmd
 
 	sshCommand = List("ssh","-o","StrictHostKeyChecking=false",target)
 
-	result = RunSecureCommand(sshCommand, cmd, acceptErrors, showDebug)
+	result = RunSecureCommand(target, sshCommand, cmd, acceptErrors, showDebug)
 
 	
 	# Modify stdout, by only including lines following the mark
@@ -289,27 +362,19 @@ P(1,ReadSSHTarget) =>sshTarget
 	P(3,false) => acceptErrors
 	P(4,false) => showDebug
 
-	# Decide if password-less sudo on remote host
-	passwordRequired = !VerifySudoNoPassword(target)
-
 	# ensure commands is a list
 	if(getType(commands)!="List") {
 		List(commands) =>commands
 	}
 
+	# Decide if sudo password reuqured
+	DetectUsingSudoPassword(target)
+	passwordRequired = UsingSudoPassword
+
 	if (showDebug) {
-		println(target,"passwordRequired=" + passwordRequired)
+		println("** UsingSudoPassword=" + passwordRequired)
 	}
 	
-	usingSudoPassword=UsingSudoPassword as boolean
-	if (passwordRequired) {
-		if (showDebug) println("ENABLING sudo password for this request")
-		SetUsingSudoPassword(true)
-	} else {
-		if (showDebug) println("DISABLING sudo password for this request")
-		SetUsingSudoPassword(false)
-	}
-
 	Sequence(
 		@ /bin/bash <<EOF
 		@ export HISTIGNORE="*"
@@ -331,9 +396,6 @@ P(1,ReadSSHTarget) =>sshTarget
 	
 	# Call run function to handle the ssh wrapper
 	run(target,commands,acceptErrors,showDebug)
-	
-	# restore the UsingSudoPassword value (if changed)
-	SetUsingSudoPassword(usingSudoPassword)
 /sudo
 
 
@@ -351,7 +413,7 @@ P(1,ReadSSHTarget) =>sshTarget
     }
     
     cmd=List("scp", localFile, target+":"+remoteName)
-    RunSecureCommand(cmd,null,acceptErrors,showDebug)
+    RunSecureCommand(target,cmd,null,acceptErrors,showDebug)
 /copy
 
 
@@ -367,7 +429,7 @@ P(1,ReadSSHTarget) =>sshTarget
         localFile=localFile.path
     }
     cmd=List("scp", target+":"+remoteName, localFile)
-    RunSecureCommand(cmd,null,acceptErrors,showDebug)
+    RunSecureCommand(target,cmd,null,acceptErrors,showDebug)
     
 /getFile
 
