@@ -23,7 +23,7 @@
 <<< EOF
 -------------------------------------------------
 Script file running remote commands via SSH.
-Require login without password and sudo without
+May require login without password and sudo without
 password (for selected user).  
 
 Also has code for distributing ssh key to remote
@@ -50,6 +50,13 @@ Log in as root, then add the following line to
 
 # onLoad
 # --
+	if (Sys.isWindows) {
+		Lib:Header("WARNING: may not work on windows, depends on sshpass command")
+	} else {
+		if(Lib:run("which","sshpass").exitCode != 0) {
+			Lib:Header("WARNING: requires sshpass")
+		}
+	}
 	ResetDetectSudoPassword
 	ResetDetectSSHPassword
 /onLoad
