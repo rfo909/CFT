@@ -24,7 +24,7 @@ CFT is an interactive shell, which is extended with functions collected into *sc
 When entering commands at the CFT prompt, these fall into one of the *three* following categories:
 
 1. CFT shell-like commands
-2. CFT code
+2. CFT code (calling and writing)
 3. External program
 
 
@@ -147,13 +147,12 @@ it by a TAB. This lets us run the "ls" program of the underlying OS
 ```
 
 
-
 # Why a new script language?
 
 The reason for developing CFT, is mainly the horrors of PowerShell, but also a desire for a an automation
 environment and shell that works the same on both Windows and Linux. 
 
-CFT is inspired by PowerShell, working with objects instead of just strings, as in the linux/unix traditional shells. 
+Still, CFT is also inspired by PowerShell, working with objects instead of just strings, as in the linux/unix tradition. 
 
 Lastly it should be mentioned that parsers and intepreters, and language design is a long lasting interest,
 ever since creating a preprocessor for Ada for parallel simulation purposes at University pre 1993. 
@@ -269,7 +268,7 @@ This produces the following list:
 ```
 
 
-So even with only some 30 global functions, the system library consists of *500+ member functions*, spread out across
+So even with only some 30 global functions, the system library consists of close to *600 member functions*, spread out across
 80+ object and value types.
 
 See for example the global objects Std and Sys, which contain various functions, like
@@ -286,12 +285,14 @@ The Sys.environment function returns a dictionary object.
 Util:ShowDict(Sys.environment)
 ```
 
-This produces a list of all environment values, nicely formatted into columns. To access and use a value, as long
-as the value name is a valid identifier, we say:
+From the differing syntax, we see that Sys is an object while Util is a script (dot vs colon).
+
+This produces a list of all environment values, nicely formatted into columns. We access the value as follows:
 
 ```
-Sys.environment.Path
+Sys.environment.get("Path")
 ```
+
 
 
 
@@ -330,10 +331,10 @@ CFT.props
 ```
 
 
-## 21k lines of CFT script
+## 25k lines of CFT script
 
-In total, CFT has some 21000 lines of CFT scripts under the two code.* directories, among them
-a full recursive descent JSON parser and also an XML parser.
+In total, CFT has some 25000 lines of CFT scripts under the two directories 
+*code.lib* and *code.examples* - among them a full recursive descent JSON parser and also an XML parser.
 
 There are also scripts for automating PowerShell use, installing and working with Docker and
 Kubernetes, and many others. 

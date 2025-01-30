@@ -3945,6 +3945,7 @@ Functions:        317
 Object types:     36
 Value types:      12
 ```
+
 ### 2021-09-26
 
 
@@ -4032,3 +4033,13 @@ Value types:      13
 ```
 
 
+### 2025-01-30 v4.4.1
+
+```
+Script code:      25117 lines
+Java code:        38315 lines
+Functions:        590
+Shell commands:   22
+Object types:     76
+Value types:      13
+```
