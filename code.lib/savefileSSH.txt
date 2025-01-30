@@ -51,10 +51,10 @@ Log in as root, then add the following line to
 # onLoad
 # --
 	if (Sys.isWindows) {
-		Lib:Header("WARNING: may not work on windows, depends on sshpass command")
+		Lib:Header("WARNING: script " + Sys.savefile.name + " may not work on windows, depends on sshpass command")
 	} else {
 		if(Lib:run("which","sshpass").exitCode != 0) {
-			Lib:Header("WARNING: requires sshpass")
+			Lib:Header("WARNING: script " + Sys.savefile.name + " requires sshpass")
 		}
 	}
 	ResetDetectSudoPassword
