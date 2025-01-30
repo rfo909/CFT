@@ -290,35 +290,50 @@ P(1,ReadSSHTarget) =>sshTarget
 	P(4,false) => showDebug
 
 	# Decide if password-less sudo on remote host
-	noPassword = VerifySudoNoPassword(target)
+	passwordRequired = !VerifySudoNoPassword(target)
 
 	# ensure commands is a list
 	if(getType(commands)!="List") {
 		List(commands) =>commands
 	}
 
-
-	if (noPassword) {
-		if (showDebug) println(target,"supports sudo without password")
-		commands = List("sudo bash")+commands
-	} else {
-		Sequence(
-			@ /bin/bash <<EOF
-			@ export HISTIGNORE="*"
-			@ export HISTFILESIZE=0
-			@ chmod 600 ~/.bash_history
-			@ cat /dev/null > ~/.bash_history
-			@ echo "<<GetSudoPassword>>" | sudo -S true >/dev/null 2>&1
-			@ sudo bash
-			@ <<commands>>
-			@ exit
-			@ sudo -k
-			@ EOF
-		).mergeExpr => commands
+	if (showDebug) {
+		println(target,"passwordRequired=" + passwordRequired)
 	}
+	
+	usingSudoPassword=UsingSudoPassword as boolean
+	if (passwordRequired) {
+		if (showDebug) println("ENABLING sudo password for this request")
+		SetUsingSudoPassword(true)
+	} else {
+		if (showDebug) println("DISABLING sudo password for this request")
+		SetUsingSudoPassword(false)
+	}
+
+	Sequence(
+		@ /bin/bash <<EOF
+		@ export HISTIGNORE="*"
+		@ export HISTFILESIZE=0
+		@ chmod 600 ~/.bash_history
+		@ cat /dev/null > ~/.bash_history
+		if (passwordRequired) {
+			@ echo "<<GetSudoPassword>>" | sudo -S true >/dev/null 2>&1
+		} else {
+			@ # No sudo password
+		}
+		@ sudo bash
+		@ <<commands>>
+		@ sudo -k
+		@ exit
+		@ sudo -k
+		@ EOF
+	).mergeExpr => commands
 	
 	# Call run function to handle the ssh wrapper
 	run(target,commands,acceptErrors,showDebug)
+	
+	# restore the UsingSudoPassword value (if changed)
+	SetUsingSudoPassword(usingSudoPassword)
 /sudo
 
 
