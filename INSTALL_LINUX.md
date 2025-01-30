@@ -1,5 +1,5 @@
 
-# CFT Install on Linux
+# CFT Install on Ubuntu
 
 ### Java and maven
 

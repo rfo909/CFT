@@ -436,7 +436,7 @@ mvn package
 
 [Install on Windows](INSTALL_WINDOWS.md).
 
-[Install on Linux](INSTALL_LINUX.md).
+[Install on Ubuntu](INSTALL_LINUX.md).
 
 
 # References
