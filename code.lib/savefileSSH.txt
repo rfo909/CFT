@@ -187,18 +187,16 @@ P(1,ReadSSHTarget) =>sshTarget
 			# On linux we use a named pipe to avoid storing the password on disk
 			Dir.run("mkfifo",passwordFile.path)
 			isPipe=true
+			
+			# async process writing password to pipe (blocks until read)
 			SpawnProcess(SymDict(passwordFile,sshPassword), {
 				passwordFile.append(sshPassword)
 			})
 		}
 		localCommand=List("sshpass", "-f"+passwordFile.path) + localCommand
 	}
-	
-	if (showDebug) Inner {
-		localCommand->s println("localCommand:",s) |
-		stdin->s println("stdin:",s) |
-	}
 
+	
 	result = Lib:run (localCommand, stdin, acceptErrors, false)
 
 
@@ -253,13 +251,23 @@ P(1,ReadSSHTarget) =>sshTarget
 	result.set("stdout",outLines) # overwrite
 
 	if (showDebug) Inner {
+		stdin=result.get("stdin")
+		
+		if (UsingSSHPassword) {
+			sshPassword=GetSSHPassword
+			stdin = Inner{stdin->line out(line.replace(sshPassword,"<PASSWORD>"))}
+		}
+		if (UsingSudoPassword) {
+			sudoPassword=GetSudoPassword
+			stdin = Inner{stdin->line out(line.replace(sudoPassword,"<PASSWORD>"))}
+		}
 		println("- cmd:")
 		result.get("cmd")->line println("    " + line) |
 
 		println("- exitCode = " + result.get("exitCode"))
 
 		println("- stdin:")
-		result.get("stdin")->line println("   # " + line) |
+		stdin->line println("   # " + line) |
 
 		println("- stdout:")
 		result.get("stdout")->line println("   # " + line) |
@@ -294,31 +302,26 @@ P(1,ReadSSHTarget) =>sshTarget
 		if (showDebug) println(target,"supports sudo without password")
 		commands = List("sudo bash")+commands
 	} else {
-		if (showDebug) println(target,"requires sudo password")
-		## THIS DOES NOT WORK!!
-		error(!UsingSudoPassword,"NOT SET UP TO USE SUDO PASSWORD, run SetUsingSudoPassword")
-		commands = Sequence(
+		Sequence(
+			@ /bin/bash <<EOF
+			@ export HISTIGNORE="*"
 			@ export HISTFILESIZE=0
+			@ chmod 600 ~/.bash_history
+			@ cat /dev/null > ~/.bash_history
 			@ echo "<<GetSudoPassword>>" | sudo -S true >/dev/null 2>&1
 			@ sudo bash
+			@ <<commands>>
+			@ exit
 			@ sudo -k
-		).mergeExpr + commands
-
+			@ EOF
+		).mergeExpr => commands
 	}
 	
+	# Call run function to handle the ssh wrapper
 	run(target,commands,acceptErrors,showDebug)
 /sudo
 
 
-# test
-# --
-	sudo("roar@10.0.11.61","cat /etc/sudoers",false,false).stdout
-/t
-
-# test
-# --
-	run("roar@10.0.11.61","ls",false,false).stdout
-/t2
 
 # Copy local file via scp (secure copy over SSH) to remote target, returns Dict object
 # --
