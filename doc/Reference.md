@@ -1,9 +1,9 @@
 
 # CFT Reference
 
-Last updated: 2024-08-20 RFO
+Last updated: 2025-01-30 RFO
 
-v4.2.3
+v4.4.1
 
 
 # ---- Using CFT as a shell
@@ -306,23 +306,39 @@ do not respect the virtualized (line-based) I/O that is used to control CFT back
 
 ## Command history
 
-CFT remembers the last 40 commands. Display the command history using shortcut
+The command history is displayed by entering a single exclamation mark.
 
 ```
-@CH
+!
 ```
 
-This lists up to 100 commands, and lets you either rerun the command (in the same directory) or
-just change to the directory of one of the commands, without running the command over.
-
-
-## Recent directories history
-
-A unique list of recent directories is available with
+To get help about the history functions, type 
 
 ```
-@H
+!?
 ```
+
+Command history is local to the session, and goes away when starting another instance of CFT. 
+
+The history function remembers the last directories, and differs between in-session and globally.
+
+```
+  !            show full history
+  !?           help (this text)
+  !!           repeat last command
+
+  !N           execute command by position in history
+  !xxx         repeat last command starting with xxx
+  !xxx*yyy     repeat last command starting with xxx and containing yyy
+
+  !:N          as above, but changes to original directory
+  !:xxx
+  !:xxx*yyy
+
+  !/           show recent directories within session
+  !//          show directories last week, global
+```
+
 
 
 ## The "shell" command
@@ -347,17 +363,6 @@ cd -down/different/path
 pwd
 /some/long/path/down/different/path
 ```
-
-
-This works with all the shell functions, not just "cd":
-
-
-```
-cd /some/long/path/again
-touch -pa/test.txt
-```
-
-Here 'pa' matches 'path' and we touch file /home/long/path/test.txt
 
 
 ## TAB "autocompletion"
@@ -477,20 +482,24 @@ The codeDirs field defines a search order when loading scripts (followed by curr
 The code.examples contains some example code for various use, while code.lib contains
 library code, used by most other scripts.
 
-
 Each script remembers where it was loaded from, so when saving it, it is written back
 to that location.
 
+### Local scripts may hide library scripts
+
+When creating scripts in locations other than the two *code* directories under CFT, take care to select
+a unique script name. Making one with the same name as one from the *code* directories effectively hides
+the original.
+
 ## Calling functions in other scripts
 
-
-Sometimes we want to call a useful function in another script file. This is
-implemented with with the following syntax:
+We frequently need to call functions in another script file. This is
+implemented with with the following syntax, using a colon:
 
 ```
 Script:Function (...)
 
-Example:
+# Example:
 Lib:Header("This is a test")
 ```
 
@@ -520,6 +529,12 @@ The shortcut @scr calls this function.
 @scr
 ```
 
+
+## Search through all scripts
+
+```
+@sscr
+```
 
 
 
@@ -766,11 +781,11 @@ The List object has a single .sort() member function, which does the following:
 - if all values are float, sort ascending on float value
 - otherwise sort ascending on "string representation" of all values
 
-
+### Masquerading
 
 Now, to sort other types of values, we use a "trick", which consists of wrapping each
 value inside a special *wrapper object*, masking the original values as either int, float
-or STring, then sort, and finally extract the actual value from the wrappers.
+or String, then sort, and finally extract the actual value from the wrappers.
 
 
 To sort a list of files on their size, biggest first, we do the following:
@@ -786,7 +801,7 @@ The first loop wraps each File object inside an Int object, which is created by
 supplying two values to global function Int: the value to sort on, and the object itself.
 
 
-Then the resulting list is "piped" to code that picks it off the stack, sorts and
+Then the resulting list is "piped" to code that picks it off the stack (the underscore), sorts and
 reverses it, before iterating over the result, and for each object (now the Int objects),
 outputs the original File object, available via the .data() function.
 
@@ -795,8 +810,9 @@ outputs the original File object, available via the .data() function.
 
 Similarly there is a global Str() function for sorting on strings, and Float() for
 sorting on floats. Together with Int() function, these produce Str, Float and Int objects,
-which are actually subclasses of the regular "String", "float" and "int" value types, with
-the additional function .data() to retrieve the original value.
+which are actually subclasses of the regular "String", "float" and "int" value types. 
+
+They are all used in the same way as in the example above. 
 
 
 ## List filtering with Lambda
@@ -1068,10 +1084,22 @@ The implementation of the shell command "grep", is actually done in CFT, using t
 It starts with ShellGrep.java which retrieves the mGrep value from CFT.props, which points at
 the Lib:InteractiveGrep function, which handles the logic, using the Grep system object.
 
+### Search files from result list
 
+```
+ls *.txt
+ :
+ :
+grep something ::
+```
 
+The *::* means all values from the previous list result.
 
+If we have some function that returns a list of files, of course we can also do this
 
+```
+grep something (SomeFunction)
+```
 
 # ---- Block expressions
 
