@@ -599,6 +599,7 @@ Inside a loop, we use the following to control execution of code inside
 assert(expr)   # continue with next iteration if expr is false or null
 reject(expr)   # continue with next iteration if expr is not false and not null (inverse of assert) 
 break(expr?)   # if expr is true or if no expr, then terminate the loop
+continue       # unconditionally continue with next iteration
 ```
 
 Note that these apply to nested loops as well as non-nested loops, unless using Inner blocks. More about

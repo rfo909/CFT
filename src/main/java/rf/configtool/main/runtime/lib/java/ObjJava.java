@@ -190,6 +190,7 @@ public class ObjJava extends Obj {
             "",
             "Std.Java.forName(\"java.lang.String\") => String",
             "String.getConstructor(String).call(Std.Java.String(\"test\")) => obj",
+			"   # note: the getConstructor() parameter is a Java type obtained via forName(), in this case the String",
             "String.getConstructor(String).call(Std.Java.String(\"123\")) => obj2",
             "Std.Java.Object(obj2) => paramObj",
             "String.getMethod(\"concat\",String).call(obj,paramObj).value",
