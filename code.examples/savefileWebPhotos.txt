@@ -54,6 +54,13 @@ runs in the background.
 /GetDesc
 
 
+# min
+# --
+	P(1) => a
+	P(2) => b
+	if (a>b) a else b
+/Max
+
 # Initialize web server 
 # --
 
@@ -79,9 +86,33 @@ runs in the background.
     	.GET(Lambda{
             P(1) as WebRequest => requestObj
             index=requestObj.urlParams.id.parseInt
+
+            file=ImageDir.files("*.jpg").nth(index)
+            Std.Raster.load(file) => raster
+
+            tmp=Lib:TmpFile
+
+            WIDTH=1200
+            HEIGHT=800
+
+			factor=1.0
+			if (raster.width / raster.height > WIDTH/HEIGHT) {
+				factor=WIDTH/raster.width
+			} else {
+				factor=HEIGHT/raster.height
+			}
+
+            w=(raster.width*factor).i
+            h=(raster.height*factor).i
+
+            raster.scaleTo(w,h).save(tmp)
+
+            binaryData=tmp.readBinary
+            tmp.delete
+            
             
             # return binary object
-            ImageDir.files("*.jpg").nth(index).readBinary
+            binaryData
     	})
         
     Root.GET(Lambda{
