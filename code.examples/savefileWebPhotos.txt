@@ -1,0 +1,137 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2025 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+//License
+
+
+# Readme
+# --
+<<<< EOF
+
+Simple web server for displaying random pictures from a collection, 
+with a single line of text, describing the picture.
+
+Remember to run Init after changes, to restart the web server, which
+runs in the background.
+
+>>>> EOF
+//Readme
+
+
+
+# Log file
+# --
+    File("WebTest_log.txt")
+/LogFile
+
+# Image dir
+# --
+	Dir("/home/roar/Images")
+/ImageDir
+
+
+# Get description for image
+# --
+	P(1) as File => imgFile
+	txtFile=imgFile.dir.file(imgFile.name+".txt")
+	if (txtFile.exists) txtFile.read.first else imgFile.name
+/GetDesc
+
+
+# Initialize web server 
+# --
+
+    Std.Web.Server(8080) => server
+    if (LogFile.exists) LogFile.delete
+    server.setServerLogFile(LogFile)
+    
+    server.RootContext => Root   # The "/" path
+
+    # Define my.css "file"
+    Root.Context("my.css","text/css")
+        .GET(Lambda{
+            P(1) as WebRequest => requestObj
+
+			# return text as list of lines
+            Sequence(
+                @ * {font-family: courier}
+                @ body {background-color:#FFFFFF}
+            )
+    })
+
+    Root.Context("img","image/jpg")
+    	.GET(Lambda{
+            P(1) as WebRequest => requestObj
+            index=requestObj.urlParams.id.parseInt
+            
+            # return binary object
+            ImageDir.files("*.jpg").nth(index).readBinary
+    	})
+        
+    Root.GET(Lambda{
+        P(1) as WebRequest => requestObj
+
+        files=ImageDir.allFiles("*.jpg")
+        count=files.length
+        whichOne=currentTimeMillis % count
+        imgFile=files.nth(whichOne)
+        desc=GetDesc(imgFile)
+
+		# return HTML as list of lines
+        Sequence(
+            @ << BodyStart >>
+            @ <div><<desc>></div>
+            @ <img src="/img?id=<<whichOne>>" alt="<<desc>>" onclick="window.location.reload()" />
+            @ << BodyEnd >>
+        ).mergeExpr
+    })
+        
+/Init
+
+# Helpers
+
+
+# Open Body 
+# --
+    Sequence(
+            @ <html>
+            @ <head>
+            @   <meta charset="utf-8"/>
+            @   <link rel="stylesheet" href="/my.css">
+            @ </head>
+            @ <body>
+            @ <div style="background-color:white; padding:10px">
+    )
+//BodyStart
+
+
+# Close Body 
+# --
+    Sequence(
+        @ </div>
+        @ </body>
+        @ </html>
+    )
+//BodyEnd
+
+
+# Show logfile
+# --
+    LogFile.read
+/show
