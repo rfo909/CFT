@@ -168,3 +168,7 @@ db2Dir = private/Db2
 
 globalOnLoad = Lib:GlobalOnLoad
 
+# Including a private props file, which if it exists may override any settings in
+# this file
+
+#include private/CFT.props

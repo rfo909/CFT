@@ -84,27 +84,19 @@ public class PropsFile {
     private String fixDir (String s) {
         return s.replace("/", File.separator);
     }
-    
-    public void refreshFromFile() throws Exception {
-        File f=new File(PROPS_FILE);
 
-        // Decide if file has changed
-        String newFileInfo=f.length() + "x" + f.lastModified();
-        if (newFileInfo.equals(fileInfo)) return;
 
-        // going ahead with reading file
-        fileInfo=newFileInfo;
-        
+    private void setDefaults() {
         // Set defaults
         codeDirs=".";
         prompt="'$ '";  // code
         bangCommand="println('bangCommand not defined')"; // code
         runExtCommand="println('runExtCommand not defined')";
         historyAppendCommand="println('historyCommand not defined')";
-        
+
         shell = "/usr/bin/bash";
         winShell = "powershell";
-        
+
         // code
         mCat  = "Lambda {error('mCat lambda undefined in " + PROPS_FILE + "') }";
         mEdit = "Lambda {error('mEdit lambda undefined in " + PROPS_FILE + "') }";
@@ -117,16 +109,33 @@ public class PropsFile {
         mHex = "Lambda{error('mHex lambda undefined in " + PROPS_FILE + "') }";
         mGrep = "Lambda{error('mGrep lambda undefined in " + PROPS_FILE + "') }";
         mWhich = "Lambda{error('mWhich lambda undefined in " + PROPS_FILE + "') }";
-        
+
         mSymGet = "Lambda{error('mSymGet lambda undefined in " + PROPS_FILE + "') }";
         mSymSet = "Lambda{error('mSymSet lambda undefined in " + PROPS_FILE + "') }";
-        
-        
+
+
         shortcutPrefix = "@";
         shortcuts=new HashMap<String,String>();
 
         db2Dir = "Db";
-        
+    }
+    public void refreshFromFile() throws Exception {
+        File f = new File(PROPS_FILE);
+
+        // Decide if file has changed
+        String newFileInfo = f.length() + "x" + f.lastModified();
+        if (newFileInfo.equals(fileInfo)) return;
+
+        // going ahead with reading file
+        fileInfo = newFileInfo;
+
+        setDefaults();
+
+        processFile(f);
+    }
+
+    private void processFile (File f) throws Exception {
+
         // process file
         BufferedReader br=null;
         try {
@@ -134,7 +143,28 @@ public class PropsFile {
             for (;;) {
                 String line=br.readLine();
                 if (line==null) break;
-                
+
+                if (line.startsWith("#include")) {
+                    String path=line.substring(8).trim();
+                    String s=f.getAbsolutePath();
+                    String fullPath;
+                    if (s.startsWith("/") || s.startsWith("\\")) {
+                        fullPath=s;
+                    } else {
+                        int lastFS = s.lastIndexOf(File.separator);
+                        fullPath = s.substring(0, lastFS) + File.separator + path;
+                    }
+                    if (File.separatorChar=='/') {
+                        fullPath=fullPath.replace("\\","/");
+                    } else {
+                        fullPath=fullPath.replace("/","\\");
+                    }
+                    File includedFile=new File(fullPath);
+                    if (includedFile.isFile() && includedFile.exists()) {
+                        //System.out.println("# [Config] " + includedFile.getAbsolutePath());
+                        processFile(includedFile);
+                    }
+                }
                 if (line.startsWith("#")) continue;
             
                 int pos=line.indexOf('=');
