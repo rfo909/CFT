@@ -90,7 +90,7 @@ Input("SSH target on format username@server").get
     SSH:copy (f, target, "./hostname")
     
     println("* Moving hostname file to /etc")
-    run(target,List("sudo bash","cp ./hostname /etc"))
+    sudo(target,List("cp ./hostname /etc"))
     
     println("* Deleting hostname from home dir")
     run(target,"rm ./hostname")
@@ -127,10 +127,10 @@ Input("SSH target on format username@server").get
     SSH:copy (f, target, "./netplan.txt")
     
     println("* Deleting all files under /etc/netplan")
-    run(target, List("sudo bash","rm -f /etc/netplan/*"))
+    sudo(target, List("rm -f /etc/netplan/*"))
     
     println("* Moving netplan file into /etc")
-    run(target, List("sudo bash","mv ./netplan.txt /etc/netplan/50-cloud-init.yaml"))
+    sudo(target, List("mv ./netplan.txt /etc/netplan/50-cloud-init.yaml"))
 /VMConfigureNetplan
 
 
