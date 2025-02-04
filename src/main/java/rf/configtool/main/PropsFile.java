@@ -145,23 +145,20 @@ public class PropsFile {
                 if (line==null) break;
 
                 if (line.startsWith("#include")) {
-                    String path=line.substring(8).trim();
-                    String s=f.getAbsolutePath();
-                    String fullPath;
-                    if (s.startsWith("/") || s.startsWith("\\")) {
-                        fullPath=s;
-                    } else {
-                        int lastFS = s.lastIndexOf(File.separator);
-                        fullPath = s.substring(0, lastFS) + File.separator + path;
-                    }
+                    String includePath=line.substring(8).trim();
                     if (File.separatorChar=='/') {
-                        fullPath=fullPath.replace("\\","/");
+                        includePath=includePath.replace("\\","/");
                     } else {
-                        fullPath=fullPath.replace("/","\\");
+                        includePath=includePath.replace("/","\\");
                     }
+                    
+                    String currPath=f.getAbsolutePath();
+		    int lastFS = currPath.lastIndexOf(File.separator);
+		    String fullPath = currPath.substring(0, lastFS) + File.separator + includePath;
                     File includedFile=new File(fullPath);
+
                     if (includedFile.isFile() && includedFile.exists()) {
-                        //System.out.println("# [Config] " + includedFile.getAbsolutePath());
+                    	System.out.println("Processing " + includedFile.getAbsolutePath());
                         processFile(includedFile);
                     }
                 }
