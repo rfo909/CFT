@@ -45,15 +45,6 @@ Input("SSH target on format username@server").get
 /ReadSSHTarget
 
 
-# Helper, calls SSH:run
-# --
-	P(1,ReadSSHTarget) =>target
-	P(2,readLine("Command")) =>command
-	P(3,Dict) =>codes
-	P(4,false) =>showDebug
-    SSH:run (target,command,codes,showDebug)
-//run
-
 
 # Wait until a VM responds to ping
 # --
@@ -90,10 +81,10 @@ Input("SSH target on format username@server").get
     SSH:copy (f, target, "./hostname")
     
     println("* Moving hostname file to /etc")
-    sudo(target,List("cp ./hostname /etc"))
+    SSH:sudo(target,List("cp ./hostname /etc"))
     
     println("* Deleting hostname from home dir")
-    run(target,"rm ./hostname")
+    SSH:run(target,"rm ./hostname")
     
     f.delete
 /VMSetHostname
@@ -112,7 +103,7 @@ Input("SSH target on format username@server").get
     if (nic==null) Inner{
         println("* Running remote command 'ip addr' to list network device names")
         println("---------------------------------------------------------------")
-        run(target,"ip addr").get("stdout")->line
+        SSH:run(target,"ip addr").get("stdout")->line
             println("    " + line)
         |
         
@@ -127,10 +118,10 @@ Input("SSH target on format username@server").get
     SSH:copy (f, target, "./netplan.txt")
     
     println("* Deleting all files under /etc/netplan")
-    sudo(target, List("rm -f /etc/netplan/*"))
+    SSH:sudo(target, List("rm -f /etc/netplan/*"))
     
     println("* Moving netplan file into /etc")
-    sudo(target, List("mv ./netplan.txt /etc/netplan/50-cloud-init.yaml"))
+    SSH:sudo(target, List("mv ./netplan.txt /etc/netplan/50-cloud-init.yaml"))
 /VMConfigureNetplan
 
 
