@@ -43,13 +43,13 @@ CodeStats:main->line out("^t".unEsc+line)
 
 
 .h Shell
-    - ls / cd / cat / more / cp / mv / ...
+    - ls / cd / cat / more / cp / mv / mkdir / rm  ...
 	- edit
 
 	git status
 	ls
-	edit :N
 	cat :N
+	edit :N
 
 	System       : 
 	Shortcuts    @
@@ -73,6 +73,7 @@ CodeStats:main->line out("^t".unEsc+line)
 	:load Git
 	?
 	?UpdateSubmodules
+	@e
 
 		
     help
