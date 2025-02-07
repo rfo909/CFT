@@ -26,72 +26,68 @@ CodeStats:main->line out("^t".unEsc+line)
 <<<<< TEXT
 .h CFT
 
+	<<Sys.version>>
+
     https://github.com/rfo909/CFT
 
 	"ConfigTool"
 
-    - Script language
     - Shell
+    - Script language
+
+
 	- GNU GPL 3.0 ("open source")
 	- Java
 
 
 
-.h Shell
-    - ls / cd 
-    - cat / more / tail
-	- cp / mv / rm / mkdir
-	- touch / edit
-	- hex / hash / grep / which / showtree
-	
-	!         <- show history
-	@         <- list shortcuts
-	:         <- list colon commands
-    ?         <- list functions in script
-	@%        <- list symbols
-		
-	@S        <- search
-	@FL       <- file locate
-	@fp       <- file paths
 
+.h Shell
+    - ls / cd / cat / more / cp / mv / ...
+	- edit
+
+	git status
+	ls
+	edit :N
+	cat :N
+
+	System       : 
+	Shortcuts    @
+	History      !
+
+	Symbols      @%
+    
+	ls pom*
+	%%pom
+	cd %xdsl
+	cat %pom
+
+
+
+
+.h Script
+
+
+	@scr
+
+	:load Git
+	?
+	?UpdateSubmodules
+
+		
     help
 	<value> help
 
 
-
-.h Demo
-
-	Fra loggfil, linjer på følgende format
-
-	2686 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  [390ms] Timing save of 12 attributes
-	2687 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  [390ms] Adding attrTypeId=23200 attrValueString=r attrValueNum=null attrValueDate=null
-	2688 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  [390ms] Adding attrTypeId=23201 attrValueString=d attrValueNum=null attrValueDate=null
-	2689 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  [390ms] Adding attrTypeId=23202 attrValueString=7029 attrValueNum=null attrValueDate=null
-      :
-      :
-
-	Trenger å sende til CAE på Teams, rydder opp først:
-
-	readLines(".")->line println(line.after("]").trim)
-	/fix
+	@sscr    - search scripts
 
 
-	(LogLines)
 
 
-.h Search
 
-	@P
+.h Ferdig
 
-    EditConfig
-
-    ch
-	curr
-
-    S
-    FL
-
-
+<<Curses:TxtYellow+Curses:Bold>><<Logo:Logo>><<Curses:Reset>>
 
 
 >>>>> TEXT

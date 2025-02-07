@@ -128,14 +128,14 @@
 # Update submodules according to .gitmodules in current dir
 # --
 	P(1,Dir) as Dir => currentDir
-    P(2,Input("Enter glob pattern to match submodule(s)").setCurrCond("*").get) => modulePattern
+	P(2,Input("Enter glob pattern to match submodule(s)").setCurrCond("*").get) => modulePattern
 
 	Submodules(currentDir)->path
-        if (Glob(modulePattern).regex.match(path)) {
-            command="git submodule update --remote " +  path
-            println(command)
-            currentDir.run(command.split)
-        }
+		if (Glob(modulePattern).regex.match(path)) {
+			command="git submodule update --remote " +  path
+			println(command)
+			currentDir.run(command.split)
+		}
 /UpdateSubmodules
 
 

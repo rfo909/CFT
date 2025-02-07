@@ -1527,11 +1527,11 @@ run(null,null,null,true)
 	
 # Search all known scripts names, function names, and full line comments
 # --
-	P(1,Input("Searching all scripts for function names / comments").get) => st
+	P(1,Input("Searching all scripts for function names / comments").get) as String => st
 
     Sys.codeDirs.reverse->d
 		d.files(Glob("savefile*.txt"))->f
-			if (f.name.contains(st)) report(f, f.name, "", "<--- Script")
+			if (f.name.toLower.contains(st.toLower)) report(f, f.name, "", "<--- Script")
 			f.read->line
 				t=line.trim
 				assert (t.startsWith("/") || t.startsWith("#"))
