@@ -1,9 +1,9 @@
 
 # CFT Reference
 
-Last updated: 2025-01-30 RFO
+Last updated: 2025-02-12 RFO
 
-v4.4.1
+v4.4.2
 
 
 # ---- Using CFT as a shell
@@ -2028,29 +2028,14 @@ ssh-copy-id user@host
 # ---- CFT command line args
 
 
-If CFT is invoked with command line arguments, the first is the name of the script to load and use as "current script", 
-and it is named in the same way as for the ":load" command, that is, a savefile minus the "savefile" prefix and ".txt" ending.
-
-
-Then follows zero
-or more command lines, on string format. For values containing space or otherwise
-have meaning to the shell, use quotes. Example:
+If CFT is invoked with command line arguments, each argument is taken as an input line. Typically it will consist of
+a single function call, which if it contains blanks, or characters that interfere with the calling shell, must be represented as a string. 
+Then, if we want the CFT interpreter to terminate, add a ":quit" line. 
 
 ```
-./cft Projects Curr
+./cft ":load Projects" curr
+./cft ":load Projects" ch CFTScripts
 ```
-
-This loads script Projects, then calls the Curr function inside.
-
-```
-./cft
-./cft scriptName [commandLines]*
-./cft -version
-./cft -help
-./cft -d scriptDir [scriptName [commandLines]*]?
-```
-
-
 
 
 
