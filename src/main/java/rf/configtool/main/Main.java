@@ -56,7 +56,7 @@ public class Main {
                 System.out.println("Valid options:");
                 System.out.println("  -version");
                 System.out.println("  -help");
-                System.out.println("  [FLAGS]? [scriptName [command-lines]]");
+                System.out.println("  [FLAGS]? [command-line]+");
                 System.out.println("[FLAGS]");
                 System.out.println("  -d scriptDir");
                 System.out.println("  -noterm     ## no proper terminal - when called remotely");
@@ -72,7 +72,7 @@ public class Main {
                 args.get("advance past known -d");
                 scriptDir=args.get("scriptDir following -d");
             } else if (args.peek().equals("-noterm")) {
-                args.get("comsume -noterm");
+                args.get("consume -noterm");
                 noTerminal=true;
             } else {
                 System.out.println("Invalid flag. Run CFT with -help.");
@@ -87,17 +87,11 @@ public class Main {
         StdioReal stdio=new StdioReal(stdin, stdout);
         Root root=new Root(stdio, scriptDir, noTerminal);
         
-        if (args.hasNext()) {
-            String scriptName=args.get("scriptname");
-            root.loadScript(scriptName);
-        }
-        
-        List<String> commands=new ArrayList<String>();
         while (args.hasNext()) {
-            commands.add(args.get("command-string"));
+            String s=args.get("command-string");
+            root.addInitialCommand(s);
         }
-        for (String line:commands) root.addInitialCommand(line);
-        
+
         root.inputLoop();
     }
  
