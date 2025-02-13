@@ -1,4 +1,4 @@
-# TODO list to set up environment
+# Generate TODO list to set up environment if something missing
 # --
 	List("ansible","sshpass")->prog
 		found=false
@@ -11,7 +11,22 @@
 
 	if (!todo.empty) todo=List("apt-get update") + todo
 	todo
-/onLoad
+//onLoad
+
+
+# Set ansible root directory (which contains hosts file and playbooks dir)
+# --
+	P(1,Dir) => dir
+	Db2:Set(Sys.scriptId,"rootDir",dir)
+/SetRootDir
+
+
+# Get ansible root directory
+# --
+	Db2:Get(Sys.scriptId,"rootDir",Dir)
+/GetRootDir
+
+
 
 # Hosts file
 # --
@@ -30,6 +45,13 @@
 	P(2) as String? => sshUser
 	P(3,true) => askPass
 	P(4,false) => askSudoPass
+
+	GetRootDir => rootDir
+	println("Running ansible from " + rootDir.path)
+	
+	currDir=Dir
+	rootDir.cd
+
 
 	if (playbook==null) Inner{
 		PlaybookDir.files->f println("   " + f.name) |
@@ -53,7 +75,9 @@
 
 	cmd.print
 
-	Dir.run(cmd)
+	Dir.run(cmd) => result
+	currDir.cd
+	result
 /RunPlaybook
 
 
