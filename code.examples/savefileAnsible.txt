@@ -28,6 +28,8 @@
 # --	
 	P(1) as String? => playbook
 	P(2) as String? => sshUser
+	P(3,true) => askPass
+	P(4,false) => askSudoPass
 
 	if (playbook==null) Inner{
 		PlaybookDir.files->f println("   " + f.name) |
@@ -40,12 +42,18 @@
 		sshUser=Input("Enter ssh user").get
 	}
 	
-	cmd="ansible-playbook " 
-		+ playbook.path + " --user " + sshUser 
-		+ " -i " + HostsFile.path
-		+ "--ask-pass --ask-become-pass"
-	println(cmd)
-	Dir.run(cmd.split)
+	cmd=List(
+		"ansible-playbook", 
+		playbook.path,
+		"--user", sshUser, 
+		"-i", HostsFile.path
+	) 
+	if(askPass) cmd=cmd + "--ask-pass"
+	if (askSudoPass) cmd=cmd + "--ask-become-pass"
+
+	cmd.print
+
+	Dir.run(cmd)
 /RunPlaybook
 
 
