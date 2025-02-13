@@ -1,0 +1,49 @@
+# Display /etc/sudoers
+# --
+	data=Hosts:HostsFile
+	data.AllHosts->host
+		assert(data.HasProperty(host,"os","ubuntu"))
+		target=data.GetProperty(host,"ssh.user","roar") + "@" + host
+		report(host)
+		SSH:sudo(target,"cat /etc/sudoers").stdout->line report("",line)
+/Show
+
+
+# Make sudo automatic on ubuntu hosts
+# --
+	data=Hosts:HostsFile
+	data.AllHosts->host
+		assert(data.HasProperty(host,"sudo.nopass","yes"))
+		assert(data.HasProperty(host,"os","ubuntu"))
+		data.GetProperty(host,"ssh.user") => sshUser
+		error(sshUser==null,"ssh.user is null for " + host)
+		target=sshUser + "@" + host
+		
+		echo="echo '<<sshUser>>   ALL=(ALL:ALL) NOPASSWD:ALL'".mergeExpr.first
+		cmd=echo + " >> /etc/sudoers"
+		report(target,cmd)
+
+		SSH:sudo(target, cmd)
+/ExtendSudoers
+
+# Show all config
+# --
+	Hosts:Grid
+/Grid
+
+
+# Example hosts file
+# --
+<<<< EOF
+[os=ubuntu]
+10.0.8.38
+10.0.8.39
+10.0.8.40
+
+[ssh.user=roar]
+(os=ubuntu)
+
+[sudo.nopass=yes]
+(os=ubuntu)
+>>>> EOF
+/ExampleHosts

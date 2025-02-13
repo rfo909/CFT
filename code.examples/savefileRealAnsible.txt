@@ -11,44 +11,40 @@
 
 	if (!todo.empty) todo=List("apt-get update") + todo
 	todo
-/TODO
+/onLoad
 
-# First test
+# Hosts file
 # --
-	cmd="ansible -i ./hosts ubuntu -m ping --user roar"  ## --ask-pass
-	Dir.run(cmd.split)
-		# Note: not smart enough to answer yes when asked the following:
-		#
-		# The authenticity of host '10.0.8.40 (10.0.8.40)' can't be established.
-		# ECDSA key fingerprint is SHA256:FOnNRj459w2HPoYwHxuc8ujVpuxuFcWtFYQ3sFLAb70.
-		# Are you sure you want to continue connecting (yes/no/[fingerprint])?
+	Dir.file("hosts.txt")
+/HostsFile
 
-/PingServers
-
-
-# Run apt playbook
+# Playbook directory
 # --
-	cmd="ansible-playbook ./playbooks/apt.yml --user roar -i ./hosts" ## --ask-pass --ask-become-pass
-	Dir.run(cmd.split)
-/RunApt
-
-
-# Run java playbook
-# --
-	cmd="ansible-playbook ./playbooks/java.yml --user roar -i ./hosts" ## --ask-pass --ask-become-pass
-	Dir.run(cmd.split)
-/RunJava
+	Dir.sub("playbooks")
+/PlaybookDir
 
 
 # Run any playbook
-# --
-	P(1) => playbook
-	if (playbook==null) Inner{
-		Dir.sub("playbooks").files->f println("   " + f.name.beforeLast(".")) |
-		Input("Enter name of playbook").get => playbook
-	}
+# --	
+	P(1) as String? => playbook
+	P(2) as String? => sshUser
 
-	cmd="ansible-playbook ./playbooks/" + playbook + ".yml --user roar -i ./hosts"
+	if (playbook==null) Inner{
+		PlaybookDir.files->f println("   " + f.name) |
+		Input("Enter name of playbook").get => name
+		if (!name.endsWith(".yml")) name=name + ".yml"
+		playbook=PlaybookDir.file(name)
+
+	}
+	if (sshUser==null) {
+		sshUser=Input("Enter ssh user").get
+	}
+	
+	cmd="ansible-playbook " 
+		+ playbook.path + " --user " + sshUser 
+		+ " -i " + HostsFile.path
+		+ "--ask-pass --ask-become-pass"
+	println(cmd)
 	Dir.run(cmd.split)
 /RunPlaybook
 
