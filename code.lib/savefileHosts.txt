@@ -160,7 +160,7 @@ r03.s
             P(1) as String =>host
             P(2) as String =>field
             P(3) as String? =>defaultValue
-            P(4, false) as boolean => optional
+            P(4, true) as boolean => optional
 
             result=defaultValue
 

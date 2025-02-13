@@ -20,19 +20,6 @@
 /License
 
 
-# Verify all hosts have copy of SSH key
-# --
-    data=Hosts:HostsFile
-	
-    data.AllHosts->host
-        sshUser=data.GetProperty(host,"SSHUser")
-        assert(sshUser != null)
-        target=sshUser+"@"+host
-        println("------ " + target)
-        Dir.run("ssh-copy-id",target)
-/CheckSSHKeys
-
-
 # Marker in /etc/hosts for custom content
 # --
         "# CFT"
@@ -87,7 +74,7 @@
 # --
     data=Hosts:HostsFile
     data.AllHosts->host
-        sshUser=data.GetProperty(host,"SSHUser")
+        sshUser=data.GetProperty(host,"ssh.user")
         assert(sshUser != null)
         target=sshUser+"@"+host
         println("------ " + target)
@@ -106,24 +93,18 @@
 # ---
     HostData=Hosts:HostsFile
     HostData.AllHosts.sort->host
-        assert(HostData.GetProperty(host, "OSFamily", "unknown")=="debian")
+    	println(host,"OS:",HostData.GetProperty(host,"OS"))
+    	assert(HostData.HasProperty(host,"OS", "ubuntu"))
+
+   	
                
-            HostData.GetProperty (host, "SSHUser") =>sshUser
-             assert(sshUser != null)
+            HostData.GetProperty (host, "ssh.user") =>sshUser
+            assert(sshUser != null)
 
             target=sshUser+"@"+host
-        
-            ctx=SymDict(target)
-            proc=SpawnProcess(ctx,{
             ok = SSH:HostOkSSH(target)
-                status = if (ok,"OK","-")
-                println(target + ": " + status)
-                status
-            })
-        out(proc)
-    | _->proc
-        status = proc.wait.exitValue
-        report(proc.data.target, status)
+		status = if (ok,"OK","-")
+		report(target, ": ", status)
 /HostsStatus
         
 
@@ -132,8 +113,9 @@
 # Returns true/false for ok/nok
 # --
     P(1,Input("target").get)=>target
-    println("Calling APTUpdate:run for target="+target)
-    distUpgrade=false
+    P(2,false)=>distUpgrade
+    
+    println("Calling APTUpdate:run for target="+target,"distUpgrade="+distUpgrade)
     APTUpdate:run(target,3,distUpgrade)
         # Danger: doing dist-upgrade on ELK and KUB may cause problems!
 /AptUpdate
@@ -155,16 +137,20 @@
 
         #println("* " + host)
 
-        pm=data.GetProperty(host,"PackageManager")
-        assert(pm=="apt")
-        #println("*   pm==apt ok")
+	assert(data.HasProperty(host,"pm","apt"))
 
-        sshUser=data.GetProperty(host,"SSHUser")
+
+        sshUser=data.GetProperty(host,"ssh.user")
         assert(sshUser != null)
         #println("*   sshUser != null ok")
 
         target=sshUser+"@"+host
-        processData = SymDict(target)
+        distUpgrade = data.HasProperty(host, "do.distupgrade", "yes")
+        processData = SymDict(target,distUpgrade)
+        
+        # Set passwords that may be needed by jobs
+	SSH:SetSSHPassword
+	SSH:SetSudoPassword
 
         # Block until less than given number of active processes
         mon.Lwait(10, true)
@@ -172,7 +158,7 @@
         #println("*   starting process for " + target)
         process = SpawnProcess(processData, {
             start=currentTimeMillis
-            result = AptUpdate(target)
+            result = AptUpdate(target,distUpgrade)
             end=currentTimeMillis
             println("### time=" + (end-start) + " ms")
             # return value
@@ -190,6 +176,7 @@
         
         target=process.data.target
         exitValue=process.exitValue
+        if (exitValue==null) exitValue="-"
         output=process.output.split(Newline)
         date=Date
         
@@ -251,14 +238,18 @@
     # only one host from each reboot group can boot at a time
     rebootGroups=List
 
+	# Set passwords that may be needed by jobs
+	SSH:SetSSHPassword
+	SSH:SetSudoPassword
+
     HostData.AllHosts.sort->host
-        assert(HostData.HasProperty (host,"OSFamily","debian"))
-        HostData.GetProperty (host, "SSHUser") =>sshUser
+        assert(HostData.HasProperty (host,"OS","ubuntu"))
+        HostData.GetProperty (host, "ssh.user") =>sshUser
 
         sshUser+"@"+host =>target
-        HostData.GetProperty (host, "RebootGroup", null, true) => rebootGroup
+        HostData.GetProperty (host, "RebootGroup") => rebootGroup
 
-        HostData.HasProperty (host, "Auto.reboot", "yes") => allowReboot
+        HostData.HasProperty (host, "do.reboot", "yes") => allowReboot
         
         Inner {
             SSH:HostOkSSH (target) =>hostOk
@@ -320,10 +311,14 @@
 # --
     mon=Util:ProcessMonitor
     
+    	# Set passwords that may be needed by jobs
+	SSH:SetSSHPassword
+	SSH:SetSudoPassword
+
     HostData=Hosts:HostsFile
     HostData.AllHosts.sort->host
-        assert(HostData.HasProperty(host,"Install.CFT","1"))
-        sshUser=HostData.GetProperty (host,"SSHUser")
+        assert(HostData.HasProperty(host,"do.cft","yes"))
+        sshUser=HostData.GetProperty (host,"ssh.user")
         assert(sshUser != null)
 
         mon.Lwait(8,true)
@@ -339,8 +334,6 @@
 
     mon.Lwait(0,true)
 
-    
-    
 
     processes _->process
         Lib:Header(""+process.data.host)
@@ -351,16 +344,20 @@
 
 
 
-P(1)=>host
-P(2)=>target
-P(3,"mpstat") => command
-P(4)=>lineFilter
+# Run status command on host
+# --
+	P(1)=>host
+	P(2)=>target
+	P(3,"mpstat") => command
+	P(4)=>lineFilter
+	
     if (SSH:HostOk (host)) Inner {
 
         println("---- " + host + " ----")
         SSH:run (target, "which mpstat", true).get("exitCode") != 0 =>install
         if(install) {
             println("    (installing sysstat)")
+            SSH:sudo (target, "apt-get update")
             SSH:sudo (target, "apt-get -y install sysstat")
         }
         SSH:run (target, command).get("stdout")->line
@@ -370,21 +367,26 @@ P(4)=>lineFilter
 //SysStat
 
 
-# View host status
+# Get status for all linux hosts
 # --
     P(1,"mpstat") => command
     P(2)  => lineFilter
 
     HostData=Hosts:HostsFile
     
+	# Set passwords that may be needed by jobs
+	SSH:SetSSHPassword
+	SSH:SetSudoPassword
+
     mon=Util:ProcessMonitor
+    
 
     HostData.AllHosts->host
 
         HostData.GetProperty(host, "OS") => os
-        assert(os=="linux")
+        assert(os=="ubuntu" || os=="rocky" || os=="debian")
         
-            HostData.GetProperty(host, "SSHUser") =>sshUser
+            HostData.GetProperty(host, "ssh.user") =>sshUser
             assert(sshUser != null)
         
         sshUser+"@"+host =>target
@@ -402,7 +404,6 @@ P(4)=>lineFilter
     procList -> proc
         proc.wait
         Inner {
-            #proc.output.split(Newline)->line println(line) |
             proc.exitValue->line println(line)
         }   
 /SysStatAll
@@ -416,75 +417,17 @@ SysStatAll("iostat")
 
 
 
-
-
-
-# Configure /etc/systemd/resolved.conf
-#### Does it do any good on Ubuntu Server 20+ ??
-# ---
-    HostData=Hosts:HostsFile
-    file=Lib:TmpFile("resolved_conf")
-    file.create(resolved_conf)
-    
-    HostData.AllHosts->host
-        assert(HostData.GetProperty(host, "OSFamily")=="debian")
-               
-        HostData.GetProperty (host, "SSHUser") =>sshUser
-        assert(sshUser != null)
-
-        Lib:Header(host)
-
-        target=sshUser+"@"+host
-        if (!SSH:HostOkSSH(target)) {
-            println("- Host unreachable - skipping target " + target)
-            continue
-        }
-
-        SSH:copy(file, target, "./resolved_conf")
-        SSH:sudo(target,"cp ./resolved_conf /etc/systemd/resolved.conf")
-        println("- Updated file /etc/systemd/resolv.conf")
-    |
-    file.delete
-    
-//FixResolve
-
-
-# /etc/systemd/resolved.conf
-# --
-<<<<< EOF
-#  This file is part of systemd.
-#
-#  systemd is free software; you can redistribute it and/or modify it
-#  under the terms of the GNU Lesser General Public License as published by
-#  the Free Software Foundation; either version 2.1 of the License, or
-#  (at your option) any later version.
-#
-# Entries in this file show the compile time defaults.
-# You can change settings by editing this file.
-# Defaults can be restored by simply deleting this file.
-#
-# See resolved.conf(5) for details
-
-[Resolve]
-DNS=10.0.0.3 10.0.0.4
-#FallbackDNS=
-#Domains=
-#LLMNR=no
-#MulticastDNS=no
-#DNSSEC=no
-#Cache=yes
-#DNSStubListener=yes
->>>>> EOF
-//resolved_conf
-
-
-
-
 # Dump content from Hosts file
 # -- 
     Hosts:HostsFile.Dump
 /Dump
 
+
+
+# Show grid from Hosts file
+# --
+	Hosts:Grid
+/Grid
 
 
 # Run all periodic jobs
