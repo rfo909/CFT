@@ -1,0 +1,78 @@
+# Readme
+# --
+<<<< EOF
+
+Ansible
+-------
+This script contains simple playbook examples.
+
+>>>> EOF
+_.print
+/Readme
+
+# Show script
+# --
+	P(1,List) => lines
+	println
+	println("#-----8<-------------------------")
+	lines.print
+	println("#-----8<-------------------------")
+	println
+	println
+	true
+//ShowScript
+
+
+# Fetch
+# --
+<<<< EOF
+# Store files in /tmp/fetch/<hostname>/var/log/syslog
+
+- hosts: "ubuntu"
+  become: no
+  tasks:
+    - name: Fetch syslog file
+      ansible.builtin.fetch:
+        src: /var/log/syslog
+        dest: /tmp/fetched
+>>>> EOF
+ShowScript(_)
+/Fetch
+
+
+# Ansible gathers facts about remote servers
+# --
+<<<< EOF
+- hosts: "ubuntu"
+  become: yes
+  tasks:
+    - name: Print all available facts
+      ansible.builtin.debug:
+        var: ansible_facts
+>>>> EOF
+ShowScript(_)
+/Facts
+
+
+# Remote shell commands
+# --
+<<<< EOF
+# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/shell_module.html
+
+- hosts: "ubuntu"
+  become: no
+  tasks:
+    - name: list system files
+      ansible.builtin.shell: |
+         ls -la /bin > ~/bin.log.txt
+         ls -la /usr/bin >> ~/usr.bin.log.txt
+         ls -la /etc >> ~/etc.log.txt
+         tar cf ~/logs.tar ~/*.log.txt
+    - name: get summary files
+      ansible.builtin.fetch:
+        src: ~/logs.tar
+        dest: ./fetched
+>>>> EOF
+ShowScript(_)
+/Shell
+

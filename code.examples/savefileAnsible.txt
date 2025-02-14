@@ -41,10 +41,10 @@
 
 # Run any playbook
 # --	
-	P(1) as String? => playbook
-	P(2) as String? => sshUser
-	P(3,true) => askPass
-	P(4,false) => askSudoPass
+	P(1,true) => askPass
+	P(2,false) => askSudoPass
+	P(3) as String? => playbook
+	P(4) as String? => sshUser
 
 	GetRootDir => rootDir
 	println("Running ansible from " + rootDir.path)
@@ -52,6 +52,7 @@
 	currDir=Dir
 	rootDir.cd
 
+	error(!PlaybookDir.exists, "Invalid directory, playbooks subdirectory not found")
 
 	if (playbook==null) Inner{
 		PlaybookDir.files->f println("   " + f.name) |
