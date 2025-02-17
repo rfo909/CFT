@@ -35,12 +35,7 @@ CodeStats:main->line out("^t".unEsc+line)
     - Shell
     - Script language
 
-
-	- GNU GPL 3.0 ("open source")
-	- Java
-
-
-
+	
 
 .h Shell
     - ls / cd / cat / more / cp / mv / mkdir / rm  ...
@@ -55,13 +50,6 @@ CodeStats:main->line out("^t".unEsc+line)
 	Shortcuts    @
 	History      !
 
-	Symbols      @%
-    
-	ls pom*
-	%%pom
-	cd %xdsl
-	cat %pom
-
 
 
 
@@ -69,18 +57,18 @@ CodeStats:main->line out("^t".unEsc+line)
 
 
 	@scr
+	@sscr
 
 	:load Git
 	?
 	?UpdateSubmodules
 	@e
-
 		
+
     help
 	<value> help
 
-
-	@sscr    - search scripts
+	@P
 
 
 
