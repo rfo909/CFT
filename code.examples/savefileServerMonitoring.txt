@@ -1,0 +1,51 @@
+# Check remote directory status (new, deleted and changed files)
+# --
+	P(1,SSH:ReadSSHTarget) => target
+	P(2,"/usr/bin") => path
+	
+	newData=Dict
+	SSH:run(target,"ls -la " + path).stdout->line
+		line.replace("^t".unEsc," ").split.keep(8).concat(" ") => ident  # file name but also links on format x -> y
+		newData.set(ident,line.split.concat(" "))  # eliminating formatting
+	|
+	# load previous data
+	key=target+":"+path
+	
+	oldData = Db2:Get(Sys.scriptId,key,Dict)
+	
+	println("Got " + oldData.keys.length + " old entries and " + newData.keys.length + " new entries")
+	
+	# show diff
+	Inner{
+		newData.keys->key
+			if (!oldData.has(key)) {
+				println("NEW: " + newData.get(key))
+			} else {
+				a=oldData.get(key)
+				b=newData.get(key)
+				if (a != b) {
+					println
+					println("OLD: " + a)
+					println("CHG: " + b)
+				}
+			}
+	} 
+	Inner{
+		oldData.keys->key
+			if (!newData.has(key)) {
+				println("DEL: "+data.get(key))
+			}
+	}
+	
+	# Update base
+	Db2:Set(Sys.scriptId,key,newData)
+/DirStatus
+
+# Test
+# --
+	P(1,SSH:ReadSSHTarget) => target
+	List("/usr/bin","/bin","/etc")->path
+		Lib:Header(target + ":" + path)
+		DirStatus(target,path)
+//t01
+

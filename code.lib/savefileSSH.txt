@@ -57,9 +57,23 @@ Log in as root, then add the following line to
 	ResetDetectSSHPassword
 /onLoad
 
-
-Input("SSH target on format username@server").get
+# Read SSH target on format username@server
+# --
+	user=if(Sys.isWindows) {
+		Sys.environment.get("USERNAME","")
+	} else {
+		Dir.runCapture("whoami").first
+	}
+			
+	Input("SSH user (or user@server)").setCurrCond(user).get => user
+	if (user.contains("@")) {
+		user 
+	} else {
+		Input("SSH server name").get => server
+		user + "@" + server
+	}
 /ReadSSHTarget
+
 
 # SSH password is session secret
 # --
