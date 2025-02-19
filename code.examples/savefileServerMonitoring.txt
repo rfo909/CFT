@@ -60,4 +60,8 @@
 			} else {
 				report(target,path,"OK")
 			}
+	| _=>rows
+	Lib:ShowRows(rows)
+	rows
+	
 /ProcessDirList			
