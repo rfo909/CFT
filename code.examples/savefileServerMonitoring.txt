@@ -54,11 +54,13 @@
 	targets->target
 		paths->path
 			result = ServerMonitoring:DirStatus(target, path)
-			if (!result.empty) Inner {
+			if (!result.empty) {
 				ok=false
 				report(target,path,"CHANGED")
 				Lib:Header(target+":"+path)
-				result->line println(line)
+				Inner{
+					result->line println(line)
+				}
 			} else {
 				report(target,path,"OK")
 			}
