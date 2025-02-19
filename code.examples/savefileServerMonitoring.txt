@@ -2,6 +2,7 @@
 # --
 	P(1,SSH:ReadSSHTarget) => target
 	P(2,"/usr/bin") => path
+	P(3,false) => verbose
 	
 	newData=Dict
 	SSH:run(target,"ls -la " + path).stdout->line
@@ -13,39 +14,52 @@
 	
 	oldData = Db2:Get(Sys.scriptId,key,Dict)
 	
-	println("Got " + oldData.keys.length + " old entries and " + newData.keys.length + " new entries")
+	if (verbose) println("Got " + oldData.keys.length + " old entries and " + newData.keys.length + " new entries")
 	
 	# show diff
 	Inner{
 		newData.keys->key
 			if (!oldData.has(key)) {
-				println("NEW: " + newData.get(key))
+				out("NEW: " + newData.get(key))
 			} else {
 				a=oldData.get(key)
 				b=newData.get(key)
 				if (a != b) {
-					println
-					println("OLD: " + a)
-					println("CHG: " + b)
+					out("OLD: " + a)
+					out("CHG: " + b)
 				}
 			}
-	} 
+	} _=>result1
+	
 	Inner{
 		oldData.keys->key
 			if (!newData.has(key)) {
-				println("DEL: "+data.get(key))
+				out("DEL: "+data.get(key))
 			}
-	}
+	} _=>result2
 	
 	# Update base
 	Db2:Set(Sys.scriptId,key,newData)
+
+	result1 + result2
 /DirStatus
 
-# Test
-# --
-	P(1,SSH:ReadSSHTarget) => target
-	List("/usr/bin","/bin","/etc")->path
-		Lib:Header(target + ":" + path)
-		DirStatus(target,path)
-//t01
 
+# Check DirStatus for a list of ssh targets (user@host) and a list of paths for each target
+# --
+	P(1) as List => targets  # user@host
+	P(2) as List => paths
+
+	data=Hosts:HostsFile(HostsFile)
+
+	targets->target
+		paths->path
+			result = ServerMonitoring:DirStatus(target, path)
+			if (!result.empty) Inner {
+				report(target,path,"CHANGED")
+				Lib:Header(target+":"+path)
+				result->line println(line)
+			} else {
+				report(target,path,"OK")
+			}
+/ProcessDirList			
