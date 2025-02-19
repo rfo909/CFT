@@ -65,6 +65,8 @@
 				report(target,path,"OK")
 			}
 	| _=>rows
+	println
+	println
 	Lib:ShowRows(rows)
 	ok
 /ProcessDirList			
