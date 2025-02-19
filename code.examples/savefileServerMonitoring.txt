@@ -50,8 +50,6 @@
 	P(1) as List => targets  # user@host
 	P(2) as List => paths
 
-	data=Hosts:HostsFile(HostsFile)
-
 	targets->target
 		paths->path
 			result = ServerMonitoring:DirStatus(target, path)
