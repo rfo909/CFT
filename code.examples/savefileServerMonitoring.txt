@@ -42,18 +42,20 @@
 	Db2:Set(Sys.scriptId,key,newData)
 
 	result1 + result2
-/DirStatus
+/GetDirStatus
 
 
-# Check DirStatus for a list of ssh targets (user@host) and a list of paths for each target
+
+# Call GetDirStatus for a single or list of ssh targets (user@host) and a list of paths for each target
+# Returns list of Sys.row with the changes, additions and deletions (target, path, info). 
 # --
-	P(1) as List => targets  # user@host
-	P(2) as List => paths
+	P(1,SSH:ReadSSHTarget) => targets  # user@host
+	P(2,"/usr/bin") => paths
 
 	ok=true
 	targets->target
 		paths->path
-			result = ServerMonitoring:DirStatus(target, path)
+			result = ServerMonitoring:GetDirStatus(target, path)
 			if (!result.empty) {
 				ok=false
 				report(target,path,"CHANGED")
@@ -69,4 +71,51 @@
 	println
 	Lib:ShowRows(rows)
 	ok
-/ProcessDirList			
+/ProcessDirList	
+
+
+# Fetch apt history file from remote servers and parse it, returns Dict with Date values for
+# fields upgrade, unattendedUpgrade and distUpgrade
+# --
+	P(1) => targets  # user@host
+
+	data=Dict
+	
+	targets->target
+		localFile=Lib:TmpFile("apt-history","log")
+		SSH:getFile(localFile,target,"/var/log/apt/history.log")
+		time=null
+		variant=null
+		localFile.read->line
+			if (line.startsWith("Start-Date:")) variant=null
+			
+			if (line.startsWith("Commandline:")) {
+				if (line.contains("unattended-upgrade")) variant="unattendedUpgrade"
+				else if (line.contains("dist-upgrade")) variant="distUpgrade"
+				else if (line.contains("upgrade")) variant="upgrade"
+			}
+			if (line.startsWith("End-Date: ") && variant != null) {
+				dateString=line.after(":").trim.split.concat(" ")  # avoid risk of tab
+				Date.setFormat("yyyy-MM-dd HH:mm:ss").parse(dateString) => date
+				data.set(variant,date)
+				variant=null
+			}
+	|
+	data
+/GetAptHistory
+
+
+
+# Call GetAptHistory and present a readable result
+# --
+	P(1,SSH:ReadSSHTarget) => targets
+	
+	data=GetAptHistory(targets)
+	data.keys->key
+		d=data.get(key)
+		report(key, d.fmt, Date.diff(d)) # date and time
+/ShowAptHistory
+					
+				
+		
+			

@@ -271,14 +271,36 @@ public class ObjRaster extends Obj {
             return "scaleTo";
         }
         public String getShortDesc() {
-            return "scaleTo(width,height) - return new image";
+            return "scaleTo(width,height,preserveRatio?) - return new image";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            final String err="Expected parameters width, height";
+            final String err="Expected parameters width, height, preserveRatio?";
 
-            if (params.size() != 2) throw new Exception(err);
+            if (params.size() < 2) throw new Exception(err);
             int width=(int) getInt("width",params,0);
             int height=(int) getInt("height",params,1);
+
+            boolean preserveRatio=false;
+            if (params.size()==3) {
+                preserveRatio=getBoolean("preserveRatio", params, 2);
+
+            }
+            if (params.size() > 3) throw new Exception(err);
+
+            if (preserveRatio) {
+                double dw=(double) width;
+                double dh=(double) height;
+
+                double factor;
+                if (img.getWidth()/img.getHeight() > dw/dh) {
+                    factor=dw / img.getWidth();
+                } else {
+                    factor=dh / img.getHeight();
+                }
+
+                width = (int) Math.round(img.getWidth()*factor);
+                height = (int) Math.round(img.getHeight()*factor);
+            }
 
             RasterImage newImage=img.scaleTo(width,height);
             return new ValueObj(new ObjRaster(newImage));
