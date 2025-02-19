@@ -50,10 +50,12 @@
 	P(1) as List => targets  # user@host
 	P(2) as List => paths
 
+	ok=true
 	targets->target
 		paths->path
 			result = ServerMonitoring:DirStatus(target, path)
 			if (!result.empty) Inner {
+				ok=false
 				report(target,path,"CHANGED")
 				Lib:Header(target+":"+path)
 				result->line println(line)
@@ -62,6 +64,5 @@
 			}
 	| _=>rows
 	Lib:ShowRows(rows)
-	rows
-	
+	ok
 /ProcessDirList			
