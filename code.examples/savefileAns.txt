@@ -344,6 +344,39 @@
 
 
 
+# Monitor directories on servers
+# --
+	P(1,List("/usr/bin","/bin","/etc")) => paths
+	
+	HostData=Hosts:HostsFile
+	HostData.AllHosts.sort->host
+		sshUser=HostData.GetProperty (host,"ssh.user")
+		assert(sshUser != null)
+		target=sshUser+"@"+host
+		out(target)
+	| _=> targets
+	
+	ServerMonitoring:ProcessDirList(targets,paths)
+/DirStatus
+
+
+# Check update status
+# --
+	P(1,List("/usr/bin","/bin","/etc")) => pathList
+	
+	HostData=Hosts:HostsFile
+	HostData.AllHosts.sort->host
+		sshUser=HostData.GetProperty (host,"ssh.user")
+		assert(sshUser != null)
+		target=sshUser+"@"+host
+		ServerMonitoring:ShowAptHistory(target) => rows
+		Lib:Header(target)
+		Lib:ShowRows(rows)
+/AptStatus
+
+
+
+
 # Run status command on host
 # --
 	P(1)=>host

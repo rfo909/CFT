@@ -1,3 +1,30 @@
+# Data dir
+# --
+	Lib:DirPrivate.sub("ServerMonitoring").create
+//DataDir
+
+# Read data file
+# --
+	P(1) as String => filename
+	file=DataDir.file(filename)
+	if (file.exists) {
+		eval(file.read.first) => dict
+		error(getType(dict) != "Dict", "Invalid data in data file " + filename)
+		dict
+	} else {
+		Dict
+	}
+//ReadDictFile
+
+
+# Write data file
+# --
+	P(1) as String => filename
+	P(2) as Dict => data
+	DataDir.file(filename).create(syn(data))
+//WriteDictFile
+	
+
 # Check remote directory status (new, deleted and changed files)
 # --
 	P(1,SSH:ReadSSHTarget) => target
@@ -5,14 +32,14 @@
 	P(3,false) => verbose
 	
 	newData=Dict
-	SSH:run(target,"ls -la " + path).stdout->line
+	SSH:run(target,"ls -la " + path, true).stdout->line
 		line.replace("^t".unEsc," ").split.keep(8).concat(" ") => ident  # file name but also links on format x -> y
 		newData.set(ident,line.split.concat(" "))  # eliminating formatting
 	|
 	# load previous data
-	key=target+":"+path
+	fName=target+":"+(path.replace(Sys.fileSeparator,"."))
 	
-	oldData = Db2:Get(Sys.scriptId,key,Dict)
+	oldData=ReadDictFile(fName)
 	
 	if (verbose) println("Got " + oldData.keys.length + " old entries and " + newData.keys.length + " new entries")
 	
@@ -37,9 +64,8 @@
 				out("DEL: "+data.get(key))
 			}
 	} _=>result2
-	
-	# Update base
-	Db2:Set(Sys.scriptId,key,newData)
+
+	WriteDictFile(fName,newData)	
 
 	result1 + result2
 /GetDirStatus
@@ -51,12 +77,19 @@
 # --
 	P(1,SSH:ReadSSHTarget) => targets  # user@host
 	P(2,"/usr/bin") => paths
-	P(3,Lib:DirPrivate.sub("ServerMonitoring").create.file("DirList.txt")) => outputFile
+	P(3) => outputFile
+
+	if (outputFile==null) {
+		date = Date.setFormat("yyyyMMdd_HHmmss").fmt
+		outputFile = DataDir.file(date+"_dirlist.txt")
+	}
 
 	outputFile.create(List(Date.fmt,""))
 
 	ok=true
 	targets->target
+		outputFile.append(Date.fmt + " " + target)
+		println(target)
 		paths->path
 			result = ServerMonitoring:GetDirStatus(target, path)
 			if (!result.empty) {
@@ -93,7 +126,10 @@
 	
 	targets->target
 		localFile=Lib:TmpFile("apt-history","log")
-		SSH:getFile(localFile,target,"/var/log/apt/history.log")
+		SSH:getFile(localFile,target,"/var/log/apt/history.log",true)
+		if (!localFile.exists) {
+			localFile.touch  # ensure empty file
+		}
 		time=null
 		variant=null
 		localFile.read->line
