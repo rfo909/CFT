@@ -53,7 +53,7 @@
 	P(2,"/usr/bin") => paths
 	P(3,Lib:DirPrivate.sub("ServerMonitoring").create.file("DirList.txt")) => outputFile
 
-	outputFile.create(List(Date.fmt),"")
+	outputFile.create(List(Date.fmt,""))
 
 	ok=true
 	targets->target
@@ -77,7 +77,8 @@
 			}
 	| _=>rows
 	println
-	println
+	println(outputFile.path)
+
 	Lib:ShowRows(rows)
 	ok
 /ProcessDirList	
