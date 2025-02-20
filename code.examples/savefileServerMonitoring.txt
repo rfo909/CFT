@@ -20,12 +20,12 @@
 	Inner{
 		newData.keys->key
 			if (!oldData.has(key)) {
-				out("NEW: " + newData.get(key))
+				out("ADD: " + newData.get(key))
 			} else {
 				a=oldData.get(key)
 				b=newData.get(key)
 				if (a != b) {
-					out("OLD: " + a)
+					#out("OLD: " + a)
 					out("CHG: " + b)
 				}
 			}
@@ -51,6 +51,9 @@
 # --
 	P(1,SSH:ReadSSHTarget) => targets  # user@host
 	P(2,"/usr/bin") => paths
+	P(3,Lib:DirPrivate.sub("ServerMonitoring").create.file("DirList.txt")) => outputFile
+
+	outputFile.create(List(Date.fmt),"")
 
 	ok=true
 	targets->target
@@ -58,11 +61,17 @@
 			result = ServerMonitoring:GetDirStatus(target, path)
 			if (!result.empty) {
 				ok=false
-				report(target,path,"CHANGED")
-				Lib:Header(target+":"+path)
+
+				h=target+":"+path
+				outputFile.append(List("",h,"-".times(h.length)))
+				outputFile.append(result)
+
+				Lib:Header(h)
 				Inner{
 					result->line println(line)
 				}
+
+				report(target,path,"CHANGED")
 			} else {
 				report(target,path,"OK")
 			}
