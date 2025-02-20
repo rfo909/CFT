@@ -162,7 +162,7 @@ P(1,ReadSSHTarget) =>sshTarget
 # Check if server responds on ping
 # --
 P(1) =>target
-    if(target.contains("@"), target.after("@"), target) =>host
+    if(target.contains("@"), target.afterLast("@"), target) =>host
     Lib:run(List("ping","-c","1",host),List,true).exitCode => ex
 
     ex == 0

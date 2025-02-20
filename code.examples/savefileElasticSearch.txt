@@ -283,7 +283,7 @@ Input("ssh target user@host").get
     P(2,List(target)) => masterHosts
     P(3,"")=>prefix
 
-    target.after("@") => nodeHost
+    target.afterLast("@") => nodeHost
     GetIp(nodeHost) => nodeHostIp
 
     nodeHost.before(".") => nodeName
@@ -423,7 +423,7 @@ Input("ssh target user@host").get
     # Only works using IP-address, not "localhost", see text in
     # the InstallElasticSearchConfig function
 
-    target.after("@") => host
+    target.afterLast("@") => host
     GetIp(host) => ip
     SSH:run(target,"curl -XGET 'http://"+ip+":9200/_cluster/state?pretty'").stdout
 /CheckInstallRemote

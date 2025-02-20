@@ -271,7 +271,7 @@ P(1,GetTarget) =>target
     println("* Setting permissions on dbPath " + DbPath)
     SSH:sudo (target, "chown -R mongodb:mongodb " + DbPath)
     
-    target.after("@") =>host
+    target.afterLast("@") =>host
 
     println("* Creating mondod.cfg file")
     TmpFile("configfile") =>f
