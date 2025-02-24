@@ -131,21 +131,18 @@
 			localFile.touch  # ensure empty file
 		}
 		time=null
-		variant=null
+		command=null
 		localFile.read->line
-			if (line.startsWith("Start-Date:")) variant=null
+			if (line.startsWith("Start-Date:")) command=null
 			
 			if (line.startsWith("Commandline:")) {
-				variant=line.after(":").trim
-				#if (line.contains("unattended-upgrade")) variant="unattendedUpgrade"
-				#else if (line.contains("dist-upgrade")) variant="distUpgrade"
-				#else if (line.contains("upgrade")) variant="upgrade"
+				command=line.after(":").trim
 			}
-			if (line.startsWith("End-Date: ") && variant != null) {
+			if (line.startsWith("End-Date: ") && command != null) {
 				dateString=line.after(":").trim.split.concat(" ")  # avoid risk of tab
 				Date.setFormat("yyyy-MM-dd HH:mm:ss").parse(dateString) => date
-				data.set(variant,date)
-				variant=null
+				data.set(command,date)
+				command=null
 			}
 	|
 	data
@@ -158,9 +155,9 @@
 	P(1,SSH:ReadSSHTarget) => targets
 	
 	data=GetAptHistory(targets)
-	data.keys->key
-		d=data.get(key)
-		report(key, d.fmt, Date.diff(d)) # date and time
+	data.keys->command
+		time=data.get(command)
+		report(command, time.fmt, Date.diff(time)) # date and time
 /ShowAptHistory
 					
 				
