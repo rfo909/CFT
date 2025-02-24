@@ -136,9 +136,10 @@
 			if (line.startsWith("Start-Date:")) variant=null
 			
 			if (line.startsWith("Commandline:")) {
-				if (line.contains("unattended-upgrade")) variant="unattendedUpgrade"
-				else if (line.contains("dist-upgrade")) variant="distUpgrade"
-				else if (line.contains("upgrade")) variant="upgrade"
+				variant=line.after(":").trim
+				#if (line.contains("unattended-upgrade")) variant="unattendedUpgrade"
+				#else if (line.contains("dist-upgrade")) variant="distUpgrade"
+				#else if (line.contains("upgrade")) variant="upgrade"
 			}
 			if (line.startsWith("End-Date: ") && variant != null) {
 				dateString=line.after(":").trim.split.concat(" ")  # avoid risk of tab

@@ -32,6 +32,7 @@ passwords and other secrets for the duration of the session.
 # --
     P(1,"Label") => label
     P(2,false) => echo
+	P(3,false) => verify
     
     label.toHexString => key
     "v"+key => verifyKey
@@ -47,8 +48,10 @@ passwords and other secrets for the duration of the session.
             readLine(label) => value
         } else {
             Sys.readPassword(label) => value
-            Sys.readPassword(label+" (again)") => value2
-            error(value != value2, "Passwords don't match")
+            if (verify) {
+				Sys.readPassword(label+" (again)") => value2
+				error(value != value2, "Passwords don't match")
+			}
         }
 
         SessionSecretSet(label, value)
