@@ -150,7 +150,16 @@ P(1,ReadSSHTarget) =>sshTarget
 # Copy ssh key to remote target host. If password defined, it uses sshpass to automate this process.
 # --
 	P(1,ReadSSHTarget) =>sshTarget
-	cmd=List("ssh-copy-id",sshTarget)
+	P(2) as File? => keyFile
+
+	cmd=List("ssh-copy-id")
+	if (keyFile != null) {
+		error(!keyFile.exists, "File not found: " + keyFile.path)
+		cmd.add("-i")
+		cmd.add(keyFile.path)
+	}
+	keyFile.add(sshTarget)
+
 	RunSecureCommand(sshTarget,cmd)
 /sshEnable
 
