@@ -65,13 +65,9 @@ Log in as root, then add the following line to
 		Dir.runCapture("whoami").first
 	}
 			
-	Input("SSH user (or user@server)").setCurrCond(user).get => user
-	if (user.contains("@")) {
-		user 
-	} else {
-		Input("SSH server name").get => server
-		user + "@" + server
-	}
+	Input("SSH user").setCurrCond(user).get => user
+	Input("SSH server name").get => server
+	user + "@" + server
 /ReadSSHTarget
 
 
