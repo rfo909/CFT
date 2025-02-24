@@ -158,7 +158,7 @@ P(1,ReadSSHTarget) =>sshTarget
 		cmd.add("-i")
 		cmd.add(keyFile.path)
 	}
-	keyFile.add(sshTarget)
+	cmd.add(sshTarget)
 
 	RunSecureCommand(sshTarget,cmd)
 /sshEnable
