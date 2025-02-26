@@ -1242,7 +1242,7 @@ run(null,null,null,true)
 # Show symbols (helper)
 # --
     Db2:Get(Sys.scriptId,"symbolDict",Dict)=>data
-    data.keys.sort->key
+    data.keys->key
         data.get(key)=>entryDict
         value=entryDict.value
         s=""+value
