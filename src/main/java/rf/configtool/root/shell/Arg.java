@@ -39,6 +39,8 @@ public class Arg {
     public boolean isExpr() {
         return expr != null;
     }
+
+    public boolean isString() { return !isExpr(); }
     
     public Value resolveExpr (Ctx ctx) throws Exception {
         return this.expr.resolve(ctx);

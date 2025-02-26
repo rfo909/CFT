@@ -1,7 +1,7 @@
 
 # CFT Reference
 
-Last updated: 2025-02-12 RFO
+Last updated: 2025-02-26 RFO
 
 v4.4.2
 
@@ -352,16 +352,34 @@ When exiting that shell, we are returned to the CFT prompt.
 
 If we are working down a deep path, and want to access a directory somewhere down that path,
 we can use the *parent lookup* notation, which looks for an element in the path,
-by exact match or substring, starting at the bottom (current directory), moving up towards
-the root.
+by exact match or substring.
 
-Example:
+It comes in two variants, starting either from the end of the current path, or from the start.
+
+Example searching from the end:
 
 ```
 cd /some/long/path/down/a/deep/tree
 cd -down/different/path
 pwd
 /some/long/path/down/different/path
+```
+
+If there are duplicate names in our path, or we want to type as little as possible, there is
+the option of selecting which end of the path to start the search.
+
+Example, using same deep path
+
+```
+cd /some/long/path/down/a/deep/tree
+cd -a
+pwd
+/some/long/path/down/a
+
+cd /some/long/path/down/a/deep/tree
+cd +a
+pwd
+cd /some/long/path
 ```
 
 

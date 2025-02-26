@@ -212,9 +212,11 @@ public class FileSet {
     
     private void processStringArg (String currentDir, String arg, boolean allowNewDir, boolean allowNewFile) throws Exception {
 
-        // Pre-processing arg: the path lookup operator
+        // Pre-processing arg: the path lookup operators
         
-        if (arg.startsWith("-")) {
+        if (arg.startsWith("-") || arg.startsWith("+")) {
+            boolean fromStart=(arg.startsWith("+"));
+
             String remainingArg=arg.substring(1);
             String lookupTerm;
             
@@ -231,7 +233,13 @@ public class FileSet {
             
             //System.out.println("Path lookup: lookupTerm=" + lookupTerm + " remainingArg=" + remainingArg);
             
-            int pathMatchPos=currentDir.lastIndexOf(lookupTerm);
+            int pathMatchPos;
+            if (fromStart) {
+                pathMatchPos=currentDir.indexOf(lookupTerm);
+            } else {
+                pathMatchPos=currentDir.lastIndexOf(lookupTerm);
+            }
+
             if (pathMatchPos < 0) {
                 throw new Exception("Path lookup: no match: " + arg);
             }
