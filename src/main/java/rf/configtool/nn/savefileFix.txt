@@ -1,0 +1,7 @@
+Dir.files("*.java")->f
+	Inner {f.read(false)->line
+		if (line.startsWith("package")) out("package rf.configtool.nn;") else out(line)
+	} => lines
+	f.setWriteLF.create(lines)
+/t
+	
