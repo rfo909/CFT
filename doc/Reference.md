@@ -142,9 +142,6 @@ cd %myDir
 
 cat %myDir.files("*.java").first
 
-# or even
-
-
 ```
 
 To see all symbols, use shortcut
@@ -154,6 +151,12 @@ To see all symbols, use shortcut
 ```
 
 This lists all defined symbols, and gives you the option of deleting symbols.
+
+### Symbols are values
+
+Creating a symbol for a directory, as shown above, associates a piece of code
+with the symbol, which when invoked generates the Dir object. This is what allows
+for the example where we access the .files of %myDir above. 
 
 
 ### Diffing files example

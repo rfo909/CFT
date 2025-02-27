@@ -248,20 +248,23 @@ public class ObjRaster extends Obj {
             return "gray";
         }
         public String getShortDesc() {
-            return "gray(x,y) - get gray level for pixel in range 0-1 (float)";
+            return "gray() - return modified Raster converted to gray scale";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            final String err="Expected parameters x,y";
-
-            if (params.size() != 2) throw new Exception(err);
-            int x=(int) getInt("x",params,0);
-            int y=(int) getInt("y",params,1);
-
-            int red=img.getRed(x,y);
-            int green=img.getGreen(x,y);
-            int blue=img.getBlue(x,y);
-
-            return new ValueFloat((red+green+blue)/3.0/256.0);
+            RasterImage newImg=new RasterImage(img.getWidth(), img.getHeight());
+            for (int x=0; x<img.getWidth(); x++) {
+                for (int y=0; y<img.getHeight(); y++) {
+                    int red=img.getRed(x,y);
+                    int green=img.getGreen(x,y);
+                    int blue=img.getBlue(x,y);
+                    int gray=(red+green+blue)/3;
+                    if (gray > 255) gray=255;
+                    if (gray < 0) gray=0;
+                    int grayPixel = RasterImage.makePixel(gray,gray,gray,RasterImage.ALPHA_OPAQUE);
+                    newImg.setPixel(x,y,grayPixel);
+                }
+            }
+            return new ValueObj(new ObjRaster(newImg));
         }
     }
 
