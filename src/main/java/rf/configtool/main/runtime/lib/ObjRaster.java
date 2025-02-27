@@ -192,7 +192,9 @@ public class ObjRaster extends Obj {
             int x=(int) getInt("x",params,0);
             int y=(int) getInt("y",params,1);
 
-            img.setPixel(x,img.getHeight()-y,color);
+            y=img.getHeight()-y;
+            
+            img.setPixel(x,y,color);
 
             return new ValueObj(theObj());            
         }
@@ -233,6 +235,8 @@ public class ObjRaster extends Obj {
             if (params.size() != 2) throw new Exception(err);
             int x=(int) getInt("x",params,0);
             int y=(int) getInt("y",params,1);
+
+            y=img.getHeight()-y;
 
             int red=img.getRed(x,y);
             int green=img.getGreen(x,y);
