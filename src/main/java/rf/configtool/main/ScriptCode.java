@@ -148,7 +148,7 @@ public class ScriptCode {
                 
                 FunctionBody body=getFunctionBody(name);
                 
-                if ( ((body.isPrivate() || body.isClass()) && publicOnly && !showFull) ) continue;
+                if ( (body.isPrivate() && publicOnly && !showFull) ) continue;
                 
                 
                 
