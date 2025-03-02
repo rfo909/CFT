@@ -168,7 +168,7 @@
 /class EditBuffer		
 	
 
-# Testdata
+# Testdata for EditBuffer class
 # --
 	<<<< EOF
 package some.thing;
@@ -246,8 +246,125 @@ import org.slf4j.LoggerFactory;
 	|	
 
 	buf.out
-/test
+//test
 
 
+
+
+# Buffered string with lookahead similar to Std.Text.Lexer -> TokenStream
+# --
+	P(1) => string
+	
+	self.string=string
+	self.pos=0
+	
+	# Rest of string after what has been matched or skipped so far
+	self.rest = Lambda{
+		self.string.sub(self.pos)
+	}
+	
+	# True if rest starts with pattern, does not advance pointer
+	self.peek = Lambda{
+		P(1) as String => pattern
+		self.rest.startsWith(pattern)
+	}
+	
+	# Advance pointer if match, return boolean
+	self.match = Lambda{
+		P(1) as String => pattern
+		if (self.peek(pattern)) {
+			self.pos=self.pos + pattern.length
+			true
+		} else {
+			false
+		}
+	}
+	
+	self.advance = Lambda{
+		P(1) as int => count
+		self.pos=self.pos+count
+	}
+	
+	self.atEOL = Lambda {
+		self.pos >= self.string.length
+	}
+	
+	# Advance to start of pattern, if found return consumed text, otherwise null
+	self.advanceTo = Lambda {
+		P(1) as String => pattern
+		foundPos=self.rest.indexOf(pattern)
+		if (foundPos >= 0) {
+			s=self.rest.sub(0,foundPos)
+			self.advance(foundPos) # relative to self.pos
+			s
+		} else {
+			null
+		} 
+	}
+	
+	# Search for pattern, then advance past it, return text consumed or null if no match
+	self.advancePast = Lambda{
+		P(1) as String => pattern
+		s=self.advanceTo(pattern)
+		if (s==null) {
+			null
+		} else {
+			self.advance(pattern.length)
+			s+pattern
+		}
+	}
+	
+	# Consume whitespace, return consumed text or null if no match
+	self.ws = Lambda{
+		P(1,true) => multiple
+		start=self.pos
+		
+		loop
+			if (self.rest.startsWith(" ") || self.string.startsWith("^t".unEsc)) {
+				self.advance(1)
+				break(!multiple)
+			} else break
+		|
+		if (self.pos > start) 
+			self.string.sub(start, self.pos)
+		else
+			null
+	}
+	
+	# Consume date, return Date object or null if no date found
+	self.date = Lambda{
+		P(1,"yyyy-MM-dd") as String => fmt
+		date = Date.setFormat(fmt).parse(self.rest)
+		if (date != null) {
+			self.advance(fmt.length)
+		}
+		date
+	}
+			
+		
+/class BufferedString
+
+
+
+
+
+# BufferedString example and test
+# --
+	data = "[2025-03-02]        the value is: 42 # but what is the question?"
+	
+	bs=BufferedString(data)
+	Sequence(
+		bs.advancePast("[")
+		"DATE = " + bs.date("yyyy-MM-dd")
+		bs.advancePast("]")
+		"SINGLE SPACE = '" + bs.ws(false) + "'"
+		"MULTI SPACE = '" + bs.ws + "'"
+		bs.advancePast(":")
+		"VALUE = " + bs.advanceTo("#")
+		"REST=" + bs.rest
+		bs.atEOL
+		bs.peek("#")
+	).print
+/t
 
 
