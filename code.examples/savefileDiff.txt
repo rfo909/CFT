@@ -27,18 +27,20 @@
 # Identify file A
 # --
     P(1,Sys.lastResult)=>f
+	if (getType(f) != "File") f=File(f)
     Db2:Set("Diff","FileA",f)
 /f1
 
 # Identify file B
 # --
     P(1,Sys.lastResult)=>f
+	if (getType(f) != "File") f=File(f)
     Db2:Set("Diff","FileB",f)
 /f2
 
 # Search for next match
 # --
-    P(1) => str
+    P(1).trim => str
     P(2) => pos
     P(3) => list
     
@@ -46,7 +48,7 @@
         break(pos >= list.length)
         #println("Search: " + list.nth(pos))
         #println("        " + str)
-        break(list.nth(pos)==str)
+        break(list.nth(pos).trim==str)
         pos=pos+1
     |
     pos
@@ -92,13 +94,18 @@
 
 # Get color A
 # --
-    Db2:Get("Diff","ColorA",Curses:TxtGreen)
+    Db2:Get("Diff","ColorB",Curses:TxtYellow)
 //ColA
 
 # Get color B
 # --
-    Db2:Get("Diff","ColorB",Curses:TxtRed)
+    Db2:Get("Diff","ColorA",Curses:TxtGreen)
 //ColB
+
+# Matches
+# --
+	Db2:Get("Diff","ColorMatch",Curses:TxtWhite)
+//ColMatch
 
 
 # Reset color
@@ -107,11 +114,17 @@
 //ColReset
 
     
-# Diff
+# Diff two files
 # --
-    P(1, Db2:Get("Diff","FileA")).read->line out(line.trim) | _ => a
-    P(2, Db2:Get("Diff","FileB")).read->line out(line.trim) | _ => b
-    
+    P(1) => fileA
+    P(2) => fileB
+
+	a=fileA.read
+	b=fileB.read
+	
+	if (getType(fileA)=="String") fileA=File(fileA)
+	if (getType(fileB)=="String") fileB=File(fileB)
+
     ca=cb=0 # line counters
     loop
         if (ca >= a.length) {
@@ -124,35 +137,42 @@
         sa=a.nth(ca)
         sb=b.nth(cb)
         
-        if (sa==sb) {
-            #println(fix(ca+1) + " " + fix(cb+1) + " : " + sa)
+        if (sa.trim==sb.trim) {
+			println(ColReset + fix(ca+1) + " =" + fix(cb+1) + " :   " + ColMatch + sa + ColReset)
             ca=ca+1
             cb=cb+1
         } else {
-            
+			# Search ahead for next match
             ma=Search(sb,ca,a)-ca
             mb=Search(sa,cb,b)-cb
             
             if (mb<ma) {
-                println(fix("") + " " + fix(cb+1) + " > " + ColB + sb + ColReset)
+                println(ColReset + fix("") + "  " + fix(cb+1) + " >>  " + ColB + sb + ColReset)
                 cb=cb+1
             } else {
-                println(fix(ca+1) + " " + fix("") + " < " + ColA + sa + ColReset)
+                println(ColReset + fix(ca+1) + "  " + fix("") + " <   " + ColA + sa + ColReset)
                 ca=ca+1
             }
         }
     |
     loop
         break (ca >= a.length)
-        println(fix(ca+1) + " " + fix("") + " < " + ColA + a.nth(ca) + ColReset)
+        println(ColReset + fix(ca+1) + "  " + fix("") + " <  " + ColA + a.nth(ca) + ColReset)
         ca=ca+1
     |
     loop
         break (cb >= b.length)
-        println(fix("") + " " + fix(cb+1) + " > " + ColB + b.nth(cb) + ColReset)
+        println(ColReset + fix("") + "  " + fix(cb+1) + " >> " + ColB + b.nth(cb) + ColReset)
         cb=cb+1
     |
         
+	println
+	println("   ^   ^")
+	println("   |   |")
+	println("   +----- " + fileA.path)
+	println("       |")
+	println("       +- " + fileB.path)
+	println
 
-/Diff   
-            
+/diff
+       

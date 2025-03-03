@@ -1125,19 +1125,21 @@ run(null,null,null,true)
 # --
     P(1) as File => a
     P(2) as File => b
-    if (Sys.isWindows) {
-        Lib:TmpFile("tmp","ps1") => script
-        script.create(Sequence(
-            @ $file1 = '<<a.path>>'
-            @ $file2 = '<<b.path>>'
-            @ Compare-Object -ReferenceObject $(Get-Content $file1) -DifferenceObject $(Get-Content $file2) -CaseSensitive
-        ).mergeExpr)
-        Dir.runCapture("powershell",script.path) => result
-        script.delete
-        result
-    } else {
-        Dir.run("diff",a.path,b.path)
-    }
+
+	Diff:diff(a,b)
+    #if (Sys.isWindows) {
+        #Lib:TmpFile("tmp","ps1") => script
+        #script.create(Sequence(
+        #    @ $file1 = '<<a.path>>'
+        #    @ $file2 = '<<b.path>>'
+        #    @ Compare-Object -ReferenceObject $(Get-Content $file1) -DifferenceObject $(Get-Content $file2) -CaseSensitive
+        #).mergeExpr)
+        #Dir.runCapture("powershell",script.path) => result
+        #script.delete
+        #result
+    #} else {
+    #    Dir.run("diff",a.path,b.path)
+    #}
 /DiffFiles
 
 

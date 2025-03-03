@@ -566,16 +566,27 @@ Missing directories are logged to screen following
 /SI
 
 
-# Find duplicate files by name
+# Find duplicate files by name, if given a pattern, do a diff on first set of files that match pattern
 # --
-        data=Dict
-        SearchableFiles->f
-                if (data.has(f.name)) {
-                        out(f.path)
-                        out(data.get(f.name).path)
-                } else {
-                        data.set(f.name,f)
-                }
+	P(1) as String? => pattern
+
+	data=Dict
+	complete=false
+	SearchableFiles->f
+			break(complete)
+			if (data.has(f.name)) {
+				f2=data.get(f.name)
+				if(pattern) {
+					Diff:diff(f,f2) => rows
+					Lib:ShowRows(rows)
+					complete=true
+				} else {
+					report(f, f.path)
+					report(f2, f2.path)
+				}
+			} else {
+					data.set(f.name,f)
+			}
 
 /Dup
 
