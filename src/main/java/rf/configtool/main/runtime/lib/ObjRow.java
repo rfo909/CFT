@@ -21,16 +21,7 @@ package rf.configtool.main.runtime.lib;
 import java.util.*;
 
 import rf.configtool.main.Ctx;
-import rf.configtool.main.runtime.ColList;
-import rf.configtool.main.runtime.Function;
-import rf.configtool.main.runtime.IsSynthesizable;
-import rf.configtool.main.runtime.Obj;
-import rf.configtool.main.runtime.Value;
-import rf.configtool.main.runtime.ValueInt;
-import rf.configtool.main.runtime.ValueObj;
-import rf.configtool.main.runtime.ValueString;
-import rf.configtool.main.runtime.ValueBoolean;
-import rf.configtool.main.runtime.ValueList;
+import rf.configtool.main.runtime.*;
 
 import rf.configtool.util.DateTimeDurationFormatter;
 
@@ -47,11 +38,24 @@ public class ObjRow extends Obj implements IsSynthesizable {
     public ObjRow(List<Value> rowData) {
         this.rowData=rowData;
         add(new FunctionGet());
+        add(new FunctionFile());
+        add(new FunctionDir());
+        add(new FunctionDate());
+        add(new FunctionDuration());
         add(new FunctionShow());
         add(new FunctionAsStringsRow());
         add(new FunctionAsList());
         add(new FunctionContains());
     }
+
+
+    private String getValueType (Value v) {
+        if (v instanceof ValueObj) {
+            return ((ValueObj) v).getVal().getTypeName();
+        }
+        return v.getTypeName();
+    }
+
 
     public ObjRow () {
         this(new ArrayList<Value>());
@@ -126,6 +130,69 @@ public class ObjRow extends Obj implements IsSynthesizable {
             return rowData.get(n);
         }
     }
+
+
+    class FunctionFile extends Function {
+        public String getName() {
+            return "file";
+        }
+        public String getShortDesc() {
+            return "file() - return first File object or null if none";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            for (Value v : rowData) {
+                if (getValueType(v).equals("File")) return v;
+            }
+            return new ValueNull();
+        }
+    }
+
+    class FunctionDir extends Function {
+        public String getName() {
+            return "dir";
+        }
+        public String getShortDesc() {
+            return "dir() - return first Dir or null if none";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            for (Value v : rowData) {
+                if (getValueType(v).equals("Dir")) return v;
+            }
+            return new ValueNull();
+        }
+    }
+
+    class FunctionDate extends Function {
+        public String getName() {
+            return "date";
+        }
+        public String getShortDesc() {
+            return "date() - return first Date object or null if none";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            for (Value v : rowData) {
+                if (getValueType(v).equals("Date")) return v;
+            }
+            return new ValueNull();
+        }
+    }
+
+
+    class FunctionDuration extends Function {
+        public String getName() {
+            return "duration";
+        }
+        public String getShortDesc() {
+            return "duration() - return first Duration object or null if none";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            for (Value v : rowData) {
+                if (getValueType(v).equals("Duration")) return v;
+            }
+            return new ValueNull();
+        }
+    }
+
 
 
     class FunctionShow extends Function {
