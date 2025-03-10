@@ -974,8 +974,12 @@ run(null,null,null,true)
     P(2,Input("Search term").get) => st
     P(3,Input("Search files: enter partial file name, or glob pattern with '*'").get) => fname
     P(4,Input("Include sub-dirs y/n").setCurrCond("y").get.toLower=="y") => subDirs
-    
-	Db2:Set("SearchTextFiles","data", SymDict(dir,st,fname,subDirs))
+	P(5,true) => addToHistory
+
+	if (addToHistory) {
+		Db2:Set("SearchTextFiles","data", SymDict(dir,st,fname,subDirs))
+		SearchTextFilesCommit
+	}
 
     glob=if(fname.contains("*"),Glob(fname),Glob("*"+fname+"*"))
     grep=Grep(st)
@@ -994,8 +998,12 @@ run(null,null,null,true)
 	P(3,Input("Search term 2").get) => st2
     P(4,Input("Search files: enter partial file name, or glob pattern with '*'").get) => fname
     P(4,Input("Include sub-dirs y/n").setCurrCond("y").get.toLower=="y") => subDirs
+	P(5,true) => addToHistory
     
-	Db2:Set("SearchTextFiles","data", SymDict(dir,st,st2,fname,subDirs))
+	if (addToHistory) {
+		Db2:Set("SearchTextFiles","data", SymDict(dir,st,st2,fname,subDirs))
+		SearchTextFilesCommit
+	}
 
     glob=if(fname.contains("*"),Glob(fname),Glob("*"+fname+"*"))
     grep=Grep.match(st).match(st2)
@@ -1009,28 +1017,75 @@ run(null,null,null,true)
 # Commit last SearchTextFiles* to hotlist
 # --
 	Db2:Get("SearchTextFiles","data", null) => data
-	error(data==null,"No committed last text search")
-	Db2:Get("SearchTextFiles","hotList",List).add(data).last(20) => newList
+	error(data==null,"No last text search")
+	Db2:Get("SearchTextFiles","hotList",List).add(data).last(100) => newList
 	Db2:Set("SearchTextFiles","hotList",newList)
 //SearchTextFilesCommit
 
 
-# Repeat text file search
+# Select text file search to repeat (for current directory)
 # --
-	println("----")
+	P(1,Dir) => dir
+
+	# Create list of searches for this directory
 	Db2:Get("SearchTextFiles","hotList",List) -> x
-		report(x.dir.path, '"' + x.st + '"' + if (x.has("st2"), ' "'+x.st2+'"',""), x.fname )
-	| 
-	Lib:ShowRows(_)
-	println("----")
-	Input("Enter number").get.parseInt => pos
-	Db2:Get("SearchTextFiles","hotList",List).nth(pos) => data
-	if (data.has("st2")) {
-		SearchTextFiles2(data.dir, data.st, data.st2, data.fname, data.subDirs)
+		assert(x.dir.path==dir.path)
+		out(x)
+	| _=>list
+
+	if (list.length==1) {
+		RepeatTextSearch(list.first)
+	} else if (list.length > 1) Inner{ 
+		# Build nice presentation
+		list->x
+			st2=""
+			if (x.has("st2")) st2= ' "'+x.st2+'"'
+			report(x.dir.path, '"' + x.st + '"' + st2, x.fname )
+		| _=>rows
+
+		println("----")
+		Lib:ShowRows(rows)
+		println("----")
+
+		Input("Enter number or part of search term or glob expression").get => term
+		if (term.?parseInt) {
+			pos=term.parseInt
+			RepeatTextSearch(list.nth(pos))
+		} else Inner{
+			# search for term
+			found=null
+			list->x
+				println("term=" + term + " x.st=" + x.st)
+				if (x.st.contains(term) || x.has("st2") && x.st2.contains(term) || x.fname.contains(term)) {
+					found=x
+					break
+				}
+			|
+			if (found) {
+				RepeatTextSearch(found)
+			} else {
+				println("No match")
+				false
+			}
+		}
+			
 	} else {
-		SearchTextFiles(data.dir, data.st, data.fname, data.subDirs)
+		println("No searches found for this directory")
+		false
 	}
-//RepeatTextFileSearch
+//SelectTextSearches
+
+# Repeat single text file search
+# --
+	P(1,Db2:Get("SearchTextFiles","data",null)) => data
+	error(data==null, "Invalid search")
+
+	if (data.has("st2")) {
+		SearchTextFiles2(data.dir, data.st, data.st2, data.fname, data.subDirs, false)
+	} else {
+		SearchTextFiles(data.dir, data.st, data.fname, data.subDirs, false)
+	}
+//RepeatTextSearch
   
 
 

@@ -368,3 +368,25 @@ import org.slf4j.LoggerFactory;
 /t
 
 
+# Perform replacement of text in a set of files
+# --
+	P(1,Dir) => currentDir
+	P(2,readLine("File glob")) => glob
+	P(3,readLine("Search for")) => pattern
+	P(4,readLine("Replace with")) => replacement
+
+	currentDir.allFiles(glob)->file
+		changes=false
+		Inner{
+			file.read(false)->line 
+				s=line.replace(pattern,replacement)
+				if (line != s) changes=true
+				out(s)
+		} _=> newLines
+		if (changes) {
+			println(file.path)
+			Lib:PreserveFileLineSeparator(file).create(newLines)
+		}
+/ReplaceInFiles
+
+		
