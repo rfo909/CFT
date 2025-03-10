@@ -1014,7 +1014,7 @@ run(null,null,null,true)
 /SearchTextFiles2
 
 
-# Commit last SearchTextFiles* to hotlist
+# Commit last SearchTextFiles* parameters to hotList
 # --
 	Db2:Get("SearchTextFiles","data", null) => data
 	error(data==null,"No last text search")
@@ -1040,7 +1040,7 @@ run(null,null,null,true)
 		list->x
 			st2=""
 			if (x.has("st2")) st2= ' "'+x.st2+'"'
-			report(x.dir.path, '"' + x.st + '"' + st2, x.fname )
+			report('"' + x.st + '"' + st2, x.fname )
 		| _=>rows
 
 		println("----")
@@ -1054,8 +1054,8 @@ run(null,null,null,true)
 		} else Inner{
 			# search for term
 			found=null
-			list->x
-				println("term=" + term + " x.st=" + x.st)
+			# Search in reverse, to match most recent searches first
+			list.reverse->x
 				if (x.st.contains(term) || x.has("st2") && x.st2.contains(term) || x.fname.contains(term)) {
 					found=x
 					break
@@ -1075,10 +1075,17 @@ run(null,null,null,true)
 	}
 //SelectTextSearches
 
+
+
 # Repeat single text file search
 # --
 	P(1,Db2:Get("SearchTextFiles","data",null)) => data
 	error(data==null, "Invalid search")
+
+	x=data
+	st2=""
+	if (x.has("st2")) st2= ' "'+x.st2+'"'
+	Lib:Header('"' + x.st + '"' + st2 + " "+ x.fname)
 
 	if (data.has("st2")) {
 		SearchTextFiles2(data.dir, data.st, data.st2, data.fname, data.subDirs, false)
