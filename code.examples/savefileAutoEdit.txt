@@ -368,6 +368,127 @@ import org.slf4j.LoggerFactory;
 /t
 
 
+# Unescape string using backslashes to pass control characters
+# --
+	P(1) as String => s
+	esc=false
+	s.chars->c
+		if (esc) {
+			if (c=="s") out(" ") else if (c=="t") out("^t".unEsc) else out(c)
+			esc=false
+		} else if (c=="\") {
+			esc=true
+		} else {
+			out(c)
+		}
+	| _.concat
+//UnescapeBackslash
+
+
+
+# Compact notation for BufferedString dissect
+# " =name " Types. =type ,
+# 
+# means
+# - Search for double quote 
+# - create dictionary element name up to next delimiter which is another double quote
+# - then search for the Types. string, create another dict element =type up to the comma
+# 
+# Use backslash to escape first characters in token to avoid confusion with commands, plus
+# \s = space
+# \t = tab
+#
+# --
+	P(1,Input("Example data string").get) as String => data
+	P(2,Input("Commands").get) as String => commands
+
+	pos=0	
+	dict=Dict
+	name=null
+
+	commands.split->part
+		
+		if (part.startsWith("=")) {
+			name=part.sub(1)
+			continue
+		}
+
+		# search for delimiter
+		searchFor=UnescapeBackslash(part)
+
+		matchPos=data.sub(pos).indexOf(searchFor)
+		error(matchPos<0, "No match for '" + searchFor + "' from pos=" + pos)
+		
+		if (name != null) {
+			dict.get(name,"") + data.sub(pos,pos+matchPos) => val
+			dict.set(name,val)
+		}
+
+		# terminate symbol
+		name=null
+		pos=pos+matchPos+searchFor.length
+	|
+	if (pos < data.length && name != null) {
+		dict.get(name,"") + data.sub(pos) => val
+		dict.set(name,val)
+	}
+
+	dict
+
+/BufferedStringDissect
+
+
+# Apply BufferedStringDissect on list of lines
+# --
+	P(1) as List? => lines
+	if (lines==null) {
+		println("Paste lines, terminate with '.' on separate line")
+		readLines(".") => lines
+	}
+	P(2,Input("Commands").get) => commands
+	
+	lines->line
+		reject(line.trim=="")
+		out(BufferedStringDissect(line,commands))
+	| _=> dissectOut
+
+	Db2:Set(Sys.scriptId,"BSDCommands", commands)
+	Db2:Set(Sys.scriptId,"BSDLast", dissectOut)
+
+	dissectOut->dict
+		report(dict.name, dict.type)
+	| _=>rows
+	Lib:ShowRows(rows)
+
+	dissectOut->dict
+			values = Inner{
+				dict.keys->key out(dict.get(key))
+			}
+			println(values.concat(" "))
+	|
+
+/BSD
+
+
+
+# Generate output using last result from BSD command (stored in Db)
+# --
+	Lib:Header(Db2:Get(Sys.scriptId,"BSDCommands","<Not found>"))
+	Input("Enter generation string, using ${x} for named values").get => generationString
+
+	println
+	println("----")
+	Db2:Get(Sys.scriptId,"BSDLast",List)->dict
+		println(generationString.merge(dict.mergeCodes))
+	|
+	println("----")
+	true
+/BSDGen
+
+	
+
+
+
 # Perform replacement of text in a set of files
 # --
 	P(1,Dir) => currentDir
