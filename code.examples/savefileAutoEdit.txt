@@ -386,7 +386,7 @@ import org.slf4j.LoggerFactory;
 
 
 
-# Compact notation for BufferedString dissect
+# Compact notation for dissect of string
 # " =name " Types. =type ,
 # 
 # means
@@ -435,10 +435,10 @@ import org.slf4j.LoggerFactory;
 
 	dict
 
-/BufferedStringDissect
+/Dissect
 
 
-# Apply BufferedStringDissect on list of lines
+# Apply Dissect on list of lines, shows result and stores data in Db2 for DisGen to work with
 # --
 	P(1) as List? => lines
 	if (lines==null) {
@@ -449,7 +449,7 @@ import org.slf4j.LoggerFactory;
 	
 	lines->line
 		reject(line.trim=="")
-		out(BufferedStringDissect(line,commands))
+		out(Dissect(line,commands))
 	| _=> dissectOut
 
 	Db2:Set(Sys.scriptId,"BSDCommands", commands)
@@ -467,15 +467,26 @@ import org.slf4j.LoggerFactory;
 			println(values.concat(" "))
 	|
 
-/BSD
+/Dis
 
 
 
 # Generate output using last result from BSD command (stored in Db)
 # --
-	Lib:Header(Db2:Get(Sys.scriptId,"BSDCommands","<Not found>"))
-	Input("Enter generation string, using ${x} for named values").get => generationString
+	Lib:Header("Dissect pattern: " + Db2:Get(Sys.scriptId,"BSDCommands","<Not found>"))
+	P(1) => generationString
 
+	Db2:Get(Sys.scriptId,"BSDLast",List) => data
+	error(data.length==0, "No matched lines found")
+
+	if (generationString==null) {
+		defaultString=Inner{
+			data.first.keys->key
+				out(key + "=${" + key + "}")
+			| _.concat(" ")
+		}
+		Input("Enter generation string, using ${x} for named values").setCurrCond(defaultString).get => generationString
+	}
 	println
 	println("----")
 	Db2:Get(Sys.scriptId,"BSDLast",List)->dict
@@ -483,7 +494,7 @@ import org.slf4j.LoggerFactory;
 	|
 	println("----")
 	true
-/BSDGen
+/DisGen
 
 	
 

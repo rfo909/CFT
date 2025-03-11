@@ -108,6 +108,10 @@ shortcut:FL   = "---- File Locate under curr Dir ----"    Lib:LocateFiles(Dir)
 shortcut:DL   = "---- Dir Locate under curr Dir ----"     Lib:LocateDirs(Dir)
 shortcut:PURG = "---- Purge old files in curr Dir ----"   Util:PurgeOldFiles(Dir)
 
+# Dissect text lins
+shortcut:dis  = "---- Dissect lines of text (paste) ----"      AutoEdit:Dis
+shortcut:dgen = "---- Generate output from dissect data ----"  AutoEdit:DisGen
+
 # Projects script 
 shortcut:P    = "---- Projects ----"                      Sys.stdin(":load Projects","curr")
 
