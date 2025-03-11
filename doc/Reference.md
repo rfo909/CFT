@@ -1,7 +1,7 @@
 
 # CFT Reference
 
-Last updated: 2025-02-26 RFO
+Last updated: 2025-03-10 RFO
 
 v4.4.2
 
@@ -1061,17 +1061,14 @@ a test
 
 
 
-# ---- Searching - Grep
+# ---- Searching 
 
 ## Global function Grep()
 
 CFT has a global function Grep() which creates a Grep object. It in turn has member functions for
 adding search criteria, as string or regex. 
 
-Mostly we don't use the Grep object directly. Instead it is used in script code, particularly the
-@S shortcut to perform ad-hoc search of all files under current directory (recursive), and the @P (Projects)
-shortcut, which uses Grep to look through files of multiple types across multiple directories, for
-different projects. 
+Mostly we don't use the Grep object directly, as it is intended for use in code.
 
 ## As shell command
 
@@ -1106,7 +1103,63 @@ The implementation of the shell command "grep", is actually done in CFT, using t
 It starts with ShellGrep.java which retrieves the mGrep value from CFT.props, which points at
 the Lib:InteractiveGrep function, which handles the logic, using the Grep system object.
 
-### Search files from result list
+## The @S shortcut
+
+The @S shortcut is used to to perform ad-hoc search of all files under current directory (recursive). It
+is named after the function "S" in the Projects script, which is used to search multiple files in different
+directories, and of multiple types. 
+
+### The Row object
+
+Searching for text in files, for example with @S returns a list of data which gets formatted into
+columns for readability.
+
+The mechanism that drives this is the report() statement, which takes a list of values. Certain types of values
+are not considered displayable, while others are. Displayable values are strings, int, boolean, Date and Duration,
+but we frequently include other data. When searching through files, we will often want to open the file of
+a hit.
+
+```
+# Example of search function
+# --
+	P(1,Input("Search term").get) => term
+	grep=Grep(term) 
+	Dir.allFiles("*.txt")->f 
+		grep.file(f)->line
+			report(f,f.path,line.lineNumber,line)
+/Search
+
+```
+
+The report() statement both includes the file object, which is not displayable, and "f.path" which is a string, 
+and gets reported along with the line number in the file and the line itself.
+
+What the report() statement does corresponds to
+
+```
+	out(Sys.Row(...))
+```
+
+The formatting into columns is handled when presenting the result; if it is a list of Row objects, the visible elements
+get formatted into columns.
+
+#### Access Row content
+
+In this case, if we wanted to edit the file object, after running the Search function, say from match line 5, we say:
+
+```
+edit :5.file
+```
+
+This works because the Sys.Row object implements a function "file" which locates the first File object in the Row.
+Other useful functions are "dir", "date" and "duration". 
+
+```
+Sys.Row help
+```
+
+
+## Search files from result list
 
 ```
 ls *.txt

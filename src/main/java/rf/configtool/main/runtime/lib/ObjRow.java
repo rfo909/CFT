@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.main.runtime.lib;
 
+import java.io.File;
 import java.util.*;
 
 import rf.configtool.main.Ctx;
@@ -152,12 +153,24 @@ public class ObjRow extends Obj implements IsSynthesizable {
             return "dir";
         }
         public String getShortDesc() {
-            return "dir() - return first Dir or null if none";
+            return "dir() - return first Dir or dir of first File, or null if none";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             for (Value v : rowData) {
                 if (getValueType(v).equals("Dir")) return v;
             }
+            for (Value v : rowData) {
+                if (getValueType(v).equals("File")) {
+                    ObjFile f = (ObjFile) ((ValueObj) v).getVal();
+                    String path = f.getPath();
+                    int i=path.lastIndexOf(File.separator);
+                    if (i>=0) path=path.substring(0,i);
+                    if (path.equals("")) path=File.separator;
+                    return new ValueObj(new ObjDir(path, f.getProtection()));
+                }
+            }
+            
+
             return new ValueNull();
         }
     }
