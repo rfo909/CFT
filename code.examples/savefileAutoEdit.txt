@@ -456,16 +456,13 @@ import org.slf4j.LoggerFactory;
 	Db2:Set(Sys.scriptId,"BSDLast", dissectOut)
 
 	dissectOut->dict
-		report(dict.name, dict.type)
+		values=List
+		Inner{dict.keys->key values.add(key + "=" + dict.get(key))}
+		reportList(values)
 	| _=>rows
 	Lib:ShowRows(rows)
 
-	dissectOut->dict
-			values = Inner{
-				dict.keys->key out(dict.get(key))
-			}
-			println(values.concat(" "))
-	|
+	true
 
 /Dis
 
