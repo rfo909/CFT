@@ -265,10 +265,8 @@ nicely formatted JSON.
         PPObj(value,indent2,LOut,showDictTypes)
     } else if (t=="List") {
         PPList(value,indent2,LOut,showDictTypes)
-    } else if (t=="Dict") {
-        PPObj(value,indent2,LOut,showDictTypes)
     } else if (t=="String") {
-        LOut.call('"' + value.replace('"','\"')+'"')
+	        LOut.call('"' + value.replace('"','\"')+'"')
     } else {
         LOut.call(""+value)
     }

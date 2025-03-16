@@ -100,9 +100,11 @@ Export as string
 
 	#insideIdent.sub(":") => colon
 	#colon.sub(identFirstChars, ident)  # back to main ident parser
+		# (implemented in parser, not tokenizer)
 
 	#insideIdent.sub(".") => dot
 	#dot.sub(identFirstChars, ident) # back to main ident parser
+		# (implemented in parser, not tokenizer)
 
 	# Strings = 5
 	List('"',"'")->c 
@@ -261,12 +263,15 @@ exampleXML
 
 
 # Create synthetic root object with output from Parse as content. which 
-# allows us to use .subNodes("xxx") to locate specifically named content
+# allows us to use .subNodes("xxx") to locate specifically named content. 
+# Note that if doing PP on the returned object, the root object is tagged
+# as GENERATED_ROOT. 
 # --
     P(1)=>xml
     content=Parse(xml)
 
     obj=XMLNode
+    obj.tagName="GENERATED_ROOT"
     obj.content=content
     obj
 /ParseObject
@@ -512,35 +517,37 @@ exampleXML
     ## Pretty-print XML
     ## ----------------
     self.PP=Lambda{
-        P(1,"") as String => indent
-        P(2,List) as List => result
+	P(1,"") as String => indent
+	P(2,List) as List => result
         
-        attributes=Inner{
-            self.attributes.keys->attrName
-                out(attrName + '="' + self.attributes.get(attrName) + '"')
-            | _.concat(" ")
-        }
-        if (attributes.length>0) attributes=" "+attributes
+	attributes=Inner{
+		self.attributes.keys->attrName
+			out(attrName + '="' + self.attributes.get(attrName) + '"')
+		| _.concat(" ")
+	}
+	if (attributes.length>0) attributes=" "+attributes
         
-		if (self.content.length==1 && getType(self.content.first)=="String") {
-			result.add(indent+"<"+self.tagName + attributes + ">" + self.content.first + "</" + self.tagName + ">")
-		} else {
-			result.add(indent+"<"+self.tagName + attributes + if(self.content.length==0,"/>",">"))
-			indent2=indent+"^t".unEsc
-			if (self.content.length>0) {
-				Inner {
-					self.content->x
-						x as? &XMLNode => isNode
-						if (isNode) {
-							x.PP(indent2,result)
-						} else {
-							s=x.trim
-							if (s.length>0) result.add(indent2 + Util:EscapeXMLString(s))
-						}
-				}
-				result.add(indent+"</"+self.tagName+">")
+	if (self.content.length==1 && getType(self.content.first)=="String") {
+		# inline presentation of single string content element
+		result.add(indent+"<"+self.tagName + attributes + ">" + self.content.first + "</" + self.tagName + ">")
+	} else {
+		# indented presentation of multiple or non-string content elements
+		result.add(indent+"<"+self.tagName + attributes + if(self.content.length==0,"/>",">"))
+		indent2=indent+"^t".unEsc
+		if (self.content.length>0) {
+			Inner {
+				self.content->x
+					x as? &XMLNode => isNode
+					if (isNode) {
+						x.PP(indent2,result)
+					} else {
+						s=x.trim
+						if (s.length>0) result.add(indent2 + Util:EscapeXMLString(s))
+					}
 			}
+			result.add(indent+"</"+self.tagName+">")
 		}
+	}
         
         result
     }
@@ -566,6 +573,12 @@ exampleXML
 	
 
 
+# Export is implemented inside XMLNode
+# --
+	P(1) as &XMLNode => node
+	node.export
+/export
+
 
 
 # Unescape special characters in string
@@ -581,19 +594,19 @@ exampleXML
 # --
     node = Parse(exampleXML).first
     node.PP
-/t1
+//t1
 
 # JSON:PP for all details after parse
 # --
     node = Parse(exampleXML).first
     JSON:PP(node)
-/t2
+//t2
 
 
 # Export test
 # --
     Parse(exampleXML).first.export
-/t3
+//t3
 
 
 # Construct XML structure with code
@@ -612,18 +625,18 @@ exampleXML
     b.sub("D")
     
     root
-/constructedObject
+//constructedObject
 
 # Show constructed object by calling its PP function
 # --
     constructedObject.PP
-/t4
+//t4
 
 
 # Parse the pretty-printed version of constructedObject, and pretty-print it
 # --
     Parse(constructedObject.PP).first.PP
-/t4b
+//t4b
 
 # Lookup test, accessing data inside constructedObject - call t4 to see it prettyprinted
 # --
@@ -631,7 +644,7 @@ exampleXML
     println("root.attr.nonExist = " + root.attrGet("nonExist"))
     println("A.attr.inner = " + root.subNodes("A").first.attrGet("inner"))
     println("A.content.last = " + root.content.last) # special characters test
-/t5   
+//t5   
 
 
 # Parse example, then pretty-print it. Parse the output, and pretty-print that. Compare the two outputs, 
