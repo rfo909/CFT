@@ -420,6 +420,9 @@ import org.slf4j.LoggerFactory;
 # - Search for double quote 
 # - create dictionary element name up to next delimiter which is another double quote
 # - then search for the Types. string, create another dict element =type up to the comma
+#
+# Delimeters can also have alternatives, for example ,|) matching either a comma or a right
+# paranthesis. If both occur in the data string, the leftmost is used.
 # 
 # Use backslash to escape first characters in token to avoid confusion with commands, plus
 # \s = space
@@ -451,11 +454,22 @@ import org.slf4j.LoggerFactory;
 		
 
 		# search for delimiter
-		searchFor=UnescapeBackslash(part)
+		searchList=UnescapeBackslash(part).split("|") # list of options
 
-		matchPos=data.sub(pos).indexOf(searchFor)
-		#error(matchPos<0, "No match for '" + searchFor + "' from pos=" + pos)
-		
+		matchPos=0
+		matchLength=0
+		Inner{
+			# use first match (lowest pos) from the list of patterns
+			searchList->pattern
+				x=data.sub(pos).indexOf(pattern)
+				if (x>=0) out(Int(x,pattern))
+			| _.sort => matches
+			if (!matches.empty) {
+				matchPos=matches.first
+				matchLength=matches.first.data.length
+			}
+		}
+			
 		if (name != null) {
 			if (matchPos >= 0) {
 				dict.get(name,"") + data.sub(pos,pos+matchPos) => val
@@ -465,7 +479,7 @@ import org.slf4j.LoggerFactory;
 
 		# terminate symbol
 		name=null
-		if (matchPos>0) pos=pos+matchPos+searchFor.length
+		pos=pos+matchPos+matchLength
 	|
 	if (pos < data.length && name != null) {
 		dict.get(name,"") + data.sub(pos) => val
