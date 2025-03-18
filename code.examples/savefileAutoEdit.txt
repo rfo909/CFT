@@ -368,6 +368,28 @@ import org.slf4j.LoggerFactory;
 /t
 
 
+# Show special characters in lines of text
+# --
+	P(1) as List? => lines
+	P(2, true) => onlyShowLinesWithSpecials
+
+	if (lines==null) {
+		println("Paste lines, terminate with '.' on separate line")
+		readLines(".") => lines
+	}
+	lines->line
+		s = line
+			.replace("^t".unEsc,"<TAB>")
+			.replace("^n".unEsc,"<NEWLINE>")
+			.replace("^r".unEsc,"<CR>")
+		if (!onlyShowLinesWithSpecials  
+			|| s.contains("<TAB>") 
+			|| s.contains("<NEWLINE>")
+			|| s.contains("<CR>")) println(s)
+/ShowSpecials
+
+
+
 # Unescape string using backslashes to pass control characters
 # --
 	P(1) as String => s
@@ -402,6 +424,12 @@ import org.slf4j.LoggerFactory;
 # Use backslash to escape first characters in token to avoid confusion with commands, plus
 # \s = space
 # \t = tab
+# \n = newline
+# \r = carriage return
+# \\ = \
+# 
+# All other \x = x
+#
 #
 # --
 	P(1,Input("Example data string").get) as String => data
@@ -460,6 +488,9 @@ import org.slf4j.LoggerFactory;
 		println("Paste lines, terminate with '.' on separate line")
 		readLines(".") => lines
 	}
+
+	ShowSpecials(lines)
+
 	P(2,Input("Commands").get) => commands
 	
 	lines->line
