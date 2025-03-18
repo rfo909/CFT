@@ -372,9 +372,14 @@ import org.slf4j.LoggerFactory;
 # --
 	P(1) as String => s
 	esc=false
+	Dict
+		.set("s"," ")
+		.set("t","^t".unEsc)
+		.set("r","^r".unEsc)
+		.set("n","^n".unEsc) => map
 	s.chars->c
 		if (esc) {
-			if (c=="s") out(" ") else if (c=="t") out("^t".unEsc) else out(c)
+			out(if(map.has(c), map.get(c), c))
 			esc=false
 		} else if (c=="\") {
 			esc=true
@@ -406,33 +411,43 @@ import org.slf4j.LoggerFactory;
 	dict=Dict
 	name=null
 
+	allKeys=List
+
 	commands.split->part
 		
 		if (part.startsWith("=")) {
 			name=part.sub(1)
+			allKeys.add(name)
 			continue
 		}
+		
 
 		# search for delimiter
 		searchFor=UnescapeBackslash(part)
 
 		matchPos=data.sub(pos).indexOf(searchFor)
-		error(matchPos<0, "No match for '" + searchFor + "' from pos=" + pos)
+		#error(matchPos<0, "No match for '" + searchFor + "' from pos=" + pos)
 		
 		if (name != null) {
-			dict.get(name,"") + data.sub(pos,pos+matchPos) => val
-			dict.set(name,val)
+			if (matchPos >= 0) {
+				dict.get(name,"") + data.sub(pos,pos+matchPos) => val
+				dict.set(name,val)
+			}
 		}
 
 		# terminate symbol
 		name=null
-		pos=pos+matchPos+searchFor.length
+		if (matchPos>0) pos=pos+matchPos+searchFor.length
 	|
 	if (pos < data.length && name != null) {
 		dict.get(name,"") + data.sub(pos) => val
 		dict.set(name,val)
 	}
 
+	if (dict.keys.length > 0) {
+		# populate missing keys with blank strings
+		Inner{allKeys->key dict.get(key,"")}
+	}
 	dict
 
 /Dissect
@@ -449,11 +464,12 @@ import org.slf4j.LoggerFactory;
 	
 	lines->line
 		reject(line.trim=="")
-		out(Dissect(line,commands))
+		dict=Dissect(line,commands)
+		if (dict.keys.length>0) out(dict)
 	| _=> dissectOut
 
-	Db2:Set(Sys.scriptId,"BSDCommands", commands)
-	Db2:Set(Sys.scriptId,"BSDLast", dissectOut)
+	Db2:Set(Sys.scriptId,"DissectCommands", commands)
+	Db2:Set(Sys.scriptId,"DissectLast", dissectOut)
 
 	dissectOut->dict
 		values=List
@@ -473,7 +489,7 @@ import org.slf4j.LoggerFactory;
 	Lib:Header("Dissect pattern: " + Db2:Get(Sys.scriptId,"BSDCommands","<Not found>"))
 	P(1) => generationString
 
-	Db2:Get(Sys.scriptId,"BSDLast",List) => data
+	Db2:Get(Sys.scriptId,"DissectLast",List) => data
 	error(data.length==0, "No matched lines found")
 
 	if (generationString==null) {
@@ -486,7 +502,7 @@ import org.slf4j.LoggerFactory;
 	}
 	println
 	println("----")
-	Db2:Get(Sys.scriptId,"BSDLast",List)->dict
+	Db2:Get(Sys.scriptId,"DissectLast",List)->dict
 		println(generationString.merge(dict.mergeCodes))
 	|
 	println("----")
