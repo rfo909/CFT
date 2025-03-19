@@ -492,7 +492,7 @@ import org.slf4j.LoggerFactory;
 	}
 	dict
 
-/Dissect
+//DissectLine
 
 
 # Apply Dissect on list of lines, shows result and stores data in Db2 for DisGen to work with
@@ -509,7 +509,7 @@ import org.slf4j.LoggerFactory;
 	
 	lines->line
 		reject(line.trim=="")
-		dict=Dissect(line,commands)
+		dict=DissectLine(line,commands)
 		if (dict.keys.length>0) out(dict)
 	| _=> dissectOut
 
@@ -525,26 +525,65 @@ import org.slf4j.LoggerFactory;
 
 	true
 
-/Dis
+/Dissect
 
+
+# Dissect last result
+# --
+	Db2:Get(Sys.scriptId,"DissectLast",List)
+//DissectLastResult
+
+
+
+# Show dissect last result
+# --
+	P(1,DissectLastResult)->dict
+		Inner{
+			dict.keys->key out(key + "=" + dict.get(key))
+		} reportList(_)
+	| _=>list
+	Lib:ShowRows(list)
+/DissectShow
+			
+
+# Edit Dis list
+# --
+		
+		P(1)=>code
+		if (code==null) {
+			println("Enter code that picks up the list as P(1) and")
+			println("applies modifications to it. Note that return")
+			println("value from the code is not used!!")
+			println
+			println("To create completely new values, just to P(1).clear then")
+			println("add dictionaries.")
+			println("---")
+			Input("Enter code").get => code
+		}
+		lambda="Lambda{"+ code + "}"
+		Lib:Header(lambda)
+		
+		lastResult=DissectLastResult
+		eval(lambda).call(lastResult) # may modify the result list
+		DissectShow(lastResult)
+		Lib:Confirm("ok?") => ok
+		if (ok) {
+			Db2:Set(Sys.scriptId,"DissectLast", lastResult)
+		}
+/DissectEdit
 
 
 # Generate output using last result from BSD command (stored in Db)
 # --
-	Lib:Header("Dissect pattern: " + Db2:Get(Sys.scriptId,"BSDCommands","<Not found>"))
-	P(1) => generationString
 
-	Db2:Get(Sys.scriptId,"DissectLast",List) => data
+	data=DissectLastResult
 	error(data.length==0, "No matched lines found")
 
-	if (generationString==null) {
-		defaultString=Inner{
-			data.first.keys->key
-				out(key + "=${" + key + "}")
-			| _.concat(" ")
-		}
-		Input("Enter generation string, using ${x} for named values").setCurrCond(defaultString).get => generationString
-	}
+	DissectShow
+	println
+
+	Input("Enter generation string, using ${x} for named values").get => generationString
+
 	println
 	println("----")
 	Db2:Get(Sys.scriptId,"DissectLast",List)->dict
@@ -552,7 +591,7 @@ import org.slf4j.LoggerFactory;
 	|
 	println("----")
 	true
-/DisGen
+/DissectGen
 
 	
 
