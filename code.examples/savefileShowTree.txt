@@ -46,7 +46,7 @@
     P(1,1)=>hours
     SymDict(hours).set("x",Lambda{
         P(1)=>file
-        currentTimeMillis-file.lastModified < self.hours*3600*1000
+        Sys.currentTimeMillis-file.lastModified < self.hours*3600*1000
     }).x
 /NewestFiles
 

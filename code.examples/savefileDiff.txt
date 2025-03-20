@@ -27,14 +27,14 @@
 # Identify file A
 # --
     P(1,Sys.lastResult)=>f
-	if (getType(f) != "File") f=File(f)
+	if (Sys.getType(f) != "File") f=File(f)
     Db2:Set("Diff","FileA",f)
 /f1
 
 # Identify file B
 # --
     P(1,Sys.lastResult)=>f
-	if (getType(f) != "File") f=File(f)
+	if (Sys.getType(f) != "File") f=File(f)
     Db2:Set("Diff","FileB",f)
 /f2
 
@@ -122,8 +122,8 @@
 	a=fileA.read
 	b=fileB.read
 	
-	if (getType(fileA)=="String") fileA=File(fileA)
-	if (getType(fileB)=="String") fileB=File(fileB)
+	if (Sys.getType(fileA)=="String") fileA=File(fileA)
+	if (Sys.getType(fileB)=="String") fileB=File(fileB)
 
     ca=cb=0 # line counters
     loop

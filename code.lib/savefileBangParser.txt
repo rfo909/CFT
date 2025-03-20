@@ -98,7 +98,7 @@ Command history
 	}
 
 	# update last access time
-	sdata.lastAccess=currentTimeMillis
+	sdata.lastAccess=Sys.currentTimeMillis
 
 	# append history data?
 	if (appendData != null) {
@@ -108,7 +108,7 @@ Command history
 	}
 
 	# clean out old data
-	limit=currentTimeMillis-86400*1000
+	limit=Sys.currentTimeMillis-86400*1000
 	Inner{
 		data.keys->sid
 			if (data.get(sid).lastAccess<limit) data.remove(sid)
@@ -155,9 +155,9 @@ Command history
 
 	# remove expired data (and duplicates of addDir if defined)
 	Inner{
-		exp=currentTimeMillis - GlobalDirExpiration
+		exp=Sys.currentTimeMillis - GlobalDirExpiration
 		list->data
-			assert(data.time >= exp && getType(data.dir)=="String")
+			assert(data.time >= exp && Sys.getType(data.dir)=="String")
 			reject(addDir != null && data.dir == addDir)
 			#reject(addDir != null && addDir.startsWith(data.dir))
 			out(data)
@@ -165,7 +165,7 @@ Command history
 	}
 	changed=newList.length != list.length
 	if (addDir != null) {
-		time=currentTimeMillis
+		time=Sys.currentTimeMillis
 		dir=addDir
 		newList.add(SymDict(time,dir))
 		changed=true
@@ -227,7 +227,7 @@ Command history
 	} 
 	if (dict != null) {
 		dir=Dir(dict.currDir) # stored as string
-		if (gotoDir && dir.path != currentDir.path) Sys.stdin('"BangParser" ' + syn(dir)+'.cd')
+		if (gotoDir && dir.path != currentDir.path) Sys.stdin('"BangParser" ' + Sys.syn(dir)+'.cd')
 		println(dict.command)
 		Sys.stdin(dict.command)
 	} else {

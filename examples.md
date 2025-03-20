@@ -60,7 +60,7 @@
 
 # Show type of object
 # --
-	getType(2.3)
+	Sys.getType(2.3)
 /ShowType
 
 ```

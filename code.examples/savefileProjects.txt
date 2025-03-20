@@ -132,13 +132,13 @@ Missing directories are logged to screen following
     Db2:Get("Projects","Sessions",Dict) => sessions
 
     uuid=Sys.sessionUUID
-    time=currentTimeMillis
+    time=Sys.currentTimeMillis
 
     sessions.set(uuid,SymDict(name,time))
     
     # clean up old sessions, to avoid data entry growing indefinitely
     {sessions.keys->key
-        if(sessions.get(key).time < currentTimeMillis - 86400*1000*14) {
+        if(sessions.get(key).time < Sys.currentTimeMillis - 86400*1000*14) {
             sessions.remove(key)
         }
     }

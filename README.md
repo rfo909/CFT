@@ -174,7 +174,7 @@ Show global functions by typing 'help':
 help
   <obj: <GLOBAL>>
   <GLOBAL>
-  # v4.2.1
+  # v4.4.2
   # 
   # _Expr() - information about expressions in CFT
   # _Shell() - CFT shell-like commands
@@ -189,7 +189,7 @@ help
   # File(str) - creates File object
   # FileLine(str, lineNo, File) - create FileLine object
   # Float(value,data) - create Float object - for sorting
-  # Glob(pattern,ignoreCase?) - creates Glob object for file name matching, such as '*.txt' +
+  # Glob(pattern,ignoreCase?) - creates Glob object for file name matching, such as '*.txt' - ignoreCase defaults to true on windows, ot+
   # Grep() or Grep(a,b,...) or Grep(list) - create Grep object
   # Input(label) - create Input object
   # Int(value,data) - create Int object - for sorting
@@ -199,16 +199,13 @@ help
   # Str(value,data) - create Str object - for sorting
   # Sys() - create Sys object
   # Term - get terminal config object
-  # currentTimeMillis() - return current time as millis
   # error(cond?, msg) - if cond expr is true or no condition, throw soft error exception
-  # eval(str) - execute program line and return result
-  # getExprCount() - get number of expressions resolved
-  # getType(any) - get value or object type
+  # Sys.eval(str) - execute program line and return result
+  # Sys.getType(any) - get value or object type
   # print([str[,...]]?) - print string
   # println([str[,...]]?) - print string
   # readLine(prompt?) - read single input line
   # readLines(endmarker) - read input until label on separate line, returns list of strings
-  # syn(value) - get value as syntesized string, or exception if it can not be synthesized
 ```
 
 When calling a function without any parameter values, the ()'s are optional. Running the "Dir" function without

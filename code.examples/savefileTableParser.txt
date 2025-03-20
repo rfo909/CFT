@@ -77,7 +77,7 @@ $Codes:  if(P(1)=="-",List,P(1).split(","))
             if (line.startsWith("$")) {
                 name=line.after("$").before(":").trim
                 expr=line.after(":").trim
-                rules.set(name,eval("Lambda{P(1) " + expr + "}"))
+                rules.set(name,Sys.eval("Lambda{P(1) " + expr + "}"))
                 continue
             }
             out(line)

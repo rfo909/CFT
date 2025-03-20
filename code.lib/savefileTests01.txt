@@ -295,7 +295,7 @@ t10.concat("-")=="1-2-3"
 # Inner loop report output problem
 # --
     t13 => result
-    getType(result)=="List" && result.concat=="xi1xi2xi3"
+    Sys.getType(result)=="List" && result.concat=="xi1xi2xi3"
 /Test13_Inner_report_output_propagation
 
 
@@ -321,7 +321,7 @@ t10.concat("-")=="1-2-3"
 # Inner loop report output problem
 # --
     t13b => result
-    getType(result)=="List" && result.concat=="xi1xi2xi3"
+    Sys.getType(result)=="List" && result.concat=="xi1xi2xi3"
 /Test13b_Inner_out_output_propagation
 
 
@@ -643,7 +643,7 @@ Dict.set("a",1).set("b",Lambda{P(1) as int=>x self.a+x})
     closure = t39_dict.get("b")
     
     # verify that variable "closure" is not result from auto-invoke
-    getType(closure)=="Callable"  
+    Sys.getType(closure)=="Callable"  
     
 /Test40_non_auto_invoke_closure_when_dict_get
 
@@ -651,7 +651,7 @@ Dict.set("a",1).set("b",Lambda{P(1) as int=>x self.a+x})
 
 # Verifying type of Lambda
 # --
-    getType(Lambda{})=="Callable"
+    Sys.getType(Lambda{})=="Callable"
 /Test41_verify_lambda_is_callable
   
 
@@ -810,9 +810,9 @@ Dict.set("a",1).set("b",Lambda{P(1) as int=>x self.a+x})
 
 # Test 49 - verify that both lambdas and closure have type "Callable"
 # --
-    getType(Lambda{})=="Callable"
+    Sys.getType(Lambda{})=="Callable"
     &&
-    getType(Dict.set("a",Lambda{}).get("a"))=="Callable"
+    Sys.getType(Dict.set("a",Lambda{}).get("a"))=="Callable"
 /Test49_verify_lambda_and_closure_of_type_Callable
 
 
@@ -851,11 +851,11 @@ Dict.set("a",1).set("b",Lambda{P(1) as int=>x self.a+x})
     LPresent=Lambda{
         P(1)=>val
         # Inner lambda to check if synthesizable via predicate call
-        LSyn=Lambda{syn(P(1))}
+        LSyn=Lambda{Sys.syn(P(1))}
         
         if (LSyn.?call(val)) {
             # value is synthesizable
-            syn(val)
+            Sys.syn(val)
         } else {
             val
         }
@@ -1084,7 +1084,7 @@ ERROR: [<script> Tests01:861.8] Invalid value Dict [] + 1
 
 # Test 58 - version 4.0.14 bugfix: Dict value dotted lookup must not hide Dict functions
 # --
-    d=Dict d.set("keys", 3) getType(d.keys)=="List"
+    d=Dict d.set("keys", 3) Sys.getType(d.keys)=="List"
 /Test58_dotted_lookup_value_vs_functions
 
 
@@ -1095,7 +1095,7 @@ ERROR: [<script> Tests01:861.8] Invalid value Dict [] + 1
     Sys.functions.sort->f
         assert(f.startsWith("Test"))
         count=count+1
-        result=tryCatch(eval(f))
+        result=tryCatch(Sys.eval(f))
         if (result.ok) {
             if (result.result) {
                 println("ok  ", f)

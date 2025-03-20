@@ -61,7 +61,7 @@
     
     rimCenterRadius=500
     
-    println(getType(world))
+    println(Sys.getType(world))
 
 
     Circle(ref, world.LineBrush.setColor(Std.Color(200,100,0)), axleHoleRadius)

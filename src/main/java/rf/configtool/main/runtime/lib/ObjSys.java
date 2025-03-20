@@ -25,6 +25,8 @@ import java.util.Map;
 
 import rf.configtool.lexer.SourceLocation;
 import rf.configtool.main.FunctionBody;
+import rf.configtool.main.FunctionState;
+import rf.configtool.main.CFTCallStackFrame;
 import rf.configtool.main.Ctx;
 import rf.configtool.main.PropsFile;
 import rf.configtool.main.Stdio;
@@ -41,6 +43,39 @@ import rf.configtool.main.runtime.ValueList;
 import rf.configtool.main.runtime.ValueNull;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.ValueString;
+import rf.configtool.main.runtime.lib.ObjSys.FunctionCPUCores;
+import rf.configtool.main.runtime.lib.ObjSys.FunctionClone;
+import rf.configtool.main.runtime.lib.ObjSys.FunctionCurrFunction;
+import rf.configtool.main.runtime.lib.ObjSys.FunctionEnvironment;
+import rf.configtool.main.runtime.lib.ObjSys.FunctionEval;
+import rf.configtool.main.runtime.lib.ObjSys.FunctionFileSeparator;
+import rf.configtool.main.runtime.lib.ObjSys.FunctionFunctions;
+import rf.configtool.main.runtime.lib.ObjSys.FunctionGetCallHistory;
+import rf.configtool.main.runtime.lib.ObjSys.FunctionGetExprCount;
+import rf.configtool.main.runtime.lib.ObjSys.FunctionGetType;
+import rf.configtool.main.runtime.lib.ObjSys.FunctionHomeDir;
+import rf.configtool.main.runtime.lib.ObjSys.FunctionIsWindows;
+import rf.configtool.main.runtime.lib.ObjSys.FunctionJobs;
+import rf.configtool.main.runtime.lib.ObjSys.FunctionLastResult;
+import rf.configtool.main.runtime.lib.ObjSys.FunctionLastResultList;
+import rf.configtool.main.runtime.lib.ObjSys.FunctionLint;
+import rf.configtool.main.runtime.lib.ObjSys.FunctionLog;
+import rf.configtool.main.runtime.lib.ObjSys.FunctionNewline;
+import rf.configtool.main.runtime.lib.ObjSys.FunctionOutCount;
+import rf.configtool.main.runtime.lib.ObjSys.FunctionReadPassword;
+import rf.configtool.main.runtime.lib.ObjSys.FunctionRest;
+import rf.configtool.main.runtime.lib.ObjSys.FunctionRow;
+import rf.configtool.main.runtime.lib.ObjSys.FunctionSavefile;
+import rf.configtool.main.runtime.lib.ObjSys.FunctionScriptId;
+import rf.configtool.main.runtime.lib.ObjSys.FunctionScriptName;
+import rf.configtool.main.runtime.lib.ObjSys.FunctionSecureSessionID;
+import rf.configtool.main.runtime.lib.ObjSys.FunctionSessionUUID;
+import rf.configtool.main.runtime.lib.ObjSys.FunctionSleep;
+import rf.configtool.main.runtime.lib.ObjSys.FunctionStdin;
+import rf.configtool.main.runtime.lib.ObjSys.FunctionSyn;
+import rf.configtool.main.runtime.lib.ObjSys.FunctionUchar;
+import rf.configtool.main.runtime.lib.ObjSys.FunctionUptime;
+import rf.configtool.main.runtime.lib.ObjSys.FunctionVersion;
 
 public class ObjSys extends Obj {
 
@@ -76,6 +111,13 @@ public class ObjSys extends Obj {
                 new FunctionRest(),
                 new FunctionNewline(),
                 new FunctionRow(),
+                new FunctionGetExprCount(),
+                new FunctionSyn(),
+                new FunctionEval(),
+                new FunctionGetType(),
+                new FunctionCurrentTimeMillis(),
+
+
         };
         setFunctions(arr);
         
@@ -710,6 +752,88 @@ public class ObjSys extends Obj {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             return new ValueObj(new ObjRow(params));
+        }
+    }
+
+    class FunctionGetExprCount extends Function {
+        public String getName() {
+            return "getExprCount";
+        }
+        public String getShortDesc() {
+            return "getExprCount() - get number of expressions resolved";
+        }
+        @Override
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueInt(ctx.getObjGlobal().getExprCount());
+        }
+    }
+    
+    class FunctionSyn extends Function {
+        public String getName() {
+            return "syn";
+        }
+        public String getShortDesc() {
+            return "syn(value) - get value as syntesized string, or exception if it can not be synthesized";
+        }
+        @Override
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected one parameter of any synthesizable type");
+            String s=params.get(0).synthesize();
+            return new ValueString(s);
+        }
+    }
+
+    class FunctionEval extends Function {
+        public String getName() {
+            return "eval";
+        }
+        public String getShortDesc() {
+            return "eval(str) - execute program line and return result";
+        }
+        @Override
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected parameter str");
+            String str=getString("str",params,0);
+            SourceLocation loc=new SourceLocation("<eval>", 0, 0);
+            CFTCallStackFrame caller=new CFTCallStackFrame("eval");
+            return ctx.getObjGlobal().getRuntime().processFunction(ctx.getStdio(), caller, new FunctionBody(str, loc),new FunctionState(null,null));
+        }
+    }
+
+
+   class FunctionGetType extends Function {
+        public String getName() {
+            return "getType";
+        }
+        public String getShortDesc() {
+            return "getType(any) - get value or object type";
+        }
+        @Override
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected parameter any");
+            Value v=params.get(0);
+            String s;
+            if (v instanceof ValueObj) {
+                s=((ValueObj) v).getVal().getTypeName();
+            } else {
+                s=v.getTypeName();
+            }
+            return new ValueString(s);
+        }
+    }
+   
+
+    class FunctionCurrentTimeMillis extends Function {
+        public String getName() {
+            return "currentTimeMillis";
+        }
+        public String getShortDesc() {
+            return "currentTimeMillis() - return current time as millis";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueInt(System.currentTimeMillis());
         }
     }
 

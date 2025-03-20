@@ -157,7 +157,7 @@ c
 # --
     Sys.functions.sort->f
         assert(f.startsWith("Test"))
-        tryCatch(eval(f)) => result
+        tryCatch(Sys.eval(f)) => result
         if (result.ok) {
             if (result.result) {
                 println("ok  ", f)

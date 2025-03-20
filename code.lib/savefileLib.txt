@@ -44,10 +44,10 @@ choice.
 	P(1) => x
 	file=null
 	
-	if (getType(x)=="Row") {
+	if (Sys.getType(x)=="Row") {
 	    	Inner {
 	    		x.asList->element
-	    			if (getType(element)=="File") {
+	    			if (Sys.getType(element)=="File") {
 	    				file=element
 	    				break
 	    			}
@@ -115,12 +115,12 @@ choice.
 # Get file from lastResult if possible, otherwise error
 # --
     x = Sys.lastResult
-    if (getType(x)=="List") {
-        files=Inner{x->e assert(getType(e)=="File") out(e)}
+    if (Sys.getType(x)=="List") {
+        files=Inner{x->e assert(Sys.getType(e)=="File") out(e)}
         error(files.empty,"No files in lastResult")
         Lib:MenuSelect(files,Lambda{P(1).name},null,true) => x
     }
-    error(getType(x)!="File","Not a file")
+    error(Sys.getType(x)!="File","Not a file")
     x
 /GetLastResultFile
 
@@ -281,8 +281,8 @@ choice.
 # --
     P(1,"tmp") => name
     if (Sys.isWindows,
-        Dir("c:\temp\"+name+currentTimeMillis),
-        Dir("/tmp/"+name+currentTimeMillis)
+        Dir("c:\temp\"+name+Sys.currentTimeMillis),
+        Dir("/tmp/"+name+Sys.currentTimeMillis)
     ) =>d
     if (!d.exists) {
         d.create
@@ -440,10 +440,10 @@ choice.
     P(3,false) => acceptErrors
     P(4,false) => showDebug
 
-    if (getType(cmd) != "List") {
+    if (Sys.getType(cmd) != "List") {
         cmd=List(cmd) # wrap as list
     }
-    if (getType(stdinLines) != "List") {
+    if (Sys.getType(stdinLines) != "List") {
         stdinLines=List(stdinLines) # wrap as List
     }
 
@@ -717,7 +717,7 @@ run(null,null,null,true)
 
 	# Conver to rows of strings for printable columns only
 	data -> row
-		error(getType(row) != "Row", "Expected list of Row objects")
+		error(Sys.getType(row) != "Row", "Expected list of Row objects")
 		out(row.asStringsRow)
 	| _=> stringRows
 
@@ -781,7 +781,7 @@ run(null,null,null,true)
     P(4,false) => emptyMeansNone
     P(5,LLabel) =>LValue          ## separate (narrower) value for matching input?
 
-    error(getType(options) != "List", "Options must be a list (" + title + ")")
+    error(Sys.getType(options) != "List", "Options must be a list (" + title + ")")
     error(options.length==0,"No elements in options list (" + title + ")")
     
     if(options.length==1) {
@@ -817,7 +817,7 @@ run(null,null,null,true)
     P(2,Lambda {P(1)}) =>LLabel   ## display value
     P(3,"Enter number to select value") =>title 
 
-    error(getType(options) != "List", "Options must be a list (" + title + ")")
+    error(Sys.getType(options) != "List", "Options must be a list (" + title + ")")
     error(options.length==0,"No elements in options list (" + title + ")")
     
     if(options.length==1) {
@@ -923,7 +923,7 @@ run(null,null,null,true)
 # --
     P(1,List) =>lines
     P(2) =>value
-    if(getType(value)=="Dict") Inner{
+    if(Sys.getType(value)=="Dict") Inner{
         # match keys and result corresponding values as list
         dict=value
         result=List
@@ -1102,7 +1102,7 @@ run(null,null,null,true)
 	P(2,Input("Search term").get) => st
 
 	if (list==null) list=Sys.lastResultList
-	error(getType(list) != "List", "Expected list of files as last result")
+	error(Sys.getType(list) != "List", "Expected list of files as last result")
 	
 	grep=Grep(st)
 	list->file
@@ -1157,11 +1157,11 @@ run(null,null,null,true)
     data=Sys.lastResult
     files=List
 
-    if (getType(data)=="File" || getType(data)=="Dir") {
+    if (Sys.getType(data)=="File" || Sys.getType(data)=="Dir") {
          files.add(data)
-    } else if (getType(data)=="List") Inner {
+    } else if (Sys.getType(data)=="List") Inner {
         data->x
-            if (getType(x)=="File" || getType(x)=="Dir") {
+            if (Sys.getType(x)=="File" || Sys.getType(x)=="Dir") {
                 files.add(x)
             }
     }
@@ -1193,8 +1193,8 @@ run(null,null,null,true)
     fCount=dCount=0
     Lib:Header("Clipboard content")
     Inner{files->f 
-        if (getType(f)=="File") fCount=fCount+1 else dCount=dCount+1
-        println(f.path.last(50) + if(getType(f)=="Dir", Sys.fileSeparator, ""))
+        if (Sys.getType(f)=="File") fCount=fCount+1 else dCount=dCount+1
+        println(f.path.last(50) + if(Sys.getType(f)=="Dir", Sys.fileSeparator, ""))
     }
     println
     confirmed = Lib:Confirm("Confirm delete")
@@ -1210,7 +1210,7 @@ run(null,null,null,true)
 # Show content of clipboard
 # --
     Db2:Get("Lib","ClipboardFiles",List)->f
-        println(f.path.last(50) + if(getType(f)=="Dir", Sys.fileSeparator, "") + " " + if (!f.exists,"DOES-NOT-EXIST",""))
+        println(f.path.last(50) + if(Sys.getType(f)=="Dir", Sys.fileSeparator, "") + " " + if (!f.exists,"DOES-NOT-EXIST",""))
 /ClipboardList
 
 
@@ -1243,10 +1243,10 @@ run(null,null,null,true)
     P(1) as List => filesAndDirs
 
     filesAndDirs->x
-        if (getType(x)=="File") {
+        if (Sys.getType(x)=="File") {
             ok = x.delete
             report(ok,"File",x.path)
-        } else if (getType(x)=="Dir") {
+        } else if (Sys.getType(x)=="Dir") {
             ok = x.delete
             if (ok) {
                 report(ok,"Dir",x.path)
@@ -1292,14 +1292,14 @@ run(null,null,null,true)
 
     Sys.lastResult => value
 
-    if (getType(value) != "Dir" && getType(value) != "File") {
-        Lib:ShowWarn("Sys.lastResult not Dir or File, type=" + getType(value))
+    if (Sys.getType(value) != "Dir" && Sys.getType(value) != "File") {
+        Lib:ShowWarn("Sys.lastResult not Dir or File, type=" + Sys.getType(value))
         error(readLine("Press y to continue, otherwise abort").toLower != "y","Aborting")
     }
 
-#    if (getType(value) == "Dir" || getType(value) == "File") {
+#    if (Sys.getType(value) == "Dir" || Sys.getType(value) == "File") {
 #        Lib:Header("Protection?")
-#        println("Should the " + getType(value) + " reference be protected against destructive operations?")
+#        println("Should the " + Sys.getType(value) + " reference be protected against destructive operations?")
 #        readLine("Enter non-blank string to protect it").trim => reason
 #        if (reason != "") {
 #            value.protect(reason)
@@ -1307,7 +1307,7 @@ run(null,null,null,true)
 #    }
 
     Db2:Get(Sys.scriptId,"symbolDict",Dict) => data
-    time=currentTimeMillis
+    time=Sys.currentTimeMillis
     data.set(symbol,SymDict(value,time))
     Db2:Set(Sys.scriptId,"symbolDict",data)
     
@@ -1326,7 +1326,7 @@ run(null,null,null,true)
     Db2:Get(Sys.scriptId,"symbolDict",Dict) => data
     if (data.has(symbol)) {
         data.get(symbol) => entryDict
-        entryDict.time=currentTimeMillis
+        entryDict.time=Sys.currentTimeMillis
         Db2:Set(Sys.scriptId,"symbols",data)
         entryDict.value
     } else {
@@ -1341,8 +1341,8 @@ run(null,null,null,true)
         data.get(key)=>entryDict
         value=entryDict.value
         s=""+value
-        if (getType(value)=="File" || getType(value)=="Dir") s=value.path
-        report(key,getType(value),s)
+        if (Sys.getType(value)=="File" || Sys.getType(value)=="Dir") s=value.path
+        report(key,Sys.getType(value),s)
 //SymbolsReport   
 
 
@@ -1389,7 +1389,7 @@ run(null,null,null,true)
 	
 	# Check if row contains File object
 	file=null
-	Inner{row.asList->x if(getType(x)=="File") {file=x break}}
+	Inner{row.asList->x if(Sys.getType(x)=="File") {file=x break}}
 	if (file != null) {
 		InteractiveGrepFile(str,file)
 	} else {
@@ -1416,11 +1416,11 @@ run(null,null,null,true)
 	P(2) as List => list
 	
 	list->element
-		if (getType(element)=="File") {
+		if (Sys.getType(element)=="File") {
 			InteractiveGrepFile(str,element)->x out(x)
-		} else if (getType(element)=="Row") {
+		} else if (Sys.getType(element)=="Row") {
 			InteractiveGrepRow(str,element)->x out(x)
-		} else if(getType(element)=="List") {
+		} else if(Sys.getType(element)=="List") {
 			InteractiveGrepList(str,element)->x out(x)
 		} else {
 			if ((""+element).contains(str)) out(element)
@@ -1437,11 +1437,11 @@ run(null,null,null,true)
 	grep=Grep(str)
 
 	data -> element
-		if (getType(element)=="File") {
+		if (Sys.getType(element)=="File") {
 			InteractiveGrepFile(str,element)->x out(x)
-		} else if (getType(element)=="Row") {
+		} else if (Sys.getType(element)=="Row") {
 			InteractiveGrepRow(str,element)->x out(x)
-		} else if (getType(element)=="List") {
+		} else if (Sys.getType(element)=="List") {
 			InteractiveGrepList(str,element)->x out(x)
 		} else {
 			InteractiveGrepList(List(element))->x out(x)
@@ -1551,12 +1551,12 @@ run(null,null,null,true)
 # path strings
 # --
     val=Sys.lastResult
-    if (!getType(val)=="List") val=List(val)
+    if (!Sys.getType(val)=="List") val=List(val)
     val->x
-        if (getType(x)=="File" || getType(x)=="Dir") out(x.path) 
-		else if (getType(x)=="Row") {
+        if (Sys.getType(x)=="File" || Sys.getType(x)=="Dir") out(x.path) 
+		else if (Sys.getType(x)=="Row") {
 			f=x.get(0)
-			if (getType(f)=="File" || getType(f)=="Dir") out(f.path)
+			if (Sys.getType(f)=="File" || Sys.getType(f)=="Dir") out(f.path)
 		}
 /Paths
 
@@ -1569,7 +1569,7 @@ run(null,null,null,true)
     dict=Dict
     data->x
         val=x
-        if (getType(val)=="File") val=val.name
+        if (Sys.getType(val)=="File") val=val.name
         dict.set(val,dict.get(val,0)+1)
     |
     # duplicates returned as simple list, no count included

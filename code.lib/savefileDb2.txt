@@ -58,9 +58,9 @@ knowing the UUID.
 
     error(collection.startsWith("."), "Invalid collection, '.' indicates system collections")
     
-    x = Lambda {syn(P(1))}
-    error (x.?call(value)==false, "Value " + getType(value) + " not synthesizable")
-    value = syn(value)
+    x = Lambda {Sys.syn(P(1))}
+    error (x.?call(value)==false, "Value " + Sys.getType(value) + " not synthesizable")
+    value = Sys.syn(value)
     
     Std.Db.Db2.set(collection,key,value)
 
@@ -79,7 +79,7 @@ knowing the UUID.
         # the eval only fails if collection is corrupted, but we
         # want to continue operating still
         tryCatch(
-            eval(value)
+            Sys.eval(value)
         )=>x
         if (!x.ok) {
             Db2:Set(collection,key,defaultValue)        
@@ -141,7 +141,7 @@ knowing the UUID.
         count=0 
         Inner {
             keys->key 
-                report(count, key, syn(Get(collection,key))) 
+                report(count, key, Sys.syn(Get(collection,key))) 
                 count=count+1
         }->line println(line)
     }
@@ -153,16 +153,16 @@ knowing the UUID.
     } else if (command==".a") {
         readLine("Key") => key
         readLine("Value as code, which means quotes around Strings etc") => newValCode
-        actualValue=eval(newValCode)
+        actualValue=Sys.eval(newValCode)
         Set(collection,key,actualValue)
     } else {
         # Edit row by number
         key=keys.nth(command.parseInt)
-        value=syn(Get(collection,key))
+        value=Sys.syn(Get(collection,key))
         println("Current value:")
         println(value)
         readLine("New value") => newValCode
-        modifiedValue=eval(newValCode)
+        modifiedValue=Sys.eval(newValCode)
         Set(collection,key,modifiedValue)
     }
 

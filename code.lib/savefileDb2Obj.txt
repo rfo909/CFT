@@ -67,7 +67,7 @@ Objects can be sorted on date of last update, and located using a lambda.
 # --
     P(1)=>collection
     P(2)=>value
-    error(value != null && getType(value) != "Dict","Value must be Dict")
+    error(value != null && Sys.getType(value) != "Dict","Value must be Dict")
     
     uuid=Std.Db.UUID
     data=Dict.set("id",uuid).set("date",Date).set("value",value)
@@ -99,7 +99,7 @@ Objects can be sorted on date of last update, and located using a lambda.
     P(1)=>collection
     P(2)=>uuid
     P(3)=>value
-    error(value != null && getType(value) != "Dict","Value must be Dict")
+    error(value != null && Sys.getType(value) != "Dict","Value must be Dict")
 
     data=Dict.set("id",uuid).set("date",Date).set("value",value)
     Db2:Set(FixCN(collection),uuid,data)
@@ -202,10 +202,10 @@ Objects can be sorted on date of last update, and located using a lambda.
     Collections -> collection
         Lfilter = Lambda {
             P(1) => obj 
-            getType(obj.value) != "Dict"
+            Sys.getType(obj.value) != "Dict"
         }
         FindObjects(FixCN(collection), Lfilter) -> obj
-            println("Deleting value " + getType(obj.value))
+            println("Deleting value " + Sys.getType(obj.value))
             DeleteObject(collection, obj.id)
 /DeleteNonObjects
 

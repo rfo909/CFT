@@ -269,7 +269,7 @@ through the REST API.
 
     # should be a list of index objects
 
-    error(getType(data) != "List", "Expected list, got " + getType(data))
+    error(Sys.getType(data) != "List", "Expected list, got " + Sys.getType(data))
 
     # Iterate over indexes and count matches
     matches=0

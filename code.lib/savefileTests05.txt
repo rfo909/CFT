@@ -163,7 +163,7 @@
     Sys.functions.sort->f
         assert(f.startsWith("Test"))
         count=count+1
-        result=eval(f)
+        result=Sys.eval(f)
         allOk=allOk && result
         report(f,result)
     | -> line

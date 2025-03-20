@@ -147,7 +147,7 @@ dir.protect.file("f").binaryCreate(Std.Util.randomBinary("sdf"))
         assert(f.startsWith("Test"))
         
         Cleanup
-        tryCatch(eval(f)) => result
+        tryCatch(Sys.eval(f)) => result
         
         completed=false
         

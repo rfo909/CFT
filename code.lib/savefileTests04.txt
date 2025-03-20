@@ -34,7 +34,7 @@ Time consuming tests related to Db2 and locking
 # --
     Sys.functions.sort->f
         assert(f.startsWith("Test"))
-        report(f,eval(f))
+        report(f,Sys.eval(f))
 /RunAll
 
 

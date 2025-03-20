@@ -319,7 +319,7 @@ P(1) =>target
 	error(commands==null, "Invalid commands: can not be null")
 
 	# ensure commands is a list
-	if(getType(commands) != "List") {
+	if(Sys.getType(commands) != "List") {
 		commands = List(commands)
 	}
 	
@@ -385,7 +385,7 @@ P(1) =>target
 	P(4,false) => showDebug
 
 	# ensure commands is a list
-	if(getType(commands)!="List") {
+	if(Sys.getType(commands)!="List") {
 		List(commands) =>commands
 	}
 
@@ -430,7 +430,7 @@ P(1) =>target
     P(4, false) => acceptErrors
     P(5, false) => showDebug
 
-    if (getType(localFile)=="File") {
+    if (Sys.getType(localFile)=="File") {
         localFile=localFile.path
     }
     
@@ -449,7 +449,7 @@ copy
     P(4, false) => acceptErrors
     P(5, false) => showDebug
     
-    if (getType(localFile)=="File") {
+    if (Sys.getType(localFile)=="File") {
         localFile=localFile.path
     }
     cmd=List("scp", target+":"+remoteName, localFile)

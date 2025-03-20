@@ -31,11 +31,11 @@
     LPresent=Lambda{
         P(1)=>val
         # Inner lambda to check if synthesizable via predicate call
-        LSyn=Lambda{syn(P(1))}
+        LSyn=Lambda{Sys.syn(P(1))}
         
         if (LSyn.?call(val)) {
             # value is synthesizable
-            syn(val)
+            Sys.syn(val)
         } else {
             val
         }
@@ -66,7 +66,7 @@
 
     Lib:Header("Run command")
 
-    if (getType(cmd)!="List") {
+    if (Sys.getType(cmd)!="List") {
         cmd=cmd.split
     }
 
@@ -202,9 +202,9 @@
 
     if (file==null) {
         file=Sys.lastResult
-        error(getType(file) != "File", "No file")
+        error(Sys.getType(file) != "File", "No file")
     }
-    error(getType(file) != "File", "Expected File, got " + getType(file))
+    error(Sys.getType(file) != "File", "Expected File, got " + Sys.getType(file))
     Lib:Header(file.name)
     file.read->line
         s=line.trim
@@ -305,9 +305,9 @@
     }
 
     if (plusMinus=="+") {
-        Date(currentTimeMillis+millis.i)
+        Date(Sys.currentTimeMillis+millis.i)
     } else {
-        Date(currentTimeMillis-millis.i)
+        Date(Sys.currentTimeMillis-millis.i)
     }
 /SelectRelativeDateTime
 
@@ -578,7 +578,7 @@ Dict.set("list",List)
     cmd.add(url)
     if (jsonData != null) {
         cmd.add("-d")
-        str=if (getType(jsonData)=="String", jsonData, JSON:Export(jsonData))
+        str=if (Sys.getType(jsonData)=="String", jsonData, JSON:Export(jsonData))
         if (Sys.isWindows) str=str.replace('"','\"')
         cmd.add(str)
     }
@@ -650,7 +650,7 @@ Dict.set("list",List)
 
     if (jsonData != null) {
         cmd.add("-d")
-        str=if (getType(jsonData)=="String", jsonData, JSON:Export(jsonData))
+        str=if (Sys.getType(jsonData)=="String", jsonData, JSON:Export(jsonData))
         if (Sys.isWindows) str=str.replace('"','\"')
         cmd.add(str)
     }
@@ -953,7 +953,7 @@ Dict.set("list",List)
 	# --
 	self.add = Lambda{
 		P(1,"") => text
-		if (getType(text)=="List") {
+		if (Sys.getType(text)=="List") {
 			text->line self.list.add(line)
 		} else {
 			self.list.add(text)
@@ -983,7 +983,7 @@ Dict.set("list",List)
 		P(1,"") as String => indent
 		
 		self.list->x
-			if (getType(x)=="String") {
+			if (Sys.getType(x)=="String") {
 				out(indent + x)
 			} else {
 				x as &OutContext

@@ -54,7 +54,7 @@ Uses internal functions
 #   "0xff23"   (hex)
 # --
     P(1)=>value
-    if (getType(value) == "String") {
+    if (Sys.getType(value) == "String") {
         if (value.startsWith("b")) {
             value.sub(1).parseInt(2)
         } else if (value.startsWith("0x")) {

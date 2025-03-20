@@ -80,7 +80,7 @@ public class ObjGlobal extends Obj {
     public boolean isDebugMode() {
         return root.isDebugMode();
     }
-    
+
     public ObjGlobal(Root root, String currentDir, Stdio stdio) throws Exception {
         this.root=root;
         this.currentDir=currentDir;
@@ -103,14 +103,11 @@ public class ObjGlobal extends Obj {
         add(new FunctionInt());
         add(new FunctionFloat());
         add(new FunctionStr());
-        add(new FunctionCurrentTime());
         add(new FunctionDict());
         add(new FunctionDate());
         add(new FunctionRegex());
         add(new FunctionGlob());
         add(new FunctionDataFile());
-        add(new FunctionEval());
-        add(new FunctionSyn());
         add(new FunctionReadLines());
         add(new FunctionReadLine());
         add(new FunctionTerm());
@@ -118,8 +115,6 @@ public class ObjGlobal extends Obj {
         add(new FunctionPrint());
         add(new FunctionFileLine());
         add(new FunctionError());
-        add(new FunctionGetType());
-        add(new FunctionGetExprCount());
         add(new FunctionBinary());
         add(new FunctionAValue());
 
@@ -470,20 +465,7 @@ public class ObjGlobal extends Obj {
             }
         }
     }
-    
-    class FunctionCurrentTime extends Function {
-        public String getName() {
-            return "currentTimeMillis";
-        }
-        public String getShortDesc() {
-            return "currentTimeMillis() - return current time as millis";
-        }
-        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 0) throw new Exception("Expected no parameters");
-            return new ValueInt(System.currentTimeMillis());
-        }
-    }
-    
+        
     class FunctionDict extends Function {
         public String getName() {
             return "Dict";
@@ -592,40 +574,8 @@ public class ObjGlobal extends Obj {
         }
     }
     
-    class FunctionEval extends Function {
-        public String getName() {
-            return "eval";
-        }
-        public String getShortDesc() {
-            return "eval(str) - execute program line and return result";
-        }
-        @Override
-        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 1) throw new Exception("Expected parameter str");
-            String str=getString("str",params,0);
-            SourceLocation loc=new SourceLocation("<eval>", 0, 0);
-            CFTCallStackFrame caller=new CFTCallStackFrame("eval");
-            return runtime.processFunction(ctx.getStdio(), caller, new FunctionBody(str, loc),new FunctionState(null,null));
-        }
-    }
 
-    class FunctionSyn extends Function {
-        public String getName() {
-            return "syn";
-        }
-        public String getShortDesc() {
-            return "syn(value) - get value as syntesized string, or exception if it can not be synthesized";
-        }
-        @Override
-        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 1) throw new Exception("Expected one parameter of any synthesizable type");
-            String s=params.get(0).synthesize();
-            return new ValueString(s);
-        }
-    }
-
-
-    class FunctionReadLines extends Function {
+     class FunctionReadLines extends Function {
         public String getName() {
             return "readLines";
         }
@@ -814,47 +764,7 @@ public class ObjGlobal extends Obj {
             //return new ValueObj(new ObjSys());
         }
     } 
-
-   
-    class FunctionGetType extends Function {
-        public String getName() {
-            return "getType";
-        }
-        public String getShortDesc() {
-            return "getType(any) - get value or object type";
-        }
-        @Override
-        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 1) throw new Exception("Expected parameter any");
-            Value v=params.get(0);
-            String s;
-            if (v instanceof ValueObj) {
-                s=((ValueObj) v).getVal().getTypeName();
-            } else {
-                s=v.getTypeName();
-            }
-            return new ValueString(s);
-        }
-    }
-    
-
-
-
-    
-    class FunctionGetExprCount extends Function {
-        public String getName() {
-            return "getExprCount";
-        }
-        public String getShortDesc() {
-            return "getExprCount() - get number of expressions resolved";
-        }
-        @Override
-        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 0) throw new Exception("Expected no parameters");
-            return new ValueInt(exprCount);
-        }
-    }
-    
+ 
 
 
     class FunctionAValue extends Function {

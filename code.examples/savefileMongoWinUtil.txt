@@ -33,15 +33,15 @@ P(6,"127.0.0.1:27017") => connectionString
 
     temp = Dir("\\"+host+"\c$\temp")
 
-    if (getType(jsCode) != "List") {
+    if (Sys.getType(jsCode) != "List") {
         jsCode=List(jsCode)
     }
-    mark = "--------" + currentTimeMillis+"-CFT-mark-----------"
+    mark = "--------" + Sys.currentTimeMillis+"-CFT-mark-----------"
 
     jsCode=List('print("' + mark + '")') + jsCode
 
     
-    js1 = temp.file("mongoshell"+currentTimeMillis+".js")
+    js1 = temp.file("mongoshell"+Sys.currentTimeMillis+".js")
     js1.create(jsCode)
     
     if (verbose) {

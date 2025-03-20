@@ -64,7 +64,7 @@ This can also be done by entering TAB + q + Enter in job input
         #println("Jobs:onLoad cleaning up Db2 old content")
         addDebug("Purging Db2 collection for Jobs script: " + Sys.scriptId)
         Db2:DeleteCollection(Sys.scriptId)
-        Db2:Set(sysKey,"lastPurge", currentTimeMillis)
+        Db2:Set(sysKey,"lastPurge", Sys.currentTimeMillis)
         ## NOT releasing the lock
         ###Std.Db.releaseLock(sysKey)
     }
@@ -150,7 +150,7 @@ This can also be done by entering TAB + q + Enter in job input
     P(3) as int => lastBlockOnInputTime
     P(4,3000) as int => timeoutDelayMs
     
-    startTime=currentTimeMillis
+    startTime=Sys.currentTimeMillis
     Inner {
         loop
             Sys.sleep(10)
@@ -170,7 +170,7 @@ This can also be done by entering TAB + q + Enter in job input
                 break
               }
               
-            break(currentTimeMillis - startTime > timeoutDelayMs)
+            break(Sys.currentTimeMillis - startTime > timeoutDelayMs)
     }
 //WaitForInput       
 

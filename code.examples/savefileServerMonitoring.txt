@@ -8,8 +8,8 @@
 	P(1) as String => filename
 	file=DataDir.file(filename)
 	if (file.exists) {
-		eval(file.read.first) => dict
-		error(getType(dict) != "Dict", "Invalid data in data file " + filename)
+		Sys.eval(file.read.first) => dict
+		error(Sys.getType(dict) != "Dict", "Invalid data in data file " + filename)
 		dict
 	} else {
 		Dict
@@ -21,7 +21,7 @@
 # --
 	P(1) as String => filename
 	P(2) as Dict => data
-	DataDir.file(filename).create(syn(data))
+	DataDir.file(filename).create(Sys.syn(data))
 //WriteDictFile
 	
 

@@ -120,7 +120,7 @@ runs in the background.
 
         files=ImageDir.allFiles("*.jpg")
         count=files.length
-        whichOne=currentTimeMillis % count
+        whichOne=Sys.currentTimeMillis % count
         imgFile=files.nth(whichOne)
         desc=GetDesc(imgFile)
 

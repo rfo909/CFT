@@ -226,7 +226,7 @@ nicely formatted JSON.
         readLines(".") => json
     }
     
-    start=currentTimeMillis
+    start=Sys.currentTimeMillis
 
     RootNode => root
     Std.Text.Lexer => lexer
@@ -259,7 +259,7 @@ nicely formatted JSON.
 
     indent2=indent #+"  "
 
-    t=getType(value)
+    t=Sys.getType(value)
 
     if (t=="Dict") {
         PPObj(value,indent2,LOut,showDictTypes)
@@ -293,7 +293,7 @@ nicely formatted JSON.
     comma=false
     object.keys->key
         value=object.get(key)
-        reject(getType(value)=="Callable")  # when listing out XML structures for debug
+        reject(Sys.getType(value)=="Callable")  # when listing out XML structures for debug
         if (comma) LOut.call(","+NEWLINE)
         LOut.call(indent2+'"' + key.replace('"','\"') + '": ')
         PPValue(value,indent2,LOut,showDictTypes)
@@ -331,13 +331,13 @@ nicely formatted JSON.
     P(2,false)=>print
     P(3,false)=>showDictTypes
 
-    Lib:Header("JSONValue=" + getType(JSONValue))
+    Lib:Header("JSONValue=" + Sys.getType(JSONValue))
 
     if (JSONValue==null) {
         Lib:Header("Paste JSON, terminate with '.' on separate line")
         readLines(".") => JSONValue
     }
-    if (getType(JSONValue)=="String" || getType(JSONValue)=="List" && getType(JSONValue.first)=="String") {  # string or list of string
+    if (Sys.getType(JSONValue)=="String" || Sys.getType(JSONValue)=="List" && Sys.getType(JSONValue.first)=="String") {  # string or list of string
         println("Parsing string")
         JSONValue=JSON:Parse(JSONValue)
     }

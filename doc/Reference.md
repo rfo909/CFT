@@ -1,9 +1,10 @@
 
 # CFT Reference
 
-Last updated: 2025-03-10 RFO
 
-v4.4.2
+Last updated: 2025-03-20 RFO
+
+v4.4.3
 
 
 # ---- Using CFT as a shell
@@ -2165,15 +2166,15 @@ from the outside. Marking functions as local is only about default visibility wi
 
 ## Get type of value
 
-The global function getType() takes one parameter, and returns
+The function Sys.getType() takes one parameter, and returns
 the type name of that value, as a string
 
 ```
-getType(3)
+Sys.getType(3)
 <String>
 int
 
-getType(Dict)
+Sys.getType(Dict)
 <String>
 Dict
 ```
@@ -2183,14 +2184,14 @@ Dict
 ## Type checking with "as"
 
 
-The getType() has frequently been combined with error() to do type checking of parameters.
+The Sys.getType() has frequently been combined with error() to do type checking of parameters.
 
 ```
 P(1)=>x
-error(getType(x) != "String","Invalid value")
+error(Sys.getType(x) != "String","Invalid value")
 ```
 
-The problem, is that it is easy to mistype, like getType("x") which of course always is "String".
+The problem, is that it is easy to mistype, like Sys.getType("x") which of course always is "String".
 
 
 The "as" syntax simplifies this to the following:
@@ -2336,7 +2337,7 @@ The *synthesis* functionality comes in the following variants.
 1. The :syn command syntesizes code from the last result
 2. The :NN  (where NN is an integer) syntesizes the indicated element of the last result list. If
 last result is not a list, you get an error.
-3. The global function syn() 
+3. The global function Sys.syn() 
 
 
 ## Example using :syn
@@ -2405,18 +2406,18 @@ When used *inside* a command, it instead just means "use the N'th value from the
 
 
 
-## Using syn()
+## Using Sys.syn()
 
 Synthesis is frequently employed in code, where we want to "serialize" data. To de-serialize 
-those data we use the global eval() function.
+those data we use the global Sys.eval() function.
 
 Example:
 
 ```
-syn(Dir.files)  # returns long string
+Sys.syn(Dir.files)  # returns long string
 /s
 
-eval(s)    # returns the Dir.files list
+Sys.eval(s)    # returns the Dir.files list
 ```
 
 ### The underscore function?
@@ -2425,15 +2426,15 @@ Note that the underscore function ("_") only refers to the top-of-the-stack valu
 previous interactive command. In other words:
 
 ```
-syn(Dir.files)
-eval(_)
+Sys.syn(Dir.files)
+Sys.eval(_)
 ERROR: Invalid expression value
 ```
 
 If used in the same command line, however, it will work as expected.
 
 ```
-syn(Dir.files) eval(_)
+Sys.syn(Dir.files) Sys.eval(_)
 ```
 
 :-)
@@ -2453,7 +2454,7 @@ The clone can also be done manually:
 
 ```
 a=List(1,2,3)
-b=eval(syn(a))
+b=Sys.eval(Sys.syn(a))
 ```
 
 

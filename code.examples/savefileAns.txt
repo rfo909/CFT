@@ -157,9 +157,9 @@
         
         #println("*   starting process for " + target)
         process = SpawnProcess(processData, {
-            start=currentTimeMillis
+            start=Sys.currentTimeMillis
             result = AptUpdate(target,distUpgrade)
-            end=currentTimeMillis
+            end=Sys.currentTimeMillis
             println("### time=" + (end-start) + " ms")
             # return value
             result

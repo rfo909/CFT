@@ -42,7 +42,7 @@ P(1) =>target P(2) =>cmd P(3) =>acceptErrors P(4) =>showDebug
 
 
 P(1,"temp") =>name
-    Dir("/tmp").file(name + "." + currentTimeMillis)
+    Dir("/tmp").file(name + "." + Sys.currentTimeMillis)
 /TmpFile
 
 

@@ -271,7 +271,7 @@ loop
 # Log data
 # --
     Sys.lastResult =>res
-    getType(res)=="List" =>isList
+    Sys.getType(res)=="List" =>isList
 
     if(isList) {
         readLine("Element number (Enter for all)") =>num
@@ -280,11 +280,11 @@ loop
 
 	# if list of Sys.Row, create nice formatting
 	isRow=false
-	if (getType(res)=="List") {
+	if (Sys.getType(res)=="List") {
 		isRow=true
 		Inner{
 			res->x 
-			if(getType(x)!="Row") {
+			if(Sys.getType(x)!="Row") {
 				isRow=false break 
 			} 
 		}
@@ -390,7 +390,7 @@ Lib:e (LogFile)
     P(1,false) => minuteBeep
     Db2:Get(Sys.scriptId,"ALoop_minutes",5) => minutes
 
-    start=curr=currentTimeMillis
+    start=curr=Sys.currentTimeMillis
     Date.setFormat("yyyy-MM-dd").fmt + "_log" => key
 
     LogFile.append("")
@@ -403,7 +403,7 @@ Lib:e (LogFile)
     println("[Interval: " + minutes + " minutes]")
     
     loop
-        if (currentTimeMillis - start >= minutes*60000) {
+        if (Sys.currentTimeMillis - start >= minutes*60000) {
             Alarm(1)
 
             readLine("Activity / blank to quit") => line
@@ -415,9 +415,9 @@ Lib:e (LogFile)
             }
             println("---")
 
-            start=curr=currentTimeMillis
+            start=curr=Sys.currentTimeMillis
         } else {
-            if (currentTimeMillis > curr+60000) {
+            if (Sys.currentTimeMillis > curr+60000) {
                 curr=curr+60000
                 println("" + if(minuteBeep,Sys.uchar(7),"") + ((curr-start)/60000) + "/" + minutes)
             }

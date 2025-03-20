@@ -6,6 +6,7 @@
   |  The "::"
   |  Colon commands and shortcuts
   |  Symbols 
+        Symbols are values
         Diffing files example
   |  :N, :: and %x initiate expressions
   |  Repeat last line
@@ -64,10 +65,13 @@
   |  When value name is valid identifier
 * ---- String escape char
   |  Escape codes
-* ---- Searching - Grep
+* ---- Searching 
   |  Global function Grep()
   |  As shell command
-        Search files from result list
+  |  The @S shortcut
+        The Row object
+       * Access Row content
+  |  Search files from result list
 * ---- Block expressions
   |  Local blocks
   |  Inner blocks
@@ -137,7 +141,7 @@
   |  Example using :syn
   |  Example using :NN
         Two different situations
-  |  Using syn()
+  |  Using Sys.syn()
         The underscore function?
   |  Clone any value
 * ---- Templating

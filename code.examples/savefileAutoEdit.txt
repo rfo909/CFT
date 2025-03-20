@@ -41,7 +41,7 @@
 # --
 	P(1)=>linesOrFile
 	
-	if (getType(linesOrFile)=="File") {
+	if (Sys.getType(linesOrFile)=="File") {
 		self.lines=linesOrFile.read(false)
 	} else {
 		self.lines=linesOrFile
@@ -564,7 +564,7 @@ import org.slf4j.LoggerFactory;
 		Lib:Header(lambda)
 		
 		lastResult=DissectLastResult
-		eval(lambda).call(lastResult) # may modify the result list
+		Sys.eval(lambda).call(lastResult) # may modify the result list
 		DissectShow(lastResult)
 		Lib:Confirm("ok?") => ok
 		if (ok) {

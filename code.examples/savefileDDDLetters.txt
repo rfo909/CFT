@@ -110,7 +110,7 @@
 # Run all frames
 # --
     processes=List
-    start=currentTimeMillis
+    start=Sys.currentTimeMillis
     
     NUM_THREADS=(Sys.cpuCores*1.4).i
     apm=Util:AutomaticProcessMonitor(NUM_THREADS)
@@ -132,7 +132,7 @@
         apm.LAdd(SpawnProcess(SymDict(rot), makeFrame(rot)))
     |
     apm.LWaitAll
-    end=currentTimeMillis
+    end=Sys.currentTimeMillis
     
     println("Processing time for images: " + (end-start) + " ms with " 
         + NUM_THREADS + " threads on " + Sys.cpuCores + " cpu cores")

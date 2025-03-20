@@ -33,11 +33,11 @@
 
     seconds=minutes*60
 
-    start=currentTimeMillis
+    start=Sys.currentTimeMillis
     i=0
     loop
         targetTime=start+(i*1000)
-        waitTime=targetTime-currentTimeMillis
+        waitTime=targetTime-Sys.currentTimeMillis
         if (waitTime > 0) Sys.sleep(waitTime)
 
         # present current value
@@ -134,7 +134,7 @@
 
 # Reset minutes counter
 # --
-    Db2:Set(Sys.scriptId,"mStart",currentTimeMillis)
+    Db2:Set(Sys.scriptId,"mStart",Sys.currentTimeMillis)
 /ResetMC
 
 
@@ -144,7 +144,7 @@
     if (Db2:Get(Sys.scriptId,"mStart",0)==0) {
         ResetMC
     }
-    ms=currentTimeMillis-Db2:Get(Sys.scriptId,"mStart")
+    ms=Sys.currentTimeMillis-Db2:Get(Sys.scriptId,"mStart")
     ms div 60000
 /GetMC
     

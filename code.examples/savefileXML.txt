@@ -229,7 +229,7 @@ exampleXML
         readLines(".") => xml
     }
     
-    start=currentTimeMillis
+    start=Sys.currentTimeMillis
 
     RootNode => root
     Std.Text.Lexer => lexer
@@ -527,7 +527,7 @@ exampleXML
 	}
 	if (attributes.length>0) attributes=" "+attributes
         
-	if (self.content.length==1 && getType(self.content.first)=="String") {
+	if (self.content.length==1 && Sys.getType(self.content.first)=="String") {
 		# inline presentation of single string content element
 		result.add(indent+"<"+self.tagName + attributes + ">" + self.content.first + "</" + self.tagName + ">")
 	} else {

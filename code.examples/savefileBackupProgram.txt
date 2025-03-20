@@ -125,7 +125,7 @@ as it contains generated content.
 
 # Create salt string
 # --
-    P(1,currentTimeMillis) => x
+    P(1,Sys.currentTimeMillis) => x
     Std.Util.randomBinary(""+x).hex.first(8)
 //Salt
 
@@ -273,7 +273,7 @@ as it contains generated content.
     metadataFile=File(backupFile.path+".meta")
     if (!metadataFile.exists && file.?getTimes) {
         data=file.getTimes  ### v3.2.4+
-        metadataFile.create(syn(data))
+        metadataFile.create(Sys.syn(data))
     }
 
 //processFile
@@ -343,7 +343,7 @@ as it contains generated content.
                 
                 metadataFile=File(backupFile.path+".meta")
                 if (metadataFile.exists) {
-                    data=eval(metadataFile.read.first)
+                    data=Sys.eval(metadataFile.read.first)
                     resultFile.setTimes(data.created, data.modified, data.accessed)
                 }
                 
