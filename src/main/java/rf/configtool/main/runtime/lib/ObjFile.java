@@ -129,6 +129,7 @@ public class ObjFile extends Obj implements IsSynthesizable {
                 new FunctionGetTimes(),
                 new FunctionSetTimes(),
                 new FunctionTouch(),
+                new FunctionFile(),
         };
         setFunctions(arr);
 
@@ -1469,7 +1470,23 @@ public class ObjFile extends Obj implements IsSynthesizable {
             return new ValueObj(self());
         }
     }
- 
+
+
+    class FunctionFile extends Function {
+        // To be compatible with  the .file function of the Row object after searching, so when
+        // result is list of files instead of list of Row, and we type :N.file, it works as expected
+        public String getName() {
+            return "file";
+        }
+        public String getShortDesc() {
+            return "file() - returns self";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            return new ValueObj(self());
+        }
+    }
+
+
 
     private String fmt (int i, int n) {
         String s=""+i;

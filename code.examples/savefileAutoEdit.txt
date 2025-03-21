@@ -528,10 +528,10 @@ import org.slf4j.LoggerFactory;
 /Dissect
 
 
-# Dissect last result
+# Dissect last result (list of dictionaries)
 # --
 	Db2:Get(Sys.scriptId,"DissectLast",List)
-//DissectLastResult
+/DissectLastResult
 
 
 

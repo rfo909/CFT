@@ -206,11 +206,27 @@
     }
     error(Sys.getType(file) != "File", "Expected File, got " + Sys.getType(file))
     Lib:Header(file.name)
-    file.read->line
+	Uncomment(file.read(false))
+/UncommentFile
+
+
+# Return list of lines after removing comments and empty lines.
+# --
+    P(1) as List? => lines
+    P(2,"#") => commentStart
+
+	if (lines==null) {
+		println("Paste lines, terminate with '.' on separate line")
+		readLines(".") => lines
+	}
+
+	lines->line
         s=line.trim
         reject(s.startsWith(commentStart) || s=="")
-        out(line)
-/UncommentFile
+        println(line)
+	|
+	true
+/Uncomment
 
 
 

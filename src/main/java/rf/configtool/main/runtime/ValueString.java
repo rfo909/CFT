@@ -198,7 +198,7 @@ public class ValueString extends Value implements IsSynthesizable {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             String delimiters;
             if (params.size()==0) {
-                delimiters=" ";
+                delimiters=" \t";
             } else if (params.size()==1) {
                 if (!isString(params,0)) {
                     throw new Exception("Expected parameter: delimeters");
