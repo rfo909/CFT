@@ -39,12 +39,15 @@ public class Token {
         
         if (type==TOK_STRING) {
             str=str.substring(1,str.length()-1);  // strip quotes
-        }
+        } else
         if (type==TOK_RAW_STRING) {
             if (str.startsWith("@ ") || str.startsWith("@@")) str=str.substring(2);
             else str=str.substring(1);
             while(str.endsWith("\r") || str.endsWith("\n")) str=str.substring(0,str.length()-1);
             type=TOK_STRING;
+        } else if (type==TOK_INT || type==TOK_FLOAT) {
+            // remove _ which is used for readability
+            str=str.replace("_","");
         }
         this.type=type;
         this.str=str;

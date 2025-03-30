@@ -113,7 +113,7 @@ public class Lexer {
         CharTable numInt=new CharTable();
         numInt.setTokenType(Token.TOK_INT);
         root.setMapping("0123456789", numInt);
-        numInt.setMapping("0123456789", numInt);
+        numInt.setMapping("0123456789_", numInt);
         
         // --- floats ---
         CharTable dot=new CharTable();
@@ -121,7 +121,7 @@ public class Lexer {
         numInt.setMapping(".", dot);
         dot.setMapping("0123456789", numFloat);
         numFloat.setTokenType(Token.TOK_FLOAT);
-        numFloat.setMapping("0123456789", numFloat);
+        numFloat.setMapping("0123456789_", numFloat);
         
         // --- strings ---
         String[] startEndStrings={"\"\"", "''"};

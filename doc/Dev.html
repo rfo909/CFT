@@ -14,6 +14,19 @@
 <h1>CFT Change log</h1>
 
 
+<h3>4.4.4 2025-03-30 extended number literals</h3>
+<p>
+Allow using underscore inside strings of digits, for readability:
+</p>
+<pre>
+1_000_000
+3.141_592_65
+</pre>
+
+<p>
+The underscores are stripped out source is parsed, so no changes internally.
+</p>
+
 <h3>4.4.3 2025-03-20 global name space</h3>
 <p>
 Moved syn(), eval(), getType() and currentTimeMillis() from ObjGlobal into ObjSys, to minimize pollution of global name space
