@@ -5,11 +5,11 @@ TODO
 
 - Make file manager program configurable (@fm)
 
-- Create support for additional configuration file that modifies and adds to the
-  default CFT.props, and which is not checked in, to avoid overwriting local 
-  settings on git pull
-
-
-
 - better terminal I/O handling, like not losing control over the UI if
-  running a command like "top" in the background ... 
+  running a command like "top" in the background ...
+  
+- make embeddable version that strips away the shell-like commands and 
+  interactive stuff, in order to embed string, int, file, float, dir, etc
+  functionality into other environments
+  
+  
