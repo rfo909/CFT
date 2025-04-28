@@ -30,16 +30,10 @@ import rf.configtool.main.runtime.*;
 
 import java.io.*;
 import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.http.HttpRequest;
-import java.nio.charset.StandardCharsets;
-import java.security.DigestInputStream;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.net.URL;
-import java.util.UUID;
 
 public class ObjRest extends Obj {
 
