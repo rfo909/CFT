@@ -1,7 +1,5 @@
 
-type Roar( test)
-
-# List with name "Roar", which makes it into a struct
+type FileLine(file,line,lineNumber)
 
 
 def Search (file, pattern) {
@@ -13,7 +11,7 @@ def Search (file, pattern) {
 		lineNumber=lineNumber+1
 		line=file.readLine
 		if (line.contains(pattern)) {
-			matches.add(FileMatch(lineNumber, line))
+			matches.add(FileLine(file,lineNumber, line))
 		}
 	}
 	return matches

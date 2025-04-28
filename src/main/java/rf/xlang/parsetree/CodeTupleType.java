@@ -26,9 +26,10 @@ public class CodeTupleType extends LexicalElement {
         ts.matchStr("type", "expected 'type' keyword");
         type=ts.matchIdentifier("Expected type name");
         ts.matchStr("(", "expected '(' defining tuple data");
+
         while (!ts.peekStr(")")) {
             content.add(ts.matchIdentifier("expected field identifier"));
-            if (!ts.peekStr(",")) break;
+            if (!ts.matchStr(",")) break;
         }
         ts.matchStr(")", "expected ')' or comma");
     }
