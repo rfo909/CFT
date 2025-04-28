@@ -94,10 +94,10 @@ public class TokenStream {
             int p=pos+i;
             if (p < tokens.size()) {
                 if (i > 0) sb.append(' ');
-                sb.append(tokens.get(p).getStr());
+                sb.append("[" + tokens.get(p).getStr() + "]");
             }
         }
-        return sb.toString();
+        return "NextTokens: " + sb.toString();
     }
 
     /**
@@ -105,7 +105,7 @@ public class TokenStream {
      */
     public Token matchAnyToken(String errMsg) throws ParseException {
         if (atEOF()) {
-            throw new ParseException("(at EOF) " + errMsg);
+            throw new ParseException("(at EOF) " + errMsg + " " + showNextTokens(2));
         }
         Token t=curr();
         pos++;
@@ -128,7 +128,7 @@ public class TokenStream {
             return t;
         }
         if (errMsg != null) {
-            throw new ParseException(t.getSourceLocation(), errMsg);
+            throw new ParseException(t.getSourceLocation(), errMsg + " " + showNextTokens(2));
         }
         return null;
     }
@@ -150,7 +150,7 @@ public class TokenStream {
             return t;
         }
         if (errMsg != null) {
-            throw new ParseException(t.getSourceLocation(),errMsg);
+            throw new ParseException(t.getSourceLocation(),errMsg + " " + showNextTokens(2));
         }
         return null;
     }

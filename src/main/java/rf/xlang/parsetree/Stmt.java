@@ -41,6 +41,10 @@ public abstract class Stmt extends LexicalElement {
         if (ts.peekStr("return")) {
             return new StmtReturn(ts);
         }
+        if (ts.peekStr("{")) {
+            return new StmtBlock(ts);
+        }
+
         
     
         // otherwise it must be an expression

@@ -9,8 +9,8 @@ import rf.configtool.main.Ctx;
 public class CodeFunction extends LexicalElement {
 
     private String functionName;
-    private List<ParameterDef> parameters;
-    private List<Stmt> statements;
+    private List<String> parameters = new ArrayList<>();
+    private List<Stmt> statements = new ArrayList<>();
 
     public CodeFunction (TokenStream ts) throws Exception {
         super(ts);
@@ -19,11 +19,17 @@ public class CodeFunction extends LexicalElement {
         functionName=ts.matchIdentifier("expected identifier");
 
         ts.matchStr("(", "expected '('");
-        boolean comma=false;
-        while (!ts.matchStr(")")) {
-            parameters.add(new ParameterDef(ts));
-            if (comma) ts.matchStr(",", "expected comma or ')'");
+        while (!ts.peekStr(")")) {
+            parameters.add(ts.matchIdentifier("expected parameter name"));
+            if (!ts.matchStr(",")) break;
         }
+        ts.matchStr(")", "expected closing ')' for parameter list");
+
+        ts.matchStr("{", "expected '{' starting function body");
+        while (!ts.peekStr("}")) {
+            statements.add(Stmt.parse(ts));
+        }
+        ts.matchStr("}", "expected '}' closing function body");
     }
     
     

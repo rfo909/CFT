@@ -1,0 +1,21 @@
+
+type Roar( test)
+
+# List with name "Roar", which makes it into a struct
+
+
+def Search (file, pattern) {
+	file.openForText
+	lineNumber=0
+	matches=List
+	loop {
+		if (file.atEOF) break
+		lineNumber=lineNumber+1
+		line=file.readLine
+		if (line.contains(pattern)) {
+			matches.add(FileMatch(lineNumber, line))
+		}
+	}
+	return matches
+}	
+			
