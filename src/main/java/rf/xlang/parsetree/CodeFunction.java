@@ -32,6 +32,9 @@ public class CodeFunction extends LexicalElement {
         ts.matchStr("}", "expected '}' closing function body");
     }
     
+    public String getFunctionName() {
+        return functionName;
+    }
     
     public void execute (Ctx ctx) throws Exception {
         /*for (Stmt stmt:statements) {

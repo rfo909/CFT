@@ -18,13 +18,13 @@ import rf.configtool.main.Ctx;
  */
 public class CodeTupleType extends LexicalElement {
     
-    private String type;
+    private String name;
     private List<String> content=new ArrayList<>();
     
     public CodeTupleType (TokenStream ts) throws Exception {
         super(ts);
         ts.matchStr("type", "expected 'type' keyword");
-        type=ts.matchIdentifier("Expected type name");
+        name=ts.matchIdentifier("Expected type name");
         ts.matchStr("(", "expected '(' defining tuple data");
 
         while (!ts.peekStr(")")) {
@@ -34,6 +34,9 @@ public class CodeTupleType extends LexicalElement {
         ts.matchStr(")", "expected ')' or comma");
     }
     
+    public String getName() {
+        return name;
+    }
     
     public void execute (Ctx ctx) throws Exception {
         /*for (Stmt stmt:statements) {

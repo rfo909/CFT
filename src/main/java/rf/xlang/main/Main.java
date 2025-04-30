@@ -4,33 +4,24 @@ import java.io.*;
 import rf.configtool.lexer.*;
 import rf.configtool.main.ScriptSourceLine;
 
-import rf.xlang.parsetree.CodeFile;
+import rf.xlang.parsetree.*;
 
 public class Main {
 
     public static void main (String[] argsArray) throws Exception {
+        Parser parser=new Parser();
         for (String file:argsArray) {
-            processFile(file);
+            parser.addSourceFile(new File(file));
+        }
+        CodeFile topLevel = parser.parse();
+        for (CodeTupleType type : topLevel.getTypes()) {
+            System.out.println("type " + type.getName());
+        }
+        for (CodeFunction function : topLevel.getFunctions()) {
+            System.out.println("def " + function.getFunctionName());
         }
     }
 
-    private static void processFile (String filename) throws Exception {
-        Lexer lexer = new Lexer();
-        try (BufferedReader br=new BufferedReader(new FileReader(filename))) {
-            int lineNo=1;
-            for(;;) {
-                String line=br.readLine();
-                if (line==null) break;
-                line=line.trim();
-                SourceLocation loc = new SourceLocation(filename, lineNo, 0);
-                lexer.processLine(new ScriptSourceLine(loc, line));
-
-                lineNo++;
-            }
-        }
-        TokenStream ts = lexer.getTokenStream();
-        CodeFile file=new CodeFile(ts);
-    }
 
 
 }

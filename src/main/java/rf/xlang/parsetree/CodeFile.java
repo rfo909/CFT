@@ -24,6 +24,13 @@ public class CodeFile extends LexicalElement {
         }
     }
     
+    public List<CodeTupleType> getTypes() {
+        return types;
+    }
+    
+    public List<CodeFunction> getFunctions() {
+        return functions;
+    }
     
     public void execute (Ctx ctx) throws Exception {
         /*for (Stmt stmt:statements) {
