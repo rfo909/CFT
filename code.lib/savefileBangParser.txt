@@ -72,9 +72,10 @@ Command history
 	} else if (commandLine=="!") {
 		GetCommandHistory(dir)
 	} else if (commandLine.startsWith("!//")) {
-		Sys.stdin("BangParser:GlobalDirList")
+		Sys.stdin("BangParser:GlobalDirList(null," + Sys.syn(commandLine) + ")")
 	} else if (commandLine.startsWith("!/")) {
-		Sys.stdin("BangParser:GetDirHistory")
+		
+		Sys.stdin("BangParser:GetDirHistory(" + Sys.syn(commandLine) + ")")
 	} else {
 		RunHistoryCommand(dir,commandLine)
 	}
@@ -148,9 +149,15 @@ Command history
 
 
 # Get global list or recent directories visited
+# If "!/" is followed by words, these are matched against the directory list, and
+# if it matches one, we issue cd to that directory via Sys.stdin
+# 2025-05-08 RFO
 # --
 	P(1) as String? => addDir  # null to just get list
-	
+	P(2) as String? => commandLine # !// ... - using additional words to match against dir paths
+
+	words=commandLine.split.keep(1) # omit the !// part
+
 	list = Db2:Get(Sys.scriptId,"GD",List)
 
 	# remove expired data (and duplicates of addDir if defined)
@@ -179,7 +186,18 @@ Command history
 		list=newList
 	}
 	# return list of paths
-	list->data out(data.dir)
+	list->data 
+		path=data.dir
+		ok=true
+		Inner{words->w reject(path.toLower.contains(w.toLower)) ok=false}
+		if (ok) out(path)
+	| => list
+	if (list.length==1) {
+		Sys.stdin("cd " + Sys.syn(list.first))
+	} else {
+		list
+	}
+
 /GlobalDirList
 
 
@@ -240,11 +258,28 @@ Command history
  
 
 # Get directories history
+# If "!/" is followed by words, these are matched against the directory list, and
+# if it matches one, we issue cd to that directory via Sys.stdin
+# 2025-05-08 RFO
 # --
-   
+	P(1)=>commandLine  # !/ ... - use words in the ... part to match against directories
+
+	words=commandLine.split.keep(1) # skip the !/ part
+
 	DbGetCommandHistory.get("history",List)->dict
-        out(dict.currDir)
-    | _.unique.last(30)
+		out(dict.currDir)
+    | _.unique.last(30) -> path
+		ok=true
+		Inner{words->w reject(path.toLower.contains(w.toLower)) ok=false}
+		if (ok) out(path)
+	| => list
+
+	if (list.length==1) {
+		Sys.stdin("cd " + Sys.syn(list.first))
+		true
+	} else {
+		list
+	}
 //GetDirHistory
 
 
