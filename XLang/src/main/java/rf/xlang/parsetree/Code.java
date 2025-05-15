@@ -23,21 +23,12 @@ public class Code extends LexicalElement {
             }
         }
     }
-<<<<<<< HEAD:src/main/java/rf/xlang/parsetree/CodeFile.java
-    
-    public List<CodeTupleType> getTypes() {
-        return types;
-    }
-    
-    public List<CodeFunction> getFunctions() {
-=======
 
     public List<TupleType> getTupleTypes() {
         return types;
     }
 
     public List<CodeFunction> getCodeFunctions() {
->>>>>>> 8ad777f9e9ba47f24eb9122dfff78b42e4cf0d9e:XLang/src/main/java/rf/xlang/parsetree/Code.java
         return functions;
     }
     

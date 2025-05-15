@@ -46,7 +46,6 @@ public class ObjSys extends Obj {
                 new FunctionGetType(),
                 new FunctionCurrentTimeMillis(),
                 new FunctionUUID(),
-                new FunctionEnvironment(),
 
 
         };
