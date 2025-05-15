@@ -371,7 +371,7 @@ import org.slf4j.LoggerFactory;
 # Show special characters in lines of text
 # --
 	P(1) as List? => lines
-	P(2, true) => onlyShowLinesWithSpecials
+	P(2, false) => onlyShowLinesWithSpecials
 
 	if (lines==null) {
 		println("Paste lines, terminate with '.' on separate line")
@@ -502,6 +502,11 @@ import org.slf4j.LoggerFactory;
 		println("Paste lines, terminate with '.' on separate line")
 		readLines(".") => lines
 	}
+	lines = Inner{
+		lines->line out(line.replace("^t".unEsc," ").split.concat(" "))
+	}
+	
+
 
 	ShowSpecials(lines)
 
