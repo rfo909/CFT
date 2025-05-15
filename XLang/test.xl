@@ -1,0 +1,37 @@
+type FileMatch (fileName, lineNo, line)
+
+def Search (file, pattern) {
+	i=0
+	matches=List
+	for (line:file.read) {
+		if (line.contains(pattern)) {
+			matches.add(FileMatch(file.name, i, line))
+		}
+		i=i+1
+	}
+	return matches
+}
+
+def TextFiles (dir) {
+	result=List
+	for (f:dir.files) {
+		#if (f.name.endsWith(".txt") || f.name.endsWith(".xml")) 
+		result.add(f)
+	}
+	return result
+}
+
+type T (a,b)
+
+def main () {
+	x=T(3,4)
+	println("x",x.a,x.b)
+	
+	for (f : TextFiles(Dir("."))) println(f.name.left(20),f.length.str.right(6))
+	
+	
+	a=T("this is a","b")
+	return a.a
+	
+}
+	
