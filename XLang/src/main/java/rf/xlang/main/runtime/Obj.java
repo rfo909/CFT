@@ -1,8 +1,9 @@
 
 package rf.xlang.main.runtime;
 
+import rf.xlang.main.*;
 import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * Superclass of all object types, including Value hierarchy
@@ -132,6 +133,48 @@ public abstract class Obj {
     
     public abstract String getTypeName();
     public abstract boolean eq(Obj x);
-        
+
+    public void generateHelp(Ctx ctx) {
+        ObjGlobal objGlobal=ctx.getObjGlobal();
+        if (this instanceof ObjGlobal) {
+            objGlobal.addSystemMessage(Version.getVersion());
+            objGlobal.addSystemMessage("");
+        }
+
+
+        // populate functions map completely for help
+        if (functionArr != null) {
+            for (Function f:functionArr) functions.put(f.getName(), f);
+            functionArr=null;
+        }
+
+        List<String> fNames=new ArrayList<String>();
+        Iterator<String> names=functions.keySet().iterator();
+
+        while(names.hasNext()) {
+            String name=names.next();
+            fNames.add(name);
+        }
+        fNames.sort(new Comparator<String>() {
+            public int compare (String a, String b) {
+                return a.compareTo(b);
+            }
+        });
+
+
+        boolean foundSpecial=false;
+        for (String name:fNames) {
+            if (name.startsWith("_")) {
+                objGlobal.addSystemMessage(functions.get(name).getShortDesc());
+                foundSpecial=true;
+            }
+        }
+        if (foundSpecial) {
+            objGlobal.addSystemMessage("");
+        }
+        for (String name:fNames) {
+            if (!name.startsWith("_")) objGlobal.addSystemMessage(functions.get(name).getShortDesc());
+        }
+    }
     
 }

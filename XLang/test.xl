@@ -31,6 +31,8 @@ def main () {
 	
 	
 	a=T("this is a","b")
+
+	help(Sys)
 	return a.a
 	
 }

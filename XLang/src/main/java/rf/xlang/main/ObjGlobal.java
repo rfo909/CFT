@@ -31,7 +31,9 @@ public class ObjGlobal extends Obj {
         add(new FunctionDate());
         add(new FunctionRegex());
         add(new FunctionMath());
+        add(new FunctionSys());
         add(new FunctionPrintln());
+        add(new FunctionHelp());
 
     }
 
@@ -88,6 +90,12 @@ public class ObjGlobal extends Obj {
     public String getTypeName() {
         return "<GLOBAL>";
     }
+
+    private Obj self() {
+        return this;
+    }
+
+
 
     class FunctionList extends Function {
         public String getName() {
@@ -259,7 +267,6 @@ public class ObjGlobal extends Obj {
         }
     }
 
-
     class FunctionPrintln extends Function {
         public String getName() {
             return "println";
@@ -280,5 +287,27 @@ public class ObjGlobal extends Obj {
         }
     }
 
+    class FunctionHelp extends Function {
+        public String getName() {
+            return "help";
+        }
+        public String getShortDesc() {
+            return "help(value) - show help for value";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            Obj obj=null;
+
+            if (params.size() == 1) {
+                obj = params.get(0);
+                if (obj instanceof ValueObj) obj = ((ValueObj) obj).getVal();
+            } else if (params.size() != 0) {
+                throw new Exception("Expected optional single value");
+            }
+
+            if (obj==null) obj=self();
+            obj.generateHelp(ctx);
+            return new ValueBoolean(true);
+        }
+    }
 
 }

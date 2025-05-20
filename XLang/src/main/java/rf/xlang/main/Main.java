@@ -35,6 +35,9 @@ public class Main {
 
         System.out.println("Returned from script function 'main': " + returnValue.getValAsString());
 
+        List<String> lines = objGlobal.getSystemMessages();
+        for (String line : lines) System.out.println("# " + line);
+
     }
 
     private static void processFile (Lexer lexer, String filename) throws Exception {
