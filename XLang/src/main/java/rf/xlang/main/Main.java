@@ -5,14 +5,52 @@ import rf.xlang.lexer.*;
 import rf.xlang.parsetree.*;
 import rf.xlang.main.runtime.*;
 import java.util.*;
+import java.io.*;
 
 public class Main {
     
+    public static void interactive (Lexer lexer) throws Exception {
+        System.out.println("Enter lines of code inside main() - blank line to execute");
+        try (
+            BufferedReader stdin=new BufferedReader(new InputStreamReader(System.in));
+        ) {
+
+            List<String> inputLines=new ArrayList<>();
+            inputLines.add("def main () {");
+
+            for(;;) {
+                String line=stdin.readLine();
+                if (line.trim().length()==0) break;
+                inputLines.add(line);
+            }
+            inputLines.add("}");
+
+            int lineNo=0;
+            for (String s : inputLines) { 
+                processInputLine(lexer, s, lineNo);
+                lineNo++;
+            }
+        }
+    }
+    
+
     public static void main (String[] argsArray) throws Exception {
         Lexer lexer = new Lexer();
+        boolean isInteractive = false;
         for (String file:argsArray) {
-            processFile(lexer, file);
+            if (file.equals("-i")) {
+                isInteractive=true;
+            } else {
+                processFile(lexer, file);
+            }
         }
+        if (isInteractive) {
+            interactive(lexer);
+        } 
+        executeCode(lexer);
+    }
+    
+    private static void executeCode (Lexer lexer) throws Exception {
         TokenStream ts = lexer.getTokenStream();
         Code code=new Code(ts);
 
@@ -53,6 +91,13 @@ public class Main {
                 lineNo++;
             }
         }
+    }
+ 
+    
+    private static void processInputLine (Lexer lexer, String line, int lineNo) throws Exception {
+        line=line.trim();
+        SourceLocation loc = new SourceLocation("<input>", lineNo, 0);
+        lexer.processLine(new ScriptSourceLine(loc, line));
     }
  
     
