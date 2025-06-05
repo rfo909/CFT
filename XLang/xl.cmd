@@ -1,2 +1,2 @@
 
-java -cp target/xlang-jar-with-dependencies.jar rf.xlang.main.Main test.xl
+java -cp target/xlang-jar-with-dependencies.jar rf.xlang.main.Main -i test.xl

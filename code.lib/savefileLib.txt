@@ -1490,18 +1490,14 @@ run(null,null,null,true)
 /ListNewestFiles
 
 
-# List files newer than some limit, recursively
+# List all files sorted for change date, newest last
 # --
     P(1,Dir) => dir
-    P(2,Input("Number of hours").setCurrCond("24").get.parseInt) => hours
-    P(3,Input("Glob pattern").setCurrCond("*").get) => glob
-
-    limit=Date.sub(Date.Duration.hours(hours)).get
-    dir.allFiles(glob)->f
-        reject(f.lastModified < limit)
-        out(f)
-/ListNewFilesRecursively
-        
+	P(2,Input("Enter glob pattern").get) => glob
+	dir.allFiles(glob)->file
+		out(Int(file.lastModified, file)) 
+	| _.sort->x out(x.data)
+/ListAllNewestFiles
 
 
 # Encrypt single file
