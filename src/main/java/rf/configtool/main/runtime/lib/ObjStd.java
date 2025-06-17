@@ -52,6 +52,7 @@ public class ObjStd extends Obj {
         this.add(new FunctionDDD());
         this.add(new FunctionColor());
         this.add(new FunctionRaster());
+        this.add(new FunctionArray());
         
     }
     
@@ -289,6 +290,23 @@ public class ObjStd extends Obj {
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
             return new ValueObj(new ObjRaster());
+        }
+    }
+
+    class FunctionArray extends Function {
+        public String getName() {
+            return "Array";
+        }
+
+        public String getShortDesc() {
+            return "Array(list) - create Array object from list";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected list parameter");
+            Value value=params.get(0);
+            if (!(value instanceof ValueList)) throw new Exception("Expected list parameter");
+            return new ValueObj(new ObjArray((ValueList) value));
         }
     }
 
