@@ -113,14 +113,14 @@
 
 
 
-# Minutes since midnight
+# Minutes since midnight 
 # --
     P(1,Date)=>date
     date.timeSinceMidnight.asMinutes
 /MinutesSinceMidnight
 
 
-# Show minutes since midnight
+# Show minutes since midnight (forever)
 # --
     loop
         println(Curses:Clear)
@@ -150,7 +150,7 @@
     
 
 
-# Count minutes since last reset
+# Count minutes since last reset (forever)
 # --
     lastVal=-99
     loop
