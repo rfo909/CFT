@@ -21,14 +21,7 @@ import java.util.List;
 
 import rf.configtool.main.Ctx;
 import rf.configtool.main.SoftErrorException;
-import rf.configtool.main.runtime.ColList;
-import rf.configtool.main.runtime.Function;
-import rf.configtool.main.runtime.Obj;
-import rf.configtool.main.runtime.Value;
-import rf.configtool.main.runtime.ValueBoolean;
-import rf.configtool.main.runtime.ValueInt;
-import rf.configtool.main.runtime.ValueObj;
-import rf.configtool.main.runtime.ValueString;
+import rf.configtool.main.runtime.*;
 
 public class ObjLexerTokenStream extends Obj {
     
@@ -44,8 +37,10 @@ public class ObjLexerTokenStream extends Obj {
         this.add(new FunctionMatch());
         this.add(new FunctionPeekType());
         this.add(new FunctionNext());
+        this.add(new FunctionGetCurrentPos());
+        this.add(new FunctionSetCurrentPos());
     }
-    
+
     private ObjLexerToken curr() throws Exception {
         if (pos >= tokens.size()) throw new Exception("At EOF");
         return tokens.get(pos);
@@ -80,9 +75,9 @@ public class ObjLexerTokenStream extends Obj {
     private Obj theObj () {
         return this;
     }
-    
 
-    
+
+
     class FunctionSourceLocation extends Function {
         public String getName() {
             return "sourceLocation";
@@ -118,7 +113,7 @@ public class ObjLexerTokenStream extends Obj {
             return "peek";
         }
         public String getShortDesc() {
-            return "peek() - string represenation of next token";
+            return "peek() - get string representation of next token";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
@@ -184,7 +179,33 @@ public class ObjLexerTokenStream extends Obj {
         }
     }
 
-    
-    
-    
+
+
+    class FunctionGetCurrentPos extends Function {
+        public String getName() {
+            return "getCurrentPos";
+        }
+        public String getShortDesc() {
+            return "getCurrentPos() - get current position in token stream";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueInt(pos);
+        }
+    }
+
+    class FunctionSetCurrentPos extends Function {
+        public String getName() {
+            return "setCurrentPos";
+        }
+        public String getShortDesc() {
+            return "setCurrentPos() - set current position in token stream";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected single position parameter: int");
+            pos=(int) getInt("pos", params, 0);
+            return new ValueNull();
+        }
+    }
+
 }
