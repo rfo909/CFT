@@ -106,7 +106,7 @@ public class ValueString extends Value implements IsSynthesizable {
             }
         }
         if (useHex) {
-            return '"' + toHexString(val) + '"' + ".fromHexString";
+            return '"' + toHexString(val,"UTF-8") + '"' + ".fromHexString('UTF-8')";
         }
         
         // decide if using .esc / .unEsc
@@ -625,14 +625,14 @@ public class ValueString extends Value implements IsSynthesizable {
         return sb.toString();
     }
 
-    public static String toHexString (String s) throws Exception {
-        byte[] bytes=s.getBytes("UTF-8");
+    public static String toHexString (String s, String charset) throws Exception {
+        byte[] bytes=s.getBytes(charset);
         return Hex.toHex(bytes);
     }
     
-    public static String fromHexString (String s) throws Exception {
+    public static String fromHexString (String s, String charset) throws Exception {
         byte[] bytes=Hex.fromHex(s);
-        return new String(bytes,"UTF-8");
+        return new String(bytes,charset);
     }
     
 
@@ -677,10 +677,13 @@ public class ValueString extends Value implements IsSynthesizable {
             return "toHexString() - convert to hex format";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 0) {
-                throw new Exception("Expected no parameters");
+            String charset="UTF-8";
+            if (params.size() == 1) {
+                charset=getString("charset", params, 0);
+            } else if (params.size() != 0) {
+                throw new Exception("Expected optional charset parameter");
             }
-            return new ValueString(toHexString(val));
+            return new ValueString(toHexString(val,charset));
         }
     }
 
@@ -689,13 +692,16 @@ public class ValueString extends Value implements IsSynthesizable {
             return "fromHexString";
         }
         public String getShortDesc() {
-            return "fromHexString() - convert hex string back to original content";
+            return "fromHexString(charset?) - convert hex string back to original string";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 0) {
-                throw new Exception("Expected no parameters");
+            String charset="UTF-8";
+            if (params.size() == 1) {
+                charset=getString("charset", params, 0);
+            } else if (params.size() != 0) {
+                throw new Exception("Expected optional charset parameter");
             }
-            return new ValueString(fromHexString(val));
+            return new ValueString(fromHexString(val,charset));
         }
     }
 

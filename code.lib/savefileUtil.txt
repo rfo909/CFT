@@ -588,19 +588,62 @@ Dict.set("list",List)
 /UrlEscapeString
 
 
+# Unescape string on URLEscapeString format
+# --
+	P(1) as String => str
+	P(2,"UTF-8") as String => charset
+
+	hex=""
+	count=0
+	str.replace("+"," ").chars->c
+		if (c=="%") {
+			count=2
+			continue
+		}
+		if (count > 0) {
+			hex=hex+c
+			count=count-1
+			continue
+		}
+		if (hex != "") {
+			out(hex.fromHexString(charset))
+			hex=""
+		}
+		out(c)
+	|_.concat
+/UnescapeUrlString
+
 
 # URL encode set of values (dictionary)
 # --
 	P(1) as Dict => data
+	P(2, "UTF-8") as String => charset
 
 	sep=false
 	data.keys->key
 		if (sep) out("&")
 		value="" + data.get(key)
-		out(UrlEscapeString(key) + "=" + UrlEscapeString(value))
+		out(UrlEscapeString(key, charset) + "=" + UrlEscapeString(value, charset))
 		sep=true
 	| _.concat
 /UrlEncodeValues
+
+
+# Decode URL parameters separated by '&' into dictionary
+# --
+	P(1) as String => str
+	P(2, "UTF-8") as String => charset
+
+	dict=Dict
+
+	str.split("&")->part
+		part.split("=") => parts
+		name=parts.first
+		value=parts.last
+		dict.set(UnescapeUrlString(name, charset), UnescapeUrlString(value, charset))
+	|
+	dict
+/UrlDecodeValues
 
 
 # Invoke curl with detailed parameters
