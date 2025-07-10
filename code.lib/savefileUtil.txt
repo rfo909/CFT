@@ -570,21 +570,64 @@ Dict.set("list",List)
 /AutomaticProcessMonitor
 
 
+# URL-escape string
+# --
+	P(1) as String => str
+	P(2,"UTF-8") as String => charset
+
+	harmlessChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789"
+	str.chars->char
+		if (harmlessChars.contains(char)) {
+			out(char)
+		} else {
+			if (char==" ") out("+")
+			else out(char.getBytes(charset).hex("%"))
+		}
+	| _.concat
+
+/UrlEscapeString
+
+
+
+# URL encode set of values (dictionary)
+# --
+	P(1) as Dict => data
+
+	sep=false
+	data.keys->key
+		if (sep) out("&")
+		value="" + data.get(key)
+		out(UrlEscapeString(key) + "=" + UrlEscapeString(value))
+		sep=true
+	| _.concat
+/UrlEncodeValues
+
 
 # Invoke curl with detailed parameters
+# The bodyParams can be a JSON (single line) string on object or array format {...} or [...]
+# Or, if not recognized as a JSON string, it is assumed to be encoded on URL format a=b&c=d with proper
+# conversions, with "&" in data converted to "%26", "+" to "%2B" and space to "+" 
+# 
+# See UrlEscapeString and UrlEncodeValues
 # --
-    P(1,"http")=>protocol
-    P(2)=>HostPort
-    P(3,"GET") => method
-    P(4,error("path required"))=>path
-    P(5) => jsonData
+    P(1,"http") as String=>protocol
+    P(2) as String =>HostPort
+    P(3,"GET") as String => method
+    P(4,error("path required")) as String =>path
+    P(5) as String => bodyData 
     P(6,false)=>verbose
+
+	isJsonData = bodyData.startsWith("{") || bodyData.startsWith("[")
     
     
     cmd=List("curl","-X",method)
-    if (jsonData != null) {
+    if (isJsonData) {
         cmd.add("--header")
         cmd.add("Content-Type: application/json")
+    } else if (bodyData != null) {
+		# url encoded data
+        cmd.add("--header")
+        cmd.add("Content-Type: application/x-www-form-urlencoded")
     }
 
     if (!protocol.endsWith(":")) protocol=protocol+":"
@@ -592,11 +635,11 @@ Dict.set("list",List)
     
     url=protocol + HostPort + path
     cmd.add(url)
-    if (jsonData != null) {
+
+    if (bodyData != null) {
         cmd.add("-d")
-        str=if (Sys.getType(jsonData)=="String", jsonData, JSON:Export(jsonData))
-        if (Sys.isWindows) str=str.replace('"','\"')
-        cmd.add(str)
+        if (Sys.isWindows) bodyData=bodyData.replace('"','\"')
+        cmd.add(bodyData)
     }
     
     if (verbose) {

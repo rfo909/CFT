@@ -28,7 +28,7 @@ public class ClientMain implements Runnable {
     private final Socket sock;
     private final ObjWebServer objServer;
     private final int id;
-    
+
     private boolean completed=false;
     
     public synchronized boolean isCompleted() {
@@ -42,6 +42,14 @@ public class ClientMain implements Runnable {
         this.sock=sock;
         this.objServer=objServer;
         this.id=id;
+    }
+
+    private void log (String context, String s) {
+        objServer.appendToServerLog(context, s);
+    }
+
+    private void log (String context, String s, Exception ex) {
+        objServer.appendToServerLog(context, s, ex);
     }
 
     private void sendData (PrintWriter out, BufferedOutputStream outBinary, ResponseData resp) throws Exception {
@@ -107,7 +115,7 @@ public class ClientMain implements Runnable {
             
             List<String> lines=getRequestPlusHeaders(in);
             
-            objServer.appendToServerLog("ClientMain:"+id, lines);
+            objServer.appendToServerLog("HDR ClientMain id="+id, lines);
 
             StringTokenizer st = new StringTokenizer(lines.get(0)," ",false);
             String method = st.nextToken().toUpperCase(); // we get the HTTP method of the client
@@ -133,7 +141,6 @@ public class ClientMain implements Runnable {
                 String value=line.substring(colonPos+1).trim();
                 
                 headers.put(name, value);
-                //System.out.println("HDR> " + line);
             }
             
             
@@ -145,6 +152,13 @@ public class ClientMain implements Runnable {
                 int bytesRead=in.read(body);
                 if (bytesRead < 0) throw new Exception("Got eof from inBinary");
                 if (bytesRead != contentLength) throw new Exception("Should do repeat reads on content? (" + bytesRead + " of " + contentLength + ")");
+
+                try {
+                    String bodyString=new String(body,"UTF-8");
+                    log("body",bodyString);
+                } catch (Exception ex) {
+                    log("body", "could not convert to string", ex);
+                }
             }
             
             Map<String,String> bodyParams=null;

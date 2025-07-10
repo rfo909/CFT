@@ -101,11 +101,22 @@ public class ValueBinary extends Value {
             return "hex";
         }
         public String getShortDesc() {
-            return "hex() - Returns hex string";
+            return "hex(prefix?) - Returns hex string";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 0) throw new Exception("Expected no parameters");
-            return new ValueString(Hex.toHex(val));
+            String prefix=null;
+            if (params.size() == 1) prefix=getString("prefix", params, 0);
+            else if (params.size() != 0) throw new Exception("Expected optional single parameter 'prefix'");
+            String result = Hex.toHex(val);
+            if (prefix != null) {
+                StringBuffer sb=new StringBuffer();
+                for (int i=0; i<result.length(); i+=2) {
+                    sb.append(prefix);
+                    sb.append(result.substring(i, i+2));
+                }
+                result=sb.toString();
+            }
+            return new ValueString(result);
         }
 
     }

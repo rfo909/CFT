@@ -26,7 +26,7 @@ import java.util.List;
 public class ServerMainLoop implements Runnable {
     private int serverPort;
     private ObjWebServer objServer;
-    
+
     private boolean shuttingDown=false;
     private boolean completed=false;
     private List<ClientMain> pendingClients=new ArrayList<ClientMain>();

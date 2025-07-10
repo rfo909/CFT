@@ -48,7 +48,7 @@ public class ObjWebServer extends ObjPersistent {
     private int serverPort;
     private Ctx asyncCtx;
     private File serverLogFile;
-    
+
     private HashMap<String,ObjWebServerContext> bindings=new HashMap<String,ObjWebServerContext>();
     private ServerMainLoop serverMainLoop;
 
@@ -57,7 +57,7 @@ public class ObjWebServer extends ObjPersistent {
         this.asyncCtx=asyncCtx;
 
         this.add(new FunctionRootContext());
-        this.add(new FunctionSetServerLogFile());;
+        this.add(new FunctionSetServerLogFile());
     }
     
     @Override
@@ -67,7 +67,6 @@ public class ObjWebServer extends ObjPersistent {
    
     @Override
     public void initPersistentObj() {
-        
         this.serverMainLoop=new ServerMainLoop(serverPort, theServer());
         (new Thread(serverMainLoop)).start();
     }
@@ -173,7 +172,7 @@ public class ObjWebServer extends ObjPersistent {
             return new ValueObj(new ObjWebServerContext(theServer(), "/"));
         }
     }
-    
+
     class FunctionSetServerLogFile extends Function {
         public String getName() {
             return "setServerLogFile";
@@ -190,11 +189,7 @@ public class ObjWebServer extends ObjPersistent {
             return new ValueObj(theServer());
         }
     }
-    
 
-    
-    
-    
     /**
      * Callback method via ServerMainLoop -> ClientMain
      */
