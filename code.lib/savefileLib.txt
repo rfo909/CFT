@@ -356,15 +356,12 @@ choice.
 
     # recursion control parameters
     P(2,0)=>nestCount
-    P(3,List)=>output
 
-    indent="|  ".times(nestCount)
-    indent2="|  ".times(nestCount+1)
-    indent2="|  ".times(nestCount+1)
+    indent="| ".times(nestCount)
+    indent2="| ".times(nestCount+1)
 
-    output.add(indent + "+ " + dir.name)
+    println(indent + "+ " + dir.name + Sys.fileSeparator)
 
-    error(output.length > 1000,"Over 1000 lines of text generated. Aborting.")
 
     Inner{
         files=dir.files
@@ -372,7 +369,7 @@ choice.
         lineCount=0
         files->f 
             if (line.length+1+f.name.length >= Term.w) {
-                output.add(line)
+                println(line)
                 lineCount=lineCount+1
                 line=indent2
             }
@@ -380,19 +377,17 @@ choice.
             break(lineCount >= 5)
         |
         if (lineCount >= 5) {
-            output.add(indent2 + " ...")
+            println(indent2 + " ...")
         } else {
-            if (line.length > indent2.length) output.add(line)
+            if (line.length > indent2.length) println(line)
         }
-        output.add(indent2)
+        println(indent2)
     }
     Inner{
         dir.dirs->d 
             reject(d.name.startsWith("."))  # ignore system directories
-            ShowTree(d,nestCount+1,output)
+            ShowTree(d,nestCount+1)
     }
-
-    output
 /ShowTree
         
 
