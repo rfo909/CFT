@@ -1,0 +1,101 @@
+# Converting a project to Tomcat10
+# Run from project root directory
+# --
+	Lib:Header("Maven:CleanAll")
+	Maven:CleanAll(Dir)
+
+	Lib:Header("ProcessJavaFiles")
+	ProcessJavaFiles
+
+	Lib:Header("FixAxisPOMVersions")
+	FixAxisPOMVersions
+
+	Lib:Header("Maven:UseSNAPSHOT")
+	Maven:UseSNAPSHOT(Dir)
+
+	println
+	println
+	Lib:Header("Ready for Maven:DeployAll")
+
+/Convert
+
+
+# Replace patterns for java
+# --
+	Dict
+		.set("javax.servlet", "jakarta.servlet")
+//ReplacePatterns
+
+
+# Submodule paths
+# --
+	fs=Sys.fileSeparator
+	Git:Submodules(Dir)->path out(fs + path + fs)
+//Submodules
+
+
+# Java files not under submodules
+# --
+	list=Submodules
+
+	Dir.allFiles("*.java")->f
+		ok=true
+		Inner{
+			list->x
+				if (f.path.contains(x)) ok=false
+		}
+		#if (!ok) println("EXCLUDING",f.path)
+		assert(ok)
+		out(f)
+//JavaFiles
+
+
+# Search project java files (not under submodules)
+# --
+	P(1,readLine("Enter search term")) => st
+	JavaFiles->f
+		Grep(st).file(f)->line
+			report(f,line.file.name, line.lineNumber, line)
+/S
+
+
+# Process all java files not under submodules
+# --
+	JavaFiles->f
+		lines=f.read(false)
+		modifiedLines=Replace(lines)
+		if (modifiedLines != null) {
+			report(f.path,"CHANGED")
+			if(Lib:UsesCRLF(f)) {
+				f.setWriteCRLF
+			} else {
+				f.setWriteLF
+			}
+			f.create(modifiedLines)
+		} else {
+			report(f.path,"-")
+		}
+//ProcessJavaFiles
+
+
+# Replace patterns in list of lines
+# --
+	P(1) as List => lines
+	patterns=ReplacePatterns
+	changed=false
+
+	lines->line
+		patterns.keys->p
+			newline = line.replace(p,patterns.get(p))
+			if (newline != line) changed=true
+			out(newline)
+	| _ => newLines
+
+	if (changed, newLines, null)
+//Replace
+		
+		
+# Update POM files with Axis2 version
+# --
+	Maven:VersionEditAllPom(Dir,"org.apache.axis2","","2.0.0")
+//FixAxisPOMVersions

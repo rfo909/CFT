@@ -674,7 +674,7 @@ public class ValueString extends Value implements IsSynthesizable {
             return "toHexString";
         }
         public String getShortDesc() {
-            return "toHexString() - convert to hex format";
+            return "toHexString(charset?) - convert to hex format";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             String charset="UTF-8";

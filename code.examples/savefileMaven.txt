@@ -20,6 +20,23 @@
 /License
 
 
+# onLoad: show group id
+# --
+	Db2:Get(Sys.scriptId,"git-group-id",null) => gid
+	println
+	println("----------")
+	if (gid==null) {
+		println("Group Id not set")
+	} else {
+		println("Group Id set to: " + gid)
+	}
+	println("Run SetGroupId to update")
+	println("----------")
+	println
+/onLoad
+
+	
+
 # Set group id as used by git for this project
 # --
 	Db2:Set(Sys.scriptId,"git-group-id",readLine("Enter group id"))
@@ -389,6 +406,17 @@
 /DeployAll
 
 
+
+# Run "mvn clean" for all pom-files, to delete temporary files
+# --
+	P(1,Dir) as Dir => currentDir
+	Pom(currentDir,false)->f
+		println(f.path)
+		cmd=List("cmd","/c","mvn","-f",f.path,"clean")
+		Lib:run(cmd,null,true)
+/CleanAll
+
+
 # Show pom files which have no java source files under the pom directory 
 # --
 	P(1,Dir) as Dir => currentDir
@@ -487,3 +515,37 @@
 /VersionEditAllPom
 
 
+# Get version info for all non-submodule pom files
+# --
+	P(1,Dir) => currentDir
+
+ 	Pom(currentDir,false)->f
+		XML:Parse(f.read).first => node
+		groupId = node.subNode("groupId").getContent
+		artifactId = node.subNode("artifactId").getContent
+		version = node.subNode("version").getContent
+		out(SymDict(groupId, artifactId, version))
+//GetVersionInfo
+
+
+# Modify all non-submodule pom files to -SNAPSHOT, and internal references as well
+# --
+	P(1,Dir) => currentDir
+
+	GetVersionInfo -> dict
+		version=dict.version
+		if (!version.endsWith("-SNAPSHOT")) version=version+"-SNAPSHOT"
+		VersionEditAllPom(Dir, dict.groupId, dict.artifactId, version)
+/UseSNAPSHOT
+
+
+# Modify all non-submodule pom files by removing -SNAPSHOT
+# --
+	P(1,Dir) => currentDir
+
+	GetVersionInfo -> dict
+		version=dict.version.before("-SNAPSHOT")
+		if (version != dict.version) {
+			VersionEditAllPom(Dir, dict.groupId, dict.artifactId, version)
+		}
+/RemoveSNAPSHOT
