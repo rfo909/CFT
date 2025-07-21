@@ -515,6 +515,64 @@
 /VersionEditAllPom
 
 
+# Change dependency group id's
+# NOTE: depends on proper format, as it uses line logic, not XML parser, since XML parser PP is incomplete
+# 
+# (Developed for the Tomcat10 script)
+# --
+	P(1) as File => pomFile
+	P(2) as Dict => map   # key = from, value = to
+
+	buf=AutoEdit:EditBuffer(pomFileLines)
+
+	buf.match("<dependencies>")
+	loop
+		break(!buf.matchOptional("<dependeny>"))
+		buf.match("<groupId>",2)
+		line=buf.line
+
+		# check for improper format
+		if (line.count("<groupId>") != 1 || line.count("</groupId>") != 1) {
+			println(pomFile.path)
+			println("Invalid line: " + line)
+			println("Should contain exactly one <groupId> and one </groupId>")
+			error("aborting")
+		}
+
+		groupId = line.after("groupId>").before("</groupId").trim
+		if (map.has(groupId)) {
+			line=line.past("<groupId>") + map.get(groupId) + line.from("</groupId>")
+			buf.write(line)
+		}
+	|
+
+	if (buf.isModified) {
+		# Verify that it is still valid XML (crashes if not)
+		XML:Parse(buf.out)
+		# return modified file content
+		buf.out
+	} else {
+		null
+	}
+/ChangeDepGroupIds
+
+
+# Change dependency groupId for all pom files (not submodules)
+# (See Tomcat10 script)
+# --
+	P(1,Dir) => currentDir
+	P(2,Dict) => map
+
+	POM(currentDir,false)->f
+		lines=ChangeDepGroupIds(f, map)
+		if (lines != null) {
+			# updated version
+			println("CHANGED: " + f.path)
+			Lib:PreserveFileLineSeparator(f).create(lines)
+		}
+/ChangeDepGroupIdsAll
+
+
 # Get version info for all non-submodule pom files
 # --
 	P(1,Dir) => currentDir

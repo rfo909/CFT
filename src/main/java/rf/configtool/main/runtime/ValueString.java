@@ -42,6 +42,7 @@ public class ValueString extends Value implements IsSynthesizable {
                 new FunctionEndsWith(),
                 new FunctionStartsWith(),
                 new FunctionContains(),
+                new FunctionCount(),
                 new FunctionToUpper(),
                 new FunctionToLower(),
                 new FunctionParseInt(),
@@ -249,7 +250,7 @@ public class ValueString extends Value implements IsSynthesizable {
             }
         }
     }
-    
+
 
     class FunctionContains extends Function {
         public String getName() {
@@ -261,6 +262,31 @@ public class ValueString extends Value implements IsSynthesizable {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size()==1) {
                 return new ValueBoolean(val.contains(params.get(0).getValAsString()));
+            } else {
+                throw new Exception("Expected one string parameter");
+            }
+        }
+    }
+
+    class FunctionCount extends Function {
+        public String getName() {
+            return "count";
+        }
+        public String getShortDesc() {
+            return "count(str) - returns number of occurrences";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size()==1) {
+                String str=getString("str",params, 0);
+                String value=val;
+                int count=0;
+                for(;;) {
+                    int pos=value.indexOf(str);
+                    if (pos < 0) break;
+                    count++;
+                    value=value.substring(pos+str.length());
+                }
+                return new ValueInt(count);
             } else {
                 throw new Exception("Expected one string parameter");
             }

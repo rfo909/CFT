@@ -568,7 +568,8 @@ exampleXML
 # Pretty-print is implemented inside XMLNode
 # --
 	P(1) as &XMLNode => node
-	node.PP
+	node.PP -> line
+		out(line.replace("&lt;!--","<!--").replace("--&gt;","-->"))
 /PP
 	
 

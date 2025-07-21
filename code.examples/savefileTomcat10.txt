@@ -10,6 +10,9 @@
 	Lib:Header("FixAxisPOMVersions")
 	FixAxisPOMVersions
 
+	Lib:Header("FixPOMGroupIds")
+	FixPOMGroupIds
+
 	Lib:Header("Maven:UseSNAPSHOT")
 	Maven:UseSNAPSHOT(Dir)
 
@@ -23,8 +26,29 @@
 # Replace patterns for java
 # --
 	Dict
-		.set("javax.servlet", "jakarta.servlet")
-//ReplacePatterns
+		.set("javax.servlet.", "jakarta.servlet.")
+		.set("javax.el.", "jakarta.el.")
+		.set("javax.websocket.", "jakarta.websocket.")
+		.set("javax.annotation.", "jakarta.annotation.")
+
+		# less likely
+		.set("javax.persistence.", "jakarta.persistence.")
+		.set("javax.ejb.", "jakarta.ejb.")
+		.set("javax.jms.", "jakarta.jms.")
+		.set("javax.ws.rs.", "jakarta.ws.rs.")
+//ReplaceJavaCodePatterns
+
+
+# Replace POM dependency group ids
+# --
+	Dict
+		.set("javax.activation", "jakarta.activation")
+		.set("javax.mail", "jakarta.mail")
+		.set("javax.servlet", "jakarta.servet")
+		.set("javax.validation", "jakarta.validation")
+		.set("javax.xml", "jakarta.xml")
+		.set("javax.xml.ws", "jakarta.xml.ws")
+//ReplacePomGroupPatterns
 
 
 # Submodule paths
@@ -63,7 +87,7 @@
 # --
 	JavaFiles->f
 		lines=f.read(false)
-		modifiedLines=Replace(lines)
+		modifiedLines=JavaReplace(lines)
 		if (modifiedLines != null) {
 			report(f.path,"CHANGED")
 			if(Lib:UsesCRLF(f)) {
@@ -75,13 +99,16 @@
 		} else {
 			report(f.path,"-")
 		}
+	| _=>rows
+	Lib:ShowRows(rows)
+
 //ProcessJavaFiles
 
 
 # Replace patterns in list of lines
 # --
 	P(1) as List => lines
-	patterns=ReplacePatterns
+	patterns=ReplaceJavaCodePatterns
 	changed=false
 
 	lines->line
@@ -92,10 +119,135 @@
 	| _ => newLines
 
 	if (changed, newLines, null)
-//Replace
+//JavaReplace
 		
 		
+# FixPOMGroupIds
+# --
+	Maven:ChangeDepGroupIdsAll(Dir, ReplacePomGroupPatterns)
+/FixPOMGroupIds
+
+
 # Update POM files with Axis2 version
 # --
 	Maven:VersionEditAllPom(Dir,"org.apache.axis2","","2.0.0")
 //FixAxisPOMVersions
+
+
+
+
+# x
+# --
+	File("javax2.txt").read->line
+		assert(line.contains(".annotation."))
+		out(line.after(".annotation.").before(";").before("("))
+	| _.unique.print
+/t
+
+
+
+# ChatGPT on markdown format
+# --
+<<<< EOF
+# Migrating `javax.*` to `jakarta.*` for Tomcat 10 – Full Chat
+
+---
+
+**User:**  
+What are the packages in javax namespace that belong to the Java EE and are replaced by Jakarta?
+
+**Assistant:**  
+The `javax.*` packages were originally part of **Java EE (Enterprise Edition)**. When Java EE was transferred from Oracle to the Eclipse Foundation and renamed **Jakarta EE**, most of the packages previously under `javax.*` were **moved to `jakarta.*`**, starting with **Jakarta EE 9**.
+
+## Key `javax.*` packages from Java EE (now replaced by `jakarta.*`):
+
+| Old Java EE Package (`javax.*`)         | New Jakarta EE Package (`jakarta.*`)  | Description |
+|-----------------------------------------|----------------------------------------|-------------|
+| `javax.servlet`                         | `jakarta.servlet`                      | Servlet API for web applications. |
+| `javax.faces`                           | `jakarta.faces`                        | JavaServer Faces (JSF) for UI components. |
+| `javax.persistence`                     | `jakarta.persistence`                  | JPA – Java Persistence API (ORM). |
+| `javax.ejb`                             | `jakarta.ejb`                          | Enterprise JavaBeans for business logic. |
+| `javax.jms`                             | `jakarta.jms`                          | Java Message Service for messaging. |
+| `javax.json`                            | `jakarta.json`                         | JSON processing (JSON-P). |
+| `javax.json.bind`                       | `jakarta.json.bind`                    | JSON binding (JSON-B). |
+| `javax.ws.rs`                           | `jakarta.ws.rs`                        | JAX-RS – RESTful web services. |
+| `javax.jws`, `javax.xml.ws`             | `jakarta.jws`, `jakarta.xml.ws`       | JAX-WS – SOAP web services. |
+| `javax.mail`                            | `jakarta.mail`                         | Mail API (now Jakarta Mail). |
+| `javax.transaction`                     | `jakarta.transaction`                  | Transaction management API. |
+| `javax.annotation`                      | `jakarta.annotation`                   | Common annotations (e.g., `@Resource`, `@PostConstruct`). |
+| `javax.validation`                      | `jakarta.validation`                   | Bean Validation API. |
+| `javax.security.auth.message`          | `jakarta.security.auth.message`       | Jakarta Authentication. |
+| `javax.enterprise.context`, etc.        | `jakarta.enterprise.context`, etc.     | CDI – Contexts and Dependency Injection. |
+| `javax.batch`                           | `jakarta.batch`                        | Batch processing. |
+| `javax.interceptor`                     | `jakarta.interceptor`                  | Interceptors (AOP-like behavior). |
+| `javax.resource`                        | `jakarta.resource`                     | Java Connector Architecture (JCA). |
+
+> **Important Note:** Not *all* `javax.*` packages were moved. Packages that are part of **Java SE** (e.g., `javax.swing`, `javax.crypto`, `javax.net`) are **not renamed** and remain in `javax.*`.
+
+---
+
+**User:**  
+Which uses of javax packages need to be migrated to jakarta for using Tomcat 10? Is it only javax.servlet?
+
+**Assistant:**  
+No, it's not just `javax.servlet`. Tomcat 10 is aligned with Jakarta EE 9+, which means **all EE APIs must use `jakarta.*` instead of `javax.*`**.
+
+### You must migrate the following if used:
+
+| Technology         | Old Package           | New Package            |
+|--------------------|------------------------|------------------------|
+| Servlet API        | `javax.servlet`        | `jakarta.servlet`      |
+| JSP API            | `javax.servlet.jsp`    | `jakarta.servlet.jsp`  |
+| Expression Language| `javax.el`             | `jakarta.el`           |
+| WebSocket API      | `javax.websocket`      | `jakarta.websocket`    |
+| Annotations (EE)   | `javax.annotation`     | `jakarta.annotation`   |
+
+### You do **not** need to migrate:
+
+- JPA, EJB, JMS, JAX-RS, etc. — these are used in **full Jakarta EE servers**, not Tomcat.
+- Java SE packages like `javax.swing`, `javax.crypto`, etc.
+
+---
+
+**User:**  
+About `javax.annotation.*` — is it ok to replace this with `jakarta.annotation.*`?
+
+**Assistant:**  
+Yes — if you're deploying to Tomcat 10 or any Jakarta EE 9+ runtime, **you must replace** `javax.annotation.*` with `jakarta.annotation.*` **for EE annotations**.
+
+### ✅ Migrate these:
+
+| `javax.annotation`       | `jakarta.annotation`     | Purpose                  |
+|--------------------------|---------------------------|---------------------------|
+| `@PostConstruct`         | `@PostConstruct`          | Lifecycle init            |
+| `@PreDestroy`            | `@PreDestroy`             | Cleanup methods           |
+| `@Resource`              | `@Resource`               | Dependency injection      |
+| `@Generated` (from EE)   | `@Generated`              | Code generation metadata  |
+
+### ❌ Do **not** migrate:
+
+- `javax.annotation.processing.*` → Java SE annotation processors
+- `@Nonnull`, `@Nullable` (e.g. from JSR-305 or other libs) → Not part of Jakarta
+
+### ✅ In Tomcat 10:
+
+Tomcat 10 uses:
+
+- `jakarta.annotation.*` for EE features like `@WebServlet`, `@Resource`, `@PostConstruct`, etc.
+
+So:  
+**✔️ Replace EE-related annotations**  
+**❌ Leave Java SE-related annotations alone**
+
+### Example Maven dependency:
+
+```xml
+<dependency>
+  <groupId>jakarta.annotation</groupId>
+  <artifactId>jakarta.annotation-api</artifactId>
+  <version>2.1.1</version>
+</dependency>
+```
+>>>> EOF
+	.print
+/ChatGPT
