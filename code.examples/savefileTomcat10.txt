@@ -136,18 +136,8 @@
 
 
 
-# x
-# --
-	File("javax2.txt").read->line
-		assert(line.contains(".annotation."))
-		out(line.after(".annotation.").before(";").before("("))
-	| _.unique.print
-/t
-
-
-
 # ChatGPT on markdown format
-# --
+# ------------------------------------------------------------------------------------
 <<<< EOF
 # Migrating `javax.*` to `jakarta.*` for Tomcat 10 – Full Chat
 

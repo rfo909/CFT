@@ -269,7 +269,7 @@ choice.
     P(1,"tmp") =>name 
     P(2,"txt") => type
     Util:Counter("Lib.TmpFile.id") => x
-    s=name+Std.Db.UUID+"-"+x+"."+type
+    s=name+"-"+x+"."+type
     if (Sys.isWindows,
         Dir("c:\temp").file(s),
         Dir("/tmp").file(s) 

@@ -128,12 +128,14 @@
 # Show artifact and version from all pom files
 # --
 	P(1,Dir) => currentDir
-	P(2,true) => includeSubmodules
+	P(2,false) => includeSubmodules
 
 	Pom(currentDir,includeSubmodules)->f
 		XML:Parse(f.read).first => node
 		report(f, node.subNode("groupId").getContent + ":" + node.subNode("artifactId").getContent + ":" + node.subNode("version").getContent, f.path)
 /Versions
+
+
 	
 
 # Create dependency
