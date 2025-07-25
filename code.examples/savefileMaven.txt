@@ -20,43 +20,6 @@
 /License
 
 
-# onLoad: show group id
-# --
-	Db2:Get(Sys.scriptId,"git-group-id",null) => gid
-	println
-	println("----------")
-	if (gid==null) {
-		println("Group Id not set")
-	} else {
-		println("Group Id set to: " + gid)
-	}
-	println("Run SetGroupId to update")
-	println("----------")
-	println
-/onLoad
-
-	
-
-# Set group id as used by git for this project
-# --
-	Db2:Set(Sys.scriptId,"git-group-id",readLine("Enter group id"))
-/SetGroupId
-
-
-
-# Group id for git / ShowSummaryAll
-# Used in ShowSummaryAll, to tag dependencies with code "?" for references that 
-# should be local but are not built by a pom 
-# --
-	Db2:Get(Sys.scriptId,"git-group-id",null) => gid
-	if (gid==null) {
-		readLine("Enter group id for project") => gid
-		Db2:Set(Sys.scriptId,"git-group-id", gid)
-	}
-	gid
-/GetGroupId
-		
-
 
 # Path depth for file
 # --
@@ -302,7 +265,6 @@
 	resultFile.append("Dependencies:")
 	resultFile.append("  '*' means created by local pom file")
 	resultFile.append("  'E' means inconsistent versions between dependency and local pom file")
-	resultFile.append("  'X' means starts with GetGroupId (" + GetGroupId + ") but not matching local pom")
 	resultFile.append("")
 
 
@@ -318,7 +280,6 @@
 
 		summary.dep->dep
 			prefix="   "
-			if (dep.startsWith(GetGroupId)) prefix=" X "
 			extra=""
 			
 			Inner{
