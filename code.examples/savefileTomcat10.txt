@@ -116,13 +116,11 @@
 
 # Process all java files not under submodules
 # --
-	changes=0
 	JavaFiles->f
 		lines=f.read(false)
 		modifiedLines=JavaReplace(lines)
 		if (modifiedLines != null) {
 			report("CHANGED", TrimPath(f))
-			changes=changes + 1
 			if(Lib:UsesCRLF(f)) {
 				f.setWriteCRLF
 			} else {
@@ -134,8 +132,6 @@
 		}
 	| _=>rows
 	Lib:ShowRows(rows)
-	println
-	println("# Number of changes: " + changes)
 
 //ProcessJavaFiles
 

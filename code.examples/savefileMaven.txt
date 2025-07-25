@@ -531,9 +531,13 @@
 		lines=ChangeDepGroupIds(f, map)
 		if (lines != null) {
 			# updated version
-			println("CHANGED: " + f.path)
+			report("CHANGED", f.path)
 			Lib:PreserveFileLineSeparator(f).create(lines)
+		} else {
+			report("-", f.path)
 		}
+	| _=>rows
+	Lib:ShowRows(rows)
 /ChangeDepGroupIdsAll
 
 
