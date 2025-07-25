@@ -1244,6 +1244,13 @@ Dict.set("list",List)
 # Version parser class for numbers on format N.N.N....
 # --
 	P(1) as String => version
+	self.snapshot=""
+
+	if (version.contains("-")) {
+		self.snapshot=version.from("-")
+		version=version.before("-")
+	}
+
 	version.split(".")->part
 		out(part.parseInt)
 	| _ => list
@@ -1276,7 +1283,7 @@ Dict.set("list",List)
 			if (dot) out(".")
 			out (""+x)
 			dot=true
-		| _.concat
+		| _.concat + self.snapshot
 	}
 	
 	# Compare to other version. 
@@ -1321,7 +1328,17 @@ Dict.set("list",List)
 	
 # Version example code (and test)
 # --	
-	ver=Version("1.2.3")
+	ver=Version("1.2.3-SNAPSHOT")
+	ver.increase(0)
+	println(ver.toString)
+	ver.increase(1)
+	println(ver.toString)
+	ver.increase(2)
+	println(ver.toString)
+	ver.increase(3)
+	println(ver.toString)
+	
+	ver=Version("7.8.9.10")
 	ver.increase(0)
 	println(ver.toString)
 	ver.increase(1)

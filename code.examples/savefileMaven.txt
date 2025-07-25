@@ -500,19 +500,20 @@
 	P(2, Input("groupId").get) as String => groupId
 	P(3, readLine("artifactId (blank for all)")) as String? => artifactId
 	P(4, readLine("new version")) as String => version
+	P(5, true) => verbose
 
 	if (artifactId=="") artifactId=null
 
 	Maven:Pom(currentDir,false)->f
-		println(f.path)
+		if (verbose) println(f.path)
 		
 		lines=Maven:VersionEditPom(f, groupId, artifactId, version)
 		if (lines==null) {
-			println("   No change")
+			if (verbose) println("   No change")
 			assert(false)
 		}
 		
-		println("   UPDATED")
+		if (verbose) println("   UPDATED")
 		Lib:PreserveFileLineSeparator(f).create(lines)
 /VersionEditAllPom
 
@@ -525,7 +526,7 @@
 	P(1) as File => pomFile
 	P(2) as Dict => map   # key = from, value = to
 
-	buf=AutoEdit:EditBuffer(pomFileLines)
+	buf=AutoEdit:EditBuffer(pomFile.read(false))
 
 	buf.match("<dependencies>")
 	loop
@@ -556,7 +557,7 @@
 	} else {
 		null
 	}
-/ChangeDepGroupIds
+//ChangeDepGroupIds
 
 
 # Change dependency groupId for all pom files (not submodules)
@@ -565,7 +566,7 @@
 	P(1,Dir) => currentDir
 	P(2,Dict) => map
 
-	POM(currentDir,false)->f
+	Pom(currentDir,false)->f
 		lines=ChangeDepGroupIds(f, map)
 		if (lines != null) {
 			# updated version
@@ -584,18 +585,41 @@
 		groupId = node.subNode("groupId").getContent
 		artifactId = node.subNode("artifactId").getContent
 		version = node.subNode("version").getContent
-		out(SymDict(groupId, artifactId, version))
+		file = f
+		out(SymDict(groupId, artifactId, version, file))
 //GetVersionInfo
+
+
+
+
+# Modify all non-submodule pom files version, adding 1 to given level
+# Note level 0 is the far right number, 1 is the one to the left and so on. 
+# Handles -SNAPSHOT.
+# --
+	P(1,Dir) as Dir => currentDir
+	P(2,0) => level
+
+	GetVersionInfo(currentDir) -> dict
+		version = Util:Version(dict.version)
+		version.increase(0)
+		version=version.toString
+		println("Converting",dict.artifactId, ":", dict.version,"to",version)
+		VersionEditAllPom(Dir, dict.groupId, dict.artifactId, version, false)
+
+/VersionIncrement
 
 
 # Modify all non-submodule pom files to -SNAPSHOT, and internal references as well
 # --
 	P(1,Dir) => currentDir
 
-	GetVersionInfo -> dict
+	GetVersionInfo(currentDir) -> dict
 		version=dict.version
-		if (!version.endsWith("-SNAPSHOT")) version=version+"-SNAPSHOT"
-		VersionEditAllPom(Dir, dict.groupId, dict.artifactId, version)
+		if (!version.endsWith("-SNAPSHOT")) {
+			version=version+"-SNAPSHOT"
+			println("Add SNAPSHOT",dict.artifactId,":",dict.version,"->",version)
+			VersionEditAllPom(Dir, dict.groupId, dict.artifactId, version, false)
+		}
 /UseSNAPSHOT
 
 
@@ -603,9 +627,10 @@
 # --
 	P(1,Dir) => currentDir
 
-	GetVersionInfo -> dict
+	GetVersionInfo(currentDir) -> dict
 		version=dict.version.before("-SNAPSHOT")
 		if (version != dict.version) {
-			VersionEditAllPom(Dir, dict.groupId, dict.artifactId, version)
+			println("Removing SNAPSHOT",dict.artifactId,":",dict.version,"->",version)
+			VersionEditAllPom(Dir, dict.groupId, dict.artifactId, version, false)
 		}
 /RemoveSNAPSHOT

@@ -16,11 +16,32 @@
 	Lib:Header("Maven:UseSNAPSHOT")
 	Maven:UseSNAPSHOT(Dir)
 
+	Lib:Header("Maven:VersionIncrement")
+	Maven:VersionIncrement(Dir)
+
+	Lib:Header("Automatic conversion done!")
 	println
+	Info->line println(line) |
 	println
-	Lib:Header("Ready for Maven:DeployAll")
 
 /Convert
+
+# Info
+# --
+<<<< EOF
+	Add dependencies to relevant POM's
+
+		<!-- https://mvnrepository.com/artifact/jakarta.servlet/jakarta.servlet-api -->
+		<dependency>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+			<version>6.1.0</version>
+			<scope>provided</scope>
+		</dependency>
+
+	Ready for Maven:DeployAll 
+>>>> EOF
+//Info
 
 
 # Replace patterns for java
@@ -30,6 +51,9 @@
 		.set("javax.el.", "jakarta.el.")
 		.set("javax.websocket.", "jakarta.websocket.")
 		.set("javax.annotation.", "jakarta.annotation.")
+
+		.set(".httpclient3",".httpclient5")
+		.set(".httpclient4",".httpclient5")
 
 		# less likely
 		.set("javax.persistence.", "jakarta.persistence.")
@@ -82,14 +106,23 @@
 			report(f,line.file.name, line.lineNumber, line)
 /S
 
+# Trim path
+# --
+	P(1) as File => file
+	path=file.path
+	if (path.length > 60) path="..." + (path.last(60).from(Sys.fileSeparator))
+	path
+//TrimPath
 
 # Process all java files not under submodules
 # --
+	changes=0
 	JavaFiles->f
 		lines=f.read(false)
 		modifiedLines=JavaReplace(lines)
 		if (modifiedLines != null) {
-			report(f.path,"CHANGED")
+			report("CHANGED", TrimPath(f))
+			changes=changes + 1
 			if(Lib:UsesCRLF(f)) {
 				f.setWriteCRLF
 			} else {
@@ -97,10 +130,12 @@
 			}
 			f.create(modifiedLines)
 		} else {
-			report(f.path,"-")
+			report("-", TrimPath(f))
 		}
 	| _=>rows
 	Lib:ShowRows(rows)
+	println
+	println("# Number of changes: " + changes)
 
 //ProcessJavaFiles
 
@@ -112,8 +147,11 @@
 	changed=false
 
 	lines->line
-		patterns.keys->p
-			newline = line.replace(p,patterns.get(p))
+		Inner{
+			newline=line
+			patterns.keys->p
+				newline = newline.replace(p,patterns.get(p))
+			}
 			if (newline != line) changed=true
 			out(newline)
 	| _ => newLines
@@ -132,7 +170,6 @@
 # --
 	Maven:VersionEditAllPom(Dir,"org.apache.axis2","","2.0.0")
 //FixAxisPOMVersions
-
 
 
 
