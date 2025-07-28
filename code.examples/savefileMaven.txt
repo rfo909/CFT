@@ -343,6 +343,7 @@
 # --
 	P(1,Dir) as Dir => currentDir
 	P(2,false) as boolean => showErrors
+	P(3,true) as boolean => subdirs
 
 	Sequence(
 		List("clean","package","-U")
@@ -350,6 +351,10 @@
 	) => MavenArgs
 
 	Pom(currentDir,false)->f
+		if (!subdirs) {
+			println("Ignoring subdir pom", f.path)
+			reject(f.dir.path != currentDir.path)
+		}
 		Lib:Header(f.path)
 
 		MavenArgs->args
@@ -365,9 +370,15 @@
 				lines->line
 					if (line.contains("[ERROR]")) Lib:ShowText(line)
 			}
-
 /DeployAll
 
+# Run deploy on pom files under root directory of project only
+# --
+	P(1,Dir) as Dir => currentDir
+	P(2,false) as boolean => showErrors
+
+	DeployAll(currentDir,showErrors,false)
+/DeployTop
 
 
 # Run "mvn clean" for all pom-files, to delete temporary files
@@ -421,7 +432,7 @@
 		if (ok) {
 			buf.match("<version>",3)
 			line=buf.line
-			line=line.before("<version>") + "<version>" + VERSION + "</version>" + line.after("</version>")
+			line=line.past("<version>") + VERSION + line.from("</version>")
 			buf.write(line)
 			buf.next
 		}
@@ -438,7 +449,7 @@
 		if (ok) {
 			buf.match("<version>", 3)
 			line=buf.line
-			line=line.before("<version>") + "<version>" + VERSION + "</version>" + line.after("</version>")
+			line=line.past("<version>") + VERSION + line.from("</version>")
 			buf.write(line)
 		}
 	|
@@ -454,7 +465,6 @@
 /VersionEditPom
 
 
-
 # Update version for all pom*.xml under current directory
 # --
 	P(1,Dir) as Dir => currentDir
@@ -465,6 +475,8 @@
 
 	if (artifactId=="") artifactId=null
 
+	println("currentDir: " + currentDir.path)
+
 	Maven:Pom(currentDir,false)->f
 		if (verbose) println(f.path)
 		
@@ -473,7 +485,6 @@
 			if (verbose) println("   No change")
 			assert(false)
 		}
-		
 		if (verbose) println("   UPDATED")
 		Lib:PreserveFileLineSeparator(f).create(lines)
 /VersionEditAllPom
@@ -583,7 +594,7 @@
 		if (!version.endsWith("-SNAPSHOT")) {
 			version=version+"-SNAPSHOT"
 			println("Add SNAPSHOT",dict.artifactId,":",dict.version,"->",version)
-			VersionEditAllPom(Dir, dict.groupId, dict.artifactId, version, false)
+			VersionEditAllPom(currentDir, dict.groupId, dict.artifactId, version, false)
 		}
 /UseSNAPSHOT
 
@@ -596,6 +607,6 @@
 		version=dict.version.before("-SNAPSHOT")
 		if (version != dict.version) {
 			println("Removing SNAPSHOT",dict.artifactId,":",dict.version,"->",version)
-			VersionEditAllPom(Dir, dict.groupId, dict.artifactId, version, false)
+			VersionEditAllPom(currentDir, dict.groupId, dict.artifactId, version, false)
 		}
 /RemoveSNAPSHOT

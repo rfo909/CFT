@@ -7,6 +7,9 @@
 	Lib:Header("ProcessJavaFiles")
 	ProcessJavaFiles
 
+	Lib:Header("GNT 15.0.6")
+	Maven:VersionEditAllPom(Dir,"st.systor","gnt","15.0.6")
+
 	Lib:Header("FixAxisPOMVersions")
 	FixAxisPOMVersions
 
@@ -19,16 +22,25 @@
 	Lib:Header("Maven:VersionIncrement")
 	Maven:VersionIncrement(Dir)
 
-	Lib:Header("Automatic conversion done!")
 	println
-	Info->line println(line) |
+	Info
 	println
 
 /Convert
 
+
 # Info
 # --
+	Lib:Header("Automatic conversion done!")
 <<<< EOF
+
+	Manual operations
+	-----------------
+	- jakarta.servlet.SingleThreadModel - does not exist anymore
+	- org.apache.axis2.kernel.http.HTTPConstants - does not exist anymore
+	- reordering pom file dependencies?
+		"First Declaration Wins (at the same depth)"
+
 	Add dependencies to relevant POM's
 
 		<!-- https://mvnrepository.com/artifact/jakarta.servlet/jakarta.servlet-api -->
@@ -39,9 +51,28 @@
 			<scope>provided</scope>
 		</dependency>
 
-	Ready for Maven:DeployAll 
+		<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-servlet-api</artifactId>
+			<version>10.1.36</version>
+			<scope>provided</scope>
+		</dependency>
+
+	Test compile and deploy
+	-----------------------
+	:sw Maven
+	DeployAll
+
+	When ok
+	-------
+	Maven:RemoveSNAPSHOT
+	DeployAll
+	git add / commit / push
+
+
 >>>> EOF
-//Info
+	_.print
+/Info
 
 
 # Replace patterns for java
@@ -159,7 +190,7 @@
 # FixPOMGroupIds
 # --
 	Maven:ChangeDepGroupIdsAll(Dir, ReplacePomGroupPatterns)
-/FixPOMGroupIds
+//FixPOMGroupIds
 
 
 # Update POM files with Axis2 version
