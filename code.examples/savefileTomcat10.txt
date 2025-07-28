@@ -65,8 +65,8 @@
 
 	When ok
 	-------
-	Maven:RemoveSNAPSHOT
-	DeployAll
+	Maven:RemoveSNAPSHOT(Dir)
+	Maven:DeployAll(Dir)
 	git add / commit / push
 
 
