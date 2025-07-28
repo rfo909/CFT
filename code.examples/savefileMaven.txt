@@ -580,7 +580,7 @@
 		version.increase(0)
 		version=version.toString
 		println("Converting",dict.artifactId, ":", dict.version,"to",version)
-		VersionEditAllPom(Dir, dict.groupId, dict.artifactId, version, false)
+		VersionEditAllPom(currentDir, dict.groupId, dict.artifactId, version, false)
 
 /VersionIncrement
 
