@@ -24,10 +24,7 @@
 # Path depth for file
 # --
 	P(1) as File => f
-	f.path.chars->c
-		assert(c==Sys.fileSeparator)
-		out(1)
-	| _.length
+	f.path.count(Sys.fileSeparator)
 //PathDepth
 
 
@@ -352,8 +349,10 @@
 
 	Pom(currentDir,false)->f
 		if (!subdirs) {
-			println("Ignoring subdir pom", f.path)
-			reject(f.dir.path != currentDir.path)
+			if(f.dir.path != currentDir.path) {
+				println("Ignoring subdir pom", f.path)
+				continue
+			}
 		}
 		Lib:Header(f.path)
 
