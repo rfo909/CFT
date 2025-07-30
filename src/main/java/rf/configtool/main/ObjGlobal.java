@@ -327,7 +327,7 @@ public class ObjGlobal extends Obj {
             return "List";
         }
         public String getShortDesc() {
-            return "List(a,b,c,...,x) - creates list object";
+            return "List(a,b,c,...) or List() - creates list object";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             return new ValueList(params);
@@ -637,7 +637,7 @@ public class ObjGlobal extends Obj {
             return "Term";
         }
         public String getShortDesc() {
-            return "Term - get terminal config object";
+            return "Term() - get terminal config object";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
