@@ -19,12 +19,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package rf.configtool.main.runtime.lib;
 
 import java.io.File;
+import java.io.BufferedReader;
 import java.util.*;
 
 import rf.configtool.main.Ctx;
 import rf.configtool.main.runtime.*;
 
 import rf.configtool.util.DateTimeDurationFormatter;
+import rf.configtool.util.TabUtil;
 
 /**
  * Report data row
@@ -47,6 +49,8 @@ public class ObjRow extends Obj implements IsSynthesizable {
         add(new FunctionAsStringsRow());
         add(new FunctionAsList());
         add(new FunctionContains());
+        add(new FunctionLineNo());
+        add(new FunctionLines());
     }
 
 
@@ -144,6 +148,13 @@ public class ObjRow extends Obj implements IsSynthesizable {
             for (Value v : rowData) {
                 if (getValueType(v).equals("File")) return v;
             }
+            for (Value v : rowData) {
+                if (getValueType(v).equals("FileLine")) {
+                    ValueObjFileLine fl=(ValueObjFileLine) v;
+                    return new ValueObj(fl.getFile());
+
+                }
+            }
             return new ValueNull();
         }
     }
@@ -159,17 +170,30 @@ public class ObjRow extends Obj implements IsSynthesizable {
             for (Value v : rowData) {
                 if (getValueType(v).equals("Dir")) return v;
             }
+            ObjFile file=null;
             for (Value v : rowData) {
                 if (getValueType(v).equals("File")) {
-                    ObjFile f = (ObjFile) ((ValueObj) v).getVal();
-                    String path = f.getPath();
-                    int i=path.lastIndexOf(File.separator);
-                    if (i>=0) path=path.substring(0,i);
-                    if (path.equals("")) path=File.separator;
-                    return new ValueObj(new ObjDir(path, f.getProtection()));
+                    file = (ObjFile) ((ValueObj) v).getVal();
+                    break;
                 }
             }
-            
+            if (file==null) {
+                for (Value v : rowData) {
+                    if (getValueType(v).equals("FileLine")) {
+                        ValueObjFileLine fl=(ValueObjFileLine) v;
+                        file=fl.getFile();
+                        break;
+                    }
+                }
+    
+            }
+            if (file != null) {
+                String path = file.getPath();
+                int i=path.lastIndexOf(File.separator);
+                if (i>=0) path=path.substring(0,i);
+                if (path.equals("")) path=File.separator;
+                return new ValueObj(new ObjDir(path, file.getProtection()));
+            }
 
             return new ValueNull();
         }
@@ -313,4 +337,73 @@ public class ObjRow extends Obj implements IsSynthesizable {
         }
     }
 
+
+    class FunctionLineNo extends Function {
+        public String getName() {
+            return "lineNo";
+        }
+        public String getShortDesc() {
+            return "lineNo() - find first FileLine object and return lineNo from it, or null if none";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            for (Value v : rowData) {
+                if (getValueType(v).equals("FileLine")) {
+                    ValueObjFileLine fl=(ValueObjFileLine) v;
+                    return new ValueInt(fl.getLineNo());
+                }
+            }
+            return new ValueNull();
+        }
+    }
+
+
+    class FunctionLines extends Function {
+        public String getName() {
+            return "lines";
+        }
+        public String getShortDesc() {
+            return "lines(backCount,fwdcount) - if row contains a FileLine, display content accordingly";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size()!=2) throw new Exception("Expected parameters backCount, fwdCount");
+            long backCount=(int) getInt("backCount",params,0);
+            long fwdCount=(int) getInt("fwdCount",params,1);
+
+            for (Value v : rowData) {
+                if (getValueType(v).equals("FileLine")) {
+                    ValueObjFileLine fl=(ValueObjFileLine) v;
+                    long lineNo=fl.getLineNo();
+                    long startLine=lineNo-backCount;
+                    if (startLine < 1) startLine=1;
+                    long endLine=lineNo + fwdCount;
+                    ObjFile f=fl.getFile();
+                    return createLineList(f,startLine,endLine);
+                }
+            }
+            // not found
+            return new ValueNull();
+        }
+
+        private ValueList createLineList (ObjFile f, long startLine, long endLine) throws Exception{
+            BufferedReader br=null;
+            try {
+                br=f.getBufferedReader();
+                List<Value> result=new ArrayList<Value>();
+                long lineNo=0;
+                for (;;) {
+                    String line=br.readLine();
+                    lineNo++;
+                    if (line==null) break;
+
+                    if (lineNo >= startLine && lineNo <= endLine) {
+                        String deTabbed = TabUtil.substituteTabs(line, 4);
+                        result.add(new ValueObjFileLine(deTabbed, lineNo, f));
+                    }
+                }
+                return new ValueList(result);
+            } finally {
+                if (br != null) try {br.close();} catch (Exception ex) {};
+            }
+        }
+    }
 }

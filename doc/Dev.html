@@ -13,6 +13,32 @@
 
 <h1>CFT Change log</h1>
 
+<h3>4.4.7 2025-08-06 Row improvements</h3>
+<p>
+Improved the Row CFT object. The file() function looks for a File object, and returns 
+it if found. But now it also scans for a FileLine, and if found, isolates the File
+object from it and returns. 
+</p>
+<p>
+Did the same with the dir() function, which first searched for a Dir object, then for
+a File object, returning the directory of the file, and now in addition also looks for
+a FileLine, isolating the File and then the Dir from it.
+</p>
+<p>
+Added a lineNo() function that if there is a FileLine object, returns the lineNo from it.
+</p>
+<p>
+And added a lines(backCount,fwdCount), which if there is a FileLine object, returns a
+list of lines relative to the lineNo in that object, given the parameters. Very useful
+not having to do "edit :N.file" just to look at a few lines around the line that matched
+a search.
+</p>
+<p>
+Hasn't changed any of the script code, since the searches already include the FileLine,
+as it displays as a ValueString.
+</p>
+
+
 <h3>4.4.6 2025-07-09 Lexer extension</h3>
 <p>
 Extended TokenStream object with two functions to get and set current position, in
