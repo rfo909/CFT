@@ -101,7 +101,8 @@ public class ValueString extends Value implements IsSynthesizable {
         boolean useHex=false;
         for (int i=0; i<val.length(); i++) {
             char ch=val.charAt(i);
-            if (ch < 32 || ch >= 127) {
+            String escapedChars = "\t\r\n";
+            if ((ch < 32 || ch >= 127) && escapedChars.indexOf(ch)<0) { 
                 useHex=true;
                 break;
             }

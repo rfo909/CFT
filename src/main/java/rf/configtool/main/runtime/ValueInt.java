@@ -140,6 +140,7 @@ public class ValueInt extends Value implements IsSynthesizable {
                 result=chars.charAt(digit)+result;
                 remaining /= 16;
             }
+            if (result.length()==0) result="0";
             return new ValueString(result);
         }
 
