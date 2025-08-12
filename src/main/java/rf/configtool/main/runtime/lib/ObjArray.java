@@ -28,7 +28,7 @@ import rf.configtool.main.runtime.*;
 
 
 public class ObjArray extends Obj implements IsSynthesizable {
-    private List<Value> data;
+    private List<Value> data=new ArrayList<Value>();
 
     public ObjArray (ValueList list) {
         List<Value> values = list.getVal();
@@ -145,7 +145,7 @@ public class ObjArray extends Obj implements IsSynthesizable {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 1) throw new Exception("Expected value parameter");
             int pos=(int) getInt("pos", params, 0);
-            Value value=params.get(1);
+            Value value=params.get(0);
             data.add(value);
             return new ValueObj(theObj());
         }
