@@ -45,6 +45,7 @@ public class ValueList extends Value implements IsSynthesizable {
                 new FunctionReverse(),
                 new FunctionReplace(),
                 new FunctionRemove(),
+                new FunctionRemoveLast(),
                 new FunctionSet(),
                 new FunctionInsert(),
                 new FunctionEmpty(),
@@ -452,7 +453,25 @@ public class ValueList extends Value implements IsSynthesizable {
             }
             int pos=(int) getInt("pos",params,0);
             val.remove(pos);
-            
+
+            return self();
+        }
+    }
+
+    class FunctionRemoveLast extends Function {
+        public String getName() {
+            return "removeLast";
+        }
+        public String getShortDesc() {
+            return "removeLast() - delete element, return self (same list instance)";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) {
+                throw new Exception("Expected no parameters");
+            }
+            if (val.size() > 0) {
+                val.remove(val.size()-1);
+            }
             return self();
         }
     }

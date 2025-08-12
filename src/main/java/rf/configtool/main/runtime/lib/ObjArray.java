@@ -28,17 +28,18 @@ import rf.configtool.main.runtime.*;
 
 
 public class ObjArray extends Obj implements IsSynthesizable {
-    private Value[] data;
+    private List<Value> data;
 
     public ObjArray (ValueList list) {
         List<Value> values = list.getVal();
-        data=new Value[values.size()];
-        for (int i=0; i<data.length; i++) data[i]=values.get(i);
+        data=new ArrayList<Value>();
+        for (int i=0; i<list.getVal().size(); i++) data.add(values.get(i));
 
         this.add(new FunctionLength());
         this.add(new FunctionSet());
         this.add(new FunctionGet());
         this.add(new FunctionList());
+        this.add(new FunctionAdd());
     }
 
     private ObjArray theObj() {
@@ -58,7 +59,7 @@ public class ObjArray extends Obj implements IsSynthesizable {
 
     @Override
     public ColList getContentDescription() {
-        return ColList.list().regular("[" + data.length + "]");
+        return ColList.list().regular("[" + data.size() + "]");
     }
 
     @Override
@@ -85,7 +86,7 @@ public class ObjArray extends Obj implements IsSynthesizable {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
-            return new ValueInt(data.length);
+            return new ValueInt(data.size());
         }
     }
 
@@ -99,7 +100,7 @@ public class ObjArray extends Obj implements IsSynthesizable {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 1) throw new Exception("Expected pos parameter (int)");
             int pos=(int) getInt("pos", params, 0);
-            return data[pos];
+            return data.get(pos);
         }
     }
 
@@ -114,7 +115,7 @@ public class ObjArray extends Obj implements IsSynthesizable {
             if (params.size() != 2) throw new Exception("Expected pos parameter (int) and value");
             int pos=(int) getInt("pos", params, 0);
             Value value=params.get(1);
-            data[pos] = value;
+            data.set(pos,value);
             return new ValueObj(theObj());
         }
     }
@@ -129,8 +130,24 @@ public class ObjArray extends Obj implements IsSynthesizable {
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 0) throw new Exception("Expected no parameters");
             List<Value> list=new ArrayList<Value>();
-            for (int i=0; i<data.length; i++) list.add(data[i]);
+            for (int i=0; i<data.size(); i++) list.add(data.get(i));
             return new ValueList(list);
+        }
+    }
+
+    class FunctionAdd extends Function {
+        public String getName() {
+            return "add";
+        }
+        public String getShortDesc() {
+            return "add(value) - returns self";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected value parameter");
+            int pos=(int) getInt("pos", params, 0);
+            Value value=params.get(1);
+            data.add(value);
+            return new ValueObj(theObj());
         }
     }
 
