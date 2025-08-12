@@ -362,12 +362,20 @@ public class ObjRow extends Obj implements IsSynthesizable {
             return "lines";
         }
         public String getShortDesc() {
-            return "lines(backCount,fwdcount) - if row contains a FileLine, display content accordingly";
+            return "lines([[backCount]?,fwdcount]?) - if row contains a FileLine, display content accordingly";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size()!=2) throw new Exception("Expected parameters backCount, fwdCount");
-            long backCount=(int) getInt("backCount",params,0);
-            long fwdCount=(int) getInt("fwdCount",params,1);
+            long backCount=0;
+            long fwdCount=20;
+
+            if (params.size()==1) {
+                fwdCount = getInt("fwdCount", params, 0);
+            } else if (params.size()==2) {
+                backCount = getInt("fwdCount", params, 0);
+                fwdCount = getInt("fwdCount", params, 1);
+            } else if (params.size() > 2) {
+                throw new Exception("Expected parameters [[backCount]?, fwdCount]?");
+            }
 
             for (Value v : rowData) {
                 if (getValueType(v).equals("FileLine")) {
@@ -377,18 +385,18 @@ public class ObjRow extends Obj implements IsSynthesizable {
                     if (startLine < 1) startLine=1;
                     long endLine=lineNo + fwdCount;
                     ObjFile f=fl.getFile();
-                    return createLineList(f,startLine,endLine);
+                    displayLines(ctx,f,startLine,endLine);
+                    return new ValueString(f.getPath() + " : " + lineNo);
                 }
             }
             // not found
             return new ValueNull();
         }
 
-        private ValueList createLineList (ObjFile f, long startLine, long endLine) throws Exception{
+        private void displayLines (Ctx ctx, ObjFile f, long startLine, long endLine) throws Exception{
             BufferedReader br=null;
             try {
                 br=f.getBufferedReader();
-                List<Value> result=new ArrayList<Value>();
                 long lineNo=0;
                 for (;;) {
                     String line=br.readLine();
@@ -397,10 +405,10 @@ public class ObjRow extends Obj implements IsSynthesizable {
 
                     if (lineNo >= startLine && lineNo <= endLine) {
                         String deTabbed = TabUtil.substituteTabs(line, 4);
-                        result.add(new ValueObjFileLine(deTabbed, lineNo, f));
+                        ctx.getStdio().println(deTabbed);
                     }
+                    if (lineNo >= endLine) break;
                 }
-                return new ValueList(result);
             } finally {
                 if (br != null) try {br.close();} catch (Exception ex) {};
             }
