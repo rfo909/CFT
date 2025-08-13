@@ -25,7 +25,7 @@
 
 		error(addr < 0 || addr >= self.HERE, "Invalid memory address: " + addr)
 
-		self.memory.set(addr,WordByte(value,0))
+		self.memory.set(addr,HWSim:WordByte(value,0))
 	}
 
 	self.readByte = Lambda{
@@ -58,7 +58,7 @@
 
 		addrOffset=0
 		Std.Data.each(self.wordSize-1, 0)->bytePos
-			self.writeByte(addr + addrOffset, WordByte(value,bytePos))
+			self.writeByte(addr + addrOffset, HWSim:WordByte(value,bytePos))
 			addrOffset=addrOffset+1
 	}
 
@@ -223,7 +223,6 @@
 //MemStackTest
 
 
-
 # Get single byte from bigger word
 # --
     P(1) as int => value
@@ -243,3 +242,8 @@
 
     "ok"
 //TestWordByte
+
+
+
+
+
