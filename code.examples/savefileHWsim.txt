@@ -1,0 +1,245 @@
+# Simulated byte oriented memory
+# --
+	P(1,2) as int => wordSize
+
+	self.wordSize=wordSize
+	self.memory = Std.Array(List)  # initially empty
+
+	self.HERE = Lambda{
+		self.memory.length
+	}
+
+	self.malloc = Lambda{
+		P(1) as int => bytes
+		Std.Data.for(0,bytes,1)->i self.memory.add(0)
+	}
+
+	self.mallocWords = Lambda{
+		P(1) as int => words
+		self.malloc(words*self.wordSize)
+	}
+
+	self.writeByte = Lambda{
+		P(1) as int => addr
+		P(2) as int => value
+
+		error(addr < 0 || addr >= self.HERE, "Invalid memory address: " + addr)
+
+		self.memory.set(addr,WordByte(value,0))
+	}
+
+	self.readByte = Lambda{
+		P(1) as int => addr
+
+		error(addr < 0 || addr >= self.HERE, "Invalid memory address: " + addr)
+
+		self.memory.get(addr)
+	}
+
+	self.writeChar = Lambda{
+		P(1) as int => addr
+		P(2) as String => char   # all program code is 7-bit printable characters a-zA-Z0-9 + some specials like +-*/!@
+
+		error(char.length != 1, "Expected single character: " + char)
+		
+		value=char.toHexString("ISO-8859-1").parseInt(16)
+		self.writeByte(addr, value)
+	}
+
+	self.readChar = Lambda {
+		P(1) as int => addr
+		value=self.readByte(addr)
+		value.hex.fromHexString("ISO-8859-1")
+	}
+
+	self.writeWord = Lambda {
+		P(1) as int => addr
+		P(2) as int => value
+
+		addrOffset=0
+		Std.Data.each(self.wordSize-1, 0)->bytePos
+			self.writeByte(addr + addrOffset, WordByte(value,bytePos))
+			addrOffset=addrOffset+1
+	}
+
+	self.readWord = Lambda {
+		P(1) as int => addr
+
+		addrOffset=0
+		bits=""
+		Std.Data.each(self.wordSize-1, 0)->bytePos
+			bits=bits + self.readByte(addr + addrOffset).bin(8)
+			addrOffset=addrOffset+1
+		|
+		bits.parseInt(2)
+	}
+
+	self.dump = Lambda {
+		P(1,0) => start
+		P(2,self.HERE) => end
+		Std.Data.for(start,end,1)->addr
+			value=self.readByte(addr)
+			iaddr=("     "+addr).last(5)
+			char=""
+			if (value < 128) char=Sys.uchar(value).printable.esc
+			report(iaddr + " - 0x"+addr.hex(4), value, "0x"+value.hex(2), char)
+		| _=>rows
+		Lib:ShowRows(rows)
+	}
+
+/class Memory
+
+
+
+# Memory test
+# --
+	m=Memory(2)
+	m.malloc(10)
+	#m.dump
+	#println
+	m.writeByte(1,23)
+	m.dump
+	println
+	println("Writing word 0xcafe to addr 6")
+	m.writeWord(6,"cafe".parseInt(16))
+	m.dump
+	println
+	println("Read back word: " + m.readWord(6).hex(4))
+
+	println
+	println("Write char 't' to pos 8")
+	m.writeChar(8,"t")
+	println("Read back char: " + m.readChar(8))
+
+	println("Write char TAB to pos 9")
+	m.writeChar(9,"^t".unEsc)
+
+	println
+	m.dump
+	println
+	
+//MemTest
+
+
+
+
+# Stack living inside simulated memory. All values are stored as words,
+# as defined by Memory.wordSize. Data is stored linearly increasing, growing
+# up fro startAddress up to startAddress+(wordCount*wordSize)
+# --
+	P(1) as &Memory => memory
+	P(2) as int => startAddress
+	P(3) as int => wordCount
+	P(4) as String => stackName
+
+	self.memory=memory
+	self.startAddress=startAddress
+	self.wordCount=wordCount
+	self.name=stackName
+	self.wordSize=memory.wordSize
+
+	self.next=0  # word index
+
+	self.setNext = Lambda{
+		P(1) as int => next
+		self.next=next
+		println(self.name,"setNext",next)
+	}
+
+	self.push = Lambda{
+		P(1) as int => value
+		error(self.next >= self.wordCount, self.name + ": Stack overflow")
+		self.memory.writeWord(self.startAddress + (self.next*self.wordSize), value)
+		self.next=self.next+1
+	}
+
+	self.pop = Lambda{
+		error(self.next <= 0, self.name + ": pop: stack underflow")
+		self.next=self.next-1
+		self.memory.readWord(self.startAddress + (self.next*self.wordSize))  # previous top value
+	}
+
+	self.peek = Lambda{
+		error(self.next <= 0, self.name + ": peek: stack underflow")
+		self.memory.readWord(self.startAddress + (self.next-1)*self.wordSize)
+	}
+
+	self.replaceTop = Lambda{
+		P(1) as int => newValue
+		error(self.next <= 0, self.name + ": replace: stack empty")
+		self.pop
+		self.push(newValue)
+	}
+	
+
+	self.isEmpty = Lambda{
+		self.next==0
+	}
+
+	self.getStackValues = Lambda{  # top at end
+		word=0
+		end=self.next
+		loop
+			break(word >= end)
+			out(self.memory.readWord(self.startAddress + (word*self.wordSize)))
+			word=word+1
+	}
+
+	self.dump = Lambda{
+		println(self.getStackValues.concat(" "))
+	}
+		
+/class MemStack
+		
+
+# Test
+# --
+	memory=HWSim:Memory(2)
+	
+	wordCount=5
+	memory.mallocWords(wordCount)
+	startAddress=0
+	name="test"
+
+	stack=MemStack(memory, startAddress, wordCount, name)
+	stack.push(34)
+	stack.dump
+	stack.push(35)
+	stack.dump
+
+	println("pop",stack.pop)
+	println("pop",stack.pop)
+
+	stack.dump
+	stack.push(1)
+	stack.push(2)
+	println("peek",stack.peek)
+	stack.push(3)
+	stack.push(4)
+	stack.push(5)
+	stack.dump
+	# should overflow:
+	stack.push(35)
+//MemStackTest
+
+
+
+# Get single byte from bigger word
+# --
+    P(1) as int => value
+    P(2) as int => bytePos   # byte index: (3 2 1 0) for 32-bit value (1 0) for 16-bit
+
+    bits=(bytePos+1)*8
+    value.bin(bits).first(8).parseInt(2)
+/WordByte
+
+
+
+# Test bits and bytes operations
+# --
+    x="CAFE".parseInt(16)
+    error(!WordByte(x,0).hex.toUpper=="FE", "t1")
+    error(!WordByte(x,1).hex.toUpper=="CA", "t1")
+
+    "ok"
+//TestWordByte
