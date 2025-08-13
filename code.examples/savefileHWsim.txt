@@ -171,6 +171,29 @@
 		self.push(newValue)
 	}
 	
+	self.getValue = Lambda{
+		P(1)=>pos  # 0=top, 1=second etc
+		error (pos > self.next, self.name + ": getValue: stack underflow")
+
+		offset = self.next-1-pos
+		addr = self.startAddress + offset*self.wordSize
+		self.memory.readWord(addr)
+	}
+
+	self.removeValue = Lambda{  # picks value from stack
+		P(1)=>pos  # 0=top, 1=second etc
+		error (pos > self.next, self.name + ": getValue: stack underflow")
+
+		temp=List
+		Std.Data.for(0,pos,1)->i 
+			temp.add(self.pop)
+		|
+		value=self.pop
+		temp.reverse->value
+			self.push(value)
+		|
+		value
+	}
 
 	self.isEmpty = Lambda{
 		self.next==0
@@ -218,8 +241,18 @@
 	stack.push(4)
 	stack.push(5)
 	stack.dump
+
 	# should overflow:
-	stack.push(35)
+	println(tryCatch(stack.push(35)).msg)
+
+	1
+	println("stack.getValue(1) should be 4 =>", stack.getValue(1))
+	stack.dump
+
+	println("stack.removeValue(2) should be 3 =>", stack.removeValue(2))
+
+	stack.dump
+
 //MemStackTest
 
 
