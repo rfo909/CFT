@@ -129,7 +129,7 @@ public class ValueInt extends Value implements IsSynthesizable {
             return "hex";
         }
         public String getShortDesc() {
-            return "hex() - returns hex string (positive values only)";
+            return "hex(digits?) - returns hex string (positive values only)";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             final String chars="0123456789abcdef";
@@ -141,6 +141,15 @@ public class ValueInt extends Value implements IsSynthesizable {
                 remaining /= 16;
             }
             if (result.length()==0) result="0";
+            if (params.size()==1) {
+                int digits=(int) getInt("digits", params,0);
+                while (result.length() < digits) {
+                    result="0"+result;
+                }
+                if (result.length() > digits) {
+                    throw new Exception(".hex(" + digits + ") - value too big: " + result);
+                }
+            }
             return new ValueString(result);
         }
 
