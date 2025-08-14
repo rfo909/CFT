@@ -265,15 +265,86 @@
 /WordByte
 
 
+# Bitwise and
+# --
+	P(1) as int => a
+	P(2) as int => b
+	P(3) as int => bytes
+	
+	ca = a.bin(bytes*8).chars
+	cb = b.bin(bytes*8).chars
+	
+	Std.Data.for(0,ca.length,1)->i
+		if (ca.get(i)=="1" && cb.get(i)=="1") out("1") else out("0")
+	| _.concat.parseInt(2)
+/BitwiseAnd	
+	
+# Bitwise or
+# --
+	P(1) as int => a
+	P(2) as int => b
+	P(3) as int => bytes
+	
+	ca = a.bin(bytes*8).chars
+	cb = b.bin(bytes*8).chars
+	
+	Std.Data.for(0,ca.length,1)->i
+		if (ca.get(i)=="1" || cb.get(i)=="1") out("1") else out("0")
+	| _.concat.parseInt(2)
+/BitwiseOr	
+
+# Bitwise not
+# --
+	P(1) as int => a
+	P(2) as int => bytes
+	
+	ca = a.bin(bytes*8).chars
+	
+	Std.Data.for(0,ca.length,1)->i
+		if (ca.get(i)=="1") out("0") else out("1")
+	| _.concat.parseInt(2)
+/BitwiseNot	
+
+	
+
+# Rightshift
+# --
+	P(1) as int => value
+	P(2) as int => count
+	P(2) as int => bytes
+	
+	("0".times(count) + value.bin(bytes*8)).first(bytes*8).parseInt(2)
+/Rightshift	
+
+# Leftshift
+# --
+	P(1) as int => value
+	P(2) as int => count
+	P(2) as int => bytes
+	
+	(value.bin(bytes*8)+"0".times(count)).last(bytes*8).parseInt(2)
+/Leftshift	
+
+
 
 # Test bits and bytes operations
 # --
     x="CAFE".parseInt(16)
     error(!WordByte(x,0).hex.toUpper=="FE", "t1")
-    error(!WordByte(x,1).hex.toUpper=="CA", "t1")
+    error(!WordByte(x,1).hex.toUpper=="CA", "t2")
+    
+    error(BitwiseAnd("1F".parseInt(16),"24".parseInt(16),2).hex.toUpper != "4", "t3")
+    error(BitwiseOr("1F".parseInt(16),"24".parseInt(16),2).hex.toUpper != "3F", "t4")
+
+    error(BitwiseNot("1100110011001100".parseInt(2),2).bin(16) != "0011001100110011", "t5")
+	
+    
+    error(Rightshift("10".parseInt(16),2,2).hex.toUpper != "4", "t6")
+    error(Leftshift("10".parseInt(16),2,2).hex.toUpper != "40", "t7")
 
     "ok"
-//TestWordByte
+
+//Tests
 
 
 
