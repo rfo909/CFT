@@ -143,7 +143,6 @@
 	self.setNext = Lambda{
 		P(1) as int => next
 		self.next=next
-		println(self.name,"setNext",next)
 	}
 
 	self.push = Lambda{
