@@ -391,6 +391,17 @@
 /HexToChars
 
 
+# Convert hex string to list of bytes
+# --
+	P(1) as String => s
+	error(s.length % 2 == 1, "Odd number of characters: " + s)
+	loop
+		break(s=="")
+		out(s.first(2).parseInt(16))
+		s=s.sub(2)
+/HexToBytes
+	
+
 # Convert ISO_8859_1 string to hex string
 # --
 	P(1) => str
