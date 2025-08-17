@@ -6,6 +6,8 @@ Last updated: 2025-08-06 RFO
 
 v4.4.7
 
+*"Okay, so I like writing docs ..."* :-)
+
 
 # ---- Using CFT as a shell
 
