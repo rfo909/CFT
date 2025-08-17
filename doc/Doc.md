@@ -542,17 +542,39 @@ To get to one of those File objects, interactively we now may say:
 ```
 JavaInfo
   :
-  :
-  
 :200.get(0)       ## or just .get, as it defaults to 0
   <obj: File>
   StmtHelp.java 1k 1709 2d18h 2024-07-17 21:14:48
 ```
 
-### Show available columns
+### .file and .dir
 
-All the visible data are also available to get(), and to see what is available, the rows have another function,
-the show():
+Picking up files and directories from a report list is so common that instead of remembering or
+finding out which column contains the data we're after, the Sys.Row object has some specific
+functions
+
+```
+JavaInfo
+ :
+:200.file
+  <obj: File>
+  StmtHelp.java 1k 1709 2d18h 2024-07-17 21:14:48
+```
+
+There is also a .dir function. Note that it does not only look for a Dir object, but if none
+is found, if it finds a File object, it returns the directory of that file.
+
+### .date and .duration
+
+These search the row for Date and Duration objects. Even though they are both defined as printable,
+we may well want to access them.
+
+### .show - show available columns
+
+All the visible data is available to get(), and to see what is available, be it int or Strings or booleans,
+we may need to know the position in the Row where the values of interest are found.
+
+Example
 
 ```
 JavaInfo
@@ -569,11 +591,14 @@ JavaInfo
 
 ### Use in code
 
+Example:
+
 ```
 JavaInfo->row out(row.get(0).path)
 ```
 
 This code uses the JavaInfo to grab the File objects, and output a list of full paths.
+
 
 
 # Getting help
@@ -672,6 +697,19 @@ From this we see that the "int" objects have a function .bin():
   00001101
 ```
 
+We also see that both int and float values have two identically named functions which
+converts between the two:
+
+```
+3.14.i         # returns 3 (.i means as int)
+3.f            # converts to float (looks the same)
+```
+
+For simplicity, the int objects also have the ".i" and floats have the ".f", so in cases where we 
+are not sure if a number is int or float, we can just call the function to make it into what
+we want.
+
+
 ## Show script functions
 
 The obvious way of listing the functions inside a script, is to load it, then type '?'.
@@ -732,6 +770,17 @@ The Util script has a function to display a dictionary in a readable way. Exampl
 # --
 	Util:ShowDict(MyDict)
 /test
+```
+
+## Alternative syntax
+
+When the name of a value in a dictionary, or to be set in a dictionary, is a valid identifier,
+and one that does not collide with any of the member functions of the dictionary, we
+can use dotted notation for better readability.
+
+```
+MyDict.a         # returns 1
+MyDict.sum=a+b   # store a+b under name "sum"
 ```
 
 

@@ -2,9 +2,9 @@
 # CFT Reference
 
 
-Last updated: 2025-03-20 RFO
+Last updated: 2025-08-06 RFO
 
-v4.4.3
+v4.4.7
 
 
 # ---- Using CFT as a shell
@@ -35,12 +35,16 @@ edit (DataFile)
 
 ## The ":N"
 
-The function Sys.lastResult returns the result from the previous interactive command. The
-Sys.lastResult function takes an optional int parameter for when the result is
-a list, to obtain value at a position in the list. 
+CFT keeps track of the last result in two ways. The original is just to remember the last
+result, nothing more. It is available via the Sys.lastResult function. But later we found
+it practical to remember lists and non-lists separately, and the Sys.lastResultList function
+was added.
+
+Both these have an optional int parameter indicating the position in the list. For Sys.lastResult,
+if the last result was not a list, sending a list index to it, will produce an error message.
 
 ```
-lsd 
+lsd  # (list directories only) 
 cd (Sys.lastResult(3))   # using ()'s to run CFT expression
 ```
 
@@ -57,6 +61,7 @@ cd :0.dir            # go to directory of a file in the output from previous com
 Dir.allFiles("*.java")
 :0.dir.cd            # same as above
 ```
+
 
 ### Complex example
 
@@ -89,6 +94,36 @@ cd ::
 FunctionThatReturnsDirObject.cd
 ```
 
+## The point of remembering lists separately
+
+The reason behind the Sys.lastResultList is that often we search for something, and get a result
+list of files or rows (via report()), and want to do something to multiple of those values.
+
+An example:
+
+```
+Dir.files
+edit :3
+edit :5
+```
+
+If lists were not remembered separately, then we have the situation that every command, also the
+edit-command, returns something. That means that Sys.lastResult is now changed, but since lists
+are remembered separately, the next command still works. 
+
+We can continue working on list elements until running a command that returns a list.
+
+If the result list scrolls out of the screen, we can see it again by the shortcut
+
+```
+@:
+```
+
+This just runs Sys.lastResultList.
+
+
+
+
 ## Colon commands and shortcuts
 
 Shortcuts are ways of running CFT code, and are defined in CFT.props. 
@@ -110,7 +145,7 @@ View all shortcuts by typing the '@' and press Enter
 @
 ```
 
-Shortcuts are defined in the CFT.props file.
+Shortcuts are defined in the CFT.props file, while colon commands are implemented in Java.
 
 
 
@@ -174,6 +209,13 @@ cd /where/the/other/file/exists
 diff somefile.txt %a
 ```
 
+### Symbols are global
+
+When running CFT in separate windows, the symbols we define in one session are immediately available
+in all others. This means after assigning symbol %a to a file in one window, we can
+refer to it in another window, running the diff command or something else.
+
+
 ## :N, :: and %x initiate expressions
 
 Parameters to shell commands (and external programs) starting with ":" or "%" are considered CFT expressions even without
@@ -183,7 +225,7 @@ being embedded inside parantheses. Those expressions can not contain free spaces
 
 ## Repeat last line
 
-The single dot "." is used to rerun the last command given via interactive input to CFT. Note also that
+The single dot "." is used to rerun the last CFT language linem given via interactive input to CFT. Note also that
 it can be followed by additional text, which is literally appended to previous command. Example:
 
 ```
@@ -192,12 +234,16 @@ Dir.files    # returns a list of files
 ..length     # run command Dir.files.length 
 ```
 
-Note that after that last line, the last command is now changed into
+It does not refer to shell-like commands like cd, ls, pwd etc.
+
+Note that after that last line, the new last command is now changed into
 
 ```
 Dir.files.length
 ```
 
+See separate section "Command history", where we use the "!" to do 
+various history-related tasks.
 
 
 
@@ -343,6 +389,24 @@ The history function remembers the last directories, and differs between in-sess
   !//          show directories last week, global
 ```
 
+The !xxx*yyy form is very practical for when repeating similar commands. As an example, when
+working with windows services (on remote hosts), I will be using the PS script, typically on
+a jump host:
+
+```
+PS:StartService
+(asked about host and service name)
+PS:StopService
+(same)
+```
+
+Later, after doing other stuff, like checking logs or wanting to deploy new code, I can then just
+do this:
+
+```
+!*Start
+!*Stop
+```
 
 
 ## The "shell" command
@@ -489,7 +553,16 @@ A common shortcut is @e, which opens current savefile in an editor:
 
 Shortcuts can be redefined in the CFT.props file.
 
-## CFT.props - codeDirs
+# CFT.props
+
+This file defines all shortcuts, what shell to use when running the "shell" command, 
+and also configuration for many commands, which are really impemented in CFT, such as
+cat, edit, more, showtree etc. 
+
+In the CFT.props these are called "macros", which is an early word for lambdas ...
+
+
+## codeDirs
 
 
 The CFT.props file contains the following line by default
@@ -498,22 +571,39 @@ The CFT.props file contains the following line by default
 codeDirs = . ; code.examples ; code.lib
 ```
 
-The codeDirs field defines a search order when loading scripts (followed by current dir)
+The codeDirs field defines a search order when loading scripts, starting with the current 
+dir.
 
 
 The code.examples contains some example code for various use, while code.lib contains
-library code, used by most other scripts.
+library code, mostly used by other scripts.
 
 Each script remembers where it was loaded from, so when saving it, it is written back
 to that location.
 
-### Local scripts may hide library scripts
+## include
+
+The CFT.props file is checked into the git repository, for without it, CFT is mostly useless.
+
+In order for users to do lasting modifications that are not lost when pulling the latest version
+from the repo, an include setting was added. It is commented out, and points to a file CFT.props
+under the "private" directory, which the .gitignore ensures is not part of git.
+
+```
+# Including a private props file, which if it exists may override any settings in
+# this file
+
+#include private/CFT.props
+```
+
+
+## Local scripts may hide library scripts
 
 When creating scripts in locations other than the two *code* directories under CFT, take care to select
 a unique script name. Making one with the same name as one from the *code* directories effectively hides
-the original.
+the original while that directory is the current.
 
-## Calling functions in other scripts
+# Calling functions in other scripts
 
 We frequently need to call functions in another script file. This is
 implemented with with the following syntax, using a colon:
@@ -665,13 +755,13 @@ javaFiles = Inner{ Dir.files->f assert(f.name.endsWith(".jaca") out(f) }
 Loops are also terminated in local blocks, but using loops inside local blocks (not preceded by the Inner keyword)
 behaves differently and sometimes unexpectedly. 
 
-### Avoid loops inside local blocks
+### About loops inside local blocks
 
 In a local block, the out() and report() statements affect the result list of the surrounding context. CFT detects
 when code contains loops, and returns that list, and local blocks are not isolated from the outer context
 as with Inner blocks.
 
-This may work, and may produce unexpected results. First off, a local block does not have a return value, like
+This may work, but may also produce unexpected results. First off, a local block does not have a return value, like
 Inner blocks do. 
 
 ```
@@ -875,6 +965,12 @@ List(1,2,3,4).nth(-1)
 <int>
 ```
 
+## .nth vs .get
+
+The List.get function is identical to the List.nth. The .nth was created first, and 
+used in code, before realizing that the normal name of a function to get a list
+element is .get().
+
 
 
 
@@ -940,7 +1036,7 @@ _.y=2
 
 # Some function expecting a Point dictionary as parameter
 # --
-P(1) as &amp;Point => point
+P(1) as &Point => point
 ...
 /f
 ```
@@ -972,7 +1068,8 @@ this:
 	P(1) =>propFile
 	Dict =>d
 		propFile.read->line
-		reject(line.trim.startsWith("#"))
+		s=line.before("#")
+		reject(line.trim=="")
 		assert(line.contains(":") || line.contains("="))
 		d.setStr(line)
 	|
@@ -1256,12 +1353,16 @@ the PIPE to split function bodies into code spaces.
 Partitioning an Inner block with PIPE does not affect the code outside the Inner block. 
 
 
-
 ## Lambdas
 
 
 A Lambda is an object (a value) that contains a block of code, so it can be called, with parameters. The code
-inside runs detached from the caller, and behaves exactly like a function.
+inside runs detached from the caller, and behaves exactly like a function, but a "homeless" one, which means that
+if it needs to call functions in the script where it is defined, it needs to prefix those function names by the
+script name and colon (":").
+
+Below we create a function MyLambda that creates a Lambda which is returned from the funciton. Then we call it
+with .call and parameters
 
 ```
 Lambda{P(1)+P(2)}
@@ -1272,9 +1373,6 @@ MyLambda.call(1,2)
 Can be used to create local functions inside regular functions, but mostly used to create
 closures and/or Dict objects / classes.
 
-
-The above vode defines a regular function, MyLambda, that returns a Lambda object, which can
-then be called with the .call().
 
 
 ## Block expressions summary
@@ -2363,7 +2461,7 @@ whether it exists or not).
 When we run the ":syn" command, and as CFT remembers the last result value, it creates code for it.
 
 
-If this succeeds, it inserts the generated code line tino the "code history", pretending
+If this succeeds, it inserts the generated code line into the "code history", pretending
 it was a command given by the user, which means it can now be assigned a name, for example "DirSrc"
 
 
@@ -2802,7 +2900,7 @@ When the owner of the daemon terminates, the first that needs it, will create a 
 instance. Even if two CFT sessions try to create the daemon at the same time, only
 one will succeed, because the port number can only be used by a single process.
 
-The locks also handle multiple threads on a singe CFT instance / session, which are
+The locks also handle multiple threads on a single CFT instance / session, which are
 initiated in two ways:
 
 ```

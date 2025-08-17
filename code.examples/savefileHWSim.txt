@@ -139,9 +139,11 @@
 	self.wordSize=memory.wordSize
 
 	self.next=0  # word index
+	self.maxDepth=0
 
 	self.setNext = Lambda{
 		P(1) as int => next
+		error(next > self.next, "Can not setNext up, only down: self.next=" + self.next + " - given value: " + next)
 		self.next=next
 	}
 
@@ -150,6 +152,7 @@
 		error(self.next >= self.wordCount, self.name + ": Stack overflow")
 		self.memory.writeWord(self.startAddress + (self.next*self.wordSize), value)
 		self.next=self.next+1
+		if (self.next > self.maxDepth) self.maxDepth=self.next
 	}
 
 	self.pop = Lambda{
