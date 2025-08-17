@@ -34,7 +34,9 @@
   |  Using report()
         Behind the scenes
         Non-visible report() data
-        Show available columns
+        .file and .dir
+        .date and .duration
+        .show - show available columns
         Use in code
 * Getting help
   |  Global functions
@@ -43,6 +45,7 @@
   |  Show script functions
   |  CFT Internals
 * Dictionaries
+  |  Alternative syntax
 * Dates
   |  Date calculations
 * The Sys object
