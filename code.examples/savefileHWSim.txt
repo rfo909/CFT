@@ -166,6 +166,14 @@
 		self.memory.readWord(self.startAddress + (self.next-1)*self.wordSize)
 	}
 
+	self.optionalPeek = Lambda{
+		if(self.next <= 0) {
+			null
+		} else {
+			self.peek
+		}
+	}
+
 	self.replaceTop = Lambda{
 		P(1) as int => newValue
 		error(self.next <= 0, self.name + ": replace: stack empty")
