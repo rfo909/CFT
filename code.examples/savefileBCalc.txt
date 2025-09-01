@@ -192,3 +192,11 @@ Uses internal functions
     println("dec:    " + toInt(value))
     toInt(value)
 /show
+
+
+# Subtract 
+# --
+	P(1)=>a
+	P(2)=>b
+	toInt(a)-toInt(b)
+/sub
