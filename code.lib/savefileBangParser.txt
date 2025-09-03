@@ -55,7 +55,8 @@ Command history
   !:xxx*yyy
 
   !/           show recent directories within session
-  !//          show directories last week, global
+  !//          show directory parths last week, global
+  !//xxx       show directory paths last week that contain xxx
 >>>> EOF
 	->line println(line)
 /Help
