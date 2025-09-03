@@ -17,18 +17,21 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.main.runtime.lib.web;
 
+import java.util.List;
+
 public class ResponseData {
 
     private String contentType;
+    private List<String> httpHeaders;
     private byte[] data;
     
     public ResponseData (byte[] data) {
-        this("text/html", data);
+        this("text/html", null, data);
     }
     
-    public ResponseData(String contentType, byte[] data) {
-        super();
+    public ResponseData(String contentType, List<String> httpHeaders, byte[] data) {
         this.contentType = contentType;
+        this.httpHeaders = httpHeaders;
         this.data = data;
     }
 
@@ -36,6 +39,7 @@ public class ResponseData {
         return contentType;
     }
 
+    public List<String> getHttpHeaders() { return httpHeaders; }
     public byte[] getData() {
         return data;
     }

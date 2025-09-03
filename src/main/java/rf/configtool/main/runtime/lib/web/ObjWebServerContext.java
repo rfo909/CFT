@@ -36,6 +36,8 @@ public class ObjWebServerContext extends Obj {
     private ObjWebServer server;
     private String path;
     private String contentType;
+
+    private List<String> httpHeaders=new ArrayList<String>();
     
     private ObjClosure closureGET;
     private ObjClosure closurePOST;
@@ -55,6 +57,7 @@ public class ObjWebServerContext extends Obj {
         this.add(new FunctionContext());
         this.add(new FunctionGET());
         this.add(new FunctionPOST());
+        this.add(new FunctionAddHttpHeader());
     }
     
     public ObjClosure getClosureGET() {
@@ -71,7 +74,8 @@ public class ObjWebServerContext extends Obj {
         return contentType;
     }
     
-    
+    public List<String> getHttpHeaders () { return httpHeaders; }
+
     @Override
     public boolean eq(Obj x) {
         return x==this;
@@ -101,7 +105,8 @@ public class ObjWebServerContext extends Obj {
     private ObjWebServerContext theContext () {
         return this;
     }
-    
+
+
     class FunctionContext extends Function {
         public String getName() {
             return "Context";
@@ -171,7 +176,23 @@ public class ObjWebServerContext extends Obj {
             return new ValueObj(theContext());
         }
     }
-    
-    
+
+    class FunctionAddHttpHeader extends Function {
+        public String getName() {
+            return "addHttpHeader";
+        }
+        public String getShortDesc() {
+            return "addHttpHeader(header) - add HTTP header for this context";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected header string");
+            httpHeaders.add(getString("header", params, 0));
+            return new ValueObj(theContext());
+        }
+    }
+
+
+
+
 
 }

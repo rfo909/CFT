@@ -57,6 +57,12 @@ public class ClientMain implements Runnable {
         out.println("Server: CFT " + Version.getVersion());
         out.println("Date: " + new Date());
         out.println("Content-type: " + resp.getContentType());
+
+        List<String> httpHeaders=resp.getHttpHeaders();
+        if (httpHeaders != null) {
+            for (String headerLine:httpHeaders) out.println(headerLine);
+        }
+
         out.println("Content-length: " + resp.getData().length);
         out.println(); 
         out.flush();
@@ -191,7 +197,7 @@ public class ClientMain implements Runnable {
                 }
             } else {
                 byte[] data=("<html><body><p>"+(new Date())+" invalid method " + method).getBytes("UTF-8");
-                ResponseData resp=new ResponseData("text/html", data);
+                ResponseData resp=new ResponseData("text/html", null, data);
                 
                 objServer.appendToServerLog("ClientMain:"+id,"Sending invalid method message (" + method + ")");
                 sendData(out, outBinary, resp);

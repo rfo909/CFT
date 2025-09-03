@@ -198,6 +198,7 @@ public class ObjWebServer extends ObjPersistent {
         if (context != null) {
             ObjClosure closure = context.getClosureGET();
             String contentType=context.getContentType();
+            List<String> httpHeaders=context.getHttpHeaders();
             
             if (closure != null) {
                 List<Value> params=new ArrayList<Value>();
@@ -207,7 +208,7 @@ public class ObjWebServer extends ObjPersistent {
 
                 Value output = closure.callClosure(asyncCtx.sub(), caller, params);
                 byte[] data = createBytesFromValue(output);
-                return new ResponseData(contentType, data);
+                return new ResponseData(contentType, httpHeaders, data);
             }
         }
         //System.out.println("ObjServer.processRequest(url=" + url + ")");
@@ -223,7 +224,9 @@ public class ObjWebServer extends ObjPersistent {
         if (context != null) {
             ObjClosure closure = context.getClosurePOST();
             String contentType=context.getContentType();
-            
+            List<String> httpHeaders=context.getHttpHeaders();
+
+
             if (closure != null) {
                 List<Value> params=new ArrayList<Value>();
                 params.add(new ValueObj(request));
@@ -232,7 +235,7 @@ public class ObjWebServer extends ObjPersistent {
 
                 Value output = closure.callClosure(asyncCtx.sub(), caller, params);
                 byte[] data = createBytesFromValue(output);
-                return new ResponseData(contentType, data);
+                return new ResponseData(contentType, httpHeaders, data);
             }
         }
         //System.out.println("ObjServer.processRequest(url=" + url + ")");
