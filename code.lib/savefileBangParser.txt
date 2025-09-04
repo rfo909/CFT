@@ -150,8 +150,8 @@ Command history
 
 
 # Get global list or recent directories visited
-# If "!/" is followed by words, these are matched against the directory list, and
-# if it matches one, we issue cd to that directory via Sys.stdin
+# If "!//" is followed by a string, this is matched against the directory list, and
+# if the result is exactly one, we issue cd to that directory via Sys.stdin
 # 2025-05-08 RFO
 # --
 	P(1) as String? => addDir  # null to just get list
@@ -196,7 +196,7 @@ Command history
 	if (list.length==1) {
 		Sys.stdin("cd " + Sys.syn(list.first))
 	} else {
-		list
+		list.sort
 	}
 
 /GlobalDirList
