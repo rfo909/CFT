@@ -193,11 +193,7 @@ Command history
 		assert(commandLine==null || path.contains(commandLine))
 		out(path)
 	| =>list
-	if (list.length==1) {
-		Sys.stdin("cd " + Sys.syn(list.first))
-	} else {
-		list.sort
-	}
+	list.sort
 
 /GlobalDirList
 

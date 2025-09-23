@@ -322,7 +322,7 @@
 
 	Pom(currentDir,false)->f
 		Lib:Header(f.path)
-		result = Lib:run(List("cmd","/c","mvn","-f", f.path, "clean","package","-U"), null, true)
+		result = Lib:run(List("cmd","/c","mvn","-f", f.path, "clean","package","-U","install"), null, true)
 
 		if(result.exitCode==0) println("   OK") else println("   ERROR")
 
