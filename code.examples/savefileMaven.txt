@@ -315,16 +315,23 @@
 
 
 
-# test-compile all pom files (except git submodules)
+# test-compile all pom files (except git submodules) and install locally
 # --
 	P(1,Dir) as Dir => currentDir
 	P(2,true) as boolean => showErrors
 
+	# Must run package and install separately, or get phase complaints like for plugins etc
+
 	Pom(currentDir,false)->f
 		Lib:Header(f.path)
-		result = Lib:run(List("cmd","/c","mvn","-f", f.path, "clean","package","-U","install"), null, true)
+		result = Lib:run(List("cmd","/c","mvn","-f", f.path, "clean","package","-U"), null, true)
 
-		if(result.exitCode==0) println("   OK") else println("   ERROR")
+		if(result.exitCode==0) {
+			println("   OK (running mvn install)")
+			Lib:run(List("cmd","/c","mvn","-f",f.path,"install"), null, true)
+		} else {
+			println("   ERROR")
+		}
 
 		if (showErrors) {
 			lines = result.stdout + result.stderr
