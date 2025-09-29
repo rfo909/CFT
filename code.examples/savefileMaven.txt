@@ -616,3 +616,142 @@
 			VersionEditAllPom(currentDir, dict.groupId, dict.artifactId, version, false)
 		}
 /RemoveSNAPSHOT
+
+
+
+# Change dependency group id's
+# NOTE: depends on proper format, as it uses line logic, not XML parser, since XML parser PP is incomplete
+# 
+# (Developed for the Tomcat10 script)
+# --
+	P(1) as File => pomFile
+	P(2) as Dict => map   # key = from, value = to
+
+	buf=AutoEdit:EditBuffer(pomFile.read(false))
+
+	buf.match("<dependencies>")
+	loop
+		break(!buf.matchOptional("<dependeny>"))
+		buf.match("<groupId>",2)
+		line=buf.line
+
+		# check for improper format
+		if (line.count("<groupId>") != 1 || line.count("</groupId>") != 1) {
+			println(pomFile.path)
+			println("Invalid line: " + line)
+			println("Should contain exactly one <groupId> and one </groupId>")
+			error("aborting")
+		}
+
+		groupId = line.after("groupId>").before("</groupId").trim
+		if (map.has(groupId)) {
+			line=line.past("<groupId>") + map.get(groupId) + line.from("</groupId>")
+			buf.write(line)
+		}
+	|
+
+	if (buf.isModified) {
+		# Verify that it is still valid XML (crashes if not)
+		XML:Parse(buf.out)
+		# return modified file content
+		buf.out
+	} else {
+		null
+	}
+//ChangeDepGroupIds
+
+
+# Change plugin versions
+# (See Tomcat10 script)
+# --
+	P(1,Dir) => currentDir
+	P(2) => groupId
+	P(3) => artifactId
+	P(4) => version
+
+	error(groupId==null && artifactId==null,"Must provide groupId or groupId+artifactId")
+
+	Pom(currentDir,false) -> f
+		lines=DoChangePluginVersions(f, groupId, artifactId, version)
+		if (lines != null) {
+			Lib:PreserveFileLineSeparator(f).create(lines)
+			report("UPDATED", f.path)
+		} else {
+			report("-", f.path)
+		}
+	| _=>rows
+	Lib:ShowRows(rows)
+/ChangePluginVersions
+
+# Change plugin versions for one pom file
+# --
+	P(1) as File => pomFile
+	P(2) as String? => groupId
+	P(3) as String? => artifactId
+	P(4) as String => version
+
+	buf=AutoEdit:EditBuffer(pomFile.read(false))
+
+	loop
+		break(!buf.matchOptional("<plugin>"))
+		buf.match("<groupId>",2)
+		gline=buf.line
+		if (groupId != null && !gline.contains(groupId)) continue
+
+		buf.match("<artifactId>",2)
+		aline=buf.line
+		if (artifactId != null && !aline.contains(artifactId)) continue
+
+
+		buf.match("<version>",2)
+		vline=buf.line
+		modified=vline.past("<version>") + version + "</version>")
+		buf.write(modified)
+	|
+
+/DoChangePluginVersions
+
+
+
+# Show plugin versions for one pom file
+# --
+	P(1) as File => pomFile
+	P(2) as String? => groupId
+	P(3) as String? => artifactId
+
+	buf=AutoEdit:EditBuffer(pomFile.read(false))
+
+	loop
+		break(!buf.matchOptional("<plugin>"))
+
+		buf.match("<groupId>",2)
+		gline=buf.line
+		if (groupId != null && !gline.contains(groupId)) continue
+
+		buf.match("<artifactId>",2)
+		aline=buf.line
+		if (artifactId != null && !aline.contains(artifactId)) continue
+
+		buf.match("<version>",2)
+		vline=buf.line
+
+		println(gline.trim)
+		println(aline.trim)
+		println(vline.trim)
+
+		println
+	|
+
+//ShowPluginVersions
+
+
+# Show plugin versions for all pom files
+# --
+	P(1,Dir) => currentDir
+	P(2) => groupId
+	P(3) => artifactId
+
+	Pom(currentDir,false)->f
+		Lib:Header(f.path)
+		ShowPluginVersions(f,groupId,artifactId)
+/ShowPluginVersionsAll
