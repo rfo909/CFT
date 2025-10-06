@@ -318,7 +318,7 @@
 # test-compile all pom files (except git submodules) and install locally
 # --
 	P(1,Dir) as Dir => currentDir
-	P(2,true) as boolean => showErrors
+	P(2,false) as boolean => showErrors
 
 	# Must run package and install separately, or get phase complaints like for plugins etc
 
