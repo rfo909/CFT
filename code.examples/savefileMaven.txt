@@ -683,6 +683,7 @@
 	Lib:ShowRows(rows)
 /ChangePluginVersions
 
+
 # Change plugin versions for one pom file
 # --
 	P(1) as File => pomFile
@@ -705,10 +706,18 @@
 
 		buf.match("<version>",2)
 		vline=buf.line
-		modified=vline.past("<version>") + version + "</version>")
+		modified=vline.past("<version>") + version + "</version>"
 		buf.write(modified)
 	|
 
+	if (buf.isModified) {
+		# Verify that it is still valid XML (crashes if not)
+		XML:Parse(buf.out)
+		# return modified file content
+		buf.out
+	} else {
+		null
+	}
 /DoChangePluginVersions
 
 
