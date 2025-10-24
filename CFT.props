@@ -86,6 +86,7 @@ shortcut:dup  = "---- duplicates in list of strings ----" Lib:DuplicatesInList
 shortcut:sort = "---- sort list of strings ----"          Lib:SortList
 
 shortcut:gs   = "---- git status -----"                   Dir.run("git","status")
+shortcut:gd   = "---- git diff -----"                     Dir.run("git","diff",".")
 
 shortcut:%    = "---- show current symbols ----"          Lib:Symbols
 shortcut::    = "---- Sys.lastResultList ----"            Sys.lastResultList

@@ -1663,3 +1663,21 @@ run(null,null,null,true)
 	dict
 /UtfBom
 
+
+# Copy certain or all files from a directory tree to another location, preserving tree structure
+# --
+	P(1,Dir) => sourceDir
+	P(2) as Dir => targetDir
+	P(3) as Glob => glob
+
+	sourceDir.allFiles(glob)->f
+		fullPath=f.dir.path
+		localPath=fullPath.sub(sourceDir.path.length)
+
+		newPath=targetDir.path + localPath
+		copyToDir=Dir(newPath)
+		if (!copyToDir.exists) copyToDir.create
+		copyToDir.copy(f)
+		report(f.path, copyToDir.path)
+
+/CopyTree

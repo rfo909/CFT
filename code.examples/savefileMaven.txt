@@ -96,6 +96,25 @@
 /Versions
 
 
+
+
+# Create maven dependencies for pom files
+# --
+	P(1,Dir) => currentDir
+	P(2,false) => includeSubmodules
+
+	GetVersionInfo -> dict
+<<< EOF
+<dependency>
+    <groupId><< dict.groupId >></groupId>
+    <artifactId><< dict.artifactId >></artifactId>
+    <version><< dict.version >></version>
+</dependency>
+>>> EOF
+	_.mergeExpr->line println(line)
+/Deps
+
+
 	
 
 # Create dependency
@@ -574,8 +593,8 @@
 
 
 
-# Modify all non-submodule pom files version, adding 1 to given level
-# Note level 0 is the far right number, 1 is the one to the left and so on. 
+# Modify all non-submodule pom files version, adding 1 to given level (defaults to last number)
+# Note level 0 is the far right number, 1 is the first one to the left, from the end, and so on. 
 # Handles -SNAPSHOT.
 # --
 	P(1,Dir) as Dir => currentDir
