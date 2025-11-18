@@ -98,6 +98,7 @@ public class ObjGlobal extends Obj {
         add(new FunctionList());
         add(new FunctionDir());
         add(new FunctionFile());
+        add(new FunctionRawFile());
         add(new FunctionGrep());
         add(new FunctionObjInput());
         add(new FunctionInt());
@@ -367,7 +368,20 @@ public class ObjGlobal extends Obj {
         }
     }
     
-
+    class FunctionRawFile extends Function {
+        public String getName() {
+            return "RawFile";
+        }
+        public String getShortDesc() {
+            return "RawFile(str) - creates RawFile object";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected 1 parameter");
+            if (!(params.get(0) instanceof ValueString)) throw new Exception("Expected String parameter");
+            return new ValueObj(new ObjRawFile( ((ValueString) params.get(0)).getVal()));
+        }
+    }
+    
  
     class FunctionGrep extends Function {
         public String getName() {
