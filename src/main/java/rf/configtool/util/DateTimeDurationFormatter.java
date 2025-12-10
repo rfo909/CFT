@@ -27,7 +27,7 @@ public class DateTimeDurationFormatter {
         hours=x%24;       x/=24;   // x is now days
         days=x;
     }
-    private String f(long x, int n) {
+    private String padZerosFormatter(long x, int n) {
         String s=""+x;
         while (s.length() < n) s="0"+s;
         return s;
@@ -38,10 +38,10 @@ public class DateTimeDurationFormatter {
         if (days > 185) return (days/30) + "mo"; 
         if (days > 5) return days+"d";
         if (days > 0) return days+"d" + hours + "h";
-        if (hours > 0) return hours + "h" + f(minutes,2)+"m";
-        if (minutes > 0) return minutes+"m"+f(seconds,2)+"s";
+        if (hours > 0) return hours + "h" + padZerosFormatter(minutes,2)+"m";
+        if (minutes > 0) return minutes+"m"+ padZerosFormatter(seconds,2)+"s";
         if (seconds >= 10) return seconds+"s";
-        return seconds+"."+f(millis,3) + "s";
+        return seconds+"."+ padZerosFormatter(millis,3) + "s";
     }
 
 }
