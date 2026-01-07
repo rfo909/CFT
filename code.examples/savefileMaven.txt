@@ -783,3 +783,17 @@
 		Lib:Header(f.path)
 		ShowPluginVersions(f,groupId,artifactId)
 /ShowPluginVersionsAll
+
+
+# Get JAR dependency tree (must compile)
+# --
+	P(1,Dir) => currentDir
+    currentDir.files("pom*.xml")->f out(f.name) | _.print
+	Input("Enter pom file").get=>filename
+	
+	currentDir.file(filename) => pom
+	error(!pom.exists,"pom file not found: " + pom.path)
+
+	command=List("cmd","/c","mvn","dependency:tree","-f",pom.path)
+	currentDir.run(command)
+/mvnDepTree
