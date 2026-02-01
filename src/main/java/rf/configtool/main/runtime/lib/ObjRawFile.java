@@ -17,31 +17,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 package rf.configtool.main.runtime.lib;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.io.RandomAccessFile;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.attribute.BasicFileAttributeView;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.FileTime;
-import java.security.MessageDigest;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import rf.configtool.main.Ctx;
-import rf.configtool.main.SoftErrorException;
-import rf.configtool.main.Stdio;
+
 import rf.configtool.main.runtime.ColList;
 import rf.configtool.main.runtime.Function;
 import rf.configtool.main.runtime.IsSynthesizable;
@@ -61,15 +43,21 @@ import rf.configtool.util.FileInfo;
 import rf.configtool.util.Hex;
 import rf.configtool.util.TabUtil;
 import rf.configtool.util.DateTimeDurationFormatter;
+import java.io.RandomAccessFile;
 
 
 public class ObjRawFile extends Obj implements IsSynthesizable {
 
     private String name;
+    private RandomAccessFile raf;
 
     public ObjRawFile(String name) throws Exception {
         this.name=name;
+        this.raf=new RandomAccessFile(new File(name), "rw");
         this.add(new FunctionWrite());
+        this.add(new FunctionRead());
+        this.add(new FunctionClose());
+        this.add(new FunctionName());
     }   
 
     
@@ -78,14 +66,14 @@ public class ObjRawFile extends Obj implements IsSynthesizable {
     public boolean eq(Obj x) {
         if (x instanceof ObjRawFile) {
             ObjRawFile f=(ObjRawFile) x;
-            return f.name.equals(name); // always canonical when possible
+            return f.name.equals(name);
         }
         return false;
     }
 
     @Override
     public String createCode() throws Exception {
-        return "RawDevice(" + (new ValueString(name)).synthesize() + ")";
+        return "RawFile(" + (new ValueString(name)).synthesize() + ")";
     }
 
 
@@ -109,12 +97,45 @@ public class ObjRawFile extends Obj implements IsSynthesizable {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             int val=(int) getInt("byte", params, 0);
-            File f=new File(name);
-            FileOutputStream fos=new FileOutputStream(f);
-            fos.write(val);
-            fos.close();
+            raf.write(val); 
+            return new ValueNull();       
+        }
+    }
+
+    class FunctionRead extends Function {
+        public String getName() {
+            return "read";
+        }
+        public String getShortDesc() {
+            return "read() - read byte, may block";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            return new ValueInt(raf.read());
+        }
+    }
+
+    class FunctionClose extends Function {
+        public String getName() {
+            return "close";
+        }
+        public String getShortDesc() {
+            return "close() - close raw file";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            raf.close();
             return new ValueNull();
         }
     }
 
+    class FunctionName extends Function {
+        public String getName() {
+            return "name";
+        }
+        public String getShortDesc() {
+            return "name() - return name";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            return new ValueString(name);
+        }
+    }   
 }
