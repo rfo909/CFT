@@ -187,10 +187,13 @@
 # --
 	P(1) as File => src
 	P(2) as File => target
+	P(3,true) => includeVersion
 
 	CreateSummary(src)->line
 		assert(line.startsWith("dep"))
-		out(line.after("dep").trim)
+		s=line.after("dep").trim
+		if (!includeVersion) s=s.beforeLast(":") + ":*"
+		out(s)
 	| _.sort => srcDep
 
 	Lib:Header(src.path)
@@ -198,7 +201,9 @@
 
 	CreateSummary(target)->line
 		assert(line.startsWith("dep"))
-		out(line.after("dep").trim)
+		s=line.after("dep").trim
+		if (!includeVersion) s=s.beforeLast(":") + ":*"
+		out(s)
 	| _.sort => targetDep
 
 	Lib:Header(target.path)
@@ -385,7 +390,7 @@
 				if (line.contains("[ERROR]")) Lib:ShowText(line)
 		}
 
-/CompileLocal
+/CompileTop
 
 
 
@@ -409,13 +414,21 @@
 		}
 		Lib:Header(f.path)
 
+		abort=false
 		MavenArgs->args
+			reject(abort)
+
 			cmd=List("cmd","/c","mvn","-f", f.path) + args
 			println(cmd.concat(" "))
 
 			result = Lib:run(cmd, null, true) 
 
-			if(result.exitCode==0) println("   OK") else println("   *** ERROR ***")
+			if(result.exitCode==0) {
+				println("   OK")
+			} else {
+				println("   *** ERROR ***")
+				abort=true
+			}
 
 			if (showErrors) {
 				lines = result.stdout + result.stderr
