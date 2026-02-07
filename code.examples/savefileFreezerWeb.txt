@@ -20,6 +20,26 @@
 //License
 
 
+# Readme
+# --
+<<< EOF
+A web interface for managing content in different locations which
+has an expiration date.
+
+TODO: 
+When pressing Show for a named storage, we get a list. 
+
+- Must add filtering and sorting for this list
+- Must also add links on the names, where we can edit an entry, and optionally delete it
+- Must also offer edit link in the "Added to Xxx" screen
+
+- It should contain links to decrease the count by 1, and when reaching zero, delete the entry
+
+
+
+>>> EOF
+/Readme
+
 # Log file
 # --
     File("WebTest_log.txt")
@@ -75,29 +95,6 @@
 /ParseDate	
 	
 
-# Add article
-# --
-	P(1) as int => storageId
-	P(2) => name
-	P(3) => date
-	
-	
-	Sequence(
-		@ Added to storage <<GetStorageName(storageId)>>: <<name>> expires <<date>> ok
-	).mergeExpr
-/AddArticle
-	
-
-# Search
-# --
-	P(1) as int => storageId
-	P(2) => str
-	
-	Sequence(
-		@ Not found in storage <<GetStorageName(storageId)>>: <<str>>
-	).mergeExpr
-/Search
-
 
 
 # Initialize web server 
@@ -116,9 +113,11 @@
 
 			# return text as list of lines
             Sequence(
-                @ * {font-family: courier}
-                @ * {font-size: 24pt}
-                @ .action {background-color: red; color: white}
+                #@ * {font-family: courier}
+                @ * {font-size: 18pt}
+                @ .action {background-color: #99FF99; color: black}
+                @ .link {font-weight: bold; color: #449944}
+                @ .data {color:#444499}
                 @ .content {padding-left:1Em}
             )
     })
@@ -128,13 +127,18 @@
         P(1) as WebRequest => requestObj
 
 	storages=Db2:Get(DbId,"Storages",List)
+	hidden=Db2:Get(DbId,"HiddenStorages",List)
+	
 	
 	content=Inner{
 		pos=0
 		storages->st
-			line='<a href="/storage?id=' + pos + '"> <span style="font-size:36pt">' + st + '</span></a></br>'
+			if (!hidden.contains(st)) {
+				line='<a class="link" href="/storage?id=' + pos + '">' + pos + " " + st + '</a></br><br/>'
+				out(line)
+			}
 			pos=pos+1
-			out(line)
+
 	}
 			
 
@@ -145,8 +149,13 @@
             @ <br/>
             @
             @ <form action="/addstorage" method="POST">
-            @ <input type="text" name="storage" style="width:20Em">
+            @ <input type="text" name="storage" style="width:10Em">
             @ <button class="action" type="submit">Add storage</button>
+            @ </form>
+
+            @ <form action="/hidestorage" method="POST">
+            @ <input type="text" name="storage" style="width:10Em">
+            @ <button class="action" type="submit">Hide storage</button>
             @ </form>
 
             @ << BodyEnd >>
@@ -164,13 +173,40 @@
  	    } else {
  	    	Db2:Get(DbId,"Storages",List).add(st).unique => newList
  	    	Db2:Set(DbId,"Storages",newList)
+ 	    	
+ 	    	Db2:Get(DbId,"HiddenStorages",List) => hidden
+ 	    	hidden=Inner{
+ 	    		hidden->x reject(x==st) out(x)
+ 	    	}
+ 	    	Db2:Set(DbId,"HiddenStorages",hidden)
  	    	result="Storage added!"
  	    }
  	    
  	    Sequence(
 	    	@ <<BodyStart>>
 	    	@ <<result>>
-	    	@ <a class="action" href="/"> Back </a>
+	    	@ <a class="link" href="/"> Back </a>
+	    ).mergeExpr
+	   })
+   	
+    
+    Root.Context("hidestorage", "text/html")
+    	.POST(Lambda{
+ 	    P(1) as WebRequest => requestObj
+ 	    bp=requestObj.bodyParams
+ 	    st=bp.storage.trim
+ 	    result=null
+ 	    if (st=="") {
+ 	    	result="Enter storage name!"
+ 	    } else {
+ 	    	Db2:Get(DbId,"HiddenStorages",List).add(st).unique => newList
+ 	    	Db2:Set(DbId,"HiddenStorages",newList)
+ 	    }
+ 	    
+ 	    Sequence(
+	    	@ <<BodyStart>>
+	    	@ <<result>>
+	    	@ <a class="link" href="/"> Back </a>
 	    ).mergeExpr
 	   })
    	
@@ -183,43 +219,29 @@
 	    Sequence(
 	    	@ <<BodyStart>>
 	    	
-	    	#@ <<ShowRequest(requestObj)>>
-	    		  
+	    	@ <a class="link" href="/list?id=<<id>>">Show</a>
+		@ <br/>
 	    
 	    	@ <form action="/add" method="POST">
 	    	@ <input type="hidden" name="id" value="<<id>>"/>
 	    	    	  	
-	    	@ <h1>Storage <<GetStorageName(id)>></h1>
-	    	@ <h3>New element</h3>
-	    	@ <div class="content">
-	    	@ Name:<br/>
-	    	@ <input name="article" style="width:20Em"/><br/>
-	    	@ Date:<br/>
-	    	@ <input name="date" style="width:10Em"><br/>
-	    	@ (y-m-d or y-m)<br/>
+	    	@ <h1>Storage: <<GetStorageName(id)>></h1>
+	    	@ <table>
+	    	@ <tr>
+	    	@   <td>Name</td>
+	    	@   <td>Expiration</td>
+	    	@   <td>Count</td>
+	    	@ </tr>
+	    	@ <tr>
+	    	@   <td><input name="article" style="width:20ex"/></td>
+	    	@   <td><input name="date" style="width:10ex"></td>
+	    	@   <td><input name="count" style="width:5ex"></td>
+	    	@ </tr>
+		@ </table>
+	    	@ Expiration: y-m-d / y-m / -m / -m-d
+	    	@ <br/><br/>
 	    	@ <button class="action" type="submit">Add</button>
-	    	@ </div>
 	    	@ </form>
-
-	    	@ <form action="/search" method="POST">
-	    	@ <input type="hidden" name="id" value="<<id>>"/>
-
-	    	@ <h3>Search/update</h3>
-	    	@ <div class="content">
-	    	@ Name:<br/>
-	    	@ <input name="search" style="width:20Em"/><br/>
-	  	@ <button class="action" type="submit">Search</button>
-		@ </div>
-		@ </form>
-
-	    	@ <h3>List all</h3>
-	    	@ <div class="content">
-	    	@ <a class="action" href="show?id=<<id>>&amp;by=name">By name</a>
-	    	@ <br/>
-	    	@ <a class="action" href="show?id=<<id>>&amp;by=dateAsc">By date old first</a>
-	    	@ <br/>
-	    	@ <a class="action" href="show?id=<<id>>&amp;by=dateDesc">By date new first</a>
-	    	@ </div>
 
 	    	@ <<BodyEnd>>
 	    ).mergeExpr
@@ -234,50 +256,36 @@
 	    bp=requestObj.bodyParams
 	    id=bp.id.parseInt
 	    
+	    
 	    result=null
-	    if (bp.article != "" && bp.date != "") result = AddArticle(id,bp.article,bp.date)
+	    if (bp.article != "" && bp.date != "") result = AddArticle(id,bp.article,bp.date,bp.count)
 	    
 	    if (result == null) result="Enter article name and expiration date!"
 	    Sequence(
 	    	@ <<BodyStart>>
 	    	@ <<result>>
 	    	@ <br>
-		@ <a class="action" href="/storage?id=<<id>>"> Back </a>
+		@ <a class="link" href="/storage?id=<<id>>"> Back </a>
 	    	@ <<BodyEnd>>
 	    ).mergeExpr
     	})
 
 
-   # Path: /search (POST)
-   Root.Context("search","text/html")
-    	.POST(Lambda{
+    # path=/list (GET)
+    Root.Context("list","text/html")
+    	.GET(Lambda{
 	    P(1) as WebRequest => requestObj
-	    bp=requestObj.bodyParams
-	    id=bp.id.parseInt
-	    
-	    result=null
-	    if (bp.search != "") result = Search(id,bp.search)
-	    
-	    if (result == null) result="Enter search term!"
+            id=requestObj.urlParams.id.parseInt
+            result = ListAll(id)
+            
 	    Sequence(
 	    	@ <<BodyStart>>
 	    	@ <<result>>
 	    	@ <br>
-		@ <a class="action" href="/storage?id=<<id>>"> Back </a>
+		@ <a class="link" href="/storage?id=<<id>>"> Back </a>
 	    	@ <<BodyEnd>>
 	    ).mergeExpr
-    	})
-
-    Root.Context("show","text/html")
-    	.GET(Lambda{
-	    P(1) as WebRequest => requestObj
-            #id=requestObj.urlParams.id
-            #by=requestObj.urlParams.by
-            Sequence(
-	    	@ <<BodyStart>>
-            	@ Showing <<id>> by <<by>>
-	    	@ <<BodyEnd>>
-            ).mergeExpr
+            
          })
 	
     
@@ -295,6 +303,76 @@
         
 /Init
 
+
+
+
+# Add article
+# --
+	P(1) as int => storageId
+	P(2) as String => name
+	P(3) as String => dateString
+	P(4) as String => countString
+	
+	
+	
+	tryCatch(countString.parseInt) => countParse
+	tryCatch(ParseDate(dateString)) => dateParse
+	if (!countParse.ok)
+		"Invalid count, must be number!"
+	else
+	if (!dateParse.ok || dateParse.result==null) {
+		"Invalid date value!"
+	} else {
+		count=countParse.result
+		date=dateParse.result
+		
+		Db2:Get(DbId,"Data",List) => data
+		data.add(SymDict(storageId,name,date,count))
+		Db2:Set(DbId,"Data",data)
+		
+		Sequence(
+			@ Added to "<<GetStorageName(storageId)>>"<br/>
+			@ <br/>
+			@ Name: <span class="data"><<name>></span><br/>
+			@ Expires: <span class="data"><<date.fmt>></span><br/>
+			@ Count: <span class="data"><<count>></span>
+		).mergeExpr
+	}
+/AddArticle
+	
+
+# Search
+# --
+	P(1) as int => storageId
+	P(2) => str
+	
+	Sequence(
+		@ Not found in storage <<GetStorageName(storageId)>>: <<str>>
+	).mergeExpr
+/Search
+
+
+# List all
+# --
+	P(1) as int => storageId
+	
+	Db2:Get(DbId,"Data",List) => data
+	lines=Inner{
+		data->d 
+			assert(d.storageId==storageId)
+			out("<tr><td>" + d.date + "</td><td class='data'>" + d.name + "</td><td>(" + d.count + ")</td></tr>")
+	}
+
+	# generate page	
+	Sequence(
+		@ <table>
+		@ <<lines>>
+		@ </table>
+	).mergeExpr
+/ListAll
+
+
+
 # Helpers
 
 
@@ -307,8 +385,7 @@
             @   <link rel="stylesheet" href="/my.css">
             @ </head>
             @ <body>
-            @ <a href="/"><span style="font-size:48pt; background-color:red; color:white">Food Storage</span></a>
-            @ <div style="background-color:white; padding:10px">
+            @ <a href="/"><span style="color:red; font-size:36pt">Start</span></a><br/><br/>
     )
 //BodyStart
 
@@ -316,7 +393,6 @@
 # Close Body 
 # --
     Sequence(
-        @ </div>
         @ </body>
         @ </html>
     )
