@@ -29,12 +29,10 @@ has an expiration date.
 TODO: 
 When pressing Show for a named storage, we get a list. 
 
-- Must add filtering and sorting for this list
-- Must also add links on the names, where we can edit an entry, and optionally delete it
-- Must also offer edit link in the "Added to Xxx" screen
-
+- Must add links on the names, where we can edit an entry, and optionally delete it
 - It should contain links to decrease the count by 1, and when reaching zero, delete the entry
 
+Must also offer edit link in the "Added to Xxx" screen
 
 
 >>> EOF
@@ -134,7 +132,7 @@ When pressing Show for a named storage, we get a list.
 		pos=0
 		storages->st
 			if (!hidden.contains(st)) {
-				line='<a class="link" href="/storage?id=' + pos + '">' + pos + " " + st + '</a></br><br/>'
+				line='<a class="link" href="/storage?id=' + pos + '">' + st + '</a></br><br/>'
 				out(line)
 			}
 			pos=pos+1
@@ -150,12 +148,12 @@ When pressing Show for a named storage, we get a list.
             @
             @ <form action="/addstorage" method="POST">
             @ <input type="text" name="storage" style="width:10Em">
-            @ <button class="action" type="submit">Add storage</button>
+            @ <button class="action" type="submit">Add</button>
             @ </form>
 
             @ <form action="/hidestorage" method="POST">
             @ <input type="text" name="storage" style="width:10Em">
-            @ <button class="action" type="submit">Hide storage</button>
+            @ <button class="action" type="submit">Hide</button>
             @ </form>
 
             @ << BodyEnd >>
@@ -225,7 +223,7 @@ When pressing Show for a named storage, we get a list.
 	    	@ <form action="/add" method="POST">
 	    	@ <input type="hidden" name="id" value="<<id>>"/>
 	    	    	  	
-	    	@ <h1>Storage: <<GetStorageName(id)>></h1>
+	    	@ <h1><<GetStorageName(id)>></h1>
 	    	@ <table>
 	    	@ <tr>
 	    	@   <td>Name</td>
@@ -284,9 +282,24 @@ When pressing Show for a named storage, we get a list.
 	    	@ <br>
 		@ <a class="link" href="/storage?id=<<id>>"> Back </a>
 	    	@ <<BodyEnd>>
-	    ).mergeExpr
-            
+	    ).mergeExpr            
          })
+         .POST(Lambda{
+	    P(1) as WebRequest => requestObj
+            id=requestObj.bodyParams.id.parseInt
+            filter=requestObj.bodyParams.filter
+            result = ListAll(id,filter)
+
+	    Sequence(
+	    	@ <<BodyStart>>
+	    	@ <<result>>
+	    	@ <br>
+		@ <a class="link" href="/storage?id=<<id>>"> Back </a>
+	    	@ <<BodyEnd>>
+	    ).mergeExpr
+         })
+            
+         
 	
     
     Root.Context("icon","image/jpg")
@@ -331,7 +344,7 @@ When pressing Show for a named storage, we get a list.
 		Db2:Set(DbId,"Data",data)
 		
 		Sequence(
-			@ Added to "<<GetStorageName(storageId)>>"<br/>
+			@ "<<GetStorageName(storageId)>>"<br/>
 			@ <br/>
 			@ Name: <span class="data"><<name>></span><br/>
 			@ Expires: <span class="data"><<date.fmt>></span><br/>
@@ -341,30 +354,33 @@ When pressing Show for a named storage, we get a list.
 /AddArticle
 	
 
-# Search
-# --
-	P(1) as int => storageId
-	P(2) => str
-	
-	Sequence(
-		@ Not found in storage <<GetStorageName(storageId)>>: <<str>>
-	).mergeExpr
-/Search
 
 
 # List all
 # --
 	P(1) as int => storageId
+	P(2) as String? => filter  # via POST to /list - form below
 	
 	Db2:Get(DbId,"Data",List) => data
 	lines=Inner{
 		data->d 
 			assert(d.storageId==storageId)
+			reject(filter != null && !d.name.toLower.contains(filter.toLower))
+			out(Int(d.date.get,d))
+		| _.sort->x
+			d=x.data
 			out("<tr><td>" + d.date + "</td><td class='data'>" + d.name + "</td><td>(" + d.count + ")</td></tr>")
 	}
 
 	# generate page	
 	Sequence(
+		@ <b><<GetStorageName(storageId)>></b><br/><br/>
+		@ <form action="/list" method="POST">
+		@ <input type="hidden" name="id" value="<<storageId>>"/>
+		@ <input type="text" name="filter" style="width:5Em"/>
+		@ <button type="submit" class="action">Filter</button>
+		@ </form>
+		@ <br/>
 		@ <table>
 		@ <<lines>>
 		@ </table>
