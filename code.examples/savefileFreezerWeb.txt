@@ -1,0 +1,366 @@
+# License
+<<< EOF
+#
+# CFT - an interactive programmable shell for automation 
+# Copyright (C) 2020-2025 Roar Foshaug
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>
+#
+>>> EOF
+//License
+
+
+# Log file
+# --
+    File("WebTest_log.txt")
+/LogFile
+
+# Image dir
+# --
+	Dir("/home/roar/Images")
+/ImageDir
+
+
+# Database app id
+# --
+	"Freezer2"
+/DbId
+
+
+# Get storage name for storage id
+# --
+	P(1) as int => id
+	Db2:Get(DbId,"Storages",List).get(id)
+/GetStorageName
+
+# Parse date
+# --
+	P(1) as String => datestring
+	datestring.replace("-"," - ").split("-") => parts
+	if (parts.length==1) parts.add("1")
+	if (parts.length==2) parts.add("1")
+	
+	# (current year is 2026)
+	
+	# -9  becomes 2026-09-01
+	# 30-9-2 becomes 2030-09-02
+	# -10 becomes 2026-10-01
+	
+	y=parts.get(0).trim
+	m=parts.get(1).trim
+	d=parts.get(2).trim
+	
+	if (m.length==0) m="1"
+	if (d.length==0) d="1"
+	
+	if (m.length==1) m="0"+m
+	if (d.length==1) d="0"+d
+	
+	year=Date.setFormat("yyyy").fmt
+	year=year.sub(0,year.length-y.length)+y
+	
+	str=year + "-" + m + "-" + d
+	
+	Date.setFormat("yyyy-MM-dd").parse(str)
+/ParseDate	
+	
+
+# Add article
+# --
+	P(1) as int => storageId
+	P(2) => name
+	P(3) => date
+	
+	
+	Sequence(
+		@ Added to storage <<GetStorageName(storageId)>>: <<name>> expires <<date>> ok
+	).mergeExpr
+/AddArticle
+	
+
+# Search
+# --
+	P(1) as int => storageId
+	P(2) => str
+	
+	Sequence(
+		@ Not found in storage <<GetStorageName(storageId)>>: <<str>>
+	).mergeExpr
+/Search
+
+
+
+# Initialize web server 
+# --
+
+    Std.Web.Server(8080) => server
+    if (LogFile.exists) LogFile.delete
+    server.setServerLogFile(LogFile)
+    
+    server.RootContext => Root   # The "/" path
+
+    # Define my.css "file"
+    Root.Context("my.css","text/css")
+        .GET(Lambda{
+            P(1) as WebRequest => requestObj
+
+			# return text as list of lines
+            Sequence(
+                @ * {font-family: courier}
+                @ * {font-size: 24pt}
+                @ .action {background-color: red; color: white}
+                @ .content {padding-left:1Em}
+            )
+    })
+
+    # path = /
+    Root.GET(Lambda{
+        P(1) as WebRequest => requestObj
+
+	storages=Db2:Get(DbId,"Storages",List)
+	
+	content=Inner{
+		pos=0
+		storages->st
+			line='<a href="/storage?id=' + pos + '"> <span style="font-size:36pt">' + st + '</span></a></br>'
+			pos=pos+1
+			out(line)
+	}
+			
+
+        Sequence(
+            @ << BodyStart >>
+            @ 
+            @ << content >>
+            @ <br/>
+            @
+            @ <form action="/addstorage" method="POST">
+            @ <input type="text" name="storage" style="width:20Em">
+            @ <button class="action" type="submit">Add storage</button>
+            @ </form>
+
+            @ << BodyEnd >>
+        ).mergeExpr
+    })
+    
+    Root.Context("addstorage", "text/html")
+    	.POST(Lambda{
+ 	    P(1) as WebRequest => requestObj
+ 	    bp=requestObj.bodyParams
+ 	    st=bp.storage.trim
+ 	    result=null
+ 	    if (st=="") {
+ 	    	result="Enter storage name!"
+ 	    } else {
+ 	    	Db2:Get(DbId,"Storages",List).add(st).unique => newList
+ 	    	Db2:Set(DbId,"Storages",newList)
+ 	    	result="Storage added!"
+ 	    }
+ 	    
+ 	    Sequence(
+	    	@ <<BodyStart>>
+	    	@ <<result>>
+	    	@ <a class="action" href="/"> Back </a>
+	    ).mergeExpr
+	   })
+   	
+    
+    Root.Context("storage","text/html")
+    	.GET(Lambda{
+	    P(1) as WebRequest => requestObj
+	    id=requestObj.urlParams.id.parseInt
+	    
+	    Sequence(
+	    	@ <<BodyStart>>
+	    	
+	    	#@ <<ShowRequest(requestObj)>>
+	    		  
+	    
+	    	@ <form action="/add" method="POST">
+	    	@ <input type="hidden" name="id" value="<<id>>"/>
+	    	    	  	
+	    	@ <h1>Storage <<GetStorageName(id)>></h1>
+	    	@ <h3>New element</h3>
+	    	@ <div class="content">
+	    	@ Name:<br/>
+	    	@ <input name="article" style="width:20Em"/><br/>
+	    	@ Date:<br/>
+	    	@ <input name="date" style="width:10Em"><br/>
+	    	@ (y-m-d or y-m)<br/>
+	    	@ <button class="action" type="submit">Add</button>
+	    	@ </div>
+	    	@ </form>
+
+	    	@ <form action="/search" method="POST">
+	    	@ <input type="hidden" name="id" value="<<id>>"/>
+
+	    	@ <h3>Search/update</h3>
+	    	@ <div class="content">
+	    	@ Name:<br/>
+	    	@ <input name="search" style="width:20Em"/><br/>
+	  	@ <button class="action" type="submit">Search</button>
+		@ </div>
+		@ </form>
+
+	    	@ <h3>List all</h3>
+	    	@ <div class="content">
+	    	@ <a class="action" href="show?id=<<id>>&amp;by=name">By name</a>
+	    	@ <br/>
+	    	@ <a class="action" href="show?id=<<id>>&amp;by=dateAsc">By date old first</a>
+	    	@ <br/>
+	    	@ <a class="action" href="show?id=<<id>>&amp;by=dateDesc">By date new first</a>
+	    	@ </div>
+
+	    	@ <<BodyEnd>>
+	    ).mergeExpr
+	})		   
+
+
+
+    # path = /add (POST)
+    Root.Context("add","text/html")
+    	.POST(Lambda{
+	    P(1) as WebRequest => requestObj
+	    bp=requestObj.bodyParams
+	    id=bp.id.parseInt
+	    
+	    result=null
+	    if (bp.article != "" && bp.date != "") result = AddArticle(id,bp.article,bp.date)
+	    
+	    if (result == null) result="Enter article name and expiration date!"
+	    Sequence(
+	    	@ <<BodyStart>>
+	    	@ <<result>>
+	    	@ <br>
+		@ <a class="action" href="/storage?id=<<id>>"> Back </a>
+	    	@ <<BodyEnd>>
+	    ).mergeExpr
+    	})
+
+
+   # Path: /search (POST)
+   Root.Context("search","text/html")
+    	.POST(Lambda{
+	    P(1) as WebRequest => requestObj
+	    bp=requestObj.bodyParams
+	    id=bp.id.parseInt
+	    
+	    result=null
+	    if (bp.search != "") result = Search(id,bp.search)
+	    
+	    if (result == null) result="Enter search term!"
+	    Sequence(
+	    	@ <<BodyStart>>
+	    	@ <<result>>
+	    	@ <br>
+		@ <a class="action" href="/storage?id=<<id>>"> Back </a>
+	    	@ <<BodyEnd>>
+	    ).mergeExpr
+    	})
+
+    Root.Context("show","text/html")
+    	.GET(Lambda{
+	    P(1) as WebRequest => requestObj
+            #id=requestObj.urlParams.id
+            #by=requestObj.urlParams.by
+            Sequence(
+	    	@ <<BodyStart>>
+            	@ Showing <<id>> by <<by>>
+	    	@ <<BodyEnd>>
+            ).mergeExpr
+         })
+	
+    
+    Root.Context("icon","image/jpg")
+    	.GET(Lambda{
+            P(1) as WebRequest => requestObj
+            id=requestObj.urlParams.id
+
+            file=ImageDir.file(id+".jpg")
+
+            binaryData=file.readBinary
+            binaryData
+    	})
+            
+        
+/Init
+
+# Helpers
+
+
+# Open Body 
+# --
+    Sequence(
+            @ <html>
+            @ <head>
+            @   <meta charset="utf-8"/>
+            @   <link rel="stylesheet" href="/my.css">
+            @ </head>
+            @ <body>
+            @ <a href="/"><span style="font-size:48pt; background-color:red; color:white">Food Storage</span></a>
+            @ <div style="background-color:white; padding:10px">
+    )
+//BodyStart
+
+
+# Close Body 
+# --
+    Sequence(
+        @ </div>
+        @ </body>
+        @ </html>
+    )
+//BodyEnd
+
+
+# Show all data from Request object
+# --
+    P(1) => req
+    
+    body=req.body
+    if (body==null) {
+        body="null"
+    } else {
+        # Binary value
+        body=body.hex
+        if (body.length > 50) body=body.sub(0,40) + "..."
+    }
+    Sequence(
+        @ <h2>.headers</h2>
+        @ <<ShowDict(req.headers)>>
+        @ <h2>.method</h2>
+        @ <<req.method>><br>
+        @ <h2>.url</h2>
+        @ <<req.url>><br/>
+        @ <h2>.urlParams</h2>
+        @ <<ShowDict(req.urlParams)>>
+        @ <h2>.body</h2>
+        @ <<body>><br/>
+        @ <h2>.bodyParams</h2>
+        @ <<ShowDict(req.bodyParams)>>
+    ) -> line
+        line.mergeExpr->s out(s)
+//ShowRequest
+
+# Show dictionary
+# --
+    P(1)=>dict
+    dict.keys->key
+        out(""+key + ": " + dict.get(key) + "<br/>")
+//ShowDict
+
+
+# Show logfile
+# --
+    LogFile.read
+/show

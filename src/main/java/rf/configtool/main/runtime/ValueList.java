@@ -56,6 +56,7 @@ public class ValueList extends Value implements IsSynthesizable {
                 new FunctionMax(),
                 new FunctionMin(),
                 new FunctionPrint(),
+                new FunctionSeparate(),
         };
         setFunctions(arr);
     }
@@ -738,6 +739,33 @@ public class ValueList extends Value implements IsSynthesizable {
             return new ValueBoolean(true);
         }
     }
+
+    
+
+    class FunctionSeparate extends Function {
+        public String getName() {
+            return "separate";
+        }
+        public String getShortDesc() {
+            return "separate(sep) - insert value between existing values of list, returns self";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected separator value");
+            Value sep=params.get(0);
+
+            List<Value> newList=new ArrayList<Value>();
+
+            boolean first=true;
+            for (Value v:val) {
+                if (!first) newList.add(sep);
+                newList.add(v);
+                first=false;
+            }
+            val=newList;
+            return self();
+        }
+    }
+
 
 
 }

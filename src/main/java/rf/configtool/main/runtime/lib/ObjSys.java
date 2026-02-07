@@ -115,6 +115,7 @@ public class ObjSys extends Obj {
                 new FunctionSyn(),
                 new FunctionEval(),
                 new FunctionGetType(),
+                new FunctionGetFunctions(),
                 new FunctionCurrentTimeMillis(),
 
 
@@ -823,6 +824,33 @@ public class ObjSys extends Obj {
         }
     }
    
+    class FunctionGetFunctions extends Function {
+        public String getName() {
+            return "getFunctions";
+        }
+        public String getShortDesc() {
+            return "getFunctions(any) - get list of functions in object";
+        }
+        @Override
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected parameter any");
+            Obj v=params.get(0);
+            if (v instanceof ValueObj) {
+                v=((ValueObj) v).getVal();
+            }
+
+            List<String> names=v.getFunctionNames();
+
+            List<Value> result=new ArrayList<Value>();
+            for (String name:names) {
+                Function f=v.getFunction(name);
+                if (f==null) throw new Exception("ERROR: Function " + name + " not found");
+                else result.add(new ValueString(f.getShortDesc()));
+
+            }
+            return new ValueList(result);
+        }
+    }
 
     class FunctionCurrentTimeMillis extends Function {
         public String getName() {

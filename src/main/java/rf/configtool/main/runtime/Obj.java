@@ -191,6 +191,35 @@ public abstract class Obj {
         }
         return null;
     }
+
+    public List<String> getFunctionNames() {
+
+        // populate functions map completely for help
+        if (functionArr != null) {
+            for (Function f:functionArr) functions.put(f.getName(), f);
+            functionArr=null;
+        }
+        
+        List<String> fNames=new ArrayList<String>();        
+        Iterator<String> names=functions.keySet().iterator();
+        
+        while(names.hasNext()) {
+            String name=names.next();
+            fNames.add(name);
+        }
+        fNames.sort(new Comparator<String>() {
+            public int compare (String a, String b) {
+                return a.compareTo(b);
+            }
+        });
+
+        List<String> desc=new ArrayList<String>();
+
+        for (String name:fNames) {
+            desc.add(functions.get(name).getName());
+        }
+        return desc;
+    }
     
     public abstract String getTypeName();
     public abstract ColList getContentDescription();
@@ -232,8 +261,7 @@ public abstract class Obj {
     }
    
     
-    
-    
+  
     public void generateHelp(Ctx ctx) {
         ObjGlobal objGlobal=ctx.getObjGlobal();
         if (this instanceof ObjGlobal) {
