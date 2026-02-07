@@ -24,7 +24,7 @@
 # --
 <<< EOF
 A web interface for managing content in different locations which
-has an expiration date.
+has an date, either a "best-before" or "added to freezer".
 
 TODO: 
 When pressing Show for a named storage, we get a list. 
@@ -227,7 +227,7 @@ Must also offer edit link in the "Added to Xxx" screen
 	    	@ <table>
 	    	@ <tr>
 	    	@   <td>Name</td>
-	    	@   <td>Expiration</td>
+	    	@   <td>Date</td>
 	    	@   <td>Count</td>
 	    	@ </tr>
 	    	@ <tr>
@@ -236,7 +236,7 @@ Must also offer edit link in the "Added to Xxx" screen
 	    	@   <td><input name="count" style="width:5ex"></td>
 	    	@ </tr>
 		@ </table>
-	    	@ Expiration: y-m-d / y-m / -m / -m-d
+	    	@ Date: y-m-d / y-m / -m / -m-d
 	    	@ <br/><br/>
 	    	@ <button class="action" type="submit">Add</button>
 	    	@ </form>
@@ -258,7 +258,7 @@ Must also offer edit link in the "Added to Xxx" screen
 	    result=null
 	    if (bp.article != "" && bp.date != "") result = AddArticle(id,bp.article,bp.date,bp.count)
 	    
-	    if (result == null) result="Enter article name and expiration date!"
+	    if (result == null) result="Missing values!"
 	    Sequence(
 	    	@ <<BodyStart>>
 	    	@ <<result>>
@@ -347,7 +347,7 @@ Must also offer edit link in the "Added to Xxx" screen
 			@ "<<GetStorageName(storageId)>>"<br/>
 			@ <br/>
 			@ Name: <span class="data"><<name>></span><br/>
-			@ Expires: <span class="data"><<date.fmt>></span><br/>
+			@ Date: <span class="data"><<date.fmt>></span><br/>
 			@ Count: <span class="data"><<count>></span>
 		).mergeExpr
 	}
