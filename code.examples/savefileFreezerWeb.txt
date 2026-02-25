@@ -344,7 +344,7 @@ Must also offer edit link in the "Added to Xxx" screen
 		Db2:Set(DbId,"Data",data)
 		
 		Sequence(
-			@ "<<GetStorageName(storageId)>>"<br/>
+			@ <b><<GetStorageName(storageId)>></b><br/>
 			@ <br/>
 			@ Name: <span class="data"><<name>></span><br/>
 			@ Date: <span class="data"><<date.fmt>></span><br/>

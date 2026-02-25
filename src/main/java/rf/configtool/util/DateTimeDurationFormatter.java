@@ -34,8 +34,8 @@ public class DateTimeDurationFormatter {
     }
     
     public String fmt() {
-        if (days > 740) return (days/365) + "y";
-        if (days > 185) return (days/30) + "mo"; 
+        if (days > 740) return (days/365) + "y" + ((days%365)/30)+"mo";
+        if (days > 185) return (days/30) + "mo" + (days%30)+"d"; 
         if (days > 5) return days+"d";
         if (days > 0) return days+"d" + hours + "h";
         if (hours > 0) return hours + "h" + f(minutes,2)+"m";
