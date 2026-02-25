@@ -657,6 +657,8 @@ Dict.set("list",List)
 /UrlDecodeValues
 
 
+# For a more general implementation, see CURL script (2026-02 RFO)
+#
 # Invoke curl with detailed parameters
 # The bodyParams can be a JSON (single line) string on object or array format {...} or [...]
 # Or, if not recognized as a JSON string, it is assumed to be encoded on URL format a=b&c=d with proper

@@ -1,0 +1,50 @@
+
+# Invoke curl with detailed parameters
+# --
+    P(1,"http") as String => protocol
+    P(2) as String        => hostPort
+    P(3,"GET") as String  => method
+    P(4,"/") as String    => path
+	P(5) as Dict          => httpHeaders
+    P(6) as String?       => bodyData 
+    P(7,false)        =>verbose
+
+    cmd=List("curl","-X",method)
+	
+	# http headers
+	Inner{
+		httpHeaders.keys->key 
+			value=httpHeaders.get(key)
+			cmd.add("--header")
+			cmd.add(key + ": " + value)
+	}
+
+	# build URL
+
+    url=protocol + "://" + hostPort + path
+    cmd.add(url)
+
+	# body data
+    if (bodyData != null) {
+        cmd.add("-d")
+        if (Sys.isWindows) bodyData=bodyData.replace('"','\"')
+        cmd.add(bodyData)
+    }
+    
+    if (verbose) {
+        println
+        Inner {
+            cmd->x println("COMMAND: " + x)
+        }
+        println
+    }
+    result = Lib:run(cmd)
+    if (verbose) {
+        println("exitCode = " + result.exitCode)
+        Inner{result.stdout->line println("(out) " + line)}
+        Inner{result.stderr->line println("(err) " + line)}
+    }
+    result
+/Invoke
+
+

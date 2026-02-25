@@ -1,0 +1,82 @@
+
+
+# Create SOAP XML call
+# --
+	P(1,"http://example.com/service") as String => serviceNamespace
+	P(2,"noop") as String => action
+	P(3,Dict) as Dict => params
+
+	paramList=ActionParameters(params,"ser")
+	
+	<<< EOF
+		<?xml version="1.0" encoding="UTF-8"?>
+		<soapenv:Envelope 
+			xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+			xmlns:ser="<<serviceNamespace>>">
+		<soapenv:Header/>
+		<soapenv:Body>
+			<ser:<<action>>>
+<<paramList>>
+			</ser:<<action>>>
+		</soapenv:Body>
+		</soapenv:Envelope>
+	>>> EOF
+	_.mergeExpr
+/CreateSoapRequest
+
+
+# Create action parameters (helper)
+# --
+	P(1) as Dict => params
+	P(2) as String => ns
+	P(3,"^t^t^t^t".unEsc) => indent
+
+	params.keys->key
+		value=""+params.get(key)
+		tag=ns + ":" + key
+		out(indent + "<"+tag+">" + Util:EscapeXMLString(value) + "</"+tag+">")
+//ActionParameters
+
+
+# Create basic authentication string
+# --
+	P(1) as String => username
+	P(2) as String => password
+
+	(username + ":" + password).getBytes("UTF-8").base64
+/BasicAuth	
+
+
+# Create complete HTTP request for a soap call and call it with CURL:Invoke
+# --
+	P(1,"http://example.com/service") as String => soapService
+	P(2,"http://example.com/service/noop") as String => soapAction
+	P(3) as String => body
+	P(4) as String? => basicAuth
+	P(5, false) => debug
+
+	protocol=soapService.before(":")
+	targetHostPort=soapService.after("//").before("/")
+	targetHost=targetHostPort.before(":")
+	targetService=soapService.after("//").from("/")
+
+	if (debug) {
+		println("soapService =",soapService)
+		println("targetHostPort=",targetHostPort)
+		println("targetHost =",targetHost)
+		println("targetService =",targetService)
+		println("soapAction =", soapAction)
+	}
+
+	headers=Dict
+		.set("Content-Type", "text/xml;charset=UTF-8")
+		.set("SOAPAction", soapAction)
+		.set("Host",targetHost)
+		.set("User-Agent","Apache-HttpClient/4.5.5 (Java/12.0.1)")
+	
+	# Note: Content-Length is handled by curl
+
+	if (basicAuth != null) headers.set("Authorization", "Basic " + basicAuth)
+
+	CURL:Invoke(protocol, targetHostPort, "POST", targetService, headers, body, debug)
+/Call
