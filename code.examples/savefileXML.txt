@@ -35,6 +35,9 @@ usually only) XML object.
 
 To traverse an XML structure:
 
+	someNode.tagName				# String
+	someNode.attributes				# Dict
+
 	someNode.attrGet("attrName")	# Get attribute or null if undefined
 	someNode.subNodes("tagName")    # returs list of &XMLNode objects with tag name (or empty list if none)
 	someNode.subNode("tagName")     # first subnode with given tag (crashes if not found)

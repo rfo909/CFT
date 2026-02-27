@@ -12,13 +12,10 @@
 	
 
 # Schema processing
+# May be called on its own, reading a file, or from a Wsdl object
 # --
 	
 	self.sourceFile=null
-	self.simpleTypes=Dict
-	self.complexTypes=Dict
-	self.includedSchema=List
-	self.globalElements=Dict
 
 	self.init = Lambda{
 		P(1) as File => f
@@ -36,11 +33,16 @@
 
 		self.schema = schema
 		self.sourceFile=sourceFile
-		error(self.sourceFile==null, "No sourcefile, can not resolve includes")
+		error(self.sourceFile==null, "No sourcefile, can not resolve imports")
 
 		self.xmlns=schema.attrGet("xmlns")
 		self.nsPrefixes=GetNamespacePrefixes(schema)
 		self.targetNamespace=schema.attrGet("targetNamespace")
+
+		self.importedSchema=List
+		self.simpleTypes=Dict
+		self.complexTypes=Dict
+		self.globalElements=Dict
 
 		self.processImports(schema)
 		self.addSimpleTypes(schema)
@@ -56,7 +58,8 @@
 			if (t.subNodes("xsd:restriction")) Inner {
 				t.subNode("xsd:restriction").attrGet("base") => type
 			}
-			self.simpleTypes.set(name,type)
+			e=t
+			self.simpleTypes.set(name,SymDict(type,e))
 	}
 
 	self.addComplexTypes = Lambda{
@@ -69,9 +72,10 @@
 				t.subNode("xsd:sequence").subNodes("xsd:element")->e
 					name=e.attrGet("name")
 					type=e.attrGet("type")
-					sequence.add(SymDict(name,type))
+					sequence.add(SymDict(name,type,e))
 			}
-			self.complexTypes.set(typeName,sequence)
+			e=t
+			self.complexTypes.set(typeName,SymDict(sequence,e))
 	}
 
 
@@ -85,6 +89,7 @@
 			println("Processing import XSD file: " + xfile.path)
 			schema=Schema
 			schema.init(xfile)
+			self.importedSchema.add(schema)
 	}
 
 	self.processGlobalElements = Lambda{  # global elements not inside types
@@ -97,9 +102,10 @@
 				self.globalElements.set(name,type)
 	}
 
+	# Just verify there are no loose non-namespaced references
 	self.checkConsistency = Lambda{
 		self.complexTypes.keys->ctname
-			self.complexTypes.get(ctname)->ct  # list of Dict with name, type
+			self.complexTypes.get(ctname).sequence->ct  # list of Dict with name, type
 				name=ct.name
 				type=ct.type
 				if (!type.contains(":") && !self.complexTypes.has(type) && !self.simpleTypes.has(type)) {
@@ -109,8 +115,8 @@
 
 	self.showSimple = Lambda{
 		self.simpleTypes.keys->name
-			type=self.simpleTypes.get(name)
-			report(name, type)
+			dict=self.simpleTypes.get(name)
+			report(name, dict.type)
 	}
 
 	self.showComplex = Lambda{
@@ -118,7 +124,7 @@
 			report("")
 			report(name)
 			report("-".times(name.length))
-			sequence=self.complexTypes.get(name)
+			sequence=self.complexTypes.get(name).sequence
 			sequence->row
 				report(row.name,row.type)
 	}
@@ -135,6 +141,25 @@
 			report(prefix, namespace)
 	}
 
+	self.showEverything = Lambda{
+		Lib:Header("xmlns")
+		println(self.xmlns)
+
+		Lib:Header("targetNamespace")
+		println(self.targetNamespace)
+
+		Lib:Header("Namespace prefixes")
+		Lib:ShowRows(self.showNsPrefixes)
+
+		Lib:Header("Simple types")
+		Lib:ShowRows(self.showSimple)
+
+		Lib:Header("Complex types")
+		Lib:ShowRows(self.showComplex)
+
+		Lib:Header("Global elements")
+		Lib:ShowRows(self.showGlobalElements)
+	}
 /class Schema
 
 
@@ -142,7 +167,7 @@
 
 
 
-# Xsd file test
+# Xsd (schema) file test
 # --
 	P(1) as File => f
 	
@@ -150,15 +175,8 @@
 	schema.init(f)
 
 	schema.checkConsistency
-	Lib:Header("Simple types")
-	Lib:ShowRows(schema.showSimple)
-	Lib:Header("Complex types")
-	Lib:ShowRows(schema.showComplex)
-	Lib:Header("Global elements")
-	Lib:ShowRows(schema.showGlobalElements)
-	Lib:Header("Namespace prefixes")
-	Lib:ShowRows(schema.showNsPrefixes)
-//xpt
+	schema.showEverything
+//sct
 
 
 
@@ -168,6 +186,8 @@
 # --
 	self.sourceFile=null
 	self.schema=List   # list of XsdSchema objects
+	self.messages=Dict
+	self.portTypes=Dict
 
 	self.init = Lambda{
 		P(1) as File => f
@@ -175,22 +195,106 @@
 		self.sourceFile=f
 		XML:Parse(f.read).first => root
 
-		root.subNode("wsdl:types")->wt
-			# schema
+		if (root.tagName != "wsdl:definitions") {
+			error("WSDL root element should be of type wsdl:definitions")
+		}
+
+		self.xmlns=root.attrGet("xmlns")
+		self.nsPrefixes=GetNamespacePrefixes(root)
+		self.targetNamespace=root.attrGet("targetNamespace")
+
+		root.subNodes("wsdl:types")->wt
+			# inline schema
 			Inner {
 				wt.subNodes("xsd:schema")->xschema
 					s=Schema
 					s.processSchemaNode(xschema, f)
 					self.schema.add(s)
+					#s.showEverything
 			}
-	}				
-					
-/class WsdlParser
+		|
+		
+		root.subNodes("wsdl:message")->e
+			name=e.attrGet("name")
+			parts=List
+			Inner{
+				e.subNodes("wsdl:part")->p
+					part = Dict
+						.set("name",p.attrGet("name"))
+						.set("element",p.attrGet("element"))
+						.set("e", p) # XML element
+					parts.add(part)
+			}
+			self.messages.set(name,SymDict(parts, e)) # store XML element
+		|
+
+		root.subNodes("wsdl:portType")->e
+			name=e.attrGet("name")
+			
+			operations=List
+			Inner{
+				e.subNodes("wsdl:operation")->op
+				operation=Dict
+					.set("name", op.attrGet("name"))
+					.set("e", op)  # XML element
+				operations.add(operation)
+			}
+			self.portTypes.set(name,SymDict(operations, e)) # store XML element
+		|
+			
+		# omitting for now:
+		# root.subNodes("wsdl:binding")
+		# root.subNodes("wsdl:service")
+
+	}
+
+	self.showNsPrefixes = Lambda{
+		self.nsPrefixes.keys->prefix
+			namespace=self.nsPrefixes.get(prefix)
+			report(prefix, namespace)
+	}
+
+
+
+	self.showMessages = Lambda{
+		self.messages.keys->key
+			report(key)
+			self.messages.get(key).parts->p
+				report("",p.name,p.element)
+	}
+
+	self.showPortTypes = Lambda{
+		self.portTypes.keys->key
+			report(key)
+			self.portTypes.get(key).operations->op
+				report("",op.name)
+	}
+
+	self.showEverything = Lambda{
+		Lib:Header("xmlns")
+		println(self.xmlns)
+
+		Lib:Header("targetNamespace")
+		println(self.targetNamespace)
+
+		Lib:Header("Namespace prefixes")
+		Lib:ShowRows(self.showNsPrefixes)
+
+		Lib:Header("Messages")
+		Lib:ShowRows(self.showMessages)
+
+		Lib:Header("Port types")
+		Lib:ShowRows(self.showPortTypes)
+	}
+
+/class Wsdl
 
 # WsdlParser test
 # --
 	P(1) as File => f
-	parser=WsdlParser(f)
+	parser=Wsdl
+	parser.init(f)
+	parser.showEverything
 //wpt
 	
 
