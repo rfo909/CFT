@@ -8,7 +8,7 @@
 		dict.set(name.after(":"), node.attributes.get(name))
 	|
 	dict
-/GetNamespacePrefixes
+//GetNamespacePrefixes
 	
 
 # Schema processing
@@ -95,11 +95,10 @@
 	self.processGlobalElements = Lambda{  # global elements not inside types
 		P(1) as &XMLNode => schema
 
-		schema.subNodes("xsd:complexType")->ctype
-			ctype.subNodes("xsd:element")->elem
-				name=xelement.attrGet("name")
-				type=xelement.attrGet("type")
-				self.globalElements.set(name,type)
+		schema.subNodes("xsd:element")->elem
+			name=elem.attrGet("name")
+			type=elem.attrGet("type")
+			self.globalElements.set(name,type)
 	}
 
 	# Just verify there are no loose non-namespaced references
@@ -176,7 +175,7 @@
 
 	schema.checkConsistency
 	schema.showEverything
-//sct
+/stest
 
 
 
@@ -254,7 +253,11 @@
 			report(prefix, namespace)
 	}
 
-
+	self.showInlineSchema = Lambda{
+		self.schema->schema
+				Lib:Header("Schema")
+				schema.showEverything
+	}
 
 	self.showMessages = Lambda{
 		self.messages.keys->key
@@ -280,6 +283,9 @@
 		Lib:Header("Namespace prefixes")
 		Lib:ShowRows(self.showNsPrefixes)
 
+		Lib:Header("Inline schema")
+		println("Call <wsdl-object>.showInlineSchema")
+
 		Lib:Header("Messages")
 		Lib:ShowRows(self.showMessages)
 
@@ -289,16 +295,24 @@
 
 /class Wsdl
 
-# WsdlParser test
+
+# Wsdl test
 # --
 	P(1) as File => f
 	parser=Wsdl
 	parser.init(f)
 	parser.showEverything
-//wpt
+/wtest
 	
 
-
+# Wsdl test2 - list inline schema
+# --
+	P(1) as File => f
+	parser=Wsdl
+	parser.init(f)
+	parser.showInlineSchema
+//t2
+	
 
 
 
