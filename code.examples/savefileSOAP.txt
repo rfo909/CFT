@@ -1,3 +1,201 @@
+# Namespace prefixes
+# --
+	P(1) as &XMLNode => node
+	dict=Dict
+
+	node.attributes.keys->name 
+		assert(name.startsWith("xmlns:"))
+		dict.set(name.after(":"), node.attributes.get(name))
+	|
+	dict
+/GetNamespacePrefixes
+	
+
+# Schema processing
+# --
+	
+	self.sourceFile=null
+	self.simpleTypes=Dict
+	self.complexTypes=Dict
+	self.includedSchema=List
+	self.globalElements=Dict
+
+	self.init = Lambda{
+		P(1) as File => f
+
+		XML:Parse(f.read).first => schema  # expects xsd:schema element
+		self.sourceFile=f
+		self.processSchemaNode(schema)
+	}
+
+	self.processSchemaNode = Lambda{
+		P(1) as &XMLNode => schema
+		P(2, self.sourceFile) as File => sourceFile  
+
+		error(schema.tagName != "xsd:schema", "Not an xsd:schema node")
+
+		self.schema = schema
+		self.sourceFile=sourceFile
+		error(self.sourceFile==null, "No sourcefile, can not resolve includes")
+
+		self.xmlns=schema.attrGet("xmlns")
+		self.nsPrefixes=GetNamespacePrefixes(schema)
+		self.targetNamespace=schema.attrGet("targetNamespace")
+
+		self.processImports(schema)
+		self.addSimpleTypes(schema)
+		self.addComplexTypes(schema)
+		self.processGlobalElements(schema)
+	}
+
+	self.addSimpleTypes = Lambda{
+		P(1) => schema
+		schema.subNodes("xsd:simpleType")->t
+			name=t.attrGet("name")
+			type="Any"
+			if (t.subNodes("xsd:restriction")) Inner {
+				t.subNode("xsd:restriction").attrGet("base") => type
+			}
+			self.simpleTypes.set(name,type)
+	}
+
+	self.addComplexTypes = Lambda{
+		P(1) => schema
+		schema.subNodes("xsd:complexType")->t
+			typeName=t.attrGet("name")
+			sequence=List
+
+			if (t.subNodes("xsd:sequence")) Inner{
+				t.subNode("xsd:sequence").subNodes("xsd:element")->e
+					name=e.attrGet("name")
+					type=e.attrGet("type")
+					sequence.add(SymDict(name,type))
+			}
+			self.complexTypes.set(typeName,sequence)
+	}
+
+
+	self.processImports = Lambda{
+		P(1) as &XMLNode => schema
+
+		schema.subNodes("xsd:import")->ximp
+			ns=ximp.attrGet("namespace")
+			loc=ximp.attrGet("schemaLocation")
+			xfile=self.sourceFile.dir.file(loc)
+			println("Processing import XSD file: " + xfile.path)
+			schema=Schema
+			schema.init(xfile)
+	}
+
+	self.processGlobalElements = Lambda{  # global elements not inside types
+		P(1) as &XMLNode => schema
+
+		schema.subNodes("xsd:complexType")->ctype
+			ctype.subNodes("xsd:element")->elem
+				name=xelement.attrGet("name")
+				type=xelement.attrGet("type")
+				self.globalElements.set(name,type)
+	}
+
+	self.checkConsistency = Lambda{
+		self.complexTypes.keys->ctname
+			self.complexTypes.get(ctname)->ct  # list of Dict with name, type
+				name=ct.name
+				type=ct.type
+				if (!type.contains(":") && !self.complexTypes.has(type) && !self.simpleTypes.has(type)) {
+					error(ctName + "." + name + " : UNDEFINED TYPE: " + type)
+				}
+	}
+
+	self.showSimple = Lambda{
+		self.simpleTypes.keys->name
+			type=self.simpleTypes.get(name)
+			report(name, type)
+	}
+
+	self.showComplex = Lambda{
+		self.complexTypes.keys->name
+			report("")
+			report(name)
+			report("-".times(name.length))
+			sequence=self.complexTypes.get(name)
+			sequence->row
+				report(row.name,row.type)
+	}
+
+	self.showGlobalElements = Lambda{
+		self.globalElements.keys->name
+			type=self.globalElements.get(name)
+			report(name,type)
+	}
+
+	self.showNsPrefixes = Lambda{
+		self.nsPrefixes.keys->prefix
+			namespace=self.nsPrefixes.get(prefix)
+			report(prefix, namespace)
+	}
+
+/class Schema
+
+
+
+
+
+
+# Xsd file test
+# --
+	P(1) as File => f
+	
+	schema=Schema
+	schema.init(f)
+
+	schema.checkConsistency
+	Lib:Header("Simple types")
+	Lib:ShowRows(schema.showSimple)
+	Lib:Header("Complex types")
+	Lib:ShowRows(schema.showComplex)
+	Lib:Header("Global elements")
+	Lib:ShowRows(schema.showGlobalElements)
+	Lib:Header("Namespace prefixes")
+	Lib:ShowRows(schema.showNsPrefixes)
+//xpt
+
+
+
+
+
+# WSDL file parser
+# --
+	self.sourceFile=null
+	self.schema=List   # list of XsdSchema objects
+
+	self.init = Lambda{
+		P(1) as File => f
+
+		self.sourceFile=f
+		XML:Parse(f.read).first => root
+
+		root.subNode("wsdl:types")->wt
+			# schema
+			Inner {
+				wt.subNodes("xsd:schema")->xschema
+					s=Schema
+					s.processSchemaNode(xschema, f)
+					self.schema.add(s)
+			}
+	}				
+					
+/class WsdlParser
+
+# WsdlParser test
+# --
+	P(1) as File => f
+	parser=WsdlParser(f)
+//wpt
+	
+
+
+
 
 
 # Create SOAP XML call

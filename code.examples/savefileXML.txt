@@ -35,12 +35,12 @@ usually only) XML object.
 
 To traverse an XML structure:
 
-	someNode.attrGet("attrName")
-	someNode.subNodes("tagName")    # returs list of &XMLNode objects with tag name
-	someNode.subNode("tagName")     # first subnode with given tag
+	someNode.attrGet("attrName")	# Get attribute or null if undefined
+	someNode.subNodes("tagName")    # returs list of &XMLNode objects with tag name (or empty list if none)
+	someNode.subNode("tagName")     # first subnode with given tag (crashes if not found)
 	someNode.getText                # get list of String from content inside node
 	someNode.getString("default")   # get first String content value
-	someNode.getContent             # get all content strings added together, separated by space
+	someNode.getContent             # Get all content lines trimmed and concatenated
 	
 To create an XML structure from scratch:
 
