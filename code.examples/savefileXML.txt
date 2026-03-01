@@ -35,15 +35,17 @@ usually only) XML object.
 
 To traverse an XML structure:
 
-	someNode.tagName				# String
-	someNode.attributes				# Dict
+	someNode.tagName			# String
+	someNode.attributes			# Dict
 
-	someNode.attrGet("attrName")	# Get attribute or null if undefined
-	someNode.subNodes("tagName")    # returs list of &XMLNode objects with tag name (or empty list if none)
-	someNode.subNode("tagName")     # first subnode with given tag (crashes if not found)
-	someNode.getText                # get list of String from content inside node
-	someNode.getString("default")   # get first String content value
-	someNode.getContent             # Get all content lines trimmed and concatenated
+	someNode.attrGet(attrName, default?)	# Get attribute or "x" if undefined
+	someNode.attrGet(attrName)		# Get attribute or null if undefined
+	someNode.subNodes(tagName?)   	 	# returs list of &XMLNode objects with tag name (or empty list if none)
+	someNode.subNode(tagName?)     		# first subnode with given tag (fails if not found, check with .subnodes() first)
+	someNode.allSubNodes(tagName?)
+	someNode.getText                	# get list of String from content inside node
+	someNode.getString("default")   	# get first String content value
+	someNode.getContent             	# Get all content lines trimmed and concatenated
 	
 To create an XML structure from scratch:
 
@@ -150,7 +152,7 @@ Export as string
 
 	# return value is the root node
 	root
-//RootNode
+//LexerRootNode
 
 
 
@@ -205,7 +207,7 @@ exampleXML
         readLines(".") => xml
     }
 
-    RootNode => root
+    LexerRootNode => root
     Std.Text.Lexer => lexer
 
     xml->line lexer.addLine(line) |
@@ -234,7 +236,7 @@ exampleXML
     
     start=Sys.currentTimeMillis
 
-    RootNode => root
+    LexerRootNode => root
     Std.Text.Lexer => lexer
     
     xml->line 
@@ -336,7 +338,8 @@ exampleXML
     # --
     self.attrGet=Lambda{
         P(1) as String => attrName
-        if (self.attributes.has(attrName), self.attributes.get(attrName), null)
+        P(2) as String? => default
+        if (self.attributes.has(attrName), self.attributes.get(attrName), default)
     }
     
     # Get list of XMLNode from content
@@ -350,11 +353,29 @@ exampleXML
             out(x)
     }
 
-	# Get first XMLNode from content
-	# --
-	self.subNode=Lambda{
+    # Get first XMLNode from content
+    # --
+    self.subNode=Lambda{
         P(1) as String? => tag
-		self.subNodes(tag).first
+	self.subNodes(tag).first
+    }
+    
+    # Get all sub nodes (recursively)
+    # --
+    self.allSubNodes=Lambda{
+    	self.subNodes->node
+    		out(node)
+    		node.allSubNodes->x
+    			out(x)
+    }
+    
+    # Filter allSubNodes on tag name
+    # --
+    self.allSubNodesByTag = Lambda{
+    	P(1) => tag
+    	self.allSubNodes->n
+    		assert(n.tagName==tag)
+    		out(n)
     }
 
     # Get list of String from content
@@ -679,12 +700,6 @@ exampleXML
 //test03
 
 
-
-
-
-    
-
-
 Std.Text.Lexer help
 //LexerHelp
 
@@ -696,3 +711,125 @@ Std.Text.Lexer.Node help
 Std.Text.Lexer.getTokenStream(Std.Text.Lexer.Node) help
 //TSHelp
 
+
+
+# XML Name spaces processing
+# --
+<<< EOF
+2026-03-01 RFO
+
+In an attempt to automate SOAP with CURL + CFT, I needed to understand XML namespaces.
+SOAP is defined with wsdl files, and WSDL as well as XSD name spaces employ an
+attribute 'targetNamespace' for defined content. 
+
+That attribute is not inherited, and since it applies to SOAP, it is not part of the
+XML parser (this file). 
+
+The attribute xmlns identifies default namespace for unqualified tags, and is inherited.
+
+To use custom name spaces, we use xmlns:xxx="http://something/something", and these
+are inherited down the XML tree as well, unless redefined. It is not considered good
+practice to let xsd:schema depend on inheritance, but that's another matter.
+
+The main function is the ProcessNamespaces, which converts tagName of all XML nodes
+to "Clark notation" on format {http://somewhere/something}Customer
+
+It stores a reference namespaceInfo into each node. The NamespaceInfo objects form a
+tree where each points to its (lexical) parent, enabling inheritance of xmlns and
+namespace prefixes.
+
+
+>>> EOF
+/Readme_Namespaces
+
+
+# Undefined name space on internal format
+# --
+	"{}"
+/NS_undefined
+
+# Keep track of namespace stuff; forms a linked list according to XML nesting, in order
+# to look up inherited namespaces
+# --
+	P(1) as &XMLNode => forNode
+	P(2) => parent
+
+	self.forNode=forNode
+	self.parent=parent
+	
+	self.xmlns=if(forNode.attributes.has("xmlns")) "{" + forNode.attrGet("xmlns") + "}" else NS_undefined
+	
+		# The xmlns is the default namespace for unqualified XML elements in scope
+		# Using {} to mean undefined
+	
+	# lookup for namespace prefixes	
+	self.dict=Dict
+	
+	forNode.attributes.keys->attr 
+		assert(attr.startsWith("xmlns:"))
+		prefix=attr.after(":")
+		value=forNode.attributes.get(attr)
+		self.dict.set(prefix, "{" + value + "}") 
+	|
+	
+	# resolve namespaced name/tag to full format
+	self.resolveNamespace = Lambda{
+		P(1) as String => name
+		
+		error(name.contains("{"), "Value already resolved: " + name)
+		error(!name.contains(":"), "Value has no name space prefix: " + name)
+	
+		pre=name.before(":")
+		
+		if (self.dict.has(pre)) {
+			self.dict.get(pre) + name.after(":")
+		} else if (self.parent != null) {
+			self.parent.resolveNamespace(name)
+		} else {
+			error("Undefined namespace prefix: " + self.forNode.nsPrefix + " => " + name)
+		}
+	}
+		
+	# apply xmlns to unqualified tag, or look up namespace prefix
+	self.expandXMLTag = Lambda{
+		P(1) as String => tag
+		
+		if (!tag.contains(":")) {
+			if (self.xmlns=="{}" && self.parent != null) {
+				self.parent.expandXMLTag(tag)
+			} else {
+				self.xmlns+tag
+			}
+		} else {
+			# contains colon
+			self.resolveNamespace(tag)
+		}
+	}
+
+/class NamespaceInfo
+
+
+# Traverse XML node tree and replace tag names with fully qualified names
+# using Clark notation: {http://example.com/ns}Customer
+#
+# Note that this no longer is valid XML, but useful for data mining the structure.
+#
+# Also stores a reference to NamespaceInfo objects inside each node
+# --
+	P(1) as &XMLNode => node
+	P(2) => parentNsInfo  # null for root node
+	
+	namespaceInfo=NamespaceInfo(node, parentNsInfo)
+	
+	if (node.tagName.contains(":")) {
+		node.nsPrefix=node.tagName.before(":")
+	} else {
+		node.nsPrefix=null
+	}
+	node.tagName=namespaceInfo.expandXMLTag(node.tagName)
+	node.namespaceInfo=namespaceInfo
+	
+	node.subNodes->sub ProcessNamespaces(sub, namespaceInfo)
+	
+/ProcessNamespaces
+		

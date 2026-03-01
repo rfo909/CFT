@@ -1,77 +1,234 @@
-# Namespace prefixes
-# --
-	P(1) as &XMLNode => node
-	dict=Dict
 
-	node.attributes.keys->name 
-		assert(name.startsWith("xmlns:"))
-		dict.set(name.after(":"), node.attributes.get(name))
-	|
-	dict
-//GetNamespacePrefixes
-	
-
-# Schema processing
-# May be called on its own, reading a file, or from a Wsdl object
+# WSDL name space on internal format
 # --
+	P(1,"") => tag
+	"{http://schemas.xmlsoap.org/wsdl/}"+tag
+/NS_WSDL
+
+# SOAP name space on internal format
+# --
+	P(1,"") => tag
+	"{http://schemas.xmlsoap.org/wsdl/soap/}"+tag
+/NS_SOAP
+
+# XSD name space on internal format
+# --
+	P(1,"") => tag
+	"{http://www.w3.org/2001/XMLSchema}"+tag
+/NS_XSD
+
+
+NS_WSDL("definitions")
+/WSDL_DEFINITIONS
+
+NS_XSD("schema")
+/XSD_SCHEMA
+
+NS_XSD("import")
+/XSD_IMPORT
+
+
+# Data store 
+# --
+	self.wsdlDocuments = List
+	self.schema = List
 	
+	self.addWsdlDocument = Lambda{
+		P(1) as &WsdlDocument => x
+		println("Adding WsdlDocument")
+		self.wsdlDocuments.add(x)
+	}
+	
+	self.addSchema = Lambda{
+		P(1) as &Schema => s
+		println("Adding Schema")
+		self.schema.add(s)
+	}
+	
+/class DataStore
+
+
+# WSDL file parser
+# --
 	self.sourceFile=null
-
+	self.messages=Dict
+	self.portTypes=Dict
+	self.rootNode=null
+	
 	self.init = Lambda{
 		P(1) as File => f
+		P(2) as &DataStore => dataStore
 
-		XML:Parse(f.read).first => schema  # expects xsd:schema element
+		dataStore.addWsdlDocument(self)
+		
 		self.sourceFile=f
-		self.processSchemaNode(schema)
+		XML:Parse(f.read).first => root
+		XML:ProcessNamespaces(root)
+
+		if (root.tagName != SOAP:WSDL_DEFINITIONS) {
+			error("WSDL root element should be of type " + SOAP:WSDL_DEFINITIONS)
+		}
+
+		self.rootNode=root
+		self.targetNamespace=root.attrGet("targetNamespace")
+
+		root.subNodes(SOAP:NS_WSDL("types"))->wt
+			# inline schema
+			Inner {
+				wt.subNodes(SOAP:XSD_SCHEMA)->schemaNode
+					s=SOAP:Schema
+					s.processSchemaNode(schemaNode, f, dataStore)
+			}
+		|
+		
+		root.subNodes(SOAP:NS_WSDL("message"))->e
+			name=e.attrGet("name")
+			parts=List
+			Inner{
+				e.subNodes(SOAP:NS_WSDL("part"))->p
+					part = Dict
+						.set("name",p.attrGet("name"))
+						.set("element",p.attrGet("element"))
+						.set("e", p) # XML element
+					parts.add(part)
+			}
+			self.messages.set(name,SymDict(parts, e)) # store XML element
+		|
+
+		root.subNodes(SOAP:NS_WSDL("portType"))->e
+			name=e.attrGet("name")
+			
+			operations=List
+			Inner{
+				e.subNodes(SOAP:NS_WSDL("operation"))->op
+				operation=Dict
+					.set("name", op.attrGet("name"))
+					.set("e", op)  # XML element
+				operations.add(operation)
+			}
+			self.portTypes.set(name,SymDict(operations, e)) # store XML element
+		|
+			
+		# omitting for now:
+		# root.subNodes("wsdl:binding")
+		# root.subNodes("wsdl:service")
+
 	}
 
+	self.showMessages = Lambda{
+		self.messages.keys->key
+			report(key)
+			self.messages.get(key).parts->p
+				report("",p.name,p.element)
+	}
+
+	self.showPortTypes = Lambda{
+		self.portTypes.keys->key
+			report(key)
+			self.portTypes.get(key).operations->op
+				report("",op.name)
+	}
+
+	self.showEverything = Lambda{
+		Lib:Header("xmlns")
+		println(self.xmlns)
+
+		Lib:Header("targetNamespace")
+		println(self.targetNamespace)
+
+		Lib:Header("Messages")
+		Lib:ShowRows(self.showMessages)
+
+		Lib:Header("Port types")
+		Lib:ShowRows(self.showPortTypes)
+	}
+
+/class WsdlDocument
+
+
+
+# Schema processing, main function is processSchemaNode with takes an XMLNode as parameter
+# (Which must have tag SOAP:XSD_SCHEMA)
+# --
+	self.dataStore=null
+	self.schemaNode=null
+	self.sourceFile=null
+
+	self.simpleTypes=Dict
+	self.complexTypes=Dict
+	self.globalElements=Dict
+
+	# This function gets called from the Wsdl parser, and when processing imports (below)
+	# --
 	self.processSchemaNode = Lambda{
-		P(1) as &XMLNode => schema
-		P(2, self.sourceFile) as File => sourceFile  
+		P(1) as &XMLNode => schemaNode
+		P(2) as File => sourceFile  
+		P(3) as &DataStore => dataStore
+		
+		self.dataStore=dataStore
+		self.dataStore.addSchema(self)
 
-		error(schema.tagName != "xsd:schema", "Not an xsd:schema node")
+		error(schemaNode.tagName != SOAP:XSD_SCHEMA, "Not an " + SOAP:XSD_SCHEMA + " node")
 
-		self.schema = schema
+		self.schemaNode = schemaNode
 		self.sourceFile=sourceFile
-		error(self.sourceFile==null, "No sourcefile, can not resolve imports")
 
-		self.xmlns=schema.attrGet("xmlns")
-		self.nsPrefixes=GetNamespacePrefixes(schema)
-		self.targetNamespace=schema.attrGet("targetNamespace")
+		self.targetNamespace="{" + schemaNode.attrGet("targetNamespace","") + "}"
+		error(self.targetNamespace=="{}", "Attribute targetNamespace missing in " + SOAP:NS_XSD("schema"))
 
-		self.importedSchema=List
-		self.simpleTypes=Dict
-		self.complexTypes=Dict
-		self.globalElements=Dict
+		self.processImports(schemaNode)
+		self.addSimpleTypes(schemaNode)
+		self.addComplexTypes(schemaNode)
+		self.processGlobalElements(schemaNode)
+	}
+	
+	self.applyTargetNamespace = Lambda{
+		P(1) as String => name
+		if (!name.contains(":")) {
+			self.targetNamespace + name
+		} else {
+			self.resolveNamespace(name)
+		}
+	}
+	
+	self.resolveNamespace = Lambda{
+		P(1) as String => name
+		error (name.contains("{"), "Already on Clark format!") 
+		error (!name.contains(":"), "No namespace prefix!")
 
-		self.processImports(schema)
-		self.addSimpleTypes(schema)
-		self.addComplexTypes(schema)
-		self.processGlobalElements(schema)
+		self.schemaNode.namespaceInfo.resolveNamespace(name)
 	}
 
 	self.addSimpleTypes = Lambda{
 		P(1) => schema
-		schema.subNodes("xsd:simpleType")->t
+		schema.subNodes(SOAP:NS_XSD("simpleType"))->t
 			name=t.attrGet("name")
 			type="Any"
-			if (t.subNodes("xsd:restriction")) Inner {
-				t.subNode("xsd:restriction").attrGet("base") => type
+			if (t.subNodes(SOAP:NS_XSD("restriction"))) Inner {
+				t.subNode(SOAP:NS_XSD("restriction")).attrGet("base") => type
 			}
+			name=self.applyTargetNamespace(name)
+			type=self.applyTargetNamespace(type)
 			e=t
 			self.simpleTypes.set(name,SymDict(type,e))
 	}
 
 	self.addComplexTypes = Lambda{
 		P(1) => schema
-		schema.subNodes("xsd:complexType")->t
+		schema.subNodes(SOAP:NS_XSD("complexType"))->t
 			typeName=t.attrGet("name")
 			sequence=List
 
-			if (t.subNodes("xsd:sequence")) Inner{
-				t.subNode("xsd:sequence").subNodes("xsd:element")->e
+			typeName=self.applyTargetNamespace(typeName)
+
+			if (t.subNodes(SOAP:NS_XSD("sequence"))) Inner{
+				t.subNode(SOAP:NS_XSD("sequence")).subNodes(SOAP:NS_XSD("element"))->e
 					name=e.attrGet("name")
 					type=e.attrGet("type")
+					
+					name=self.applyTargetNamespace(name)
+					type=self.applyTargetNamespace(type)
+					
 					sequence.add(SymDict(name,type,e))
 			}
 			e=t
@@ -82,22 +239,28 @@
 	self.processImports = Lambda{
 		P(1) as &XMLNode => schema
 
-		schema.subNodes("xsd:import")->ximp
-			ns=ximp.attrGet("namespace")
+		schema.subNodes(SOAP:XSD_IMPORT)->ximp
+			ns=ximp.attrGet("namespace")  # must match targetNamespace of schema!
 			loc=ximp.attrGet("schemaLocation")
-			xfile=self.sourceFile.dir.file(loc)
-			println("Processing import XSD file: " + xfile.path)
-			schema=Schema
-			schema.init(xfile)
-			self.importedSchema.add(schema)
+			importFile=self.sourceFile.dir.file(loc)
+			println("Processing " + SOAP:XSD_IMPORT + " file: " + importFile.path)
+			schema=SOAP:Schema
+			XML:Parse(importFile.read).first => schemaNode
+			XML:ProcessNamespaces(schemaNode, self.schemaNode.namespaceInfo)
+			
+			schema.processSchemaNode(schemaNode, importFile, self.dataStore)
 	}
 
 	self.processGlobalElements = Lambda{  # global elements not inside types
 		P(1) as &XMLNode => schema
 
-		schema.subNodes("xsd:element")->elem
+		schema.subNodes(SOAP:NS_XSD("element"))->elem
 			name=elem.attrGet("name")
 			type=elem.attrGet("type")
+
+			name=self.applyTargetNamespace(name)
+			type=self.applyTargetNamespace(type)
+			
 			self.globalElements.set(name,type)
 	}
 
@@ -134,21 +297,10 @@
 			report(name,type)
 	}
 
-	self.showNsPrefixes = Lambda{
-		self.nsPrefixes.keys->prefix
-			namespace=self.nsPrefixes.get(prefix)
-			report(prefix, namespace)
-	}
 
 	self.showEverything = Lambda{
-		Lib:Header("xmlns")
-		println(self.xmlns)
-
 		Lib:Header("targetNamespace")
 		println(self.targetNamespace)
-
-		Lib:Header("Namespace prefixes")
-		Lib:ShowRows(self.showNsPrefixes)
 
 		Lib:Header("Simple types")
 		Lib:ShowRows(self.showSimple)
@@ -166,153 +318,9 @@
 
 
 
-# Xsd (schema) file test
-# --
-	P(1) as File => f
-	
-	schema=Schema
-	schema.init(f)
-
-	schema.checkConsistency
-	schema.showEverything
-/stest
 
 
 
-
-
-# WSDL file parser
-# --
-	self.sourceFile=null
-	self.schema=List   # list of XsdSchema objects
-	self.messages=Dict
-	self.portTypes=Dict
-
-	self.init = Lambda{
-		P(1) as File => f
-
-		self.sourceFile=f
-		XML:Parse(f.read).first => root
-
-		if (root.tagName != "wsdl:definitions") {
-			error("WSDL root element should be of type wsdl:definitions")
-		}
-
-		self.xmlns=root.attrGet("xmlns")
-		self.nsPrefixes=GetNamespacePrefixes(root)
-		self.targetNamespace=root.attrGet("targetNamespace")
-
-		root.subNodes("wsdl:types")->wt
-			# inline schema
-			Inner {
-				wt.subNodes("xsd:schema")->xschema
-					s=Schema
-					s.processSchemaNode(xschema, f)
-					self.schema.add(s)
-					#s.showEverything
-			}
-		|
-		
-		root.subNodes("wsdl:message")->e
-			name=e.attrGet("name")
-			parts=List
-			Inner{
-				e.subNodes("wsdl:part")->p
-					part = Dict
-						.set("name",p.attrGet("name"))
-						.set("element",p.attrGet("element"))
-						.set("e", p) # XML element
-					parts.add(part)
-			}
-			self.messages.set(name,SymDict(parts, e)) # store XML element
-		|
-
-		root.subNodes("wsdl:portType")->e
-			name=e.attrGet("name")
-			
-			operations=List
-			Inner{
-				e.subNodes("wsdl:operation")->op
-				operation=Dict
-					.set("name", op.attrGet("name"))
-					.set("e", op)  # XML element
-				operations.add(operation)
-			}
-			self.portTypes.set(name,SymDict(operations, e)) # store XML element
-		|
-			
-		# omitting for now:
-		# root.subNodes("wsdl:binding")
-		# root.subNodes("wsdl:service")
-
-	}
-
-	self.showNsPrefixes = Lambda{
-		self.nsPrefixes.keys->prefix
-			namespace=self.nsPrefixes.get(prefix)
-			report(prefix, namespace)
-	}
-
-	self.showInlineSchema = Lambda{
-		self.schema->schema
-				Lib:Header("Schema")
-				schema.showEverything
-	}
-
-	self.showMessages = Lambda{
-		self.messages.keys->key
-			report(key)
-			self.messages.get(key).parts->p
-				report("",p.name,p.element)
-	}
-
-	self.showPortTypes = Lambda{
-		self.portTypes.keys->key
-			report(key)
-			self.portTypes.get(key).operations->op
-				report("",op.name)
-	}
-
-	self.showEverything = Lambda{
-		Lib:Header("xmlns")
-		println(self.xmlns)
-
-		Lib:Header("targetNamespace")
-		println(self.targetNamespace)
-
-		Lib:Header("Namespace prefixes")
-		Lib:ShowRows(self.showNsPrefixes)
-
-		Lib:Header("Inline schema")
-		println("Call <wsdl-object>.showInlineSchema")
-
-		Lib:Header("Messages")
-		Lib:ShowRows(self.showMessages)
-
-		Lib:Header("Port types")
-		Lib:ShowRows(self.showPortTypes)
-	}
-
-/class Wsdl
-
-
-# Wsdl test
-# --
-	P(1) as File => f
-	parser=Wsdl
-	parser.init(f)
-	parser.showEverything
-/wtest
-	
-
-# Wsdl test2 - list inline schema
-# --
-	P(1) as File => f
-	parser=Wsdl
-	parser.init(f)
-	parser.showInlineSchema
-//t2
-	
 
 
 
