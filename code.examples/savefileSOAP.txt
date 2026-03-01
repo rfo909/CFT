@@ -11,8 +11,9 @@ To process a wdsl file, do the following:
 	wsdl.init(f,dataStore)
 	println("wsdl file ok")
 	
-	# Now got 
-
+		
+	# update attribute values with regards to xmlns or targetNamespace, or prefix resolve
+	SOAP:UpdateAttributeValuesNamespaces(wsdl)
 	
 	dataStore.schema->schemaNode 
 		schemaNode.showEverything
@@ -23,19 +24,19 @@ To process a wdsl file, do the following:
 >>> EOF
 /Readme
 
-# WSDL name space on internal format
+# WSDL namespace on internal format
 # --
 	P(1,"") => tag
 	"{http://schemas.xmlsoap.org/wsdl/}"+tag
 /NS_WSDL
 
-# SOAP name space on internal format
+# SOAP namespace on internal format
 # --
 	P(1,"") => tag
 	"{http://schemas.xmlsoap.org/wsdl/soap/}"+tag
 /NS_SOAP
 
-# XSD name space on internal format
+# XSD namespace on internal format
 # --
 	P(1,"") => tag
 	"{http://www.w3.org/2001/XMLSchema}"+tag
@@ -334,6 +335,73 @@ NS_XSD("import")
 	}
 /class Schema
 
+
+
+# Apply xmlns default namespace of no namespace prefix, or resolve prefix, for list of attributes in XML node
+# --
+	P(1) as &WsdlDocument => wsdlDocument
+	P(2) as String => tag
+	P(3) as List => attrList
+	P(4) as boolean => defaultToTargetNamespace   # false = default to xmlns
+	
+	println
+	println("Updating XML nodes " + tag)
+	println("   Attributes: " + attrList.concat(", "))
+	println("   Default namespace: " + if(defaultToTargetNamespace,"targetNamespace","xmlns"))
+
+
+	count=0	
+	wsdlDocument.rootNode.allSubNodesByTag(tag)->node
+		if (defaultToTargetNamespace) {
+			definingNode=node.namespaceInfo.findNodeByAttribute("targetNamespace")
+			if (definingNode==null) error("Node " + tag + " has no parent node with attribute targetNamespace")
+			 
+			defaultNamespace=definingNode.attrGet("defaultNamespace")
+			defaultNamespace="{" + defaultNamespace + "}"
+		} else {
+			defaultNameSpace=node.namespaceInfo.getXmlns # already on correct format
+		}
+		
+		updated=false
+		Inner{
+			attrList->attr
+				# we only update attributes that have value
+				if (node.attributes.has(attr)) {
+					str=node.attrGet(attr)
+					if (!str.contains(":")) {
+						str=defaultNamespace + str
+					} else {
+						str=node.namespaceInfo.resolveNamespace(str)
+					}
+					# update
+					node.attributes.set(attr,str)
+					updated=true
+				}
+		}
+		if (updated) count=count+1
+	|
+	println("   Updated nodes: " + count)
+//ResolveNSAttributeValues
+	
+
+
+# Update various attribute values with regards to name spaces
+# Contains a hard-coded list of changes to do to attribute values
+# --
+	P(1) as &WsdlDocument => wd
+	
+	# xmlns
+	defaultSelection=false
+	ResolveNSAttributeValues(wd, NS_WSDL("part"), "element".split, defaultSelection)
+	
+	# targetNamespace
+	defaultSelection=true
+	ResolveNSAttributeValues(wd, NS_XSD("element"), "name type".split, defaultSelection)
+	ResolveNSAttributeValues(wd, NS_WSDL("message"), "name".split, defaultSelection)
+	ResolveNSAttributeValues(wd, NS_WSDL("part"), "name".split, defaultSelection)
+	
+
+/UpdateAttributeValuesNamespaces
 
 
 

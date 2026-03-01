@@ -109,6 +109,9 @@ shortcut:FL   = "---- File Locate under curr Dir ----"    Lib:LocateFiles(Dir)
 shortcut:DL   = "---- Dir Locate under curr Dir ----"     Lib:LocateDirs(Dir)
 shortcut:PURG = "---- Purge old files in curr Dir ----"   Util:PurgeOldFiles(Dir)
 
+# Show help for classes inside library scripts
+shortcut:CH   = "---- class help ----"                    Util:ClassHelp
+
 # Dissect text lins
 shortcut:dis  = "---- Dissect lines of text (paste) ----"      AutoEdit:Dissect
 shortcut:disg = "---- Generate output from dissect data ----"  AutoEdit:DissectGen

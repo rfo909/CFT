@@ -1402,3 +1402,29 @@ Dict.set("list",List)
 		
 /VersionExample	
 		
+		
+		
+# Show lambda's inside classes in library script file
+# --
+	P(1,Input("Enter name of script, like 'XML'").get) as String => script
+	
+	fname="savefile"+script+".txt"
+	
+	Sys.homeDir.sub("code.lib").file(fname) => f
+	if (!f.exists) {
+		Sys.homeDir.sub("code.examples").file(fname) => f
+	}
+	error (!f.exists,"Not found")
+	
+	println("-".times(80))
+
+	comments=List("")
+	f.read->line
+		if (line.startsWith("#")) comments.add(line)
+		if (line.startsWith("/")) comments=List("")
+		if (line.contains("self.") && line.contains("Lambda") || line.startsWith("/class")) Inner{
+			comments.print
+			comments=List
+			println(line.before("{"))
+		}
+/ClassHelp

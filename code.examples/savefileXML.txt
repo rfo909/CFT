@@ -766,31 +766,45 @@ namespace prefixes.
 	"{}"
 /NS_undefined
 
+# NamespaceInfo class
+# -------------------
 # Keep track of namespace stuff; forms a linked list according to XML nesting, in order
 # to look up inherited namespaces
 # --
-	P(1) as &XMLNode => forNode
+	P(1) as &XMLNode => xmlNode
 	P(2) => parent
 
-	self.forNode=forNode
+	self.xmlNode=xmlNode
 	self.parent=parent
 	
-	self.xmlns=if(forNode.attributes.has("xmlns")) "{" + forNode.attrGet("xmlns") + "}" else NS_undefined
+	self.xmlns=if(xmlNode.attributes.has("xmlns")) "{" + xmlNode.attrGet("xmlns") + "}" else NS_undefined
 	
 		# The xmlns is the default namespace for unqualified XML elements in scope
-		# Using {} to mean undefined
+		# Using NS_undefined to mean undefined
 	
 	# lookup for namespace prefixes	
 	self.dict=Dict
 	
-	forNode.attributes.keys->attr 
+	# populate namespace prefix lookup dictionary
+	xmlNode.attributes.keys->attr 
 		assert(attr.startsWith("xmlns:"))
 		prefix=attr.after(":")
-		value=forNode.attributes.get(attr)
+		value=xmlNode.attributes.get(attr)
 		self.dict.set(prefix, "{" + value + "}") 
 	|
 	
-	# resolve namespaced name/tag to full format
+	# look up xmlns property, up the parent chain, fails with error if not found
+	self.getXmlns = Lambda{
+		if (self.xmlns != XML:NS_undefined) {
+			self.xmlns
+		} else if (self.parent != null) {
+			self.parent.getXmlns
+		} else {
+			error("No xmlns property found")
+		}
+	}
+	
+	# resolve namespaced name/tag to full format, fails with error if failing
 	self.resolveNamespace = Lambda{
 		P(1) as String => name
 		
@@ -804,7 +818,7 @@ namespace prefixes.
 		} else if (self.parent != null) {
 			self.parent.resolveNamespace(name)
 		} else {
-			error("Undefined namespace prefix: " + self.forNode.nsPrefix + " => " + name)
+			error("Undefined namespace prefix: " + self.xmlNode.nsPrefix + " => " + name)
 		}
 	}
 		
@@ -813,16 +827,37 @@ namespace prefixes.
 		P(1) as String => tag
 		
 		if (!tag.contains(":")) {
-			if (self.xmlns=="{}" && self.parent != null) {
-				self.parent.expandXMLTag(tag)
-			} else {
-				self.xmlns+tag
-			}
+			self.getXmlns + ":" + tag
 		} else {
-			# contains colon
 			self.resolveNamespace(tag)
 		}
 	}
+	
+	# return list of parent nodes, starting with closest parent, upwards
+	self.getParentNodes = Lambda{
+		curr=self.parent
+		loop
+			break(curr==null)
+			out(curr.xmlNode)
+			curr=curr.parent
+	}
+	
+	# look up xmlNode (self or parent) which has a particular property, return null if not found
+	self.findNodeByAttribute = Lambda{
+		P(1) as String => attrName
+		P(2, true) as boolean => includeSelf
+		
+		found=null
+		if (includeSelf && self.xmlNode.attributes.has(attrName)) found=self
+		if (!found) Inner{
+			self.getParentNodes->node
+				if (node.attributes.has(attrName)) found=node
+				break(found)
+		}
+		found
+	}
+	
+		
 
 /class NamespaceInfo
 
