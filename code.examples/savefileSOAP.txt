@@ -1,3 +1,27 @@
+# Readme
+# --
+<<< EOF
+To process a wdsl file, do the following:
+
+	dataStore=SOAP:DataStore
+	
+	f=File("some.wsdl")
+	
+	wsdl=SOAP:WsdlDocument
+	wsdl.init(f,dataStore)
+	println("wsdl file ok")
+	
+	# Now got 
+
+	
+	dataStore.schema->schemaNode 
+		schemaNode.showEverything
+	|
+	dataStore.wsdlDocuments->wdslNode
+		wsdlNode.showEverything
+	|
+>>> EOF
+/Readme
 
 # WSDL name space on internal format
 # --
@@ -130,9 +154,6 @@ NS_XSD("import")
 	}
 
 	self.showEverything = Lambda{
-		Lib:Header("xmlns")
-		println(self.xmlns)
-
 		Lib:Header("targetNamespace")
 		println(self.targetNamespace)
 
