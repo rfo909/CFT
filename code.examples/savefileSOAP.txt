@@ -3,24 +3,26 @@
 <<< EOF
 To process a wdsl file, do the following:
 
+# Test real wdsl file, which imports xsd file
+# --
 	dataStore=SOAP:DataStore
 	
-	f=File("some.wsdl")
-	
+	f=File("/some/file.wsdl")
 	wsdl=SOAP:WsdlDocument
 	wsdl.init(f,dataStore)
 	println("wsdl file ok")
 	
-		
 	# update attribute values with regards to xmlns or targetNamespace, or prefix resolve
 	SOAP:UpdateAttributeValuesNamespaces(wsdl)
 	
-	dataStore.schema->schemaNode 
-		schemaNode.showEverything
-	|
-	dataStore.wsdlDocuments->wdslNode
+	#dataStore.schema->schemaNode
+	#	schemaNode.showEverything
+	#|
+	dataStore.wsdlDocuments->wsdlNode
 		wsdlNode.showEverything
-	|
+	|	
+/t3
+
 >>> EOF
 /Readme
 
@@ -195,23 +197,12 @@ NS_XSD("import")
 		self.schemaNode = schemaNode
 		self.sourceFile=sourceFile
 
-		self.targetNamespace="{" + schemaNode.attrGet("targetNamespace","") + "}"
-		error(self.targetNamespace=="{}", "Attribute targetNamespace missing in " + SOAP:NS_XSD("schema"))
-
 		self.processImports(schemaNode)
 		self.addSimpleTypes(schemaNode)
 		self.addComplexTypes(schemaNode)
 		self.processGlobalElements(schemaNode)
 	}
 	
-	self.applyTargetNamespace = Lambda{
-		P(1) as String => name
-		if (!name.contains(":")) {
-			self.targetNamespace + name
-		} else {
-			self.resolveNamespace(name)
-		}
-	}
 	
 	self.resolveNamespace = Lambda{
 		P(1) as String => name
@@ -229,8 +220,6 @@ NS_XSD("import")
 			if (t.subNodes(SOAP:NS_XSD("restriction"))) Inner {
 				t.subNode(SOAP:NS_XSD("restriction")).attrGet("base") => type
 			}
-			name=self.applyTargetNamespace(name)
-			type=self.applyTargetNamespace(type)
 			e=t
 			self.simpleTypes.set(name,SymDict(type,e))
 	}
@@ -241,15 +230,10 @@ NS_XSD("import")
 			typeName=t.attrGet("name")
 			sequence=List
 
-			typeName=self.applyTargetNamespace(typeName)
-
 			if (t.subNodes(SOAP:NS_XSD("sequence"))) Inner{
 				t.subNode(SOAP:NS_XSD("sequence")).subNodes(SOAP:NS_XSD("element"))->e
 					name=e.attrGet("name")
 					type=e.attrGet("type")
-					
-					name=self.applyTargetNamespace(name)
-					type=self.applyTargetNamespace(type)
 					
 					sequence.add(SymDict(name,type,e))
 			}
@@ -262,7 +246,7 @@ NS_XSD("import")
 		P(1) as &XMLNode => schema
 
 		schema.subNodes(SOAP:XSD_IMPORT)->ximp
-			ns=ximp.attrGet("namespace")  # must match targetNamespace of schema!
+			ns=ximp.attrGet("namespace")  # must match targetNamespace of schema! (TODO)
 			loc=ximp.attrGet("schemaLocation")
 			importFile=self.sourceFile.dir.file(loc)
 			println("Processing " + SOAP:XSD_IMPORT + " file: " + importFile.path)
@@ -279,9 +263,6 @@ NS_XSD("import")
 		schema.subNodes(SOAP:NS_XSD("element"))->elem
 			name=elem.attrGet("name")
 			type=elem.attrGet("type")
-
-			name=self.applyTargetNamespace(name)
-			type=self.applyTargetNamespace(type)
 			
 			self.globalElements.set(name,type)
 	}
@@ -321,9 +302,6 @@ NS_XSD("import")
 
 
 	self.showEverything = Lambda{
-		Lib:Header("targetNamespace")
-		println(self.targetNamespace)
-
 		Lib:Header("Simple types")
 		Lib:ShowRows(self.showSimple)
 
@@ -337,52 +315,31 @@ NS_XSD("import")
 
 
 
-# Apply xmlns default namespace of no namespace prefix, or resolve prefix, for list of attributes in XML node
+# Apply default namespace if no namespace prefix, or if no default, resolve prefix if present
 # --
-	P(1) as &WsdlDocument => wsdlDocument
-	P(2) as String => tag
-	P(3) as List => attrList
-	P(4) as boolean => defaultToTargetNamespace   # false = default to xmlns
+	P(1) as &XMLNode => node
+	P(2) as List => attrNames
+	P(3) as String? => defaultNamespace
 	
 	println
-	println("Updating XML nodes " + tag)
-	println("   Attributes: " + attrList.concat(", "))
-	println("   Default namespace: " + if(defaultToTargetNamespace,"targetNamespace","xmlns"))
-
-
-	count=0	
-	wsdlDocument.rootNode.allSubNodesByTag(tag)->node
-		if (defaultToTargetNamespace) {
-			definingNode=node.namespaceInfo.findNodeByAttribute("targetNamespace")
-			if (definingNode==null) error("Node " + tag + " has no parent node with attribute targetNamespace")
-			 
-			defaultNamespace=definingNode.attrGet("defaultNamespace")
-			defaultNamespace="{" + defaultNamespace + "}"
-		} else {
-			defaultNameSpace=node.namespaceInfo.getXmlns # already on correct format
-		}
-		
-		updated=false
-		Inner{
-			attrList->attr
-				# we only update attributes that have value
-				if (node.attributes.has(attr)) {
-					str=node.attrGet(attr)
-					if (!str.contains(":")) {
-						str=defaultNamespace + str
-					} else {
-						str=node.namespaceInfo.resolveNamespace(str)
-					}
-					# update
-					node.attributes.set(attr,str)
-					updated=true
-				}
-		}
-		if (updated) count=count+1
-	|
-	println("   Updated nodes: " + count)
-//ResolveNSAttributeValues
+	println("Resolving namespace for " + node.tagName)
+	println("   Attributes: " + attrNames.concat(", "))
+	println("   Default namespace: " + defaultNamespace)
 	
+	attrNames->attr
+		if (node.attributes.has(attr)) {
+			value=node.attributes.get(attr)
+			if (value.contains(":")) {
+				value=node.namespaceInfo.resolveNamespace(value)
+			} else if (defaultNamespace != null) {
+				value="{" + defaultNamespace + "}" + value
+			} else {
+				error("Attribute " + attr + " value '" + value + "' must have namespace prefix")
+			}
+			# update the attribute
+			node.attributes.set(attr,value)
+		}
+/NSResolveAttributes
 
 
 # Update various attribute values with regards to name spaces
@@ -391,22 +348,51 @@ NS_XSD("import")
 # Remember @CH
 # --
 	P(1) as &WsdlDocument => wd
-		
-	# targetNamespace
-	defaultSelection=true
 	
-	# (should only apply to top-level "element" inside schema)
-	ResolveNSAttributeValues(wd, NS_XSD("element"), "name type".split, defaultSelection)
-	ResolveNSAttributeValues(wd, NS_XSD("complexType"), "name".split, defaultSelection)
-	ResolveNSAttributeValues(wd, NS_XSD("simpleType"), "name".split, defaultSelection)
-	ResolveNSAttributeValues(wd, NS_XSD("attribute"), "name type".split, defaultSelection)
+	updateCount=0
 	
-	# xmlns
-	defaultSelection=false
-	ResolveNSAttributeValues(wd, NS_WSDL("part"), "name element".split, defaultSelection)
+	# targetNamespace: Top-level subnodes of certain nodes onlu
 	
-	ResolveNSAttributeValues(wd, NS_XSD("restriction"), "name".split, defaultSelection)
+	wd.rootNode.allSubNodesByTag(NS_XSD("schema"))->schema
+	
+		defaultNamespace=schema.attrGet("targetNamespace")  # or null
 
+		{	schema.allSubNodes(NS_XSD("element"))->element 
+				NSResolveAttributes(element,"name type".split, defaultNamespace)
+				updateCount=updateCount+1
+		}
+		{	schema.allSubNodes(NS_XSD("complexType"))->ctype 
+				updateCount=updateCount+1
+				NSResolveAttributes(ctype,"name type".split, defaultNamespace)
+		}
+		{	schema.allSubNodes(NS_XSD("simpleType"))->stype 
+				NSResolveAttributes(stype,"name".split, defaultNamespace)
+				updateCount=updateCount+1
+		}
+	|
+	wd.rootNode.allSubNodesByTag(NS_WSDL("definitions"))->defs
+	
+		defaultNamespace=schema.attrGet("targetNamespace")  # or null
+
+		{	defs.allSubNodes(NS_WSDL("message"))->message 
+				NPResolveAttributes(message,"name".split, defaultNamespace)
+				updateCount=updateCount+1
+		}
+		{
+			defs.allSubNodes(NS_WSDL("portType"))->port
+				NPResolveAttributes(port,"name".split, defaultNamespace)
+				updateCount=updateCount+1
+		}
+		{	defs.allSubNodes(NS_WSDL("binding"))->binding
+				NPResolveAttributes(binding,"name".split, defaultNamespace)
+				updateCount=updateCount+1
+		}
+		{	defs.allSubNodes(NS_WSDL("service"))->service
+				NPResolveAttributes(service,"name".split, defaultNamespace)
+				updateCount=updateCount+1
+			
+		}
+	|
 
 /UpdateAttributeValuesNamespaces
 

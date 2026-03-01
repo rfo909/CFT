@@ -808,7 +808,9 @@ namespace prefixes.
 	self.resolveNamespace = Lambda{
 		P(1) as String => name
 		
-		error(name.contains("{"), "Value already resolved: " + name)
+		alreadyResolved = name.contains("{")
+		error(alreadyResolved,"Node namespace already resolved: " + name)
+		
 		error(!name.contains(":"), "Value has no name space prefix: " + name)
 	
 		pre=name.before(":")
