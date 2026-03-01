@@ -68,6 +68,23 @@ Pretty-printing
 Export as string
 
 	someNode.export       # return single string for XML structure
+	
+XML Namespaces support
+
+	ProcessNameSpaces(node) 
+		
+	This function parses "xmlns" and "xmlns:xxx" properties for all XML nodes,
+	creating NamespaceInfo objects which are associated with each XML node
+	in the document tree. These are used to rewrite the tags of all XML nodes
+	to the following format:
+	
+	{http://name.space/something}tag
+	
+	This is no longer valid for XML export, but it makes it possible to do correct
+	traversal of name spaced content, regardless of prefixes used. 
+	
+	See also the SOAP script Schema and WsdlDocument classes for examples of
+	such traversal.
 
 >>>> EOF
 /Readme
@@ -302,9 +319,9 @@ exampleXML
         x
     }
 
-	# Set self.content to empty list, returns self
-	# --
-	self.clearContent=Lambda{
+    # Set self.content to empty list, returns self
+    # --
+    self.clearContent=Lambda{
 		self.content=List
 		self
 	}
@@ -324,9 +341,9 @@ exampleXML
     }
 
 
-	# Set single text value into self.content
-	# --
-	self.setText=Lambda{
+    # Set single text value into self.content
+    # --
+    self.setText=Lambda{
 		P(1) as String? => text
 		self.clearContent
 		self.addText(text)
@@ -395,12 +412,13 @@ exampleXML
         if (list.empty, default, list.first)
     }
 
-	# Get all strings from content (trimmed)
-	self.getContent=Lambda{
+    # Get all strings from content (trimmed)
+    # --
+    self.getContent=Lambda{
         P(1,null) => default
         list=self.getText
         if (list.empty, default, list.concat(" ").trim)
-	}
+    }
 
 
 
