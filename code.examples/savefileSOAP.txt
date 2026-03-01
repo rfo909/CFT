@@ -387,19 +387,26 @@ NS_XSD("import")
 
 # Update various attribute values with regards to name spaces
 # Contains a hard-coded list of changes to do to attribute values
+# TODO
+# Remember @CH
 # --
 	P(1) as &WsdlDocument => wd
+		
+	# targetNamespace
+	defaultSelection=true
+	
+	# (should only apply to top-level "element" inside schema)
+	ResolveNSAttributeValues(wd, NS_XSD("element"), "name type".split, defaultSelection)
+	ResolveNSAttributeValues(wd, NS_XSD("complexType"), "name".split, defaultSelection)
+	ResolveNSAttributeValues(wd, NS_XSD("simpleType"), "name".split, defaultSelection)
+	ResolveNSAttributeValues(wd, NS_XSD("attribute"), "name type".split, defaultSelection)
 	
 	# xmlns
 	defaultSelection=false
-	ResolveNSAttributeValues(wd, NS_WSDL("part"), "element".split, defaultSelection)
+	ResolveNSAttributeValues(wd, NS_WSDL("part"), "name element".split, defaultSelection)
 	
-	# targetNamespace
-	defaultSelection=true
-	ResolveNSAttributeValues(wd, NS_XSD("element"), "name type".split, defaultSelection)
-	ResolveNSAttributeValues(wd, NS_WSDL("message"), "name".split, defaultSelection)
-	ResolveNSAttributeValues(wd, NS_WSDL("part"), "name".split, defaultSelection)
-	
+	ResolveNSAttributeValues(wd, NS_XSD("restriction"), "name".split, defaultSelection)
+
 
 /UpdateAttributeValuesNamespaces
 
