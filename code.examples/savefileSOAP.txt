@@ -1,11 +1,17 @@
 # Readme
 # --
 <<< EOF
-To process a wdsl file, do the following:
+To process a wdsl file, see example function t1 below
 
+>>> EOF
+/Readme
+
+
+# Test 
+# --
+	P(1) as File => f
 	dataStore=SOAP:DataStore
 	
-	f=File("/some/file.wsdl")
 	wsdl=SOAP:WsdlDocument
 	wsdl.init(f,dataStore)
 	println("wsdl file ok")
@@ -24,11 +30,10 @@ To process a wdsl file, do the following:
 	#|
 	#dataStore.wsdlDocuments->wsdlNode
 	#	wsdlNode.showEverything
-	#|	/t3
+	#|	
+/t1
 
->>> EOF
--> line out("| " + line)
-/Readme
+	
 
 # WSDL namespace on internal format
 # --
@@ -324,16 +329,25 @@ NS_XSD("import")
 	P(1) as &XMLNode => node
 	P(2) as List => attrNames
 	P(3) as String? => defaultNamespace
+	P(4,false) as boolean => tolerateAlreadyResolved
 	
-	println
-	println("Resolving namespace for " + node.tagName)
-	println("   Attributes: " + attrNames.concat(", "))
-	println("   Default namespace: " + defaultNamespace)
+	#println
+	#println("Resolving namespace for " + node.tagName)
+	#println("   Attributes: " + attrNames.concat(", "))
+	#println("   Default namespace: " + defaultNamespace)
 	
 	attrNames->attr
 		if (node.attributes.has(attr)) {
 			value=node.attributes.get(attr)
-			if (value.contains(":")) {
+			isResolved=value.contains("{")
+
+			if (!tolerateAlreadyResolved && isResolved) {
+				error("Already resolved: " + node.tagName + " attr=" + attr + " value=" + value)
+			}
+
+			if (isResolved) {
+				# leave value as is
+			} else if (value.contains(":")) {
 				value=node.namespaceInfo.resolveNamespace(value)
 			} else if (defaultNamespace != null) {
 				value="{" + defaultNamespace + "}" + value
@@ -393,11 +407,31 @@ NS_XSD("import")
 	# Resolve namespace of attributes with no default namespace
 	# ---------------------------------------------------------
 	defaultNamespace=null
+	acceptResolved=true
 	
-	wd.rootNode.allSubNodes(NS_WSDL("part"))->part
-		NSResolveAttributes(part,"element".split, defaultNamespace)
+	wd.rootNode.allSubNodesByTag("{http://schemas.xmlsoap.org/wsdl/}part")->node
+		NSResolveAttributes(node,"element".split, defaultNamespace, acceptResolved)
+	|
+	wd.rootNode.allSubNodesByTag("{http://schemas.xmlsoap.org/wsdl/}input")->node
+		NSResolveAttributes(node,"message".split, defaultNamespace, acceptResolved)
+	|
+	wd.rootNode.allSubNodesByTag("{http://schemas.xmlsoap.org/wsdl/}output")->node
+		NSResolveAttributes(node,"message".split, defaultNamespace, acceptResolved)
+	|
+	wd.rootNode.allSubNodesByTag("{http://schemas.xmlsoap.org/wsdl/}fault")->node
+		NSResolveAttributes(node,"message".split, defaultNamespace, acceptResolved)
+	|
+	wd.rootNode.allSubNodesByTag("{http://www.w3.org/2001/XMLSchema}element")->node
+		NSResolveAttributes(node,"type".split, defaultNamespace, acceptResolved)
+	|
+	wd.rootNode.allSubNodesByTag("{http://schemas.xmlsoap.org/wsdl/}port")->node
+		NSResolveAttributes(node,"binding".split, defaultNamespace, acceptResolved)
+	|
+	wd.rootNode.allSubNodesByTag("{http://schemas.xmlsoap.org/wsdl/}binding")->node
+		NSResolveAttributes(node,"type".split, defaultNamespace, acceptResolved)
 	|
 
+	
 /UpdateAttributeValuesNamespaces
 
 
@@ -414,7 +448,11 @@ NS_XSD("import")
 				report(node.tagName, attr, value)
 			}
 	| _=> rows
-	Lib:ShowRows(rows)
+	if(rows.empty) {
+		println("(None)")
+	} else {
+		Lib:ShowRows(rows)
+	}
 /ShowUnresolvedAttributes
 
 
@@ -422,13 +460,19 @@ NS_XSD("import")
 # For debug purposes
 # --
 	P(1) as &WsdlDocument => wd
-	Lib:Header("Attributes with colon in name")
+	Lib:Header("(Suspicious) attributes with colon in name")
 	
 	wd.rootNode.allSubNodes->node
 		node.attributes.keys->attr
+			reject(attr.startsWith("xmlns:"))
+			reject(attr.startsWith("xml:"))
 			if (attr.contains(":")) report(node.tagName, attr)
 	| _=> rows
-	Lib:ShowRows(rows)
+	if(rows.empty) {
+		println("(None)")
+	} else {
+		Lib:ShowRows(rows)
+	}
 /ShowAttributesWithColonInName
 
 
