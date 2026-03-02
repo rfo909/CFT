@@ -804,12 +804,12 @@ namespace prefixes.
 		}
 	}
 	
-	# resolve namespaced name/tag to full format, fails with error if failing
+	# resolve namespaced name/tag to full format, fails with error if undefined namespace
 	self.resolveNamespace = Lambda{
 		P(1) as String => name
 		
 		alreadyResolved = name.contains("{")
-		error(alreadyResolved,"Node namespace already resolved: " + name)
+		error(alreadyResolved,"Name already resolved: " + name)
 		
 		error(!name.contains(":"), "Value has no name space prefix: " + name)
 	
