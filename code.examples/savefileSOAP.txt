@@ -15,18 +15,38 @@ To process a wdsl file, see test function below
 	wsdl=SOAP:WsdlDocument
 	wsdl.init(f,dataStore)
 	
-	# update attribute values with regards to xmlns or targetNamespace, or prefix resolve
+	# update attribute values for different kinds of XML nodes, deciding'
+	# which "inherit" targetNamespace, and which don't
 	SOAP:UpdateAttributeValuesNamespaces(wsdl)
+
 	
+	# Build search structures for central elements attributes
+	# simpleType complexType message, global elements (in schema and wsdl) port operation 
+	#
+	# Should be written inside the SOAP:DataStore
+	# Must identify the path from 
+	#
+	#  wsdl:portType -> wsdl:operation
+	#    -> wsdl:input 
+	#    -> wsdl:output
+	#    -> wsdl:fault
+	#		-> .message -> wsdl:message -> wdsl:part -> element
+	
+	Lib:Header("Creating templates")
+	dataStore.createTemplates.print
+
+	# -----------------
+
 	# (DEBUG) while developing, find forgotten attributes
-	SOAP:ShowUnresolvedAttributes(wsdl)
+	#SOAP:ShowUnresolvedAttributes(wsdl)
 
 	# (DEBUG) show attributes in nodes that both have namespace and not
-	SOAP:ShowAttributesMissingResolve(wsdl)
+	#SOAP:ShowAttributesMissingResolve(wsdl)
 
 	# (DEBUG) attributes with simple values
 	#SOAP:ShowNonNamespacedAttributes(wsdl)
 
+	
 
 	#dataStore.schema->schema
 	#	XML:PP(schema.schemaNode).print
@@ -79,7 +99,8 @@ NS_XSD("import")
 /XSD_IMPORT
 
 
-# Data store 
+# Data store - perhaps not relevant after adding imported data to 
+# document structure.
 # --
 	self.wsdlDocuments = List
 	self.schema = List
@@ -95,6 +116,57 @@ NS_XSD("import")
 		println("Adding Schema")
 		self.schema.add(s)
 	}
+
+	self.createTemplates = Lambda{
+		
+		self.wsdlDocuments->wsdlDocument
+			wsdlDocument.rootNode.subNodes(SOAP:NS_WSDL("portType"))->portType
+				out("# ----------------------------------")
+				out("# portType: " + portType.attrGet("name"))
+				out("# ----------------------------------")
+				portType.subNodes(SOAP:NS_WSDL("operation"))->operation
+					out("")
+					out("# operation: " + operation.attrGet("name"))
+					out("# ----------")
+					
+					{
+						operation.subNodes(SOAP:NS_WSDL("input"))->input
+							out("# input: message=" + input.attrGet("message") + " name=" + input.attrGet("name"))
+							
+							self.createMessageTemplate(wsdlDocument, input.attrGet("message"))->line out(line)
+					}
+					{
+						operation.subNodes(SOAP:NS_WSDL("output"))->output
+							out("# output: message=" + output.attrGet("message") + " name=" + output.attrGet("name"))
+							self.createMessageTemplate(wsdlDocument, output.attrGet("message"))->line out(line)
+					}
+					{
+						operation.subNodes(SOAP:NS_WSDL("fault"))->fault
+							out("# fault: message=" + fault.attrGet("message") + " name=" + fault.attrGet("name"))
+							self.createMessageTemplate(wsdlDocument, fault.attrGet("message"))->line out(line)
+					}
+
+	}
+
+	self.createMessageTemplate = Lambda{
+		P(1) as &WsdlDocument => wsdlDocument
+		P(2) as String => messageId
+		wsdlDocument.rootNode.allSubNodesByTag(SOAP:NS_WSDL("message"))->m
+			assert(m.attrGet("name")==messageId)
+			out(m)
+		| _=>messages
+
+		1->x
+			if (messages.length != 1) {
+				out("#   Found " + messages.length + " messages")
+			} else {
+				out("#   message: name=" + m.attrGet("name"))
+			}
+		
+	}
+		
+
+
 	
 /class DataStore
 
