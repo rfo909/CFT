@@ -1,7 +1,7 @@
 # Readme
 # --
 <<< EOF
-To process a wdsl file, see example function t1 below
+To process a wdsl file, see test function below
 
 >>> EOF
 /Readme
@@ -14,7 +14,6 @@ To process a wdsl file, see example function t1 below
 	
 	wsdl=SOAP:WsdlDocument
 	wsdl.init(f,dataStore)
-	println("wsdl file ok")
 	
 	# update attribute values with regards to xmlns or targetNamespace, or prefix resolve
 	SOAP:UpdateAttributeValuesNamespaces(wsdl)
@@ -22,16 +21,22 @@ To process a wdsl file, see example function t1 below
 	# (DEBUG) while developing, find forgotten attributes
 	SOAP:ShowUnresolvedAttributes(wsdl)
 	
-	# (DEBUG) while developing, locate attributes with colon in name
-	SOAP:ShowAttributesWithColonInName(wsdl)
-	
 	#dataStore.schema->schemaNode
 	#	schemaNode.showEverything
 	#|
 	#dataStore.wsdlDocuments->wsdlNode
 	#	wsdlNode.showEverything
-	#|	
-/t1
+	#|
+
+	SOAP:ShowAllNodeTags(wsdl)
+
+	Lib:Header("message elements")
+	wsdl.rootNode.allSubNodesByTag("{http://schemas.xmlsoap.org/wsdl/}message")->n
+		println
+		XML:PP(n).print
+	|
+
+/test
 
 	
 
@@ -252,18 +257,22 @@ NS_XSD("import")
 
 
 	self.processImports = Lambda{
-		P(1) as &XMLNode => schema
+		P(1) as &XMLNode => schemaNode
 
-		schema.subNodes(SOAP:XSD_IMPORT)->ximp
+		schemaNode.subNodes(SOAP:XSD_IMPORT)->ximp
 			ns=ximp.attrGet("namespace")  # must match targetNamespace of schema! (TODO)
 			loc=ximp.attrGet("schemaLocation")
 			importFile=self.sourceFile.dir.file(loc)
 			println("Processing " + SOAP:XSD_IMPORT + " file: " + importFile.path)
+
 			schema=SOAP:Schema
-			XML:Parse(importFile.read).first => schemaNode
-			XML:ProcessNamespaces(schemaNode, self.schemaNode.namespaceInfo)
+			XML:Parse(importFile.read).first => newSchemaNode
+			XML:ProcessNamespaces(newSchemaNode, self.schemaNode.namespaceInfo)
 			
-			schema.processSchemaNode(schemaNode, importFile, self.dataStore)
+			schema.processSchemaNode(newSchemaNode, importFile, self.dataStore)
+
+			# add the imported node to the document tree
+			schemaNode.addSubNode(newSchemaNode)
 	}
 
 	self.processGlobalElements = Lambda{  # global elements not inside types
@@ -370,18 +379,20 @@ NS_XSD("import")
 	# targetNamespace: Top-level subnodes of certain nodes only
 	# ---------------------------------------------------------
 	
+	acceptResolved=false
+
 	wd.rootNode.allSubNodesByTag(NS_XSD("schema"))->schema
 	
 		defaultNamespace=schema.attrGet("targetNamespace")  # or null
 
 		{	schema.subNodes(NS_XSD("element"))->element 
-				NSResolveAttributes(element,"name type".split, defaultNamespace)
+				NSResolveAttributes(element,"name type".split, defaultNamespace, acceptResolved)
 		}
 		{	schema.subNodes(NS_XSD("complexType"))->ctype 
-				NSResolveAttributes(ctype,"name type".split, defaultNamespace)
+				NSResolveAttributes(ctype,"name type".split, defaultNamespace, acceptResolved)
 		}
 		{	schema.subNodes(NS_XSD("simpleType"))->stype 
-				NSResolveAttributes(stype,"name".split, defaultNamespace)
+				NSResolveAttributes(stype,"name".split, defaultNamespace, acceptResolved)
 		}
 	|
 	wd.rootNode.allSubNodesByTag(NS_WSDL("definitions"))->defs
@@ -389,23 +400,26 @@ NS_XSD("import")
 		defaultNamespace=schema.attrGet("targetNamespace")  # or null
 
 		{	defs.subNodes(NS_WSDL("message"))->message 
-				NSResolveAttributes(message,"name".split, defaultNamespace)
+				NSResolveAttributes(message,"name".split, defaultNamespace, acceptResolved)
 		}
 		{
 			defs.subNodes(NS_WSDL("portType"))->port
-				NSResolveAttributes(port,"name".split, defaultNamespace)
+				NSResolveAttributes(port,"name".split, defaultNamespace, acceptResolved)
 		}
 		{	defs.subNodes(NS_WSDL("binding"))->binding
-				NSResolveAttributes(binding,"name".split, defaultNamespace)
+				NSResolveAttributes(binding,"name".split, defaultNamespace, acceptResolved)
 		}
 		{	defs.SubNodes(NS_WSDL("service"))->service
-				NSResolveAttributes(service,"name".split, defaultNamespace)
+				NSResolveAttributes(service,"name".split, defaultNamespace, acceptResolved)
+		}
+		{	wd.rootNode.allSubNodesByTag("{http://www.w3.org/2001/XMLSchema}element")->node
+				NSResolveAttributes(node,"type".split, defaultNamespace, acceptResolved)
 		}
 	|
 	
 	
-	# Resolve namespace of attributes with no default namespace
-	# ---------------------------------------------------------
+	# Resolve namespace of attributes with no default namespace (requires ns prefix)
+	# ------------------------------------------------------------------------------
 	defaultNamespace=null
 	acceptResolved=true
 	
@@ -421,9 +435,6 @@ NS_XSD("import")
 	wd.rootNode.allSubNodesByTag("{http://schemas.xmlsoap.org/wsdl/}fault")->node
 		NSResolveAttributes(node,"message".split, defaultNamespace, acceptResolved)
 	|
-	wd.rootNode.allSubNodesByTag("{http://www.w3.org/2001/XMLSchema}element")->node
-		NSResolveAttributes(node,"type".split, defaultNamespace, acceptResolved)
-	|
 	wd.rootNode.allSubNodesByTag("{http://schemas.xmlsoap.org/wsdl/}port")->node
 		NSResolveAttributes(node,"binding".split, defaultNamespace, acceptResolved)
 	|
@@ -431,7 +442,6 @@ NS_XSD("import")
 		NSResolveAttributes(node,"type".split, defaultNamespace, acceptResolved)
 	|
 
-	
 /UpdateAttributeValuesNamespaces
 
 
@@ -456,27 +466,26 @@ NS_XSD("import")
 /ShowUnresolvedAttributes
 
 
-# (DEBUG) Locate attributes across the complete document with colon in name
-# For debug purposes
+# (DEBUG) Show all XML node tags
 # --
 	P(1) as &WsdlDocument => wd
-	Lib:Header("(Suspicious) attributes with colon in name")
+
+	Lib:Header("All XML node tags in the document")
 	
+	dict=Dict
 	wd.rootNode.allSubNodes->node
-		node.attributes.keys->attr
-			reject(attr.startsWith("xmlns:"))
-			reject(attr.startsWith("xml:"))
-			if (attr.contains(":")) report(node.tagName, attr)
+		tag=node.tagName
+		count=dict.get(tag,0)+1
+		dict.set(tag,count)
+	|
+	dict.keys->key
+		out(Int(dict.get(key),key))
+	| _.sort.reverse->x 
+		key=x.data
+		report(key, dict.get(key))
 	| _=> rows
-	if(rows.empty) {
-		println("(None)")
-	} else {
-		Lib:ShowRows(rows)
-	}
-/ShowAttributesWithColonInName
-
-
-
+	Lib:ShowRows(rows)
+/ShowAllNodeTags
 
 
 

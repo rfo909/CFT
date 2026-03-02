@@ -374,9 +374,16 @@ exampleXML
     # --
     self.subNode=Lambda{
         P(1) as String? => tag
-	self.subNodes(tag).first
+		self.subNodes(tag).first
     }
     
+	# Add sub-node to content
+	# --
+	self.addSubNode=Lambda{
+		P(1) as &XMLNode => node
+		self.content.add(node)
+	}
+
     # Get all sub nodes (recursively)
     # --
     self.allSubNodes=Lambda{
