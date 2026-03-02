@@ -20,21 +20,31 @@ To process a wdsl file, see test function below
 	
 	# (DEBUG) while developing, find forgotten attributes
 	SOAP:ShowUnresolvedAttributes(wsdl)
-	
-	#dataStore.schema->schemaNode
-	#	schemaNode.showEverything
+
+	# (DEBUG) show attributes in nodes that both have namespace and not
+	SOAP:ShowAttributesMissingResolve(wsdl)
+
+	# (DEBUG) attributes with simple values
+	#SOAP:ShowNonNamespacedAttributes(wsdl)
+
+
+	#dataStore.schema->schema
+	#	XML:PP(schema.schemaNode).print
 	#|
 	#dataStore.wsdlDocuments->wsdlNode
-	#	wsdlNode.showEverything
+	#	XML:PP(wsdlNode).print
 	#|
 
-	SOAP:ShowAllNodeTags(wsdl)
+	##XML:PP(wsdl.rootNode).print
 
-	Lib:Header("message elements")
-	wsdl.rootNode.allSubNodesByTag("{http://schemas.xmlsoap.org/wsdl/}message")->n
-		println
-		XML:PP(n).print
-	|
+	#SOAP:ShowAllNodeTags(wsdl)
+	
+
+	#Lib:Header("message elements")
+	#wsdl.rootNode.allSubNodesByTag("{http://schemas.xmlsoap.org/wsdl/}message")->n
+	#	println
+	#	XML:PP(n).print
+	#|
 
 /test
 
@@ -92,7 +102,6 @@ NS_XSD("import")
 # WSDL file parser
 # --
 	self.sourceFile=null
-	self.messages=Dict
 	self.portTypes=Dict
 	self.rootNode=null
 	
@@ -122,63 +131,6 @@ NS_XSD("import")
 			}
 		|
 		
-		root.subNodes(SOAP:NS_WSDL("message"))->e
-			name=e.attrGet("name")
-			parts=List
-			Inner{
-				e.subNodes(SOAP:NS_WSDL("part"))->p
-					part = Dict
-						.set("name",p.attrGet("name"))
-						.set("element",p.attrGet("element"))
-						.set("e", p) # XML element
-					parts.add(part)
-			}
-			self.messages.set(name,SymDict(parts, e)) # store XML element
-		|
-
-		root.subNodes(SOAP:NS_WSDL("portType"))->e
-			name=e.attrGet("name")
-			
-			operations=List
-			Inner{
-				e.subNodes(SOAP:NS_WSDL("operation"))->op
-				operation=Dict
-					.set("name", op.attrGet("name"))
-					.set("e", op)  # XML element
-				operations.add(operation)
-			}
-			self.portTypes.set(name,SymDict(operations, e)) # store XML element
-		|
-			
-		# omitting for now:
-		# root.subNodes("wsdl:binding")
-		# root.subNodes("wsdl:service")
-
-	}
-
-	self.showMessages = Lambda{
-		self.messages.keys->key
-			report(key)
-			self.messages.get(key).parts->p
-				report("",p.name,p.element)
-	}
-
-	self.showPortTypes = Lambda{
-		self.portTypes.keys->key
-			report(key)
-			self.portTypes.get(key).operations->op
-				report("",op.name)
-	}
-
-	self.showEverything = Lambda{
-		Lib:Header("targetNamespace")
-		println(self.targetNamespace)
-
-		Lib:Header("Messages")
-		Lib:ShowRows(self.showMessages)
-
-		Lib:Header("Port types")
-		Lib:ShowRows(self.showPortTypes)
 	}
 
 /class WsdlDocument
@@ -191,10 +143,6 @@ NS_XSD("import")
 	self.dataStore=null
 	self.schemaNode=null
 	self.sourceFile=null
-
-	self.simpleTypes=Dict
-	self.complexTypes=Dict
-	self.globalElements=Dict
 
 	# This function gets called from the Wsdl parser, and when processing imports (below)
 	# --
@@ -212,9 +160,6 @@ NS_XSD("import")
 		self.sourceFile=sourceFile
 
 		self.processImports(schemaNode)
-		self.addSimpleTypes(schemaNode)
-		self.addComplexTypes(schemaNode)
-		self.processGlobalElements(schemaNode)
 	}
 	
 	
@@ -225,36 +170,6 @@ NS_XSD("import")
 
 		self.schemaNode.namespaceInfo.resolveNamespace(name)
 	}
-
-	self.addSimpleTypes = Lambda{
-		P(1) => schema
-		schema.subNodes(SOAP:NS_XSD("simpleType"))->t
-			name=t.attrGet("name")
-			type="Any"
-			if (t.subNodes(SOAP:NS_XSD("restriction"))) Inner {
-				t.subNode(SOAP:NS_XSD("restriction")).attrGet("base") => type
-			}
-			e=t
-			self.simpleTypes.set(name,SymDict(type,e))
-	}
-
-	self.addComplexTypes = Lambda{
-		P(1) => schema
-		schema.subNodes(SOAP:NS_XSD("complexType"))->t
-			typeName=t.attrGet("name")
-			sequence=List
-
-			if (t.subNodes(SOAP:NS_XSD("sequence"))) Inner{
-				t.subNode(SOAP:NS_XSD("sequence")).subNodes(SOAP:NS_XSD("element"))->e
-					name=e.attrGet("name")
-					type=e.attrGet("type")
-					
-					sequence.add(SymDict(name,type,e))
-			}
-			e=t
-			self.complexTypes.set(typeName,SymDict(sequence,e))
-	}
-
 
 	self.processImports = Lambda{
 		P(1) as &XMLNode => schemaNode
@@ -275,15 +190,6 @@ NS_XSD("import")
 			schemaNode.addSubNode(newSchemaNode)
 	}
 
-	self.processGlobalElements = Lambda{  # global elements not inside types
-		P(1) as &XMLNode => schema
-
-		schema.subNodes(SOAP:NS_XSD("element"))->elem
-			name=elem.attrGet("name")
-			type=elem.attrGet("type")
-			
-			self.globalElements.set(name,type)
-	}
 
 	# Just verify there are no loose non-namespaced references
 	self.checkConsistency = Lambda{
@@ -296,39 +202,6 @@ NS_XSD("import")
 				}
 	}
 
-	self.showSimple = Lambda{
-		self.simpleTypes.keys->name
-			dict=self.simpleTypes.get(name)
-			report(name, dict.type)
-	}
-
-	self.showComplex = Lambda{
-		self.complexTypes.keys->name
-			report("")
-			report(name)
-			report("-".times(name.length))
-			sequence=self.complexTypes.get(name).sequence
-			sequence->row
-				report(row.name,row.type)
-	}
-
-	self.showGlobalElements = Lambda{
-		self.globalElements.keys->name
-			type=self.globalElements.get(name)
-			report(name,type)
-	}
-
-
-	self.showEverything = Lambda{
-		Lib:Header("Simple types")
-		Lib:ShowRows(self.showSimple)
-
-		Lib:Header("Complex types")
-		Lib:ShowRows(self.showComplex)
-
-		Lib:Header("Global elements")
-		Lib:ShowRows(self.showGlobalElements)
-	}
 /class Schema
 
 
@@ -361,7 +234,7 @@ NS_XSD("import")
 			} else if (defaultNamespace != null) {
 				value="{" + defaultNamespace + "}" + value
 			} else {
-				error("Attribute " + attr + " value '" + value + "' must have namespace prefix")
+				error("<" + node.tagName + "> Attribute '" + attr + "' with value '" + value + "' must have namespace prefix")
 			}
 			# update the attribute
 			node.attributes.set(attr,value)
@@ -371,49 +244,74 @@ NS_XSD("import")
 
 # Update various attribute values with regards to name spaces
 # Contains a hard-coded list of changes to do to attribute values
-# TODO
-# Remember @CH
 # --
 	P(1) as &WsdlDocument => wd
 	
 	# targetNamespace: Top-level subnodes of certain nodes only
 	# ---------------------------------------------------------
 	
-	acceptResolved=false
-
+	# schema subnodes
+	# ---------------
 	wd.rootNode.allSubNodesByTag(NS_XSD("schema"))->schema
-	
-		defaultNamespace=schema.attrGet("targetNamespace")  # or null
+		acceptResolved=false
 
-		{	schema.subNodes(NS_XSD("element"))->element 
-				NSResolveAttributes(element,"name type".split, defaultNamespace, acceptResolved)
-		}
-		{	schema.subNodes(NS_XSD("complexType"))->ctype 
-				NSResolveAttributes(ctype,"name type".split, defaultNamespace, acceptResolved)
-		}
-		{	schema.subNodes(NS_XSD("simpleType"))->stype 
-				NSResolveAttributes(stype,"name".split, defaultNamespace, acceptResolved)
+		Inner{
+			defaultNamespace=schema.attrGet("targetNamespace")  # or null
+
+			schema.subNodes(NS_XSD("element"))->node 
+				NSResolveAttributes(node,"name type value".split, defaultNamespace, acceptResolved)
+			|
+
+			schema.subNodes(NS_XSD("complexType"))->node 
+				NSResolveAttributes(node,"name type".split, defaultNamespace, acceptResolved)
+				Inner{
+					# sub-content inheriting the default namespace
+					node.allSubNodesByTag(NS_XSD("element"))->elementNode
+						NSResolveAttributes(elementNode,"name type".split, defaultNamespace, acceptResolved)
+				}
+			|
+			schema.subNodes(NS_XSD("simpleType"))->node 
+				NSResolveAttributes(node,"name".split, defaultNamespace, acceptResolved)
+				Inner{
+					# sub-content inheriting the default namespace
+					node.allSubNodesByTag(NS_XSD("restriction"))->elementNode
+						NSResolveAttributes(elementNode,"base".split, defaultNamespace, acceptResolved)
+				}
+			|
 		}
 	|
+
+	# wdsl:definitions subnodes
+	# -------------------------
 	wd.rootNode.allSubNodesByTag(NS_WSDL("definitions"))->defs
 	
 		defaultNamespace=schema.attrGet("targetNamespace")  # or null
 
-		{	defs.subNodes(NS_WSDL("message"))->message 
-				NSResolveAttributes(message,"name".split, defaultNamespace, acceptResolved)
-		}
-		{
-			defs.subNodes(NS_WSDL("portType"))->port
-				NSResolveAttributes(port,"name".split, defaultNamespace, acceptResolved)
-		}
-		{	defs.subNodes(NS_WSDL("binding"))->binding
-				NSResolveAttributes(binding,"name".split, defaultNamespace, acceptResolved)
-		}
-		{	defs.SubNodes(NS_WSDL("service"))->service
-				NSResolveAttributes(service,"name".split, defaultNamespace, acceptResolved)
-		}
-		{	wd.rootNode.allSubNodesByTag("{http://www.w3.org/2001/XMLSchema}element")->node
+		Inner{
+			schema.subNodes(NS_XSD("element"))->node 
+				NSResolveAttributes(node,"name type value".split, defaultNamespace, acceptResolved)
+			|
+
+
+			defs.subNodes(NS_WSDL("message"))->node 
+				NSResolveAttributes(node,"name".split, defaultNamespace, acceptResolved)
+			|
+		
+			defs.subNodes(NS_WSDL("portType"))->node
+				NSResolveAttributes(node,"name".split, defaultNamespace, acceptResolved)
+			|
+
+			defs.subNodes(NS_WSDL("binding"))->node
+				NSResolveAttributes(node,"name".split, defaultNamespace, acceptResolved)
+			|
+
+			defs.SubNodes(NS_WSDL("service"))->node
+				NSResolveAttributes(node,"name".split, defaultNamespace, acceptResolved)
+			|
+
+			wd.rootNode.allSubNodesByTag("{http://www.w3.org/2001/XMLSchema}element")->node
 				NSResolveAttributes(node,"type".split, defaultNamespace, acceptResolved)
+			|
 		}
 	|
 	
@@ -422,7 +320,13 @@ NS_XSD("import")
 	# ------------------------------------------------------------------------------
 	defaultNamespace=null
 	acceptResolved=true
+
+	# nodes from complete wdsl-document, by tag 
 	
+	wd.rootNode.allSubNodesByTag(NS_XSD("element"))->node 
+		NSResolveAttributes(node,"name type value".split, defaultNamespace, acceptResolved)
+	|
+
 	wd.rootNode.allSubNodesByTag("{http://schemas.xmlsoap.org/wsdl/}part")->node
 		NSResolveAttributes(node,"element".split, defaultNamespace, acceptResolved)
 	|
@@ -454,7 +358,7 @@ NS_XSD("import")
 	wd.rootNode.allSubNodes->node
 		node.attributes.keys->attr
 			value=node.attributes.get(attr)
-			if (!value.contains("http") && value.contains(":")) {
+			if (!value.contains("{") && !value.startsWith("http") && value.contains(":")) {
 				report(node.tagName, attr, value)
 			}
 	| _=> rows
@@ -487,6 +391,58 @@ NS_XSD("import")
 	Lib:ShowRows(rows)
 /ShowAllNodeTags
 
+
+# (DEBUG) Show all combinations of tag + attribute which have
+# namespace:value for some but not all instances!
+# --
+	P(1) as &WsdlDocument => wd
+
+	withNs=Dict
+	withoutNs=Dict
+
+	Lib:Header("Show attributes which both have namespace and don't")
+
+	wd.rootNode.allSubNodes->node
+		node.attributes.keys->attr
+			key=node.tagName+" " + attr
+			value=node.attributes.get(attr)
+			if (value.contains("{") || value.contains(":")) {
+				withNs.set(key,1)
+			} else {
+				withoutNs.set(key,1)
+			}
+	|
+
+	# identify shared keys
+	withNs.keys->key
+		if (withoutNs.has(key)) out(key)
+	| => list
+	if (list.length==0) {
+		println("(None)")
+	} else {
+		list.print
+	}
+/ShowAttributesMissingResolve
+
+
+
+# (DEBUG) Show attributes without namespace (simple values)
+# --
+	P(1) as &WsdlDocument => wd
+
+	Lib:Header("Show attributes with simple values")
+
+	dict=Dict
+	wd.rootNode.allSubNodes->node
+		node.attributes.keys->attr
+			value=node.attributes.get(attr)
+			if (!value.contains("{")) {
+				str=node.tagName + " "+ attr + "=" + value
+				dict.set(str,1)
+			}
+	|
+	dict.keys.sort->str println(str)
+/ShowNonNamespacedAttributes
 
 
 
