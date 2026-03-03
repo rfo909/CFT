@@ -158,6 +158,15 @@ duplicates (works for strings).
 			self.outputHandler.getOutput
 		} else {
 			# outputHandler will not be used, even if defined, because content has subGenerators
+			if(self.outputHandler != null) {
+				println
+				println("WARNING: OutputGenerator:Generator .produceOutput()")
+				println("   Generator with name=" + self.name)
+				println("   An OutputHandler has been added, but there are also sub-Generators in content.")
+				println("   This means the OutputHandler will not be used on the data.")
+				println
+			}
+			
 			self.content->x
 				if (Sys.getType(x)=="Dict" && x.getName=="Generator") {
 					x.produceOutput->value out(value)
