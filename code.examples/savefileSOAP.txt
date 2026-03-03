@@ -151,22 +151,61 @@ NS_XSD("import")
 	self.createMessageTemplate = Lambda{
 		P(1) as &WsdlDocument => wsdlDocument
 		P(2) as String => messageId
-		wsdlDocument.rootNode.allSubNodesByTag(SOAP:NS_WSDL("message"))->m
-			#println("Checking message with name=" + m.attrGet("name"))
+
+		messageTag=SOAP:NS_WSDL("message")
+
+		wsdlDocument.rootNode.allSubNodesByTag(messageTag)->m
 			assert(m.attrGet("name")==messageId)
 			out(m)
 		| _=>messages
 
-		1->x
-			if (messages.length != 1) {
-				out("#   Found " + messages.length + " messages")
-			} else {
-				m=messages.first
-				out("#   message: name=" + m.attrGet("name"))
-			}
-		
+		error(messages.length==0, "No " + messageTag + " found")
+		error(messages.length>1, "More than one " + messageTag + " found")
+
+		message=messages.first
+		message.subNodes(SOAP:NS_WSDL("part")) -> part
+			elementName=part.attrGet("element")
+			out("#   message part name=" + part.attrGet("name") + " element=" + elementName)
+			Inner{
+				wsdlDocument.rootNode.allSubNodesByTag(SOAP:NS_XSD("element"))->element
+					#println("Examining element with name=" + element.attrGet("name"))
+					assert(element.attrGet("name")==elementName)
+					out(element)
+			} _=> elementList
+			if (elementList.length != 1) error(elementName + " matches " + elementList.length + " elements")
+
+			self.createElementTemplate(wsdlDocument, elementList.first)->line out(line)
 	}
+
+	self.createElementTemplate = Lambda{
+		P(1) as &WsdlDocument => wsdlDocument
+		P(2) as &XMLNode => element
+		element->e
+			typeName=e.attrGet("type")
+			out("#      element name="+e.attrGet("name") + " type=" + typeName)
 		
+			Inner{
+				wsdlDocument.rootNode.allSubNodesByTag(SOAP:NS_XSD("complexType"))->type
+					assert(type.attrGet("name")==typeName)
+					out(type)
+			} _=> typeList
+			if (typeList.length != 1) error(typeName + " matches " + typeList.length + " elements")
+
+			self.createComplexTypeTemplate(wsdlDocument, typeList.first)->line out(line)
+	}
+
+	self.createComplexTypeTemplate = Lambda {
+		P(1) as &WsdlDocument => wsdlDocument
+		P(2) as &XMLNode => complexType
+
+		sequenceTag=SOAP:NS_XSD("sequence")
+		complexType.subNode(sequenceTag)->sequence
+			sequence.subNodes(SOAP:NS_XSD("element"))->element
+				name=element.attrGet("name")
+				type=element.attrGet("type")
+				out("#         element name=" + name + " type=" + type)
+			
+	}	
 
 
 	
