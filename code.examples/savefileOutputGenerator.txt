@@ -2,24 +2,52 @@
 # --
 <<< EOF
 The point of this script is to provide a general way of emitting output, where
-data collection in later stages may affect earlier stages.
+data traversal in later stages may affect earlier stages.
 
-The implementation consists of the main class, Generator. Objects of this
-type can be equipped with a single &OutputHandler object, using .setOutput(). That
-object is then made available as .out. 
+The main class is the Generator. A generator has an internal list, content, which is
+populated by calls to the out() function. Sub-generators are added with addSubGenerator,
+which takes two optional parameters, a name, and an output handler.
 
-The default implementation of the OutputHandler class is the ListOutput, which has
-one function .emit(any) plus the mandatory .getOutput. In order for ListOutput to 
-satisfy the type check on .setOutput() it is retyped with "as OutputHandler". 
+An output handler is an object that is of type &OutputHandler, and which must
+implement two functions: addValue() and getResult(). 
 
-See test functions t2 and tAdvanced
+The OutputHandler is stored in a separate field inside the Generator.
 
-Note that the ListOutput is the default output handler in all output generators.
-Also added a second output handler, ListOutputUnique, which is demonstrated in
-the tAdvanced example.
+We create sub-generators, to handle a particular type of data, and those are
+added to the internal content list, which also contains added objects
+via out() -- which may often be strings, but needs not be.
 
-Basic line formatting can be done by emitting instances of the two empty classes
-MoreIndent and LessIndent, and post-process the raw output accordingly.
+When it comes time to produceOutput(), there are two cases:
+
+- if there are no Generator objects in the content, and there is an OutputHandler,
+  all the data of the content list is added to the OutputHandler, and then
+  it's getResult() is called
+  
+- If either there are Generator objects in content, or there is no OutputHandler,
+  the content list is traversed. All non-Generator objects are passed through,
+  while for Generator objects, we call the produceOutput, and merges the result
+  into the result list
+
+Names
+-----
+Generator-objects have the option of being given a name. This is optional, but
+necessary for the "data collecting" at later stages to affect "earlier" parts.
+
+When creating sub-generators, they have a parent pointer to where they were
+created. 
+
+See test function t2 for its use, where we look up a parent Generator, then
+access one of its sub-generators, by name, and add data to it.
+
+OutputHandler magic
+-------------------
+Applications can create their own OutputHandler classes. The t2 test uses
+the ListOutputUnique which is redefined into "as OutputHandler" to be
+used in that capability. 
+
+It is a very simple example, in that it collects data and eliminates
+duplicates (works for strings).
+
 
 2026-03 RFO
 
@@ -34,25 +62,35 @@ MoreIndent and LessIndent, and post-process the raw output accordingly.
 	self.name=rootName
 	self.parent=null
 
-	# normally we will be either using outputHandler or sub-generators; if both
-	# are used, the outputHandler result comes before that from the sub-generators.
-	# --
-	self.outputHandler=OutputGenerator:ListOutput
-	self.subGenerators=List
+	self.content=List
+	self.outputHandler=null
 
-	# Add sub-generator (name optional)
+	# Add sub-generator (name optional, defaults to ListOutput)
 	# --
 	self.addSubGenerator = Lambda{
 		P(1) as String? => name
-		P(2, OutputGenerator:ListOutput) as &OutputHandler => outputHandler
+		P(2) => outputHandler  # optional
+		
+		if (outputHandler != null) self.setOutputHandler(outputHandler)
 
 		x=OutputGenerator:Generator
 		x.name=name
 		x.outputHandler=outputHandler
 		x.parent=self
 
-		self.subGenerators.add(x)
+		self.content.add(x)
 		x
+	}
+	
+	# Set output handler
+	# --
+	self.setOutputHandler = Lambda{
+		P(1) as &OutputHandler => outputHandler
+		
+		if (!outputHandler.has("addValue") || !outputHandler.has("getOutput")) {
+			error("OutputHandler must have addValue() and getOutput() lambdas")
+		}
+		self.outputHandler=outputHandler
 	}
 
 	# locate sub-generator by name
@@ -61,8 +99,9 @@ MoreIndent and LessIndent, and post-process the raw output accordingly.
 		P(1) as String => name
 
 		result=null
-		self.subGenerators->x
+		self.content->x
 			break(result)
+			assert({x as &Generator})
 			assert(x.name==name)
 			result=x
 		|
@@ -100,44 +139,43 @@ MoreIndent and LessIndent, and post-process the raw output accordingly.
 
 	# get outputHandler, fails if not defined
 	self.out = Lambda{
-		error(self.outputHandler==null,"No OutputHandler")
-		self.outputHandler
+		P(1) => value
+		self.content.add(value)
 	}
 
 	self.produceOutput = Lambda{
-		result=List
-		if (self.outputHandler) result=self.outputHandler.getOutput
-
-		self.subGenerators->subGenerator
-			subGenerator.produceOutput->x result.add(x)
+		hasData=false
+		hasSubGenerators=false
+		
+		self.content->x
+			if (Sys.getType(x)=="Dict" && x.getName=="Generator") hasSubGenerators=true else hasData=true
+			break(hasData && hasSubGenerators)
 		|
-		result
+		
+		if (hasData && !hasSubGenerators && self.outputHandler != null) {
+			# if there is only data, and we have an outputHandler, use it
+			Inner{ self.content->x self.outputHandler.addValue(x) }
+			self.outputHandler.getOutput
+		} else {
+			# outputHandler will not be used, even if defined, because content has subGenerators
+			self.content->x
+				if (Sys.getType(x)=="Dict" && x.getName=="Generator") {
+					x.produceOutput->value out(value)
+				} else {
+					out(x)
+				}
+		}
 	}
 		
 /class Generator
 
 
 
-# Basic output handler - list
-# --
-	self.data=List
-	
-	self.emit = Lambda{
-		P(1) => value
-		self.data.add(value)
-		self
-	}
-
-	self.getOutput = Lambda{
-		self.data
-	}
-/class ListOutput as OutputHandler
-
 # Basic output handler - unique values
 # --
 	self.data=Dict
 	
-	self.emit = Lambda{
+	self.addValue = Lambda{
 		P(1) as String => value
 		self.data.set(value,1)
 		self
@@ -149,23 +187,6 @@ MoreIndent and LessIndent, and post-process the raw output accordingly.
 /class ListOutputUnique as OutputHandler
 
 
-# More indent marker
-# --
-/class MoreIndent
-
-# Less indent marker
-# --
-/class LessIndent
-
-
-# Testing ListOutput
-# --
-	ListOutput => x
-	x.emit(1)
-	x.emit("test")
-	x.getOutput
-//t1
-
 
 
 # Testing OutputGenerator
@@ -173,29 +194,31 @@ MoreIndent and LessIndent, and post-process the raw output accordingly.
 	root=Generator
 	a=root.addSubGenerator
 	b=root.addSubGenerator
-	a.out.emit("test")
-	b.out.emit("nonsense")
-	a.out.emit("more test")
-	b.out.emit("more nonsense")
+	a.out("test")
+	b.out("nonsense")
+	a.out("more test")
+	b.out("more nonsense")
 	root.produceOutput
-//t2
+//t1
 
 # More advanced test, using the ListOutputUnique handler for the "namespaces"
 # --
 	P(1,Generator)=> root
 	root.setGeneratorName("ROOT")
-	root.addSubGenerator.out.emit("# name spaces")
+	root.addSubGenerator.out("# name spaces")
 
-	root.addSubGenerator("namespaces",ListOutputUnique)  # looked up by name from inside tFields 
+	root.addSubGenerator("namespaces").setOutputHandler(ListOutputUnique)  # looked up by name from inside tFields 
+		# data-only
 
-	root.addSubGenerator.out.emit("").emit("# fields")   
+	root.out("")
+	root.out("# fields")   
 	
 	tFields(root.addSubGenerator)  # no name needed if never looked up
 	root.produceOutput
-//t3
+//t2
 
 
-# process fields (called from t3 to test parent lookup and getSubGenerator)
+# process fields - called from t2 to test getParent and getSubGenerator
 # --
 	P(1) as &Generator => outgen
 
@@ -203,6 +226,6 @@ MoreIndent and LessIndent, and post-process the raw output accordingly.
 		prefix=field.before(":")
 		name=field.after(":")
 
-		outgen.out.emit(field)
-		outgen.getParent("ROOT").getSubGenerator("namespaces").out.emit("namespace: " + prefix)
+		outgen.out(field)
+		outgen.getParent("ROOT").getSubGenerator("namespaces").out("namespace: " + prefix)
 //tFields

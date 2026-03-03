@@ -123,29 +123,29 @@ NS_XSD("import")
 		
 		self.wsdlDocuments->wsdlDocument
 			wsdlDocument.rootNode.subNodes(SOAP:NS_WSDL("portType"))->portType
-				gen.out.emit("# ----------------------------------")
-				gen.out.emit("# portType: " + portType.attrGet("name"))
-				gen.out.emit("# ----------------------------------")
+				gen.out("# ----------------------------------")
+				gen.out("# portType: " + portType.attrGet("name"))
+				gen.out("# ----------------------------------")
 				portType.subNodes(SOAP:NS_WSDL("operation"))->operation
-					gen.out.emit("")
-					gen.out.emit("# operation: " + operation.attrGet("name"))
-					gen.out.emit("# ----------")
+					gen.out("")
+					gen.out("# operation: " + operation.attrGet("name"))
+					gen.out("# ----------")
 					
 					{
 						operation.subNodes(SOAP:NS_WSDL("input"))->input
-							gen.out.emit("# input: message=" + input.attrGet("message") + " name=" + input.attrGet("name"))
+							gen.out("# input: message=" + input.attrGet("message") + " name=" + input.attrGet("name"))
 							
-							self.createMessageTemplate(gen.addSubGenerator, wsdlDocument, input.attrGet("message"))
+							self.createMessageTemplate(gen, wsdlDocument, input.attrGet("message"))
 					}
 					{
 						operation.subNodes(SOAP:NS_WSDL("output"))->output
-							gen.out.emit("# output: message=" + output.attrGet("message") + " name=" + output.attrGet("name"))
-							self.createMessageTemplate(gen.addSubGenerator, wsdlDocument, output.attrGet("message"))
+							gen.out("# output: message=" + output.attrGet("message") + " name=" + output.attrGet("name"))
+							self.createMessageTemplate(gen, wsdlDocument, output.attrGet("message"))
 					}
 					{
 						operation.subNodes(SOAP:NS_WSDL("fault"))->fault
-							gen.out.emit("# fault: message=" + fault.attrGet("message") + " name=" + fault.attrGet("name"))
-							self.createMessageTemplate(gen.addSubGenerator, wsdlDocument, fault.attrGet("message"))
+							gen.out("# fault: message=" + fault.attrGet("message") + " name=" + fault.attrGet("name"))
+							self.createMessageTemplate(gen, wsdlDocument, fault.attrGet("message"))
 					}
 
 		| 
@@ -171,7 +171,7 @@ NS_XSD("import")
 		message=messages.first
 		message.subNodes(SOAP:NS_WSDL("part")) -> part
 			elementName=part.attrGet("element")
-			gen.out.emit("#   message part name=" + part.attrGet("name") + " element=" + elementName)
+			gen.out("#   message part name=" + part.attrGet("name") + " element=" + elementName)
 			Inner{
 				wsdlDocument.rootNode.allSubNodesByTag(SOAP:NS_XSD("element"))->element
 					#println("Examining element with name=" + element.attrGet("name"))
@@ -185,7 +185,7 @@ NS_XSD("import")
 
 			# Must reverse full name spaces to prefixes (stored in each node under nsPrefix dictionary field
 
-			self.createElementTemplate(gen.addSubGenerator, wsdlDocument, elementList.first)->line out(line)
+			self.createElementTemplate(gen, wsdlDocument, elementList.first)->line out(line)
 	}
 
 	self.createElementTemplate = Lambda{
@@ -194,7 +194,7 @@ NS_XSD("import")
 		P(3) as &XMLNode => element
 		element->e
 			typeName=e.attrGet("type")
-			gen.out.emit("#      element name="+e.attrGet("name") + " type=" + typeName)
+			gen.out("#      element name="+e.attrGet("name") + " type=" + typeName)
 		
 			Inner{
 				wsdlDocument.rootNode.allSubNodesByTag(SOAP:NS_XSD("complexType"))->type
@@ -203,7 +203,7 @@ NS_XSD("import")
 			} _=> typeList
 			if (typeList.length != 1) error(typeName + " matches " + typeList.length + " elements")
 
-			self.createComplexTypeTemplate(gen.addSubGenerator, wsdlDocument, typeList.first)->line out(line)
+			self.createComplexTypeTemplate(gen, wsdlDocument, typeList.first)->line out(line)
 	}
 
 	self.createComplexTypeTemplate = Lambda {
@@ -219,7 +219,7 @@ NS_XSD("import")
 			sequence.subNodes(SOAP:NS_XSD("element"))->element
 				name=element.attrGet("name")
 				type=element.attrGet("type")
-				gen.out.emit("#         element name=" + name + " type=" + type)
+				gen.out("#         element name=" + name + " type=" + type)
 
 				# decide max min repeats (optional, multiple)
 				# if single value and simple type, generate XML for it, with merge code
