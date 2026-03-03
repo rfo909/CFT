@@ -99,6 +99,7 @@ NS_XSD("import")
 /XSD_IMPORT
 
 
+
 # Data store - perhaps not relevant after adding imported data to 
 # document structure.
 # --
@@ -174,6 +175,11 @@ NS_XSD("import")
 			} _=> elementList
 			if (elementList.length != 1) error(elementName + " matches " + elementList.length + " elements")
 
+			# create something like this:
+			# <soapenv:Body xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:abdc="http://np.systor.st/abdc" xmlns:com="http://np.systor.st/commontypes">
+
+			# Must reverse full name spaces to prefixes (stored in each node under nsPrefix dictionary field
+
 			self.createElementTemplate(wsdlDocument, elementList.first)->line out(line)
 	}
 
@@ -199,11 +205,22 @@ NS_XSD("import")
 		P(2) as &XMLNode => complexType
 
 		sequenceTag=SOAP:NS_XSD("sequence")
+		
+		# note that for empty messages like NOOP there is no sequence nor elements, so no checks here
+
 		complexType.subNode(sequenceTag)->sequence
 			sequence.subNodes(SOAP:NS_XSD("element"))->element
 				name=element.attrGet("name")
 				type=element.attrGet("type")
 				out("#         element name=" + name + " type=" + type)
+
+				# decide max min repeats (optional, multiple)
+				# if single value and simple type, generate XML for it, with merge code
+				# otherwise generate separate templates for
+				# - optional/multiple elements
+				# - complex type
+
+				# also need to map full namespace to prefix 
 			
 	}	
 

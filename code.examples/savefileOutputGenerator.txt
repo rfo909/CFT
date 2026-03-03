@@ -1,0 +1,189 @@
+# Readme
+# --
+<<< EOF
+The point of this script is to provide a general way of emitting output, where
+data collection in later stages may affect earlier stages.
+
+The implementation consists of the main class, OutputGenerator. Objects of this
+type can be equipped with a single &OutputHandler object, using .setOutput(). That
+object is then made available as .out. 
+
+The default implementation of the OutputHandler class is the ListOutput, which has
+one function .emit(any) plus the mandatory .getOutput. In order for ListOutput to 
+satisfy the type check on .setOutput() it is retyped with "as OutputHandler". 
+
+See test functions t2 and tAdvanced
+
+Note that the ListOutput is the default output handler in all output generators.
+Also added a second output handler, ListOutputUnique, which is demonstrated in
+the tAdvanced example.
+
+
+>>> EOF
+/Readme
+
+# Basic output handler - list
+# --
+	self.data=List
+	
+	self.emit = Lambda{
+		P(1) => value
+		self.data.add(value)
+		self
+	}
+
+	self.getOutput = Lambda{
+		self.data
+	}
+/class ListOutput as OutputHandler
+
+# Basic output handler - unique values
+# --
+	self.data=Dict
+	
+	self.emit = Lambda{
+		P(1) as String => value
+		self.data.set(value,1)
+		self
+	}
+
+	self.getOutput = Lambda{
+		self.data.keys
+	}
+/class ListOutputUnique as OutputHandler
+
+
+# Testing ListOutput
+# --
+	ListOutput => x
+	x.emit(1)
+	x.emit("test")
+	x.getOutput
+//t1
+
+# Output generation class, in order to "patch" earlier generated content
+# Does not need to handle just strings.
+# --
+	self.name=null
+	self.parent=null
+
+	# normally we will be either using outputHandler or sub-generators; if both
+	# are used, the outputHandler result comes before that from the sub-generators.
+	# --
+	self.outputHandler=OutputGenerator:ListOutput
+	self.subGenerators=List
+
+	# Add sub-generator (name optional)
+	# --
+	self.addSubGenerator = Lambda{
+		P(1) as String? => name
+		P(2, OutputGenerator:ListOutput) as &OutputHandler => outputHandler
+
+		x=OutputGenerator:OutputGenerator
+		x.name=name
+		x.outputHandler=outputHandler
+		x.parent=self
+
+		self.subGenerators.add(x)
+		x
+	}
+
+	# locate sub-generator by name
+	# --
+	self.getSubGenerator = Lambda{
+		P(1) as String => name
+
+		result=null
+		self.subGenerators->x
+			break(result)
+			assert(x.name==name)
+			result=x
+		|
+		error(result==null,"No sub-generator '" + name + "'")
+		result
+	}
+
+	self.setGeneratorName = Lambda{
+		P(1) as String => name
+		self.name=name
+	}
+
+	self.getGeneratorName = Lambda{
+		self.name
+	}
+
+	self.getParent = Lambda{
+		P(1) as String => name
+
+		ptr=self
+		loop
+			break(ptr==null)
+			break(ptr.name==name)
+			ptr=ptr.parent
+		|
+		error(ptr==null,"No parent '" + name + "' found")
+		ptr
+	}
+
+	self.setOutputHandler = Lambda{
+		P(1) as &OutputHandler => handler
+		error(!handler.has("getOutput"), "OutputHandler object must have getOutput function")
+		self.outputHandler=handler
+	}
+
+	# get outputHandler, fails if not defined
+	self.out = Lambda{
+		error(self.outputHandler==null,"No OutputHandler")
+		self.outputHandler
+	}
+
+	self.produceOutput = Lambda{
+		result=List
+		if (self.outputHandler) result=self.outputHandler.getOutput
+
+		self.subGenerators->subGenerator
+			println("Calling subGenerator " + subGenerator.name)
+			subGenerator.produceOutput->x result.add(x)
+		|
+		result
+	}
+		
+/class OutputGenerator
+
+
+# Testing OutputGenerator
+# --
+	root=OutputGenerator
+	a=root.addSubGenerator("a")
+	b=root.addSubGenerator("b")
+	a.out.emit("test")
+	b.out.emit("nonsense")
+	a.out.emit("more test")
+	b.out.emit("more nonsense")
+	root.produceOutput
+//t2
+
+# More advanced test, using the ListOutputUnique handler for the "namespaces"
+# --
+	root=OutputGenerator
+	root.setGeneratorName("ROOT")
+	root.addSubGenerator.out.emit("# name spaces")
+	root.addSubGenerator("namespaces",ListOutputUnique)
+	root.addSubGenerator.out.emit("").emit("# fields")
+	fields=root.addSubGenerator("fields")
+	
+	tFields(fields)
+	root.produceOutput
+//tAdvanced
+
+# process fields (called from tAdvanced to test parent lookup and getSubGenerator)
+# --
+	P(1) as &OutputGenerator => outgen
+
+	"personal:name personal:age location:address location:town location:zipcode".split->field
+		prefix=field.before(":")
+		name=field.after(":")
+
+		outgen.out.emit(field)
+		outgen.getParent("ROOT").getSubGenerator("namespaces").out.emit("namespace: " + prefix)
+//tFields
