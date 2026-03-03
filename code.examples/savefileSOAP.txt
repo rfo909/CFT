@@ -119,14 +119,15 @@ NS_XSD("import")
 	}
 
 	self.createTemplates = Lambda{
-		OutputGenerator:Generator("ROOT") => gen
+		OutputGenerator:Generator => root
 		
 		self.wsdlDocuments->wsdlDocument
 			wsdlDocument.rootNode.subNodes(SOAP:NS_WSDL("portType"))->portType
-				gen.out("# ----------------------------------")
-				gen.out("# portType: " + portType.attrGet("name"))
-				gen.out("# ----------------------------------")
+				root.out("# ----------------------------------")
+				root.out("# portType: " + portType.attrGet("name"))
+				root.out("# ----------------------------------")
 				portType.subNodes(SOAP:NS_WSDL("operation"))->operation
+					gen=root.sub("operation")
 					gen.out("")
 					gen.out("# operation: " + operation.attrGet("name"))
 					gen.out("# ----------")
@@ -157,6 +158,13 @@ NS_XSD("import")
 		P(1) as &Generator => gen
 		P(2) as &WsdlDocument => wsdlDocument
 		P(3) as String => messageId
+		
+		gen=gen.sub("message")
+		
+		gen.out("<soapEnv:Body")
+		gen.sub("message-namespaces", OutputGenerator:ListOutputUnique)
+		gen.out(">")
+		
 
 		messageTag=SOAP:NS_WSDL("message")
 
@@ -181,7 +189,8 @@ NS_XSD("import")
 			if (elementList.length != 1) error(elementName + " matches " + elementList.length + " elements")
 
 			# create something like this:
-			# <soapenv:Body xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:abdc="http://np.systor.st/abdc" xmlns:com="http://np.systor.st/commontypes">
+			# <soapenv:Body xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+			#	xmlns:abdc="http://np.systor.st/abdc" xmlns:com="http://np.systor.st/commontypes">
 
 			# Must reverse full name spaces to prefixes (stored in each node under nsPrefix dictionary field
 

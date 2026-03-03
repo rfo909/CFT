@@ -82,6 +82,16 @@ duplicates (works for strings).
 		x
 	}
 	
+	# short for addSubGenerator
+	# --
+	self.sub = Lambda{
+		P(1) as String? => name
+		P(2) => outputHandler
+		self.addSubGenerator(name,outputHandler)
+	}
+
+	
+	
 	# Set output handler
 	# --
 	self.setOutputHandler = Lambda{
@@ -108,16 +118,7 @@ duplicates (works for strings).
 		error(result==null,"No sub-generator '" + name + "'")
 		result
 	}
-
-	self.setGeneratorName = Lambda{
-		P(1) as String => name
-		self.name=name
-	}
-
-	self.getGeneratorName = Lambda{
-		self.name
-	}
-
+	
 	self.getParent = Lambda{
 		P(1) as String => name
 
@@ -213,7 +214,7 @@ duplicates (works for strings).
 # More advanced test, using the ListOutputUnique handler for the "namespaces"
 # --
 	P(1,Generator)=> root
-	root.setGeneratorName("ROOT")
+	root=root.sub("ROOT")
 	root.addSubGenerator.out("# name spaces")
 
 	root.addSubGenerator("namespaces").setOutputHandler(ListOutputUnique)  # looked up by name from inside tFields 
@@ -238,3 +239,24 @@ duplicates (works for strings).
 		outgen.out(field)
 		outgen.getParent("ROOT").getSubGenerator("namespaces").out("namespace: " + prefix)
 //tFields
+
+
+# Naming test
+# --
+	root=Generator
+	a=root.sub("report")
+	b=root.sub("report")
+	
+	tReport(a,1)
+	tReport(b,2)
+	root.produceOutput
+//t3
+
+# Report -- called from t3
+# --
+	P(1) as &Generator => gen
+	P(2) => id
+	gen.out("This is a report " + id)
+	gen.out("------------------")
+/tReport
+
