@@ -18,57 +18,20 @@ Note that the ListOutput is the default output handler in all output generators.
 Also added a second output handler, ListOutputUnique, which is demonstrated in
 the tAdvanced example.
 
-NOTE: formatting is not part of this implementation, as it is generic enough that
-it doesn't have to work with strings.
+Basic line formatting can be done by emitting instances of the two empty classes
+MoreIndent and LessIndent, and post-process the raw output accordingly.
 
 2026-03 RFO
 
 >>> EOF
 /Readme
 
-# Basic output handler - list
-# --
-	self.data=List
-	
-	self.emit = Lambda{
-		P(1) => value
-		self.data.add(value)
-		self
-	}
-
-	self.getOutput = Lambda{
-		self.data
-	}
-/class ListOutput as OutputHandler
-
-# Basic output handler - unique values
-# --
-	self.data=Dict
-	
-	self.emit = Lambda{
-		P(1) as String => value
-		self.data.set(value,1)
-		self
-	}
-
-	self.getOutput = Lambda{
-		self.data.keys
-	}
-/class ListOutputUnique as OutputHandler
-
-
-# Testing ListOutput
-# --
-	ListOutput => x
-	x.emit(1)
-	x.emit("test")
-	x.getOutput
-//t1
 
 # Output generation class, in order to "patch" earlier generated content
 # Does not need to handle just strings.
 # --
-	self.name=null
+	P(1) as String? => rootName
+	self.name=rootName
 	self.parent=null
 
 	# normally we will be either using outputHandler or sub-generators; if both
@@ -146,13 +109,63 @@ it doesn't have to work with strings.
 		if (self.outputHandler) result=self.outputHandler.getOutput
 
 		self.subGenerators->subGenerator
-			println("Calling subGenerator " + subGenerator.name)
 			subGenerator.produceOutput->x result.add(x)
 		|
 		result
 	}
 		
 /class Generator
+
+
+
+# Basic output handler - list
+# --
+	self.data=List
+	
+	self.emit = Lambda{
+		P(1) => value
+		self.data.add(value)
+		self
+	}
+
+	self.getOutput = Lambda{
+		self.data
+	}
+/class ListOutput as OutputHandler
+
+# Basic output handler - unique values
+# --
+	self.data=Dict
+	
+	self.emit = Lambda{
+		P(1) as String => value
+		self.data.set(value,1)
+		self
+	}
+
+	self.getOutput = Lambda{
+		self.data.keys
+	}
+/class ListOutputUnique as OutputHandler
+
+
+# More indent marker
+# --
+/class MoreIndent
+
+# Less indent marker
+# --
+/class LessIndent
+
+
+# Testing ListOutput
+# --
+	ListOutput => x
+	x.emit(1)
+	x.emit("test")
+	x.getOutput
+//t1
+
 
 
 # Testing OutputGenerator
