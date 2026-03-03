@@ -4,7 +4,7 @@
 The point of this script is to provide a general way of emitting output, where
 data collection in later stages may affect earlier stages.
 
-The implementation consists of the main class, OutputGenerator. Objects of this
+The implementation consists of the main class, Generator. Objects of this
 type can be equipped with a single &OutputHandler object, using .setOutput(). That
 object is then made available as .out. 
 
@@ -18,6 +18,10 @@ Note that the ListOutput is the default output handler in all output generators.
 Also added a second output handler, ListOutputUnique, which is demonstrated in
 the tAdvanced example.
 
+NOTE: formatting is not part of this implementation, as it is generic enough that
+it doesn't have to work with strings.
+
+2026-03 RFO
 
 >>> EOF
 /Readme
@@ -79,7 +83,7 @@ the tAdvanced example.
 		P(1) as String? => name
 		P(2, OutputGenerator:ListOutput) as &OutputHandler => outputHandler
 
-		x=OutputGenerator:OutputGenerator
+		x=OutputGenerator:Generator
 		x.name=name
 		x.outputHandler=outputHandler
 		x.parent=self
@@ -148,12 +152,12 @@ the tAdvanced example.
 		result
 	}
 		
-/class OutputGenerator
+/class Generator
 
 
 # Testing OutputGenerator
 # --
-	root=OutputGenerator
+	root=Generator
 	a=root.addSubGenerator("a")
 	b=root.addSubGenerator("b")
 	a.out.emit("test")
@@ -165,7 +169,7 @@ the tAdvanced example.
 
 # More advanced test, using the ListOutputUnique handler for the "namespaces"
 # --
-	root=OutputGenerator
+	root=Generator
 	root.setGeneratorName("ROOT")
 	root.addSubGenerator.out.emit("# name spaces")
 	root.addSubGenerator("namespaces",ListOutputUnique)
@@ -174,11 +178,11 @@ the tAdvanced example.
 	
 	tFields(fields)
 	root.produceOutput
-//tAdvanced
+//t3
 
-# process fields (called from tAdvanced to test parent lookup and getSubGenerator)
+# process fields (called from t3 to test parent lookup and getSubGenerator)
 # --
-	P(1) as &OutputGenerator => outgen
+	P(1) as &Generator => outgen
 
 	"personal:name personal:age location:address location:town location:zipcode".split->field
 		prefix=field.before(":")
