@@ -152,6 +152,7 @@ NS_XSD("import")
 		P(1) as &WsdlDocument => wsdlDocument
 		P(2) as String => messageId
 		wsdlDocument.rootNode.allSubNodesByTag(SOAP:NS_WSDL("message"))->m
+			#println("Checking message with name=" + m.attrGet("name"))
 			assert(m.attrGet("name")==messageId)
 			out(m)
 		| _=>messages
@@ -160,6 +161,7 @@ NS_XSD("import")
 			if (messages.length != 1) {
 				out("#   Found " + messages.length + " messages")
 			} else {
+				m=messages.first
 				out("#   message: name=" + m.attrGet("name"))
 			}
 		
@@ -280,18 +282,29 @@ NS_XSD("import")
 
 # Apply default namespace if no namespace prefix, or if no default, resolve prefix if present
 # --
-	P(1) as &XMLNode => node
-	P(2) as List => attrNames
-	P(3) as String? => defaultNamespace
-	P(4,false) as boolean => tolerateAlreadyResolved
-	
-	#println
-	#println("Resolving namespace for " + node.tagName)
-	#println("   Attributes: " + attrNames.concat(", "))
-	#println("   Default namespace: " + defaultNamespace)
-	
-	attrNames->attr
-		if (node.attributes.has(attr)) {
+	P(1) as &XMLNode => startNode
+	P(2) as boolean => directSubNodes  # or all sub-nodes
+	P(3) as String => tag
+	P(4) as List => attrNames
+	P(5) as String? => defaultNamespace
+	P(6,false) as boolean => tolerateAlreadyResolved
+
+	nodeList = if(directSubNodes, startNode.subNodes(tag), startNode.allSubNodesByTag(tag))
+
+	if (nodeList.length==0) {
+		println
+		println("WARNING: no " + if(directSubNodes, "direct", " (any)") + " subnodes found under " + startNode.tagName)
+		println("   For tag " + tag)
+	}
+
+	updateCount=0
+	nodeCount=0
+
+	nodeList->node
+		nodeCount=nodeCount+1
+		attrNames->attr
+			assert(node.attributes.has(attr))
+
 			value=node.attributes.get(attr)
 			isResolved=value.contains("{")
 
@@ -310,7 +323,15 @@ NS_XSD("import")
 			}
 			# update the attribute
 			node.attributes.set(attr,value)
-		}
+			updateCount=updateCount+1
+	|
+	if (nodeCount>0 && updateCount==0) {
+		Lib:Header("WARNING: no updates across " + nodeCount + " nodes")
+		println("  startNode=" + startNode.tagName)
+		println("  directSubNodes=" + directSubNodes)
+		println("  tag=" + tag)
+		println("  attrNames=" + attrNames.concat(", "))
+	}
 /NSResolveAttributes
 
 
@@ -322,71 +343,47 @@ NS_XSD("import")
 	# targetNamespace: Top-level subnodes of certain nodes only
 	# ---------------------------------------------------------
 	
+	GET_SUB=true
+	GET_ALL=false
+
 	# schema subnodes
 	# ---------------
 	wd.rootNode.allSubNodesByTag(NS_XSD("schema"))->schema
+
+		defaultNamespace=schema.attrGet("targetNamespace")  # or null
 		acceptResolved=false
 
+		NSResolveAttributes(schema, GET_SUB, NS_XSD("element"), "name value type".split, defaultNamespace, acceptResolved)
+		NSResolveAttributes(schema, GET_SUB, NS_XSD("complexType"), "name type".split, defaultNamespace, acceptResolved)
+		NSResolveAttributes(schema, GET_SUB, NS_XSD("simpleType"), "name".split, defaultNamespace, acceptResolved)
+
 		Inner{
-			defaultNamespace=schema.attrGet("targetNamespace")  # or null
-
-			schema.subNodes(NS_XSD("element"))->node 
-				NSResolveAttributes(node,"name type value".split, defaultNamespace, acceptResolved)
+			# propagate defaultNamespace for complexType -> all element
+			schema.subNodes(NS_XSD("complexType"))->node
+				NSResolveAttributes(node, GET_ALL, NS_XSD("element"), "name type".split, defaultNamespace, acceptResolved)
 			|
-
-			schema.subNodes(NS_XSD("complexType"))->node 
-				NSResolveAttributes(node,"name type".split, defaultNamespace, acceptResolved)
-				Inner{
-					# sub-content inheriting the default namespace
-					node.allSubNodesByTag(NS_XSD("element"))->elementNode
-						NSResolveAttributes(elementNode,"name type".split, defaultNamespace, acceptResolved)
-				}
-			|
-			schema.subNodes(NS_XSD("simpleType"))->node 
-				NSResolveAttributes(node,"name".split, defaultNamespace, acceptResolved)
-				Inner{
-					# sub-content inheriting the default namespace
-					node.allSubNodesByTag(NS_XSD("restriction"))->elementNode
-						NSResolveAttributes(elementNode,"base".split, defaultNamespace, acceptResolved)
-				}
+			# same for simpleType -> all restriction
+			schema.subNodes(NS_XSD("simpleType"))->node
+				NSResolveAttributes(node, GET_ALL, NS_XSD("restriction"), "base".split, defaultNamespace, acceptResolved)
 			|
 		}
 	|
 
 	# wdsl:definitions subnodes
 	# -------------------------
-	wd.rootNode.allSubNodesByTag(NS_WSDL("definitions"))->defs
+	defs = wd.rootNode
+
+	error(defs.tagName != SOAP:NS_WSDL("definitions"), "Invalid defs element")
 	
-		defaultNamespace=schema.attrGet("targetNamespace")  # or null
+	defaultNamespace=defs.attrGet("targetNamespace")  # or null
+	acceptResolved=false
 
-		Inner{
-			schema.subNodes(NS_XSD("element"))->node 
-				NSResolveAttributes(node,"name type value".split, defaultNamespace, acceptResolved)
-			|
+	NSResolveAttributes(defs, GET_SUB, NS_WSDL("message"), "name".split, defaultNamespace, acceptResolved)
+	NSResolveAttributes(defs, GET_SUB, NS_WSDL("portType"), "name".split, defaultNamespace, acceptResolved)
+	NSResolveAttributes(defs, GET_SUB, NS_WSDL("binding"), "name".split, defaultNamespace, acceptResolved)
+	NSResolveAttributes(defs, GET_SUB, NS_WSDL("service"), "name".split, defaultNamespace, acceptResolved)
+	NSResolveAttributes(defs, GET_SUB, NS_WSDL("element"), "type".split, defaultNamespace, acceptResolved)
 
-
-			defs.subNodes(NS_WSDL("message"))->node 
-				NSResolveAttributes(node,"name".split, defaultNamespace, acceptResolved)
-			|
-		
-			defs.subNodes(NS_WSDL("portType"))->node
-				NSResolveAttributes(node,"name".split, defaultNamespace, acceptResolved)
-			|
-
-			defs.subNodes(NS_WSDL("binding"))->node
-				NSResolveAttributes(node,"name".split, defaultNamespace, acceptResolved)
-			|
-
-			defs.SubNodes(NS_WSDL("service"))->node
-				NSResolveAttributes(node,"name".split, defaultNamespace, acceptResolved)
-			|
-
-			wd.rootNode.allSubNodesByTag("{http://www.w3.org/2001/XMLSchema}element")->node
-				NSResolveAttributes(node,"type".split, defaultNamespace, acceptResolved)
-			|
-		}
-	|
-	
 	
 	# Resolve namespace of attributes with no default namespace (requires ns prefix)
 	# ------------------------------------------------------------------------------
@@ -394,30 +391,15 @@ NS_XSD("import")
 	acceptResolved=true
 
 	# nodes from complete wdsl-document, by tag 
+
+	NSResolveAttributes(defs, GET_ALL, NS_XSD("element"), "name type value".split, defaultNamespace, acceptResolved)
+	NSResolveAttributes(defs, GET_ALL, NS_WSDL("part"), "element".split, defaultNamespace, acceptResolved)
+	NSResolveAttributes(defs, GET_ALL, NS_WSDL("input"), "message".split, defaultNamespace, acceptResolved)
+	NSResolveAttributes(defs, GET_ALL, NS_WSDL("output"), "message".split, defaultNamespace, acceptResolved)
+	NSResolveAttributes(defs, GET_ALL, NS_WSDL("fault"), "message".split, defaultNamespace, acceptResolved)
+	NSResolveAttributes(defs, GET_ALL, NS_WSDL("port"), "binding".split, defaultNamespace, acceptResolved)
+	NSResolveAttributes(defs, GET_ALL, NS_WSDL("binding"), "type".split, defaultNamespace, acceptResolved)
 	
-	wd.rootNode.allSubNodesByTag(NS_XSD("element"))->node 
-		NSResolveAttributes(node,"name type value".split, defaultNamespace, acceptResolved)
-	|
-
-	wd.rootNode.allSubNodesByTag("{http://schemas.xmlsoap.org/wsdl/}part")->node
-		NSResolveAttributes(node,"element".split, defaultNamespace, acceptResolved)
-	|
-	wd.rootNode.allSubNodesByTag("{http://schemas.xmlsoap.org/wsdl/}input")->node
-		NSResolveAttributes(node,"message".split, defaultNamespace, acceptResolved)
-	|
-	wd.rootNode.allSubNodesByTag("{http://schemas.xmlsoap.org/wsdl/}output")->node
-		NSResolveAttributes(node,"message".split, defaultNamespace, acceptResolved)
-	|
-	wd.rootNode.allSubNodesByTag("{http://schemas.xmlsoap.org/wsdl/}fault")->node
-		NSResolveAttributes(node,"message".split, defaultNamespace, acceptResolved)
-	|
-	wd.rootNode.allSubNodesByTag("{http://schemas.xmlsoap.org/wsdl/}port")->node
-		NSResolveAttributes(node,"binding".split, defaultNamespace, acceptResolved)
-	|
-	wd.rootNode.allSubNodesByTag("{http://schemas.xmlsoap.org/wsdl/}binding")->node
-		NSResolveAttributes(node,"type".split, defaultNamespace, acceptResolved)
-	|
-
 /UpdateAttributeValuesNamespaces
 
 
