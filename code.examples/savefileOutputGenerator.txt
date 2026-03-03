@@ -158,8 +158,8 @@ it doesn't have to work with strings.
 # Testing OutputGenerator
 # --
 	root=Generator
-	a=root.addSubGenerator("a")
-	b=root.addSubGenerator("b")
+	a=root.addSubGenerator
+	b=root.addSubGenerator
 	a.out.emit("test")
 	b.out.emit("nonsense")
 	a.out.emit("more test")
@@ -169,16 +169,18 @@ it doesn't have to work with strings.
 
 # More advanced test, using the ListOutputUnique handler for the "namespaces"
 # --
-	root=Generator
+	P(1,Generator)=> root
 	root.setGeneratorName("ROOT")
 	root.addSubGenerator.out.emit("# name spaces")
-	root.addSubGenerator("namespaces",ListOutputUnique)
-	root.addSubGenerator.out.emit("").emit("# fields")
-	fields=root.addSubGenerator("fields")
+
+	root.addSubGenerator("namespaces",ListOutputUnique)  # looked up by name from inside tFields 
+
+	root.addSubGenerator.out.emit("").emit("# fields")   
 	
-	tFields(fields)
+	tFields(root.addSubGenerator)  # no name needed if never looked up
 	root.produceOutput
 //t3
+
 
 # process fields (called from t3 to test parent lookup and getSubGenerator)
 # --
