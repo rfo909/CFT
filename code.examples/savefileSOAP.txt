@@ -211,11 +211,11 @@ NS_XSD("import")
 							gen.out("# output: message=" + output.attrGet("message") + " name=" + output.attrGet("name"))
 							self.createMessageTemplate(gen, wsdlDocument, output.attrGet("message"))
 					}
-					#{
-					#	operation.subNodes(SOAP:NS_WSDL("fault"))->fault
-					#		gen.out("# fault: message=" + fault.attrGet("message") + " name=" + fault.attrGet("name"))
-					#		self.createMessageTemplate(gen, wsdlDocument, fault.attrGet("message"))
-					#}
+					{
+						operation.subNodes(SOAP:NS_WSDL("fault"))->fault
+							gen.out("# fault: message=" + fault.attrGet("message") + " name=" + fault.attrGet("name"))
+							self.createMessageTemplate(gen, wsdlDocument, fault.attrGet("message"))
+					}
 
 		| 
 		CreateFormattedOutput(root.produceOutput)
@@ -294,6 +294,11 @@ NS_XSD("import")
 				type=element.attrGet("type")
 				gen.out("#>>>")
 				gen.out("# complexType: element name=" + name + " type=" + type)
+				minOccurs=element.attrGet("minOccurs",null)
+				maxOccurs=element.attrGet("maxOccurs",null)  # can be "unbounded" or some number
+
+				if (minOccurs!=null) gen.out("#   minOccurs=" + minOccurs)
+				if (maxOccurs!=null) gen.out("#   maxOccurs=" + maxOccurs)		
 
 				# Look up type, unless soap system type
 				if (!IsSystemType(type)) {
