@@ -114,6 +114,7 @@ NS_XSD("import")
 	if (typeList.empty) null else typeList.first
 /LookupComplexTypeByName
 
+
 # Return SimpleType object or null
 # --
 	P(1) as &WsdlDocument => wsdlDocument
@@ -142,6 +143,7 @@ NS_XSD("import")
 	type
 /LookupType
 
+
 # Is a type a system type?
 # --
 	P(1) as String => typeName
@@ -151,7 +153,19 @@ NS_XSD("import")
 /IsSystemType
 
 
-# Formatted output
+# Deconstruct {xxx}yyy type string, returns SymDict(namespace,prefix,simpleName)
+# --
+	P(1) as String => value
+
+	value.after("{").before("}") => namespace
+	namespace.split("/").last => prefix
+	value.after("}") => simpleName
+	SymDict(namespace,prefix,simpleName)
+/DeconstructType
+
+
+
+# Formatted output (indents)
 # --
 	P(1) as List => lines
 	indent=0
@@ -206,16 +220,16 @@ NS_XSD("import")
 							
 							self.createMessageTemplate(gen, wsdlDocument, input.attrGet("message"))
 					}
-					{
-						operation.subNodes(SOAP:NS_WSDL("output"))->output
-							gen.out("# output: message=" + output.attrGet("message") + " name=" + output.attrGet("name"))
-							self.createMessageTemplate(gen, wsdlDocument, output.attrGet("message"))
-					}
-					{
-						operation.subNodes(SOAP:NS_WSDL("fault"))->fault
-							gen.out("# fault: message=" + fault.attrGet("message") + " name=" + fault.attrGet("name"))
-							self.createMessageTemplate(gen, wsdlDocument, fault.attrGet("message"))
-					}
+					#{
+					#	operation.subNodes(SOAP:NS_WSDL("output"))->output
+					#		gen.out("# output: message=" + output.attrGet("message") + " name=" + output.attrGet("name"))
+					#		self.createMessageTemplate(gen, wsdlDocument, output.attrGet("message"))
+					#}
+					#{
+					#	operation.subNodes(SOAP:NS_WSDL("fault"))->fault
+					#		gen.out("# fault: message=" + fault.attrGet("message") + " name=" + fault.attrGet("name"))
+					#		self.createMessageTemplate(gen, wsdlDocument, fault.attrGet("message"))
+					#}
 
 		| 
 		CreateFormattedOutput(root.produceOutput)
@@ -227,6 +241,17 @@ NS_XSD("import")
 		P(3) as String => messageId
 		
 		gen=gen.sub("message")
+		gen.out('<soapEnv:Envelope')
+
+		gen.out("#>>>")
+		gen.sub("namespaces").out('xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"')
+		gen.out(">")
+		gen.out("#<<<")
+
+
+		gen.out("#>>>")
+		gen.out("<soapEnv:Header/>")
+		gen.out("<soapenv:Body>")
 		
 		messageTag=SOAP:NS_WSDL("message")
 
@@ -241,10 +266,16 @@ NS_XSD("import")
 		message=messages.first
 		message.subNodes(SOAP:NS_WSDL("part")) -> part
 			elementName=part.attrGet("element")
+
+			dtype=DeconstructType(elementName)
+
+			gen.getParent("message").getSubGenerator("namespaces").out("xmlns:" + dtype.prefix + '="' + dtype.namespace + '"')
+			gen.out("#>>>")
 			gen.out("# message part name=" + part.attrGet("name") + " element=" + elementName)
+			gen.out("<" + dtype.prefix + ":" + dtype.simpleName + ">")
+
 			Inner{
 				wsdlDocument.rootNode.allSubNodesByTag(SOAP:NS_XSD("element"))->element
-					#println("Examining element with name=" + element.attrGet("name"))
 					assert(element.attrGet("name")==elementName)
 					out(element)
 			} _=> elementList
@@ -256,7 +287,15 @@ NS_XSD("import")
 
 			# Must reverse full name spaces to prefixes (stored in each node under nsPrefix dictionary field
 
-			self.createMessageElementTemplate(gen, wsdlDocument, elementList.first)->line out(line)
+			self.createMessageElementTemplate(gen, wsdlDocument, elementList.first)
+
+			gen.out("</" + dtype.prefix + ":" + dtype.simpleName + ">")
+			gen.out("#<<<")
+			
+		|
+		gen.out("</soapenv:Body>")
+		gen.out("#<<<")
+
 	}
 
 		
@@ -266,14 +305,19 @@ NS_XSD("import")
 		P(2) as &WsdlDocument => wsdlDocument
 		P(3) as &XMLNode => element
 		element->e
+			elementName=e.attrGet("name")
 			typeName=e.attrGet("type")
+
 			gen.out("#>>>")
-			gen.out("# message element name="+e.attrGet("name") + " type=" + typeName)
-		
-			complexType=LookupComplexTypeByName(wsdlDocument,typeName)
-			error(complexType==null, "No complex type found for name=" + typeName)
-			{
-				self.createComplexTypeTemplate(gen, wsdlDocument, complexType)->line out(line)
+			gen.out("# message element name=" + elementName + " type=" + typeName)
+
+			node=LookupType(wsdlDocument,typeName)
+
+			if (node.tagName.endsWith("complexType")) {
+				self.createComplexTypeTemplate(gen, wsdlDocument, node)
+			} else {
+				println("WARNING: can message element type point to simpleType??")
+				self.createSimpleTypeTemplate(gen, wsdlDocument, node)
 			}
 			gen.out("#<<<")
 			
@@ -289,11 +333,19 @@ NS_XSD("import")
 		# note that for empty messages like NOOP there is no sequence nor elements, so no checks here
 
 		complexType.subNode(sequenceTag)->sequence
+			gen.out("# sequence")
 			sequence.subNodes(SOAP:NS_XSD("element"))->element
 				name=element.attrGet("name")
 				type=element.attrGet("type")
 				gen.out("#>>>")
+
+				dtype=DeconstructType(name)
+
+				gen.getParent("message").getSubGenerator("namespaces").out("xmlns:" + dtype.prefix + '="' + dtype.namespace + '"')
+				gen.out("#>>>")
 				gen.out("# complexType: element name=" + name + " type=" + type)
+				gen.out("<" + dtype.prefix + ":" + dtype.simpleName + ">")
+
 				minOccurs=element.attrGet("minOccurs",null)
 				maxOccurs=element.attrGet("maxOccurs",null)  # can be "unbounded" or some number
 
@@ -311,17 +363,10 @@ NS_XSD("import")
 					}
 
 				}
+
+			gen.out("</" + dtype.prefix + ":" + dtype.simpleName + ">")
+			gen.out("#<<<")
 				gen.out("#<<<")
-
-				# decide max min repeats (optional, multiple)
-				# if single value and simple type, generate XML for it, with merge code
-				# otherwise generate separate templates for
-				# - optional/multiple elements
-				# - complex type
-
-				# also need to map full namespace to prefix 
-			
-			
 	}	
 
 
@@ -558,7 +603,7 @@ NS_XSD("import")
 		Inner{
 			# propagate defaultNamespace for complexType -> all element
 			schema.subNodes(NS_XSD("complexType"))->node
-				NSResolveAttributes(node, GET_ALL, NS_XSD("element"), List("type"), defaultNamespace, acceptResolved)
+				NSResolveAttributes(node, GET_ALL, NS_XSD("element"), List("name","type"), defaultNamespace, acceptResolved)
 			|
 			# same for simpleType -> all restriction
 			schema.subNodes(NS_XSD("simpleType"))->node

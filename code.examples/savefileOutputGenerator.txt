@@ -111,7 +111,7 @@ duplicates (works for strings).
 		result=null
 		self.content->x
 			break(result)
-			assert({x as &Generator})
+			assert(Sys.getType(x)=="Dict" && x.getName=="Generator")
 			assert(x.name==name)
 			result=x
 		|
