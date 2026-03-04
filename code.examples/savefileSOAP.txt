@@ -164,6 +164,10 @@ NS_XSD("import")
 /DeconstructType
 
 
+# Remove comments from output?
+# --
+	false
+/RemoveComments
 
 # Formatted output (indents)
 # --
@@ -175,6 +179,8 @@ NS_XSD("import")
 		} else if (line.trim=="#<<<") {
 			indent = indent - 4
 			if (indent < 0) indent=0
+		} else if (RemoveComments && line.trim.startsWith("#")) {
+			# ignore it
 		} else {
 			out(" ".times(indent) + line)
 		}
@@ -241,17 +247,17 @@ NS_XSD("import")
 		P(3) as String => messageId
 		
 		gen=gen.sub("message")
-		gen.out('<soapEnv:Envelope')
+		gen.out('<envelope:Envelope')
 
 		gen.out("#>>>")
-		gen.sub("namespaces").out('xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"')
+		gen.sub("namespaces", OutputGenerator:ListOutputUnique).out('xmlns:envelope="http://schemas.xmlsoap.org/soap/envelope/"')
 		gen.out(">")
 		gen.out("#<<<")
 
 
 		gen.out("#>>>")
-		gen.out("<soapEnv:Header/>")
-		gen.out("<soapenv:Body>")
+		gen.out("<envelope:Header/>")
+		gen.out("<envelope:Body>")
 		
 		messageTag=SOAP:NS_WSDL("message")
 
@@ -281,10 +287,6 @@ NS_XSD("import")
 			} _=> elementList
 			if (elementList.length != 1) error(elementName + " matches " + elementList.length + " elements")
 
-			# create something like this:
-			# <soapenv:Body xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
-			#	xmlns:abdc="http://np.systor.st/abdc" xmlns:com="http://np.systor.st/commontypes">
-
 			# Must reverse full name spaces to prefixes (stored in each node under nsPrefix dictionary field
 
 			self.createMessageElementTemplate(gen, wsdlDocument, elementList.first)
@@ -293,8 +295,9 @@ NS_XSD("import")
 			gen.out("#<<<")
 			
 		|
-		gen.out("</soapenv:Body>")
+		gen.out("</envelope:Body>")
 		gen.out("#<<<")
+		gen.out("</envelope:Envelope>")
 
 	}
 
@@ -353,7 +356,11 @@ NS_XSD("import")
 				if (maxOccurs!=null) gen.out("#   maxOccurs=" + maxOccurs)		
 
 				# Look up type, unless soap system type
-				if (!IsSystemType(type)) {
+				if (IsSystemType(type)) {
+					gen.out("#>>>")
+					gen.out("${VALUE}")
+					gen.out("#<<<")
+				} else {
 					LookupType(wsdlDocument,type) => typeObject
 
 					if (typeObject.tagName.endsWith("complexType")) {
@@ -404,6 +411,9 @@ NS_XSD("import")
 				} else {
 					self.createSimpleTypeTemplate(gen,wsdlDocument,typeObject)
 				}
+			} else {
+				# look up name from parent ComplexType which 
+				gen.out("${VALUE}")
 			}
 
 
