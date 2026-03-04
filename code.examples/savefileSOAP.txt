@@ -7,7 +7,7 @@ To process a wdsl file, see test function below
 /Readme
 
 
-# Test 
+# Test by processing a wsdl file and generate output
 # --
 	P(1) as File => f
 	dataStore=SOAP:DataStore
@@ -169,8 +169,7 @@ NS_XSD("import")
 
 
 
-# Data store - perhaps not relevant after adding imported data to 
-# document structure.
+# Data store
 # --
 	self.wsdlDocuments = List
 	self.schema = List
@@ -207,11 +206,11 @@ NS_XSD("import")
 							
 							self.createMessageTemplate(gen, wsdlDocument, input.attrGet("message"))
 					}
-					#{
-					#	operation.subNodes(SOAP:NS_WSDL("output"))->output
-					#		gen.out("# output: message=" + output.attrGet("message") + " name=" + output.attrGet("name"))
-					#		self.createMessageTemplate(gen, wsdlDocument, output.attrGet("message"))
-					#}
+					{
+						operation.subNodes(SOAP:NS_WSDL("output"))->output
+							gen.out("# output: message=" + output.attrGet("message") + " name=" + output.attrGet("name"))
+							self.createMessageTemplate(gen, wsdlDocument, output.attrGet("message"))
+					}
 					#{
 					#	operation.subNodes(SOAP:NS_WSDL("fault"))->fault
 					#		gen.out("# fault: message=" + fault.attrGet("message") + " name=" + fault.attrGet("name"))
@@ -473,6 +472,7 @@ NS_XSD("import")
 
 
 
+# Helper, called from UpdateAttributeValuesNamespaces
 # Apply default namespace if no namespace prefix, or if no default, resolve prefix if present
 # --
 	P(1) as &XMLNode => startNode
@@ -525,7 +525,7 @@ NS_XSD("import")
 		println("  tag=" + tag)
 		println("  attrNames=" + attrNames.concat(", "))
 	}
-/NSResolveAttributes
+//NSResolveAttributes
 
 
 # Update various attribute values with regards to name spaces
@@ -546,18 +546,18 @@ NS_XSD("import")
 		defaultNamespace=schema.attrGet("targetNamespace")  # or null
 		acceptResolved=false
 
-		NSResolveAttributes(schema, GET_SUB, NS_XSD("element"), "name value type".split, defaultNamespace, acceptResolved)
-		NSResolveAttributes(schema, GET_SUB, NS_XSD("complexType"), "name type".split, defaultNamespace, acceptResolved)
-		NSResolveAttributes(schema, GET_SUB, NS_XSD("simpleType"), "name".split, defaultNamespace, acceptResolved)
+		NSResolveAttributes(schema, GET_SUB, NS_XSD("element"), List("name","value","type"), defaultNamespace, acceptResolved)
+		NSResolveAttributes(schema, GET_SUB, NS_XSD("complexType"), List("name","type"), defaultNamespace, acceptResolved)
+		NSResolveAttributes(schema, GET_SUB, NS_XSD("simpleType"), List("name"), defaultNamespace, acceptResolved)
 
 		Inner{
 			# propagate defaultNamespace for complexType -> all element
 			schema.subNodes(NS_XSD("complexType"))->node
-				NSResolveAttributes(node, GET_ALL, NS_XSD("element"), "type".split, defaultNamespace, acceptResolved)
+				NSResolveAttributes(node, GET_ALL, NS_XSD("element"), List("type"), defaultNamespace, acceptResolved)
 			|
 			# same for simpleType -> all restriction
 			schema.subNodes(NS_XSD("simpleType"))->node
-				NSResolveAttributes(node, GET_ALL, NS_XSD("restriction"), "base".split, defaultNamespace, acceptResolved)
+				NSResolveAttributes(node, GET_ALL, NS_XSD("restriction"), List("base"), defaultNamespace, acceptResolved)
 			|
 		}
 	|
@@ -571,12 +571,11 @@ NS_XSD("import")
 	defaultNamespace=defs.attrGet("targetNamespace")  # or null
 	acceptResolved=false
 
-	NSResolveAttributes(defs, GET_SUB, NS_WSDL("message"), "name".split, defaultNamespace, acceptResolved)
-	NSResolveAttributes(defs, GET_SUB, NS_WSDL("portType"), "name".split, defaultNamespace, acceptResolved)
-	NSResolveAttributes(defs, GET_SUB, NS_WSDL("binding"), "name".split, defaultNamespace, acceptResolved)
-	NSResolveAttributes(defs, GET_SUB, NS_WSDL("service"), "name".split, defaultNamespace, acceptResolved)
-	NSResolveAttributes(defs, GET_SUB, NS_WSDL("element"), "type".split, defaultNamespace, acceptResolved)
-
+	NSResolveAttributes(defs, GET_SUB, NS_WSDL("message"), List("name"), defaultNamespace, acceptResolved)
+	NSResolveAttributes(defs, GET_SUB, NS_WSDL("portType"), List("name"), defaultNamespace, acceptResolved)
+	NSResolveAttributes(defs, GET_SUB, NS_WSDL("binding"), List("name"), defaultNamespace, acceptResolved)
+	NSResolveAttributes(defs, GET_SUB, NS_WSDL("service"), List("name"), defaultNamespace, acceptResolved)
+	NSResolveAttributes(defs, GET_SUB, NS_WSDL("element"), List("type"), defaultNamespace, acceptResolved)
 	
 	# Resolve namespace of attributes with no default namespace (requires ns prefix)
 	# ------------------------------------------------------------------------------
@@ -585,13 +584,13 @@ NS_XSD("import")
 
 	# nodes from complete wdsl-document, by tag 
 
-	NSResolveAttributes(defs, GET_ALL, NS_XSD("element"), "type value".split, defaultNamespace, acceptResolved)
-	NSResolveAttributes(defs, GET_ALL, NS_WSDL("part"), "element".split, defaultNamespace, acceptResolved)
-	NSResolveAttributes(defs, GET_ALL, NS_WSDL("input"), "message".split, defaultNamespace, acceptResolved)
-	NSResolveAttributes(defs, GET_ALL, NS_WSDL("output"), "message".split, defaultNamespace, acceptResolved)
-	NSResolveAttributes(defs, GET_ALL, NS_WSDL("fault"), "message".split, defaultNamespace, acceptResolved)
-	NSResolveAttributes(defs, GET_ALL, NS_WSDL("port"), "binding".split, defaultNamespace, acceptResolved)
-	NSResolveAttributes(defs, GET_ALL, NS_WSDL("binding"), "type".split, defaultNamespace, acceptResolved)
+	NSResolveAttributes(defs, GET_ALL, NS_XSD("element"), List("type","value"), defaultNamespace, acceptResolved)
+	NSResolveAttributes(defs, GET_ALL, NS_WSDL("part"), List("element"), defaultNamespace, acceptResolved)
+	NSResolveAttributes(defs, GET_ALL, NS_WSDL("input"), List("message"), defaultNamespace, acceptResolved)
+	NSResolveAttributes(defs, GET_ALL, NS_WSDL("output"), List("message"), defaultNamespace, acceptResolved)
+	NSResolveAttributes(defs, GET_ALL, NS_WSDL("fault"), List("message"), defaultNamespace, acceptResolved)
+	NSResolveAttributes(defs, GET_ALL, NS_WSDL("port"), List("binding"), defaultNamespace, acceptResolved)
+	NSResolveAttributes(defs, GET_ALL, NS_WSDL("binding"), List("type"), defaultNamespace, acceptResolved)
 	
 /UpdateAttributeValuesNamespaces
 
