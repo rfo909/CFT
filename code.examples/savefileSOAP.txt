@@ -150,6 +150,25 @@ NS_XSD("import")
 
 /IsSystemType
 
+
+# Formatted output
+# --
+	P(1) as List => lines
+	indent=0
+	lines->line
+		if (line.trim=="#>>>") {
+			indent = indent + 4
+		} else if (line.trim=="#<<<") {
+			indent = indent - 4
+			if (indent < 0) indent=0
+		} else {
+			out(" ".times(indent) + line)
+		}
+	
+/CreateFormattedOutput
+
+
+
 # Data store - perhaps not relevant after adding imported data to 
 # document structure.
 # --
@@ -177,7 +196,7 @@ NS_XSD("import")
 				root.out("# portType: " + portType.attrGet("name"))
 				root.out("# ----------------------------------")
 				portType.subNodes(SOAP:NS_WSDL("operation"))->operation
-					gen=root # root.sub("operation")
+					gen=root.sub("operation")
 					gen.out("")
 					gen.out("# operation: " + operation.attrGet("name"))
 					gen.out("# ----------")
@@ -200,8 +219,7 @@ NS_XSD("import")
 					#}
 
 		| 
-		gen.produceOutput ->line out(line)
-		true
+		CreateFormattedOutput(root.produceOutput)
 	}
 
 	self.createMessageTemplate = Lambda{
@@ -211,11 +229,6 @@ NS_XSD("import")
 		
 		gen=gen.sub("message")
 		
-		gen.out("<soapEnv:Body")
-		gen.sub("message-namespaces", OutputGenerator:ListOutputUnique)
-		gen.out(">")
-		
-
 		messageTag=SOAP:NS_WSDL("message")
 
 		wsdlDocument.rootNode.allSubNodesByTag(messageTag)->m
@@ -229,7 +242,7 @@ NS_XSD("import")
 		message=messages.first
 		message.subNodes(SOAP:NS_WSDL("part")) -> part
 			elementName=part.attrGet("element")
-			gen.out("#   message part name=" + part.attrGet("name") + " element=" + elementName)
+			gen.out("# message part name=" + part.attrGet("name") + " element=" + elementName)
 			Inner{
 				wsdlDocument.rootNode.allSubNodesByTag(SOAP:NS_XSD("element"))->element
 					#println("Examining element with name=" + element.attrGet("name"))
@@ -244,22 +257,27 @@ NS_XSD("import")
 
 			# Must reverse full name spaces to prefixes (stored in each node under nsPrefix dictionary field
 
-			self.createElementTemplate(gen, wsdlDocument, elementList.first)->line out(line)
+			self.createMessageElementTemplate(gen, wsdlDocument, elementList.first)->line out(line)
 	}
 
 		
 
-	self.createElementTemplate = Lambda{
+	self.createMessageElementTemplate = Lambda{
 		P(1) as &Generator => gen
 		P(2) as &WsdlDocument => wsdlDocument
 		P(3) as &XMLNode => element
 		element->e
 			typeName=e.attrGet("type")
-			gen.out("#      element name="+e.attrGet("name") + " type=" + typeName)
+			gen.out("#>>>")
+			gen.out("# message element name="+e.attrGet("name") + " type=" + typeName)
 		
 			complexType=LookupComplexTypeByName(wsdlDocument,typeName)
 			error(complexType==null, "No complex type found for name=" + typeName)
-			self.createComplexTypeTemplate(gen, wsdlDocument, complexType)->line out(line)
+			{
+				self.createComplexTypeTemplate(gen, wsdlDocument, complexType)->line out(line)
+			}
+			gen.out("#<<<")
+			
 	}
 
 	self.createComplexTypeTemplate = Lambda {
@@ -275,7 +293,8 @@ NS_XSD("import")
 			sequence.subNodes(SOAP:NS_XSD("element"))->element
 				name=element.attrGet("name")
 				type=element.attrGet("type")
-				gen.out("#         element name=" + name + " type=" + type)
+				gen.out("#>>>")
+				gen.out("# complexType: element name=" + name + " type=" + type)
 
 				# Look up type, unless soap system type
 				if (!IsSystemType(type)) {
@@ -288,6 +307,7 @@ NS_XSD("import")
 					}
 
 				}
+				gen.out("#<<<")
 
 				# decide max min repeats (optional, multiple)
 				# if single value and simple type, generate XML for it, with merge code
@@ -308,18 +328,37 @@ NS_XSD("import")
 
 		simpleType.subNodes(SOAP:NS_XSD("restriction"))->restriction
 			base=restriction.attrGet("base")
-			gen.out("#             base=" + base)
+			gen.out("#>>>")
+			gen.out("# simpleType base=" + base)
+	
+			{
+				simpleType.subNodes(SOAP:NS_XSD("annotation"))->annotation
+					annotation.subNodes(SOAP:NS_XSD("documentation"))->documentation
+						gen.out("# DOC: " + documentation.getText.concat(" ").trim)
+			}
+			{
+				restriction.subNodes(SOAP:NS_XSD("pattern"))->pattern
+					gen.out("# pattern: " + pattern.attrGet("value"))
+			}
 
-				if (!IsSystemType(base)) {
-					LookupType(wsdlDocument,base) => typeObject
 
-					if (typeObject.tagName.endsWith("complexType")) {
-						self.createComplexTypeTemplate(gen,wsdlDocument,typeObject)
-					} else {
-						self.createSimpleTypeTemplate(gen,wsdlDocument,typeObject)
-					}
+			{
+				restriction.subNodes(SOAP:NS_XSD("enumeration"))->enum
+					gen.out("# enumeration: " + enum.attrGet("value"))
+			}
 
+			if (!IsSystemType(base)) {
+				LookupType(wsdlDocument,base) => typeObject
+
+				if (typeObject.tagName.endsWith("complexType")) {
+					self.createComplexTypeTemplate(gen,wsdlDocument,typeObject)
+				} else {
+					self.createSimpleTypeTemplate(gen,wsdlDocument,typeObject)
 				}
+			}
+
+
+			gen.out("#<<<")
 				
 	}
 
@@ -514,7 +553,7 @@ NS_XSD("import")
 		Inner{
 			# propagate defaultNamespace for complexType -> all element
 			schema.subNodes(NS_XSD("complexType"))->node
-				NSResolveAttributes(node, GET_ALL, NS_XSD("element"), "name type".split, defaultNamespace, acceptResolved)
+				NSResolveAttributes(node, GET_ALL, NS_XSD("element"), "type".split, defaultNamespace, acceptResolved)
 			|
 			# same for simpleType -> all restriction
 			schema.subNodes(NS_XSD("simpleType"))->node
@@ -546,7 +585,7 @@ NS_XSD("import")
 
 	# nodes from complete wdsl-document, by tag 
 
-	NSResolveAttributes(defs, GET_ALL, NS_XSD("element"), "name type value".split, defaultNamespace, acceptResolved)
+	NSResolveAttributes(defs, GET_ALL, NS_XSD("element"), "type value".split, defaultNamespace, acceptResolved)
 	NSResolveAttributes(defs, GET_ALL, NS_WSDL("part"), "element".split, defaultNamespace, acceptResolved)
 	NSResolveAttributes(defs, GET_ALL, NS_WSDL("input"), "message".split, defaultNamespace, acceptResolved)
 	NSResolveAttributes(defs, GET_ALL, NS_WSDL("output"), "message".split, defaultNamespace, acceptResolved)
