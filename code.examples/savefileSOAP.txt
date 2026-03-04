@@ -98,7 +98,57 @@ NS_XSD("schema")
 NS_XSD("import")
 /XSD_IMPORT
 
+# Return ComplexType object or null
+# --
+	P(1) as &WsdlDocument => wsdlDocument
+	P(2) as String => typeName
 
+	if (typeName.startsWith(XSD_SCHEMA)) error("Can not look up " + XSD_SCHEMA + " type: " + typeName)
+
+	Inner{
+		wsdlDocument.rootNode.allSubNodesByTag(SOAP:NS_XSD("complexType"))->type
+			assert(type.attrGet("name")==typeName)
+			out(type)
+	} _=> typeList
+	if (typeList.length > 1) error(typeName + " matches " + typeList.length + " complexType elements")
+	if (typeList.empty) null else typeList.first
+/LookupComplexTypeByName
+
+# Return SimpleType object or null
+# --
+	P(1) as &WsdlDocument => wsdlDocument
+	P(2) as String => typeName
+
+	if (typeName.startsWith(XSD_SCHEMA)) error("Can not look up " + XSD_SCHEMA + " type: " + typeName)
+
+	Inner{
+		wsdlDocument.rootNode.allSubNodesByTag(SOAP:NS_XSD("simpleType"))->type
+			assert(type.attrGet("name")==typeName)
+			out(type)
+	} _=> typeList
+	if (typeList.length > 1) error(typeName + " matches " + typeList.length + " simmpleType elements")
+	if (typeList.empty) null else typeList.first
+/LookupSimpleTypeByName
+
+
+# Return SimpleType or ComplexType object, or fail if not found
+# --
+	P(1) as &WsdlDocument => wsdlDocument
+	P(2) as String => typeName
+
+	type=LookupSimpleTypeByName(wsdlDocument, typeName)
+	if (type==null) type=LookupComplexTypeByName(wsdlDocument, typeName)
+	if (type==null) error("Unknown type name: " + typeName)
+	type
+/LookupType
+
+# Is a type a system type?
+# --
+	P(1) as String => typeName
+
+	typeName.startsWith(SOAP:NS_XSD)
+
+/IsSystemType
 
 # Data store - perhaps not relevant after adding imported data to 
 # document structure.
@@ -127,7 +177,7 @@ NS_XSD("import")
 				root.out("# portType: " + portType.attrGet("name"))
 				root.out("# ----------------------------------")
 				portType.subNodes(SOAP:NS_WSDL("operation"))->operation
-					gen=root.sub("operation")
+					gen=root # root.sub("operation")
 					gen.out("")
 					gen.out("# operation: " + operation.attrGet("name"))
 					gen.out("# ----------")
@@ -138,16 +188,16 @@ NS_XSD("import")
 							
 							self.createMessageTemplate(gen, wsdlDocument, input.attrGet("message"))
 					}
-					{
-						operation.subNodes(SOAP:NS_WSDL("output"))->output
-							gen.out("# output: message=" + output.attrGet("message") + " name=" + output.attrGet("name"))
-							self.createMessageTemplate(gen, wsdlDocument, output.attrGet("message"))
-					}
-					{
-						operation.subNodes(SOAP:NS_WSDL("fault"))->fault
-							gen.out("# fault: message=" + fault.attrGet("message") + " name=" + fault.attrGet("name"))
-							self.createMessageTemplate(gen, wsdlDocument, fault.attrGet("message"))
-					}
+					#{
+					#	operation.subNodes(SOAP:NS_WSDL("output"))->output
+					#		gen.out("# output: message=" + output.attrGet("message") + " name=" + output.attrGet("name"))
+					#		self.createMessageTemplate(gen, wsdlDocument, output.attrGet("message"))
+					#}
+					#{
+					#	operation.subNodes(SOAP:NS_WSDL("fault"))->fault
+					#		gen.out("# fault: message=" + fault.attrGet("message") + " name=" + fault.attrGet("name"))
+					#		self.createMessageTemplate(gen, wsdlDocument, fault.attrGet("message"))
+					#}
 
 		| 
 		gen.produceOutput ->line out(line)
@@ -197,6 +247,8 @@ NS_XSD("import")
 			self.createElementTemplate(gen, wsdlDocument, elementList.first)->line out(line)
 	}
 
+		
+
 	self.createElementTemplate = Lambda{
 		P(1) as &Generator => gen
 		P(2) as &WsdlDocument => wsdlDocument
@@ -205,14 +257,9 @@ NS_XSD("import")
 			typeName=e.attrGet("type")
 			gen.out("#      element name="+e.attrGet("name") + " type=" + typeName)
 		
-			Inner{
-				wsdlDocument.rootNode.allSubNodesByTag(SOAP:NS_XSD("complexType"))->type
-					assert(type.attrGet("name")==typeName)
-					out(type)
-			} _=> typeList
-			if (typeList.length != 1) error(typeName + " matches " + typeList.length + " elements")
-
-			self.createComplexTypeTemplate(gen, wsdlDocument, typeList.first)->line out(line)
+			complexType=LookupComplexTypeByName(wsdlDocument,typeName)
+			error(complexType==null, "No complex type found for name=" + typeName)
+			self.createComplexTypeTemplate(gen, wsdlDocument, complexType)->line out(line)
 	}
 
 	self.createComplexTypeTemplate = Lambda {
@@ -230,6 +277,18 @@ NS_XSD("import")
 				type=element.attrGet("type")
 				gen.out("#         element name=" + name + " type=" + type)
 
+				# Look up type, unless soap system type
+				if (!IsSystemType(type)) {
+					LookupType(wsdlDocument,type) => typeObject
+
+					if (typeObject.tagName.endsWith("complexType")) {
+						self.createComplexTypeTemplate(gen,wsdlDocument,typeObject)
+					} else {
+						self.createSimpleTypeTemplate(gen,wsdlDocument,typeObject)
+					}
+
+				}
+
 				# decide max min repeats (optional, multiple)
 				# if single value and simple type, generate XML for it, with merge code
 				# otherwise generate separate templates for
@@ -238,8 +297,31 @@ NS_XSD("import")
 
 				# also need to map full namespace to prefix 
 			
+			
 	}	
 
+
+	self.createSimpleTypeTemplate = Lambda {
+		P(1) as &Generator => gen
+		P(2) as &WsdlDocument => wsdlDocument
+		P(3) as &XMLNode => simpleType
+
+		simpleType.subNodes(SOAP:NS_XSD("restriction"))->restriction
+			base=restriction.attrGet("base")
+			gen.out("#             base=" + base)
+
+				if (!IsSystemType(base)) {
+					LookupType(wsdlDocument,base) => typeObject
+
+					if (typeObject.tagName.endsWith("complexType")) {
+						self.createComplexTypeTemplate(gen,wsdlDocument,typeObject)
+					} else {
+						self.createSimpleTypeTemplate(gen,wsdlDocument,typeObject)
+					}
+
+				}
+				
+	}
 
 	
 /class DataStore
