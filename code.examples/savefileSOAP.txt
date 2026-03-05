@@ -227,14 +227,14 @@ NS_XSD("import")
 
 							self.createMessageTemplate(gen, wsdlDocument, output.attrGet("message"))
 					}
-					{
-						operation.subNodes(SOAP:NS_WSDL("fault"))->fault
-							gen.out("")
-							gen.out("# fault: message=" + fault.attrGet("message") + " name=" + fault.attrGet("name"))
-							gen.out('<!-- rule="1" type="fault" op="' + opName + '" message="' + fault.attrGet("name") + '" -->')
-							
-							self.createMessageTemplate(gen, wsdlDocument, fault.attrGet("message"))
-					}
+					#{
+					#	operation.subNodes(SOAP:NS_WSDL("fault"))->fault
+					#		gen.out("")
+					#		gen.out("# fault: message=" + fault.attrGet("message") + " name=" + fault.attrGet("name"))
+					#		gen.out('<!-- rule="1" type="fault" op="' + opName + '" message="' + fault.attrGet("name") + '" -->')
+					#		
+					#		self.createMessageTemplate(gen, wsdlDocument, fault.attrGet("message"))
+					#}
 
 		| 
 		root.produceOutput
@@ -341,19 +341,19 @@ NS_XSD("import")
 			sequence.subNodes(SOAP:NS_XSD("element"))->element
 				name=element.attrGet("name")
 				type=element.attrGet("type")
-				gen.out("#>>>")
 
 				dtype=DeconstructType(name)
 
 				gen.getParent("message").getSubGenerator("namespaces").out("xmlns:" + dtype.prefix + '="' + dtype.namespace + '"')
 				gen.out("#>>>")
 				gen.out("# complexType: element name=" + name + " type=" + type)
-				minOccurs=element.attrGet("minOccurs","undefined")
-				maxOccurs=element.attrGet("maxOccurs","undefined")  # can be "unbounded" or some number
+
+				minOccurs=element.attrGet("minOccurs","-")
+				maxOccurs=element.attrGet("maxOccurs","-")  # can be "unbounded" or some number
 				
-				if (minOccurs != "undefined" || maxOccurs != "undefined") {
-					gen.out('<!-- rule="1" minOccurs="' + minOccurs + '" maxOccurs="' + maxOccurs + '" -->')
-				}
+				#if (minOccurs != "-" || maxOccurs != "-") {
+					gen.out('<!-- rule="1" for="' + dtype.simpleName + '" minOccurs="' + minOccurs + '" maxOccurs="' + maxOccurs + '" -->')
+				#}
 				gen.out("<" + dtype.prefix + ":" + dtype.simpleName + ">")
 
 
@@ -373,8 +373,7 @@ NS_XSD("import")
 
 				}
 
-			gen.out("</" + dtype.prefix + ":" + dtype.simpleName + ">")
-			gen.out("#<<<")
+				gen.out("</" + dtype.prefix + ":" + dtype.simpleName + ">")
 				gen.out("#<<<")
 	}	
 
@@ -389,24 +388,22 @@ NS_XSD("import")
 			gen.out("#>>>")
 			gen.out("# simpleType base=" + base)
 	
-			{
-				simpleType.subNodes(SOAP:NS_XSD("annotation"))->annotation
-					annotation.subNodes(SOAP:NS_XSD("documentation"))->documentation
-						gen.out("<!-- " + documentation.getText.concat(" ").trim + " -->")
+			patterns = Inner{
+				restriction.subNodes(SOAP:NS_XSD("pattern"))->pattern 
+					out(pattern.attrGet("value"))
 			}
-			{
-				restriction.subNodes(SOAP:NS_XSD("pattern"))->pattern
-					gen.out('<!-- rule="1" pattern="' + pattern.attrGet("value") + '" -->')
-			}
-
 
 			enumValues = Inner{
 				restriction.subNodes(SOAP:NS_XSD("enumeration"))->enum
 					out(enum.attrGet("value"))
 			}
-			
-			if (!enumValues.empty) {
-				gen.out("<!-- values: " + enumValues.concat(" ") + " -->")
+
+			enumString=if(enumValues.empty,""," (" + enumValues.concat("|") + ")")
+
+			{
+				simpleType.subNodes(SOAP:NS_XSD("annotation"))->annotation
+					annotation.subNodes(SOAP:NS_XSD("documentation"))->documentation
+						gen.out("<!-- " + documentation.getText.concat(" ").trim + " " + patterns.concat(" ") + enumString + " -->")
 			}
 
 			if (!IsSystemType(base)) {
