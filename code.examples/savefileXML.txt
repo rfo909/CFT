@@ -129,7 +129,7 @@ XML Namespaces support
 		# (implemented in parser, not tokenizer)
 
 	# Strings = 5
-	List('"',"'")->c 
+	List('"')->c 
 		root.sub(c) => insideString
 		insideString.setDefault(insideString)
 		insideString.sub("\").setDefault(insideString)
@@ -802,7 +802,7 @@ namespace prefixes.
 	
 	# look up xmlns property, up the parent chain, fails with error if not found
 	self.getXmlns = Lambda{
-		if (self.xmlns != XML:NS_undefined) {
+		if (self.xmlns != NS_undefined) {
 			self.xmlns
 		} else if (self.parent != null) {
 			self.parent.getXmlns
@@ -836,7 +836,7 @@ namespace prefixes.
 		P(1) as String => tag
 		
 		if (!tag.contains(":")) {
-			self.getXmlns + ":" + tag
+			self.getXmlns + tag
 		} else {
 			self.resolveNamespace(tag)
 		}
@@ -885,8 +885,6 @@ namespace prefixes.
 	
 	if (node.tagName.contains(":")) {
 		node.nsPrefix=node.tagName.before(":")
-	} else {
-		node.nsPrefix=null
 	}
 	node.tagName=namespaceInfo.expandXMLTag(node.tagName)
 	node.namespaceInfo=namespaceInfo
