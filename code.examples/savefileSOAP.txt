@@ -11,7 +11,7 @@ To process a wdsl file, see test function below
 # --
 	P(1) as File => f
 	P(2,false) as boolean => debugMode
-	P(3) as Dir? => targetDir  # where we write resulting XML files
+	P(3) as Dir => targetDir  # where we write resulting XML files
 	
 	
 	dataStore=SOAP:DataStore
@@ -26,9 +26,9 @@ To process a wdsl file, see test function below
 
 	Lib:Header("Creating templates")
 	rawOutput = dataStore.createTemplates
-	niceOutput = CreateFormattedOutput(rawOutput, debugMode)
-	Sys.homeDir.file("SOAP_XML.txt").create(niceOutput)
-	niceOutput.print
+	targetDir.file("raw.txt").create(rawOutput)
+
+	CreateFormattedOutput(rawOutput, debugMode, targetDir)
 	
 	# -----------------
 
@@ -161,19 +161,36 @@ NS_XSD("import")
 # --
 	P(1) as List => lines
 	P(2,false) as boolean => debugMode
-	
+	P(3) as Dir => targetDir
+
+	targetFile=null
+
+	buffer=List
+
 	indent=0
 	lines->line
-		if (line.trim=="#>>>") {
+		if (line.trim.startsWith("#operation")) {
+			if (targetFile != null) {
+				println(targetFile.path)
+				targetFile.create(buffer)
+			}
+			buffer=List
+			targetFile=targetDir.file(line.after(" ").trim+".xml")
+		} else if (line.trim=="#>>>") {
 			indent = indent + 4
 		} else if (line.trim=="#<<<") {
 			indent = indent - 4
 			if (indent < 0) indent=0
 		} else if (line.trim.startsWith("#")) {
-			if (debugMode) out(" ".times(indent)+"<!-- DEBUG: " + line.trim.after("#") + " -->")
+			if (debugMode) buffer.add(" ".times(indent)+"<!-- DEBUG: " + line.trim.after("#") + " -->")
 		} else {
-			out(" ".times(indent) + line)
+			buffer.add(" ".times(indent) + line)
 		}
+	|
+	if (targetFile != null) {
+		println(targetFile.path)
+		targetFile.create(buffer)
+	}
 	
 /CreateFormattedOutput
 
@@ -311,7 +328,12 @@ NS_XSD("import")
 			typeName=e.attrGet("type")
 
 			gen.out("#>>>")
-			gen.out("# message element name=" + elementName + " type=" + typeName)
+			gen.out("# message element " + element.tagName + " name=" + elementName + " type=" + typeName)
+			if (typeName==null) {
+				println("WARNING: element " + element.tagName + " name=" + elementName)
+				println("   No type attribute, does it contain embedded anonymous types?")
+				error("support for those not implemented yet")
+			}
 
 			node=LookupType(wsdlDocument,typeName)
 
@@ -506,17 +528,21 @@ NS_XSD("import")
 		schemaNode.subNodes(SOAP:XSD_IMPORT)->ximp
 			ns=ximp.attrGet("namespace")  # must match targetNamespace of schema! (TODO)
 			loc=ximp.attrGet("schemaLocation")
-			importFile=self.sourceFile.dir.file(loc)
-			println("Processing " + SOAP:XSD_IMPORT + " file: " + importFile.path)
+			if (loc==null) {
+				println("WARNING: ingoring import without schemaLocation attribute")
+			} else {
+				importFile=self.sourceFile.dir.file(loc)
+				println("Processing " + SOAP:XSD_IMPORT + " file: " + importFile.path)
 
-			schema=SOAP:Schema
-			XML:Parse(importFile.read).first => newSchemaNode
-			XML:ProcessNamespaces(newSchemaNode, self.schemaNode.namespaceInfo)
-			
-			schema.processSchemaNode(newSchemaNode, importFile, self.dataStore)
+				schema=SOAP:Schema
+				XML:Parse(importFile.read).first => newSchemaNode
+				XML:ProcessNamespaces(newSchemaNode, self.schemaNode.namespaceInfo)
+				
+				schema.processSchemaNode(newSchemaNode, importFile, self.dataStore)
 
-			# add the imported node to the document tree
-			schemaNode.addSubNode(newSchemaNode)
+				# add the imported node to the document tree
+				schemaNode.addSubNode(newSchemaNode)
+			}
 	}
 
 
