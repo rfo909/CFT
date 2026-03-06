@@ -365,19 +365,27 @@ NS_XSD("import")
 
 			gen.out("#>>>")
 			gen.out("# message element " + element.tagName + " name=" + elementName + " type=" + typeName)
+			typeNode=null
 			if (typeName==null) {
-				println("WARNING: element " + element.tagName + " name=" + elementName)
-				println("   No type attribute, does it contain embedded anonymous types?")
-				error("support for those not implemented yet")
+				# look for type node as sub-content under the element
+				Inner {
+					element.subNodes->tnode
+						if (tnode.tagName==SOAP:NS_XSD("simpleType") || tnode.tagName==SOAP:NS_XSD("complexType")) {
+							foundType=tnode
+						}
+						break(typeNode)
+				}
+				if (!typeNode) {
+					error("Element " + element.tagName + " no type attribute and no embedded type node")
+				}
+			} else {
+				typeNode=LookupType(wsdlDocument,typeName)
 			}
 
-			node=LookupType(wsdlDocument,typeName)
-
-			if (node.tagName.endsWith("complexType")) {
-				self.createComplexTypeTemplate(gen, wsdlDocument, node)
+			if (typeNode.tagName.endsWith("complexType")) {
+				self.createComplexTypeTemplate(gen, wsdlDocument, typeNode)
 			} else {
-				println("WARNING: can message element type point to simpleType??")
-				self.createSimpleTypeTemplate(gen, wsdlDocument, node)
+				self.createSimpleTypeTemplate(gen, wsdlDocument, typeNode)
 			}
 			gen.out("#<<<")
 			
