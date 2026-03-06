@@ -11,7 +11,7 @@ To process a wdsl file, see test function below
 # --
 	P(1) as File => f
 	P(2,false) as boolean => debugMode
-	P(3) as Dir => targetDir  # where we write resulting XML files
+	P(3) as Dir? => targetDir  # where we write resulting XML files
 	
 	
 	dataStore=SOAP:DataStore
@@ -26,7 +26,7 @@ To process a wdsl file, see test function below
 
 	Lib:Header("Creating templates")
 	rawOutput = dataStore.createTemplates
-	targetDir.file("raw.txt").create(rawOutput)
+	if (targetDir) targetDir.file("raw.txt").create(rawOutput)
 
 	CreateFormattedOutput(rawOutput, debugMode, targetDir)
 	
@@ -161,7 +161,7 @@ NS_XSD("import")
 # --
 	P(1) as List => lines
 	P(2,false) as boolean => debugMode
-	P(3) as Dir => targetDir
+	P(3) as Dir? => targetDir
 
 	targetFile=null
 
@@ -169,7 +169,7 @@ NS_XSD("import")
 
 	indent=0
 	lines->line
-		if (line.trim.startsWith("#operation")) {
+		if (targetDir != null && line.trim.startsWith("#operation")) {
 			if (targetFile != null) {
 				println(targetFile.path)
 				targetFile.create(buffer)
@@ -190,8 +190,10 @@ NS_XSD("import")
 	if (targetFile != null) {
 		println(targetFile.path)
 		targetFile.create(buffer)
-	}
-	
+	} 
+
+	if (!targetDir) buffer.print
+		
 /CreateFormattedOutput
 
 
@@ -231,24 +233,24 @@ NS_XSD("import")
 					{
 						operation.subNodes(SOAP:NS_WSDL("input"))->input
 							gen.out("")
-							gen.out("# input: message=" + input.attrGet("message") + " name=" + input.attrGet("name"))
-							gen.out('<!-- rule="1" type="input" op="' + opName + '" message="' + input.attrGet("name") + '" -->')
+							gen.out("#input message=" + input.attrGet("message") + " name=" + input.attrGet("name"))
+							gen.out('<!-- type="input" op="' + opName + '" message="' + input.attrGet("name") + '" -->')
 							
 							self.createMessageTemplate(gen, wsdlDocument, input.attrGet("message"))
 					}
 					{
 						operation.subNodes(SOAP:NS_WSDL("output"))->output
 							gen.out("")
-							gen.out("# output: message=" + output.attrGet("message") + " name=" + output.attrGet("name"))
-							gen.out('<!-- rule="1" type="output" op="' + opName + '" message="' + output.attrGet("name") + '" -->')
+							gen.out("#output message=" + output.attrGet("message") + " name=" + output.attrGet("name"))
+							gen.out('<!-- type="output" op="' + opName + '" message="' + output.attrGet("name") + '" -->')
 
 							self.createMessageTemplate(gen, wsdlDocument, output.attrGet("message"))
 					}
 					#{
 					#	operation.subNodes(SOAP:NS_WSDL("fault"))->fault
 					#		gen.out("")
-					#		gen.out("# fault: message=" + fault.attrGet("message") + " name=" + fault.attrGet("name"))
-					#		gen.out('<!-- rule="1" type="fault" op="' + opName + '" message="' + fault.attrGet("name") + '" -->')
+					#		gen.out("#fault message=" + fault.attrGet("message") + " name=" + fault.attrGet("name"))
+					#		gen.out('<!-- type="fault" op="' + opName + '" message="' + fault.attrGet("name") + '" -->')
 					#		
 					#		self.createMessageTemplate(gen, wsdlDocument, fault.attrGet("message"))
 					#}
@@ -374,7 +376,7 @@ NS_XSD("import")
 				maxOccurs=element.attrGet("maxOccurs","-")  # can be "unbounded" or some number
 				
 				#if (minOccurs != "-" || maxOccurs != "-") {
-					gen.out('<!-- rule="1" for="' + dtype.simpleName + '" minOccurs="' + minOccurs + '" maxOccurs="' + maxOccurs + '" -->')
+					gen.out('<!-- for="' + dtype.simpleName + '" minOccurs="' + minOccurs + '" maxOccurs="' + maxOccurs + '" -->')
 				#}
 				gen.out("<" + dtype.prefix + ":" + dtype.simpleName + ">")
 
