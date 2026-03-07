@@ -176,6 +176,7 @@ NS_XSD("import")
 		XML:Explore(wsdlDocument.rootNode)
 		error("terminating")
 	}
+	type=ResolveRef(wsdlDocument, type)
 	type
 /LookupType
 
@@ -214,6 +215,42 @@ NS_XSD("import")
 
 /GetEmbeddedType
 
+
+# Resolve ref attribute
+# --
+	P(1) as &WsdlDocument => wsdlDocument
+	P(2) as &XMLNode => node
+
+	ref=node.attrGet("ref")
+	if (ref != null) Inner{
+		tag="}"+node.tagName.after("}")
+
+		foundNode=null
+		wsdlDocument.rootNode.allSubNodes->node
+			assert(node.tagName.endsWith(tag))
+			assert(node.attrGet("name")==ref)
+			foundNode=node
+			break(foundNode)
+		|
+
+		if (foundNode.attrGet("ref") != null) {
+			ResolveRef(wsdlDocument, foundNode.attrGet("ref"))
+		} else {
+			foundNode
+		}
+	 } else {
+		# no change
+		node
+	} _=> result
+	if (result != node) {
+		println("ResolveRef " + node.tagName + " => " + result.tagName)
+	}
+	result
+/ResolveRef
+
+
+	
+
 # Formatted output (indents)
 # --
 	P(1) as List => lines
@@ -229,7 +266,7 @@ NS_XSD("import")
 	lines->line
 		if (targetDir != null && line.trim.startsWith("#operation")) {
 			if (targetFile != null) {
-				println(targetFile.path)
+				#println(targetFile.path)
 				targetFile.create(buffer)
 			}
 			buffer=List
@@ -254,7 +291,7 @@ NS_XSD("import")
 		}
 	|
 	if (targetFile != null) {
-		println(targetFile.path)
+		#println(targetFile.path)
 		targetFile.create(buffer)
 	} 
 
@@ -285,11 +322,13 @@ NS_XSD("import")
 		OutputGenerator:Generator => root
 		
 		self.wsdlDocuments->wsdlDocument
-			wsdlDocument.rootNode.subNodes(SOAP:NS_WSDL("portType"))->portType
+			wsdlDocument.rootNode.subNodes(SOAP:NS_WSDL("portType"))->pt
+				portType=ResolveRef(wsdlDocument,pt)
 				root.out("# ----------------------------------")
 				root.out("# portType: " + portType.attrGet("name"))
 				root.out("# ----------------------------------")
-				portType.subNodes(SOAP:NS_WSDL("operation"))->operation
+				portType.subNodes(SOAP:NS_WSDL("operation"))->op
+					operation=ResolveRef(wsdlDocument,op)
 					gen=root.sub("operation")
 					gen.out("")
 
@@ -297,7 +336,8 @@ NS_XSD("import")
 					gen.out("#operation " + opName)
 										
 					{
-						operation.subNodes(SOAP:NS_WSDL("input"))->input
+						operation.subNodes(SOAP:NS_WSDL("input"))->inp
+							input=ResolveRef(wsdlDocument, inp)
 							gen.out("")
 							gen.out("#input message=" + input.attrGet("message") + " name=" + input.attrGet("name"))
 							gen.out('<!-- type="input" op="' + opName + '" message="' + input.attrGet("name") + '" -->')
@@ -305,7 +345,8 @@ NS_XSD("import")
 							self.createMessageTemplate(gen, wsdlDocument, input.attrGet("message"))
 					}
 					{
-						operation.subNodes(SOAP:NS_WSDL("output"))->output
+						operation.subNodes(SOAP:NS_WSDL("output"))->outp
+							output=ResolveRef(wsdlDocument, outp)
 							gen.out("")
 							gen.out("#output message=" + output.attrGet("message") + " name=" + output.attrGet("name"))
 							gen.out('<!-- type="output" op="' + opName + '" message="' + output.attrGet("name") + '" -->')
@@ -313,7 +354,8 @@ NS_XSD("import")
 							self.createMessageTemplate(gen, wsdlDocument, output.attrGet("message"))
 					}
 					{
-						operation.subNodes(SOAP:NS_WSDL("fault"))->fault
+						operation.subNodes(SOAP:NS_WSDL("fault"))->flt
+							fault=ResolveRef(wsdlDocument, flt)
 							gen.out("")
 							gen.out("#fault message=" + fault.attrGet("message") + " name=" + fault.attrGet("name"))
 							gen.out('<!-- type="fault" op="' + opName + '" message="' + fault.attrGet("name") + '" -->')
@@ -353,9 +395,16 @@ NS_XSD("import")
 		error(messages.length==0, "No " + messageTag + " found")
 		error(messages.length>1, "More than one " + messageTag + " found")
 
-		message=messages.first
-		message.subNodes(SOAP:NS_WSDL("part")) -> part
+		message=ResolveRef(wsdlDocument,messages.first)
+		message.subNodes(SOAP:NS_WSDL("part")) -> prt
+			part=ResolveRef(wsdlDocument,prt)
 			elementName=part.attrGet("element")
+
+			if (elementName==null) {
+				println("Element name is null")
+				XML:Explore(element)
+				error("terminating")
+			}
 
 			dtype=DeconstructType(elementName)
 
@@ -377,7 +426,7 @@ NS_XSD("import")
 
 			# Must reverse full name spaces to prefixes (stored in each node under nsPrefix dictionary field
 
-			self.createMessageElementTemplate(gen, wsdlDocument, elementList.first)
+			self.createMessageElementTemplate(gen, wsdlDocument, ResolveRef(wsdlDocument,elementList.first))
 
 			gen.out("</" + dtype.prefix + ":" + dtype.simpleName + ">")
 			gen.out("#<<<")
@@ -433,27 +482,28 @@ NS_XSD("import")
 
 		complexType.subNode(sequenceTag)->sequence
 			gen.out("# sequence")
-			sequence.subNodes(SOAP:NS_XSD("element"))->element
+			sequence.subNodes(SOAP:NS_XSD("element"))->e
+				element=ResolveRef(wsdlDocument,e)
 				name=element.attrGet("name")
 				type=element.attrGet("type")
 
 				if (type==null) {
-					println("WARNING: element type null, trying element ref")
-					type=element.attrGet("ref")
-					println("  found: " + type)
-				}
-
-				if (type==null) {
 					println("INFO: element type null, looking up typeNode under element")
-					typeNode=GetEmbeddedType(element)
+					typeNode=GetEmbeddedType(wsdlDocument.rootNode)
 					type=typeNode.attrGet("type")					
 				}
 
 				if (type==null) {
-					element.PP.print
-					error("createComplexTypeTemplate: no type found")
+					println("createComplexTypeTemplate: no type found")
+					XML:Explore(element)
+					error("terminating")
 				}
 
+				if (name==null) {
+					println("element name is null")
+					XML:Explore(wsdlDocument.rootNode)
+					error("terminating")
+				}
 				dtype=DeconstructType(name)
 
 				gen.getParent("message").getSubGenerator("namespaces").out("xmlns:" + dtype.prefix + '="' + dtype.namespace + '"')
@@ -692,7 +742,6 @@ NS_XSD("import")
 					error("Node " + tagName + " has no targetNamespace attribute")
 				}
 			}
-			println(attr,"=",value)
 			n.attributes.set(attr,value)
 /UseTargetNamespace
 

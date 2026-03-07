@@ -925,10 +925,10 @@ namespace prefixes.
 		}
 		assert(ok)
 
-		report(node.tagName)
+		report(node, node.tagName)
 			node.attributes.keys.sort->attr
 				value=node.attributes.get(attr)
-				report("",attr+" =", value)
+				report(node,"",attr, value)
 //ExploreSearch
 
 
