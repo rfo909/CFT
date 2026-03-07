@@ -385,6 +385,7 @@ exampleXML
 	}
 
     # Get all sub nodes (recursively)
+	# Parent before children!
     # --
     self.allSubNodes=Lambda{
     	self.subNodes->node
@@ -893,3 +894,54 @@ namespace prefixes.
 	
 /ProcessNamespaces
 		
+
+# Explore XML structure
+# --
+	P(1) as &XMLNode => root
+
+	loop
+		readLine("Tag substring, or =substr to search for attr value, a combination, or enter to quit") => pattern
+		break(pattern=="")
+		
+		Lib:ShowRows(ExploreSearch(root,pattern))
+	
+/Explore
+
+
+# Explore search
+# --
+	P(1) as &XMLNode => root
+	P(2) as String => pattern
+
+	root.allSubNodes->node
+		ok=true
+		Inner{
+			pattern.split->s
+				if (s.startsWith("=")) {
+					if (!NodeHasAttrValueSubstring(node,s.sub(1))) ok=false
+				}
+				else if (!node.tagName.contains(s)) ok=false
+				break(!ok)
+		}
+		assert(ok)
+
+		report(node.tagName)
+			node.attributes.keys.sort->attr
+				value=node.attributes.get(attr)
+				report("",attr+" =", value)
+//ExploreSearch
+
+
+# Node has attribute with value matching substring
+# --
+	P(1) as &XMLNode => node
+	P(2) as String => str
+
+	found=false
+	node.attributes.keys->key
+		assert(node.attrGet(key).contains(str))
+		found=true
+		break(found)
+	|
+	found
+//NodeHasAttrValueSubstring
