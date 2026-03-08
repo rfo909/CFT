@@ -893,7 +893,7 @@ namespace prefixes.
 	node.subNodes->sub ProcessNamespaces(sub, namespaceInfo)
 	
 /ProcessNamespaces
-		
+
 
 # Explore XML structure
 # --

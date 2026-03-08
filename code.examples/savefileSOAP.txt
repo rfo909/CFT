@@ -392,7 +392,7 @@ NS_XSD("import")
 			out(m)
 		| _=>messages
 
-		error(messages.length==0, "No " + messageTag + " found")
+		error(messages.length==0, "No " + messageTag + " with name=" + messageId + " found")
 		error(messages.length>1, "More than one " + messageTag + " found")
 
 		message=ResolveRef(wsdlDocument,messages.first)
@@ -706,7 +706,8 @@ NS_XSD("import")
 
 
 # Recursively distribute targetNamespace to all XML nodes under
-# those that define it
+# those that define it, making it available to apply to the
+# proper attributes.
 # --
 	P(1) as &XMLNode => node
 	P(2) as String? => targetNamespace
@@ -719,6 +720,9 @@ NS_XSD("import")
 	node.subNodes->x PropagateTargetNamespace(x,targetNamespace)
 
 //PropagateTargetNamespace
+
+
+
 
 # Apply targetNamespace to attributes in elements 
 # --
