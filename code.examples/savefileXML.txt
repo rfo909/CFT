@@ -945,3 +945,50 @@ namespace prefixes.
 	|
 	found
 //NodeHasAttrValueSubstring
+
+
+# Collect path structure of XML document
+# --
+	P(1) as &XMLNode => node
+	P(2) as Dict => dict
+	
+	node.subNodes->n
+		tag=n.tagName + " // " + Inner{
+			n.attributes.keys.sort->key
+				reject(key.startsWith("xmlns") || key.startsWith("xml:"))
+				out("."+key)
+			| _.concat(" ")
+		} 
+		if (!dict.has(tag)) dict.set(tag,Dict)
+		subDict=dict.get(tag)
+		CollectPaths(n,subDict)
+//CollectPaths
+
+
+# Show paths for XML document
+# --
+	P(1) as File => f
+	
+	XML:Parse(f.read).first => root
+	XML:ProcessNamespaces(root)
+	
+	dict=Dict
+	
+	CollectPaths(root,dict)
+	
+	ShowPathDict(dict)
+/ShowPaths
+
+
+# Show path dictionary
+# --
+	P(1) as Dict? => dict
+	P(2,0) as int => indent
+	
+	dict.keys.sort->key
+		println("|" + " ".times(indent*2)+key)
+			ShowPathDict(dict.get(key),indent+1)
+//ShowPathDict
+	
+	
+	
