@@ -54,7 +54,7 @@ script calling ProcessWsdlFile()
 	# which "inherit" targetNamespace, and which don't
 	SOAP:UpdateAttributeValuesNamespaces(wsdl)
 
-	#XML:Explore(wsdl.rootNode)
+	#Explore(wsdl)
 	#error("STOP")
 
 	Lib:Header("Creating templates")
@@ -92,6 +92,19 @@ script calling ProcessWsdlFile()
 	P(1) as File => file
 	ProcessWsdlFile(file,false)
 /show
+
+
+# Optionally explore XML on error
+# --
+	true
+/EnableExplore
+
+
+# Explore XML on error?
+# --
+	P(1) as &WsdlDocument => wd
+	if (EnableExplore) XML:Explore(wd.rootNode)
+/Explore
 
 
 # WSDL namespace on internal format
@@ -136,7 +149,7 @@ NS_XSD("import")
 	} _=> typeList
 	if (typeList.length > 1) {
 		println("typeName " + typeName + " matches " + typeList.length + " complexType elements")
-		XML:Explore(wsdlDocument.rootNode)
+		Explore(wsdlDocument)
 		error("Terminating")
 	}
 	if (typeList.empty) null else typeList.first
@@ -157,7 +170,7 @@ NS_XSD("import")
 	} _=> typeList
 	if (typeList.length > 1) {
 		println("typeName " + typeName + " matches " + typeList.length + " simpleType elements")
-		XML:Explore(wsdlDocument.rootNode)
+		Explore(wsdlDocument)
 		error("Terminating")
 	}
 	if (typeList.empty) null else typeList.first
@@ -173,10 +186,12 @@ NS_XSD("import")
 	if (type==null) type=LookupComplexTypeByName(wsdlDocument, typeName)
 	if (type==null) {
 		println("Unknown type name: " + typeName)
-		XML:Explore(wsdlDocument.rootNode)
+		Explore(wsdlDocument)
 		error("terminating")
 	}
 	type=ResolveRef(wsdlDocument, type)
+	#Lib:Header("LookupType")
+	#XML:PP(type).print
 	type
 /LookupType
 
@@ -205,7 +220,7 @@ NS_XSD("import")
 	P(1) as &XMLNode => element
 	typeNode=null
 
-	element.subNodes->tnode
+	element.allSubNodes->tnode
 		if (tnode.tagName==SOAP:NS_XSD("simpleType") || tnode.tagName==SOAP:NS_XSD("complexType")) {
 			typeNode=tnode
 		}
@@ -277,7 +292,7 @@ NS_XSD("import")
 			indent = indent - 4
 			if (indent < 0) indent=0
 		} else if (line.trim.startsWith("#")) {
-			if (debugMode) buffer.add(" ".times(indent)+"<!-- DEBUG: " + line.trim.after("#") + " -->")
+			if (debugMode) buffer.add(" ".times(indent)+line.trim)
 		} else if (line.trim=="${VALUE}") {
 			lastLine=buffer.last + line.trim
 			buffer.removeLast.add(lastLine)
@@ -332,15 +347,15 @@ NS_XSD("import")
 					gen=root.sub("operation")
 					gen.out("")
 
-					opName=operation.attrGet("name")
+					opName=operation.attrGet("name").after("}")
 					gen.out("#operation " + opName)
 										
 					{
 						operation.subNodes(SOAP:NS_WSDL("input"))->inp
 							input=ResolveRef(wsdlDocument, inp)
 							gen.out("")
-							gen.out("#input message=" + input.attrGet("message") + " name=" + input.attrGet("name"))
-							gen.out('<!-- type="input" op="' + opName + '" message="' + input.attrGet("name") + '" -->')
+							messageName=input.attrGet("message").after("}")
+							gen.out('<!-- type="input" op="' + opName + '" message="' + messageName + '" -->')
 							
 							self.createMessageTemplate(gen, wsdlDocument, input.attrGet("message"))
 					}
@@ -348,8 +363,8 @@ NS_XSD("import")
 						operation.subNodes(SOAP:NS_WSDL("output"))->outp
 							output=ResolveRef(wsdlDocument, outp)
 							gen.out("")
-							gen.out("#output message=" + output.attrGet("message") + " name=" + output.attrGet("name"))
-							gen.out('<!-- type="output" op="' + opName + '" message="' + output.attrGet("name") + '" -->')
+							messageName=output.attrGet("message").after("}")
+							gen.out('<!-- type="output" op="' + opName + '" message="' + messageName + '" -->')
 
 							self.createMessageTemplate(gen, wsdlDocument, output.attrGet("message"))
 					}
@@ -357,8 +372,8 @@ NS_XSD("import")
 						operation.subNodes(SOAP:NS_WSDL("fault"))->flt
 							fault=ResolveRef(wsdlDocument, flt)
 							gen.out("")
-							gen.out("#fault message=" + fault.attrGet("message") + " name=" + fault.attrGet("name"))
-							gen.out('<!-- type="fault" op="' + opName + '" message="' + fault.attrGet("name") + '" -->')
+							messageName=fault.attrGet("message").after("}")
+							gen.out('<!-- type="fault" op="' + opName + '" message="' + messageName + '" -->')
 							
 							self.createMessageTemplate(gen, wsdlDocument, fault.attrGet("message"))
 					}
@@ -398,11 +413,12 @@ NS_XSD("import")
 		message=ResolveRef(wsdlDocument,messages.first)
 		message.subNodes(SOAP:NS_WSDL("part")) -> prt
 			part=ResolveRef(wsdlDocument,prt)
+
 			elementName=part.attrGet("element")
 
 			if (elementName==null) {
-				println("Element name is null")
-				XML:Explore(element)
+				println(part.tagName + " for message " + messageTag + " name=" + messageId + ": attr element is null")
+				Explore(wsdlDocument)
 				error("terminating")
 			}
 
@@ -420,7 +436,7 @@ NS_XSD("import")
 			} _=> elementList
 			if (elementList.length != 1) {
 				println(elementName + " matches " + elementList.length + " elements")
-				XML:Explore(wsdlDocument.rootNode)
+				Explore(wsdlDocument)
 				error("terminating")
 			}
 
@@ -444,6 +460,7 @@ NS_XSD("import")
 		P(1) as &Generator => gen
 		P(2) as &WsdlDocument => wsdlDocument
 		P(3) as &XMLNode => element
+
 		element->e
 			elementName=e.attrGet("name")
 			typeName=e.attrGet("type")
@@ -459,7 +476,6 @@ NS_XSD("import")
 			} else {
 				typeNode=LookupType(wsdlDocument,typeName)
 			}
-
 			if (typeNode.tagName.endsWith("complexType")) {
 				self.createComplexTypeTemplate(gen, wsdlDocument, typeNode)
 			} else {
@@ -475,6 +491,10 @@ NS_XSD("import")
 		P(3) as &XMLNode => complexType
 
 		sequenceTag=SOAP:NS_XSD("sequence")
+		if (!complexType.subNodes(sequenceTag)) {
+			sequenceTag=SOAP:NS_XSD("all")
+				# the "all" tag allows content in any order, while "sequence" is stricter
+		}
 		
 		gen=gen.sub("complexType")
 		
@@ -484,24 +504,28 @@ NS_XSD("import")
 			gen.out("# sequence")
 			sequence.subNodes(SOAP:NS_XSD("element"))->e
 				element=ResolveRef(wsdlDocument,e)
+
 				name=element.attrGet("name")
 				type=element.attrGet("type")
 
 				if (type==null) {
 					println("INFO: element type null, looking up typeNode under element")
-					typeNode=GetEmbeddedType(wsdlDocument.rootNode)
-					type=typeNode.attrGet("type")					
+					typeNode=GetEmbeddedType(element)
+					if (typeNode != null) {
+						type=typeNode.attrGet("name")					
+						println("INFO: found typeNode: " + type)
+					}
 				}
 
 				if (type==null) {
-					println("createComplexTypeTemplate: no type found")
-					XML:Explore(element)
+					println("createComplexTypeTemplate: no type found element name=" + name)
+					Explore(wsdlDocument)
 					error("terminating")
 				}
 
 				if (name==null) {
-					println("element name is null")
-					XML:Explore(wsdlDocument.rootNode)
+					println("element name is null, element type=" + type)
+					Explore(wsdlDocument)
 					error("terminating")
 				}
 				dtype=DeconstructType(name)
@@ -674,7 +698,7 @@ NS_XSD("import")
 			ns=ximp.attrGet("namespace")  # must match targetNamespace of schema! (TODO)
 			loc=ximp.attrGet("schemaLocation")
 			if (loc==null) {
-				println("WARNING: ingoring import without schemaLocation attribute")
+				println("WARNING: ignoring import without schemaLocation attribute")
 			} else {
 				importFile=self.sourceFile.dir.file(loc)
 				println("Processing " + SOAP:XSD_IMPORT + " file: " + importFile.path)
@@ -761,20 +785,20 @@ NS_XSD("import")
 	# unless containing a regular namespace prefix
 
 	UseTargetNamespace(wd,"element",List("name","value","type","ref"))
-	UseTargetNamespace(wd,"complexType",List("name","type"))
-	UseTargetNamespace(wd,"simpleType",List("name","type"))
+	UseTargetNamespace(wd,"complexType",List("name","type","ref"))
+	UseTargetNamespace(wd,"simpleType",List("name","type","ref"))
 	UseTargetNamespace(wd,"restriction",List("base"))
 
 	UseTargetNamespace(wd,"message",List("name"))
 	UseTargetNamespace(wd,"portType",List("name"))
 	UseTargetNamespace(wd,"binding",List("name","type"))
 	UseTargetNamespace(wd,"service",List("name"))
-	#UseTargetNamespace(wd,"operation",List("name"))
+	UseTargetNamespace(wd,"operation",List("name"))
 
-	UseTargetNamespace(wd,"part",List("element"))
-	UseTargetNamespace(wd,"input",List("message"))
-	UseTargetNamespace(wd,"output",List("message"))
-	UseTargetNamespace(wd,"fault",List("message"))
+	UseTargetNamespace(wd,"part",List("element","name","ref"))
+	UseTargetNamespace(wd,"input",List("message","name","ref"))
+	UseTargetNamespace(wd,"output",List("message","name","ref"))
+	UseTargetNamespace(wd,"fault",List("message","name","ref"))
 	UseTargetNamespace(wd,"port",List("binding"))
 
 /UpdateAttributeValuesNamespaces
