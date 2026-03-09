@@ -447,7 +447,12 @@ exampleXML
 
         # START TAG BEGIN + TAG NAME
         
+
 		ws.call(ts)
+
+		# 2026 RFO: all nodes now have a sourceLocation
+		self.sourceLocation=ts.sourceLocation
+
         error(!ts.peek=="<",ts.sourceLocation + ": expected '<' starting a tag")
         ts.next
 
@@ -986,9 +991,50 @@ namespace prefixes.
 	P(2,0) as int => indent
 	
 	dict.keys.sort->key
-		println("|" + " ".times(indent*2)+key)
-			ShowPathDict(dict.get(key),indent+1)
+		out("|" + " ".times(indent*2)+key)
+			ShowPathDict(dict.get(key),indent+1)->line out(line)
 //ShowPathDict
 	
+
+# ListRemove
+# --
+	P(1) as List => list
+	P(2) => item
+
+	list->x
+		reject(x==item)
+		out(x)
+//ListRemove
 	
+# Compare two XML files (ShowPaths)
+# --
+	P(1) as File => a
+	P(2) as File => b
+
+	aList=ShowPaths(a)
+	bList=ShowPaths(b)
+
+	bList->line 
+		if (aList.contains(line)) aList=ListRemove(aList,line)
+	|
+	Lib:Header(a.path)
+	println("Lines not found in the other file are marked (nesting level sensitive)")
+	println
+	ShowPaths(a)->line
+		if (aList.contains(line)) println("** " + line) else println("   " + line)
+	|
+
+	aList=ShowPaths(a)
+	aList->line 
+		if (bList.contains(line)) bList=ListRemove(bList,line)
+	|
+
+	Lib:Header(b.path)
+	println("Lines not found in the other file are marked (nesting level sensitive)")
+	println
+	ShowPaths(b)->line
+		if (bList.contains(line)) println("** " + line) else println("   " + line)
+	|
+	true
+/CompareXML
 	
