@@ -813,7 +813,8 @@ namespace prefixes.
 		} else if (self.parent != null) {
 			self.parent.getXmlns
 		} else {
-			error("No xmlns property found")
+			println("WARNING: no xmlns found " + self.xmlNode.tagName + " " + self.xmlNode.sourceLocation)
+			""
 		}
 	}
 	
