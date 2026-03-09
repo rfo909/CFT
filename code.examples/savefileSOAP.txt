@@ -211,7 +211,7 @@ NS_XSD("import")
 	P(1) as String => value
 
 	value.after("{").before("}") => namespace
-	namespace.split("/").last => prefix
+	namespace.split("/").last.replace(".","_").replace(":","_") => prefix
 	value.after("}") => simpleName
 	SymDict(namespace,prefix,simpleName)
 /DeconstructType
