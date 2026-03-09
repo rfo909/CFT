@@ -475,6 +475,12 @@ NS_XSD("import")
 
 			gen.out("#>>>")
 			gen.out("# message element " + element.tagName + " name=" + elementName + " type=" + typeName)
+
+			minOccurs=element.attrGet("minOccurs","-")
+			maxOccurs=element.attrGet("maxOccurs","-")
+
+			gen.out("# minOccurs=" + minOccurs + " maxOccurs=" + maxOccurs)
+
 			typeNode=null
 			if (typeName==null) {
 				typeNode=GetEmbeddedType(element)
@@ -486,6 +492,7 @@ NS_XSD("import")
 			} else {
 				if (IsSystemType(typeName)) {
 					gen.out("#>>>")
+					
 					gen.out("${VALUE}")
 					gen.out("#<<<")
 				} else {
@@ -558,8 +565,9 @@ NS_XSD("import")
 				gen.out("# complexType: element name=" + name + " type=" + type)
 
 				minOccurs=element.attrGet("minOccurs","-")
-				maxOccurs=element.attrGet("maxOccurs","-")  # can be "unbounded" or some number
-				
+				maxOccurs=element.attrGet("maxOccurs","-")
+				gen.out("# for=" + dtype.prefix + ":" + dtype.simpleName + " minOccurs=" + minOccurs + " maxOccurs=" + maxOccurs)
+
 				gen.out("<" + dtype.prefix + ":" + dtype.simpleName + ">")
 
 
