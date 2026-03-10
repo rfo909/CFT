@@ -315,6 +315,43 @@ NS_XSD("import")
 
 
 
+# Generate comment based on minOccurs and maxOccurs
+# --
+	P(1) as String => minOccurs		# defaults to "-"
+	P(2) as String => maxOccurs		# defaults to "-"
+	P(3) as &Generator => gen
+
+	if (minOccurs=="-") minOccurs="1"
+	if (minOccurs=="0") {
+		if (maxOccurs=="-") 
+			gen.out("<!-- optional -->")
+		else 
+			gen.out("<!-- 0+ times -->")
+	} else {
+		# minOccurs != "0"
+
+		if (maxOccurs=="-") {
+			if (minOccurs != "1") {
+				gen.out("<!-- " + minOccurs + " times -->")
+			} else {
+				# single instance
+			}
+		} else if (maxOccurs=="1") {
+			if (minOccurs=="0") {
+				gen.out("<!-- optional -->")
+			} else {
+				# single instance
+			}
+		} else if (maxOccurs=="unbounded") {
+			gen.out("<!-- " + minOccurs + "+ times -->")
+		} else {
+			gen.out("<!-- " + minOccurs + "-" + maxOccurs + " times -->")
+		}
+	}
+
+/GenerateMinMaxComment
+
+
 # Data store
 # --
 	self.wsdlDocuments = List
@@ -485,6 +522,7 @@ NS_XSD("import")
 			maxOccurs=element.attrGet("maxOccurs","-")
 
 			gen.getParentSubGenerator("meta").out("#occurs min=" + minOccurs + " max=" + maxOccurs)
+			GenerateMinMaxComment(minOccurs,maxOccurs, gen.getParentSubGenerator("meta"))
 
 			typeNode=null
 			if (typeName==null) {
@@ -572,6 +610,7 @@ NS_XSD("import")
 				minOccurs=element.attrGet("minOccurs","-")
 				maxOccurs=element.attrGet("maxOccurs","-")
 				gen.out("#occurs min=" + minOccurs + " max=" + maxOccurs)
+				GenerateMinMaxComment(minOccurs,maxOccurs,gen)
 
 				gen.out("<" + dtype.prefix + ":" + dtype.simpleName + ">")
 
