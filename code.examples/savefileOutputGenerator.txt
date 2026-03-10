@@ -119,6 +119,8 @@ duplicates (works for strings).
 		result
 	}
 	
+	# locate self or parent with given name
+	# --
 	self.getParent = Lambda{
 		P(1) as String => name
 
@@ -130,6 +132,37 @@ duplicates (works for strings).
 		|
 		error(ptr==null,"No parent '" + name + "' found")
 		ptr
+	}
+
+	self.hasSubGenerator = Lambda{
+		P(1) as String => name
+		found=false
+		self.content->x
+			break(found)
+			assert(Sys.getType(x)=="Dict" && x.getName=="Generator")
+			assert(x.name==name)
+			found=true
+		|
+		found
+	}
+
+		
+
+	# Locate self or parent sub-generator by name
+	# This allows us to search for commonly named sub-generators for comments and metainformation,
+	# without knowing the name of the closest parent containing such a generator.
+	# --
+	self.getParentSubGenerator = Lambda{
+		P(1) as String => name
+		ptr=self
+		found=null
+		loop
+			break(ptr==null)
+			break(found)
+			if (ptr.hasSubGenerator(name)) found=ptr.getSubGenerator(name) else ptr=ptr.parent
+		|
+		error(found==null,"No parent with subgenerator '" + name + "'")
+		found
 	}
 
 	self.setOutputHandler = Lambda{

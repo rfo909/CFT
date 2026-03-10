@@ -293,7 +293,7 @@ NS_XSD("import")
 			if (indent < 0) indent=0
 		} else if (line.trim.startsWith("#")) {
 			if (debugMode) buffer.add(" ".times(indent)+line.trim)
-		} else if (line.trim=="${VALUE}") {
+		} else if (!debugMode && line.trim=="${VALUE}") {
 			lastLine=buffer.last + line.trim
 			buffer.removeLast.add(lastLine)
 			concat=true
@@ -354,6 +354,7 @@ NS_XSD("import")
 							input=ResolveRef(wsdlDocument, inp)
 							gen.out("")
 							messageName=input.attrGet("message").after("}")
+							gen.out("#message type=input op=" + opName + " message=" + messageName)
 							gen.out('<!-- type="input" op="' + opName + '" message="' + messageName + '" -->')
 							
 							self.createMessageTemplate(gen, wsdlDocument, input.attrGet("message"))
@@ -363,6 +364,7 @@ NS_XSD("import")
 							output=ResolveRef(wsdlDocument, outp)
 							gen.out("")
 							messageName=output.attrGet("message").after("}")
+							gen.out("#message type=output op=" + opName + " message=" + messageName)
 							gen.out('<!-- type="output" op="' + opName + '" message="' + messageName + '" -->')
 
 							self.createMessageTemplate(gen, wsdlDocument, output.attrGet("message"))
@@ -372,6 +374,7 @@ NS_XSD("import")
 							fault=ResolveRef(wsdlDocument, flt)
 							gen.out("")
 							messageName=fault.attrGet("message").after("}")
+							gen.out("#message type=fault op=" + opName + " message=" + messageName)
 							gen.out('<!-- type="fault" op="' + opName + '" message="' + messageName + '" -->')
 							
 							self.createMessageTemplate(gen, wsdlDocument, fault.attrGet("message"))
@@ -424,6 +427,8 @@ NS_XSD("import")
 			gen.getParent("message").getSubGenerator("namespaces").out("xmlns:" + dtype.prefix + '="' + dtype.namespace + '"')
 			gen.out("#>>>")
 			gen.out("# message part name=" + part.attrGet("name") + " element=" + elementName)
+
+			gen.sub("meta") 
 			gen.out("<" + dtype.prefix + ":" + dtype.simpleName + ">")
 
 			Inner{
@@ -479,7 +484,7 @@ NS_XSD("import")
 			minOccurs=element.attrGet("minOccurs","-")
 			maxOccurs=element.attrGet("maxOccurs","-")
 
-			gen.out("# minOccurs=" + minOccurs + " maxOccurs=" + maxOccurs)
+			gen.getParentSubGenerator("meta").out("#occurs min=" + minOccurs + " max=" + maxOccurs)
 
 			typeNode=null
 			if (typeName==null) {
@@ -566,7 +571,7 @@ NS_XSD("import")
 
 				minOccurs=element.attrGet("minOccurs","-")
 				maxOccurs=element.attrGet("maxOccurs","-")
-				gen.out("# for=" + dtype.prefix + ":" + dtype.simpleName + " minOccurs=" + minOccurs + " maxOccurs=" + maxOccurs)
+				gen.out("#occurs min=" + minOccurs + " max=" + maxOccurs)
 
 				gen.out("<" + dtype.prefix + ":" + dtype.simpleName + ">")
 
@@ -586,8 +591,10 @@ NS_XSD("import")
 					#Debug("processing typeObject " + typeObject.sourceLocation)
 
 					if (typeObject.tagName.endsWith("complexType")) {
+						gen.out("# calling createComplexTypeTemplate")
 						self.createComplexTypeTemplate(gen,wsdlDocument,typeObject)
 					} else {
+						gen.out("# calling createSimpleTypeTemplate")
 						self.createSimpleTypeTemplate(gen,wsdlDocument,typeObject)
 					}
 
@@ -620,25 +627,25 @@ NS_XSD("import")
 
 			enumString=if(enumValues.empty,null," " + enumValues.concat("|"))
 
+			docString=null
 			{
 				simpleType.subNodes(SOAP:NS_XSD("annotation"))->annotation
 					annotation.subNodes(SOAP:NS_XSD("documentation"))->documentation
 						docString=documentation.getText.concat(" ").trim
-
-						if (docString.length>0) 
-							gen.out("#doc: " + docString)
-						if (patterns) 
-							gen.out("#patterns: " + patterns.concat(" "))
-						if (enumString) 
-							gen.out("#enumeration: " + enumString)
 			}
+			if (docString) gen.out("#doc " + docString)
+			if (patterns) gen.out("#patterns " + patterns.concat(" "))
+			if (enumString) gen.out("#enumeration " + enumString)
+
 
 			if (!IsSystemType(base)) {
 				LookupType(wsdlDocument,base) => typeObject
 
 				if (typeObject.tagName.endsWith("complexType")) {
+					gen.out("# calling createComplexTypeTemplate")
 					self.createComplexTypeTemplate(gen,wsdlDocument,typeObject)
 				} else {
+					gen.out("# calling createSimpleTypeTemplate")
 					self.createSimpleTypeTemplate(gen,wsdlDocument,typeObject)
 				}
 			} else {
