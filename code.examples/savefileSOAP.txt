@@ -293,7 +293,7 @@ NS_XSD("import")
 			if (indent < 0) indent=0
 		} else if (line.trim.startsWith("#")) {
 			if (debugMode) buffer.add(" ".times(indent)+line.trim)
-		} else if (!debugMode && line.trim.startsWith("${")) {
+		} else if (!debugMode && line.trim.startsWith("${") && !buffer.last.trim.startsWith("#") && !buffer.last.trim.startsWith("<!--")) {
 			lastLine=buffer.last + line.trim
 			buffer.removeLast.add(lastLine)
 			concat=true
@@ -319,37 +319,112 @@ NS_XSD("import")
 # --
 	P(1) as String => minOccurs		# defaults to "-"
 	P(2) as String => maxOccurs		# defaults to "-"
-	P(3) as &Generator => gen
 
 	if (minOccurs=="-") minOccurs="1"
 	if (minOccurs=="0") {
 		if (maxOccurs=="-") 
-			gen.out("<!-- optional -->")
+			"optional"
 		else 
-			gen.out("<!-- 0+ times -->")
+			"0+ times"
 	} else {
 		# minOccurs != "0"
 
 		if (maxOccurs=="-") {
 			if (minOccurs != "1") {
-				gen.out("<!-- " + minOccurs + " times -->")
+				"" + minOccurs + " times"
 			} else {
 				# single instance
+				""
 			}
 		} else if (maxOccurs=="1") {
-			if (minOccurs=="0") {
-				gen.out("<!-- optional -->")
-			} else {
-				# single instance
-			}
+			# single instance
+			""
 		} else if (maxOccurs=="unbounded") {
-			gen.out("<!-- " + minOccurs + "+ times -->")
+			"" + minOccurs + "+ times"
 		} else {
-			gen.out("<!-- " + minOccurs + "-" + maxOccurs + " times -->")
+			"" + minOccurs + "-" + maxOccurs + " times"
 		}
 	}
 
 /GenerateMinMaxComment
+
+
+# Generate comment and debug output containing min/max/doc/enumerations/pattern
+# Applies to node types "element", "simpleType" and "complexType"
+# --
+	P(1) as &Generator => gen
+	P(2) as &XMLNode => element
+
+	baseType=""
+	element.subNodes(SOAP:NS_XSD("annotation"))->annotation
+		annotation.subNodes(SOAP:NS_XSD("documentation"))->doc
+			doc.getText->line
+				out(line.trim)
+	| _.concat(" ") => doc
+
+	element.subNodes(SOAP:NS_XSD("annotation"))->annotation
+		annotation.subNodes(SOAP:NS_XSD("restriction"))->restriction
+			b=restriction.attrGet("base")
+			if (b) baseType=b
+			restriction.subNodes(SOAP:NS_XSD("pattern"))->pattern
+				p=pattern.attrGet("value")
+				condOut(p,p)
+			
+	| _.concat(" ") => patterns
+
+	minOccurs=element.attrGet("minOccurs","-")
+	maxOccurs=element.attrGet("maxOccurs","-")
+	minMax = GenerateMinMaxComment(minOccurs,maxOccurs)
+
+	if (!IsSystemType(baseType)) baseType=""
+	
+	if (element.attributes.has("type") && IsSystemType(element.attrGet("type"))) {
+		baseType=element.attrGet("type")
+	}
+
+	if (baseType != "") baseType=baseType.after("}")
+
+	content=List
+	if (baseType != "") content.add("baseType=" + baseType)
+	if (patterns != "") content.add("patterns=" + patterns)
+	if (minMax != "") content.add("count=" + minMax)
+	if (doc != "") content.add("doc=" + doc)
+
+	s=content.concat(" | ")
+	if (s != "") gen.out("#DATA " + s)
+/GenerateNodeInfo
+
+
+
+# Locate "element" in document, error if not able to produce 1 result
+# --
+	P(1) as &WsdlDocument => wsdlDocument
+	P(2) as String => elementName
+
+	Inner{
+		wsdlDocument.rootNode.allSubNodesByTag(SOAP:NS_XSD("element"))->element
+			assert(element.attrGet("name")==elementName)
+			out(element)
+	} _=> elementList
+
+	if (elementList.length > 1) {
+		# select the one that has XSD:schema as parent
+		Debug("element with name " + elementName + " got " + elementList.length + " matches")
+		elementList=Inner{
+			elementList->x 
+				Debug("Checking element " + x.sourceLocation)
+				if (x.namespaceInfo.getParentNodes.first.tagName==SOAP:NS_XSD("schema")) out(x)
+		}
+	}
+	if (elementList.length > 1) {
+		Error("Got more than one match, which are all direct subnodes under schema", wsdlDocument, elementList)
+	}
+	if (elementList.length == 0) {
+		Error(elementName + " matches " + elementList.length + " elements", wsdlDocument, part)
+	}
+	elementList.first
+/GetElementNode
+
 
 
 # Data store
@@ -459,42 +534,12 @@ NS_XSD("import")
 				Error(part.tagName + " for message " + messageTag + " name=" + messageId + ": attr element is null", wsdlDocument, part)
 			}
 
-			dtype=DeconstructType(elementName)
+			element=GetElementNode(wsdlDocument, elementName)
 
-			gen.getParent("message").getSubGenerator("namespaces").out("xmlns:" + dtype.prefix + '="' + dtype.namespace + '"')
 			gen.out("#>>>")
-			gen.out("# message part name=" + part.attrGet("name") + " element=" + elementName)
 
-			gen.sub("meta") 
-			gen.out("<" + dtype.prefix + ":" + dtype.simpleName + ">")
+			self.createMessageElementTemplate(gen, wsdlDocument, ResolveRef(wsdlDocument,element))
 
-			Inner{
-				wsdlDocument.rootNode.allSubNodesByTag(SOAP:NS_XSD("element"))->element
-					assert(element.attrGet("name")==elementName)
-					out(element)
-			} _=> elementList
-		
-			if (elementList.length > 1) {
-				# select the one that has XSD:schema as parent
-				Debug("element with name " + elementName + " got " + elementList.length + " matches")
-				elementList=Inner{
-					elementList->x 
-						Debug("Checking element " + x.sourceLocation)
-						if (x.namespaceInfo.getParentNodes.first.tagName==SOAP:NS_XSD("schema")) out(x)
-				}
-			}
-			if (elementList.length > 1) {
-				Error("Got more than one match, which are all direct subnodes under schema", wsdlDocument, elementList)
-			}
-			if (elementList.length == 0) {
-				Error(elementName + " matches " + elementList.length + " elements", wsdlDocument, part)
-			}
-
-			# Must reverse full name spaces to prefixes (stored in each node under nsPrefix dictionary field
-
-			self.createMessageElementTemplate(gen, wsdlDocument, ResolveRef(wsdlDocument,elementList.first))
-
-			gen.out("</" + dtype.prefix + ":" + dtype.simpleName + ">")
 			gen.out("#<<<")
 			
 		|
@@ -505,56 +550,60 @@ NS_XSD("import")
 	}
 
 		
-
 	self.createMessageElementTemplate = Lambda{
 		P(1) as &Generator => gen
 		P(2) as &WsdlDocument => wsdlDocument
 		P(3) as &XMLNode => element
 
-		element->e
-			elementName=e.attrGet("name")
-			typeName=e.attrGet("type")
+		elementName=element.attrGet("name")
+	
+		dtype=DeconstructType(elementName)
 
-			gen.out("#>>>")
-			gen.out("# message element " + element.tagName + " name=" + elementName + " type=" + typeName)
+		gen.getParent("message").getSubGenerator("namespaces").out("xmlns:" + dtype.prefix + '="' + dtype.namespace + '"')
 
-			minOccurs=element.attrGet("minOccurs","-")
-			maxOccurs=element.attrGet("maxOccurs","-")
+		GenerateNodeInfo(gen, element)
 
-			gen.getParentSubGenerator("meta").out("#occurs min=" + minOccurs + " max=" + maxOccurs)
-			GenerateMinMaxComment(minOccurs,maxOccurs, gen.getParentSubGenerator("meta"))
+		gen.out("<" + dtype.prefix + ":" + dtype.simpleName + ">")
 
-			typeNode=null
-			if (typeName==null) {
-				typeNode=GetEmbeddedType(element)
-				if (typeNode==null) {
-					Error("Element " + element.tagName + " name=" + elementName + " no type attribute and no embedded type", wsdlDocument, e)
-				} else {
-					Debug("Got typeNode " + typeNode.tagName + " " + typeNode.sourceLocation)
-				}
+		# process element content
+
+		gen.out("#>>>")
+		
+		typeName=element.attrGet("type")
+		typeNode=null
+
+		if (typeName==null) {
+			typeNode=GetEmbeddedType(element)
+			if (typeNode==null) {
+				Error("Element " + element.tagName + " name=" + elementName + " no type attribute and no embedded type", wsdlDocument, e)
 			} else {
-				if (IsSystemType(typeName)) {
-					gen.out("#>>>")
-					
-					gen.out("${VALUE}")
-					gen.out("#<<<")
-				} else {
-					typeNode=LookupType(wsdlDocument,typeName)
-					if (typeNode==null) {
-						Error("Unknown type: " + typeName, wsdlDocument, null)
-					}
+				Debug("Got typeNode " + typeNode.tagName + " " + typeNode.sourceLocation)
+			}
+		} else {
+			if (IsSystemType(typeName)) {
+				gen.out("#>>>")
+				
+				gen.out("${VALUE}")
+				gen.out("#<<<")
+			} else {
+				typeNode=LookupType(wsdlDocument,typeName)
+				if (typeNode==null) {
+					Error("Unknown type: " + typeName, wsdlDocument, null)
 				}
 			}
-			if (typeNode != null) {
-				if (typeNode.tagName.endsWith("}complexType")) {
-					self.createComplexTypeTemplate(gen, wsdlDocument, typeNode)
-				} else 	if (typeNode.tagName.endsWith("}simpleType")) {
-					self.createSimpleTypeTemplate(gen, wsdlDocument, typeNode)
-				} else {
-					Error("Unknown type " + typeNode.tagName, wsdlDocument, typeNode)
-				}
+		}
+		if (typeNode != null) {
+			if (typeNode.tagName.endsWith("}complexType")) {
+				self.createComplexTypeTemplate(gen, wsdlDocument, typeNode)
+			} else 	if (typeNode.tagName.endsWith("}simpleType")) {
+				self.createSimpleTypeTemplate(gen, wsdlDocument, typeNode)
+			} else {
+				Error("Unknown type " + typeNode.tagName, wsdlDocument, typeNode)
 			}
-			gen.out("#<<<")
+		}
+		gen.out("#<<<")
+
+		gen.out("</" + dtype.prefix + ":" + dtype.simpleName + ">")
 			
 	}
 
@@ -607,10 +656,7 @@ NS_XSD("import")
 				gen.out("#>>>")
 				gen.out("# complexType: element name=" + name + " type=" + type)
 
-				minOccurs=element.attrGet("minOccurs","-")
-				maxOccurs=element.attrGet("maxOccurs","-")
-				gen.out("#occurs min=" + minOccurs + " max=" + maxOccurs)
-				GenerateMinMaxComment(minOccurs,maxOccurs,gen)
+				GenerateNodeInfo(gen, element)
 
 				gen.out("<" + dtype.prefix + ":" + dtype.simpleName + ">")
 
@@ -649,51 +695,36 @@ NS_XSD("import")
 		P(2) as &WsdlDocument => wsdlDocument
 		P(3) as &XMLNode => simpleType
 
+		base=null
 		simpleType.subNodes(SOAP:NS_XSD("restriction"))->restriction
-			base=restriction.attrGet("base")
-			gen.out("#>>>")
-			gen.out("# simpleType base=" + base)
-	
-			patterns = Inner{
-				restriction.subNodes(SOAP:NS_XSD("pattern"))->pattern 
-					out(pattern.attrGet("value"))
-			}
+			b=restriction.attrGet("base")
+			if (b != null) base=b
+			break(base)
+		|
 
-			enumValues = Inner{
-				restriction.subNodes(SOAP:NS_XSD("enumeration"))->enum
-					out(enum.attrGet("value"))
-			}
+		gen.out("#>>>")
 
-			enumString=if(enumValues.empty,null," " + enumValues.concat("|"))
-
-			docString=null
-			{
-				simpleType.subNodes(SOAP:NS_XSD("annotation"))->annotation
-					annotation.subNodes(SOAP:NS_XSD("documentation"))->documentation
-						docString=documentation.getText.concat(" ").trim
-			}
-			if (docString) gen.out("#doc " + docString)
-			if (patterns) gen.out("#patterns " + patterns.concat(" "))
-			if (enumString) gen.out("#enumeration " + enumString)
+		GenerateNodeInfo(gen, simpleType)
 
 
-			if (!IsSystemType(base)) {
-				LookupType(wsdlDocument,base) => typeObject
+		if (!IsSystemType(base)) {
+			LookupType(wsdlDocument,base) => typeObject
 
-				if (typeObject.tagName.endsWith("complexType")) {
-					gen.out("# calling createComplexTypeTemplate")
-					self.createComplexTypeTemplate(gen,wsdlDocument,typeObject)
-				} else {
-					gen.out("# calling createSimpleTypeTemplate")
-					self.createSimpleTypeTemplate(gen,wsdlDocument,typeObject)
-				}
+			if (typeObject.tagName.endsWith("complexType")) {
+				gen.out("# calling createComplexTypeTemplate")
+				self.createComplexTypeTemplate(gen,wsdlDocument,typeObject)
 			} else {
-				# look up name from parent ComplexType which 
-				gen.out("${VALUE}")
+				gen.out("# calling createSimpleTypeTemplate")
+				self.createSimpleTypeTemplate(gen,wsdlDocument,typeObject)
 			}
+		} else {
+
+			# look up name from parent ComplexType which 
+			gen.out("${VALUE}")
+		}
 
 
-			gen.out("#<<<")
+		gen.out("#<<<")
 				
 	}
 
