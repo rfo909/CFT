@@ -293,7 +293,7 @@ NS_XSD("import")
 			if (indent < 0) indent=0
 		} else if (line.trim.startsWith("#")) {
 			if (debugMode) buffer.add(" ".times(indent)+line.trim)
-		} else if (!debugMode && line.trim=="${VALUE}") {
+		} else if (!debugMode && line.trim.startsWith("${")) {
 			lastLine=buffer.last + line.trim
 			buffer.removeLast.add(lastLine)
 			concat=true

@@ -164,6 +164,14 @@ duplicates (works for strings).
 		error(found==null,"No parent with subgenerator '" + name + "'")
 		found
 	}
+	
+	# Locate sub-generator in self or parent, then output value to it
+	# --
+	self.subOut = Lambda{
+		P(1) as String => name
+		P(2) => value
+		self.getParentSubGenerator(name).out(value)
+	}	
 
 	self.setOutputHandler = Lambda{
 		P(1) as &OutputHandler => handler
