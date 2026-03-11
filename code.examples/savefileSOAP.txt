@@ -4,21 +4,6 @@
 2026-03 Status
 --------------
 
-The code to process WSDL files is FLAWED, and can not be trusted for anything
-critical. 
-
-It has a few known bugs/weaknesses:
-
-	- resolving targetNamespace for schema and wsdl elements is completely "ad hoc"
-	- elements depending on sub-content defining the type do not work
-
-Still it was good enough to validate a competing implementation written in Java
-by AI, as I was able to validate some 200 SOAP endpoints, comparing the XML:PP output
-for the expanded namespace format ("Clark notation"), which makes the data independent
-of the namespace prefixes. It failed for about 15, and those failures were massive,
-with the output from this script lacking most or all message content. I tend to trust
-the AI got it right.
-
 To process a wdsl file, see functions test() and show() - or create a separate
 script calling ProcessWsdlFile()
 
@@ -385,13 +370,21 @@ NS_XSD("import")
 	if (baseType != "") baseType=baseType.after("}")
 
 	content=List
+
+	
 	if (baseType != "") content.add("baseType=" + baseType)
 	if (patterns != "") content.add("patterns=" + patterns)
 	if (minMax != "") content.add("count=" + minMax)
 	if (doc != "") content.add("doc=" + doc)
 
+	
 	s=content.concat(" | ")
-	if (s != "") gen.out("#DATA " + s)
+	if (s != "") {
+		dtype=DeconstructType(element.attrGet("name"))
+		for=dtype.prefix + ":" + dtype.simpleName
+		gen.subOut("comment","# comment for " + for)
+		gen.subOut("comment","<!-- " + s + " -->")
+	}
 /GenerateNodeInfo
 
 
@@ -502,6 +495,7 @@ NS_XSD("import")
 		P(3) as String => messageId
 		
 		gen=gen.sub("message")
+
 		gen.out('<envelope:Envelope')
 
 		gen.out("#>>>")
@@ -555,12 +549,15 @@ NS_XSD("import")
 		P(2) as &WsdlDocument => wsdlDocument
 		P(3) as &XMLNode => element
 
+		gen=gen.sub("messageElement")
+
 		elementName=element.attrGet("name")
 	
 		dtype=DeconstructType(elementName)
 
 		gen.getParent("message").getSubGenerator("namespaces").out("xmlns:" + dtype.prefix + '="' + dtype.namespace + '"')
 
+		gen.sub("comment")
 		GenerateNodeInfo(gen, element)
 
 		gen.out("<" + dtype.prefix + ":" + dtype.simpleName + ">")
@@ -582,7 +579,6 @@ NS_XSD("import")
 		} else {
 			if (IsSystemType(typeName)) {
 				gen.out("#>>>")
-				
 				gen.out("${VALUE}")
 				gen.out("#<<<")
 			} else {
@@ -626,6 +622,7 @@ NS_XSD("import")
 			gen.out("# sequence")
 			sequence.subNodes(SOAP:NS_XSD("element"))->e
 				element=ResolveRef(wsdlDocument,e)
+				gen=gen.sub("e")
 
 				name=element.attrGet("name")
 				type=element.attrGet("type")
@@ -656,8 +653,9 @@ NS_XSD("import")
 				gen.out("#>>>")
 				gen.out("# complexType: element name=" + name + " type=" + type)
 
+				gen.sub("comment")
 				GenerateNodeInfo(gen, element)
-
+	
 				gen.out("<" + dtype.prefix + ":" + dtype.simpleName + ">")
 
 
@@ -695,6 +693,8 @@ NS_XSD("import")
 		P(2) as &WsdlDocument => wsdlDocument
 		P(3) as &XMLNode => simpleType
 
+		gen=gen.sub("simpleType")
+
 		base=null
 		simpleType.subNodes(SOAP:NS_XSD("restriction"))->restriction
 			b=restriction.attrGet("base")
@@ -704,6 +704,7 @@ NS_XSD("import")
 
 		gen.out("#>>>")
 
+		#gen.sub("comment")
 		GenerateNodeInfo(gen, simpleType)
 
 
