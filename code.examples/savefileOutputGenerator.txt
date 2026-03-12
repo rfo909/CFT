@@ -71,9 +71,9 @@ duplicates (works for strings).
 		P(1) as String? => name
 		P(2) => outputHandler  # optional
 		
-		if (outputHandler != null) self.setOutputHandler(outputHandler)
 
 		x=OutputGenerator:Generator
+
 		x.name=name
 		x.outputHandler=outputHandler
 		x.parent=self
@@ -89,7 +89,6 @@ duplicates (works for strings).
 		P(2) => outputHandler
 		self.addSubGenerator(name,outputHandler)
 	}
-
 	
 	
 	# Set output handler
@@ -103,13 +102,13 @@ duplicates (works for strings).
 		self.outputHandler=outputHandler
 	}
 
-	# locate sub-generator by name
+	# locate sub-generator by name (most recent if multiple with same name)
 	# --
 	self.getSubGenerator = Lambda{
 		P(1) as String => name
 
 		result=null
-		self.content->x
+		self.content.reverse->x
 			break(result)
 			assert(Sys.getType(x)=="Dict" && x.getName=="Generator")
 			assert(x.name==name)
@@ -146,7 +145,15 @@ duplicates (works for strings).
 		found
 	}
 
-		
+	# clear name of all subgenerators with this name, preventing lookup
+	# --
+	self.clearSubGenerators = Lambda{
+		P(1) as String => name
+		self.content->x
+			if (Sys.getType(x)=="Dict"  && x.getName=="Generator") {
+				x.name=""
+			}
+	}
 
 	# Locate self or parent sub-generator by name
 	# This allows us to search for commonly named sub-generators for comments and metainformation,
@@ -179,7 +186,7 @@ duplicates (works for strings).
 		self.outputHandler=handler
 	}
 
-	# get outputHandler, fails if not defined
+	# add value to content
 	self.out = Lambda{
 		P(1) => value
 		self.content.add(value)

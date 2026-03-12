@@ -349,13 +349,20 @@ NS_XSD("import")
 
 	element.subNodes(SOAP:NS_XSD("annotation"))->annotation
 		annotation.subNodes(SOAP:NS_XSD("restriction"))->restriction
-			b=restriction.attrGet("base")
-			if (b) baseType=b
+			base=restriction.attrGet("base")
+			if (base) baseType=base
 			restriction.subNodes(SOAP:NS_XSD("pattern"))->pattern
 				p=pattern.attrGet("value")
 				condOut(p,p)
 			
 	| _.concat(" ") => patterns
+
+	element.subNodes(SOAP:NS_XSD("annotation"))->annotation
+		annotation.subNodes(SOAP:NS_XSD("restriction"))->restriction
+			restriction.subNodes(SOAP:NS_XSD("enumeration"))->enumeration
+				out(enumeration.attrGet("value"))
+	| _.concat("|") => enumeration
+
 
 	minOccurs=element.attrGet("minOccurs","-")
 	maxOccurs=element.attrGet("maxOccurs","-")
@@ -374,6 +381,7 @@ NS_XSD("import")
 	
 	if (baseType != "") content.add("baseType=" + baseType)
 	if (patterns != "") content.add("patterns=" + patterns)
+	if (enumeration != "") content.add("enum=(" + enumeration + ")")
 	if (minMax != "") content.add("count=" + minMax)
 	if (doc != "") content.add("doc=" + doc)
 
