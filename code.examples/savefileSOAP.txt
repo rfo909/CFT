@@ -264,21 +264,30 @@ NS_XSD("import")
 
 	indent=0
 	concat=false  # force next line to be added to last line (for processing ${VALUE} merge codes
-	lines->line
-		if (targetDir != null && line.trim.startsWith("#operation")) {
-			if (targetFile != null) {
-				targetFile.create(buffer)
-			}
+	lines->rawLine
+		line=rawLine.trim
+		if (targetDir != null 
+				&& line.startsWith("<!--")
+				&& line.contains("type=") 
+				&& line.contains("op=") 
+				&& line.contains("message=")) 
+		{
+			if (targetFile != null) targetFile.create(buffer)
 			buffer=List
-			targetFile=targetDir.file(line.after(" ").trim+".xml")
-		} else if (line.trim=="#>>>") {
+
+			type=line.after('type="').before('"')
+			op=line.after('op="').before('"')
+			message=line.after('message="').before('"')
+
+			targetFile=targetDir.sub(op).create.file(message + "_" + type + ".xml")
+		} else if (line=="#>>>") {
 			indent = indent + 4
-		} else if (line.trim=="#<<<") {
+		} else if (line=="#<<<") {
 			indent = indent - 4
 			if (indent < 0) indent=0
-		} else if (line.trim.startsWith("#")) {
+		} else if (line.startsWith("#")) {
 			if (debugMode) buffer.add(" ".times(indent)+line.trim)
-		} else if (!debugMode && line.trim.startsWith("${") && !buffer.last.trim.startsWith("#") && !buffer.last.trim.startsWith("<!--")) {
+		} else if (!debugMode && line.startsWith("${") && !buffer.last.trim.startsWith("#") && !buffer.last.trim.startsWith("<!--")) {
 			lastLine=buffer.last + line.trim
 			buffer.removeLast.add(lastLine)
 			concat=true

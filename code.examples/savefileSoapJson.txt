@@ -1,0 +1,133 @@
+# Readme
+# --
+<<< EOF
+This script parses an XML file for a SOAP endpoint, as created by the SOAP script,
+and creates a JSON configuration for it. 
+
+It depends on the comments in those XML files, so if that's changed (SOAP script), then
+this script may fail.
+
+>>> EOF
+/Readme
+
+
+# Does node have sub-content that is a merge code? Return it or null.
+# --
+	P(1) as &XMLNode => node
+	
+	hasNoSubNodes=node.subNodes.length==0
+	node.content.concat.trim => s
+	
+	if (hasNoSubNodes && s.startsWith("${") && s.endsWith("}")) s else null
+//ContentIsMergeCode
+	
+
+# Is node content an array?
+# --
+	P(1) as &XMLNode => node
+
+	hasSingleSubNode=node.subNodes.length==1
+	isMultiple=false
+
+	node.content->x
+			break(isMultiple)
+			if (Sys.getType(x)=="String") {
+				if (x.contains("count=")) {
+					count=x.after("count=").before(" ")
+					#println("count=" + count)
+					if (count.contains("-") || count.contains("+")) isMultiple=true
+				}
+			}
+	|
+	hasSingleSubNode && isMultiple
+//ContentIsArray
+
+
+# Create tag
+# --
+	P(1) as boolean => inArray
+	P(2) as &XMLNode => node
+
+	if (inArray)
+		""
+	else 
+		'"' + node.tagName + '": '
+//TagColon
+
+
+# Generate JSON
+# 
+# This code handles indent, except for the commas.  This is not needed, as 
+# we pretty-print the resulting JSON at the end. But it was very helpful
+# while debugging.
+# --
+	P(1) as &XMLNode => node
+	P(2,0) as int => indentCount
+	P(3,OutputGenerator:Generator) => generator
+	P(4,false) => inArray
+
+	gen=generator.sub
+
+
+	indent=" ".times(indentCount*4)
+
+	mergeCode=ContentIsMergeCode(node)
+
+	if (mergeCode) {
+		gen.out(indent + TagColon(inArray,node) + '"' + mergeCode + '"')
+
+	} else if (ContentIsArray(node)) {
+		gen.out(indent + TagColon(inArray,node) + '[')
+		# No comma logic required here, as there is only one element
+		# in this template, multiple instances may occur in use, and then
+		# commas must be added
+		GenerateJSON(node.subNode, indentCount+1, gen, true)
+		gen.out(indent + "]")
+
+	} else if (node.subNodes.length > 0) {
+		gen.out(indent + TagColon(inArray,node) + '{')
+		Inner{node.subNodes->n
+			if (gen.hasSubGenerator("comma")) gen.getSubGenerator("comma").out(",")
+			GenerateJSON(n, indentCount+1,gen)
+			gen.sub("comma")
+		}
+		gen.clearSubGenerators("comma")
+		gen.out(indent + "}")
+	}
+//GenerateJSON
+
+
+# Process XML file
+# --
+	P(1) as File => f
+
+	XML:Parse(f.read) => result
+	if (result.length > 1) {
+		Lib:Header("Warning")
+		println("Found " + result.length + " XML objects in file, using the first")
+	}
+	result.first => root
+	root.subNode("envelope:Body").subNodes.first=>message
+
+	gen = OutputGenerator:Generator
+	json = gen.sub
+
+	comments=gen.sub("comments")
+	GenerateJSON(message, 0, json)
+
+	output = gen.produceOutput
+
+	json=List("{") + output + List("}")
+
+	tryCatch(
+		JSON:PP(JSON:Parse(json))
+	) => result
+	if (result.ok) {
+		result.result
+	} else {
+		println(result.msg)
+		json.print
+		readLine("ERROR, press Enter to continue")
+		
+	} 
+/ProcessXMLFile

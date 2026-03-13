@@ -328,17 +328,17 @@ nicely formatted JSON.
 # Pretty-print data structure as formatted JSON
 # --
     P(1)=>JSONValue
-    P(2,false)=>print
+    P(2,false)=>show
     P(3,false)=>showDictTypes
 
-    Lib:Header("JSONValue=" + Sys.getType(JSONValue))
+    #Lib:Header("JSONValue=" + Sys.getType(JSONValue))
 
     if (JSONValue==null) {
         Lib:Header("Paste JSON, terminate with '.' on separate line")
         readLines(".") => JSONValue
     }
     if (Sys.getType(JSONValue)=="String" || Sys.getType(JSONValue)=="List" && Sys.getType(JSONValue.first)=="String") {  # string or list of string
-        println("Parsing string")
+        #println("Parsing string")
         JSONValue=JSON:Parse(JSONValue)
     }
     
@@ -352,7 +352,7 @@ nicely formatted JSON.
     PPValue(JSONValue,"",obj.get("LOut"),showDictTypes)
     NEWLINE="^n".unEsc
     result = obj.data.concat.split(NEWLINE)
-    if(print) Inner{
+    if(show) Inner{
         result->line println(line)
     }
     result
