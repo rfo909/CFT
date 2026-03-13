@@ -4,8 +4,8 @@
 This script parses an XML file for a SOAP endpoint, as created by the SOAP script,
 and creates a JSON configuration for it. 
 
-It depends on the comments in those XML files, so if that's changed (SOAP script), then
-this script may fail.
+It depends on the comments and document structure of those XML files, so if that's 
+changed (SOAP script), then this code may fail.
 
 >>> EOF
 /Readme
@@ -57,9 +57,9 @@ this script may fail.
 
 # Generate JSON
 # 
-# This code handles indent, except for the commas.  This is not needed, as 
-# we pretty-print the resulting JSON at the end. But it was very helpful
-# while debugging.
+# NOTE: This code handles indent, except for the commas.  This is not necessary,
+# as we parse and pretty-print the resulting JSON to produce result. But it was 
+# very helpful while debugging.
 # --
 	P(1) as &XMLNode => node
 	P(2,0) as int => indentCount
@@ -126,6 +126,7 @@ this script may fail.
 		result.result
 	} else {
 		println(result.msg)
+		# display raw (invalid?) json 
 		json.print
 		readLine("ERROR, press Enter to continue")
 		
