@@ -13,6 +13,20 @@
 
 <h1>CFT Change log</h1>
 
+<h3>4.4.9 2026-03-14 small bugfix</h3>
+<p>
+The "as" expression for type checking failed when using the optional form combined
+with a class object.
+</p>
+
+```
+	P(1) as &XMLNode? => node
+```
+
+<p>
+This would fail for value null. Fixed with a couple of lines in top of ExprAs.java
+</p>
+
 <h3>4.4.9 2025-02-07 Sys.getFunctions(any)</h3>
 <p>
 Added function to get list of functions for further processing, while building a web

@@ -57,11 +57,17 @@ public class ExprAs extends ExprCommon {
 
     public Value resolve (Ctx ctx) throws Exception {
         final Value stackValue=ctx.pop();
+
+        if (stackValue==null && orNull) {
+        	if (testMode) return new ValueBoolean(true); else return stackValue;
+        }
         
         Obj theValue=stackValue;
         if (theValue instanceof ValueObj) {
             theValue=((ValueObj) theValue).getVal(); // unwrap Obj 
         }
+        
+        	
         
         final List<String> typeNames=new ArrayList<String>();
         

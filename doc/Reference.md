@@ -2,9 +2,9 @@
 # CFT Reference
 
 
-Last updated: 2025-08-06 RFO
+Last updated: 2026-03-14 RFO
 
-v4.4.7
+v4.4.9
 
 *"Okay, so I like writing docs ..."* :-)
 
@@ -2331,6 +2331,45 @@ P(1) as ("String null".split) => optionalStringValue
 P(1) as String? => optionalStringValue  # The '?' means "or null"
 P(1) as ("String int".split)?    # String, int or null
 ```
+
+### As boolean test
+
+Inserting a '?' after the "as" keyword, changes the behaviour from letting the value pass through if okay,
+and fail with error if not okay, to a boolean result.
+
+```
+3 as? int
+
+# returns true
+
+null as? int?
+
+# also true
+```
+
+3 as? (List("String","Dict"))
+
+
+### Use in expressions
+
+The "as" is an expression, which takes the value to be checked from the stack. This means it operates independently
+from whatever generated that value, and so we have the following issue:
+
+```
+a=5
+if (a as? String) {...}
+```
+
+This fails, because "a as String" can not be parsed as a single expression. 
+
+Instead, to make this work, we remember that block statements are also expressions:
+
+```
+a=5
+if ({a as? String}) {...}
+```
+
+
 ### Dict (type) names
 
 
@@ -4232,3 +4271,15 @@ Shell commands:   22
 Object types:     76
 Value types:      13
 ```
+
+
+### 2026-03-14 v4.4.9
+```
+Script code:      27846 lines
+Java code:        39691 lines
+Functions:        615
+Shell commands:   22
+Object types:     78
+Value types:      13
+```
+
