@@ -2347,13 +2347,12 @@ null as? int?
 # also true
 ```
 
-3 as? (List("String","Dict"))
-
 
 ### Use in expressions
 
-The "as" is an expression, which takes the value to be checked from the stack. This means it operates independently
-from whatever generated that value, and so we have the following issue:
+The "as" is an expression, but one that takes the value to be checked from the stack, similar to
+the "=>" assignment. This means that syntactically it operates independently from whatever generated
+that value, and so we have the following issue:
 
 ```
 a=5
@@ -2368,6 +2367,7 @@ Instead, to make this work, we remember that block statements are also expressio
 a=5
 if ({a as? String}) {...}
 ```
+
 
 
 ### Dict (type) names
