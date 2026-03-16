@@ -774,8 +774,6 @@ Dict.set("a",1).set("b",Lambda{P(1) as int=>x self.a+x})
     ex.msg.contains("unknown symbol 'a'")
 /Test47d_verify_lambda_no_access_to_create_context
 
-
-
 # Test 48 - Verify that shared structures from super classes are
 # properly copied when creating subclasses. The Dict.copyFrom function
 # only copies Value objects, not cloning anything, but as we see below,
@@ -1086,6 +1084,33 @@ ERROR: [<script> Tests01:861.8] Invalid value Dict [] + 1
 # --
     d=Dict d.set("keys", 3) Sys.getType(d.keys)=="List"
 /Test58_dotted_lookup_value_vs_functions
+
+
+
+# Test 59 - 2026-03 - null with optional named dict
+# --
+	x=Lambda{P(1) as &Data? => value }
+    tryCatch(
+		x.call(null)
+	).ok
+/Test59_null_value_with_optional_named_dict_parameter_bugfix_2026_03
+
+# Test - 2026-03
+# --
+	{null as? &Data} == false
+/Test59a 
+
+# Test - 2026-03
+# --
+	{null as? &Data?}
+/Test59b
+
+# Test - 2026-03
+# --
+	{3 as? &Data?} == false
+/Test59c
+
+
 
 
 # Run all TestX

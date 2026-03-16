@@ -58,8 +58,9 @@ public class ExprAs extends ExprCommon {
     public Value resolve (Ctx ctx) throws Exception {
         final Value stackValue=ctx.pop();
 
-        if (stackValue==null && orNull) {
-        	if (testMode) return new ValueBoolean(true); else return stackValue;
+        if (stackValue instanceof ValueNull && orNull) {
+        	if (testMode) return new ValueBoolean(true);
+			if (stackValue != null) return stackValue; else return new ValueNull();
         }
         
         Obj theValue=stackValue;
