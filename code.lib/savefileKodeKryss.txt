@@ -39,7 +39,7 @@
 /DeleteLine
 
 
-# Clear
+# Clear the data lines
 # --
 	readLine("Answer 'yes' to delete all lines")=>str
 	error(str != "yes", "Aborting")
@@ -53,7 +53,7 @@
 //GetCodes
 
 
-# Save codes
+# Save codes dict
 # --
 	P(1) as Dict => codes
 	Db2:Set(Sys.scriptId,"Koder",Dict)
@@ -72,7 +72,7 @@
 //DeleteCharLookup
 
 
-# Enter lookups
+# Work the cross word, test lookups
 # --
 	loop
 		Show(true)
@@ -131,7 +131,15 @@
 		out(Int(dict.get(key), key))
 	| _.sort.reverse->x 
 		report(""+x.data,""+x)
-//GetCounts
+/GetCounts
+
+
+
+# Show current code selection
+# --
+	Util:ShowDict(GetCodes)
+/ShowCodes
+
 
 # Clear codes
 # --
