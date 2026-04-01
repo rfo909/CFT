@@ -1,0 +1,247 @@
+# Get lines of data
+# --
+	Db2:Get(Sys.scriptId,"Kryss",List)
+/GetLines
+
+	
+
+# Define input data
+# --
+	lines=GetLines
+	loop
+		Show
+		readLine("N: ... to rewrite, else numbers separated by space, _ for empty, enter to quit") => str
+		break(str.trim=="")
+			
+		N=null
+		if (str.contains(":")) {
+			N=str.before(":").parseInt
+			str=str.after(":")
+		}
+		if (N==null) lines.add(str) else {
+			lines.remove(N)
+			lines.insert(N,str)
+		}
+		Db2:Set(Sys.scriptId,"Kryss", lines)
+	}
+/Define
+
+# Delete line
+# --
+	Show
+	readLine("Line number to delete, enter to abort") => str
+	if (str.trim != "") {
+		lines = GetLines
+		lines.remove(str.parseInt)
+		Db2:Set(Sys.scriptId,"Kryss",lines)
+	}
+	Show
+/DeleteLine
+
+
+# Clear
+# --
+	readLine("Answer 'yes' to delete all lines")=>str
+	error(str != "yes", "Aborting")
+	Db2:Set(Sys.scriptId,"Kryss",List)
+/Clear
+
+
+# Get code dictionary
+# --
+	Db2:Get(Sys.scriptId,"Koder",Dict)
+//GetCodes
+
+
+# Save codes
+# --
+	P(1) as Dict => codes
+	Db2:Set(Sys.scriptId,"Koder",Dict)
+//SaveCodes
+
+
+# Delete character from codes
+# --
+	P(1) as Dict => codes
+	P(2) as String => ch
+	
+	codes.keys->key
+		if (codes.get(key)==ch) codes.remove(key)
+	|
+	codes
+//DeleteCharLookup
+
+
+# Enter lookups
+# --
+	loop
+		Show(true)
+		codes=GetCodes
+		
+		println("Unassigned: " + GetUnassignedLetters)
+		readLine("N=ch or ch1=ch2 or !ch to remove char, enter to quit") => str
+		break(str.trim=="")
+		if (str.startsWith("!")) {
+			ch=str.after("!".trim)
+			codes=DeleteCharLookup(codes,ch)
+		} else {
+			parts=str.split("=")
+			a=parts.first.trim
+			b=parts.last.trim
+			
+			# remove previous mapping for target character
+			codes=DeleteCharLookup(codes,b)
+
+			if (a.?parseInt) {
+				codes.set(""+a,b)
+			} else {
+				# replace character
+				Inner{
+					codes.keys->key
+						if (codes.get(key)==a) codes.set(key,b)
+				}
+			}
+		}
+		Db2:Set(Sys.scriptId,"Koder", codes)
+/Enter
+
+
+# Show unused letters
+# --
+	chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ"
+	codes=GetCodes
+	codes.keys->key
+		ch=codes.get(key).toUpper
+		assert(ch.length==1)
+		chars=chars.replace(ch,"")
+	|
+	chars
+//GetUnassignedLetters
+
+# Get counts for numbers
+# --
+	dict=Dict
+	GetLines->line
+		line.split->part
+			assert(part.?parseInt)
+			dict.get(part,0)+1 => count
+			dict.set(part,count)
+	|
+	dict.keys->key 
+		out(Int(dict.get(key), key))
+	| _.sort.reverse->x 
+		report(""+x.data,""+x)
+//GetCounts
+
+# Clear codes
+# --
+	SaveCodes(Dict)
+/ClearCodes
+
+# Word file
+# --
+	File("/home/roar/Prosjekter/NLP/nsf2023.txt")
+/WordFile
+
+
+# Words from word file
+# --
+	P(1,2) => minLength
+	P(2,12) => maxLength
+	
+	WordFile.read->line
+		s=line.trim
+		reject(s.length < minLength || s.length > maxLength)
+		out(s)
+/WordFileList
+
+
+# Check if dictionary word follows pattern in coded word
+# --
+	P(1) as String => codedWord
+	P(2) as String => dictionaryWord
+	P(3, Dict) as Dict => map
+	
+	dChars=dictionaryWord.chars
+	i=0
+	fail=false
+	codedWord.chars->c
+		break(fail)
+		if (map.has(c)) { 
+			if (dChars.get(i) != map.get(c)) fail=true
+		} else {
+			# extend map
+			map.set(c,dChars.get(i))
+		}
+		i=i+1
+	|
+	if (!fail) {
+		# also check that no two keys refer to the same resulting char
+		reverseMap=Dict
+		Inner{map.keys->key 
+			break(fail)
+			ch=map.get(key)
+			if (reverseMap.has(ch) && reverseMap.get(ch) != key) fail=true else reverseMap.set(ch,key)
+		}
+	}
+	if(fail,null,map)
+/CheckWord
+
+# Search for words following pattern (uppercase must match exactly)
+# --
+	P(1,Input("Word pattern (uppercase must match directly)").get) => pattern
+	len=pattern.length
+	dictionary=WordFileList(len,len)
+	dictionary->dw
+		if (CheckWord(pattern,dw.toLower) != null) {
+			match=true
+			Inner{
+				pos=0
+				pattern.chars->c
+					assert(match)
+					if (c.toUpper==c) {
+						if (dw.chars.get(pos).toUpper != c) match=false
+					}
+					pos=pos+1
+			}
+			if (match) println(dw.toUpper)
+		}
+/SP
+
+# Test CheckWord
+# --
+	println(CheckWord("nggn","abba") != null)
+	println(CheckWord("nuggene", "rxggxrx") == null)
+	println(CheckWord("nggn","akka", Dict.set("g","k")) != null)
+	println(CheckWord("nggn","abba", Dict.set("g","k")) == null)
+//testCW
+
+
+# Show data
+# --
+	P(1,false) => lookupCodes
+	
+	codes=GetCodes
+
+	lineNo=0
+	GetLines->str
+		parts=str.split
+		
+		print(("   " + lineNo).last(3) + ": ")
+		Inner{
+			parts->part
+				s=part
+				bold=false
+				if (lookupCodes && codes.has(part)) {
+					s=codes.get(part)
+					bold=true
+				}
+				s=(s+"  ").first(2)				
+				if (bold) print(Curses:TxtBlue + Curses:Bold + s+ Curses:Reset + "|")
+				else print(Curses:TxtYellow + s + Curses:Reset + "|")
+		}
+		println
+		lineNo=lineNo+1
+	}
+/Show
+
