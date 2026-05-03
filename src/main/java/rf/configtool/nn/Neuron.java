@@ -4,9 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Neuron {
+
 	private List<Float> inputWeights;  // referring to location in output vector from previous layer
 	private float bias;
-	private float sum;
+
+	private float weightGradient;
+	private float biasGradient;
+	
+	private float rawSum;
 
 	public Neuron (int previousLayerWidth, ParamGenerator pgen) {
 		inputWeights=new ArrayList<Float>();
@@ -16,31 +21,49 @@ public class Neuron {
 		bias=pgen.nextFloat(10f)-5f;
 	}
 
+	public void setBias (float bias) {
+		this.bias=bias;
+	}
+
+	// backprop
+	public void setWeightGradient (float wg) {
+		weightGradient=wg;
+	}
+
+	// backprop
+	public void setBiasGradient (float bg) {
+		biasGradient=bg;
+	}
+
+	public List<Float> getInputWeights() {
+		return inputWeights;
+	}
+
 	/**
-	 * Sum of (input * weight) for the complete input vector, then
-	 * apply activation function, returning the result value
+	 * rawSum of (input * weight) for the complete input vector, plus bias, then
+	 * apply acticavation function, returning the result value. Storing the
+	 * signed rawSum internally for back prop pass. 
 	 */
 	public float processInputVector (List<Float> inputs) {
-		this.sum=bias;
+		this.rawSum=bias;
 
 		if (inputWeights.size() != inputs.size()) {
 			throw new RuntimeException("Weight vs input mismatch");
 		}
 
 		for (int i=0; i<inputWeights.size(); i++) {
-			this.sum += (inputWeights.get(i)*inputs.get(i));
+			this.rawSum += (inputWeights.get(i)*inputs.get(i));
 		}
 
-		// ReLU activation function, capped at +256
+		// ReLU activation function
 
-		if (this.sum<0) {
+		if (this.rawSum<0) {
 			return 0f;
-		}
-		if (this.sum>256f) {
-			return 256f;
 		} 
-		return this.sum;
+		return this.rawSum;
 	}
 
-	
+	public float getRawSum() {
+		return this.rawSum;
+	}
 }

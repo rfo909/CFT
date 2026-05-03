@@ -4,6 +4,7 @@ import java.util.*;
 
 public class Layer {
     private List<Neuron> neurons=new ArrayList<Neuron>(); 
+    private List<Float> activations;
 
     public Layer (int width, int inputVectorSize, ParamGenerator pgen) {
         for (int i=0; i<width; i++) {
@@ -16,6 +17,15 @@ public class Layer {
         for (Neuron n : neurons) {
             result.add(n.processInputVector(inputs));
         }
+        this.activations=result;
         return result;
+    }
+
+    public List<Neuron> getNeurons() {
+        return neurons;
+    }
+
+    public List<Float> getActivations() {
+        return activations;
     }
 }

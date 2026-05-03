@@ -11,6 +11,7 @@ public class ObjBrain extends Obj {
     public ObjBrain(Brain brain) {
         this.brain=brain;
         this.add(new FunctionProcess());
+        this.add(new FunctionBP());
     }
 
     @Override
@@ -81,19 +82,19 @@ public class ObjBrain extends Obj {
             return "BP(inputList,expectedOutputList) - backpropagation test";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 2) throw new Exception("Expected input and expected result lists");
+            if (params.size() != 2) throw new Exception("Expected input and correct-result lists");
 
             Value value1=params.get(0);
             Value value2=params.get(1);
 
-            if (!(value1 instanceof ValueList)) throw new Exception("Expected input and expected result lists");
-            if (!(value2 instanceof ValueList)) throw new Exception("Expected input and expected result lists");
+            if (!(value1 instanceof ValueList)) throw new Exception("Expected input and correct-result lists");
+            if (!(value2 instanceof ValueList)) throw new Exception("Expected input and correct-result lists");
 
             List<Float> inputs=fromCFTFormat((ValueList) value1);
             List<Float> expected=fromCFTFormat((ValueList) value2);
 
             List<Float> result = brain.execute(inputs);
-            brain.backPropagate(expected);
+            brain.backPropagate(result, expected);
 
             return (toCFTFormat(result));
         }
