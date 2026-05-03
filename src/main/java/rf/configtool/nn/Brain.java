@@ -47,90 +47,29 @@ public class Brain {
 		return dataVector; // result from output neurons
 	}
 
-	private float lossFunction(List<Float> output, List<Float> correctResult) {
-        // Mean squared error loss function for multi-class classification
-        float sum = 0f;
-        
-        for (int i = 0; i < correctResult.size(); i++) {
-			sum += (float) Math.pow(output.get(i) - correctResult.get(i), 2);
-        }
-        
-        return sum / correctResult.size();
+	private List<Float> calculateOutputLayerErrors(Layer outputLayer, List<Float> correctResult) {
+		List<Float> activations = outputLayer.getActivations();
+		if (correctResult.size() != activations.size()) throw new RuntimeException("lossFunction: output mismatch");
+
+		List<Float> errors=new ArrayList<Float>();
+		for (int i=0; i<activations.size(); i++) {
+			float dx=activations.get(i)-correctResult.get(i);
+			errors.add(dx*dx);
+		}
+
+		return errors;
     }
 
 
 
+	/*
+	Call this method after a regular execute(), having produced output values (activations). These
+	are stored in the layers, as well as the rawSum stored in each Neuron
+	*/
+	public void backPropagate (List<Float> target) {
+		List<Float> outputErrors=calculateOutputLayerErrors(layers.get(layers.size()-1), target);
 
-	public void backPropagate (List<Float> activations, List<Float> correctResult) {
-		float error=lossFunction(activations, correctResult);
-
-		/*
-		// (COMPILES BUT LOOKS SHADY - weight gradient is a list in code below)
-
-		Layer lastLayer=layers.get(layers.size()-1);
-		List<Neuron> lastLayerNeurons=lastLayer.getNeurons();
-
-		for (int i = 0; i < lastLayerNeurons.size(); i++) {
-            Neuron neuron = lastLayerNeurons.get(i);
-            float dz = activations.get(i); // Get the z value for backpropagation
-            float dw = LEARNING_RATE * dz * error; // Compute the gradient with respect to the weights
-            
-            neuron.setWeightGradient(dw); // Store the weight gradient for update
-            neuron.setBiasGradient(dw); // Use the same gradient for bias update
-
-		}
-		*/
-
-		/*
 		int numLayers=layers.size();
 
-        // Backpropagate gradients through the previous layers
-        for (int l = numLayers - 1; l > 0; l--) {
-            Layer currentLayer = layers.get(l);
-            Layer previousLayer = layers.get(l + 1);
-            
-            // Compute gradients for each neuron in the current layer
-            List<Neuron> currentLayerNeurons = currentLayer.getNeurons();
-			List<Float> prevActivations = previousLayer.getActivations();
-			
-            for (int i = 0; i < currentLayerNeurons.size(); i++) {
-                Neuron neuron = currentLayerNeurons.get(i);
-
-                float dz = activations.get(activations.size() - prevActivations.size() + i).getValue()[0]; // Get the z value for backpropagation
-                
-                // Compute the gradient with respect to the weights
-                List<Float> dw = new ArrayList<>();
-                for (float w : neuron.getWeights()) {
-                    float dW = learningRate * dz * previousLayer.get(i).getLastOutput();
-                    dw.add(dW);
-                }
-                
-                // Update the weight gradients for this layer's neurons
-                neuron.setWeightGradients(dw);
-                
-                // Compute the gradient with respect to the bias
-                float db = learningRate * dz;
-                neuron.setBiasGradient(db);
-            }
-        }
-        
-        // Update weights and biases based on gradients
-        for (Layer layer : layers) {
-            for (Neuron neuron : layer.getNeurons()) {
-                List<Float> weightGrads = neuron.getWeightGradients();
-                List<Float> weights = neuron.getWeights();
-                
-                // Update weights
-                for (int i = 0; i < weights.size(); i++) {
-                    weights.set(i, weights.get(i) - weightGrads.get(i));
-                }
-                
-                // Update bias
-                float bias = neuron.getBias();
-                bias -= learningRate * neuron.getBiasGradient();
-                neuron.setBias(bias);
-            }
-        }		
-		*/
 	}
 }

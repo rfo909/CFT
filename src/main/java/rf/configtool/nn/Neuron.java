@@ -8,9 +8,6 @@ public class Neuron {
 	private List<Float> inputWeights;  // referring to location in output vector from previous layer
 	private float bias;
 
-	private float weightGradient;
-	private float biasGradient;
-	
 	private float rawSum;
 
 	public Neuron (int previousLayerWidth, ParamGenerator pgen) {
@@ -18,21 +15,11 @@ public class Neuron {
 		for (int i=0; i<previousLayerWidth; i++) {
 			inputWeights.add((float) (pgen.nextFloat(2f) - 1f));
 		}
-		bias=pgen.nextFloat(10f)-5f;
+		bias=pgen.nextFloat(2f)-1f;
 	}
 
 	public void setBias (float bias) {
 		this.bias=bias;
-	}
-
-	// backprop
-	public void setWeightGradient (float wg) {
-		weightGradient=wg;
-	}
-
-	// backprop
-	public void setBiasGradient (float bg) {
-		biasGradient=bg;
 	}
 
 	public List<Float> getInputWeights() {
@@ -66,4 +53,30 @@ public class Neuron {
 	public float getRawSum() {
 		return this.rawSum;
 	}
+
+	
+	// ----------------------------------
+	// back propagation calculations
+	// ----------------------------------
+
+	public float calculateError(float[] nextLayerErrors) {
+        float delta = 0f;
+        for (int i = 0; i < nextLayerErrors.length; i++) {
+            delta += inputWeights.get(i) * nextLayerErrors[i];
+        }
+        return delta * reluDerivative(); // assuming ReLU activation function
+    }
+
+    public void updateWeightsAndBias(float[] errors, float learningRate, List<Float> inputActivations) {
+        for (int i = 0; i < inputWeights.size(); i++) {
+            float gradient = errors[i] * reluDerivative() * inputActivations.get(i);
+            inputWeights.set(i, inputWeights.get(i) - learningRate * gradient);
+        }
+        bias -= learningRate * errors[0] * reluDerivative(); // assuming error is a scalar value
+    }
+
+	private float reluDerivative() {
+        return rawSum > 0f ? 1f : 0f;
+    }
+
 }

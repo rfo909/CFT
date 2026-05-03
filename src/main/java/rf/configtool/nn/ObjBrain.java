@@ -79,24 +79,19 @@ public class ObjBrain extends Obj {
             return "BP";
         }
         public String getShortDesc() {
-            return "BP(inputList,expectedOutputList) - backpropagation test";
+            return "BP(targetList) - backpropagation test";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 2) throw new Exception("Expected input and correct-result lists");
+            if (params.size() != 1) throw new Exception("Expected target list of desired values");
 
-            Value value1=params.get(0);
-            Value value2=params.get(1);
+            Value value=params.get(0);
+            if (!(value instanceof ValueList)) throw new Exception("Expected target list");
 
-            if (!(value1 instanceof ValueList)) throw new Exception("Expected input and correct-result lists");
-            if (!(value2 instanceof ValueList)) throw new Exception("Expected input and correct-result lists");
+            List<Float> target=fromCFTFormat((ValueList) value);
+            brain.backPropagate(target);
 
-            List<Float> inputs=fromCFTFormat((ValueList) value1);
-            List<Float> expected=fromCFTFormat((ValueList) value2);
 
-            List<Float> result = brain.execute(inputs);
-            brain.backPropagate(result, expected);
-
-            return (toCFTFormat(result));
+            return new ValueBoolean(true);
         }
     }
 
