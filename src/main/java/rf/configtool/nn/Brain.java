@@ -2,7 +2,6 @@ package rf.configtool.nn;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class Brain {
 
@@ -11,15 +10,17 @@ public class Brain {
 
 	public Brain (int inputWidth, int hiddenTiers, int hiddenTierWidth, int outputWidth) {
 		this.inputWidth=inputWidth;
-		Random random=new Random();
+		ParamGenerator pgen = new ParamGenerator();
 
 		for (int i=0; i<hiddenTiers; i++) {
 			int layerInputCount = (i==0 ? inputWidth : hiddenTierWidth);
-			layers.add(new Layer(hiddenTierWidth, layerInputCount, random));
+			layers.add(new Layer(hiddenTierWidth, layerInputCount, pgen));
 		}
 
 		// output layer
-		layers.add(new Layer(outputWidth, hiddenTierWidth, random));
+		layers.add(new Layer(outputWidth, hiddenTierWidth, pgen));
+
+		System.out.println("Brain parameters: " + pgen.getParamCount());
 
 	}
 
@@ -31,6 +32,14 @@ public class Brain {
 		}
 
 		return dataVector; // result from output neurons
+	}
+
+	/**
+	 * All the neurons of the individual layers remember their internal sum
+	 * prior to the activation function. These are used to adjust weights up
+	 * the layers, to try to improve the output
+	 */
+	public void backPropagate (List<Float> correctResult) {
 
 	}
 }

@@ -5,9 +5,9 @@ import java.util.*;
 public class Layer {
     private List<Neuron> neurons=new ArrayList<Neuron>(); 
 
-    public Layer (int width, int inputVectorSize, Random random) {
+    public Layer (int width, int inputVectorSize, ParamGenerator pgen) {
         for (int i=0; i<width; i++) {
-            neurons.add(new Neuron(inputVectorSize, random));
+            neurons.add(new Neuron(inputVectorSize, pgen));
         }
     }
 
