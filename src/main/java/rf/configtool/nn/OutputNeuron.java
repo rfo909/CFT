@@ -1,13 +1,11 @@
 package rf.configtool.nn;
 
+import java.util.Random;
+
 public class OutputNeuron extends Neuron {
 
-	public OutputNeuron (String name) {
-		super(name);
-	}
-
-	public void mutate (MutationState mutations) {
-		return; // no mutations of output neurons
+	public OutputNeuron (int previousLayerWidth, Random random) {
+		super(previousLayerWidth, random);
 	}
 
 }

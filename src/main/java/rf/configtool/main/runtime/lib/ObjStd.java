@@ -35,6 +35,8 @@ import rf.configtool.main.runtime.lib.java.ObjJava;
 import rf.configtool.main.runtime.lib.math.ObjMath;
 import rf.configtool.main.runtime.lib.text.ObjText;
 import rf.configtool.main.runtime.lib.web.ObjWeb;
+import rf.configtool.nn.Brain;
+import rf.configtool.nn.ObjBrain;
 
 public class ObjStd extends Obj {
     
@@ -53,6 +55,7 @@ public class ObjStd extends Obj {
         this.add(new FunctionColor());
         this.add(new FunctionRaster());
         this.add(new FunctionArray());
+        this.add(new FunctionBrain());
         
     }
     
@@ -307,6 +310,30 @@ public class ObjStd extends Obj {
             Value value=params.get(0);
             if (!(value instanceof ValueList)) throw new Exception("Expected list parameter");
             return new ValueObj(new ObjArray((ValueList) value));
+        }
+    }
+
+    class FunctionBrain extends Function {
+        public String getName() {
+            return "Brain";
+        }
+
+        public String getShortDesc() {
+            return "Brain(inputWidth, hiddenTiers, hiddenTierWidth, outputWidth) - create neural network";
+        }
+
+        public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 4) {
+                throw new Exception("Expected params: inputWidth, hiddenTiers, hiddenTierWidth, outputWidth");
+            }
+            int inputWidth=(int) getInt("inputWidth",params,0);
+            int hiddenTiers=(int) getInt("inputWidth",params,1);
+            int hiddenTierWidth=(int) getInt("inputWidth",params,2);
+            int outputWidth=(int) getInt("inputWidth",params,3);
+            
+            Brain brain=new Brain(inputWidth, hiddenTiers, hiddenTierWidth, outputWidth);
+            return new ValueObj(new ObjBrain(brain));
+
         }
     }
 
