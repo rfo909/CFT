@@ -30,9 +30,11 @@ public class Brain {
 	}
 
 	public List<Float> execute (List<Float> dataVector) {
-		// copy dataVector as bias values into the first layer
+		// copy dataVector as bias values into the first layer; those neurons have zero inputs, 
+		// so the bias becomes their activation value
 
 		if (dataVector.size() != inputWidth) throw new RuntimeException("input vector mismatch");
+
 		List<Neuron> inputNeurons=layers.get(0).getNeurons();
 		for (int i=0; i<inputNeurons.size(); i++) {
 			inputNeurons.get(i).setBias(dataVector.get(i));
@@ -47,29 +49,33 @@ public class Brain {
 		return dataVector; // result from output neurons
 	}
 
-	private List<Float> calculateOutputLayerErrors(Layer outputLayer, List<Float> correctResult) {
-		List<Float> activations = outputLayer.getActivations();
-		if (correctResult.size() != activations.size()) throw new RuntimeException("lossFunction: output mismatch");
 
-		List<Float> errors=new ArrayList<Float>();
-		for (int i=0; i<activations.size(); i++) {
-			float dx=activations.get(i)-correctResult.get(i);
-			errors.add(dx*dx);
+	// ---------------------------------------------------
+	// Back propagation
+	// ---------------------------------------------------
+
+	private void setOutputCorrectValues (List<Float> correctResult) {
+		Layer outputLayer=layers.get(layers.size()-1);
+		List<Neuron> neurons=outputLayer.getNeurons();
+		if (correctResult.size() != neurons.size()) throw new RuntimeException("output mismatch");
+		for (int i=0; i<neurons.size(); i++) {
+			neurons.get(i).addDesiredOutput(correctResult.get(i));
 		}
-
-		return errors;
     }
 
-
-
 	/*
-	Call this method after a regular execute(), having produced output values (activations). These
-	are stored in the layers, as well as the rawSum stored in each Neuron
+	Call this method after a regular execute(), having produced output values
 	*/
 	public void backPropagate (List<Float> target) {
-		List<Float> outputErrors=calculateOutputLayerErrors(layers.get(layers.size()-1), target);
+		setOutputCorrectValues(target);
 
-		int numLayers=layers.size();
+		for (int layer=layers.size()-1; layer>=1; layer--) {
+			Layer currLayer=layers.get(layer);
+			Layer prevLayer=layers.get(layer-1);  // for looking up their previous output
 
+			for (Neuron n:currLayer.getNeurons()) {
+				n.backPropagate(prevLayer);
+			}
+		}
 	}
 }

@@ -68,6 +68,7 @@ public class ObjBrain extends Obj {
             if (!(value instanceof ValueList)) throw new Exception("Expected list parameter");
 
             List<Float> inputs=fromCFTFormat((ValueList) value);
+            
             List<Float> result = brain.execute(inputs);
             return toCFTFormat(result);
         }

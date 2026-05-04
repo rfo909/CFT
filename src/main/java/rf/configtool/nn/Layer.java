@@ -4,7 +4,6 @@ import java.util.*;
 
 public class Layer {
     private List<Neuron> neurons=new ArrayList<Neuron>(); 
-    private List<Float> activations;  // neuron outputs 
 
     public Layer (int width, int inputVectorSize, ParamGenerator pgen) {
         for (int i=0; i<width; i++) {
@@ -17,7 +16,6 @@ public class Layer {
         for (Neuron n : neurons) {
             result.add(n.processInputVector(inputs));
         }
-        this.activations=result;
         return result;
     }
 
@@ -25,19 +23,6 @@ public class Layer {
         return neurons;
     }
 
-    public List<Float> getActivations() {
-        return activations;
-    }
-
-    // Calculate errors for this layer given the next layer's errors
-    public float[] calculateErrors(float[] nextLayerErrors) {
-        float[] errors = new float[neurons.size()];
-        
-        for (int i = 0; i < neurons.size(); i++) {
-            errors[i] = neurons.get(i).calculateError(nextLayerErrors);
-        }
-        return errors;
-    }
 
 
 }

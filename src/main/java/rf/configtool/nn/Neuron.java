@@ -5,10 +5,17 @@ import java.util.List;
 
 public class Neuron {
 
+	final float MAX_ACTIVATION = 1.0f;
+	final float MIN_ACTIVATION = -0.5f;
+
 	private List<Float> inputWeights;  // referring to location in output vector from previous layer
 	private float bias;
 
 	private float rawSum;
+	private float activation; // rawSum after activation function
+
+	private float desiredOutput;
+	private int desiredOutputCount;
 
 	public Neuron (int previousLayerWidth, ParamGenerator pgen) {
 		inputWeights=new ArrayList<Float>();
@@ -34,6 +41,10 @@ public class Neuron {
 	public float processInputVector (List<Float> inputs) {
 		this.rawSum=bias;
 
+		// prepare for BP
+		this.desiredOutput=0f;
+		this.desiredOutputCount=0;
+
 		if (inputWeights.size() != inputs.size()) {
 			throw new RuntimeException("Weight vs input mismatch");
 		}
@@ -42,16 +53,21 @@ public class Neuron {
 			this.rawSum += (inputWeights.get(i)*inputs.get(i));
 		}
 
-		// ReLU activation function
+		// "shifted ReLU" activation function, allowing for negative
+		// data, but keeping the transition point at zero, and the
+		// derivative unchanged
 
-		if (this.rawSum<0) {
-			return 0f;
-		} 
-		return this.rawSum;
-	}
+		if (rawSum<0) {
+			activation = rawSum/2f;  // derivative 0.5 and 1
+		} else {
+			activation = rawSum;
+		}
 
-	public float getRawSum() {
-		return this.rawSum;
+		if (activation<MIN_ACTIVATION) activation=MIN_ACTIVATION;
+		if (activation>MAX_ACTIVATION) activation=MAX_ACTIVATION;
+
+
+		return this.activation;
 	}
 
 	
@@ -59,24 +75,49 @@ public class Neuron {
 	// back propagation calculations
 	// ----------------------------------
 
-	public float calculateError(float[] nextLayerErrors) {
-        float delta = 0f;
-        for (int i = 0; i < nextLayerErrors.length; i++) {
-            delta += inputWeights.get(i) * nextLayerErrors[i];
-        }
-        return delta * reluDerivative(); // assuming ReLU activation function
-    }
+	public float getActivation() {
+		return activation;
+	}
 
-    public void updateWeightsAndBias(float[] errors, float learningRate, List<Float> inputActivations) {
-        for (int i = 0; i < inputWeights.size(); i++) {
-            float gradient = errors[i] * reluDerivative() * inputActivations.get(i);
-            inputWeights.set(i, inputWeights.get(i) - learningRate * gradient);
-        }
-        bias -= learningRate * errors[0] * reluDerivative(); // assuming error is a scalar value
-    }
+	public void addDesiredOutput (float value) {
+		this.desiredOutput += value;
+		this.desiredOutputCount++;
+	}
+
+	public void backPropagate (Layer prevLayer) {
+		float avgDesiredOutput=this.desiredOutput/this.desiredOutputCount;
+		//System.out.println("avgDesiredOutput=" + avgDesiredOutput + " activation=" + this.activation);
+		
+		float diff = avgDesiredOutput - this.activation;
+		
+		List<Neuron> prevNeurons=prevLayer.getNeurons();
+		for (int i=0; i<prevNeurons.size(); i++) {
+
+			Neuron p=prevNeurons.get(i);
+			float input=p.getActivation();
+			float weight=inputWeights.get(i);
+
+			// calculate a 1% change spread out across the input count
+			float change = diff/inputWeights.size()/10f;
+			inputWeights.set(i,weight+change);
+			bias += change;
+	
+			// at this point we have handled 1% of the difference, now we ask the
+			// neurons in the previous layer to close in on values that make
+			// our new activation perfect
+
+			p.addDesiredOutput(input+diff/inputWeights.get(i)); 
+				// modify its previous output (our input) to handle the remaining 99% correction
+		}
+		
+	}
 
 	private float reluDerivative() {
-        return rawSum > 0f ? 1f : 0f;
+		if (rawSum < 0) {
+			return 0.5f;
+ 		} else {
+			return 1f;
+		}
     }
 
 }
