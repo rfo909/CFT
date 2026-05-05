@@ -5,8 +5,8 @@ import java.util.List;
 
 public class Neuron {
 
-	final float MAX_ACTIVATION = 1.0f;
-	final float MIN_ACTIVATION = -0.5f;
+	final float MAX_ACTIVATION = 2.0f;
+	final float MIN_ACTIVATION = -2.0f;
 
 	private List<Float> inputWeights;  // referring to location in output vector from previous layer
 	private float bias;
