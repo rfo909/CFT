@@ -5,33 +5,32 @@ import java.util.List;
 
 public class Brain {
 
-	static final float LEARNING_RATE = 0.01f; 
-
 	private int inputWidth;
 	List<Layer> layers=new ArrayList<Layer>();
 
 	public Brain (int inputWidth, int hiddenTiers, int hiddenTierWidth, int outputWidth) {
 		this.inputWidth=inputWidth;
+
 		ParamGenerator pgen = new ParamGenerator();
+		ActivationFunction activationFunction = new ActivationSigmoid(pgen);
 
 		// input layer
-		layers.add(new Layer(inputWidth, 0, pgen));
+		layers.add(new Layer(inputWidth, 0, activationFunction));
 
 		for (int i=0; i<hiddenTiers; i++) {
 			int layerInputCount = (i==0 ? inputWidth : hiddenTierWidth);
-			layers.add(new Layer(hiddenTierWidth, layerInputCount, pgen));
+			layers.add(new Layer(hiddenTierWidth, layerInputCount, activationFunction));
 		}
 
 		// output layer
-		layers.add(new Layer(outputWidth, hiddenTierWidth, pgen));
+		layers.add(new Layer(outputWidth, hiddenTierWidth, activationFunction));
 
 		System.out.println("Brain parameters: " + pgen.getParamCount());
 
 	}
 
-	public List<Float> execute (List<Float> dataVector) {
-		// copy dataVector as bias values into the first layer; those neurons have zero inputs, 
-		// so the bias becomes their activation value
+	public List<Float> forwardPass (List<Float> dataVector) {
+		// copy dataVector as bias values into the first layer
 
 		if (dataVector.size() != inputWidth) throw new RuntimeException("input vector mismatch");
 
@@ -40,8 +39,8 @@ public class Brain {
 			inputNeurons.get(i).setBias(dataVector.get(i));
 		}
 
-		dataVector=new ArrayList<Float>(); // empty list of inputs for first layer 
-	
+		dataVector=new ArrayList<Float>(); // first layer has no inputs
+
 		for (Layer layer:layers) {
 			dataVector = layer.process(dataVector);
 		}
@@ -49,33 +48,29 @@ public class Brain {
 		return dataVector; // result from output neurons
 	}
 
+	private List<Float> calculateOutputLayerErrors(Layer outputLayer, List<Float> correctResult) {
+		List<Float> activations = outputLayer.getActivations();
+		if (correctResult.size() != activations.size()) throw new RuntimeException("lossFunction: output mismatch");
 
-	// ---------------------------------------------------
-	// Back propagation
-	// ---------------------------------------------------
-
-	private void setOutputCorrectValues (List<Float> correctResult) {
-		Layer outputLayer=layers.get(layers.size()-1);
-		List<Neuron> neurons=outputLayer.getNeurons();
-		if (correctResult.size() != neurons.size()) throw new RuntimeException("output mismatch");
-		for (int i=0; i<neurons.size(); i++) {
-			neurons.get(i).addDesiredOutput(correctResult.get(i));
+		List<Float> errors=new ArrayList<Float>();
+		for (int i=0; i<activations.size(); i++) {
+			float dx=activations.get(i)-correctResult.get(i);
+			errors.add(dx*dx);
 		}
+
+		return errors;
     }
 
+
+
 	/*
-	Call this method after a regular execute(), having produced output values
+	Call this method after a regular execute(), having produced output values (activations). These
+	are stored in the layers, as well as the rawSum stored in each Neuron
 	*/
-	public void backPropagate (List<Float> target) {
-		setOutputCorrectValues(target);
+	public void backPropagate (float learningRate, List<Float> target) {
+		List<Float> outputErrors=calculateOutputLayerErrors(layers.get(layers.size()-1), target);
 
-		for (int layer=layers.size()-1; layer>=1; layer--) {
-			Layer currLayer=layers.get(layer);
-			Layer prevLayer=layers.get(layer-1);  // for looking up their previous output
+		int numLayers=layers.size();
 
-			for (Neuron n:currLayer.getNeurons()) {
-				n.backPropagate(prevLayer);
-			}
-		}
 	}
 }

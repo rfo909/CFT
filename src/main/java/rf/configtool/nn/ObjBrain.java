@@ -10,8 +10,10 @@ public class ObjBrain extends Obj {
 
     public ObjBrain(Brain brain) {
         this.brain=brain;
-        this.add(new FunctionProcess());
+        this.add(new FunctionForwardPass());
         this.add(new FunctionBP());
+        this.add(new FunctionExport());
+        this.add(new FunctionImport());
     }
 
     @Override
@@ -55,12 +57,12 @@ public class ObjBrain extends Obj {
         return new ValueList(vList);
     }
 
-    class FunctionProcess extends Function {
+    class FunctionForwardPass extends Function {
         public String getName() {
-            return "process";
+            return "forwardPass";
         }
         public String getShortDesc() {
-            return "process(list) - process list of float, returns list of float";
+            return "forwardPass(list) - process list of float, returns list of float";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 1) throw new Exception("Expected list parameter");
@@ -68,8 +70,7 @@ public class ObjBrain extends Obj {
             if (!(value instanceof ValueList)) throw new Exception("Expected list parameter");
 
             List<Float> inputs=fromCFTFormat((ValueList) value);
-            
-            List<Float> result = brain.execute(inputs);
+            List<Float> result = brain.forwardPass(inputs);
             return toCFTFormat(result);
         }
     }
@@ -80,19 +81,47 @@ public class ObjBrain extends Obj {
             return "BP";
         }
         public String getShortDesc() {
-            return "BP(targetList) - backpropagation test";
+            return "BP(learningFactor,targetList) - backpropagation test";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 1) throw new Exception("Expected target list of desired values");
+            if (params.size() != 2) throw new Exception("Expected learningFactor, targetList (correct values)");
+            double learningRate = getFloat("learningFactor", params, 0);
 
-            Value value=params.get(0);
+            Value value=params.get(1);
             if (!(value instanceof ValueList)) throw new Exception("Expected target list");
 
             List<Float> target=fromCFTFormat((ValueList) value);
-            brain.backPropagate(target);
+            brain.backPropagate((float) learningRate, target);
 
 
             return new ValueBoolean(true);
+        }
+    }
+
+    class FunctionExport extends Function {
+        public String getName() {
+            return "export";
+        }
+        public String getShortDesc() {
+            return "export(file) - save model to file";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected file parameter");
+            throw new Exception("Not implemented");
+        }
+    }
+
+
+    class FunctionImport extends Function {
+        public String getName() {
+            return "import";
+        }
+        public String getShortDesc() {
+            return "import(file) - load model from file";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected file parameter");
+            throw new Exception("Not implemented");
         }
     }
 

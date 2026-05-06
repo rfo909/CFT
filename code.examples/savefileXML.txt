@@ -971,24 +971,19 @@ namespace prefixes.
 //CollectPaths
 
 
-# Show paths for XML document
+# Generate list of paths for XML document (should apply XML:ProcessNamespaces first)
 # --
-	P(1) as File => f
-	
-	XML:Parse(f.read).first => root
-	XML:ProcessNamespaces(root)
+	P(1) as &XMLNode => root
 	
 	dict=Dict
-	
 	CollectPaths(root,dict)
-	
 	ShowPathDict(dict)
 /ShowPaths
 
 
 # Show path dictionary
 # --
-	P(1) as Dict? => dict
+	P(1) as Dict => dict
 	P(2,0) as int => indent
 	
 	dict.keys.sort->key
@@ -1007,35 +1002,43 @@ namespace prefixes.
 		out(x)
 //ListRemove
 	
-# Compare two XML files (ShowPaths)
+
+# Compare two XML documents
+# May apply XML:ProcessNamespaces to each first, to avoid diff's because of different ns-prefixes
 # --
-	P(1) as File => a
-	P(2) as File => b
+	P(1) as &XMLNode => a
+	P(2) as &XMLNode => b
+	P(3, false) as boolean => showInfo
 
 	aList=ShowPaths(a)
 	bList=ShowPaths(b)
 
+	match=true
+
+	if (showInfo) Inner{
+		Lib:Header("First document")
+		aList->line println("<", line) |
+		Lib:Header("Second document")
+		bList->line println(">", line)
+	}
+
 	bList->line 
 		if (aList.contains(line)) aList=ListRemove(aList,line)
 	|
-	Lib:Header(a.path)
-	println("Lines not found in the other file are marked (nesting level sensitive)")
-	println
-	ShowPaths(a)->line
-		if (aList.contains(line)) println("** " + line) else println("   " + line)
-	|
 
-	aList=ShowPaths(a)
-	aList->line 
+	if (!aList.empty) match=false
+
+	ShowPaths(a)->line
 		if (bList.contains(line)) bList=ListRemove(bList,line)
 	|
 
-	Lib:Header(b.path)
-	println("Lines not found in the other file are marked (nesting level sensitive)")
-	println
-	ShowPaths(b)->line
-		if (bList.contains(line)) println("** " + line) else println("   " + line)
-	|
-	true
+	if (!bList.empty) match=false
+
+	if (showInfo) Inner{
+		aList->line println("<", line) |
+		bList->line println(">", line)
+	}
+
+	match
 /CompareXML
 	
