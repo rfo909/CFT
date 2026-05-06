@@ -1,0 +1,416 @@
+>>> Kan du lage enkel og lesbar pseudo-kode (java-lignende) for back-propagation i 
+et nevralt nettverk, hvor jeg har klasser som heter Layer og Neuron, der Layer 
+inneholder liste av Neuron, og husker alle activation-verdiene til nevronene i 
+laget, og hvert Neuron husker sin rawSum? Jeg har et input-lag av Neurons, som 
+initalizeres ved å sette bias. De har ingen inputs, så det blir output, og siste 
+lag er outputs, de er regulære Neuron. Jeg benytter ReLU activation function, men 
+er usikker på begrensninger for positiv output-verdi fra hvert Neuron.
+
+
+
+class Neuron {
+    List<Neuron> inputs;
+    List<Double> weights;
+
+    double bias;
+    double rawSum;       // z
+    double activation;   // a
+    double delta;        // dLoss/dRawSum
+
+    double forward() {
+        if (inputs.isEmpty()) {
+            // Input-nevron: activation er satt direkte
+            // Eventuelt kan bias brukes som input-verdi hos deg
+            activation = bias;
+            rawSum = activation;
+            return activation;
+        }
+
+        rawSum = bias;
+
+        for (int i = 0; i < inputs.size(); i++) {
+            rawSum += inputs.get(i).activation * weights.get(i);
+        }
+
+        activation = relu(rawSum);
+        return activation;
+    }
+}
+
+
+class Layer {
+    List<Neuron> neurons;
+
+    void forward() {
+        for (Neuron n : neurons) {
+            n.forward();
+        }
+    }
+
+    List<Double> activations() {
+        List<Double> result = new ArrayList<>();
+
+        for (Neuron n : neurons) {
+            result.add(n.activation);
+        }
+
+        return result;
+    }
+}
+
+double relu(double x) {
+    return max(0, x);
+}
+
+double reluDerivative(double rawSum) {
+    if (rawSum > 0) return 1;
+    return 0;
+}
+
+void forwardPass(List<Layer> network, List<Double> inputValues) {
+    Layer inputLayer = network.get(0);
+
+    for (int i = 0; i < inputLayer.neurons.size(); i++) {
+        inputLayer.neurons.get(i).bias = inputValues.get(i);
+    }
+
+    for (Layer layer : network) {
+        layer.forward();
+    }
+}
+
+
+
+void backpropagate(
+    List<Layer> network,
+    List<Double> expectedOutputs,
+    double learningRate
+) {
+    Layer outputLayer = network.get(network.size() - 1);
+
+    // 1. Delta for output-laget
+    for (int i = 0; i < outputLayer.neurons.size(); i++) {
+        Neuron n = outputLayer.neurons.get(i);
+
+        double error = n.activation - expectedOutputs.get(i);
+
+        n.delta = error * reluDerivative(n.rawSum);
+    }
+
+    // 2. Delta for skjulte lag, baklengs
+    for (int layerIndex = network.size() - 2; layerIndex >= 1; layerIndex--) {
+        Layer currentLayer = network.get(layerIndex);
+        Layer nextLayer = network.get(layerIndex + 1);
+
+        for (int i = 0; i < currentLayer.neurons.size(); i++) {
+            Neuron currentNeuron = currentLayer.neurons.get(i);
+
+            double weightedDeltaSum = 0;
+
+            for (Neuron nextNeuron : nextLayer.neurons) {
+                int inputIndex = nextNeuron.inputs.indexOf(currentNeuron);
+                double weight = nextNeuron.weights.get(inputIndex);
+
+                weightedDeltaSum += weight * nextNeuron.delta;
+            }
+
+            currentNeuron.delta =
+                weightedDeltaSum * reluDerivative(currentNeuron.rawSum);
+        }
+    }
+
+    // 3. Oppdater vekter og bias
+    for (int layerIndex = 1; layerIndex < network.size(); layerIndex++) {
+        Layer layer = network.get(layerIndex);
+
+        for (Neuron n : layer.neurons) {
+            for (int i = 0; i < n.inputs.size(); i++) {
+                double inputActivation = n.inputs.get(i).activation;
+
+                double gradient = n.delta * inputActivation;
+
+                n.weights.set(i, n.weights.get(i) - learningRate * gradient);
+            }
+
+            n.bias = n.bias - learningRate * n.delta;
+        }
+    }
+}
+
+>>> Takk for oversiktlig kode. Jeg tenkte å bruke et veldig enkelt problem for å teste 
+back-propagation, som følger: to input-nevroner A og B, og to output-nevroner X og Y, 
+som hvis A>B gir X=1 og Y=0 ellers X=0 og Y=1. Jeg sørger for at A aldri er lik B. 
+Er dette noe et (lite) nevralt nettverk kan finne ut av, og hva er passe antall skjulte 
+lag og bredde, samt passende input-verder? Skalere til range 0-1 eller hva?
+
+Input:
+A og B skalert til 0..1
+
+Output:
+X = 1 hvis A > B, ellers 0
+Y = 1 hvis B > A, ellers 0
+
+Arkitektur:
+2 input
+2 output
+ingen hidden layer
+
+Eller, hvis du vil teste backprop med skjult lag:
+
+2 input
+1 skjult lag med 2-4 nevroner
+2 output
+
+Det er mer enn nok.
+
+Passende treningsdata:
+
+A=0.9, B=0.2  -> X=1, Y=0
+A=0.7, B=0.1  -> X=1, Y=0
+A=0.3, B=0.8  -> X=0, Y=1
+A=0.2, B=0.6  -> X=0, Y=1
+A=0.55, B=0.45 -> X=1, Y=0
+A=0.45, B=0.55 -> X=0, Y=1
+
+A = random(0.0, 1.0);
+B = random(0.0, 1.0);
+
+if (abs(A - B) < 0.05) {
+    skipExample();
+}
+
+Jeg ville unngå eksempler veldig nær A == B i starten, fordi de ligger tett på beslutningsgrensen og gjør læringen mer følsom.
+
+Anbefaling for ditt ReLU-oppsett:
+
+Input-lag: 2
+Hidden-lag: 4 ReLU-nevroner
+Output-lag: 2 lineære nevroner eller sigmoid-nevroner
+Loss: mean squared error i starten
+Learning rate: 0.01
+Input range: 0..1
+
+Viktig: Ikke bruk ReLU på siste lag hvis du vil ha pene 0/1-verdier. Bruk heller:
+
+output = sigmoid(rawSum);
+double sigmoid(double x) {
+    return 1.0 / (1.0 + exp(-x));
+}
+
+Da blir output alltid mellom 0 og 1.
+
+>>> hvordan implementerer jeg sigmoid activation-function og derivert?
+
+
+Sigmoid er veldig enkel å implementere.
+
+
+Den mapper alle tall til området: 0..1
+
+Typisk Java-lignende kode:
+
+double sigmoid(double x) {
+    return 1.0 / (1.0 + Math.exp(-x));
+}
+
+Eksempler:
+
+x = -10  -> ~0.000045
+x = 0    -> 0.5
+x = 10   -> ~0.99995
+
+Derivert av sigmoid:
+
+Det fine er at du kan bruke activation-verdien direkte:
+
+double sigmoidDerivative(double activation) {
+    return activation * (1.0 - activation);
+}
+
+Da slipper du å regne sigmoid to ganger.
+
+Under backpropagation:
+
+delta = error * sigmoidDerivative(activation);
+
+Ikke:
+sigmoidDerivative(rawSum)
+
+fordi du allerede har activation lagret.
+Et komplett eksempel:
+
+class Neuron {
+
+    double rawSum;
+    double activation;
+    double delta;
+
+    double sigmoid(double x) {
+        return 1.0 / (1.0 + Math.exp(-x));
+    }
+
+    double sigmoidDerivative(double activation) {
+        return activation * (1.0 - activation);
+    }
+
+    void forward() {
+        rawSum = ...;
+
+        activation = sigmoid(rawSum);
+    }
+
+    void backward(double expected) {
+        double error = activation - expected;
+
+        delta = error * sigmoidDerivative(activation);
+    }
+}
+
+
+For ditt A>B-problem vil sigmoid-output typisk konvergere mot noe som:
+X ≈ 0.98, Y ≈ 0.02
+eller motsatt, som er helt normalt. Man tolker største output som valgt klasse.
+
+>>> kan jeg bruke sigmoid i alle nevronene, for automatisk avgrensning? Fordeler, ulemper?
+
+Ja, absolutt. Det er faktisk slik klassiske nevrale nettverk fungerte før ReLU ble 
+vanlig. Du kan bruke sigmoid i alle nevroner.
+
+
+Fordeler med sigmoid overalt
+============================
+
+1. Begrenset output
+
+Ingen eksploderende activation-verdier:
+
+0 <= activation <= 1
+
+Det gjør vekter og outputs mer kontrollerte.
+
+2. Lett å tolke
+
+Outputs kan sees som “styrke” eller sannsynlighet:
+
+0.98 = veldig sikker
+0.02 = veldig usikker
+
+3. Glatt derivert
+
+Sigmoid er kontinuerlig og derivérbar overalt.
+
+ReLU har et “knekkpunkt” ved 0.
+
+4. Bra for små eksperimenter
+
+For små nettverk og læringsprosjekter er sigmoid ofte enklere å jobbe med.
+
+Ulemper med sigmoid
+===================
+
+Dette er grunnen til at moderne nettverk ofte bruker ReLU i skjulte lag.
+
+1. Vanishing gradients
+
+Når sigmoid mettes:
+
+x << 0  -> output ~0
+x >> 0  -> output ~1
+
+blir deriverten nesten null
+
+maksimal derivert er bare:
+
+0.25
+
+og nær 0 eller 1 blir den nesten 0.
+
+Da stopper læringen opp.
+
+2. Dype nettverk lærer tregt
+
+Hvis du har mange lag:
+
+gradient *= 0.1 * 0.1 * 0.1 * ...
+
+så forsvinner gradienten bakover.
+
+Dette er hovedproblemet sigmoid fikk i praksis.
+
+3. Ikke sentrert rundt 0
+
+Sigmoid gir bare positive outputs:
+
+0..1
+
+Det kan gi tregere optimalisering enn funksjoner som også gir negative verdier.
+
+Hva bør du bruke?
+=================
+
+For ditt prosjekt akkurat nå:
+
+Jeg ville brukt sigmoid overalt.
+
+Du får:
+
+enklere debugging
+stabil numerikk
+lettere å forstå output
+enklere å visualisere læring
+
+Det er perfekt for:
+
+læring
+eksperimentering
+små nettverk
+forståelse av backprop
+
+
+En viktig detalj
+================
+
+Når du bruker sigmoid overalt, må du passe på initialisering av vekter.
+
+Ikke start med store tilfeldige vekter som:
+
+random(-10, 10)
+
+Da vil sigmoid umiddelbart mettes til:
+
+0 eller 1
+
+og gradientene blir nesten null.
+
+Bruk små vekter:
+
+random(-0.5, 0.5)
+
+eller enda mindre:
+
+random(-0.1, 0.1)
+
+Det er veldig viktig for sigmoid-nettverk.
+
+Min anbefaling til ditt prosjekt
+================================
+
+Input:
+2 neuroner
+
+Hidden:
+1 lag
+4 sigmoid-nevroner
+
+Output:
+2 sigmoid-nevroner
+
+Learning rate:
+0.01
+
+Weights:
+random(-0.1, 0.1)
+
+Inputs:
+0..1
+
