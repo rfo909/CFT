@@ -39,6 +39,7 @@ public class ObjMath extends Obj {
         this.add(new FunctionLog());
         this.add(new FunctionLog10());
         this.add(new FunctionComplex());
+        this.add(new FunctionExp());
     }
     
     @Override
@@ -182,6 +183,21 @@ public class ObjMath extends Obj {
             return new ValueObj(new ObjComplex(real,imag));
         }
     }   
+
+    class FunctionExp extends Function {
+        public String getName() {
+            return "exp";
+        }
+        public String getShortDesc() {
+            return "exp(value) - e^value";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected value parameter");
+            double value=getFloat("value", params, 0);
+            return new ValueFloat(Math.exp(value));
+        }
+    }
+
     
     // private helpers
     
