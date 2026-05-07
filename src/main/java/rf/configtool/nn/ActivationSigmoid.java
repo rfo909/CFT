@@ -9,7 +9,7 @@ public class ActivationSigmoid extends ActivationFunction {
 
     @Override
     public float activation(float rawSum) {
-        return (float) (1.0 / (1.0+Math.exp(rawSum)));
+        return (float) (1.0 / (1.0 + Math.exp(-rawSum)));
     }
 
     @Override
