@@ -1,3 +1,25 @@
+# Readme
+# --
+<<< EOF
+Finally got back propagation to work. Thanks ChatGPT.
+
+I made this simple test, where I want the neural net to 
+decide which of two inputs is greater. 
+
+Using sigmoid activation function.
+
+2 input neurons
+1 hidden layer of 2 neurons
+2 output neurons
+
+Or slightly better with 100k learn count
+
+1 hidden layer of 4 neurons
+
+
+>>> EOF
+
+
 
 # Abs
 # --
@@ -17,17 +39,17 @@
 
 		sum=sum + (Abs(af-bf))
 	|
-	(sum*1000).i
+	sum*100000
 /ComputeError
 
 
 # Interactive testing the model
 # --
 	P(1) => brain
-	Lib:Header("Testing with (0.5,0)")
-	brain.forwardPass(List(0.5,0)).print
-	Lib:Header("Testing with (0,0.5)")
-	brain.forwardPass(List(0,0.5)).print
+	Lib:Header("Testing with (1,0)")
+	brain.forwardPass(List(1,0)).print
+	Lib:Header("Testing with (0,1)")
+	brain.forwardPass(List(0,1)).print
 /TestCalc
 
 
@@ -41,13 +63,14 @@
 
 # Test
 # --
-	brain=Std.Brain(2,1,5,2)
+	brain=Std.Brain(2,1,4,2)
 	
-	calculatedError=10000
-	
-	ITER=1000000
-	MAX_LEARNING_FACTOR = 0.01
-	EPOCH=200
+	ITER=100000
+	MAX_LEARNING_FACTOR = 0.04
+	EPOCH=1000
+		# the number of training samples after which we
+		# calculate average error, and if it is better than
+		# before, save model
 
 	savefile=Savefile
 
@@ -62,12 +85,11 @@
 		
 		correct=List(
 			if(a>b,1,0),
-			if(b>1,1,0)
+			if(b>a,1,0)
 		)
 		output=brain.forwardPass(input)
 
-		learningFactor=((ITER*4-i)/ITER)*MAX_LEARNING_FACTOR
-		#learningFactor=MAX_LEARNING_FACTOR
+		learningFactor=MAX_LEARNING_FACTOR
 
 		brain.BP(learningFactor, correct)
 		
