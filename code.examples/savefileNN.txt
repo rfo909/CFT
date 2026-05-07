@@ -35,30 +35,32 @@
 # Interactive testing the model
 # --
 	P(1) => brain
-	loop
-		readLine("Enter A 0-1000").parseInt/1000 => a
-		readLine("Enter B 0-1000").parseInt/1000 => b
-		brain.forwardPass(List(a,b)).print
-/InteractiveTest
+	Lib:Header("Testing 0,1")
+	brain.forwardPass(List(0,1)).print
+	Lib:Header("Testing 1,0")
+	brain.forwardPass(List(1,0)).print
+/TestCompute
 		
 
 # Test
 # --
 	#RndReset
-	brain=Std.Brain(2,1,2,2)
+	brain=Std.Brain(2,2,4,2)
 	
-	calculatedError=10000
+	ITER=20000
+	MAX_LEARNING_FACTOR = 0.1  # initial speed learning
+	MIN_LEARNING_FACTOR = 0.001
 	
-	ITER=50000
-	MAX_LEARNING_FACTOR = 0.02
 	EPOCH=200
+		# the number of training runs that we calculate
+		# an average error for, to look for improvement
 	
 
 	errorSum=0
 	lowestErrorSum=EPOCH*EPOCH*EPOCH
 
 	Std.Data.for(1,ITER,1)->i
-		a=Rnd
+		a=Rnd # (0-1000)
 		b=Rnd
 		if (Abs(a-b) < 5) continue
 		input=List(a/1000, b/1000)
@@ -69,7 +71,11 @@
 		)
 		output=brain.forwardPass(input)
 
+		# past the initial speed-learning
+		if(i>3000) MAX_LEARNING_FACTOR=0.01
+		
 		learningFactor=((ITER-i)/ITER)*MAX_LEARNING_FACTOR
+		if (learningFactor < MIN_LEARNING_FACTOR) learningFactor=MIN_LEARNING_FACTOR
 		brain.BP(learningFactor, correct)
 		
 		calculatedError=ComputeError(output,correct)
@@ -82,5 +88,5 @@
 	|
 	println("Error: " + calculatedError)
 	
-	InteractiveTest(brain)
+	TestCompute(brain)
 /t
