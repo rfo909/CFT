@@ -24,10 +24,10 @@
 # Interactive testing the model
 # --
 	P(1) => brain
-	Lib:Header("Testing with (1,0)")
-	brain.forwardPass(List(1,0)).print
-	Lib:Header("Testing with (0,1)")
-	brain.forwardPass(List(0,1)).print
+	Lib:Header("Testing with (0.5,0)")
+	brain.forwardPass(List(0.5,0)).print
+	Lib:Header("Testing with (0,0.5)")
+	brain.forwardPass(List(0,0.5)).print
 /TestCalc
 
 
@@ -41,11 +41,11 @@
 
 # Test
 # --
-	brain=Std.Brain(2,1,4,2)
+	brain=Std.Brain(2,1,5,2)
 	
 	calculatedError=10000
 	
-	ITER=500000
+	ITER=1000000
 	MAX_LEARNING_FACTOR = 0.01
 	EPOCH=200
 
@@ -66,8 +66,8 @@
 		)
 		output=brain.forwardPass(input)
 
-		#learningFactor=((ITER-i)/ITER)*MAX_LEARNING_FACTOR
-		learningFactor=MAX_LEARNING_FACTOR
+		learningFactor=((ITER*4-i)/ITER)*MAX_LEARNING_FACTOR
+		#learningFactor=MAX_LEARNING_FACTOR
 
 		brain.BP(learningFactor, correct)
 		
@@ -84,5 +84,7 @@
 	|
 
 	Lib:Header(savefile.path)
+
+	#brain = Std.Brain(savefile)
 	TestCalc(brain)
 /t
