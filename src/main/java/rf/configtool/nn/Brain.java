@@ -34,23 +34,24 @@ public class Brain {
 
 	}
 
-	public List<Float> forwardPass (List<Float> dataVector) {
+	public List<Float> forwardPass (List<Float> inputs) {
 		// copy dataVector as bias values into the first layer
-
-		if (dataVector.size() != inputWidth) throw new RuntimeException("input vector mismatch");
 
 		List<Neuron> inputNeurons=layers.get(0).neurons;
 		for (int i=0; i<inputNeurons.size(); i++) {
-			inputNeurons.get(i).bias=dataVector.get(i);
+			inputNeurons.get(i).bias=inputs.get(i);
 		}
-
-		dataVector=new ArrayList<Float>(); // first layer has no inputs
 
 		for (Layer layer:layers) {
-			dataVector = layer.process(dataVector);
+			layer.forward();
 		}
 
-		return dataVector; // result from output neurons
+		List<Float> output=new ArrayList<Float>();
+		Layer outputLayer=layers.get(layers.size()-1);
+		for (Neuron n:outputLayer.neurons) {
+			output.add(n.activation);
+		}
+		return output;
 	}
 
 

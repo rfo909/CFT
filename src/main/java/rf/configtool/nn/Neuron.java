@@ -26,14 +26,15 @@ public class Neuron {
 	}
 
 
-	public float processInputs (List<Float> inputs) {
-		if (inputWeights.size() != inputs.size()) {
-			throw new RuntimeException("Weight vs input mismatch");
+	public float forward () {
+		if (inputNeurons.size()==0) {
+			rawSum=bias;
+			activation=bias;
+			return activation;
 		}
-
 		rawSum=bias;
 		for (int i=0; i<inputWeights.size(); i++) {
-			rawSum += (inputWeights.get(i)*inputs.get(i));
+			rawSum += (inputWeights.get(i)*inputNeurons.get(i).activation);
 		}
 
 		activation=activationFunction.activation(rawSum);

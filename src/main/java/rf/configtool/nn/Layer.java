@@ -11,12 +11,10 @@ public class Layer {
         }
     }
 
-    public List<Float> process (List<Float> inputs) {
-        List<Float> result=new ArrayList<Float>();
+    public void forward () {
         for (Neuron n : neurons) {
-            result.add(n.processInputs(inputs));
+            n.forward();
         }
-        return result;
     }
 
 
