@@ -1,13 +1,13 @@
 # Random
 # --
-	counter=Db2:Get("Test","counter",1025)+1
-	Db2:Set("Test","counter",counter)
+	counter=Db2:Get("NN","counter",1025)+1
+	Db2:Set("NN","counter",counter)
 	939054033839 % counter % 1000
 /Rnd
 
 # Reset random stream
 # --
-	Db2:Set("Test","counter",1025)
+	Db2:Set("NN","counter",1025)
 /RndReset
 
 # Abs
@@ -35,24 +35,33 @@
 # Interactive testing the model
 # --
 	P(1) => brain
-	loop
-		readLine("Enter A 0-1000").parseInt/1000 => a
-		readLine("Enter B 0-1000").parseInt/1000 => b
-		brain.forwardPass(List(a,b)).print
-/InteractiveTest
+	Lib:Header("Testing with (1,0)")
+	brain.forwardPass(List(1,0)).print
+	Lib:Header("Testing with (0,1)")
+	brain.forwardPass(List(0,1)).print
+/TestCalc
+
+
+# Savefile
+# --
+	Db2:Get("NN","fileCount",1) => count
+	Db2:Set("NN","fileCount", count+1)
+	Dir.file("brain_" + count + ".txt")
+/Savefile
 		
 
 # Test
 # --
 	#RndReset
-	brain=Std.Brain(2,1,2,2)
+	brain=Std.Brain(2,2,4,2)
 	
 	calculatedError=10000
 	
 	ITER=50000
 	MAX_LEARNING_FACTOR = 0.02
 	EPOCH=200
-	
+
+	savefile=Savefile
 
 	errorSum=0
 	lowestErrorSum=EPOCH*EPOCH*EPOCH
@@ -75,12 +84,15 @@
 		calculatedError=ComputeError(output,correct)
 		errorSum = errorSum + calculatedError
 		if (i % EPOCH==0) {
-			if (errorSum < lowestErrorSum) lowestErrorSum=errorSum
+			if (errorSum < lowestErrorSum) {
+				lowestErrorSum=errorSum
+				brain.export(savefile)
+			}
 			println("#"+i + " AvgError="+(errorSum/EPOCH).i+"  Lowest=" + (lowestErrorSum/EPOCH).i + " LF=" + learningFactor.fmt("",".",6))
 			errorSum=0
 		}
 	|
-	println("Error: " + calculatedError)
-	
-	InteractiveTest(brain)
+
+	Lib:Header(savefile.path)
+	TestCalc(brain)
 /t

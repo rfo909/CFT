@@ -4,6 +4,8 @@ import java.util.*;
 
 import rf.configtool.main.Ctx;
 import rf.configtool.main.runtime.*;
+import rf.configtool.main.runtime.lib.ObjFile;
+import java.io.*;
 
 public class ObjBrain extends Obj {
     private Brain brain;
@@ -107,7 +109,11 @@ public class ObjBrain extends Obj {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 1) throw new Exception("Expected file parameter");
-            throw new Exception("Not implemented");
+            Obj obj=getObj("file", params, 0);
+            if (!(obj instanceof ObjFile)) throw new Exception("Expected file parameter");
+            File f=((ObjFile) obj).getFile();
+            brain.exportToFile(f);
+            return new ValueNull();
         }
     }
 

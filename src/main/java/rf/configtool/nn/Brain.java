@@ -2,6 +2,7 @@ package rf.configtool.nn;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.io.*;
 
 public class Brain {
 
@@ -108,6 +109,21 @@ public class Brain {
 				}
 
 				n.bias = n.bias - learningRate * n.delta;
+			}
+		}
+	}
+
+	public void exportToFile (File f) throws Exception {
+		try (PrintStream ps=new PrintStream(new FileOutputStream(f))) {
+			for (Layer layer:layers) {
+				ps.println(layer.neurons.size());
+			}
+			ps.println();
+			for (Layer layer:layers) {
+				for (Neuron neuron : layer.neurons) {
+					ps.println(neuron.bias);
+					for (Float w:neuron.inputWeights) ps.println(w);
+				}
 			}
 		}
 	}
