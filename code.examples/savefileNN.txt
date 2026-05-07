@@ -1,14 +1,3 @@
-# Random
-# --
-	counter=Db2:Get("NN","counter",1025)+1
-	Db2:Set("NN","counter",counter)
-	939054033839 % counter % 1000
-/Rnd
-
-# Reset random stream
-# --
-	Db2:Set("NN","counter",1025)
-/RndReset
 
 # Abs
 # --
@@ -52,13 +41,12 @@
 
 # Test
 # --
-	#RndReset
-	brain=Std.Brain(2,2,4,2)
+	brain=Std.Brain(2,1,4,2)
 	
 	calculatedError=10000
 	
-	ITER=50000
-	MAX_LEARNING_FACTOR = 0.02
+	ITER=500000
+	MAX_LEARNING_FACTOR = 0.01
 	EPOCH=200
 
 	savefile=Savefile
@@ -67,10 +55,10 @@
 	lowestErrorSum=EPOCH*EPOCH*EPOCH
 
 	Std.Data.for(1,ITER,1)->i
-		a=Rnd
-		b=Rnd
-		if (Abs(a-b) < 5) continue
-		input=List(a/1000, b/1000)
+		a=Std.Math.random(1)
+		b=Std.Math.random(1)
+		if (Abs(a-b) < 0.1) continue  # avoid too close to equal while training
+		input=List(a,b)
 		
 		correct=List(
 			if(a>b,1,0),
@@ -78,7 +66,9 @@
 		)
 		output=brain.forwardPass(input)
 
-		learningFactor=((ITER-i)/ITER)*MAX_LEARNING_FACTOR
+		#learningFactor=((ITER-i)/ITER)*MAX_LEARNING_FACTOR
+		learningFactor=MAX_LEARNING_FACTOR
+
 		brain.BP(learningFactor, correct)
 		
 		calculatedError=ComputeError(output,correct)

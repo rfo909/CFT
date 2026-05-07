@@ -27,10 +27,14 @@ import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueFloat;
 import rf.configtool.main.runtime.ValueObj;
 import rf.configtool.main.runtime.lib.dd.DD;
+import java.util.Random;
 
 public class ObjMath extends Obj {
+
+    private Random random;
     
     public ObjMath() {
+        this.random=new Random();
         this.add(new FunctionCos());
         this.add(new FunctionSin());
         this.add(new FunctionPI());
@@ -40,6 +44,7 @@ public class ObjMath extends Obj {
         this.add(new FunctionLog10());
         this.add(new FunctionComplex());
         this.add(new FunctionExp());
+        this.add(new FunctionRandom());
     }
     
     @Override
@@ -182,7 +187,7 @@ public class ObjMath extends Obj {
             double imag=getFloat("imag", params, 1);
             return new ValueObj(new ObjComplex(real,imag));
         }
-    }   
+    }
 
     class FunctionExp extends Function {
         public String getName() {
@@ -198,7 +203,24 @@ public class ObjMath extends Obj {
         }
     }
 
-    
+
+    class FunctionRandom extends Function {
+        public String getName() {
+            return "random";
+        }
+        public String getShortDesc() {
+            return "random(value) - return float [0-value>";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected value parameter");
+            double value=getFloat("value", params, 0);
+
+            double rnd=random.nextDouble()*value;
+            return new ValueFloat(rnd);
+        }
+    }
+
+
     // private helpers
     
     private double toRadians (double deg) {
