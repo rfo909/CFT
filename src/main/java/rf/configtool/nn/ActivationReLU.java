@@ -22,7 +22,7 @@ public class ActivationReLU extends ActivationFunction {
 
     @Override
     public float randomBias() {
-        return random(2)-1;
+        return random(0.2f);
     }
 
 }

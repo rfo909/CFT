@@ -15,11 +15,11 @@ public class ActivationSigmoid extends ActivationFunction {
 
     @Override
     public float randomWeight() {
-        return random(0.2f)-0.1f;
+        return random(0.1f);
     }
 
     @Override
     public float randomBias() {
-        return random(0.2f)-0.1f;
+        return random(0.1f);
     }
 }

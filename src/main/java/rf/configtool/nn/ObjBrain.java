@@ -12,10 +12,14 @@ public class ObjBrain extends Obj {
 
     public ObjBrain(Brain brain) {
         this.brain=brain;
-        this.add(new FunctionForwardPass());
+
         this.add(new FunctionUseReLU());
         this.add(new FunctionUseLeakyReLU());
         this.add(new FunctionUseSigmoid());
+        this.add(new FunctionUseLinear());
+
+        this.add(new FunctionForwardPass());
+
         this.add(new FunctionBackPropgate());
         this.add(new FunctionExport());
         this.add(new FunctionImport());
@@ -62,23 +66,6 @@ public class ObjBrain extends Obj {
         return new ValueList(vList);
     }
 
-    class FunctionForwardPass extends Function {
-        public String getName() {
-            return "forwardPass";
-        }
-        public String getShortDesc() {
-            return "forwardPass(list) - process list of float, returns list of float";
-        }
-        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 1) throw new Exception("Expected list parameter");
-            Value value=params.get(0);
-            if (!(value instanceof ValueList)) throw new Exception("Expected list parameter");
-
-            List<Float> inputs=fromCFTFormat((ValueList) value);
-            List<Float> result = brain.forwardPass(inputs);
-            return toCFTFormat(result);
-        }
-    }
 
 
 
@@ -124,6 +111,40 @@ public class ObjBrain extends Obj {
             int layer=(int) getInt("layer", params, 0);
             brain.setActivationFunction(layer, new ActivationSigmoid());
             return new ValueNull();
+        }
+    }
+
+    class FunctionUseLinear extends Function {
+        public String getName() {
+            return "useLinear";
+        }
+        public String getShortDesc() {
+            return "useLinear(layer) - set activation function for layer";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected layer (int)");
+            int layer=(int) getInt("layer", params, 0);
+            brain.setActivationFunction(layer, new ActivationLinear());
+            return new ValueNull();
+        }
+    }
+
+
+    class FunctionForwardPass extends Function {
+        public String getName() {
+            return "forwardPass";
+        }
+        public String getShortDesc() {
+            return "forwardPass(list) - process list of float, returns list of float";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected list parameter");
+            Value value=params.get(0);
+            if (!(value instanceof ValueList)) throw new Exception("Expected list parameter");
+
+            List<Float> inputs=fromCFTFormat((ValueList) value);
+            List<Float> result = brain.forwardPass(inputs);
+            return toCFTFormat(result);
         }
     }
 
