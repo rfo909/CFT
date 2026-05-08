@@ -43,14 +43,28 @@ Or slightly better with 100k learn count
 /ComputeError
 
 
-# Interactive testing the model
+# Testing the model
 # --
 	P(1) => brain
+
 	Lib:Header("Testing with (1,0)")
 	brain.forwardPass(List(1,0)).print
 	Lib:Header("Testing with (0,1)")
 	brain.forwardPass(List(0,1)).print
+	Lib:Header("Testing with (0.6,0)")
+	brain.forwardPass(List(0.6,0)).print
+	Lib:Header("Testing with (0,0.6)")
+	brain.forwardPass(List(0,0.6)).print
+
+	Lib:Header("Testing with (0.1,0.2)")
+	brain.forwardPass(List(0.1,0.2)).print
+	Lib:Header("Testing with (0.8,0.7)")
+	brain.forwardPass(List(0.8,0.7)).print
+
+	Lib:Header("Testing with (0.45,0.5)")
+	brain.forwardPass(List(0.45,0.5)).print
 /TestCalc
+
 
 
 # Savefile
@@ -67,7 +81,7 @@ Or slightly better with 100k learn count
 	
 	ITER=100000
 	MAX_LEARNING_FACTOR = 0.04
-	EPOCH=1000
+	EPOCH=100
 		# the number of training samples after which we
 		# calculate average error, and if it is better than
 		# before, save model
@@ -80,7 +94,7 @@ Or slightly better with 100k learn count
 	Std.Data.for(1,ITER,1)->i
 		a=Std.Math.random(1)
 		b=Std.Math.random(1)
-		if (Abs(a-b) < 0.1) continue  # avoid too close to equal while training
+		if (Abs(a-b) < 0.05) continue  # avoid too close to equal while training
 		input=List(a,b)
 		
 		correct=List(
@@ -109,4 +123,8 @@ Or slightly better with 100k learn count
 
 	#brain = Std.Brain(savefile)
 	TestCalc(brain)
+/Main
+
+
+Main
 /t
