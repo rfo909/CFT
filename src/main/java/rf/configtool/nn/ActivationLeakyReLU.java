@@ -17,11 +17,11 @@ public class ActivationLeakyReLU extends ActivationFunction {
     }
 
     @Override
-    public float randomWeight() { return random(2)-1; }
+    public float randomWeight() {
+        return random(0.2f) + 0.05f;
+    }
 
     @Override
-    public float randomBias() {
-        return random(2)-1;
-    }
+    public float randomBias() { return random(0.1f); }
 
 }

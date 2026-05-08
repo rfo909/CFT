@@ -17,12 +17,10 @@ public class ActivationReLU extends ActivationFunction {
 
     @Override
     public float randomWeight() {
-        return random(2)-1;
+        return random(0.2f) + 0.05f;
     }
 
     @Override
-    public float randomBias() {
-        return random(0.2f);
-    }
+    public float randomBias() { return random(0.1f); }
 
 }
