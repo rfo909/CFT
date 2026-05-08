@@ -28,6 +28,7 @@ import rf.configtool.main.runtime.Obj;
 import rf.configtool.main.runtime.Value;
 import rf.configtool.main.runtime.ValueList;
 import rf.configtool.main.runtime.ValueObj;
+import rf.configtool.main.runtime.ValueInt;
 import rf.configtool.main.runtime.lib.db.ObjDb;
 import rf.configtool.main.runtime.lib.dd.DD;
 import rf.configtool.main.runtime.lib.ddd.DDD;
@@ -319,19 +320,20 @@ public class ObjStd extends Obj {
         }
 
         public String getShortDesc() {
-            return "Brain(inputWidth, hiddenTiers, hiddenTierWidth, outputWidth) - create neural network";
+            return "Brain(List) - list of layer widths (int) - creates neural network";
         }
 
         public Value callFunction(Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 4) {
-                throw new Exception("Expected params: inputWidth, hiddenTiers, hiddenTierWidth, outputWidth");
+            if (params.size() != 1) {
+                throw new Exception("Expected list of layer widths (int) ");
             }
-            int inputWidth=(int) getInt("inputWidth",params,0);
-            int hiddenTiers=(int) getInt("inputWidth",params,1);
-            int hiddenTierWidth=(int) getInt("inputWidth",params,2);
-            int outputWidth=(int) getInt("inputWidth",params,3);
-            
-            Brain brain=new Brain(inputWidth, hiddenTiers, hiddenTierWidth, outputWidth);
+            List<Value> list=getList("List", params, 0);
+            List<Integer> intList=new ArrayList<Integer>();
+            for (Value v:list) {
+                if (!(v instanceof ValueInt)) throw new Exception("Expected list of layer widths (int) ");
+                intList.add( (int) (((ValueInt) v).getVal()) );
+            }
+            Brain brain=new Brain(intList);
             return new ValueObj(new ObjBrain(brain));
 
         }

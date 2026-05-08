@@ -1,25 +1,26 @@
 package rf.configtool.nn;
 
-import java.lang.Math;
-public class ActivationSigmoid extends ActivationFunction {
+public class ActivationLinear extends ActivationFunction {
+    // (not a proper activation function for neural nets, used for input layer only)
 
     @Override
     public float activation(float rawSum) {
-        return (float) (1.0 / (1.0 + Math.exp(-rawSum)));
+        return rawSum;
     }
 
     @Override
     public float derivative(float rawSum, float activation) {
-        return activation * (1f-activation);
+        return 1;
     }
 
     @Override
     public float randomWeight() {
-        return random(0.2f)-0.1f;
+        return random(1);
     }
 
     @Override
     public float randomBias() {
-        return random(0.2f)-0.1f;
+        return random(1);
     }
+
 }

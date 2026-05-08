@@ -1,10 +1,8 @@
 package rf.configtool.nn;
 
 public class ActivationReLU extends ActivationFunction {
+    // "Rectified Linear Unit"
 
-    public ActivationReLU (ParamGenerator paramGenerator) {
-        super(paramGenerator);
-    }
     @Override
     public float activation(float rawSum) {
         if (rawSum < 0) return 0;
@@ -19,12 +17,12 @@ public class ActivationReLU extends ActivationFunction {
 
     @Override
     public float randomWeight() {
-        return paramGenerator.nextFloat(2)-1;
+        return random(2)-1;
     }
 
     @Override
     public float randomBias() {
-        return paramGenerator.nextFloat(2)-1;
+        return random(2)-1;
     }
 
 }

@@ -3,36 +3,44 @@ package rf.configtool.nn;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.*;
+import java.util.Random;
 
 public class Brain {
 
+	public static Random random=new Random();
 	private int inputWidth;
 	List<Layer> layers=new ArrayList<Layer>();
 
-	public Brain (int inputWidth, int hiddenTiers, int hiddenTierWidth, int outputWidth) {
-		this.inputWidth=inputWidth;
 
-		ParamGenerator pgen = new ParamGenerator();
-		ActivationFunction activationFunction = new ActivationSigmoid(pgen);
+
+	public Brain (List<Integer> layerWidths) {
+		this.inputWidth=layerWidths.get(0);
 
 		// input layer
-		List<Neuron> emptyNeuronList=new ArrayList<Neuron>(); // input layer has no inputs
-		Layer inputLayer=new Layer(inputWidth, emptyNeuronList, activationFunction);
-		layers.add(inputLayer);
+		List<Neuron> prevLayerNeurons=new ArrayList<Neuron>(); // input layer has no inputs
 
-		Layer prevLayer=inputLayer; 
+		for (int i=0; i<layerWidths.size(); i++) {
+			int w=layerWidths.get(i);
+			ActivationFunction f;
+			if (i==0) {
+				// input layer uses this for rawSum pass-through
+				f = new ActivationLinear();
+			} else if (i==layerWidths.size()-1) {
+				// output layer default, for 0-1 normalization
+				f=new ActivationSigmoid();
+			} else {
+				// default for the other layers
+				f = new ActivationLeakyReLU();
+			}
 
-		for (int i=0; i<hiddenTiers; i++) {
-			Layer newLayer=new Layer(hiddenTierWidth, prevLayer.neurons, activationFunction);
+			Layer newLayer=new Layer(w, prevLayerNeurons, f);
+			prevLayerNeurons=newLayer.neurons;
 			layers.add(newLayer);
-			prevLayer=newLayer;
 		}
+	}
 
-		// output layer
-		layers.add(new Layer(outputWidth, prevLayer.neurons, activationFunction));
-
-		System.out.println("Brain parameters: " + pgen.getParamCount());
-
+	void setActivationFunction (int layer, ActivationFunction f) {
+		layers.get(layer).setActivationFunction(f);
 	}
 
 	public List<Float> forwardPass (List<Float> inputs) {

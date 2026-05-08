@@ -13,7 +13,10 @@ public class ObjBrain extends Obj {
     public ObjBrain(Brain brain) {
         this.brain=brain;
         this.add(new FunctionForwardPass());
-        this.add(new FunctionBP());
+        this.add(new FunctionUseReLU());
+        this.add(new FunctionUseLeakyReLU());
+        this.add(new FunctionUseSigmoid());
+        this.add(new FunctionBackPropgate());
         this.add(new FunctionExport());
         this.add(new FunctionImport());
     }
@@ -78,12 +81,59 @@ public class ObjBrain extends Obj {
     }
 
 
-    class FunctionBP extends Function {
+
+    class FunctionUseReLU extends Function {
         public String getName() {
-            return "BP";
+            return "useReLU";
         }
         public String getShortDesc() {
-            return "BP(learningFactor,targetList) - backpropagation test";
+            return "useReLU(layer) - set ReLU activation function for layer";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected layer id (int)");
+            int layer=(int) getInt("layer", params, 0);
+            brain.setActivationFunction(layer, new ActivationReLU());
+            return new ValueNull();
+        }
+    }
+
+    class FunctionUseLeakyReLU extends Function {
+        public String getName() {
+            return "useLeakyReLU";
+        }
+        public String getShortDesc() {
+            return "useLeakyReLU(layer) - set activation function for layer";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected layer (int)");
+            int layer=(int) getInt("layer", params, 0);
+            brain.setActivationFunction(layer, new ActivationLeakyReLU());
+            return new ValueNull();
+        }
+    }
+
+    class FunctionUseSigmoid extends Function {
+        public String getName() {
+            return "useSigmoid";
+        }
+        public String getShortDesc() {
+            return "useSigmoid(layer) - set activation function for layer";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected layer (int)");
+            int layer=(int) getInt("layer", params, 0);
+            brain.setActivationFunction(layer, new ActivationSigmoid());
+            return new ValueNull();
+        }
+    }
+
+
+    class FunctionBackPropgate extends Function {
+        public String getName() {
+            return "BackPropagate";
+        }
+        public String getShortDesc() {
+            return "BackPropagate(learningFactor,targetList) - backpropagation test";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 2) throw new Exception("Expected learningFactor, targetList (correct values)");
@@ -99,6 +149,8 @@ public class ObjBrain extends Obj {
             return new ValueBoolean(true);
         }
     }
+
+
 
     class FunctionExport extends Function {
         public String getName() {

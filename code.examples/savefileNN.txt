@@ -75,9 +75,27 @@ Or slightly better with 100k learn count
 /Savefile
 		
 
+# Sigmoid
+# --
+	P(1) => x
+	
+	1.0 / (1.0 + Std.Math.exp(-x))
+//s
+
 # Test
 # --
-	brain=Std.Brain(2,1,4,2)
+	brain=Std.Brain(List(2,4,2)) 
+	# first input layer is input
+	# last input layer is output
+	
+	# inputs are encoded into input layers as bias, which after summing up 
+	# zero inputs becomes the rawSum, then after applying the activation
+	# function, becomes the activation of the neuron.
+
+	# The Brain object uses "linear" activation function for input layer, which is just
+	# a pass through for rawSum, and sigmoid for the output layer, to normalize output
+	# in 0-1 range. The "hidden" layers default to leakyReLU for optimal trainability. 
+	
 	
 	ITER=100000
 	MAX_LEARNING_FACTOR = 0.04
@@ -105,7 +123,7 @@ Or slightly better with 100k learn count
 
 		learningFactor=MAX_LEARNING_FACTOR
 
-		brain.BP(learningFactor, correct)
+		brain.BackPropagate(learningFactor, correct)
 		
 		calculatedError=ComputeError(output,correct)
 		errorSum = errorSum + calculatedError

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Neuron {
-	private ActivationFunction activationFunction;
+	ActivationFunction activationFunction;
 
 	List<Neuron> inputNeurons;
 	List<Float> inputWeights;  // referring to location in output vector from previous layer

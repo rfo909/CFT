@@ -11,6 +11,10 @@ public class Layer {
         }
     }
 
+    void setActivationFunction (ActivationFunction f) {
+        for (Neuron neuron:neurons) neuron.activationFunction=f;
+    }
+
     public void forward () {
         for (Neuron n : neurons) {
             n.forward();
