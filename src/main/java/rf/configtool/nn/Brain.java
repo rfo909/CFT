@@ -124,13 +124,25 @@ public class Brain {
 	public void exportToFile (File f) throws Exception {
 		try (PrintStream ps=new PrintStream(new FileOutputStream(f))) {
 			for (Layer layer:layers) {
-				ps.println(layer.neurons.size());
-			}
-			ps.println();
-			for (Layer layer:layers) {
 				for (Neuron neuron : layer.neurons) {
 					ps.println(neuron.bias);
 					for (Float w:neuron.inputWeights) ps.println(w);
+				}
+			}
+		}
+	}
+
+	public void importFromFile (File f) throws Exception {
+		// no checks, assuming everything is okay
+		try (BufferedReader br=new BufferedReader(new FileReader(f))) {
+			for (Layer layer:layers) {
+				for (Neuron neuron : layer.neurons) {
+					neuron.bias=Float.parseFloat(br.readLine());
+					List<Float> inputWeights=new ArrayList<Float>();
+					for (int i=0; i<neuron.inputWeights.size(); i++) {
+						inputWeights.add(Float.parseFloat(br.readLine()));
+					}
+					neuron.inputWeights=inputWeights;
 				}
 			}
 		}

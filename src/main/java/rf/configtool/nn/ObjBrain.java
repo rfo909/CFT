@@ -200,7 +200,11 @@ public class ObjBrain extends Obj {
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 1) throw new Exception("Expected file parameter");
-            throw new Exception("Not implemented");
+            Obj obj=getObj("file", params, 0);
+            if (!(obj instanceof ObjFile)) throw new Exception("Expected file parameter");
+            File f=((ObjFile) obj).getFile();
+            brain.importFromFile(f);
+            return new ValueNull();
         }
     }
 
