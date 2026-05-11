@@ -94,14 +94,14 @@ Or slightly better with 100k learn count
 
 	# The Brain object uses "linear" activation function for input layer, which is just
 	# a pass through for rawSum, and sigmoid for the output layer, to normalize output
-	# in 0-1 range. The "hidden" layers default to leakyReLU for optimal trainability. 
+	# in 0-1 range. The "hidden" layers default to LeakyReLU for optimal trainability. 
 	
 	#brain.errorMeanSquared
 	#brain.errorMeanAbsolute
 	brain.errorLinear
-	#brain.useLeakyReLU(2)  # output layer
+	brain.useLeakyReLU(2)  # output layer
 
-	ITER=20000
+	ITER=100000
 	MAX_LEARNING_FACTOR = 0.08
 	EPOCH=100
 		# the number of training samples after which we
