@@ -11,6 +11,9 @@ public class Brain {
 	private int inputWidth;
 	List<Layer> layers=new ArrayList<Layer>();
 
+	private ErrorFunc errorFunction = new ErrorFuncMeanAbsolute();
+	private float[] outputDeltas;
+
 
 
 	public Brain (List<Integer> layerWidths) {
@@ -37,10 +40,17 @@ public class Brain {
 			prevLayerNeurons=newLayer.neurons;
 			layers.add(newLayer);
 		}
+
+		outputDeltas=new float[layers.get(layers.size()-1).neurons.size()];
+		clearOutputDeltas();
 	}
 
 	void setActivationFunction (int layer, ActivationFunction f) {
 		layers.get(layer).setActivationFunction(f);
+	}
+
+	void setErrorFunction (ErrorFunc errorFunction) {
+		this.errorFunction=errorFunction;
 	}
 
 	public List<Float> forwardPass (List<Float> inputs) {
@@ -64,21 +74,49 @@ public class Brain {
 	}
 
 
-	/*
-	Call this method after a regular execute(), having produced output values (activations). These
-	are stored in the layers, as well as the rawSum stored in each Neuron
-	*/
-	public void backPropagate (float learningRate, List<Float> target) {
+	// In order to process batches of data, we sum up the delta for each
+	// sample, then calculate average in the backPropagate
+
+	public void clearOutputDeltas() {
+		for (int i = 0; i < outputDeltas.length; i++) outputDeltas[i] = 0f;
+	}
+
+	public void addOutputDeltas (List<Float> target) {
 		Layer outputLayer=layers.get(layers.size()-1);
-			
+
 		// Calculate delta for output layer
 		List<Neuron> outputNeurons=outputLayer.neurons;
 		for (int i = 0; i < outputNeurons.size(); i++) {
 			Neuron n = outputNeurons.get(i);
 
-			float error = n.activation - target.get(i);
+			float targetValue=target.get(i);
 
-			n.delta = error * n.derivative();
+			float error = errorFunction.error(n.activation, targetValue);
+			outputDeltas[i] += error * n.derivative() * errorFunction.derivative(n.activation, targetValue);
+		}
+	}
+
+	public void calculateAverageDeltas (int batchSize) {
+		for (int i=0; i<outputDeltas.length; i++) {
+			outputDeltas[i] /= batchSize;
+		}
+	}
+
+
+	/*
+	Call this method after a regular execute(), having produced output values (activations). These
+	are stored in the layers, as well as the rawSum stored in each Neuron
+	*/
+	public void backPropagate (float learningRate) {
+		// insert deltas into output layer neurons
+		Layer outputLayer=layers.get(layers.size()-1);
+		List<Neuron> outputNeurons=outputLayer.neurons;
+
+		if (outputDeltas.length != outputNeurons.size()) throw new RuntimeException("BP: output size fail");
+			
+		// Calculate delta for output layer
+		for (int i=0; i<outputDeltas.length; i++) {
+			outputNeurons.get(i).delta=outputDeltas[i];
 		}
 
 		// Calculate delta for hidden layers, in reverse

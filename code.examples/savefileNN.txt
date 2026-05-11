@@ -96,9 +96,13 @@ Or slightly better with 100k learn count
 	# a pass through for rawSum, and sigmoid for the output layer, to normalize output
 	# in 0-1 range. The "hidden" layers default to leakyReLU for optimal trainability. 
 	
-	
-	ITER=100000
-	MAX_LEARNING_FACTOR = 0.04
+	#brain.errorMeanSquared
+	#brain.errorMeanAbsolute
+	brain.errorLinear
+	#brain.useLeakyReLU(2)  # output layer
+
+	ITER=20000
+	MAX_LEARNING_FACTOR = 0.08
 	EPOCH=100
 		# the number of training samples after which we
 		# calculate average error, and if it is better than
@@ -119,11 +123,13 @@ Or slightly better with 100k learn count
 			if(a>b,1,0),
 			if(b>a,1,0)
 		)
+		brain.clearOutputDeltas
 		output=brain.forwardPass(input)
+		brain.addOutputDeltas(correct)
+		#brain.calculateAverageDeltas(1)
 
 		learningFactor=MAX_LEARNING_FACTOR
-
-		brain.BackPropagate(learningFactor, correct)
+		brain.BackPropagate(learningFactor)
 		
 		calculatedError=ComputeError(output,correct)
 		errorSum = errorSum + calculatedError
@@ -139,7 +145,8 @@ Or slightly better with 100k learn count
 
 	Lib:Header(savefile.path)
 
-	#brain = Std.Brain(savefile)
+	# test on best version
+	brain.import(savefile)
 	TestCalc(brain)
 /Main
 

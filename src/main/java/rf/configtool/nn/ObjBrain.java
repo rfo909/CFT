@@ -18,9 +18,17 @@ public class ObjBrain extends Obj {
         this.add(new FunctionUseSigmoid());
         this.add(new FunctionUseLinear());
 
+        this.add(new FunctionErrorMeanSquared());
+        this.add(new FunctionErrorMeanAbsolute());
+        this.add(new FunctionErrorLinear());
+
         this.add(new FunctionForwardPass());
 
-        this.add(new FunctionBackPropgate());
+        this.add(new FunctionClearOutputDeltas());
+        this.add(new FunctionAddOutputDeltas());
+
+        this.add(new FunctionCalculateAverageDeltas());
+        this.add(new FunctionBackPropagate());
         this.add(new FunctionExport());
         this.add(new FunctionImport());
     }
@@ -130,6 +138,46 @@ public class ObjBrain extends Obj {
     }
 
 
+    class FunctionErrorMeanSquared extends Function {
+        public String getName() {
+            return "errorMeanSquared";
+        }
+        public String getShortDesc() {
+            return "errorMeanSquared() - set error function";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            brain.setErrorFunction(new ErrorFuncMeanSquared());
+            return new ValueNull();
+        }
+    }
+
+    class FunctionErrorMeanAbsolute extends Function {
+        public String getName() {
+            return "errorMeanAbsolute";
+        }
+        public String getShortDesc() {
+            return "errorMeanAbsolute() - set error function";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            brain.setErrorFunction(new ErrorFuncMeanAbsolute());
+            return new ValueNull();
+        }
+    }
+
+    class FunctionErrorLinear extends Function {
+        public String getName() {
+            return "errorLinear";
+        }
+        public String getShortDesc() {
+            return "errorLinear() - set error function";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            brain.setErrorFunction(new ErrorFuncLinear());
+            return new ValueNull();
+        }
+    }
+
+
     class FunctionForwardPass extends Function {
         public String getName() {
             return "forwardPass";
@@ -149,23 +197,74 @@ public class ObjBrain extends Obj {
     }
 
 
-    class FunctionBackPropgate extends Function {
+    class FunctionClearOutputDeltas extends Function {
+        public String getName() {
+            return "clearOutputDeltas";
+        }
+        public String getShortDesc() {
+            return "clearOutputDeltas() - reset list of deltas for output neurons";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+
+            brain.clearOutputDeltas();
+
+            return new ValueBoolean(true);
+        }
+    }
+
+
+
+    class FunctionAddOutputDeltas extends Function {
+        public String getName() {
+            return "addOutputDeltas";
+        }
+        public String getShortDesc() {
+            return "addOutputDeltas(targetList) - add to list of deltas for output neurons";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected targetList (correct output values)");
+            Value value=params.get(0);
+            if (!(value instanceof ValueList)) throw new Exception("Expected targetList");
+
+            List<Float> target=fromCFTFormat((ValueList) value);
+            brain.addOutputDeltas(target);
+
+            return new ValueBoolean(true);
+        }
+    }
+
+
+    class FunctionCalculateAverageDeltas extends Function {
+        public String getName() {
+            return "calculateAverageDeltas";
+        }
+        public String getShortDesc() {
+            return "calculateAverageDeltas(batchSize) - average deltas across a batch";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected batchSize parameter");
+            int batchSize=(int) getInt("batchSize",params,0);
+
+            brain.calculateAverageDeltas(batchSize);
+
+            return new ValueBoolean(true);
+        }
+    }
+
+
+
+    class FunctionBackPropagate extends Function {
         public String getName() {
             return "BackPropagate";
         }
         public String getShortDesc() {
-            return "BackPropagate(learningFactor,targetList) - backpropagation test";
+            return "BackPropagate(learningFactor) - backpropagation using the averaged output deltas";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 2) throw new Exception("Expected learningFactor, targetList (correct values)");
+            if (params.size() != 1) throw new Exception("Expected learningFactor parameter");
             double learningRate = getFloat("learningFactor", params, 0);
-
-            Value value=params.get(1);
-            if (!(value instanceof ValueList)) throw new Exception("Expected target list");
-
-            List<Float> target=fromCFTFormat((ValueList) value);
-            brain.backPropagate((float) learningRate, target);
-
+            brain.backPropagate((float) learningRate);
 
             return new ValueBoolean(true);
         }
