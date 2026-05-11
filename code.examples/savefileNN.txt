@@ -126,10 +126,9 @@ Or slightly better with 100k learn count
 		brain.clearOutputDeltas
 		output=brain.forwardPass(input)
 		brain.addOutputDeltas(correct)
-		#brain.calculateAverageDeltas(1)
 
 		learningFactor=MAX_LEARNING_FACTOR
-		brain.BackPropagate(learningFactor)
+		brain.backPropagate(learningFactor)
 		
 		calculatedError=ComputeError(output,correct)
 		errorSum = errorSum + calculatedError

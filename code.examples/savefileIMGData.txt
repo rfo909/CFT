@@ -1,0 +1,130 @@
+# Target dir
+# --
+	Sys.savefile.dir.sub("testdata")
+/TargetDir
+
+# Photos dir contains 13k jpg and 20k JPG-files
+# --
+	Dir("/home/roar/Foto")
+/PhotoDir
+
+
+# Imagefiles
+# --
+	PhotoDir.dirs("beste*")->dir
+		list = dir.allFiles("*jpg") + dir.allFiles("*.JPG")
+		list->x out(x)
+/ImageFiles
+
+
+# Single example file
+# --
+	PhotoDir.file("193.JPG")
+//ExampleFile
+
+
+
+# Process set of photos
+# --
+	P(1,"set1.txt") => fname
+	P(2,10) => samplesPerFile
+	
+	dataFile=TargetDir.file(fname)
+	if (dataFile.exists) dataFile.delete
+	
+	list=List
+	fileCount=0
+	ImageFiles->f
+		fileCount=fileCount+1
+		if(fileCount % 10==0) {
+			print("" + fileCount+" ")
+		}
+
+		if (list.length>1000) {
+			print("(sync) ")
+			dataFile.append(list)
+			list=List
+		}
+		tryCatch(ProcessImage(f,samplesPerFile)) => output
+		if (output.ok) Inner{
+			output.result->line list.add(line)
+		}
+	|
+	dataFile.append(list)
+	println("#files=" + fileCount)
+/CreatePhotoSet
+
+
+# Create multiple sets
+# --
+	samplesPerFile=30
+	Std.Data.for(0,10,1)->i
+		fname="set" + i + ".txt"
+		println
+		println(fname)
+		CreatePhotoSet(fname, samplesPerFile)
+/t
+
+		
+# Process image, returns list of test strings (hex-coded inputs + outputs)
+# --
+	P(1,ExampleFile) as File => file
+	P(2,10) as int => numSamples
+	
+	raster=Std.Raster.load(file)
+
+	if (raster.width < 640 || raster.height < 640) {
+		# return empty list
+		List
+	} else {
+		raster=raster.gray().scaleTo(640,640,true)
+		GetRasterData(raster,numSamples)
+	}
+/ProcessImage
+
+# Get raster data for a single raster object 
+# --
+	P(1) as Raster => img
+	P(2,10) as int => numSamples
+	
+	patternWidth=16+1  # result column to the right
+	patternHeight=16
+	Std.Data.for(0,numSamples,1)->i
+		x=Std.Math.random(img.width-patternWidth).i
+		y=Std.Math.random(img.height-patternHeight).i
+		str=ToHex(PickInputs(img,x,y))
+			+ " "
+			+ ToHex(PickOutputs(img,x,y))
+		out(str)
+/GetRasterData
+
+# Convert list of bytes to hexstring
+# --
+	P(1) as List => data
+	data->i
+		out(i.hex(2))
+	| _.concat
+//ToHex
+			
+	
+# Pick 256 inputs from an area 16x16 wide. The two rightmost pixels
+# columns make up 128 bits. Returns list of bytes for the grey levels
+# --
+	P(1) as Raster => img
+	P(2) as int => x
+	P(3) as int => y
+	
+	Std.Data.for(0,16,1)->dx
+	Std.Data.for(0,16,1)->dy
+		out(img.pixel(x+dx,y+dy).r)
+/PickInputs	
+
+# Pick 32 output values used for back propagation
+# --
+	P(1) as Raster => img
+	P(2) as int => x
+	P(3) as int => y
+	
+	Std.Data.for(0,16,1) -> i
+		out(img.pixel(x+16,y+i).r)
+/PickOutputs

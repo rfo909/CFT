@@ -13,6 +13,7 @@ public class Brain {
 
 	private ErrorFunc errorFunction = new ErrorFuncMeanAbsolute();
 	private float[] outputDeltas;
+	private int outputDeltasCount=0;
 
 
 
@@ -79,6 +80,7 @@ public class Brain {
 
 	public void clearOutputDeltas() {
 		for (int i = 0; i < outputDeltas.length; i++) outputDeltas[i] = 0f;
+		outputDeltasCount=0;
 	}
 
 	public void addOutputDeltas (List<Float> target) {
@@ -94,29 +96,26 @@ public class Brain {
 			float error = errorFunction.error(n.activation, targetValue);
 			outputDeltas[i] += error * n.derivative() * errorFunction.derivative(n.activation, targetValue);
 		}
+		outputDeltasCount++;
 	}
 
-	public void calculateAverageDeltas (int batchSize) {
-		for (int i=0; i<outputDeltas.length; i++) {
-			outputDeltas[i] /= batchSize;
-		}
-	}
-
-
+	
 	/*
 	Call this method after a regular execute(), having produced output values (activations). These
 	are stored in the layers, as well as the rawSum stored in each Neuron
 	*/
 	public void backPropagate (float learningRate) {
+		if (outputDeltasCount==0) return;
+		
 		// insert deltas into output layer neurons
 		Layer outputLayer=layers.get(layers.size()-1);
 		List<Neuron> outputNeurons=outputLayer.neurons;
 
 		if (outputDeltas.length != outputNeurons.size()) throw new RuntimeException("BP: output size fail");
 			
-		// Calculate delta for output layer
+		// Calculate delta for output layer (averaging over the batch)
 		for (int i=0; i<outputDeltas.length; i++) {
-			outputNeurons.get(i).delta=outputDeltas[i];
+			outputNeurons.get(i).delta=outputDeltas[i]/outputDeltasCount;
 		}
 
 		// Calculate delta for hidden layers, in reverse

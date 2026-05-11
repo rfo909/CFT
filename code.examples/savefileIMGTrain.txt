@@ -1,0 +1,209 @@
+
+
+# Abs
+# --
+	P(1) => i
+	if (i<0) -i else i
+/Abs
+
+# Compute average absolute error comparing output and target vectors
+# --
+	P(1) as List => a
+	P(2) as List => b
+
+	sum=0.0
+	Std.Data.for(0,a.length,1)->i
+		af=a.get(i).f
+		bf=b.get(i).f
+
+		sum=sum + (Abs(af-bf))
+	|
+	sum/a.length
+/ComputeError
+
+
+# Savefile
+# --
+	Db2:Get("IMG","fileCount",1) => count
+	Db2:Set("IMG","fileCount", count+1)
+	Sys.savefile.dir.file("brain_" + count + ".txt")
+/Savefile
+
+# Convert from bytes to floats
+# --
+	P(1) as String => hexString
+	Std.Data.for(0,hexString.length,2)->i
+		out(hexString.sub(i,i+2).parseInt(16)/256.0)
+//FromHex
+
+# Read in list of lines from test data file and prepare them for easy testing
+# --
+	P(1) as File => f
+	f.read->line
+		reject(line.trim=="")
+		parts=line.split
+		data=FromHex(parts.first)
+		target=FromHex(parts.last)
+		out(SymDict(data,target))
+/TestData
+
+
+# Number of neurons
+# --
+	P(1) as List => layers
+	layers.sum
+/CalculateNeurons
+
+# Number of weights
+# --
+	P(1) as List => list
+	Std.Data.for(0,list.length-2,1)->i
+		out(list.get(i)*list.get(i+1))
+	| _.sum
+/CalculateWeights
+
+
+# Create the neural net
+# --
+	layers=List(256, 512, 256, 64, 16)
+	brain=Std.Brain(layers)
+	
+	Lib:Header("#neurons: " + CalculateNeurons(layers) 
+		+ " #weights: " + CalculateWeights(layers)
+		+ " #params: " + (CalculateWeights(layers) + CalculateNeurons(layers)) )
+
+	brain.useSigmoid(1)
+	brain.useSigmoid(2)
+	brain.useSigmoid(3)
+	brain.useLinear(4)
+	
+	# error function
+	brain.errorMeanSquared
+	brain
+/CreateBrain
+
+
+# Batching to get a more stable evolution
+# --
+	32
+/BATCH_SIZE
+
+
+# EPOCH is how many times we run forward + back prop before calculating average error.
+# If error is smaller, we save model, otherwise load model from file
+# --
+	200
+/EPOCH
+
+
+
+
+
+# Learning factor
+# High means rapid descent, but also instability, or putting too much weight on 
+# the early samples.
+# --
+	0.001
+/MAX_LEARNING_FACTOR
+
+
+# Minimum learning factor
+# --
+	0.00001
+/MIN_LEARNING_FACTOR
+
+
+# Process test set randomly spanning all data
+# --
+	P(1) as Brain => brain
+	P(2) as File => testDataFile
+	P(3) as File => savefile
+	P(4, 1.0*EPOCH) as float => lowestErrorSum
+	
+	testData=TestData(testDataFile)
+	println("Loaded " + testData.length + " test cases")
+	println
+	
+	ITER=(testData.length*10).i
+	
+	learningFactor = MAX_LEARNING_FACTOR
+
+	errorSum=0
+	#lastImprovement=0
+	
+	
+
+	Std.Data.for(1,ITER,1)->i
+		pos=Std.Math.random(testData.length).i
+		if (pos >= testData.length) pos=Std.Math.random(testData.length).i
+		if (pos >= testData.length) pos=testData.length
+		
+		input=testData.get(pos).data
+		target=testData.get(pos).target
+
+		brain.clearOutputDeltas
+		output=brain.forwardPass(input)
+		brain.addOutputDeltas(target)
+
+		if (i>0 && i%BATCH_SIZE == 0) {
+			learningFactor=MAX_LEARNING_FACTOR
+			brain.backPropagate(learningFactor)
+		}
+
+
+		calculatedError=ComputeError(output,target)
+		
+		
+		errorSum = errorSum + calculatedError
+
+		#if (i<EPOCH) println("#" + i, calculatedError.fmt("",".",6))
+		if (i % EPOCH==0) {
+			if (errorSum < lowestErrorSum) {
+				lowestErrorSum=errorSum
+				brain.export(savefile)
+			}
+			avgError=errorSum/EPOCH
+			
+			# float.fmt may fail if NaN - if that happens, we restore previous
+			# model and try again
+			
+			tryCatch(
+				println("#"+i + " AvgError="+avgError.fmt("",".",8)
+					+"  Lowest=" + (lowestErrorSum/EPOCH).fmt("",".",8) 
+					+ " LF=" + learningFactor.fmt("",".",12))
+			) => tryResult
+			if (!tryResult.ok && savefile.exists) {
+				brain.import(savefile)
+				println("   NaN")
+			} else
+			if (errorSum > lowestErrorSum * 1.4 && savefile.exists) {
+				println("   (Restoring saved brain)")
+				brain.import(savefile)
+				#learningFactor = learningFactor * 0.9
+				#if (learningFactor < MIN_LEARNING_FACTOR) learningFactor=MIN_LEARNING_FACTOR
+			}
+			
+			errorSum=0
+		}
+	|
+	# return value
+	lowestErrorSum
+/TrainOnDataset
+
+
+# Cycle through all training data sets
+# --
+	brain=CreateBrain
+	savefile=Savefile
+	
+	firstRun=true
+	lowestErrorSum=null
+	
+	Sys.savefile.dir.sub("testdata").files->f
+		if (!firstRun) brain.import(savefile)
+		lowestErrorSum = TrainOnDataset(brain,f,savefile,lowestErrorSum)
+		firstRun=false
+
+/t
+
+

@@ -27,7 +27,6 @@ public class ObjBrain extends Obj {
         this.add(new FunctionClearOutputDeltas());
         this.add(new FunctionAddOutputDeltas());
 
-        this.add(new FunctionCalculateAverageDeltas());
         this.add(new FunctionBackPropagate());
         this.add(new FunctionExport());
         this.add(new FunctionImport());
@@ -235,31 +234,14 @@ public class ObjBrain extends Obj {
     }
 
 
-    class FunctionCalculateAverageDeltas extends Function {
-        public String getName() {
-            return "calculateAverageDeltas";
-        }
-        public String getShortDesc() {
-            return "calculateAverageDeltas(batchSize) - average deltas across a batch";
-        }
-        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
-            if (params.size() != 1) throw new Exception("Expected batchSize parameter");
-            int batchSize=(int) getInt("batchSize",params,0);
-
-            brain.calculateAverageDeltas(batchSize);
-
-            return new ValueBoolean(true);
-        }
-    }
-
-
+    
 
     class FunctionBackPropagate extends Function {
         public String getName() {
-            return "BackPropagate";
+            return "backPropagate";
         }
         public String getShortDesc() {
-            return "BackPropagate(learningFactor) - backpropagation using the averaged output deltas";
+            return "backPropagate(learningFactor) - backpropagation using the averaged output deltas";
         }
         public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
             if (params.size() != 1) throw new Exception("Expected learningFactor parameter");
