@@ -146,7 +146,7 @@
 	Std.Data.for(1,ITER,1)->i
 		pos=Std.Math.random(testData.length).i
 		if (pos >= testData.length) pos=Std.Math.random(testData.length).i
-		if (pos >= testData.length) pos=testData.length
+		if (pos >= testData.length) pos=testData.length-1
 		
 		input=testData.get(pos).data
 		target=testData.get(pos).target

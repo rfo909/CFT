@@ -1,0 +1,76 @@
+
+# Workdir
+# --
+	Dir("/home/roar/AI")
+/WorkDir
+
+# Image
+# --
+	WorkDir.file("images/t2.jpg")
+/Image
+
+# Create the neural net - exactly as trained 
+# --
+	IMGTrain:CreateBrain
+/CreateBrain
+
+
+# Create list of brains
+# --
+	b1=CreateBrain
+	b1.import(WorkDir.file("B1.txt"))
+	
+	b2=CreateBrain
+	b2.import(WorkDir.file("B2.txt"))
+	
+	b3=CreateBrain
+	b2.import(WorkDir.file("B3.txt"))
+	
+	List(b1,b2,b3)
+/Brains
+
+
+
+# Test 
+# --
+	raster = Std.Raster.load(Image)
+	raster.scaleTo(640,640,true)
+	raster=raster.gray
+	raster.save(WorkDir.file("grey.png"))
+	
+	brains=Brains
+	Std.Data.for( 0, raster.height-16, 32)->y
+		println("y:",y)
+		Std.Data.for( (raster.width/2).i, 0, -1)->x
+			Apply(x,y,raster,brains)
+	|
+	raster.save(WorkDir.file("out.png"))
+/t
+
+# Calculate 16 pixels in raster
+# --
+	P(1) => x
+	P(2) => y
+	P(3) => raster
+	P(4) => brains
+	
+	Std.Data.for(0,16,1)->dx
+	Std.Data.for(0,16,1)->dy
+		out(raster.pixel(x+dx,y+dy).r/255.0)	
+	| _=> inputs
+	
+	result = brains.last.forwardPass(inputs)
+	
+	Std.Data.for(0,16,1) -> i
+		c=result.get(i)
+		ci=(c*255.0).i
+		if (ci<0) ci=0
+		if (ci>255) ci=255
+		col=Std.Color(ci,ci,ci)
+		raster.setColor(col)
+		
+		raster.setPixel(x,y+i)	
+/Apply
+
+
+
