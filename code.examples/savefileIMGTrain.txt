@@ -82,9 +82,9 @@
 		+ " #weights: " + CalculateWeights(layers)
 		+ " #params: " + (CalculateWeights(layers) + CalculateNeurons(layers)) )
 
-	brain.useSigmoid(1)
-	brain.useSigmoid(2)
-	brain.useSigmoid(3)
+	#brain.useSigmoid(1)
+	#brain.useSigmoid(2)
+	#brain.useSigmoid(3)
 	brain.useLinear(4)
 	
 	# error function
