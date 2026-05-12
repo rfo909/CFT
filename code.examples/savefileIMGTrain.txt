@@ -1,4 +1,14 @@
 
+# Workdir
+# --
+	Dir("/home/roar/AI")
+/WorkDir
+
+# Test files dir
+# --
+	WorkDir.sub("testdata")
+/TestDataDir
+
 
 # Abs
 # --
@@ -26,7 +36,7 @@
 # --
 	Db2:Get("IMG","fileCount",1) => count
 	Db2:Set("IMG","fileCount", count+1)
-	Sys.savefile.dir.file("brain_" + count + ".txt")
+	WorkDir.file("brain_" + count + ".txt")
 /Savefile
 
 # Convert from bytes to floats
@@ -191,7 +201,7 @@
 /TrainOnDataset
 
 
-# Cycle through all training data sets
+# Cycle through all training data sets ... forever
 # --
 	brain=CreateBrain
 	savefile=Savefile
@@ -199,10 +209,14 @@
 	firstRun=true
 	lowestErrorSum=null
 	
-	Sys.savefile.dir.sub("testdata").files->f
-		if (!firstRun) brain.import(savefile)
-		lowestErrorSum = TrainOnDataset(brain,f,savefile,lowestErrorSum)
-		firstRun=false
+	iter=0
+	loop
+		iter=iter+1
+		TestDataDir.files->f
+			println("iter=",iter,"f=",f.name)
+			if (!firstRun) brain.import(savefile)
+			lowestErrorSum = TrainOnDataset(brain,f,savefile,lowestErrorSum)
+			firstRun=false
 
 /t
 
