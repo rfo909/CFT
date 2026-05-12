@@ -102,7 +102,7 @@
 # EPOCH is how many times we run forward + back prop before calculating average error.
 # If error is smaller, we save model, otherwise load model from file
 # --
-	200
+	1000
 /EPOCH
 
 
