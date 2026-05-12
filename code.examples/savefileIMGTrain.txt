@@ -134,7 +134,7 @@
 	println("Loaded " + testData.length + " test cases")
 	println
 	
-	ITER=(testData.length*10).i
+	ITER=(testData.length*2).i
 	
 	learningFactor = MAX_LEARNING_FACTOR
 
