@@ -102,7 +102,7 @@
 # EPOCH is how many times we run forward + back prop before calculating average error.
 # If error is smaller, we save model, otherwise load model from file
 # --
-	1000
+	500
 /EPOCH
 
 
@@ -128,7 +128,7 @@
 	P(1) as Brain => brain
 	P(2) as File => testDataFile
 	P(3) as File => savefile
-	P(4, 1.0*EPOCH) as float => lowestErrorSum
+	P(4, 9999999.0*EPOCH) as float => lowestErrorSum
 	
 	testData=TestData(testDataFile)
 	println("Loaded " + testData.length + " test cases")

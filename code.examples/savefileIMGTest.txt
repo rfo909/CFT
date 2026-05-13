@@ -17,32 +17,25 @@
 
 # Create list of brains
 # --
-	b1=CreateBrain
-	b1.import(WorkDir.file("B1.txt"))
-	
-	b2=CreateBrain
-	b2.import(WorkDir.file("B2.txt"))
-	
-	b3=CreateBrain
-	b2.import(WorkDir.file("B3.txt"))
-	
-	List(b1,b2,b3)
-/Brains
+	b=CreateBrain
+	b.import(WorkDir.file("B1.txt"))
+	b
+/Brain
 
 
 
 # Test 
 # --
 	raster = Std.Raster.load(Image)
-	raster.scaleTo(640,640,true)
+	raster=raster.scaleTo(640,640,true)
 	raster=raster.gray
 	raster.save(WorkDir.file("grey.png"))
 	
-	brains=Brains
+	brain=Brain
 	Std.Data.for( 0, raster.height-16, 32)->y
 		println("y:",y)
 		Std.Data.for( (raster.width/2).i, 0, -1)->x
-			Apply(x,y,raster,brains)
+			Apply(x,y,raster,brain)
 	|
 	raster.save(WorkDir.file("out.png"))
 /t
@@ -52,14 +45,14 @@
 	P(1) => x
 	P(2) => y
 	P(3) => raster
-	P(4) => brains
+	P(4) => brain
 	
 	Std.Data.for(0,16,1)->dx
 	Std.Data.for(0,16,1)->dy
 		out(raster.pixel(x+dx,y+dy).r/255.0)	
 	| _=> inputs
 	
-	result = brains.last.forwardPass(inputs)
+	result = brain.forwardPass(inputs)
 	
 	Std.Data.for(0,16,1) -> i
 		c=result.get(i)

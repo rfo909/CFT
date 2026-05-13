@@ -1,6 +1,6 @@
 # Target dir
 # --
-	Dir("/home/roar/AI")
+	Dir("/home/roar/AI/testdata").create
 /TargetDir
 
 # Photos dir contains 13k jpg and 20k JPG-files
@@ -42,9 +42,16 @@
 /CreatePhotoSet
 
 
+# Training file sample count
+# --
+	20000
+/TrainingFileSampleCount
+
+
 # Create multiple sets
 # --
-	samplesPerFile=500
+	samplesPerFile=(TrainingFileSampleCount / ImageFiles.length).i
+	
 	Std.Data.for(0,20,1)->i
 		fname="set" + i + ".txt"
 		println
@@ -120,3 +127,5 @@
 	Std.Data.for(0,16,1) -> i
 		out(img.pixel(x+16,y+i).r)
 /PickOutputs
+
+
