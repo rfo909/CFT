@@ -36,6 +36,7 @@ import rf.configtool.main.runtime.lib.java.ObjJava;
 import rf.configtool.main.runtime.lib.math.ObjMath;
 import rf.configtool.main.runtime.lib.text.ObjText;
 import rf.configtool.main.runtime.lib.web.ObjWeb;
+import rf.configtool.main.runtime.lib.webclient.ObjWebClient;
 import rf.configtool.nn.Brain;
 import rf.configtool.nn.ObjBrain;
 
@@ -51,6 +52,7 @@ public class ObjStd extends Obj {
         this.add(new FunctionUtil());
         this.add(new FunctionJava());
         this.add(new FunctionWeb());
+        this.add(new FunctionWebClient());
         this.add(new FunctionDD());
         this.add(new FunctionDDD());
         this.add(new FunctionColor());
@@ -233,6 +235,21 @@ public class ObjStd extends Obj {
             return new ValueObj(new ObjWeb());
         }
     } 
+
+    class FunctionWebClient extends Function {
+        public String getName() {
+            return "WebClient";
+        }
+        public String getShortDesc() {
+            return "WebClient() - object for calling web servers";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 0) throw new Exception("Expected no parameters");
+            return new ValueObj(new ObjWebClient());
+        }
+    } 
+
+    
     
     
     class FunctionDD extends Function {
