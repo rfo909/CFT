@@ -1,0 +1,41 @@
+# Readme
+# --
+<<< EOF
+Make test pattern image
+>>> EOF
+
+# Photos dir
+# --
+	Dir("/home/roar/AI/images")
+/PhotoDir
+
+
+# Create test pattern vertical lines
+# --
+	raster=Std.Raster
+	raster.init(400,400,Std.Color(0,0,0))
+	white=Std.Color(255,255,255)
+	raster.setColor(white)
+
+	Std.Data.for(0,raster.height,1)->y
+		Std.Data.for(0,raster.width,4)->x
+			raster.setPixel(x,y)
+	|
+	raster.save(PhotoDir.file("ver.png"))
+/ver
+
+
+# Create test pattern horizontal lines
+# --
+	raster=Std.Raster
+	raster.init(400,400,Std.Color(0,0,0))
+	white=Std.Color(255,255,255)
+	raster.setColor(white)
+
+	Std.Data.for(0,raster.height,4)->y
+		Std.Data.for(0,raster.width,1)->x
+			raster.setPixel(x,y)
+	|
+	raster.save(PhotoDir.file("hor.png"))
+/hor
+

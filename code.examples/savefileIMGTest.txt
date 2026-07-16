@@ -6,7 +6,7 @@
 
 # Image
 # --
-	WorkDir.file("images/t2.jpg")
+	WorkDir.file("images/hor.png")
 /Image
 
 # Create the neural net - exactly as trained 
@@ -27,7 +27,7 @@
 # Test 
 # --
 	raster = Std.Raster.load(Image)
-	raster=raster.scaleTo(640,640,true)
+	if (raster.width > 640 || raster.height > 640) raster=raster.scaleTo(640,640,true)
 	raster=raster.gray
 	raster.save(WorkDir.file("grey.png"))
 	

@@ -51,7 +51,7 @@
 	P(1) as File => f
 	f.read->line
 		reject(line.trim=="")
-		parts=line.split
+		parts=line.split(":")
 		data=FromHex(parts.first)
 		target=FromHex(parts.last)
 		out(SymDict(data,target))
@@ -113,7 +113,7 @@
 # High means rapid descent, but also instability, or putting too much weight on 
 # the early samples.
 # --
-	0.001
+	0.0001
 /MAX_LEARNING_FACTOR
 
 

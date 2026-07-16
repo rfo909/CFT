@@ -11,7 +11,7 @@
 
 # Imagefiles
 # --
-	PhotoDir.files("*jpg") + PhotoDir.files("*.JPG")
+	PhotoDir.files("*jpg") + PhotoDir.files("*.JPG") + PhotoDir.files("*.png") + PhotoDir.files("*.PNG")
 /ImageFiles
 
 
@@ -47,12 +47,17 @@
 	20000
 /TrainingFileSampleCount
 
+# Training set count
+# --
+	1
+/TrainingSetCount
+
 
 # Create multiple sets
 # --
 	samplesPerFile=(TrainingFileSampleCount / ImageFiles.length).i
 	
-	Std.Data.for(0,20,1)->i
+	Std.Data.for(0,TrainingSetCount,1)->i
 		fname="set" + i + ".txt"
 		println
 		println(fname)
@@ -68,16 +73,12 @@
 	raster=Std.Raster.load(file)
 
 	if (raster.width < 640 && raster.height < 640) {
-		# return empty list
-		println(file.name + " too small")
-		file.dir.sub("small").create.copy(file)
-		file.delete
-		List
+		# use as is without scaling
+		raster=raster.gray()
+		GetRasterData(raster,numSamples)
 	} else {
 		raster=raster.gray().scaleTo(640,640,true)
-		list=GetRasterData(raster,numSamples)
-		#println("For file " + file.name + " => " + list.length)
-		list
+		GetRasterData(raster,numSamples)
 	}
 /ProcessImage
 
@@ -92,7 +93,7 @@
 		x=Std.Math.random(img.width-patternWidth).i
 		y=Std.Math.random(img.height-patternHeight).i
 		str=ToHex(PickInputs(img,x,y))
-			+ " "
+			+ ":"
 			+ ToHex(PickOutputs(img,x,y))
 		out(str)
 /GetRasterData

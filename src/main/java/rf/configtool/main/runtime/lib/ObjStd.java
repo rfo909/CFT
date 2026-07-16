@@ -57,7 +57,6 @@ public class ObjStd extends Obj {
         this.add(new FunctionRaster());
         this.add(new FunctionArray());
         this.add(new FunctionBrain());
-        
     }
     
     @Override
@@ -339,4 +338,5 @@ public class ObjStd extends Obj {
         }
     }
 
+   
 }
