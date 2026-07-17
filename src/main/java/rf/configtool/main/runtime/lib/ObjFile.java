@@ -123,6 +123,7 @@ public class ObjFile extends Obj implements IsSynthesizable {
                 new FunctionConvertCompressed(),
                 new FunctionReadBinary(),
                 new FunctionBinaryCreate(),
+                new FunctionBinaryAppend(),
                 new FunctionVerify(),
                 new FunctionEncrypt(),
                 new FunctionDecrypt(),
@@ -1239,6 +1240,33 @@ public class ObjFile extends Obj implements IsSynthesizable {
             File f=new File(name);
             try {
                 out=new FileOutputStream(f);
+                out.write(data.getVal());
+            } finally  {
+                if (out != null) try {out.close();} catch (Exception ex) {};
+            }
+            return new ValueObj(self());
+        }
+    }
+    
+
+    class FunctionBinaryAppend extends Function {
+        public String getName() {
+            return "binaryAppend";
+        }
+        public String getShortDesc() {
+            return "binaryAppend(data) - append binary data to file - returns self";
+        }
+        public Value callFunction (Ctx ctx, List<Value> params) throws Exception {
+            if (params.size() != 1) throw new Exception("Expected binary data parameter");
+            ValueBinary data=getBinary("data",params,0);
+            
+            validateDestructiveOperation("File.binaryAppend");
+            data.validateNonSecure("File.binaryAppend");
+            
+            OutputStream out=null;
+            File f=new File(name);
+            try {
+                out=new FileOutputStream(f, true);
                 out.write(data.getVal());
             } finally  {
                 if (out != null) try {out.close();} catch (Exception ex) {};
