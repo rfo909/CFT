@@ -6,6 +6,11 @@ relying on FTP, NFS or drive mounts. In other words: Windows.
 
 The code consists of two components, a web server that we start on the remote
 host, and a client that runs on the host where we replicate to.
+
+In order to eliminate character set issues, string parameters in calls to the web
+server, as well as string (JSON) responses from the web server are hex encoded (UTF-8).
+
+
 >>> EOF
 ->line
 	println("| " + line)
@@ -94,10 +99,8 @@ host, and a client that runs on the host where we replicate to.
 	dirPath=dirPath.toHexString("UTF-8")
 	
 	result=Std.WebClient.Get("localhost",2500,"/files?path=" + dirPath)
-	#Util:ShowDict(result)
 	
-	json=JSON:Parse(result.data.fromHexString("UTF-8"))
-	JSON:PP(json)
+	JSON:Parse(result.data.fromHexString("UTF-8"))
 //GetFiles
 
 
@@ -108,8 +111,7 @@ host, and a client that runs on the host where we replicate to.
 	
 	result=Std.WebClient.Get("localhost",2500,"/dirs?path=" + dirPath)
 	
-	json=JSON:Parse(result.data.fromHexString("UTF-8"))
-	JSON:PP(json)
+	JSON:Parse(result.data.fromHexString("UTF-8"))
 //GetDirs
 
 
@@ -147,7 +149,18 @@ host, and a client that runs on the host where we replicate to.
 		readPos = readPos + count
 //GetFile
 
+
+# Test GetFiles
+# --
+	json=GetFiles("/home/roar/CFT")
+	JSON:PP(json)
+//t1
 	
+# Test GetDirs
+# --
+	json=GetDirs("/home/roar")
+	JSON:PP(json)
+//t2
 
 # Test GetFile
 # --
@@ -158,7 +171,7 @@ host, and a client that runs on the host where we replicate to.
 	length = File(remoteDir+"/"+fileName).length
 	
 	GetFile(localDir, remoteDir, fileName, length)
-/t
+//t3
 
 
 
