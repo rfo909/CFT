@@ -1,0 +1,81 @@
+
+# Log file
+# --
+    File("WebTest_log.txt")
+/LogFile
+
+
+# Initialize web server on port 2500 - for testing
+# --
+
+    Std.Web.Server(2500) => server
+    if (LogFile.exists) LogFile.delete
+    server.setServerLogFile(LogFile)
+    
+    server.RootContext => Root   # The "/" path
+    
+    # Fetch information about all files in directory
+    Root.Context("files", "application/json")
+    	.GET(Lambda{
+            P(1) as WebRequest => requestObj
+            path=requestObj.urlParams.path
+            
+            if (Sys.isWindows) path=path.replace("/","\") else path=path.replace("\","/")
+            dir=Dir(path)
+            
+            list=List
+            dir.files->f
+            	dict=Dict
+            	dict.name=f.name
+            	dict.length=f.length
+            	dict.lastModified=f.lastModified
+            	list.add(dict)
+            |
+            obj=SymDict(list)
+            JSON:Export(obj)
+    	})
+    
+    
+    # Fetch information about all subdirs in directory
+    Root.Context("dirs", "application/json")
+    	.GET(Lambda{
+            P(1) as WebRequest => requestObj
+            path=requestObj.urlParams.path
+            
+            if (Sys.isWindows) path=path.replace("/","\") else path=path.replace("\","/")
+            dir=Dir(path)
+            
+            list=List
+            dir.dirs->d
+            	list.add(d.name)
+            |
+            obj=SymDict(list)
+            JSON:Export(obj)
+    	})
+    
+    
+    Root.Context("file","application/octet-stream")
+    	.GET(Lambda{
+            P(1) as WebRequest => requestObj
+            path=requestObj.urlParams.path
+            start=requestObj.urlParams.start.parseInt
+            count=requestObj.urlParams.count.parseInt
+            
+            if (Sys.isWindows) path=path.replace("/","\") else path=path.replace("\","/")
+            file=File(path)
+
+            binaryData=file.readBinary(start,count)
+            
+            
+            # return binary object
+            binaryData
+    	})
+/CreateServer
+
+
+# Client-test
+# --
+	result = Std.WebClient.Get("localhost",2500,"/dirs?path=/home/roar")
+   	Util:ShowDict(result)
+ /t
+
