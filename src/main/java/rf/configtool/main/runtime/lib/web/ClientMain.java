@@ -125,13 +125,13 @@ public class ClientMain implements Runnable {
 
             StringTokenizer st = new StringTokenizer(lines.get(0)," ",false);
             String method = st.nextToken().toUpperCase(); // we get the HTTP method of the client
-            String url = st.nextToken().toLowerCase();
+            String url = st.nextToken();
             
             Map<String,String> urlParams = null;
             if (url.contains("?")) {
                 int pos=url.indexOf('?');
                 urlParams=splitAndDecodeUrlFields(url.substring(pos+1),"UTF-8");
-                url=url.substring(0,pos);
+                url=url.substring(0,pos).toLowerCase();
             }
             
             Map<String,String> headers = new HashMap<String,String>();
@@ -220,7 +220,7 @@ public class ClientMain implements Runnable {
             assignment=java.net.URLDecoder.decode(assignment, charset);
             int pos=assignment.indexOf('=');
             if (pos > 0) {
-                String name=assignment.substring(0,pos);
+                String name=assignment.substring(0,pos).toLowerCase();
                 String value=assignment.substring(pos+1);
                 result.put(name, value);
             }

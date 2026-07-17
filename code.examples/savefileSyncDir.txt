@@ -1,8 +1,21 @@
+# Readme
+# --
+<<< EOF
+This script allows us to sync a directory tree from one server to another, without
+relying on FTP, NFS or drive mounts. In other words: Windows.
+
+The code consists of two components, a web server that we start on the remote
+host, and a client that runs on the host where we replicate to.
+>>> EOF
+->line
+	println("| " + line)
+/Readme
+
 
 # Log file
 # --
     File("WebTest_log.txt")
-/LogFile
+//LogFile
 
 
 # Initialize web server on port 2500 - for testing
@@ -18,8 +31,9 @@
     Root.Context("files", "application/json")
     	.GET(Lambda{
             P(1) as WebRequest => requestObj
-            path=requestObj.urlParams.path
+            path=requestObj.urlParams.path.fromHexString("UTF-8")
             
+            #print("files.path=" + path)
             if (Sys.isWindows) path=path.replace("/","\") else path=path.replace("\","/")
             dir=Dir(path)
             
@@ -32,7 +46,7 @@
             	list.add(dict)
             |
             obj=SymDict(list)
-            JSON:Export(obj)
+            JSON:Export(obj).toHexString("UTF-8")
     	})
     
     
@@ -40,7 +54,7 @@
     Root.Context("dirs", "application/json")
     	.GET(Lambda{
             P(1) as WebRequest => requestObj
-            path=requestObj.urlParams.path
+            path=requestObj.urlParams.path.fromHexString("UTF-8")
             
             if (Sys.isWindows) path=path.replace("/","\") else path=path.replace("\","/")
             dir=Dir(path)
@@ -50,14 +64,14 @@
             	list.add(d.name)
             |
             obj=SymDict(list)
-            JSON:Export(obj)
+            JSON:Export(obj).toHexString("UTF-8")
     	})
     
     
     Root.Context("file","application/octet-stream")
     	.GET(Lambda{
             P(1) as WebRequest => requestObj
-            path=requestObj.urlParams.path
+            path=requestObj.urlParams.path.fromHexString("UTF-8")
             start=requestObj.urlParams.start.parseInt
             count=requestObj.urlParams.count.parseInt
             
@@ -73,9 +87,78 @@
 /CreateServer
 
 
-# Client-test
+
+# Fetch list of files in directory
 # --
-	result = Std.WebClient.Get("localhost",2500,"/dirs?path=/home/roar")
-   	Util:ShowDict(result)
- /t
+	P(1) as String => dirPath
+	dirPath=dirPath.toHexString("UTF-8")
+	
+	result=Std.WebClient.Get("localhost",2500,"/files?path=" + dirPath)
+	#Util:ShowDict(result)
+	
+	json=JSON:Parse(result.data.fromHexString("UTF-8"))
+	JSON:PP(json)
+//GetFiles
+
+
+# Fetch list of dirs in directory
+# --
+	P(1) as String => dirPath
+	dirPath=dirPath.toHexString("UTF-8")
+	
+	result=Std.WebClient.Get("localhost",2500,"/dirs?path=" + dirPath)
+	
+	json=JSON:Parse(result.data.fromHexString("UTF-8"))
+	JSON:PP(json)
+//GetDirs
+
+
+# Fetch file
+# --
+	P(1) as Dir => localDir
+	P(2) as String => remoteDir
+	P(3) as String => fileName
+	P(4) as int => length
+	
+	remotePath=remoteDir+"/"+fileName 
+		# server handles mapping to backslash if Windows
+
+	BLOCKSIZE = 4*1024*1024
+
+	targetFile=localDir.file(fileName)
+	if (targetFile.exists) targetFile.delete
+	
+	readPos=0
+	loop
+		break(readPos>=length)
+		count=BLOCKSIZE
+		if (readPos+BLOCKSIZE>=length) {
+			count=length-readPos	
+		}
+		#println("readPos=",readPos,"count=",count)
+		
+		path="/file?path=" + remotePath.toHexString("UTF-8") + "&start=" + readPos + "&count="+count
+		result=Std.WebClient.Get("localhost",2500,path)
+	
+		error(Sys.getType(result.data) != "Binary","GetFile: Expected binary object")
+		
+		targetFile.binaryAppend(result.data)
+		
+		readPos = readPos + count
+//GetFile
+
+	
+
+# Test GetFile
+# --
+	localDir = Dir("/home/roar/XXX/fetch").create => localDir
+	remoteDir = "/home/roar"
+	fileName = "20260222_lorus.jpg"
+	
+	length = File(remoteDir+"/"+fileName).length
+	
+	GetFile(localDir, remoteDir, fileName, length)
+/t
+
+
 

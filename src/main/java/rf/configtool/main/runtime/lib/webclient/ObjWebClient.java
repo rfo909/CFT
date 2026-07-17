@@ -96,11 +96,16 @@ public class ObjWebClient extends Obj {
             BufferedReader reader =
                     new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
 
-            String status = reader.readLine();
+            //String status = reader.readLine();
+            //System.out.println("status=" + status);
+
             Map<String,String> headers = new HashMap<>();
 
             String line;
-            while (!(line = reader.readLine()).isEmpty()) {
+            for(;;) {
+                line=reader.readLine();
+                if (line==null || line.isEmpty()) break;
+
                 int p = line.indexOf(':');
                 if (p > 0) {
                     headers.put(
@@ -112,6 +117,8 @@ public class ObjWebClient extends Obj {
             String contentType = headers.getOrDefault("content-type", "");
             int contentLength =
                     Integer.parseInt(headers.getOrDefault("content-length", "0"));
+
+            //System.out.println("content-length = " + contentLength);
 
             byte[] body = new byte[contentLength];
 
@@ -126,14 +133,9 @@ public class ObjWebClient extends Obj {
             ObjDict dict=new ObjDict();
             dict.set("Content-Type",new ValueString(contentType));
 
-            if (contentType.startsWith("text/html")) {
-                String html = new String(body, StandardCharsets.UTF_8);
-                dict.set("data", new ValueString(html));
-
-            } else if (contentType.startsWith("application/json")) {
-
-                String json = new String(body, StandardCharsets.UTF_8);
-                dict.set("data", new ValueString(json));
+            if (contentType.startsWith("text/") || contentType.endsWith("/json")) {
+                String text = new String(body, StandardCharsets.UTF_8);
+                dict.set("data", new ValueString(text));
 
             } else if (contentType.startsWith("application/octet-stream")) {
 

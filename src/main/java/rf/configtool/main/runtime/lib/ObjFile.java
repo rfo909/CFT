@@ -1266,7 +1266,11 @@ public class ObjFile extends Obj implements IsSynthesizable {
             OutputStream out=null;
             File f=new File(name);
             try {
-                out=new FileOutputStream(f, true);
+                if (f.exists() && f.length()>0) {
+                    out=new FileOutputStream(f, true);
+                } else {
+                    out=new FileOutputStream(f);
+                }
                 out.write(data.getVal());
             } finally  {
                 if (out != null) try {out.close();} catch (Exception ex) {};
