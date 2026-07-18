@@ -5,7 +5,8 @@ This script allows us to sync a directory tree from one server to another, witho
 relying on FTP, NFS or drive mounts. In other words: Windows.
 
 The code consists of two components, a web server that we start on the remote
-host, and a client that runs on the host where we replicate to.
+host, and a set of client functions, to invoke the corresponding end points on
+the web server.
 
 In order to eliminate character set issues, string parameters in calls to the web
 server, as well as string (JSON) responses from the web server are hex encoded (UTF-8).
@@ -100,7 +101,6 @@ server, as well as string (JSON) responses from the web server are hex encoded (
 	dirPath=dirPath.toHexString("UTF-8")
 	
 	result=Std.WebClient.Get(host,2500,"/files?path=" + dirPath)
-	println(result.data.fromHexString("UTF-8"))
 	
 	JSON:Parse(result.data.fromHexString("UTF-8"))
 //GetFiles
@@ -217,5 +217,45 @@ server, as well as string (JSON) responses from the web server are hex encoded (
 	|
 	result.result
 /DoGetFile
+
+
+# Creating a class for the replication process
+# --
+	P(1) as String => remoteHost
+	P(2) as String => remoteDir
+	P(3) as Dir => localDir
+	
+	self.remoteHost=remoteHost
+	self.remoteDir=remoteDir
+	self.localDir=localDir
+	
+	self.sync=Lambda{
+		self.processDir(self.remoteDir, self.localDir)
+	}
+	self.processDir=Lambda{
+		P(1) as String => fromDir
+		P(2) as Dir => toDir
+		self.copyDirFiles(fromDir,toDir)
+		json=SyncRemote:DoGetDirs(self.remoteHost, fromDir)
+		#JSON:PP(json,true)
+		json.list->dirName
+			self.processDir(fromDir+"/"+dirName, toDir.sub(dirName).create)
+		
+	}
+	self.copyDirFiles=Lambda{
+		P(1) as String => fromDir
+		P(2) as Dir => toDir
+		
+		json=SyncRemote:DoGetFiles(self.remoteHost, fromDir)
+		#JSON:PP(json,true)
+		json.list->entry
+			fileName=entry.name
+			fileLength=entry.length
+			println("fromDir",fromDir,"toDir",toDir.path,"fileName",fileName,"fileLength",fileLength)
+			SyncRemote:DoGetFile(self.remoteHost, fromDir, fileName, fileLength, toDir)
+	}
+		
+/class Client
+
 
 
