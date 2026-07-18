@@ -11,6 +11,31 @@ the web server.
 In order to eliminate character set issues, string parameters in calls to the web
 server, as well as string (JSON) responses from the web server are hex encoded (UTF-8).
 
+---
+
+The server has no configuration. It runs on port 2500 and awaits requests. Start
+it with the CreateServer function.
+
+The client requires a bit of configuration, passed as parameters to the Client class.
+Example:
+
+# Create mirror
+# --
+    SyncRemote:CreateServer
+    
+    remoteHost="10.0.0.82"
+    remoteDir="xxx"
+    localDir=Dir("xxx").create
+    
+    client=SyncRemote:Client(remoteHost, remoteDir, localDir)
+    client.sync()
+/CreateMirror
+
+If the job is interrupted, it can be restarted. It will traverse the same remote
+directory again, but when it comes to copying files in directory, it checks if
+each file already exists, and if it does, gets the hash of the remote file, and
+compares it to the file in the local dir. Only when they differ is the file
+downloaded, replacing the one with bad hash.
 
 >>> EOF
 ->line
@@ -73,6 +98,23 @@ server, as well as string (JSON) responses from the web server are hex encoded (
             JSON:Export(obj).toHexString("UTF-8")
     	})
     
+
+    # Use this to decide if a file has been modified at the server, or that
+    # download is correct
+    # --
+    Root.Context("hash","text/plain")
+    	.GET(Lambda{
+            P(1) as WebRequest => requestObj
+            path=requestObj.urlParams.path.fromHexString("UTF-8")
+            
+            if (Sys.isWindows) path=path.replace("/","\") else path=path.replace("\","/")
+            
+            file=File(path)
+            
+            # return hash string
+	    file.hash.toHexString("UTF-8")
+    	})
+    
     
     Root.Context("file","application/octet-stream")
     	.GET(Lambda{
@@ -116,6 +158,23 @@ server, as well as string (JSON) responses from the web server are hex encoded (
 	
 	JSON:Parse(result.data.fromHexString("UTF-8"))
 //GetDirs
+
+
+
+# Fetch file hash
+# --
+	P(1) as String => remoteHost
+	P(2) as String => remoteDir
+	P(3) as String => remoteFile
+
+	path=remoteDir+"/"+remoteFile	
+	path=path.toHexString("UTF-8")
+	
+	result=Std.WebClient.Get(remoteHost,2500,"/hash?path=" + path)
+	
+	# receives hash string directly
+	result.data.fromHexString("UTF-8")
+//GetHash
 
 
 # Fetch file
@@ -203,6 +262,21 @@ server, as well as string (JSON) responses from the web server are hex encoded (
 	result.result
 /DoGetFiles
 
+
+# Robust GetHash
+# --
+	P(1) as String => remoteHost
+	P(2) as String => remoteDir
+	P(3) as String => remoteFile
+	
+	loop
+		tryCatch(GetHash(remoteHost, remoteDir, remoteFile)) => result
+		break(result.ok)
+	|
+	result.result
+/DoGetHash
+
+
 # Robust GetFile
 # --
 	P(1) as String => remoteHost
@@ -251,8 +325,28 @@ server, as well as string (JSON) responses from the web server are hex encoded (
 		json.list->entry
 			fileName=entry.name
 			fileLength=entry.length
-			println("fromDir",fromDir,"toDir",toDir.path,"fileName",fileName,"fileLength",fileLength)
-			SyncRemote:DoGetFile(self.remoteHost, fromDir, fileName, fileLength, toDir)
+			
+			println(fromDir+"/"+fileName,fileLength,"bytes")
+			
+			localFile=toDir.file(fileName)
+			skipDownload=false
+			
+			if (localFile.exists) {
+				# Running local and remote hash functions in parallel
+				#process=SpawnProcess(SymDict(localfile), localFile.hash)
+				
+				remoteHash=SyncRemote:DoGetHash(self.remoteHost, fromDir, fileName)
+				
+				#localHash=process.wait.exitValue
+				localHash=localFile.hash
+				
+				if (localHash==remoteHash) skipDownload=true
+			}
+			if (skipDownload) {
+				println("   Hash OK")
+			} else {
+				SyncRemote:DoGetFile(self.remoteHost, fromDir, fileName, fileLength, toDir)
+			}
 	}
 		
 /class Client
