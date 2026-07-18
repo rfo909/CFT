@@ -95,10 +95,11 @@ server, as well as string (JSON) responses from the web server are hex encoded (
 
 # Fetch list of files in directory
 # --
-	P(1) as String => dirPath
+	P(1) as String => host
+	P(2) as String => dirPath
 	dirPath=dirPath.toHexString("UTF-8")
 	
-	result=Std.WebClient.Get("localhost",2500,"/files?path=" + dirPath)
+	result=Std.WebClient.Get(host,2500,"/files?path=" + dirPath)
 	
 	JSON:Parse(result.data.fromHexString("UTF-8"))
 //GetFiles
@@ -106,10 +107,11 @@ server, as well as string (JSON) responses from the web server are hex encoded (
 
 # Fetch list of dirs in directory
 # --
-	P(1) as String => dirPath
+	P(1) as String => host
+	P(2) as String => dirPath
 	dirPath=dirPath.toHexString("UTF-8")
 	
-	result=Std.WebClient.Get("localhost",2500,"/dirs?path=" + dirPath)
+	result=Std.WebClient.Get(host,2500,"/dirs?path=" + dirPath)
 	
 	JSON:Parse(result.data.fromHexString("UTF-8"))
 //GetDirs
@@ -117,11 +119,12 @@ server, as well as string (JSON) responses from the web server are hex encoded (
 
 # Fetch file
 # --
-	P(1) as Dir => localDir
-	P(2) as String => remoteDir
-	P(3) as String => fileName
-	P(4) as int => length
-	
+	P(1) as String => host
+	P(2) as Dir => localDir
+	P(3) as String => remoteDir
+	P(4) as String => fileName
+	P(5) as int => length
+		
 	remotePath=remoteDir+"/"+fileName 
 		# server handles mapping to backslash if Windows
 
@@ -140,7 +143,7 @@ server, as well as string (JSON) responses from the web server are hex encoded (
 		#println("readPos=",readPos,"count=",count)
 		
 		path="/file?path=" + remotePath.toHexString("UTF-8") + "&start=" + readPos + "&count="+count
-		result=Std.WebClient.Get("localhost",2500,path)
+		result=Std.WebClient.Get(host,2500,path)
 	
 		error(Sys.getType(result.data) != "Binary","GetFile: Expected binary object")
 		
@@ -152,13 +155,13 @@ server, as well as string (JSON) responses from the web server are hex encoded (
 
 # Test GetFiles
 # --
-	json=GetFiles("/home/roar/CFT")
+	json=GetFiles("localhost","/home/roar/CFT")
 	JSON:PP(json)
 //t1
 	
 # Test GetDirs
 # --
-	json=GetDirs("/home/roar")
+	json=GetDirs("localhost","/home/roar")
 	JSON:PP(json)
 //t2
 
@@ -170,8 +173,12 @@ server, as well as string (JSON) responses from the web server are hex encoded (
 	
 	length = File(remoteDir+"/"+fileName).length
 	
-	GetFile(localDir, remoteDir, fileName, length)
+	GetFile("localhost",localDir, remoteDir, fileName, length)
 //t3
 
-
+# Test GetDirs
+# --
+	json=GetDirs("10.0.0.82","e:\")
+	JSON:PP(json)
+//t4
 
