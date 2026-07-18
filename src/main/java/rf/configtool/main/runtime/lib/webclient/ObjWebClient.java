@@ -130,6 +130,10 @@ public class ObjWebClient extends Obj {
                 total += n;
             }
 
+            if (total != contentLength) {
+                System.out.println(method + ": contentLength=" + contentLength + " received " + total + " bytes");
+            }
+
             ObjDict dict=new ObjDict();
             dict.set("Content-Type",new ValueString(contentType));
 

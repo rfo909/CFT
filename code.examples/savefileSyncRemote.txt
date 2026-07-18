@@ -21,8 +21,6 @@ Example:
 
 # Create mirror
 # --
-    SyncRemote:CreateServer
-    
     remoteHost="10.0.0.82"
     remoteDir="xxx"
     localDir=Dir("xxx").create
@@ -210,6 +208,9 @@ downloaded, replacing the one with bad hash.
 		targetFile.binaryAppend(result.data)
 		
 		readPos = readPos + count
+	|
+	# return targetFile
+	targetFile
 //GetFile
 
 
@@ -285,11 +286,25 @@ downloaded, replacing the one with bad hash.
 	P(4) as int => length
 	P(5) as Dir => localDir
 	
+	remoteHash=DoGetHash(remoteHost, remoteDir, remoteFile)
+	localFile=localDir.file(remoteFile)
+		
+	firstIteration=true
 	loop
+		if (localFile.exists) {
+			if (localFile.hash==remoteHash) {
+				println(if(firstIteration, "   Local file hash ok - no download","   Hash ok"))
+				break
+			} else {
+				println(if(firstIteration, "   Local file hash failed - downloading", "   Hash failed, retrying"))
+			}
+		} 
+		firstIteration=false
+		
 		tryCatch(GetFile(remoteHost, localDir, remoteDir, remoteFile, length)) => result
-		break(result.ok)
 	|
-	result.result
+	
+	localFile
 /DoGetFile
 
 
@@ -328,25 +343,7 @@ downloaded, replacing the one with bad hash.
 			
 			println(fromDir+"/"+fileName,fileLength,"bytes")
 			
-			localFile=toDir.file(fileName)
-			skipDownload=false
-			
-			if (localFile.exists) {
-				# Running local and remote hash functions in parallel
-				#process=SpawnProcess(SymDict(localfile), localFile.hash)
-				
-				remoteHash=SyncRemote:DoGetHash(self.remoteHost, fromDir, fileName)
-				
-				#localHash=process.wait.exitValue
-				localHash=localFile.hash
-				
-				if (localHash==remoteHash) skipDownload=true
-			}
-			if (skipDownload) {
-				println("   Hash OK")
-			} else {
-				SyncRemote:DoGetFile(self.remoteHost, fromDir, fileName, fileLength, toDir)
-			}
+			SyncRemote:DoGetFile(self.remoteHost, fromDir, fileName, fileLength, toDir)
 	}
 		
 /class Client
