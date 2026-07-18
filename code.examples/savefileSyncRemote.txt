@@ -100,6 +100,7 @@ server, as well as string (JSON) responses from the web server are hex encoded (
 	dirPath=dirPath.toHexString("UTF-8")
 	
 	result=Std.WebClient.Get(host,2500,"/files?path=" + dirPath)
+	println(result.data.fromHexString("UTF-8"))
 	
 	JSON:Parse(result.data.fromHexString("UTF-8"))
 //GetFiles
@@ -176,9 +177,45 @@ server, as well as string (JSON) responses from the web server are hex encoded (
 	GetFile("localhost",localDir, remoteDir, fileName, length)
 //t3
 
-# Test GetDirs
+
+# Robust GetDirs
 # --
-	json=GetDirs("10.0.0.82","e:\")
-	JSON:PP(json)
-//t4
+	P(1) as String => remoteHost
+	P(2) as String => remotePath
+	
+	loop
+		tryCatch(GetDirs(remoteHost, remotePath)) => result
+		break(result.ok)
+	|		
+	result.result
+/DoGetDirs
+
+
+# Robust GetFiles
+# --
+	P(1) as String => remoteHost
+	P(2) as String => remotePath
+	
+	loop
+		tryCatch(GetFiles(remoteHost, remotePath)) => result
+		break(result.ok)
+	|	
+	result.result
+/DoGetFiles
+
+# Robust GetFile
+# --
+	P(1) as String => remoteHost
+	P(2) as String => remoteDir
+	P(3) as String => remoteFile
+	P(4) as int => length
+	P(5) as Dir => localDir
+	
+	loop
+		tryCatch(GetFile(remoteHost, localDir, remoteDir, remoteFile, length)) => result
+		break(result.ok)
+	|
+	result.result
+/DoGetFile
+
 
