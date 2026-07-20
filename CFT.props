@@ -1,3 +1,21 @@
+# =======================================================================================
+#
+# DO NOT CHANGE
+#
+# This file should not be modified, as it contains many settings that the CFT shell and
+# interpreter depends on to even run. Instead, at the bottom of this file there is
+# an #include which looks for an additional CFT.props under the private directory.
+#
+# This is where we enter persistent local changes, as the private directory is
+# hidden via .gitignore, whereas this file may have additions or changes from time
+# to time, being visible to git.
+#
+# =======================================================================================
+
+
+
+
+
 # codeDirs
 #
 # Semicolon-separated list of directories to locate code, in sequence
@@ -12,16 +30,15 @@
 codeDirs = . ; code.examples ; code.lib
 
 
-# Favourite shell, for the shell() global function
+# Favourite OS shell, for the shell() global function
 # ----
 
-shell = bash
+shell = /bin/bash
 winShell = powershell
 
 
 
-
-# Macros invoked for various "shell" commands, 
+# Code invoked for various "shell" commands. 
 # ----
 
 mCat = Lambda { P(1)=>file if(file==null, Lib:GetLastResultFile, file) => file file.read->line println(line) | true}
@@ -47,7 +64,7 @@ mGrep = Lambda { P(1)=>str P(2)=>data Lib:InteractiveGrep(str,data) }
 mWhich = Lambda { P(1)=>str Lib:Which(str) }
 
 
-# Lambdas for symbol set and get
+# Lambdas for symbol set and get ("%"-prefix) -
 # ----
 
 mSymGet = Lambda { P(1)=>sym Lib:SymbolGet(sym) }
@@ -80,7 +97,8 @@ shortcut:sscr = "---- Search all scripts ----"            Lib:SearchScripts
 
 shortcut:home = "---- move to script dir ----"            Sys.savefile.dir.cd
 
-shortcut:f    = "---- get files from search rows ----"    Sys.lastResultList.filter( Lambda{x=P(1) if(getType(x)=="Row",x.get(0),x)}).unique
+shortcut:f    = "---- get files from search rows ----"    Sys.lastResultList.filter( Lambda{x=P(1) if(Sys.getType(x)=="Row",x.file,if(Sys.getType(x)=="File",x,null))}).unique
+shortcut:d    = "---- get dirs from search rows ----"     Sys.lastResultList.filter( Lambda{x=P(1) if(Sys.getType(x)=="Row",x.dir,if(Sys.getType(x)=="Dir",x,null))}).unique
 shortcut:fp   = "---- lastResult file/dir object paths ----" Lib:Paths
 shortcut:dup  = "---- duplicates in list of strings ----" Lib:DuplicatesInList
 shortcut:sort = "---- sort list of strings ----"          Lib:SortList
