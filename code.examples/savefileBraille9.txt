@@ -1,0 +1,151 @@
+# Readme
+# --
+<<< EOF
+Instead of braille, we define a sequence of two button presses
+per character, from a total of 9 buttons, which gives us
+9x9 combinations. This also differs from Braille in that
+sequence of button presses matter, so 12 is different from 21 etc
+
+For numeric keypads
+
+1 2 3
+4 5 6
+7 8 9 
+  
+>>> EOF
+/Readme
+
+# Data
+# --
+<<< EOF
+
+A12
+B42
+C29
+D62
+E13
+F23
+G78
+H65
+I15
+J87
+K92
+L64
+M79
+N97
+O16
+P24
+Q68
+R46
+S67
+T26
+U17
+V49
+W94
+X85
+Y18
+Z76
+
+111
+222
+333
+444
+555
+666
+777
+888
+999
+021
+
+,35
+?68
+.37
+/38
+!39
+
+
+-53
++54
+_56
+:57
+;58
+.59
+
+(31
+)32
+
+<71
+=72
+>73
+
+>>> EOF
+	=>lines
+	dict=Dict
+	lines->line
+		reject(line.trim=="")
+		line.split->x
+			char=x.sub(0,1)
+			code=x.sub(1)
+			if (dict.has(code)) {
+				println("Duplicate code: " + code)
+			}
+			dict.set(code,char) 
+			out(x)
+	| _.sort
+/Data
+
+# Show data sorted by code, showing hierarchies
+# --
+	Data->line
+		char=line.sub(0,1)
+		code=line.sub(1)
+		out(code + " => " + char)
+		
+	| _.sort
+/Codes
+
+
+# Lookup character from keys
+# --
+	P(1) as String => keys
+	keys
+		.replace("7","a")
+		.replace("8","b")
+		.replace("9","c")
+			
+		.replace("1","7")
+		.replace("2","8")
+		.replace("3","9")
+		
+		.replace("a","1")
+		.replace("b","2")
+		.replace("c","3")
+	=>keys
+	#println("keys=" + keys)
+	
+	ok=false
+	Data->d 
+		char=d.sub(0,1)
+		if (keys==d.sub(1)) {
+			println("=> " + char)
+			ok=true
+		}
+	|
+	if (!ok) println("=> NO MATCH")
+//Lookup
+		
+		
+# Train loop
+# --
+	println("Type keys, Enter to continue, q to abort")
+	loop
+		readLine()=>line
+		break(line=="q")
+		line.split->part 
+			str=part
+			loop
+				s=str.sub(0,2)
+				Lookup(s)
+				str=str.sub(2)
+				break(str=="")
+/Train

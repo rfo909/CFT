@@ -1,0 +1,89 @@
+# Readme
+# --
+<<< EOF
+Rehearsing braille input
+Using keys SDF for left hand and JKL for right, space to commit letter
+           123                   654
+           
+Matrix
+  1 4 
+  2 5
+  3 6
+
+This is a mirrored, non-standard input mapping
+
+  
+>>> EOF
+/Readme
+
+# Data
+# --
+<<< EOF
+A1 B12 C14 D145 E15 F124 G1245 H125 I24 J245 
+K13 L123 M143 N1453 O153 P1234 Q12345 R1235 S423 T4523
+U136 V1236 W2456 X1346 Y13456 Z1356 '3 ?236 !235 .2 _36 .256 ^6 #3456 ;23 :25
+/34
+>>> EOF
+->line
+	line.split->x out(x)
+/Data
+
+# Show data (for debugging)
+# --
+	Data->d
+		char=d.sub(0,1)
+		dots=d.sub(1)
+		
+		Letters7x5:GetText(char).print
+		println
+
+		# Show the dots
+		if (dots.contains("1")) print("# ") else print("O ")
+		if (dots.contains("4")) println("#") else println("O")
+
+		if (dots.contains("2")) print("# ") else print("O ")
+		if (dots.contains("5")) println("#") else println("O")
+		
+		if (dots.contains("3")) print("# ") else print("O ")
+		if (dots.contains("6")) println("#") else println("O")
+		
+		println
+		println
+//Show 
+
+
+# Lookup character from keys
+# --
+	P(1) as String => keys
+	keys.toUpper
+		.replace("S","1")
+		.replace("D","2")
+		.replace("F","3")
+			
+		.replace("L","4")
+		.replace("K","5")
+		.replace("J","6")
+		.chars.sort.unique.concat=>keys
+
+	ok=false
+	Data->d 
+		char=d.sub(0,1)
+		d.sub(1).chars.sort.concat=>x
+		if (x==keys) {
+			println("=> " + char)
+			ok=true
+		}
+	|
+	if (!ok) println("=> NO MATCH")
+//Lookup
+		
+		
+# Train loop
+# --
+	println("Type keys, Enter to continue, q to abort")
+	loop
+		readLine()=>line
+		break(line=="q")
+		line.split->part Lookup(part)
+/Train
+
