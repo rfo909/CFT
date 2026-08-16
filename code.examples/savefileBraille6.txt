@@ -1,0 +1,304 @@
+# Readme
+# --
+<<< EOF
+Instead of braille, we define a sequence of three button presses
+per character, from a total of 6 buttons, which gives us
+6x6x6 combinations. This also differs from Braille in that
+sequence of button presses matter
+
+For numeric keypads
+
+1 2 3
+4 5 6
+  
+>>> EOF
+/Readme
+
+# Invalid combinations
+# --
+	"14 41 25 52 36 63".split
+//InvalidCombos
+
+# Genereate valid combinations
+# --
+	Std.Data.each(1,6)->a
+	Std.Data.each(1,6)->b
+	Std.Data.each(1,6)->c
+		combination=""+a+b+c
+		println(combination)
+		valid=true
+		Inner{
+			InvalidCombos->ic
+				if (combination.contains(ic)) valid=false
+		}
+		assert(valid)
+		out(combination)
+//ValidCombos
+	
+# Data
+# --
+<<< EOF
+.Backspace:111
+.:222
+.Return:333
+?:444
+!:555
+.Send:666
+
+A:122
+E:133
+I:155
+
+O:211
+U:233
+Y:244
+266
+
+311
+322
+344
+355
+
+422
+433
+455
+466
+
+511
+533
+544
+566
+
+611
+622
+644
+655
+
+S:112
+T:113
+N:115
+M:116
+R:121
+_:123
+124
+K:126
+<>:131
+L:132
+134
+Z:135
+X:151
+153
+154
+B:156
+C:161
+D:162
+F:164
+H:165
+J:166
+
+G:212
+213
+215
+216
+221
+
+P:223
+Q:224
+226
+W:231
+V:232
+
+1:141
+2:142
+3:143
+4:251
+5:252
+6:253
+7:361
+8:362
+9:363
+0:144
+
+234
+235
+242
+243
+
+245
+246
+261
+262
+264
+265
+266
+311
+312
+313
+315
+316
+321
+322
+323
+324
+326
+331
+332
+
+334
+335
+342
+343
+344
+345
+346
+351
+353
+354
+355
+356
+421
+(:422
+<:423
+424
+426
+431
+>:432
+):433
+434
+435
+442
+443
+
+445
+446
+451
+453
+454
+455
+456
+461
+462
+464
+465
+466
+511
+512
+513
+515
+516
+531
+532
+533
+534
+535
+542
+543
+544
+545
+546
+551
+553
+554
+
+556
+561
+562
+564
+565
+566
+611
+612
+613
+615
+616
+621
+622
+623
+624
+626
+642
+643
+644
+645
+646
+651
+653
+654
+655
+656
+661
+662
+664
+665
+
+>>> EOF
+	=>lines
+	symbols=List
+	codes=List
+	lines->line
+		reject(line.trim=="")
+		line.split->x
+			assert(x.contains(":"))
+			
+			symbol=x.before(":")
+			code=x.after(":")
+
+			error(symbols.contains(symbol),"Duplicate symbol " + symbol)
+			error(codes.contains(code), "Duplicate code " + code)
+			
+			symbols.add(symbol)
+			codes.add(code)
+			
+			out(x)
+	| _.sort
+/Data
+
+# Show data sorted by code, showing hierarchies
+# --
+	Data->line
+		symbol=line.before(":")
+		code=line.after(":")
+		out(code + " => " + symbol)
+		
+	| _.sort
+/Codes
+
+
+# Lookup character from keys
+# --
+	P(1) as String => keys
+	keys
+		.replace("7","1")
+		.replace("8","2")
+		.replace("9","3")
+	=>keys
+	#println("keys=" + keys)
+	
+	ok=false
+	Data->d 
+		symbol=d.before(":")
+		code=d.after(":")
+		
+		if (keys==code) {
+			println("=> " + symbol)
+			ok=true
+		}
+	|
+	if (!ok) println("=> NO MATCH")
+//Lookup
+		
+		
+# Train loop
+# --
+	println("Type keys, Enter to continue, q to abort")
+	loop
+		readLine()=>line
+		break(line=="q")
+		line.split->part 
+			str=part
+			loop
+				s=str.sub(0,3)
+				Lookup(s)
+				str=str.sub(3)
+				break(str=="")
+/Train
