@@ -1,0 +1,116 @@
+# Readme
+# --
+<<< EOF
+Morse trainer
+>>> EOF
+/Readme
+
+	
+# Data
+# --
+<<< EOF
+A:.-
+B:-...
+C:-.-.
+D:-..
+E:.
+F:..-.
+G:--.
+H:....
+I:..
+J:.---
+K:-.-
+L:.-..
+M:--
+N:-.
+O:---
+P:.--.
+Q:--.-
+R:.-.
+S:...
+T:-
+U:..-
+V:...-
+W:.--
+X:-..-
+Y:-.--
+Z:--..
+1:.----
+2:..---
+3:...--
+4:....-
+5:.....
+6:-....
+7:--...
+8:---..
+9:----.
+0:-----
+
+.:.-.-.-
+,:--..--
+?:..--..
+/:-..-.
+-:-....-
+(:-.--.
+):-.--.-
+=:-...-
++:.-.-.
+@:.--.-.
+
+
+Æ:.-.-
+Ø:---.
+Å:.--.-
+
+
+
+>>> EOF
+	=>lines
+	symbols=List
+	codes=List
+	lines->line
+		reject(line.trim=="")
+		line.split->x
+			assert(x.contains(":"))
+			
+			symbol=x.before(":")
+			code=x.after(":")
+
+			error(symbols.contains(symbol),"Duplicate symbol " + symbol)
+			error(codes.contains(code), "Duplicate code " + code)
+			
+			symbols.add(symbol)
+			codes.add(code)
+			
+			out(x)
+	| _.sort
+/Data
+
+# Lookup character from keys
+# --
+	P(1) as String => keys
+	
+	ok=false
+	Data->d 
+		symbol=d.before(":")
+		code=d.after(":")
+		
+		if (keys==code) {
+			println("=> " + symbol)
+			ok=true
+		}
+	|
+	if (!ok) println("=> NO MATCH")
+//Lookup
+		
+		
+# Train loop
+# --
+	println("Type keys, Enter to continue, q to abort")
+	loop
+		readLine()=>line
+		break(line=="q")
+		line.split->letter 
+			Lookup(letter)
+/Train
+
