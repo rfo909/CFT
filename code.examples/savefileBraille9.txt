@@ -90,15 +90,15 @@ _56
 				println("Duplicate code: " + code)
 			}
 			dict.set(code,char) 
-			out(x)
+			out(char+":"+code)
 	| _.sort
 /Data
 
 # Show data sorted by code, showing hierarchies
 # --
 	Data->line
-		char=line.sub(0,1)
-		code=line.sub(1)
+		char=line.before(":")
+		code=line.after(":")
 		out(code + " => " + char)
 		
 	| _.sort
@@ -125,8 +125,8 @@ _56
 	
 	ok=false
 	Data->d 
-		char=d.sub(0,1)
-		if (keys==d.sub(1)) {
+		char=d.before(":")
+		if (keys==d.after(":")) {
 			println("=> " + char)
 			ok=true
 		}
