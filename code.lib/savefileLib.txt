@@ -1681,3 +1681,17 @@ run(null,null,null,true)
 		report(f.path, copyToDir.path)
 
 /CopyTree
+
+
+# Repeat searches in file
+# --
+	P(1) as File =>f
+	loop
+		println
+		readLine("Search term, blank to exit") => term
+		break(term=="")
+		grep=Grep(term)
+		Curses:Clear
+		grep.file(f)->line
+			println(line)
+/RepeatSearch
