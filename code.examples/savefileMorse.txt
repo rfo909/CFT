@@ -114,3 +114,55 @@ Z:--..
 			Lookup(letter)
 /Train
 
+
+# Mhz to wave length
+# --
+	P(1,Input("Mhz").get.parseFloat) => mhz
+	300/mhz
+/WL
+
+
+# Wave length to MHz
+# --
+	P(1,Input("Wave length in meters").get.parseFloat) => meters
+	300/meters
+/MHz
+
+
+# Lookup table for microcontroller
+# ----
+# Converting a string of dots and dashes as follows
+#
+# index=1
+# pattern.chars->c
+#   index = index << 1
+#   if (c=='-') index = index || 1
+#
+# If the resulting index is in range [smallest,biggest] then
+# (index - smallest) points to the character in the string, unless
+# that character is '%' which means invalid code.
+# --
+	dict=Dict
+	smallest=999
+	biggest=0
+	omit="ÆØÅ"
+	Data->line
+		char=line.before(":")
+		reject(omit.contains(char))
+		pattern="-"+line.after(":")
+		numeric=Inner{
+			pattern.chars->c
+				out(if(c=='-',"1","0"))
+			| _.concat.parseInt(2)
+		}
+		if (numeric>biggest) biggest=numeric
+		if (numeric<smallest) smallest=numeric
+		dict.set(""+numeric,char)
+	|
+	println("smallest="+smallest)
+	println("biggest="+biggest)
+	Std.Data.each(smallest,biggest)->i
+		if (dict.has(""+i)) out(dict.get(""+i)) else out("%")
+	| _.concat
+
+/mcuTable
