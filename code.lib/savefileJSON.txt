@@ -360,6 +360,14 @@ nicely formatted JSON.
 
 
 
+# Fix JSON file formatting
+# --
+	P(1) as File => f
+	x=JSON:Parse(f.read)
+	f.create(JSON:PP(x))
+/FixFileFormat
+
+
 # test
 PP(Parse(exampleJSON))
 //t

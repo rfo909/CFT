@@ -29,7 +29,7 @@
 # Count down seconds
 # --
     P(1,10) => minutes
-    prefix=""
+	P(2,"") => prefix
 
     seconds=minutes*60
 
@@ -48,38 +48,59 @@
         println(prefix+"Total time: " + minutes + " minutes")
 
         # progress bar
-        (50*i/seconds).i => done
+        (60*i/seconds).i => done
         Std.Data.yes(done,Sys.uchar("2588")).concat => bar
-        Std.Data.yes(50-done,".").concat => remaining
+        Std.Data.yes(60-done,"_").concat => remaining
         
         percent=(100*i/seconds).i
         println(prefix + bar+remaining+" " + percent + " %")
 
         break(i>=seconds)
-        if (seconds-i > 300) {
-            i=i+10
-        } else {
-            i=i+3
-        }
+		x=(seconds-i) div 5
+		if (x<1) x=1
+		if (x>5) x=5
+		i=i+x
     |
     println
     Alarm
 /CountDown
 
 
-# Pomodoro, countdown 45 minutes
+# Pomodoro, countdown 20 minutes
 # --
-    P(1,45) => minutes
-    CountDown(minutes)
+    CountDown(20)
 /Pomodoro
+
+
+# Count down 5 minutes
+# --
+	CountDown(5)
+/P5
+
+# Count down 10 minutes
+# --
+	CountDown(10)
+/P10
+
+
+# Count down 15 minutes
+# --
+	CountDown(15)
+/P15
+
+# Count down 45 minutes
+# --
+	CountDown(45)
+/P45
 
 
 
 # Alarm
 # --
-    Std.Data.each(1,4)->x
-        println("ALARM!!" + Sys.uchar(7))
-        Sys.sleep(1000)
+    Std.Data.each(1,40)->x
+		print(" ".times((x*4)%20))
+        println("Completed!!")
+        Sys.sleep(100)
 /Alarm
 
 
