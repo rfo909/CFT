@@ -105,6 +105,26 @@ FormatTableLines
 		}
 		if (!tableData.empty) result=result + FormatTableLines(tableData)
 	|
+	if (!tableData.empty) result=result + FormatTableLines(tableData)
 	file.create(result)
 /FixFileTables
 
+
+# Generate doc from python Gherkin/Behave file
+# --
+	P(1) as File => pythonFile
+	
+	count=0  # distance since @-line
+	pythonFile.read->line
+		if (line.startsWith("@")) {
+			out("")
+			out(line)
+			count=0
+			continue
+		}
+		count=count+1
+		if (line.trim.startsWith("#") && line.contains("|") && count <= 2)
+			out(line)
+	| _.print
+/PyDoc
+		
