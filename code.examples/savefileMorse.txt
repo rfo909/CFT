@@ -9,80 +9,91 @@ Morse trainer
 # Data
 # --
 <<< EOF
-A:.-
-B:-...
-C:-.-.
-D:-..
-E:.
-F:..-.
-G:--.
-H:....
-I:..
-J:.---
-K:-.-
-L:.-..
-M:--
-N:-.
-O:---
-P:.--.
-Q:--.-
-R:.-.
-S:...
-T:-
-U:..-
-V:...-
-W:.--
-X:-..-
-Y:-.--
-Z:--..
-1:.----
-2:..---
-3:...--
-4:....-
-5:.....
-6:-....
-7:--...
-8:---..
-9:----.
-0:-----
+A .-
+B -...
+C -.-.
+D -..
+E .
+F ..-.
+G --.
+H ....
+I ..
+J .---
+K -.-
+L .-..
+M --
+N -.
+O ---
+P .--.
+Q --.-
+R .-.
+S ...
+T -
+U ..-
+V ...-
+W .--
+X -..-
+Y -.--
+Z --..
+1 .----
+2 ..---
+3 ...--
+4 ....-
+5 .....
+6 -....
+7 --...
+8 ---..
+9 ----.
+0 -----
 
-.:.-.-.-
-,:--..--
-?:..--..
-/:-..-.
--:-....-
-(:-.--.
-):-.--.-
-=:-...-
-+:.-.-.
-@:.--.-.
+. .-.-.-
+, --..--
+? ..--..
+/ -..-.
+- -....-
+( -.--.
+) -.--.-
+= -...-
++ .-.-.
+@ .--.-.
+' .---.
+! -.-.--
+& .-...
+: ---...
+; -.-.-.
+_ ..--.-
+` .-..-.
+$ ...-..-
 
+Æ .-.-
+Ø ---.
+Å .--.-
 
-Æ:.-.-
-Ø:---.
-Å:.--.-
+# My own additions
 
-
+* ..-.-
+> ..-.-.
+< .-.-..
 
 >>> EOF
 	=>lines
 	symbols=List
 	codes=List
 	lines->line
-		reject(line.trim=="")
-		line.split->x
-			assert(x.contains(":"))
-			
-			symbol=x.before(":")
-			code=x.after(":")
+		reject(line.trim=="" || line.trim.startsWith("#"))
+		x=line.trim
+		reject(x == "")
+		
+		symbol=x.before(" ")
+		code=x.after(" ")
 
-			error(symbols.contains(symbol),"Duplicate symbol " + symbol)
-			error(codes.contains(code), "Duplicate code " + code)
-			
-			symbols.add(symbol)
-			codes.add(code)
-			
-			out(x)
+		error(symbols.contains(symbol),"Duplicate symbol " + symbol)
+		error(codes.contains(code), "Duplicate code " + code)
+		
+		symbols.add(symbol)
+		codes.add(code)
+		
+		out(x)
 	| _.sort
 /Data
 
@@ -92,8 +103,8 @@ Z:--..
 	
 	ok=false
 	Data->d 
-		symbol=d.before(":")
-		code=d.after(":")
+		symbol=d.before(" ")
+		code=d.after(" ")
 		
 		if (keys==code) {
 			println("=> " + symbol)
@@ -147,9 +158,9 @@ Z:--..
 	biggest=0
 	omit="ÆØÅ"
 	Data->line
-		char=line.before(":")
+		char=line.before(" ")
 		reject(omit.contains(char))
-		pattern="-"+line.after(":")
+		pattern="-"+line.after(" ")
 		numeric=Inner{
 			pattern.chars->c
 				out(if(c=='-',"1","0"))
@@ -162,7 +173,7 @@ Z:--..
 	println("smallest="+smallest)
 	println("biggest="+biggest)
 	Std.Data.each(smallest,biggest)->i
-		if (dict.has(""+i)) out(dict.get(""+i)) else out("%")
+		if (dict.has(""+i)) out(dict.get(""+i)) else out(" ")
 	| _.concat
 
 /mcuTable
