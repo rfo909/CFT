@@ -25,3 +25,16 @@
 	| _.print
 /PyDoc
 		
+
+# Show the key lines from behave / gherkin feature file
+# --
+	P(1) as File => manuscriptFile
+	keyword="Unknown"
+	manuscriptFile.read->s
+		line=s.trim
+		if (line.startsWith("And ")) line=keyword + " " + line.after(" ")
+		assert(line.startsWith("When ") || line.startsWith("Then ") || line.startsWith("Given "))
+		keyword=line.before(" ")
+		out(line)
+	| _.print
+/Extract

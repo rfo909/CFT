@@ -7,6 +7,8 @@
 To process a wdsl file, see functions test() and show() - or create a separate
 script calling ProcessWsdlFile()
 
+See also WDSL script for smaller management routines
+
 >>> EOF
 /Readme
 

@@ -319,6 +319,18 @@ choice.
 /CopyDirTree
 
 
+# Delete empty directories
+# --
+	P(1,Dir) => dir
+
+	dir.dirs->d
+		DeleteEmptyDirs(d)
+		if (d.dirs.length + d.files.length == 0) {
+			d.delete
+		}
+/DeleteEmptyDirs
+
+
 
 # Compare files from source tree to target tree, prints report to stdout
 # --

@@ -1,0 +1,34 @@
+# Readme
+# --
+<<< EOF
+Tools for managing wsdl files in projects
+
+See also SOAP script
+>>> EOF
+/Readme
+
+# Copy wsdl and xsd files only
+# --
+	P(1) as Dir => SourceDir
+	P(2) as Dir => TargetDir
+
+	Verbose=true
+	Execute=true
+
+	Lib:CopyDirTree(SourceDir, TargetDir, Verbose, Execute, 
+		Lambda{
+			P(1)=>f 
+			f.name.endsWith(".wsdl") && !f.path.contains("target")
+		})
+
+	Lib:CopyDirTree(SourceDir, TargetDir, Verbose, Execute, 
+		Lambda{
+			P(1)=>f 
+			f.name.endsWith(".xsd") && !f.path.contains("target")
+		})
+
+	println
+	println("Deleting empty directories")
+
+	Lib:DeleteEmptyDirs(TargetDir, false)
+/Copy
